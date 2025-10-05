@@ -8,9 +8,16 @@ import type {
   XPAwardRequest,
   XPAwardResponse,
 } from '@/types/gamification';
-import { awardXPAction, updateStreakAction, updatePreferencesAction } from '@/app/actions/gamification';
+import {
+  awardXPAction,
+  updateStreakAction,
+  updatePreferencesAction,
+  getDashboardDataAction,
+  getLeaderboardAction,
+} from '@/app/actions/gamification';
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
-import { XPToast, LevelUpCelebration } from '@/components/Dashboard/Gamification/xp-toast';
+import { useEnhancedXPToast } from '@/lib/gamification/components/enhanced-xp-toast';
+import { LevelUpCelebration } from '@/components/Dashboard/Gamification/xp-toast';
 import { AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 
@@ -79,10 +86,8 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<GamificationError | null>(null);
 
-  // XP Toast state
-  const [xpToastQueue, setXpToastQueue] = useState<
-    Array<{ amount: number; source?: string; triggeredLevelUp?: boolean }>
-  >([]);
+  // Enhanced XP notification system with automatic batching
+  const { showXPToast: showEnhancedXPToast, ToastContainer } = useEnhancedXPToast();
   const [levelUpQueue, setLevelUpQueue] = useState<Array<{ newLevel: number }>>([]);
 
   // Update state when initialData changes (from server-side refetch)
@@ -103,19 +108,29 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
     [profile],
   );
 
-  // Refetch function (triggers router.refresh or revalidation)
+  // Refetch function (triggers server data refresh)
   const refetch = useCallback(async () => {
-    // In Next.js App Router, you'd typically use router.refresh() here
-    // or trigger revalidation via Server Actions
+    // Fetch fresh data from server without full page reload
     setIsLoading(true);
     try {
-      // Trigger page revalidation - the Server Component will refetch
-      // This could be enhanced with router.refresh() if needed
-      window.location.reload(); // Simple solution - can be improved
+      const [dashboardData, leaderboardData] = await Promise.all([
+        getDashboardDataAction(orgId),
+        getLeaderboardAction(orgId),
+      ]);
+
+      if (dashboardData) {
+        setProfile(dashboardData.profile);
+        setDashboard(dashboardData);
+      }
+      if (leaderboardData) {
+        setLeaderboard(leaderboardData);
+      }
+    } catch (err) {
+      console.error('Failed to refetch gamification data:', err);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [orgId]);
 
   // Award XP with optimistic update
   const awardXP = useCallback(
@@ -222,14 +237,13 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
     [orgId, t],
   );
 
-  // XP Toast handlers with improved UX
-  const showXPToast = useCallback((amount: number, source?: string, triggeredLevelUp?: boolean) => {
-    setXpToastQueue((prev) => {
-      // Limit queue to 3 items
-      const filtered = prev.slice(-2);
-      return [...filtered, { amount, source, triggeredLevelUp }];
-    });
-  }, []);
+  // XP Toast handlers using enhanced notification system with automatic batching
+  const showXPToast = useCallback(
+    (amount: number, source?: string, triggeredLevelUp?: boolean) => {
+      showEnhancedXPToast({ amount, source, triggeredLevelUp });
+    },
+    [showEnhancedXPToast],
+  );
 
   const showLevelUpCelebration = useCallback((newLevel: number) => {
     // Only show one level-up at a time
@@ -238,10 +252,6 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
 
   const dismissLevelUpCelebration = useCallback(() => {
     setLevelUpQueue([]);
-  }, []);
-
-  const handleToastComplete = useCallback((index: number) => {
-    setXpToastQueue((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   const value: GamificationContextValue = {
@@ -262,18 +272,8 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
   return (
     <GamificationContext.Provider value={value}>
       {children}
-      {/* Render XP toasts */}
-      <AnimatePresence mode="popLayout">
-        {xpToastQueue.map((toast, index) => (
-          <XPToast
-            key={`toast-${index}-${toast.amount}`}
-            amount={toast.amount}
-            source={toast.source}
-            triggeredLevelUp={toast.triggeredLevelUp}
-            onComplete={() => handleToastComplete(index)}
-          />
-        ))}
-      </AnimatePresence>
+      {/* Enhanced XP notification container with automatic batching */}
+      <ToastContainer />
       {/* Render level-up celebrations */}
       <AnimatePresence>
         {levelUpQueue.length > 0 && levelUpQueue[0] && (

@@ -17,8 +17,7 @@ export const XP_SOURCES = {
   ADMIN_AWARD: 'admin_award',
 } as const;
 
-export type KnownXPSource = (typeof XP_SOURCES)[keyof typeof XP_SOURCES];
-export type XPSource = KnownXPSource | (string & Record<never, never>); // Allow unknown sources
+export type XPSource = (typeof XP_SOURCES)[keyof typeof XP_SOURCES];
 
 // XP award request
 export interface XPAwardRequest {
@@ -175,7 +174,7 @@ export function getTransactionsByDateRange(
 }
 
 // XP source metadata for UI (can be moved to config)
-export const XP_SOURCE_METADATA: Record<KnownXPSource, XPSourceMetadata> = {
+export const XP_SOURCE_METADATA: Record<XPSource, XPSourceMetadata> = {
   [XP_SOURCES.ACTIVITY_COMPLETION]: {
     source: XP_SOURCES.ACTIVITY_COMPLETION,
     defaultAmount: 25,

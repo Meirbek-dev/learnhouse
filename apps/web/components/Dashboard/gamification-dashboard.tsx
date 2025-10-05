@@ -14,12 +14,7 @@ interface GamificationDashboardProps {
 /**
  * Unified Gamification Dashboard (Server Component)
  *
- * Directly fetches gamification data and renders the dashboard.
- * This replaces the old pattern of:
- *   LearnerDashboard.server.tsx -> LearnerDashboard.tsx -> LearnerDashboardContent
- *
- * Now it's just:
- *   gamification-dashboard.tsx (fetches data) -> Client UI components
+ * Fetches gamification data and renders dashboard components.
  */
 export default async function GamificationDashboard({ orgId }: GamificationDashboardProps) {
   const session = await auth();

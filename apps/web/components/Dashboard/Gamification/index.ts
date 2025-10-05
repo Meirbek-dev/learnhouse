@@ -1,11 +1,10 @@
 /**
  * Gamification Components Index
  *
- * Exports all gamification UI components with centralized constants
+ * Exports all gamification UI components
  */
 
 // Core gamification exports
-export { Leaderboard } from './leaderboard';
 export { GamificationProfileSection } from './GamificationProfileSection';
 
 // Dashboard cards
@@ -14,8 +13,15 @@ export { QuickStatsCard } from './quick-stats-card';
 export { RecentActivityFeed } from './recent-activity-feed';
 export { LeaderboardCard } from './leaderboard-card';
 
-// Level indicators (simplified version)
-export { LevelBadge, LevelProgress, LevelUpAnimation } from './level-indicators';
+// Level up celebration (used in context)
+export { LevelUpCelebration } from './xp-toast';
 
-// XP Toast notifications
-export { XPToast, LevelUpCelebration, useXPToast } from './xp-toast';
+// Re-export enhanced components from unified system
+export {
+  GlowingLevelBadge,
+  EnhancedLevelProgress,
+  MilestoneProgress,
+  XPGainAnimation,
+  ParticleEffect,
+  useEnhancedXPToast,
+} from '@/lib/gamification';

@@ -24,7 +24,7 @@ export function LoginBonusHandler({ orgId }: LoginBonusHandlerProps) {
 
     try {
       const todayKey = `gamification:lastLoginAward:${orgId}:${new Date().toISOString().slice(0, 10)}`;
-      const alreadyDone = typeof window !== 'undefined' ? localStorage.getItem(todayKey) : '1';
+      const alreadyDone = typeof window !== 'undefined' ? localStorage.getItem(todayKey) : null;
 
       if (alreadyDone) return;
 

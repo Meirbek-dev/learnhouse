@@ -1,592 +1,199 @@
 'use client';
 
-import {
-  Activity,
-  AlertTriangle,
-  Bell,
-  BellOff,
-  Crown,
-  Eye,
-  EyeOff,
-  Loader2,
-  Palette,
-  RotateCcw,
-  Settings,
-  Shield,
-  Trophy,
-  Zap,
-} from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import { GamificationProfileSection } from '@/components/Dashboard/Gamification';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useOrg } from '@/components/Contexts/OrgContext';
+import { updatePreferencesAction } from '@/app/actions/gamification';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { Loader2, Save, Check } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { useSession } from 'next-auth/react';
+import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 
-// Types for gamification preferences
+/**
+ * Gamification Settings
+ *
+ * Core preference toggles:
+ * - Show on leaderboard (privacy.showOnLeaderboard)
+ * - XP gain notifications (notifications.xpGain)
+ * - Animated effects (display.animatedEffects)
+ */
+
 interface GamificationPreferences {
-  notifications: {
-    levelUp: boolean;
-    xpGain: boolean;
-    streakReminder: boolean;
-    weeklyReport: boolean;
-  };
-  privacy: {
-    showOnLeaderboard: boolean;
-    publicProfileStats: boolean;
-    shareProgress: boolean;
-  };
-  display: {
-    animatedEffects: boolean;
-    compactMode: boolean;
-    showLevelIndicator: boolean;
-    autoHideToasts: boolean;
-  };
+  showOnLeaderboard: boolean;
+  xpGainNotifications: boolean;
+  animatedEffects: boolean;
 }
 
-// Default preferences
 const DEFAULT_PREFERENCES: GamificationPreferences = {
-  notifications: {
-    levelUp: true,
-    xpGain: true,
-    streakReminder: false,
-    weeklyReport: true,
-  },
-  privacy: {
-    showOnLeaderboard: true,
-    publicProfileStats: true,
-    shareProgress: false,
-  },
-  display: {
-    animatedEffects: true,
-    compactMode: false,
-    showLevelIndicator: true,
-    autoHideToasts: false,
-  },
+  showOnLeaderboard: true,
+  xpGainNotifications: true,
+  animatedEffects: true,
 };
-
-// Remote persistence helpers via internal API route
-async function fetchPreferences(orgId: number): Promise<GamificationPreferences> {
-  const res = await fetch(`/api/gamification/${orgId}`, { method: 'GET' });
-  if (!res.ok) throw new Error('Failed to load');
-  const json = await res.json();
-  const serverPrefs = json?.dashboard?.profile?.preferences ?? {};
-  return { ...DEFAULT_PREFERENCES, ...serverPrefs };
-}
-
-async function savePreferencesRemote(orgId: number, prefs: GamificationPreferences) {
-  const res = await fetch(`/api/gamification/${orgId}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'update_preferences', preferences: prefs }),
-  });
-  if (!res.ok) throw new Error('Failed to save');
-  return res.json();
-}
 
 export default function UserGamificationSettings() {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const org = useOrg() as any;
-  const { data: session } = useSession();
-  const [activeTab, setActiveTab] = useState('overview');
-  const [isLoading, setIsLoading] = useState(false);
-  const [showResetDialog, setShowResetDialog] = useState(false);
+  const orgId = org?.id;
+  const ctx = useOptionalGamificationContext();
+  const profile = ctx?.profile;
+
   const [preferences, setPreferences] = useState<GamificationPreferences>(DEFAULT_PREFERENCES);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
-  const orgId = useMemo(() => org?.id || 1, [org?.id]);
-
-  // Load preferences (server authoritative)
+  // Load preferences from profile
   useEffect(() => {
-    let cancelled = false;
-    const run = async () => {
-      if (!(session?.user?.id && orgId)) return;
-      setIsLoading(true);
-      try {
-        const remote = await fetchPreferences(orgId);
-        if (!cancelled) setPreferences(remote);
-      } catch {
-        // Fall back to defaults silently
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    };
-    run();
-    return () => {
-      cancelled = true;
-    };
-  }, [session?.user?.id, orgId]);
+    if (profile?.preferences) {
+      const prefs = profile.preferences as any;
+      setPreferences({
+        showOnLeaderboard: prefs?.privacy?.showOnLeaderboard ?? DEFAULT_PREFERENCES.showOnLeaderboard,
+        xpGainNotifications: prefs?.notifications?.xpGain ?? DEFAULT_PREFERENCES.xpGainNotifications,
+        animatedEffects: prefs?.display?.animatedEffects ?? DEFAULT_PREFERENCES.animatedEffects,
+      });
+    }
+  }, [profile]);
 
-  // Save preferences handler
-  const handleSavePreferences = useCallback(async () => {
-    if (!session?.user?.id) {
-      toast.error(t('toast.userNotAuthenticated'));
+  const handlePreferenceChange = (key: keyof GamificationPreferences, value: boolean) => {
+    setPreferences((prev) => ({ ...prev, [key]: value }));
+    setHasChanges(true);
+    setSaveSuccess(false);
+  };
+
+  const handleSave = async () => {
+    if (!orgId) {
+      toast.error(t('errors.noOrgId'));
       return;
     }
 
-    setIsLoading(true);
+    setIsSaving(true);
     try {
-      // Optimistic: local state already updated; push to server via internal API
-      await savePreferencesRemote(orgId, preferences);
-      toast.success(t('toast.preferencesSaved'));
+      // Map simplified preferences to full structure
+      const fullPreferences = {
+        privacy: {
+          showOnLeaderboard: preferences.showOnLeaderboard,
+        },
+        notifications: {
+          xpGain: preferences.xpGainNotifications,
+        },
+        display: {
+          animatedEffects: preferences.animatedEffects,
+        },
+      };
+
+      await updatePreferencesAction(orgId, fullPreferences);
+
+      setHasChanges(false);
+      setSaveSuccess(true);
+      toast.success(t('settings.saved'));
+
+      // Reset success indicator after 2 seconds
+      setTimeout(() => {
+        setSaveSuccess(false);
+      }, 2000);
     } catch (error) {
       console.error('Failed to save preferences:', error);
-      toast.error(t('toast.preferencesError'));
+      toast.error(t('settings.saveFailed'));
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
-  }, [session?.user?.id, orgId, preferences, t]);
+  };
 
-  // Reset preferences handler
-  const handleResetPreferences = useCallback(() => {
-    setPreferences(DEFAULT_PREFERENCES);
-    setShowResetDialog(false);
-    toast.success(t('toast.preferencesReset'));
-  }, [t]);
-
-  // Preference update helpers
-  const updateNotificationPreference = useCallback(
-    (key: keyof GamificationPreferences['notifications'], value: boolean) => {
-      setPreferences((prev) => ({
-        ...prev,
-        notifications: { ...prev.notifications, [key]: value },
-      }));
-    },
-    [],
-  );
-
-  const updatePrivacyPreference = useCallback((key: keyof GamificationPreferences['privacy'], value: boolean) => {
-    setPreferences((prev) => ({
-      ...prev,
-      privacy: { ...prev.privacy, [key]: value },
-    }));
-  }, []);
-
-  const updateDisplayPreference = useCallback((key: keyof GamificationPreferences['display'], value: boolean) => {
-    setPreferences((prev) => ({
-      ...prev,
-      display: { ...prev.display, [key]: value },
-    }));
-  }, []);
-
-  // Authentication guard
-  if (!session?.user?.id) {
-    return (
-      <div className="soft-shadow bg-background mx-0 rounded-xl sm:mx-10">
-        <div className="flex flex-col">
-          <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
-            <h1 className="text-xl font-bold text-gray-800">{t('pageTitle')}</h1>
-            <h2 className="text-base text-gray-500">{t('errors.userNotAuthenticated')}</h2>
-          </div>
-          <div className="px-8 py-6">
-            <Alert>
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>{t('errors.userNotAuthenticated')}</AlertDescription>
-            </Alert>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Error boundary for org data
   if (!orgId) {
     return (
-      <div className="soft-shadow bg-background mx-0 rounded-xl sm:mx-10">
-        <div className="flex flex-col">
-          <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
-            <h1 className="text-xl font-bold text-gray-800">{t('pageTitle')}</h1>
-            <h2 className="text-base text-gray-500">{t('errors.orgNotAvailable')}</h2>
-          </div>
-          <div className="px-8 py-6">
-            <Alert>
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>{t('errors.orgNotAvailable')}</AlertDescription>
-            </Alert>
-          </div>
-        </div>
+      <div className="flex items-center justify-center p-8">
+        <p className="text-muted-foreground">{t('errors.noOrgId')}</p>
       </div>
     );
   }
 
   return (
-    <div className="soft-shadow bg-background mx-0 rounded-xl sm:mx-10">
-      <div className="flex flex-col">
-        {/* Header */}
-        <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-white px-5 py-3">
-          <h1 className="text-xl font-bold text-gray-800">{t('pageTitle')}</h1>
-          <h2 className="text-base text-gray-500">{t('description')}</h2>
-        </div>
+    <div className="mx-8 space-y-6">
+      {/* Profile Overview */}
+      <GamificationProfileSection
+        orgId={orgId}
+        variant="full"
+        showUnlocks
+      />
 
-        {/* Content */}
-        <div className="px-8 py-6">
-          {/* Tabs Navigation */}
-          <Tabs
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="space-y-6"
-          >
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger
-                value="overview"
-                className="flex items-center gap-2"
-              >
-                <Activity className="h-4 w-4" />
-                {t('tabs.overview')}
-              </TabsTrigger>
-              <TabsTrigger
-                value="customization"
-                className="flex items-center gap-2"
-              >
-                <Palette className="h-4 w-4" />
-                {t('tabs.avatar')}
-              </TabsTrigger>
-              <TabsTrigger
-                value="preferences"
-                className="flex items-center gap-2"
-              >
-                <Settings className="h-4 w-4" />
-                {t('tabs.preferences')}
-              </TabsTrigger>
-            </TabsList>
+      {/* Settings Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('settings.title')}</CardTitle>
+          <CardDescription>{t('settings.descriptionSimplified')}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Show on Leaderboard */}
+          <div className="flex items-center justify-between space-x-2">
+            <div className="space-y-0.5">
+              <Label htmlFor="show-leaderboard">{t('settings.showOnLeaderboard')}</Label>
+              <p className="text-sm text-muted-foreground">{t('settings.showOnLeaderboardDescription')}</p>
+            </div>
+            <Switch
+              id="show-leaderboard"
+              checked={preferences.showOnLeaderboard}
+              onCheckedChange={(checked) => handlePreferenceChange('showOnLeaderboard', checked)}
+            />
+          </div>
 
-            {/* Overview Tab */}
-            <TabsContent
-              value="overview"
-              className="space-y-6"
+          {/* XP Gain Notifications */}
+          <div className="flex items-center justify-between space-x-2">
+            <div className="space-y-0.5">
+              <Label htmlFor="xp-notifications">{t('settings.xpGainNotifications')}</Label>
+              <p className="text-sm text-muted-foreground">{t('settings.xpGainNotificationsDescription')}</p>
+            </div>
+            <Switch
+              id="xp-notifications"
+              checked={preferences.xpGainNotifications}
+              onCheckedChange={(checked) => handlePreferenceChange('xpGainNotifications', checked)}
+            />
+          </div>
+
+          {/* Animated Effects */}
+          <div className="flex items-center justify-between space-x-2">
+            <div className="space-y-0.5">
+              <Label htmlFor="animated-effects">{t('settings.animatedEffects')}</Label>
+              <p className="text-sm text-muted-foreground">{t('settings.animatedEffectsDescription')}</p>
+            </div>
+            <Switch
+              id="animated-effects"
+              checked={preferences.animatedEffects}
+              onCheckedChange={(checked) => handlePreferenceChange('animatedEffects', checked)}
+            />
+          </div>
+
+          {/* Save Button */}
+          <div className="flex items-center justify-end gap-3 pt-4">
+            {saveSuccess && (
+              <span className="flex items-center gap-2 text-sm text-green-600">
+                <Check className="h-4 w-4" />
+                {t('settings.saved')}
+              </span>
+            )}
+            <Button
+              onClick={handleSave}
+              disabled={!hasChanges || isSaving}
+              className="min-w-[120px]"
             >
-              <GamificationProfileSection
-                orgId={orgId}
-                variant="compact"
-                showUnlocks={false}
-              />
-            </TabsContent>
-
-            {/* Avatar Customization Tab */}
-            <TabsContent
-              value="customization"
-              className="space-y-6"
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle>Аватар</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Alert>
-                    <AlertDescription>Описание</AlertDescription>
-                  </Alert>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Preferences Tab */}
-            <TabsContent
-              value="preferences"
-              className="space-y-6"
-            >
-              <div className="grid gap-6">
-                {/* Notifications Section */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Bell className="h-5 w-5" />
-                      {t('notifications.title')}
-                    </CardTitle>
-                    <p className="text-muted-foreground text-sm">{t('notifications.description')}</p>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid gap-4">
-                      <div className="flex items-center justify-between space-x-2">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <Crown className="h-4 w-4 text-amber-500" />
-                            <span className="text-sm font-medium">{t('notifications.levelUp')}</span>
-                          </div>
-                          <p className="text-muted-foreground text-xs">{t('notifications.levelUpDescription')}</p>
-                        </div>
-                        <Switch
-                          checked={preferences.notifications.levelUp}
-                          onCheckedChange={(checked) => updateNotificationPreference('levelUp', checked)}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between space-x-2">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <Zap className="h-4 w-4 text-blue-500" />
-                            <span className="text-sm font-medium">{t('notifications.xpGain')}</span>
-                          </div>
-                          <p className="text-muted-foreground text-xs">{t('notifications.xpGainDescription')}</p>
-                        </div>
-                        <Switch
-                          checked={preferences.notifications.xpGain}
-                          onCheckedChange={(checked) => updateNotificationPreference('xpGain', checked)}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between space-x-2">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <BellOff className="h-4 w-4 text-orange-500" />
-                            <span className="text-sm font-medium">{t('notifications.streakReminder')}</span>
-                          </div>
-                          <p className="text-muted-foreground text-xs">
-                            {t('notifications.streakReminderDescription')}
-                          </p>
-                        </div>
-                        <Switch
-                          checked={preferences.notifications.streakReminder}
-                          onCheckedChange={(checked) => updateNotificationPreference('streakReminder', checked)}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between space-x-2">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <Trophy className="h-4 w-4 text-green-500" />
-                            <span className="text-sm font-medium">{t('notifications.weeklyReport')}</span>
-                          </div>
-                          <p className="text-muted-foreground text-xs">{t('notifications.weeklyReportDescription')}</p>
-                        </div>
-                        <Switch
-                          checked={preferences.notifications.weeklyReport}
-                          onCheckedChange={(checked) => updateNotificationPreference('weeklyReport', checked)}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Privacy Section */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Shield className="h-5 w-5" />
-                      {t('privacy.title')}
-                    </CardTitle>
-                    <p className="text-muted-foreground text-sm">{t('privacy.description')}</p>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid gap-4">
-                      <div className="flex items-center justify-between space-x-2">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <Trophy className="h-4 w-4 text-amber-500" />
-                            <span className="text-sm font-medium">{t('privacy.showOnLeaderboard')}</span>
-                          </div>
-                          <p className="text-muted-foreground text-xs">{t('privacy.showOnLeaderboardDescription')}</p>
-                        </div>
-                        <Switch
-                          checked={preferences.privacy.showOnLeaderboard}
-                          onCheckedChange={(checked) => updatePrivacyPreference('showOnLeaderboard', checked)}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between space-x-2">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <Eye className="h-4 w-4 text-blue-500" />
-                            <span className="text-sm font-medium">{t('privacy.publicProfileStats')}</span>
-                          </div>
-                          <p className="text-muted-foreground text-xs">{t('privacy.publicProfileStatsDescription')}</p>
-                        </div>
-                        <Switch
-                          checked={preferences.privacy.publicProfileStats}
-                          onCheckedChange={(checked) => updatePrivacyPreference('publicProfileStats', checked)}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between space-x-2">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <EyeOff className="h-4 w-4 text-green-500" />
-                            <span className="text-sm font-medium">{t('privacy.shareProgress')}</span>
-                          </div>
-                          <p className="text-muted-foreground text-xs">{t('privacy.shareProgressDescription')}</p>
-                        </div>
-                        <Switch
-                          checked={preferences.privacy.shareProgress}
-                          onCheckedChange={(checked) => updatePrivacyPreference('shareProgress', checked)}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Display Section */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Settings className="h-5 w-5" />
-                      {t('display.title')}
-                    </CardTitle>
-                    <p className="text-muted-foreground text-sm">{t('display.description')}</p>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid gap-4">
-                      <div className="flex items-center justify-between space-x-2">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <Zap className="h-4 w-4 text-purple-500" />
-                            <span className="text-sm font-medium">{t('display.animatedEffects')}</span>
-                          </div>
-                          <p className="text-muted-foreground text-xs">{t('display.animatedEffectsDescription')}</p>
-                        </div>
-                        <Switch
-                          checked={preferences.display.animatedEffects}
-                          onCheckedChange={(checked) => updateDisplayPreference('animatedEffects', checked)}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between space-x-2">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <Activity className="h-4 w-4 text-gray-500" />
-                            <span className="text-sm font-medium">{t('display.compactMode')}</span>
-                          </div>
-                          <p className="text-muted-foreground text-xs">{t('display.compactModeDescription')}</p>
-                        </div>
-                        <Switch
-                          checked={preferences.display.compactMode}
-                          onCheckedChange={(checked) => updateDisplayPreference('compactMode', checked)}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between space-x-2">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <Crown className="h-4 w-4 text-amber-500" />
-                            <span className="text-sm font-medium">{t('display.showLevelIndicator')}</span>
-                          </div>
-                          <p className="text-muted-foreground text-xs">{t('display.showLevelIndicatorDescription')}</p>
-                        </div>
-                        <Switch
-                          checked={preferences.display.showLevelIndicator}
-                          onCheckedChange={(checked) => updateDisplayPreference('showLevelIndicator', checked)}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between space-x-2">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <Bell className="h-4 w-4 text-blue-500" />
-                            <span className="text-sm font-medium">{t('display.autoHideToasts')}</span>
-                          </div>
-                          <p className="text-muted-foreground text-xs">{t('display.autoHideToastsDescription')}</p>
-                        </div>
-                        <Switch
-                          checked={preferences.display.autoHideToasts}
-                          onCheckedChange={(checked) => updateDisplayPreference('autoHideToasts', checked)}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Danger Zone */}
-                <Card className="border-destructive/20">
-                  <CardHeader>
-                    <CardTitle className="text-destructive flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5" />
-                      {t('dangerZone.title')}
-                    </CardTitle>
-                    <p className="text-muted-foreground text-sm">{t('dangerZone.description')}</p>
-                  </CardHeader>
-                  <CardContent>
-                    <Alert className="mb-4">
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertDescription>{t('dangerZone.resetWarning')}</AlertDescription>
-                    </Alert>
-                    <div className="flex gap-3">
-                      <Button
-                        variant="outline"
-                        onClick={() => setPreferences(DEFAULT_PREFERENCES)}
-                        className="flex items-center gap-2"
-                      >
-                        <RotateCcw className="h-4 w-4" />
-                        {t('dangerZone.resetPreferences')}
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        onClick={() => setShowResetDialog(true)}
-                        className="flex items-center gap-2"
-                      >
-                        <AlertTriangle className="h-4 w-4" />
-                        {t('dangerZone.resetAllData')}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Save Button */}
-                <div className="flex justify-end">
-                  <Button
-                    onClick={handleSavePreferences}
-                    disabled={isLoading}
-                    className="flex items-center gap-2"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        {t('saving')}
-                      </>
-                    ) : (
-                      <>
-                        <Settings className="h-4 w-4" />
-                        {t('savePreferences')}
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
-
-          {/* Reset Confirmation Dialog */}
-          <Dialog
-            open={showResetDialog}
-            onOpenChange={setShowResetDialog}
-          >
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle className="text-destructive flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5" />
-                  {t('dangerZone.resetConfirmTitle')}
-                </DialogTitle>
-                <DialogDescription>{t('dangerZone.resetConfirmDescription')}</DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowResetDialog(false)}
-                >
-                  {t('cancel')}
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={handleResetPreferences}
-                  className="flex items-center gap-2"
-                >
-                  <AlertTriangle className="h-4 w-4" />
-                  {t('dangerZone.resetAllData')}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t('settings.saving')}
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  {t('settings.save')}
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

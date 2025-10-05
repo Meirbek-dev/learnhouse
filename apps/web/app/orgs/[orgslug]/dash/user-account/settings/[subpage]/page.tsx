@@ -1,6 +1,6 @@
 'use client';
 
-import UserGamificationSettingsSimplified from '@components/Dashboard/Pages/UserAccount/UserGamificationSettings/UserGamificationSettingsSimplified';
+import UserGamificationSettings from '@components/Dashboard/Pages/UserAccount/UserGamificationSettings/UserGamificationSettings';
 import UserEditPassword from '@components/Dashboard/Pages/UserAccount/UserEditPassword/UserEditPassword';
 import UserEditGeneral from '@components/Dashboard/Pages/UserAccount/UserEditGeneral/UserEditGeneral';
 import UserProfile from '@components/Dashboard/Pages/UserAccount/UserProfile/UserProfile';
@@ -95,7 +95,7 @@ const SettingsPage = ({ params }: { params: Promise<SettingsParams> }) => {
       id: 'gamification',
       label: 'gamification',
       icon: Trophy,
-      component: UserGamificationSettingsSimplified,
+      component: UserGamificationSettings,
     },
     {
       id: 'security',

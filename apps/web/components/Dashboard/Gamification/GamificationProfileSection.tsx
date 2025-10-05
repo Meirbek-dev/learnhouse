@@ -3,10 +3,10 @@
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import { Activity, Crown, Flame, Star, Target, Trophy, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { GlowingLevelBadge, EnhancedLevelProgress } from '@/lib/gamification';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
 import { AVATAR_UNLOCKS, getLevelInfo } from '@/lib/gamification/levels';
 import type { UserGamificationProfile } from '@/types/gamification';
-import { LevelBadge, LevelProgress } from './level-indicators';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
@@ -132,10 +132,10 @@ export function GamificationProfileSection({
           <div className="flex-1 space-y-3">
             {/* Level Badge and Progress */}
             <div className="flex items-center justify-between">
-              <LevelBadge
+              <GlowingLevelBadge
                 level={profile.level}
                 size="lg"
-                showIcon
+                animated
               />
               <div className="text-right text-sm">
                 <div className="font-semibold">{profile.total_xp.toLocaleString()} XP</div>
@@ -145,10 +145,9 @@ export function GamificationProfileSection({
               </div>
             </div>
 
-            <LevelProgress
+            <EnhancedLevelProgress
               profile={profile}
-              variant="bar"
-              showLabels
+              showMilestones
               animated
             />
 

@@ -28,7 +28,6 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
 
   // Check if custom landing is enabled
   const hasCustomLanding = org.config?.config?.landing?.enabled;
-  const showDashboard = session?.user && !hasCustomLanding;
 
   return hasCustomLanding ? (
     <LandingCustom
@@ -41,7 +40,6 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
       collections={collections}
       orgslug={orgslug}
       org_id={org.id}
-      showLearnerDashboard={showDashboard}
     />
   );
 }

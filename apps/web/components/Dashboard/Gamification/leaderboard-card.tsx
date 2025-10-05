@@ -1,15 +1,14 @@
 'use client';
 
+import { GamificationCard, getRankTheme, LoadingState, EmptyState, CardTrendIndicator } from '@/lib/gamification';
+import { animations } from '@/lib/gamification/design-tokens';
 import type { LeaderboardEntry } from '@/types/gamification';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { getRankIcon, getRankColor, getRankBgColor } from '@/lib/gamification/constants';
-import { LeaderboardSkeleton } from './shared/loading-states';
-import { EmptyLeaderboard } from './shared/empty-states';
-import { GamificationCard } from './shared/gamification-card';
 
 interface LeaderboardCardProps {
   entries: LeaderboardEntry[];
@@ -20,40 +19,66 @@ interface LeaderboardCardProps {
 export function LeaderboardCard({ entries, currentUserId, isLoading }: LeaderboardCardProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
 
-  if (isLoading) return <LeaderboardSkeleton title={t('dashboard.leaderboard')} itemCount={5} />;
+  if (isLoading) {
+    return (
+      <LoadingState
+        title={t('dashboard.leaderboard')}
+        variant="list"
+        itemCount={5}
+      />
+    );
+  }
+
   if (!entries || entries.length === 0) {
-    return <EmptyLeaderboard title={t('dashboard.leaderboard')} message={t('dashboard.noLeaderboard')} />;
+    return (
+      <EmptyState
+        title={t('dashboard.leaderboard')}
+        message={t('dashboard.noLeaderboard')}
+        variant="info"
+      />
+    );
   }
 
   return (
     <GamificationCard title={t('dashboard.leaderboard')}>
       <ScrollArea className="h-[400px] pr-4">
-        <div className="space-y-3">
-          {entries.map((entry) => {
-            const RankIcon = getRankIcon(entry.rank);
-            const rankColor = getRankColor(entry.rank);
-            const rankBgColor = getRankBgColor(entry.rank);
+        <div className="space-y-2">
+          {entries.map((entry, index) => {
+            const rankTheme = getRankTheme(entry.rank);
             const isCurrentUser = entry.user_id === currentUserId;
 
             return (
-              <div
+              <motion.div
                 key={entry.user_id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{
+                  delay: index * 0.05,
+                  duration: animations.duration.normal / 1000,
+                }}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg p-2 transition-colors',
-                  isCurrentUser && 'bg-primary/5 ring-1 ring-primary/20',
+                  'flex items-center gap-3 m-2 rounded-lg p-3 transition-all',
+                  animations.css.fast,
+                  isCurrentUser && 'bg-primary/10 ring-2 ring-primary/30 shadow-sm',
+                  !isCurrentUser && 'hover:bg-muted/70 hover:scale-[1.02]',
                 )}
               >
-                {/* Rank */}
-                <div className={cn('flex h-6 w-6 shrink-0 items-center justify-center rounded-full', RankIcon && rankBgColor)}>
-                  {RankIcon ? (
-                    <RankIcon className={cn('h-4 w-4', rankColor)} />
+                {/* Rank with badge */}
+                <div
+                  className={cn(
+                    'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+                    rankTheme.badge && rankTheme.bgColor,
+                  )}
+                >
+                  {rankTheme.badge ? (
+                    <rankTheme.icon className={cn('h-4 w-4', rankTheme.color)} />
                   ) : (
-                    <span className="text-muted-foreground text-sm font-medium">{entry.rank}</span>
+                    <span className="text-sm font-semibold text-muted-foreground">{entry.rank}</span>
                   )}
                 </div>
 
                 {/* Avatar */}
-                <div className="bg-muted relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
                   {entry.avatar_url && (
                     <Image
                       src={entry.avatar_url}
@@ -66,26 +91,35 @@ export function LeaderboardCard({ entries, currentUserId, isLoading }: Leaderboa
 
                 {/* User Info */}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">
-                    {entry.username}
+                  <div className="flex items-center gap-2">
+                    <p className="truncate text-sm font-medium">{entry.username}</p>
                     {isCurrentUser && (
                       <Badge
                         variant="outline"
-                        className="ml-2"
+                        className="text-xs"
                       >
                         {t('leaderboard.you')}
                       </Badge>
                     )}
-                  </p>
-                  <p className="text-muted-foreground text-xs">{t('leaderboard.level', { level: entry.level })}</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t('leaderboard.level', { level: entry.level })}</p>
                 </div>
 
-                {/* XP */}
-                <div className="shrink-0 text-right">
-                  <p className="text-sm font-bold">{entry.total_xp.toLocaleString()}</p>
-                  <p className="text-muted-foreground text-xs">XP</p>
+                {/* XP and Trend */}
+                <div className="flex shrink-0 items-center gap-2 text-right">
+                  <div>
+                    <p className="text-sm font-bold tabular-nums">{entry.total_xp.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">XP</p>
+                  </div>
+                  {entry.rank_change !== undefined && entry.rank_change !== 0 && (
+                    <CardTrendIndicator
+                      value={-entry.rank_change}
+                      size="sm"
+                      showIcon
+                    />
+                  )}
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>

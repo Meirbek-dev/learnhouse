@@ -1,13 +1,16 @@
 'use client';
 
+import {
+  GamificationCard,
+  LoadingState,
+  EmptyState,
+  GlowingLevelBadge,
+  EnhancedLevelProgress,
+} from '@/lib/gamification';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
 import type { UserGamificationProfile } from '@/types/gamification';
-import { LevelBadge, LevelProgress } from './level-indicators';
-import { Activity, Flame } from 'lucide-react';
+import { Activity, Flame, User } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { ProfileSkeleton } from './shared/loading-states';
-import { EmptyProfile } from './shared/empty-states';
-import { GamificationCard } from './shared/gamification-card';
 
 interface ProfileCardProps {
   profile: UserGamificationProfile | null;
@@ -17,64 +20,81 @@ interface ProfileCardProps {
 export function ProfileCard({ profile, isLoading }: ProfileCardProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
 
-  if (isLoading) return <ProfileSkeleton title={t('dashboard.title')} />;
-  if (!profile) return <EmptyProfile title={t('dashboard.title')} message={t('dashboard.noData')} />;
+  if (isLoading) {
+    return (
+      <LoadingState
+        title={t('dashboard.title')}
+        variant="profile"
+      />
+    );
+  }
+
+  if (!profile) {
+    return (
+      <EmptyState
+        title={t('dashboard.title')}
+        message={t('dashboard.noData')}
+        variant="info"
+      />
+    );
+  }
 
   return (
-    <GamificationCard
-      title={t('dashboard.title')}
-      headerAction={
-        <LevelBadge
-          level={profile.level}
-          size="md"
-          showIcon
-        />
-      }
-    >
-      <div className="flex items-start gap-4">
-        <GamifiedUserAvatar
-          size="2xl"
-          gamificationProfile={profile}
-          showLevelBadge
-          use_with_session
-          className="shrink-0"
-        />
-        <div className="flex-1 space-y-3">
-          {/* XP Display */}
-          <div className="flex items-center justify-between text-sm">
-            <div>
-              <div className="font-semibold">{profile.total_xp.toLocaleString()} XP</div>
-              <div className="text-muted-foreground text-xs">
-                {profile.xp_to_next_level?.toLocaleString() ?? 0} {t('levelIndicators.xpToNext')}
-              </div>
-            </div>
-          </div>
-
-          {/* Level Progress */}
-          <LevelProgress
-            profile={profile}
-            variant="compact"
-            showLabels={false}
+    <GamificationCard>
+      <GamificationCard.Header
+        icon={User}
+        title={t('dashboard.title')}
+        badge={
+          <GlowingLevelBadge
+            level={profile.level}
+            size="md"
             animated
           />
+        }
+      />
+      <GamificationCard.Content>
+        <div className="flex items-start gap-4">
+          <GamifiedUserAvatar
+            size="2xl"
+            gamificationProfile={profile}
+            showLevelBadge
+            use_with_session
+            className="shrink-0"
+          />
+          <div className="flex-1 space-y-4">
+            {/* Enhanced Level Progress */}
+            <EnhancedLevelProgress
+              profile={profile}
+              showMilestones
+              animated
+            />
 
-          {/* Quick Streaks */}
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="flex items-center gap-2">
-              <Flame className="h-4 w-4 text-orange-500" />
-              <span>
-                {t('streaks.login.title')}: {profile.login_streak || 0}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Activity className="h-4 w-4 text-green-500" />
-              <span>
-                {t('streaks.learning.title')}: {profile.learning_streak || 0}
-              </span>
+            {/* XP Metrics */}
+            <div className="space-y-2">
+              <GamificationCard.MetricRow
+                label={t('stats.totalXP')}
+                value={profile.total_xp.toLocaleString()}
+                sublabel={`${profile.xp_to_next_level?.toLocaleString() ?? 0} ${t('levelIndicators.xpToNext')}`}
+                color="text-purple-500"
+              />
+              <GamificationCard.MetricRow
+                label={t('streaks.login.title')}
+                value={profile.login_streak || 0}
+                icon={Flame}
+                color="text-orange-500"
+                trend={profile.login_streak > profile.longest_login_streak - 5 ? 'up' : 'neutral'}
+              />
+              <GamificationCard.MetricRow
+                label={t('streaks.learning.title')}
+                value={profile.learning_streak || 0}
+                icon={Activity}
+                color="text-green-500"
+                trend={profile.learning_streak > profile.longest_learning_streak - 5 ? 'up' : 'neutral'}
+              />
             </div>
           </div>
         </div>
-      </div>
+      </GamificationCard.Content>
     </GamificationCard>
   );
 }

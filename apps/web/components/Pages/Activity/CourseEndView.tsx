@@ -5,7 +5,7 @@ import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 // Gamification imports
-import { LevelProgress } from '@components/Dashboard/Gamification';
+import { EnhancedLevelProgress } from '@/lib/gamification';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
@@ -586,9 +586,9 @@ const CourseEndView: FC<CourseEndViewProps> = ({
                 <div className="space-y-2">
                   <div className="text-center">
                     {gamificationProfile && (
-                      <LevelProgress
+                      <EnhancedLevelProgress
                         profile={gamificationProfile}
-                        variant="compact"
+                        showMilestones={false}
                         className="justify-center"
                       />
                     )}

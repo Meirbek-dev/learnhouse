@@ -16,7 +16,6 @@ interface LandingClassicProps {
   collections: any[];
   orgslug: string;
   org_id: number;
-  showLearnerDashboard?: boolean;
 }
 
 const EmptyCollectionsState = ({ t }: { t: any }) => (
@@ -93,24 +92,16 @@ const CollectionGrid = ({ collections, orgslug, org_id }: { collections: any[]; 
 
 // CourseGrid component is now extracted to CourseGridClient.tsx
 
-const LandingClassic = ({
-  courses,
-  collections,
-  orgslug,
-  org_id,
-  showLearnerDashboard = false,
-}: LandingClassicProps) => {
+const LandingClassic = ({ courses, collections, orgslug, org_id }: LandingClassicProps) => {
   const t = useTranslations('HomePage');
 
   return (
     <div className="w-full">
       <GeneralWrapperStyled>
         {/* Gamification Dashboard Section */}
-        {showLearnerDashboard && (
-          <section className="mb-8">
-            <GamificationDashboard orgId={org_id} />
-          </section>
-        )}
+        <section className="mb-8">
+          <GamificationDashboard orgId={org_id} />
+        </section>
 
         {/* Courses Section */}
         <section className="flex flex-col space-y-6">

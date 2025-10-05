@@ -1,0 +1,171 @@
+/**
+ * Enhanced XP Toast with Notification Queue
+ *
+ * Improvements over old system:
+ * - Automatic batching of similar XP gains
+ * - Smart positioning
+ * - Queue management
+ * - Less intrusive design
+ */
+
+'use client';
+
+import {
+  useXPNotificationQueue,
+  XPNotificationContainer,
+  BatchIndicator,
+  type XPNotification,
+} from '@/lib/gamification/components/notification-queue';
+import { ParticleEffect } from '@/lib/gamification/components/enhanced-level-indicators';
+import { AnimatedValue } from '@/lib/gamification/components/animated-value';
+import { getXPSourceTheme } from '@/lib/gamification';
+import { useTranslations } from 'next-intl';
+import { motion } from 'framer-motion';
+import { useCallback } from 'react';
+import { X } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+// ============================================================================
+// Enhanced XP Toast Component
+// ============================================================================
+
+interface EnhancedXPToastProps {
+  notification: XPNotification & { batchCount: number; totalAmount: number };
+  onDismiss: () => void;
+}
+
+function EnhancedXPToast({ notification, onDismiss }: EnhancedXPToastProps) {
+  const t = useTranslations('DashPage.UserAccountSettings.Gamification');
+  const theme = getXPSourceTheme(notification.source);
+
+  const getSourceLabel = (sourceKey: string): string => {
+    const labelKey = `xpSources.${sourceKey}` as any;
+    const translated = t(labelKey);
+    return translated === labelKey ? sourceKey.replace(/_/g, ' ') : translated;
+  };
+
+  const sourceLabel = getSourceLabel(notification.source);
+  const isBatched = notification.batchCount > 1;
+
+  return (
+    <motion.div
+      layout
+      className={cn(
+        'group relative w-80 overflow-hidden rounded-lg border bg-card shadow-lg',
+        'hover:shadow-xl transition-shadow duration-200',
+      )}
+    >
+      {/* Background gradient */}
+      <div
+        className={cn('absolute inset-0 opacity-5', theme.bgColor)}
+        style={{
+          background: `linear-gradient(135deg, ${theme.bgColor.replace('bg-', '')} 0%, transparent 100%)`,
+        }}
+      />
+
+      {/* Content */}
+      <div className="relative flex items-center gap-3 p-4">
+        {/* Icon */}
+        <div className={cn('flex-shrink-0 rounded-lg p-2', theme.bgColor)}>
+          <theme.icon className={cn('h-5 w-5', theme.color)} />
+        </div>
+
+        {/* Text Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium text-foreground truncate">{sourceLabel}</p>
+            {isBatched && <BatchIndicator count={notification.batchCount} />}
+          </div>
+          <div className="flex items-baseline gap-1.5 mt-1">
+            <span className="text-lg font-bold text-foreground">+</span>
+            <AnimatedValue
+              value={notification.totalAmount}
+              className={cn('text-lg font-bold tabular-nums', theme.color)}
+              format={(v) => Math.round(v).toLocaleString()}
+            />
+            <span className="text-sm text-muted-foreground">XP</span>
+          </div>
+        </div>
+
+        {/* Dismiss Button */}
+        <button
+          onClick={onDismiss}
+          className="flex-shrink-0 rounded-md p-1.5 opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100"
+          aria-label="Dismiss"
+        >
+          <X className="h-4 w-4 text-muted-foreground" />
+        </button>
+      </div>
+
+      {/* Level Up Indicator */}
+      {notification.triggeredLevelUp && (
+        <div className="border-t bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 px-4 py-2">
+          <p className="text-center text-sm font-bold text-white">🎉 {t('toast.levelUp')} 🎉</p>
+        </div>
+      )}
+
+      {/* Particle effect for level ups */}
+      {notification.triggeredLevelUp && (
+        <ParticleEffect
+          trigger={true}
+          particleCount={15}
+        />
+      )}
+    </motion.div>
+  );
+}
+
+// ============================================================================
+// Enhanced XP Toast Hook
+// ============================================================================
+
+export interface ShowXPToastOptions {
+  amount: number;
+  source?: string;
+  triggeredLevelUp?: boolean;
+  showSourceLabel?: boolean;
+}
+
+export function useEnhancedXPToast() {
+  const { notifications, addNotification, dismissNotification } = useXPNotificationQueue({
+    maxVisible: 3,
+    batchWindowMs: 2000,
+    displayDurationMs: 3000,
+    position: 'bottom-right',
+  });
+
+  const showXPToast = useCallback(
+    ({ amount, source = 'default', triggeredLevelUp = false }: ShowXPToastOptions) => {
+      addNotification({
+        amount,
+        source,
+        triggeredLevelUp,
+      });
+    },
+    [addNotification],
+  );
+
+  const renderNotification = useCallback(
+    (notification: any) => (
+      <EnhancedXPToast
+        notification={notification}
+        onDismiss={() => dismissNotification(notification.id)}
+      />
+    ),
+    [dismissNotification],
+  );
+
+  return {
+    showXPToast,
+    ToastContainer: () => (
+      <XPNotificationContainer
+        notifications={notifications}
+        position="bottom-right"
+        onDismiss={dismissNotification}
+        renderNotification={renderNotification}
+      />
+    ),
+  };
+}
+
+

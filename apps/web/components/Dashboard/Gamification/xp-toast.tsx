@@ -1,125 +1,15 @@
+/**
+ * Level Up Celebration Component
+ *
+ * Full-screen and compact celebration animations for level-ups.
+ */
+
 'use client';
 
-import { Sparkles } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
-import { getXPSourceIcon, getXPSourceColor } from '@/lib/gamification/constants';
-
-interface XPToastProps {
-  amount: number;
-  source?: string;
-  triggeredLevelUp?: boolean;
-  position?: { x: number; y: number };
-  onComplete?: () => void;
-  showSourceLabel?: boolean;
-}
-
-export function XPToast({
-  amount,
-  source = 'default',
-  triggeredLevelUp,
-  position,
-  onComplete,
-  showSourceLabel = true,
-}: XPToastProps) {
-  const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-  const [isVisible, setIsVisible] = useState(true);
-  const IconComponent = getXPSourceIcon(source);
-  const iconColor = getXPSourceColor(source);
-
-  // Get localized source label
-  const getSourceLabel = (sourceKey: string): string => {
-    const key = `xpSources.${sourceKey}` as any;
-    try {
-      return t(key);
-    } catch {
-      return t('xpSources.unknown', { source: sourceKey });
-    }
-  };
-
-  const sourceLabel = getSourceLabel(source);
-
-  useEffect(() => {
-    // Auto-dismiss after 2.5 seconds
-    const timer = setTimeout(() => {
-      setIsVisible(false);
-      setTimeout(() => onComplete?.(), 300); // Wait for exit animation
-    }, 2500);
-
-    return () => clearTimeout(timer);
-  }, [onComplete]);
-
-  return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          initial={{
-            opacity: 0,
-            scale: 0.8,
-            y: 20,
-          }}
-          animate={{
-            opacity: 1,
-            scale: 1,
-            y: 0,
-          }}
-          exit={{
-            opacity: 0,
-            scale: 0.8,
-            y: -20,
-          }}
-          transition={{
-            type: 'spring',
-            stiffness: 500,
-            damping: 30,
-          }}
-          className={cn(
-            'fixed bottom-20 right-6 z-50 flex flex-col gap-1 rounded-xl border-2 bg-background/95 px-5 py-3 shadow-2xl backdrop-blur-md',
-            triggeredLevelUp
-              ? 'border-yellow-500/70 bg-gradient-to-br from-yellow-500/20 to-orange-500/20'
-              : 'border-primary/50 bg-primary/5',
-          )}
-        >
-          <div className="flex items-center gap-3">
-            <motion.div
-              initial={{ rotate: -180, scale: 0 }}
-              animate={{ rotate: 0, scale: 1 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            >
-              <IconComponent className={cn('h-6 w-6', triggeredLevelUp ? 'text-yellow-500' : iconColor)} />
-            </motion.div>
-
-            <div className="flex flex-col">
-              {showSourceLabel && <span className="text-xs text-muted-foreground font-medium">{sourceLabel}</span>}
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.1 }}
-                className={cn('text-2xl font-bold', triggeredLevelUp ? 'text-yellow-500' : 'text-primary')}
-              >
-                +{amount} XP
-              </motion.span>
-            </div>
-          </div>
-
-          {triggeredLevelUp && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="flex items-center gap-1 rounded-md bg-yellow-500/20 px-2 py-1 border border-yellow-500/30"
-            >
-              <Sparkles className="h-3 w-3 text-yellow-500" />
-              <span className="text-xs font-semibold text-yellow-500">{t('levelUp')}</span>
-            </motion.div>
-          )}
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
+import { Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useEffect } from 'react';
 
 interface LevelUpCelebrationProps {
   newLevel: number;
@@ -312,57 +202,4 @@ export function LevelUpCelebration({ newLevel, onDismiss, compact = false }: Lev
       </motion.div>
     </motion.div>
   );
-}
-
-// Hook for managing XP toasts
-export function useXPToast() {
-  const [toasts, setToasts] = useState<Array<{ id: string; props: XPToastProps }>>([]);
-  const [levelUpData, setLevelUpData] = useState<{ newLevel: number; compact?: boolean } | null>(null);
-
-  const showXPToast = (
-    amount: number,
-    source?: string,
-    triggeredLevelUp?: boolean,
-    position?: { x: number; y: number },
-    showSourceLabel?: boolean,
-  ) => {
-    const id = Math.random().toString(36).substring(2, 11);
-
-    setToasts((prev) => {
-      // Limit to 3 toasts at once
-      const filtered = prev.slice(-2);
-      return [
-        ...filtered,
-        {
-          id,
-          props: {
-            amount,
-            source,
-            triggeredLevelUp,
-            position,
-            showSourceLabel,
-            onComplete: () => {
-              setToasts((current) => current.filter((t) => t.id !== id));
-            },
-          },
-        },
-      ];
-    });
-  };
-
-  const showLevelUpCelebration = (newLevel: number, compact = false) => {
-    setLevelUpData({ newLevel, compact });
-  };
-
-  const dismissLevelUpCelebration = () => {
-    setLevelUpData(null);
-  };
-
-  return {
-    toasts,
-    showXPToast,
-    levelUpData,
-    showLevelUpCelebration,
-    dismissLevelUpCelebration,
-  };
 }
