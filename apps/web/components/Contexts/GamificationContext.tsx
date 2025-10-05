@@ -7,24 +7,30 @@ import type {
   UserGamificationProfile,
   XPAwardRequest,
   XPAwardResponse,
-  StreakType,
 } from '@/types/gamification';
-import { gamificationApi } from '@/services/gamification/client';
+import {
+  awardXPAction,
+  updateStreakAction,
+  updatePreferencesAction,
+} from '@/app/actions/gamification';
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 
 /**
- * UNIFIED GAMIFICATION CONTEXT v2
+ * SIMPLIFIED GAMIFICATION CONTEXT v3
  *
- * Now using type-safe API client with:
- * - Automatic retry logic
- * - Request deduplication
- * - Response caching
- * - Type-safe error handling
- * - Optimistic updates
+ * Responsibilities:
+ * - UI state (animations, loading states)
+ * - Server Action orchestration
+ * - Optimistic UI updates
+ *
+ * NOT responsible for:
+ * - Data fetching (handled by Server Components)
+ * - Client-side caching (handled by Next.js)
+ * - Complex retry logic (handled by Server Actions)
  */
 
 interface GamificationContextValue {
-  // Core Data
+  // Core Data (provided by Server Components via props)
   profile: UserGamificationProfile | null;
   dashboard: DashboardData | null;
   leaderboard: OrganizationLeaderboard | null;
@@ -33,7 +39,7 @@ interface GamificationContextValue {
   isLoading: boolean;
   error: GamificationError | null;
 
-  // Actions
+  // Actions (Server Actions)
   awardXP: (payload: XPAwardRequest) => Promise<XPAwardResponse>;
   updateStreak: (type: 'login' | 'learning') => Promise<void>;
   updatePreferences: (preferences: Record<string, any>) => Promise<void>;
@@ -61,12 +67,19 @@ interface GamificationProviderProps {
 }
 
 export function GamificationProvider({ children, orgId, initialData }: GamificationProviderProps) {
-  // Unified State
+  // Server-provided data (updated via props)
   const [profile, setProfile] = useState<UserGamificationProfile | null>(initialData?.profile || null);
   const [dashboard, setDashboard] = useState<DashboardData | null>(initialData?.dashboard || null);
   const [leaderboard, setLeaderboard] = useState<OrganizationLeaderboard | null>(initialData?.leaderboard || null);
-  const [isLoading, setIsLoading] = useState(!initialData?.profile);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<GamificationError | null>(null);
+
+  // Update state when initialData changes (from server-side refetch)
+  useEffect(() => {
+    if (initialData?.profile) setProfile(initialData.profile);
+    if (initialData?.dashboard) setDashboard(initialData.dashboard);
+    if (initialData?.leaderboard) setLeaderboard(initialData.leaderboard);
+  }, [initialData]);
 
   // Computed streaks
   const streaks = useMemo(
@@ -79,161 +92,123 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
     [profile],
   );
 
-  // Unified data fetcher using new API client
-  const fetchData = useCallback(async () => {
-    if (!orgId) return;
+  // Refetch function (triggers router.refresh or revalidation)
+  const refetch = useCallback(async () => {
+    // In Next.js App Router, you'd typically use router.refresh() here
+    // or trigger revalidation via Server Actions
     setIsLoading(true);
-    setError(null);
     try {
-      // Use type-safe client with automatic retry and caching
-      const dash = await gamificationApi.getDashboard(orgId);
-      const lb = await gamificationApi.getLeaderboard(orgId, { limit: 20 });
-
-      if (dash) {
-        setProfile(dash.profile);
-        setDashboard(dash);
-      }
-      if (lb) setLeaderboard(lb);
-    } catch (err) {
-      // Type-safe error handling
-      if (err && typeof err === 'object' && 'type' in err) {
-        setError(err as GamificationError);
-      } else {
-        // Fallback for unknown errors using error factory
-        const { createUnknownError } = await import('@/types/gamification/errors');
-        setError(createUnknownError(
-          err instanceof Error ? err.message : 'Failed to fetch gamification data',
-          err,
-        ));
-      }
+      // Trigger page revalidation - the Server Component will refetch
+      // This could be enhanced with router.refresh() if needed
+      window.location.reload(); // Simple solution - can be improved
     } finally {
       setIsLoading(false);
     }
-  }, [orgId]);
+  }, []);
 
-  // Auto-fetch on mount and token/org changes
-  useEffect(() => {
-    if (!initialData?.profile) {
-      fetchData();
-    }
-  }, [fetchData, initialData?.profile]);
-
-  // Auto-login streak updater + daily login bonus
-  // Runs when profile becomes available. Ensures at most once per day per org in the client by localStorage guard.
-  useEffect(() => {
-    if (!orgId) return;
-    if (!profile) return;
-    try {
-      const todayKey = `gamification:lastLoginAward:${orgId}:${new Date().toISOString().slice(0, 10)}`;
-      const alreadyDone = typeof window !== 'undefined' ? localStorage.getItem(todayKey) : '1';
-      if (alreadyDone) return;
-
-      // Fire-and-forget: update login streak, then award login bonus using new API client
-      // Backend is idempotent and enforces daily caps; client guard prevents extra calls.
-      (async () => {
-        try {
-          // Update login streak using type-safe client
-          await gamificationApi.updateStreak(orgId, 'login');
-
-          // Award login bonus with idempotency key per user/day/org
-          await gamificationApi.awardXP(orgId, {
-            source: 'login_bonus',
-            idempotency_key: `login_bonus_${profile.user_id}_${orgId}_${new Date().toISOString().slice(0, 10)}`,
-          });
-
-          localStorage.setItem(todayKey, '1');
-          // Refresh cached dashboard/profile
-          fetchData();
-        } catch {
-          // non-fatal
-        }
-      })();
-    } catch {
-      // ignore storage errors (e.g., SSR)
-    }
-  }, [orgId, profile, fetchData]);
-
-  // Action Handlers with optimistic updates
+  // Award XP with optimistic update
   const awardXP = useCallback(
     async (payload: XPAwardRequest): Promise<XPAwardResponse> => {
-      if (!orgId) throw new Error('Organization required');
-
-      // Optimistic update: immediately add XP to local state
-      const optimisticAmount = payload.amount || 25; // Default XP
-      if (profile) {
-        const optimisticProfile = {
-          ...profile,
-          total_xp: profile.total_xp + optimisticAmount,
-          daily_xp_earned: profile.daily_xp_earned + optimisticAmount,
-        };
-        setProfile(optimisticProfile);
-        setDashboard((prev) => (prev ? { ...prev, profile: optimisticProfile } : prev));
-      }
-
+      setError(null);
       try {
-        // Use type-safe client with automatic retry
-        const result = await gamificationApi.awardXP(orgId, payload);
+        // Call Server Action
+        const result = await awardXPAction(orgId, payload);
 
-        // Update with server response (authoritative)
+        // Optimistically update local state
         if (result.profile) {
           setProfile(result.profile);
-          setDashboard((prev) => (prev ? { ...prev, profile: result.profile } : prev));
+          // Update dashboard if needed
+          if (dashboard) {
+            setDashboard({
+              ...dashboard,
+              profile: result.profile,
+            });
+          }
         }
 
         return result;
-      } catch (error) {
-        // Rollback optimistic update on error
-        if (profile) {
-          setProfile(profile);
-          setDashboard((prev) => (prev ? { ...prev, profile } : prev));
-        }
+      } catch (err: any) {
+        const error: GamificationError = {
+          type: 'SERVER_ERROR',
+          message: err.message || 'Failed to award XP',
+          timestamp: new Date().toISOString(),
+          statusCode: err.statusCode || 500,
+        };
+        setError(error);
         throw error;
       }
     },
-    [orgId, profile],
+    [orgId, dashboard],
   );
 
+  // Update streak
   const updateStreak = useCallback(
-    async (type: StreakType) => {
-      if (!orgId) throw new Error('Organization required');
-
-      // Use type-safe client
-      await gamificationApi.updateStreak(orgId, type);
-
-      // Refresh data
-      await fetchData();
-    },
-    [orgId, fetchData],
-  );
-
-  const updatePreferences = useCallback(
-    async (preferences: Record<string, unknown>) => {
-      if (!orgId) throw new Error('Organization required');
-
-      // Optimistic update
-      if (profile) {
-        const optimisticProfile = { ...profile, preferences: { ...profile.preferences, ...preferences } };
-        setProfile(optimisticProfile);
-        setDashboard((prev) => (prev ? { ...prev, profile: optimisticProfile } : prev));
-      }
-
+    async (type: 'login' | 'learning') => {
+      setError(null);
       try {
-        // Use type-safe client
-        const updatedProfile = await gamificationApi.updatePreferences(orgId, preferences);
+        const result = await updateStreakAction(orgId, type);
 
-        // Update with server response
-        setProfile(updatedProfile);
-        setDashboard((prev) => (prev ? { ...prev, profile: updatedProfile } : prev));
-      } catch (error) {
-        // Rollback on error
-        if (profile) {
-          setProfile(profile);
-          setDashboard((prev) => (prev ? { ...prev, profile } : prev));
+        // Optimistically update local profile
+        if (result) {
+          setProfile((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  ...(type === 'login'
+                    ? {
+                        login_streak: result.current_streak,
+                        longest_login_streak: result.longest_streak,
+                      }
+                    : {
+                        learning_streak: result.current_streak,
+                        longest_learning_streak: result.longest_streak,
+                      }),
+                }
+              : null
+          );
         }
+      } catch (err: any) {
+        const error: GamificationError = {
+          type: 'SERVER_ERROR',
+          message: err.message || 'Failed to update streak',
+          timestamp: new Date().toISOString(),
+          statusCode: err.statusCode || 500,
+        };
+        setError(error);
         throw error;
       }
     },
-    [orgId, profile],
+    [orgId],
+  );
+
+  // Update preferences
+  const updatePreferences = useCallback(
+    async (preferences: Record<string, any>) => {
+      setError(null);
+      try {
+        await updatePreferencesAction(orgId, preferences);
+
+        // Optimistically update local profile
+        setProfile((prev) =>
+          prev
+            ? {
+                ...prev,
+                preferences: { ...prev.preferences, ...preferences },
+              }
+            : null
+        );
+      } catch (err: any) {
+        const error: GamificationError = {
+          type: 'SERVER_ERROR',
+          message: err.message || 'Failed to update preferences',
+          timestamp: new Date().toISOString(),
+          statusCode: err.statusCode || 500,
+        };
+        setError(error);
+        throw error;
+      }
+    },
+    [orgId],
   );
 
   const value: GamificationContextValue = {
@@ -245,7 +220,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
     awardXP,
     updateStreak,
     updatePreferences,
-    refetch: fetchData,
+    refetch,
     streaks,
   };
 
@@ -255,7 +230,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
 export function useGamificationContext(): GamificationContextValue {
   const context = useContext(GamificationContext);
   if (!context) {
-    throw new Error('useGamificationContext must be used within a GamificationProvider');
+    throw new Error('useGamificationContext must be used within GamificationProvider');
   }
   return context;
 }
