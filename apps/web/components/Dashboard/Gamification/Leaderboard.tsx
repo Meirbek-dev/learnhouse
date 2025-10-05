@@ -1,13 +1,15 @@
 'use client';
 
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Award, Crown, Medal, TrendingUp, Trophy } from 'lucide-react';
+import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
 import type { OrganizationLeaderboard } from '@/types/gamification';
-import UserAvatar from '@/components/Objects/UserAvatar';
+import { Trophy, Medal, Award, Crown, Search } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useMemo, useState, useCallback } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { LevelBadge } from './level-indicators';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
 interface LeaderboardProps {
@@ -19,6 +21,8 @@ interface LeaderboardProps {
   currentUserId?: number;
 }
 
+type TimeRange = 'daily' | 'weekly' | 'monthly' | 'all-time';
+
 export function Leaderboard({
   orgId,
   className = '',
@@ -28,66 +32,45 @@ export function Leaderboard({
   currentUserId,
 }: LeaderboardProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [timeRange, setTimeRange] = useState<TimeRange>('all-time');
   const leaderboard = serverData ?? null;
 
   const getRankIcon = useCallback(
     (rank: number) => {
       switch (rank) {
-        case 1: {
+        case 1:
           return (
-            <Crown
-              className="h-5 w-5 text-yellow-500"
-              aria-label={t('leaderboard.ranks.first')}
-            />
+            <div className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-yellow-500" />
+              <span className="text-yellow-500 font-bold">{t('leaderboard.gold')}</span>
+            </div>
           );
-        }
-        case 2: {
+        case 2:
           return (
-            <Medal
-              className="h-5 w-5 text-gray-400"
-              aria-label={t('leaderboard.ranks.second')}
-            />
+            <div className="flex items-center gap-2">
+              <Medal className="h-5 w-5 text-gray-400" />
+              <span className="text-gray-400 font-bold">{t('leaderboard.silver')}</span>
+            </div>
           );
-        }
-        case 3: {
+        case 3:
           return (
-            <Award
-              className="h-5 w-5 text-amber-600"
-              aria-label={t('leaderboard.ranks.third')}
-            />
+            <div className="flex items-center gap-2">
+              <Award className="h-5 w-5 text-amber-600" />
+              <span className="text-amber-600 font-bold">{t('leaderboard.bronze')}</span>
+            </div>
           );
-        }
-        default: {
-          return <span className="text-muted-foreground text-sm font-bold">#{rank}</span>;
-        }
+        default:
+          return <span className="font-semibold text-muted-foreground">#{rank}</span>;
       }
     },
     [t],
   );
 
   const getRankBadgeVariant = useCallback((rank: number): 'default' | 'secondary' | 'outline' => {
-    switch (rank) {
-      case 1: {
-        return 'default';
-      }
-      case 2: {
-        return 'secondary';
-      }
-      case 3: {
-        return 'outline';
-      }
-      default: {
-        return 'outline';
-      }
-    }
-  }, []);
-
-  const getUserInitials = useCallback((userId: number) => {
-    // Generate consistent initials based on user ID
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const first = chars[userId % chars.length];
-    const second = chars[(userId * 7) % chars.length];
-    return `${first}${second}`;
+    if (rank <= 3) return 'default';
+    if (rank <= 10) return 'secondary';
+    return 'outline';
   }, []);
 
   const isCurrentUser = useCallback(
@@ -95,34 +78,55 @@ export function Leaderboard({
     [currentUserId],
   );
 
-  const topEntries = useMemo(() => {
-    return leaderboard?.entries.slice(0, limit) || [];
-  }, [leaderboard, limit]);
+  // Filter and search entries
+  const filteredEntries = useMemo(() => {
+    if (!leaderboard?.entries) return [];
+
+    let entries = leaderboard.entries;
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      entries = entries.filter(
+        (entry) => entry.username?.toLowerCase().includes(query) || entry.user_id.toString().includes(query),
+      );
+    }
+
+    // Note: timeRange filter would need backend support
+    // For now, we're showing all entries from the server
+
+    return entries.slice(0, limit);
+  }, [leaderboard, searchQuery, limit]);
+
+  // Find current user's rank
+  const currentUserEntry = useMemo(() => {
+    if (!currentUserId || !leaderboard?.entries) return null;
+    return leaderboard.entries.find((entry) => entry.user_id === currentUserId);
+  }, [currentUserId, leaderboard]);
 
   // Loading state
   if (!leaderboard) {
     return (
       <Card className={className}>
         <CardHeader>
-          <Skeleton className="h-6 w-32" />
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-5 w-5" />
+            {t('leaderboard.title')}
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div
-            className="space-y-3"
-            role="status"
-            aria-label={t('leaderboard.loading')}
-          >
+          <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
               <div
                 key={i}
-                className="flex items-center gap-3 rounded-lg border p-3"
+                className="flex items-center gap-3"
               >
-                <Skeleton className="h-8 w-8 rounded-full" />
-                <div className="flex-1">
-                  <Skeleton className="mb-1 h-4 w-24" />
-                  <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-24" />
                 </div>
-                <Skeleton className="h-6 w-16" />
+                <Skeleton className="h-8 w-16" />
               </div>
             ))}
           </div>
@@ -134,77 +138,6 @@ export function Leaderboard({
   // Compact view
   if (compact) {
     return (
-      <TooltipProvider>
-        <Card className={className}>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Trophy className="h-4 w-4" />
-              {t('leaderboard.topLearners')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div
-              className="space-y-2"
-              role="list"
-              aria-label={t('leaderboard.topLearners')}
-            >
-              {topEntries.slice(0, 10).map((entry) => (
-                <Tooltip key={entry.user_id}>
-                  <TooltipTrigger asChild>
-                    <div
-                      role="listitem"
-                      className={`flex cursor-help items-center gap-2 rounded-lg p-2 transition-colors ${
-                        isCurrentUser(entry.user_id)
-                          ? 'border-primary/20 bg-primary/10 border'
-                          : 'bg-muted/50 hover:bg-muted/70'
-                      }`}
-                    >
-                      <div className="flex items-center gap-1">{getRankIcon(entry.rank)}</div>
-                      <UserAvatar
-                        size="sm"
-                        userId={entry.user_id}
-                        username={entry.username ?? undefined}
-                        predefined_avatar="empty"
-                        fallbackText={(entry.username?.[0] || getUserInitials(entry.user_id)).toUpperCase()}
-                        showProfilePopup
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-xs font-medium">
-                          {entry.username || t('leaderboard.user', { id: entry.user_id })}
-                          {isCurrentUser(entry.user_id) && (
-                            <span className="text-primary ml-1">{t('leaderboard.you')}</span>
-                          )}
-                        </p>
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className="px-1 text-xs"
-                      >
-                        {t('leaderboard.levelShort', { level: entry.level })}
-                      </Badge>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>
-                      {t('leaderboard.tooltipUser', {
-                        user: entry.username || t('leaderboard.user', { id: entry.user_id }),
-                        level: entry.level,
-                        xp: entry.total_xp.toLocaleString(),
-                      })}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </TooltipProvider>
-    );
-  }
-
-  // Full leaderboard view
-  return (
-    <TooltipProvider>
       <Card className={className}>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
@@ -212,87 +145,211 @@ export function Leaderboard({
               <Trophy className="h-5 w-5" />
               {t('leaderboard.title')}
             </div>
-            {/* Total participants removed from simplified leaderboard contract */}
+            {leaderboard.total_participants > 0 && (
+              <Badge variant="secondary">
+                {leaderboard.total_participants} {t('leaderboard.participants')}
+              </Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div
-            className="space-y-3"
-            role="list"
-            aria-label={t('leaderboard.aria.rankings')}
-          >
-            {topEntries.map((entry, _index) => (
-              <Tooltip key={entry.user_id}>
-                <TooltipTrigger asChild>
-                  <div
-                    role="listitem"
-                    className={`flex cursor-help items-center gap-4 rounded-lg border p-4 transition-all duration-200 ${
-                      isCurrentUser(entry.user_id)
-                        ? 'border-primary/20 bg-primary/10 ring-primary/10 shadow-sm ring-1'
-                        : 'hover:bg-muted/50 hover:shadow-sm'
-                    }`}
-                  >
-                    {/* Rank */}
-                    <div className="flex w-8 items-center justify-center">{getRankIcon(entry.rank)}</div>
+          <div className="space-y-2">
+            {filteredEntries.slice(0, 5).map((entry) => (
+              <div
+                key={entry.user_id}
+                className={`flex items-center gap-3 rounded-lg p-2 transition-colors ${
+                  isCurrentUser(entry.user_id) ? 'bg-primary/10 ring-1 ring-primary/20' : 'hover:bg-muted/50'
+                }`}
+              >
+                <div className="flex items-center gap-2 w-12">
+                  {entry.rank <= 3 ? (
+                    <Trophy
+                      className={`h-4 w-4 ${
+                        entry.rank === 1 ? 'text-yellow-500' : entry.rank === 2 ? 'text-gray-400' : 'text-amber-600'
+                      }`}
+                    />
+                  ) : (
+                    <span className="text-sm text-muted-foreground">#{entry.rank}</span>
+                  )}
+                </div>
 
-                    {/* Avatar and User Info */}
-                    <div className="flex min-w-0 flex-1 items-center gap-3">
-                      <UserAvatar
-                        size="md"
-                        userId={entry.user_id}
-                        username={entry.username ?? undefined}
-                        predefined_avatar="empty"
-                        fallbackText={(entry.username?.[0] || getUserInitials(entry.user_id)).toUpperCase()}
-                        showProfilePopup
-                      />
+                <GamifiedUserAvatar
+                  size="sm"
+                  userId={entry.user_id}
+                  username={entry.username || undefined}
+                  avatar_url={entry.avatar_url || undefined}
+                  showLevelIndicator
+                  showLevelBadge={false}
+                />
 
-                      <div className="min-w-0 flex-1">
-                        <div className="mb-1 flex items-center gap-2">
-                          <p className="truncate font-medium">
-                            {entry.username || t('leaderboard.user', { id: entry.user_id })}
-                          </p>
-                          {isCurrentUser(entry.user_id) && (
-                            <Badge
-                              variant="secondary"
-                              className="text-xs"
-                            >
-                              {t('leaderboard.you')}
-                            </Badge>
-                          )}
-                        </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{entry.username || t('leaderboard.user', { id: entry.user_id })}</p>
+                  <p className="text-xs text-muted-foreground">{t('leaderboard.level')} {entry.level}</p>
+                </div>
 
-                        <div className="text-muted-foreground flex items-center gap-3 text-xs">
-                          <span className="flex items-center gap-1">
-                            <TrendingUp className="h-3 w-3" />
-                            {t('leaderboard.levelLabel', { level: entry.level })}
-                          </span>
-                          <span>{t('leaderboard.xp', { xp: entry.total_xp.toLocaleString() })}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Streaks intentionally omitted in compact contract; use streak summary endpoint if needed */}
-
-                    {/* Rank Badge */}
-                    <Badge variant={getRankBadgeVariant(entry.rank)}>#{entry.rank}</Badge>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <div className="text-center">
-                    <p className="font-medium">{entry.username || t('leaderboard.user', { id: entry.user_id })}</p>
-                    <p className="text-sm">
-                      {t('leaderboard.rankLevel', { rank: entry.rank, level: entry.level })}
-                    </p>
-                    <p className="text-sm">{t('leaderboard.xpEarned', { xp: entry.total_xp.toLocaleString() })}</p>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
+                <div className="text-right">
+                  <p className="text-sm font-semibold">{entry.total_xp.toLocaleString()} XP</p>
+                </div>
+              </div>
             ))}
           </div>
-
-          {/* Pagination / total participants messaging removed with simplified data */}
         </CardContent>
       </Card>
-    </TooltipProvider>
+    );
+  }
+
+  // Full leaderboard view with filters
+  return (
+    <Card className={className}>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Trophy className="h-5 w-5" />
+            {t('leaderboard.title')}
+          </div>
+          {leaderboard.total_participants > 0 && (
+            <Badge variant="secondary">
+              {leaderboard.total_participants} {t('leaderboard.participants')}
+            </Badge>
+          )}
+        </CardTitle>
+
+        {/* Filters */}
+        <div className="flex gap-3 mt-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={t('leaderboard.searchPlaceholder')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* <Select value={timeRange} onValueChange={(value: TimeRange) => setTimeRange(value)}>
+            <SelectTrigger className="w-[150px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="daily">{t('leaderboard.daily')}</SelectItem>
+              <SelectItem value="weekly">{t('leaderboard.weekly')}</SelectItem>
+              <SelectItem value="monthly">{t('leaderboard.monthly')}</SelectItem>
+              <SelectItem value="all-time">{t('leaderboard.allTime')}</SelectItem>
+            </SelectContent>
+          </Select> */}
+        </div>
+      </CardHeader>
+
+      <CardContent>
+        {/* My Rank Header (Sticky) */}
+        {currentUserEntry && (
+          <div className="mb-4 rounded-lg border-2 border-primary bg-primary/5 p-3 sticky top-0 z-10">
+            <div className="flex items-center gap-3">
+              <Badge
+                variant="default"
+                className="shrink-0"
+              >
+                {t('leaderboard.yourRank')}: #{currentUserEntry.rank}
+              </Badge>
+
+              <GamifiedUserAvatar
+                size="md"
+                userId={currentUserEntry.user_id}
+                username={currentUserEntry.username || undefined}
+                avatar_url={currentUserEntry.avatar_url || undefined}
+                use_with_session
+                showLevelIndicator
+              />
+
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold truncate">
+                  {currentUserEntry.username || t('leaderboard.user', { id: currentUserEntry.user_id })}
+                </p>
+                <div className="flex items-center gap-2">
+                  <LevelBadge
+                    level={currentUserEntry.level}
+                    size="sm"
+                  />
+                  <span className="text-sm text-muted-foreground">{currentUserEntry.total_xp.toLocaleString()} XP</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <ScrollArea className="h-[500px] pr-4">
+          <div className="space-y-3">
+            {filteredEntries.length === 0 ? (
+              <div className="py-8 text-center text-muted-foreground">
+                {searchQuery ? t('leaderboard.noResults') : t('leaderboard.noEntries')}
+              </div>
+            ) : (
+              filteredEntries.map((entry) => (
+                <div
+                  key={entry.user_id}
+                  className={`flex items-center gap-4 rounded-lg border p-4 transition-all ${
+                    isCurrentUser(entry.user_id)
+                      ? 'border-primary bg-primary/5 shadow-sm'
+                      : 'border-border hover:border-primary/50 hover:bg-muted/30'
+                  }`}
+                >
+                  {/* Rank */}
+                  <div className="flex items-center justify-center w-20 shrink-0">{getRankIcon(entry.rank)}</div>
+
+                  {/* Avatar */}
+                  <GamifiedUserAvatar
+                    size="lg"
+                    userId={entry.user_id}
+                    username={entry.username || undefined}
+                    avatar_url={entry.avatar_url || undefined}
+                    showLevelIndicator
+                    showLevelBadge={false}
+                    showProfilePopup
+                  />
+
+                  {/* User Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold truncate">{entry.username || t('leaderboard.user', { id: entry.user_id })}</p>
+                      {isCurrentUser(entry.user_id) && (
+                        <Badge
+                          variant="secondary"
+                          className="shrink-0"
+                        >
+                          {t('leaderboard.you')}
+                        </Badge>
+                      )}
+                      {entry.rank <= 3 && <Crown className="h-4 w-4 text-yellow-500 shrink-0" />}
+                    </div>
+
+                    <div className="flex items-center gap-2 mt-1">
+                      <LevelBadge
+                        level={entry.level}
+                        size="sm"
+                        showIcon={false}
+                      />
+                      {entry.rank_change && entry.rank_change !== 0 && (
+                        <Badge
+                          variant={entry.rank_change > 0 ? 'default' : 'destructive'}
+                          className="text-xs"
+                        >
+                          {entry.rank_change > 0 ? '↑' : '↓'} {Math.abs(entry.rank_change)}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* XP */}
+                  <div className="text-right shrink-0">
+                    <p className="text-lg font-bold">{entry.total_xp.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">XP</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </ScrollArea>
+      </CardContent>
+    </Card>
   );
 }

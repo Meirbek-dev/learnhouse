@@ -1,7 +1,7 @@
-import { z } from 'zod';
 import type { UserGamificationProfile, StreakInfo } from './profile';
-import type { XPTransaction } from './transactions';
 import type { OrganizationLeaderboard } from './leaderboard';
+import type { XPTransaction } from './transactions';
+import { z } from 'zod';
 
 /**
  * Dashboard and Aggregate Types
@@ -103,10 +103,7 @@ export const ActivityFeedItemSchema = z.object({
 });
 
 // Helper functions
-export function createActivityFeedFromTransactions(
-  transactions: XPTransaction[],
-  limit = 10,
-): ActivityFeedItem[] {
+export function createActivityFeedFromTransactions(transactions: XPTransaction[], limit = 10): ActivityFeedItem[] {
   return transactions.slice(0, limit).map((tx) => ({
     id: `tx-${tx.id}`,
     type: tx.triggered_level_up ? ('level_up' as const) : ('xp_award' as const),

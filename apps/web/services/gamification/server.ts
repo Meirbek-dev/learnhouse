@@ -224,12 +224,11 @@ export async function revalidateGamificationTags(orgId: number) {
 // Server-side mutation helpers
 export async function awardXPOnServer(orgId: number, payload: Record<string, any>) {
   const accessToken = await requireAccessToken();
-  // Map legacy client payload to backend shape
   const body = {
     source: payload.source,
-    source_id: payload.source_id ?? undefined,
-    custom_amount: payload.amount ?? payload.custom_amount ?? undefined,
-    idempotency_key: payload.idempotency_key ?? undefined,
+    source_id: payload.source_id,
+    amount: payload.amount ?? payload.custom_amount,
+    idempotency_key: payload.idempotency_key,
   };
   const res = await fetch(`${getAPIUrl()}gamification/${orgId}/xp`, {
     method: 'POST',

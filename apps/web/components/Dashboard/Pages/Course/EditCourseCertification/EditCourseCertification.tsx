@@ -267,7 +267,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
         }
       };
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     watchedValues.certification_name,
     watchedValues.certification_description,

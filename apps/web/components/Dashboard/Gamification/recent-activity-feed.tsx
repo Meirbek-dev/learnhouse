@@ -1,13 +1,13 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import type { XPTransaction } from '@/types/gamification';
-import { formatDistanceToNow } from 'date-fns';
 import { Award, Trophy, Zap, TrendingUp } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
+import type { XPTransaction } from '@/types/gamification';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
+import { formatDistanceToNow } from 'date-fns';
+import { useTranslations } from 'next-intl';
 
 interface RecentActivityFeedProps {
   transactions: XPTransaction[];
@@ -35,7 +35,10 @@ export function RecentActivityFeed({ transactions, isLoading }: RecentActivityFe
         <CardContent>
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex items-center gap-3">
+              <div
+                key={i}
+                className="flex items-center gap-3"
+              >
                 <Skeleton className="h-8 w-8 rounded-full" />
                 <div className="flex-1 space-y-2">
                   <Skeleton className="h-4 w-3/4" />
@@ -81,14 +84,15 @@ export function RecentActivityFeed({ transactions, isLoading }: RecentActivityFe
                 : '';
 
               return (
-                <div key={transaction.id} className="flex items-start gap-3">
+                <div
+                  key={transaction.id}
+                  className="flex items-start gap-3"
+                >
                   <div className="bg-primary/10 rounded-full p-2">
                     <IconComponent className="text-primary h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">
-                      {t(`xpSources.${transaction.source}` as any)}
-                    </p>
+                    <p className="truncate text-sm font-medium">{t(`xpSources.${transaction.source}` as any)}</p>
                     <p className="text-muted-foreground text-xs">{timeAgo}</p>
                   </div>
                   <div className="shrink-0">

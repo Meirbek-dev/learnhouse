@@ -5,7 +5,7 @@ import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 // Gamification imports
-import { LevelDisplay } from '@components/Dashboard/Gamification';
+import { LevelProgress } from '@components/Dashboard/Gamification';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
@@ -585,11 +585,13 @@ const CourseEndView: FC<CourseEndViewProps> = ({
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <div className="text-center">
-                    <LevelDisplay
-                      profile={gamificationProfile}
-                      variant="compact"
-                      className="justify-center"
-                    />
+                    {gamificationProfile && (
+                      <LevelProgress
+                        profile={gamificationProfile}
+                        variant="compact"
+                        className="justify-center"
+                      />
+                    )}
                   </div>
                 </div>
 

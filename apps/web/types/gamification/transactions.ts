@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import type { UserGamificationProfile } from './profile';
+import { z } from 'zod';
 
 /**
  * XP Transactions and Award Types
@@ -130,28 +130,21 @@ export function groupTransactionsBySource(transactions: XPTransaction[]): Array<
   amount: number;
   count: number;
 }> {
-  const grouped = transactions.reduce(
-    (acc, tx) => {
-      const existing = acc.get(tx.source);
-      if (existing) {
-        existing.amount += tx.amount;
-        existing.count += 1;
-      } else {
-        acc.set(tx.source, { source: tx.source, amount: tx.amount, count: 1 });
-      }
-      return acc;
-    },
-    new Map<XPSource, { source: XPSource; amount: number; count: number }>(),
-  );
+  const grouped = transactions.reduce((acc, tx) => {
+    const existing = acc.get(tx.source);
+    if (existing) {
+      existing.amount += tx.amount;
+      existing.count += 1;
+    } else {
+      acc.set(tx.source, { source: tx.source, amount: tx.amount, count: 1 });
+    }
+    return acc;
+  }, new Map<XPSource, { source: XPSource; amount: number; count: number }>());
 
   return Array.from(grouped.values());
 }
 
-export function calculateDailySummary(
-  transactions: XPTransaction[],
-  date: string,
-  dailyLimit: number,
-): DailyXPSummary {
+export function calculateDailySummary(transactions: XPTransaction[], date: string, dailyLimit: number): DailyXPSummary {
   const dateTransactions = transactions.filter((tx) => tx.created_at.startsWith(date));
   const totalXP = dateTransactions.reduce((sum, tx) => sum + tx.amount, 0);
   const sources = groupTransactionsBySource(dateTransactions);

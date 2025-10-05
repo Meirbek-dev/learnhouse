@@ -38,7 +38,9 @@ export function LevelBadge({
   };
 
   return (
-    <Badge className={cn(levelInfo.color, sizeClasses[size], 'flex items-center gap-1 text-primary-foreground', className)}>
+    <Badge
+      className={cn(levelInfo.color, sizeClasses[size], 'flex items-center gap-1 text-primary-foreground', className)}
+    >
       {showIcon && <Icon className={iconSizes[size]} />}
       {t('levelIndicators.level')} {level}
     </Badge>

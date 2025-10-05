@@ -1,11 +1,11 @@
-import { auth } from '@/auth';
-import { GamificationProvider } from '@/components/Contexts/GamificationContext';
-import { Skeleton } from '@/components/ui/skeleton';
 import { getServerGamificationDashboard, getServerOrganizationLeaderboard } from '@/services/gamification/server';
-import { LeaderboardCard } from './Gamification/leaderboard-card';
-import { ProfileCard } from './Gamification/profile-card';
-import { QuickStatsCard } from './Gamification/quick-stats-card';
+import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import { RecentActivityFeed } from './Gamification/recent-activity-feed';
+import { LeaderboardCard } from './Gamification/leaderboard-card';
+import { QuickStatsCard } from './Gamification/quick-stats-card';
+import { ProfileCard } from './Gamification/profile-card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { auth } from '@/auth';
 
 interface GamificationDashboardProps {
   orgId: number;
@@ -39,7 +39,10 @@ export default async function GamificationDashboard({ orgId }: GamificationDashb
     ]);
 
     return (
-      <GamificationProvider orgId={orgId} initialData={{ dashboard: dashboardData, profile: dashboardData.profile }}>
+      <GamificationProvider
+        orgId={orgId}
+        initialData={{ dashboard: dashboardData, profile: dashboardData.profile }}
+      >
         <div className="space-y-6">
           {/* Top Row: Profile & Quick Stats */}
           <div className="grid gap-6 md:grid-cols-2">
@@ -50,7 +53,10 @@ export default async function GamificationDashboard({ orgId }: GamificationDashb
           {/* Bottom Row: Recent Activity & Leaderboard */}
           <div className="grid gap-6 md:grid-cols-2">
             <RecentActivityFeed transactions={dashboardData.recent_transactions || []} />
-            <LeaderboardCard entries={leaderboardData.entries} currentUserId={userId ? Number(userId) : undefined} />
+            <LeaderboardCard
+              entries={leaderboardData.entries}
+              currentUserId={userId ? Number(userId) : undefined}
+            />
           </div>
         </div>
       </GamificationProvider>

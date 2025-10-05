@@ -116,10 +116,7 @@ export function markCurrentUser(entries: LeaderboardEntry[], currentUserId: numb
   }));
 }
 
-export function calculateRankChange(
-  currentRank: number,
-  previousRank: number | undefined,
-): number {
+export function calculateRankChange(currentRank: number, previousRank: number | undefined): number {
   if (previousRank === undefined) return 0;
   // Positive = improved (moved up = lower rank number)
   return previousRank - currentRank;
@@ -130,18 +127,11 @@ export function calculatePercentile(rank: number, totalParticipants: number): nu
   return Math.round(((totalParticipants - rank + 1) / totalParticipants) * 100);
 }
 
-export function findUserInLeaderboard(
-  leaderboard: OrganizationLeaderboard,
-  userId: number,
-): LeaderboardEntry | null {
+export function findUserInLeaderboard(leaderboard: OrganizationLeaderboard, userId: number): LeaderboardEntry | null {
   return leaderboard.entries.find((entry) => entry.user_id === userId) ?? null;
 }
 
-export function getNearbyEntries(
-  leaderboard: OrganizationLeaderboard,
-  userId: number,
-  range = 2,
-): LeaderboardEntry[] {
+export function getNearbyEntries(leaderboard: OrganizationLeaderboard, userId: number, range = 2): LeaderboardEntry[] {
   const userIndex = leaderboard.entries.findIndex((entry) => entry.user_id === userId);
   if (userIndex === -1) return [];
 
@@ -165,8 +155,7 @@ export function enrichUserRank(
 
   const userIndex = leaderboard.entries.findIndex((entry) => entry.user_id === userId);
   const nearest_above = userIndex > 0 ? leaderboard.entries[userIndex - 1] : null;
-  const nearest_below =
-    userIndex < leaderboard.entries.length - 1 ? leaderboard.entries[userIndex + 1] : null;
+  const nearest_below = userIndex < leaderboard.entries.length - 1 ? leaderboard.entries[userIndex + 1] : null;
 
   return {
     user_id: userId,

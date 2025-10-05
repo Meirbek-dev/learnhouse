@@ -1,7 +1,7 @@
+export { Leaderboard } from './leaderboard';
 // Core gamification exports
 
 export { GamificationProfileSection } from './GamificationProfileSection';
-export { Leaderboard } from './Leaderboard';
 
 // Dashboard cards
 export { ProfileCard } from './profile-card';
@@ -11,3 +11,6 @@ export { LeaderboardCard } from './leaderboard-card';
 
 // Level indicators (simplified version)
 export { LevelBadge, LevelProgress, LevelUpAnimation } from './level-indicators';
+
+// XP Toast notifications
+export { XPToast, LevelUpCelebration, useXPToast } from './xp-toast';

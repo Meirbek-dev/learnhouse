@@ -8,12 +8,11 @@ import type {
   XPAwardRequest,
   XPAwardResponse,
 } from '@/types/gamification';
-import {
-  awardXPAction,
-  updateStreakAction,
-  updatePreferencesAction,
-} from '@/app/actions/gamification';
+import { awardXPAction, updateStreakAction, updatePreferencesAction } from '@/app/actions/gamification';
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import { XPToast, LevelUpCelebration } from '@/components/Dashboard/Gamification/xp-toast';
+import { AnimatePresence } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 
 /**
  * SIMPLIFIED GAMIFICATION CONTEXT v3
@@ -45,6 +44,10 @@ interface GamificationContextValue {
   updatePreferences: (preferences: Record<string, any>) => Promise<void>;
   refetch: () => Promise<void>;
 
+  // XP Toast notifications
+  showXPToast: (amount: number, source?: string, triggeredLevelUp?: boolean) => void;
+  showLevelUpCelebration: (newLevel: number) => void;
+
   // Computed Values
   streaks: {
     login: number;
@@ -67,12 +70,20 @@ interface GamificationProviderProps {
 }
 
 export function GamificationProvider({ children, orgId, initialData }: GamificationProviderProps) {
+  const t = useTranslations('DashPage.UserAccountSettings.Gamification');
+
   // Server-provided data (updated via props)
   const [profile, setProfile] = useState<UserGamificationProfile | null>(initialData?.profile || null);
   const [dashboard, setDashboard] = useState<DashboardData | null>(initialData?.dashboard || null);
   const [leaderboard, setLeaderboard] = useState<OrganizationLeaderboard | null>(initialData?.leaderboard || null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<GamificationError | null>(null);
+
+  // XP Toast state
+  const [xpToastQueue, setXpToastQueue] = useState<
+    Array<{ amount: number; source?: string; triggeredLevelUp?: boolean }>
+  >([]);
+  const [levelUpQueue, setLevelUpQueue] = useState<Array<{ newLevel: number }>>([]);
 
   // Update state when initialData changes (from server-side refetch)
   useEffect(() => {
@@ -130,7 +141,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
       } catch (err: any) {
         const error: GamificationError = {
           type: 'SERVER_ERROR',
-          message: err.message || 'Failed to award XP',
+          message: err.message || t('error.awardXPFailed'),
           timestamp: new Date().toISOString(),
           statusCode: err.statusCode || 500,
         };
@@ -138,7 +149,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
         throw error;
       }
     },
-    [orgId, dashboard],
+    [orgId, dashboard, t],
   );
 
   // Update streak
@@ -164,13 +175,13 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
                         longest_learning_streak: result.longest_streak,
                       }),
                 }
-              : null
+              : null,
           );
         }
       } catch (err: any) {
         const error: GamificationError = {
           type: 'SERVER_ERROR',
-          message: err.message || 'Failed to update streak',
+          message: err.message || t('error.updateStreakFailed'),
           timestamp: new Date().toISOString(),
           statusCode: err.statusCode || 500,
         };
@@ -178,7 +189,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
         throw error;
       }
     },
-    [orgId],
+    [orgId, t],
   );
 
   // Update preferences
@@ -195,12 +206,12 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
                 ...prev,
                 preferences: { ...prev.preferences, ...preferences },
               }
-            : null
+            : null,
         );
       } catch (err: any) {
         const error: GamificationError = {
           type: 'SERVER_ERROR',
-          message: err.message || 'Failed to update preferences',
+          message: err.message || t('error.updatePreferencesFailed'),
           timestamp: new Date().toISOString(),
           statusCode: err.statusCode || 500,
         };
@@ -208,8 +219,30 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
         throw error;
       }
     },
-    [orgId],
+    [orgId, t],
   );
+
+  // XP Toast handlers with improved UX
+  const showXPToast = useCallback((amount: number, source?: string, triggeredLevelUp?: boolean) => {
+    setXpToastQueue((prev) => {
+      // Limit queue to 3 items
+      const filtered = prev.slice(-2);
+      return [...filtered, { amount, source, triggeredLevelUp }];
+    });
+  }, []);
+
+  const showLevelUpCelebration = useCallback((newLevel: number) => {
+    // Only show one level-up at a time
+    setLevelUpQueue([{ newLevel }]);
+  }, []);
+
+  const dismissLevelUpCelebration = useCallback(() => {
+    setLevelUpQueue([]);
+  }, []);
+
+  const handleToastComplete = useCallback((index: number) => {
+    setXpToastQueue((prev) => prev.filter((_, i) => i !== index));
+  }, []);
 
   const value: GamificationContextValue = {
     profile,
@@ -221,10 +254,38 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
     updateStreak,
     updatePreferences,
     refetch,
+    showXPToast,
+    showLevelUpCelebration,
     streaks,
   };
 
-  return <GamificationContext.Provider value={value}>{children}</GamificationContext.Provider>;
+  return (
+    <GamificationContext.Provider value={value}>
+      {children}
+      {/* Render XP toasts */}
+      <AnimatePresence mode="popLayout">
+        {xpToastQueue.map((toast, index) => (
+          <XPToast
+            key={`toast-${index}-${toast.amount}`}
+            amount={toast.amount}
+            source={toast.source}
+            triggeredLevelUp={toast.triggeredLevelUp}
+            onComplete={() => handleToastComplete(index)}
+          />
+        ))}
+      </AnimatePresence>
+      {/* Render level-up celebrations */}
+      <AnimatePresence>
+        {levelUpQueue.length > 0 && levelUpQueue[0] && (
+          <LevelUpCelebration
+            newLevel={levelUpQueue[0].newLevel}
+            onDismiss={dismissLevelUpCelebration}
+            compact={(profile?.preferences as any)?.display?.compactMode ?? false}
+          />
+        )}
+      </AnimatePresence>
+    </GamificationContext.Provider>
+  );
 }
 
 export function useGamificationContext(): GamificationContextValue {

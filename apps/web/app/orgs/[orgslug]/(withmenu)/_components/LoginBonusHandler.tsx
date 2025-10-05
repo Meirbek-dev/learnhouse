@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useGamificationContext } from '@/components/Contexts/GamificationContext';
+import { useEffect } from 'react';
 
 /**
  * LoginBonusHandler

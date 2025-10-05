@@ -1,12 +1,12 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LevelBadge, LevelProgress } from './level-indicators';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
 import type { UserGamificationProfile } from '@/types/gamification';
+import { LevelBadge, LevelProgress } from './level-indicators';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Activity, Flame } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface ProfileCardProps {
   profile: UserGamificationProfile | null;
@@ -57,7 +57,11 @@ export function ProfileCard({ profile, isLoading }: ProfileCardProps) {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>{t('dashboard.title')}</span>
-          <LevelBadge level={profile.level} size="md" showIcon />
+          <LevelBadge
+            level={profile.level}
+            size="md"
+            showIcon
+          />
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -81,7 +85,12 @@ export function ProfileCard({ profile, isLoading }: ProfileCardProps) {
             </div>
 
             {/* Level Progress */}
-            <LevelProgress profile={profile} variant="compact" showLabels={false} animated />
+            <LevelProgress
+              profile={profile}
+              variant="compact"
+              showLabels={false}
+              animated
+            />
 
             {/* Quick Streaks */}
             <div className="grid grid-cols-2 gap-3 text-sm">

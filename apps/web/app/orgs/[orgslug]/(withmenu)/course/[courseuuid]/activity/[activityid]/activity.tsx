@@ -976,21 +976,18 @@ export const MarkStatus = (props: {
 
       await mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`);
 
-      // Show XP notification after a short delay to allow backend processing
-      setTimeout(async () => {
-        if (refetchGamification) {
-          await refetchGamification();
+      // Refetch gamification data and show XP toast
+      if (gamificationContext) {
+        // The backend automatically awards XP for activity completion
+        // Refetch to get updated profile
+        await refetchGamification();
 
-          // Show a generic success message since we can't reliably get updated state here
-          toast.success(`🔥 +25 XP за завершение "${props.activity.name}"!`, {
-            style: {
-              borderRadius: '8px',
-              background: '#333',
-              color: '#fff',
-            },
-          });
-        }
-      }, 1000);
+        // Show XP toast (25 XP for activity completion)
+        gamificationContext.showXPToast(25, 'activity_completion', false);
+      } else {
+        // Fallback for non-gamified orgs
+        toast.success(t('activityCompleted'));
+      }
 
       if (willCompleteAll) {
         const cleanCourseUuid = props.course.course_uuid.replace('course_', '');

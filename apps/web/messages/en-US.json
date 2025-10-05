@@ -2787,6 +2787,28 @@
     },
     "Gamification": {
       "cancel": "Cancel",
+      "continue": "Continue",
+      "clickAnywhereToClose": "Click anywhere to close",
+      "levelUp": "Level Up!",
+      "levelUpTitle": "Level Up!",
+      "reachedLevel": "You reached level {level}",
+      "errors": {
+        "noOrgId": "Organization ID not found"
+      },
+      "settings": {
+        "title": "Gamification Settings",
+        "descriptionSimplified": "Customize your gamification experience with these simple options",
+        "showOnLeaderboard": "Show me on leaderboard",
+        "showOnLeaderboardDescription": "Display your progress on the organization leaderboard",
+        "xpGainNotifications": "XP gain notifications",
+        "xpGainNotificationsDescription": "Show notifications when you earn experience points",
+        "animatedEffects": "Animated effects",
+        "animatedEffectsDescription": "Enable animations for level ups and XP gains",
+        "save": "Save Changes",
+        "saving": "Saving...",
+        "saved": "Settings saved!",
+        "saveFailed": "Failed to save settings"
+      },
       "dangerZone": {
         "description": "Irreversible actions that affect your gamification data",
         "resetAllData": "Reset All Data",
@@ -3664,7 +3686,10 @@
           "title": "Display Settings"
         },
         "error": {
-          "loadFailed": "Failed to load gamification data"
+          "loadFailed": "Failed to load gamification data",
+          "awardXPFailed": "Failed to award XP",
+          "updateStreakFailed": "Failed to update streak",
+          "updatePreferencesFailed": "Failed to update preferences"
         },
         "errors": {
           "orgNotAvailable": "Organization data not available. Please refresh the page."
@@ -3704,7 +3729,25 @@
           "xp": "{xp} XP",
           "xpEarned": "{xp} XP earned",
           "you": "You",
-          "yourRank": "Your Rank"
+          "yourRank": "Your Rank",
+          "gold": "Gold",
+          "silver": "Silver",
+          "bronze": "Bronze",
+          "participants": "participants",
+          "searchPlaceholder": "Search by username...",
+          "filters": {
+            "daily": "Today",
+            "weekly": "This Week",
+            "monthly": "This Month",
+            "allTime": "All Time"
+          },
+          "level": "Level",
+          "of": "of",
+          "showing": "Showing",
+          "lastUpdated": "Last updated",
+          "clearSearch": "Clear search",
+          "noResults": "No users found matching your search",
+          "noEntries": "No leaderboard entries yet"
         },
         "levelIndicators": {
           "congratsMaxLevel": "Congratulations! You've reached the maximum level!",

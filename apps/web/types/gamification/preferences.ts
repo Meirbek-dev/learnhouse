@@ -172,10 +172,7 @@ export function deserializePreferences(json: string): GamificationPreferences {
 }
 
 // Type guards
-export function hasNotificationEnabled(
-  prefs: GamificationPreferences,
-  type: keyof NotificationPreferences,
-): boolean {
+export function hasNotificationEnabled(prefs: GamificationPreferences, type: keyof NotificationPreferences): boolean {
   return prefs.notifications[type];
 }
 

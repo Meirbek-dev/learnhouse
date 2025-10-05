@@ -229,9 +229,7 @@ export function getNextUnlock(level: number): AvatarUnlock | null {
     ...AVATAR_ACCESSORIES.map((a) => ({ type: 'accessory' as const, item: a, level: a.unlockLevel })),
   ];
 
-  const nextItem = allItems
-    .filter((item) => item.level > level)
-    .sort((a, b) => a.level - b.level)[0];
+  const nextItem = allItems.filter((item) => item.level > level).sort((a, b) => a.level - b.level)[0];
 
   if (!nextItem) return null;
 
