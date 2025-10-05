@@ -5,7 +5,7 @@ Provides a centralized way to get timezone-aware datetime objects
 based on the configured timezone in config.yaml
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from zoneinfo import ZoneInfo
 
 from config.config import get_openu_config
@@ -57,7 +57,7 @@ def utcnow() -> datetime:
     Returns:
         datetime: Current datetime in UTC
     """
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def to_timezone(dt: datetime) -> datetime:
@@ -72,7 +72,7 @@ def to_timezone(dt: datetime) -> datetime:
     """
     if dt.tzinfo is None:
         # If naive, assume UTC
-        dt = dt.replace(tzinfo=timezone.utc)
+        dt = dt.replace(tzinfo=UTC)
 
     return dt.astimezone(get_timezone())
 

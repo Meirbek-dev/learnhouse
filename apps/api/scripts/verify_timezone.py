@@ -4,7 +4,7 @@ Timezone Verification Script
 Run this script to verify the timezone configuration is working correctly.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 
 from src.core.timezone import (
     get_timezone,
@@ -14,11 +14,11 @@ from src.core.timezone import (
 )
 
 
-def print_separator():
+def print_separator() -> None:
     print("=" * 70)
 
 
-def main():
+def main() -> None:
     print_separator()
     print("TIMEZONE CONFIGURATION VERIFICATION")
     print_separator()
@@ -61,7 +61,7 @@ def main():
     print(f"   Converted to {tz}: {converted_naive}")
 
     # UTC datetime
-    utc_dt = datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+    utc_dt = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
     converted_utc = to_timezone(utc_dt)
     print(f"   UTC datetime: {utc_dt}")
     print(f"   Converted to {tz}: {converted_utc}")

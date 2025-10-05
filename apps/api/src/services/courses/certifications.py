@@ -454,7 +454,7 @@ async def get_user_certificates_for_course(
         logger.debug(
             f"Certificate check/creation result for user {current_user.id} in course {course_uuid}: {completion_result}"
         )
-    except Exception as err:  # noqa: BLE001
+    except Exception as err:
         # Don't fail the request on certificate creation errors; just log and proceed to list.
         logger.error(
             f"check_course_completion_and_create_certificate failed during get_user_certificates_for_course: {err}",
@@ -587,7 +587,7 @@ async def check_course_completion_and_create_certificate(
             )
         except Exception as xp_error:
             # Log the error but don't fail subsequent certificate logic
-            logger.error(
+            logger.exception(
                 f"Failed to award XP for course completion (user_id: {user_id}, course_id: {course_id}): {xp_error}"
             )
 
