@@ -113,7 +113,11 @@ async def get_unified_dashboard(
             )
             for tx in data["recent_transactions"]
         ]
-        return DashboardRead(profile=profile, recent_transactions=recent_txs)
+        return DashboardRead(
+            profile=profile,
+            recent_transactions=recent_txs,
+            user_rank=data.get("user_rank")
+        )
 
     except Exception as e:
         logger.exception("Dashboard error for user %s org %s: %s", user.id, org_id, e)

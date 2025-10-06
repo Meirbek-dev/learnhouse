@@ -1,8 +1,8 @@
 import { getServerGamificationDashboard, getServerOrganizationLeaderboard } from '@/services/gamification/server';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
-import { Leaderboard } from './Gamification/leaderboard';
 import { RecentActivityFeed } from './Gamification/recent-activity-feed';
 import { HeroSection } from './Gamification/hero-section';
+import { Leaderboard } from './Gamification/leaderboard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/auth';

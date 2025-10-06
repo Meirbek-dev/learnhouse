@@ -17,8 +17,8 @@ import {
 } from '@/lib/gamification/components/notification-queue';
 import { ParticleEffect } from '@/lib/gamification/components/level-indicators';
 import { AnimatedValue } from '@/lib/gamification/components/animated-value';
-import { getXPSourceTheme } from '@/lib/gamification';
 import { useReducedData } from '@/hooks/use-reduced-data';
+import { getXPSourceTheme } from '@/lib/gamification';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import { useCallback } from 'react';
@@ -84,9 +84,7 @@ function XPToast({ notification, onDismiss }: XPToastProps) {
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             <p className="text-xs text-muted-foreground truncate">
-              {isBatched
-                ? t('toast.fromActivities', { count: notification.batchCount })
-                : sourceLabel}
+              {isBatched ? t('toast.fromActivities', { count: notification.batchCount }) : sourceLabel}
             </p>
           </div>
         </div>
@@ -104,7 +102,9 @@ function XPToast({ notification, onDismiss }: XPToastProps) {
       {/* Level Up Indicator */}
       {notification.triggeredLevelUp && (
         <div className="border-t bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 px-4 py-2">
-          <p className="text-center text-sm font-bold text-white">{'🎉'} {t('toast.levelUp')} {'🎉'}</p>
+          <p className="text-center text-sm font-bold text-white">
+            {'🎉'} {t('toast.levelUp')} {'🎉'}
+          </p>
         </div>
       )}
 
@@ -171,5 +171,3 @@ export function useXPToast() {
     ),
   };
 }
-
-

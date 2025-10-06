@@ -27,12 +27,7 @@ interface LevelProgressProps {
   className?: string;
 }
 
-export function LevelProgress({
-  profile,
-  showMilestones = false,
-  animated = true,
-  className,
-}: LevelProgressProps) {
+export function LevelProgress({ profile, showMilestones = false, animated = true, className }: LevelProgressProps) {
   const [previousLevel, setPreviousLevel] = useState(profile.level);
   const controls = useAnimationControls();
 
@@ -53,7 +48,10 @@ export function LevelProgress({
   }, [profile.level, previousLevel, controls, animated]);
 
   return (
-    <motion.div animate={controls} className={cn('space-y-1.5', className)}>
+    <motion.div
+      animate={controls}
+      className={cn('space-y-1.5', className)}
+    >
       {/* Compact progress bar */}
       <div className="relative h-1.5 overflow-hidden rounded-full bg-muted/50">
         <motion.div
@@ -194,10 +192,7 @@ export function GlowingLevelBadge({ level, size = 'md', animated = true, classNa
     >
       {/* Subtle background glow */}
       <div
-        className={cn(
-          'absolute inset-0 rounded-full opacity-20 blur-sm',
-          levelInfo.color.replace('text-', 'bg-'),
-        )}
+        className={cn('absolute inset-0 rounded-full opacity-20 blur-sm', levelInfo.color.replace('text-', 'bg-'))}
       />
 
       {/* Clean badge */}
@@ -252,8 +247,7 @@ export function XPGainAnimation({ amount, trigger, position, onComplete }: XPGai
       transition={{ duration: 1.2, times: [0, 0.2, 0.8, 1], ease: [0.4, 0, 0.2, 1] }}
     >
       <div className="flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold text-primary shadow-lg">
-        <Sparkles className="h-3 w-3" />
-        +{amount} XP
+        <Sparkles className="h-3 w-3" />+{amount} XP
       </div>
     </motion.div>
   );

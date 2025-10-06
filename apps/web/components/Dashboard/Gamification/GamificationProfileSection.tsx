@@ -3,9 +3,9 @@
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import { Activity, Crown, Flame, Star, Target, Trophy, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { GlowingLevelBadge, LevelProgress } from '@/lib/gamification';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
 import { AVATAR_UNLOCKS, getLevelInfo } from '@/lib/gamification/levels';
+import { GlowingLevelBadge, LevelProgress } from '@/lib/gamification';
 import type { UserGamificationProfile } from '@/types/gamification';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -138,7 +138,9 @@ export function GamificationProfileSection({
                 animated
               />
               <div className="text-right text-sm">
-                <div className="font-semibold">{profile.total_xp.toLocaleString()} {'XP'}</div>
+                <div className="font-semibold">
+                  {profile.total_xp.toLocaleString()} {'XP'}
+                </div>
                 <div className="text-muted-foreground text-xs">
                   {(profile as any).xp_to_next_level?.toLocaleString() || 0} {t('levelIndicators.xpToNext')}
                 </div>
@@ -156,7 +158,9 @@ export function GamificationProfileSection({
               <div className="flex items-center gap-2">
                 <Flame className="h-4 w-4 text-orange-500" />
                 <span>
-                  {t('streaks.login.title')}{': '}{profile.login_streak || 0} {t('streaks.days')}
+                  {t('streaks.login.title')}
+                  {': '}
+                  {profile.login_streak || 0} {t('streaks.days')}
                 </span>
               </div>
               <div className="flex items-center gap-2">

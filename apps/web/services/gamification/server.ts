@@ -157,7 +157,9 @@ export async function getServerGamificationDashboard(
       total_participants: 0,
       last_updated: new Date().toISOString(),
     },
-    user_rank: null, // Will be populated separately if needed
+    user_rank: (() => {
+      return json.user_rank !== undefined && json.user_rank !== null ? Number(json.user_rank) : null;
+    })(),
     streak_info: {
       login: {
         current: Number(profile.login_streak) || 0,

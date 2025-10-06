@@ -9,13 +9,13 @@
 
 'use client';
 
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
+import { useReducedData } from '@/hooks/use-reduced-data';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslations } from 'next-intl';
 import { Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useEffect } from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useReducedMotion } from '@/hooks/use-reduced-motion';
-import { useReducedData } from '@/hooks/use-reduced-data';
 
 interface LevelUpCelebrationProps {
   newLevel: number;
@@ -83,9 +83,7 @@ export function LevelUpCelebration({ newLevel, onDismiss, compact = false }: Lev
           <motion.div
             initial={prefersReducedMotion ? { opacity: 0 } : { scale: 0, rotate: -90 }}
             animate={prefersReducedMotion ? { opacity: 1 } : { scale: 1, rotate: 0 }}
-            transition={
-              prefersReducedMotion ? { duration: 0.2 } : { type: 'spring', stiffness: 400, damping: 15 }
-            }
+            transition={prefersReducedMotion ? { duration: 0.2 } : { type: 'spring', stiffness: 400, damping: 15 }}
             className="shrink-0"
           >
             <div className="rounded-full bg-yellow-500/20 p-2 md:p-3 border-2 border-yellow-500">

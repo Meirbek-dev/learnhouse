@@ -25,7 +25,8 @@ export function useReducedData(): boolean {
     }
 
     // 2. Check Network Information API (saveData)
-    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+    const connection =
+      (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
     if (connection) {
       if (connection.saveData === true) {
         reduced = true;

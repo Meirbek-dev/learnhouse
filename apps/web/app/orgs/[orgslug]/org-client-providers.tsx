@@ -1,6 +1,7 @@
 'use client';
 
 import Toast from '@components/Objects/StyledElements/Toast/Toast';
+import { useTheme } from '@/components/providers/theme-provider';
 import { OrgProvider } from '@components/Contexts/OrgContext';
 import NextTopLoader from 'nextjs-toploader';
 import type { ReactNode } from 'react';
@@ -11,17 +12,19 @@ interface OrgClientProvidersProps {
 }
 
 export default function OrgClientProviders({ children, orgslug }: OrgClientProvidersProps) {
+  const { theme: currentTheme } = useTheme();
+
   return (
     <OrgProvider orgslug={orgslug}>
       <NextTopLoader
-        color="#2b75ee"
+        color={currentTheme.colors.primary}
         initialPosition={0.1}
         crawlSpeed={300}
-        height={2}
+        height={3}
         easing="ease"
         speed={1000}
         showSpinner={false}
-        shadow="0 0 10px #2b75ee, 0 0 5px #2b75ee"
+        shadow={`0 0 10px ${currentTheme.colors.primary}, 0 0 5px ${currentTheme.colors.primary}`}
         crawl
       />
       <Toast />

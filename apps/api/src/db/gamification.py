@@ -234,6 +234,7 @@ class DashboardRead(PydanticStrictBaseModel):
 
     profile: ProfileRead
     recent_transactions: list[TransactionRead]
+    user_rank: int | None = None
 
 
 class LeaderboardEntryRead(PydanticStrictBaseModel):

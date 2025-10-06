@@ -4,13 +4,13 @@ import { useOptionalGamificationContext } from '@/components/Contexts/Gamificati
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-// Gamification imports
-import { LevelProgress } from '@/lib/gamification';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { useWindowSize } from '@/hooks/useWindowSize';
 import { useEffect, useMemo, useState } from 'react';
+// Gamification imports
+import { LevelProgress } from '@/lib/gamification';
 import ReactConfetti from 'react-confetti';
 import html2canvas from 'html2canvas-pro';
 import type { FC } from 'react';

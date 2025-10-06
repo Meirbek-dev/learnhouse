@@ -95,7 +95,14 @@ const CollectionGrid = ({ collections, orgslug, org_id }: { collections: any[]; 
 
 // CourseGrid component is now extracted to CourseGridClient.tsx
 
-const LandingClassic = ({ courses, collections, orgslug, org_id, gamificationProfile, userRank }: LandingClassicProps) => {
+const LandingClassic = ({
+  courses,
+  collections,
+  orgslug,
+  org_id,
+  gamificationProfile,
+  userRank,
+}: LandingClassicProps) => {
   const t = useTranslations('HomePage');
 
   return (

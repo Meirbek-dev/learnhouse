@@ -976,14 +976,15 @@ export const MarkStatus = (props: {
 
       await mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`);
 
-      // Refetch gamification data and show XP toast
+      // Award XP via gamification context (idempotent with stable key)
       if (gamificationContext) {
-        // The backend automatically awards XP for activity completion
-        // Refetch to get updated profile
-        await refetchGamification();
-
-        // Show XP toast (25 XP for activity completion)
-        gamificationContext.showXPToast(25, 'activity_completion', false);
+        // Use stable idempotency key to prevent duplicate XP awards and toasts
+        // Backend is also idempotent, so this is safe even if called multiple times
+        await gamificationContext.awardXP({
+          source: 'activity_completion',
+          source_id: props.activity.id?.toString(),
+          idempotency_key: `activity_completion_${props.activity.id}_${session?.user?.id || 'unknown'}`,
+        });
       } else {
         // Fallback for non-gamified orgs
         toast.success(t('activityCompleted'));

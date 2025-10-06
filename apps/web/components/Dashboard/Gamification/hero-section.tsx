@@ -1,16 +1,16 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Trophy, TrendingUp, Flame, Zap, Calendar } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useMemo } from 'react';
-import { GlowingLevelBadge, getLevelInfo } from '@/lib/gamification';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
+import { Trophy, TrendingUp, Flame, Zap, Calendar } from 'lucide-react';
 import { useLHSession } from '@/components/Contexts/LHSessionContext';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { GlowingLevelBadge, getLevelInfo } from '@/lib/gamification';
 import type { UserGamificationProfile } from '@/types/gamification';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { useTranslations } from 'next-intl';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useMemo } from 'react';
 
 interface HeroSectionProps {
   profile: UserGamificationProfile;
@@ -42,7 +42,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
     const dailyProgress = Math.min((dailyEarned / dailyCap) * 100, 100);
 
     // Next milestone
-    const nextLevel = [5, 10, 15, 25, 50, 100].find(l => l > profile.level);
+    const nextLevel = [5, 10, 15, 25, 50, 100].find((l) => l > profile.level);
 
     // Streak status
     const loginStreak = profile.login_streak || 0;
@@ -68,12 +68,11 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
     : session?.data?.user?.username;
 
   return (
-    <Card className={cn('relative overflow-hidden border-2', className)}>
+    <Card className={cn('relative overflow-hidden border-2 py-2', className)}>
       {/* Dynamic gradient background based on level */}
-      <div className={cn(
-        'absolute inset-0 opacity-10',
-        'bg-gradient-to-br from-primary via-transparent to-purple-500'
-      )} />
+      <div
+        className={cn('absolute inset-0 opacity-10', 'bg-gradient-to-br from-primary via-transparent to-purple-500')}
+      />
 
       {/* Animated particles for high-level users */}
       {profile.level >= 15 && (
@@ -106,7 +105,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
         </div>
       )}
 
-      <div className="relative p-6 md:p-8">
+      <div className="relative px-6 md:p-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-8">
           {/* Left: Avatar & Level */}
           <div className="flex shrink-0 flex-col items-center gap-4">
@@ -162,11 +161,10 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
                         'gap-1 px-2 py-1',
                         userRank === 1 && 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/50',
                         userRank === 2 && 'bg-gray-400/20 text-gray-600 dark:text-gray-300 border-gray-400/50',
-                        userRank === 3 && 'bg-orange-600/20 text-orange-600 dark:text-orange-400 border-orange-600/50'
+                        userRank === 3 && 'bg-orange-600/20 text-orange-600 dark:text-orange-400 border-orange-600/50',
                       )}
                     >
-                      <Trophy className="h-3 w-3" />
-                      #{userRank}
+                      <Trophy className="h-3 w-3" />#{userRank}
                     </Badge>
                   </motion.div>
                 )}
@@ -175,17 +173,13 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
               {/* Level title with icon */}
               <div className="flex items-center gap-2">
                 <levelInfo.icon className={cn('h-5 w-5', levelInfo.color)} />
-                <p className={cn('text-lg font-semibold', levelInfo.color)}>
-                  {levelInfo.title}
-                </p>
+                <p className={cn('text-lg font-semibold', levelInfo.color)}>{levelInfo.title}</p>
                 <span className="text-muted-foreground text-sm">
                   • {t('levelIndicators.level')} {profile.level}
                 </span>
               </div>
 
-              <p className="text-muted-foreground text-sm">
-                {t(`levels.${getLevelKey(profile.level)}`)}
-              </p>
+              <p className="text-muted-foreground text-sm">{t(`levels.${getLevelKey(profile.level)}`)}</p>
             </div>
 
             {/* Level Progress - Enhanced */}
@@ -200,9 +194,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
                 {/* Progress bar with gradient */}
                 <div className="relative h-4 overflow-hidden rounded-full bg-muted">
                   <motion.div
-                    className={cn(
-                      'h-full rounded-full bg-accent-foreground',
-                    )}
+                    className={cn('h-full rounded-full bg-gradient-to-r from-primary to-purple-500')}
                     initial={{ width: 0 }}
                     animate={{ width: `${xpProgress}%` }}
                     transition={{ duration: 1, ease: 'easeOut' }}
@@ -240,16 +232,15 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground flex items-center gap-1.5 font-medium">
-                  <Zap className={cn(
-                    'h-4 w-4',
-                    dailyXpProgress >= 100 ? 'text-orange-500' : 'text-yellow-500'
-                  )} />
+                  <Zap className={cn('h-4 w-4', dailyXpProgress >= 100 ? 'text-orange-500' : 'text-yellow-500')} />
                   {t('progress.dailyXP')}
                 </span>
-                <span className={cn(
-                  'font-bold tabular-nums',
-                  dailyXpProgress >= 100 ? 'text-orange-500' : 'text-foreground'
-                )}>
+                <span
+                  className={cn(
+                    'font-bold tabular-nums',
+                    dailyXpProgress >= 100 ? 'text-orange-500' : 'text-foreground',
+                  )}
+                >
                   {profile.daily_xp_earned?.toLocaleString() || 0} {'/ 500'}
                 </span>
               </div>
@@ -260,7 +251,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
                       'h-full rounded-full transition-colors',
                       dailyXpProgress >= 100
                         ? 'bg-gradient-to-r from-orange-500 to-red-500'
-                        : 'bg-gradient-to-r from-yellow-500 to-amber-500'
+                        : 'bg-gradient-to-r from-yellow-500 to-amber-500',
                     )}
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(dailyXpProgress, 100)}%` }}
@@ -311,15 +302,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
 /**
  * Animated Streak Badge
  */
-function StreakBadge({
-  type,
-  value,
-  label
-}: {
-  type: 'fire' | 'zap';
-  value: number;
-  label: string
-}) {
+function StreakBadge({ type, value, label }: { type: 'fire' | 'zap'; value: number; label: string }) {
   const Icon = type === 'fire' ? Flame : Zap;
   const baseColor = type === 'fire' ? 'text-orange-500' : 'text-yellow-500';
   const glowColor = type === 'fire' ? 'shadow-orange-500/50' : 'shadow-yellow-500/50';
@@ -332,18 +315,9 @@ function StreakBadge({
     >
       <Badge
         variant="secondary"
-        className={cn(
-          'gap-1 px-3 py-1.5',
-          value > 0 && 'shadow-lg',
-          value > 0 && glowColor
-        )}
+        className={cn('gap-1 px-3 py-1.5', value > 0 && 'shadow-lg', value > 0 && glowColor)}
       >
-        <Icon
-          className={cn(
-            'h-4 w-4',
-            value > 0 ? baseColor : 'text-muted-foreground'
-          )}
-        />
+        <Icon className={cn('h-4 w-4', value > 0 ? baseColor : 'text-muted-foreground')} />
         <span className="font-bold">{value}</span>
       </Badge>
 
@@ -352,7 +326,7 @@ function StreakBadge({
         <motion.div
           className={cn(
             'absolute inset-0 rounded-full blur-md',
-            type === 'fire' ? 'bg-orange-500/30' : 'bg-yellow-500/30'
+            type === 'fire' ? 'bg-orange-500/30' : 'bg-yellow-500/30',
           )}
           animate={{
             scale: [1, 1.2, 1],

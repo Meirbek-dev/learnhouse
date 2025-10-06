@@ -1,16 +1,16 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { Crown, TrendingUp, TrendingDown, Minus, ChevronUp, ChevronDown } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import type { LeaderboardEntry } from '@/types/gamification';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { getRankTheme } from '@/lib/gamification';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { getRankTheme } from '@/lib/gamification';
-import type { LeaderboardEntry } from '@/types/gamification';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface LeaderboardProps {
@@ -30,17 +30,12 @@ interface LeaderboardProps {
  * - Visual distinction for top 3
  * - "Distance to next rank" indicator
  */
-export function Leaderboard({
-  entries,
-  currentUserId,
-  userRank,
-  className
-}: LeaderboardProps) {
+export function Leaderboard({ entries, currentUserId, userRank, className }: LeaderboardProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const [showFull, setShowFull] = useState(false);
 
   const { displayEntries, currentUserEntry, rankContext } = useMemo(() => {
-    const userEntry = entries.find(e => e.user_id === currentUserId);
+    const userEntry = entries.find((e) => e.user_id === currentUserId);
 
     if (!userEntry || !userRank || showFull) {
       return {
@@ -89,11 +84,7 @@ export function Leaderboard({
             className="h-8 text-xs"
           >
             {showFull ? t('leaderboard.showLess') : t('leaderboard.showAll')}
-            {showFull ? (
-              <ChevronUp className="ml-1 h-3 w-3" />
-            ) : (
-              <ChevronDown className="ml-1 h-3 w-3" />
-            )}
+            {showFull ? <ChevronUp className="ml-1 h-3 w-3" /> : <ChevronDown className="ml-1 h-3 w-3" />}
           </Button>
         )}
       </CardHeader>
@@ -103,10 +94,11 @@ export function Leaderboard({
         {rankContext && !showFull && (
           <div className="rounded-lg bg-primary/5 p-3 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">
-                {t('leaderboard.yourPosition')}
+              <span className="text-muted-foreground">{t('leaderboard.yourPosition')}</span>
+              <span className="font-bold">
+                {'#'}
+                {rankContext.rank}
               </span>
-              <span className="font-bold">{'#'}{rankContext.rank}</span>
             </div>
             {rankContext.xpToNext > 0 && (
               <div className="mt-1 text-xs text-muted-foreground">
@@ -179,7 +171,7 @@ function LeaderboardEntryRow({
       className={cn(
         'flex items-center gap-3 rounded-lg p-3 transition-colors',
         isCurrentUser && 'bg-primary/10 ring-2 ring-primary/20',
-        !isCurrentUser && 'hover:bg-muted/50'
+        !isCurrentUser && 'hover:bg-muted/50',
       )}
     >
       {/* Rank Badge */}
@@ -197,11 +189,7 @@ function LeaderboardEntryRow({
           >
             <Badge
               variant="secondary"
-              className={cn(
-                'h-8 w-8 justify-center rounded-full font-bold',
-                rankTheme.color,
-                'shadow-lg'
-              )}
+              className={cn('h-8 w-8 justify-center rounded-full font-bold', rankTheme.color, 'shadow-lg')}
             >
               {entry.rank === 1 && <Crown className="h-4 w-4" />}
               {entry.rank > 1 && entry.rank}
@@ -217,38 +205,33 @@ function LeaderboardEntryRow({
       {/* Avatar */}
       <Avatar className="h-10 w-10">
         <AvatarImage src={entry.avatar_url || undefined} />
-        <AvatarFallback>
-          {entry.username?.slice(0, 2).toUpperCase() || 'U'}
-        </AvatarFallback>
+        <AvatarFallback>{entry.username?.slice(0, 2).toUpperCase() || 'U'}</AvatarFallback>
       </Avatar>
 
       {/* User Info */}
       <div className="flex-1 min-w-0">
-        <p className={cn(
-          'truncate font-semibold',
-          isCurrentUser && 'text-primary'
-        )}>
+        <p className={cn('truncate font-semibold', isCurrentUser && 'text-primary')}>
           {entry.username || 'Anonymous'}
-          {isCurrentUser && (
-            <span className="ml-2 text-xs text-muted-foreground">({t('leaderboard.you')})</span>
-          )}
+          {isCurrentUser && <span className="ml-2 text-xs text-muted-foreground">({t('leaderboard.you')})</span>}
         </p>
         <p className="text-xs text-muted-foreground">
-          {t('leaderboard.levelLabel', { level: entry.level })} {'•'} {t('leaderboard.xp', { xp: entry.total_xp.toLocaleString() })}
+          {t('leaderboard.levelLabel', { level: entry.level })} {'•'}{' '}
+          {t('leaderboard.xp', { xp: entry.total_xp.toLocaleString() })}
         </p>
       </div>
 
       {/* Rank Change Indicator */}
       {entry.rank_change !== undefined && entry.rank_change !== 0 && (
-        <div className={cn(
-          'flex items-center gap-1 text-xs font-semibold',
-          entry.rank_change > 0 && 'text-green-500',
-          entry.rank_change < 0 && 'text-red-500'
-        )}>
+        <div
+          className={cn(
+            'flex items-center gap-1 text-xs font-semibold',
+            entry.rank_change > 0 && 'text-green-500',
+            entry.rank_change < 0 && 'text-red-500',
+          )}
+        >
           {entry.rank_change > 0 && (
             <>
-              <TrendingUp className="h-3 w-3" />
-              +{entry.rank_change}
+              <TrendingUp className="h-3 w-3" />+{entry.rank_change}
             </>
           )}
           {entry.rank_change < 0 && (
@@ -260,9 +243,7 @@ function LeaderboardEntryRow({
         </div>
       )}
 
-      {entry.rank_change === 0 && (
-        <Minus className="h-3 w-3 text-muted-foreground" />
-      )}
+      {entry.rank_change === 0 && <Minus className="h-3 w-3 text-muted-foreground" />}
     </motion.div>
   );
 }

@@ -75,7 +75,10 @@ export function RecentActivityFeed({ transactions, isLoading }: RecentActivityFe
                   <p className="text-muted-foreground text-xs">{timeAgo}</p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <span className="text-primary text-sm font-bold tabular-nums">{'+'}{transaction.amount}</span>
+                  <span className="text-primary text-sm font-bold tabular-nums">
+                    {'+'}
+                    {transaction.amount}
+                  </span>
                   <p className="text-muted-foreground text-xs">{'XP'}</p>
                 </div>
               </motion.div>

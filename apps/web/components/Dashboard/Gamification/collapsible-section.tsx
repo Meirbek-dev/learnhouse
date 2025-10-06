@@ -7,10 +7,10 @@
 
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 import { type ReactNode, useEffect, useState } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 
 interface CollapsibleSectionProps {

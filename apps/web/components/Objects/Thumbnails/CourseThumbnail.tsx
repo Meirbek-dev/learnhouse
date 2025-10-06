@@ -82,19 +82,6 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
   const completedActivities = courseRun?.steps?.filter((step: any) => step.complete === true)?.length || 0;
   const progressPercentage = totalActivities > 0 ? Math.round((completedActivities / totalActivities) * 100) : 0;
 
-  // Debug logging (can be removed after verification)
-  if (isEnrolled && typeof window !== 'undefined') {
-    console.log(`[CourseThumbnail Debug] Course: ${course.name}`, {
-      cleanCourseUuid,
-      isEnrolled,
-      totalActivities,
-      completedActivities,
-      progressPercentage,
-      courseRunSteps: courseRun?.steps?.length,
-      completedSteps: courseRun?.steps?.filter((s: any) => s.complete === true).length,
-    });
-  }
-
   const deleteCourse = async () => {
     const toastId = toast.loading(t('deleting'));
     try {

@@ -240,7 +240,8 @@ export function BatchIndicator({ count, className }: BatchIndicatorProps) {
       animate={{ scale: 1 }}
       className={`inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-xs font-bold text-primary-foreground ${className}`}
     >
-      {'×'}{count}
+      {'×'}
+      {count}
     </motion.div>
   );
 }
