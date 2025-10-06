@@ -4,14 +4,12 @@
  */
 
 // Import types and utilities
-import type { Theme, ThemeColors } from './theme-utils';
-import { CSS_VARIABLE_MAP } from './theme-utils';
+import type { Theme } from './theme-utils';
 
 // Re-export theme definitions from separate file
 export { defaultTheme, themes } from './theme-definitions';
-// Re-export types and utilities from theme-utils
+// Re-export types from theme-utils
 export type { Theme, ThemeColors } from './theme-utils';
-export { CSS_VARIABLE_MAP, createThemeFromCSS } from './theme-utils';
 
 // Import for use in utility functions
 import { defaultTheme, themes } from './theme-definitions';
@@ -34,7 +32,6 @@ export function getTheme(name: string): Readonly<Theme> {
 
 /**
  * Apply theme colors to CSS variables on the document root
- * Uses the CSS_VARIABLE_MAP for consistent variable naming
  *
  * @param theme - The theme to apply
  */
@@ -42,15 +39,9 @@ export function applyTheme(theme: Readonly<Theme>): void {
   if (typeof document === 'undefined') return;
 
   const root = document.documentElement;
-  const { colors, radius, name } = theme;
+  const { name } = theme;
 
-  // Apply color variables using the CSS variable map
-  (Object.entries(CSS_VARIABLE_MAP) as [keyof ThemeColors, string][]).forEach(([colorKey, cssVarName]) => {
-    root.style.setProperty(`--${cssVarName}`, colors[colorKey]);
-  });
-
-  // Apply radius
-  root.style.setProperty('--radius', radius);
+  root.setAttribute('data-theme', name);
 
   // Store theme preference
   localStorage.setItem('theme', name);

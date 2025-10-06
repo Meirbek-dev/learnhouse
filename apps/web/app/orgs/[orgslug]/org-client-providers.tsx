@@ -5,6 +5,7 @@ import { useTheme } from '@/components/providers/theme-provider';
 import { OrgProvider } from '@components/Contexts/OrgContext';
 import NextTopLoader from 'nextjs-toploader';
 import type { ReactNode } from 'react';
+import { useMemo } from 'react';
 
 interface OrgClientProvidersProps {
   children: ReactNode;
@@ -14,19 +15,25 @@ interface OrgClientProvidersProps {
 export default function OrgClientProviders({ children, orgslug }: OrgClientProvidersProps) {
   const { theme: currentTheme } = useTheme();
 
+  // Memoize NextTopLoader props to prevent re-renders on theme changes
+  const topLoaderProps = useMemo(
+    () => ({
+      color: currentTheme.colors.primary,
+      initialPosition: 0.1,
+      crawlSpeed: 300,
+      height: 3,
+      easing: 'ease' as const,
+      speed: 1000,
+      showSpinner: false,
+      shadow: `0 0 10px ${currentTheme.colors.primary}, 0 0 5px ${currentTheme.colors.primary}`,
+      crawl: true,
+    }),
+    [currentTheme.colors.primary],
+  );
+
   return (
     <OrgProvider orgslug={orgslug}>
-      <NextTopLoader
-        color={currentTheme.colors.primary}
-        initialPosition={0.1}
-        crawlSpeed={300}
-        height={3}
-        easing="ease"
-        speed={1000}
-        showSpinner={false}
-        shadow={`0 0 10px ${currentTheme.colors.primary}, 0 0 5px ${currentTheme.colors.primary}`}
-        crawl
-      />
+      <NextTopLoader {...topLoaderProps} />
       <Toast />
       {children}
     </OrgProvider>

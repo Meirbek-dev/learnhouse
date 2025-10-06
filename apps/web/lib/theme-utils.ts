@@ -98,8 +98,6 @@ export const CSS_VARIABLE_MAP = {
  *   // ... more variables
  * `);
  * ```
- *
- * @throws {Error} If required CSS variables are missing
  */
 export function createThemeFromCSS(
   name: string,
@@ -122,58 +120,24 @@ export function createThemeFromCSS(
     }
   }
 
-  // Helper to get value with type-safe fallback
-  const getVar = (cssName: string, fallback?: string): string => {
-    const value = vars.get(cssName);
-    if (!(value || fallback)) {
-      console.warn(`Theme "${name}": Missing CSS variable --${cssName}, using default`);
-      return 'oklch(0.5 0 0)';
-    }
-    return value || fallback!;
-  };
+  // Simple getter - returns undefined if not found
+  const getVar = (cssName: string): string | undefined => vars.get(cssName);
 
-  // Build theme colors using the CSS variable map
-  const colors: ThemeColors = {
-    background: getVar(CSS_VARIABLE_MAP.background),
-    foreground: getVar(CSS_VARIABLE_MAP.foreground),
-    card: getVar(CSS_VARIABLE_MAP.card),
-    cardForeground: getVar(CSS_VARIABLE_MAP.cardForeground),
-    popover: getVar(CSS_VARIABLE_MAP.popover),
-    popoverForeground: getVar(CSS_VARIABLE_MAP.popoverForeground),
-    primary: getVar(CSS_VARIABLE_MAP.primary),
-    primaryForeground: getVar(CSS_VARIABLE_MAP.primaryForeground),
-    secondary: getVar(CSS_VARIABLE_MAP.secondary),
-    secondaryForeground: getVar(CSS_VARIABLE_MAP.secondaryForeground),
-    muted: getVar(CSS_VARIABLE_MAP.muted),
-    mutedForeground: getVar(CSS_VARIABLE_MAP.mutedForeground),
-    accent: getVar(CSS_VARIABLE_MAP.accent),
-    accentForeground: getVar(CSS_VARIABLE_MAP.accentForeground),
-    destructive: getVar(CSS_VARIABLE_MAP.destructive),
-    destructiveForeground: getVar(CSS_VARIABLE_MAP.destructiveForeground),
-    border: getVar(CSS_VARIABLE_MAP.border),
-    input: getVar(CSS_VARIABLE_MAP.input),
-    ring: getVar(CSS_VARIABLE_MAP.ring),
-    chart1: getVar(CSS_VARIABLE_MAP.chart1),
-    chart2: getVar(CSS_VARIABLE_MAP.chart2),
-    chart3: getVar(CSS_VARIABLE_MAP.chart3),
-    chart4: getVar(CSS_VARIABLE_MAP.chart4),
-    chart5: getVar(CSS_VARIABLE_MAP.chart5),
-    sidebar: getVar(CSS_VARIABLE_MAP.sidebar),
-    sidebarForeground: getVar(CSS_VARIABLE_MAP.sidebarForeground),
-    sidebarPrimary: getVar(CSS_VARIABLE_MAP.sidebarPrimary),
-    sidebarPrimaryForeground: getVar(CSS_VARIABLE_MAP.sidebarPrimaryForeground),
-    sidebarAccent: getVar(CSS_VARIABLE_MAP.sidebarAccent),
-    sidebarAccentForeground: getVar(CSS_VARIABLE_MAP.sidebarAccentForeground),
-    sidebarBorder: getVar(CSS_VARIABLE_MAP.sidebarBorder),
-    sidebarRing: getVar(CSS_VARIABLE_MAP.sidebarRing),
-    radius: getVar(CSS_VARIABLE_MAP.radius),
-  };
+  // Build theme colors - only include values that were actually defined
+  const colors: any = {};
+
+  for (const [key, cssName] of Object.entries(CSS_VARIABLE_MAP)) {
+    const value = getVar(cssName);
+    if (value) {
+      colors[key] = value;
+    }
+  }
 
   return Object.freeze({
     name,
     label,
     description,
     colors: Object.freeze(colors),
-    radius: getVar('radius', '0.5rem'),
+    radius: getVar('radius') || '0.5rem',
   });
 }

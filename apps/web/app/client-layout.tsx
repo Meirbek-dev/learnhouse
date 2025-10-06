@@ -5,25 +5,12 @@ import StyledComponentsRegistry from '../components/Utils/libs/styled-registry';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { updateUserTheme } from '@services/users/users';
 import { SessionProvider } from 'next-auth/react';
-import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 
 interface ClientLayoutProps {
   children: ReactNode;
 }
-
-const variants = {
-  hidden: { opacity: 0 },
-  enter: { opacity: 1 },
-  exit: { opacity: 0 },
-} as const;
-
-const pageTransition = {
-  type: 'tween' as const,
-  ease: 'linear' as const,
-  duration: 0.3,
-} as const;
 
 function ThemeSync() {
   const session = useLHSession() as any;
@@ -33,9 +20,8 @@ function ThemeSync() {
       const customEvent = event as CustomEvent<{ theme: string }>;
       if (session?.data?.user?.id && session?.data?.tokens?.access_token) {
         try {
+          // Update theme on server without refreshing session (avoid unnecessary re-renders)
           await updateUserTheme(session.data.user.id, customEvent.detail.theme, session.data.tokens.access_token);
-          // Refresh session to get updated theme from server
-          await session.update();
         } catch (error) {
           console.error('Failed to sync theme to server:', error);
         }
@@ -73,15 +59,7 @@ function ThemeProviderWrapper({ children }: { children: ReactNode }) {
     <ThemeProvider userTheme={userTheme}>
       <ThemeSync />
       <StyledComponentsRegistry>
-        <motion.main
-          variants={variants}
-          initial="hidden"
-          animate="enter"
-          exit="exit"
-          transition={pageTransition}
-        >
-          {children}
-        </motion.main>
+        <main className="animate-fade-in">{children}</main>
       </StyledComponentsRegistry>
     </ThemeProvider>
   );
