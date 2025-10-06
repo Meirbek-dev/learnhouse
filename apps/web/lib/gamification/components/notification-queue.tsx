@@ -6,11 +6,16 @@
  * - Smart positioning to avoid content blocking
  * - Queue management to prevent spam
  * - Smooth transitions between notifications
+ *
+ * Performance optimization:
+ * - Uses setTimeout for each notification instead of setInterval polling
+ * - Prevents jittery animations caused by excessive re-renders (was 10x/sec)
+ * - Properly cleans up timeouts on unmount and manual dismissal
  */
 
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { animations } from '../design-tokens';
 
@@ -53,6 +58,7 @@ export function useXPNotificationQueue(options: XPNotificationQueueOptions = {})
   const opts = { ...DEFAULT_OPTIONS, ...options };
   const [queue, setQueue] = useState<BatchedNotification[]>([]);
   const [visible, setVisible] = useState<BatchedNotification[]>([]);
+  const timeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
   // Add notification to queue with batching logic
   const addNotification = useCallback(
@@ -71,8 +77,14 @@ export function useXPNotificationQueue(options: XPNotificationQueueOptions = {})
         );
 
         if (recentSimilar) {
+          // Clear existing timeout for this notification
+          const existingTimeout = timeoutsRef.current.get(recentSimilar.id);
+          if (existingTimeout) {
+            clearTimeout(existingTimeout);
+          }
+
           // Batch with existing notification
-          return prev.map((n) =>
+          const updated = prev.map((n) =>
             n.id === recentSimilar.id
               ? {
                   ...n,
@@ -82,6 +94,16 @@ export function useXPNotificationQueue(options: XPNotificationQueueOptions = {})
                 }
               : n,
           );
+
+          // Set new timeout for batched notification
+          const timeout = setTimeout(() => {
+            setQueue((q) => q.filter((n) => n.id !== recentSimilar.id));
+            setVisible((v) => v.filter((n) => n.id !== recentSimilar.id));
+            timeoutsRef.current.delete(recentSimilar.id);
+          }, opts.displayDurationMs);
+          timeoutsRef.current.set(recentSimilar.id, timeout);
+
+          return updated;
         }
 
         // Add as new notification
@@ -91,38 +113,51 @@ export function useXPNotificationQueue(options: XPNotificationQueueOptions = {})
           totalAmount: newNotification.amount,
         };
 
+        // Schedule automatic dismissal
+        const timeout = setTimeout(() => {
+          setQueue((q) => q.filter((n) => n.id !== batched.id));
+          setVisible((v) => v.filter((n) => n.id !== batched.id));
+          timeoutsRef.current.delete(batched.id);
+        }, opts.displayDurationMs);
+        timeoutsRef.current.set(batched.id, timeout);
+
         return [...prev, batched];
       });
     },
-    [opts.batchWindowMs],
+    [opts.batchWindowMs, opts.displayDurationMs],
   );
 
-  // Process queue and update visible notifications
+  // Update visible list whenever queue changes
   useEffect(() => {
-    const interval = setInterval(() => {
-      setQueue((prev) => {
-        // Remove expired notifications
-        const now = Date.now();
-        const active = prev.filter((n) => now - n.timestamp < opts.displayDurationMs);
+    setVisible(queue.slice(0, opts.maxVisible));
+  }, [queue, opts.maxVisible]);
 
-        // Update visible list (respecting maxVisible limit)
-        setVisible(active.slice(0, opts.maxVisible));
-
-        return active;
-      });
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [opts.displayDurationMs, opts.maxVisible]);
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    const timeouts = timeoutsRef.current;
+    return () => {
+      timeouts.forEach((timeout) => clearTimeout(timeout));
+      timeouts.clear();
+    };
+  }, []);
 
   // Manually dismiss a notification
   const dismissNotification = useCallback((id: string) => {
+    // Clear timeout if exists
+    const timeout = timeoutsRef.current.get(id);
+    if (timeout) {
+      clearTimeout(timeout);
+      timeoutsRef.current.delete(id);
+    }
     setQueue((prev) => prev.filter((n) => n.id !== id));
     setVisible((prev) => prev.filter((n) => n.id !== id));
   }, []);
 
   // Clear all notifications
   const clearAll = useCallback(() => {
+    // Clear all timeouts
+    timeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
+    timeoutsRef.current.clear();
     setQueue([]);
     setVisible([]);
   }, []);

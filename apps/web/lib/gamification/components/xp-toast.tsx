@@ -21,7 +21,7 @@ import { useReducedData } from '@/hooks/use-reduced-data';
 import { getXPSourceTheme } from '@/lib/gamification';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -159,15 +159,24 @@ export function useXPToast() {
     [dismissNotification],
   );
 
+  // Memoize ToastContainer to prevent re-mounting on every render
+  const ToastContainer = useMemo(
+    () =>
+      function ToastContainerComponent() {
+        return (
+          <XPNotificationContainer
+            notifications={notifications}
+            position="bottom-right"
+            onDismiss={dismissNotification}
+            renderNotification={renderNotification}
+          />
+        );
+      },
+    [notifications, dismissNotification, renderNotification],
+  );
+
   return {
     showXPToast,
-    ToastContainer: () => (
-      <XPNotificationContainer
-        notifications={notifications}
-        position="bottom-right"
-        onDismiss={dismissNotification}
-        renderNotification={renderNotification}
-      />
-    ),
+    ToastContainer,
   };
 }

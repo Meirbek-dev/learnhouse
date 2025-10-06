@@ -18,7 +18,7 @@ const ClientAdminLayout = ({ children, params }: { children: ReactNode; params: 
       ) : (
         <SidebarProvider>
           <DashSidebar className="z-50" />
-          <SidebarInset className="flex-1">{children}</SidebarInset>
+          <SidebarInset className="flex-1 bg-background/30">{children}</SidebarInset>
         </SidebarProvider>
       )}
     </>

@@ -35,16 +35,19 @@ function buildCacheOptions(
     cache = opts.cache;
   }
 
-  const revalidate = opts?.revalidate;
-  if (revalidate !== undefined && revalidate !== null) {
-    const parsed = Number(revalidate);
-    if (Number.isFinite(parsed) && parsed > 0) {
-      next.revalidate = parsed;
-    } else {
-      cache = 'no-store';
+  // Only set revalidate if cache is not 'no-store'
+  if (cache !== 'no-store') {
+    const revalidate = opts?.revalidate;
+    if (revalidate !== undefined && revalidate !== null) {
+      const parsed = Number(revalidate);
+      if (Number.isFinite(parsed) && parsed > 0) {
+        next.revalidate = parsed;
+      } else {
+        cache = 'no-store';
+      }
+    } else if (fallbackRevalidate > 0) {
+      next.revalidate = fallbackRevalidate;
     }
-  } else if (fallbackRevalidate > 0) {
-    next.revalidate = fallbackRevalidate;
   }
 
   if (Object.keys(next).length === 0) {

@@ -893,6 +893,9 @@ export const MarkStatus = (props: {
   const gamificationContext = useOptionalGamificationContext();
   const refetchGamification = gamificationContext?.refetch ?? (async () => {});
 
+  // Track completed activities to prevent duplicate XP toasts
+  const completedActivitiesRef = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const markedTooltipCount = localStorage.getItem('activity_marked_tooltip_count');
@@ -976,15 +979,18 @@ export const MarkStatus = (props: {
 
       await mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`);
 
-      // Award XP via gamification context (idempotent with stable key)
+      // Show XP feedback and update profile
       if (gamificationContext) {
-        // Use stable idempotency key to prevent duplicate XP awards and toasts
-        // Backend is also idempotent, so this is safe even if called multiple times
-        await gamificationContext.awardXP({
-          source: 'activity_completion',
-          source_id: props.activity.id?.toString(),
-          idempotency_key: `activity_completion_${props.activity.id}_${session?.user?.id || 'unknown'}`,
-        });
+        // Only show XP toast if we haven't already shown it for this activity
+        const activityKey = `${props.activity.id}`;
+        if (!completedActivitiesRef.current.has(activityKey)) {
+          completedActivitiesRef.current.add(activityKey);
+          // Show XP toast immediately (backend already awarded XP, this is just UI feedback)
+          gamificationContext.showXPToast(25, 'activity_completion', false);
+        }
+
+        // Refetch in background to update profile with actual XP from backend
+        refetchGamification().catch((err) => console.error('Failed to refetch gamification:', err));
       } else {
         // Fallback for non-gamified orgs
         toast.success(t('activityCompleted'));
