@@ -2,7 +2,7 @@
 
 import { Crown, TrendingUp, TrendingDown, Minus, ChevronUp, ChevronDown } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
 import type { LeaderboardEntry } from '@/types/gamification';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getRankTheme } from '@/lib/gamification';
@@ -169,7 +169,7 @@ function LeaderboardEntryRow({
     <motion.div
       whileHover={{ scale: 1.02 }}
       className={cn(
-        'flex items-center gap-3 rounded-lg p-3 transition-colors',
+        'flex items-center gap-3 rounded-lg px-4 py-2 transition-colors',
         isCurrentUser && 'bg-primary/10 ring-2 ring-primary/20',
         !isCurrentUser && 'hover:bg-muted/50',
       )}
@@ -203,17 +203,45 @@ function LeaderboardEntryRow({
       </div>
 
       {/* Avatar */}
-      <Avatar className="h-10 w-10">
-        <AvatarImage src={entry.avatar_url || undefined} />
-        <AvatarFallback>{entry.username?.slice(0, 2).toUpperCase() || 'U'}</AvatarFallback>
-      </Avatar>
+      <GamifiedUserAvatar
+        size="md"
+        avatar_url={entry.avatar_url || undefined}
+        username={entry.username || undefined}
+        userId={entry.user_id}
+        showProfilePopup={true}
+        showLevelBadge={true}
+        gamificationProfile={{
+          user_id: entry.user_id,
+          org_id: 0,
+          level: entry.level,
+          total_xp: entry.total_xp,
+          xp_to_next_level: 0,
+          login_streak: 0,
+          learning_streak: 0,
+          longest_login_streak: 0,
+          longest_learning_streak: 0,
+          total_activities_completed: 0,
+          total_courses_completed: 0,
+          daily_xp_earned: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          preferences: {},
+        }}
+        levelIndicatorPosition="bottom-right"
+        fallbackText={entry.username?.slice(0, 2).toUpperCase() || 'U'}
+      />
 
       {/* User Info */}
       <div className="flex-1 min-w-0">
         <p className={cn('truncate font-semibold', isCurrentUser && 'text-primary')}>
-          {entry.username || 'Anonymous'}
+          {entry.first_name && entry.last_name
+            ? `${entry.first_name} ${entry.last_name}`
+            : entry.username || 'Anonymous'}
           {isCurrentUser && <span className="ml-2 text-xs text-muted-foreground">({t('leaderboard.you')})</span>}
         </p>
+        {entry.username && (entry.first_name || entry.last_name) && (
+          <p className="text-xs text-muted-foreground">@{entry.username}</p>
+        )}
         <p className="text-xs text-muted-foreground">
           {t('leaderboard.levelLabel', { level: entry.level })} {'•'}{' '}
           {t('leaderboard.xp', { xp: entry.total_xp.toLocaleString() })}

@@ -380,18 +380,34 @@ def get_leaderboard_read(db: Session, org_id: int, limit: int = 10, offset: int 
         except Exception:
             user_map = {}
 
-    entries = [
-        LeaderboardEntryRead(
-            rank=offset + i + 1,
-            user_id=p.user_id,
-            total_xp=p.total_xp,
-            level=p.level,
-            username=(
-                user_map.get(p.user_id).username if user_map.get(p.user_id) else None
-            ),
+    entries = []
+    for i, p in enumerate(profiles):
+        user = user_map.get(p.user_id)
+
+        # Construct full avatar URL if user has an avatar image
+        avatar_url = None
+        if user and user.avatar_image:
+            # Check if it's already a full URL (external avatar)
+            if user.avatar_image.startswith(('http://', 'https://')):
+                avatar_url = user.avatar_image
+            else:
+                # Construct the media directory path
+                # Format: content/users/{user_uuid}/avatars/{filename}
+                avatar_url = f"content/users/{user.user_uuid}/avatars/{user.avatar_image}"
+
+        entries.append(
+            LeaderboardEntryRead(
+                rank=offset + i + 1,
+                user_id=p.user_id,
+                total_xp=p.total_xp,
+                level=p.level,
+                username=user.username if user else None,
+                first_name=user.first_name if user else None,
+                last_name=user.last_name if user else None,
+                avatar_url=avatar_url,
+                rank_change=None,  # TODO: Implement rank change tracking
+            )
         )
-        for i, p in enumerate(profiles)
-    ]
     return LeaderboardRead(org_id=org_id, entries=entries, total_participants=total)
 
 

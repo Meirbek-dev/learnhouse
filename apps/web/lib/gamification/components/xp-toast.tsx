@@ -19,9 +19,9 @@ import { ParticleEffect } from '@/lib/gamification/components/level-indicators';
 import { AnimatedValue } from '@/lib/gamification/components/animated-value';
 import { useReducedData } from '@/hooks/use-reduced-data';
 import { getXPSourceTheme } from '@/lib/gamification';
+import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
-import { useCallback, useMemo } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

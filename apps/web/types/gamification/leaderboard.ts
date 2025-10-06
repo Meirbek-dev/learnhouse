@@ -8,7 +8,9 @@ import { z } from 'zod';
 // Leaderboard entry for a single user
 export interface LeaderboardEntry {
   user_id: number;
-  username: string | null; // May not be available for privacy
+  username: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
   avatar_url?: string | null;
   total_xp: number;
   level: number;
@@ -51,6 +53,8 @@ export interface UserRank {
 export const LeaderboardEntrySchema = z.object({
   user_id: z.number(),
   username: z.string().nullable(),
+  first_name: z.string().nullable().optional(),
+  last_name: z.string().nullable().optional(),
   avatar_url: z.string().nullable().optional(),
   total_xp: z.number().min(0),
   level: z.number().min(1),

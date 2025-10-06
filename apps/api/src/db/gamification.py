@@ -240,8 +240,7 @@ class DashboardRead(PydanticStrictBaseModel):
 class LeaderboardEntryRead(PydanticStrictBaseModel):
     """Single leaderboard entry.
 
-    Optional username included for richer leaderboard displays. Avatar or other
-    profile data intentionally omitted to keep payload small; can be added later.
+    Includes user profile data for rich leaderboard displays.
     """
 
     rank: int
@@ -249,6 +248,10 @@ class LeaderboardEntryRead(PydanticStrictBaseModel):
     total_xp: int
     level: int
     username: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    avatar_url: str | None = None
+    rank_change: int | None = None
 
 
 class LeaderboardRead(PydanticStrictBaseModel):

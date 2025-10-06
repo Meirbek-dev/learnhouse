@@ -1,12 +1,12 @@
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@components/ui/avatar';
+import { getUriWithOrg, getBackendUrl } from '@services/config/config';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import type { UserGamificationProfile } from '@/types/gamification';
 import { AVATAR_UNLOCKS } from '@/lib/gamification/levels';
 import { getUserByUsername } from '@services/users/users';
-import { getUriWithOrg } from '@services/config/config';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -131,6 +131,7 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
       return getUriWithOrg(params.orgslug as string, '/empty_avatar.webp');
     }
 
+    // Priority 1: Explicitly passed avatar_url prop (e.g., from leaderboard with pre-constructed URLs)
     if (avatar_url) {
       const extractedUrl = extractExternalUrl(avatar_url);
       if (extractedUrl) {
@@ -139,9 +140,14 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
       if (isExternalUrl(avatar_url)) {
         return avatar_url;
       }
+      // If it's a path starting with 'content/', prepend the media URL
+      if (avatar_url.startsWith('content/')) {
+        return `${getBackendUrl()}${avatar_url}`;
+      }
       return avatar_url;
     }
 
+    // Priority 2: Fetched user data (when component fetches by username)
     if (userData?.avatar_image) {
       const avatarUrl = userData.avatar_image;
       if (isExternalUrl(avatarUrl)) {
@@ -150,10 +156,12 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
       return getUserAvatarMediaDirectory(userData.user_uuid, avatarUrl);
     }
 
+    // Priority 3: Empty avatar for username without data
     if (username) {
       return getUriWithOrg(params.orgslug as string, '/empty_avatar.webp');
     }
 
+    // Priority 4: Session user data
     if (session?.data?.user?.avatar_image) {
       const avatarUrl = session.data.user.avatar_image;
       if (isExternalUrl(avatarUrl)) {
@@ -162,6 +170,7 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
       return getUserAvatarMediaDirectory(session.data.user.user_uuid, avatarUrl);
     }
 
+    // Fallback: Empty avatar
     return getUriWithOrg(params.orgslug as string, '/empty_avatar.webp');
   };
 
