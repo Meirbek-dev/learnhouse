@@ -48,7 +48,7 @@ export function GamificationCard({ title, children, headerAction, className, ani
             {headerAction}
           </CardHeader>
         )}
-        <CardContent className={cn(!title && 'pt-6')}>{children}</CardContent>
+        <CardContent className={cn(!title && 'py-0')}>{children}</CardContent>
       </Card>
     </CardWrapper>
   );

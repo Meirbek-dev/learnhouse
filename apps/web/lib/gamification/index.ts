@@ -23,7 +23,7 @@ export * from './components/animated-value';
 export * from './components/empty-state';
 export * from './components/loading-state';
 
-// Phase 2: New Components
+// UI Components
 export * from './components/card-primitives';
 export * from './components/notification-queue';
 export * from './components/enhanced-level-indicators';

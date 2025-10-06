@@ -37,22 +37,14 @@ export interface LeaderboardFilters {
   offset?: number;
 }
 
-// User rank information
+// User's rank information
 export interface UserRank {
-  user_id: number;
   rank: number;
   total_participants: number;
   percentile: number; // 0-100
-  rank_change: number;
-  nearest_above?: LeaderboardEntry | null;
-  nearest_below?: LeaderboardEntry | null;
-}
-
-// Leaderboard snapshot (for tracking changes over time)
-export interface LeaderboardSnapshot {
-  timestamp: string;
-  timeframe: 'daily' | 'weekly' | 'monthly' | 'all-time';
-  entries: LeaderboardEntry[];
+  is_top_10: boolean;
+  is_top_50: boolean;
+  rank_badge: LeaderboardBadge | null;
 }
 
 // Zod schemas
@@ -82,19 +74,12 @@ export const LeaderboardFiltersSchema = z.object({
 });
 
 export const UserRankSchema = z.object({
-  user_id: z.number(),
-  rank: z.number(),
-  total_participants: z.number(),
+  rank: z.number().min(1),
+  total_participants: z.number().min(0),
   percentile: z.number().min(0).max(100),
-  rank_change: z.number(),
-  nearest_above: LeaderboardEntrySchema.nullable().optional(),
-  nearest_below: LeaderboardEntrySchema.nullable().optional(),
-});
-
-export const LeaderboardSnapshotSchema = z.object({
-  timestamp: z.string(),
-  timeframe: z.enum(['daily', 'weekly', 'monthly', 'all-time']),
-  entries: z.array(LeaderboardEntrySchema),
+  is_top_10: z.boolean(),
+  is_top_50: z.boolean(),
+  rank_badge: z.enum(['gold', 'silver', 'bronze']).nullable(),
 });
 
 // Helper functions
@@ -153,17 +138,14 @@ export function enrichUserRank(
   const userEntry = findUserInLeaderboard(leaderboard, userId);
   if (!userEntry) return null;
 
-  const userIndex = leaderboard.entries.findIndex((entry) => entry.user_id === userId);
-  const nearest_above = userIndex > 0 ? leaderboard.entries[userIndex - 1] : null;
-  const nearest_below = userIndex < leaderboard.entries.length - 1 ? leaderboard.entries[userIndex + 1] : null;
+  const percentile = calculatePercentile(userEntry.rank, leaderboard.total_participants);
 
   return {
-    user_id: userId,
     rank: userEntry.rank,
     total_participants: leaderboard.total_participants,
-    percentile: calculatePercentile(userEntry.rank, leaderboard.total_participants),
-    rank_change: calculateRankChange(userEntry.rank, previousRank),
-    nearest_above: nearest_above ?? null,
-    nearest_below: nearest_below ?? null,
+    percentile,
+    is_top_10: userEntry.rank <= 10,
+    is_top_50: userEntry.rank <= 50,
+    rank_badge: userEntry.badge ?? null,
   };
 }

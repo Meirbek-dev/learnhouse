@@ -1,7 +1,10 @@
 /**
  * Level Up Celebration Component
  *
- * Full-screen and compact celebration animations for level-ups.
+ * Respects mobile, reduced-motion, and reduced-data preferences.
+ * Mobile: Always uses compact mode.
+ * Reduced motion: Simplified animations.
+ * Reduced data: Skip particle effects, use lighter animations.
  */
 
 'use client';
@@ -10,6 +13,9 @@ import { useTranslations } from 'next-intl';
 import { Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useEffect } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
+import { useReducedData } from '@/hooks/use-reduced-data';
 
 interface LevelUpCelebrationProps {
   newLevel: number;
@@ -19,82 +25,95 @@ interface LevelUpCelebrationProps {
 
 export function LevelUpCelebration({ newLevel, onDismiss, compact = false }: LevelUpCelebrationProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
+  const isMobile = useIsMobile();
+  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedData = useReducedData();
+
+  // Force compact mode on mobile or reduced data
+  const shouldUseCompact = compact || isMobile || prefersReducedData;
 
   useEffect(() => {
-    // Auto-dismiss after 4 seconds
-    const timer = setTimeout(() => {
-      onDismiss();
-    }, 4000);
+    // Auto-dismiss after 4 seconds (3s on mobile for faster flow)
+    const timer = setTimeout(
+      () => {
+        onDismiss();
+      },
+      isMobile ? 3000 : 4000,
+    );
 
     return () => clearTimeout(timer);
-  }, [onDismiss]);
+  }, [onDismiss, isMobile]);
 
-  if (compact) {
-    // Compact corner notification (less intrusive)
+  if (shouldUseCompact) {
+    // Compact corner notification (less intrusive, mobile-friendly)
     return (
       <motion.div
-        initial={{ opacity: 0, x: 100, y: 100 }}
-        animate={{ opacity: 1, x: 0, y: 0 }}
-        exit={{ opacity: 0, x: 100 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed bottom-6 right-6 z-[100] rounded-2xl border-2 border-yellow-500 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 p-6 shadow-2xl backdrop-blur-md max-w-sm"
+        initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: 100, y: 100 }}
+        animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, x: 0, y: 0 }}
+        exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: 100 }}
+        transition={prefersReducedMotion ? { duration: 0.2 } : { type: 'spring', stiffness: 300, damping: 30 }}
+        className="fixed bottom-6 right-6 z-[100] rounded-2xl border-2 border-yellow-500 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 p-4 md:p-6 shadow-2xl backdrop-blur-md max-w-[calc(100vw-3rem)] md:max-w-sm"
         onClick={onDismiss}
       >
-        {/* Subtle sparkle effect */}
-        <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
-          {[...Array(8)].map((_, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{
-                opacity: [0, 0.6, 0],
-                scale: [0, 1.5, 0],
-                x: [0, (Math.random() - 0.5) * 100],
-                y: [0, (Math.random() - 0.5) * 100],
-              }}
-              transition={{
-                duration: 1.5,
-                delay: Math.random() * 0.5,
-                repeat: 2,
-              }}
-              className="absolute left-1/2 top-1/2 h-1.5 w-1.5 rounded-full bg-yellow-400"
-            />
-          ))}
-        </div>
+        {/* Subtle sparkle effect (skip if reduced motion or reduced data) */}
+        {!prefersReducedMotion && !prefersReducedData && (
+          <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+            {[...Array(8)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{
+                  opacity: [0, 0.6, 0],
+                  scale: [0, 1.5, 0],
+                  x: [0, (Math.random() - 0.5) * 100],
+                  y: [0, (Math.random() - 0.5) * 100],
+                }}
+                transition={{
+                  duration: 1.5,
+                  delay: Math.random() * 0.5,
+                  repeat: 2,
+                }}
+                className="absolute left-1/2 top-1/2 h-1.5 w-1.5 rounded-full bg-yellow-400"
+              />
+            ))}
+          </div>
+        )}
 
-        <div className="relative flex items-center gap-4">
+        <div className="relative flex items-center gap-3 md:gap-4">
           <motion.div
-            initial={{ scale: 0, rotate: -90 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+            initial={prefersReducedMotion ? { opacity: 0 } : { scale: 0, rotate: -90 }}
+            animate={prefersReducedMotion ? { opacity: 1 } : { scale: 1, rotate: 0 }}
+            transition={
+              prefersReducedMotion ? { duration: 0.2 } : { type: 'spring', stiffness: 400, damping: 15 }
+            }
             className="shrink-0"
           >
-            <div className="rounded-full bg-yellow-500/20 p-3 border-2 border-yellow-500">
-              <Sparkles className="h-8 w-8 text-yellow-500" />
+            <div className="rounded-full bg-yellow-500/20 p-2 md:p-3 border-2 border-yellow-500">
+              <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-yellow-500" />
             </div>
           </motion.div>
 
           <div className="flex-1 min-w-0">
             <motion.h3
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: prefersReducedMotion ? 0 : -10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-xl font-bold text-foreground mb-1"
+              transition={{ delay: prefersReducedMotion ? 0 : 0.2 }}
+              className="text-lg md:text-xl font-bold text-foreground mb-1"
             >
               {t('levelUpTitle')}
             </motion.h3>
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="text-lg text-yellow-500 font-semibold"
+              transition={{ delay: prefersReducedMotion ? 0 : 0.3 }}
+              className="text-base md:text-lg text-yellow-500 font-semibold"
             >
               {t('reachedLevel', { level: newLevel })}
             </motion.p>
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: prefersReducedMotion ? 0 : 0.4 }}
               className="text-xs text-muted-foreground mt-1"
             >
               {t('clickAnywhereToClose')}

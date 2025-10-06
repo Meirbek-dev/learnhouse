@@ -7,13 +7,14 @@
 // Core gamification exports
 export { GamificationProfileSection } from './GamificationProfileSection';
 
-// Dashboard cards
-export { ProfileCard } from './profile-card';
-export { QuickStatsCard } from './quick-stats-card';
+// Primary dashboard components
+export { HeroSection } from './hero-section';
+export { EnhancedLeaderboard } from './enhanced-leaderboard';
+export { EngagementStreak } from './engagement-streak';
 export { RecentActivityFeed } from './recent-activity-feed';
-export { LeaderboardCard } from './leaderboard-card';
+export { CollapsibleSection } from './collapsible-section';
 
-// Level up celebration (used in context)
+// UI elements
 export { LevelUpCelebration } from './xp-toast';
 
 // Re-export enhanced components from unified system

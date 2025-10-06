@@ -15,11 +15,15 @@ import {
   getDashboardDataAction,
   getLeaderboardAction,
 } from '@/app/actions/gamification';
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, lazy } from 'react';
 import { useEnhancedXPToast } from '@/lib/gamification/components/enhanced-xp-toast';
-import { LevelUpCelebration } from '@/components/Dashboard/Gamification/xp-toast';
 import { AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
+
+// Lazy load the heavy celebration component
+const LevelUpCelebration = lazy(() =>
+  import('@/components/Dashboard/Gamification/xp-toast').then((mod) => ({ default: mod.LevelUpCelebration })),
+);
 
 /**
  * SIMPLIFIED GAMIFICATION CONTEXT v3
@@ -46,7 +50,7 @@ interface GamificationContextValue {
   error: GamificationError | null;
 
   // Actions (Server Actions)
-  awardXP: (payload: XPAwardRequest) => Promise<XPAwardResponse>;
+  awardXP: (payload: XPAwardRequest, options?: { silent?: boolean }) => Promise<XPAwardResponse>;
   updateStreak: (type: 'login' | 'learning') => Promise<void>;
   updatePreferences: (preferences: Record<string, any>) => Promise<void>;
   refetch: () => Promise<void>;
@@ -132,10 +136,12 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
     }
   }, [orgId]);
 
-  // Award XP with optimistic update
+  // Award XP with optimistic update (supports silent mode)
   const awardXP = useCallback(
-    async (payload: XPAwardRequest): Promise<XPAwardResponse> => {
+    async (payload: XPAwardRequest, options?: { silent?: boolean }): Promise<XPAwardResponse> => {
       setError(null);
+      const isSilent = options?.silent ?? false;
+
       try {
         // Call Server Action
         const result = await awardXPAction(orgId, payload);
@@ -149,6 +155,19 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
               ...dashboard,
               profile: result.profile,
             });
+          }
+
+          // Show notification ONLY if not silent
+          if (!isSilent && result.transaction.amount > 0) {
+            showEnhancedXPToast({
+              amount: result.transaction.amount,
+              source: payload.source,
+            });
+
+            // Check for level up
+            if (result.triggered_level_up) {
+              setLevelUpQueue((prev) => [...prev, { newLevel: result.profile.level }]);
+            }
           }
         }
 
@@ -164,7 +183,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
         throw error;
       }
     },
-    [orgId, dashboard, t],
+    [orgId, dashboard, t, showEnhancedXPToast],
   );
 
   // Update streak
@@ -274,14 +293,16 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
       {children}
       {/* Enhanced XP notification container with automatic batching */}
       <ToastContainer />
-      {/* Render level-up celebrations */}
+      {/* Render level-up celebrations (lazy-loaded only when needed) */}
       <AnimatePresence>
         {levelUpQueue.length > 0 && levelUpQueue[0] && (
-          <LevelUpCelebration
-            newLevel={levelUpQueue[0].newLevel}
-            onDismiss={dismissLevelUpCelebration}
-            compact={(profile?.preferences as any)?.display?.compactMode ?? false}
-          />
+          <React.Suspense fallback={null}>
+            <LevelUpCelebration
+              newLevel={levelUpQueue[0].newLevel}
+              onDismiss={dismissLevelUpCelebration}
+              compact={(profile?.preferences as any)?.display?.compactMode ?? false}
+            />
+          </React.Suspense>
         )}
       </AnimatePresence>
     </GamificationContext.Provider>

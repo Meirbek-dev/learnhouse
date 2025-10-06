@@ -7,7 +7,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, Inbox, TrendingUp, Users } from 'lucide-react';
+import { AlertCircle, Inbox, TrendingUp } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 

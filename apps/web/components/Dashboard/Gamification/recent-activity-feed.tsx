@@ -33,7 +33,7 @@ export function RecentActivityFeed({ transactions, isLoading }: RecentActivityFe
     return (
       <EmptyState
         title={t('dashboard.recentActivity')}
-        message={t('dashboard.noActivity')}
+        message={t('dashboard.noActivityDescription')}
         variant="info"
       />
     );

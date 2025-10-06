@@ -2792,6 +2792,29 @@
       "levelUp": "Level Up!",
       "levelUpTitle": "Level Up!",
       "reachedLevel": "You reached level {level}",
+      "dashboard": {
+        "recentActivity": "Recent Activity",
+        "noActivity": "No activity yet",
+        "noActivityDescription": "Complete activities, courses, or quizzes to start earning XP and see your progress here!"
+      },
+      "toast": {
+        "fromActivities": "from {count} activities",
+        "levelUp": "Level Up!"
+      },
+      "engagement": {
+        "activeDays": "Active Days",
+        "day": "day",
+        "days": "days",
+        "longestStreak": "Longest streak",
+        "record": "Record!",
+        "gracePeriod": "1-day grace period if you miss a day",
+        "getStarted": "Get started today!",
+        "greatStart": "Great start!",
+        "buildingMomentum": "Building momentum",
+        "strongHabit": "Strong habit forming",
+        "dedicated": "Dedicated learner",
+        "legendary": "Legendary consistency!"
+      },
       "errors": {
         "noOrgId": "Organization ID not found"
       },
@@ -3747,7 +3770,12 @@
           "lastUpdated": "Last updated",
           "clearSearch": "Clear search",
           "noResults": "No users found matching your search",
-          "noEntries": "No leaderboard entries yet"
+          "noEntries": "No leaderboard entries yet",
+          "yourPosition": "Your Position",
+          "xpToNextRank": "{xp} XP behind {username}",
+          "showAll": "Show All",
+          "showLess": "Show Less",
+          "noLeaderboard": "No leaderboard data available"
         },
         "levelIndicators": {
           "congratsMaxLevel": "Congratulations! You've reached the maximum level!",
@@ -3846,7 +3874,10 @@
         "saving": "Saving...",
         "stats": {
           "allTime": "All time",
-          "totalXP": "Total XP"
+          "totalXP": "Total XP",
+          "rank": "Your Rank",
+          "nextMilestone": "Next Milestone",
+          "maxLevel": "Max Level!"
         },
         "streakWidget": {
           "days": "{count, plural, one {# day} other {# days}}",
@@ -3901,7 +3932,25 @@
             "atRisk": "At risk",
             "none": "No streak",
             "title": "Login Streak"
+          },
+          "title": "Your Streaks",
+          "loginStreak": "Login Streak",
+          "learningStreak": "Learning Streak",
+          "messages": {
+            "start": "Start your learning journey today!",
+            "keepGoing": "You're off to a great start! Keep going!",
+            "goodProgress": "Nice progress! You're building a strong habit.",
+            "impressive": "Impressive dedication! Keep up the momentum!",
+            "amazing": "Amazing consistency! You're on fire! 🔥",
+            "legendary": "Legendary commitment! You're an inspiration! 🌟"
           }
+        },
+        "profile": {
+          "title": "Your Learning Profile"
+        },
+        "progress": {
+          "levelProgress": "Level Progress",
+          "dailyXP": "Today's XP"
         },
         "tabs": {
           "avatar": "Avatar",

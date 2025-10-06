@@ -2787,6 +2787,37 @@
     },
     "Gamification": {
       "cancel": "Отмена",
+      "continue": "Продолжить",
+      "clickAnywhereToClose": "Нажмите в любом месте, чтобы закрыть",
+      "levelUp": "Новый уровень!",
+      "levelUpTitle": "Новый уровень!",
+      "reachedLevel": "Вы достигли уровня {level}",
+      "dashboard": {
+        "recentActivity": "Недавняя активность",
+        "noActivity": "Пока нет активности",
+        "noActivityDescription": "Завершите активности, курсы или викторины, чтобы начать зарабатывать XP и видеть свой прогресс здесь!"
+      },
+      "toast": {
+        "fromActivities": "из {count} активностей",
+        "levelUp": "Новый уровень!"
+      },
+      "engagement": {
+        "activeDays": "Активные дни",
+        "day": "день",
+        "days": "дней",
+        "longestStreak": "Самая длинная серия",
+        "record": "Рекорд!",
+        "gracePeriod": "Льготный период 1 день, если вы пропустите",
+        "getStarted": "Начните сегодня!",
+        "greatStart": "Отличное начало!",
+        "buildingMomentum": "Набираете темп",
+        "strongHabit": "Формируется привычка",
+        "dedicated": "Целеустремленный ученик",
+        "legendary": "Легендарная последовательность!"
+      },
+      "errors": {
+        "noOrgId": "ID организации не найден"
+      },
       "dangerZone": {
         "description": "Необратимые действия, которые повлияют на ваши данные геймификации",
         "resetAllData": "Сбросить все данные",
@@ -3705,7 +3736,12 @@
           "xp": "{xp} ОП",
           "xpEarned": "Получено {xp} ОП",
           "you": "Вы",
-          "yourRank": "Ваше место"
+          "yourRank": "Ваше место",
+          "yourPosition": "Ваша позиция",
+          "xpToNextRank": "{xp} ОП отстает от {username}",
+          "showAll": "Показать все",
+          "showLess": "Показать меньше",
+          "noLeaderboard": "Нет данных таблицы лидеров"
         },
         "levelIndicators": {
           "congratsMaxLevel": "Поздравляем! Вы достигли максимального уровня!",
@@ -3804,7 +3840,10 @@
         "saving": "Сохранение...",
         "stats": {
           "allTime": "За все время",
-          "totalXP": "Всего ОП"
+          "totalXP": "Всего ОП",
+          "rank": "Ваше место",
+          "nextMilestone": "Следующая веха",
+          "maxLevel": "Макс. уровень!"
         },
         "streakWidget": {
           "days": "{count, plural, one {# день} few {# дня} many {# дней} other {# дня}}",
@@ -3859,7 +3898,25 @@
             "atRisk": "Под угрозой",
             "none": "Нет серии",
             "title": "Серия входов"
+          },
+          "title": "Ваши серии",
+          "loginStreak": "Серия входов",
+          "learningStreak": "Серия обучения",
+          "messages": {
+            "start": "Начните свое обучение сегодня!",
+            "keepGoing": "Отличное начало! Продолжайте!",
+            "goodProgress": "Хороший прогресс! Вы формируете полезную привычку.",
+            "impressive": "Впечатляющая преданность! Сохраняйте темп!",
+            "amazing": "Потрясающая последовательность! Вы в огне! 🔥",
+            "legendary": "Легендарная приверженность! Вы вдохновляете! 🌟"
           }
+        },
+        "profile": {
+          "title": "Ваш профиль обучения"
+        },
+        "progress": {
+          "levelProgress": "Прогресс уровня",
+          "dailyXP": "ОП сегодня"
         },
         "tabs": {
           "avatar": "Аватар",

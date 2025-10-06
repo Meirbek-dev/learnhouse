@@ -1,9 +1,9 @@
 import { getServerGamificationDashboard, getServerOrganizationLeaderboard } from '@/services/gamification/server';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import { RecentActivityFeed } from './Gamification/recent-activity-feed';
-import { LeaderboardCard } from './Gamification/leaderboard-card';
-import { QuickStatsCard } from './Gamification/quick-stats-card';
-import { ProfileCard } from './Gamification/profile-card';
+import { HeroSection } from './Gamification/hero-section';
+import { EnhancedLeaderboard } from './Gamification/enhanced-leaderboard';
+import { EngagementStreak } from './Gamification/engagement-streak';
 import { Skeleton } from '@/components/ui/skeleton';
 import { auth } from '@/auth';
 
@@ -39,19 +39,28 @@ export default async function GamificationDashboard({ orgId }: GamificationDashb
         initialData={{ dashboard: dashboardData, profile: dashboardData.profile }}
       >
         <div className="space-y-6">
-          {/* Top Row: Profile & Quick Stats */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <ProfileCard profile={dashboardData.profile} />
-            <QuickStatsCard profile={dashboardData.profile} />
-          </div>
+          {/* Hero Section - Main Profile & Stats */}
+          <HeroSection
+            profile={dashboardData.profile}
+            userRank={dashboardData.user_rank}
+          />
 
-          {/* Bottom Row: Recent Activity & Leaderboard */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <RecentActivityFeed transactions={dashboardData.recent_transactions || []} />
-            <LeaderboardCard
-              entries={leaderboardData.entries}
-              currentUserId={userId ? Number(userId) : undefined}
-            />
+          {/* Two Column Layout */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Left Column: Activity & Streaks */}
+            <div className="space-y-6 lg:col-span-2">
+              <RecentActivityFeed transactions={dashboardData.recent_transactions || []} />
+              <EngagementStreak profile={dashboardData.profile} />
+            </div>
+
+            {/* Right Column: Leaderboard */}
+            <div>
+              <EnhancedLeaderboard
+                entries={leaderboardData.entries}
+                currentUserId={userId ? Number(userId) : undefined}
+                userRank={dashboardData.user_rank}
+              />
+            </div>
           </div>
         </div>
       </GamificationProvider>
@@ -79,13 +88,16 @@ function DashboardError({ error }: { error: string }) {
 export function GamificationDashboardSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 md:grid-cols-2">
-        <Skeleton className="h-[280px]" />
-        <Skeleton className="h-[280px]" />
-      </div>
-      <div className="grid gap-6 md:grid-cols-2">
-        <Skeleton className="h-[450px]" />
-        <Skeleton className="h-[450px]" />
+      {/* Hero Skeleton */}
+      <Skeleton className="h-[240px]" />
+
+      {/* Two Column Layout */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          <Skeleton className="h-[400px]" />
+          <Skeleton className="h-[300px]" />
+        </div>
+        <Skeleton className="h-[700px]" />
       </div>
     </div>
   );

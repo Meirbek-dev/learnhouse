@@ -45,12 +45,12 @@ export interface UserGamificationProfile {
 export interface LevelInfo {
   level: number;
   title: string;
-  titleKey?: string; // Translation key (optional for backward compatibility)
+  titleKey?: string;
   color: string; // Tailwind color class
   icon: LucideIcon; // Icon component
   minXP: number;
   maxXP?: number; // undefined for max level
-  unlocks?: string[]; // Translation keys for unlocked features (optional)
+  unlocks?: string[];
 }
 
 // Streak information
@@ -64,29 +64,6 @@ export interface StreakInfo {
     current: number;
     longest: number;
     lastDate: string | null;
-  };
-}
-
-// Level milestone for UI
-export interface LevelMilestone {
-  level: number;
-  title: string;
-  titleKey: string;
-  color: string;
-  minXP: number;
-  unlocks: string[];
-}
-
-// Dashboard profile data
-export interface DashboardProfile {
-  profile: UserGamificationProfile;
-  streaks: StreakInfo;
-  nextMilestone: LevelMilestone | null;
-  levelProgress: {
-    currentLevelXP: number;
-    nextLevelXP: number;
-    progressPercent: number;
-    xpToNext: number;
   };
 }
 
@@ -136,27 +113,6 @@ export const StreakInfoSchema = z.object({
     current: z.number(),
     longest: z.number(),
     lastDate: z.string().nullable(),
-  }),
-});
-
-export const LevelMilestoneSchema = z.object({
-  level: z.number(),
-  title: z.string(),
-  titleKey: z.string(),
-  color: z.string(),
-  minXP: z.number(),
-  unlocks: z.array(z.string()),
-});
-
-export const DashboardProfileSchema = z.object({
-  profile: UserGamificationProfileSchema,
-  streaks: StreakInfoSchema,
-  nextMilestone: LevelMilestoneSchema.nullable(),
-  levelProgress: z.object({
-    currentLevelXP: z.number(),
-    nextLevelXP: z.number(),
-    progressPercent: z.number(),
-    xpToNext: z.number(),
   }),
 });
 

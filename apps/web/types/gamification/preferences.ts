@@ -49,14 +49,14 @@ export type PartialGamificationPreferences = {
   display?: Partial<DisplayPreferences>;
 };
 
-// Default preferences factory
+// Default preferences factory - optimized for less intrusive experience
 export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
-  levelUp: true,
-  xpGain: true,
-  streakReminder: false,
-  weeklyReport: true,
-  achievements: true,
-  leaderboardPosition: false,
+  levelUp: true, // Important milestone
+  xpGain: false, // Too noisy by default
+  streakReminder: false, // Can cause anxiety
+  weeklyReport: true, // Good summary
+  achievements: true, // Meaningful events
+  leaderboardPosition: false, // Opt-in only
 };
 
 export const DEFAULT_PRIVACY_PREFERENCES: PrivacyPreferences = {
@@ -68,11 +68,11 @@ export const DEFAULT_PRIVACY_PREFERENCES: PrivacyPreferences = {
 };
 
 export const DEFAULT_DISPLAY_PREFERENCES: DisplayPreferences = {
-  animatedEffects: true,
-  compactMode: false,
+  animatedEffects: true, // Will respect prefers-reduced-motion
+  compactMode: true, // Less intrusive by default
   showLevelIndicator: true,
-  autoHideToasts: false,
-  soundEffects: false,
+  autoHideToasts: true, // Auto-dismiss for cleaner UX
+  soundEffects: false, // Opt-in only
   showXPNumbers: true,
   theme: 'auto',
 };

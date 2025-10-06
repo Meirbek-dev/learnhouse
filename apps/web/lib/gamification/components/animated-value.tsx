@@ -55,7 +55,9 @@ export function AnimatedValue({
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, [value, duration]); // displayValue intentionally excluded to prevent infinite loops
+    // displayValue intentionally excluded to prevent infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, duration]);
 
   return <span className={className}>{format(displayValue)}</span>;
 }

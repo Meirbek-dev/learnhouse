@@ -13,12 +13,12 @@
 import {
   useXPNotificationQueue,
   XPNotificationContainer,
-  BatchIndicator,
   type XPNotification,
 } from '@/lib/gamification/components/notification-queue';
 import { ParticleEffect } from '@/lib/gamification/components/enhanced-level-indicators';
 import { AnimatedValue } from '@/lib/gamification/components/animated-value';
 import { getXPSourceTheme } from '@/lib/gamification';
+import { useReducedData } from '@/hooks/use-reduced-data';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import { useCallback } from 'react';
@@ -37,6 +37,7 @@ interface EnhancedXPToastProps {
 function EnhancedXPToast({ notification, onDismiss }: EnhancedXPToastProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const theme = getXPSourceTheme(notification.source);
+  const prefersReducedData = useReducedData();
 
   const getSourceLabel = (sourceKey: string): string => {
     const labelKey = `xpSources.${sourceKey}` as any;
@@ -72,11 +73,7 @@ function EnhancedXPToast({ notification, onDismiss }: EnhancedXPToastProps) {
 
         {/* Text Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-medium text-foreground truncate">{sourceLabel}</p>
-            {isBatched && <BatchIndicator count={notification.batchCount} />}
-          </div>
-          <div className="flex items-baseline gap-1.5 mt-1">
+          <div className="flex items-baseline gap-1.5">
             <span className="text-lg font-bold text-foreground">+</span>
             <AnimatedValue
               value={notification.totalAmount}
@@ -84,6 +81,13 @@ function EnhancedXPToast({ notification, onDismiss }: EnhancedXPToastProps) {
               format={(v) => Math.round(v).toLocaleString()}
             />
             <span className="text-sm text-muted-foreground">XP</span>
+          </div>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className="text-xs text-muted-foreground truncate">
+              {isBatched
+                ? t('toast.fromActivities', { count: notification.batchCount })
+                : sourceLabel}
+            </p>
           </div>
         </div>
 
@@ -104,8 +108,8 @@ function EnhancedXPToast({ notification, onDismiss }: EnhancedXPToastProps) {
         </div>
       )}
 
-      {/* Particle effect for level ups */}
-      {notification.triggeredLevelUp && (
+      {/* Particle effect for level ups (skip if reduced data) */}
+      {notification.triggeredLevelUp && !prefersReducedData && (
         <ParticleEffect
           trigger={true}
           particleCount={15}
