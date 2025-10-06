@@ -13,7 +13,7 @@ import { getRankTheme } from '@/lib/gamification';
 import type { LeaderboardEntry } from '@/types/gamification';
 import { cn } from '@/lib/utils';
 
-interface EnhancedLeaderboardProps {
+interface LeaderboardProps {
   entries: LeaderboardEntry[];
   currentUserId?: number;
   userRank?: number | null;
@@ -21,7 +21,7 @@ interface EnhancedLeaderboardProps {
 }
 
 /**
- * Enhanced Leaderboard with Context-Aware Positioning
+ * Leaderboard with Context-Aware Positioning
  *
  * Improvements:
  * - Shows user's position with surrounding context
@@ -30,12 +30,12 @@ interface EnhancedLeaderboardProps {
  * - Visual distinction for top 3
  * - "Distance to next rank" indicator
  */
-export function EnhancedLeaderboard({
+export function Leaderboard({
   entries,
   currentUserId,
   userRank,
   className
-}: EnhancedLeaderboardProps) {
+}: LeaderboardProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const [showFull, setShowFull] = useState(false);
 
@@ -106,7 +106,7 @@ export function EnhancedLeaderboard({
               <span className="text-muted-foreground">
                 {t('leaderboard.yourPosition')}
               </span>
-              <span className="font-bold">#{rankContext.rank}</span>
+              <span className="font-bold">{'#'}{rankContext.rank}</span>
             </div>
             {rankContext.xpToNext > 0 && (
               <div className="mt-1 text-xs text-muted-foreground">
@@ -135,7 +135,7 @@ export function EnhancedLeaderboard({
                   {showSeparator && (
                     <div className="my-3 flex items-center gap-2 text-xs text-muted-foreground">
                       <div className="h-px flex-1 bg-border" />
-                      <span>...</span>
+                      <span>{'...'}</span>
                       <div className="h-px flex-1 bg-border" />
                     </div>
                   )}
@@ -145,6 +145,7 @@ export function EnhancedLeaderboard({
                     isCurrentUser={isCurrentUser}
                     isTop3={isTop3}
                     rankTheme={rankTheme}
+                    t={t}
                   />
                 </div>
               );
@@ -164,11 +165,13 @@ function LeaderboardEntryRow({
   isCurrentUser,
   isTop3,
   rankTheme,
+  t,
 }: {
   entry: LeaderboardEntry;
   isCurrentUser: boolean;
   isTop3: boolean;
   rankTheme: ReturnType<typeof getRankTheme>;
+  t: any;
 }) {
   return (
     <motion.div
@@ -227,11 +230,11 @@ function LeaderboardEntryRow({
         )}>
           {entry.username || 'Anonymous'}
           {isCurrentUser && (
-            <span className="ml-2 text-xs text-muted-foreground">(You)</span>
+            <span className="ml-2 text-xs text-muted-foreground">({t('leaderboard.you')})</span>
           )}
         </p>
         <p className="text-xs text-muted-foreground">
-          Level {entry.level} • {entry.total_xp.toLocaleString()} XP
+          {t('leaderboard.levelLabel', { level: entry.level })} {'•'} {t('leaderboard.xp', { xp: entry.total_xp.toLocaleString() })}
         </p>
       </div>
 

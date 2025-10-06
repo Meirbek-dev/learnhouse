@@ -1,10 +1,10 @@
 import { getServerGamificationDashboard, getServerOrganizationLeaderboard } from '@/services/gamification/server';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
+import { Leaderboard } from './Gamification/leaderboard';
 import { RecentActivityFeed } from './Gamification/recent-activity-feed';
 import { HeroSection } from './Gamification/hero-section';
-import { EnhancedLeaderboard } from './Gamification/enhanced-leaderboard';
-import { EngagementStreak } from './Gamification/engagement-streak';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getTranslations } from 'next-intl/server';
 import { auth } from '@/auth';
 
 interface GamificationDashboardProps {
@@ -46,16 +46,12 @@ export default async function GamificationDashboard({ orgId }: GamificationDashb
           />
 
           {/* Two Column Layout */}
-          <div className="grid gap-6 lg:grid-cols-3">
-            {/* Left Column: Activity & Streaks */}
-            <div className="space-y-6 lg:col-span-2">
-              <RecentActivityFeed transactions={dashboardData.recent_transactions || []} />
-              <EngagementStreak profile={dashboardData.profile} />
-            </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <RecentActivityFeed transactions={dashboardData.recent_transactions || []} />
 
             {/* Right Column: Leaderboard */}
             <div>
-              <EnhancedLeaderboard
+              <Leaderboard
                 entries={leaderboardData.entries}
                 currentUserId={userId ? Number(userId) : undefined}
                 userRank={dashboardData.user_rank}
@@ -73,10 +69,12 @@ export default async function GamificationDashboard({ orgId }: GamificationDashb
 /**
  * Error Display Component
  */
-function DashboardError({ error }: { error: string }) {
+async function DashboardError({ error }: { error: string }) {
+  const t = await getTranslations('DashPage.UserAccountSettings.Gamification');
+
   return (
     <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center">
-      <p className="text-destructive font-semibold">Error loading dashboard</p>
+      <p className="text-destructive font-semibold">{t('dashboardErrors.errorLoading')}</p>
       <p className="text-muted-foreground text-sm">{error}</p>
     </div>
   );

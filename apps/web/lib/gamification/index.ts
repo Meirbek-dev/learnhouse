@@ -26,5 +26,5 @@ export * from './components/loading-state';
 // UI Components
 export * from './components/card-primitives';
 export * from './components/notification-queue';
-export * from './components/enhanced-level-indicators';
-export * from './components/enhanced-xp-toast';
+export * from './components/level-indicators';
+export * from './components/xp-toast';

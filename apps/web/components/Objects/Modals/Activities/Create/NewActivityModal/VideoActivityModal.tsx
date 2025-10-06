@@ -243,7 +243,7 @@ const SubtitleManager = ({
       if (files.length === 0) return;
 
       files.forEach((file) => {
-        // Enhanced language detection
+        // language detection
         const fileName = file.name.toLowerCase();
         const parts = fileName.split('.');
         const potentialLang = parts.length > 2 ? parts[parts.length - 2] : '';

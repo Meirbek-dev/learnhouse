@@ -2,6 +2,8 @@
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
+import { RecentActivityFeed } from '@/components/Dashboard/Gamification/recent-activity-feed';
+import { Leaderboard } from '@/components/Dashboard/Gamification/leaderboard';
 import TrailCourseElement from '@components/Pages/Trail/TrailCourseElement';
 import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
 import UserCertificates from '@components/Pages/Trail/UserCertificates';
@@ -33,6 +35,21 @@ const Trail = (params: any) => {
     error,
     mutate,
   } = useSWR(`${getAPIUrl()}trail/org/${orgID}/trail`, (url) => swrFetcher(url, access_token));
+
+  // Fetch gamification data
+  const { data: gamificationData, isLoading: isGamificationLoading } = useSWR(
+    orgID ? `${getAPIUrl()}gamification/${orgID}` : null,
+    (url) => swrFetcher(url, access_token),
+  );
+
+  const { data: leaderboardData, isLoading: isLeaderboardLoading } = useSWR(
+    orgID ? `${getAPIUrl()}gamification/${orgID}/leaderboard?limit=10` : null,
+    (url) => swrFetcher(url, access_token),
+  );
+
+  const { data: userRankData } = useSWR(orgID ? `${getAPIUrl()}gamification/${orgID}/rank` : null, (url) =>
+    swrFetcher(url, access_token),
+  );
 
   const handleQuitAllCourses = async () => {
     if (!trail?.runs?.length || isQuittingAll) return;
@@ -133,6 +150,22 @@ const Trail = (params: any) => {
 
         {/* Certificates Section */}
         <UserCertificates orgslug={orgslug} />
+
+        {/* Gamification Section - Recent Activity and Leaderboard */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Leaderboard */}
+          <Leaderboard
+            entries={leaderboardData?.entries || []}
+            currentUserId={session?.data?.user?.id ? Number(session.data.user.id) : undefined}
+            userRank={userRankData?.rank}
+          />
+
+          {/* Recent Activity Feed */}
+          <RecentActivityFeed
+            transactions={gamificationData?.recent_transactions || []}
+            isLoading={isGamificationLoading}
+          />
+        </div>
       </div>
     </GeneralWrapperStyled>
   );

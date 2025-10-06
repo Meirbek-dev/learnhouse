@@ -3663,8 +3663,10 @@
           "completed": "Завершено",
           "dayStreak": "Серия дней",
           "failedToLoad": "Не удалось загрузить данные геймификации",
+          "leaderboard": "Таблица лидеров",
           "nextMilestone": "Следующая цель",
           "noData": "Нет данных геймификации",
+          "noActivityDescription": "Завершите активности, курсы или тесты, чтобы начать зарабатывать XP и видеть свой прогресс здесь!",
           "profile": "Профиль",
           "progress": "Прогресс",
           "quickStats": "Быстрая статистика",
@@ -3770,6 +3772,12 @@
           "xpEarned": "+{xp} ОП получено!"
         },
         "levels": {
+          "novice": "Только начинает свой путь обучения",
+          "apprentice": "Уверенно прогрессирует и развивает навыки",
+          "scholar": "Демонстрирует уверенные знания и понимание",
+          "expert": "Продвинутый ученик с глубокими знаниями",
+          "master": "Исключительное владение предметом",
+          "grandmaster": "Элита с непревзойденными знаниями",
           "descriptions": {
             "apprentice": "Уверенно прогрессирует и развивает навыки",
             "expert": "Продвинутый ученик с глубокими знаниями",
@@ -3785,7 +3793,12 @@
             "level": "Уровень",
             "toNextLevel": "до следующего уровня",
             "totalProgress": "Общий прогресс",
-            "xpAbbreviation": "ОП"
+            "xpAbbreviation": "ОП",
+            "levelProgress": "Прогресс уровня",
+            "xpToGo": "ОП осталось",
+            "dailyXP": "Ежедневный ОП",
+            "levelTransition": "Уровень {current} → {next}",
+            "levelShort": "Ур."
           },
           "requirements": {
             "activitiesCompleted": "Завершено заданий: {count}",
@@ -3916,7 +3929,11 @@
         },
         "progress": {
           "levelProgress": "Прогресс уровня",
-          "dailyXP": "ОП сегодня"
+          "dailyXP": "ОП сегодня",
+          "xpToGo": "ОП осталось",
+          "levelTransition": "Уровень {current} → {next}",
+          "levelShort": "Ур.",
+          "xpAbbreviation": "ОП"
         },
         "tabs": {
           "avatar": "Аватар",
@@ -3965,6 +3982,87 @@
           "streak_bonus_7_days": "Бонус за серию 7 дн.",
           "unknown": "Неизвестный источник: {source}",
           "video_completion": "Видео просмотрено"
+        },
+        "accessibility": {
+          "collapseSection": "Свернуть раздел",
+          "expandSection": "Развернуть раздел",
+          "closeNotification": "Закрыть уведомление",
+          "viewDetails": "Посмотреть детали",
+          "levelBadge": "Значок {level} уровня"
+        },
+        "emptyStates": {
+          "noActivity": "Пока нет активности",
+          "noActivityDescription": "Выполняйте задания, чтобы начать зарабатывать опыт и подниматься в таблице лидеров!",
+          "noLeaderboard": "Нет данных таблицы лидеров",
+          "noLeaderboardDescription": "Станьте первым, кто заработает опыт в этой организации!",
+          "noProgress": "Нет данных о прогрессе",
+          "noProgressDescription": "Начните обучение, чтобы отслеживать свой прогресс здесь.",
+          "noTransactions": "Нет недавней активности",
+          "noTransactionsDescription": "Ваши транзакции опыта будут отображаться здесь по мере выполнения заданий."
+        },
+        "loadingStates": {
+          "loadingProfile": "Загрузка профиля...",
+          "loadingDashboard": "Загрузка панели...",
+          "loadingLeaderboard": "Загрузка таблицы лидеров...",
+          "loadingActivity": "Загрузка активности..."
+        },
+        "errorMessages": {
+          "loadFailed": "Не удалось загрузить данные",
+          "networkError": "Ошибка сети. Проверьте ваше подключение.",
+          "serverError": "Ошибка сервера. Попробуйте позже.",
+          "unauthorized": "Для просмотра этого контента необходимо войти в систему.",
+          "dailyLimitExceeded": "Достигнут дневной лимит опыта. Возвращайтесь завтра!",
+          "retryAction": "Повторить",
+          "unknownError": "Произошла неизвестная ошибка"
+        },
+        "celebration": {
+          "levelUpTitle": "🎉 Повышение уровня! 🎉",
+          "reachedLevel": "Вы достигли {level} уровня!",
+          "newTitle": "Новое звание: {title}",
+          "unlocked": "Разблокировано!",
+          "keepGoing": "Продолжайте!",
+          "dismiss": "Продолжить",
+          "shareAchievement": "Поделиться достижением"
+        },
+        "levelUpTitle": "Уровень {level}",
+        "reachedLevel": "Уровень {level}",
+        "continue": "Продолжить",
+        "clickAnywhereToClose": "Нажмите в любом месте, чтобы закрыть",
+        "engagement": {
+          "activeDays": "Активные дни",
+          "getStarted": "Начните свой путь обучения сегодня!",
+          "greatStart": "Отличное начало! Продолжайте!",
+          "buildingMomentum": "Набираете обороты!",
+          "strongHabit": "Формируется сильная привычка!",
+          "dedicated": "Впечатляющая целеустремленность! 🔥",
+          "legendary": "Легендарная приверженность! 🌟",
+          "day": "день",
+          "days": "дней",
+          "record": "Рекорд!",
+          "longestStreak": "Самая длинная серия",
+          "gracePeriod": "У вас есть 1-дневный льготный период. Оставайтесь активными!"
+        },
+        "loginBonus": {
+          "dailyBonus": "+{xp} XP Ежедневный бонус",
+          "welcomeBack": "С возвращением!"
+        },
+        "dashboardErrors": {
+          "errorLoading": "Ошибка загрузки панели управления",
+          "tryAgain": "Попробуйте снова"
+        },
+        "settings": {
+          "title": "Настройки геймификации",
+          "descriptionSimplified": "Настройте опыт геймификации с помощью этих простых опций",
+          "showOnLeaderboard": "Показывать меня в таблице лидеров",
+          "showOnLeaderboardDescription": "Отображать ваш прогресс в таблице лидеров организации",
+          "xpGainNotifications": "Уведомления о получении опыта",
+          "xpGainNotificationsDescription": "Показывать уведомления при получении очков опыта",
+          "animatedEffects": "Анимированные эффекты",
+          "animatedEffectsDescription": "Включить анимацию для повышения уровня и получения опыта",
+          "save": "Сохранить изменения",
+          "saving": "Сохранение...",
+          "saved": "Настройки сохранены!",
+          "saveFailed": "Не удалось сохранить настройки"
         }
       },
       "UserAccount": {
@@ -4070,7 +4168,7 @@
         "emailChangeWarning": "Изменение адреса электронной почты потребует повторного входа",
         "emailPlaceholder": "Введите ваш адрес электронной почты",
         "themeSelector": {
-          "title": "Цветовая тема",
+          "title": "Цветовые темы",
           "beta": "БЕТА"
         },
         "firstName": "Имя",

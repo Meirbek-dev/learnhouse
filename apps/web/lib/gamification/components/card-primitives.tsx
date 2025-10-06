@@ -43,7 +43,7 @@ export function GamificationCard({ title, children, headerAction, className, ani
     <CardWrapper {...animationProps}>
       <Card className={cn('overflow-hidden', className)}>
         {title && (
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle>{title}</CardTitle>
             {headerAction}
           </CardHeader>

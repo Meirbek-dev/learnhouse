@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { type ReactNode, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface CollapsibleSectionProps {
   title: string;
@@ -27,6 +28,7 @@ export function CollapsibleSection({
   defaultExpanded = true,
   className = '',
 }: CollapsibleSectionProps) {
+  const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -86,7 +88,7 @@ export function CollapsibleSection({
             size="sm"
             className="h-8 w-8 p-0 transition-transform"
             onClick={toggleExpanded}
-            aria-label={isExpanded ? 'Collapse section' : 'Expand section'}
+            aria-label={isExpanded ? t('accessibility.collapseSection') : t('accessibility.expandSection')}
             aria-expanded={isExpanded}
           >
             {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}

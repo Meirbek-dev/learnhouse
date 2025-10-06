@@ -3680,8 +3680,10 @@
           "completed": "Completed",
           "dayStreak": "Day Streak",
           "failedToLoad": "Failed to load gamification data",
+          "leaderboard": "Leaderboard",
           "nextMilestone": "Next Milestone",
           "noData": "No gamification data available",
+          "noActivityDescription": "Complete activities, courses, or quizzes to start earning XP and see your progress here!",
           "profile": "Profile",
           "progress": "Progress",
           "quickStats": "Quick Stats",
@@ -3753,6 +3755,10 @@
           "xpEarned": "{xp} XP earned",
           "you": "You",
           "yourRank": "Your Rank",
+          "yourPosition": "Your Position",
+          "xpToNextRank": "{xp} XP to pass {username}",
+          "showLess": "Show Less",
+          "showAll": "Show All",
           "gold": "Gold",
           "silver": "Silver",
           "bronze": "Bronze",
@@ -3771,10 +3777,6 @@
           "clearSearch": "Clear search",
           "noResults": "No users found matching your search",
           "noEntries": "No leaderboard entries yet",
-          "yourPosition": "Your Position",
-          "xpToNextRank": "{xp} XP behind {username}",
-          "showAll": "Show All",
-          "showLess": "Show Less",
           "noLeaderboard": "No leaderboard data available"
         },
         "levelIndicators": {
@@ -3804,6 +3806,12 @@
           "xpEarned": "+{xp} XP earned!"
         },
         "levels": {
+          "novice": "Just getting started on your learning journey",
+          "apprentice": "Making steady progress and building skills",
+          "scholar": "Demonstrating solid knowledge and understanding",
+          "expert": "Advanced learner with deep expertise",
+          "master": "Exceptional mastery of the subject matter",
+          "grandmaster": "Elite status with unparalleled knowledge",
           "descriptions": {
             "apprentice": "Making steady progress and building skills",
             "expert": "Advanced learner with deep expertise",
@@ -3819,7 +3827,12 @@
             "level": "Level",
             "toNextLevel": "to next level",
             "totalProgress": "Total Progress",
-            "xpAbbreviation": "XP"
+            "xpAbbreviation": "XP",
+            "levelProgress": "Level Progress",
+            "xpToGo": "XP to go",
+            "dailyXP": "Daily XP",
+            "levelTransition": "Level {current} → {next}",
+            "levelShort": "Lvl"
           },
           "requirements": {
             "activitiesCompleted": "{count} activities completed",
@@ -3950,7 +3963,11 @@
         },
         "progress": {
           "levelProgress": "Level Progress",
-          "dailyXP": "Today's XP"
+          "dailyXP": "Today's XP",
+          "xpToGo": "XP to go",
+          "levelTransition": "Level {current} → {next}",
+          "levelShort": "Lvl",
+          "xpAbbreviation": "XP"
         },
         "tabs": {
           "avatar": "Avatar",
@@ -3964,7 +3981,13 @@
           "preferencesError": "Failed to save preferences",
           "preferencesReset": "Preferences reset to defaults",
           "preferencesSaved": "Preferences saved successfully",
-          "userNotAuthenticated": "User not authenticated"
+          "userNotAuthenticated": "User not authenticated",
+          "levelUp": "Level Up!",
+          "xpGained": "+{xp} XP",
+          "fromActivities": "from {count} activities",
+          "earnedXP": "Earned {xp} XP",
+          "dailyLoginBonus": "Daily Login Bonus!",
+          "welcomeBack": "Welcome back!"
         },
         "xpGainToast": {
           "congratulations": "Congratulations!",
@@ -3999,6 +4022,73 @@
           "streak_bonus_7_days": "7-Day Streak Bonus",
           "unknown": "Unknown Source: {source}",
           "video_completion": "Video Watched"
+        },
+        "accessibility": {
+          "collapseSection": "Collapse section",
+          "expandSection": "Expand section",
+          "closeNotification": "Close notification",
+          "viewDetails": "View details",
+          "levelBadge": "Level {level} badge"
+        },
+        "emptyStates": {
+          "noActivity": "No activity yet",
+          "noActivityDescription": "Complete activities to start earning XP and climbing the leaderboard!",
+          "noLeaderboard": "No leaderboard data",
+          "noLeaderboardDescription": "Be the first to earn XP in this organization!",
+          "noProgress": "No progress data",
+          "noProgressDescription": "Start learning to track your progress here.",
+          "noTransactions": "No recent activity",
+          "noTransactionsDescription": "Your XP transactions will appear here as you complete activities."
+        },
+        "loadingStates": {
+          "loadingProfile": "Loading profile...",
+          "loadingDashboard": "Loading dashboard...",
+          "loadingLeaderboard": "Loading leaderboard...",
+          "loadingActivity": "Loading activity..."
+        },
+        "errorMessages": {
+          "loadFailed": "Failed to load data",
+          "networkError": "Network error. Please check your connection.",
+          "serverError": "Server error. Please try again later.",
+          "unauthorized": "You need to be logged in to view this content.",
+          "dailyLimitExceeded": "Daily XP limit reached. Come back tomorrow!",
+          "retryAction": "Retry",
+          "unknownError": "An unknown error occurred"
+        },
+        "celebration": {
+          "levelUpTitle": "🎉 Level Up! 🎉",
+          "reachedLevel": "You've reached Level {level}!",
+          "newTitle": "New Title: {title}",
+          "unlocked": "Unlocked!",
+          "keepGoing": "Keep going!",
+          "dismiss": "Continue",
+          "shareAchievement": "Share Achievement"
+        },
+        "levelUpTitle": "Level {level}",
+        "reachedLevel": "Level {level}",
+        "continue": "Continue",
+        "clickAnywhereToClose": "Click anywhere to close",
+        "engagement": {
+          "activeDays": "Active Days",
+          "getStarted": "Start your learning journey today!",
+          "greatStart": "Great start! Keep it up!",
+          "buildingMomentum": "Building momentum!",
+          "strongHabit": "Strong habit forming!",
+          "dedicated": "Impressive dedication! 🔥",
+          "legendary": "Legendary commitment! 🌟",
+          "day": "day",
+          "days": "days",
+          "record": "Record!",
+          "longestStreak": "Longest Streak",
+          "gracePeriod": "You have a 1-day grace period. Stay active!"
+        },
+        "loginBonus": {
+          "dailyBonus": "+{xp} XP Daily Bonus",
+          "welcomeBack": "Welcome back!"
+        },
+        "dashboardErrors": {
+          "errorLoading": "Error loading dashboard",
+          "tryAgain": "Try again"
         }
       },
       "UserAccount": {

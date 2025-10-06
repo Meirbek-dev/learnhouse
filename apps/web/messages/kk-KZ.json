@@ -3632,8 +3632,10 @@
           "completed": "Аяқталды",
           "dayStreak": "Күн тізбегі",
           "failedToLoad": "Геймификация деректерін жүктеу мүмкін болмады",
+          "leaderboard": "Көшбасшылар кестесі",
           "nextMilestone": "Келесі межелі мақсат",
           "noData": "Геймификация деректері жоқ",
+          "noActivityDescription": "XP жинауды және прогрессіңізді осында көруді бастау үшін әрекеттерді, курстарды немесе тесттерді аяқтаңыз!",
           "profile": "Профиль",
           "progress": "Прогресс",
           "quickStats": "Жылдам статистика",
@@ -3704,7 +3706,11 @@
           "xp": "{xp} ТӨ",
           "xpEarned": "{xp} ТӨ алынды",
           "you": "Сіз",
-          "yourRank": "Сіздің орныңыз"
+          "yourRank": "Сіздің орныңыз",
+          "yourPosition": "Сіздің позицияңыз",
+          "xpToNextRank": "{username} пайдаланушысынан {xp} ТӨ артта",
+          "showLess": "Азырақ көрсету",
+          "showAll": "Барлығын көрсету"
         },
         "levelIndicators": {
           "congratsMaxLevel": "Құттықтаймыз! Сіз ең жоғарғы деңгейге жеттіңіз!",
@@ -3733,6 +3739,12 @@
           "xpEarned": "+{xp} ТӨ алынды!"
         },
         "levels": {
+          "novice": "Оқу жолын енді бастаушы",
+          "apprentice": "Тұрақты алға жылжып, дағдыларын дамытушы",
+          "scholar": "Мықты білім мен түсінік көрсетуші",
+          "expert": "Терең тәжірибесі бар алдыңғы қатарлы оқушы",
+          "master": "Тақырыпты ерекше меңгерген",
+          "grandmaster": "Ең жоғары деңгейдегі білім иесі",
           "descriptions": {
             "apprentice": "Тұрақты алға жылжып, дағдыларын дамытушы",
             "expert": "Терең тәжірибесі бар алдыңғы қатарлы оқушы",
@@ -3748,7 +3760,12 @@
             "level": "Деңгей",
             "toNextLevel": "келесі деңгейге дейін",
             "totalProgress": "Жалпы прогресс",
-            "xpAbbreviation": "ТӨ"
+            "xpAbbreviation": "ТӨ",
+            "levelProgress": "Деңгей прогресі",
+            "xpToGo": "ТӨ қалды",
+            "dailyXP": "Күнделікті ТӨ",
+            "levelTransition": "Деңгей {current} → {next}",
+            "levelShort": "Дең."
           },
           "requirements": {
             "activitiesCompleted": "{count} тапсырма аяқталды",
@@ -3860,6 +3877,17 @@
             "title": "Кіру сериясы"
           }
         },
+        "profile": {
+          "title": "Сіздің оқу профиліңіз"
+        },
+        "progress": {
+          "levelProgress": "Деңгей прогресі",
+          "dailyXP": "Бүгінгі ТӨ",
+          "xpToGo": "ТӨ қалды",
+          "levelTransition": "Деңгей {current} → {next}",
+          "levelShort": "Дең.",
+          "xpAbbreviation": "ТӨ"
+        },
         "tabs": {
           "avatar": "Аватар",
           "overview": "Шолу",
@@ -3872,7 +3900,13 @@
           "preferencesError": "Параметрлерді сақтау сәтсіз аяқталды",
           "preferencesReset": "Параметрлер әдепкіге қалпына келтірілді",
           "preferencesSaved": "Параметрлер сәтті сақталды",
-          "userNotAuthenticated": "Пайдаланушы аутентификацияланбаған"
+          "userNotAuthenticated": "Пайдаланушы аутентификацияланбаған",
+          "levelUp": "Деңгей көтерілді!",
+          "xpGained": "+{xp} XP",
+          "fromActivities": "{count} әрекеттен",
+          "earnedXP": "{xp} XP алынды",
+          "dailyLoginBonus": "Күнделікті кіру бонусы!",
+          "welcomeBack": "Қош келдіңіз!"
         },
         "xpGainToast": {
           "congratulations": "Құттықтаймыз!",
@@ -3907,6 +3941,87 @@
           "streak_bonus_7_days": "7 күндік серия бонусы",
           "unknown": "Белгісіз көз: {source}",
           "video_completion": "Бейне қаралды"
+        },
+        "accessibility": {
+          "collapseSection": "Бөлімді жию",
+          "expandSection": "Бөлімді кеңейту",
+          "closeNotification": "Хабарландыруды жабу",
+          "viewDetails": "Егжей-тегжейді қарау",
+          "levelBadge": "{level} деңгей белгісі"
+        },
+        "emptyStates": {
+          "noActivity": "Әлі әрекет жоқ",
+          "noActivityDescription": "XP жинауды және рейтингте көтерілуді бастау үшін әрекеттерді орындаңыз!",
+          "noLeaderboard": "Көшбасшылар кестесі деректері жоқ",
+          "noLeaderboardDescription": "Бұл ұйымда XP жинаған бірінші адам болыңыз!",
+          "noProgress": "Прогресс деректері жоқ",
+          "noProgressDescription": "Прогрессіңізді қадағалау үшін оқуды бастаңыз.",
+          "noTransactions": "Жуықта әрекет жоқ",
+          "noTransactionsDescription": "Әрекеттерді орындаған кезде XP транзакцияларыңыз осында пайда болады."
+        },
+        "loadingStates": {
+          "loadingProfile": "Профиль жүктелуде...",
+          "loadingDashboard": "Бақылау тақтасы жүктелуде...",
+          "loadingLeaderboard": "Көшбасшылар кестесі жүктелуде...",
+          "loadingActivity": "Әрекет жүктелуде..."
+        },
+        "errorMessages": {
+          "loadFailed": "Деректерді жүктеу мүмкін болмады",
+          "networkError": "Желі қатесі. Қосылымыңызды тексеріңіз.",
+          "serverError": "Сервер қатесі. Кейінірек қайталап көріңіз.",
+          "unauthorized": "Бұл мазмұнды көру үшін жүйеге кіру қажет.",
+          "dailyLimitExceeded": "Күнделікті XP лимиті толды. Ертең қайта келіңіз!",
+          "retryAction": "Қайталау",
+          "unknownError": "Белгісіз қате орын алды"
+        },
+        "celebration": {
+          "levelUpTitle": "🎉 Деңгей көтерілді! 🎉",
+          "reachedLevel": "{level} деңгейге жеттіңіз!",
+          "newTitle": "Жаңа атақ: {title}",
+          "unlocked": "Ашылды!",
+          "keepGoing": "Жалғастыра беріңіз!",
+          "dismiss": "Жалғастыру",
+          "shareAchievement": "Жетістікті бөлісу"
+        },
+        "levelUpTitle": "{level} деңгей",
+        "reachedLevel": "{level} деңгей",
+        "continue": "Жалғастыру",
+        "clickAnywhereToClose": "Жабу үшін кез келген жерді басыңыз",
+        "engagement": {
+          "activeDays": "Белсенді күндер",
+          "getStarted": "Оқу саяхатыңызды бүгін бастаңыз!",
+          "greatStart": "Керемет бастама! Жалғастырыңыз!",
+          "buildingMomentum": "Қарқын жинап жатырсыз!",
+          "strongHabit": "Мықты әдет қалыптасуда!",
+          "dedicated": "Керемет ынталылық! 🔥",
+          "legendary": "Аңызға айналған берілгендік! 🌟",
+          "day": "күн",
+          "days": "күн",
+          "record": "Рекорд!",
+          "longestStreak": "Ең ұзақ қатар",
+          "gracePeriod": "1 күндік босаңсыту мерзіміңіз бар. Белсенді болыңыз!"
+        },
+        "loginBonus": {
+          "dailyBonus": "+{xp} XP Күнделікті бонус",
+          "welcomeBack": "Қайта келуіңізбен!"
+        },
+        "dashboardErrors": {
+          "errorLoading": "Тақтаны жүктеу қатесі",
+          "tryAgain": "Қайта көріңіз"
+        },
+        "settings": {
+          "title": "Геймификация баптаулары",
+          "descriptionSimplified": "Осы қарапайым опциялармен геймификация тәжірибеңізді баптаңыз",
+          "showOnLeaderboard": "Көшбасшылар кестесінде мені көрсету",
+          "showOnLeaderboardDescription": "Ұйым көшбасшылар кестесінде прогрессіңізді көрсету",
+          "xpGainNotifications": "XP алу туралы хабарландырулар",
+          "xpGainNotificationsDescription": "Тәжірибе ұпайларын алған кезде хабарландыруларды көрсету",
+          "animatedEffects": "Анимацияланған эффектілер",
+          "animatedEffectsDescription": "Деңгей көтеру және XP алу үшін анимацияны қосу",
+          "save": "Өзгерістерді сақтау",
+          "saving": "Сақталуда...",
+          "saved": "Баптаулар сақталды!",
+          "saveFailed": "Баптауларды сақтау мүмкін болмады"
         }
       },
       "UserAccount": {

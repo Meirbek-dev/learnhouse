@@ -9,7 +9,7 @@ export { GamificationProfileSection } from './GamificationProfileSection';
 
 // Primary dashboard components
 export { HeroSection } from './hero-section';
-export { EnhancedLeaderboard } from './enhanced-leaderboard';
+export { Leaderboard } from './leaderboard';
 export { EngagementStreak } from './engagement-streak';
 export { RecentActivityFeed } from './recent-activity-feed';
 export { CollapsibleSection } from './collapsible-section';
@@ -17,12 +17,12 @@ export { CollapsibleSection } from './collapsible-section';
 // UI elements
 export { LevelUpCelebration } from './xp-toast';
 
-// Re-export enhanced components from unified system
+// Re-export components from unified system
 export {
   GlowingLevelBadge,
-  EnhancedLevelProgress,
+  LevelProgress,
   MilestoneProgress,
   XPGainAnimation,
   ParticleEffect,
-  useEnhancedXPToast,
+  useXPToast,
 } from '@/lib/gamification';

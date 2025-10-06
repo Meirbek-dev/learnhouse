@@ -13,9 +13,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { UserGamificationProfile } from '@/types/gamification';
 import { Calendar, Flame, Star } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useMemo } from 'react';
-import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { useMemo } from 'react';
 
 interface EngagementStreakProps {
   profile: UserGamificationProfile;
@@ -70,12 +70,14 @@ export function EngagementStreak({ profile, className }: EngagementStreakProps) 
             <div className="flex items-center gap-3">
               <motion.div
                 animate={engagement.isActive ? { scale: [1, 1.1, 1] } : {}}
-                transition={{ duration: 0.5, repeat: engagement.isActive ? Number.POSITIVE_INFINITY : 0, repeatDelay: 2 }}
+                transition={{
+                  duration: 0.5,
+                  repeat: engagement.isActive ? Number.POSITIVE_INFINITY : 0,
+                  repeatDelay: 2,
+                }}
                 className={cn(
                   'flex h-12 w-12 items-center justify-center rounded-full',
-                  engagement.isActive
-                    ? 'bg-gradient-to-br from-orange-500 to-red-500'
-                    : 'bg-muted',
+                  engagement.isActive ? 'bg-gradient-to-br from-orange-500 to-red-500' : 'bg-muted',
                 )}
               >
                 {engagement.isActive ? (
@@ -119,15 +121,6 @@ export function EngagementStreak({ profile, className }: EngagementStreakProps) 
                   {engagement.longest} {engagement.longest === 1 ? t('engagement.day') : t('engagement.days')}
                 </span>
               </div>
-            </div>
-          )}
-
-          {/* Grace Period Info */}
-          {engagement.isActive && (
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900 dark:bg-blue-950">
-              <p className="text-xs text-blue-700 dark:text-blue-300">
-                💡 {t('engagement.gracePeriod')}
-              </p>
             </div>
           )}
         </div>

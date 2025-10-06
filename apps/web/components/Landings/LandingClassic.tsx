@@ -5,7 +5,8 @@ import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCours
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
-import GamificationDashboard from '@/components/Dashboard/gamification-dashboard';
+import { HeroSection } from '@/components/Dashboard/Gamification/hero-section';
+import type { UserGamificationProfile } from '@/types/gamification';
 import { getUriWithOrg } from '@services/config/config';
 import CourseGridClient from './CourseGridClient';
 import { useTranslations } from 'next-intl';
@@ -16,6 +17,8 @@ interface LandingClassicProps {
   collections: any[];
   orgslug: string;
   org_id: number;
+  gamificationProfile?: UserGamificationProfile | null;
+  userRank?: number | null;
 }
 
 const EmptyCollectionsState = ({ t }: { t: any }) => (
@@ -92,16 +95,21 @@ const CollectionGrid = ({ collections, orgslug, org_id }: { collections: any[]; 
 
 // CourseGrid component is now extracted to CourseGridClient.tsx
 
-const LandingClassic = ({ courses, collections, orgslug, org_id }: LandingClassicProps) => {
+const LandingClassic = ({ courses, collections, orgslug, org_id, gamificationProfile, userRank }: LandingClassicProps) => {
   const t = useTranslations('HomePage');
 
   return (
     <div className="w-full">
       <GeneralWrapperStyled>
-        {/* Gamification Dashboard Section */}
-        <section className="mb-8">
-          <GamificationDashboard orgId={org_id} />
-        </section>
+        {/* Gamification Hero Section */}
+        {gamificationProfile && (
+          <section className="mb-8">
+            <HeroSection
+              profile={gamificationProfile}
+              userRank={userRank}
+            />
+          </section>
+        )}
 
         {/* Courses Section */}
         <section className="flex flex-col space-y-6">

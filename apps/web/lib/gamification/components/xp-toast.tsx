@@ -1,5 +1,5 @@
 /**
- * Enhanced XP Toast with Notification Queue
+ * XP Toast with Notification Queue
  *
  * Improvements over old system:
  * - Automatic batching of similar XP gains
@@ -15,7 +15,7 @@ import {
   XPNotificationContainer,
   type XPNotification,
 } from '@/lib/gamification/components/notification-queue';
-import { ParticleEffect } from '@/lib/gamification/components/enhanced-level-indicators';
+import { ParticleEffect } from '@/lib/gamification/components/level-indicators';
 import { AnimatedValue } from '@/lib/gamification/components/animated-value';
 import { getXPSourceTheme } from '@/lib/gamification';
 import { useReducedData } from '@/hooks/use-reduced-data';
@@ -26,15 +26,15 @@ import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // ============================================================================
-// Enhanced XP Toast Component
+// XP Toast Component
 // ============================================================================
 
-interface EnhancedXPToastProps {
+interface XPToastProps {
   notification: XPNotification & { batchCount: number; totalAmount: number };
   onDismiss: () => void;
 }
 
-function EnhancedXPToast({ notification, onDismiss }: EnhancedXPToastProps) {
+function XPToast({ notification, onDismiss }: XPToastProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const theme = getXPSourceTheme(notification.source);
   const prefersReducedData = useReducedData();
@@ -74,13 +74,13 @@ function EnhancedXPToast({ notification, onDismiss }: EnhancedXPToastProps) {
         {/* Text Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-1.5">
-            <span className="text-lg font-bold text-foreground">+</span>
+            <span className="text-lg font-bold text-foreground">{'+'}</span>
             <AnimatedValue
               value={notification.totalAmount}
               className={cn('text-lg font-bold tabular-nums', theme.color)}
               format={(v) => Math.round(v).toLocaleString()}
             />
-            <span className="text-sm text-muted-foreground">XP</span>
+            <span className="text-sm text-muted-foreground">{'XP'}</span>
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             <p className="text-xs text-muted-foreground truncate">
@@ -104,7 +104,7 @@ function EnhancedXPToast({ notification, onDismiss }: EnhancedXPToastProps) {
       {/* Level Up Indicator */}
       {notification.triggeredLevelUp && (
         <div className="border-t bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 px-4 py-2">
-          <p className="text-center text-sm font-bold text-white">🎉 {t('toast.levelUp')} 🎉</p>
+          <p className="text-center text-sm font-bold text-white">{'🎉'} {t('toast.levelUp')} {'🎉'}</p>
         </div>
       )}
 
@@ -120,7 +120,7 @@ function EnhancedXPToast({ notification, onDismiss }: EnhancedXPToastProps) {
 }
 
 // ============================================================================
-// Enhanced XP Toast Hook
+// XP Toast Hook
 // ============================================================================
 
 export interface ShowXPToastOptions {
@@ -130,7 +130,7 @@ export interface ShowXPToastOptions {
   showSourceLabel?: boolean;
 }
 
-export function useEnhancedXPToast() {
+export function useXPToast() {
   const { notifications, addNotification, dismissNotification } = useXPNotificationQueue({
     maxVisible: 3,
     batchWindowMs: 2000,
@@ -151,7 +151,7 @@ export function useEnhancedXPToast() {
 
   const renderNotification = useCallback(
     (notification: any) => (
-      <EnhancedXPToast
+      <XPToast
         notification={notification}
         onDismiss={() => dismissNotification(notification.id)}
       />

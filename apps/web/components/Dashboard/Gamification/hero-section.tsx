@@ -4,9 +4,9 @@ import { motion } from 'framer-motion';
 import { Trophy, TrendingUp, Flame, Zap, Calendar } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
-import { GlowingLevelBadge } from '@/lib/gamification';
+import { GlowingLevelBadge, getLevelInfo } from '@/lib/gamification';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
-import { Progress } from '@/components/ui/progress';
+import { useLHSession } from '@/components/Contexts/LHSessionContext';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { UserGamificationProfile } from '@/types/gamification';
@@ -29,8 +29,9 @@ interface HeroSectionProps {
  */
 export function HeroSection({ profile, userRank, className }: HeroSectionProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
+  const session = useLHSession() as any;
 
-  const { xpToNext, xpProgress, dailyXpProgress, nextMilestone, streakStatus } = useMemo(() => {
+  const { xpToNext, xpProgress, dailyXpProgress, nextMilestone, streakStatus, levelInfo } = useMemo(() => {
     const xpForNext = Math.max(0, profile.xp_to_next_level || 0);
     const currentLevelXp = profile.xp_in_current_level || 0;
     const progress = xpForNext > 0 ? (currentLevelXp / (currentLevelXp + xpForNext)) * 100 : 0;
@@ -48,19 +49,62 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
     const learningStreak = profile.learning_streak || 0;
     const maxStreak = Math.max(loginStreak, learningStreak);
 
+    // Get level info
+    const info = getLevelInfo(profile.level, t);
+
     return {
       xpToNext: xpForNext,
       xpProgress: progress,
       dailyXpProgress: dailyProgress,
       nextMilestone: nextLevel,
       streakStatus: { login: loginStreak, learning: learningStreak, max: maxStreak },
+      levelInfo: info,
     };
-  }, [profile]);
+  }, [profile, t]);
+
+  // Get display name from session
+  const displayName = session?.data?.user?.first_name
+    ? `${session.data.user.first_name}${session.data.user.last_name ? ` ${session.data.user.last_name}` : ''}`
+    : session?.data?.user?.username;
 
   return (
-    <Card className={cn('relative overflow-hidden', className)}>
-      {/* Gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5" />
+    <Card className={cn('relative overflow-hidden border-2', className)}>
+      {/* Dynamic gradient background based on level */}
+      <div className={cn(
+        'absolute inset-0 opacity-10',
+        'bg-gradient-to-br from-primary via-transparent to-purple-500'
+      )} />
+
+      {/* Animated particles for high-level users */}
+      {profile.level >= 15 && (
+        <div className="absolute inset-0 overflow-hidden">
+          <motion.div
+            className="absolute -top-4 -right-4 h-32 w-32 rounded-full bg-yellow-500/20 blur-3xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+          <motion.div
+            className="absolute -bottom-4 -left-4 h-32 w-32 rounded-full bg-blue-500/20 blur-3xl"
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: 1,
+            }}
+          />
+        </div>
+      )}
 
       <div className="relative p-6 md:p-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-8">
@@ -72,11 +116,11 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
                 gamificationProfile={profile}
                 showLevelBadge={false}
                 use_with_session
-                className="ring-4 ring-background shadow-xl"
+                className="relative ring-4 ring-background shadow-2xl"
               />
 
               {/* Level badge - positioned on avatar */}
-              <div className="absolute -bottom-2 -right-2">
+              <div className="absolute -bottom-0.5 -right-0.5">
                 <GlowingLevelBadge
                   level={profile.level}
                   size="lg"
@@ -102,53 +146,138 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
 
           {/* Right: Stats & Progress */}
           <div className="flex-1 space-y-5">
-            {/* Header */}
-            <div>
-              <h2 className="text-2xl font-bold">{t('profile.title')}</h2>
+            {/* Header with username and level title */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <h2 className="text-3xl font-bold tracking-tight">{displayName}</h2>
+                {userRank && userRank <= 3 && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 200 }}
+                  >
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        'gap-1 px-2 py-1',
+                        userRank === 1 && 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/50',
+                        userRank === 2 && 'bg-gray-400/20 text-gray-600 dark:text-gray-300 border-gray-400/50',
+                        userRank === 3 && 'bg-orange-600/20 text-orange-600 dark:text-orange-400 border-orange-600/50'
+                      )}
+                    >
+                      <Trophy className="h-3 w-3" />
+                      #{userRank}
+                    </Badge>
+                  </motion.div>
+                )}
+              </div>
+
+              {/* Level title with icon */}
+              <div className="flex items-center gap-2">
+                <levelInfo.icon className={cn('h-5 w-5', levelInfo.color)} />
+                <p className={cn('text-lg font-semibold', levelInfo.color)}>
+                  {levelInfo.title}
+                </p>
+                <span className="text-muted-foreground text-sm">
+                  • {t('levelIndicators.level')} {profile.level}
+                </span>
+              </div>
+
               <p className="text-muted-foreground text-sm">
-                {t('levels.' + getLevelKey(profile.level))}
+                {t(`levels.${getLevelKey(profile.level)}`)}
               </p>
             </div>
 
-            {/* Level Progress */}
+            {/* Level Progress - Enhanced */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{t('progress.levelProgress')}</span>
-                <span className="font-semibold">
-                  Level {profile.level} → {profile.level + 1}
+                <span className="text-muted-foreground font-medium">{t('progress.levelProgress')}</span>
+                <span className="font-bold text-base">
+                  {t('progress.levelTransition', { current: profile.level, next: profile.level + 1 })}
                 </span>
               </div>
               <div className="relative">
-                <Progress
-                  value={xpProgress}
-                  className="h-3"
-                />
-                {/* XP labels */}
-                <div className="mt-1 flex justify-between text-xs text-muted-foreground">
-                  <span>{profile.xp_in_current_level?.toLocaleString() || 0} XP</span>
-                  <span>{xpToNext.toLocaleString()} XP to go</span>
+                {/* Progress bar with gradient */}
+                <div className="relative h-4 overflow-hidden rounded-full bg-muted">
+                  <motion.div
+                    className={cn(
+                      'h-full rounded-full bg-accent-foreground',
+                    )}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${xpProgress}%` }}
+                    transition={{ duration: 1, ease: 'easeOut' }}
+                  />
+
+                  {/* Shine effect */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                    animate={{
+                      x: ['-100%', '200%'],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      repeatDelay: 3,
+                      ease: 'linear',
+                    }}
+                  />
+                </div>
+
+                {/* XP labels with better styling */}
+                <div className="mt-2 flex justify-between text-xs">
+                  <span className="font-medium tabular-nums">
+                    <span className="text-foreground">{profile.xp_in_current_level?.toLocaleString() || 0}</span>
+                    <span className="text-muted-foreground"> {t('progress.xpAbbreviation')}</span>
+                  </span>
+                  <span className="font-medium text-muted-foreground tabular-nums">
+                    {xpToNext.toLocaleString()} {t('progress.xpToGo')}
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Daily XP Progress */}
+            {/* Daily XP Progress - Enhanced */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground flex items-center gap-1">
-                  <Zap className="h-3.5 w-3.5" />
+                <span className="text-muted-foreground flex items-center gap-1.5 font-medium">
+                  <Zap className={cn(
+                    'h-4 w-4',
+                    dailyXpProgress >= 100 ? 'text-orange-500' : 'text-yellow-500'
+                  )} />
                   {t('progress.dailyXP')}
                 </span>
                 <span className={cn(
-                  'font-semibold',
-                  dailyXpProgress >= 100 && 'text-orange-500'
+                  'font-bold tabular-nums',
+                  dailyXpProgress >= 100 ? 'text-orange-500' : 'text-foreground'
                 )}>
-                  {profile.daily_xp_earned?.toLocaleString() || 0} / 500
+                  {profile.daily_xp_earned?.toLocaleString() || 0} {'/ 500'}
                 </span>
               </div>
-              <Progress
-                value={dailyXpProgress}
-                className="h-2"
-              />
+              <div className="relative">
+                <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+                  <motion.div
+                    className={cn(
+                      'h-full rounded-full transition-colors',
+                      dailyXpProgress >= 100
+                        ? 'bg-gradient-to-r from-orange-500 to-red-500'
+                        : 'bg-gradient-to-r from-yellow-500 to-amber-500'
+                    )}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(dailyXpProgress, 100)}%` }}
+                    transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
+                  />
+                </div>
+
+                {dailyXpProgress >= 100 && (
+                  <motion.p
+                    className="mt-1 text-xs font-medium text-orange-500"
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    ⚡ Daily cap reached!
+                  </motion.p>
+                )}
+              </div>
             </div>
 
             {/* Quick Stats Grid */}
@@ -168,7 +297,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
               <StatCard
                 icon={Calendar}
                 label={t('stats.nextMilestone')}
-                value={nextMilestone ? `Lvl ${nextMilestone}` : t('stats.maxLevel')}
+                value={nextMilestone ? `${t('progress.levelShort')} ${nextMilestone}` : t('stats.maxLevel')}
                 iconColor="text-purple-500"
               />
             </div>

@@ -41,7 +41,7 @@ export function RecentActivityFeed({ transactions, isLoading }: RecentActivityFe
 
   return (
     <GamificationCard title={t('dashboard.recentActivity')}>
-      <ScrollArea className="h-[400px] pr-4">
+      <ScrollArea className="max-h-[500] pr-4">
         <div className="space-y-3">
           {transactions.map((transaction, index) => {
             const theme = getXPSourceTheme(transaction.source);
@@ -75,8 +75,8 @@ export function RecentActivityFeed({ transactions, isLoading }: RecentActivityFe
                   <p className="text-muted-foreground text-xs">{timeAgo}</p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <span className="text-primary text-sm font-bold tabular-nums">+{transaction.amount}</span>
-                  <p className="text-muted-foreground text-xs">XP</p>
+                  <span className="text-primary text-sm font-bold tabular-nums">{'+'}{transaction.amount}</span>
+                  <p className="text-muted-foreground text-xs">{'XP'}</p>
                 </div>
               </motion.div>
             );

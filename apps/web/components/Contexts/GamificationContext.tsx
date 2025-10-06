@@ -16,7 +16,7 @@ import {
   getLeaderboardAction,
 } from '@/app/actions/gamification';
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, lazy } from 'react';
-import { useEnhancedXPToast } from '@/lib/gamification/components/enhanced-xp-toast';
+import { useXPToast } from '@/lib/gamification/components/xp-toast';
 import { AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 
@@ -90,8 +90,8 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<GamificationError | null>(null);
 
-  // Enhanced XP notification system with automatic batching
-  const { showXPToast: showEnhancedXPToast, ToastContainer } = useEnhancedXPToast();
+  // XP notification system with automatic batching
+  const { showXPToast: showEnhancedXPToast, ToastContainer } = useXPToast();
   const [levelUpQueue, setLevelUpQueue] = useState<Array<{ newLevel: number }>>([]);
 
   // Update state when initialData changes (from server-side refetch)
@@ -256,7 +256,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
     [orgId, t],
   );
 
-  // XP Toast handlers using enhanced notification system with automatic batching
+  // XP Toast handlers using notification system with automatic batching
   const showXPToast = useCallback(
     (amount: number, source?: string, triggeredLevelUp?: boolean) => {
       showEnhancedXPToast({ amount, source, triggeredLevelUp });
@@ -291,7 +291,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
   return (
     <GamificationContext.Provider value={value}>
       {children}
-      {/* Enhanced XP notification container with automatic batching */}
+      {/* XP notification container with automatic batching */}
       <ToastContainer />
       {/* Render level-up celebrations (lazy-loaded only when needed) */}
       <AnimatePresence>
