@@ -25,8 +25,9 @@ export function ThemeProvider({ children, defaultThemeName = 'default', userThem
 
   // Initialize theme on mount
   useEffect(() => {
-    // Priority: userTheme from database > localStorage > defaultThemeName
-    const effectiveTheme = userTheme || getStoredTheme() || defaultThemeName;
+    // Priority: localStorage > userTheme from database > defaultThemeName
+    // localStorage takes priority to ensure immediate theme changes persist on refresh
+    const effectiveTheme = getStoredTheme() || userTheme || defaultThemeName;
     const initialTheme = getTheme(effectiveTheme);
 
     setThemeState(initialTheme);

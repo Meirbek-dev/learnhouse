@@ -169,7 +169,7 @@ function LeaderboardEntryRow({
     <motion.div
       whileHover={{ scale: 1.02 }}
       className={cn(
-        'flex items-center gap-3 rounded-lg px-4 py-2 transition-colors',
+        'flex items-center gap-3 rounded-lg p-2 m-4 transition-colors',
         isCurrentUser && 'bg-primary/10 ring-2 ring-primary/20',
         !isCurrentUser && 'hover:bg-muted/50',
       )}

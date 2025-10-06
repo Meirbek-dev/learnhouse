@@ -34,6 +34,8 @@ function ThemeSync() {
       if (session?.data?.user?.id && session?.data?.tokens?.access_token) {
         try {
           await updateUserTheme(session.data.user.id, customEvent.detail.theme, session.data.tokens.access_token);
+          // Refresh session to get updated theme from server
+          await session.update();
         } catch (error) {
           console.error('Failed to sync theme to server:', error);
         }
@@ -44,7 +46,7 @@ function ThemeSync() {
     return () => {
       window.removeEventListener('themeChange', handleThemeChange);
     };
-  }, [session?.data?.user?.id, session?.data?.tokens?.access_token]);
+  }, [session]);
 
   return null;
 }
