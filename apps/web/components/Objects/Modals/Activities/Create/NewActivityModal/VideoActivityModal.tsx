@@ -881,8 +881,8 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
     (event: ChangeEvent<HTMLInputElement>) => {
       const selectedFile = event.target.files?.[0];
       if (selectedFile) {
-        // Validate file size (max 500MB)
-        if (selectedFile.size > 500 * 1024 * 1024) {
+        // Validate file size (max 1000MB)
+        if (selectedFile.size > 1000 * 1024 * 1024) {
           toast.error(t('errorFileSizeLimit'));
           return;
         }
