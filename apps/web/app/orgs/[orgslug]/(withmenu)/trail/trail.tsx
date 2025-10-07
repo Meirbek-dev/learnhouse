@@ -3,13 +3,14 @@ import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationMo
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import { RecentActivityFeed } from '@/components/Dashboard/Gamification/recent-activity-feed';
+import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import { Leaderboard } from '@/components/Dashboard/Gamification/leaderboard';
 import TrailCourseElement from '@components/Pages/Trail/TrailCourseElement';
 import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
 import UserCertificates from '@components/Pages/Trail/UserCertificates';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import { removeCourse } from '@services/courses/activity';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getAPIUrl } from '@services/config/config';
@@ -36,11 +37,17 @@ const Trail = (params: any) => {
     mutate,
   } = useSWR(`${getAPIUrl()}trail/org/${orgID}/trail`, (url) => swrFetcher(url, access_token));
 
-  // Fetch gamification data
-  const { data: gamificationData, isLoading: isGamificationLoading } = useSWR(
-    orgID ? `${getAPIUrl()}gamification/${orgID}` : null,
-    (url) => swrFetcher(url, access_token),
+  // Use gamification context (already available from parent layout)
+  const gamificationContext = useOptionalGamificationContext();
+  const gamificationData = useMemo(
+    () => ({
+      profile: gamificationContext?.profile,
+      recent_transactions: gamificationContext?.dashboard?.recent_transactions || [],
+      user_rank: gamificationContext?.dashboard?.user_rank,
+    }),
+    [gamificationContext?.profile, gamificationContext?.dashboard],
   );
+  const isGamificationLoading = gamificationContext?.isLoading || false;
 
   const { data: leaderboardData, isLoading: isLeaderboardLoading } = useSWR(
     orgID ? `${getAPIUrl()}gamification/${orgID}/leaderboard?limit=10` : null,

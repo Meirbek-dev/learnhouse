@@ -49,7 +49,8 @@ const CourseEndView: FC<CourseEndViewProps> = ({
   );
 
   // Gamification state via unified context
-  const gamificationProfile = useOptionalGamificationContext()?.profile ?? null;
+  const gamificationContext = useOptionalGamificationContext();
+  const gamificationProfile = gamificationContext?.profile ?? null;
 
   // Check if course is actually completed
   const isCourseCompleted = useMemo(() => {
@@ -103,6 +104,13 @@ const CourseEndView: FC<CourseEndViewProps> = ({
 
         if (result.success && result.data && result.data.length > 0) {
           setUserCertificate(result.data[0]);
+
+          // Refetch gamification data to show course completion XP in recent activity
+          if (gamificationContext?.refetch) {
+            gamificationContext.refetch().catch((err) =>
+              console.warn('Failed to refetch gamification after course completion:', err)
+            );
+          }
         } else {
           console.warn('No certificate found. Result:', result);
           setCertificateError(t('noCertificateFound'));
@@ -116,7 +124,21 @@ const CourseEndView: FC<CourseEndViewProps> = ({
     };
 
     fetchUserCertificate();
-  }, [isCourseCompleted, courseUuid, session?.data?.tokens?.access_token, t]);
+  }, [isCourseCompleted, courseUuid, session?.data?.tokens?.access_token, t, gamificationContext]);
+
+  // Refetch gamification data on mount if course is completed
+  // This ensures recent activity feed shows course completion XP
+  useEffect(() => {
+    if (isCourseCompleted && gamificationContext?.refetch) {
+      // Small delay to ensure backend has processed course completion
+      const timer = setTimeout(() => {
+        gamificationContext.refetch().catch((err) =>
+          console.warn('Failed to refetch gamification on CourseEndView mount:', err)
+        );
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isCourseCompleted, gamificationContext]);
 
   // Generate PDF using canvas
   const downloadCertificate = async () => {

@@ -103,6 +103,36 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
     if (initialData?.leaderboard) setLeaderboard(initialData.leaderboard);
   }, [initialData]);
 
+  // Fetch initial data if not provided
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      // Only fetch if we don't have profile data yet
+      if (!profile && !isLoading) {
+        setIsLoading(true);
+        try {
+          const [dashboardData, leaderboardData] = await Promise.all([
+            getDashboardDataAction(orgId),
+            getLeaderboardAction(orgId),
+          ]);
+
+          if (dashboardData) {
+            setProfile(dashboardData.profile);
+            setDashboard(dashboardData);
+          }
+          if (leaderboardData) {
+            setLeaderboard(leaderboardData);
+          }
+        } catch (err) {
+          console.error('Failed to fetch initial gamification data:', err);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchInitialData();
+  }, [orgId, profile, isLoading]);
+
   // Computed streaks
   const streaks = useMemo(
     () => ({
