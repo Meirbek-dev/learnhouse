@@ -23,8 +23,8 @@ The following Docker volumes are included in backups:
 
 - **Frequency**: Daily at 2:00 AM
 - **Retention**: 7 days (automatically deletes older backups)
-- **Compression**: Gzip with parallel compression enabled
-- **Format**: `backup-openu-YYYY-MM-DDTHH-MM-SS.tar.gz`
+- **Compression**: Zstandard (zstd) - faster and more efficient than gzip
+- **Format**: `backup-openu-YYYY-MM-DDTHH-MM-SS.tar.zst`
 
 ## Configuration
 
@@ -54,7 +54,7 @@ All backup settings are configured in `extra/backup.env`. Key settings include:
 
 - `BACKUP_CRON_EXPRESSION` - When backups run (default: 2 AM daily)
 - `BACKUP_RETENTION_DAYS` - How long to keep backups (default: 7 days)
-- `BACKUP_COMPRESSION` - Compression method (default: gz)
+- `BACKUP_COMPRESSION` - Compression method (default: zst for Zstandard)
 - `BACKUP_ARCHIVE` - Local storage directory (default: /archive)
 
 ### Container Stopping During Backup
@@ -79,8 +79,12 @@ created when you start the backup service.
 ls ./backups
 
 # View the latest backup (symlink)
-ls ./backups/backup-openu-latest.tar.gz
+ls -lh ./backups/backup-openu-latest.tar.gz
 ```
+
+**Note**: The symlink `backup-openu-latest.tar.gz` may have a `.tar.gz` extension even though it
+points to a `.tar.zst` file. This is a known behavior of the backup tool. Always use the `--zstd`
+flag when extracting or listing the contents of the backup.
 
 ## Remote Storage (Optional)
 
@@ -126,9 +130,16 @@ docker compose down
 ### 2. Extract the Backup
 
 ```bash
-# Extract to a temporary directory
+# Extract to a temporary directory (use the actual backup filename or the symlink)
 mkdir temp-restore
-tar -xzf ./backups/backup-openu-YYYY-MM-DDTHH-MM-SS.tar.gz -C temp-restore
+
+# For zstd compressed backups (.tar.zst)
+tar --zstd -xf ./backups/backup-openu-YYYY-MM-DDTHH-MM-SS.tar.zst -C temp-restore
+# OR using the latest symlink
+tar --zstd -xf ./backups/backup-openu-latest.tar.gz -C temp-restore
+
+# For gzip compressed backups (.tar.gz) - if you change compression format
+# tar -xzf ./backups/backup-openu-YYYY-MM-DDTHH-MM-SS.tar.gz -C temp-restore
 ```
 
 ### 3. Restore Specific Volumes
@@ -185,8 +196,11 @@ docker compose logs --tail=100 backup
 ### Verify Backup Integrity
 
 ```bash
-# List contents without extracting
-tar -tzf ./backups/backup-openu-latest.tar.gz
+# List contents without extracting (for zstd compressed backups)
+tar --zstd -tf ./backups/backup-openu-latest.tar.gz
+
+# Or for the actual .tar.zst file
+tar --zstd -tf ./backups/backup-openu-YYYY-MM-DDTHH-MM-SS.tar.zst
 ```
 
 ## Notifications (Optional)
@@ -220,6 +234,25 @@ AGE_PUBLIC_KEYS="age1xxxxxxxxxxxxx,age1yyyyyyyyyyyyy"
 
 ## Troubleshooting
 
+### "gzip: stdin: not in gzip format" Error
+
+If you see this error when trying to extract or list backup contents:
+
+```bash
+tar -tzf ./backups/backup-openu-latest.tar.gz
+# gzip: stdin: not in gzip format
+```
+
+**Solution**: The backup is using zstd compression, not gzip. Use the `--zstd` flag:
+
+```bash
+# List contents
+tar --zstd -tf ./backups/backup-openu-latest.tar.gz
+
+# Extract backup
+tar --zstd -xf ./backups/backup-openu-latest.tar.gz -C temp-restore
+```
+
 ### Backup Not Running
 
 1. Check if the backup container is running:
@@ -229,6 +262,7 @@ AGE_PUBLIC_KEYS="age1xxxxxxxxxxxxx,age1yyyyyyyyyyyyy"
    ```
 
 2. Check logs for errors:
+
    ```bash
    docker compose logs backup
    ```
@@ -249,9 +283,16 @@ BACKUP_RETENTION_DAYS="3"  # Keep fewer days
    GZIP_PARALLELISM="0"  # Use all CPU cores
    ```
 
-2. Use faster compression:
+2. Zstandard compression is already enabled (fastest option):
+
    ```env
-   BACKUP_COMPRESSION="zst"  # Zstandard is faster than gzip
+   BACKUP_COMPRESSION="zst"  # Already using Zstandard
+   ```
+
+   If you need even faster backups at the cost of slightly larger files:
+
+   ```env
+   BACKUP_COMPRESSION="none"  # No compression, tar only
    ```
 
 ## Security Considerations
