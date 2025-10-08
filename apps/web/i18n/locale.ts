@@ -29,7 +29,13 @@ export async function getUserLocale() {
       }
     }
   } catch (error) {
-    console.error('Failed to fetch user locale from database:', error);
+    // Check if this is a React postpone error (PPR bailout)
+    // These should bubble up naturally, not be caught
+    if (error && typeof error === 'object' && '$$typeof' in error && String(error.$$typeof) === 'Symbol(react.postpone)') {
+      throw error;
+    }
+    // Only log actual errors, not PPR postpones
+    // Silently fall through to default
   }
 
   // Fallback to cookie or default
