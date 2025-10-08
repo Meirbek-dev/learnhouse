@@ -4,8 +4,8 @@
   "type": "module",
   "pnpm": {
     "overrides": {
-      "@types/react": "19.2.1",
-      "@types/react-dom": "19.2.0"
+      "@types/react": "19.2.2",
+      "@types/react-dom": "19.2.1"
     }
   },
   "private": true,
@@ -63,7 +63,7 @@
     "nanoid": "^5.1.6",
     "next": "15.5.4",
     "next-auth": "5.0.0-beta.29",
-    "next-intl": "4.3.9",
+    "next-intl": "4.3.11",
     "nextjs-toploader": "^3.9.17",
     "prosemirror-state": "^1.4.3",
     "qrcode": "^1.5.4",
@@ -93,8 +93,8 @@
     "@tailwindcss/postcss": "4.1.14",
     "@types/node": "24.7.0",
     "@types/qrcode": "^1.5.5",
-    "@types/react": "19.2.1",
-    "@types/react-dom": "19.2.0",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.1",
     "@types/react-katex": "^3.0.4",
     "@types/styled-components": "^5.1.34",
     "@typescript-eslint/eslint-plugin": "^8.46.0",
