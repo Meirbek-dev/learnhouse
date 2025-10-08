@@ -1,7 +1,7 @@
 'use client';
 
-import { Crown, TrendingUp, TrendingDown, Minus, ChevronUp, ChevronDown } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { ChevronDown, ChevronUp, Crown, Minus, TrendingDown, TrendingUp } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
 import type { LeaderboardEntry } from '@/types/gamification';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -95,10 +95,7 @@ export function Leaderboard({ entries, currentUserId, userRank, className }: Lea
           <div className="rounded-lg bg-primary/5 p-3 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">{t('leaderboard.yourPosition')}</span>
-              <span className="font-bold">
-                {'#'}
-                {rankContext.rank}
-              </span>
+              <span className="font-bold">#{rankContext.rank}</span>
             </div>
             {rankContext.xpToNext > 0 && (
               <div className="mt-1 text-xs text-muted-foreground">
@@ -127,7 +124,7 @@ export function Leaderboard({ entries, currentUserId, userRank, className }: Lea
                   {showSeparator && (
                     <div className="my-3 flex items-center gap-2 text-xs text-muted-foreground">
                       <div className="h-px flex-1 bg-border" />
-                      <span>{'...'}</span>
+                      <span>...</span>
                       <div className="h-px flex-1 bg-border" />
                     </div>
                   )}
@@ -208,8 +205,8 @@ function LeaderboardEntryRow({
         avatar_url={entry.avatar_url || undefined}
         username={entry.username || undefined}
         userId={entry.user_id}
-        showProfilePopup={true}
-        showLevelBadge={true}
+        showProfilePopup
+        showLevelBadge
         gamificationProfile={{
           user_id: entry.user_id,
           org_id: 0,
@@ -243,7 +240,7 @@ function LeaderboardEntryRow({
           <p className="text-xs text-muted-foreground">@{entry.username}</p>
         )}
         <p className="text-xs text-muted-foreground">
-          {t('leaderboard.levelLabel', { level: entry.level })} {'•'}{' '}
+          {t('leaderboard.levelLabel', { level: entry.level })} •{' '}
           {t('leaderboard.xp', { xp: entry.total_xp.toLocaleString() })}
         </p>
       </div>

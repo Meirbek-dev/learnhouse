@@ -1,7 +1,7 @@
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@components/ui/avatar';
-import { getUriWithOrg, getBackendUrl } from '@services/config/config';
+import { getBackendUrl, getUriWithOrg } from '@services/config/config';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import type { UserGamificationProfile } from '@/types/gamification';

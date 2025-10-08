@@ -192,19 +192,15 @@ export const AVATAR_ACCESSORIES: Omit<AvatarAccessory, 'isUnlocked' | 'isEquippe
 
 // Helper functions
 export function getUnlockedFrames(level: number): AvatarFrame[] {
-  return AVATAR_FRAMES.filter((frame) => level >= frame.unlockLevel).map((frame) => ({
-    ...frame,
-    isUnlocked: true,
-    isEquipped: false,
-  }));
+  return AVATAR_FRAMES.filter((frame) => level >= frame.unlockLevel).map((frame) =>
+    Object.assign(frame, { isUnlocked: true, isEquipped: false }),
+  );
 }
 
 export function getUnlockedAccessories(level: number): AvatarAccessory[] {
-  return AVATAR_ACCESSORIES.filter((accessory) => level >= accessory.unlockLevel).map((accessory) => ({
-    ...accessory,
-    isUnlocked: true,
-    isEquipped: false,
-  }));
+  return AVATAR_ACCESSORIES.filter((accessory) => level >= accessory.unlockLevel).map((accessory) =>
+    Object.assign(accessory, { isUnlocked: true, isEquipped: false }),
+  );
 }
 
 export function getAllFrames(level: number): AvatarFrame[] {
@@ -229,7 +225,7 @@ export function getNextUnlock(level: number): AvatarUnlock | null {
     ...AVATAR_ACCESSORIES.map((a) => ({ type: 'accessory' as const, item: a, level: a.unlockLevel })),
   ];
 
-  const nextItem = allItems.filter((item) => item.level > level).sort((a, b) => a.level - b.level)[0];
+  const nextItem = allItems.filter((item) => item.level > level).toSorted((a, b) => a.level - b.level)[0];
 
   if (!nextItem) return null;
 
@@ -264,14 +260,18 @@ export function getUnlockProgress(level: number): {
 
 export function getRarityColor(rarity: 'common' | 'rare' | 'epic' | 'legendary'): string {
   switch (rarity) {
-    case 'common':
+    case 'common': {
       return 'text-gray-500';
-    case 'rare':
+    }
+    case 'rare': {
       return 'text-blue-500';
-    case 'epic':
+    }
+    case 'epic': {
       return 'text-purple-500';
-    case 'legendary':
+    }
+    case 'legendary': {
       return 'text-orange-500';
+    }
   }
 }
 

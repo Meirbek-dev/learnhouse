@@ -5,7 +5,7 @@
  * Core themes are loaded immediately, others are lazy-loaded.
  */
 
-import { defaultTheme, blackTheme } from './theme-definitions';
+import { blackTheme, defaultTheme } from './theme-definitions';
 import type { Theme } from './theme-utils';
 
 // Core themes loaded immediately (most commonly used)
@@ -87,7 +87,7 @@ export function preloadThemes(themeNames: string[]): void {
  */
 export function clearThemeCache(): void {
   // Keep only core themes
-  const entries = Array.from(themeCache.entries());
+  const entries = [...themeCache.entries()];
   themeCache.clear();
 
   // Re-add core themes
@@ -102,6 +102,6 @@ export function clearThemeCache(): void {
 export function getThemeCacheStats() {
   return {
     size: themeCache.size,
-    themes: Array.from(themeCache.keys()),
+    themes: [...themeCache.keys()],
   };
 }

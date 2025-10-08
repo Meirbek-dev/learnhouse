@@ -69,7 +69,7 @@ export function LoginBonusHandler({ orgId }: LoginBonusHandlerProps) {
   return (
     <div className="pointer-events-none fixed bottom-20 right-4 z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
       <div className="flex items-center gap-2 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2 text-sm font-medium text-white shadow-lg backdrop-blur-sm">
-        <span className="text-lg">{'✨'}</span>
+        <span className="text-lg">✨</span>
         <span>{t('loginBonus.dailyBonus', { xp: 10 })}</span>
       </div>
     </div>

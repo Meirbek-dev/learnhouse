@@ -46,10 +46,10 @@ export interface DailyLimitExceededError extends BaseGamificationError {
 export interface ValidationError extends BaseGamificationError {
   type: typeof ERROR_TYPES.VALIDATION_ERROR;
   field?: string;
-  validationErrors: Array<{
+  validationErrors: {
     field: string;
     message: string;
-  }>;
+  }[];
 }
 
 export interface ServerError extends BaseGamificationError {

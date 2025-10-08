@@ -1,7 +1,7 @@
 'use client';
 
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
-import { Trophy, TrendingUp, Flame, Zap, Calendar } from 'lucide-react';
+import { Calendar, Flame, TrendingUp, Trophy, Zap } from 'lucide-react';
 import { useLHSession } from '@/components/Contexts/LHSessionContext';
 import { GlowingLevelBadge, getLevelInfo } from '@/lib/gamification';
 import type { UserGamificationProfile } from '@/types/gamification';
@@ -241,7 +241,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
                     dailyXpProgress >= 100 ? 'text-orange-500' : 'text-foreground',
                   )}
                 >
-                  {profile.daily_xp_earned?.toLocaleString() || 0} {'/ 500'}
+                  {profile.daily_xp_earned?.toLocaleString() || 0} / 500
                 </span>
               </div>
               <div className="relative">

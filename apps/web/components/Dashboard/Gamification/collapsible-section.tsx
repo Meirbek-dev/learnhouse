@@ -8,10 +8,11 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { type ReactNode, useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 
 interface CollapsibleSectionProps {
   title: string;

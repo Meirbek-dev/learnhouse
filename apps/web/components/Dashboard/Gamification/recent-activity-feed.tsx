@@ -1,6 +1,6 @@
 'use client';
 
-import { GamificationCard, getXPSourceTheme, LoadingState, EmptyState } from '@/lib/gamification';
+import { EmptyState, GamificationCard, LoadingState, getXPSourceTheme } from '@/lib/gamification';
 import { animations } from '@/lib/gamification/design-tokens';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import type { XPTransaction } from '@/types/gamification';
@@ -75,11 +75,8 @@ export function RecentActivityFeed({ transactions, isLoading }: RecentActivityFe
                   <p className="text-muted-foreground text-xs">{timeAgo}</p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <span className="text-primary text-sm font-bold tabular-nums">
-                    {'+'}
-                    {transaction.amount}
-                  </span>
-                  <p className="text-muted-foreground text-xs">{'XP'}</p>
+                  <span className="text-primary text-sm font-bold tabular-nums">+{transaction.amount}</span>
+                  <p className="text-muted-foreground text-xs">XP</p>
                 </div>
               </motion.div>
             );

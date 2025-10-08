@@ -3,7 +3,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTheme } from '@/components/providers/theme-provider';
 import { getThemePreviewColors } from '@/lib/theme-color-utils';
-import { useMemo, useState, useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
 import { themes } from '@/lib/themes';

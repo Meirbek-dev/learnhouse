@@ -107,9 +107,9 @@ const CourseEndView: FC<CourseEndViewProps> = ({
 
           // Refetch gamification data to show course completion XP in recent activity
           if (gamificationContext?.refetch) {
-            gamificationContext.refetch().catch((err) =>
-              console.warn('Failed to refetch gamification after course completion:', err)
-            );
+            gamificationContext
+              .refetch()
+              .catch((error) => console.warn('Failed to refetch gamification after course completion:', error));
           }
         } else {
           console.warn('No certificate found. Result:', result);
@@ -132,9 +132,9 @@ const CourseEndView: FC<CourseEndViewProps> = ({
     if (isCourseCompleted && gamificationContext?.refetch) {
       // Small delay to ensure backend has processed course completion
       const timer = setTimeout(() => {
-        gamificationContext.refetch().catch((err) =>
-          console.warn('Failed to refetch gamification on CourseEndView mount:', err)
-        );
+        gamificationContext
+          .refetch()
+          .catch((error) => console.warn('Failed to refetch gamification on CourseEndView mount:', error));
       }, 1000);
       return () => clearTimeout(timer);
     }

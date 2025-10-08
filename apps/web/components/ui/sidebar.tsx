@@ -8,7 +8,7 @@ import { PanelLeftIcon } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import type { ComponentProps, CSSProperties } from 'react';
+import type { CSSProperties, ComponentProps } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-mobile';

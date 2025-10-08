@@ -1,16 +1,16 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import { GamificationProfileSection } from '@/components/Dashboard/Gamification';
 import { updatePreferencesAction } from '@/app/actions/gamification';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { Loader2, Save, Check } from 'lucide-react';
+import { Check, Loader2, Save } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 /**

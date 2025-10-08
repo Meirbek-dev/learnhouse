@@ -43,11 +43,11 @@ export interface GamificationPreferences {
 }
 
 // Partial preferences for updates
-export type PartialGamificationPreferences = {
+export interface PartialGamificationPreferences {
   notifications?: Partial<NotificationPreferences>;
   privacy?: Partial<PrivacyPreferences>;
   display?: Partial<DisplayPreferences>;
-};
+}
 
 // Default preferences factory - optimized for less intrusive experience
 export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {

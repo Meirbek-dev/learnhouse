@@ -1,4 +1,4 @@
-import type { UserGamificationProfile, StreakInfo } from './profile';
+import type { StreakInfo, UserGamificationProfile } from './profile';
 import type { OrganizationLeaderboard } from './leaderboard';
 import { z } from 'zod';
 

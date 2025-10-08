@@ -10,11 +10,8 @@
 
 'use client';
 
-import {
-  useXPNotificationQueue,
-  XPNotificationContainer,
-  type XPNotification,
-} from '@/lib/gamification/components/notification-queue';
+import { useXPNotificationQueue, XPNotificationContainer } from '@/lib/gamification/components/notification-queue';
+import type { XPNotification } from '@/lib/gamification/components/notification-queue';
 import { ParticleEffect } from '@/lib/gamification/components/level-indicators';
 import { AnimatedValue } from '@/lib/gamification/components/animated-value';
 import { useReducedData } from '@/hooks/use-reduced-data';
@@ -74,13 +71,13 @@ function XPToast({ notification, onDismiss }: XPToastProps) {
         {/* Text Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-1.5">
-            <span className="text-lg font-bold text-foreground">{'+'}</span>
+            <span className="text-lg font-bold text-foreground">+</span>
             <AnimatedValue
               value={notification.totalAmount}
               className={cn('text-lg font-bold tabular-nums', theme.color)}
               format={(v) => Math.round(v).toLocaleString()}
             />
-            <span className="text-sm text-muted-foreground">{'XP'}</span>
+            <span className="text-sm text-muted-foreground">XP</span>
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             <p className="text-xs text-muted-foreground truncate">
@@ -102,16 +99,14 @@ function XPToast({ notification, onDismiss }: XPToastProps) {
       {/* Level Up Indicator */}
       {notification.triggeredLevelUp && (
         <div className="border-t bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 px-4 py-2">
-          <p className="text-center text-sm font-bold text-white">
-            {'🎉'} {t('toast.levelUp')} {'🎉'}
-          </p>
+          <p className="text-center text-sm font-bold text-white">🎉 {t('toast.levelUp')} 🎉</p>
         </div>
       )}
 
       {/* Particle effect for level ups (skip if reduced data) */}
       {notification.triggeredLevelUp && !prefersReducedData && (
         <ParticleEffect
-          trigger={true}
+          trigger
           particleCount={15}
         />
       )}
