@@ -3,8 +3,8 @@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
+import { BookMinus, Calendar, FilePenLine, MoreVertical, Settings2, BookOpen } from 'lucide-react';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import { BookMinus, Calendar, FilePenLine, MoreVertical, Settings2 } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { deleteCourseFromBackend } from '@services/courses/courses';
 import { Card, CardContent, CardFooter } from '@components/ui/card';
@@ -103,7 +103,7 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
   const courseUrl = customLink || getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`);
 
   return (
-    <Card className="group bg-card relative min-h-96 w-full max-w-sm min-w-[280px] overflow-hidden border-0 p-0 shadow-sm transition-all duration-300 hover:shadow-xl">
+    <Card className="group bg-card relative flex h-full w-full max-w-sm min-w-[280px] flex-col overflow-hidden border-0 p-0 shadow-sm transition-all duration-200 hover:shadow-lg">
       <AdminEditOptions
         course={course}
         orgSlug={orgslug}
@@ -118,52 +118,43 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
       >
         <div className="bg-muted relative aspect-video w-full overflow-hidden">
           <img
-            className="h-full w-full object-cover transition-all duration-300 group-hover:scale-110"
+            className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
             src={thumbnailImage}
             alt={course.name}
             loading="lazy"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
-          {/* Course metadata overlay */}
-          <div className="absolute right-2 bottom-2 left-2 flex items-end justify-between">
-            {course.update_date ? (
-              <Badge
-                variant="secondary"
-                className="bg-background/90 text-xs backdrop-blur-sm"
-              >
-                <Calendar className="mr-1 h-3 w-3" />
-                {t('updated')}{' '}
-                {new Date(course.update_date).toLocaleDateString(locale, {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
-              </Badge>
-            ) : null}
-          </div>
+          {course.update_date ? (
+            <Badge
+              variant="secondary"
+              className="bg-background/90 absolute right-2 bottom-2 text-xs backdrop-blur-sm"
+            >
+              <Calendar className="mr-1 h-3 w-3" />
+              {new Date(course.update_date).toLocaleDateString(locale, {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}
+            </Badge>
+          ) : null}
         </div>
       </Link>
 
-      <CardContent className="space-y-2 px-4 pb-2">
+      <CardContent className="flex flex-1 flex-col gap-1 px-4 pb-2">
         {/* Course Title and Description */}
-        <div className="space-y-2">
+        <div className="flex-1 space-y-1">
           <Link
             href={courseUrl}
             className="group-hover:text-primary block transition-colors"
           >
-            <h3 className="line-clamp-2 truncate text-lg leading-tight font-semibold tracking-tight">{course.name}</h3>
+            <h3 className="line-clamp-2 font-semibold leading-tight tracking-tight">{course.name}</h3>
           </Link>
-          <p className="text-muted-foreground line-clamp-3 text-sm leading-relaxed">{course.description}</p>
+          <p className="text-muted-foreground line-clamp-2 text-sm">{course.description}</p>
         </div>
 
         {/* Authors Section */}
         {displayedAuthors.length > 0 && (
           <div className="flex items-center gap-2">
             <div className="flex items-center -space-x-2">
-              <span className="text-muted-foreground pr-4 text-xs">
-                {t('authorLabel', { count: activeAuthors.length })}
-              </span>
               {displayedAuthors.map((author, idx) => (
                 <div
                   key={author.user.user_uuid}
@@ -184,35 +175,33 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
                   />
                 </div>
               ))}
-              {hasMoreAuthors ? (
-                <div className="relative z-0">
-                  <div className="border-background bg-muted text-muted-foreground hover:bg-muted/80 flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-medium transition-colors">
-                    +{remainingAuthorsCount}
-                  </div>
+              {hasMoreAuthors && (
+                <div className="border-background bg-muted text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-medium">
+                  +{remainingAuthorsCount}
                 </div>
-              ) : null}
+              )}
             </div>
+            <span className="text-muted-foreground text-xs">{t('authorLabel', { count: activeAuthors.length })}</span>
           </div>
         )}
       </CardContent>
 
-      <CardFooter className="p-4 pt-0">
+      <CardFooter className="mt-auto border-t bg-muted/30 p-3">
         {isEnrolled ? (
-          <div className="w-full space-y-2">
-            <div className="text-muted-foreground flex items-center justify-between text-xs">
-              <span>{t('progress', { defaultValue: 'Progress' })}</span>
-              <span className="font-semibold">{progressPercentage}%</span>
-            </div>
-            <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
-              <div
-                className="bg-primary h-full transition-all duration-300"
-                style={{ width: `${progressPercentage}%` }}
-              />
+          <div className="w-full space-y-1.5">
+            <div className="flex items-center gap-2">
+              <div className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full">
+                <div
+                  className="bg-primary h-full transition-all duration-300"
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
+              <span className="text-muted-foreground text-xs font-medium">{progressPercentage}%</span>
             </div>
             <Button
               asChild
               size="sm"
-              className="group-hover:bg-primary/90 w-full transition-all duration-200"
+              className="w-full"
             >
               <Link href={courseUrl}>{t('continueLearning', { defaultValue: 'Continue Learning' })}</Link>
             </Button>
@@ -221,7 +210,7 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
           <Button
             asChild
             size="sm"
-            className="group-hover:bg-primary/90 w-full transition-all duration-200"
+            className="w-full"
           >
             <Link href={courseUrl}>{t('startLearning')}</Link>
           </Button>
