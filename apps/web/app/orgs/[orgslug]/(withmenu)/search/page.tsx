@@ -24,19 +24,19 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const searchType = Array.isArray(searchParams.type) ? searchParams.type[0] : searchParams.type || 'all';
 
   // Build dynamic title and description based on search parameters
-  let title = `${t('search')} — ${org.name}`;
+  let title = `${t('search')} — МООК`;
   let description = `${t('searchContent')} ${org.name}. ${t('discoverCourses')}, ${t('collections')}, ${t('andUsers')}.`;
 
   if (searchQuery) {
-    title = `${t('searchResults')} "${searchQuery}" — ${org.name}`;
+    title = `${t('searchResults')} "${searchQuery}" — МООК`;
     description = `${t('searchResultsFor')} "${searchQuery}" ${t('in')} ${org.name}. ${t('findCourses')}, ${t('collections')}, ${t('andUsers')}.`;
   }
 
   if (searchType !== 'all' && searchType) {
     const typeLabel = t(searchType as 'courses' | 'collections' | 'users');
     title = searchQuery
-      ? `${typeLabel} ${t('searchResults')} "${searchQuery}" — ${org.name}`
-      : `${typeLabel} — ${org.name}`;
+      ? `${typeLabel} ${t('searchResults')} "${searchQuery}" — МООК`
+      : `${typeLabel} — МООК`;
     description = searchQuery
       ? `${t('searchResultsFor')} "${searchQuery}" ${t('in')} ${typeLabel.toLowerCase()} ${t('at')} ${org.name}.`
       : `${t('browse')} ${typeLabel.toLowerCase()} ${t('at')} ${org.name}.`;

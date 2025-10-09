@@ -20,7 +20,7 @@ export async function generateMetadata(params: MetadataProps): Promise<Metadata>
   });
 
   return {
-    title: t('title', { orgName: org.name }),
+    title: t('title', { orgName: "МООК" }),
   };
 }
 
