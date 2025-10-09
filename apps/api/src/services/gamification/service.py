@@ -388,12 +388,14 @@ def get_leaderboard_read(db: Session, org_id: int, limit: int = 10, offset: int 
         avatar_url = None
         if user and user.avatar_image:
             # Check if it's already a full URL (external avatar)
-            if user.avatar_image.startswith(('http://', 'https://')):
+            if user.avatar_image.startswith(("http://", "https://")):
                 avatar_url = user.avatar_image
             else:
                 # Construct the media directory path
                 # Format: content/users/{user_uuid}/avatars/{filename}
-                avatar_url = f"content/users/{user.user_uuid}/avatars/{user.avatar_image}"
+                avatar_url = (
+                    f"content/users/{user.user_uuid}/avatars/{user.avatar_image}"
+                )
 
         entries.append(
             LeaderboardEntryRead(

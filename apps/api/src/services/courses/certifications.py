@@ -334,17 +334,13 @@ async def create_certificate_user(
             # Use hash of idempotency key for deterministic but unique prefix
             import hashlib
 
-            prefix_hash = (
-                hashlib.md5(idempotency_key.encode()).hexdigest()[:2].upper()
-            )
+            prefix_hash = hashlib.md5(idempotency_key.encode()).hexdigest()[:2].upper()
         else:
             # Generate random 2-letter prefix
             prefix_hash = "".join(random.choices(string.ascii_uppercase, k=2))
 
         # Use timestamp for better uniqueness
-        timestamp_suffix = f"{int(now.timestamp())}"[
-            -6:
-        ]  # Last 6 digits of timestamp
+        timestamp_suffix = f"{int(now.timestamp())}"[-6:]  # Last 6 digits of timestamp
 
         user_certification_uuid = f"{prefix_hash}-{current_year}{current_month:02d}{current_day:02d}-{user_uuid_short}-{timestamp_suffix}"
 
@@ -369,10 +365,7 @@ async def create_certificate_user(
 
         except Exception as db_exc:
             # Handle unique constraint violations gracefully
-            if (
-                "unique" in str(db_exc).lower()
-                or "duplicate" in str(db_exc).lower()
-            ):
+            if "unique" in str(db_exc).lower() or "duplicate" in str(db_exc).lower():
                 # Race condition occurred, try to get the existing certificate
                 db_session.rollback()
 
@@ -403,7 +396,7 @@ async def create_certificate_user(
         db_session.rollback()
         logger.error(
             f"Failed to create certificate for user {user_id} and certification {certification_id}: {exc}",
-            exc_info=True
+            exc_info=True,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -458,7 +451,7 @@ async def get_user_certificates_for_course(
         # Don't fail the request on certificate creation errors; just log and proceed to list.
         logger.error(
             f"check_course_completion_and_create_certificate failed during get_user_certificates_for_course: {err}",
-            exc_info=True
+            exc_info=True,
         )
 
     # Get all certifications for this course

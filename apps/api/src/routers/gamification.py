@@ -116,7 +116,7 @@ async def get_unified_dashboard(
         return DashboardRead(
             profile=profile,
             recent_transactions=recent_txs,
-            user_rank=data.get("user_rank")
+            user_rank=data.get("user_rank"),
         )
 
     except Exception as e:
