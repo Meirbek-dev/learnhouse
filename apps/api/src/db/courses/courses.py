@@ -170,7 +170,7 @@ class FullCourseReadWithTrail(PydanticStrictBaseModel):
     org_id: int = PydanticField(default=None)
     authors: list[AuthorWithRole]
     chapters: list[ChapterRead]
-    trail: TrailRead | None
+    trail: TrailRead | None = None
 
     name: str
     description: str | None = None

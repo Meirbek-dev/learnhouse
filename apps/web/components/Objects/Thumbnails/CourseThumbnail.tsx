@@ -3,8 +3,8 @@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
-import { BookMinus, Calendar, FilePenLine, MoreVertical, Settings2 } from 'lucide-react';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import { BookMinus, Calendar, FilePenLine, MoreVertical, Settings2 } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { deleteCourseFromBackend } from '@services/courses/courses';
 import { Card, CardContent, CardFooter } from '@components/ui/card';

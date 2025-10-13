@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ orgslug: 
 
   return {
     title: `${t('metaTitle')} — МООК`,
-    description: t('metaDescription', { orgName: "МООК" }),
+    description: t('metaDescription', { orgName: 'МООК' }),
     robots: {
       index: true,
       follow: true,
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ orgslug: 
     },
     openGraph: {
       title: `${t('metaTitle')} — МООК`,
-      description: t('metaDescription', { orgName: "МООК" }),
+      description: t('metaDescription', { orgName: 'МООК' }),
       type: 'website',
       images: org.thumbnail_image
         ? [

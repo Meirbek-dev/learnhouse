@@ -31,7 +31,12 @@ export async function getUserLocale() {
   } catch (error) {
     // Check if this is a React postpone error (PPR bailout)
     // These should bubble up naturally, not be caught
-    if (error && typeof error === 'object' && '$$typeof' in error && String(error.$$typeof) === 'Symbol(react.postpone)') {
+    if (
+      error &&
+      typeof error === 'object' &&
+      '$$typeof' in error &&
+      String(error.$$typeof) === 'Symbol(react.postpone)'
+    ) {
       throw error;
     }
     // Only log actual errors, not PPR postpones

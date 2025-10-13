@@ -204,9 +204,9 @@ class ProfileRead(PydanticStrictBaseModel):
     longest_login_streak: int
     learning_streak: int
     longest_learning_streak: int
-    last_xp_award_date: datetime | None
-    last_login_date: datetime | None
-    last_learning_date: datetime | None
+    last_xp_award_date: datetime | None = None
+    last_login_date: datetime | None = None
+    last_learning_date: datetime | None = None
     daily_xp_earned: int
     total_activities_completed: int
     total_courses_completed: int
@@ -223,7 +223,7 @@ class TransactionRead(PydanticStrictBaseModel):
     org_id: int
     amount: int
     source: XPSource
-    source_id: str | None
+    source_id: str | None = None
     triggered_level_up: bool
     previous_level: int
     created_at: datetime

@@ -1,3 +1,6 @@
+import { FlatCompat } from '@eslint/eslintrc';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import unusedImports from 'eslint-plugin-unused-imports';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
@@ -7,7 +10,18 @@ import tsParser from '@typescript-eslint/parser';
 import reactPlugin from 'eslint-plugin-react';
 import js from '@eslint/js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+});
+
 export default [
+  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+  {
+    ignores: ['node_modules/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts'],
+  },
   {
     ignores: ['node_modules/', '.next/', '.next/**'],
   },
@@ -16,10 +30,10 @@ export default [
     files: ['**/*.{js,jsx,mjs,cjs}'],
     plugins: {
       '@next/next': nextPlugin,
-      react: reactPlugin,
+      'react': reactPlugin,
       'react-hooks': reactHooksPlugin,
       'unused-imports': unusedImports,
-      tailwindcss: tailwind,
+      'tailwindcss': tailwind,
     },
     languageOptions: {
       parserOptions: {
@@ -64,10 +78,10 @@ export default [
     plugins: {
       '@typescript-eslint': tsPlugin,
       '@next/next': nextPlugin,
-      react: reactPlugin,
+      'react': reactPlugin,
       'react-hooks': reactHooksPlugin,
       'unused-imports': unusedImports,
-      tailwindcss: tailwind,
+      'tailwindcss': tailwind,
     },
     languageOptions: {
       parser: tsParser,
