@@ -21,28 +21,22 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children, defaultThemeName = 'default', userTheme }: ThemeProviderProps) {
+  // Initialize theme name and apply theme immediately during initialization
   const [themeName, setThemeName] = useState<string>(() => {
-    // Initialize with stored theme or fallback
     if (typeof window !== 'undefined') {
-      return getStoredTheme() || userTheme || defaultThemeName;
+      const effectiveTheme = getStoredTheme() || userTheme || defaultThemeName;
+      const initialTheme = getTheme(effectiveTheme);
+      applyTheme(initialTheme);
+      return effectiveTheme;
     }
     return userTheme || defaultThemeName;
   });
-  const [isLoading, setIsLoading] = useState(true);
+
+  const [isLoading, setIsLoading] = useState(false);
   const serverSyncTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Memoize theme object to prevent unnecessary re-renders
   const theme = useMemo(() => getTheme(themeName), [themeName]);
-
-  // Initialize theme on mount
-  useEffect(() => {
-    const effectiveTheme = getStoredTheme() || userTheme || defaultThemeName;
-    const initialTheme = getTheme(effectiveTheme);
-
-    applyTheme(initialTheme);
-    setThemeName(effectiveTheme);
-    setIsLoading(false);
-  }, [defaultThemeName, userTheme]);
 
   // Track pending theme sync
   const pendingThemeSyncRef = useRef<string | null>(null);

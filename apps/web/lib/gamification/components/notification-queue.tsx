@@ -129,7 +129,11 @@ export function useXPNotificationQueue(options: XPNotificationQueueOptions = {})
 
   // Update visible list whenever queue changes
   useEffect(() => {
-    setVisible(queue.slice(0, opts.maxVisible));
+    // Use setTimeout to break out of render phase
+    const timeout = setTimeout(() => {
+      setVisible(queue.slice(0, opts.maxVisible));
+    }, 0);
+    return () => clearTimeout(timeout);
   }, [queue, opts.maxVisible]);
 
   // Cleanup timeouts on unmount
@@ -310,15 +314,20 @@ export function useContextualPosition(
     const isTop = rect.top < viewportHeight / 2;
     const isLeft = rect.left < viewportWidth / 2;
 
+    let newPosition: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
     if (isTop && isLeft) {
-      setPosition('bottom-right');
+      newPosition = 'bottom-right';
     } else if (isTop && !isLeft) {
-      setPosition('bottom-left');
+      newPosition = 'bottom-left';
     } else if (!isTop && isLeft) {
-      setPosition('top-right');
+      newPosition = 'top-right';
     } else {
-      setPosition('top-left');
+      newPosition = 'top-left';
     }
+
+    // Use setTimeout to break out of render phase
+    const timeout = setTimeout(() => setPosition(newPosition), 0);
+    return () => clearTimeout(timeout);
   }, [contextElement]);
 
   return position;

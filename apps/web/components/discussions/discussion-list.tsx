@@ -77,18 +77,27 @@ const transformDiscussionToPost = (discussion: any) => {
 
 export default function DiscussionList({ initialPosts, currentUser, courseUuid, onMutate }: DiscussionListProps) {
   const t = useTranslations('CoursePage');
-  const [posts, setPosts] = useState<any[]>([]);
+  // Use lazy initialization to transform initial posts
+  const [posts, setPosts] = useState<any[]>(() => {
+    if (Array.isArray(initialPosts)) {
+      return initialPosts.map(transformDiscussionToPost);
+    }
+    return [];
+  });
   const org = useOrg() as any;
   const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
 
-  // Transform initial posts on component mount and when initialPosts changes
+  // Update posts when initialPosts changes
   useEffect(() => {
     if (Array.isArray(initialPosts)) {
       const transformedPosts = initialPosts.map(transformDiscussionToPost);
-      setPosts(transformedPosts);
+      // Use setTimeout to break out of render phase
+      const timeout = setTimeout(() => setPosts(transformedPosts), 0);
+      return () => clearTimeout(timeout);
     } else {
-      setPosts([]);
+      const timeout = setTimeout(() => setPosts([]), 0);
+      return () => clearTimeout(timeout);
     }
   }, [initialPosts]);
 

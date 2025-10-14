@@ -68,7 +68,6 @@ LearnHouse uses a number of open source projects to work properly:
 - **Radix UI** - Accessible UI Components
 - **Tiptap** - An editor framework and headless wrapper around ProseMirror
 - **FastAPI** - A high performance, async API framework for Python
-- **YJS** - Shared data types for building collaborative software
 - **PostgreSQL** - SQL Database
 - **Redis** - In-Memory Database
 - **LangChain** - LangChain is a framework for developing applications powered by language models

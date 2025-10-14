@@ -29,7 +29,6 @@ Initiate a dev environment, please check the official guide
 - **TailwindCSS** - Styling
 - **Radix UI** - Accessible UI Components
 - **Tiptap** - An editor framework and headless wrapper around ProseMirror
-- **YJS** - Shared data types for building collaborative software
 - **PostgreSQL** - SQL Database
 - **React** - duh
 

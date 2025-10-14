@@ -182,7 +182,7 @@ const OrgScripts: React.FC = () => {
         console.error(t('failedToLoadScript', { scriptName }), error);
       }
     },
-    [t, org?.id, org?.slug, cleanupExistingScript, isScriptLoaded, sanitizeScriptContent],
+    [t, org, cleanupExistingScript, isScriptLoaded, sanitizeScriptContent],
   );
 
   useEffect(() => {

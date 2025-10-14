@@ -46,14 +46,53 @@ interface OnboardingStep {
 
 const Onboarding: FC = () => {
   const t = useTranslations('Components.Onboarding');
+
+  const [isOnboardingComplete, setIsOnboardingComplete] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return localStorage.getItem('isOnboardingCompleted') === 'true';
+  });
+
+  const [isTemporarilyClosed, setIsTemporarilyClosed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const temporarilyClosed = localStorage.getItem('onboardingTemporarilyClosed') === 'true';
+    const lastClosedTime = localStorage.getItem('onboardingLastClosedTime');
+
+    if (temporarilyClosed && lastClosedTime) {
+      const hoursSinceClosed = (Date.now() - Number.parseInt(lastClosedTime, 10)) / (1000 * 60 * 60);
+      if (hoursSinceClosed >= 24) {
+        // Reset temporary closure after 24 hours
+        localStorage.removeItem('onboardingTemporarilyClosed');
+        localStorage.removeItem('onboardingLastClosedTime');
+        return false;
+      }
+    }
+    return temporarilyClosed;
+  });
+
   const [currentStep, setCurrentStep] = useState(() => {
     // Initialize with saved step or 0
+    if (typeof window === 'undefined') return 0;
     const savedStep = localStorage.getItem('onboardingLastStep');
     return savedStep ? Number.parseInt(savedStep, 10) : 0;
   });
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isOnboardingComplete, setIsOnboardingComplete] = useState(true);
-  const [_isTemporarilyClosed, setIsTemporarilyClosed] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(() => {
+    // Show modal only if onboarding is not completed and not temporarily closed
+    if (typeof window === 'undefined') return false;
+    const isCompleted = localStorage.getItem('isOnboardingCompleted') === 'true';
+    const isClosed = localStorage.getItem('onboardingTemporarilyClosed') === 'true';
+    const lastClosedTime = localStorage.getItem('onboardingLastClosedTime');
+
+    if (isClosed && lastClosedTime) {
+      const hoursSinceClosed = (Date.now() - Number.parseInt(lastClosedTime, 10)) / (1000 * 60 * 60);
+      if (hoursSinceClosed >= 24) {
+        // Reset temporary closure after 24 hours
+        localStorage.removeItem('onboardingTemporarilyClosed');
+        localStorage.removeItem('onboardingLastClosedTime');
+        return !isCompleted;
+      }
+    }
+    return !isCompleted && !isClosed;
+  });
   const isMobile = useIsMobile();
   const router = useRouter();
   const org = useOrg() as any;
@@ -176,30 +215,6 @@ const Onboarding: FC = () => {
       ],
     },
   ];
-
-  useEffect(() => {
-    // Check both completion and temporary closure status
-    const isOnboardingCompleted = localStorage.getItem('isOnboardingCompleted');
-    const temporarilyClosed = localStorage.getItem('onboardingTemporarilyClosed');
-    const lastClosedTime = localStorage.getItem('onboardingLastClosedTime');
-
-    setIsOnboardingComplete(isOnboardingCompleted === 'true');
-    setIsTemporarilyClosed(temporarilyClosed === 'true');
-
-    // If temporarily closed, check if 24 hours have passed
-    if (temporarilyClosed === 'true' && lastClosedTime) {
-      const hoursSinceClosed = (Date.now() - Number.parseInt(lastClosedTime, 10)) / (1000 * 60 * 60);
-      if (hoursSinceClosed >= 24) {
-        // Reset temporary closure after 24 hours
-        localStorage.removeItem('onboardingTemporarilyClosed');
-        localStorage.removeItem('onboardingLastClosedTime');
-        setIsTemporarilyClosed(false);
-      }
-    }
-
-    // Show modal if onboarding is not completed and not temporarily closed
-    setIsModalOpen(!(isOnboardingCompleted || temporarilyClosed));
-  }, []);
 
   // Update stored step whenever currentStep changes
   useEffect(() => {

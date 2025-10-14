@@ -95,6 +95,77 @@ interface Rights {
   };
 }
 
+// PermissionSection Component - moved outside to avoid recreation on each render
+interface PermissionSectionProps {
+  title: string;
+  icon: any;
+  section: keyof Rights;
+  permissions: string[];
+  rights: Rights;
+  handleRightChange: (section: keyof Rights, action: string, value: boolean) => void;
+  handleSelectAll: (section: keyof Rights, value: boolean) => void;
+  getPermissionLabel: (permission: string) => string;
+  t: (key: string) => string;
+}
+
+const PermissionSection = ({
+  title,
+  icon: Icon,
+  section,
+  permissions,
+  rights,
+  handleRightChange,
+  handleSelectAll,
+  getPermissionLabel,
+  t,
+}: PermissionSectionProps) => {
+  const sectionRights = rights[section] as any;
+  const allSelected = permissions.every((perm) => sectionRights[perm]);
+  const someSelected = permissions.some((perm) => sectionRights[perm]) && !allSelected;
+
+  return (
+    <div className="mb-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center space-x-2">
+          <Icon className="h-4 w-4 text-gray-500" />
+          <h3 className="text-sm font-semibold text-gray-800 sm:text-base">{title}</h3>
+        </div>
+        <button
+          type="button"
+          onClick={() => handleSelectAll(section, !allSelected)}
+          className="flex items-center space-x-2 self-start text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 sm:self-auto"
+        >
+          {allSelected ? (
+            <CheckSquare className="h-4 w-4" />
+          ) : someSelected ? (
+            <Square className="h-4 w-4" />
+          ) : (
+            <Square className="h-4 w-4" />
+          )}
+          <span className="hidden sm:inline">{allSelected ? t('deselectAll') : t('selectAll')}</span>
+          <span className="sm:hidden">{allSelected ? t('deselect') : t('select')}</span>
+        </button>
+      </div>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {permissions.map((permission) => (
+          <label
+            key={permission}
+            className="flex cursor-pointer items-center space-x-2 rounded-md p-2 transition-colors hover:bg-gray-50"
+          >
+            <input
+              type="checkbox"
+              checked={rights[section]?.[permission as keyof (typeof rights)[typeof section]]}
+              onChange={(e) => handleRightChange(section, permission, e.target.checked)}
+              className="rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700 capitalize">{getPermissionLabel(permission)}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // Zod schema for form validation
 const createRoleFormSchema = (t: (key: string, values?: any) => string) =>
   z.object({
@@ -532,64 +603,6 @@ function EditRole(props: EditRoleProps) {
     return permissionMap[permission] || permission.replace('action_', '').replace('_', ' ');
   };
 
-  const PermissionSection = ({
-    title,
-    icon: Icon,
-    section,
-    permissions,
-  }: {
-    title: string;
-    icon: any;
-    section: keyof Rights;
-    permissions: string[];
-  }) => {
-    const sectionRights = rights[section] as any;
-    const allSelected = permissions.every((perm) => sectionRights[perm]);
-    const someSelected = permissions.some((perm) => sectionRights[perm]) && !allSelected;
-
-    return (
-      <div className="mb-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-        <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4 text-gray-500" />
-            <h3 className="text-sm font-semibold text-gray-800 sm:text-base">{title}</h3>
-          </div>
-          <button
-            type="button"
-            onClick={() => handleSelectAll(section, !allSelected)}
-            className="flex items-center space-x-2 self-start text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 sm:self-auto"
-          >
-            {allSelected ? (
-              <CheckSquare className="h-4 w-4" />
-            ) : someSelected ? (
-              <Square className="h-4 w-4" />
-            ) : (
-              <Square className="h-4 w-4" />
-            )}
-            <span className="hidden sm:inline">{allSelected ? t('deselectAll') : t('selectAll')}</span>
-            <span className="sm:hidden">{allSelected ? t('deselect') : t('select')}</span>
-          </button>
-        </div>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {permissions.map((permission) => (
-            <label
-              key={permission}
-              className="flex cursor-pointer items-center space-x-2 rounded-md p-2 transition-colors hover:bg-gray-50"
-            >
-              <input
-                type="checkbox"
-                checked={rights[section]?.[permission as keyof (typeof rights)[typeof section]]}
-                onChange={(e) => handleRightChange(section, permission, e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
-              />
-              <span className="text-sm text-gray-700 capitalize">{getPermissionLabel(permission)}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="mx-auto max-w-6xl px-2 py-3 sm:px-0">
       <Form {...form}>
@@ -667,6 +680,11 @@ function EditRole(props: EditRoleProps) {
                   'action_delete',
                   'action_delete_own',
                 ]}
+                rights={rights}
+                handleRightChange={handleRightChange}
+                handleSelectAll={handleSelectAll}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
 
               <PermissionSection
@@ -674,6 +692,11 @@ function EditRole(props: EditRoleProps) {
                 icon={Users}
                 section="users"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
+                rights={rights}
+                handleRightChange={handleRightChange}
+                handleSelectAll={handleSelectAll}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
 
               <PermissionSection
@@ -681,6 +704,11 @@ function EditRole(props: EditRoleProps) {
                 icon={UserCheck}
                 section="usergroups"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
+                rights={rights}
+                handleRightChange={handleRightChange}
+                handleSelectAll={handleSelectAll}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
 
               <PermissionSection
@@ -688,6 +716,11 @@ function EditRole(props: EditRoleProps) {
                 icon={FolderOpen}
                 section="collections"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
+                rights={rights}
+                handleRightChange={handleRightChange}
+                handleSelectAll={handleSelectAll}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
 
               <PermissionSection
@@ -695,6 +728,11 @@ function EditRole(props: EditRoleProps) {
                 icon={Building}
                 section="organizations"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
+                rights={rights}
+                handleRightChange={handleRightChange}
+                handleSelectAll={handleSelectAll}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
 
               <PermissionSection
@@ -702,6 +740,11 @@ function EditRole(props: EditRoleProps) {
                 icon={FileText}
                 section="coursechapters"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
+                rights={rights}
+                handleRightChange={handleRightChange}
+                handleSelectAll={handleSelectAll}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
 
               <PermissionSection
@@ -709,6 +752,11 @@ function EditRole(props: EditRoleProps) {
                 icon={Activity}
                 section="activities"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
+                rights={rights}
+                handleRightChange={handleRightChange}
+                handleSelectAll={handleSelectAll}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
 
               <PermissionSection
@@ -716,6 +764,11 @@ function EditRole(props: EditRoleProps) {
                 icon={Shield}
                 section="roles"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
+                rights={rights}
+                handleRightChange={handleRightChange}
+                handleSelectAll={handleSelectAll}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
 
               <PermissionSection
@@ -723,6 +776,11 @@ function EditRole(props: EditRoleProps) {
                 icon={Monitor}
                 section="dashboard"
                 permissions={['action_access']}
+                rights={rights}
+                handleRightChange={handleRightChange}
+                handleSelectAll={handleSelectAll}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
             </div>
           </div>

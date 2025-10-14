@@ -187,8 +187,14 @@ const ActivityClient = (props: ActivityClientProps) => {
   const [bgColor, setBgColor] = useState('bg-white');
   const [assignment, setAssignment] = useState(null) as any;
   const [_markStatusButtonActive, setMarkStatusButtonActive] = useState(false);
-  const [isFocusMode, setIsFocusMode] = useState(false);
-  const isInitialRender = useRef(true);
+  const [isFocusMode, setIsFocusMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('globalFocusMode');
+      return saved === 'true';
+    }
+    return false;
+  });
+  const [isInitialRender, setIsInitialRender] = useState(true);
   const { contributorStatus } = useContributorStatus(courseuuid);
   const router = useRouter();
   const t = useTranslations('ActivityPage');
@@ -275,15 +281,7 @@ const ActivityClient = (props: ActivityClientProps) => {
     router.push(`${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`);
   };
 
-  // Initialize focus mode from localStorage
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('globalFocusMode');
-      setIsFocusMode(saved === 'true');
-    }
-  }, []);
-
-  // Save focus mode to localStorage
+  // Save focus mode to localStorage when it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('globalFocusMode', isFocusMode.toString());
@@ -293,9 +291,13 @@ const ActivityClient = (props: ActivityClientProps) => {
           detail: { isFocusMode },
         }),
       );
-      isInitialRender.current = false;
+      // Mark as no longer initial render after first change
+      if (isInitialRender) {
+        const timeout = setTimeout(() => setIsInitialRender(false), 0);
+        return () => clearTimeout(timeout);
+      }
     }
-  }, [isFocusMode]);
+  }, [isFocusMode, isInitialRender]);
 
   function getChapterNameByActivityId(course: any, activity_id: number) {
     for (let i = 0; i < course.chapters.length; i += 1) {
@@ -309,25 +311,38 @@ const ActivityClient = (props: ActivityClientProps) => {
     }
     return null; // return null if no matching activity is found
   }
-  const getAssignmentUI = useCallback(async () => {
-    if (!activity?.activity_uuid) return;
-    const assignment = await getAssignmentFromActivityUUID(activity.activity_uuid, access_token);
-    setAssignment(assignment.data);
-  }, [activity?.activity_uuid, access_token, setAssignment]);
 
+  // Load assignment data when activity changes
+  useEffect(() => {
+    const loadAssignment = async () => {
+      if (!activity?.activity_uuid) return;
+      const assignment = await getAssignmentFromActivityUUID(activity.activity_uuid, access_token);
+      setAssignment(assignment.data);
+    };
+
+    if (activity?.activity_type === 'TYPE_ASSIGNMENT') {
+      // Use setTimeout to break out of render phase
+      const timeout = setTimeout(() => setMarkStatusButtonActive(false), 0);
+      loadAssignment();
+      return () => clearTimeout(timeout);
+    }
+  }, [activity, access_token]);
+
+  // Derive bgColor from activity type and focus mode
   useEffect(() => {
     if (!activity) return;
 
-    if (activity.activity_type === 'TYPE_DYNAMIC') {
-      setBgColor(isFocusMode ? 'bg-white' : 'bg-white soft-shadow');
-    } else if (activity.activity_type === 'TYPE_ASSIGNMENT') {
-      setMarkStatusButtonActive(false);
-      setBgColor(isFocusMode ? 'bg-white' : 'bg-white soft-shadow');
-      getAssignmentUI();
-    } else {
-      setBgColor(isFocusMode ? 'bg-zinc-950' : 'bg-zinc-950 soft-shadow');
+    let newBgColor = 'bg-zinc-950 soft-shadow';
+    if (activity.activity_type === 'TYPE_DYNAMIC' || activity.activity_type === 'TYPE_ASSIGNMENT') {
+      newBgColor = isFocusMode ? 'bg-white' : 'bg-white soft-shadow';
+    } else if (isFocusMode) {
+      newBgColor = 'bg-zinc-950';
     }
-  }, [activity, isFocusMode, getAssignmentUI]);
+
+    // Use setTimeout to break out of render phase
+    const timeout = setTimeout(() => setBgColor(newBgColor), 0);
+    return () => clearTimeout(timeout);
+  }, [activity, isFocusMode]);
 
   return (
     <CourseProvider courseuuid={course?.course_uuid}>
@@ -336,7 +351,7 @@ const ActivityClient = (props: ActivityClientProps) => {
           {isFocusMode ? (
             <AnimatePresence>
               <motion.div
-                initial={isInitialRender.current ? false : { opacity: 0 }}
+                initial={isInitialRender ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
@@ -344,7 +359,7 @@ const ActivityClient = (props: ActivityClientProps) => {
               >
                 {/* Focus Mode Top Bar */}
                 <motion.div
-                  initial={isInitialRender.current ? false : { y: -100 }}
+                  initial={isInitialRender ? false : { y: -100 }}
                   animate={{ y: 0 }}
                   exit={{ y: -100 }}
                   transition={{ duration: 0.3 }}
@@ -354,7 +369,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                     <div className="flex h-14 items-center justify-between">
                       {/* Progress Indicator - Moved to left */}
                       <motion.div
-                        initial={isInitialRender.current ? false : { opacity: 0, x: -20 }}
+                        initial={isInitialRender ? false : { opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
                         className="flex items-center space-x-2"
@@ -421,7 +436,7 @@ const ActivityClient = (props: ActivityClientProps) => {
 
                       {/* Center Course Info */}
                       <motion.div
-                        initial={isInitialRender.current ? false : { opacity: 0, y: -20 }}
+                        initial={isInitialRender ? false : { opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
                         className="flex items-center space-x-4"
@@ -451,7 +466,7 @@ const ActivityClient = (props: ActivityClientProps) => {
 
                       {/* Minimize and Chapters - Moved to right */}
                       <motion.div
-                        initial={isInitialRender.current ? false : { opacity: 0, x: 20 }}
+                        initial={isInitialRender ? false : { opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
                         className="flex items-center space-x-2"
@@ -493,7 +508,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                         <PaidCourseActivityDisclaimer course={course} />
                       ) : (
                         <motion.div
-                          initial={isInitialRender.current ? false : { scale: 0.95, opacity: 0 }}
+                          initial={isInitialRender ? false : { scale: 0.95, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
                           transition={{ delay: 0.3 }}
                           className={`rounded-lg p-7 ${bgColor} mt-4`}
@@ -509,7 +524,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                 {/* Focus Mode Bottom Bar */}
                 {activity && activity.published === true && activity.content.paid_access !== false ? (
                   <motion.div
-                    initial={isInitialRender.current ? false : { y: 100 }}
+                    initial={isInitialRender ? false : { y: 100 }}
                     animate={{ y: 0 }}
                     exit={{ y: 100 }}
                     transition={{ duration: 0.3 }}
@@ -1321,51 +1336,54 @@ const AssignmentTools = (props: {
     return 'F';
   }, []);
 
-  const getGradingBasedOnMethod = useCallback(async () => {
-    const res = await getFinalGrade(
-      session.data?.user?.id,
-      props.assignment?.assignment_uuid,
-      session.data?.tokens?.access_token,
-    );
-
-    if (res.success) {
-      const { grade, max_grade, grading_type } = res.data;
-      let displayGrade: string;
-
-      switch (grading_type) {
-        case 'ALPHABET': {
-          displayGrade = convertNumericToAlphabet(grade, max_grade);
-          break;
-        }
-        case 'NUMERIC': {
-          displayGrade = `${grade}/${max_grade}`;
-          break;
-        }
-        case 'PERCENTAGE': {
-          const percentage = (grade / max_grade) * 100;
-          displayGrade = `${percentage.toFixed(2)}%`;
-          break;
-        }
-        default: {
-          displayGrade = t('unknownGradingType');
-        }
-      } // Use displayGrade here, e.g., update state or display it
-      setFinalGrade(displayGrade);
+  // Load final grade when submission is graded
+  useEffect(() => {
+    if (!(submission && submission.length > 0 && submission[0]?.submission_status === 'GRADED')) {
+      return;
     }
+
+    const loadGrade = async () => {
+      const res = await getFinalGrade(
+        session.data?.user?.id,
+        props.assignment?.assignment_uuid,
+        session.data?.tokens?.access_token,
+      );
+
+      if (res.success) {
+        const { grade, max_grade, grading_type } = res.data;
+        let displayGrade: string;
+
+        switch (grading_type) {
+          case 'ALPHABET': {
+            displayGrade = convertNumericToAlphabet(grade, max_grade);
+            break;
+          }
+          case 'NUMERIC': {
+            displayGrade = `${grade}/${max_grade}`;
+            break;
+          }
+          case 'PERCENTAGE': {
+            const percentage = (grade / max_grade) * 100;
+            displayGrade = `${percentage.toFixed(2)}%`;
+            break;
+          }
+          default: {
+            displayGrade = t('unknownGradingType');
+          }
+        }
+        setFinalGrade(displayGrade);
+      }
+    };
+
+    loadGrade();
   }, [
+    submission,
     session.data?.user?.id,
     props.assignment?.assignment_uuid,
     session.data?.tokens?.access_token,
     t,
     convertNumericToAlphabet,
-    setFinalGrade,
   ]);
-
-  useEffect(() => {
-    if (submission && submission.length > 0 && submission[0]?.submission_status === 'GRADED') {
-      getGradingBasedOnMethod();
-    }
-  }, [submission, getGradingBasedOnMethod]);
 
   if (!submission || submission.length === 0) {
     return (

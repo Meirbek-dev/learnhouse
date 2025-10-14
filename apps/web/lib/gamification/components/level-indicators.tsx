@@ -12,7 +12,7 @@
 import type { UserGamificationProfile } from '@/types/gamification';
 import { motion, useAnimationControls } from 'framer-motion';
 import { Sparkles, Star } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getLevelInfo } from '../levels';
 import { cn } from '@/lib/utils';
 
@@ -28,7 +28,7 @@ interface LevelProgressProps {
 }
 
 export function LevelProgress({ profile, showMilestones = false, animated = true, className }: LevelProgressProps) {
-  const [previousLevel, setPreviousLevel] = useState(profile.level);
+  const previousLevelRef = useRef(profile.level);
   const controls = useAnimationControls();
 
   // Calculate progress
@@ -38,14 +38,14 @@ export function LevelProgress({ profile, showMilestones = false, animated = true
 
   // Detect level up
   useEffect(() => {
-    if (profile.level > previousLevel && animated) {
+    if (profile.level > previousLevelRef.current && animated) {
       controls.start({
         scale: [1, 1.02, 1],
         transition: { duration: 0.4, times: [0, 0.5, 1] },
       });
     }
-    setPreviousLevel(profile.level);
-  }, [profile.level, previousLevel, controls, animated]);
+    previousLevelRef.current = profile.level;
+  }, [profile.level, controls, animated]);
 
   return (
     <motion.div
@@ -103,9 +103,18 @@ export function ParticleEffect({
   onComplete,
 }: ParticleEffectProps) {
   const [particles, setParticles] = useState<Particle[]>([]);
+  const onCompleteRef = useRef(onComplete);
+  const isAnimatingRef = useRef(false);
+
+  // Keep ref updated
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
-    if (!trigger) return;
+    if (!trigger || isAnimatingRef.current) return;
+
+    isAnimatingRef.current = true;
 
     const newParticles: Particle[] = Array.from({ length: particleCount }, (_, i) => {
       const colorIndex = Math.floor(Math.random() * colors.length);
@@ -119,15 +128,22 @@ export function ParticleEffect({
       };
     });
 
-    setParticles(newParticles);
+    // Use setTimeout to break out of render phase
+    const startTimeout = setTimeout(() => {
+      setParticles(newParticles);
+    }, 0);
 
-    const timeout = setTimeout(() => {
+    const endTimeout = setTimeout(() => {
       setParticles([]);
-      onComplete?.();
+      isAnimatingRef.current = false;
+      onCompleteRef.current?.();
     }, duration + 400);
 
-    return () => clearTimeout(timeout);
-  }, [trigger, particleCount, colors, duration, onComplete]);
+    return () => {
+      clearTimeout(startTimeout);
+      clearTimeout(endTimeout);
+    };
+  }, [trigger, particleCount, colors, duration]);
 
   if (particles.length === 0) return null;
 
@@ -221,17 +237,26 @@ interface XPGainAnimationProps {
 
 export function XPGainAnimation({ amount, trigger, position, onComplete }: XPGainAnimationProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const onCompleteRef = useRef(onComplete);
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     if (trigger) {
-      setIsVisible(true);
-      const timeout = setTimeout(() => {
+      // Use setTimeout to break out of render phase
+      const showTimeout = setTimeout(() => setIsVisible(true), 0);
+      const hideTimeout = setTimeout(() => {
         setIsVisible(false);
-        onComplete?.();
+        onCompleteRef.current?.();
       }, 1200);
-      return () => clearTimeout(timeout);
+      return () => {
+        clearTimeout(showTimeout);
+        clearTimeout(hideTimeout);
+      };
     }
-  }, [trigger, onComplete]);
+  }, [trigger]);
 
   if (!isVisible) return null;
 

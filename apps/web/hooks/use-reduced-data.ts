@@ -12,7 +12,34 @@
 import { useEffect, useState } from 'react';
 
 export function useReducedData(): boolean {
-  const [prefersReducedData, setPrefersReducedData] = useState(false);
+  const [prefersReducedData, setPrefersReducedData] = useState(() => {
+    if (typeof window === 'undefined') return false;
+
+    // Check multiple signals
+    let reduced = false;
+
+    // 1. Check prefers-reduced-data media query (new standard)
+    const mediaQuery = window.matchMedia('(prefers-reduced-data: reduce)');
+    if (mediaQuery.matches) {
+      reduced = true;
+    }
+
+    // 2. Check Network Information API (saveData)
+    const connection =
+      (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+    if (connection) {
+      // Check saveData
+      if (connection.saveData) {
+        reduced = true;
+      }
+      // Check slow connection types
+      if (connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g') {
+        reduced = true;
+      }
+    }
+
+    return reduced;
+  });
 
   useEffect(() => {
     // Check multiple signals
@@ -37,8 +64,6 @@ export function useReducedData(): boolean {
         reduced = true;
       }
     }
-
-    setPrefersReducedData(reduced);
 
     // Listen for changes to prefers-reduced-data
     const handleChange = (event: MediaQueryListEvent) => {

@@ -28,19 +28,16 @@ interface SignUpClientProps {
 
 const SignUpClient = (props: SignUpClientProps) => {
   const session = useLHSession() as any;
-  const [joinMethod, setJoinMethod] = useState('open');
-  const [inviteCode, setInviteCode] = useState('');
   const searchParams = useSearchParams();
   const inviteCodeParam = searchParams.get('inviteCode');
 
-  useEffect(() => {
-    if (props.org.config) {
-      setJoinMethod(props.org?.config?.config?.features.members.signup_mode);
-    }
-    if (inviteCodeParam) {
-      setInviteCode(inviteCodeParam);
-    }
-  }, [props.org, inviteCodeParam]);
+  const [joinMethod, setJoinMethod] = useState(() => {
+    return props.org?.config?.config?.features.members.signup_mode || 'open';
+  });
+
+  const [inviteCode, setInviteCode] = useState(() => {
+    return inviteCodeParam || '';
+  });
 
   return (
     <div className="flex h-screen flex-col items-center justify-center bg-neutral-100">
@@ -178,7 +175,10 @@ const NoTokenScreen = (_props: any) => {
   const session = useLHSession() as any;
   const org = useOrg() as any;
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => {
+    // Check if session and org are already available
+    return !(session && org);
+  });
   const [inviteCode, setInviteCode] = useState('');
 
   const handleInviteCodeChange = (e: any) => {
@@ -202,7 +202,9 @@ const NoTokenScreen = (_props: any) => {
 
   useEffect(() => {
     if (session && org) {
-      setIsLoading(false);
+      // Use setTimeout to break out of render phase
+      const timeout = setTimeout(() => setIsLoading(false), 0);
+      return () => clearTimeout(timeout);
     }
   }, [org, session]);
 

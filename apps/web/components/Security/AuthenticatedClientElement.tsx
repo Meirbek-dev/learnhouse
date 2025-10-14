@@ -2,7 +2,7 @@
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 
 interface AuthenticatedClientElementProps {
@@ -14,7 +14,6 @@ interface AuthenticatedClientElementProps {
 }
 
 export const AuthenticatedClientElement = (props: AuthenticatedClientElementProps) => {
-  const [isAllowed, setIsAllowed] = useState(false);
   const session = useLHSession() as any;
   const org = useOrg() as any;
 
@@ -38,22 +37,24 @@ export const AuthenticatedClientElement = (props: AuthenticatedClientElementProp
     return false;
   }, []);
 
-  const check = useCallback(() => {
-    if (session.status === 'unauthenticated') {
-      setIsAllowed(false);
-      return;
+  // Compute authorization result as derived state
+  const isAllowed = useMemo(() => {
+    if (session.status === 'loading' || session.status === 'unauthenticated') {
+      return false;
     }
+
     if (props.checkMethod === 'authentication') {
-      setIsAllowed(session.status === 'authenticated');
-    } else if (props.checkMethod === 'roles') {
-      if (props.action && props.ressourceType) {
-        setIsAllowed(isUserAllowed(session?.data?.roles, props.action, props.ressourceType, org?.org_uuid));
-        return;
-      }
-      setIsAllowed(false);
-    } else {
-      setIsAllowed(false);
+      return session.status === 'authenticated';
     }
+
+    if (props.checkMethod === 'roles') {
+      if (props.action && props.ressourceType && session?.data?.roles) {
+        return isUserAllowed(session.data.roles, props.action, props.ressourceType, org?.org_uuid);
+      }
+      return false;
+    }
+
+    return false;
   }, [
     session.status,
     session?.data?.roles,
@@ -63,14 +64,6 @@ export const AuthenticatedClientElement = (props: AuthenticatedClientElementProp
     org?.org_uuid,
     isUserAllowed,
   ]);
-
-  useEffect(() => {
-    if (session.status === 'loading') {
-      return;
-    }
-
-    check();
-  }, [session.status, check]);
 
   return <>{isAllowed ? props.children : null}</>;
 };
