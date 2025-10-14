@@ -1,6 +1,3 @@
-import { FlatCompat } from '@eslint/eslintrc';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import unusedImports from 'eslint-plugin-unused-imports';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
@@ -8,6 +5,9 @@ import nextPlugin from '@next/eslint-plugin-next';
 import tailwind from 'eslint-plugin-tailwindcss';
 import tsParser from '@typescript-eslint/parser';
 import reactPlugin from 'eslint-plugin-react';
+import { FlatCompat } from '@eslint/eslintrc';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import js from '@eslint/js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -17,7 +17,7 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
-export default [
+const config = [
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
     ignores: ['node_modules/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts'],
@@ -137,3 +137,5 @@ export default [
     },
   },
 ];
+
+export default config;

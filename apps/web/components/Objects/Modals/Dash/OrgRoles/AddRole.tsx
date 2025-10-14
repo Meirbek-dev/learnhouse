@@ -432,6 +432,78 @@ const predefinedRoles = (t: (key: string) => string) => ({
   },
 });
 
+interface PermissionSectionProps {
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  section: keyof Rights;
+  permissions: string[];
+  rights: Rights;
+  handleSelectAll: (section: keyof Rights, select: boolean) => void;
+  handleRightChange: (section: keyof Rights, permission: string, checked: boolean) => void;
+  getPermissionLabel: (permission: string) => string;
+  t: (key: string) => string;
+}
+
+const PermissionSection = React.memo<PermissionSectionProps>(({
+  title,
+  icon: Icon,
+  section,
+  permissions,
+  rights,
+  handleSelectAll,
+  handleRightChange,
+  getPermissionLabel,
+  t,
+}) => {
+  const sectionRights = rights[section] as any;
+  const allSelected = permissions.every((perm) => sectionRights[perm]);
+  const someSelected = permissions.some((perm) => sectionRights[perm]) && !allSelected;
+
+  return (
+    <div className="bg-background mb-4 rounded-lg border border-gray-200 p-4 shadow-sm">
+      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center space-x-2">
+          <Icon className="h-4 w-4 text-gray-500" />
+          <h3 className="text-sm font-semibold text-gray-800 sm:text-base">{title}</h3>
+        </div>
+        <button
+          type="button"
+          onClick={() => handleSelectAll(section, !allSelected)}
+          className="text-primary hover:text-primary/80 flex items-center space-x-2 self-start text-sm font-medium transition-colors sm:self-auto"
+        >
+          {allSelected ? (
+            <CheckSquare className="h-4 w-4" />
+          ) : someSelected ? (
+            <Square className="h-4 w-4" />
+          ) : (
+            <Square className="h-4 w-4" />
+          )}
+          <span className="hidden sm:inline">{allSelected ? t('deselectAll') : t('selectAll')}</span>
+          <span className="sm:hidden">{allSelected ? t('deselect') : t('select')}</span>
+        </button>
+      </div>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {permissions.map((permission) => (
+          <label
+            key={permission}
+            className="flex cursor-pointer items-center space-x-2 rounded-md p-2 transition-colors hover:bg-gray-50"
+          >
+            <input
+              type="checkbox"
+              checked={rights[section]?.[permission as keyof (typeof rights)[typeof section]]}
+              onChange={(e) => handleRightChange(section, permission, e.target.checked)}
+              className="rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700 capitalize">{getPermissionLabel(permission)}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+PermissionSection.displayName = 'PermissionSection';
+
 function AddRole(props: AddRoleProps) {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.OrgRoles.AddRole');
@@ -588,64 +660,6 @@ function AddRole(props: AddRoleProps) {
     return permissionMap[permission] || permission.replace('action_', '').replace('_', ' ');
   };
 
-  const PermissionSection = ({
-    title,
-    icon: Icon,
-    section,
-    permissions,
-  }: {
-    title: string;
-    icon: any;
-    section: keyof Rights;
-    permissions: string[];
-  }) => {
-    const sectionRights = rights[section] as any;
-    const allSelected = permissions.every((perm) => sectionRights[perm]);
-    const someSelected = permissions.some((perm) => sectionRights[perm]) && !allSelected;
-
-    return (
-      <div className="bg-background mb-4 rounded-lg border border-gray-200 p-4 shadow-sm">
-        <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4 text-gray-500" />
-            <h3 className="text-sm font-semibold text-gray-800 sm:text-base">{title}</h3>
-          </div>
-          <button
-            type="button"
-            onClick={() => handleSelectAll(section, !allSelected)}
-            className="text-primary hover:text-primary/80 flex items-center space-x-2 self-start text-sm font-medium transition-colors sm:self-auto"
-          >
-            {allSelected ? (
-              <CheckSquare className="h-4 w-4" />
-            ) : someSelected ? (
-              <Square className="h-4 w-4" />
-            ) : (
-              <Square className="h-4 w-4" />
-            )}
-            <span className="hidden sm:inline">{allSelected ? t('deselectAll') : t('selectAll')}</span>
-            <span className="sm:hidden">{allSelected ? t('deselect') : t('select')}</span>
-          </button>
-        </div>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {permissions.map((permission) => (
-            <label
-              key={permission}
-              className="flex cursor-pointer items-center space-x-2 rounded-md p-2 transition-colors hover:bg-gray-50"
-            >
-              <input
-                type="checkbox"
-                checked={rights[section]?.[permission as keyof (typeof rights)[typeof section]]}
-                onChange={(e) => handleRightChange(section, permission, e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
-              />
-              <span className="text-sm text-gray-700 capitalize">{getPermissionLabel(permission)}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="mx-auto max-w-6xl px-2 py-3 sm:px-0">
       <Form {...form}>
@@ -723,6 +737,11 @@ function AddRole(props: AddRoleProps) {
                   'action_delete',
                   'action_delete_own',
                 ]}
+                rights={rights}
+                handleSelectAll={handleSelectAll}
+                handleRightChange={handleRightChange}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
 
               <PermissionSection
@@ -730,6 +749,11 @@ function AddRole(props: AddRoleProps) {
                 icon={Users}
                 section="users"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
+                rights={rights}
+                handleSelectAll={handleSelectAll}
+                handleRightChange={handleRightChange}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
 
               <PermissionSection
@@ -737,6 +761,11 @@ function AddRole(props: AddRoleProps) {
                 icon={UserCheck}
                 section="usergroups"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
+                rights={rights}
+                handleSelectAll={handleSelectAll}
+                handleRightChange={handleRightChange}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
 
               <PermissionSection
@@ -744,6 +773,11 @@ function AddRole(props: AddRoleProps) {
                 icon={FolderOpen}
                 section="collections"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
+                rights={rights}
+                handleSelectAll={handleSelectAll}
+                handleRightChange={handleRightChange}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
 
               <PermissionSection
@@ -751,6 +785,11 @@ function AddRole(props: AddRoleProps) {
                 icon={Building}
                 section="organizations"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
+                rights={rights}
+                handleSelectAll={handleSelectAll}
+                handleRightChange={handleRightChange}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
 
               <PermissionSection
@@ -758,6 +797,11 @@ function AddRole(props: AddRoleProps) {
                 icon={FileText}
                 section="coursechapters"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
+                rights={rights}
+                handleSelectAll={handleSelectAll}
+                handleRightChange={handleRightChange}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
 
               <PermissionSection
@@ -765,6 +809,11 @@ function AddRole(props: AddRoleProps) {
                 icon={Activity}
                 section="activities"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
+                rights={rights}
+                handleSelectAll={handleSelectAll}
+                handleRightChange={handleRightChange}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
 
               <PermissionSection
@@ -772,6 +821,11 @@ function AddRole(props: AddRoleProps) {
                 icon={Shield}
                 section="roles"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
+                rights={rights}
+                handleSelectAll={handleSelectAll}
+                handleRightChange={handleRightChange}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
 
               <PermissionSection
@@ -779,6 +833,11 @@ function AddRole(props: AddRoleProps) {
                 icon={Monitor}
                 section="dashboard"
                 permissions={['action_access']}
+                rights={rights}
+                handleSelectAll={handleSelectAll}
+                handleRightChange={handleRightChange}
+                getPermissionLabel={getPermissionLabel}
+                t={t}
               />
             </div>
           </div>
