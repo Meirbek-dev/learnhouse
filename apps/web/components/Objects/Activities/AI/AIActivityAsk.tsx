@@ -23,14 +23,8 @@ interface AIActivityAskProps {
 const AIActivityAsk = (props: AIActivityAskProps) => {
   const t = useTranslations('Activities.AIActivityAsk');
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'activity_ask' });
-  const [isButtonAvailable, setIsButtonAvailable] = useState(false);
+  const isButtonAvailable = is_ai_feature_enabled;
   const dispatchAIChatBot = useAIChatBotDispatch();
-
-  useEffect(() => {
-    if (is_ai_feature_enabled) {
-      setIsButtonAvailable(true);
-    }
-  }, [is_ai_feature_enabled]);
 
   return (
     <>

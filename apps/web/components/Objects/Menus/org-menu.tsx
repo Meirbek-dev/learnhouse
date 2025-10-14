@@ -2,6 +2,7 @@
 
 import AuthenticatedClientElement from '@/components/Security/AuthenticatedClientElement';
 import { NavigationMenu, NavigationMenuList } from '@/components/ui/navigation-menu';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { HeaderProfileBox } from '@/components/Security/HeaderProfileBox';
 import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
 import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
@@ -11,7 +12,6 @@ import { OpenULogoSVG } from '../../svg/openuLogoSvg';
 import { Button } from '@/components/ui/button';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 interface OrgMenuProps {
@@ -58,48 +58,65 @@ const NavigationLinkItem = ({ href, type, orgslug }: NavigationLinkProps) => {
 
 export default function OrgMenu({ orgslug }: OrgMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isFocusMode, setIsFocusMode] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const t = useTranslations('Components.OrgMenu');
 
-  useEffect(() => {
-    // Focus mode logic from original OrgMenu
-    if (typeof window !== 'undefined' && pathname?.includes('/activity/')) {
-      const saved = localStorage.getItem('globalFocusMode');
-      setIsFocusMode(saved === 'true');
-    } else {
-      setIsFocusMode(false);
+  // Use useSyncExternalStore for focus mode from localStorage
+  const isOnActivityPage = pathname?.includes('/activity/') ?? false;
+
+  const subscribe = useCallback(
+    (callback: () => void) => {
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'globalFocusMode' && isOnActivityPage) {
+          callback();
+        }
+      };
+
+      const handleFocusModeChange = (e: CustomEvent) => {
+        if (isOnActivityPage) {
+          callback();
+        }
+      };
+
+      window.addEventListener('storage', handleStorageChange);
+      window.addEventListener('focusModeChange', handleFocusModeChange as EventListener);
+
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('focusModeChange', handleFocusModeChange as EventListener);
+      };
+    },
+    [isOnActivityPage],
+  );
+
+  const getSnapshot = useCallback(() => {
+    if (!isOnActivityPage) return 'false';
+    try {
+      return localStorage.getItem('globalFocusMode') ?? 'false';
+    } catch {
+      return 'false';
     }
+  }, [isOnActivityPage]);
 
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'globalFocusMode' && pathname?.includes('/activity/')) {
-        setIsFocusMode(e.newValue === 'true');
-      }
-    };
+  const getServerSnapshot = useCallback(() => 'false', []);
 
-    const handleFocusModeChange = (e: CustomEvent) => {
-      if (pathname?.includes('/activity/')) {
-        setIsFocusMode(e.detail.isFocusMode);
-      }
-    };
+  const isFocusModeString = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const isFocusMode = isFocusModeString === 'true';
 
+  useEffect(() => {
     // Scroll detection for header background
     const handleScroll = () => {
       const { scrollY } = window;
       setIsScrolled(scrollY > 20);
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('focusModeChange', handleFocusModeChange as EventListener);
     window.addEventListener('scroll', handleScroll);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('focusModeChange', handleFocusModeChange as EventListener);
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [pathname]);
+  }, []);
 
   function toggleMenu() {
     setIsMenuOpen(!isMenuOpen);

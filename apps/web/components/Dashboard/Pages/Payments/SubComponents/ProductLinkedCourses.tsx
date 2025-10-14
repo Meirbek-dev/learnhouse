@@ -4,12 +4,12 @@ import { getCoursesLinkedToProduct, unlinkCourseFromProduct } from '@services/pa
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useCallback, useEffect, useState } from 'react';
 import { BookOpen, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { mutate } from 'swr';
+import useSWR, { mutate } from 'swr';
 
 import LinkCourseModal from './LinkCourseModal';
 
@@ -18,27 +18,39 @@ interface ProductLinkedCoursesProps {
 }
 
 export default function ProductLinkedCourses({ productId }: ProductLinkedCoursesProps) {
-  const [linkedCourses, setLinkedCourses] = useState<any[]>([]);
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const session = useLHSession() as any;
   const org = useOrg() as any;
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.Payments.LinkedCourses');
 
-  const fetchLinkedCourses = useCallback(async () => {
-    try {
-      const response = await getCoursesLinkedToProduct(org.id, productId, session.data?.tokens?.access_token);
-      setLinkedCourses(response.data || []);
-    } catch {
+  // Use SWR to fetch linked courses
+  const {
+    data: linkedCourses,
+    mutate: mutateLinkedCourses,
+    error,
+  } = useSWR(
+    org && session && productId
+      ? [`/payments/${org.id}/products/${productId}/courses`, session.data?.tokens?.access_token]
+      : null,
+    async ([, token]) => {
+      const response = await getCoursesLinkedToProduct(org.id, productId, token);
+      return response.data || [];
+    },
+  );
+
+  // Show error toast if fetch fails
+  useEffect(() => {
+    if (error) {
       toast.error(tNotify('errors.fetchLinkedCoursesFailed'));
     }
-  }, [org.id, productId, session.data?.tokens?.access_token, tNotify]);
+  }, [error, tNotify]);
 
   const handleUnlinkCourse = async (courseId: string) => {
     try {
       const response = await unlinkCourseFromProduct(org.id, productId, courseId, session.data?.tokens?.access_token);
       if (response.success) {
-        await fetchLinkedCourses();
+        await mutateLinkedCourses();
         mutate([`/payments/${org.id}/products`, session.data?.tokens?.access_token]);
         toast.success(tNotify('courseUnlinkedSuccess'));
       } else {
@@ -52,12 +64,6 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
       toast.error(tNotify('errors.unlinkCourseFailed', { error: '' }));
     }
   };
-
-  useEffect(() => {
-    if (org && session && productId) {
-      fetchLinkedCourses();
-    }
-  }, [org, session, productId, fetchLinkedCourses]);
 
   return (
     <div className="mt-4">
@@ -73,7 +79,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
               productId={productId}
               onSuccess={() => {
                 setIsLinkModalOpen(false);
-                fetchLinkedCourses();
+                mutateLinkedCourses();
               }}
             />
           }
@@ -93,7 +99,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
       </div>
 
       <div className="space-y-2">
-        {linkedCourses.length === 0 ? (
+        {!linkedCourses || linkedCourses.length === 0 ? (
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <BookOpen size={16} />
             <span>{t('noCoursesLinked')}</span>

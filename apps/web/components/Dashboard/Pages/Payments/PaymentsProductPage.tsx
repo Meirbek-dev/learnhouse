@@ -14,7 +14,6 @@ import { getPaymentConfigs } from '@services/payments/payments';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useMemo, useState } from 'react';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -22,6 +21,7 @@ import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import currencyCodes from 'currency-codes';
 import { useForm } from 'react-hook-form';
+import { useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import { z } from 'zod';
@@ -60,7 +60,6 @@ const PaymentsProductPage = () => {
   const [expandedProducts, setExpandedProducts] = useState<{
     [key: string]: boolean;
   }>({});
-  const [isStripeEnabled, setIsStripeEnabled] = useState(false);
   const { isEnabled, isLoading } = usePaymentsEnabled();
   const t = useTranslations('DashPage.Payments.ProductPage');
 
@@ -74,11 +73,10 @@ const PaymentsProductPage = () => {
     ([_url, token]) => getPaymentConfigs(org.id, token),
   );
 
-  useEffect(() => {
-    if (paymentConfigs) {
-      const stripeConfig = paymentConfigs.find((config: any) => config.provider === 'stripe');
-      setIsStripeEnabled(Boolean(stripeConfig));
-    }
+  const isStripeEnabled = useMemo(() => {
+    if (!paymentConfigs) return false;
+    const stripeConfig = paymentConfigs.find((config: any) => config.provider === 'stripe');
+    return Boolean(stripeConfig);
   }, [paymentConfigs]);
 
   const handleArchiveProduct = async (productId: string) => {
@@ -289,17 +287,16 @@ const EditProductForm = ({
 }) => {
   const org = useOrg() as any;
   const session = useLHSession() as any;
-  const [currencies, setCurrencies] = useState<{ code: string; name: string }[]>([]);
+  const currencies = useMemo(
+    () =>
+      currencyCodes.data.map((currency) => ({
+        code: currency.code,
+        name: `${currency.code} - ${currency.currency}`,
+      })),
+    [],
+  );
   const t = useTranslations('DashPage.Payments.ProductPage.editForm');
   const validationSchema = useMemo(() => createValidationSchema(t), [t]);
-
-  useEffect(() => {
-    const allCurrencies = currencyCodes.data.map((currency) => ({
-      code: currency.code,
-      name: `${currency.code} - ${currency.currency}`,
-    }));
-    setCurrencies(allCurrencies);
-  }, []);
 
   const form = useForm<EditProductFormData>({
     resolver: zodResolver(validationSchema),

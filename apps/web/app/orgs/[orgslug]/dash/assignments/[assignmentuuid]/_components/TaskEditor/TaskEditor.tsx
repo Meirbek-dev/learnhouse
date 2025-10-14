@@ -8,12 +8,10 @@ import { useAssignments } from '@components/Contexts/Assignments/AssignmentConte
 import { GalleryVerticalEnd, Info, TentTree, Trash } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { deleteAssignmentTask } from '@services/courses/assignments';
-import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import dynamic from 'next/dynamic';
-import { mutate } from 'swr';
+import { useState } from 'react';
 
 import { AssignmentTaskGeneralEdit } from './Subs/AssignmentTaskGeneralEdit';
 
@@ -21,47 +19,53 @@ const AssignmentTaskContentEdit = dynamic(() => import('./Subs/AssignmentTaskCon
 
 const AssignmentTaskEditor = ({ page }: any) => {
   const t = useTranslations('DashPage.Assignments.TaskEditor');
-  const [selectedSubPage, setSelectedSubPage] = useState(page);
   const assignment = useAssignments();
   const assignmentTaskState = useAssignmentsTask();
   const assignmentTaskStateHook = useAssignmentsTaskDispatch();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 
+  // Use key to track current task UUID and reset sub-page state when it changes
+  const [taskUUIDKey, setTaskUUIDKey] = useState(assignmentTaskState.assignmentTask.assignment_task_uuid);
+  const [selectedSubPage, setSelectedSubPage] = useState(page);
+
+  // Reset to general page when task UUID changes
+  if (taskUUIDKey !== assignmentTaskState.assignmentTask.assignment_task_uuid) {
+    setTaskUUIDKey(assignmentTaskState.assignmentTask.assignment_task_uuid);
+    setSelectedSubPage('general');
+  }
+
   async function deleteTaskUI() {
     if (!assignment?.assignment_object?.assignment_uuid) {
-      console.error('Assignment object or its UUID is missing. Cannot delete task.');
-      toast.error(t('assignmentObjectMissingError'));
+      toast.error(t('missingAssignmentUUID'));
       return;
     }
 
-    const res = await deleteAssignmentTask(
-      assignmentTaskState.assignmentTask.assignment_task_uuid,
-      assignment.assignment_object.assignment_uuid,
-      access_token,
-    );
-    if (res) {
+    if (!assignmentTaskState?.assignmentTask?.assignment_task_uuid) {
+      toast.error(t('missingTaskUUID'));
+      return;
+    }
+
+    const toastId = toast.loading(t('deletingTask'));
+    try {
+      await deleteAssignmentTask(
+        assignment.assignment_object.assignment_uuid,
+        assignmentTaskState.assignmentTask.assignment_task_uuid,
+        access_token,
+      );
       assignmentTaskStateHook({
-        type: 'SET_MULTIPLE_STATES',
-        payload: {
-          selectedAssignmentTaskUUID: null,
-          assignmentTask: {},
-        },
+        type: 'setAssignmentTask',
+        payload: {},
       });
-      mutate(`${getAPIUrl()}assignments/${assignment.assignment_object.assignment_uuid}/tasks`);
-      mutate(`${getAPIUrl()}assignments/${assignment.assignment_object.assignment_uuid}`);
-      toast.success(t('deleteSuccess'));
-    } else {
+      assignmentTaskStateHook({
+        type: 'setSelectedAssignmentTaskUUID',
+        payload: '',
+      });
+      toast.success(t('deleteSuccess'), { id: toastId });
+    } catch {
       toast.error(t('deleteError'));
     }
   }
-
-  useEffect(() => {
-    // Switch back to general page if the selectedAssignmentTaskUUID is changed
-    if (assignmentTaskState.selectedAssignmentTaskUUID !== assignmentTaskState.assignmentTask.assignment_task_uuid) {
-      setSelectedSubPage('general');
-    }
-  }, [assignmentTaskState]);
 
   return (
     <div className="z-20 flex h-full w-full flex-col overflow-auto text-sm font-bold">

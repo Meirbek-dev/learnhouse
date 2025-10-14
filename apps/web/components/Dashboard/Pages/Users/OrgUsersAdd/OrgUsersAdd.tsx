@@ -14,9 +14,9 @@ import { Textarea } from '@components/ui/textarea';
 import { Info, UserPlus } from 'lucide-react';
 import { Label } from '@components/ui/label';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
+import { useState } from 'react';
 
 const OrgUsersAdd = () => {
   const org = useOrg() as any;
@@ -24,10 +24,22 @@ const OrgUsersAdd = () => {
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.UserSettings.addSection');
   const [invitedUsers, setInvitedUsers] = useState('');
-  const [selectedInviteCode, setSelectedInviteCode] = useState<string | undefined>();
+  const [selectedInviteCode, setSelectedInviteCode] = useState<string | null>(null);
+
+  const { data: invites, isLoading: invitesLoading } = useSWR(
+    org ? `${getAPIUrl()}orgs/${org?.id}/invites` : null,
+    (url) => swrFetcher(url, access_token),
+  );
+  const { data: invited_users, isLoading: invitedUsersLoading } = useSWR(
+    org ? `${getAPIUrl()}orgs/${org?.id}/invites/users` : null,
+    (url) => swrFetcher(url, access_token),
+  );
+
+  // Use first invite code as default if not explicitly set
+  const effectiveInviteCode = selectedInviteCode ?? invites?.[0]?.invite_code_uuid;
 
   async function sendInvites() {
-    if (!selectedInviteCode) {
+    if (!effectiveInviteCode) {
       toast.error(t('selectInviteCode'));
       return;
     }
@@ -38,7 +50,7 @@ const OrgUsersAdd = () => {
 
     const toastId = toast.loading(t('sendingInvite'));
     try {
-      const res = await inviteBatchUsers(org.id, invitedUsers, selectedInviteCode, access_token);
+      const res = await inviteBatchUsers(org.id, invitedUsers, effectiveInviteCode, access_token);
       if (res.status === 200) {
         mutate(`${getAPIUrl()}orgs/${org?.id}/invites/users`);
         toast.success(t('inviteSentSuccess'), { id: toastId });
@@ -50,21 +62,6 @@ const OrgUsersAdd = () => {
       toast.error(t('errors.sendInviteFailed'), { id: toastId });
     }
   }
-
-  const { data: invites, isLoading: invitesLoading } = useSWR(
-    org ? `${getAPIUrl()}orgs/${org?.id}/invites` : null,
-    (url) => swrFetcher(url, access_token),
-  );
-  const { data: invited_users, isLoading: invitedUsersLoading } = useSWR(
-    org ? `${getAPIUrl()}orgs/${org?.id}/invites/users` : null,
-    (url) => swrFetcher(url, access_token),
-  );
-
-  useEffect(() => {
-    if (invites && invites.length > 0 && selectedInviteCode === undefined) {
-      setSelectedInviteCode(invites[0]?.invite_code_uuid);
-    }
-  }, [invites, selectedInviteCode]);
 
   const isLoading = invitesLoading || invitedUsersLoading;
 
@@ -102,7 +99,7 @@ const OrgUsersAdd = () => {
                   {t('inviteCodeLabel')}
                 </Label>
                 <Select
-                  value={selectedInviteCode || ''}
+                  value={effectiveInviteCode || ''}
                   onValueChange={setSelectedInviteCode}
                 >
                   <SelectTrigger

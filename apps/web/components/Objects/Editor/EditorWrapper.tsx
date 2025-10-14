@@ -5,7 +5,6 @@ import Toast from '@components/Objects/StyledElements/Toast/Toast';
 import { OrgProvider } from '@components/Contexts/OrgContext';
 import { updateActivity } from '@services/courses/activities';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import type { JSX } from 'react';
 
@@ -22,20 +21,14 @@ const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
   const t = useTranslations('DashPage.Editor.EditorWrapper');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    if (!session.isLoading) {
-      setIsReady(true);
-    }
-  }, [session.isLoading]);
+  const isReady = !session.isLoading;
 
   async function setContent(content: any) {
     const { activity } = props;
-    activity.content = content;
+    const updatedActivity = { ...activity, content };
 
     toast.promise(
-      updateActivity(activity, activity.activity_uuid, access_token).then((res) => {
+      updateActivity(updatedActivity, activity.activity_uuid, access_token).then((res) => {
         if (!res.success) {
           throw res;
         }

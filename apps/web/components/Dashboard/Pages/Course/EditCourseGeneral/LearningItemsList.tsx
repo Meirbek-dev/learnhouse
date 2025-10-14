@@ -22,13 +22,62 @@ interface LearningItemsListProps {
 }
 
 const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) => {
-  const [items, setItems] = useState<LearningItem[]>([]);
+  // Helper function to standardize items
+  const standardizeItems = useCallback((val: string): LearningItem[] => {
+    try {
+      if (val) {
+        const parsedItems = JSON.parse(val);
+        if (Array.isArray(parsedItems) && parsedItems.length > 0) {
+          return parsedItems.map((item: unknown) => {
+            const safeItem = item as Partial<LearningItem>;
+            return {
+              id: safeItem.id || generateUUID(),
+              text: safeItem.text ?? '',
+              emoji: safeItem.emoji || '📝',
+              link: safeItem.link || undefined,
+            };
+          });
+        }
+      }
+    } catch {
+      // Parse error - fall through to default
+    }
+    // Default item
+    return [
+      {
+        id: generateUUID(),
+        text: '',
+        emoji: '📝',
+      },
+    ];
+  }, []);
+
+  // Use lazy initialization to parse and standardize items once
+  const [items, setItems] = useState<LearningItem[]>(() => {
+    const standardized = standardizeItems(value);
+    // Sync back to parent if needed (e.g., generated IDs)
+    const needsSync =
+      !value ||
+      (() => {
+        try {
+          const parsed = JSON.parse(value);
+          return !Array.isArray(parsed) || standardized.some((item, idx) => item.id !== parsed[idx]?.id);
+        } catch {
+          return true;
+        }
+      })();
+    if (needsSync) {
+      // Schedule sync after mount
+      setTimeout(() => onChange(JSON.stringify(standardized)), 0);
+    }
+    return standardized;
+  });
+
   const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
   const [showLinkInput, setShowLinkInput] = useState<string | null>(null);
   const [focusedItemId, setFocusedItemId] = useState<string | null>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
   const linkInputRef = useRef<HTMLDivElement>(null);
-  const initializedRef = useRef(false);
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
   const linkInputFieldRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -42,73 +91,6 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
       isMountedRef.current = false;
     };
   }, []);
-
-  // Parse and validate incoming value - CRITICAL: Don't include items in dependencies to avoid infinite loop
-  useEffect(() => {
-    // Skip if already initialized and value hasn't changed from what we set
-    if (initializedRef.current) {
-      return;
-    }
-
-    try {
-      if (value) {
-        const parsedItems = JSON.parse(value);
-        if (Array.isArray(parsedItems) && parsedItems.length > 0) {
-          // Standardize items from the value prop
-          const newStandardizedItems: LearningItem[] = parsedItems.map((item: unknown) => {
-            const safeItem = item as Partial<LearningItem>;
-            return {
-              id: safeItem.id || generateUUID(),
-              text: safeItem.text ?? '',
-              emoji: safeItem.emoji || '📝',
-              link: safeItem.link || undefined,
-            };
-          });
-
-          setItems(newStandardizedItems);
-          // Sync back to parent if we generated IDs
-          const needsSync = newStandardizedItems.some(
-            (item, idx) => !parsedItems[idx]?.id || item.id !== parsedItems[idx]?.id,
-          );
-          if (needsSync) {
-            onChange(JSON.stringify(newStandardizedItems));
-          }
-          initializedRef.current = true;
-        } else {
-          // Invalid array or empty - initialize with default
-          const defaultItem: LearningItem = {
-            id: generateUUID(),
-            text: '',
-            emoji: '📝',
-          };
-          setItems([defaultItem]);
-          onChange(JSON.stringify([defaultItem]));
-          initializedRef.current = true;
-        }
-      } else {
-        // No value provided - initialize with default
-        const defaultItem: LearningItem = {
-          id: generateUUID(),
-          text: '',
-          emoji: '📝',
-        };
-        setItems([defaultItem]);
-        onChange(JSON.stringify([defaultItem]));
-        initializedRef.current = true;
-      }
-    } catch (error) {
-      console.error('Error parsing learning items:', error);
-      // Fallback to default item on error
-      const defaultItem: LearningItem = {
-        id: generateUUID(),
-        text: '',
-        emoji: '📝',
-      };
-      setItems([defaultItem]);
-      onChange(JSON.stringify([defaultItem]));
-      initializedRef.current = true;
-    }
-  }, [value, onChange]);
 
   // Add a new empty item
   const addItem = useCallback(() => {

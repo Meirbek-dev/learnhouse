@@ -10,9 +10,9 @@ import AssignmentBoxUI from '@components/Objects/Activities/Assignment/Assignmen
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Cloud, Download, File, Info, Loader2, UploadCloud } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getTaskFileSubmissionDir } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
@@ -44,13 +44,21 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
   /* TEACHER VIEW CODE */
 
   /* STUDENT VIEW CODE */
-  const [showSavingDisclaimer, setShowSavingDisclaimer] = useState<boolean>(false);
   const [userSubmissions, setUserSubmissions] = useState<FileSchema>({
     fileUUID: '',
   });
   const [initialUserSubmissions, setInitialUserSubmissions] = useState<FileSchema>({
     fileUUID: '',
   });
+
+  // Detect changes using useMemo instead of setState in effect
+  const showSavingDisclaimer = useMemo(() => {
+    return userSubmissions.fileUUID !== initialUserSubmissions.fileUUID;
+  }, [userSubmissions.fileUUID, initialUserSubmissions.fileUUID]);
+
+  /* GRADING VIEW CODE */
+  const [userSubmissionObject, setUserSubmissionObject] = useState<any>(null);
+  const [assignmentTaskOutsideProvider, setAssignmentTaskOutsideProvider] = useState<any>(null);
 
   const handleFileChange = async (event: any) => {
     // Check if user is authenticated
@@ -141,7 +149,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
           type: 'reload',
         });
         toast.success(t('saveSuccess'));
-        setShowSavingDisclaimer(false);
+        // showSavingDisclaimer will automatically become false when submissions match
         // Update userSubmissions with the returned UUID for future updates
         const updatedUserSubmissions = {
           ...userSubmissions,
@@ -203,20 +211,6 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
     }
   }, [assignmentTaskUUID, user_id, assignment.assignment_object.assignment_uuid, access_token]);
 
-  // Detect changes between initial and current submissions
-  useEffect(() => {
-    if (userSubmissions.fileUUID !== initialUserSubmissions.fileUUID) {
-      setShowSavingDisclaimer(true);
-    } else {
-      setShowSavingDisclaimer(false);
-    }
-  }, [userSubmissions, initialUserSubmissions.fileUUID]);
-
-  /* STUDENT VIEW CODE */
-
-  /* GRADING VIEW CODE */
-  const [userSubmissionObject, setUserSubmissionObject] = useState<any>(null);
-
   async function gradeCustomFC(grade: number) {
     if (assignmentTaskUUID) {
       if (grade > assignmentTaskOutsideProvider.max_grade_value) {
@@ -253,27 +247,20 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
     }
   }
 
-  /* GRADING VIEW CODE */
-  const [assignmentTaskOutsideProvider, setAssignmentTaskOutsideProvider] = useState<any>(null);
   useEffect(() => {
     // Student area
     if (view === 'student') {
-      getAssignmentTaskUI();
-      getAssignmentTaskSubmissionFromUserUI();
+      void getAssignmentTaskUI();
+      void getAssignmentTaskSubmissionFromUserUI();
     }
 
     // Grading area
     else if (view === 'custom-grading') {
-      getAssignmentTaskUI();
+      void getAssignmentTaskUI();
       // setQuestions(assignmentTaskState.assignmentTask.contents.questions);
-      getAssignmentTaskSubmissionFromIdentifiedUserUI();
+      void getAssignmentTaskSubmissionFromIdentifiedUserUI();
     }
-  }, [
-    view,
-    getAssignmentTaskUI,
-    getAssignmentTaskSubmissionFromUserUI,
-    getAssignmentTaskSubmissionFromIdentifiedUserUI,
-  ]);
+  }, [view, assignmentTaskUUID, user_id, access_token, assignment.assignment_object.assignment_uuid]);
 
   return (
     <AssignmentBoxUI

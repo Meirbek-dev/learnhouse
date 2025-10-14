@@ -14,10 +14,10 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import { format } from 'date-fns';
+import { useState } from 'react';
 import Link from 'next/link';
 
 const OrgAccess = () => {
@@ -30,22 +30,14 @@ const OrgAccess = () => {
   const { data: invites } = useSWR(org ? `${getAPIUrl()}orgs/${org?.id}/invites` : null, (url) =>
     swrFetcher(url, access_token),
   );
-  const [isLoading, setIsLoading] = useState(true);
-  const [joinMethod, setJoinMethod] = useState<null | 'open' | 'inviteOnly'>(null);
   const [invitesModal, setInvitesModal] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    if (org) {
-      setJoinMethod(org.config.config.features.members.signup_mode);
-    }
-  }, [org]);
+  // Derive joinMethod from org config
+  const joinMethod = org?.config?.config?.features?.members?.signup_mode ?? null;
 
-  useEffect(() => {
-    if (invites !== undefined && joinMethod !== null) {
-      setIsLoading(false);
-    }
-  }, [invites, joinMethod]);
+  // Derive loading state - loaded when both org and invites are available
+  const isLoading = !org || invites === undefined;
 
   async function deleteInvite(invite: any) {
     const toastId = toast.loading(t('deletingInvite'));
@@ -72,7 +64,7 @@ const OrgAccess = () => {
         toast.success(t('joinMethodChangedSuccess', { method }), {
           id: toastId,
         });
-        setJoinMethod(method);
+        // joinMethod will update automatically from org mutation
       } else {
         toast.error(t('changeJoinMethodFailed'), { id: toastId });
       }

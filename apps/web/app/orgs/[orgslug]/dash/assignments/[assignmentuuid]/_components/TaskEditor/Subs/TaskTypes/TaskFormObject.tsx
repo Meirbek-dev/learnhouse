@@ -15,7 +15,7 @@ import AssignmentBoxUI from '@components/Objects/Activities/Assignment/Assignmen
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Check, Info, Minus, Plus, PlusCircle, Type, X } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { generateUUID } from '@/lib/utils';
 import toast from 'react-hot-toast';
@@ -78,24 +78,29 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
   const assignment = useAssignments();
 
   /* TEACHER VIEW CODE */
-  const [questions, setQuestions] = useState<FormSchema[]>(
-    view === 'teacher'
-      ? [
-          {
-            questionText: '',
-            questionUUID: `question_${generateUUID()}`,
-            blanks: [
-              {
-                placeholder: t('blankPlaceholder'),
-                correctAnswer: '',
-                hint: '',
-                blankUUID: `blank_${generateUUID()}`,
-              },
-            ],
-          },
-        ]
-      : [],
-  );
+  const [questions, setQuestions] = useState<FormSchema[]>(() => {
+    if (view === 'teacher') {
+      const savedQuestions = assignmentTaskState.assignmentTask.contents?.questions;
+      if (savedQuestions) {
+        return normalizeQuestions(savedQuestions);
+      }
+      return [
+        {
+          questionText: '',
+          questionUUID: `question_${generateUUID()}`,
+          blanks: [
+            {
+              placeholder: t('blankPlaceholder'),
+              correctAnswer: '',
+              hint: '',
+              blankUUID: `blank_${generateUUID()}`,
+            },
+          ],
+        },
+      ];
+    }
+    return [];
+  });
 
   const handleQuestionChange = (index: number, value: string) => {
     const updatedQuestions = [...questions];
@@ -192,9 +197,12 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
   /* STUDENT VIEW CODE */
   const [userSubmissions, setUserSubmissions] = useState<FormSubmitSchema>(normalizeSubmissions({}));
   const [initialUserSubmissions, setInitialUserSubmissions] = useState<FormSubmitSchema>(normalizeSubmissions({}));
-  const [showSavingDisclaimer, setShowSavingDisclaimer] = useState<boolean>(false);
   const [assignmentTaskOutsideProvider, setAssignmentTaskOutsideProvider] = useState<any>(null);
   const [userSubmissionObject, setUserSubmissionObject] = useState<any>(null);
+
+  const showSavingDisclaimer = useMemo(() => {
+    return JSON.stringify(userSubmissions) !== JSON.stringify(initialUserSubmissions);
+  }, [userSubmissions, initialUserSubmissions]);
 
   const handleUserAnswerChange = (questionUUID: string, blankUUID: string, answer: string) => {
     setUserSubmissions((prev) => {
@@ -260,7 +268,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
       };
       setUserSubmissions(updatedUserSubmissions);
       setInitialUserSubmissions(updatedUserSubmissions);
-      setShowSavingDisclaimer(false);
+      // showSavingDisclaimer will automatically become false when submissions match
     } else {
       console.error('Submission error:', res);
       toast.error(t('submitError'));
@@ -330,7 +338,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
         setUserSubmissionObject(res.data);
       }
     }
-  }, [access_token, user_id, assignmentTaskUUID, assignment.assignment_object?.assignment_uuid]);
+  }, [access_token, user_id, assignmentTaskUUID, assignment.assignment_object.assignment_uuid]);
 
   const loadAssignmentTask = useCallback(async () => {
     if (!assignmentTaskUUID) return;
@@ -363,7 +371,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
       setUserSubmissions(normalizedData);
       setInitialUserSubmissions(normalizedData);
     }
-  }, [view, assignmentTaskUUID, assignment.assignment_object?.assignment_uuid, access_token]);
+  }, [view, assignmentTaskUUID, assignment.assignment_object.assignment_uuid, access_token]);
 
   // Set assignment task UUID in context - separate effect to avoid dependency issues
   useEffect(() => {
@@ -377,34 +385,19 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
 
   useEffect(() => {
     if (view === 'teacher') {
-      const savedQuestions = assignmentTaskState.assignmentTask.contents?.questions;
-      if (savedQuestions) {
-        setQuestions(normalizeQuestions(savedQuestions));
-      } else {
-        loadAssignmentTask();
+      // Questions are initialized via lazy initialization in useState
+      // Only load task if no saved questions exist
+      if (!assignmentTaskState.assignmentTask.contents?.questions) {
+        void loadAssignmentTask();
       }
     } else if (view === 'student') {
-      loadAssignmentTask();
-      loadUserSubmissions();
+      void loadAssignmentTask();
+      void loadUserSubmissions();
     } else if (view === 'grading') {
-      loadAssignmentTask();
-      getAssignmentTaskSubmissionFromIdentifiedUserUI();
+      void loadAssignmentTask();
+      void getAssignmentTaskSubmissionFromIdentifiedUserUI();
     }
-  }, [
-    assignmentTaskState.assignmentTask.contents?.questions,
-    view,
-    loadAssignmentTask,
-    loadUserSubmissions,
-    getAssignmentTaskSubmissionFromIdentifiedUserUI,
-  ]);
-
-  useEffect(() => {
-    if (JSON.stringify(userSubmissions) !== JSON.stringify(initialUserSubmissions)) {
-      setShowSavingDisclaimer(true);
-    } else {
-      setShowSavingDisclaimer(false);
-    }
-  }, [userSubmissions, initialUserSubmissions]);
+  }, [assignmentTaskState.assignmentTask.contents?.questions, view, assignmentTaskUUID, user_id, access_token, assignment.assignment_object.assignment_uuid]);
 
   // Show main UI for teacher view (always has at least the default question)
   // or when questions exist for other views

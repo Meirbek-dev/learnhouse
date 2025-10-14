@@ -296,16 +296,14 @@ const EmbedObjectsComponent = (props: any) => {
     },
   ];
 
-  const [sanitizedEmbedCode, setSanitizedEmbedCode] = useState('');
-
-  useEffect(() => {
+  const sanitizedEmbedCode = useMemo(() => {
     if (embedType === 'code' && embedCode) {
-      const sanitized = DOMPurify.sanitize(embedCode, {
+      return DOMPurify.sanitize(embedCode, {
         ADD_TAGS: ['iframe'],
         ADD_ATTR: ['*'],
       });
-      setSanitizedEmbedCode(sanitized);
     }
+    return '';
   }, [embedCode, embedType]);
 
   const handleUrlChange = (event: ChangeEvent<HTMLInputElement>) => {

@@ -32,13 +32,8 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
     courseStructure ? `${getAPIUrl()}usergroups/resource/${courseStructure.course_uuid}` : null,
     (url) => swrFetcher(url, access_token),
   );
-  const [isClientPublic, setIsClientPublic] = useState<boolean | undefined>();
-
-  useEffect(() => {
-    if (!isLoading && courseStructure?.public !== undefined) {
-      setIsClientPublic(courseStructure.public);
-    }
-  }, [isLoading, courseStructure]);
+  // Initialize from courseStructure.public with lazy initialization
+  const [isClientPublic, setIsClientPublic] = useState<boolean | undefined>(() => courseStructure?.public);
 
   useEffect(() => {
     if (

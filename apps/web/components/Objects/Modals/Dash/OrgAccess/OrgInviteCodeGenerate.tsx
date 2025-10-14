@@ -7,10 +7,10 @@ import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { Ticket } from 'lucide-react';
 import useSWR, { mutate } from 'swr';
+import { useState } from 'react';
 import Link from 'next/link';
 
 interface OrgInviteCodeGenerateProps {
@@ -22,14 +22,19 @@ const OrgInviteCodeGenerate = (props: OrgInviteCodeGenerateProps) => {
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const [usergroup_id, setUsergroup_id] = useState(0);
 
   const { data: usergroups } = useSWR(org ? `${getAPIUrl()}usergroups/org/${org.id}` : null, (url) =>
     swrFetcher(url, access_token),
   );
 
+  // Use controlled state with default fallback to first usergroup
+  const [usergroup_id, setUsergroup_id] = useState<number | null>(null);
+
+  // Use first usergroup as default if not explicitly set
+  const effectiveUsergroupId = usergroup_id ?? usergroups?.[0]?.id ?? 0;
+
   async function createInviteWithUserGroup() {
-    const res = await createInviteCodeWithUserGroup(org.id, usergroup_id, session.data?.tokens?.access_token);
+    const res = await createInviteCodeWithUserGroup(org.id, effectiveUsergroupId, session.data?.tokens?.access_token);
     if (res.status === 200) {
       mutate(`${getAPIUrl()}orgs/${org.id}/invites`);
       props.setInvitesModal(false);
@@ -56,11 +61,6 @@ const OrgInviteCodeGenerate = (props: OrgInviteCodeGenerateProps) => {
     }
   }
 
-  useEffect(() => {
-    if (usergroups && usergroups.length > 0) {
-      setUsergroup_id(usergroups[0].id);
-    }
-  }, [usergroups]);
   return (
     <div className="flex space-x-2 pt-2">
       <div className="flex h-[140px] w-full rounded-lg bg-slate-100">

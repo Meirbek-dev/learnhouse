@@ -15,7 +15,6 @@ import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import EmbedObjects from './Extensions/EmbedObjects/EmbedObjects';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import InfoCallout from './Extensions/Callout/Info/InfoCallout';
 import WebPreview from './Extensions/WebPreview/WebPreview';
 import touEmblemLight from 'public/tou_emblem_light.webp';
@@ -45,6 +44,7 @@ import Youtube from '@tiptap/extension-youtube';
 import { Table } from '@tiptap/extension-table';
 import { getLinkExtension } from './EditorConf';
 import StarterKit from '@tiptap/starter-kit';
+import { useCallback, useMemo } from 'react';
 import { Eye, Monitor } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { styled } from 'styled-components';
@@ -73,13 +73,7 @@ const Editor = (props: EditorProps) => {
   aiEditorState = useAIEditor();
 
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' });
-  const [isButtonAvailable, setIsButtonAvailable] = useState(false);
-
-  useEffect(() => {
-    if (is_ai_feature_enabled) {
-      setIsButtonAvailable(true);
-    }
-  }, [is_ai_feature_enabled]);
+  const isButtonAvailable = is_ai_feature_enabled;
 
   const courseUuid = useMemo(() => props.course.course_uuid.slice(7), [props.course.course_uuid]);
   const activityUuid = useMemo(() => props.activity.activity_uuid.slice(9), [props.activity.activity_uuid]);

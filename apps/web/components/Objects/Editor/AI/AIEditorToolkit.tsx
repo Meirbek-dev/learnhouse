@@ -18,7 +18,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
 
@@ -37,13 +36,7 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
   const aiEditorState = useAIEditor();
   const t = useTranslations('Activities.AIEditorToolkit');
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' });
-  const [isToolkitAvailable, setIsToolkitAvailable] = useState(true);
-
-  useEffect(() => {
-    if (is_ai_feature_enabled) {
-      setIsToolkitAvailable(true);
-    }
-  }, [is_ai_feature_enabled]);
+  const isToolkitAvailable = is_ai_feature_enabled;
 
   return (
     <>

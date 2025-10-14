@@ -8,7 +8,6 @@ import touEmblemDark from 'public/tou_emblem_dark.webp';
 import { BubbleMenu } from '@tiptap/react/menus';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 
 interface AICanvaToolkitProps {
@@ -19,13 +18,7 @@ interface AICanvaToolkitProps {
 const AICanvaToolkit = (props: AICanvaToolkitProps) => {
   const t = useTranslations('Activities.AICanvaToolkit');
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'activity_ask' });
-  const [isBubbleMenuAvailable, setIsButtonAvailable] = useState(false);
-
-  useEffect(() => {
-    if (is_ai_feature_enabled) {
-      setIsButtonAvailable(true);
-    }
-  }, [is_ai_feature_enabled]);
+  const isBubbleMenuAvailable = is_ai_feature_enabled;
 
   return (
     <>

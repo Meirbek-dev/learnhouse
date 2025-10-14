@@ -8,10 +8,10 @@ import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { createChapter } from '@services/courses/chapters';
-import { useEffect, useMemo, useState } from 'react';
 import { getAPIUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { Hexagon } from 'lucide-react';
 import { mutate } from 'swr';
@@ -38,8 +38,8 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   const router = useRouter();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  // Check window availability
-  const [winReady, setwinReady] = useState(false);
+  // Check window availability - use lazy initialization
+  const [winReady, setwinReady] = useState(() => typeof window !== 'undefined');
   const t = useTranslations('CourseEdit.Structure');
 
   const dispatchCourse = useCourseDispatch();
@@ -112,10 +112,6 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
     });
     dispatchCourse({ type: 'setIsNotSaved' });
   };
-
-  useEffect(() => {
-    setwinReady(true);
-  }, []);
 
   if (!course) return <PageLoading />;
 

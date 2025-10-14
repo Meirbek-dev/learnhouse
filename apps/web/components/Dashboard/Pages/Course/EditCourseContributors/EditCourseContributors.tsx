@@ -18,13 +18,13 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useLocale, useTranslations } from 'next-intl';
+import { useEffect, useMemo, useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { getAPIUrl } from '@services/config/config';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { Locale } from '@/i18n/config';
-import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 
@@ -182,20 +182,16 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
     (url: string) => swrFetcher(url, access_token),
   );
 
-  const [isOpenToContributors, setIsOpenToContributors] = useState<boolean | undefined>();
+  // Initialize from courseStructure.open_to_contributors with lazy initialization
+  const [isOpenToContributors, setIsOpenToContributors] = useState<boolean | undefined>(
+    () => courseStructure?.open_to_contributors,
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchUser[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const debouncedSearch = useDebounce(searchQuery, 300);
   const [selectedContributors, setSelectedContributors] = useState<number[]>([]);
-  const [masterCheckboxChecked, setMasterCheckboxChecked] = useState(false);
-
-  useEffect(() => {
-    if (!isLoading && courseStructure?.open_to_contributors !== undefined) {
-      setIsOpenToContributors(courseStructure.open_to_contributors);
-    }
-  }, [isLoading, courseStructure]);
 
   useEffect(() => {
     if (
@@ -247,13 +243,11 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
     }
   }, [debouncedSearch, org?.slug, access_token, t]);
 
-  useEffect(() => {
-    if (contributors) {
-      const nonCreatorContributors = contributors.filter((c) => c.authorship !== 'CREATOR');
-      setMasterCheckboxChecked(
-        nonCreatorContributors.length > 0 && selectedContributors.length === nonCreatorContributors.length,
-      );
-    }
+  // Derive master checkbox state from contributors and selected contributors
+  const masterCheckboxChecked = useMemo(() => {
+    if (!contributors) return false;
+    const nonCreatorContributors = contributors.filter((c) => c.authorship !== 'CREATOR');
+    return nonCreatorContributors.length > 0 && selectedContributors.length === nonCreatorContributors.length;
   }, [contributors, selectedContributors]);
 
   const handleUserSelect = (username: string) => {
@@ -618,7 +612,6 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
                           <Checkbox
                             checked={masterCheckboxChecked}
                             onCheckedChange={(checked) => {
-                              setMasterCheckboxChecked(Boolean(checked));
                               if (contributors) {
                                 if (checked) {
                                   // Select all non-creator contributors

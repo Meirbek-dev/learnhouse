@@ -34,7 +34,7 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import CourseDiscussions from '@/components/discussions';
 // Import UI components
 import { Card, CardContent } from '@/components/ui/card';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -72,9 +72,8 @@ const CourseClient = (props: any) => {
     swrFetcher(url, access_token),
   );
 
-  const getLearningTags = useCallback(() => {
-    // Normalizes various formats of `course.learnings` into an array that the UI can render
-    // Accepts: JSON array (new), array, JSON object with `learnings`, plain text (legacy), or null/empty
+  // Normalizes various formats of `course.learnings` into an array that the UI can render
+  const normalizedLearnings = useMemo(() => {
     const normalize = (input: unknown): any[] => {
       if (!input) return [];
 
@@ -138,12 +137,14 @@ const CourseClient = (props: any) => {
     };
 
     const src = course?.learnings as unknown;
-    const normalized = normalize(src);
-    setLearnings(normalized);
+    return normalize(src);
   }, [course?.learnings]);
 
   useEffect(() => {
-    getLearningTags();
+    setLearnings(normalizedLearnings);
+  }, [normalizedLearnings]);
+
+  useEffect(() => {
     // Collapse chapters by default if more than 5 activities in total
     if (course?.chapters) {
       const totalActivities = course.chapters.reduce(
@@ -157,7 +158,7 @@ const CourseClient = (props: any) => {
       });
       setExpandedChapters(defaultExpanded);
     }
-  }, [course, getLearningTags]);
+  }, [course]);
 
   const getActivityTypeLabel = (activityType: string) => {
     switch (activityType) {

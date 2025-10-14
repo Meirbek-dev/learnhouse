@@ -11,8 +11,8 @@
 
 import type { UserGamificationProfile } from '@/types/gamification';
 import { motion, useAnimationControls } from 'framer-motion';
-import { Sparkles, Star } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { Sparkles, Star } from 'lucide-react';
 import { getLevelInfo } from '../levels';
 import { cn } from '@/lib/utils';
 

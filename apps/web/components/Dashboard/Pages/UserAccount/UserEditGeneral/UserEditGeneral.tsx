@@ -125,8 +125,8 @@ const DetailCard = ({
     component: ElementType;
   }[];
 }) => {
-  // Add local state for label input
-  const [localLabel, setLocalLabel] = useState(detail.label);
+  // Use lazy initialization to set initial label from prop
+  const [localLabel, setLocalLabel] = useState(() => detail.label);
   const [isUserInput, setIsUserInput] = useState(false);
   const t = useTranslations('DashPage.UserAccountSettings.generalSection');
 
@@ -170,12 +170,6 @@ const DetailCard = ({
   const handleRemove = useCallback(() => {
     onRemove(id);
   }, [id, onRemove]);
-
-  // Update local label when prop changes (but don't trigger callbacks)
-  useEffect(() => {
-    setLocalLabel(detail.label);
-    setIsUserInput(false); // Reset user input flag when prop changes
-  }, [detail.label]);
 
   return (
     <div className="space-y-2 rounded-lg border bg-white p-4 shadow-sm">

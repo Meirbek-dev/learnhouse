@@ -13,9 +13,9 @@ import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useReducedData } from '@/hooks/use-reduced-data';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useEffect } from 'react';
 
 interface LevelUpCelebrationProps {
   newLevel: number;
@@ -31,6 +31,24 @@ export function LevelUpCelebration({ newLevel, onDismiss, compact = false }: Lev
 
   // Force compact mode on mobile or reduced data
   const shouldUseCompact = compact || isMobile || prefersReducedData;
+
+  // Generate random values once for particle animations to avoid purity violations
+  // Use useState with lazy initialization to compute Math.random() only once
+  const [compactParticles] = useState(() =>
+    Array.from({ length: 8 }, () => ({
+      xOffset: (Math.random() - 0.5) * 100,
+      yOffset: (Math.random() - 0.5) * 100,
+      delay: Math.random() * 0.5,
+    })),
+  );
+
+  const [fullscreenParticles] = useState(() =>
+    Array.from({ length: 30 }, () => ({
+      xOffset: (Math.random() - 0.5) * 600,
+      yOffset: (Math.random() - 0.5) * 600,
+      delay: Math.random() * 0.8,
+    })),
+  );
 
   useEffect(() => {
     // Auto-dismiss after 4 seconds (3s on mobile for faster flow)
@@ -58,19 +76,19 @@ export function LevelUpCelebration({ newLevel, onDismiss, compact = false }: Lev
         {/* Subtle sparkle effect (skip if reduced motion or reduced data) */}
         {!prefersReducedMotion && !prefersReducedData && (
           <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
-            {[...Array(8)].map((_, i) => (
+            {compactParticles.map((particle, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{
                   opacity: [0, 0.6, 0],
                   scale: [0, 1.5, 0],
-                  x: [0, (Math.random() - 0.5) * 100],
-                  y: [0, (Math.random() - 0.5) * 100],
+                  x: [0, particle.xOffset],
+                  y: [0, particle.yOffset],
                 }}
                 transition={{
                   duration: 1.5,
-                  delay: Math.random() * 0.5,
+                  delay: particle.delay,
                   repeat: 2,
                 }}
                 className="absolute left-1/2 top-1/2 h-1.5 w-1.5 rounded-full bg-yellow-400"
@@ -141,19 +159,19 @@ export function LevelUpCelebration({ newLevel, onDismiss, compact = false }: Lev
       >
         {/* Sparkles animation */}
         <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
-          {[...Array(30)].map((_, i) => (
+          {fullscreenParticles.map((particle, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, scale: 0 }}
               animate={{
                 opacity: [0, 1, 0],
                 scale: [0, 1.5, 0],
-                x: (Math.random() - 0.5) * 600,
-                y: (Math.random() - 0.5) * 600,
+                x: particle.xOffset,
+                y: particle.yOffset,
               }}
               transition={{
                 duration: 2,
-                delay: Math.random() * 0.8,
+                delay: particle.delay,
                 repeat: 2,
               }}
               className="absolute left-1/2 top-1/2 h-2 w-2 rounded-full bg-yellow-400 shadow-lg shadow-yellow-400/50"

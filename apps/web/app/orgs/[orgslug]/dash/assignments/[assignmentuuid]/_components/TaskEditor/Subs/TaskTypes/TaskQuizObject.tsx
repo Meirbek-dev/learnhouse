@@ -15,7 +15,7 @@ import AssignmentBoxUI from '@components/Objects/Activities/Assignment/Assignmen
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Check, Info, Minus, Plus, PlusCircle, X } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { generateUUID } from '@/lib/utils';
 import { toast } from 'react-hot-toast';
@@ -63,21 +63,27 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
   const assignment = useAssignments();
 
   /* TEACHER VIEW CODE */
-  const [questions, setQuestions] = useState<QuizSchema[]>([
-    {
-      questionText: '',
-      questionUUID: `question_${generateUUID()}`,
-      options: [
-        {
-          text: '',
-          fileID: '',
-          type: 'text',
-          assigned_right_answer: false,
-          optionUUID: `option_${generateUUID()}`,
-        },
-      ],
-    },
-  ]);
+  // For teacher view, initialize from assignmentTask contents if available
+  const [questions, setQuestions] = useState<QuizSchema[]>(() => {
+    if (view === 'teacher' && assignmentTaskState.assignmentTask.contents?.questions) {
+      return assignmentTaskState.assignmentTask.contents.questions;
+    }
+    return [
+      {
+        questionText: '',
+        questionUUID: `question_${generateUUID()}`,
+        options: [
+          {
+            text: '',
+            fileID: '',
+            type: 'text',
+            assigned_right_answer: false,
+            optionUUID: `option_${generateUUID()}`,
+          },
+        ],
+      },
+    ];
+  });
 
   const handleQuestionChange = (index: number, value: string) => {
     const updatedQuestions = [...questions];
@@ -188,7 +194,6 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
     questions: [],
     submissions: [],
   });
-  const [showSavingDisclaimer, setShowSavingDisclaimer] = useState<boolean>(false);
   const [assignmentTaskOutsideProvider, setAssignmentTaskOutsideProvider] = useState<any>(null);
 
   async function chooseOption(qIndex: number, oIndex: number) {
@@ -256,11 +261,9 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
     }
   }, [assignmentTaskUUID, assignment.assignment_object.assignment_uuid, access_token]);
 
-  // Detect changes between initial and current submissions
-  useEffect(() => {
-    const hasChanges =
-      JSON.stringify(initialUserSubmissions.submissions) !== JSON.stringify(userSubmissions.submissions);
-    setShowSavingDisclaimer(hasChanges);
+  // Detect changes between initial and current submissions using useMemo
+  const showSavingDisclaimer = useMemo(() => {
+    return JSON.stringify(initialUserSubmissions.submissions) !== JSON.stringify(userSubmissions.submissions);
   }, [userSubmissions, initialUserSubmissions.submissions]);
 
   const submitFC = async () => {
@@ -308,7 +311,7 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
           type: 'reload',
         });
         toast.success(t('saveSuccess'));
-        setShowSavingDisclaimer(false);
+        // showSavingDisclaimer will automatically become false when submissions match
         // Update userSubmissions with the returned UUID for future updates
         const updatedUserSubmissionsWithUUID = {
           ...updatedUserSubmissions,
@@ -404,31 +407,18 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
       type: 'setSelectedAssignmentTaskUUID',
       payload: assignmentTaskUUID,
     });
-    // Teacher area
-    if (view === 'teacher' && assignmentTaskState.assignmentTask.contents?.questions) {
-      setQuestions(assignmentTaskState.assignmentTask.contents.questions);
+    // Student area - fetch tasks and submissions
+    if (view === 'student') {
+      void getAssignmentTaskUI();
+      void getAssignmentTaskSubmissionFromUserUI();
     }
-    // Student area
-    else if (view === 'student') {
-      getAssignmentTaskUI();
-      getAssignmentTaskSubmissionFromUserUI();
-    }
-
-    // Grading area
+    // Grading area - fetch tasks and user submissions
     else if (view === 'grading') {
-      getAssignmentTaskUI();
-      // setQuestions(assignmentTaskState.assignmentTask.contents.questions);
-      getAssignmentTaskSubmissionFromIdentifiedUserUI();
+      void getAssignmentTaskUI();
+      void getAssignmentTaskSubmissionFromIdentifiedUserUI();
     }
-  }, [
-    assignmentTaskState.assignmentTask.contents?.questions,
-    assignmentTaskStateHook,
-    assignmentTaskUUID,
-    view,
-    getAssignmentTaskUI,
-    getAssignmentTaskSubmissionFromUserUI,
-    getAssignmentTaskSubmissionFromIdentifiedUserUI,
-  ]);
+    // Teacher area initializes from state via lazy initialization
+  }, [assignmentTaskStateHook, assignmentTaskUUID, view, access_token, user_id, assignment.assignment_object.assignment_uuid]);
 
   if (questions && questions.length >= 0) {
     return (

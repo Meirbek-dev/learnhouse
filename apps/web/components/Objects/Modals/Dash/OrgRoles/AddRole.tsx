@@ -444,63 +444,55 @@ interface PermissionSectionProps {
   t: (key: string) => string;
 }
 
-const PermissionSection = React.memo<PermissionSectionProps>(({
-  title,
-  icon: Icon,
-  section,
-  permissions,
-  rights,
-  handleSelectAll,
-  handleRightChange,
-  getPermissionLabel,
-  t,
-}) => {
-  const sectionRights = rights[section] as any;
-  const allSelected = permissions.every((perm) => sectionRights[perm]);
-  const someSelected = permissions.some((perm) => sectionRights[perm]) && !allSelected;
+const PermissionSection = React.memo<PermissionSectionProps>(
+  ({ title, icon: Icon, section, permissions, rights, handleSelectAll, handleRightChange, getPermissionLabel, t }) => {
+    const sectionRights = rights[section] as any;
+    const allSelected = permissions.every((perm) => sectionRights[perm]);
+    const someSelected = permissions.some((perm) => sectionRights[perm]) && !allSelected;
 
-  return (
-    <div className="bg-background mb-4 rounded-lg border border-gray-200 p-4 shadow-sm">
-      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center space-x-2">
-          <Icon className="h-4 w-4 text-gray-500" />
-          <h3 className="text-sm font-semibold text-gray-800 sm:text-base">{title}</h3>
-        </div>
-        <button
-          type="button"
-          onClick={() => handleSelectAll(section, !allSelected)}
-          className="text-primary hover:text-primary/80 flex items-center space-x-2 self-start text-sm font-medium transition-colors sm:self-auto"
-        >
-          {allSelected ? (
-            <CheckSquare className="h-4 w-4" />
-          ) : someSelected ? (
-            <Square className="h-4 w-4" />
-          ) : (
-            <Square className="h-4 w-4" />
-          )}
-          <span className="hidden sm:inline">{allSelected ? t('deselectAll') : t('selectAll')}</span>
-          <span className="sm:hidden">{allSelected ? t('deselect') : t('select')}</span>
-        </button>
-      </div>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {permissions.map((permission) => (
-          <label
-            key={permission}
-            className="flex cursor-pointer items-center space-x-2 rounded-md p-2 transition-colors hover:bg-gray-50"
+    return (
+      <div className="bg-background mb-4 rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center space-x-2">
+            <Icon className="h-4 w-4 text-gray-500" />
+            <h3 className="text-sm font-semibold text-gray-800 sm:text-base">{title}</h3>
+          </div>
+          <button
+            type="button"
+            onClick={() => handleSelectAll(section, !allSelected)}
+            className="text-primary hover:text-primary/80 flex items-center space-x-2 self-start text-sm font-medium transition-colors sm:self-auto"
           >
-            <input
-              type="checkbox"
-              checked={rights[section]?.[permission as keyof (typeof rights)[typeof section]]}
-              onChange={(e) => handleRightChange(section, permission, e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
-            />
-            <span className="text-sm text-gray-700 capitalize">{getPermissionLabel(permission)}</span>
-          </label>
-        ))}
+            {allSelected ? (
+              <CheckSquare className="h-4 w-4" />
+            ) : someSelected ? (
+              <Square className="h-4 w-4" />
+            ) : (
+              <Square className="h-4 w-4" />
+            )}
+            <span className="hidden sm:inline">{allSelected ? t('deselectAll') : t('selectAll')}</span>
+            <span className="sm:hidden">{allSelected ? t('deselect') : t('select')}</span>
+          </button>
+        </div>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {permissions.map((permission) => (
+            <label
+              key={permission}
+              className="flex cursor-pointer items-center space-x-2 rounded-md p-2 transition-colors hover:bg-gray-50"
+            >
+              <input
+                type="checkbox"
+                checked={rights[section]?.[permission as keyof (typeof rights)[typeof section]]}
+                onChange={(e) => handleRightChange(section, permission, e.target.checked)}
+                className="rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700 capitalize">{getPermissionLabel(permission)}</span>
+            </label>
+          ))}
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  },
+);
 
 PermissionSection.displayName = 'PermissionSection';
 

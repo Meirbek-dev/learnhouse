@@ -210,7 +210,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
       console.error('Logout failed:', error);
       // Could add toast notification here
     }
-  }, [org?.slug]);
+  }, [org]);
 
   // Keyboard shortcut handler
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type React from 'react';
 
 interface LinkInputTooltipProps {
@@ -9,13 +9,9 @@ interface LinkInputTooltipProps {
   currentUrl?: string;
 }
 
-const LinkInputTooltip: React.FC<LinkInputTooltipProps> = ({ onSave, onCancel, currentUrl }) => {
-  const [url, setUrl] = useState(currentUrl || '');
+const LinkInputTooltip: React.FC<LinkInputTooltipProps> = ({ onSave, onCancel, currentUrl = '' }) => {
+  const [url, setUrl] = useState(currentUrl);
   const t = useTranslations('Components.Editor.LinkInputTooltip');
-
-  useEffect(() => {
-    setUrl(currentUrl || '');
-  }, [currentUrl]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

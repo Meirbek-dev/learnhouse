@@ -6,7 +6,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { updateAssignmentTask, updateReferenceFile } from '@services/courses/assignments';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { useCallback, useEffect, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { Cloud, File, Info, Loader2, UploadCloud } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getActivityByID } from '@services/courses/activities';
@@ -286,14 +286,13 @@ const UpdateTaskRef = () => {
     );
   };
 
-  const getActivityUI = useCallback(async () => {
-    const res = await getActivityByID(assignment.assignment_object.activity_id, null, access_token);
-    setActivity(res.data);
-  }, [assignment.assignment_object.activity_id, access_token, setActivity]);
-
   useEffect(() => {
+    const getActivityUI = async () => {
+      const res = await getActivityByID(assignment.assignment_object.activity_id, null, access_token);
+      setActivity(res.data);
+    };
     getActivityUI();
-  }, [getActivityUI]);
+  }, [assignment.assignment_object.activity_id, access_token]);
 
   return (
     <div className="h-[200px] w-auto rounded-xl bg-gray-50 shadow-sm outline-gray-200">

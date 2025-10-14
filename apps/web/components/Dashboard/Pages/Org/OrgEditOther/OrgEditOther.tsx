@@ -13,9 +13,9 @@ import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+import { useState } from 'react';
 import type { FC } from 'react';
 import { mutate } from 'swr';
 import { z } from 'zod';
@@ -42,18 +42,15 @@ const OrgEditOther: FC = () => {
   const access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any;
   const [selectedView, setSelectedView] = useState<'list' | 'edit'>('list');
-  const [scripts, setScripts] = useState<Script[]>([]);
+  // Initialize scripts from org with lazy initialization
+  const [scripts, setScripts] = useState<Script[]>(() => {
+    if (org?.scripts?.scripts) {
+      return Array.isArray(org.scripts.scripts) ? org.scripts.scripts : [];
+    }
+    return [];
+  });
   const [currentScript, setCurrentScript] = useState<Script | null>(null);
   const t = useTranslations('DashPage.Other');
-
-  // Initialize scripts from org
-  useEffect(() => {
-    if (org?.scripts?.scripts) {
-      setScripts(Array.isArray(org.scripts.scripts) ? org.scripts.scripts : []);
-    } else {
-      setScripts([]);
-    }
-  }, [org]);
 
   const updateOrg = async (values: Script) => {
     const loadingToast = toast.loading(t('updatingOrganization'));

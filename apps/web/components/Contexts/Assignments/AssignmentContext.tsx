@@ -3,9 +3,9 @@
 import ErrorUI from '@components/Objects/StyledElements/Error/Error';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { createContext, use, useEffect, useState } from 'react';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { createContext, use, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import useSWR from 'swr';
@@ -34,12 +34,6 @@ export const AssignmentProvider = ({
   const session = useLHSession();
   const accessToken = session?.data?.tokens?.access_token;
   const t = useTranslations('Contexts.Assignment');
-  const [assignmentsFull, setAssignmentsFull] = useState<AssignmentContextType>({
-    assignment_object: null,
-    assignment_tasks: null,
-    course_object: null,
-    activity_object: null,
-  });
 
   const { data: assignment, error: assignmentError } = useSWR(
     assignment_uuid && assignment_uuid !== 'undefined' ? `${getAPIUrl()}assignments/${assignment_uuid}` : null,
@@ -65,15 +59,22 @@ export const AssignmentProvider = ({
     (url) => swrFetcher(url, accessToken),
   );
 
-  useEffect(() => {
+  // Derive assignmentsFull using useMemo instead of setState in effect
+  const assignmentsFull = useMemo<AssignmentContextType>(() => {
     if (assignment && assignment_tasks && (!course_id || course_object) && (!activity_id || activity_object)) {
-      setAssignmentsFull({
+      return {
         assignment_object: assignment,
         assignment_tasks,
         course_object,
         activity_object,
-      });
+      };
     }
+    return {
+      assignment_object: null,
+      assignment_tasks: null,
+      course_object: null,
+      activity_object: null,
+    };
   }, [assignment, assignment_tasks, course_object, activity_object, course_id, activity_id]);
 
   const isLoading =

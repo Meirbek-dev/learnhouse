@@ -1,30 +1,12 @@
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useCallback, useEffect, useState } from 'react';
 
 interface UseGetAIFeatures {
   feature: 'editor' | 'activity_ask' | 'course_ask' | 'global_ai_ask';
 }
 
-function useGetAIFeatures(props: UseGetAIFeatures) {
+function useGetAIFeatures(_props: UseGetAIFeatures) {
   const org = useOrg() as any;
-  const [isEnabled, setIsEnabled] = useState<boolean>(false);
-
-  const checkAvailableAIFeaturesOnOrg = useCallback(
-    (_feature: string) => {
-      return org?.config?.config?.features.ai.enabled;
-    },
-    [org],
-  );
-
-  useEffect(() => {
-    if (org) {
-      // Check if org is not null or undefined
-      const isEnabledStatus = checkAvailableAIFeaturesOnOrg(props.feature);
-      setIsEnabled(isEnabledStatus);
-    }
-  }, [org, checkAvailableAIFeaturesOnOrg, props.feature]);
-
-  return isEnabled;
+  return org?.config?.config?.features.ai.enabled || false;
 }
 
 export default useGetAIFeatures;

@@ -8,10 +8,10 @@ import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import { Info } from 'lucide-react';
+import { useState } from 'react';
 import Link from 'next/link';
 
 interface UserGroup {
@@ -37,14 +37,17 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
   );
   const [selectedUserGroup, setSelectedUserGroup] = useState<number | null>(null);
 
+  // Use first usergroup as default if not explicitly set
+  const effectiveUserGroup = selectedUserGroup ?? usergroups?.[0]?.id ?? null;
+
   const handleLink = async () => {
-    if (!selectedUserGroup) {
+    if (!effectiveUserGroup) {
       toast.error(t('selectUserGroupFirst'));
       return;
     }
 
     try {
-      const res = await linkResourcesToUserGroup(selectedUserGroup, courseStructure.course_uuid, access_token);
+      const res = await linkResourcesToUserGroup(effectiveUserGroup, courseStructure.course_uuid, access_token);
       if (res.status === 200) {
         props.setUserGroupModal(false);
         toast.success(t('linkSuccess'));
@@ -56,12 +59,6 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
       toast.error(t('linkError', { error: t('unknownError') }));
     }
   };
-
-  useEffect(() => {
-    if (usergroups && usergroups.length > 0) {
-      setSelectedUserGroup(usergroups[0].id);
-    }
-  }, [usergroups]);
 
   return (
     <div className="flex flex-col space-y-1">
@@ -78,7 +75,7 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
 
             <Select
               onValueChange={(value) => setSelectedUserGroup(Number(value))}
-              defaultValue={selectedUserGroup?.toString()}
+              value={effectiveUserGroup?.toString()}
             >
               <SelectTrigger className="mx-5 mt-2 w-fit min-w-32">
                 <SelectValue placeholder={t('selectUserGroup')} />

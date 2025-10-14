@@ -8,14 +8,15 @@ import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useCallback, useEffect, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Draggable } from '@hello-pangea/dnd';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { mutate } from 'swr';
+import useSWR from 'swr';
 
 interface ActivitiyElementProps {
   orgslug: string;
@@ -316,33 +317,23 @@ const ActivityElementOptions = ({
   isMobile: boolean;
   t: ReturnType<typeof useTranslations>;
 }) => {
-  const [assignmentUUID, setAssignmentUUID] = useState('');
   const org = useOrg() as any;
   const course = useCourse();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 
-  const getAssignmentUUIDFromActivityUUID = useCallback(
-    async (activityUUID: string): Promise<string | undefined> => {
-      const assignment = await getAssignmentFromActivityUUID(activityUUID, access_token);
-      if (assignment?.data) {
-        return assignment.data.assignment_uuid;
-      }
-      return undefined;
+  // Use SWR to fetch assignment UUID for TYPE_ASSIGNMENT activities
+  const { data: assignmentData } = useSWR(
+    activity.activity_type === 'TYPE_ASSIGNMENT'
+      ? [`assignment-from-activity-${activity.activity_uuid}`, access_token]
+      : null,
+    async () => {
+      const assignment = await getAssignmentFromActivityUUID(activity.activity_uuid, access_token);
+      return assignment?.data?.assignment_uuid?.replace('assignment_', '') || '';
     },
-    [access_token],
   );
 
-  const fetchAssignmentUUID = useCallback(async () => {
-    if (activity.activity_type === 'TYPE_ASSIGNMENT') {
-      const assignment_uuid = await getAssignmentUUIDFromActivityUUID(activity.activity_uuid);
-      if (assignment_uuid) setAssignmentUUID(assignment_uuid.replace('assignment_', ''));
-    }
-  }, [activity.activity_type, activity.activity_uuid, getAssignmentUUIDFromActivityUUID]);
-
-  useEffect(() => {
-    fetchAssignmentUUID();
-  }, [fetchAssignmentUUID]);
+  const assignmentUUID = assignmentData || '';
 
   return (
     <>

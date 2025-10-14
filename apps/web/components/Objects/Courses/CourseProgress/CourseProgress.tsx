@@ -1,7 +1,7 @@
 import { ArrowRight, BookOpenCheck, Check, FileText, Folder, Layers, Square, Video } from 'lucide-react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { useCallback, useEffect, useState } from 'react';
 import { getUriWithOrg } from '@services/config/config';
+import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import type { FC } from 'react';
 import Link from 'next/link';
@@ -16,8 +16,6 @@ interface CourseProgressProps {
 
 const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onClose, trailData }) => {
   const t = useTranslations('Courses.CoursesActions');
-  const [completedActivities, setCompletedActivities] = useState(0);
-  const [totalActivities, setTotalActivities] = useState(0);
 
   const isActivityDone = useCallback(
     (activity: any) => {
@@ -34,7 +32,7 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onCl
     [course.course_uuid, trailData?.runs],
   );
 
-  useEffect(() => {
+  const { completedActivities, totalActivities } = useMemo(() => {
     let total = 0;
     let completed = 0;
 
@@ -47,8 +45,7 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onCl
       });
     });
 
-    setTotalActivities(total);
-    setCompletedActivities(completed);
+    return { completedActivities: completed, totalActivities: total };
   }, [course.chapters, isActivityDone]);
 
   const getActivityTypeIcon = (activityType: string) => {

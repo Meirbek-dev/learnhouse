@@ -8,10 +8,10 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useSyncExternalStore, useCallback } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 
 interface CollapsibleSectionProps {
@@ -30,54 +30,41 @@ export function CollapsibleSection({
   className = '',
 }: CollapsibleSectionProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
-  const [isHydrated, setIsHydrated] = useState(false);
 
-  // Load preference from localStorage on mount
-  useEffect(() => {
+  // Use useSyncExternalStore for SSR-safe localStorage access
+  const subscribe = useCallback((callback: () => void) => {
+    window.addEventListener('storage', callback);
+    return () => window.removeEventListener('storage', callback);
+  }, []);
+
+  const getSnapshot = useCallback(() => {
     try {
       const savedState = localStorage.getItem(storageKey);
-      if (savedState !== null) {
-        setIsExpanded(savedState === 'true');
-      }
+      return savedState !== null ? savedState : String(defaultExpanded);
     } catch (error) {
       console.warn('Failed to load collapse state:', error);
+      return String(defaultExpanded);
     }
-    setIsHydrated(true);
-  }, [storageKey]);
+  }, [storageKey, defaultExpanded]);
+
+  const getServerSnapshot = useCallback(() => {
+    return String(defaultExpanded);
+  }, [defaultExpanded]);
+
+  const isExpandedString = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const isExpanded = isExpandedString === 'true';
 
   // Save preference to localStorage
   const toggleExpanded = () => {
     const newState = !isExpanded;
-    setIsExpanded(newState);
     try {
       localStorage.setItem(storageKey, String(newState));
+      // Trigger storage event manually for same-window updates
+      window.dispatchEvent(new StorageEvent('storage', { key: storageKey }));
     } catch (error) {
       console.warn('Failed to save collapse state:', error);
     }
   };
-
-  // Prevent hydration mismatch
-  if (!isHydrated) {
-    return (
-      <Card className={className}>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-xl font-semibold">{title}</CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-              disabled
-            >
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardHeader>
-        {defaultExpanded && <CardContent>{children}</CardContent>}
-      </Card>
-    );
-  }
 
   return (
     <Card className={className}>

@@ -1,10 +1,10 @@
 import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
 import { getActivityMediaDirectory } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useEffect, useMemo, useState } from 'react';
 import type ArtplayerType from 'artplayer';
 import { useLocale } from 'next-intl';
 import YouTube from 'react-youtube';
+import { useMemo } from 'react';
 
 // Function to extract YouTube video ID from various YouTube URL formats
 function getYouTubeID(url: string): string | null {
@@ -51,9 +51,16 @@ interface VideoActivityProps {
 
 const VideoActivity = ({ activity, course }: VideoActivityProps) => {
   const org = useOrg() as any;
-  const [videoId, setVideoId] = useState('');
   const fullLocale = useLocale();
   const locale = fullLocale.split('-')[0];
+
+  // Extract YouTube ID from activity content
+  const videoId = useMemo(() => {
+    if (activity?.content?.uri) {
+      return getYouTubeID(activity.content.uri) || '';
+    }
+    return '';
+  }, [activity]);
 
   // Generate subtitle entries from activity details
   const subtitleEntries: SubtitleEntry[] = useMemo(() => {
@@ -87,13 +94,6 @@ const VideoActivity = ({ activity, course }: VideoActivityProps) => {
     }
     return '';
   };
-
-  useEffect(() => {
-    if (activity?.content?.uri) {
-      const id = getYouTubeID(activity.content.uri);
-      setVideoId(id || '');
-    }
-  }, [activity]);
 
   const getVideoSrc = () => {
     if (!activity.content?.filename) return '';
