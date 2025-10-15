@@ -397,7 +397,17 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
       void loadAssignmentTask();
       void getAssignmentTaskSubmissionFromIdentifiedUserUI();
     }
-  }, [assignmentTaskState.assignmentTask.contents?.questions, view, assignmentTaskUUID, user_id, access_token, assignment.assignment_object.assignment_uuid, loadAssignmentTask, loadUserSubmissions, getAssignmentTaskSubmissionFromIdentifiedUserUI]);
+  }, [
+    assignmentTaskState.assignmentTask.contents?.questions,
+    view,
+    assignmentTaskUUID,
+    user_id,
+    access_token,
+    assignment.assignment_object.assignment_uuid,
+    loadAssignmentTask,
+    loadUserSubmissions,
+    getAssignmentTaskSubmissionFromIdentifiedUserUI,
+  ]);
 
   // Show main UI for teacher view (always has at least the default question)
   // or when questions exist for other views

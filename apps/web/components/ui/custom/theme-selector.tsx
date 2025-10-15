@@ -42,15 +42,7 @@ export function ThemeSelector({ className }: ThemeSelectorProps) {
 
   return (
     <div className={cn('space-y-4', className)}>
-      <Label className="text-base font-medium">
-        {t('title')}{' '}
-        <Badge
-          className="text-xs"
-          variant="secondary"
-        >
-          {t('beta')}
-        </Badge>
-      </Label>
+      <Label className="text-base font-medium">{t('title')}</Label>
 
       <div className="space-y-3">
         <Select

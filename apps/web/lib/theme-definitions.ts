@@ -467,10 +467,149 @@ export const violetBloomTheme = createThemeFromCSS(
   'Radiant purples with soft highlights, capturing the elegance and freshness of blooming violets',
 );
 
+export const artDecoTheme = createThemeFromCSS(
+  'artDeco',
+  'Art Deco',
+  `
+  --primary: oklch(0.77 0.14 91.27);
+  --secondary: oklch(0.67 0.13 61.58);
+  --accent: oklch(0.89 0.18 95.47);
+  `,
+  'Elegant Art Deco style with luxurious gold and geometric patterns',
+);
+
+export const corporateTheme = createThemeFromCSS(
+  'corporate',
+  'Corporate',
+  `
+  --primary: oklch(0.48 0.20 260.47);
+  --secondary: oklch(0.97 0 0);
+  --accent: oklch(0.95 0.02 260.18);
+  `,
+  'Professional corporate theme with clean lines and business aesthetics',
+);
+
+export const ghibliStudioTheme = createThemeFromCSS(
+  'ghibliStudio',
+  'Ghibli Studio',
+  `
+  --primary: oklch(0.71 0.10 111.96);
+  --secondary: oklch(0.88 0.05 83.32);
+  --accent: oklch(0.86 0.05 85.12);
+  `,
+  'Whimsical Studio Ghibli-inspired theme with gentle pastels and natural tones',
+);
+
+export const mashmallowTheme = createThemeFromCSS(
+  'mashmallow',
+  'Marshmallow',
+  `
+  --primary: oklch(0.80 0.14 348.82);
+  --secondary: oklch(0.94 0.07 97.70);
+  --accent: oklch(0.83 0.09 247.96);
+  `,
+  'Soft and fluffy marshmallow-inspired theme with sweet pastel colors',
+);
+
+export const marvelTheme = createThemeFromCSS(
+  'marvel',
+  'Marvel',
+  `
+  --primary: oklch(0.55 0.22 27.03);
+  --secondary: oklch(0.52 0.14 247.51);
+  --accent: oklch(0.86 0.04 33.45);
+  `,
+  'Heroic Marvel-inspired theme with bold reds and vibrant comic book aesthetics',
+);
+
+export const materialDesignTheme = createThemeFromCSS(
+  'materialDesign',
+  'Material Design',
+  `
+  --primary: oklch(0.51 0.21 286.50);
+  --secondary: oklch(0.49 0.04 300.23);
+  --accent: oklch(0.92 0.04 303.47);
+  `,
+  'Google Material Design theme with clean elevation and bold colors',
+);
+
+export const perplexityTheme = createThemeFromCSS(
+  'perplexity',
+  'Perplexity',
+  `
+  --primary: oklch(0.72 0.12 210.36);
+  --secondary: oklch(0.97 0.01 247.91);
+  --accent: oklch(0.96 0.02 204.34);
+  `,
+  'Clean and modern Perplexity-inspired theme with cool blue tones',
+);
+
+export const slackTheme = createThemeFromCSS(
+  'slack',
+  'Slack',
+  `
+  --primary: oklch(0.37 0.14 323.40);
+  --secondary: oklch(0.96 0.01 311.36);
+  --accent: oklch(0.88 0.02 323.34);
+  `,
+  'Collaborative Slack-inspired theme with purple accents and clean workspace aesthetics',
+);
+
+export const spotifyTheme = createThemeFromCSS(
+  'spotify',
+  'Spotify',
+  `
+  --primary: oklch(0.67 0.17 153.85);
+  --secondary: oklch(0.90 0.02 238.66);
+  --accent: oklch(0.90 0.02 240.73);
+  `,
+  'Music-inspired Spotify theme with vibrant green and dark contrasts',
+);
+
+export const summerTheme = createThemeFromCSS(
+  'summer',
+  'Summer',
+  `
+  --primary: oklch(0.70 0.17 28.12);
+  --secondary: oklch(0.81 0.15 71.81);
+  --accent: oklch(0.64 0.22 28.93);
+  `,
+  'Bright and sunny summer theme with warm oranges and golden tones',
+);
+
+export const valorantTheme = createThemeFromCSS(
+  'valorant',
+  'Valorant',
+  `
+  --primary: oklch(0.67 0.22 21.22);
+  --secondary: oklch(0.95 0.02 10.30);
+  --accent: oklch(0.99 0 0);
+  `,
+  'Tactical Valorant-inspired theme with bold reds and sharp contrasts',
+);
+
+export const vscodeTheme = createThemeFromCSS(
+  'vscode',
+  'VS Code',
+  `
+  --primary: oklch(0.71 0.15 239.15);
+  --secondary: oklch(0.91 0.03 229.20);
+  --accent: oklch(0.88 0.02 235.72);
+  `,
+  'Developer-friendly VS Code theme with cool blues and clean code aesthetics',
+);
+
 export const themes = [
   defaultTheme,
+  cosmicNightTheme,
+  vintagePaperTheme,
+  perpetuityTheme,
+  quantumRoseTheme,
+  cyberpunkTheme,
+  t3chatTheme,
   amberMinimalTheme,
   amethystHazeTheme,
+  artDecoTheme,
   blackTheme,
   boldTechTheme,
   bubblegumTheme,
@@ -480,13 +619,16 @@ export const themes = [
   claudeTheme,
   claymorphismTheme,
   cleanSlateTheme,
-  cosmicNightTheme,
-  cyberpunkTheme,
+  corporateTheme,
   darkmatterTheme,
   doom64Theme,
   elegantLuxuryTheme,
+  ghibliStudioTheme,
   graphiteTheme,
   kodamaGraveTheme,
+  marvelTheme,
+  mashmallowTheme,
+  materialDesignTheme,
   midnightBloomTheme,
   mochaMousseTheme,
   monoTheme,
@@ -496,18 +638,20 @@ export const themes = [
   notebookTheme,
   oceanBreezeTheme,
   pastelDreamsTheme,
-  perpetuityTheme,
-  quantumRoseTheme,
+  perplexityTheme,
   retroArcadeTheme,
+  slackTheme,
   softPopTheme,
   solarDuskTheme,
+  spotifyTheme,
   starryNightTheme,
+  summerTheme,
   sunsetHorizonTheme,
   supabaseTheme,
-  t3chatTheme,
   tangerineTheme,
   twitterTheme,
+  valorantTheme,
   vercelTheme,
-  vintagePaperTheme,
   violetBloomTheme,
+  vscodeTheme,
 ] as const;

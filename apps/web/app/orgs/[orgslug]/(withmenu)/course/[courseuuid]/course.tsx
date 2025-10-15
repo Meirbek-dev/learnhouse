@@ -34,8 +34,8 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import CourseDiscussions from '@/components/discussions';
 // Import UI components
 import { Card, CardContent } from '@/components/ui/card';
-import { useEffect, useMemo, useState } from 'react';
 import { Separator } from '@/components/ui/separator';
+import { useEffect, useMemo, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

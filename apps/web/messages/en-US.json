@@ -4942,6 +4942,10 @@
       "name": "Amethyst Haze",
       "description": "Soft purple haze theme with amethyst accents"
     },
+    "artDeco": {
+      "name": "Art Deco",
+      "description": "Elegant Art Deco style with luxurious gold and geometric patterns"
+    },
     "boldtech": {
       "name": "Bold Tech",
       "description": "Bold purple tech theme with vibrant accents"
@@ -4974,6 +4978,10 @@
       "name": "Clean Slate",
       "description": "Crisp minimalist theme with clean neutral tones"
     },
+    "corporate": {
+      "name": "Corporate",
+      "description": "Professional corporate theme with clean lines and business aesthetics"
+    },
     "cosmicnight": {
       "name": "Cosmic Night",
       "description": "Deep purple cosmic theme with starry night aesthetics"
@@ -4994,6 +5002,10 @@
       "name": "Elegant Luxury",
       "description": "Sophisticated luxury theme with elegant cream tones and rich mahogany accents"
     },
+    "ghibliStudio": {
+      "name": "Ghibli Studio",
+      "description": "Whimsical Studio Ghibli-inspired theme with gentle pastels and natural tones"
+    },
     "graphite": {
       "name": "Graphite",
       "description": "Professional monochrome theme with smooth graphite gray tones"
@@ -5001,6 +5013,18 @@
     "kodamaGrave": {
       "name": "Kodama Grave",
       "description": "Nature-inspired theme with peaceful forest green and earthy tones"
+    },
+    "marvel": {
+      "name": "Marvel",
+      "description": "Heroic Marvel-inspired theme with bold reds and vibrant comic book aesthetics"
+    },
+    "mashmallow": {
+      "name": "Marshmallow",
+      "description": "Soft and fluffy marshmallow-inspired theme with sweet pastel colors"
+    },
+    "materialDesign": {
+      "name": "Material Design",
+      "description": "Google Material Design theme with clean elevation and bold colors"
     },
     "midnightBloom": {
       "name": "Midnight Bloom",
@@ -5038,6 +5062,10 @@
       "name": "Pastel Dreams",
       "description": "Dreamy pastel theme with soft lavender and pink cotton candy colors"
     },
+    "perplexity": {
+      "name": "Perplexity",
+      "description": "Clean and modern Perplexity-inspired theme with cool blue tones"
+    },
     "perpetuity": {
       "name": "Perpetuity",
       "description": "Timeless monospace terminal theme with cyan-tinted blue aesthetics"
@@ -5050,6 +5078,10 @@
       "name": "Retro Arcade",
       "description": "Bold neon-inspired palette with playful contrasts, evoking the vibrant glow of 80s arcades"
     },
+    "slack": {
+      "name": "Slack",
+      "description": "Collaborative Slack-inspired theme with purple accents and clean workspace aesthetics"
+    },
     "softPop": {
       "name": "Soft Pop",
       "description": "Bright, bubbly theme with pastel accents and clean contrasts for a playful yet modern look"
@@ -5058,9 +5090,17 @@
       "name": "Solar Dusk",
       "description": "Warm, golden tones fading into deep shadows—captures the calm glow of dusk before nightfall"
     },
+    "spotify": {
+      "name": "Spotify",
+      "description": "Music-inspired Spotify theme with vibrant green and dark contrasts"
+    },
     "starryNight": {
       "name": "Starry Night",
       "description": "Deep midnight blues and luminous highlights, evoking a tranquil star-filled night sky"
+    },
+    "summer": {
+      "name": "Summer",
+      "description": "Bright and sunny summer theme with warm oranges and golden tones"
     },
     "sunsetHorizon": {
       "name": "Sunset Horizon",
@@ -5082,6 +5122,10 @@
       "name": "Twitter",
       "description": "Clean whites with iconic Twitter blue highlights, optimized for clarity and social interaction"
     },
+    "valorant": {
+      "name": "Valorant",
+      "description": "Tactical Valorant-inspired theme with bold reds and sharp contrasts"
+    },
     "vercel": {
       "name": "Vercel",
       "description": "Minimalist monochrome design with sharp contrasts, reflecting Vercel's sleek and modern aesthetic"
@@ -5093,6 +5137,10 @@
     "violetBloom": {
       "name": "Violet Bloom",
       "description": "Radiant purples with soft highlights, capturing the elegance and freshness of blooming violets"
+    },
+    "vscode": {
+      "name": "VS Code",
+      "description": "Developer-friendly VS Code theme with cool blues and clean code aesthetics"
     }
   },
   "ToastMessages": {

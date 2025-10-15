@@ -418,7 +418,17 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
       void getAssignmentTaskSubmissionFromIdentifiedUserUI();
     }
     // Teacher area initializes from state via lazy initialization
-  }, [assignmentTaskStateHook, assignmentTaskUUID, view, access_token, user_id, assignment.assignment_object.assignment_uuid, getAssignmentTaskUI, getAssignmentTaskSubmissionFromUserUI, getAssignmentTaskSubmissionFromIdentifiedUserUI]);
+  }, [
+    assignmentTaskStateHook,
+    assignmentTaskUUID,
+    view,
+    access_token,
+    user_id,
+    assignment.assignment_object.assignment_uuid,
+    getAssignmentTaskUI,
+    getAssignmentTaskSubmissionFromUserUI,
+    getAssignmentTaskSubmissionFromIdentifiedUserUI,
+  ]);
 
   if (questions && questions.length >= 0) {
     return (

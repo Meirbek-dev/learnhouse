@@ -24,7 +24,7 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
   const t = useTranslations('Components.LocaleSwitcher');
   const session = useLHSession() as any;
 
-  const handleLocaleChange = async (newLocale: Locale) => {
+  const handleLocaleChange = (newLocale: Locale) => {
     startTransition(async () => {
       await setUserLocale(newLocale);
 

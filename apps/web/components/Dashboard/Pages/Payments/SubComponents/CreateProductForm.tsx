@@ -188,9 +188,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                 name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      {priceType === 'fixed_price' ? t('priceLabel') : t('minAmountLabel')}
-                    </FormLabel>
+                    <FormLabel>{priceType === 'fixed_price' ? t('priceLabel') : t('minAmountLabel')}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
