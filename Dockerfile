@@ -41,9 +41,9 @@ COPY --from=frontend-deps /app/node_modules ./node_modules
 COPY apps/web .
 
 # Set environment variables for the build
-ENV NEXT_PUBLIC_OPENU_API_URL=http://192.168.12.35/api/v1/
-ENV NEXT_PUBLIC_OPENU_BACKEND_URL=http://192.168.12.35/
-ENV NEXT_PUBLIC_OPENU_DOMAIN=192.168.12.35
+ENV NEXT_PUBLIC_OPENU_API_URL=https://cs-mooc.tou.edu.kz/api/v1/
+ENV NEXT_PUBLIC_OPENU_BACKEND_URL=https://cs-mooc.tou.edu.kz/
+ENV NEXT_PUBLIC_OPENU_DOMAIN=cs-mooc.tou.edu.kz
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
