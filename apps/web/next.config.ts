@@ -25,6 +25,35 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   devIndicators: false,
   output: 'standalone',
+  // Reduce number of chunks to avoid rate limiting
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            // Create fewer, larger chunks
+            commons: {
+              name: 'commons',
+              chunks: 'all',
+              minChunks: 2,
+              priority: 10,
+            },
+            lib: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'lib',
+              priority: 20,
+              reuseExistingChunk: true,
+            },
+          },
+        },
+      };
+    }
+    return config;
+  },
 };
 
 const withNextIntl = createNextIntlPlugin();
