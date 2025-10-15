@@ -25,31 +25,40 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   devIndicators: false,
   output: 'standalone',
-  // Reduce number of chunks to avoid rate limiting
+  // AGGRESSIVE: Create as few chunks as possible to avoid university rate limiting
   webpack: (config, { isServer }) => {
     if (!isServer) {
+      // Disable code splitting as much as possible
       config.optimization = {
         ...config.optimization,
         splitChunks: {
           chunks: 'all',
+          maxInitialRequests: 3, // Reduce parallel requests
+          maxAsyncRequests: 3,
+          minSize: 100000, // Larger minimum chunk size (100kb)
           cacheGroups: {
             default: false,
             vendors: false,
-            // Create fewer, larger chunks
-            commons: {
-              name: 'commons',
-              chunks: 'all',
-              minChunks: 2,
-              priority: 10,
-            },
-            lib: {
+            // Single vendor bundle
+            vendor: {
               test: /[\\/]node_modules[\\/]/,
-              name: 'lib',
+              name: 'vendor',
+              chunks: 'all',
               priority: 20,
+              enforce: true,
+            },
+            // Single common bundle
+            common: {
+              name: 'common',
+              minChunks: 2,
+              chunks: 'all',
+              priority: 10,
               reuseExistingChunk: true,
+              enforce: true,
             },
           },
         },
+        runtimeChunk: false, // Disable runtime chunk splitting
       };
     }
     return config;
