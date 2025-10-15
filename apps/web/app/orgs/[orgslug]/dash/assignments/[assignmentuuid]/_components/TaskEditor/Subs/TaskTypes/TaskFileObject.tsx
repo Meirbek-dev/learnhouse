@@ -260,7 +260,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
       // setQuestions(assignmentTaskState.assignmentTask.contents.questions);
       void getAssignmentTaskSubmissionFromIdentifiedUserUI();
     }
-  }, [view, assignmentTaskUUID, user_id, access_token, assignment.assignment_object.assignment_uuid]);
+  }, [view, assignmentTaskUUID, user_id, access_token, assignment.assignment_object.assignment_uuid, getAssignmentTaskUI, getAssignmentTaskSubmissionFromUserUI, getAssignmentTaskSubmissionFromIdentifiedUserUI]);
 
   return (
     <AssignmentBoxUI

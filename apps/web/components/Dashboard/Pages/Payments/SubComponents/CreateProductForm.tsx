@@ -65,6 +65,9 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
     mode: 'onChange',
   });
 
+  const productType = form.watch('product_type');
+  const priceType = form.watch('price_type');
+
   const handleSubmit = async (values: ProductFormValues) => {
     const loadingToast = toast.loading(tNotify('creatingProduct'));
     try {
@@ -168,7 +171,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="fixed_price">{t('priceTypes.fixed_price')}</SelectItem>
-                    {form.watch('product_type') !== 'subscription' && (
+                    {productType !== 'subscription' && (
                       <SelectItem value="customer_choice">{t('priceTypes.customer_choice')}</SelectItem>
                     )}
                   </SelectContent>
@@ -186,12 +189,12 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      {form.watch('price_type') === 'fixed_price' ? t('priceLabel') : t('minAmountLabel')}
+                      {priceType === 'fixed_price' ? t('priceLabel') : t('minAmountLabel')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         type="number"
-                        placeholder={form.watch('price_type') === 'fixed_price' ? t('priceLabel') : t('minAmountLabel')}
+                        placeholder={priceType === 'fixed_price' ? t('priceLabel') : t('minAmountLabel')}
                         {...field}
                         onChange={(e) => {
                           field.onChange(Number(e.target.value));
