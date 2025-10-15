@@ -25,32 +25,34 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   devIndicators: false,
   output: 'standalone',
-  // AGGRESSIVE: Create as few chunks as possible to avoid university rate limiting
+  // ULTRA-AGGRESSIVE: Minimize chunks to absolute minimum for university rate limiting
   webpack: (config, { isServer }) => {
     if (!isServer) {
-      // Disable code splitting as much as possible
+      // Almost completely disable code splitting
       config.optimization = {
         ...config.optimization,
         splitChunks: {
           chunks: 'all',
-          maxInitialRequests: 3, // Reduce parallel requests
-          maxAsyncRequests: 3,
-          minSize: 100000, // Larger minimum chunk size (100kb)
+          maxInitialRequests: 2, // Only 2 initial chunks (main + vendor)
+          maxAsyncRequests: 2, // Only 2 async chunks
+          minSize: 200000, // Very large minimum chunk size (200kb)
+          maxSize: 5000000, // Allow very large chunks (5MB)
           cacheGroups: {
             default: false,
             vendors: false,
-            // Single vendor bundle
-            vendor: {
+            // Single massive vendor bundle containing ALL node_modules
+            allVendors: {
               test: /[\\/]node_modules[\\/]/,
-              name: 'vendor',
+              name: 'vendors-all',
               chunks: 'all',
-              priority: 20,
+              priority: 30,
               enforce: true,
+              reuseExistingChunk: true,
             },
-            // Single common bundle
-            common: {
-              name: 'common',
-              minChunks: 2,
+            // Everything else in one bundle
+            commons: {
+              name: 'commons',
+              minChunks: 1,
               chunks: 'all',
               priority: 10,
               reuseExistingChunk: true,
@@ -58,7 +60,8 @@ const nextConfig: NextConfig = {
             },
           },
         },
-        runtimeChunk: false, // Disable runtime chunk splitting
+        runtimeChunk: false, // No runtime chunk
+        moduleIds: 'deterministic', // Better caching
       };
     }
     return config;
