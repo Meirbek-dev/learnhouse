@@ -11,7 +11,7 @@ from src.core.events.logs import create_logs_dir
 
 def startup_app(app: FastAPI) -> Callable:
     async def start_app() -> None:
-        # Get OpenU Config
+        # Get CS MOOC Config
         openu_config: OpenUConfig = get_openu_config()
         app.openu_config = openu_config
 

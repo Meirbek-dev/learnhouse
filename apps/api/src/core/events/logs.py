@@ -16,7 +16,7 @@ async def init_logging() -> None:
         level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         datefmt="%d-%b-%y %H:%M:%S",
-        handlers=[logging.FileHandler("logs/openu.log"), logging.StreamHandler()],
+        handlers=[logging.FileHandler("logs/cs-mooc.log"), logging.StreamHandler()],
     )
 
     logging.info("Logging initiated")

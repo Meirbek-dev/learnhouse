@@ -225,11 +225,11 @@ const Editor = (props: EditorProps) => {
             <EditorDocSection>
               <EditorInfoWrapper>
                 <Link href="/">
-                  <EditorInfoOpenULogo
+                  <EditorInfoPlatformLogo
                     width={25}
                     height={25}
                     src={touEmblemDark}
-                    alt="OpenU Logo"
+                    alt="CS MOOC logo"
                   />
                 </Link>
                 <Link
@@ -426,7 +426,7 @@ const EditorUserProfileWrapper = styled.div`
 
 // Inside EditorInfoWrapper
 // ..todo
-const EditorInfoOpenULogo = styled(Image)`
+const EditorInfoPlatformLogo = styled(Image)`
   border-radius: 6px;
   margin-right: 0px;
 `;

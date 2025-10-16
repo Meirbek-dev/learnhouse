@@ -1,4 +1,4 @@
-export const OpenULogoSVG = () => {
+export const PlatformLogoSVG = () => {
   return (
     <svg
       version="1.1"

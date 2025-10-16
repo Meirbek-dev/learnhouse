@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import openuLogoDark from '../../../../public/openu_logo_dark.webp';
+import platformLogoDark from '../../../../public/openu_logo_dark.webp';
 
 async function DashboardHome() {
   const t = await getTranslations('DashPage.Card');
@@ -17,7 +17,7 @@ async function DashboardHome() {
         <Image
           alt={t('openuLogo')}
           width={210}
-          src={openuLogoDark}
+          src={platformLogoDark}
           className="w-48 pt-16 pb-24 sm:w-auto"
         />
       </div>

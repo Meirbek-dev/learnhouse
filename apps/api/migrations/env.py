@@ -8,7 +8,7 @@ from sqlmodel import SQLModel
 
 from config.config import get_openu_config
 
-# OpenU config
+# CS MOOC config
 
 lh_config = get_openu_config()
 

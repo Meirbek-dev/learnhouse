@@ -1,5 +1,5 @@
 """
-Timezone utilities for OpenU
+Timezone utilities
 
 Provides a centralized way to get timezone-aware datetime objects
 based on the configured timezone in config.yaml

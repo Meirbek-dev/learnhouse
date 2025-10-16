@@ -3,7 +3,7 @@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { useOrg } from '@components/Contexts/OrgContext';
-import openuLogoDark from 'public/openu_logo_dark.webp';
+import platformLogoDark from 'public/openu_logo_dark.webp';
 import { getUriWithOrg } from '@services/config/config';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { sendResetLink } from '@services/auth/auth';
@@ -65,8 +65,8 @@ const ForgotPasswordClient = () => {
                 quality={100}
                 width={230}
                 height={100}
-                src={openuLogoDark}
-                alt="OpenU logo"
+                src={platformLogoDark}
+                alt="CS MOOC logo"
               />
             </Link>
           </div>

@@ -128,7 +128,7 @@ const OrgScripts: React.FC = () => {
           } else {
             const sanitizedContent = sanitizeScriptContent(scriptTag.textContent || '');
             scriptElement.textContent = `
-            /* OpenU Organization Script - ${scriptName} */
+            /* CS MOOC Organization Script - ${scriptName} */
             try {
               (function() {
                 'use strict';
@@ -147,7 +147,7 @@ const OrgScripts: React.FC = () => {
           scriptElement.dataset.orgId = org?.id;
           scriptElement.dataset.orgSlug = org?.slug;
 
-          const comment = document.createComment(` OpenU Organization Script - ${scriptName} (${safeScriptId}) `);
+          const comment = document.createComment(` CS MOOC Organization Script - ${scriptName} (${safeScriptId}) `);
           document.body.append(comment);
           document.body.append(scriptElement);
         } else {
@@ -156,7 +156,7 @@ const OrgScripts: React.FC = () => {
 
           const sanitizedContent = sanitizeScriptContent(scriptContent);
           scriptElement.textContent = `
-          /* OpenU Organization Script - ${scriptName} */
+          /* CS MOOC Organization Script - ${scriptName} */
           try {
             (function() {
               'use strict';
@@ -174,7 +174,7 @@ const OrgScripts: React.FC = () => {
           scriptElement.dataset.orgId = org?.id;
           scriptElement.dataset.orgSlug = org?.slug;
 
-          const comment = document.createComment(` OpenU Organization Script - ${scriptName} (${safeScriptId}) `);
+          const comment = document.createComment(` CS MOOC Organization Script - ${scriptName} (${safeScriptId}) `);
           document.body.append(comment);
           document.body.append(scriptElement);
         }

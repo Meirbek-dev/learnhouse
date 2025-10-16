@@ -59,7 +59,7 @@ async def join_org(
 
     if userorg:
         raise HTTPException(
-            status_code=400, detail="Пользователь уже является частью OpenU"
+            status_code=400, detail="Пользователь уже является частью CS MOOC"
         )
 
     if join_method == "inviteOnly":

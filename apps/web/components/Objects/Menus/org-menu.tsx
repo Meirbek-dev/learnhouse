@@ -8,7 +8,7 @@ import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
 import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
 import { SearchBar } from '@/components/Objects/Search/SearchBar';
 import { getUriWithOrg } from '@/services/config/config';
-import { OpenULogoSVG } from '../../svg/openuLogoSvg';
+import { PlatformLogoSVG } from '../../svg/openuLogoSvg';
 import { Button } from '@/components/ui/button';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -184,7 +184,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
               href={getUriWithOrg(orgslug, '/')}
               className="hover:bg-accent/60 flex items-center justify-center rounded-md p-2 transition-colors"
             >
-              <OpenULogoSVG />
+              <PlatformLogoSVG />
             </Link>
 
             {/* Desktop Navigation */}

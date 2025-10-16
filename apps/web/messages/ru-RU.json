@@ -8,7 +8,7 @@
       "examplesAbbr": "пр. ",
       "hello": "Здравствуйте",
       "howCanWeHelp": "чем могу помочь?",
-      "logoAlt": "Логотип OpenU AI",
+      "logoAlt": "Логотип CS МООК AI",
       "placeholder": "Спросите ИИ об этой лекции",
       "questionAbout": "О чём эта активность?",
       "questionExamples": "Объясните эту активность на практических примерах",
@@ -39,7 +39,7 @@
       "TranslateLabel": "Перевести",
       "WriterLabel": "Писатель",
       "aiEditorTitle": "ИИ Редактор",
-      "aiIconAlt": "Иконка OpenU AI",
+      "aiIconAlt": "Иконка CS МООК AI",
       "applicationPending": "Заявка участника на рассмотрении",
       "applyToContribute": "Подать заявку на участие",
       "askAI": "Спросить ИИ",
@@ -318,7 +318,7 @@
       "hasSuccessfullyCompleted": "успешно завершил(а)",
       "instructor": "Преподаватель",
       "instructorName": "Иван Петров",
-      "organizationLogoAlt": "Логотип OpenU",
+      "organizationLogoAlt": "Логотип CS МООК",
       "scanToVerify": "Отсканируйте для проверки",
       "thisIsToConfirm": "Настоящим подтверждается, что"
     },
@@ -371,7 +371,7 @@
       "keywords": "{certificationName}, {courseName}, сертификат, проверка",
       "openGraph": {
         "description": "Проверьте подлинность сертификата {certificationName} для курса {courseName}.",
-        "siteName": "OpenU",
+        "siteName": "CS МООК",
         "title": "Проверить сертификат {certificationName} — {courseName}"
       },
       "title": "Проверка сертификата — {certificationName} ({courseName})",
@@ -765,13 +765,13 @@
       "nextButton": "Далее",
       "nextButtonLabel": "Далее",
       "onboarding": "Онбординг",
-      "step10Button": "OpenU",
-      "step10Desc": "Чтобы узнать больше о OpenU, вы можете пройти наши оригинальные курсы в OpenU",
+      "step10Button": "CS МООК",
+      "step10Desc": "Чтобы узнать больше о CS МООК, вы можете пройти наши оригинальные курсы в CS МООК",
       "step10Title": "К бесконечности",
-      "step1Desc": "Добро пожаловать в OpenU, LMS, созданную для простоты, удобства использования и производительности. Откройте для себя новый способ создания, обмена и взаимодействия с образовательным контентом.",
+      "step1Desc": "Добро пожаловать в CS МООК, LMS, созданную для простоты, удобства использования и производительности. Откройте для себя новый способ создания, обмена и взаимодействия с образовательным контентом.",
       "step1Title": "Обучайте мир!",
       "step2Button": "Создать новый курс",
-      "step2Desc": "Курсы являются основными строительными блоками OpenU, они всегда содержат Главы, а Главы содержат Активности.",
+      "step2Desc": "Курсы являются основными строительными блоками CS МООК, они всегда содержат Главы, а Главы содержат Активности.",
       "step2Title": "Создание курсов",
       "step3Button": "Узнать больше об Активностях",
       "step3Desc": "Активности — это элементы, которые вы можете добавлять в свои Курсы через Главы: Динамические страницы, Видео, Документы, Задания и многое другое в ближайшее время.",
@@ -779,8 +779,8 @@
       "step4Button": "Узнать больше о Динамических страницах и Редакторе",
       "step4Desc": "Динамические страницы — это страницы с динамическим контентом, подобным страницам Notion, они могут включать различные компоненты, такие как Тесты, Изображения, Видео, Документы и т. д.",
       "step4Title": "Динамические страницы и Редактор",
-      "step5Button": "Узнать больше об ИИ OpenU",
-      "step5Desc": "Инструменты, созданные как для учителей, так и для студентов, учитывающие контекст, они могут отвечать на основе ваших курсов и уникального контента, который вы создаете в OpenU",
+      "step5Button": "Узнать больше об CS MOOC AI",
+      "step5Desc": "Инструменты, созданные как для учителей, так и для студентов, учитывающие контекст, они могут отвечать на основе ваших курсов и уникального контента, который вы создаете в CS МООК",
       "step5Title": "Искусственный интеллект",
       "step6Button": "Создать группы пользователей",
       "step6Desc": "С помощью групп пользователей вы можете разделить студентов на группы и предоставить доступ к курсам в зависимости от их потребностей",
@@ -982,8 +982,8 @@
         "updating": "Обновление роли..."
       },
       "actions": "Действия",
-      "cardDescription": "Управляйте ролями и разрешениями OpenU",
-      "cardTitle": "Роли OpenU",
+      "cardDescription": "Управляйте ролями и разрешениями CS МООК",
+      "cardTitle": "Роли CS МООК",
       "createRole": "Создать роль",
       "createRoleDescription": "Определите новую роль с конкретными разрешениями",
       "createRoleTitle": "Создание новой роли",
@@ -1261,9 +1261,9 @@
       "loadError": "Не удалось загрузить структуру курса"
     },
     "Org": {
-      "fetchError": "Произошла ошибка при загрузке данных OpenU",
+      "fetchError": "Произошла ошибка при загрузке данных CS МООК",
       "joinOrgCTA": "Присоединиться к {orgName}",
-      "notMemberInfo": "Вы еще не являетесь членом OpenU"
+      "notMemberInfo": "Вы еще не являетесь членом CS МООК"
     }
   },
   "CourseBreadcrumbs": {
@@ -1723,7 +1723,7 @@
         "deactivateUsers": "Деактивировать пользователей",
         "executeAction": "Выполнить действие",
         "exportData": "Экспорт данных",
-        "exportDescription": "Скачать данные OpenU в CSV",
+        "exportDescription": "Скачать данные CS МООК в CSV",
         "failed": "Неудачно",
         "highPriority": "Высокий приоритет",
         "importData": "Импорт данных",
@@ -2099,7 +2099,7 @@
       "recentActions": "Недавние действия",
       "recentActionsDescription": "Журнал недавних административных операций",
       "recentActivity": "Недавняя активность",
-      "recentActivityDescription": "Последние события в OpenU",
+      "recentActivityDescription": "Последние события в CS МООК",
       "retention": "Удержание",
       "retentionInfo": "Когорты, отток и коэффициенты возврата",
       "retry": "Повторить",
@@ -2293,14 +2293,14 @@
         "title": "Курсы"
       },
       "Organization": {
-        "description": "Настройте общие параметры OpenU",
+        "description": "Настройте общие параметры CS МООК",
         "title": "Организация"
       },
       "Users": {
-        "description": "Управляйте пользователями и ролями OpenU",
+        "description": "Управляйте пользователями и ролями CS МООК",
         "title": "Пользователи"
       },
-      "openuLogo": "Логотип OpenU",
+      "openuLogo": "Логотип CS МООК",
       "openuUniversity": "Торайгыров Университет",
       "touUniversity": "Торайгыров Университет"
     },
@@ -2408,7 +2408,7 @@
             "permissions": {
               "allPermissions": "Все права",
               "manageCourses": "Управлять курсами",
-              "manageOrganization": "Управлять OpenU",
+              "manageOrganization": "Управлять CS МООК",
               "manageRoles": "Управлять ролями",
               "manageUsers": "Управлять пользователями"
             }
@@ -2451,7 +2451,7 @@
       "purchasedCourses": "Курсы, которые вы приобрели или на которые подписались",
       "title": "Курсы"
     },
-    "DashboardTitle": "Панель управления OpenU",
+    "DashboardTitle": "Панель управления CS МООК",
     "EditCourseContributors": {
       "active": "Активный",
       "activeBadge": "Активный",
@@ -2859,7 +2859,7 @@
         "shareProgress": "Делиться прогрессом",
         "shareProgressDescription": "Разрешить делиться вашим прогрессом с другими пользователями",
         "showOnLeaderboard": "Показывать в рейтинге",
-        "showOnLeaderboardDescription": "Отображать ваш прогресс в рейтинге OpenU",
+        "showOnLeaderboardDescription": "Отображать ваш прогресс в рейтинге CS МООК",
         "title": "Конфиденциальность и видимость"
       },
       "savePreferences": "Сохранить настройки",
@@ -3008,7 +3008,7 @@
       "uploadingAndCreating": "Загрузка файла и создание активности...",
       "uploadingImage": "Загрузка изображения...",
       "userGroupDeletedSuccess": "Группа пользователей удалена.",
-      "userRemovedSuccess": "Пользователь удален из OpenU."
+      "userRemovedSuccess": "Пользователь удален из CS МООК."
     },
     "OrgScripts": {
       "failedToLoadExternalScript": "Не удалось загрузить внешний скрипт \"{scriptName}\":",
@@ -3033,9 +3033,9 @@
           "descriptionMax": " ",
           "descriptionPlaceholder": "Краткое описание",
           "descriptionRequired": "Требуется краткое описание",
-          "exploreDescription": "Поделитесь курсами и контентом с сообществом OpenU.<br/>Включите эту функцию, чтобы помочь учащимся найти ваши ценные образовательные ресурсы.",
+          "exploreDescription": "Поделитесь курсами и контентом с сообществом CS МООК.<br/>Включите эту функцию, чтобы помочь учащимся найти ваши ценные образовательные ресурсы.",
           "exploreLabel": "ИССЛЕДОВАТЬ",
-          "exploreTitle": "Показать в OpenU Explore",
+          "exploreTitle": "Показать в CS МООК Explore",
           "labelLabel": "Метка платформы",
           "labelPlaceholder": "Выберите метку платформы",
           "labelRequired": "Требуется метка",
@@ -3154,7 +3154,7 @@
           "previews": "Предварительный просмотр",
           "thumbnail": "Эскиз"
         },
-        "description": "Управление логотипом, эскизом и изображениями предварительного просмотра OpenU.",
+        "description": "Управление логотипом, эскизом и изображениями предварительного просмотра CS МООК.",
         "title": "Изображения и предварительный просмотр"
       },
       "Landing": {
@@ -3335,7 +3335,7 @@
         "savingButton": "Сохранение...",
         "title": "Домашняя страница"
       },
-      "Manage additional organization settings": "Управление дополнительными настройками OpenU",
+      "Manage additional organization settings": "Управление дополнительными настройками CS МООК",
       "Socials": {
         "Form": {
           "addCustomLinkButton": "Добавить ссылку",
@@ -3354,10 +3354,10 @@
         "customLinksTitle": "Пользовательские ссылки",
         "description": "Управляйте присутствием в социальных сетях",
         "orgUpdateFailed": "Не удалось обновить платформу",
-        "orgUpdatedSuccess": "Данные OpenU обновлены",
+        "orgUpdatedSuccess": "Данные CS МООК обновлены",
         "socialLinksTitle": "Социальные ссылки",
         "title": "Социальные ссылки",
-        "updatingOrg": "Обновление данных OpenU."
+        "updatingOrg": "Обновление данных CS МООК."
       },
       "general": "Общее",
       "generalDescription": "Управление настройками",
@@ -3395,7 +3395,7 @@
       "scriptsDescription": "Управляйте пользовательскими скриптами. Используйте с осторожностью.",
       "scriptsWarning": "Для безопасности, пожалуйста, убедитесь, что вы доверяете и понимаете любые скрипты, прежде чем добавлять их. Скрипты могут взаимодействовать со страницами.",
       "tooltipWarning": "Скрипты мощные и могут влиять на безопасность и производительность сайта. Добавляйте скрипты только из надежных источников. Убедитесь, что скрипты соответствуют правилам конфиденциальности и ответственно обрабатывают пользовательские данные. Неправильно реализованные скрипты могут нарушить функциональность или создать уязвимости.",
-      "updatingOrganization": "Обновление данных OpenU...",
+      "updatingOrganization": "Обновление данных CS МООК...",
       "validation": {
         "contentRequired": "Содержимое скрипта обязательно",
         "nameRequired": "Название скрипта обязательно"
@@ -3670,8 +3670,8 @@
           "profile": "Профиль",
           "progress": "Прогресс",
           "quickStats": "Быстрая статистика",
-          "rank": "Место №{rank} в OpenU",
-          "rankInOrg": "Место №{rank} в OpenU",
+          "rank": "Место №{rank} в CS МООК",
+          "rankInOrg": "Место №{rank} в CS МООК",
           "recentAchievements": "Недавние достижения",
           "recentActivity": "Недавние активности",
           "title": "Прогресс обучения",
@@ -3700,7 +3700,7 @@
           "updatePreferencesFailed": "Не удалось обновить настройки"
         },
         "errors": {
-          "orgNotAvailable": "Данные OpenU недоступны. Пожалуйста, обновите страницу."
+          "orgNotAvailable": "Данные CS МООК недоступны. Пожалуйста, обновите страницу."
         },
         "leaderboard": {
           "aria": {
@@ -3845,7 +3845,7 @@
           "shareProgress": "Делиться прогрессом",
           "shareProgressDescription": "Разрешить делиться прогрессом обучения с другими",
           "showOnLeaderboard": "Показывать в таблице лидеров",
-          "showOnLeaderboardDescription": "Отображать прогресс в рейтингах OpenU",
+          "showOnLeaderboardDescription": "Отображать прогресс в рейтингах CS МООК",
           "title": "Настройки конфиденциальности"
         },
         "rank": "Место",
@@ -4438,7 +4438,7 @@
     },
     "UserSettings": {
       "add": "Пригласить участников",
-      "addDescription": "Пригласите участников присоединиться к OpenU",
+      "addDescription": "Пригласите участников присоединиться к CS МООК",
       "addSection": {
         "description": "Отправить приглашение по электронной почте, через запятую",
         "emailHeader": "Электронная почта",
@@ -4452,7 +4452,7 @@
         "inviteCodeLabel": "Код приглашения",
         "inviteCodeTooltip": "Используйте один из кодов приглашения, которые вы сгенерировали на странице доступа к регистрации",
         "inviteSentSuccess": "Приглашение отправлено",
-        "invitedUsersDescription": "Пользователи, которые были приглашены присоединиться к OpenU",
+        "invitedUsersDescription": "Пользователи, которые были приглашены присоединиться к CS МООК",
         "invitedUsersTitle": "Приглашенные пользователи",
         "noInviteCodesAvailable": "Нет доступных кодов приглашения",
         "noInvitedUsers": "Приглашенных пользователей нет.",
@@ -4463,7 +4463,7 @@
         "statusPending": "В ожидании",
         "statusSigned": "Зарегистрирован",
         "textAreaPlaceholder": "Пример: spike.spiegel@teachers.tou.edu.kz, michael.scott@students.tou.edu.kz",
-        "title": "Пригласить пользователей в OpenU"
+        "title": "Пригласить пользователей в CS МООК"
       },
       "addTitle": "Пригласить участников",
       "desktopOnlyMessage1": "Эта страница доступна только с настольного устройства.",
@@ -4473,16 +4473,16 @@
       "rolesDescription": "Создайте и управляйте ролями с конкретными разрешениями",
       "rolesTitle": "Роли",
       "signups": "Регистрация и коды приглашения",
-      "signupsDescription": "Выберите, откуда пользователи могут присоединиться к OpenU",
+      "signupsDescription": "Выберите, откуда пользователи могут присоединиться к CS МООК",
       "signupsSection": {
         "actionsHeader": "Действия",
         "activeLabel": "Активно",
         "changeJoinMethodFailed": "Ошибка изменения метода присоединения.",
         "changeToClosedButton": "Изменить на закрытый",
-        "changeToClosedConfirmation": "Вы уверены, что хотите изменить механизм регистрации на закрытый? Это позволит пользователям присоединяться к OpenU только по приглашению.",
+        "changeToClosedConfirmation": "Вы уверены, что хотите изменить механизм регистрации на закрытый? Это позволит пользователям присоединяться к CS МООК только по приглашению.",
         "changeToClosedModalTitle": "Изменить на закрытый?",
         "changeToOpenButton": "Изменить на открытый",
-        "changeToOpenConfirmation": "Вы уверены, что хотите изменить механизм регистрации на открытый? Это позволит пользователям свободно присоединяться к OpenU.",
+        "changeToOpenConfirmation": "Вы уверены, что хотите изменить механизм регистрации на открытый? Это позволит пользователям свободно присоединяться к CS МООК.",
         "changeToOpenModalTitle": "Изменить на открытый?",
         "changingJoinMethod": "Изменение метода присоединения...",
         "closedDescription": "Пользователи могут присоединиться только по приглашению",
@@ -4493,12 +4493,12 @@
         "deleteCodeModalTitle": "Удалить код?",
         "deleteInviteFailed": "Ошибка удаления кода приглашения.",
         "deletingInvite": "Удаление кода приглашения...",
-        "description": "Выберите, как пользователи могут присоединиться к OpenU",
+        "description": "Выберите, как пользователи могут присоединиться к CS МООК",
         "expirationHeader": "Дата истечения срока действия",
         "generateCodeButton": "Сгенерировать код приглашения",
-        "generateCodeModalDescription": "Сгенерировать новый код приглашения к OpenU",
+        "generateCodeModalDescription": "Сгенерировать новый код приглашения к CS МООК",
         "generateCodeModalTitle": "Сгенерировать код приглашения",
-        "inviteCodesDescription": "Коды приглашения можно скопировать и использовать для присоединения к OpenU",
+        "inviteCodesDescription": "Коды приглашения можно скопировать и использовать для присоединения к CS МООК",
         "inviteCodesTitle": "Коды приглашения",
         "inviteDeletedSuccess": "Код приглашения удален.",
         "joinMethodChangedSuccess": "Метод присоединения изменен на {method}.",
@@ -4553,16 +4553,16 @@
         },
         "noActionsForAdministrators": "Нет действий для администратора",
         "noUsersFound": "Пользователи не найдены.",
-        "removeFromOrgButton": "Удалить из OpenU",
+        "removeFromOrgButton": "Удалить из CS МООК",
         "removeUserButton": "Удалить пользователя",
-        "removeUserModalMessage": "Вы уверены, что хотите удалить этого пользователя из OpenU?",
+        "removeUserModalMessage": "Вы уверены, что хотите удалить этого пользователя из CS МООК?",
         "removeUserModalTitle": "Удалить {username}?",
         "removingUser": "Удаление...",
         "roleHeader": "Роль",
         "updateRoleModalDescription": "Обновить роль @{username}",
         "updateRoleModalTitle": "Обновить роль",
         "userHeader": "Пользователь",
-        "userRemovedSuccess": "Пользователь удален из OpenU"
+        "userRemovedSuccess": "Пользователь удален из CS МООК"
       },
       "usersTitle": "Пользователи"
     },
@@ -4742,7 +4742,7 @@
   },
   "HomeClient": {
     "hello": "Здравствуйте",
-    "noOrganizations": "Вы пока не являетесь членом OpenU.",
+    "noOrganizations": "Вы пока не являетесь членом CS МООК.",
     "signOut": "Выйти",
     "yourOrganizations": "Ваши организации"
   },
@@ -4804,7 +4804,7 @@
       "success": "Коллекция успешно создана!"
     },
     "visibilityLabel": "Видимость",
-    "visibilityPrivate": "Частная коллекция — Видна только членам OpenU",
+    "visibilityPrivate": "Частная коллекция — Видна только членам CS МООК",
     "visibilityPublic": "Публичная коллекция — Видна всем"
   },
   "NotFoundPage": {
@@ -4852,7 +4852,7 @@
       "collapseSidebar": "Свернуть боковую панель",
       "expandSidebar": "Развернуть боковую панель",
       "goToHomepage": "Перейти на главную",
-      "openuLogo": "Логотип OpenU",
+      "openuLogo": "Логотип CS МООК",
       "userSettings": "Настройки пользователя"
     },
     "buttons": {
@@ -4876,7 +4876,7 @@
       "settings": "Настройки",
       "users": "Пользователи"
     },
-    "orgName": "OpenU",
+    "orgName": "CS МООК",
     "tooltips": {
       "admin": "Панель администратора",
       "assignments": "Задания",
@@ -4884,7 +4884,7 @@
       "home": "Главная панель",
       "logout": "Выйти",
       "metrics": "Метрики",
-      "organization": "Настройки OpenU",
+      "organization": "Настройки CS МООК",
       "payments": "Платежи",
       "userSettings": "Настройки @{username}",
       "users": "Пользователи"
@@ -4902,7 +4902,7 @@
   "Themes": {
     "default": {
       "name": "По умолчанию",
-      "description": "Тема OpenU по умолчанию"
+      "description": "Тема CS МООК по умолчанию"
     },
     "black": {
       "name": "Чёрная",
@@ -5126,7 +5126,7 @@
     "inviteCodeValid": "Код приглашения действителен, вы будете перенаправлены на страницу регистрации через секунду!",
     "join": "Присоединиться ",
     "joinQuestion": "Присоединиться к {orgname}?",
-    "orgJoinSuccess": "Успешно присоединились к OpenU.",
+    "orgJoinSuccess": "Успешно присоединились к CS МООК.",
     "submit": "Отправить "
   },
   "Trail": {
@@ -5216,7 +5216,7 @@
   "failedToLoadUserData": "Не удалось загрузить данные пользователя.",
   "minutes": "Минуты",
   "noInviteCodesGenerated": "Коды приглашения еще не сгенерированы.",
-  "openu-logo": "Логотип OpenU",
+  "openu-logo": "Логотип CS МООК",
   "previous": "Назад",
   "seconds": "Секунды",
   "selectDeadline": "Выберите дедлайн для выполнения задачи",

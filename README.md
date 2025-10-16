@@ -1,10 +1,11 @@
-OpenU is an open source platform that makes it easy for anyone to provide world-class educational
-content and it offers a variety of content types : Dynamic Pages, Videos, Documents & more..
+# CS MOOC
+
+## CS MOOC is an open source platform that makes it easy for anyone to provide world-class educational content and it offers a variety of content types : Dynamic Pages, Videos, Documents & more..
 
 ## Progress
 
-🚧 OpenU is still on early development (alpha), as we reach stability we will release a stable
-version and add more features.
+🚧 CS MOOCCS MOOC is still on early development (alpha), as we reach stability we will release a
+stable version and add more features.
 
 ## Roadmap
 
@@ -28,7 +29,7 @@ prioritize issues by commenting on them and sharing your thoughts
 - 👟 Course Progress
 - 🛜 Course Updates
 - 💬 Discussions
-- ✨ OpenU AI : The Teachers and Students copilot
+- ✨ CS MOOC AI : The Teachers and Students copilot
 - 👪 Multiplayer Course edition
 - More to come
 

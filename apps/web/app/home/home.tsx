@@ -28,7 +28,7 @@ const HomeClient = () => {
           width={230}
           height={100}
           src={openuLogoDark}
-          alt="OpenU Logo"
+          alt="CS MOOC logo"
         />
       </div>
 

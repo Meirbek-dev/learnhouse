@@ -52,7 +52,7 @@ const SignUpClient = (props: SignUpClientProps) => {
               width={230}
               height={100}
               src={openuLogoDark}
-              alt="OpenU logo"
+              alt="CS MOOC logo"
             />
           </Link>
         </div>
