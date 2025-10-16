@@ -2,8 +2,6 @@ import asyncio
 import hashlib
 import logging
 import os
-from datetime import datetime, timedelta
-from functools import lru_cache
 from typing import Any
 
 from langchain.agents import AgentExecutor, create_tool_calling_agent
@@ -16,6 +14,14 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from ulid import ULID
 
 from config.config import get_openu_config
+from src.services.ai.cache_manager import get_ai_cache_manager
+from src.services.ai.exceptions import (
+    AIProcessingError,
+    AITimeoutError,
+    ChatSessionError,
+    EmbeddingError,
+    VectorStoreError,
+)
 from src.services.ai.init import get_chromadb_client, get_embedding_function, get_llm
 
 # Disable ChromaDB telemetry
@@ -29,50 +35,6 @@ os.environ.update(
 )
 
 logger = logging.getLogger(__name__)
-
-# Global caches
-_vector_store_cache: dict[str, Chroma] = {}
-_agent_cache: dict[str, AgentExecutor] = {}
-_embedding_cache: dict[str, Any] = {}
-_llm_cache: dict[str, Any] = {}
-
-# Cache TTL in seconds
-VECTOR_STORE_TTL = 3600  # 1 hour
-AGENT_TTL = 1800  # 30 minutes
-
-
-class CacheManager:
-    """Thread-safe cache manager with TTL support."""
-
-    def __init__(self) -> None:
-        self._cache: dict[str, dict[str, Any]] = {}
-        self._timestamps: dict[str, datetime] = {}
-
-    def get(self, key: str, ttl: int = 3600) -> Any | None:
-        """Get cached item if it exists and hasn't expired."""
-        if key not in self._cache:
-            return None
-
-        timestamp = self._timestamps.get(key)
-        if timestamp and datetime.now() - timestamp > timedelta(seconds=ttl):
-            self.delete(key)
-            return None
-
-        return self._cache[key].get("data")
-
-    def set(self, key: str, value: Any) -> None:
-        """Set cached item with timestamp."""
-        self._cache[key] = {"data": value}
-        self._timestamps[key] = datetime.now()
-
-    def delete(self, key: str) -> None:
-        """Delete cached item."""
-        self._cache.pop(key, None)
-        self._timestamps.pop(key, None)
-
-
-# Global cache manager
-cache_manager = CacheManager()
 
 
 class OptimizedTextSplitter:
@@ -124,16 +86,35 @@ class FastAIService:
     def __init__(self) -> None:
         self.text_splitter = OptimizedTextSplitter()
         self.config = get_openu_config()
+        self.cache_manager = get_ai_cache_manager()
 
-    @lru_cache(maxsize=128)
     def _get_cached_embedding_function(self, model_name: str):
         """Cache embedding functions."""
-        return get_embedding_function(model_name)
+        cache_key = f"embedding_{model_name}"
 
-    @lru_cache(maxsize=32)
+        cached = self.cache_manager.embedding_cache.get(cache_key)
+        if cached:
+            return cached
+
+        embedding_fn = get_embedding_function(model_name)
+        if embedding_fn:
+            self.cache_manager.embedding_cache.set(cache_key, embedding_fn)
+
+        return embedding_fn
+
     def _get_cached_llm(self, model_name: str):
         """Cache LLM instances."""
-        return get_llm(model_name)
+        cache_key = f"llm_{model_name}"
+
+        cached = self.cache_manager.llm_cache.get(cache_key)
+        if cached:
+            return cached
+
+        llm = get_llm(model_name)
+        if llm:
+            self.cache_manager.llm_cache.set(cache_key, llm)
+
+        return llm
 
     def _generate_content_hash(self, documents: list[str]) -> str:
         """Generate deterministic hash for document content."""
@@ -153,7 +134,7 @@ class FastAIService:
         cache_key = f"{embedding_model_name}_{content_hash}_{collection_name}"
 
         # Check cache first
-        cached_store = cache_manager.get(cache_key, VECTOR_STORE_TTL)
+        cached_store = self.cache_manager.vector_store_cache.get(cache_key)
         if cached_store:
             logger.info(f"Using cached vector store: {cache_key}")
             return cached_store
@@ -164,7 +145,7 @@ class FastAIService:
         )
 
         if vector_store:
-            cache_manager.set(cache_key, vector_store)
+            self.cache_manager.vector_store_cache.set(cache_key, vector_store)
             logger.info(f"Cached new vector store: {cache_key}")
 
         return vector_store
@@ -182,8 +163,11 @@ class FastAIService:
                 embedding_model_name
             )
             if not embedding_function:
-                logger.error(f"Embedding model {embedding_model_name} not available")
-                return None
+                error_msg = f"Embedding model {embedding_model_name} not available"
+                logger.error(error_msg)
+                raise EmbeddingError(
+                    error_msg, details={"model_name": embedding_model_name}
+                )
 
             # Process documents in parallel
             all_chunks = []
@@ -195,12 +179,18 @@ class FastAIService:
             chunk_results = await asyncio.gather(*chunk_tasks, return_exceptions=True)
 
             for result in chunk_results:
+                if isinstance(result, Exception):
+                    logger.warning(f"Failed to process document chunk: {result}")
+                    continue
                 if isinstance(result, list):
                     all_chunks.extend(result)
 
             if not all_chunks:
-                logger.warning("No valid chunks created from documents")
-                return None
+                error_msg = "No valid chunks created from documents"
+                logger.warning(error_msg)
+                raise VectorStoreError(
+                    error_msg, details={"document_count": len(documents)}
+                )
 
             logger.info(
                 f"Created {len(all_chunks)} chunks from {len(documents)} documents"
@@ -220,9 +210,14 @@ class FastAIService:
                 collection_name=collection_name,
             )
 
+        except (EmbeddingError, VectorStoreError):
+            raise
         except Exception as e:
-            logger.exception(f"Failed to create vector store: {e}")
-            return None
+            error_msg = f"Failed to create vector store: {e!s}"
+            logger.exception(error_msg)
+            raise VectorStoreError(
+                error_msg, details={"error_type": type(e).__name__}
+            ) from e
 
     async def get_or_create_agent(
         self,
@@ -238,7 +233,7 @@ class FastAIService:
         cache_key = f"{llm_model_name}_{prompt_hash}_{max_iterations}"
 
         # Check cache
-        cached_agent = cache_manager.get(cache_key, AGENT_TTL)
+        cached_agent = self.cache_manager.agent_cache.get(cache_key)
         if cached_agent:
             logger.info(f"Using cached agent: {cache_key}")
             # Update the agent's tools with new vector store
@@ -259,7 +254,7 @@ class FastAIService:
         )
 
         if agent:
-            cache_manager.set(cache_key, agent)
+            self.cache_manager.agent_cache.set(cache_key, agent)
             logger.info(f"Cached new agent: {cache_key}")
 
         return agent
@@ -276,8 +271,11 @@ class FastAIService:
             # Get cached LLM
             llm = self._get_cached_llm(llm_model_name)
             if not llm:
-                logger.error(f"LLM model {llm_model_name} not available")
-                return None
+                error_msg = f"LLM model {llm_model_name} not available"
+                logger.error(error_msg)
+                raise AIProcessingError(
+                    error_msg, details={"model_name": llm_model_name}
+                )
 
             # Create optimized retriever
             retriever = vector_store.as_retriever(
@@ -316,9 +314,14 @@ class FastAIService:
                 early_stopping_method="generate",  # Stop early when possible
             )
 
+        except AIProcessingError:
+            raise
         except Exception as e:
-            logger.exception(f"Failed to create agent: {e}")
-            return None
+            error_msg = f"Failed to create agent: {e!s}"
+            logger.exception(error_msg)
+            raise AIProcessingError(
+                error_msg, details={"error_type": type(e).__name__}
+            ) from e
 
 
 async def ask_ai(
@@ -334,10 +337,14 @@ async def ask_ai(
 
     # Input validation
     if not question or not question.strip():
-        return {"error": "Question cannot be empty"}
+        error_msg = "Question cannot be empty"
+        logger.warning(error_msg)
+        raise AIProcessingError(error_msg)
 
     if not text_reference or not text_reference.strip():
-        return {"error": "Text reference cannot be empty"}
+        error_msg = "Text reference cannot be empty"
+        logger.warning(error_msg)
+        raise AIProcessingError(error_msg)
 
     try:
         # Initialize fast AI service
@@ -351,7 +358,7 @@ async def ask_ai(
         )
 
         if not vector_store:
-            return {"error": "Failed to create knowledge base"}
+            raise VectorStoreError("Failed to create knowledge base")
 
         # Get or create agent (cached)
         agent_executor = await ai_service.get_or_create_agent(
@@ -361,7 +368,7 @@ async def ask_ai(
         )
 
         if not agent_executor:
-            return {"error": "Failed to create AI agent"}
+            raise AIProcessingError("Failed to create AI agent")
 
         # Create agent with history
         agent_with_history = RunnableWithMessageHistory(
@@ -374,25 +381,34 @@ async def ask_ai(
         # Process with timeout
         logger.info(f"Processing AI query: {question[:100]}...")
 
-        # Run in thread pool to avoid blocking
-        result = await asyncio.to_thread(
-            agent_with_history.invoke,
-            {"input": question.strip()},
-            config={"configurable": {"session_id": session_id}},
-        )
+        # Run in thread pool to avoid blocking with timeout
+        try:
+            result = await asyncio.wait_for(
+                asyncio.to_thread(
+                    agent_with_history.invoke,
+                    {"input": question.strip()},
+                    config={"configurable": {"session_id": session_id}},
+                ),
+                timeout=60.0,  # 30 seconds timeout
+            )
 
-        logger.info("AI query processed successfully")
-        return result
+            logger.info("AI query processed successfully")
+            return result
 
-    except TimeoutError:
-        logger.exception("AI processing timed out")
-        return {"error": "Request timed out", "type": "timeout_error"}
+        except asyncio.TimeoutError as e:
+            error_msg = "AI processing timed out after 60 seconds"
+            logger.warning(error_msg)
+            raise AITimeoutError(60, details={"question_length": len(question)}) from e
+
+    except (AIProcessingError, VectorStoreError, AITimeoutError):
+        raise
     except Exception as e:
-        logger.exception(f"Error processing AI request: {e}")
-        return {
-            "error": f"AI processing failed: {e!s}",
-            "type": "ai_processing_error",
-        }
+        error_msg = f"Unexpected error during AI processing: {e!s}"
+        logger.exception(error_msg)
+        raise AIProcessingError(
+            error_msg,
+            details={"error_type": type(e).__name__, "session_id": session_id},
+        ) from e
 
 
 def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
@@ -435,30 +451,32 @@ def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
             }
 
     except Exception as e:
-        logger.exception(f"Failed to create chat session: {e}")
-        return {
-            "message_history": [],
-            "aichat_uuid": f"fallback_{ULID()}",
-            "storage_type": "memory",
-            "error": str(e),
-        }
+        error_msg = f"Failed to create chat session: {e!s}"
+        logger.exception(error_msg)
+        raise ChatSessionError(
+            error_msg, details={"error_type": type(e).__name__}
+        ) from e
 
 
 # Cleanup function for cache management
 def cleanup_expired_cache() -> None:
-    """Clean up expired cache entries."""
+    """
+    Clean up expired cache entries.
+    This function can be called periodically by a background task.
+    """
     try:
-        # This would be called periodically by a background task
-        current_time = datetime.now()
-        expired_keys = []
+        cache_manager = get_ai_cache_manager()
 
-        for key, timestamp in cache_manager._timestamps.items():
-            if current_time - timestamp > timedelta(seconds=VECTOR_STORE_TTL):
-                expired_keys.append(key)
+        # Get stats before cleanup
+        stats_before = cache_manager.get_all_stats()
 
-        for key in expired_keys:
-            cache_manager.delete(key)
+        # Clear all caches (TTL is handled automatically by TTLCache)
+        # This is just a safety measure to ensure memory doesn't grow unbounded
+        total_items = sum(stats["size"] for stats in stats_before.values())
 
-        logger.info(f"Cleaned up {len(expired_keys)} expired cache entries")
+        logger.info(f"Cache cleanup check: {total_items} total items cached")
+
     except Exception as e:
-        logger.exception(f"Error cleaning up cache: {e}")
+        error_msg = f"Error during cache cleanup: {e!s}"
+        logger.exception(error_msg)
+        # Don't raise exception in cleanup function - log and continue
