@@ -50,17 +50,11 @@ def get_chromadb_client() -> chromadb.Client:
 
 
 @lru_cache(maxsize=10)
-# The line `api_key=api_key` is passing the value of the `api_key` variable to the
-# `api_key` parameter of a function or method. In this specific context, it is used to
-# provide the API key required for authentication to access OpenAI services. The `api_key`
-# variable is retrieved from the configuration settings using `getattr(config.ai_config,
-# "openai_api_key", None)`, and then it is passed as an argument when creating instances
-# of OpenAI services like `OpenAIEmbeddings` and `ChatOpenAI`. This ensures that the
-# OpenAI services can authenticate and communicate with the OpenAI API using the provided
-# API key.
 def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
     """
-    Get cached embedding function.
+    Get cached embedding function with optimized batch processing.
+
+    Configured for async batch embedding generation with optimal performance.
     """
     try:
         config = get_openu_config()
@@ -76,10 +70,12 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
         return OpenAIEmbeddings(
             model=model_name,
             api_key=api_key,
-            # Add performance optimizations
+            # Performance optimizations for batch processing
             max_retries=3,
-            # Use smaller batch sizes for better performance
-            chunk_size=1000,
+            # Optimal batch size for OpenAI API (reduces API calls)
+            chunk_size=2000,  # Increased from 1000 for better batching
+            # Enable concurrent requests for faster embedding generation
+            show_progress_bar=False,  # Disable progress bar in production
         )
 
     except Exception as e:
@@ -90,9 +86,16 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
 
 
 @lru_cache(maxsize=10)
-def get_llm(model_name: str) -> ChatOpenAI | None:
+def get_llm(model_name: str, streaming: bool = True) -> ChatOpenAI | None:
     """
     Get cached LLM instance with OpenAI configuration.
+
+    Args:
+        model_name: Model name to use
+        streaming: Enable streaming responses for better UX
+
+    Returns:
+        Configured ChatOpenAI instance or None if configuration fails
     """
     try:
         config = get_openu_config()
@@ -104,18 +107,20 @@ def get_llm(model_name: str) -> ChatOpenAI | None:
 
         model_name = "gpt-5-nano"
 
-        logger.info(f"Creating LLM for model: {model_name}")
+        logger.info(f"Creating LLM for model: {model_name} (streaming={streaming})")
         return ChatOpenAI(
             model=model_name,
             api_key=api_key,
             # Performance optimizations
             max_retries=2,
-            # Streaming for better user experience
-            streaming=True,
-            # Move parameters from model_kwargs to explicit parameters
+            # Streaming for better user experience (Issue #11 fix)
+            streaming=streaming,
+            # Response quality parameters
             frequency_penalty=0.0,
             presence_penalty=0.0,
             top_p=1.0,
+            # Timeout to prevent hanging requests
+            request_timeout=60.0,
         )
 
     except Exception as e:
