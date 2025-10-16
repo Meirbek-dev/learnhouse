@@ -1,7 +1,7 @@
 'use client';
 
 import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
-import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
+import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
 import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useEffect, useRef, useState, useTransition } from 'react';
@@ -95,71 +95,124 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
   };
 
   const [isPending, startTransition] = useTransition();
+  const [streamingMessage, setStreamingMessage] = useState('');
 
   const sendMessage = async (message: string) => {
-    if (aiChatBotState.aichat_uuid) {
-      await dispatchAIChatBot({
-        type: 'addMessage',
-        payload: { sender: 'user', message, type: 'user' },
-      });
-      startTransition(() => dispatchAIChatBot({ type: 'setIsWaitingForResponse' }));
-      const response = await sendActivityAIChatMessage(
-        message,
-        aiChatBotState.aichat_uuid,
-        props.activity.activity_uuid,
-        access_token,
-      );
-      if (!response.success) {
-        await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
-        await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
-        await dispatchAIChatBot({
-          type: 'setError',
-          payload: {
-            isError: true,
-            status: response.status,
-            error_message: response.data.detail,
+    // Add user message
+    await dispatchAIChatBot({
+      type: 'addMessage',
+      payload: { sender: 'user', message, type: 'user' },
+    });
+
+    startTransition(() => dispatchAIChatBot({ type: 'setIsWaitingForResponse' }));
+    await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
+
+    // Reset streaming message
+    setStreamingMessage('');
+
+    try {
+      if (aiChatBotState.aichat_uuid) {
+        // Send message to existing chat
+        await sendActivityAIChatMessageStream(
+          message,
+          aiChatBotState.aichat_uuid,
+          props.activity.activity_uuid,
+          access_token,
+          // onChunk: accumulate content as it arrives
+          (chunk) => {
+            if (chunk.content) {
+              setStreamingMessage(prev => prev + chunk.content);
+            }
           },
-        });
-        return;
-      }
-      startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
-      await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
-      await dispatchAIChatBot({
-        type: 'addMessage',
-        payload: { sender: 'ai', message: response.data.message, type: 'ai' },
-      });
-    } else {
-      await dispatchAIChatBot({
-        type: 'addMessage',
-        payload: { sender: 'user', message, type: 'user' },
-      });
-      startTransition(() => dispatchAIChatBot({ type: 'setIsWaitingForResponse' }));
-      const response = await startActivityAIChatSession(message, access_token, props.activity.activity_uuid);
-      if (!response.success) {
-        await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
-        await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
-        await dispatchAIChatBot({
-          type: 'setError',
-          payload: {
-            isError: true,
-            status: response.status,
-            error_message: response.data.detail,
+          // onStatus: handle status updates
+          (status) => {
+            console.log('Status:', status.message);
           },
-        });
-        return;
+          // onComplete: finalize the message
+          (final) => {
+            startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
+            dispatchAIChatBot({
+              type: 'addMessage',
+              payload: { sender: 'ai', message: final.content || streamingMessage, type: 'ai' },
+            });
+            setStreamingMessage('');
+          },
+          // onError: handle errors
+          (error) => {
+            startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
+            dispatchAIChatBot({
+              type: 'setError',
+              payload: {
+                isError: true,
+                status: 500,
+                error_message: error.error || 'Streaming failed',
+              },
+            });
+            setStreamingMessage('');
+          }
+        );
+      } else {
+        // Start new chat session
+        await startActivityAIChatSessionStream(
+          message,
+          props.activity.activity_uuid,
+          access_token,
+          // onChunk: accumulate content as it arrives
+          (chunk) => {
+            if (chunk.content) {
+              setStreamingMessage(prev => prev + chunk.content);
+            }
+          },
+          // onStatus: handle status updates
+          (status) => {
+            console.log('Status:', status.message);
+          },
+          // onComplete: finalize the message
+          (final) => {
+            startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
+
+            // Extract aichat_uuid from final response if available
+            if ((final as any).aichat_uuid) {
+              startTransition(() =>
+                dispatchAIChatBot({
+                  type: 'setAichat_uuid',
+                  payload: (final as any).aichat_uuid,
+                }),
+              );
+            }
+
+            dispatchAIChatBot({
+              type: 'addMessage',
+              payload: { sender: 'ai', message: final.content || streamingMessage, type: 'ai' },
+            });
+            setStreamingMessage('');
+          },
+          // onError: handle errors
+          (error) => {
+            startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
+            dispatchAIChatBot({
+              type: 'setError',
+              payload: {
+                isError: true,
+                status: 500,
+                error_message: error.error || 'Streaming failed',
+              },
+            });
+            setStreamingMessage('');
+          }
+        );
       }
-      startTransition(() =>
-        dispatchAIChatBot({
-          type: 'setAichat_uuid',
-          payload: response.data.aichat_uuid,
-        }),
-      );
+    } catch (error) {
       startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
-      await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
-      await dispatchAIChatBot({
-        type: 'addMessage',
-        payload: { sender: 'ai', message: response.data.message, type: 'ai' },
+      dispatchAIChatBot({
+        type: 'setError',
+        payload: {
+          isError: true,
+          status: 500,
+          error_message: error instanceof Error ? error.message : 'Unknown error',
+        },
       });
+      setStreamingMessage('');
     }
   };
 
@@ -237,6 +290,12 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
                       />
                     );
                   })}
+                  {streamingMessage && (
+                    <AIMessageComponent
+                      message={{ sender: 'ai', message: streamingMessage, type: 'ai' }}
+                      animated={true}
+                    />
+                  )}
                   <div ref={messagesEndRef} />
                 </div>
               </ScrollArea>

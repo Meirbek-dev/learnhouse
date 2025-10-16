@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
 import { themes } from '@/lib/themes';
 import { cn } from '@/lib/utils';
-import { Badge } from '../badge';
 
 interface ThemeSelectorProps {
   className?: string;

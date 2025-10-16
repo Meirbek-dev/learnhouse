@@ -10,7 +10,7 @@ import {
   X,
 } from 'lucide-react';
 import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
-import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
+import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import touEmblemLight from 'public/tou_emblem_light.webp';
@@ -141,76 +141,124 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
     });
   };
 
-  const sendReqWithMessage = async (message: string) => {
-    if (aiEditorState.aichat_uuid) {
-      await dispatchAIEditor({
-        type: 'addMessage',
-        payload: { sender: 'user', message, type: 'user' },
-      });
-      await dispatchAIEditor({ type: 'setIsWaitingForResponse' });
-      const response = await sendActivityAIChatMessage(
-        message,
-        aiEditorState.aichat_uuid,
-        props.activity.activity_uuid,
-        access_token,
-      );
-      if (!response.success) {
-        await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
-        await dispatchAIEditor({ type: 'setIsModalClose' });
-        // wait for 200ms before opening the modal again
-        await new Promise((resolve) => setTimeout(resolve, 200));
-        await dispatchAIEditor({
-          type: 'setError',
-          payload: {
-            isError: true,
-            status: response.status,
-            error_message: response.data.detail,
-          },
-        });
-        await dispatchAIEditor({ type: 'setIsModalOpen' });
-        return '';
-      }
-      await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
-      await dispatchAIEditor({ type: 'setChatInputValue', payload: '' });
-      await dispatchAIEditor({
-        type: 'addMessage',
-        payload: { sender: 'ai', message: response.data.message, type: 'ai' },
-      });
-      return response.data.message;
-    }
+  const sendReqWithMessage = async (message: string): Promise<string> => {
+    // Add user message
     await dispatchAIEditor({
       type: 'addMessage',
       payload: { sender: 'user', message, type: 'user' },
     });
+
     await dispatchAIEditor({ type: 'setIsWaitingForResponse' });
-    const response = await startActivityAIChatSession(message, access_token, props.activity.activity_uuid);
-    if (!response.success) {
-      await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
-      await dispatchAIEditor({ type: 'setIsModalClose' });
-      // wait for 200ms before opening the modal again
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      await dispatchAIEditor({
-        type: 'setError',
-        payload: {
-          isError: true,
-          status: response.status,
-          error_message: response.data.detail,
-        },
-      });
-      await dispatchAIEditor({ type: 'setIsModalOpen' });
-      return '';
-    }
-    await dispatchAIEditor({
-      type: 'setAichat_uuid',
-      payload: response.data.aichat_uuid,
-    });
-    await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
     await dispatchAIEditor({ type: 'setChatInputValue', payload: '' });
-    await dispatchAIEditor({
-      type: 'addMessage',
-      payload: { sender: 'ai', message: response.data.message, type: 'ai' },
+
+    let streamingContent = '';
+
+    return new Promise((resolve) => {
+      const processStream = async () => {
+        try {
+          if (aiEditorState.aichat_uuid) {
+            // Send message with streaming
+            await sendActivityAIChatMessageStream(
+              message,
+              aiEditorState.aichat_uuid,
+              props.activity.activity_uuid,
+              access_token,
+              (chunk) => {
+                if (chunk.content) {
+                  streamingContent += chunk.content;
+                }
+              },
+              (status) => console.log('Status:', status.message),
+              (final) => {
+                dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
+                const finalMessage = final.content || streamingContent;
+                dispatchAIEditor({
+                  type: 'addMessage',
+                  payload: { sender: 'ai', message: finalMessage, type: 'ai' },
+                });
+                resolve(finalMessage);
+              },
+              async (error) => {
+                await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
+                await dispatchAIEditor({ type: 'setIsModalClose' });
+                await new Promise((r) => setTimeout(r, 200));
+                await dispatchAIEditor({
+                  type: 'setError',
+                  payload: {
+                    isError: true,
+                    status: 500,
+                    error_message: error.error || 'Streaming failed',
+                  },
+                });
+                await dispatchAIEditor({ type: 'setIsModalOpen' });
+                resolve('');
+              }
+            );
+          } else {
+            // Start new chat session with streaming
+            await startActivityAIChatSessionStream(
+              message,
+              props.activity.activity_uuid,
+              access_token,
+              (chunk) => {
+                if (chunk.content) {
+                  streamingContent += chunk.content;
+                }
+              },
+              (status) => console.log('Status:', status.message),
+              (final) => {
+                dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
+
+                if ((final as any).aichat_uuid) {
+                  dispatchAIEditor({
+                    type: 'setAichat_uuid',
+                    payload: (final as any).aichat_uuid,
+                  });
+                }
+
+                const finalMessage = final.content || streamingContent;
+                dispatchAIEditor({
+                  type: 'addMessage',
+                  payload: { sender: 'ai', message: finalMessage, type: 'ai' },
+                });
+                resolve(finalMessage);
+              },
+              async (error) => {
+                await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
+                await dispatchAIEditor({ type: 'setIsModalClose' });
+                await new Promise((r) => setTimeout(r, 200));
+                await dispatchAIEditor({
+                  type: 'setError',
+                  payload: {
+                    isError: true,
+                    status: 500,
+                    error_message: error.error || 'Streaming failed',
+                  },
+                });
+                await dispatchAIEditor({ type: 'setIsModalOpen' });
+                resolve('');
+              }
+            );
+          }
+        } catch (error) {
+          await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
+          await dispatchAIEditor({ type: 'setIsModalClose' });
+          await new Promise((r) => setTimeout(r, 200));
+          await dispatchAIEditor({
+            type: 'setError',
+            payload: {
+              isError: true,
+              status: 500,
+              error_message: error instanceof Error ? error.message : 'Unknown error',
+            },
+          });
+          await dispatchAIEditor({ type: 'setIsModalOpen' });
+          resolve('');
+        }
+      };
+
+      processStream();
     });
-    return response.data.message;
   };
 
   const handleKeyPress = async (event: KeyboardEvent<HTMLInputElement>) => {

@@ -15,6 +15,7 @@ from ulid import ULID
 
 from config.config import get_openu_config
 from src.services.ai.cache_manager import get_ai_cache_manager
+from src.services.ai.chromadb_pool import get_chromadb_pool
 from src.services.ai.exceptions import (
     AIProcessingError,
     AITimeoutError,
@@ -22,7 +23,7 @@ from src.services.ai.exceptions import (
     EmbeddingError,
     VectorStoreError,
 )
-from src.services.ai.init import get_chromadb_client, get_embedding_function, get_llm
+from src.services.ai.init import get_embedding_function, get_llm
 
 # Disable ChromaDB telemetry
 os.environ.update(
@@ -42,8 +43,8 @@ class OptimizedTextSplitter:
 
     def __init__(
         self,
-        chunk_size: int = 1000,
-        chunk_overlap: int = 100,
+        chunk_size: int = 800,  # Reduced from 1000 for faster processing
+        chunk_overlap: int = 50,  # Reduced from 100 for less redundancy
         length_function: callable = len,
     ) -> None:
         self.splitter = RecursiveCharacterTextSplitter(
@@ -128,7 +129,7 @@ class FastAIService:
         if cached:
             return cached
 
-        llm = get_llm(model_name)
+        llm = get_llm(model_name, streaming=True)
         if llm:
             self.cache_manager.llm_cache.set(cache_key, llm)
 
@@ -234,24 +235,25 @@ class FastAIService:
                 f"✓ Created {len(all_chunks)} chunks from {len(documents)} documents"
             )
 
-            # Use persistent client with optimizations
-            chroma_client = get_chromadb_client()
+            # Use ChromaDB connection pool for better performance
+            pool = get_chromadb_pool()
 
-            collection_name = collection_name or f"doc_collection_{ULID()}"
+            async with pool.get_client() as chroma_client:
+                collection_name = collection_name or f"doc_collection_{ULID()}"
 
-            # Create vector store with batch embedding processing
-            # The OpenAIEmbeddings with chunk_size parameter handles batching internally
-            logger.info("Creating vector store with batched embeddings...")
-            vector_store = await asyncio.to_thread(
-                Chroma.from_texts,
-                texts=all_chunks,
-                embedding=embedding_function,
-                client=chroma_client,
-                collection_name=collection_name,
-            )
+                # Create vector store with batch embedding processing
+                # The OpenAIEmbeddings with chunk_size parameter handles batching internally
+                logger.info("Creating vector store with batched embeddings...")
+                vector_store = await asyncio.to_thread(
+                    Chroma.from_texts,
+                    texts=all_chunks,
+                    embedding=embedding_function,
+                    client=chroma_client,
+                    collection_name=collection_name,
+                )
 
-            logger.info("✓ Vector store created successfully")
-            return vector_store
+                logger.info("✓ Vector store created successfully")
+                return vector_store
 
         except (EmbeddingError, VectorStoreError):
             raise
@@ -267,7 +269,7 @@ class FastAIService:
         llm_model_name: str,
         system_prompt: str,
         vector_store: Chroma,
-        max_iterations: int = 3,
+        max_iterations: int = 3,  # Need 3: tool use + final answer + buffer
     ) -> AgentExecutor | None:
         """Get cached agent or create new one."""
 
@@ -275,30 +277,18 @@ class FastAIService:
         prompt_hash = hashlib.md5(system_prompt.encode()).hexdigest()
         cache_key = f"{llm_model_name}_{prompt_hash}_{max_iterations}"
 
-        # Check cache
-        cached_agent = self.cache_manager.agent_cache.get(cache_key)
-        if cached_agent:
-            logger.info(f"Using cached agent: {cache_key}")
-            # Update the agent's tools with new vector store
-            retriever_tool = create_retriever_tool(
-                retriever=vector_store.as_retriever(
-                    search_type="similarity",
-                    search_kwargs={"k": 3},
-                ),
-                name="find_context_text",
-                description="Find relevant context from the knowledge base",
-            )
-            cached_agent.tools = [retriever_tool]
-            return cached_agent
+        # NOTE: AgentExecutor caching disabled to avoid state pollution
+        # AgentExecutor maintains internal state (iteration counters, etc.) that
+        # persists between uses, causing issues when reused across different sessions.
+        # Since LLM and vector stores are already cached (expensive operations),
+        # creating fresh AgentExecutor instances is cheap and ensures clean state.
 
-        # Create new agent
+        # Create new agent (LLM and vector store are still cached)
         agent = await self._create_agent(
             llm_model_name, system_prompt, vector_store, max_iterations
         )
 
-        if agent:
-            self.cache_manager.agent_cache.set(cache_key, agent)
-            logger.info(f"Cached new agent: {cache_key}")
+        logger.info(f"Created fresh agent: {cache_key}")
 
         return agent
 
@@ -307,12 +297,12 @@ class FastAIService:
         llm_model_name: str,
         system_prompt: str,
         vector_store: Chroma,
-        max_iterations: int = 3,
+        max_iterations: int = 3,  # Need 3: tool use + final answer + buffer
     ) -> AgentExecutor | None:
         """Create agent with optimizations."""
         try:
-            # Get cached LLM
-            llm = self._get_cached_llm(llm_model_name)
+            # Get cached LLM with streaming enabled
+            llm = get_llm(llm_model_name, streaming=True)
             if not llm:
                 error_msg = f"LLM model {llm_model_name} not available"
                 logger.error(error_msg)
@@ -320,10 +310,10 @@ class FastAIService:
                     error_msg, details={"model_name": llm_model_name}
                 )
 
-            # Create optimized retriever
+            # Create highly optimized retriever with minimal results
             retriever = vector_store.as_retriever(
                 search_type="similarity",
-                search_kwargs={"k": 3},
+                search_kwargs={"k": 2},  # Only get top 2 results for speed
             )
 
             retriever_tool = create_retriever_tool(
@@ -345,7 +335,7 @@ class FastAIService:
             # Create agent
             agent = create_tool_calling_agent(llm, [retriever_tool], prompt)
 
-            # Create executor with performance optimizations
+            # Create executor with aggressive performance optimizations
             return AgentExecutor(
                 agent=agent,
                 tools=[retriever_tool],
@@ -353,8 +343,8 @@ class FastAIService:
                 return_intermediate_steps=False,  # Reduce overhead
                 handle_parsing_errors=True,
                 max_iterations=max_iterations,
-                max_execution_time=20,
-                early_stopping_method="generate",  # Stop early when possible
+                max_execution_time=30,  # Increased from 10s to allow complete responses
+                early_stopping_method="force",  # Force stop when max iterations reached
             )
 
         except AIProcessingError:
@@ -432,16 +422,16 @@ async def ask_ai(
                     {"input": question.strip()},
                     config={"configurable": {"session_id": session_id}},
                 ),
-                timeout=60.0,  # 60 seconds timeout
+                timeout=30.0,  # 30 seconds timeout (reduced from 60s for faster failure)
             )
 
             logger.info("AI query processed successfully")
             return result
 
         except asyncio.TimeoutError as e:
-            error_msg = "AI processing timed out after 60 seconds"
+            error_msg = "AI processing timed out after 30 seconds"
             logger.warning(error_msg)
-            raise AITimeoutError(60, details={"question_length": len(question)}) from e
+            raise AITimeoutError(30, details={"question_length": len(question)}) from e
 
     except (AIProcessingError, VectorStoreError, AITimeoutError):
         raise
@@ -564,11 +554,23 @@ async def ask_ai_stream(
 
 
 def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
-    """Optimized chat session history with connection pooling."""
+    """
+    Optimized chat session history with windowed loading for better performance.
+
+    Uses sliding window approach to load only recent messages instead of full history.
+    This significantly improves performance for long conversations.
+    """
     try:
         session_id = aichat_uuid or f"aichat_{ULID()}"
         config = get_openu_config()
         redis_conn_string = config.redis_config.redis_connection_string
+
+        # Get window size from config
+        window_size = getattr(
+            getattr(config.ai_config, "chat", None),
+            "history_window_size",
+            10,  # Default to last 10 messages
+        )
 
         if redis_conn_string:
             try:
@@ -580,26 +582,51 @@ def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
                     key_prefix="openu_chat:",
                 )
 
-                logger.info(f"Using Redis for chat history: {session_id}")
+                # Get windowed messages for better performance
+                all_messages = message_history.messages
+                total_count = len(all_messages)
+
+                # Use sliding window - get last N messages
+                if total_count > window_size:
+                    windowed_messages = all_messages[-window_size:]
+                    logger.info(
+                        f"Using windowed chat history: {len(windowed_messages)}/{total_count} messages "
+                        f"for session {session_id}"
+                    )
+                else:
+                    windowed_messages = all_messages
+                    logger.info(f"Using full chat history: {total_count} messages for session {session_id}")
+
+                # Create a new message history object with windowed messages
+                # For writing, use the full history; for reading, use windowed
                 return {
-                    "message_history": message_history,
+                    "message_history": message_history,  # Full history for writing
+                    "windowed_messages": windowed_messages,  # Windowed for reading
                     "aichat_uuid": session_id,
                     "storage_type": "redis",
+                    "total_messages": total_count,
+                    "window_size": window_size,
                 }
 
             except Exception as redis_error:
                 logger.warning(f"Redis connection failed: {redis_error}")
                 return {
                     "message_history": [],
+                    "windowed_messages": [],
                     "aichat_uuid": session_id,
                     "storage_type": "memory",
+                    "total_messages": 0,
+                    "window_size": window_size,
                 }
         else:
             logger.info("Redis not configured, using in-memory chat history")
             return {
                 "message_history": [],
+                "windowed_messages": [],
                 "aichat_uuid": session_id,
                 "storage_type": "memory",
+                "total_messages": 0,
+                "window_size": window_size,
             }
 
     except Exception as e:

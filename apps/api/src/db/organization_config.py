@@ -34,6 +34,16 @@ class AIOrgConfig(PydanticStrictBaseModel):
     limit: int = 10
     model: str = "gpt-5-nano"
 
+    # Performance features
+    streaming_enabled: bool = True
+    response_cache_enabled: bool = True
+    semantic_cache_enabled: bool = True
+
+    # Performance limits
+    max_tokens_per_request: int = 4000
+    max_chat_history: int = 100
+    rate_limit_per_user: int = 100  # per hour
+
 
 class AssignmentOrgConfig(PydanticStrictBaseModel):
     enabled: bool = False

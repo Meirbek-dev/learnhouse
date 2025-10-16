@@ -28,10 +28,40 @@ class ChromaDBConfig(PydanticStrictBaseModel):
     db_host: str | None = None
 
 
+class AIPerformanceConfig(PydanticStrictBaseModel):
+    streaming_enabled: bool = True
+    cache_enabled: bool = True
+    max_concurrent_requests: int = 50
+    request_timeout: int = 60
+
+
+class AICacheConfig(PydanticStrictBaseModel):
+    vector_store_ttl: int = 3600
+    response_cache_ttl: int = 1800
+    embedding_cache_ttl: int = 7200
+    semantic_similarity_threshold: float = 0.95
+
+
+class AIVectorStoreConfig(PydanticStrictBaseModel):
+    chromadb_pool_size: int = 10
+    collection_retention: int = 86400  # 24 hours
+    embedding_batch_size: int = 8191  # OpenAI max for text-embedding-3-small
+
+
+class AIChatConfig(PydanticStrictBaseModel):
+    history_window_size: int = 10
+    max_history_length: int = 100
+    message_retention: int = 86400  # 24 hours
+
+
 class AIConfig(PydanticStrictBaseModel):
     openai_api_key: str | None = None
     is_ai_enabled: bool | None = None
     chromadb_config: ChromaDBConfig | None = None
+    performance: AIPerformanceConfig = AIPerformanceConfig()
+    cache: AICacheConfig = AICacheConfig()
+    vector_store: AIVectorStoreConfig = AIVectorStoreConfig()
+    chat: AIChatConfig = AIChatConfig()
 
 
 class S3ApiConfig(PydanticStrictBaseModel):

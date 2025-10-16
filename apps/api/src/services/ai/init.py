@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 def get_chromadb_client() -> chromadb.Client:
     """
     Get cached ChromaDB client instance with optimized configuration.
+
+    Note: This function is deprecated. Use get_chromadb_pool() from chromadb_pool.py instead.
     """
     try:
         config = get_openu_config()
@@ -36,17 +38,18 @@ def get_chromadb_client() -> chromadb.Client:
                 return client
             except Exception as remote_error:
                 logger.warning(f"Remote ChromaDB connection failed: {remote_error}")
-                logger.info("Falling back to local ChromaDB client")
-                return chromadb.Client()
-        logger.info("Using local ChromaDB client")
-        return chromadb.Client()
+                logger.info("Falling back to ephemeral in-memory client")
+                return chromadb.EphemeralClient()
+
+        logger.info("Using ephemeral in-memory ChromaDB client")
+        return chromadb.EphemeralClient()
 
     except Exception as e:
         error_msg = f"Failed to create ChromaDB client: {e!s}"
         logger.exception(error_msg)
-        # Fallback to local client as last resort
-        logger.warning("Falling back to local ChromaDB client")
-        return chromadb.Client()
+        # Fallback to ephemeral client as last resort
+        logger.warning("Falling back to ephemeral ChromaDB client")
+        return chromadb.EphemeralClient()
 
 
 @lru_cache(maxsize=10)
@@ -66,16 +69,24 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
 
         model_name = "text-embedding-3-small"
 
-        logger.info(f"Creating embedding function for model: {model_name}")
+        # Get batch size from config or use optimal size for speed
+        batch_size = getattr(
+            getattr(config.ai_config, "vector_store", None),
+            "embedding_batch_size",
+            2048,  # Optimal batch size for speed vs memory
+        )
+
+        logger.info(f"Creating embedding function for model: {model_name} with batch size: {batch_size}")
         return OpenAIEmbeddings(
             model=model_name,
             api_key=api_key,
-            # Performance optimizations for batch processing
-            max_retries=3,
-            # Optimal batch size for OpenAI API (reduces API calls)
-            chunk_size=2000,  # Increased from 1000 for better batching
-            # Enable concurrent requests for faster embedding generation
-            show_progress_bar=False,  # Disable progress bar in production
+            # Performance optimizations
+            chunk_size=batch_size,
+            max_retries=1,  # Reduced from 5 for faster failure
+            request_timeout=20,  # Reduced from 30s
+            retry_min_seconds=1,  # Faster retries
+            retry_max_seconds=5,  # Faster max retry
+            dimensions=512,  # Reduced dimensions for faster similarity search
         )
 
     except Exception as e:
@@ -118,9 +129,10 @@ def get_llm(model_name: str, streaming: bool = True) -> ChatOpenAI | None:
             # Response quality parameters
             frequency_penalty=0.0,
             presence_penalty=0.0,
-            top_p=1.0,
-            # Timeout to prevent hanging requests
-            request_timeout=60.0,
+            # Aggressive timeout to prevent hanging
+            request_timeout=30.0,  # Reduced from 60s
+            # Token limits - increased to allow complete responses
+            max_tokens=4000,  # Increased from 1500 to prevent premature cutoff
         )
 
     except Exception as e:
