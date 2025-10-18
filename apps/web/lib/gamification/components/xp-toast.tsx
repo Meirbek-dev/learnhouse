@@ -69,18 +69,18 @@ function XPToast({ notification, onDismiss }: XPToastProps) {
         </div>
 
         {/* Text Content */}
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-1.5">
-            <span className="text-lg font-bold text-foreground">+</span>
+            <span className="text-foreground text-lg font-bold">+</span>
             <AnimatedValue
               value={notification.totalAmount}
               className={cn('text-lg font-bold tabular-nums', theme.color)}
               format={(v) => Math.round(v).toLocaleString()}
             />
-            <span className="text-sm text-muted-foreground">XP</span>
+            <span className="text-muted-foreground text-sm">XP</span>
           </div>
-          <div className="flex items-center gap-2 mt-0.5">
-            <p className="text-xs text-muted-foreground truncate">
+          <div className="mt-0.5 flex items-center gap-2">
+            <p className="text-muted-foreground truncate text-xs">
               {isBatched ? t('toast.fromActivities', { count: notification.batchCount }) : sourceLabel}
             </p>
           </div>
@@ -89,10 +89,10 @@ function XPToast({ notification, onDismiss }: XPToastProps) {
         {/* Dismiss Button */}
         <button
           onClick={onDismiss}
-          className="flex-shrink-0 rounded-md p-1.5 opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100"
+          className="hover:bg-muted flex-shrink-0 rounded-md p-1.5 opacity-0 transition-opacity group-hover:opacity-100"
           aria-label="Dismiss"
         >
-          <X className="h-4 w-4 text-muted-foreground" />
+          <X className="text-muted-foreground h-4 w-4" />
         </button>
       </div>
 

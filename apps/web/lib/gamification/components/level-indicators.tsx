@@ -53,9 +53,9 @@ export function LevelProgress({ profile, showMilestones = false, animated = true
       className={cn('space-y-1.5', className)}
     >
       {/* Compact progress bar */}
-      <div className="relative h-1.5 overflow-hidden rounded-full bg-muted/50">
+      <div className="bg-muted/50 relative h-1.5 overflow-hidden rounded-full">
         <motion.div
-          className="h-full rounded-full bg-gradient-to-r from-primary/80 to-primary"
+          className="from-primary/80 to-primary h-full rounded-full bg-gradient-to-r"
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{
@@ -66,7 +66,7 @@ export function LevelProgress({ profile, showMilestones = false, animated = true
       </div>
 
       {/* Minimal XP display */}
-      <div className="flex items-center justify-between text-[10px] text-muted-foreground/80">
+      <div className="text-muted-foreground/80 flex items-center justify-between text-[10px]">
         <span className="tabular-nums">{currentLevelXP.toLocaleString()}</span>
         <span className="tabular-nums">{nextLevelXP.toLocaleString()} XP</span>
       </div>
@@ -152,7 +152,7 @@ export function ParticleEffect({
       {particles.map((particle) => (
         <motion.div
           key={particle.id}
-          className="absolute left-1/2 top-1/2 rounded-full"
+          className="absolute top-1/2 left-1/2 rounded-full"
           style={{
             width: particle.size,
             height: particle.size,
@@ -271,7 +271,7 @@ export function XPGainAnimation({ amount, trigger, position, onComplete }: XPGai
       animate={{ opacity: [0, 1, 1, 0], y: -40, scale: [0.8, 1, 1] }}
       transition={{ duration: 1.2, times: [0, 0.2, 0.8, 1], ease: [0.4, 0, 0.2, 1] }}
     >
-      <div className="flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold text-primary shadow-lg">
+      <div className="border-primary/20 bg-primary/10 text-primary flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-lg backdrop-blur-sm">
         <Sparkles className="h-3 w-3" />+{amount} XP
       </div>
     </motion.div>

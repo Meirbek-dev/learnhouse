@@ -1,16 +1,22 @@
 """
 Streaming AI response support for real-time user feedback.
 """
+
 import asyncio
 import json
 import logging
-from typing import Any, AsyncGenerator
+from collections.abc import AsyncGenerator
+from typing import Any
 
 from langchain.agents import AgentExecutor
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
 
-from src.services.ai.exceptions import AIProcessingError, AITimeoutError, VectorStoreError
+from src.services.ai.exceptions import (
+    AIProcessingError,
+    AITimeoutError,
+    VectorStoreError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +30,8 @@ async def ask_ai_stream(
     openai_model_name: str,
     session_id: str = "default",
     agent_executor: AgentExecutor | None = None,
-) -> AsyncGenerator[dict[str, Any], None]:
+    cancel_event: asyncio.Event | None = None,
+) -> AsyncGenerator[dict[str, Any]]:
     """
     Stream AI responses for better perceived performance.
 
@@ -74,7 +81,8 @@ async def ask_ai_stream(
             )
 
             if not vector_store:
-                raise VectorStoreError("Failed to create knowledge base")
+                msg = "Failed to create knowledge base"
+                raise VectorStoreError(msg)
 
             # Get or create agent (cached)
             agent_executor = await ai_service.get_or_create_agent(
@@ -84,7 +92,8 @@ async def ask_ai_stream(
             )
 
             if not agent_executor:
-                raise AIProcessingError("Failed to create AI agent")
+                msg = "Failed to create AI agent"
+                raise AIProcessingError(msg)
 
         # Create agent with history
         agent_with_history = RunnableWithMessageHistory(
@@ -100,12 +109,10 @@ async def ask_ai_stream(
         chunk_count = 0
         full_response = ""
 
-        # Send initial status
-        yield {
-            "type": "status",
-            "status": "processing",
-            "message": "AI is thinking...",
-        }
+        # Send initial status as SSE string
+        yield format_sse_message(
+            {"type": "status", "status": "processing", "message": "AI is thinking..."}
+        )
 
         try:
             # Process with streaming and timeout using asyncio.timeout
@@ -122,22 +129,42 @@ async def ask_ai_stream(
                     event_type = event.get("event", "")
 
                     # Debug logging to understand what events we're receiving
-                    if event_type in ["on_chat_model_stream", "on_llm_new_token", "on_chain_end"]:
+                    if event_type in [
+                        "on_chat_model_stream",
+                        "on_llm_new_token",
+                        "on_chain_end",
+                    ]:
                         event_name = event.get("name", "")
                         logger.debug(f"Event: {event_type}, Name: {event_name}")
 
                     # Stream LLM tokens immediately as they arrive
                     # Try multiple event types for compatibility
+                    # Check cancellation at the top of the loop to abort promptly
+                    if cancel_event and cancel_event.is_set():
+                        logger.info(
+                            "ask_ai_stream: cancellation requested, aborting stream"
+                        )
+                        yield format_sse_message(
+                            {
+                                "type": "status",
+                                "status": "aborted",
+                                "message": "Request cancelled",
+                            }
+                        )
+                        return
+
                     if event_type == "on_chat_model_stream":
                         chunk = event.get("data", {}).get("chunk")
                         if chunk and hasattr(chunk, "content") and chunk.content:
                             chunk_count += 1
                             full_response += chunk.content
-                            yield {
-                                "type": "chunk",
-                                "content": chunk.content,
-                                "chunk_id": chunk_count,
-                            }
+                            yield format_sse_message(
+                                {
+                                    "type": "chunk",
+                                    "content": chunk.content,
+                                    "chunk_id": chunk_count,
+                                }
+                            )
 
                     # Alternative streaming event type
                     elif event_type == "on_llm_new_token":
@@ -145,73 +172,73 @@ async def ask_ai_stream(
                         if token:
                             chunk_count += 1
                             full_response += str(token)
-                            yield {
-                                "type": "chunk",
-                                "content": str(token),
-                                "chunk_id": chunk_count,
-                            }
+                            yield format_sse_message(
+                                {
+                                    "type": "chunk",
+                                    "content": str(token),
+                                    "chunk_id": chunk_count,
+                                }
+                            )
 
                     # Handle tool outputs for context
                     elif event_type == "on_tool_end":
                         # Send a subtle indicator that context was retrieved
-                        yield {
-                            "type": "status",
-                            "status": "context_retrieved",
-                            "message": "Retrieved context",
-                        }
+                        yield format_sse_message(
+                            {
+                                "type": "status",
+                                "status": "context_retrieved",
+                                "message": "Retrieved context",
+                            }
+                        )
 
                     # Capture ONLY the final AgentExecutor output if streaming didn't work
                     elif event_type == "on_chain_end":
-                        # Only process if this is the AgentExecutor chain (root level)
-                        # and we haven't streamed any chunks yet
-                        event_name = event.get("name", "")
-
-                        # Skip intermediate chain ends (tool calls, etc.)
-                        if "Agent" not in event_name and "RunnableWithMessageHistory" not in event_name:
-                            continue
-
-                        # Get the output from the chain
+                        # Inspect the chain output payload and try to extract
+                        # a final text answer. Some agents/tooling return a
+                        # dict, some return a string, and some return lists
+                        # of Message objects.
                         output_data = event.get("data", {}).get("output", {})
 
-                        # Extract the actual text output
+                        # Extract the actual text output in a tolerant way
                         output_text = ""
                         if isinstance(output_data, dict):
-                            # Try different keys where the output might be
-                            output_text = output_data.get("output", "") or output_data.get("text", "")
+                            output_text = (
+                                output_data.get("output")
+                                or output_data.get("text")
+                                or output_data.get("answer")
+                                or ""
+                            )
                         elif isinstance(output_data, str):
                             output_text = output_data
 
                         # Only use this fallback if:
                         # 1. We haven't streamed anything yet
                         # 2. The output is actual text (not empty, not "[]", not intermediate data)
-                        if output_text and chunk_count == 0 and output_text not in ["[]", "{}", "None"]:
-                            logger.warning(f"No streaming chunks received, using final output from {event_name}")
+                        if (
+                            output_text
+                            and chunk_count == 0
+                            and output_text not in ["[]", "{}", "None"]
+                        ):
+                            logger.warning(
+                                "No streaming chunks received, using final output from chain_end"
+                            )
                             full_response = output_text
                             # Yield the full response as a single chunk
-                            yield {
-                                "type": "chunk",
-                                "content": output_text,
-                                "chunk_id": 1,
-                            }
+                            yield format_sse_message(
+                                {"type": "chunk", "content": output_text, "chunk_id": 1}
+                            )
                             chunk_count = 1
 
             # Send final response after loop completes
-            yield {
-                "type": "final",
-                "content": full_response,
-                "total_chunks": chunk_count,
-            }
 
             logger.info(f"Streaming query completed: {chunk_count} chunks sent")
 
-        except asyncio.TimeoutError as e:
+        except TimeoutError as e:
             error_msg = "AI processing timed out after 60 seconds"
             logger.warning(error_msg)
-            yield {
-                "type": "error",
-                "error": error_msg,
-                "error_code": "TIMEOUT",
-            }
+            yield format_sse_message(
+                {"type": "error", "error": error_msg, "error_code": "TIMEOUT"}
+            )
             raise AITimeoutError(60, details={"question_length": len(question)}) from e
 
     except (AIProcessingError, VectorStoreError, AITimeoutError):
@@ -219,11 +246,9 @@ async def ask_ai_stream(
     except Exception as e:
         error_msg = f"Unexpected error during AI streaming: {e!s}"
         logger.exception(error_msg)
-        yield {
-            "type": "error",
-            "error": error_msg,
-            "error_code": "PROCESSING_ERROR",
-        }
+        yield format_sse_message(
+            {"type": "error", "error": error_msg, "error_code": "PROCESSING_ERROR"}
+        )
         raise AIProcessingError(
             error_msg,
             details={"error_type": type(e).__name__, "session_id": session_id},
@@ -240,4 +265,9 @@ def format_sse_message(data: dict[str, Any]) -> str:
     Returns:
         Formatted SSE message string
     """
-    return f"data: {json.dumps(data)}\n\n"
+    # Use ensure_ascii=False to preserve unicode, and replace any lone newlines in
+    # the JSON string with escaped newline sequences to avoid breaking SSE payloads.
+    payload = json.dumps(data, ensure_ascii=False)
+    # Replace literal newlines inside the payload to avoid SSE parsing issues
+    payload = payload.replace("\n", "\\n")
+    return f"data: {payload}\n\n"

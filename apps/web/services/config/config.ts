@@ -80,7 +80,12 @@ export const getUriWithoutOrg = (path: string) => `${OPENU_HTTP_PROTOCOL}${OPENU
 export const getOrgFromUri = () => {
   const multi_org = isMultiOrgModeEnabled();
   if (multi_org) {
-    getDefaultOrg();
+    // When multi-org mode is enabled, prefer the configured default org if present.
+    // Previously this function called getDefaultOrg() but didn't return its value.
+    // Return the default org from env when available, otherwise undefined in server context.
+    const def = getDefaultOrg();
+    if (def) return def;
+    return undefined;
   } else if (typeof window !== 'undefined') {
     const { hostname } = window.location;
 

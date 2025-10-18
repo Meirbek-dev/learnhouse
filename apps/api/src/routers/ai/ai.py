@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import Annotated
 
@@ -21,11 +22,44 @@ from src.services.ai.schemas.ai import (
     SendActivityAIChatMessage,
     StartActivityAIChatSession,
 )
+from src.services.ai.streaming import format_sse_message
 
 logger = logging.getLogger(__name__)
 
-# Initialize rate limiter
-limiter = Limiter(key_func=get_remote_address)
+
+# Initialize rate limiter: prefer auth token or X-User-Id header, fallback to IP
+def _rate_limit_key(request: Request) -> str:
+    # Prefer an explicit user header if present (set by upstream auth middleware)
+    user_header = request.headers.get("x-user-id") or request.headers.get("X-User-Id")
+    if user_header:
+        return f"user:{user_header}"
+
+    # Prefer Authorization bearer token to key by user token
+    auth = request.headers.get("authorization") or request.headers.get("Authorization")
+    if auth:
+        try:
+            parts = auth.split()
+            if len(parts) == 2 and parts[0].lower() == "bearer":
+                token = parts[1]
+                # Hash token for privacy before using as limiter key
+                import hashlib
+
+                h = hashlib.sha256(token.encode("utf-8")).hexdigest()
+                return f"token:{h}"
+            # Fallback: hash the whole auth header
+            import hashlib
+
+            h = hashlib.sha256(auth.encode("utf-8")).hexdigest()
+            return f"auth:{h}"
+        except Exception:
+            pass
+
+    # Fallback to remote address
+    return get_remote_address(request)
+
+
+# Initialize limiter using per-user key when available
+limiter = Limiter(key_func=_rate_limit_key)
 
 router = APIRouter()
 
@@ -133,21 +167,34 @@ async def api_ai_start_activity_chat_session_stream(
     logger.info(f"AI streaming chat session start request from user {current_user.id}")
 
     try:
+        cancel_event = asyncio.Event()
+
         async def event_generator():
             try:
-                async for chunk in ai_start_activity_chat_session_stream(
-                    request, chat_session_object, current_user, db_session
+                async for sse_string in ai_start_activity_chat_session_stream(
+                    request,
+                    chat_session_object,
+                    current_user,
+                    db_session,
+                    cancel_event=cancel_event,
                 ):
-                    yield chunk
+                    # If client disconnected, set cancel event and stop the generator
+                    if await request.is_disconnected():
+                        cancel_event.set()
+                        logger.info("Client disconnected; aborting streaming generator")
+                        return
+
+                    # The service yields SSE-formatted strings already
+                    yield sse_string
             except Exception as e:
                 logger.exception(f"Error in streaming generator: {e}")
-                # Yield error in SSE format
-                import json
-                yield f"data: {json.dumps({'type': 'error', 'error': str(e), 'error_code': 'STREAM_ERROR'})}\n\n"
+                yield format_sse_message(
+                    {"type": "error", "error": str(e), "error_code": "STREAM_ERROR"}
+                )
 
         return StreamingResponse(
             event_generator(),
-            media_type="text/event-stream",
+            media_type="text/event-stream; charset=utf-8",
             headers={
                 "Cache-Control": "no-cache",
                 "Connection": "keep-alive",
@@ -188,21 +235,32 @@ async def api_ai_send_activity_chat_message_stream(
     logger.info(f"AI streaming chat message request from user {current_user.id}")
 
     try:
+        cancel_event = asyncio.Event()
+
         async def event_generator():
             try:
-                async for chunk in ai_send_activity_chat_message_stream(
-                    request, chat_session_object, current_user, db_session
+                async for sse_string in ai_send_activity_chat_message_stream(
+                    request,
+                    chat_session_object,
+                    current_user,
+                    db_session,
+                    cancel_event=cancel_event,
                 ):
-                    yield chunk
+                    if await request.is_disconnected():
+                        cancel_event.set()
+                        logger.info("Client disconnected; aborting streaming generator")
+                        return
+
+                    yield sse_string
             except Exception as e:
                 logger.exception(f"Error in streaming generator: {e}")
-                # Yield error in SSE format
-                import json
-                yield f"data: {json.dumps({'type': 'error', 'error': str(e), 'error_code': 'STREAM_ERROR'})}\n\n"
+                yield format_sse_message(
+                    {"type": "error", "error": str(e), "error_code": "STREAM_ERROR"}
+                )
 
         return StreamingResponse(
             event_generator(),
-            media_type="text/event-stream",
+            media_type="text/event-stream; charset=utf-8",
             headers={
                 "Cache-Control": "no-cache",
                 "Connection": "keep-alive",

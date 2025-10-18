@@ -1,7 +1,7 @@
 'use client';
 
-import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
 import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
+import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
 import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useEffect, useRef, useState, useTransition } from 'react';
@@ -121,7 +121,7 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
           // onChunk: accumulate content as it arrives
           (chunk) => {
             if (chunk.content) {
-              setStreamingMessage(prev => prev + chunk.content);
+              setStreamingMessage((prev) => prev + chunk.content);
             }
           },
           // onStatus: handle status updates
@@ -149,7 +149,7 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
               },
             });
             setStreamingMessage('');
-          }
+          },
         );
       } else {
         // Start new chat session
@@ -160,7 +160,7 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
           // onChunk: accumulate content as it arrives
           (chunk) => {
             if (chunk.content) {
-              setStreamingMessage(prev => prev + chunk.content);
+              setStreamingMessage((prev) => prev + chunk.content);
             }
           },
           // onStatus: handle status updates
@@ -199,7 +199,7 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
               },
             });
             setStreamingMessage('');
-          }
+          },
         );
       }
     } catch (error) {

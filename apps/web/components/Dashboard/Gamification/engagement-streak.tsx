@@ -83,17 +83,17 @@ export function EngagementStreak({ profile, className }: EngagementStreakProps) 
                 {engagement.isActive ? (
                   <Flame className="h-6 w-6 text-white" />
                 ) : (
-                  <Calendar className="h-6 w-6 text-muted-foreground" />
+                  <Calendar className="text-muted-foreground h-6 w-6" />
                 )}
               </motion.div>
               <div>
                 <div className="flex items-baseline gap-1">
                   <span className="text-3xl font-bold">{engagement.current}</span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-muted-foreground text-sm">
                     {engagement.current === 1 ? t('engagement.day') : t('engagement.days')}
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground">{getMessage(engagement.current)}</p>
+                <p className="text-muted-foreground text-xs">{getMessage(engagement.current)}</p>
               </div>
             </div>
 
@@ -114,9 +114,9 @@ export function EngagementStreak({ profile, className }: EngagementStreakProps) 
 
           {/* Longest Streak */}
           {engagement.longest > 0 && engagement.longest !== engagement.current && (
-            <div className="rounded-lg border bg-muted/50 p-3">
+            <div className="bg-muted/50 rounded-lg border p-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">{t('engagement.longestStreak')}</span>
+                <span className="text-muted-foreground text-sm">{t('engagement.longestStreak')}</span>
                 <span className="text-sm font-semibold">
                   {engagement.longest} {engagement.longest === 1 ? t('engagement.day') : t('engagement.days')}
                 </span>

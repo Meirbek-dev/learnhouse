@@ -9,8 +9,8 @@ import {
   MoreVertical,
   X,
 } from 'lucide-react';
-import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
 import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
+import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import touEmblemLight from 'public/tou_emblem_light.webp';
@@ -192,7 +192,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
                 });
                 await dispatchAIEditor({ type: 'setIsModalOpen' });
                 resolve('');
-              }
+              },
             );
           } else {
             // Start new chat session with streaming
@@ -237,7 +237,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
                 });
                 await dispatchAIEditor({ type: 'setIsModalOpen' });
                 resolve('');
-              }
+              },
             );
           }
         } catch (error) {

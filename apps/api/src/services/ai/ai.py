@@ -64,7 +64,7 @@ async def _get_activity_data(
             logger.warning(f"Activity not found: {activity_uuid}")
             raise ActivityNotFoundError(activity_uuid)
 
-        activity_db, course_db, org_db, org_config_db = result
+        activity_db, course_db, _org_db, org_config_db = result
 
         # Convert to Pydantic models
         activity = ActivityRead.model_validate(activity_db)
@@ -91,6 +91,7 @@ async def ai_start_activity_chat_session(
     chat_session_object: StartActivityAIChatSession,
     current_user: PublicUser = Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
+    cancel_event: asyncio.Event | None = None,
 ) -> ActivityAIChatSessionResponse:
     """Optimized AI chat session start with proper error handling."""
 
@@ -105,7 +106,8 @@ async def ai_start_activity_chat_session(
             org_config.config.get("features", {}).get("ai", {}).get("enabled", False)
         )
         if not ai_enabled:
-            raise AIFeatureDisabledError("activity_ask", course.org_id)
+            msg = "activity_ask"
+            raise AIFeatureDisabledError(msg, course.org_id)
 
         # Process content in parallel
         content_task = asyncio.to_thread(
@@ -146,12 +148,14 @@ async def ai_start_activity_chat_session(
             embeddings,
             ai_model,
             session_id=chat_session["aichat_uuid"],
+            cancel_event=cancel_event,
         )
 
         ai_message = response.get("output", "")
         if not ai_message:
             logger.warning("AI response is empty")
-            raise AIProcessingError("AI returned an empty response")
+            msg = "AI returned an empty response"
+            raise AIProcessingError(msg)
 
         logger.info(
             f"AI chat session started successfully: {chat_session['aichat_uuid']}"
@@ -198,6 +202,7 @@ async def ai_send_activity_chat_message(
     chat_session_object: SendActivityAIChatMessage,
     current_user: PublicUser = Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
+    cancel_event: asyncio.Event | None = None,
 ) -> ActivityAIChatSessionResponse:
     """Optimized AI chat message sending with proper error handling."""
 
@@ -212,7 +217,8 @@ async def ai_send_activity_chat_message(
             org_config.config.get("features", {}).get("ai", {}).get("enabled", False)
         )
         if not ai_enabled:
-            raise AIFeatureDisabledError("activity_ask", course.org_id)
+            msg = "activity_ask"
+            raise AIFeatureDisabledError(msg, course.org_id)
 
         # Process content and get chat session in parallel
         content_task = asyncio.to_thread(
@@ -257,12 +263,14 @@ async def ai_send_activity_chat_message(
             embeddings,
             ai_model,
             session_id=chat_session["aichat_uuid"],
+            cancel_event=cancel_event,
         )
 
         ai_message = response.get("output", "")
         if not ai_message:
             logger.warning("AI response is empty")
-            raise AIProcessingError("AI returned an empty response")
+            msg = "AI returned an empty response"
+            raise AIProcessingError(msg)
 
         logger.info(
             f"AI chat message sent successfully: {chat_session_object.aichat_uuid}"
@@ -309,6 +317,7 @@ async def ai_start_activity_chat_session_stream(
     chat_session_object: StartActivityAIChatSession,
     current_user: PublicUser = Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
+    cancel_event: asyncio.Event | None = None,
 ):
     """Streaming version of AI chat session start."""
 
@@ -323,11 +332,14 @@ async def ai_start_activity_chat_session_stream(
             org_config.config.get("features", {}).get("ai", {}).get("enabled", False)
         )
         if not ai_enabled:
-            raise AIFeatureDisabledError("activity_ask", course.org_id)
+            msg = "activity_ask"
+            raise AIFeatureDisabledError(msg, course.org_id)
 
         # Check if streaming is enabled
         streaming_enabled = (
-            org_config.config.get("features", {}).get("ai", {}).get("streaming_enabled", True)
+            org_config.config.get("features", {})
+            .get("ai", {})
+            .get("streaming_enabled", True)
         )
         if not streaming_enabled:
             logger.info("Streaming disabled, falling back to regular response")
@@ -335,12 +347,14 @@ async def ai_start_activity_chat_session_stream(
             response = await ai_start_activity_chat_session(
                 request, chat_session_object, current_user, db_session
             )
-            yield format_sse_message({
-                "type": "final",
-                "aichat_uuid": response.aichat_uuid,
-                "activity_uuid": response.activity_uuid,
-                "message": response.message,
-            })
+            yield format_sse_message(
+                {
+                    "type": "final",
+                    "aichat_uuid": response.aichat_uuid,
+                    "activity_uuid": response.activity_uuid,
+                    "message": response.message,
+                }
+            )
             return
 
         # Process content in parallel
@@ -372,68 +386,86 @@ async def ai_start_activity_chat_session_stream(
         )
 
         # Send status update
-        yield format_sse_message({
-            "type": "status",
-            "status": "processing",
-            "aichat_uuid": chat_session["aichat_uuid"],
-        })
+        yield format_sse_message(
+            {
+                "type": "status",
+                "status": "processing",
+                "aichat_uuid": chat_session["aichat_uuid"],
+            }
+        )
 
         # Stream AI responses immediately
         logger.info(f"Streaming AI chat session for activity {activity.activity_uuid}")
 
         async for chunk in ask_ai_stream(
             chat_session_object.message,
-            chat_session["message_history"],
+            chat_session[
+                "message_history"
+            ],  # pass the history object expected by RunnableWithMessageHistory
             ai_friendly_text,
             system_message,
             embeddings,
             ai_model,
             session_id=chat_session["aichat_uuid"],
+            cancel_event=cancel_event,
         ):
-            yield format_sse_message(chunk)
+            # ask_ai_stream now yields SSE-formatted strings
+            yield chunk
 
-        logger.info(f"Streaming AI chat session completed: {chat_session['aichat_uuid']}")
+        logger.info(
+            f"Streaming AI chat session completed: {chat_session['aichat_uuid']}"
+        )
 
     except ActivityNotFoundError as e:
         logger.warning(f"Activity not found: {e.message}")
-        yield format_sse_message({
-            "type": "error",
-            "error": e.message,
-            "status": 404,
-        })
+        yield format_sse_message(
+            {
+                "type": "error",
+                "error": e.message,
+                "status": 404,
+            }
+        )
 
     except AIFeatureDisabledError as e:
         logger.warning(f"AI feature disabled: {e.message}")
-        yield format_sse_message({
-            "type": "error",
-            "error": e.message,
-            "status": 403,
-        })
+        yield format_sse_message(
+            {
+                "type": "error",
+                "error": e.message,
+                "status": 403,
+            }
+        )
 
     except AITimeoutError as e:
         logger.warning(f"AI timeout: {e.message}")
-        yield format_sse_message({
-            "type": "error",
-            "error": e.message,
-            "status": 504,
-        })
+        yield format_sse_message(
+            {
+                "type": "error",
+                "error": e.message,
+                "status": 504,
+            }
+        )
 
     except (AIProcessingError, VectorStoreError, ChatSessionError) as e:
         logger.error(f"AI processing error: {e.message}", exc_info=True)
-        yield format_sse_message({
-            "type": "error",
-            "error": f"AI processing failed: {e.message}",
-            "status": 500,
-        })
+        yield format_sse_message(
+            {
+                "type": "error",
+                "error": f"AI processing failed: {e.message}",
+                "status": 500,
+            }
+        )
 
     except Exception as e:
         error_msg = f"Unexpected error in streaming AI chat session: {e!s}"
         logger.exception(error_msg)
-        yield format_sse_message({
-            "type": "error",
-            "error": "An unexpected error occurred. Please try again later.",
-            "status": 500,
-        })
+        yield format_sse_message(
+            {
+                "type": "error",
+                "error": "An unexpected error occurred. Please try again later.",
+                "status": 500,
+            }
+        )
 
 
 async def ai_send_activity_chat_message_stream(
@@ -441,6 +473,7 @@ async def ai_send_activity_chat_message_stream(
     chat_session_object: SendActivityAIChatMessage,
     current_user: PublicUser = Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
+    cancel_event: asyncio.Event | None = None,
 ):
     """Streaming version of AI chat message sending."""
 
@@ -455,11 +488,14 @@ async def ai_send_activity_chat_message_stream(
             org_config.config.get("features", {}).get("ai", {}).get("enabled", False)
         )
         if not ai_enabled:
-            raise AIFeatureDisabledError("activity_ask", course.org_id)
+            msg = "activity_ask"
+            raise AIFeatureDisabledError(msg, course.org_id)
 
         # Check if streaming is enabled
         streaming_enabled = (
-            org_config.config.get("features", {}).get("ai", {}).get("streaming_enabled", True)
+            org_config.config.get("features", {})
+            .get("ai", {})
+            .get("streaming_enabled", True)
         )
         if not streaming_enabled:
             logger.info("Streaming disabled, falling back to regular response")
@@ -467,12 +503,14 @@ async def ai_send_activity_chat_message_stream(
             response = await ai_send_activity_chat_message(
                 request, chat_session_object, current_user, db_session
             )
-            yield format_sse_message({
-                "type": "final",
-                "aichat_uuid": response.aichat_uuid,
-                "activity_uuid": response.activity_uuid,
-                "message": response.message,
-            })
+            yield format_sse_message(
+                {
+                    "type": "final",
+                    "aichat_uuid": response.aichat_uuid,
+                    "activity_uuid": response.activity_uuid,
+                    "message": response.message,
+                }
+            )
             return
 
         # Process content and get chat session in parallel
@@ -506,65 +544,82 @@ async def ai_send_activity_chat_message_stream(
         )
 
         # Send status update
-        yield format_sse_message({
-            "type": "status",
-            "status": "processing",
-            "aichat_uuid": chat_session_object.aichat_uuid,
-        })
+        yield format_sse_message(
+            {
+                "type": "status",
+                "status": "processing",
+                "aichat_uuid": chat_session_object.aichat_uuid,
+            }
+        )
 
         # Stream AI responses immediately
         logger.info(f"Streaming AI message: {chat_session_object.aichat_uuid}")
 
         async for chunk in ask_ai_stream(
             chat_session_object.message,
-            chat_session["message_history"],
+            chat_session[
+                "message_history"
+            ],  # pass the history object expected by RunnableWithMessageHistory
             ai_friendly_text,
             system_message,
             embeddings,
             ai_model,
             session_id=chat_session["aichat_uuid"],
+            cancel_event=cancel_event,
         ):
-            yield format_sse_message(chunk)
+            yield chunk
 
-        logger.info(f"Streaming AI chat message completed: {chat_session_object.aichat_uuid}")
+        logger.info(
+            f"Streaming AI chat message completed: {chat_session_object.aichat_uuid}"
+        )
 
     except ActivityNotFoundError as e:
         logger.warning(f"Activity not found: {e.message}")
-        yield format_sse_message({
-            "type": "error",
-            "error": e.message,
-            "status": 404,
-        })
+        yield format_sse_message(
+            {
+                "type": "error",
+                "error": e.message,
+                "status": 404,
+            }
+        )
 
     except AIFeatureDisabledError as e:
         logger.warning(f"AI feature disabled: {e.message}")
-        yield format_sse_message({
-            "type": "error",
-            "error": e.message,
-            "status": 403,
-        })
+        yield format_sse_message(
+            {
+                "type": "error",
+                "error": e.message,
+                "status": 403,
+            }
+        )
 
     except AITimeoutError as e:
         logger.warning(f"AI timeout: {e.message}")
-        yield format_sse_message({
-            "type": "error",
-            "error": e.message,
-            "status": 504,
-        })
+        yield format_sse_message(
+            {
+                "type": "error",
+                "error": e.message,
+                "status": 504,
+            }
+        )
 
     except (AIProcessingError, VectorStoreError, ChatSessionError) as e:
         logger.error(f"AI processing error: {e.message}", exc_info=True)
-        yield format_sse_message({
-            "type": "error",
-            "error": f"AI processing failed: {e.message}",
-            "status": 500,
-        })
+        yield format_sse_message(
+            {
+                "type": "error",
+                "error": f"AI processing failed: {e.message}",
+                "status": 500,
+            }
+        )
 
     except Exception as e:
         error_msg = f"Unexpected error in streaming AI chat message: {e!s}"
         logger.exception(error_msg)
-        yield format_sse_message({
-            "type": "error",
-            "error": "An unexpected error occurred. Please try again later.",
-            "status": 500,
-        })
+        yield format_sse_message(
+            {
+                "type": "error",
+                "error": "An unexpected error occurred. Please try again later.",
+                "status": 500,
+            }
+        )

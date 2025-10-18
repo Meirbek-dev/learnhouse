@@ -3,10 +3,12 @@ Thread-safe cache manager for AI services with proper TTL management.
 """
 
 import asyncio
+import inspect
 import logging
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from threading import Lock
-from typing import Any, Callable, Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 from cachetools import TTLCache
 
@@ -15,7 +17,7 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
 
-class ThreadSafeCache(Generic[T]):
+class ThreadSafeCache[T]:
     """Thread-safe cache with TTL support using cachetools."""
 
     def __init__(self, maxsize: int = 100, ttl: int = 3600) -> None:
@@ -28,6 +30,8 @@ class ThreadSafeCache(Generic[T]):
         """
         self._cache: TTLCache[str, T] = TTLCache(maxsize=maxsize, ttl=ttl)
         self._lock = Lock()
+        # Async lock to be used by async methods to avoid blocking the event loop
+        self._async_lock = asyncio.Lock()
         self._hit_count = 0
         self._miss_count = 0
 
@@ -52,6 +56,11 @@ class ThreadSafeCache(Generic[T]):
                 logger.debug(f"Cache miss for key: {key}")
                 return None
 
+    async def async_get(self, key: str) -> T | None:
+        """Async-safe getter wrapper."""
+        # Fast-path using sync get under thread lock to avoid blocking event loop
+        return self.get(key)
+
     def set(self, key: str, value: T) -> None:
         """
         Set item in cache.
@@ -63,6 +72,11 @@ class ThreadSafeCache(Generic[T]):
         with self._lock:
             self._cache[key] = value
             logger.debug(f"Cached item with key: {key}")
+
+    async def async_set(self, key: str, value: T) -> None:
+        """Async-safe setter wrapper."""
+        # Use thread-safe sync set to modify the underlying cache
+        return await asyncio.to_thread(self.set, key, value)
 
     def delete(self, key: str) -> None:
         """
@@ -77,6 +91,10 @@ class ThreadSafeCache(Generic[T]):
                 logger.debug(f"Deleted cache entry: {key}")
             except KeyError:
                 pass
+
+    async def async_delete(self, key: str) -> None:
+        """Async-safe delete wrapper."""
+        return await asyncio.to_thread(self.delete, key)
 
     def clear(self) -> None:
         """Clear all cache entries."""
@@ -121,23 +139,31 @@ class ThreadSafeCache(Generic[T]):
         Returns:
             Cached or newly computed value
         """
-        # Check cache first
-        cached_value = self.get(key)
+        # Fast-path cache check (use async_get for consistency)
+        cached_value = await self.async_get(key)
         if cached_value is not None:
             return cached_value
 
-        # Compute value
+        # Compute value (call factory - it may return an awaitable)
         try:
-            if asyncio.iscoroutinefunction(factory):
-                value = await factory()
+            value_or_awaitable = factory()
+
+            if inspect.isawaitable(value_or_awaitable):
+                value = await value_or_awaitable
             else:
-                value = factory()
+                value = value_or_awaitable
 
-            # Cache and return
-            if value is not None:
-                self.set(key, value)
+            # Protect write path with async lock to avoid races
+            async with self._async_lock:
+                # Double-check cache in case of concurrent writer
+                cached_value = await self.async_get(key)
+                if cached_value is not None:
+                    return cached_value
 
-            return value
+                if value is not None:
+                    await self.async_set(key, value)
+
+                return value
 
         except Exception as e:
             logger.exception(f"Failed to compute value for key {key}: {e}")

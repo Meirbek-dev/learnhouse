@@ -131,7 +131,7 @@ export default function UserGamificationSettings() {
           <div className="flex items-center justify-between space-x-2">
             <div className="space-y-0.5">
               <Label htmlFor="show-leaderboard">{t('settings.showOnLeaderboard')}</Label>
-              <p className="text-sm text-muted-foreground">{t('settings.showOnLeaderboardDescription')}</p>
+              <p className="text-muted-foreground text-sm">{t('settings.showOnLeaderboardDescription')}</p>
             </div>
             <Switch
               id="show-leaderboard"
@@ -144,7 +144,7 @@ export default function UserGamificationSettings() {
           <div className="flex items-center justify-between space-x-2">
             <div className="space-y-0.5">
               <Label htmlFor="xp-notifications">{t('settings.xpGainNotifications')}</Label>
-              <p className="text-sm text-muted-foreground">{t('settings.xpGainNotificationsDescription')}</p>
+              <p className="text-muted-foreground text-sm">{t('settings.xpGainNotificationsDescription')}</p>
             </div>
             <Switch
               id="xp-notifications"
@@ -157,7 +157,7 @@ export default function UserGamificationSettings() {
           <div className="flex items-center justify-between space-x-2">
             <div className="space-y-0.5">
               <Label htmlFor="animated-effects">{t('settings.animatedEffects')}</Label>
-              <p className="text-sm text-muted-foreground">{t('settings.animatedEffectsDescription')}</p>
+              <p className="text-muted-foreground text-sm">{t('settings.animatedEffectsDescription')}</p>
             </div>
             <Switch
               id="animated-effects"

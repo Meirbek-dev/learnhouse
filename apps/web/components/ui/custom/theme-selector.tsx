@@ -57,17 +57,17 @@ export function ThemeSelector({ className }: ThemeSelectorProps) {
                 {/* Theme color preview - using OKLCH colors */}
                 <div className="flex gap-1">
                   <div
-                    className="h-4 w-4 shrink-0 rounded border border-border"
+                    className="border-border h-4 w-4 shrink-0 rounded border"
                     style={{ backgroundColor: currentColors.primary }}
                     title="Primary color"
                   />
                   <div
-                    className="h-4 w-4 shrink-0 rounded border border-border"
+                    className="border-border h-4 w-4 shrink-0 rounded border"
                     style={{ backgroundColor: currentColors.secondary }}
                     title="Secondary color"
                   />
                   <div
-                    className="h-4 w-4 shrink-0 rounded border border-border"
+                    className="border-border h-4 w-4 shrink-0 rounded border"
                     style={{ backgroundColor: currentColors.accent }}
                     title="Accent color"
                   />
@@ -88,17 +88,17 @@ export function ThemeSelector({ className }: ThemeSelectorProps) {
                     {/* Theme color preview - using OKLCH colors */}
                     <div className="flex gap-1">
                       <div
-                        className="h-4 w-4 shrink-0 rounded border border-border"
+                        className="border-border h-4 w-4 shrink-0 rounded border"
                         style={{ backgroundColor: colors.primary }}
                         title="Primary"
                       />
                       <div
-                        className="h-4 w-4 shrink-0 rounded border border-border"
+                        className="border-border h-4 w-4 shrink-0 rounded border"
                         style={{ backgroundColor: colors.secondary }}
                         title="Secondary"
                       />
                       <div
-                        className="h-4 w-4 shrink-0 rounded border border-border"
+                        className="border-border h-4 w-4 shrink-0 rounded border"
                         style={{ backgroundColor: colors.accent }}
                         title="Accent"
                       />

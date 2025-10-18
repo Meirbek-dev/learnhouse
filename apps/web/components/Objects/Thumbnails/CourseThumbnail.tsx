@@ -146,7 +146,7 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
             href={courseUrl}
             className="group-hover:text-primary block transition-colors"
           >
-            <h3 className="line-clamp-2 font-semibold leading-tight tracking-tight">{course.name}</h3>
+            <h3 className="line-clamp-2 leading-tight font-semibold tracking-tight">{course.name}</h3>
           </Link>
           <p className="text-muted-foreground line-clamp-2 text-sm">{course.description}</p>
         </div>
@@ -186,7 +186,7 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
         )}
       </CardContent>
 
-      <CardFooter className="mt-auto border-t bg-muted/30 p-3">
+      <CardFooter className="bg-muted/30 mt-auto border-t p-3">
         {isEnrolled ? (
           <div className="w-full space-y-1.5">
             <div className="flex items-center gap-2">

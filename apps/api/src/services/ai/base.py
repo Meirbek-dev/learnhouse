@@ -167,9 +167,7 @@ class FastAIService:
         # Check cache first
         cached_store = self.cache_manager.vector_store_cache.get(cache_key)
         if cached_store:
-            logger.info(
-                f"✓ Cache HIT for vector store (hash: {content_hash[:12]}...)"
-            )
+            logger.info(f"✓ Cache HIT for vector store (hash: {content_hash[:12]}...)")
             return cached_store
 
         logger.info(
@@ -391,7 +389,8 @@ async def ask_ai(
         )
 
         if not vector_store:
-            raise VectorStoreError("Failed to create knowledge base")
+            msg = "Failed to create knowledge base"
+            raise VectorStoreError(msg)
 
         # Get or create agent (cached)
         agent_executor = await ai_service.get_or_create_agent(
@@ -401,7 +400,8 @@ async def ask_ai(
         )
 
         if not agent_executor:
-            raise AIProcessingError("Failed to create AI agent")
+            msg = "Failed to create AI agent"
+            raise AIProcessingError(msg)
 
         # Create agent with history
         agent_with_history = RunnableWithMessageHistory(
@@ -428,7 +428,7 @@ async def ask_ai(
             logger.info("AI query processed successfully")
             return result
 
-        except asyncio.TimeoutError as e:
+        except TimeoutError as e:
             error_msg = "AI processing timed out after 30 seconds"
             logger.warning(error_msg)
             raise AITimeoutError(30, details={"question_length": len(question)}) from e
@@ -498,7 +498,8 @@ async def ask_ai_stream(
         )
 
         if not vector_store:
-            raise VectorStoreError("Failed to create knowledge base")
+            msg = "Failed to create knowledge base"
+            raise VectorStoreError(msg)
 
         # Get or create agent (cached)
         agent_executor = await ai_service.get_or_create_agent(
@@ -508,7 +509,8 @@ async def ask_ai_stream(
         )
 
         if not agent_executor:
-            raise AIProcessingError("Failed to create AI agent")
+            msg = "Failed to create AI agent"
+            raise AIProcessingError(msg)
 
         # Create agent with history
         agent_with_history = RunnableWithMessageHistory(
@@ -537,7 +539,7 @@ async def ask_ai_stream(
 
             logger.info("AI streaming completed successfully")
 
-        except asyncio.TimeoutError as e:
+        except TimeoutError as e:
             error_msg = "AI streaming timed out"
             logger.warning(error_msg)
             raise AITimeoutError(60, details={"question_length": len(question)}) from e
@@ -595,7 +597,9 @@ def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
                     )
                 else:
                     windowed_messages = all_messages
-                    logger.info(f"Using full chat history: {total_count} messages for session {session_id}")
+                    logger.info(
+                        f"Using full chat history: {total_count} messages for session {session_id}"
+                    )
 
                 # Create a new message history object with windowed messages
                 # For writing, use the full history; for reading, use windowed

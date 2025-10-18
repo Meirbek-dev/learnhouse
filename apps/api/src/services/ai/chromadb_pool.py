@@ -1,7 +1,9 @@
 """
 ChromaDB connection pool for efficient resource management.
 """
+
 import asyncio
+import inspect
 import logging
 from contextlib import asynccontextmanager
 from typing import Any
@@ -17,7 +19,7 @@ logger = logging.getLogger(__name__)
 class ChromaDBPool:
     """Connection pool for ChromaDB with thread-safe operations."""
 
-    def __init__(self, max_connections: int = 10):
+    def __init__(self, max_connections: int = 10) -> None:
         """
         Initialize ChromaDB connection pool.
 
@@ -51,7 +53,9 @@ class ChromaDBPool:
                 and chromadb_config.db_host
                 and getattr(chromadb_config, "isSeparateDatabaseEnabled", False)
             ):
-                logger.info(f"Creating ChromaDB client for host: {chromadb_config.db_host}")
+                logger.info(
+                    f"Creating ChromaDB client for host: {chromadb_config.db_host}"
+                )
                 try:
                     client = chromadb.HttpClient(
                         host=chromadb_config.db_host,
@@ -87,7 +91,7 @@ class ChromaDBPool:
             return chromadb.EphemeralClient()
 
     @asynccontextmanager
-    async def get_client(self):
+    async def get_client(self, cancel_event: asyncio.Event | None = None):
         """
         Get a ChromaDB client from the pool.
 
@@ -105,7 +109,8 @@ class ChromaDBPool:
                 client = self._pool.pop()
                 logger.debug(f"Reusing client from pool (pool size: {len(self._pool)})")
             else:
-                client = self._create_client()
+                # Creating Chroma clients can be blocking; perform in thread
+                client = await asyncio.to_thread(self._create_client)
                 logger.debug("Created new client (pool empty)")
 
         try:
@@ -114,23 +119,33 @@ class ChromaDBPool:
             async with self._lock:
                 if len(self._pool) < self._max_connections:
                     self._pool.append(client)
-                    logger.debug(f"Returned client to pool (pool size: {len(self._pool)})")
+                    logger.debug(
+                        f"Returned client to pool (pool size: {len(self._pool)})"
+                    )
                 else:
                     logger.debug("Pool full, discarding client")
 
-    async def close_all(self):
+    async def close_all(self) -> None:
         """Close all connections in the pool."""
         async with self._lock:
             while self._pool:
                 client = self._pool.pop()
                 try:
-                    # ChromaDB clients don't have explicit close method
-                    # They're cleaned up by garbage collection
-                    del client
+                    # Attempt graceful shutdown if available
+                    close_fn = getattr(client, "close", None) or getattr(
+                        client, "_shutdown", None
+                    )
+                    if callable(close_fn):
+                        maybe = close_fn()
+                        if inspect.isawaitable(maybe):
+                            await maybe
+                    # Otherwise rely on GC
                 except Exception as e:
                     logger.warning(f"Error closing client: {e}")
 
             logger.info(f"Closed all connections. Total created: {self._total_created}")
+
+    # (old close_all removed - graceful shutdown implementation above is used)
 
     def get_stats(self) -> dict[str, Any]:
         """
@@ -174,7 +189,7 @@ def get_chromadb_pool() -> ChromaDBPool:
     return _chromadb_pool
 
 
-async def cleanup_chromadb_pool():
+async def cleanup_chromadb_pool() -> None:
     """Cleanup function for ChromaDB pool."""
     global _chromadb_pool
     if _chromadb_pool:

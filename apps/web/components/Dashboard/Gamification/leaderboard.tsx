@@ -92,13 +92,13 @@ export function Leaderboard({ entries, currentUserId, userRank, className }: Lea
       <CardContent className="space-y-4">
         {/* User's Rank Context */}
         {rankContext && !showFull && (
-          <div className="rounded-lg bg-primary/5 p-3 text-sm">
+          <div className="bg-primary/5 rounded-lg p-3 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">{t('leaderboard.yourPosition')}</span>
               <span className="font-bold">#{rankContext.rank}</span>
             </div>
             {rankContext.xpToNext > 0 && (
-              <div className="mt-1 text-xs text-muted-foreground">
+              <div className="text-muted-foreground mt-1 text-xs">
                 {t('leaderboard.xpToNextRank', {
                   xp: rankContext.xpToNext.toLocaleString(),
                   username: rankContext.nextRankUsername || '',
@@ -122,10 +122,10 @@ export function Leaderboard({ entries, currentUserId, userRank, className }: Lea
               return (
                 <div key={entry.user_id}>
                   {showSeparator && (
-                    <div className="my-3 flex items-center gap-2 text-xs text-muted-foreground">
-                      <div className="h-px flex-1 bg-border" />
+                    <div className="text-muted-foreground my-3 flex items-center gap-2 text-xs">
+                      <div className="bg-border h-px flex-1" />
                       <span>...</span>
-                      <div className="h-px flex-1 bg-border" />
+                      <div className="bg-border h-px flex-1" />
                     </div>
                   )}
 
@@ -193,7 +193,7 @@ function LeaderboardEntryRow({
             </Badge>
           </motion.div>
         ) : (
-          <div className="flex h-8 w-8 items-center justify-center text-sm font-semibold text-muted-foreground">
+          <div className="text-muted-foreground flex h-8 w-8 items-center justify-center text-sm font-semibold">
             #{entry.rank}
           </div>
         )}
@@ -229,17 +229,17 @@ function LeaderboardEntryRow({
       />
 
       {/* User Info */}
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <p className={cn('truncate font-semibold', isCurrentUser && 'text-primary')}>
           {entry.first_name && entry.last_name
             ? `${entry.first_name} ${entry.last_name}`
             : entry.username || 'Anonymous'}
-          {isCurrentUser && <span className="ml-2 text-xs text-muted-foreground">({t('leaderboard.you')})</span>}
+          {isCurrentUser && <span className="text-muted-foreground ml-2 text-xs">({t('leaderboard.you')})</span>}
         </p>
         {entry.username && (entry.first_name || entry.last_name) && (
-          <p className="text-xs text-muted-foreground">@{entry.username}</p>
+          <p className="text-muted-foreground text-xs">@{entry.username}</p>
         )}
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           {t('leaderboard.levelLabel', { level: entry.level })} •{' '}
           {t('leaderboard.xp', { xp: entry.total_xp.toLocaleString() })}
         </p>
@@ -268,7 +268,7 @@ function LeaderboardEntryRow({
         </div>
       )}
 
-      {entry.rank_change === 0 && <Minus className="h-3 w-3 text-muted-foreground" />}
+      {entry.rank_change === 0 && <Minus className="text-muted-foreground h-3 w-3" />}
     </motion.div>
   );
 }

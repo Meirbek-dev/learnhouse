@@ -1,5 +1,5 @@
-import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
 import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
+import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
 import { BookOpen, FormInput, Languages, MoreVertical } from 'lucide-react';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -166,7 +166,7 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
                 error_message: error.error || 'Streaming failed',
               },
             });
-          }
+          },
         );
       } else {
         // Start new chat session with streaming
@@ -205,7 +205,7 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
                 error_message: error.error || 'Streaming failed',
               },
             });
-          }
+          },
         );
       }
     } catch (error) {

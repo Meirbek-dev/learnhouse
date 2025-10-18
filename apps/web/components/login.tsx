@@ -37,9 +37,9 @@ export default function SignIn() {
   const togglePasswordVisibility = () => setIsPasswordVisible((prev) => !prev);
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <Card className="w-full max-w-md mx-4 pb-0">
-        <CardHeader className="space-y-1 text-center mb-2 mt-4">
+    <div className="flex min-h-screen items-center justify-center">
+      <Card className="mx-4 w-full max-w-md pb-0">
+        <CardHeader className="mt-4 mb-2 space-y-1 text-center">
           <div className="flex justify-center">
             <Logo />
           </div>
@@ -58,11 +58,11 @@ export default function SignIn() {
             />
           </div>
           <div className="space-y-0">
-            <div className="flex items-center justify-between mb-2">
+            <div className="mb-2 flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
               <Link
                 href="#"
-                className="text-sm text-primary hover:underline"
+                className="text-primary text-sm hover:underline"
               >
                 Reset password
               </Link>
@@ -127,7 +127,7 @@ export default function SignIn() {
           </div>
         </CardContent>
         <CardFooter className="flex justify-center border-t py-4!">
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-center text-sm">
             New to Acme?{' '}
             <Link
               href="#"

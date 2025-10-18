@@ -76,7 +76,9 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
             2048,  # Optimal batch size for speed vs memory
         )
 
-        logger.info(f"Creating embedding function for model: {model_name} with batch size: {batch_size}")
+        logger.info(
+            f"Creating embedding function for model: {model_name} with batch size: {batch_size}"
+        )
         return OpenAIEmbeddings(
             model=model_name,
             api_key=api_key,
@@ -92,7 +94,7 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
     except Exception as e:
         error_msg = f"Failed to create embedding function: {e!s}"
         logger.exception(error_msg)
-        logger.error(f"Model: {model_name}, Error type: {type(e).__name__}")
+        logger.exception(f"Model: {model_name}, Error type: {type(e).__name__}")
         return None
 
 
@@ -138,7 +140,7 @@ def get_llm(model_name: str, streaming: bool = True) -> ChatOpenAI | None:
     except Exception as e:
         error_msg = f"Failed to create LLM: {e!s}"
         logger.exception(error_msg)
-        logger.error(f"Model: {model_name}, Error type: {type(e).__name__}")
+        logger.exception(f"Model: {model_name}, Error type: {type(e).__name__}")
         return None
 
 

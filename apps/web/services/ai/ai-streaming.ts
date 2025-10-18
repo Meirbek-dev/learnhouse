@@ -4,7 +4,7 @@
  * Enhanced version with Server-Sent Events (SSE) for real-time AI responses
  */
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 
@@ -98,13 +98,14 @@ export async function startActivityAIChatSessionStream(
   onStatus?: (status: AIStreamChunk) => void,
   onComplete?: (final: AIStreamChunk) => void,
   onError?: (error: AIStreamChunk) => void,
+  signal?: AbortSignal,
 ): Promise<void> {
   try {
     const data = { message, activity_uuid };
-    const response = await fetch(
-      `${getAPIUrl()}ai/start/activity_chat_session_stream`,
-      RequestBodyWithAuthHeader('POST', data, null, access_token),
-    );
+    const requestInit = RequestBodyWithAuthHeader('POST', data, null, access_token);
+    // Attach abort signal if provided
+    if (signal) (requestInit as any).signal = signal;
+    const response = await fetch(`${getAPIUrl()}ai/start/activity_chat_session_stream`, requestInit);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -119,6 +120,12 @@ export async function startActivityAIChatSessionStream(
     let buffer = '';
 
     while (true) {
+      // Stop if aborted
+      if (signal?.aborted) {
+        reader.cancel();
+        break;
+      }
+
       const { done, value } = await reader.read();
 
       if (done) {
@@ -213,13 +220,13 @@ export async function sendActivityAIChatMessageStream(
   onStatus?: (status: AIStreamChunk) => void,
   onComplete?: (final: AIStreamChunk) => void,
   onError?: (error: AIStreamChunk) => void,
+  signal?: AbortSignal,
 ): Promise<void> {
   try {
     const data = { aichat_uuid, message, activity_uuid };
-    const response = await fetch(
-      `${getAPIUrl()}ai/send/activity_chat_message_stream`,
-      RequestBodyWithAuthHeader('POST', data, null, access_token),
-    );
+    const requestInit = RequestBodyWithAuthHeader('POST', data, null, access_token);
+    if (signal) (requestInit as any).signal = signal;
+    const response = await fetch(`${getAPIUrl()}ai/send/activity_chat_message_stream`, requestInit);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -234,6 +241,11 @@ export async function sendActivityAIChatMessageStream(
     let buffer = '';
 
     while (true) {
+      if (signal?.aborted) {
+        reader.cancel();
+        break;
+      }
+
       const { done, value } = await reader.read();
 
       if (done) {
@@ -306,6 +318,7 @@ export function useAIStream() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentText, setCurrentText] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const currentControllerRef = useRef<AbortController | null>(null);
 
   const streamResponse = async (
     message: string,
@@ -313,6 +326,13 @@ export function useAIStream() {
     access_token: string,
     aichat_uuid?: string,
   ) => {
+    // Cancel any previous running stream
+    if (currentControllerRef.current) {
+      currentControllerRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    currentControllerRef.current = controller;
     setIsStreaming(true);
     setCurrentText('');
     setError(null);
@@ -341,6 +361,7 @@ export function useAIStream() {
           setError(err.error || 'Unknown error');
           setIsStreaming(false);
         },
+        controller.signal,
       );
     } else {
       await startActivityAIChatSessionStream(
@@ -365,7 +386,19 @@ export function useAIStream() {
           setError(err.error || 'Unknown error');
           setIsStreaming(false);
         },
+        controller.signal,
       );
+    }
+
+    // Clean up controller when stream completes
+    currentControllerRef.current = null;
+  };
+
+  const cancelStream = () => {
+    if (currentControllerRef.current) {
+      currentControllerRef.current.abort();
+      currentControllerRef.current = null;
+      setIsStreaming(false);
     }
   };
 
@@ -374,5 +407,6 @@ export function useAIStream() {
     isStreaming,
     currentText,
     error,
+    cancelStream,
   };
 }

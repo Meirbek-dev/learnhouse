@@ -73,13 +73,13 @@ function CardHeaderCompound({ icon: Icon, title, subtitle, badge, action, classN
     <div className={cn('flex items-start justify-between', spacing.card.padding, 'pb-4', className)}>
       <div className="flex items-start gap-3">
         {Icon && (
-          <div className="mt-1 rounded-lg bg-primary/10 p-2">
-            <Icon className="h-5 w-5 text-primary" />
+          <div className="bg-primary/10 mt-1 rounded-lg p-2">
+            <Icon className="text-primary h-5 w-5" />
           </div>
         )}
         <div>
           <h3 className="text-lg font-semibold">{title}</h3>
-          {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+          {subtitle && <p className="text-muted-foreground text-sm">{subtitle}</p>}
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -139,7 +139,7 @@ function CardStat({ label, value, icon: Icon, trend, trendLabel, color, classNam
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-muted-foreground">{label}</p>
+          <p className="text-muted-foreground text-sm font-medium">{label}</p>
           <p className={cn('mt-1 text-2xl font-bold tabular-nums', color)}>{value}</p>
           {(trend !== undefined || trendLabel) && (
             <div className="mt-2 flex items-center gap-1">
@@ -187,7 +187,7 @@ function CardMetricRow({ label, value, icon: Icon, sublabel, trend, color, class
         )}
         <div>
           <p className="text-sm font-medium">{label}</p>
-          {sublabel && <p className="text-xs text-muted-foreground">{sublabel}</p>}
+          {sublabel && <p className="text-muted-foreground text-xs">{sublabel}</p>}
         </div>
       </div>
       <div className="flex items-center gap-2">

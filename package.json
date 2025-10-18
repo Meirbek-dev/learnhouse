@@ -11,14 +11,13 @@
     "start": "turbo run start"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.6",
-    "eslint": "^9.37.0",
+    "eslint": "^9.38.0",
     "oxlint": "^1.23.0",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-sort-imports": "^1.8.8",
     "prettier-plugin-sort-json": "^4.1.1",
-    "prettier-plugin-tailwindcss": "^0.7.0",
+    "prettier-plugin-tailwindcss": "^0.7.1",
     "turbo": "^2.5.8"
   }
 }

@@ -115,11 +115,11 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
                 gamificationProfile={profile}
                 showLevelBadge={false}
                 use_with_session
-                className="relative ring-4 ring-background shadow-2xl"
+                className="ring-background relative shadow-2xl ring-4"
               />
 
               {/* Level badge - positioned on avatar */}
-              <div className="absolute -bottom-0.5 -right-0.5">
+              <div className="absolute -right-0.5 -bottom-0.5">
                 <GlowingLevelBadge
                   level={profile.level}
                   size="lg"
@@ -186,13 +186,13 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground font-medium">{t('progress.levelProgress')}</span>
-                <span className="font-bold text-base">
+                <span className="text-base font-bold">
                   {t('progress.levelTransition', { current: profile.level, next: profile.level + 1 })}
                 </span>
               </div>
               <div className="relative">
                 {/* Progress bar with gradient */}
-                <div className="relative h-4 overflow-hidden rounded-full bg-muted">
+                <div className="bg-muted relative h-4 overflow-hidden rounded-full">
                   <motion.div
                     className={cn('h-full rounded-full bg-gradient-to-r from-primary to-purple-500')}
                     initial={{ width: 0 }}
@@ -221,7 +221,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
                     <span className="text-foreground">{profile.xp_in_current_level?.toLocaleString() || 0}</span>
                     <span className="text-muted-foreground"> {t('progress.xpAbbreviation')}</span>
                   </span>
-                  <span className="font-medium text-muted-foreground tabular-nums">
+                  <span className="text-muted-foreground font-medium tabular-nums">
                     {xpToNext.toLocaleString()} {t('progress.xpToGo')}
                   </span>
                 </div>
@@ -245,7 +245,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
                 </span>
               </div>
               <div className="relative">
-                <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+                <div className="bg-muted h-2.5 overflow-hidden rounded-full">
                   <motion.div
                     className={cn(
                       'h-full rounded-full transition-colors',
@@ -358,9 +358,9 @@ function StatCard({
   iconColor?: string;
 }) {
   return (
-    <div className="space-y-1 rounded-lg bg-muted/50 p-3 text-center">
+    <div className="bg-muted/50 space-y-1 rounded-lg p-3 text-center">
       <Icon className={cn('mx-auto h-5 w-5', iconColor)} />
-      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-muted-foreground text-xs">{label}</p>
       <p className="text-lg font-bold">{value}</p>
     </div>
   );
