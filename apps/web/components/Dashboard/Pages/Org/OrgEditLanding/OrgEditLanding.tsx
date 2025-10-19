@@ -1118,7 +1118,7 @@ const HeroSectionEditor: FC<{
                     <input
                       id="imageUpload"
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
                       onChange={handleImageUpload}
                       className="hidden"
                       aria-label={t('ImageUploader.ariaLabel')}
@@ -1429,6 +1429,16 @@ const ImageUploader: FC<ImageUploaderProps> = ({ t, onImageUploaded, className, 
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file using reusable utility
+    const { validateFile } = await import('@/lib/file-validation');
+    const validation = validateFile(file, ['image']);
+
+    if (!validation.valid) {
+      toast.error(validation.error!);
+      e.target.value = ''; // Clear the input
+      return;
+    }
+
     setIsUploading(true);
     const loadingToast = toast.loading(tNotify('uploadingImage'));
     try {
@@ -1462,7 +1472,7 @@ const ImageUploader: FC<ImageUploaderProps> = ({ t, onImageUploaded, className, 
       <input
         id={inputId}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp,image/gif"
         onChange={handleFileChange}
         className="hidden"
         aria-label={t('ImageUploader.ariaLabel')}

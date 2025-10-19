@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { Resizable } from 're-resizable';
 
-const SUPPORTED_FILES = constructAcceptValue(['image']);
+const SUPPORTED_FILES = constructAcceptValue(['jpg', 'png', 'webp', 'gif']);
 
 const ImageBlockComponent = (props: any) => {
   const t = useTranslations('DashPage.Editor.ImageBlock');

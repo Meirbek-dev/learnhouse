@@ -3,10 +3,11 @@ export const ACCEPTED_FILE_FORMATS = {
   mp4: 'video/mp4',
   mkv: 'video/x-matroska',
   webm: 'video/webm',
-  image: 'image/*',
+  // Removed 'image: image/*' to prevent SVG uploads - use specific formats instead
   jpg: 'image/jpeg',
   png: 'image/png',
   webp: 'image/webp',
+  gif: 'image/gif',
   pdf: 'application/pdf',
   pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',

@@ -46,7 +46,7 @@ import { signOut } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
 import { z } from 'zod';
 
-const SUPPORTED_FILES = constructAcceptValue(['image']);
+const SUPPORTED_FILES = constructAcceptValue(['jpg', 'png', 'webp', 'gif']);
 
 const iconComponentMap = {
   'briefcase': Briefcase,

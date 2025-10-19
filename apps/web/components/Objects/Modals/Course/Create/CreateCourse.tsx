@@ -201,7 +201,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
                           id="fileInput"
                           style={{ display: 'none' }}
                           onChange={handleFileChange}
-                          accept="image/*"
+                          accept="image/jpeg,image/png,image/webp,image/gif"
                           aria-label={t('ariaLabel')}
                           title={t('selectFile')}
                         />

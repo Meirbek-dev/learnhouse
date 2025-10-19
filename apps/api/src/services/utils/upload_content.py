@@ -3,14 +3,62 @@ from typing import Literal
 
 import boto3
 from botocore.exceptions import ClientError
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 
-from config.config import get_openu_config
+from config.config import get_platform_config
+from src.security.file_validation import validate_upload
 
 
 def ensure_directory_exists(directory: str) -> None:
     if not os.path.exists(directory):
         os.makedirs(directory)
+
+
+async def upload_file(
+    file: UploadFile,
+    directory: str,
+    type_of_dir: Literal["orgs", "users"],
+    uuid: str,
+    allowed_types: list[str],
+    filename_prefix: str,
+    max_size: int | None = None,
+) -> str:
+    """
+    Secure file upload with validation.
+
+    Args:
+        file: The uploaded file
+        directory: Target directory (e.g., "logos", "avatars")
+        type_of_dir: "orgs" or "users"
+        uuid: Organization or user UUID
+        allowed_types: List of allowed file types ('image', 'video', 'document')
+        filename_prefix: Prefix for the generated filename
+        max_size: Maximum file size in bytes (optional)
+
+    Returns:
+        The saved filename
+    """
+    from ulid import ULID
+
+    from src.security.file_validation import get_safe_filename
+
+    # Validate the file
+    _, content = validate_upload(file, allowed_types, max_size)
+
+    # Generate safe filename
+    filename = get_safe_filename(file.filename, f"{ULID()}_{filename_prefix}")
+
+    # Save the file
+    await upload_content(
+        directory=directory,
+        type_of_dir=type_of_dir,
+        uuid=uuid,
+        file_binary=content,
+        file_and_format=filename,
+        allowed_formats=None,  # Already validated
+    )
+
+    return filename
 
 
 async def upload_content(
@@ -22,7 +70,7 @@ async def upload_content(
     allowed_formats: list[str] | None = None,
 ) -> None:
     # Get OpenU Config
-    openu_config = get_openu_config()
+    openu_config = get_platform_config()
 
     file_format = file_and_format.split(".")[-1].strip().lower()
 
