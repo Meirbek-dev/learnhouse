@@ -25,6 +25,7 @@ const AIActivityAsk = (props: AIActivityAskProps) => {
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'activity_ask' });
   const isButtonAvailable = is_ai_feature_enabled;
   const dispatchAIChatBot = useAIChatBotDispatch();
+  const aiChatBotState = useAIChatBot();
 
   return (
     <>
@@ -32,12 +33,24 @@ const AIActivityAsk = (props: AIActivityAskProps) => {
         <div>
           <ActivityChatMessageBox activity={props.activity} />
           <div
-            onClick={() => dispatchAIChatBot({ type: 'setIsModalOpen' })}
+            role="button"
+            tabIndex={0}
+            aria-pressed={aiChatBotState.isModalOpen}
+            onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                dispatchAIChatBot({ type: aiChatBotState.isModalOpen ? 'setIsModalClose' : 'setIsModalOpen' });
+              }
+            }}
+            onClick={() => dispatchAIChatBot({ type: aiChatBotState.isModalOpen ? 'setIsModalClose' : 'setIsModalOpen' })}
             style={{
               background:
                 'linear-gradient(135deg, oklch(0.25 0.15 270) 0%, oklch(0.40 0.18 260) 50%, oklch(0.32 0.16 255) 100%)',
             }}
-            className="flex items-center space-x-1 rounded-full p-2.5 px-5 text-sm text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer"
+            className={clsx(
+              'flex items-center space-x-1 rounded-full p-2.5 px-5 text-sm text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer',
+              { 'ring-2 ring-white/20': aiChatBotState.isModalOpen },
+            )}
           >
             <Image
               className="rounded-md outline-neutral-200/20"
