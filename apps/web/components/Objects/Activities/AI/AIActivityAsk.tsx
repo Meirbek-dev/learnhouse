@@ -76,8 +76,49 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
     { 'opacity-30': aiChatBotState.isWaitingForResponse },
   );
 
+  // Keep the background scrollable on desktop while still preventing
+  // background scroll on small screens (mobile) where the fixed modal can
+  // produce awkward scrolling behaviour. We also preserve the current
+  // scroll position when locking and restore it on close.
+  const scrollYRef = useRef<number>(0);
+
   useEffect(() => {
-    document.body.style.overflow = aiChatBotState.isModalOpen ? 'hidden' : 'unset';
+    if (typeof window === 'undefined') return;
+
+    const isSmallViewport = window.matchMedia('(max-width: 767px)').matches;
+
+    if (aiChatBotState.isModalOpen && isSmallViewport) {
+      // Save current scroll position and lock the body so the underlying
+      // content doesn't move on mobile devices.
+      scrollYRef.current = window.scrollY || window.pageYOffset || 0;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollYRef.current}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Restore body styles for desktop or when modal is closed.
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.overflow = '';
+
+      // If we were previously locked on mobile, restore the scroll pos.
+      if (!aiChatBotState.isModalOpen && isSmallViewport) {
+        window.scrollTo(0, scrollYRef.current || 0);
+      }
+    }
+
+    return () => {
+      // Cleanup in case the component is unmounted while modal is open.
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.overflow = '';
+      if (isSmallViewport) window.scrollTo(0, scrollYRef.current || 0);
+    };
   }, [aiChatBotState.isModalOpen]);
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
