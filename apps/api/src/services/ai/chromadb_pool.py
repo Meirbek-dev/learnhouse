@@ -11,7 +11,7 @@ from typing import Any
 import chromadb
 from chromadb.config import Settings
 
-from config.config import get_openu_config
+from config.config import get_platform_config
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ class ChromaDBPool:
     def _create_client(self) -> chromadb.Client:
         """Create a new ChromaDB client instance."""
         try:
-            config = get_openu_config()
+            config = get_platform_config()
             chromadb_config = getattr(config.ai_config, "chromadb_config", None)
 
             if (
@@ -177,7 +177,7 @@ def get_chromadb_pool() -> ChromaDBPool:
     global _chromadb_pool
 
     if _chromadb_pool is None:
-        config = get_openu_config()
+        config = get_platform_config()
         pool_size = getattr(
             getattr(config.ai_config, "vector_store", None),
             "chromadb_pool_size",

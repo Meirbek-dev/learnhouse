@@ -6,7 +6,7 @@ from sqlalchemy import desc
 from sqlmodel import Session, select
 from ulid import ULID
 
-from config.config import get_openu_config
+from config.config import get_platform_config
 from src.db.install import Install, InstallRead
 from src.db.organization_config import (
     AIOrgConfig,
@@ -41,7 +41,7 @@ from src.security.security import security_hash_password
 
 
 async def isInstallModeEnabled() -> bool:
-    config = get_openu_config()
+    config = get_platform_config()
 
     if config.general_config.install_mode:
         return True

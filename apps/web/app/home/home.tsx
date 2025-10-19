@@ -4,7 +4,7 @@ import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
-import openuLogoDark from 'public/openu_logo_dark.webp';
+import platformLogoDark from 'public/openu_logo_dark.webp';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
 import { useEffect } from 'react';
@@ -27,7 +27,7 @@ const HomeClient = () => {
           quality={100}
           width={230}
           height={100}
-          src={openuLogoDark}
+          src={platformLogoDark}
           alt="CS MOOC logo"
         />
       </div>

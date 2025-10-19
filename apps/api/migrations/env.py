@@ -6,11 +6,11 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
-from config.config import get_openu_config
+from config.config import get_platform_config
 
 # CS MOOC config
 
-lh_config = get_openu_config()
+platform_config = get_platform_config()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

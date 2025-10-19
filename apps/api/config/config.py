@@ -111,7 +111,7 @@ class InternalPaymentsConfig(PydanticStrictBaseModel):
     stripe: InternalStripeConfig
 
 
-class OpenUConfig(PydanticStrictBaseModel):
+class PlatformConfig(PydanticStrictBaseModel):
     site_name: str
     site_description: str
     contact_email: str
@@ -154,7 +154,7 @@ def _normalize_cookie_domain(raw_domain: str | None) -> str | None:
     return cleaned
 
 
-def get_openu_config() -> OpenUConfig:
+def get_platform_config() -> PlatformConfig:
     load_dotenv()
 
     # Get the YAML file
@@ -371,7 +371,7 @@ def get_openu_config() -> OpenUConfig:
     )
 
     # Create OpenUConfig object
-    return OpenUConfig(
+    return PlatformConfig(
         site_name=site_name,
         site_description=site_description,
         contact_email=contact_email,

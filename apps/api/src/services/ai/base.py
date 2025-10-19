@@ -13,7 +13,7 @@ from langchain_core.tools import create_retriever_tool
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from ulid import ULID
 
-from config.config import get_openu_config
+from config.config import get_platform_config
 from src.services.ai.cache_manager import get_ai_cache_manager
 from src.services.ai.chromadb_pool import get_chromadb_pool
 from src.services.ai.exceptions import (
@@ -104,7 +104,7 @@ class FastAIService:
 
     def __init__(self) -> None:
         self.text_splitter = OptimizedTextSplitter()
-        self.config = get_openu_config()
+        self.config = get_platform_config()
         self.cache_manager = get_ai_cache_manager()
 
     def _get_cached_embedding_function(self, model_name: str):
@@ -564,7 +564,7 @@ def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
     """
     try:
         session_id = aichat_uuid or f"aichat_{ULID()}"
-        config = get_openu_config()
+        config = get_platform_config()
         redis_conn_string = config.redis_config.redis_connection_string
 
         # Get window size from config

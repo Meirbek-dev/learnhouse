@@ -1262,8 +1262,10 @@
     },
     "Org": {
       "fetchError": "An error occurred while loading organization data",
+      "home": "Home",
       "joinOrgCTA": "Join {orgName}",
-      "notMemberInfo": "You are not yet a member of this Organization"
+      "notMemberInfo": "You are not part of CS MOOC yet",
+      "signOut": "Sign Out"
     }
   },
   "CourseBreadcrumbs": {
@@ -2787,51 +2789,8 @@
     },
     "Gamification": {
       "cancel": "Cancel",
-      "continue": "Continue",
       "clickAnywhereToClose": "Click anywhere to close",
-      "levelUp": "Level Up!",
-      "levelUpTitle": "Level Up!",
-      "reachedLevel": "You reached level {level}",
-      "dashboard": {
-        "recentActivity": "Recent Activity",
-        "noActivity": "No activity yet",
-        "noActivityDescription": "Complete activities, courses, or quizzes to start earning XP and see your progress here!"
-      },
-      "toast": {
-        "fromActivities": "from {count} activities",
-        "levelUp": "Level Up!"
-      },
-      "engagement": {
-        "activeDays": "Active Days",
-        "day": "day",
-        "days": "days",
-        "longestStreak": "Longest streak",
-        "record": "Record!",
-        "gracePeriod": "1-day grace period if you miss a day",
-        "getStarted": "Get started today!",
-        "greatStart": "Great start!",
-        "buildingMomentum": "Building momentum",
-        "strongHabit": "Strong habit forming",
-        "dedicated": "Dedicated learner",
-        "legendary": "Legendary consistency!"
-      },
-      "errors": {
-        "noOrgId": "Organization ID not found"
-      },
-      "settings": {
-        "title": "Gamification Settings",
-        "descriptionSimplified": "Customize your gamification experience with these simple options",
-        "showOnLeaderboard": "Show me on leaderboard",
-        "showOnLeaderboardDescription": "Display your progress on the organization leaderboard",
-        "xpGainNotifications": "XP gain notifications",
-        "xpGainNotificationsDescription": "Show notifications when you earn experience points",
-        "animatedEffects": "Animated effects",
-        "animatedEffectsDescription": "Enable animations for level ups and XP gains",
-        "save": "Save Changes",
-        "saving": "Saving...",
-        "saved": "Settings saved!",
-        "saveFailed": "Failed to save settings"
-      },
+      "continue": "Continue",
       "dangerZone": {
         "description": "Irreversible actions that affect your gamification data",
         "resetAllData": "Reset All Data",
@@ -2840,6 +2799,11 @@
         "resetPreferences": "Reset Preferences",
         "resetWarning": "Resetting your data will permanently delete all XP, levels, streaks, and unlocked items. This action cannot be undone.",
         "title": "Danger Zone"
+      },
+      "dashboard": {
+        "noActivity": "No activity yet",
+        "noActivityDescription": "Complete activities, courses, or quizzes to start earning XP and see your progress here!",
+        "recentActivity": "Recent Activity"
       },
       "description": "Customize your learning experience and gamification preferences",
       "display": {
@@ -2854,6 +2818,25 @@
         "showLevelIndicatorDescription": "Display level badge in navigation and profile areas",
         "title": "Display Settings"
       },
+      "engagement": {
+        "activeDays": "Active Days",
+        "buildingMomentum": "Building momentum",
+        "day": "day",
+        "days": "days",
+        "dedicated": "Dedicated learner",
+        "getStarted": "Get started today!",
+        "gracePeriod": "1-day grace period if you miss a day",
+        "greatStart": "Great start!",
+        "legendary": "Legendary consistency!",
+        "longestStreak": "Longest streak",
+        "record": "Record!",
+        "strongHabit": "Strong habit forming"
+      },
+      "errors": {
+        "noOrgId": "Organization ID not found"
+      },
+      "levelUp": "Level Up!",
+      "levelUpTitle": "Level Up!",
       "notifications": {
         "description": "Choose which gamification events should notify you",
         "levelUp": "Level Up Notifications",
@@ -2876,9 +2859,28 @@
         "showOnLeaderboardDescription": "Display your progress on the organization leaderboard",
         "title": "Privacy & Visibility"
       },
+      "reachedLevel": "You reached level {level}",
       "savePreferences": "Save Preferences",
       "saving": "Saving...",
-      "title": "Gamification Settings"
+      "settings": {
+        "animatedEffects": "Animated effects",
+        "animatedEffectsDescription": "Enable animations for level ups and XP gains",
+        "descriptionSimplified": "Customize your gamification experience with these simple options",
+        "save": "Save Changes",
+        "saveFailed": "Failed to save settings",
+        "saved": "Settings saved!",
+        "saving": "Saving...",
+        "showOnLeaderboard": "Show me on leaderboard",
+        "showOnLeaderboardDescription": "Display your progress on the organization leaderboard",
+        "title": "Gamification Settings",
+        "xpGainNotifications": "XP gain notifications",
+        "xpGainNotificationsDescription": "Show notifications when you earn experience points"
+      },
+      "title": "Gamification Settings",
+      "toast": {
+        "fromActivities": "from {count} activities",
+        "levelUp": "Level Up!"
+      }
     },
     "Metrics": {
       "desktopOnlyMessage1": "This page is only available on a desktop device.",
@@ -3594,6 +3596,13 @@
     },
     "UserAccountSettings": {
       "Gamification": {
+        "accessibility": {
+          "closeNotification": "Close notification",
+          "collapseSection": "Collapse section",
+          "expandSection": "Expand section",
+          "levelBadge": "Level {level} badge",
+          "viewDetails": "View details"
+        },
         "avatar": {
           "accessories": {
             "knowledgeCape": "Knowledge Cape",
@@ -3644,6 +3653,16 @@
         },
         "avatarUpdated": "Avatar updated successfully",
         "cancel": "Cancel",
+        "celebration": {
+          "dismiss": "Continue",
+          "keepGoing": "Keep going!",
+          "levelUpTitle": "🎉 Level Up! 🎉",
+          "newTitle": "New Title: {title}",
+          "reachedLevel": "You've reached Level {level}!",
+          "shareAchievement": "Share Achievement",
+          "unlocked": "Unlocked!"
+        },
+        "clickAnywhereToClose": "Click anywhere to close",
         "common": {
           "cancel": "Cancel",
           "close": "Close",
@@ -3658,6 +3677,7 @@
           "save": "Save",
           "tryAgain": "Try again"
         },
+        "continue": "Continue",
         "dangerZone": {
           "description": "These actions cannot be undone. Proceed with caution.",
           "resetAllData": "Reset All Data",
@@ -3682,8 +3702,8 @@
           "failedToLoad": "Failed to load gamification data",
           "leaderboard": "Leaderboard",
           "nextMilestone": "Next Milestone",
-          "noData": "No gamification data available",
           "noActivityDescription": "Complete activities, courses, or quizzes to start earning XP and see your progress here!",
+          "noData": "No gamification data available",
           "profile": "Profile",
           "progress": "Progress",
           "quickStats": "Quick Stats",
@@ -3696,6 +3716,10 @@
           "tryAgain": "Try Again",
           "unlockedCustomizations": "Unlocked Customizations",
           "yourProgress": "Your Learning Progress"
+        },
+        "dashboardErrors": {
+          "errorLoading": "Error loading dashboard",
+          "tryAgain": "Try again"
         },
         "description": "Customize your learning experience with gamification features and privacy settings",
         "display": {
@@ -3710,11 +3734,44 @@
           "showLevelIndicatorDescription": "Display your current level in the interface",
           "title": "Display Settings"
         },
+        "emptyStates": {
+          "noActivity": "No activity yet",
+          "noActivityDescription": "Complete activities to start earning XP and climbing the leaderboard!",
+          "noLeaderboard": "No leaderboard data",
+          "noLeaderboardDescription": "Be the first to earn XP in this organization!",
+          "noProgress": "No progress data",
+          "noProgressDescription": "Start learning to track your progress here.",
+          "noTransactions": "No recent activity",
+          "noTransactionsDescription": "Your XP transactions will appear here as you complete activities."
+        },
+        "engagement": {
+          "activeDays": "Active Days",
+          "buildingMomentum": "Building momentum!",
+          "day": "day",
+          "days": "days",
+          "dedicated": "Impressive dedication! 🔥",
+          "getStarted": "Start your learning journey today!",
+          "gracePeriod": "You have a 1-day grace period. Stay active!",
+          "greatStart": "Great start! Keep it up!",
+          "legendary": "Legendary commitment! 🌟",
+          "longestStreak": "Longest Streak",
+          "record": "Record!",
+          "strongHabit": "Strong habit forming!"
+        },
         "error": {
-          "loadFailed": "Failed to load gamification data",
           "awardXPFailed": "Failed to award XP",
-          "updateStreakFailed": "Failed to update streak",
-          "updatePreferencesFailed": "Failed to update preferences"
+          "loadFailed": "Failed to load gamification data",
+          "updatePreferencesFailed": "Failed to update preferences",
+          "updateStreakFailed": "Failed to update streak"
+        },
+        "errorMessages": {
+          "dailyLimitExceeded": "Daily XP limit reached. Come back tomorrow!",
+          "loadFailed": "Failed to load data",
+          "networkError": "Network error. Please check your connection.",
+          "retryAction": "Retry",
+          "serverError": "Server error. Please try again later.",
+          "unauthorized": "You need to be logged in to view this content.",
+          "unknownError": "An unknown error occurred"
         },
         "errors": {
           "orgNotAvailable": "Organization data not available. Please refresh the page."
@@ -3723,16 +3780,32 @@
           "aria": {
             "rankings": "User rankings leaderboard"
           },
+          "bronze": "Bronze",
+          "clearSearch": "Clear search",
           "currentUser": "You",
           "failedToLoad": "Failed to load leaderboard",
+          "filters": {
+            "allTime": "All Time",
+            "daily": "Today",
+            "monthly": "This Month",
+            "weekly": "This Week"
+          },
+          "gold": "Gold",
+          "lastUpdated": "Last updated",
           "learningStreakTooltip": "{count, plural, =1 {1 day learning streak} other {# days learning streak}}",
+          "level": "Level",
           "levelLabel": "Level {level}",
           "levelShort": "L{level}",
           "loading": "Loading leaderboard...",
           "loadingTimeout": "Request timed out. Please try again.",
           "loginStreakTooltip": "{count, plural, =1 {1 day login streak} other {# days login streak}}",
+          "noEntries": "No leaderboard entries yet",
+          "noLeaderboard": "No leaderboard data available",
           "noParticipants": "No participants yet",
+          "noResults": "No users found matching your search",
           "notRanked": "Not ranked yet",
+          "of": "of",
+          "participants": "participants",
           "rankLevel": "Rank #{rank}, Level {level}",
           "ranks": {
             "first": "First place",
@@ -3740,7 +3813,12 @@
             "third": "Third place"
           },
           "retry": "Retry",
+          "searchPlaceholder": "Search by username...",
+          "showAll": "Show All",
+          "showLess": "Show Less",
+          "showing": "Showing",
           "showingTop": "Showing top {limit} of {total} participants",
+          "silver": "Silver",
           "stats": {
             "learningStreak": "{count} day learning streak",
             "level": "Level {level}",
@@ -3753,31 +3831,10 @@
           "user": "User {id}",
           "xp": "{xp} XP",
           "xpEarned": "{xp} XP earned",
-          "you": "You",
-          "yourRank": "Your Rank",
-          "yourPosition": "Your Position",
           "xpToNextRank": "{xp} XP to pass {username}",
-          "showLess": "Show Less",
-          "showAll": "Show All",
-          "gold": "Gold",
-          "silver": "Silver",
-          "bronze": "Bronze",
-          "participants": "participants",
-          "searchPlaceholder": "Search by username...",
-          "filters": {
-            "daily": "Today",
-            "weekly": "This Week",
-            "monthly": "This Month",
-            "allTime": "All Time"
-          },
-          "level": "Level",
-          "of": "of",
-          "showing": "Showing",
-          "lastUpdated": "Last updated",
-          "clearSearch": "Clear search",
-          "noResults": "No users found matching your search",
-          "noEntries": "No leaderboard entries yet",
-          "noLeaderboard": "No leaderboard data available"
+          "you": "You",
+          "yourPosition": "Your Position",
+          "yourRank": "Your Rank"
         },
         "levelIndicators": {
           "congratsMaxLevel": "Congratulations! You've reached the maximum level!",
@@ -3805,13 +3862,9 @@
           "title": "Level Up!",
           "xpEarned": "+{xp} XP earned!"
         },
+        "levelUpTitle": "Level {level}",
         "levels": {
-          "novice": "Just getting started on your learning journey",
           "apprentice": "Making steady progress and building skills",
-          "scholar": "Demonstrating solid knowledge and understanding",
-          "expert": "Advanced learner with deep expertise",
-          "master": "Exceptional mastery of the subject matter",
-          "grandmaster": "Elite status with unparalleled knowledge",
           "descriptions": {
             "apprentice": "Making steady progress and building skills",
             "expert": "Advanced learner with deep expertise",
@@ -3820,19 +3873,23 @@
             "novice": "Just getting started on your learning journey",
             "scholar": "Demonstrating solid knowledge and understanding"
           },
+          "expert": "Advanced learner with deep expertise",
+          "grandmaster": "Elite status with unparalleled knowledge",
+          "master": "Exceptional mastery of the subject matter",
+          "novice": "Just getting started on your learning journey",
           "progress": {
             "allTime": "All time",
             "currentProgress": "Current Progress",
+            "dailyXP": "Daily XP",
             "experiencePoints": "Experience Points",
             "level": "Level",
+            "levelProgress": "Level Progress",
+            "levelShort": "Lvl",
+            "levelTransition": "Level {current} → {next}",
             "toNextLevel": "to next level",
             "totalProgress": "Total Progress",
             "xpAbbreviation": "XP",
-            "levelProgress": "Level Progress",
-            "xpToGo": "XP to go",
-            "dailyXP": "Daily XP",
-            "levelTransition": "Level {current} → {next}",
-            "levelShort": "Lvl"
+            "xpToGo": "XP to go"
           },
           "requirements": {
             "activitiesCompleted": "{count} activities completed",
@@ -3840,6 +3897,7 @@
             "streakDays": "{count} day streak required",
             "xpRequired": "{xp} XP required"
           },
+          "scholar": "Demonstrating solid knowledge and understanding",
           "titles": {
             "apprentice": "Apprentice",
             "expert": "Expert",
@@ -3858,6 +3916,16 @@
             "premiumFeatures": "Premium Features",
             "specialBadges": "Special Badges"
           }
+        },
+        "loadingStates": {
+          "loadingActivity": "Loading activity...",
+          "loadingDashboard": "Loading dashboard...",
+          "loadingLeaderboard": "Loading leaderboard...",
+          "loadingProfile": "Loading profile..."
+        },
+        "loginBonus": {
+          "dailyBonus": "+{xp} XP Daily Bonus",
+          "welcomeBack": "Welcome back!"
         },
         "notifications": {
           "description": "Choose which gamification events you want to be notified about",
@@ -3882,15 +3950,27 @@
           "showOnLeaderboardDescription": "Display your progress on organization leaderboards",
           "title": "Privacy Settings"
         },
+        "profile": {
+          "title": "Your Learning Profile"
+        },
+        "progress": {
+          "dailyXP": "Today's XP",
+          "levelProgress": "Level Progress",
+          "levelShort": "Lvl",
+          "levelTransition": "Level {current} → {next}",
+          "xpAbbreviation": "XP",
+          "xpToGo": "XP to go"
+        },
         "rank": "Rank",
+        "reachedLevel": "Level {level}",
         "savePreferences": "Save Preferences",
         "saving": "Saving...",
         "stats": {
           "allTime": "All time",
-          "totalXP": "Total XP",
-          "rank": "Your Rank",
+          "maxLevel": "Max Level!",
           "nextMilestone": "Next Milestone",
-          "maxLevel": "Max Level!"
+          "rank": "Your Rank",
+          "totalXP": "Total XP"
         },
         "streakWidget": {
           "days": "{count, plural, one {# day} other {# days}}",
@@ -3940,34 +4020,23 @@
             "none": "No streak",
             "title": "Learning Streak"
           },
+          "learningStreak": "Learning Streak",
           "login": {
             "active": "Active streak",
             "atRisk": "At risk",
             "none": "No streak",
             "title": "Login Streak"
           },
-          "title": "Your Streaks",
           "loginStreak": "Login Streak",
-          "learningStreak": "Learning Streak",
           "messages": {
-            "start": "Start your learning journey today!",
-            "keepGoing": "You're off to a great start! Keep going!",
+            "amazing": "Amazing consistency! You're on fire! 🔥",
             "goodProgress": "Nice progress! You're building a strong habit.",
             "impressive": "Impressive dedication! Keep up the momentum!",
-            "amazing": "Amazing consistency! You're on fire! 🔥",
-            "legendary": "Legendary commitment! You're an inspiration! 🌟"
-          }
-        },
-        "profile": {
-          "title": "Your Learning Profile"
-        },
-        "progress": {
-          "levelProgress": "Level Progress",
-          "dailyXP": "Today's XP",
-          "xpToGo": "XP to go",
-          "levelTransition": "Level {current} → {next}",
-          "levelShort": "Lvl",
-          "xpAbbreviation": "XP"
+            "keepGoing": "You're off to a great start! Keep going!",
+            "legendary": "Legendary commitment! You're an inspiration! 🌟",
+            "start": "Start your learning journey today!"
+          },
+          "title": "Your Streaks"
         },
         "tabs": {
           "avatar": "Avatar",
@@ -3978,16 +4047,16 @@
         },
         "title": "Your Progress",
         "toast": {
+          "dailyLoginBonus": "Daily Login Bonus!",
+          "earnedXP": "Earned {xp} XP",
+          "fromActivities": "from {count} activities",
+          "levelUp": "Level Up!",
           "preferencesError": "Failed to save preferences",
           "preferencesReset": "Preferences reset to defaults",
           "preferencesSaved": "Preferences saved successfully",
           "userNotAuthenticated": "User not authenticated",
-          "levelUp": "Level Up!",
-          "xpGained": "+{xp} XP",
-          "fromActivities": "from {count} activities",
-          "earnedXP": "Earned {xp} XP",
-          "dailyLoginBonus": "Daily Login Bonus!",
-          "welcomeBack": "Welcome back!"
+          "welcomeBack": "Welcome back!",
+          "xpGained": "+{xp} XP"
         },
         "xpGainToast": {
           "congratulations": "Congratulations!",
@@ -4022,73 +4091,6 @@
           "streak_bonus_7_days": "7-Day Streak Bonus",
           "unknown": "Unknown Source: {source}",
           "video_completion": "Video Watched"
-        },
-        "accessibility": {
-          "collapseSection": "Collapse section",
-          "expandSection": "Expand section",
-          "closeNotification": "Close notification",
-          "viewDetails": "View details",
-          "levelBadge": "Level {level} badge"
-        },
-        "emptyStates": {
-          "noActivity": "No activity yet",
-          "noActivityDescription": "Complete activities to start earning XP and climbing the leaderboard!",
-          "noLeaderboard": "No leaderboard data",
-          "noLeaderboardDescription": "Be the first to earn XP in this organization!",
-          "noProgress": "No progress data",
-          "noProgressDescription": "Start learning to track your progress here.",
-          "noTransactions": "No recent activity",
-          "noTransactionsDescription": "Your XP transactions will appear here as you complete activities."
-        },
-        "loadingStates": {
-          "loadingProfile": "Loading profile...",
-          "loadingDashboard": "Loading dashboard...",
-          "loadingLeaderboard": "Loading leaderboard...",
-          "loadingActivity": "Loading activity..."
-        },
-        "errorMessages": {
-          "loadFailed": "Failed to load data",
-          "networkError": "Network error. Please check your connection.",
-          "serverError": "Server error. Please try again later.",
-          "unauthorized": "You need to be logged in to view this content.",
-          "dailyLimitExceeded": "Daily XP limit reached. Come back tomorrow!",
-          "retryAction": "Retry",
-          "unknownError": "An unknown error occurred"
-        },
-        "celebration": {
-          "levelUpTitle": "🎉 Level Up! 🎉",
-          "reachedLevel": "You've reached Level {level}!",
-          "newTitle": "New Title: {title}",
-          "unlocked": "Unlocked!",
-          "keepGoing": "Keep going!",
-          "dismiss": "Continue",
-          "shareAchievement": "Share Achievement"
-        },
-        "levelUpTitle": "Level {level}",
-        "reachedLevel": "Level {level}",
-        "continue": "Continue",
-        "clickAnywhereToClose": "Click anywhere to close",
-        "engagement": {
-          "activeDays": "Active Days",
-          "getStarted": "Start your learning journey today!",
-          "greatStart": "Great start! Keep it up!",
-          "buildingMomentum": "Building momentum!",
-          "strongHabit": "Strong habit forming!",
-          "dedicated": "Impressive dedication! 🔥",
-          "legendary": "Legendary commitment! 🌟",
-          "day": "day",
-          "days": "days",
-          "record": "Record!",
-          "longestStreak": "Longest Streak",
-          "gracePeriod": "You have a 1-day grace period. Stay active!"
-        },
-        "loginBonus": {
-          "dailyBonus": "+{xp} XP Daily Bonus",
-          "welcomeBack": "Welcome back!"
-        },
-        "dashboardErrors": {
-          "errorLoading": "Error loading dashboard",
-          "tryAgain": "Try again"
         }
       },
       "UserAccount": {
@@ -4193,10 +4195,6 @@
         "email": "Email",
         "emailChangeWarning": "Changing your email will require you to sign in again",
         "emailPlaceholder": "Enter your email",
-        "themeSelector": {
-          "title": "Color Theme",
-          "beta": "BETA"
-        },
         "firstName": "First Name",
         "firstNamePlaceholder": "Enter your first name",
         "language": "Language",
@@ -4209,6 +4207,10 @@
         "saveChanges": "Save Changes",
         "saving": "Saving...",
         "selectFile": "Select Image File",
+        "themeSelector": {
+          "beta": "BETA",
+          "title": "Color Theme"
+        },
         "title": "Account Settings",
         "uploadingAvatar": "Uploading",
         "username": "Username",
@@ -4926,221 +4928,221 @@
     "submit": "Submit"
   },
   "Themes": {
-    "default": {
-      "name": "Default",
-      "description": "The default OpenU theme"
-    },
-    "black": {
-      "name": "Black",
-      "description": "Minimalistic black and white theme"
-    },
     "amberminimal": {
-      "name": "Amber Minimal",
-      "description": "Minimalistic amber theme"
+      "description": "Minimalistic amber theme",
+      "name": "Amber Minimal"
     },
     "amethysthaze": {
-      "name": "Amethyst Haze",
-      "description": "Soft purple haze theme with amethyst accents"
+      "description": "Soft purple haze theme with amethyst accents",
+      "name": "Amethyst Haze"
     },
     "artDeco": {
-      "name": "Art Deco",
-      "description": "Elegant Art Deco style with luxurious gold and geometric patterns"
+      "description": "Elegant Art Deco style with luxurious gold and geometric patterns",
+      "name": "Art Deco"
+    },
+    "black": {
+      "description": "Minimalistic black and white theme",
+      "name": "Black"
     },
     "boldtech": {
-      "name": "Bold Tech",
-      "description": "Bold purple tech theme with vibrant accents"
+      "description": "Bold purple tech theme with vibrant accents",
+      "name": "Bold Tech"
     },
     "bubblegum": {
-      "name": "Bubblegum",
-      "description": "Playful pink bubblegum theme with flat shadows"
+      "description": "Playful pink bubblegum theme with flat shadows",
+      "name": "Bubblegum"
     },
     "caffeine": {
-      "name": "Caffeine",
-      "description": "Warm coffee-inspired theme with rich brown tones"
+      "description": "Warm coffee-inspired theme with rich brown tones",
+      "name": "Caffeine"
     },
     "candyland": {
-      "name": "Candyland",
-      "description": "Sweet candy-colored theme with pastel rainbow accents"
+      "description": "Sweet candy-colored theme with pastel rainbow accents",
+      "name": "Candyland"
     },
     "catppuccin": {
-      "name": "Catppuccin",
-      "description": "Soothing pastel theme inspired by Catppuccin color palette"
+      "description": "Soothing pastel theme inspired by Catppuccin color palette",
+      "name": "Catppuccin"
     },
     "claude": {
-      "name": "Claude",
-      "description": "Warm beige theme inspired by Claude AI with copper accents"
+      "description": "Warm beige theme inspired by Claude AI with copper accents",
+      "name": "Claude"
     },
     "claymorphism": {
-      "name": "Claymorphism",
-      "description": "Soft clay-textured theme with prominent rounded corners and depth"
+      "description": "Soft clay-textured theme with prominent rounded corners and depth",
+      "name": "Claymorphism"
     },
     "cleanSlate": {
-      "name": "Clean Slate",
-      "description": "Crisp minimalist theme with clean neutral tones"
+      "description": "Crisp minimalist theme with clean neutral tones",
+      "name": "Clean Slate"
     },
     "corporate": {
-      "name": "Corporate",
-      "description": "Professional corporate theme with clean lines and business aesthetics"
+      "description": "Professional corporate theme with clean lines and business aesthetics",
+      "name": "Corporate"
     },
     "cosmicnight": {
-      "name": "Cosmic Night",
-      "description": "Deep purple cosmic theme with starry night aesthetics"
+      "description": "Deep purple cosmic theme with starry night aesthetics",
+      "name": "Cosmic Night"
     },
     "cyberpunk": {
-      "name": "Cyberpunk",
-      "description": "Neon-infused futuristic theme with vibrant pink and cyan accents"
+      "description": "Neon-infused futuristic theme with vibrant pink and cyan accents",
+      "name": "Cyberpunk"
     },
     "darkmatter": {
-      "name": "Darkmatter",
-      "description": "Deep space theme with mysterious dark matter aesthetics and golden accents"
+      "description": "Deep space theme with mysterious dark matter aesthetics and golden accents",
+      "name": "Darkmatter"
+    },
+    "default": {
+      "description": "The default OpenU theme",
+      "name": "Default"
     },
     "doom64": {
-      "name": "Doom 64",
-      "description": "Retro gaming theme inspired by Doom 64 with sharp corners and bold colors"
+      "description": "Retro gaming theme inspired by Doom 64 with sharp corners and bold colors",
+      "name": "Doom 64"
     },
     "elegantLuxury": {
-      "name": "Elegant Luxury",
-      "description": "Sophisticated luxury theme with elegant cream tones and rich mahogany accents"
+      "description": "Sophisticated luxury theme with elegant cream tones and rich mahogany accents",
+      "name": "Elegant Luxury"
     },
     "ghibliStudio": {
-      "name": "Ghibli Studio",
-      "description": "Whimsical Studio Ghibli-inspired theme with gentle pastels and natural tones"
+      "description": "Whimsical Studio Ghibli-inspired theme with gentle pastels and natural tones",
+      "name": "Ghibli Studio"
     },
     "graphite": {
-      "name": "Graphite",
-      "description": "Professional monochrome theme with smooth graphite gray tones"
+      "description": "Professional monochrome theme with smooth graphite gray tones",
+      "name": "Graphite"
     },
     "kodamaGrave": {
-      "name": "Kodama Grave",
-      "description": "Nature-inspired theme with peaceful forest green and earthy tones"
+      "description": "Nature-inspired theme with peaceful forest green and earthy tones",
+      "name": "Kodama Grave"
     },
     "marvel": {
-      "name": "Marvel",
-      "description": "Heroic Marvel-inspired theme with bold reds and vibrant comic book aesthetics"
+      "description": "Heroic Marvel-inspired theme with bold reds and vibrant comic book aesthetics",
+      "name": "Marvel"
     },
     "mashmallow": {
-      "name": "Marshmallow",
-      "description": "Soft and fluffy marshmallow-inspired theme with sweet pastel colors"
+      "description": "Soft and fluffy marshmallow-inspired theme with sweet pastel colors",
+      "name": "Marshmallow"
     },
     "materialDesign": {
-      "name": "Material Design",
-      "description": "Google Material Design theme with clean elevation and bold colors"
+      "description": "Google Material Design theme with clean elevation and bold colors",
+      "name": "Material Design"
     },
     "midnightBloom": {
-      "name": "Midnight Bloom",
-      "description": "Elegant nighttime theme with rich purple blooms and soft shadows"
+      "description": "Elegant nighttime theme with rich purple blooms and soft shadows",
+      "name": "Midnight Bloom"
     },
     "mochaMousse": {
-      "name": "Mocha Mousse",
-      "description": "Warm coffee-inspired theme with rich mocha and cream tones"
+      "description": "Warm coffee-inspired theme with rich mocha and cream tones",
+      "name": "Mocha Mousse"
     },
     "mono": {
-      "name": "Mono",
-      "description": "Ultra-minimal monochrome theme with pure black and white, no shadows"
+      "description": "Ultra-minimal monochrome theme with pure black and white, no shadows",
+      "name": "Mono"
     },
     "nature": {
-      "name": "Nature",
-      "description": "Fresh nature-inspired theme with organic green tones and earthy accents"
+      "description": "Fresh nature-inspired theme with organic green tones and earthy accents",
+      "name": "Nature"
     },
     "neoBrutalism": {
-      "name": "Neo Brutalism",
-      "description": "Bold brutalist design with thick black borders and strong shadows"
+      "description": "Bold brutalist design with thick black borders and strong shadows",
+      "name": "Neo Brutalism"
     },
     "northernLights": {
-      "name": "Northern Lights",
-      "description": "Magical aurora borealis theme with ethereal green and purple gradients"
+      "description": "Magical aurora borealis theme with ethereal green and purple gradients",
+      "name": "Northern Lights"
     },
     "notebook": {
-      "name": "Notebook",
-      "description": "Paper notebook theme with ruled lines aesthetic and handwritten font style"
+      "description": "Paper notebook theme with ruled lines aesthetic and handwritten font style",
+      "name": "Notebook"
     },
     "oceanBreeze": {
-      "name": "Ocean Breeze",
-      "description": "Refreshing ocean-inspired theme with cool turquoise and seafoam tones"
+      "description": "Refreshing ocean-inspired theme with cool turquoise and seafoam tones",
+      "name": "Ocean Breeze"
     },
     "pastelDreams": {
-      "name": "Pastel Dreams",
-      "description": "Dreamy pastel theme with soft lavender and pink cotton candy colors"
-    },
-    "perplexity": {
-      "name": "Perplexity",
-      "description": "Clean and modern Perplexity-inspired theme with cool blue tones"
+      "description": "Dreamy pastel theme with soft lavender and pink cotton candy colors",
+      "name": "Pastel Dreams"
     },
     "perpetuity": {
-      "name": "Perpetuity",
-      "description": "Timeless monospace terminal theme with cyan-tinted blue aesthetics"
+      "description": "Timeless monospace terminal theme with cyan-tinted blue aesthetics",
+      "name": "Perpetuity"
+    },
+    "perplexity": {
+      "description": "Clean and modern Perplexity-inspired theme with cool blue tones",
+      "name": "Perplexity"
     },
     "quantumRose": {
-      "name": "Quantum Rose",
-      "description": "Futuristic rose-tinted theme with quantum-inspired pink and magenta hues"
+      "description": "Futuristic rose-tinted theme with quantum-inspired pink and magenta hues",
+      "name": "Quantum Rose"
     },
     "retroArcade": {
-      "name": "Retro Arcade",
-      "description": "Bold neon-inspired palette with playful contrasts, evoking the vibrant glow of 80s arcades"
+      "description": "Bold neon-inspired palette with playful contrasts, evoking the vibrant glow of 80s arcades",
+      "name": "Retro Arcade"
     },
     "slack": {
-      "name": "Slack",
-      "description": "Collaborative Slack-inspired theme with purple accents and clean workspace aesthetics"
+      "description": "Collaborative Slack-inspired theme with purple accents and clean workspace aesthetics",
+      "name": "Slack"
     },
     "softPop": {
-      "name": "Soft Pop",
-      "description": "Bright, bubbly theme with pastel accents and clean contrasts for a playful yet modern look"
+      "description": "Bright, bubbly theme with pastel accents and clean contrasts for a playful yet modern look",
+      "name": "Soft Pop"
     },
     "solarDusk": {
-      "name": "Solar Dusk",
-      "description": "Warm, golden tones fading into deep shadows—captures the calm glow of dusk before nightfall"
+      "description": "Warm, golden tones fading into deep shadows—captures the calm glow of dusk before nightfall",
+      "name": "Solar Dusk"
     },
     "spotify": {
-      "name": "Spotify",
-      "description": "Music-inspired Spotify theme with vibrant green and dark contrasts"
+      "description": "Music-inspired Spotify theme with vibrant green and dark contrasts",
+      "name": "Spotify"
     },
     "starryNight": {
-      "name": "Starry Night",
-      "description": "Deep midnight blues and luminous highlights, evoking a tranquil star-filled night sky"
+      "description": "Deep midnight blues and luminous highlights, evoking a tranquil star-filled night sky",
+      "name": "Starry Night"
     },
     "summer": {
-      "name": "Summer",
-      "description": "Bright and sunny summer theme with warm oranges and golden tones"
+      "description": "Bright and sunny summer theme with warm oranges and golden tones",
+      "name": "Summer"
     },
     "sunsetHorizon": {
-      "name": "Sunset Horizon",
-      "description": "Radiant oranges and glowing ambers that reflect the warmth of a summer sunset on the horizon"
+      "description": "Radiant oranges and glowing ambers that reflect the warmth of a summer sunset on the horizon",
+      "name": "Sunset Horizon"
     },
     "supabase": {
-      "name": "Supabase",
-      "description": "Clean minimalism with fresh green accents, inspired by the signature Supabase brand identity"
+      "description": "Clean minimalism with fresh green accents, inspired by the signature Supabase brand identity",
+      "name": "Supabase"
     },
     "t3chat": {
-      "name": "T3 Chat",
-      "description": "Modern chat-inspired design with vibrant magentas and cool contrasts for lively conversations"
+      "description": "Modern chat-inspired design with vibrant magentas and cool contrasts for lively conversations",
+      "name": "T3 Chat"
     },
     "tangerine": {
-      "name": "Tangerine",
-      "description": "Juicy citrus tones blended with cool accents, delivering a fresh and energetic aesthetic"
+      "description": "Juicy citrus tones blended with cool accents, delivering a fresh and energetic aesthetic",
+      "name": "Tangerine"
     },
     "twitter": {
-      "name": "Twitter",
-      "description": "Clean whites with iconic Twitter blue highlights, optimized for clarity and social interaction"
+      "description": "Clean whites with iconic Twitter blue highlights, optimized for clarity and social interaction",
+      "name": "Twitter"
     },
     "valorant": {
-      "name": "Valorant",
-      "description": "Tactical Valorant-inspired theme with bold reds and sharp contrasts"
+      "description": "Tactical Valorant-inspired theme with bold reds and sharp contrasts",
+      "name": "Valorant"
     },
     "vercel": {
-      "name": "Vercel",
-      "description": "Minimalist monochrome design with sharp contrasts, reflecting Vercel's sleek and modern aesthetic"
+      "description": "Minimalist monochrome design with sharp contrasts, reflecting Vercel's sleek and modern aesthetic",
+      "name": "Vercel"
     },
     "vintagePaper": {
-      "name": "Vintage Paper",
-      "description": "Soft parchment tones with muted contrasts, evoking the warmth and texture of aged paper"
+      "description": "Soft parchment tones with muted contrasts, evoking the warmth and texture of aged paper",
+      "name": "Vintage Paper"
     },
     "violetBloom": {
-      "name": "Violet Bloom",
-      "description": "Radiant purples with soft highlights, capturing the elegance and freshness of blooming violets"
+      "description": "Radiant purples with soft highlights, capturing the elegance and freshness of blooming violets",
+      "name": "Violet Bloom"
     },
     "vscode": {
-      "name": "VS Code",
-      "description": "Developer-friendly VS Code theme with cool blues and clean code aesthetics"
+      "description": "Developer-friendly VS Code theme with cool blues and clean code aesthetics",
+      "name": "VS Code"
     }
   },
   "ToastMessages": {

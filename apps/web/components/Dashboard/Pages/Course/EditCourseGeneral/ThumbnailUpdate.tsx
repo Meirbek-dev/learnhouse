@@ -16,7 +16,7 @@ import { mutate } from 'swr';
 const MAX_FILE_SIZE = 8_000_000; // 8MB for images
 const MAX_VIDEO_FILE_SIZE = 100_000_000; // 100MB for videos
 const VALID_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png'] as const;
-const VALID_VIDEO_MIME_TYPES = ['video/mp4', 'video/webm'] as const;
+const VALID_VIDEO_MIME_TYPES = ['video/mp4', 'video/webm', 'video/x-matroska'] as const;
 
 type ValidImageMimeType = (typeof VALID_IMAGE_MIME_TYPES)[number];
 type ValidVideoMimeType = (typeof VALID_VIDEO_MIME_TYPES)[number];
@@ -305,7 +305,7 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
           ref={videoInputRef}
           type="file"
           className="hidden"
-          accept=".mp4,.webm"
+          accept=".mp4,.webm,.mkv"
           onChange={(e) => handleFileChange(e, 'video')}
           aria-label={t('ariaLabelVideo')}
           title={t('selectVideoFile')}

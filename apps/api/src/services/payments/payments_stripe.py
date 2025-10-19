@@ -5,7 +5,7 @@ import stripe
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
 
-from config.config import get_openu_config
+from config.config import get_platform_config
 from src.db.payments.payments import PaymentsConfig, PaymentsConfigUpdate
 from src.db.payments.payments_products import (
     PaymentPriceTypeEnum,
@@ -40,7 +40,7 @@ async def get_stripe_connected_account_id(
 
 async def get_stripe_internal_credentials():
     # Get payments config from config file
-    openu_config = get_openu_config()
+    openu_config = get_platform_config()
 
     if not openu_config.payments_config.stripe.stripe_secret_key:
         raise HTTPException(status_code=400, detail="Stripe secret key not configured")
@@ -349,7 +349,7 @@ async def generate_stripe_connect_link(
     stripe.api_key = creds.get("stripe_secret_key")
 
     # Get openu config for client_id
-    openu_config = get_openu_config()
+    openu_config = get_platform_config()
     client_id = openu_config.payments_config.stripe.stripe_client_id
 
     if not client_id:

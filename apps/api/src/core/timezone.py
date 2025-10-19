@@ -8,7 +8,7 @@ based on the configured timezone in config.yaml
 from datetime import UTC, datetime, timezone
 from zoneinfo import ZoneInfo
 
-from config.config import get_openu_config
+from config.config import get_platform_config
 
 _CACHED_TIMEZONE: ZoneInfo | None = None
 
@@ -25,7 +25,7 @@ def get_timezone() -> ZoneInfo:
     if _CACHED_TIMEZONE is not None:
         return _CACHED_TIMEZONE
 
-    config = get_openu_config()
+    config = get_platform_config()
     tz_name = config.general_config.timezone
 
     try:

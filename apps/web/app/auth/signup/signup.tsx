@@ -11,7 +11,7 @@ import { MailWarning, Ticket, UserPlus } from 'lucide-react';
 import InviteOnlySignUpComponent from './InviteOnlySignUp';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
-import openuLogoDark from 'public/openu_logo_dark.webp';
+import platformLogoDark from 'public/openu_logo_dark.webp';
 import { joinOrg } from '@services/organizations/orgs';
 import { Button } from '@components/ui/button';
 import OpenSignUpComponent from './OpenSignup';
@@ -51,7 +51,7 @@ const SignUpClient = (props: SignUpClientProps) => {
               quality={100}
               width={230}
               height={100}
-              src={openuLogoDark}
+              src={platformLogoDark}
               alt="CS MOOC logo"
             />
           </Link>

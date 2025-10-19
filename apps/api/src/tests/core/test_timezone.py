@@ -30,7 +30,7 @@ class TestTimezone:
         mock_config = MagicMock()
         mock_config.general_config.timezone = "Asia/Almaty"
 
-        with patch("src.core.timezone.get_openu_config", return_value=mock_config):
+        with patch("src.core.timezone.get_platform_config", return_value=mock_config):
             tz = get_timezone()
             assert isinstance(tz, ZoneInfo)
             assert str(tz) == "Asia/Almaty"
@@ -41,7 +41,7 @@ class TestTimezone:
         mock_config.general_config.timezone = "Asia/Almaty"
 
         with patch(
-            "src.core.timezone.get_openu_config", return_value=mock_config
+            "src.core.timezone.get_platform_config", return_value=mock_config
         ) as mock_get_config:
             # First call
             tz1 = get_timezone()
@@ -57,7 +57,7 @@ class TestTimezone:
         mock_config = MagicMock()
         mock_config.general_config.timezone = "Invalid/Timezone"
 
-        with patch("src.core.timezone.get_openu_config", return_value=mock_config):
+        with patch("src.core.timezone.get_platform_config", return_value=mock_config):
             tz = get_timezone()
             assert isinstance(tz, ZoneInfo)
             assert str(tz) == "UTC"
@@ -67,7 +67,7 @@ class TestTimezone:
         mock_config = MagicMock()
         mock_config.general_config.timezone = "Asia/Almaty"
 
-        with patch("src.core.timezone.get_openu_config", return_value=mock_config):
+        with patch("src.core.timezone.get_platform_config", return_value=mock_config):
             dt = now()
             assert isinstance(dt, datetime)
             assert dt.tzinfo is not None
@@ -78,7 +78,7 @@ class TestTimezone:
         mock_config = MagicMock()
         mock_config.general_config.timezone = "Asia/Almaty"
 
-        with patch("src.core.timezone.get_openu_config", return_value=mock_config):
+        with patch("src.core.timezone.get_platform_config", return_value=mock_config):
             dt = utcnow()
             assert isinstance(dt, datetime)
             assert dt.tzinfo == UTC
@@ -88,7 +88,7 @@ class TestTimezone:
         mock_config = MagicMock()
         mock_config.general_config.timezone = "Asia/Almaty"
 
-        with patch("src.core.timezone.get_openu_config", return_value=mock_config):
+        with patch("src.core.timezone.get_platform_config", return_value=mock_config):
             naive_dt = datetime(2025, 1, 1, 12, 0, 0)
             converted_dt = to_timezone(naive_dt)
 
@@ -100,7 +100,7 @@ class TestTimezone:
         mock_config = MagicMock()
         mock_config.general_config.timezone = "Asia/Almaty"
 
-        with patch("src.core.timezone.get_openu_config", return_value=mock_config):
+        with patch("src.core.timezone.get_platform_config", return_value=mock_config):
             utc_dt = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
             converted_dt = to_timezone(utc_dt)
 
@@ -115,7 +115,7 @@ class TestTimezone:
         mock_config.general_config.timezone = "Asia/Almaty"
 
         with patch(
-            "src.core.timezone.get_openu_config", return_value=mock_config
+            "src.core.timezone.get_platform_config", return_value=mock_config
         ) as mock_get_config:
             # First call
             get_timezone()
@@ -133,7 +133,7 @@ class TestTimezone:
         mock_config = MagicMock()
         mock_config.general_config.timezone = "Asia/Almaty"
 
-        with patch("src.core.timezone.get_openu_config", return_value=mock_config):
+        with patch("src.core.timezone.get_platform_config", return_value=mock_config):
             before = datetime.now(ZoneInfo("Asia/Almaty"))
             dt = now()
             after = datetime.now(ZoneInfo("Asia/Almaty"))

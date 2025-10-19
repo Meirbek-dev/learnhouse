@@ -4,7 +4,7 @@ from functools import lru_cache
 import chromadb
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
-from config.config import get_openu_config
+from config.config import get_platform_config
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ def get_chromadb_client() -> chromadb.Client:
     Note: This function is deprecated. Use get_chromadb_pool() from chromadb_pool.py instead.
     """
     try:
-        config = get_openu_config()
+        config = get_platform_config()
         chromadb_config = getattr(config.ai_config, "chromadb_config", None)
 
         if (
@@ -60,7 +60,7 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
     Configured for async batch embedding generation with optimal performance.
     """
     try:
-        config = get_openu_config()
+        config = get_platform_config()
         api_key = getattr(config.ai_config, "openai_api_key", None)
 
         if not api_key:
@@ -111,7 +111,7 @@ def get_llm(model_name: str, streaming: bool = True) -> ChatOpenAI | None:
         Configured ChatOpenAI instance or None if configuration fails
     """
     try:
-        config = get_openu_config()
+        config = get_platform_config()
         api_key = getattr(config.ai_config, "openai_api_key", None)
 
         if not api_key:

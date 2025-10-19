@@ -2,15 +2,15 @@ from sqlalchemy import create_engine
 from sqlmodel import Session, SQLModel, select
 
 from cli import install
-from config.config import get_openu_config
+from config.config import get_platform_config
 from src.db.organizations import Organization
 
 
 def auto_install() -> None:
     # Get the database session
-    openu_config = get_openu_config()
+    platform_config = get_platform_config()
     engine = create_engine(
-        openu_config.database_config.sql_connection_string,
+        platform_config.database_config.sql_connection_string,
         echo=False,
         pool_pre_ping=True,
     )

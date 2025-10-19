@@ -4,7 +4,7 @@ import typer
 from sqlalchemy import create_engine
 from sqlmodel import Session, SQLModel
 
-from config.config import get_openu_config
+from config.config import get_platform_config
 from src.db.organizations import OrganizationCreate
 from src.db.users import UserCreate
 from src.security.security import generate_secure_password
@@ -22,9 +22,9 @@ def install(
     short: Annotated[bool, typer.Option(help="Install with predefined values")] = False,
 ) -> None:
     # Get the database session
-    openu_config = get_openu_config()
+    platform_config = get_platform_config()
     engine = create_engine(
-        openu_config.database_config.sql_connection_string,
+        platform_config.database_config.sql_connection_string,
         echo=False,
         pool_pre_ping=True,
     )
@@ -39,13 +39,13 @@ def install(
 
     if short:
         # Create the Organization
-        print("Creating OpenU...")
+        print("Creating CS MOOC...")
         org = OrganizationCreate(
             name="OpenU",
-            description="OpenU",
-            about="OpenU - Образовательная платформа для онлайн-обучения",
+            description="CS MOOC",
+            about="CS MOOC - Образовательная платформа для онлайн-обучения",
             slug="openu",
-            email="meirbek.123@gmail.com",
+            email="meirbek.dev@gmail.com",
             logo_image="",
             thumbnail_image="",
             label="OpenU",
@@ -54,13 +54,13 @@ def install(
         print("OpenU created ✅")
 
         # Create Organization User
-        print("Creating OpenU user...")
+        print("Creating CS MOOC user...")
         # Generate random 8 digit password
         email = "meirbek.dev@gmail.com"
         password = generate_secure_password(8)
         user = UserCreate(username="Meirbek", email=email, password=password)
         install_create_organization_user(user, "openu", db_session)
-        print("OpenU user created ✅")
+        print("CS MOOC user created ✅")
 
         # Show the user how to login
         print("Installation completed ✅")
@@ -79,7 +79,7 @@ def install(
         )
         org = OrganizationCreate(
             name=orgname,
-            description="OpenU",
+            description="CS MOOC",
             slug=slug,
             email="",
             logo_image="",

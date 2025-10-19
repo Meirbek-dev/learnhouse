@@ -89,7 +89,9 @@ class TestFeaturesUtils:
     ) -> None:
         """Test feature limit check for unlimited feature (limit = 0)"""
         with (
-            patch("src.security.features_utils.usage.get_openu_config") as mock_config,
+            patch(
+                "src.security.features_utils.usage.get_platform_config"
+            ) as mock_config,
             patch("redis.Redis.from_url") as mock_redis_class,
         ):
             # Mock config
@@ -122,7 +124,9 @@ class TestFeaturesUtils:
     ) -> None:
         """Test feature limit check when no previous usage exists"""
         with (
-            patch("src.security.features_utils.usage.get_openu_config") as mock_config,
+            patch(
+                "src.security.features_utils.usage.get_platform_config"
+            ) as mock_config,
             patch("redis.Redis.from_url") as mock_redis_class,
         ):
             # Mock config
@@ -150,7 +154,9 @@ class TestFeaturesUtils:
     async def test_increase_feature_usage_success(self, mock_db_session) -> None:
         """Test successful feature usage increase"""
         with (
-            patch("src.security.features_utils.usage.get_openu_config") as mock_config,
+            patch(
+                "src.security.features_utils.usage.get_platform_config"
+            ) as mock_config,
             patch("redis.Redis.from_url") as mock_redis_class,
         ):
             # Mock config
@@ -180,7 +186,9 @@ class TestFeaturesUtils:
     ) -> None:
         """Test feature usage increase when no previous usage exists"""
         with (
-            patch("src.security.features_utils.usage.get_openu_config") as mock_config,
+            patch(
+                "src.security.features_utils.usage.get_platform_config"
+            ) as mock_config,
             patch("redis.Redis.from_url") as mock_redis_class,
         ):
             # Mock config
@@ -207,7 +215,9 @@ class TestFeaturesUtils:
     async def test_decrease_feature_usage_success(self, mock_db_session) -> None:
         """Test successful feature usage decrease"""
         with (
-            patch("src.security.features_utils.usage.get_openu_config") as mock_config,
+            patch(
+                "src.security.features_utils.usage.get_platform_config"
+            ) as mock_config,
             patch("redis.Redis.from_url") as mock_redis_class,
         ):
             # Mock config
@@ -237,7 +247,9 @@ class TestFeaturesUtils:
     ) -> None:
         """Test feature usage decrease when no previous usage exists"""
         with (
-            patch("src.security.features_utils.usage.get_openu_config") as mock_config,
+            patch(
+                "src.security.features_utils.usage.get_platform_config"
+            ) as mock_config,
             patch("redis.Redis.from_url") as mock_redis_class,
         ):
             # Mock config
@@ -278,7 +290,9 @@ class TestFeaturesUtils:
         ]
 
         with (
-            patch("src.security.features_utils.usage.get_openu_config") as mock_config,
+            patch(
+                "src.security.features_utils.usage.get_platform_config"
+            ) as mock_config,
             patch("redis.Redis.from_url") as mock_redis_class,
         ):
             # Mock config

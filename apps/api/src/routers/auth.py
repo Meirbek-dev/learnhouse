@@ -7,7 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import ConfigDict, EmailStr
 from sqlmodel import Session
 
-from config.config import get_openu_config
+from config.config import get_platform_config
 from src.core.events.database import get_db_session
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, UserRead
@@ -29,9 +29,9 @@ def _set_access_cookie(response: Response, value: str) -> None:
     - secure=True: HTTPS only (when SSL is enabled)
     - samesite='lax': CSRF protection while allowing normal navigation
     """
-    openu_config = get_openu_config()
-    cookie_domain = openu_config.hosting_config.cookie_config.domain
-    is_ssl_enabled = openu_config.hosting_config.ssl
+    platform_config = get_platform_config()
+    cookie_domain = platform_config.hosting_config.cookie_config.domain
+    is_ssl_enabled = platform_config.hosting_config.ssl
 
     cookie_kwargs: dict[str, object] = {
         "httponly": True,  # ✅ Prevent XSS attacks

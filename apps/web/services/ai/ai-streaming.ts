@@ -4,9 +4,9 @@
  * Enhanced version with Server-Sent Events (SSE) for real-time AI responses
  */
 
-import { useState, useRef } from 'react';
 import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { useState, useRef } from 'react';
 
 interface AIResponse {
   success: boolean;
@@ -320,12 +320,7 @@ export function useAIStream() {
   const [error, setError] = useState<string | null>(null);
   const currentControllerRef = useRef<AbortController | null>(null);
 
-  const streamResponse = async (
-    message: string,
-    activity_uuid: string,
-    access_token: string,
-    aichat_uuid?: string,
-  ) => {
+  const streamResponse = async (message: string, activity_uuid: string, access_token: string, aichat_uuid?: string) => {
     // Cancel any previous running stream
     if (currentControllerRef.current) {
       currentControllerRef.current.abort();

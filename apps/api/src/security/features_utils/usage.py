@@ -4,7 +4,7 @@ import redis
 from fastapi import HTTPException
 from sqlmodel import Session
 
-from config.config import get_openu_config
+from config.config import get_platform_config
 
 type FeatureSet = Literal[
     "ai",
@@ -34,8 +34,8 @@ def increase_feature_usage(
     org_id: int,
     db_session: Session,
 ) -> bool:
-    LH_CONFIG = get_openu_config()
-    redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
+    PLATFORM_CONFIG = get_platform_config()
+    redis_conn_string = PLATFORM_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
         raise HTTPException(
@@ -62,8 +62,8 @@ def decrease_feature_usage(
     org_id: int,
     db_session: Session,
 ) -> bool:
-    LH_CONFIG = get_openu_config()
-    redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
+    PLATFORM_CONFIG = get_platform_config()
+    redis_conn_string = PLATFORM_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
         raise HTTPException(

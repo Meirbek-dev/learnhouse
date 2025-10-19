@@ -7,7 +7,7 @@ from pydantic import EmailStr
 from sqlmodel import Session, select
 from ulid import ULID
 
-from config.config import get_openu_config
+from config.config import get_platform_config
 from src.db.organizations import (
     Organization,
     OrganizationRead,
@@ -25,8 +25,8 @@ async def create_invite_code(
     db_session: Session,
 ):
     # Redis init
-    LH_CONFIG = get_openu_config()
-    redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
+    PLATFORM_CONFIG = get_platform_config()
+    redis_conn_string = PLATFORM_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
         raise HTTPException(
@@ -98,8 +98,8 @@ async def create_invite_code_with_usergroup(
     db_session: Session,
 ):
     # Redis init
-    LH_CONFIG = get_openu_config()
-    redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
+    PLATFORM_CONFIG = get_platform_config()
+    redis_conn_string = PLATFORM_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
         raise HTTPException(
@@ -171,8 +171,8 @@ async def get_invite_codes(
     db_session: Session,
 ):
     # Redis init
-    LH_CONFIG = get_openu_config()
-    redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
+    PLATFORM_CONFIG = get_platform_config()
+    redis_conn_string = PLATFORM_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
         raise HTTPException(
@@ -224,8 +224,8 @@ async def get_invite_code(
     db_session: Session,
 ):
     # Redis init
-    LH_CONFIG = get_openu_config()
-    redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
+    PLATFORM_CONFIG = get_platform_config()
+    redis_conn_string = PLATFORM_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
         raise HTTPException(
@@ -277,8 +277,8 @@ async def delete_invite_code(
     db_session: Session,
 ):
     # Redis init
-    LH_CONFIG = get_openu_config()
-    redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
+    PLATFORM_CONFIG = get_platform_config()
+    redis_conn_string = PLATFORM_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
         raise HTTPException(
@@ -329,8 +329,8 @@ def send_invite_email(
     user: UserRead,
     email: EmailStr,
 ) -> bool:
-    LH_CONFIG = get_openu_config()
-    redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
+    PLATFORM_CONFIG = get_platform_config()
+    redis_conn_string = PLATFORM_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
         raise HTTPException(

@@ -42,7 +42,9 @@ const AIActivityAsk = (props: AIActivityAskProps) => {
                 dispatchAIChatBot({ type: aiChatBotState.isModalOpen ? 'setIsModalClose' : 'setIsModalOpen' });
               }
             }}
-            onClick={() => dispatchAIChatBot({ type: aiChatBotState.isModalOpen ? 'setIsModalClose' : 'setIsModalOpen' })}
+            onClick={() =>
+              dispatchAIChatBot({ type: aiChatBotState.isModalOpen ? 'setIsModalClose' : 'setIsModalOpen' })
+            }
             style={{
               background:
                 'linear-gradient(135deg, oklch(0.25 0.15 270) 0%, oklch(0.40 0.18 260) 50%, oklch(0.32 0.16 255) 100%)',

@@ -69,13 +69,12 @@ async def upload_content(
     file_and_format: str,
     allowed_formats: list[str] | None = None,
 ) -> None:
-    # Get OpenU Config
-    openu_config = get_platform_config()
+    platform_config = get_platform_config()
 
     file_format = file_and_format.split(".")[-1].strip().lower()
 
     # Get content delivery method
-    content_delivery = openu_config.hosting_config.content_delivery.type
+    content_delivery = platform_config.hosting_config.content_delivery.type
 
     # Check if format file is allowed
     if allowed_formats and file_format not in allowed_formats:
@@ -101,7 +100,7 @@ async def upload_content(
         print("Uploading to s3...")
         s3 = boto3.client(
             "s3",
-            endpoint_url=openu_config.hosting_config.content_delivery.s3api.endpoint_url,
+            endpoint_url=platform_config.hosting_config.content_delivery.s3api.endpoint_url,
         )
 
         # Upload file to server

@@ -8,7 +8,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi_another_jwt_auth import AuthJWT
 from sqlmodel import Session
 
-from config.config import get_openu_config
+from config.config import get_platform_config
 from src.core.events.database import get_db_session
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
@@ -29,9 +29,9 @@ def _normalize_secure_flag(value: bool | str | None) -> bool:
     return bool(value)
 
 
-_OPENU_CONFIG = get_openu_config()
-_COOKIE_DOMAIN = _OPENU_CONFIG.hosting_config.cookie_config.domain
-_COOKIE_SECURE = _normalize_secure_flag(_OPENU_CONFIG.hosting_config.ssl)
+_PLATFORM_CONFIG = get_platform_config()
+_COOKIE_DOMAIN = _PLATFORM_CONFIG.hosting_config.cookie_config.domain
+_COOKIE_SECURE = _normalize_secure_flag(_PLATFORM_CONFIG.hosting_config.ssl)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 

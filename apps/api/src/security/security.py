@@ -4,12 +4,12 @@ import string
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
-from config.config import get_openu_config
+from config.config import get_platform_config
 
 ### 🔒 JWT ##############################################################
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
-SECRET_KEY = get_openu_config().security_config.auth_jwt_secret_key
+SECRET_KEY = get_platform_config().security_config.auth_jwt_secret_key
 ALGORITHM = "HS256"
 
 ### 🔒 JWT ##############################################################
