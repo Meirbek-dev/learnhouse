@@ -49,6 +49,7 @@ const CollectionThumbnail = (props: PropsType) => {
           </div>
           <div className="flex flex-col">
             <Link
+              prefetch={false}
               href={getUriWithOrg(
                 props.orgslug,
                 `/collection/${removeCollectionPrefix(props.collection.collection_uuid)}`,

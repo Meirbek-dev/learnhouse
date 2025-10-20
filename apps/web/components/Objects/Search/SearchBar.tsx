@@ -262,6 +262,7 @@ export const SearchBar: FC<SearchBarProps> = ({
           <div className="space-y-1">
             {searchTerms.map(({ term, type, icon }) => (
               <Link
+                prefetch={false}
                 key={`${term}-${type}`}
                 href={getUriWithOrg(orgslug, `/search?q=${encodeURIComponent(term)}`)}
                 className="group flex items-center rounded-lg px-3 py-2 transition-colors hover:bg-black/[0.02]"
@@ -305,6 +306,7 @@ export const SearchBar: FC<SearchBarProps> = ({
             </div>
             {searchResults.courses.map((course) => (
               <Link
+                prefetch={false}
                 key={course.course_uuid}
                 href={getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
                 className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/[0.02]"
@@ -354,6 +356,7 @@ export const SearchBar: FC<SearchBarProps> = ({
             </div>
             {searchResults.collections.map((collection) => (
               <Link
+                prefetch={false}
                 key={collection.collection_uuid}
                 href={getUriWithOrg(orgslug, `/collection/${collection.collection_uuid}`)}
                 className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/[0.02]"
@@ -387,6 +390,7 @@ export const SearchBar: FC<SearchBarProps> = ({
             </div>
             {searchResults.users.map((user) => (
               <Link
+                prefetch={false}
                 key={user.user_uuid}
                 href={getUriWithOrg(orgslug, `/user/${user.username}`)}
                 className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/[0.02]"

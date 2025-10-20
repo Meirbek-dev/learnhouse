@@ -112,7 +112,7 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
 
       {/* Course Image */}
       <Link
-        prefetch
+        prefetch={false}
         href={courseUrl}
         className="relative block overflow-hidden"
       >
@@ -143,6 +143,7 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
         {/* Course Title and Description */}
         <div className="flex-1 space-y-1">
           <Link
+            prefetch={false}
             href={courseUrl}
             className="group-hover:text-primary block transition-colors"
           >
@@ -203,7 +204,12 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
               size="sm"
               className="w-full"
             >
-              <Link href={courseUrl}>{t('continueLearning', { defaultValue: 'Continue Learning' })}</Link>
+              <Link
+                prefetch={false}
+                href={courseUrl}
+              >
+                {t('continueLearning', { defaultValue: 'Continue Learning' })}
+              </Link>
             </Button>
           </div>
         ) : (
@@ -212,7 +218,12 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
             size="sm"
             className="w-full"
           >
-            <Link href={courseUrl}>{t('startLearning')}</Link>
+            <Link
+              prefetch={false}
+              href={courseUrl}
+            >
+              {t('startLearning')}
+            </Link>
           </Button>
         )}
       </CardFooter>
@@ -254,7 +265,7 @@ const AdminEditOptions: FC<{
               className="focus:bg-muted/50 cursor-pointer"
             >
               <Link
-                prefetch
+                prefetch={false}
                 href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/content`)}
                 className="flex items-center"
               >
@@ -266,7 +277,7 @@ const AdminEditOptions: FC<{
               className="focus:bg-muted/50 cursor-pointer"
             >
               <Link
-                prefetch
+                prefetch={false}
                 href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`)}
                 className="flex items-center"
               >

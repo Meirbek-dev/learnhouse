@@ -75,6 +75,7 @@ const AssignmentsHome = () => {
                     </div>
                   </div>
                   <Link
+                    prefetch={false}
                     href={{
                       pathname: getUriWithOrg(
                         org.slug,
@@ -82,7 +83,6 @@ const AssignmentsHome = () => {
                       ),
                       query: { subpage: 'editor' },
                     }}
-                    prefetch
                     className="soft-shadow bg-primary flex items-center space-x-1.5 rounded-md px-3 py-1 text-sm font-semibold text-zinc-100"
                   >
                     <GalleryVerticalEnd size={15} />
@@ -110,6 +110,7 @@ const AssignmentsHome = () => {
                         size={17}
                       />
                       <Link
+                        prefetch={false}
                         href={{
                           pathname: getUriWithOrg(
                             org.slug,
@@ -117,13 +118,13 @@ const AssignmentsHome = () => {
                           ),
                           query: { subpage: 'editor' },
                         }}
-                        prefetch
                         className="soft-shadow flex items-center space-x-2 rounded-full bg-white px-3 py-0.5"
                       >
                         <Layers2 size={15} />
                         <p>{t('editor')}</p>
                       </Link>
                       <Link
+                        prefetch={false}
                         href={{
                           pathname: getUriWithOrg(
                             org.slug,
@@ -131,7 +132,6 @@ const AssignmentsHome = () => {
                           ),
                           query: { subpage: 'submissions' },
                         }}
-                        prefetch
                         className="soft-shadow flex items-center space-x-2 rounded-full bg-white px-3 py-0.5"
                       >
                         <UserRoundPen size={15} />
@@ -164,7 +164,7 @@ const MiniThumbnail = (props: { course: any }) => {
   }
 
   return (
-    <Link href={getUriWithOrg(org.orgslug, `/course/${removeCoursePrefix(props.course.course_uuid)}`)}>
+    <Link prefetch={false} href={getUriWithOrg(org.orgslug, `/course/${removeCoursePrefix(props.course.course_uuid)}`)}>
       {props.course.thumbnail_image ? (
         <div
           className="inset-0 h-[40px] w-[70px] rounded-lg bg-cover shadow-xl ring-1 ring-black/10 ring-inset"

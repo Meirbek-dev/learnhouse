@@ -76,7 +76,7 @@ const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) =
       className="trailcoursebox flex rounded-xl bg-white p-3"
       style={{ boxShadow: '0px 4px 7px 0px rgba(0, 0, 0, 0.03)' }}
     >
-      <Link href={getUriWithOrg(orgslug, `/course/${courseid}`)}>
+      <Link prefetch={false} href={getUriWithOrg(orgslug, `/course/${courseid}`)}>
         <div
           className="course_tumbnail relative inset-0 h-[50px] w-[72px] rounded-lg bg-cover bg-center ring-1 ring-black/10 ring-inset"
           style={{
@@ -132,6 +132,7 @@ const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) =
                   <span className="text-xs font-medium text-gray-700">{t('viewCertificate')}</span>
                 </div>
                 <Link
+                  prefetch={false}
                   href={getUriWithOrg(
                     orgslug,
                     `/certificates/${courseCertificate.certificate_user.user_certification_uuid}/verify`,
