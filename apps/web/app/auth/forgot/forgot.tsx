@@ -13,7 +13,7 @@ import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 import { z } from 'zod';
 
 const createValidationSchema = (t: (key: string) => string) =>
@@ -58,7 +58,7 @@ const ForgotPasswordClient = () => {
         <div className="rounded-xl border-2 bg-white px-10 py-6 shadow-lg">
           <div className="flex justify-center pb-6">
             <Link
-              prefetch
+              prefetch={false}
               href={getUriWithOrg(org?.slug, '/')}
             >
               <Image

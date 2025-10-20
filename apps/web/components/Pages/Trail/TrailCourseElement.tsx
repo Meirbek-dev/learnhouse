@@ -10,7 +10,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 import { mutate } from 'swr';
 
 interface TrailCourseElementProps {

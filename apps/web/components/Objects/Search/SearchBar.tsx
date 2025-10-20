@@ -22,7 +22,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import UserAvatar from '../UserAvatar';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 interface User {
   username: string;
@@ -480,6 +480,7 @@ export const SearchBar: FC<SearchBarProps> = ({
                     searchResults.users.length > 0 ||
                     searchQuery.trim()) && (
                     <Link
+                      prefetch={false}
                       href={getUriWithOrg(orgslug, `/search?q=${encodeURIComponent(searchQuery)}`)}
                       className="flex items-center justify-between px-4 py-2.5 text-xs text-black/50 transition-colors hover:bg-black/[0.02] hover:text-black/70"
                     >

@@ -11,7 +11,7 @@ import { toast } from 'react-hot-toast';
 import { Ticket } from 'lucide-react';
 import useSWR, { mutate } from 'swr';
 import { useState } from 'react';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 interface OrgInviteCodeGenerateProps {
   setInvitesModal: any;

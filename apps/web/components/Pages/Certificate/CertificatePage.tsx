@@ -9,7 +9,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import html2canvas from 'html2canvas-pro';
 import type React from 'react';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 import QRCode from 'qrcode';
 import jsPDF from 'jspdf';
 

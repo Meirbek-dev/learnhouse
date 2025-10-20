@@ -10,7 +10,7 @@ import { getTaskRefFileDir } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 const AssignmentStudentActivity = () => {
   const t = useTranslations('Activities.AssignmentStudentActivity');

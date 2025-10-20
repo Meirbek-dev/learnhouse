@@ -9,7 +9,7 @@ import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import type React from 'react';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 interface CertificateVerificationPageProps {
   certificateUuid: string;

@@ -10,7 +10,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 import useSWR from 'swr';
 
 const AssignmentsHome = () => {

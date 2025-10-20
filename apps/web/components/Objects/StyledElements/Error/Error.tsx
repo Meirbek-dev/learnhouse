@@ -4,7 +4,7 @@ import { AlertTriangle, HomeIcon, RefreshCcw } from 'lucide-react';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 const ErrorUI = ({ message, submessage }: { message?: string; submessage?: string }) => {
   const t = useTranslations('Components.ErrorUI');

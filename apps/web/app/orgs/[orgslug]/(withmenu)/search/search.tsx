@@ -13,7 +13,7 @@ import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 // Types from SearchBar component
 interface User {

@@ -48,7 +48,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 // Lazy load heavy components
 const Canva = lazy(() => import('@components/Objects/Activities/DynamicCanva/DynamicCanva'));

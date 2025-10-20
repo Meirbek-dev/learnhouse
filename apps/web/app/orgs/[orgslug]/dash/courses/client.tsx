@@ -13,7 +13,7 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { BookOpen } from 'lucide-react';
 import { useState } from 'react';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 interface CourseProps {
   orgslug: string;

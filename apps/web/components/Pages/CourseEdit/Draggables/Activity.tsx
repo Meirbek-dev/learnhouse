@@ -9,7 +9,7 @@ import { Draggable } from '@hello-pangea/dnd';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 import { mutate } from 'swr';
 
 interface ModifiedActivityInterface {

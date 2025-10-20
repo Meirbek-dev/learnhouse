@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 import { mutate } from 'swr';
 
 import AssignmentEditorSubPage from './subpages/AssignmentEditorSubPage';

@@ -18,7 +18,7 @@ import { Badge } from '@components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import type { FC } from 'react';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 // Utility types and functions
 export interface Course {

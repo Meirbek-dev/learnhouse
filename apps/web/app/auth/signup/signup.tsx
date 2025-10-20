@@ -20,7 +20,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 interface SignUpClientProps {
   org: any;
@@ -44,7 +44,7 @@ const SignUpClient = (props: SignUpClientProps) => {
       <div className="rounded-xl border-2 bg-white p-12 shadow-lg">
         <div className="flex justify-center pb-8">
           <Link
-            prefetch
+            prefetch={false}
             href={getUriWithOrg(props.org.slug, '/')}
           >
             <Image

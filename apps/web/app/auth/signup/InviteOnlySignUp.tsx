@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 import { z } from 'zod';
 
 interface InviteOnlySignUpProps {

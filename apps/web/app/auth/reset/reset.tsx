@@ -13,7 +13,7 @@ import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 import { z } from 'zod';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>

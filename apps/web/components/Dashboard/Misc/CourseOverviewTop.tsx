@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import { BookOpen } from 'lucide-react';
 import { useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@components/ui/ServerLink';
 
 import EmptyThumbnailImage from '../../../public/empty_thumbnail.webp';
 

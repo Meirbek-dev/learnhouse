@@ -12,7 +12,7 @@ import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import { Info } from 'lucide-react';
 import { useState } from 'react';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 interface UserGroup {
   id: number;

@@ -6,7 +6,7 @@ import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useFormatter, useTranslations } from 'next-intl';
 import { swrFetcher } from '@services/utils/ts/requests';
 import type React from 'react';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 import useSWR from 'swr';
 
 interface UserCertificatesProps {
