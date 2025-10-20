@@ -138,6 +138,7 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
                     {certificate.certification.config.certification_type.replace('_', ' ')}
                   </div>
                   <Link
+                    prefetch={false}
                     href={verificationLink}
                     target="_blank"
                     rel="noopener noreferrer"

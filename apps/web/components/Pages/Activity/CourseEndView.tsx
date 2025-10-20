@@ -671,6 +671,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
                   <span>{t('downloadCertificate')}</span>
                 </button>
                 <Link
+                  prefetch={false}
                   href={getUriWithOrg(
                     orgslug,
                     `/certificates/${userCertificate.certificate_user.user_certification_uuid}/verify`,
@@ -692,6 +693,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
 
           <div className="pt-6">
             <Link
+              prefetch={false}
               href={getUriWithOrg(orgslug, `/course/${courseUuid.replace('course_', '')}`)}
               className="inline-flex items-center space-x-2 rounded-full bg-gray-800 px-6 py-3 text-white transition duration-200 hover:bg-gray-700"
             >

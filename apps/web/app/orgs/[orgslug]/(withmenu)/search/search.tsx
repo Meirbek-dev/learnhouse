@@ -397,6 +397,7 @@ const SearchPage = () => {
                   <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4">
                     {searchResults.courses.map((course) => (
                       <Link
+                        prefetch={false}
                         key={course.course_uuid}
                         href={getUriWithOrg(org?.slug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
                         className="soft-shadow group overflow-hidden rounded-xl bg-white transition-all hover:shadow-md"
@@ -460,6 +461,7 @@ const SearchPage = () => {
                   <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
                     {searchResults.collections.map((collection) => (
                       <Link
+                        prefetch={false}
                         key={collection.collection_uuid}
                         href={getUriWithOrg(
                           org?.slug,
@@ -499,6 +501,7 @@ const SearchPage = () => {
                   <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
                     {searchResults.users.map((user) => (
                       <Link
+                        prefetch={false}
                         key={user.user_uuid}
                         href={getUriWithOrg(org?.slug, `/user/${user.username}`)}
                         className="soft-shadow flex items-center gap-4 rounded-xl bg-white p-4 transition-all hover:shadow-md"

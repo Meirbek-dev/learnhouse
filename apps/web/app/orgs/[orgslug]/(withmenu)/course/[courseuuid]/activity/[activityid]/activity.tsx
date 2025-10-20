@@ -442,7 +442,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                         className="flex items-center space-x-4"
                       >
                         <div className="flex">
-                          <Link href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}`}>
+                          <Link prefetch={false} href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}`}>
                             <img
                               className="h-[34px] w-[60px] rounded-md drop-shadow-md"
                               src={
@@ -628,7 +628,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                       <div className="flex items-center justify-between">
                         <div className="flex space-x-6">
                           <div className="flex">
-                            <Link href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}`}>
+                            <Link prefetch={false} href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}`}>
                               <img
                                 className="h-[57px] w-[100px] rounded-md drop-shadow-md"
                                 src={
@@ -788,6 +788,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                                   />
                                   {contributorStatus === 'ACTIVE' && activity.activity_type === 'TYPE_DYNAMIC' && (
                                     <Link
+                                      prefetch={false}
                                       href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${activityid}/edit`}
                                       className="flex items-center space-x-2 rounded-full bg-emerald-600 p-2.5 px-5 text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:cursor-pointer"
                                     >
