@@ -18,9 +18,9 @@ import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo } from 'react';
+import Link from '@components/ui/AppLink';
 import { signOut } from 'next-auth/react';
 import type { ReactNode } from 'react';
-import Link from 'next/link';
 
 interface RoleInfo {
   name: string;
@@ -149,7 +149,10 @@ export const HeaderProfileBox = () => {
                 size="sm"
                 asChild
               >
-                <Link href={{ pathname: getUriWithoutOrg('/login'), query: org ? { orgslug: org.slug } : undefined }}>
+                <Link
+                  prefetch={false}
+                  href={{ pathname: getUriWithoutOrg('/login'), query: org ? { orgslug: org.slug } : undefined }}
+                >
                   {t('login')}
                 </Link>
               </Button>
@@ -159,7 +162,10 @@ export const HeaderProfileBox = () => {
                 size="sm"
                 asChild
               >
-                <Link href={{ pathname: getUriWithoutOrg('/signup'), query: org ? { orgslug: org.slug } : undefined }}>
+                <Link
+                  prefetch={false}
+                  href={{ pathname: getUriWithoutOrg('/signup'), query: org ? { orgslug: org.slug } : undefined }}
+                >
                   {t('signUp')}
                 </Link>
               </Button>
@@ -247,6 +253,7 @@ export const HeaderProfileBox = () => {
                 {rights?.dashboard?.action_access && (
                   <DropdownMenuItem asChild>
                     <Link
+                      prefetch={false}
                       href="/dash"
                       className="flex items-center space-x-2"
                     >
@@ -257,6 +264,7 @@ export const HeaderProfileBox = () => {
                 )}
                 <DropdownMenuItem asChild>
                   <Link
+                    prefetch={false}
                     href="/dash/user-account/settings/general"
                     className="flex items-center space-x-2"
                   >

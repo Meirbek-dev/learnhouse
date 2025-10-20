@@ -30,7 +30,10 @@ export const CourseOverviewTop = ({ params }: { params: CourseOverviewParams }) 
       />
       <div className="flex">
         <div className="flex grow items-center py-3">
-          <Link prefetch={false} href={`${getUriWithOrg(org?.slug, '')}/course/${params.courseuuid}`}>
+          <Link
+            prefetch={false}
+            href={`${getUriWithOrg(org?.slug, '')}/course/${params.courseuuid}`}
+          >
             {course?.courseStructure?.thumbnail_image ? (
               <img
                 className="h-[57px] w-[100px] rounded-md drop-shadow-md"

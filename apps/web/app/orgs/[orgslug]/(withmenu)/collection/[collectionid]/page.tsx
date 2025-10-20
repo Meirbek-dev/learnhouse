@@ -81,7 +81,10 @@ const CollectionPage = async (params: any) => {
             className="pr-8"
             key={course.course_uuid}
           >
-            <Link prefetch={false} href={getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}>
+            <Link
+              prefetch={false}
+              href={getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
+            >
               <div
                 className="relative inset-0 h-[131px] w-[249px] rounded-lg bg-cover shadow-xl ring-1 ring-black/10 ring-inset"
                 style={{

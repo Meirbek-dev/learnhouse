@@ -1,7 +1,7 @@
 import { AlertTriangle, ChevronRight, CreditCard, Settings, ShoppingCart, Users } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
+import Link from '@components/ui/ServerLink';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 
 const UnconfiguredPaymentsDisclaimer = () => {
   const t = useTranslations('DashPage.Payments');
@@ -32,6 +32,7 @@ const UnconfiguredPaymentsDisclaimer = () => {
               </ul>
             </div>
             <Link
+              prefetch={false}
               href="./configuration"
               className="inline-flex items-center pl-2 font-medium text-yellow-900 transition-colors duration-200 hover:text-yellow-700"
             >

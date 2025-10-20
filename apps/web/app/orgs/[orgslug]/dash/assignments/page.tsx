@@ -164,7 +164,10 @@ const MiniThumbnail = (props: { course: any }) => {
   }
 
   return (
-    <Link prefetch={false} href={getUriWithOrg(org.orgslug, `/course/${removeCoursePrefix(props.course.course_uuid)}`)}>
+    <Link
+      prefetch={false}
+      href={getUriWithOrg(org.orgslug, `/course/${removeCoursePrefix(props.course.course_uuid)}`)}
+    >
       {props.course.thumbnail_image ? (
         <div
           className="inset-0 h-[40px] w-[70px] rounded-lg bg-cover shadow-xl ring-1 ring-black/10 ring-inset"

@@ -10,10 +10,10 @@ import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
+import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { z } from 'zod';
 
 interface LoginClientProps {
@@ -77,7 +77,7 @@ const LoginClient = (props: LoginClientProps) => {
         <div className="rounded-xl border-2 bg-white p-12 shadow-lg">
           <div className="flex justify-center pb-8">
             <Link
-              prefetch
+              prefetch={false}
               href={getUriWithOrg(props.org.slug, '/')}
             >
               <Image
@@ -141,6 +141,7 @@ const LoginClient = (props: LoginClientProps) => {
 
                   <div>
                     <Link
+                      prefetch={false}
                       href={{
                         pathname: getUriWithoutOrg('/forgot'),
                         query: props.org.slug ? { orgslug: props.org.slug } : undefined,
@@ -176,6 +177,7 @@ const LoginClient = (props: LoginClientProps) => {
               <div className="mx-auto flex justify-center py-5">{t('or')}</div>
               <div className="flex flex-col space-y-4">
                 <Link
+                  prefetch={false}
                   href={{
                     pathname: getUriWithoutOrg('/signup'),
                     query: props.org.slug ? { orgslug: props.org.slug } : undefined,

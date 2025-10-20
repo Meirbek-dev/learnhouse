@@ -1,9 +1,9 @@
 import platformLogoDark from 'public/openu_logo_dark.webp';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@components/ui/button';
+import Link from '@components/ui/ServerLink';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 
 export default async function NotFound() {
   const t = await getTranslations('NotFoundPage');
@@ -28,7 +28,7 @@ export default async function NotFound() {
           <Link
             className="flex items-center gap-2"
             href="/"
-            prefetch
+            prefetch={false}
           >
             {t('button')}
             <ArrowRight className="ml-1 tracking-tight transition-transform duration-150 ease-in-out group-hover:translate-x-0.5" />

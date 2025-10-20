@@ -7,6 +7,7 @@ import { updateUserTheme } from '@services/users/users';
 import { SessionProvider } from 'next-auth/react';
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
+import { SWRConfig } from 'swr';
 
 interface ClientLayoutProps {
   children: ReactNode;
@@ -39,13 +40,27 @@ function ThemeSync() {
 
 export default function ClientLayout({ children }: ClientLayoutProps) {
   return (
+    // Lower frequency of session refetches to avoid unnecessary periodic calls that
+    // may contribute to being rate limited. Also disable refetch on window focus.
     <SessionProvider
-      refetchInterval={60_000}
-      refetchOnWindowFocus
+      refetchInterval={5 * 60_000} // 5 minutes
+      refetchOnWindowFocus={false}
       refetchWhenOffline={false}
     >
       <LHSessionProvider>
-        <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
+        {/* Global SWR defaults to reduce frequent revalidation and dedupe identical requests. */}
+        <SWRConfig
+          value={{
+            dedupingInterval: 60_000, // dedupe identical requests for 60s
+            focusThrottleInterval: 60_000, // throttle refetches on focus
+            revalidateOnFocus: false,
+            revalidateOnReconnect: false,
+            shouldRetryOnError: false,
+            errorRetryCount: 1,
+          }}
+        >
+          <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
+        </SWRConfig>
       </LHSessionProvider>
     </SessionProvider>
   );

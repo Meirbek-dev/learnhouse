@@ -442,7 +442,10 @@ const ActivityClient = (props: ActivityClientProps) => {
                         className="flex items-center space-x-4"
                       >
                         <div className="flex">
-                          <Link prefetch={false} href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}`}>
+                          <Link
+                            prefetch={false}
+                            href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}`}
+                          >
                             <img
                               className="h-[34px] w-[60px] rounded-md drop-shadow-md"
                               src={
@@ -628,7 +631,10 @@ const ActivityClient = (props: ActivityClientProps) => {
                       <div className="flex items-center justify-between">
                         <div className="flex space-x-6">
                           <div className="flex">
-                            <Link prefetch={false} href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}`}>
+                            <Link
+                              prefetch={false}
+                              href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}`}
+                            >
                               <img
                                 className="h-[57px] w-[100px] rounded-md drop-shadow-md"
                                 src={

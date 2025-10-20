@@ -2,9 +2,9 @@
 
 import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
+import platformLogoDark from 'public/openu_logo_dark.webp';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
-import platformLogoDark from 'public/openu_logo_dark.webp';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
 import { useEffect } from 'react';

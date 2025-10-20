@@ -12,7 +12,7 @@ export const FILE_TYPES = {
   },
   video: {
     extensions: ['.mp4', '.webm', '.mkv'],
-    mimeTypes: ['video/mp4', 'video/webm', "video/x-matroska"],
+    mimeTypes: ['video/mp4', 'video/webm', 'video/x-matroska'],
     maxSize: 500 * 1024 * 1024, // 500MB
   },
   document: {
@@ -92,9 +92,7 @@ export function getFileTypeDescription(allowedTypes: FileType[]): string {
   const maxSizes = Array.from(new Set(allowedTypes.map((type) => FILE_TYPES[type].maxSize)));
   // Safely read the first/max size
   const onlyMaxSize = maxSizes[0];
-  const maxSizeStr = maxSizes.length === 1 && onlyMaxSize != null
-    ? `${onlyMaxSize / 1024 / 1024}MB`
-    : 'varies';
+  const maxSizeStr = maxSizes.length === 1 && onlyMaxSize != null ? `${onlyMaxSize / 1024 / 1024}MB` : 'varies';
 
   return `${extensions} (max ${maxSizeStr})`;
 }

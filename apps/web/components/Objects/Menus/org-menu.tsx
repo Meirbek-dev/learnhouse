@@ -12,7 +12,7 @@ import { PlatformLogoSVG } from '../../svg/openuLogoSvg';
 import { Button } from '@/components/ui/button';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 interface OrgMenuProps {
   orgslug: string;
@@ -41,6 +41,7 @@ const NavigationLinkItem = ({ href, type, orgslug }: NavigationLinkProps) => {
   return (
     <div>
       <Link
+        prefetch={false}
         href={getUriWithOrg(orgslug, href)}
         className={`hover:text-primary flex max-h-[36px] items-center gap-3 rounded-md px-4 py-2 font-medium transition-colors ${
           isActive ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'

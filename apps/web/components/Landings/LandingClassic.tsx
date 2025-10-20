@@ -132,6 +132,7 @@ const LandingClassic = ({
               orgId={org_id}
             >
               <Link
+                prefetch={false}
                 href={getUriWithOrg(orgslug, '/courses?new=true')}
                 className="transition-transform duration-200 hover:scale-105"
               >
@@ -164,6 +165,7 @@ const LandingClassic = ({
               orgId={org_id}
             >
               <Link
+                prefetch={false}
                 href={getUriWithOrg(orgslug, '/collections/new')}
                 className="transition-transform duration-200 hover:scale-105"
               >

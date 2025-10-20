@@ -7,9 +7,9 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { getUriWithOrg } from '@services/config/config';
+import Link from '@components/ui/ServerLink';
 import { useTranslations } from 'next-intl';
 import { Book } from 'lucide-react';
-import Link from 'next/link';
 
 interface ActivityBreadcrumbsProps {
   course: any;

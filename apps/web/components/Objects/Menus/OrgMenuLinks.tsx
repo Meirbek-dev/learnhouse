@@ -2,7 +2,7 @@ import AuthenticatedClientElement from '@components/Security/AuthenticatedClient
 import { BookCopy, Signpost, SquareLibrary } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 const MenuLinks = (props: { orgslug: string }) => {
   return (
@@ -34,7 +34,10 @@ const LinkItem = (props: any) => {
   const { link } = props;
   const { orgslug } = props;
   return (
-    <Link href={getUriWithOrg(orgslug, link)}>
+    <Link
+      prefetch={false}
+      href={getUriWithOrg(orgslug, link)}
+    >
       <li className="flex items-center space-x-2 font-medium text-[#909192]">
         {props.type === 'courses' && (
           <>
