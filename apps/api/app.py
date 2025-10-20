@@ -2,6 +2,9 @@ import logfire
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
+import re
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import ORJSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -30,6 +33,87 @@ app.add_middleware(
     allow_credentials=True,
     allow_headers=["*"],
 )
+
+
+# Fix-up middleware: ensure the CORS headers are set correctly for allowed origins.
+# Some proxies or misconfigurations can lead to an empty
+# 'Access-Control-Allow-Credentials' header which browsers reject when
+# credentials are sent. This middleware is conservative: it only echoes the
+# incoming Origin back as Access-Control-Allow-Origin when the origin is
+# explicitly allowed (via allowed_origins or allowed_regexp) or when running
+# in development mode.
+class _EnsureCorsHeadersMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app):
+        super().__init__(app)
+        self.allowed_origins = list(
+            platform_config.hosting_config.allowed_origins or []
+        )
+        self.allowed_regexp = platform_config.hosting_config.allowed_regexp
+        self.allow_credentials = True
+
+    def _is_origin_allowed(self, origin: str) -> bool:
+        if not origin:
+            return False
+        # Exact match against configured allowed origins
+        if origin in self.allowed_origins:
+            return True
+
+        # Regex match if configured
+        if self.allowed_regexp:
+            try:
+                return re.match(self.allowed_regexp, origin) is not None
+            except re.error:
+                # Invalid regex in config — fall back to permissive behavior
+                return bool(platform_config.general_config.development_mode)
+
+        # In development mode be permissive for convenience
+        return bool(platform_config.general_config.development_mode)
+
+    async def dispatch(self, request: Request, call_next):
+        origin = request.headers.get("origin")
+
+        allowed = self._is_origin_allowed(origin) if origin else False
+
+        # Preflight handling
+        if request.method == "OPTIONS":
+            if not origin:
+                return Response(status_code=204)
+            if not allowed:
+                return Response(status_code=403)
+
+            headers = {
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Credentials": "true" if self.allow_credentials else "false",
+                "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+                "Access-Control-Allow-Headers": request.headers.get(
+                    "access-control-request-headers", "*"
+                ),
+                "Vary": "Origin",
+            }
+            return Response(status_code=204, headers=headers)
+
+        response = await call_next(request)
+
+        # Ensure the credentials header is a proper string when origin is allowed
+        if allowed:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = (
+                "true" if self.allow_credentials else "false"
+            )
+            # Ensure Vary header includes Origin so caches don't mix responses
+            vary = response.headers.get("Vary")
+            if vary:
+                if "Origin" not in [h.strip() for h in vary.split(",")]:
+                    response.headers["Vary"] = f"{vary}, Origin"
+            else:
+                response.headers["Vary"] = "Origin"
+
+        return response
+
+
+# Add the ensuring middleware after the CORS middleware so it can correct
+# any headers if necessary.
+app.add_middleware(_EnsureCorsHeadersMiddleware)
 
 # Only enable logfire if explicitly configured
 if platform_config.general_config.logfire_enabled:
