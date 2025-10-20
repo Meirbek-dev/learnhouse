@@ -182,6 +182,11 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
           },
           // onStatus: handle status updates
           (status) => {
+            if ((status as any)?.aichat_uuid) {
+              startTransition(() =>
+                dispatchAIChatBot({ type: 'setAichat_uuid', payload: (status as any).aichat_uuid }),
+              );
+            }
             console.log('Status:', status.message);
           },
           // onComplete: finalize the message
@@ -221,6 +226,11 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
           },
           // onStatus: handle status updates
           (status) => {
+            if ((status as any)?.aichat_uuid) {
+              startTransition(() =>
+                dispatchAIChatBot({ type: 'setAichat_uuid', payload: (status as any).aichat_uuid }),
+              );
+            }
             console.log('Status:', status.message);
           },
           // onComplete: finalize the message

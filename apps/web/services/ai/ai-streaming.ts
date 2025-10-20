@@ -118,6 +118,10 @@ export async function startActivityAIChatSessionStream(
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
+    // Accumulate chunk content locally so we can finalize the
+    // response even if server doesn't send an explicit 'final' event.
+    let accumulatedContent = '';
+    let completed = false;
 
     while (true) {
       // Stop if aborted
@@ -129,6 +133,12 @@ export async function startActivityAIChatSessionStream(
       const { done, value } = await reader.read();
 
       if (done) {
+        // If stream ended without a 'final' event, finalize with
+        // whatever we have accumulated so the UI doesn't stay stuck.
+        if (!completed) {
+          onComplete?.({ type: 'final', content: accumulatedContent });
+          completed = true;
+        }
         break;
       }
 
@@ -148,12 +158,15 @@ export async function startActivityAIChatSessionStream(
                 onStatus?.(chunk);
                 break;
               case 'chunk':
+                if (chunk.content) accumulatedContent += chunk.content;
                 onChunk?.(chunk);
                 break;
               case 'final':
+                completed = true;
                 onComplete?.(chunk);
                 break;
               case 'error':
+                completed = true;
                 onError?.(chunk);
                 break;
             }
@@ -239,6 +252,10 @@ export async function sendActivityAIChatMessageStream(
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
+    // Accumulate chunk content locally so we can finalize the
+    // response even if server doesn't send an explicit 'final' event.
+    let accumulatedContent = '';
+    let completed = false;
 
     while (true) {
       if (signal?.aborted) {
@@ -249,6 +266,10 @@ export async function sendActivityAIChatMessageStream(
       const { done, value } = await reader.read();
 
       if (done) {
+        if (!completed) {
+          onComplete?.({ type: 'final', content: accumulatedContent });
+          completed = true;
+        }
         break;
       }
 
@@ -267,12 +288,15 @@ export async function sendActivityAIChatMessageStream(
                 onStatus?.(chunk);
                 break;
               case 'chunk':
+                if (chunk.content) accumulatedContent += chunk.content;
                 onChunk?.(chunk);
                 break;
               case 'final':
+                completed = true;
                 onComplete?.(chunk);
                 break;
               case 'error':
+                completed = true;
                 onError?.(chunk);
                 break;
             }

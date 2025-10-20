@@ -168,7 +168,12 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
                   streamingContent += chunk.content;
                 }
               },
-              (status) => console.log('Status:', status.message),
+              (status) => {
+                if ((status as any)?.aichat_uuid) {
+                  dispatchAIEditor({ type: 'setAichat_uuid', payload: (status as any).aichat_uuid });
+                }
+                console.log('Status:', status.message);
+              },
               (final) => {
                 dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
                 const finalMessage = final.content || streamingContent;
@@ -205,7 +210,12 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
                   streamingContent += chunk.content;
                 }
               },
-              (status) => console.log('Status:', status.message),
+              (status) => {
+                if ((status as any)?.aichat_uuid) {
+                  dispatchAIEditor({ type: 'setAichat_uuid', payload: (status as any).aichat_uuid });
+                }
+                console.log('Status:', status.message);
+              },
               (final) => {
                 dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
 

@@ -229,7 +229,23 @@ async def ask_ai_stream(
                             )
                             chunk_count = 1
 
-            # Send final response after loop completes
+            # Send final response after loop completes so clients can
+            # finalize UI state (stop spinners) and persist session id.
+            # Include assembled full response and metadata.
+            try:
+                yield format_sse_message(
+                    {
+                        "type": "final",
+                        "content": full_response,
+                        "chunk_count": chunk_count,
+                        "aichat_uuid": session_id,
+                    }
+                )
+            except Exception:
+                # In rare cases the client may have disconnected between
+                # the last chunk and the final publication; ignore failures
+                # here but still log the completion for observability.
+                logger.debug("Unable to yield final SSE message to client (client disconnected?)")
 
             logger.info(f"Streaming query completed: {chunk_count} chunks sent")
 

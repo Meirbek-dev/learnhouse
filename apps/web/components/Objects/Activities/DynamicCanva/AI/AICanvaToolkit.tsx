@@ -148,7 +148,14 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
               streamingContent += chunk.content;
             }
           },
-          (status) => console.log('Status:', status.message),
+          (status) => {
+            // Persist aichat_uuid if provided in status so clients can
+            // send follow-up messages before the final chunk arrives.
+            if ((status as any)?.aichat_uuid) {
+              dispatchAIChatBot({ type: 'setAichat_uuid', payload: (status as any).aichat_uuid });
+            }
+            console.log('Status:', status.message);
+          },
           (final) => {
             dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
             dispatchAIChatBot({
@@ -179,7 +186,12 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
               streamingContent += chunk.content;
             }
           },
-          (status) => console.log('Status:', status.message),
+          (status) => {
+            if ((status as any)?.aichat_uuid) {
+              dispatchAIChatBot({ type: 'setAichat_uuid', payload: (status as any).aichat_uuid });
+            }
+            console.log('Status:', status.message);
+          },
           (final) => {
             dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
 
