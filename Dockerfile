@@ -1,5 +1,5 @@
 # Base image for Python backend
-FROM python:3.13.7-slim-trixie AS base
+FROM python:3.13.9-slim-trixie AS base
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \

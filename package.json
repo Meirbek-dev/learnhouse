@@ -1,6 +1,6 @@
 {
   "name": "openu",
-  "packageManager": "pnpm@10.18.3",
+  "packageManager": "pnpm@10.19.0",
   "private": true,
   "scripts": {
     "build": "turbo run build",
