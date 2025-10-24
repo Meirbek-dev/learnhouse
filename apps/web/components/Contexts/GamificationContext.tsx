@@ -90,6 +90,12 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<GamificationError | null>(null);
 
+  // Circuit breaker: Track failed fetch attempts to prevent infinite retries
+  const [fetchAttempts, setFetchAttempts] = useState(0);
+  const [lastFetchTime, setLastFetchTime] = useState<number>(0);
+  const MAX_FETCH_ATTEMPTS = 3;
+  const FETCH_COOLDOWN_MS = 60000; // 1 minute cooldown after max attempts
+
   // XP notification system with automatic batching - MUST be stable reference
   const xpToastSystem = useXPToast();
   const showEnhancedXPToast = useMemo(() => xpToastSystem.showXPToast, [xpToastSystem.showXPToast]);
@@ -103,12 +109,25 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
     if (initialData?.leaderboard) setLeaderboard(initialData.leaderboard);
   }, [initialData]);
 
-  // Fetch initial data if not provided
+  // Fetch initial data if not provided (with circuit breaker)
   useEffect(() => {
     const fetchInitialData = async () => {
-      // Only fetch if we don't have profile data yet
-      if (!profile && !isLoading) {
+      // Circuit breaker: Check if we've exceeded max attempts
+      const now = Date.now();
+      if (fetchAttempts >= MAX_FETCH_ATTEMPTS) {
+        if (now - lastFetchTime < FETCH_COOLDOWN_MS) {
+          console.warn('Gamification fetch circuit breaker triggered - too many failed attempts');
+          return;
+        } else {
+          // Reset after cooldown period
+          setFetchAttempts(0);
+        }
+      }
+
+      // Only fetch if we don't have profile data yet and initial data was not provided
+      if (!profile && !isLoading && initialData === undefined) {
         setIsLoading(true);
+        setLastFetchTime(now);
         try {
           const [dashboardData, leaderboardData] = await Promise.all([
             getDashboardDataAction(orgId),
@@ -118,20 +137,27 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
           if (dashboardData) {
             setProfile(dashboardData.profile);
             setDashboard(dashboardData);
+            setFetchAttempts(0); // Reset on success
+          } else {
+            setFetchAttempts(prev => prev + 1);
           }
           if (leaderboardData) {
             setLeaderboard(leaderboardData);
           }
         } catch (err) {
           console.error('Failed to fetch initial gamification data:', err);
+          setFetchAttempts(prev => prev + 1);
         } finally {
           setIsLoading(false);
         }
       }
     };
 
-    fetchInitialData();
-  }, [orgId, profile, isLoading]);
+    // Only run if initialData was not provided (avoid fetching when server provides data)
+    if (initialData === undefined) {
+      fetchInitialData();
+    }
+  }, [orgId, profile, isLoading, initialData, fetchAttempts, lastFetchTime]);
 
   // Computed streaks
   const streaks = useMemo(

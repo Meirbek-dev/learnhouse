@@ -14,58 +14,70 @@ interface GamificationDashboardProps {
  * Unified Gamification Dashboard (Server Component)
  *
  * Fetches gamification data and renders dashboard components.
+ * Returns null if user is not authenticated to avoid render loops.
  */
 export default async function GamificationDashboard({ orgId }: GamificationDashboardProps) {
-  const session = await auth();
-  const userId = session?.user?.id;
+  try {
+    const session = await auth();
+    const userId = session?.user?.id;
 
-  // Fetch dashboard data and leaderboard in parallel
-  const [dashboardData, leaderboardData] = await Promise.all([
-    getServerGamificationDashboard(orgId, {
-      revalidate: 30,
-      tags: [`gamification:dashboard:${orgId}`],
-    }),
-    getServerOrganizationLeaderboard(orgId, 10, {
-      revalidate: 60,
-      tags: [`gamification:leaderboard:${orgId}`],
-    }),
-  ]);
+    // Return null early if no session (not authenticated)
+    if (!session || !userId) {
+      return null;
+    }
 
-  // If no dashboard data (user not authenticated or error), show skeleton
-  if (!dashboardData) {
-    return;
-  }
+    // Fetch dashboard data and leaderboard in parallel
+    const [dashboardData, leaderboardData] = await Promise.all([
+      getServerGamificationDashboard(orgId, {
+        revalidate: 30,
+        tags: [`gamification:dashboard:${orgId}`],
+      }),
+      getServerOrganizationLeaderboard(orgId, 10, {
+        revalidate: 60,
+        tags: [`gamification:leaderboard:${orgId}`],
+      }),
+    ]);
 
-  return (
-    <GamificationProvider
-      orgId={orgId}
-      initialData={{ dashboard: dashboardData, profile: dashboardData.profile }}
-    >
-      <div className="space-y-6">
-        {/* Hero Section - Main Profile & Stats */}
-        <HeroSection
-          profile={dashboardData.profile}
-          userRank={dashboardData.user_rank}
-        />
+    // If no dashboard data (error or not available), return null silently
+    if (!dashboardData) {
+      return null;
+    }
 
-        {/* Two Column Layout */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <RecentActivityFeed transactions={dashboardData.recent_transactions || []} />
+    return (
+      <GamificationProvider
+        orgId={orgId}
+        initialData={{ dashboard: dashboardData, profile: dashboardData.profile }}
+      >
+        <div className="space-y-6">
+          {/* Hero Section - Main Profile & Stats */}
+          <HeroSection
+            profile={dashboardData.profile}
+            userRank={dashboardData.user_rank}
+          />
 
-          {/* Right Column: Leaderboard */}
-          {leaderboardData && (
-            <div>
-              <Leaderboard
-                entries={leaderboardData.entries}
-                currentUserId={userId ? Number(userId) : undefined}
-                userRank={dashboardData.user_rank}
-              />
-            </div>
-          )}
+          {/* Two Column Layout */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <RecentActivityFeed transactions={dashboardData.recent_transactions || []} />
+
+            {/* Right Column: Leaderboard */}
+            {leaderboardData && (
+              <div>
+                <Leaderboard
+                  entries={leaderboardData.entries}
+                  currentUserId={userId ? Number(userId) : undefined}
+                  userRank={dashboardData.user_rank}
+                />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </GamificationProvider>
-  );
+      </GamificationProvider>
+    );
+  } catch (error) {
+    // Silently fail - log error but don't crash the app
+    console.error('Gamification dashboard error:', error);
+    return null;
+  }
 }
 
 /**
