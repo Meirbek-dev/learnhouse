@@ -21,7 +21,7 @@ async function getAccessToken(): Promise<string | null> {
     const session = await auth();
     const token = (session as any)?.tokens?.access_token as string | undefined;
     return token || null;
-  } catch (error) {
+  } catch {
     // Silently fail for unauthorized users - this is expected behavior
     return null;
   }

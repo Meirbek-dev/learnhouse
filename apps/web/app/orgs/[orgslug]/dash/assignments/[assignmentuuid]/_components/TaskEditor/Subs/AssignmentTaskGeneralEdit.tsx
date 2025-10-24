@@ -292,7 +292,7 @@ const UpdateTaskRef = () => {
       setActivity(res.data);
     };
     getActivityUI();
-  }, [assignment.assignment_object.activity_id, access_token]);
+  }, [assignment.assignment_object.activity_id, access_token, setActivity]);
 
   return (
     <div className="h-[200px] w-auto rounded-xl bg-gray-50 shadow-sm outline-gray-200">

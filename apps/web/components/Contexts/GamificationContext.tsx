@@ -10,12 +10,12 @@ import type {
 } from '@/types/gamification';
 import {
   awardXPAction,
-  updateStreakAction,
-  updatePreferencesAction,
   getDashboardDataAction,
   getLeaderboardAction,
+  updatePreferencesAction,
+  updateStreakAction,
 } from '@/app/actions/gamification';
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, lazy } from 'react';
+import React, { createContext, lazy, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useXPToast } from '@/lib/gamification/components/xp-toast';
 import { AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
@@ -94,13 +94,13 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
   const [fetchAttempts, setFetchAttempts] = useState(0);
   const [lastFetchTime, setLastFetchTime] = useState<number>(0);
   const MAX_FETCH_ATTEMPTS = 3;
-  const FETCH_COOLDOWN_MS = 60000; // 1 minute cooldown after max attempts
+  const FETCH_COOLDOWN_MS = 60_000; // 1 minute cooldown after max attempts
 
   // XP notification system with automatic batching - MUST be stable reference
   const xpToastSystem = useXPToast();
   const showEnhancedXPToast = useMemo(() => xpToastSystem.showXPToast, [xpToastSystem.showXPToast]);
   const ToastContainer = useMemo(() => xpToastSystem.ToastContainer, [xpToastSystem.ToastContainer]);
-  const [levelUpQueue, setLevelUpQueue] = useState<Array<{ newLevel: number }>>([]);
+  const [levelUpQueue, setLevelUpQueue] = useState<{ newLevel: number }[]>([]);
 
   // Update state when initialData changes (from server-side refetch)
   useEffect(() => {
@@ -139,14 +139,14 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
             setDashboard(dashboardData);
             setFetchAttempts(0); // Reset on success
           } else {
-            setFetchAttempts(prev => prev + 1);
+            setFetchAttempts((prev) => prev + 1);
           }
           if (leaderboardData) {
             setLeaderboard(leaderboardData);
           }
-        } catch (err) {
-          console.error('Failed to fetch initial gamification data:', err);
-          setFetchAttempts(prev => prev + 1);
+        } catch (error) {
+          console.error('Failed to fetch initial gamification data:', error);
+          setFetchAttempts((prev) => prev + 1);
         } finally {
           setIsLoading(false);
         }
@@ -187,8 +187,8 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
       if (leaderboardData) {
         setLeaderboard(leaderboardData);
       }
-    } catch (err) {
-      console.error('Failed to refetch gamification data:', err);
+    } catch (error) {
+      console.error('Failed to refetch gamification data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -230,15 +230,18 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
         }
 
         return result;
-      } catch (err: any) {
-        const error: GamificationError = {
+      } catch (error) {
+        // Normalize unknown thrown values into our GamificationError shape
+        const message = (error && typeof (error as any).message === 'string' && (error as any).message) || t('error.awardXPFailed');
+        const statusCode = (error && typeof (error as any).statusCode === 'number' && (error as any).statusCode) || 500;
+        const gamificationError: GamificationError = {
           type: 'SERVER_ERROR',
-          message: err.message || t('error.awardXPFailed'),
+          message,
           timestamp: new Date().toISOString(),
-          statusCode: err.statusCode || 500,
+          statusCode,
         };
-        setError(error);
-        throw error;
+        setError(gamificationError);
+        throw gamificationError;
       }
     },
     [orgId, dashboard, t, showEnhancedXPToast],
@@ -270,15 +273,17 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
               : null,
           );
         }
-      } catch (err: any) {
-        const error: GamificationError = {
+      } catch (error) {
+        const message = (error && typeof (error as any).message === 'string' && (error as any).message) || t('error.updateStreakFailed');
+        const statusCode = (error && typeof (error as any).statusCode === 'number' && (error as any).statusCode) || 500;
+        const gamificationError: GamificationError = {
           type: 'SERVER_ERROR',
-          message: err.message || t('error.updateStreakFailed'),
+          message,
           timestamp: new Date().toISOString(),
-          statusCode: err.statusCode || 500,
+          statusCode,
         };
-        setError(error);
-        throw error;
+        setError(gamificationError);
+        throw gamificationError;
       }
     },
     [orgId, t],
@@ -300,15 +305,17 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
               }
             : null,
         );
-      } catch (err: any) {
-        const error: GamificationError = {
+      } catch (error) {
+        const message = (error && typeof (error as any).message === 'string' && (error as any).message) || t('error.updatePreferencesFailed');
+        const statusCode = (error && typeof (error as any).statusCode === 'number' && (error as any).statusCode) || 500;
+        const gamificationError: GamificationError = {
           type: 'SERVER_ERROR',
-          message: err.message || t('error.updatePreferencesFailed'),
+          message,
           timestamp: new Date().toISOString(),
-          statusCode: err.statusCode || 500,
+          statusCode,
         };
-        setError(error);
-        throw error;
+        setError(gamificationError);
+        throw gamificationError;
       }
     },
     [orgId, t],

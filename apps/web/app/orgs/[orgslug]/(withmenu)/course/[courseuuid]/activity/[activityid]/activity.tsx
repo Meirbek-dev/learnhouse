@@ -326,7 +326,7 @@ const ActivityClient = (props: ActivityClientProps) => {
       loadAssignment();
       return () => clearTimeout(timeout);
     }
-  }, [activity, access_token]);
+  }, [activity, access_token, setAssignment]);
 
   // Derive bgColor from activity type and focus mode
   useEffect(() => {
@@ -1390,6 +1390,7 @@ const AssignmentTools = (props: {
     session.data?.tokens?.access_token,
     t,
     convertNumericToAlphabet,
+    setFinalGrade,
   ]);
 
   if (!submission || submission.length === 0) {
