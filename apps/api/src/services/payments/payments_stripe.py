@@ -40,21 +40,21 @@ async def get_stripe_connected_account_id(
 
 async def get_stripe_internal_credentials():
     # Get payments config from config file
-    openu_config = get_platform_config()
+    platform_config = get_platform_config()
 
-    if not openu_config.payments_config.stripe.stripe_secret_key:
+    if not platform_config.payments_config.stripe.stripe_secret_key:
         raise HTTPException(status_code=400, detail="Stripe secret key not configured")
 
-    if not openu_config.payments_config.stripe.stripe_publishable_key:
+    if not platform_config.payments_config.stripe.stripe_publishable_key:
         raise HTTPException(
             status_code=400, detail="Stripe publishable key not configured"
         )
 
     return {
-        "stripe_secret_key": openu_config.payments_config.stripe.stripe_secret_key,
-        "stripe_publishable_key": openu_config.payments_config.stripe.stripe_publishable_key,
-        "stripe_webhook_standard_secret": openu_config.payments_config.stripe.stripe_webhook_standard_secret,
-        "stripe_webhook_connect_secret": openu_config.payments_config.stripe.stripe_webhook_connect_secret,
+        "stripe_secret_key": platform_config.payments_config.stripe.stripe_secret_key,
+        "stripe_publishable_key": platform_config.payments_config.stripe.stripe_publishable_key,
+        "stripe_webhook_standard_secret": platform_config.payments_config.stripe.stripe_webhook_standard_secret,
+        "stripe_webhook_connect_secret": platform_config.payments_config.stripe.stripe_webhook_connect_secret,
     }
 
 
@@ -349,8 +349,8 @@ async def generate_stripe_connect_link(
     stripe.api_key = creds.get("stripe_secret_key")
 
     # Get openu config for client_id
-    openu_config = get_platform_config()
-    client_id = openu_config.payments_config.stripe.stripe_client_id
+    platform_config = get_platform_config()
+    client_id = platform_config.payments_config.stripe.stripe_client_id
 
     if not client_id:
         raise HTTPException(status_code=400, detail="Stripe client ID not configured")

@@ -12,7 +12,7 @@ def send_account_creation_email(
     # send email
     return send_email(
         to=email,
-        subject=f"Welcome to OpenU, {user.username}!",
+        subject=f"Welcome to Ashyq Bilim, {user.username}!",
         body=f"""
 <html>
     <body>

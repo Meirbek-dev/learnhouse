@@ -25,7 +25,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
     access_token,
   );
   return {
-    title: `${t('title')} — МООК`,
+    title: `${t('title')} — Ashyq Bilim`,
     description: t('metaDescription'),
   };
 }

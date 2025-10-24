@@ -1,6 +1,6 @@
-# OpenU Backup Configuration
+# Ashyq Bilim Backup Configuration
 
-This document describes the automated backup system configured for the OpenU platform using
+This document describes the automated backup system configured for the Ashyq Bilim platform using
 [docker-volume-backup](https://github.com/offen/docker-volume-backup).
 
 ## Overview

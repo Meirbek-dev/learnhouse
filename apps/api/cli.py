@@ -51,7 +51,7 @@ def install(
             label="OpenU",
         )
         install_create_organization(org, db_session)
-        print("OpenU created ✅")
+        print("Ashyq Bilim created ✅")
 
         # Create Organization User
         print("Creating Ashyq Bilim user...")

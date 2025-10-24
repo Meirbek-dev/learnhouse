@@ -28,8 +28,8 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
   // SEO
   return {
-    title: `${t('title')} — МООК`,
-    description: `${t('collectionOfCourses', { orgName: 'МООК' })}`,
+    title: `${t('title')} — Ashyq Bilim`,
+    description: `${t('collectionOfCourses', { orgName: 'Ashyq Bilim' })}`,
     robots: {
       index: true,
       follow: true,
@@ -41,8 +41,8 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       },
     },
     openGraph: {
-      title: `${t('title')} — МООК`,
-      description: `${t('collectionOfCourses', { orgName: 'МООК' })}`,
+      title: `${t('title')} — Ashyq Bilim`,
+      description: `${t('collectionOfCourses', { orgName: 'Ashyq Bilim' })}`,
       type: 'website',
       images: [
         {

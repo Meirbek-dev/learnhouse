@@ -12,8 +12,8 @@ export async function generateMetadata({ params }: { params: Promise<{ orgslug: 
   });
 
   return {
-    title: `${t('metaTitle')} — МООК`,
-    description: t('metaDescription', { orgName: 'МООК' }),
+    title: `${t('metaTitle')} — Ashyq Bilim`,
+    description: t('metaDescription', { orgName: 'Ashyq Bilim' }),
     robots: {
       index: true,
       follow: true,
@@ -25,8 +25,8 @@ export async function generateMetadata({ params }: { params: Promise<{ orgslug: 
       },
     },
     openGraph: {
-      title: `${t('metaTitle')} — МООК`,
-      description: t('metaDescription', { orgName: 'МООК' }),
+      title: `${t('metaTitle')} — Ashyq Bilim`,
+      description: t('metaDescription', { orgName: 'Ashyq Bilim' }),
       type: 'website',
       images: org.thumbnail_image
         ? [
