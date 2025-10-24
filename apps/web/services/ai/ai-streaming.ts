@@ -6,7 +6,7 @@
 
 import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 
 interface AIResponse {
   success: boolean;
@@ -154,24 +154,28 @@ export async function startActivityAIChatSessionStream(
             const chunk: AIStreamChunk = JSON.parse(line.slice(6));
 
             switch (chunk.type) {
-              case 'status':
+              case 'status': {
                 onStatus?.(chunk);
                 break;
-              case 'chunk':
+              }
+              case 'chunk': {
                 if (chunk.content) accumulatedContent += chunk.content;
                 onChunk?.(chunk);
                 break;
-              case 'final':
+              }
+              case 'final': {
                 completed = true;
                 onComplete?.(chunk);
                 break;
-              case 'error':
+              }
+              case 'error': {
                 completed = true;
                 onError?.(chunk);
                 break;
+              }
             }
-          } catch (e) {
-            console.error('Failed to parse SSE chunk:', e);
+          } catch (error) {
+            console.error('Failed to parse SSE chunk:', error);
           }
         }
       }
@@ -284,24 +288,28 @@ export async function sendActivityAIChatMessageStream(
             const chunk: AIStreamChunk = JSON.parse(line.slice(6));
 
             switch (chunk.type) {
-              case 'status':
+              case 'status': {
                 onStatus?.(chunk);
                 break;
-              case 'chunk':
+              }
+              case 'chunk': {
                 if (chunk.content) accumulatedContent += chunk.content;
                 onChunk?.(chunk);
                 break;
-              case 'final':
+              }
+              case 'final': {
                 completed = true;
                 onComplete?.(chunk);
                 break;
-              case 'error':
+              }
+              case 'error': {
                 completed = true;
                 onError?.(chunk);
                 break;
+              }
             }
-          } catch (e) {
-            console.error('Failed to parse SSE chunk:', e);
+          } catch (error) {
+            console.error('Failed to parse SSE chunk:', error);
           }
         }
       }

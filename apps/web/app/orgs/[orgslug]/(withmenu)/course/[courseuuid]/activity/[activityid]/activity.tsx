@@ -46,9 +46,9 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import Link from '@components/ui/AppLink';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
-import Link from '@components/ui/AppLink';
 
 // Lazy load heavy components
 const Canva = lazy(() => import('@components/Objects/Activities/DynamicCanva/DynamicCanva'));
@@ -1012,7 +1012,7 @@ export const MarkStatus = (props: {
         }
 
         // Refetch in background to update profile with actual XP from backend
-        refetchGamification().catch((err) => console.error('Failed to refetch gamification:', err));
+        refetchGamification().catch((error) => console.error('Failed to refetch gamification:', error));
       } else {
         // Fallback for non-gamified orgs
         toast.success(t('activityCompleted'));

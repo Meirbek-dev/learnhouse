@@ -40,8 +40,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
-import { cn } from '@/lib/utils';
 import Link from '@components/ui/AppLink';
+import { cn } from '@/lib/utils';
 import useSWR from 'swr';
 
 const CourseClient = (props: any) => {

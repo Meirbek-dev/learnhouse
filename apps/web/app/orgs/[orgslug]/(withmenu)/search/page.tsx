@@ -34,7 +34,9 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
   if (searchType !== 'all' && searchType) {
     const typeLabel = t(searchType as 'courses' | 'collections' | 'users');
-    title = searchQuery ? `${typeLabel} ${t('searchResults')} "${searchQuery}" — Ashyq Bilim` : `${typeLabel} — Ashyq Bilim`;
+    title = searchQuery
+      ? `${typeLabel} ${t('searchResults')} "${searchQuery}" — Ashyq Bilim`
+      : `${typeLabel} — Ashyq Bilim`;
     description = searchQuery
       ? `${t('searchResultsFor')} "${searchQuery}" ${t('in')} ${typeLabel.toLowerCase()} ${t('at')} ${org.name}.`
       : `${t('browse')} ${typeLabel.toLowerCase()} ${t('at')} ${org.name}.`;

@@ -11,10 +11,10 @@ import { useWindowSize } from '@/hooks/useWindowSize';
 import { useEffect, useMemo, useState } from 'react';
 // Gamification imports
 import { LevelProgress } from '@/lib/gamification';
+import Link from '@components/ui/ServerLink';
 import ReactConfetti from 'react-confetti';
 import html2canvas from 'html2canvas-pro';
 import type { FC } from 'react';
-import Link from '@components/ui/ServerLink';
 import QRCode from 'qrcode';
 import jsPDF from 'jspdf';
 

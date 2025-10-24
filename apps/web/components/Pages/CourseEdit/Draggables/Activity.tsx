@@ -8,8 +8,8 @@ import { revalidateTags } from '@services/utils/ts/requests';
 import { Draggable } from '@hello-pangea/dnd';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 import Link from '@components/ui/AppLink';
+import { useState } from 'react';
 import { mutate } from 'swr';
 
 interface ModifiedActivityInterface {

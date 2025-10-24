@@ -10,8 +10,8 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { X } from 'lucide-react';
 import Link from '@components/ui/AppLink';
+import { X } from 'lucide-react';
 
 interface PropsType {
   collection: any;

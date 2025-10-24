@@ -21,8 +21,8 @@ import { getUriWithOrg } from '@services/config/config';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
-import UserAvatar from '../UserAvatar';
 import Link from '@components/ui/AppLink';
+import UserAvatar from '../UserAvatar';
 
 interface User {
   username: string;

@@ -89,10 +89,14 @@ export function getFileTypeDescription(allowedTypes: FileType[]): string {
     .map((ext) => ext.toUpperCase().slice(1))
     .join(', ');
 
-  const maxSizes = Array.from(new Set(allowedTypes.map((type) => FILE_TYPES[type].maxSize)));
+  const maxSizes = [...new Set(allowedTypes.map((type) => FILE_TYPES[type].maxSize))];
   // Safely read the first/max size
   const onlyMaxSize = maxSizes[0];
-  const maxSizeStr = maxSizes.length === 1 && onlyMaxSize != null ? `${onlyMaxSize / 1024 / 1024}MB` : 'varies';
+  // Guard against undefined — TypeScript can't infer that maxSizes[0] exists even when length === 1
+  const maxSizeStr =
+    maxSizes.length === 1 && typeof onlyMaxSize !== 'undefined'
+      ? `${onlyMaxSize / 1024 / 1024}MB`
+      : 'varies';
 
   return `${extensions} (max ${maxSizeStr})`;
 }

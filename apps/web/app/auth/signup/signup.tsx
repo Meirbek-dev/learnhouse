@@ -18,9 +18,9 @@ import OpenSignUpComponent from './OpenSignup';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
+import Link from '@components/ui/AppLink';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
-import Link from '@components/ui/AppLink';
 
 interface SignUpClientProps {
   org: any;

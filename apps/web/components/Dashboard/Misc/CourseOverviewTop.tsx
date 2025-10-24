@@ -4,11 +4,11 @@ import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { Button } from '@/components/ui/button';
+import Link from '@components/ui/ServerLink';
 import { useTranslations } from 'next-intl';
 import { BookOpen } from 'lucide-react';
 import { useEffect } from 'react';
 import Image from 'next/image';
-import Link from '@components/ui/ServerLink';
 
 import EmptyThumbnailImage from '../../../public/empty_thumbnail.webp';
 

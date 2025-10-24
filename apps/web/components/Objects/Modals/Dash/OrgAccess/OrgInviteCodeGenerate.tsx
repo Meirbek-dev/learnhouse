@@ -7,11 +7,11 @@ import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useTranslations } from 'next-intl';
+import Link from '@components/ui/AppLink';
 import { toast } from 'react-hot-toast';
 import { Ticket } from 'lucide-react';
 import useSWR, { mutate } from 'swr';
 import { useState } from 'react';
-import Link from '@components/ui/AppLink';
 
 interface OrgInviteCodeGenerateProps {
   setInvitesModal: any;

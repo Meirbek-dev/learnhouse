@@ -359,7 +359,7 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
                   {streamingMessage && (
                     <AIMessageComponent
                       message={{ sender: 'ai', message: streamingMessage, type: 'ai' }}
-                      animated={true}
+                      animated
                     />
                   )}
                   <div ref={messagesEndRef} />

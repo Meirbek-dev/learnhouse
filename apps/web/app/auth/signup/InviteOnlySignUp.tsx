@@ -11,10 +11,10 @@ import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
+import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
-import Link from '@components/ui/AppLink';
 import { z } from 'zod';
 
 interface InviteOnlySignUpProps {

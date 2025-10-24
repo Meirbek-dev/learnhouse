@@ -4,7 +4,7 @@ import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
 import ErrorUI from '@components/Objects/StyledElements/Error/Error';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { LogOut, PersonStanding, Home } from 'lucide-react';
+import { Home, LogOut, PersonStanding } from 'lucide-react';
 import { createContext, useContext, useMemo } from 'react';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { usePathname } from 'next/navigation';

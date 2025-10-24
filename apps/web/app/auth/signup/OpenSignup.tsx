@@ -11,10 +11,10 @@ import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { signup } from '@services/auth/auth';
 import { useTranslations } from 'next-intl';
+import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
-import Link from '@components/ui/AppLink';
 import { z } from 'zod';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>

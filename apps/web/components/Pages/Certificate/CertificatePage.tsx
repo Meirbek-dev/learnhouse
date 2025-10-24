@@ -7,9 +7,9 @@ import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
+import Link from '@components/ui/AppLink';
 import html2canvas from 'html2canvas-pro';
 import type React from 'react';
-import Link from '@components/ui/AppLink';
 import QRCode from 'qrcode';
 import jsPDF from 'jspdf';
 

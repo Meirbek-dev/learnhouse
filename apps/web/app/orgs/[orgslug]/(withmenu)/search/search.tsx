@@ -12,8 +12,8 @@ import { getUriWithOrg } from '@services/config/config';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import type { FormEvent } from 'react';
 import Link from '@components/ui/AppLink';
+import type { FormEvent } from 'react';
 
 // Types from SearchBar component
 interface User {

@@ -6,8 +6,8 @@ import tailwind from 'eslint-plugin-tailwindcss';
 import tsParser from '@typescript-eslint/parser';
 import reactPlugin from 'eslint-plugin-react';
 import { FlatCompat } from '@eslint/eslintrc';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
 import js from '@eslint/js';
 
 const __filename = fileURLToPath(import.meta.url);

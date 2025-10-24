@@ -5,8 +5,8 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useFormatter, useTranslations } from 'next-intl';
 import { swrFetcher } from '@services/utils/ts/requests';
-import type React from 'react';
 import Link from '@components/ui/AppLink';
+import type React from 'react';
 import useSWR from 'swr';
 
 interface UserCertificatesProps {

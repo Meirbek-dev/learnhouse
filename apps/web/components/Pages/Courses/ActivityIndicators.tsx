@@ -5,8 +5,8 @@ import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { getUriWithOrg } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Fragment, useMemo } from 'react';
 import Link from '@components/ui/AppLink';
+import { Fragment, useMemo } from 'react';
 
 interface Props {
   course: any;

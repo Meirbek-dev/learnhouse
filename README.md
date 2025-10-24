@@ -4,8 +4,8 @@
 
 ## Progress
 
-🚧 Ashyq Bilim is still on early development (alpha), as we reach stability we will release a
-stable version and add more features.
+🚧 Ashyq Bilim is still on early development (alpha), as we reach stability we will release a stable
+version and add more features.
 
 ## Roadmap
 

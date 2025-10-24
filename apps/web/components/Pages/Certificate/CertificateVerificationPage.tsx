@@ -8,8 +8,8 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import type React from 'react';
 import Link from '@components/ui/AppLink';
+import type React from 'react';
 
 interface CertificateVerificationPageProps {
   certificateUuid: string;

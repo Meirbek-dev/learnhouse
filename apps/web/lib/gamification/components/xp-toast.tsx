@@ -10,7 +10,7 @@
 
 'use client';
 
-import { useXPNotificationQueue, XPNotificationContainer } from '@/lib/gamification/components/notification-queue';
+import { XPNotificationContainer, useXPNotificationQueue } from '@/lib/gamification/components/notification-queue';
 import type { XPNotification } from '@/lib/gamification/components/notification-queue';
 import { ParticleEffect } from '@/lib/gamification/components/level-indicators';
 import { AnimatedValue } from '@/lib/gamification/components/animated-value';

@@ -11,9 +11,9 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import Link from '@components/ui/AppLink';
 import { BookOpen } from 'lucide-react';
 import { useState } from 'react';
-import Link from '@components/ui/AppLink';
 
 interface CourseProps {
   orgslug: string;

@@ -8,11 +8,11 @@ import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useTranslations } from 'next-intl';
+import Link from '@components/ui/AppLink';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import { Info } from 'lucide-react';
 import { useState } from 'react';
-import Link from '@components/ui/AppLink';
 
 interface UserGroup {
   id: number;

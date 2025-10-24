@@ -4,8 +4,8 @@ import { getUriWithOrg } from '@services/config/config';
 import { useEffect, useRef, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslations } from 'next-intl';
-import type { ReactNode } from 'react';
 import Link from '@components/ui/AppLink';
+import type { ReactNode } from 'react';
 
 interface ActivityChapterDropdownProps {
   course: any;

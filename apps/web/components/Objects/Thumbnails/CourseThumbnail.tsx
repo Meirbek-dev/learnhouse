@@ -16,9 +16,9 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useRouter } from 'next/navigation';
+import Link from '@components/ui/AppLink';
 import { toast } from 'react-hot-toast';
 import type { FC } from 'react';
-import Link from '@components/ui/AppLink';
 
 // Utility types and functions
 export interface Course {

@@ -1,13 +1,14 @@
 'use client';
 
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { type JSX, type SVGProps, useState } from 'react';
 import { EyeIcon, EyeOffIcon, Key } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import type { JSX, SVGProps } from 'react';
 import Link from '@components/ui/AppLink';
+import { useState } from 'react';
 
 const Logo = (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
   <svg
