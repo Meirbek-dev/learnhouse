@@ -1,5 +1,4 @@
 import resend
-
 from pydantic import EmailStr
 
 from config.config import get_platform_config
@@ -13,7 +12,9 @@ def future_send_email(to: EmailStr, subject: str, body: str):
     platform_config = get_platform_config()
 
     params = {
-        "from": "CS MOOC <" + platform_config.mailing_config.system_email_address + ">",
+        "from": "Ashyq Bilim <"
+        + platform_config.mailing_config.system_email_address
+        + ">",
         "to": [to],
         "subject": subject,
         "html": body,

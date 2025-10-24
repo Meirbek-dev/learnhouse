@@ -39,11 +39,11 @@ def install(
 
     if short:
         # Create the Organization
-        print("Creating CS MOOC...")
+        print("Creating Ashyq Bilim...")
         org = OrganizationCreate(
             name="OpenU",
-            description="CS MOOC",
-            about="CS MOOC - Образовательная платформа для онлайн-обучения",
+            description="Ashyq Bilim",
+            about="Ashyq Bilim - Образовательная платформа для онлайн-обучения",
             slug="openu",
             email="meirbek.dev@gmail.com",
             logo_image="",
@@ -54,13 +54,13 @@ def install(
         print("OpenU created ✅")
 
         # Create Organization User
-        print("Creating CS MOOC user...")
+        print("Creating Ashyq Bilim user...")
         # Generate random 8 digit password
         email = "meirbek.dev@gmail.com"
         password = generate_secure_password(8)
         user = UserCreate(username="Meirbek", email=email, password=password)
         install_create_organization_user(user, "openu", db_session)
-        print("CS MOOC user created ✅")
+        print("Ashyq Bilim user created ✅")
 
         # Show the user how to login
         print("Installation completed ✅")
@@ -79,7 +79,7 @@ def install(
         )
         org = OrganizationCreate(
             name=orgname,
-            description="CS MOOC",
+            description="Ashyq Bilim",
             slug=slug,
             email="",
             logo_image="",

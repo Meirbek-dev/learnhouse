@@ -11,7 +11,7 @@ from src.core.events.logs import create_logs_dir
 
 def startup_app(app: FastAPI) -> Callable:
     async def start_app() -> None:
-        # Get CS MOOC Config
+        # Get Ashyq Bilim Config
         platform_config: PlatformConfig = get_platform_config()
         app.platform_config = platform_config
 

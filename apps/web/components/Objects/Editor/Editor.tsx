@@ -229,7 +229,7 @@ const Editor = (props: EditorProps) => {
                     width={25}
                     height={25}
                     src={touEmblemDark}
-                    alt="CS MOOC logo"
+                    alt="Ashyq Bilim logo"
                   />
                 </Link>
                 <Link

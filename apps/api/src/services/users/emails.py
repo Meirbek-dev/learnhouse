@@ -17,7 +17,7 @@ def send_account_creation_email(
 <html>
     <body>
         <p>Hello {user.username}</p>
-        <p>Welcome to CS MOOC! , get started by creating your own organization or join a one.</p>
+        <p>Welcome to Ashyq Bilim! , get started by creating your own organization or join a one.</p>
         <p>Need some help to get started ? <a href="https://tou.edu.kz/ru/">Toraighyrov University</a></p>
     </body>
 </html>

@@ -65,7 +65,7 @@ const StripeConnectCallback = () => {
             width={50}
             height={50}
             src={touEmblemDark}
-            alt="CS MOOC logo"
+            alt="Ashyq Bilim logo"
           />
         </div>
 

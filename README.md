@@ -1,10 +1,10 @@
-# CS MOOC
+# Ashyq Bilim
 
-## CS MOOC is an open source platform that makes it easy for anyone to provide world-class educational content and it offers a variety of content types : Dynamic Pages, Videos, Documents & more..
+## Ashyq Bilim is an open source platform that makes it easy for anyone to provide world-class educational content and it offers a variety of content types : Dynamic Pages, Videos, Documents & more..
 
 ## Progress
 
-🚧 CS MOOC is still on early development (alpha), as we reach stability we will release a
+🚧 Ashyq Bilim is still on early development (alpha), as we reach stability we will release a
 stable version and add more features.
 
 ## Roadmap
@@ -29,7 +29,7 @@ prioritize issues by commenting on them and sharing your thoughts
 - 👟 Course Progress
 - 🛜 Course Updates
 - 💬 Discussions
-- ✨ CS MOOC AI : The Teachers and Students copilot
+- ✨ Ashyq Bilim AI : The Teachers and Students copilot
 - 👪 Multiplayer Course edition
 - More to come
 

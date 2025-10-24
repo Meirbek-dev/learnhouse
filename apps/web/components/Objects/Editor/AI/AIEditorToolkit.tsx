@@ -493,7 +493,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
           <Image
             width={32}
             src={touEmblemLight}
-            alt="CS MOOC logo"
+            alt="Ashyq Bilim logo"
           />
         </div>
         <div className="mx-auto flex h-[115px] justify-center antialiased">

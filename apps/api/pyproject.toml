@@ -1,5 +1,5 @@
 [project]
-description = "CS MOOC Backend"
+description = "Ashyq Bilim Backend"
 name = "openu-api"
 version = "0.1.0"
 requires-python = ">=3.13.7,<3.14.0"

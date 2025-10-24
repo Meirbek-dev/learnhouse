@@ -85,7 +85,7 @@ const LoginClient = (props: LoginClientProps) => {
                 width={230}
                 height={100}
                 src={platformLogoDark}
-                alt="CS MOOC logo"
+                alt="Ashyq Bilim logo"
               />
             </Link>
           </div>

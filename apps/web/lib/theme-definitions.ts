@@ -13,7 +13,7 @@ export const defaultTheme = createThemeFromCSS(
   --secondary: oklch(0.967 0.0029 264.5419);
   --accent: oklch(0.9514 0.025 236.8242);
   `,
-  'The default CS MOOC theme',
+  'The default Ashyq Bilim theme',
 );
 
 export const blackTheme = createThemeFromCSS(

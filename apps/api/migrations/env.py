@@ -8,7 +8,7 @@ from sqlmodel import SQLModel
 
 from config.config import get_platform_config
 
-# CS MOOC config
+# Ashyq Bilim config
 
 platform_config = get_platform_config()
 
