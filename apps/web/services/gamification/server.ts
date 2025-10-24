@@ -12,9 +12,23 @@ interface GamificationFetchOptions {
   cache?: RequestCache | null;
 }
 
+/**
+ * Get access token from session without throwing
+ * Returns null if no session or error occurs
+ */
+async function getAccessToken(): Promise<string | null> {
+  try {
+    const session = await auth();
+    const token = (session as any)?.tokens?.access_token as string | undefined;
+    return token || null;
+  } catch (error) {
+    // Silently fail for unauthorized users - this is expected behavior
+    return null;
+  }
+}
+
 async function requireAccessToken(): Promise<string> {
-  const session = await auth();
-  const token = (session as any)?.tokens?.access_token as string | undefined;
+  const token = await getAccessToken();
   if (!token) throw new Error('Authentication required');
   return token;
 }
@@ -56,31 +70,61 @@ function buildCacheOptions(
 
   return cache ? { next, cache } : { next };
 }
+/**
+ * Fetch unified gamification data from API
+ * Returns null if user is not authenticated or if fetch fails
+ */
 async function getUnifiedServerData(orgId: number, opts?: GamificationFetchOptions) {
-  const accessToken = await requireAccessToken();
-  // New unified endpoint returns DashboardRead (profile + recent_transactions)
-  const { next, cache } = buildCacheOptions(orgId, opts, 30);
-  const fetchOptions: RequestInit & { next?: Record<string, any> } = {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${accessToken}` },
-  };
-  if (cache) {
-    fetchOptions.cache = cache;
+  // Check if user is authenticated first
+  const accessToken = await getAccessToken();
+  if (!accessToken) {
+    return null; // Expected: user not authenticated
   }
-  if (next) {
-    fetchOptions.next = next;
-  }
-  const res = await fetch(`${getAPIUrl()}gamification/${orgId}`, fetchOptions);
 
-  if (!res.ok) throw new Error(`Failed to fetch gamification data: ${res.status}`);
-  return res.json();
+  try {
+    // New unified endpoint returns DashboardRead (profile + recent_transactions)
+    const { next, cache } = buildCacheOptions(orgId, opts, 30);
+    const fetchOptions: RequestInit & { next?: Record<string, any> } = {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    };
+    if (cache) {
+      fetchOptions.cache = cache;
+    }
+    if (next) {
+      fetchOptions.next = next;
+    }
+    const res = await fetch(`${getAPIUrl()}gamification/${orgId}`, fetchOptions);
+
+    if (!res.ok) {
+      // Don't log for auth errors (expected for unauthorized users)
+      if (res.status === 401 || res.status === 403) {
+        return null;
+      }
+      // Log unexpected errors but still return null to prevent crashes
+      console.error(`Failed to fetch gamification data: ${res.status}`);
+      return null;
+    }
+    return res.json();
+  } catch (error) {
+    // Only log if it's not a network error (which can happen when API is down)
+    if (error instanceof Error && !error.message.includes('fetch')) {
+      console.error('Error fetching gamification data:', error);
+    }
+    return null;
+  }
 }
 
 export async function getServerGamificationProfile(
   orgId: number,
   opts?: GamificationFetchOptions,
-): Promise<UserGamificationProfile> {
+): Promise<UserGamificationProfile | null> {
   const json = await getUnifiedServerData(orgId, opts);
+
+  // Return null if no data (unauthorized or error)
+  if (!json) {
+    return null;
+  }
 
   // Transform API response to frontend UserGamificationProfile type
   const p = json?.profile ?? json;
@@ -114,8 +158,13 @@ export async function getServerGamificationProfile(
 export async function getServerGamificationDashboard(
   orgId: number,
   opts?: GamificationFetchOptions,
-): Promise<DashboardData> {
+): Promise<DashboardData | null> {
   const json = await getUnifiedServerData(orgId, opts);
+
+  // Return null if no data (unauthorized or error)
+  if (!json) {
+    return null;
+  }
 
   // Transform backend DashboardRead (profile + recent_transactions)
   const profile = json.profile ?? {};
@@ -180,46 +229,70 @@ export async function getServerGamificationDashboard(
   return dashboardData;
 }
 
+/**
+ * Fetch organization leaderboard
+ * Returns null if user is not authenticated or if fetch fails
+ */
 export async function getServerOrganizationLeaderboard(
   orgId: number,
   limit = 20,
   opts?: GamificationFetchOptions,
-): Promise<OrganizationLeaderboard> {
-  const accessToken = await requireAccessToken();
-  const { next, cache } = buildCacheOptions(orgId, opts, 30);
-  const fetchOptions: RequestInit & { next?: Record<string, any> } = {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${accessToken}` },
-  };
-  if (cache) {
-    fetchOptions.cache = cache;
+): Promise<OrganizationLeaderboard | null> {
+  // Check if user is authenticated first
+  const accessToken = await getAccessToken();
+  if (!accessToken) {
+    return null; // Expected: user not authenticated
   }
-  if (next) {
-    fetchOptions.next = next;
-  }
-  const res = await fetch(
-    `${getAPIUrl()}gamification/${orgId}/leaderboard?limit=${encodeURIComponent(String(limit))}`,
-    fetchOptions,
-  );
-  if (!res.ok) throw new Error(`Failed to fetch leaderboard: ${res.status}`);
-  const json = await res.json();
 
-  const transformed: OrganizationLeaderboard = {
-    entries: (json?.entries ?? []).map((entry: any, index: number) => ({
-      user_id: Number(entry.user_id) || 0,
-      total_xp: Number(entry.total_xp) || 0,
-      level: Number(entry.level) || 1,
-      rank: Number(entry.rank ?? index + 1),
-      username: entry.username ?? null,
-      first_name: entry.first_name ?? null,
-      last_name: entry.last_name ?? null,
-      avatar_url: entry.avatar_url ?? null,
-      rank_change: entry.rank_change,
-    })),
-    total_participants: Number(json?.total_participants) || 0,
-    last_updated: json?.last_updated || new Date().toISOString(),
-  };
-  return transformed;
+  try {
+    const { next, cache } = buildCacheOptions(orgId, opts, 30);
+    const fetchOptions: RequestInit & { next?: Record<string, any> } = {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    };
+    if (cache) {
+      fetchOptions.cache = cache;
+    }
+    if (next) {
+      fetchOptions.next = next;
+    }
+    const res = await fetch(
+      `${getAPIUrl()}gamification/${orgId}/leaderboard?limit=${encodeURIComponent(String(limit))}`,
+      fetchOptions,
+    );
+
+    if (!res.ok) {
+      // Don't log for auth errors (expected for unauthorized users)
+      if (res.status === 401 || res.status === 403) {
+        return null;
+      }
+      // Log unexpected errors but return null
+      console.error(`Failed to fetch leaderboard: ${res.status}`);
+      return null;
+    }
+
+    const json = await res.json();
+
+    const transformed: OrganizationLeaderboard = {
+      entries: (json?.entries ?? []).map((entry: any, index: number) => ({
+        user_id: Number(entry.user_id) || 0,
+        total_xp: Number(entry.total_xp) || 0,
+        level: Number(entry.level) || 1,
+        rank: Number(entry.rank ?? index + 1),
+        username: entry.username ?? null,
+        first_name: entry.first_name ?? null,
+        last_name: entry.last_name ?? null,
+        avatar_url: entry.avatar_url ?? null,
+        rank_change: entry.rank_change,
+      })),
+      total_participants: Number(json?.total_participants) || 0,
+      last_updated: json?.last_updated || new Date().toISOString(),
+    };
+    return transformed;
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+    return null;
+  }
 }
 
 // Server-only revalidation utility after successful mutations

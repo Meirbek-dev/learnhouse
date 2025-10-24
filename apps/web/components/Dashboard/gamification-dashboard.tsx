@@ -31,6 +31,11 @@ export default async function GamificationDashboard({ orgId }: GamificationDashb
     }),
   ]);
 
+  // If no dashboard data (user not authenticated or error), show skeleton
+  if (!dashboardData) {
+    return;
+  }
+
   return (
     <GamificationProvider
       orgId={orgId}
@@ -48,13 +53,15 @@ export default async function GamificationDashboard({ orgId }: GamificationDashb
           <RecentActivityFeed transactions={dashboardData.recent_transactions || []} />
 
           {/* Right Column: Leaderboard */}
-          <div>
-            <Leaderboard
-              entries={leaderboardData.entries}
-              currentUserId={userId ? Number(userId) : undefined}
-              userRank={dashboardData.user_rank}
-            />
-          </div>
+          {leaderboardData && (
+            <div>
+              <Leaderboard
+                entries={leaderboardData.entries}
+                currentUserId={userId ? Number(userId) : undefined}
+                userRank={dashboardData.user_rank}
+              />
+            </div>
+          )}
         </div>
       </div>
     </GamificationProvider>

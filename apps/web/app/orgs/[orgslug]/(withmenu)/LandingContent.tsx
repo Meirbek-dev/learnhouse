@@ -19,13 +19,18 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
     tags: ['organizations'],
   });
 
+  // Only fetch gamification data if user is authenticated
+  const gamificationPromise = access_token
+    ? getServerGamificationDashboard(org.id, {
+        revalidate: 30,
+        tags: [`gamification:dashboard:${org.id}`],
+      }).catch(() => null)
+    : Promise.resolve(null);
+
   const [courses, collections, gamificationData] = await Promise.all([
     getOrgCourses(orgslug, { cache: 'no-store', tags: ['courses'] }, access_token || null),
     getOrgCollections(org.id, access_token, { cache: 'no-store', tags: ['courses'] }),
-    getServerGamificationDashboard(org.id, {
-      revalidate: 30,
-      tags: [`gamification:dashboard:${org.id}`],
-    }).catch(() => null), // Gracefully handle if gamification is not available
+    gamificationPromise,
   ]);
 
   // Check if custom landing is enabled
