@@ -4,11 +4,11 @@ import { useOptionalGamificationContext } from '@/components/Contexts/Gamificati
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { useWindowSize } from '@/hooks/useWindowSize';
-import { useEffect, useMemo, useRef, useState } from 'react';
 // Gamification imports
 import { LevelProgress } from '@/lib/gamification';
 import Link from '@components/ui/ServerLink';
@@ -609,7 +609,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
 
           {/* Gamification Celebration */}
           {gamificationProfile && (
-            <div className="space-y-4 rounded-lg border border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50 p-6">
+            <div className="space-y-4 rounded-lg border border-yellow-200 bg-linear-to-br from-yellow-50 to-orange-50 p-6">
               <div className="flex items-center justify-center space-x-2">
                 <Trophy className="h-6 w-6 text-yellow-600" />
                 <h3 className="text-xl font-semibold text-gray-900">{t('learningAchievementUnlocked')}</h3>

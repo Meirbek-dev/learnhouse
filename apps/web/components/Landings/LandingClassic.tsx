@@ -25,7 +25,7 @@ const EmptyCollectionsState = ({ t }: { t: any }) => (
   <div className="col-span-full flex items-center justify-center py-12">
     <div className="max-w-md text-center">
       <div className="mb-6">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-50 to-purple-100">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br from-purple-50 to-purple-100">
           <svg
             className="text-primary h-8 w-8"
             fill="none"
@@ -52,7 +52,7 @@ const EmptyCoursesState = ({ t }: { t: any }) => (
   <div className="col-span-full flex items-center justify-center py-12">
     <div className="max-w-md text-center">
       <div className="mb-6">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-50 to-blue-100">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br from-blue-50 to-blue-100">
           <svg
             className="text-primary h-8 w-8"
             fill="none"

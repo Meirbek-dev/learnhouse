@@ -265,7 +265,7 @@ export const SearchBar: FC<SearchBarProps> = ({
                 prefetch={false}
                 key={`${term}-${type}`}
                 href={getUriWithOrg(orgslug, `/search?q=${encodeURIComponent(term)}`)}
-                className="group flex items-center rounded-lg px-3 py-2 transition-colors hover:bg-black/[0.02]"
+                className="group flex items-center rounded-lg px-3 py-2 transition-colors hover:bg-black/2"
               >
                 <div className="flex flex-1 items-center gap-2">
                   {icon}
@@ -309,7 +309,7 @@ export const SearchBar: FC<SearchBarProps> = ({
                 prefetch={false}
                 key={course.course_uuid}
                 href={getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
-                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/[0.02]"
+                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/2"
               >
                 <div className="relative">
                   {course.thumbnail_image ? (
@@ -359,7 +359,7 @@ export const SearchBar: FC<SearchBarProps> = ({
                 prefetch={false}
                 key={collection.collection_uuid}
                 href={getUriWithOrg(orgslug, `/collection/${collection.collection_uuid}`)}
-                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/[0.02]"
+                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/2"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-black/5">
                   <Book
@@ -393,7 +393,7 @@ export const SearchBar: FC<SearchBarProps> = ({
                 prefetch={false}
                 key={user.user_uuid}
                 href={getUriWithOrg(orgslug, `/user/${user.username}`)}
-                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/[0.02]"
+                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/2"
               >
                 <UserAvatar
                   size="md"
@@ -482,7 +482,7 @@ export const SearchBar: FC<SearchBarProps> = ({
                     <Link
                       prefetch={false}
                       href={getUriWithOrg(orgslug, `/search?q=${encodeURIComponent(searchQuery)}`)}
-                      className="flex items-center justify-between px-4 py-2.5 text-xs text-black/50 transition-colors hover:bg-black/[0.02] hover:text-black/70"
+                      className="flex items-center justify-between px-4 py-2.5 text-xs text-black/50 transition-colors hover:bg-black/2 hover:text-black/70"
                     >
                       <span>{t('viewAllResults')}</span>
                       <ArrowRight size={14} />

@@ -460,7 +460,7 @@ const SubtitleManager = ({
                 className="group flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all duration-200 hover:border-gray-300 hover:shadow-md"
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-blue-200">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-100 to-blue-200">
                     <span className="text-xs font-semibold text-blue-700">{index + 1}</span>
                   </div>
                   <div className="min-w-0 flex-1">
@@ -676,7 +676,7 @@ const VideoSettingsForm = ({
       </CollapsibleTrigger>
 
       <CollapsibleContent className="data-[state=closed]:animate-slideUp data-[state=open]:animate-slideDown overflow-hidden">
-        <div className="mt-3 space-y-6 rounded-lg border-2 border-gray-100 bg-gradient-to-br from-gray-50 to-white p-6 shadow-sm">
+        <div className="mt-3 space-y-6 rounded-lg border-2 border-gray-100 bg-linear-to-br from-gray-50 to-white p-6 shadow-sm">
           {/* Timing Controls */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 border-b border-gray-200 pb-3">
@@ -721,7 +721,7 @@ const VideoSettingsForm = ({
               >
                 <AlertTriangle
                   size={16}
-                  className="mt-0.5 flex-shrink-0 text-amber-600"
+                  className="mt-0.5 shrink-0 text-amber-600"
                 />
                 <div>
                   <p className="text-sm font-medium text-amber-800">{t('invalidTimeRange')}</p>

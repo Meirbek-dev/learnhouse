@@ -257,8 +257,8 @@ const DashSidebar = ({ className }: SidebarProps) => {
       side="left"
       variant="sidebar"
       collapsible="icon"
-      className={`bg-sidebar/95 supports-[backdrop-filter]:bg-sidebar/60 border-r backdrop-blur-sm transition-all duration-300 ${
-        isCollapsed ? 'min-w-[4rem]' : 'min-w-[16rem]'
+      className={`bg-sidebar/95 supports-backdrop-filter:bg-sidebar/60 border-r backdrop-blur-sm transition-all duration-300 ${
+        isCollapsed ? 'min-w-[4rem]' : 'min-w-3xs'
       } ${className}`}
     >
       <SidebarHeader className="border-sidebar-border border-b p-4">
@@ -270,7 +270,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
             }`}
             aria-label={t('ariaLabels.goToHomepage')}
           >
-            <div className="from-primary to-primary/80 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br p-1.5 shadow-sm">
+            <div className="from-primary to-primary/80 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-linear-to-br p-1.5 shadow-sm">
               <Image
                 alt={t('ariaLabels.openuLogo')}
                 width={24}

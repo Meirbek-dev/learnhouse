@@ -6,10 +6,10 @@ import { removeCourse, startCourse } from '@services/courses/activity';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { useEffect, useState, useTransition, useRef } from 'react';
 import { getProductsByCourse } from '@services/payments/products';
 import { checkPaidAccess } from '@services/payments/payments';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
@@ -140,6 +140,13 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
   const t = useTranslations('Courses.CourseActionsMobile');
   const router = useRouter();
   const session = useLHSession() as any;
+  // stable primitives to avoid effects depending on the whole session object
+  const accessToken = session.data?.tokens?.access_token;
+  const userId = session.data?.user?.id;
+
+  // one-shot guards to avoid repeated requests when context identity changes
+  const fetchedLinkedProductsRef = useRef<Record<string, boolean>>({});
+  const checkedAccessRef = useRef<Record<string, boolean>>({});
   const [linkedProducts, setLinkedProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
@@ -159,7 +166,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
   useEffect(() => {
     const fetchLinkedProducts = async () => {
       try {
-        const response = await getProductsByCourse(course.org_id, course.id, session.data?.tokens?.access_token);
+        const response = await getProductsByCourse(course.org_id, course.id, accessToken);
         setLinkedProducts(response.data || []);
       } catch {
         console.error('Failed to fetch linked products');
@@ -168,17 +175,20 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
       }
     };
 
+    // run once per course id to avoid loops caused by unstable session/context identity
+    if (fetchedLinkedProductsRef.current[course.id]) return;
+    fetchedLinkedProductsRef.current[course.id] = true;
     fetchLinkedProducts();
-  }, [course.id, course.org_id, session.data?.tokens?.access_token]);
+  }, [course.id, course.org_id, accessToken]);
 
   useEffect(() => {
     const checkAccess = async () => {
-      if (!session.data?.user) return;
+      if (!userId) return;
       try {
         const response = await checkPaidAccess(
           Number.parseInt(course.id, 10), // TODO: why parsing course id as int?
           course.org_id,
-          session.data?.tokens?.access_token,
+          accessToken,
         );
         setHasAccess(response.has_access);
       } catch {
@@ -187,10 +197,12 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
       }
     };
 
-    if (linkedProducts.length > 0) {
-      checkAccess();
-    }
-  }, [course.id, course.org_id, session.data?.tokens?.access_token, session.data?.user, linkedProducts]);
+    if (linkedProducts.length === 0) return;
+    const checkKey = `${course.id}:${accessToken || 'no-token'}`;
+    if (checkedAccessRef.current[checkKey]) return;
+    checkedAccessRef.current[checkKey] = true;
+    checkAccess();
+  }, [course.id, course.org_id, accessToken, userId, linkedProducts]);
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {

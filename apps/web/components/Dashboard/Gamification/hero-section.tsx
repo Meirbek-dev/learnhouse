@@ -71,7 +71,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
     <Card className={cn('relative overflow-hidden border-2 py-2', className)}>
       {/* Dynamic gradient background based on level */}
       <div
-        className={cn('absolute inset-0 opacity-10', 'bg-gradient-to-br from-primary via-transparent to-purple-500')}
+        className={cn('absolute inset-0 opacity-10', 'bg-linear-to-br from-primary via-transparent to-purple-500')}
       />
 
       {/* Animated particles for high-level users */}
@@ -194,7 +194,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
                 {/* Progress bar with gradient */}
                 <div className="bg-muted relative h-4 overflow-hidden rounded-full">
                   <motion.div
-                    className={cn('h-full rounded-full bg-gradient-to-r from-primary to-purple-500')}
+                    className={cn('h-full rounded-full bg-linear-to-r from-primary to-purple-500')}
                     initial={{ width: 0 }}
                     animate={{ width: `${xpProgress}%` }}
                     transition={{ duration: 1, ease: 'easeOut' }}
@@ -202,7 +202,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
 
                   {/* Shine effect */}
                   <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                    className="absolute inset-0 bg-linear-to-r from-transparent via-white/30 to-transparent"
                     animate={{
                       x: ['-100%', '200%'],
                     }}
@@ -250,8 +250,8 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
                     className={cn(
                       'h-full rounded-full transition-colors',
                       dailyXpProgress >= 100
-                        ? 'bg-gradient-to-r from-orange-500 to-red-500'
-                        : 'bg-gradient-to-r from-yellow-500 to-amber-500',
+                        ? 'bg-linear-to-r from-orange-500 to-red-500'
+                        : 'bg-linear-to-r from-yellow-500 to-amber-500',
                     )}
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(dailyXpProgress, 100)}%` }}

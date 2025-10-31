@@ -528,7 +528,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
   const theme = getPatternTheme(certificatePattern);
 
   return (
-    <div className="h-full w-full rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
+    <div className="h-full w-full rounded-xl border border-blue-200 bg-linear-to-br from-blue-50 to-indigo-50 p-4">
       <div className="relative flex h-full w-full flex-col overflow-hidden rounded-lg bg-white p-6 shadow-sm">
         {/* Dynamic Certificate Pattern */}
         {renderCertificatePattern(certificatePattern)}
@@ -567,20 +567,20 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           {/* Header with decorative line */}
           <div className="mb-2 flex items-center justify-center space-x-2">
             <div
-              className={`h-px w-6 bg-gradient-to-r from-transparent sm:w-8 ${theme.secondary.replace('text-', 'to-')}`}
+              className={`h-px w-6 bg-linear-to-r from-transparent sm:w-8 ${theme.secondary.replace('text-', 'to-')}`}
             />
             <div className={`text-xs sm:text-sm ${theme.secondary} font-medium tracking-wider uppercase`}>
               {t('certificate')}
             </div>
             <div
-              className={`h-px w-6 bg-gradient-to-l from-transparent sm:w-8 ${theme.secondary.replace('text-', 'to-')}`}
+              className={`h-px w-6 bg-linear-to-l from-transparent sm:w-8 ${theme.secondary.replace('text-', 'to-')}`}
             />
           </div>
 
           {/* Award Icon with decorative elements */}
           <div className="relative flex justify-center">
             <div
-              className={`h-12 w-12 bg-gradient-to-br sm:h-16 sm:w-16 ${theme.icon.replace('text-', 'from-')}-100 ${theme.icon.replace('text-', 'to-')}-200 relative flex items-center justify-center rounded-full`}
+              className={`h-12 w-12 bg-linear-to-br sm:h-16 sm:w-16 ${theme.icon.replace('text-', 'from-')}-100 ${theme.icon.replace('text-', 'to-')}-200 relative flex items-center justify-center rounded-full`}
             >
               <Award className={`h-6 w-6 sm:h-8 sm:w-8 ${theme.icon}`} />
               {/* Decorative rays */}

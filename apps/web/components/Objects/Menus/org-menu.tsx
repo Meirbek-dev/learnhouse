@@ -266,7 +266,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
 
       {/* Mobile menu */}
       {isMenuOpen ? (
-        <div className="fixed inset-0 z-[60] md:hidden">
+        <div className="fixed inset-0 z-60 md:hidden">
           {/* Overlay */}
           <div
             className="absolute inset-0 bg-black/20 backdrop-blur-sm"

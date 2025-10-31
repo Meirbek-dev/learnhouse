@@ -70,7 +70,7 @@ export function LevelUpCelebration({ newLevel, onDismiss, compact = false }: Lev
         animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, x: 0, y: 0 }}
         exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: 100 }}
         transition={prefersReducedMotion ? { duration: 0.2 } : { type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed right-6 bottom-6 z-[100] max-w-[calc(100vw-3rem)] rounded-2xl border-2 border-yellow-500 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 p-4 shadow-2xl backdrop-blur-md md:max-w-sm md:p-6"
+        className="fixed right-6 bottom-6 z-100 max-w-[calc(100vw-3rem)] rounded-2xl border-2 border-yellow-500 bg-linear-to-br from-yellow-500/20 to-orange-500/20 p-4 shadow-2xl backdrop-blur-md md:max-w-sm md:p-6"
         onClick={onDismiss}
       >
         {/* Subtle sparkle effect (skip if reduced motion or reduced data) */}
@@ -146,7 +146,7 @@ export function LevelUpCelebration({ newLevel, onDismiss, compact = false }: Lev
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm"
       onClick={onDismiss}
     >
       <motion.div
@@ -154,7 +154,7 @@ export function LevelUpCelebration({ newLevel, onDismiss, compact = false }: Lev
         animate={{ scale: 1, rotate: 0, opacity: 1 }}
         exit={{ scale: 0.5, rotate: 15, opacity: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        className="relative mx-4 max-w-lg rounded-3xl border-4 border-yellow-500 bg-gradient-to-br from-yellow-500/20 via-orange-500/20 to-red-500/10 p-12 text-center shadow-2xl"
+        className="relative mx-4 max-w-lg rounded-3xl border-4 border-yellow-500 bg-linear-to-br from-yellow-500/20 via-orange-500/20 to-red-500/10 p-12 text-center shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Sparkles animation */}

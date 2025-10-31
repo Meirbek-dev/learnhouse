@@ -13,7 +13,7 @@ const EmptyState = ({ t }: { t: any }) => (
   <div className="col-span-full flex items-center justify-center py-16">
     <div className="max-w-md text-center">
       <div className="mb-6">
-        <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-br from-blue-50 to-indigo-100">
           <ShoppingCart className="text-primary h-10 w-10" />
         </div>
       </div>
@@ -82,7 +82,7 @@ const OwnedCoursesPage = () => {
       {/* Header Card */}
       <div className="soft-shadow mb-8 flex flex-col rounded-lg border border-gray-100 bg-white px-6 py-5">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-50 to-indigo-100">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-linear-to-br from-blue-50 to-indigo-100">
             <Package2 className="text-primary h-6 w-6" />
           </div>
           <div className="flex flex-col">

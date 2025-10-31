@@ -240,7 +240,7 @@ const FlipcardExtension: React.FC = (props: any) => {
                         e.preventDefault();
                         e.stopPropagation();
                       }}
-                      className="pointer-events-auto ml-2 flex-shrink-0 opacity-60 hover:opacity-100"
+                      className="pointer-events-auto ml-2 shrink-0 opacity-60 hover:opacity-100"
                     >
                       <Edit size={14} />
                     </button>
@@ -293,7 +293,7 @@ const FlipcardExtension: React.FC = (props: any) => {
                         e.preventDefault();
                         e.stopPropagation();
                       }}
-                      className="pointer-events-auto ml-2 flex-shrink-0 opacity-60 hover:opacity-100"
+                      className="pointer-events-auto ml-2 shrink-0 opacity-60 hover:opacity-100"
                     >
                       <Edit size={14} />
                     </button>

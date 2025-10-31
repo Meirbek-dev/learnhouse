@@ -55,7 +55,7 @@ export function LevelProgress({ profile, showMilestones = false, animated = true
       {/* Compact progress bar */}
       <div className="bg-muted/50 relative h-1.5 overflow-hidden rounded-full">
         <motion.div
-          className="from-primary/80 to-primary h-full rounded-full bg-gradient-to-r"
+          className="from-primary/80 to-primary h-full rounded-full bg-linear-to-r"
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{

@@ -12,9 +12,9 @@ import { revalidateTags } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import CoursePaidOptions from './CoursePaidOptions';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
 

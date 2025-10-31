@@ -114,7 +114,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
             {/* Header with Avatar and Name */}
             <div className="relative">
               {/* Background gradient */}
-              <div className="absolute inset-0 h-28 rounded-t-lg bg-gradient-to-b from-gray-100/30 to-transparent" />
+              <div className="absolute inset-0 h-28 rounded-t-lg bg-linear-to-b from-gray-100/30 to-transparent" />
 
               {/* Content */}
               <div className="relative px-5 pt-5 pb-4">

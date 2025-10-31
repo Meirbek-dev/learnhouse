@@ -130,7 +130,7 @@ const ConfirmationModal = (params: ModalParams) => {
           <div className="flex items-start gap-4">
             <div
               className={cn(
-                'flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full transition-colors',
+                'flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors',
                 statusConfig.iconBg,
               )}
               aria-hidden="true"

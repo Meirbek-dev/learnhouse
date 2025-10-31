@@ -64,7 +64,7 @@ function XPToast({ notification, onDismiss }: XPToastProps) {
       {/* Content */}
       <div className="relative flex items-center gap-3 p-4">
         {/* Icon */}
-        <div className={cn('flex-shrink-0 rounded-lg p-2', theme.bgColor)}>
+        <div className={cn('shrink-0 rounded-lg p-2', theme.bgColor)}>
           <theme.icon className={cn('h-5 w-5', theme.color)} />
         </div>
 
@@ -89,7 +89,7 @@ function XPToast({ notification, onDismiss }: XPToastProps) {
         {/* Dismiss Button */}
         <button
           onClick={onDismiss}
-          className="hover:bg-muted flex-shrink-0 rounded-md p-1.5 opacity-0 transition-opacity group-hover:opacity-100"
+          className="hover:bg-muted shrink-0 rounded-md p-1.5 opacity-0 transition-opacity group-hover:opacity-100"
           aria-label="Dismiss"
         >
           <X className="text-muted-foreground h-4 w-4" />
@@ -98,7 +98,7 @@ function XPToast({ notification, onDismiss }: XPToastProps) {
 
       {/* Level Up Indicator */}
       {notification.triggeredLevelUp && (
-        <div className="border-t bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 px-4 py-2">
+        <div className="border-t bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 px-4 py-2">
           <p className="text-center text-sm font-bold text-white">🎉 {t('toast.levelUp')} 🎉</p>
         </div>
       )}

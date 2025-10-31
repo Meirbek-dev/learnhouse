@@ -77,7 +77,7 @@ export function EngagementStreak({ profile, className }: EngagementStreakProps) 
                 }}
                 className={cn(
                   'flex h-12 w-12 items-center justify-center rounded-full',
-                  engagement.isActive ? 'bg-gradient-to-br from-orange-500 to-red-500' : 'bg-muted',
+                  engagement.isActive ? 'bg-linear-to-br from-orange-500 to-red-500' : 'bg-muted',
                 )}
               >
                 {engagement.isActive ? (

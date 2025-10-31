@@ -185,7 +185,7 @@ const RightsDocumentation = ({ params }: RightsDocumentationProps) => {
                           key={permIndex}
                           className="flex items-center space-x-2 text-sm"
                         >
-                          <CheckCircle className="h-3 w-3 flex-shrink-0 text-green-600" />
+                          <CheckCircle className="h-3 w-3 shrink-0 text-green-600" />
                           <span>{permission}</span>
                         </li>
                       ))}
@@ -233,7 +233,7 @@ const RightsDocumentation = ({ params }: RightsDocumentationProps) => {
                           key={permIndex}
                           className="flex items-center space-x-2 text-sm"
                         >
-                          <CheckCircle className="h-3 w-3 flex-shrink-0 text-green-600" />
+                          <CheckCircle className="h-3 w-3 shrink-0 text-green-600" />
                           <span>{permission}</span>
                         </li>
                       ))}

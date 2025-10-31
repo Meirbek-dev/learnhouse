@@ -78,7 +78,7 @@ export default function DiscussionReply({
           size="sm"
           variant="default"
           username={reply.username}
-          className="flex-shrink-0"
+          className="shrink-0"
         />
 
         <div className="min-w-0 flex-1">
@@ -97,7 +97,7 @@ export default function DiscussionReply({
                   {t('admin')}
                 </Badge>
               )}
-              <div className="flex flex-shrink-0 items-center gap-1 text-xs text-slate-400">
+              <div className="flex shrink-0 items-center gap-1 text-xs text-slate-400">
                 <Clock size={12} />
                 <span>{format.relativeTime(new Date(reply.createDate), now)}</span>
                 {reply.updateDate &&

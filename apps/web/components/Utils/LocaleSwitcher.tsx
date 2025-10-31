@@ -66,7 +66,7 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
         </SelectTrigger>
       )}
       <SelectContent
-        className={cn(isMobile && 'z-[80]')}
+        className={cn(isMobile && 'z-80')}
         position={isMobile ? 'popper' : 'popper'}
         sideOffset={4}
         side={isMobile ? 'bottom' : 'bottom'}
