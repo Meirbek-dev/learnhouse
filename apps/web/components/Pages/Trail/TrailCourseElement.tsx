@@ -7,7 +7,7 @@ import { revalidateTags } from '@services/utils/ts/requests';
 import { Award, ExternalLink, Loader2 } from 'lucide-react';
 import { removeCourse } from '@services/courses/activity';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -35,6 +35,7 @@ const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) =
   );
   const [courseCertificate, setCourseCertificate] = useState<any>(null);
   const [isLoadingCertificate, setIsLoadingCertificate] = useState(false);
+  const fetchedCourseCertificateRef = useRef<Record<string, boolean>>({});
 
   async function quitCourse(course_uuid: string) {
     // Close activity
@@ -49,9 +50,12 @@ const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) =
 
   // Fetch certificate for this course
   useEffect(() => {
-    const fetchCourseCertificate = async () => {
-      if (!access_token || course_progress < 100) return;
+    // Avoid repeated fetches for the same course if we've already tried
+    if (!access_token || course_progress < 100) return;
+    if (fetchedCourseCertificateRef.current[course.course_uuid]) return;
 
+    const fetchCourseCertificate = async () => {
+      fetchedCourseCertificateRef.current[course.course_uuid] = true;
       setIsLoadingCertificate(true);
       try {
         const result = await getUserCertificates(course.course_uuid, access_token);

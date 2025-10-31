@@ -14,7 +14,7 @@ import UserAvatar from '@components/Objects/UserAvatar';
 import CoursePaidOptions from './CoursePaidOptions';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
 
@@ -67,6 +67,14 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
   const org = useOrg() as any;
   const t = useTranslations('Courses.CoursesActions');
 
+  // stable primitives to avoid effects depending on whole session object
+  const accessToken = session.data?.tokens?.access_token;
+  const userId = session.data?.user?.id;
+
+  // one-shot guards to avoid repeated requests when context identity changes
+  const fetchedLinkedProductsRef = useRef<Record<string, boolean>>({});
+  const checkedAccessRef = useRef<Record<string, boolean>>({});
+
   // Clean up course UUID by removing 'course_' prefix if it exists
   const cleanCourseUuid = course.course_uuid?.replace('course_', '');
 
@@ -79,7 +87,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
   useEffect(() => {
     const fetchLinkedProducts = async () => {
       try {
-        const response = await getProductsByCourse(course.org_id, course.id, session.data?.tokens?.access_token);
+        const response = await getProductsByCourse(course.org_id, course.id, accessToken);
         setLinkedProducts(response.data || []);
       } catch {
         console.error('Failed to fetch linked products');
@@ -88,17 +96,20 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
       }
     };
 
+    // run once per course id to avoid loops caused by unstable session/context identity
+    if (fetchedLinkedProductsRef.current[course.id]) return;
+    fetchedLinkedProductsRef.current[course.id] = true;
     fetchLinkedProducts();
-  }, [course.id, course.org_id, session.data?.tokens?.access_token]);
+  }, [course.id, course.org_id, accessToken]);
 
   useEffect(() => {
     const checkAccess = async () => {
-      if (!session.data?.user) return;
+      if (!userId) return;
       try {
         const response = await checkPaidAccess(
           Number.parseInt(course.id, 10), // TODO: why parsing course id as int?
           course.org_id,
-          session.data?.tokens?.access_token,
+          accessToken,
         );
         setHasAccess(response.has_access);
       } catch {
@@ -108,10 +119,13 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
       }
     };
 
-    if (linkedProducts.length > 0) {
-      checkAccess();
-    }
-  }, [course.id, course.org_id, session.data?.tokens?.access_token, session.data?.user, linkedProducts]);
+    // Only run when there are linked products and avoid rerunning repeatedly
+    if (linkedProducts.length === 0) return;
+    const checkKey = `${course.id}:${accessToken || 'no-token'}`;
+    if (checkedAccessRef.current[checkKey]) return;
+    checkedAccessRef.current[checkKey] = true;
+    checkAccess();
+  }, [course.id, course.org_id, accessToken, userId, linkedProducts]);
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {

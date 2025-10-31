@@ -6,7 +6,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from '@components/ui/AppLink';
 import html2canvas from 'html2canvas-pro';
 import type React from 'react';
@@ -26,10 +26,19 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
   const [error, setError] = useState<string | null>(null);
   const locale = useLocale();
   const t = useTranslations('Certificates.CertificatePage');
+  const fetchedCertificateRef = useRef<Record<string, boolean>>({});
 
   // Fetch user certificate
   useEffect(() => {
+    // Avoid repeated fetches if access token refreshes or session object changes
+    if (fetchedCertificateRef.current[courseid]) {
+      setIsLoading(false);
+      return;
+    }
+
     const fetchCertificate = async () => {
+      fetchedCertificateRef.current[courseid] = true;
+
       if (!session?.data?.tokens?.access_token) {
         setError(t('errorAuth'));
         setIsLoading(false);
