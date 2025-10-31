@@ -21,6 +21,8 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const session = useLHSession() as any;
   const org = useOrg() as any;
+  const accessToken = session?.data?.tokens?.access_token;
+  const orgId = org?.id;
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.Payments.LinkedCourses');
 
@@ -30,11 +32,11 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
     mutate: mutateLinkedCourses,
     error,
   } = useSWR(
-    org && session && productId
-      ? [`/payments/${org.id}/products/${productId}/courses`, session.data?.tokens?.access_token]
+    orgId && accessToken && productId
+      ? [`/payments/${orgId}/products/${productId}/courses`, accessToken]
       : null,
     async ([, token]) => {
-      const response = await getCoursesLinkedToProduct(org.id, productId, token);
+      const response = await getCoursesLinkedToProduct(orgId, productId, token);
       return response.data || [];
     },
   );
@@ -48,10 +50,10 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
 
   const handleUnlinkCourse = async (courseId: string) => {
     try {
-      const response = await unlinkCourseFromProduct(org.id, productId, courseId, session.data?.tokens?.access_token);
+      const response = await unlinkCourseFromProduct(orgId, productId, courseId, accessToken);
       if (response.success) {
         await mutateLinkedCourses();
-        mutate([`/payments/${org.id}/products`, session.data?.tokens?.access_token]);
+        mutate([`/payments/${orgId}/products`, accessToken]);
         toast.success(tNotify('courseUnlinkedSuccess'));
       } else {
         toast.error(

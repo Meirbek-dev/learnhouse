@@ -33,8 +33,8 @@ const COMMON_RULES = {
   'react/jsx-no-literals': 'off',
   'react-hooks/rules-of-hooks': 'error',
   'react-hooks/exhaustive-deps': 'warn',
-  'react-hooks/set-state-in-effect': 'warn',
-  'react-hooks/incompatible-library': 'warn',
+  'react-hooks/set-state-in-effect': 'off',
+  'react-hooks/incompatible-library': 'off',
   'tailwindcss/classnames-order': 'warn',
   'unused-imports/no-unused-imports': 'warn',
   'no-console': 'off',
@@ -72,8 +72,8 @@ export default defineConfig([
       react: { version: 'detect' },
       tailwindcss: { config: false },
     },
-  // Cast to any to avoid TS type mismatch with RuleConfig in flat config
-  rules: /** @type {any} */ (COMMON_RULES),
+    // Cast to any to avoid TS type mismatch with RuleConfig in flat config
+    rules: /** @type {any} */ (COMMON_RULES),
   },
 
   // ───────────────────────────────

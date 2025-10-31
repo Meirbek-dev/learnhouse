@@ -55,6 +55,8 @@ type EditProductFormData = z.infer<ReturnType<typeof createValidationSchema>>;
 const PaymentsProductPage = () => {
   const org = useOrg() as any;
   const session = useLHSession() as any;
+  const accessToken = session?.data?.tokens?.access_token;
+  const orgId = org?.id;
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [expandedProducts, setExpandedProducts] = useState<{
@@ -64,13 +66,13 @@ const PaymentsProductPage = () => {
   const t = useTranslations('DashPage.Payments.ProductPage');
 
   const { data: products, error } = useSWR(
-    () => (org && session ? [`/payments/${org.id}/products`, session.data?.tokens?.access_token] : null),
-    ([_url, token]) => getProducts(org.id, token),
+    () => (orgId && accessToken ? [`/payments/${orgId}/products`, accessToken] : null),
+    ([_url, token]) => getProducts(orgId, token),
   );
 
   const { data: paymentConfigs, error: paymentConfigError } = useSWR(
-    () => (org && session ? [`/payments/${org.id}/config`, session.data?.tokens?.access_token] : null),
-    ([_url, token]) => getPaymentConfigs(org.id, token),
+    () => (orgId && accessToken ? [`/payments/${orgId}/config`, accessToken] : null),
+    ([_url, token]) => getPaymentConfigs(orgId, token),
   );
 
   const isStripeEnabled = useMemo(() => {
@@ -81,8 +83,8 @@ const PaymentsProductPage = () => {
 
   const handleArchiveProduct = async (productId: string) => {
     try {
-      const res = await archiveProduct(org.id, productId, session.data?.tokens?.access_token);
-      mutate([`/payments/${org.id}/products`, session.data?.tokens?.access_token]);
+      const res = await archiveProduct(orgId, productId, accessToken);
+      mutate([`/payments/${orgId}/products`, accessToken]);
       if (res.status === 200) {
         toast.success(t('productArchivedSuccess'));
       } else {

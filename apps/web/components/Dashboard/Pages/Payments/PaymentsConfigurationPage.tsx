@@ -24,7 +24,7 @@ import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getUriWithoutOrg } from '@services/config/config';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { SiStripe } from '@icons-pack/react-simple-icons';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -303,7 +303,10 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ orgId, configId
     },
   });
 
+  const fetchedConfigRef = useRef<Record<string, boolean>>({});
+
   useEffect(() => {
+    const key = `${isOpen ? 'open' : 'closed'}:${configId}:${accessToken || 'no-token'}`;
     const fetchConfig = async () => {
       try {
         const config = await getPaymentConfigs(orgId, accessToken);
@@ -317,7 +320,8 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ orgId, configId
       }
     };
 
-    if (isOpen) {
+    if (isOpen && !fetchedConfigRef.current[key]) {
+      fetchedConfigRef.current[key] = true;
       fetchConfig();
     }
   }, [isOpen, orgId, configId, accessToken, t, form]);

@@ -38,6 +38,8 @@ type ProductFormValues = z.infer<ReturnType<typeof createValidationSchema>>;
 const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   const org = useOrg() as any;
   const session = useLHSession() as any;
+  const accessToken = session?.data?.tokens?.access_token;
+  const orgId = org?.id;
   const [currencies, setCurrencies] = useState<{ code: string; name: string }[]>([]);
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('Payments.ProductForm');
@@ -71,10 +73,10 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   const handleSubmit = async (values: ProductFormValues) => {
     const loadingToast = toast.loading(tNotify('creatingProduct'));
     try {
-      const res = await createProduct(org.id, values, session.data?.tokens?.access_token);
+      const res = await createProduct(orgId, values, accessToken);
       if (res.success) {
         toast.success(tNotify('productCreatedSuccess'), { id: loadingToast });
-        mutate([`/payments/${org.id}/products`, session.data?.tokens?.access_token]);
+        mutate([`/payments/${orgId}/products`, accessToken]);
         form.reset();
         onSuccess();
       } else {

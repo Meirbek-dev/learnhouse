@@ -83,25 +83,26 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
   const [searchTerm, setSearchTerm] = useState('');
   const org = useOrg() as any;
   const session = useLHSession() as any;
+  const accessToken = session?.data?.tokens?.access_token;
+  const orgId = org?.id;
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.Payments.LinkCourseModal');
 
   const { data: coursesData, error: coursesError } = useSWR(
-    () => (org && session ? [org.slug, session.data?.tokens?.access_token] : null),
+    () => (org?.slug && accessToken ? [org.slug, accessToken] : null),
     ([orgSlug, token]) => getOrgCourses(orgSlug, null, token),
   );
 
   const { data: linkedCoursesData, error: linkedCoursesError } = useSWR(
-    () =>
-      org && session ? [`/payments/${org.id}/products/${productId}/courses`, session.data?.tokens?.access_token] : null,
-    ([_, token]) => getCoursesLinkedToProduct(org.id, productId, token),
+    () => (orgId && accessToken ? [`/payments/${orgId}/products/${productId}/courses`, accessToken] : null),
+    ([_, token]) => getCoursesLinkedToProduct(orgId, productId, token),
   );
 
   const handleLinkCourse = async (courseId: string) => {
     try {
-      const response = await linkCourseToProduct(org.id, productId, courseId, session.data?.tokens?.access_token);
+      const response = await linkCourseToProduct(orgId, productId, courseId, accessToken);
       if (response.success) {
-        mutate([`/payments/${org.id}/products`, session.data?.tokens?.access_token]);
+        mutate([`/payments/${orgId}/products`, accessToken]);
         toast.success(tNotify('courseLinkedSuccess'));
         onSuccess();
       } else {

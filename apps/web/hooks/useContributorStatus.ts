@@ -16,9 +16,11 @@ export function useContributorStatus(courseUuid: string) {
   const [contributorStatus, setContributorStatus] = useState<ContributorStatus>('NONE');
   const [isLoading, setIsLoading] = useState(true);
   const t = useTranslations('Hooks.useContributorStatus');
+  const accessToken = session?.data?.tokens?.access_token;
+  const userId = session?.data?.user?.id;
 
   const checkContributorStatus = useCallback(async () => {
-    if (!session.data?.user) {
+    if (!userId) {
       setIsLoading(false);
       return;
     }
@@ -26,13 +28,11 @@ export function useContributorStatus(courseUuid: string) {
     try {
       const response = await getCourseContributors(
         courseUuid.startsWith('course_') ? courseUuid : `course_${courseUuid}`,
-        session.data?.tokens?.access_token,
+        accessToken,
       );
 
       if (response?.data && Array.isArray(response.data)) {
-        const currentUser = response.data.find(
-          (contributor: Contributor) => contributor.user_id === session.data.user.id,
-        );
+        const currentUser = response.data.find((contributor: Contributor) => contributor.user_id === userId);
 
         if (currentUser) {
           setContributorStatus(currentUser.authorship_status as ContributorStatus);
@@ -49,13 +49,13 @@ export function useContributorStatus(courseUuid: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [courseUuid, session.data?.tokens?.access_token, session.data?.user, t]);
+  }, [courseUuid, accessToken, userId, t]);
 
   useEffect(() => {
-    if (session.data?.user) {
+    if (userId) {
       checkContributorStatus();
     }
-  }, [checkContributorStatus, session.data?.user]);
+  }, [checkContributorStatus, userId]);
 
   return { contributorStatus, isLoading, refetch: checkContributorStatus };
 }

@@ -125,6 +125,7 @@ export const SearchBar: FC<SearchBarProps> = ({
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const session = useLHSession();
+  const accessToken = session?.data?.tokens?.access_token;
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Debounce the search query value
@@ -153,14 +154,7 @@ export const SearchBar: FC<SearchBarProps> = ({
 
       setIsLoading(true);
       try {
-        const response = await searchOrgContent(
-          orgslug,
-          debouncedSearch,
-          1,
-          3,
-          null,
-          session?.data?.tokens?.access_token,
-        );
+        const response = await searchOrgContent(orgslug, debouncedSearch, 1, 3, null, accessToken);
 
         // Type assertion and safe access
         const typedResponse = response.data;
@@ -183,7 +177,7 @@ export const SearchBar: FC<SearchBarProps> = ({
     };
 
     fetchResults();
-  }, [debouncedSearch, orgslug, session?.data?.tokens?.access_token]);
+  }, [debouncedSearch, orgslug, accessToken]);
 
   const MemoizedEmptyState = useMemo(() => {
     if (!searchQuery.trim()) {

@@ -15,12 +15,13 @@ interface CourseGridClientProps {
 export default function CourseGridClient({ courses, orgslug }: CourseGridClientProps) {
   const session = useLHSession() as any;
   const org = useOrg() as any;
-  const access_token = session?.data?.tokens?.access_token;
+  const accessToken = session?.data?.tokens?.access_token;
+  const orgId = org?.id;
 
   // Fetch trail data to show progress on course thumbnails
   const { data: trailData } = useSWR(
-    org?.id && access_token ? `${getAPIUrl()}trail/org/${org.id}/trail` : null,
-    (url) => swrFetcher(url, access_token),
+    orgId && accessToken ? `${getAPIUrl()}trail/org/${orgId}/trail` : null,
+    (url) => swrFetcher(url, accessToken),
   );
 
   return (
