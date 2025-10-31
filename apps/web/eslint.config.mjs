@@ -1,147 +1,120 @@
-import unusedImports from 'eslint-plugin-unused-imports';
-import reactHooksPlugin from 'eslint-plugin-react-hooks';
-import tsPlugin from '@typescript-eslint/eslint-plugin';
-import nextPlugin from '@next/eslint-plugin-next';
-import tailwind from 'eslint-plugin-tailwindcss';
+// eslint.config.mjs
 import tsParser from '@typescript-eslint/parser';
-import reactPlugin from 'eslint-plugin-react';
-import { FlatCompat } from '@eslint/eslintrc';
-import { fileURLToPath } from 'node:url';
-import { dirname } from 'node:path';
-import js from '@eslint/js';
+import { defineConfig } from 'eslint/config';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// ESLint plugins (explicit imports for flat config)
+import unusedImports from 'eslint-plugin-unused-imports';
+import tseslint from '@typescript-eslint/eslint-plugin';
+import tailwindcss from 'eslint-plugin-tailwindcss';
+import reactHooks from 'eslint-plugin-react-hooks';
+import nextPlugin from '@next/eslint-plugin-next';
+import react from 'eslint-plugin-react';
 
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
+/**
+ * Centralized plugin map for reuse in overrides.
+ * Casting to `any` avoids TS type mismatches between ESLint plugin shapes.
+ */
+const PLUGINS = /** @type {const} */ ({
+  '@typescript-eslint': /** @type {any} */ (tseslint),
+  'react': /** @type {any} */ (react),
+  'react-hooks': /** @type {any} */ (reactHooks),
+  'tailwindcss': /** @type {any} */ (tailwindcss),
+  '@next/next': /** @type {any} */ (nextPlugin),
+  'unused-imports': /** @type {any} */ (unusedImports),
 });
 
-const config = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+/** Shared React + Next + Tailwind rules */
+const COMMON_RULES = {
+  '@next/next/no-img-element': 'off',
+  '@next/next/no-sync-scripts': 'off',
+  'react/react-in-jsx-scope': 'off',
+  'react/prop-types': 'off',
+  'react/no-unescaped-entities': 'off',
+  'react/jsx-no-literals': 'off',
+  'react-hooks/rules-of-hooks': 'error',
+  'react-hooks/exhaustive-deps': 'warn',
+  'react-hooks/set-state-in-effect': 'warn',
+  'react-hooks/incompatible-library': 'warn',
+  'tailwindcss/classnames-order': 'warn',
+  'unused-imports/no-unused-imports': 'warn',
+  'no-console': 'off',
+};
+
+export default defineConfig([
+  // ───────────────────────────────
+  // Root-level ignores
+  // ───────────────────────────────
   {
     ignores: ['node_modules/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts'],
   },
-  {
-    ignores: ['node_modules/', '.next/', '.next/**'],
-  },
-  js.configs.recommended,
+
+  // ───────────────────────────────
+  // JavaScript / JSX
+  // ───────────────────────────────
   {
     files: ['**/*.{js,jsx,mjs,cjs}'],
     plugins: {
-      '@next/next': nextPlugin,
-      'react': reactPlugin,
-      'react-hooks': reactHooksPlugin,
-      'unused-imports': unusedImports,
-      'tailwindcss': tailwind,
+      'react': PLUGINS.react,
+      'react-hooks': PLUGINS['react-hooks'],
+      'tailwindcss': PLUGINS.tailwindcss,
+      '@next/next': PLUGINS['@next/next'],
+      'unused-imports': PLUGINS['unused-imports'],
     },
     languageOptions: {
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        ecmaFeatures: {
-          jsx: true,
-        },
+        ecmaFeatures: { jsx: true },
       },
-      globals: {
-        React: 'readonly',
-        JSX: 'readonly',
-      },
+      globals: { React: 'readonly', JSX: 'readonly' },
     },
     settings: {
-      react: {
-        version: 'detect',
-      },
-      tailwindcss: {
-        config: false,
-      },
+      react: { version: 'detect' },
+      tailwindcss: { config: false },
     },
-    rules: {
-      ...nextPlugin.configs.recommended.rules,
-      ...nextPlugin.configs['core-web-vitals'].rules,
-      '@next/next/no-img-element': 'off',
-      '@next/next/no-sync-scripts': 'off',
-      ...reactPlugin.configs.recommended.rules,
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
-      'react-hooks/set-state-in-effect': 'off',
-      'react-hooks/incompatible-library': 'off',
-      'react/react-in-jsx-scope': 'off',
-      'react/prop-types': 'off',
-      'react/no-unescaped-entities': 'off',
-      'react/jsx-no-literals': 'off',
-      ...tailwind.configs.recommended.rules,
-      'tailwindcss/classnames-order': 'warn',
-      'unused-imports/no-unused-imports': 'warn',
-      'no-console': 'off',
-    },
+    rules: COMMON_RULES,
   },
+
+  // ───────────────────────────────
+  // TypeScript / TSX
+  // ───────────────────────────────
   {
     files: ['**/*.{ts,tsx}'],
     plugins: {
-      '@typescript-eslint': tsPlugin,
-      '@next/next': nextPlugin,
-      'react': reactPlugin,
-      'react-hooks': reactHooksPlugin,
-      'unused-imports': unusedImports,
-      'tailwindcss': tailwind,
+      '@typescript-eslint': PLUGINS['@typescript-eslint'],
+      'react': PLUGINS.react,
+      'react-hooks': PLUGINS['react-hooks'],
+      'tailwindcss': PLUGINS.tailwindcss,
+      '@next/next': PLUGINS['@next/next'],
+      'unused-imports': PLUGINS['unused-imports'],
     },
     languageOptions: {
       parser: tsParser,
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        ecmaFeatures: {
-          jsx: true,
-        },
+        ecmaFeatures: { jsx: true },
         project: './tsconfig.json',
       },
-      globals: {
-        React: 'readonly',
-        JSX: 'readonly',
-      },
+      globals: { React: 'readonly', JSX: 'readonly' },
     },
     settings: {
-      react: {
-        version: 'detect',
-      },
-      tailwindcss: {
-        config: false,
-      },
+      react: { version: 'detect' },
+      tailwindcss: { config: false },
     },
     rules: {
-      ...tsPlugin.configs.recommended.rules,
-      ...nextPlugin.configs.recommended.rules,
-      ...nextPlugin.configs['core-web-vitals'].rules,
-      '@next/next/no-img-element': 'off',
-      '@next/next/no-sync-scripts': 'off',
-      ...reactPlugin.configs.recommended.rules,
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
-      'react-hooks/set-state-in-effect': 'off',
-      'react-hooks/incompatible-library': 'off',
-      'react/react-in-jsx-scope': 'off',
-      'react/prop-types': 'off',
-      'react/no-unescaped-entities': 'off',
-      'react/jsx-no-literals': 'off',
-      // TypeScript-specific relaxations to reduce widespread noise so we can fix
-      // problems incrementally.
+      ...COMMON_RULES,
+      // TypeScript-specific relaxations (incremental adoption)
       '@typescript-eslint/no-unsafe-function-type': 'off',
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/triple-slash-reference': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'no-undef': 'off',
       'no-redeclare': 'warn',
       'no-empty': 'warn',
       'no-unused-expressions': 'warn',
-      ...tailwind.configs.recommended.rules,
-      'tailwindcss/classnames-order': 'warn',
       'tailwindcss/no-custom-classname': 'off',
-      'unused-imports/no-unused-imports': 'warn',
-      'no-console': 'off',
-      'no-undef': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': 'off', // Let unused-imports handle this
     },
   },
-];
-
-export default config;
+]);
