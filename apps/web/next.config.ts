@@ -16,12 +16,12 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     ppr: false,
-    reactCompiler: true,
     optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
   },
   compiler: {
     styledComponents: true,
   },
+  reactCompiler: true,
   reactStrictMode: true,
   devIndicators: false,
   output: 'standalone',

@@ -72,7 +72,8 @@ export default defineConfig([
       react: { version: 'detect' },
       tailwindcss: { config: false },
     },
-    rules: COMMON_RULES,
+  // Cast to any to avoid TS type mismatch with RuleConfig in flat config
+  rules: /** @type {any} */ (COMMON_RULES),
   },
 
   // ───────────────────────────────
@@ -102,7 +103,8 @@ export default defineConfig([
       react: { version: 'detect' },
       tailwindcss: { config: false },
     },
-    rules: {
+    // Cast combined rules to any to satisfy TypeScript for RuleConfig
+    rules: /** @type {any} */ ({
       ...COMMON_RULES,
       // TypeScript-specific relaxations (incremental adoption)
       '@typescript-eslint/no-unsafe-function-type': 'off',
@@ -115,6 +117,6 @@ export default defineConfig([
       'no-empty': 'warn',
       'no-unused-expressions': 'warn',
       'tailwindcss/no-custom-classname': 'off',
-    },
+    }),
   },
 ]);

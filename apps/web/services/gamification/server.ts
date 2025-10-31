@@ -299,7 +299,8 @@ export async function getServerOrganizationLeaderboard(
 export async function revalidateGamificationTags(orgId: number) {
   if (!orgId) return;
   for (const tag of gamificationTags(orgId)) {
-    revalidateTag(tag);
+    // Match Next.js typings: second argument is profile string or CacheLifeConfig
+    revalidateTag(tag, { expire: 0 });
   }
 }
 

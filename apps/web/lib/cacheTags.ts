@@ -14,5 +14,6 @@ export function gamificationTags(orgId: number): string[] {
 export async function revalidateGamification(orgId: number) {
   // Dynamically import to keep this file usable on both server and client
   const { revalidateTag } = await import('next/cache');
-  for (const tag of gamificationTags(orgId)) revalidateTag(tag);
+  // Pass CacheLifeConfig as second arg to satisfy Next.js typings (profile | CacheLifeConfig)
+  for (const tag of gamificationTags(orgId)) revalidateTag(tag, { expire: 0 });
 }
