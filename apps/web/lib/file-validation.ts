@@ -94,9 +94,7 @@ export function getFileTypeDescription(allowedTypes: FileType[]): string {
   const onlyMaxSize = maxSizes[0];
   // Guard against undefined — TypeScript can't infer that maxSizes[0] exists even when length === 1
   const maxSizeStr =
-    maxSizes.length === 1 && typeof onlyMaxSize !== 'undefined'
-      ? `${onlyMaxSize / 1024 / 1024}MB`
-      : 'varies';
+    maxSizes.length === 1 && typeof onlyMaxSize !== 'undefined' ? `${onlyMaxSize / 1024 / 1024}MB` : 'varies';
 
   return `${extensions} (max ${maxSizeStr})`;
 }

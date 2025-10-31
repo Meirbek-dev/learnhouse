@@ -232,7 +232,8 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
         return result;
       } catch (error) {
         // Normalize unknown thrown values into our GamificationError shape
-        const message = (error && typeof (error as any).message === 'string' && (error as any).message) || t('error.awardXPFailed');
+        const message =
+          (error && typeof (error as any).message === 'string' && (error as any).message) || t('error.awardXPFailed');
         const statusCode = (error && typeof (error as any).statusCode === 'number' && (error as any).statusCode) || 500;
         const gamificationError: GamificationError = {
           type: 'SERVER_ERROR',
@@ -274,7 +275,9 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
           );
         }
       } catch (error) {
-        const message = (error && typeof (error as any).message === 'string' && (error as any).message) || t('error.updateStreakFailed');
+        const message =
+          (error && typeof (error as any).message === 'string' && (error as any).message) ||
+          t('error.updateStreakFailed');
         const statusCode = (error && typeof (error as any).statusCode === 'number' && (error as any).statusCode) || 500;
         const gamificationError: GamificationError = {
           type: 'SERVER_ERROR',
@@ -306,7 +309,9 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
             : null,
         );
       } catch (error) {
-        const message = (error && typeof (error as any).message === 'string' && (error as any).message) || t('error.updatePreferencesFailed');
+        const message =
+          (error && typeof (error as any).message === 'string' && (error as any).message) ||
+          t('error.updatePreferencesFailed');
         const statusCode = (error && typeof (error as any).statusCode === 'number' && (error as any).statusCode) || 500;
         const gamificationError: GamificationError = {
           type: 'SERVER_ERROR',
