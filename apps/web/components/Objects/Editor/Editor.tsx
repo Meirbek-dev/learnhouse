@@ -279,14 +279,12 @@ const Editor = (props: EditorProps) => {
                       className="flex items-center space-x-1 rounded-md px-3 py-2 text-sm text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer"
                       title={t('aiEditor')}
                     >
-                      <i>
-                        <Image
-                          className=""
-                          width={24}
-                          src={platformLogoLight}
-                          alt="AI Editor Icon"
-                        />
-                      </i>
+                      <Image
+                        className=""
+                        width={16}
+                        src={platformLogoLight}
+                        alt="AI Editor Icon"
+                      />
                       <i className="text-xs font-bold not-italic">{t('aiEditor')}</i>
                     </div>
                   ) : null}

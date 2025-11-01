@@ -583,16 +583,16 @@
       "deleting": "Удаление курса...",
       "editContent": "Редактировать содержание",
       "noThumbnailAlt": "Миниатюра курса по умолчанию",
+      "openCourse": "Открыть {course}",
       "progress": "Прогресс",
+      "progressBarAria": "Прогресс по курсу {course}",
       "settings": "Настройки",
       "startLearning": "Начать обучение",
       "startLearningButton": "Начать обучение",
       "toastDeleteError": "Не удалось удалить курс. Пожалуйста, попробуйте снова.",
       "toastDeleteSuccess": "Курс успешно удалён",
       "updated": "Обновлён",
-      "updatedDate": "Обновлено {updateDate, date, medium}",
-      "openCourse": "Открыть {course}",
-      "progressBarAria": "Прогресс по курсу {course}"
+      "updatedDate": "Обновлено {updateDate, date, medium}"
     },
     "CreateCourseModal": {
       "ariaLabel": "Выберите «Конечное изображение миниатюр» для загрузки",
@@ -2532,48 +2532,6 @@
       "usersSelectedMessage": "{count, plural, one {# пользователь выбран} few {# пользователя выбрано} many {# пользователей выбрано} other {# пользователей выбрано}}"
     },
     "Editor": {
-      "Scenarios": {
-        "interactiveScenario": "Интерактивный сценарий",
-        "scenarioComplete": "Сценарий завершён!",
-        "scenarioCompleteDescription": "Вы успешно прошли этот интерактивный сценарий.",
-        "editScenarios": "Редактировать сценарии",
-        "resetScenario": "Сбросить сценарий",
-        "scenarioTitlePlaceholder": "Название сценария",
-        "clickEditToConfigure": "Нажмите «Редактировать сценарии», чтобы настроить интерактивную историю с ветвлением",
-        "startOver": "Начать заново",
-        "scenarioNotFound": "Сценарий не найден",
-        "scenarioNotFoundDescription": "Проверьте настройки сценария и попробуйте снова.",
-        "scenarioIllustrationAlt": "Иллюстрация сценария",
-        "maxScenariosAllowed": "Допускается максимум 40 сценариев",
-        "newScenarioText": "Текст нового сценария...",
-        "newOptionText": "Новый вариант",
-        "interactivePreview": "Интерактивный просмотр",
-        "reset": "Сброс",
-        "backToEdit": "Вернуться к редактированию",
-        "scenarioTitleLabel": "Название сценария",
-        "enterScenarioTitlePlaceholder": "Введите название сценария...",
-        "preview": "Предпросмотр",
-        "add": "Добавить",
-        "scenarioOptionLabel": "Сценарий {id}",
-        "startingPoint": "Начальная точка",
-        "setAsStartingScenario": "Назначить начальным сценарием",
-        "start": "Начать",
-        "setStart": "Установить начало",
-        "scenarioDescriptionLabel": "Описание сценария",
-        "describeScenarioPlaceholder": "Опишите, что происходит в этом сценарии...",
-        "imageUrlLabel": "URL изображения",
-        "imageUrlPlaceholder": "https://example.com/image.jpg",
-        "responseOptionsLabel": "Варианты ответа ({count}/4)",
-        "enterResponseOptionPlaceholder": "Введите вариант ответа...",
-        "endScenarioOption": "Завершить сценарий",
-        "noScenariosYet": "Сценарии пока отсутствуют",
-        "createFirstScenarioDescription": "Создайте свой первый сценарий, чтобы начать.",
-        "createFirstScenario": "Создать первый сценарий",
-        "scenarioPreviewTitle": "Предпросмотр сценария",
-        "testYourInteractiveScenario": "Протестируйте интерактивный сценарий",
-        "cancel": "Отмена",
-        "saveChanges": "Сохранить изменения"
-      },
       "BadgesExtension": {
         "deepDive": "Глубокое погружение",
         "discussionTopic": "Тема для обсуждения",
@@ -2739,7 +2697,93 @@
         "submit": "Отправить",
         "title": "Тест"
       },
+      "Scenarios": {
+        "add": "Добавить",
+        "addImage": "Добавить изображение",
+        "addResponseOption": "Добавить",
+        "atLeastOneScenarioRequired": "Требуется как минимум один сценарий",
+        "backToEdit": "Вернуться к редактированию",
+        "cancel": "Отмена",
+        "clickEditToConfigure": "Нажмите «Редактировать сценарии», чтобы настроить интерактивную историю с ветвлением",
+        "createFirstScenario": "Создать первый сценарий",
+        "createFirstScenarioDescription": "Создайте свой первый сценарий, чтобы начать.",
+        "deleteOption": "Удалить вариант",
+        "deleteScenario": "Удалить сценарий",
+        "describeScenarioPlaceholder": "Опишите, что происходит в этом сценарии...",
+        "editImage": "Редактировать изображение",
+        "editScenarios": "Редактировать сценарии",
+        "endScenarioOption": "Завершить сценарий",
+        "enterResponseOptionPlaceholder": "Введите вариант ответа...",
+        "enterScenarioTitlePlaceholder": "Введите название сценария...",
+        "imageUrlLabel": "URL изображения",
+        "imageUrlPlaceholder": "https://example.com/image.jpg",
+        "interactivePreview": "Интерактивный просмотр",
+        "interactiveScenario": "Интерактивный сценарий",
+        "maxOptionsPerScenario": "Максимум 4 варианта ответа на сценарий",
+        "maxScenariosAllowed": "Допускается максимум 40 сценариев",
+        "modal": {
+          "editDescription": "Создавайте и управляйте интерактивными сценариями",
+          "editTitle": "Редактировать сценарии",
+          "previewDescription": "Тестируйте ваш интерактивный сценарий",
+          "previewTitle": "Просмотр сценария"
+        },
+        "newOptionText": "Новый вариант",
+        "newScenarioText": "Текст нового сценария...",
+        "noScenariosYet": "Сценарии пока отсутствуют",
+        "preview": "Предпросмотр",
+        "reset": "Сброс",
+        "resetScenario": "Сбросить сценарий",
+        "responseOptionsLabel": "Варианты ответа ({count}/4)",
+        "saveChanges": "Сохранить изменения",
+        "scenarioComplete": "Сценарий завершён!",
+        "scenarioCompleteDescription": "Вы успешно прошли этот интерактивный сценарий.",
+        "scenarioDescriptionLabel": "Описание сценария",
+        "scenarioIllustrationAlt": "Иллюстрация сценария",
+        "scenarioNotFound": "Сценарий не найден",
+        "scenarioNotFoundDescription": "Проверьте настройки сценария и попробуйте снова.",
+        "scenarioOptionLabel": "Сценарий {id}",
+        "scenarioPreviewTitle": "Предпросмотр сценария",
+        "scenarioTitleLabel": "Название сценария",
+        "scenarioTitlePlaceholder": "Название сценария",
+        "setAsStartingScenario": "Назначить начальным сценарием",
+        "setStart": "Сделать точкой старта",
+        "start": "Точка старта",
+        "startOver": "Начать заново",
+        "startingPoint": "Начальная точка",
+        "testYourInteractiveScenario": "Протестируйте интерактивный сценарий",
+        "scenariosConfigured": "{count} из {max} сценариев настроено"
+      },
       "Toolbar": {
+        "interactiveScenarios": "Интерактивные сценарии",
+        "aria": {
+          "insertInteractiveScenarios": "Вставить интерактивные сценарии"
+        },
+        "defaultScenario": {
+          "title": "Интерактивный сценарий",
+          "scenarios": {
+            "1": {
+              "text": "Добро пожаловать в этот интерактивный сценарий. Что вы хотите сделать?",
+              "options": {
+                "opt1": "Продолжить изучение",
+                "opt2": "Узнать больше о теме"
+              }
+            },
+            "2": {
+              "text": "Отличный выбор! Теперь вы исследуете дальше. Какой ваш следующий шаг?",
+              "options": {
+                "opt3": "Вернуться к началу",
+                "opt4": "Завершить сценарий"
+              }
+            },
+            "3": {
+              "text": "Вот дополнительная информация по теме. Это поможет вам лучше понять.",
+              "options": {
+                "opt5": "Вернуться к началу",
+                "opt6": "Завершить сценарий"
+              }
+            }
+          }
+        },
         "addColumnRight": "Добавить столбец справа",
         "addRowBelow": "Добавить строку ниже",
         "badge": "Значок",

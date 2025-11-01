@@ -11,40 +11,20 @@ export default Node.create({
   addAttributes() {
     return {
       title: {
-        default: 'Interactive Scenario',
+        // Keep the node defaults neutral so translations are provided
+        // from the React NodeView (ScenariosExtension) which can use
+        // the i18n/translations system.
+        default: '',
       },
       scenarios: {
-        default: [
-          {
-            id: '1',
-            text: 'Welcome to this interactive scenario. What would you like to do?',
-            imageUrl: '',
-            options: [
-              { id: 'opt1', text: 'Continue exploring', nextScenarioId: '2' },
-              { id: 'opt2', text: 'Learn more about the topic', nextScenarioId: '3' },
-            ],
-          },
-          {
-            id: '2',
-            text: "Great choice! You are now exploring further. What's your next step?",
-            imageUrl: '',
-            options: [
-              { id: 'opt3', text: 'Go back to start', nextScenarioId: '1' },
-              { id: 'opt4', text: 'Finish scenario', nextScenarioId: null },
-            ],
-          },
-          {
-            id: '3',
-            text: "Here's more information about the topic. This helps you understand better.",
-            imageUrl: '',
-            options: [
-              { id: 'opt5', text: 'Go back to start', nextScenarioId: '1' },
-              { id: 'opt6', text: 'Finish scenario', nextScenarioId: null },
-            ],
-          },
-        ],
+        // No hard-coded scenario content here. The editor NodeView
+        // (ScenariosExtension) will populate scenarios and render localized
+        // default text via the translations system.
+        default: [],
       },
       currentScenarioId: {
+        // Default to the first scenario id when scenarios are provided
+        // from the node view. Use '1' as a neutral placeholder.
         default: '1',
       },
     };

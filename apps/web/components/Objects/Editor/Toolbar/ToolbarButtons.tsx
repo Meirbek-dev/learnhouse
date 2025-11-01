@@ -518,7 +518,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           <RotateCw size={15} />
         </ToolBtn>
       </ToolTip>
-      <ToolTip content="Interactive Scenarios">
+      <ToolTip content={t('interactiveScenarios')}>
         <ToolBtn
           onClick={() =>
             editor
@@ -527,33 +527,33 @@ export const ToolbarButtons = ({ editor, props }: any) => {
               .insertContent({
                 type: 'scenarios',
                 attrs: {
-                  title: 'Interactive Scenario',
+                  title: t('defaultScenario.title'),
                   scenarios: [
                     {
                       id: '1',
-                      text: 'Welcome to this interactive scenario. What would you like to do?',
+                      text: t('defaultScenario.scenarios.1.text'),
                       imageUrl: '',
                       options: [
-                        { id: 'opt1', text: 'Continue exploring', nextScenarioId: '2' },
-                        { id: 'opt2', text: 'Learn more about the topic', nextScenarioId: '3' },
+                        { id: 'opt1', text: t('defaultScenario.scenarios.1.options.opt1'), nextScenarioId: '2' },
+                        { id: 'opt2', text: t('defaultScenario.scenarios.1.options.opt2'), nextScenarioId: '3' },
                       ],
                     },
                     {
                       id: '2',
-                      text: "Great choice! You are now exploring further. What's your next step?",
+                      text: t('defaultScenario.scenarios.2.text'),
                       imageUrl: '',
                       options: [
-                        { id: 'opt3', text: 'Go back to start', nextScenarioId: '1' },
-                        { id: 'opt4', text: 'Finish scenario', nextScenarioId: null },
+                        { id: 'opt3', text: t('defaultScenario.scenarios.2.options.opt3'), nextScenarioId: '1' },
+                        { id: 'opt4', text: t('defaultScenario.scenarios.2.options.opt4'), nextScenarioId: null },
                       ],
                     },
                     {
                       id: '3',
-                      text: "Here's more information about the topic. This helps you understand better.",
+                      text: t('defaultScenario.scenarios.3.text'),
                       imageUrl: '',
                       options: [
-                        { id: 'opt5', text: 'Go back to start', nextScenarioId: '1' },
-                        { id: 'opt6', text: 'Finish scenario', nextScenarioId: null },
+                        { id: 'opt5', text: t('defaultScenario.scenarios.3.options.opt5'), nextScenarioId: '1' },
+                        { id: 'opt6', text: t('defaultScenario.scenarios.3.options.opt6'), nextScenarioId: null },
                       ],
                     },
                   ],
@@ -562,7 +562,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
               })
               .run()
           }
-          aria-label="Insert interactive scenarios"
+          aria-label={t('aria.insertInteractiveScenarios')}
         >
           <GitBranch size={15} />
         </ToolBtn>

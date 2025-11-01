@@ -50,13 +50,13 @@ const AIActivityAsk = (props: AIActivityAskProps) => {
                 'linear-gradient(135deg, oklch(0.25 0.15 270) 0%, oklch(0.40 0.18 260) 50%, oklch(0.32 0.16 255) 100%)',
             }}
             className={clsx(
-              'flex items-center space-x-1 rounded-full p-2.5 px-5 text-sm text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer',
+              'flex items-center space-x-1.5 rounded-full p-2.5 px-5 text-sm text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer',
               { 'ring-2 ring-white/20': aiChatBotState.isModalOpen },
             )}
           >
             <Image
               className="rounded-md outline-neutral-200/20"
-              width={24}
+              width={18}
               src={platformLogoLight}
               alt={t('askAI')}
             />

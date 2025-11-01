@@ -583,16 +583,16 @@
       "deleting": "Deleting course...",
       "editContent": "Edit content",
       "noThumbnailAlt": "Default course thumbnail",
+      "openCourse": "Open {course}",
       "progress": "Progress",
+      "progressBarAria": "Progress for {course}",
       "settings": "Settings",
       "startLearning": "Start Learning",
       "startLearningButton": "Start Learning",
       "toastDeleteError": "Failed to delete course. Please try again.",
       "toastDeleteSuccess": "Course deleted successfully",
       "updated": "Updated",
-      "updatedDate": "Updated {updateDate, date, medium}",
-      "openCourse": "Open {course}",
-      "progressBarAria": "Progress for {course}"
+      "updatedDate": "Updated {updateDate, date, medium}"
     },
     "CreateCourseModal": {
       "ariaLabel": "Choose course thumbnail image to upload",
@@ -2532,48 +2532,6 @@
       "usersSelectedMessage": "{count, plural, one {# user selected} other {# users selected}}"
     },
     "Editor": {
-      "Scenarios": {
-        "interactiveScenario": "Interactive Scenario",
-        "scenarioComplete": "Scenario Complete!",
-        "scenarioCompleteDescription": "You've successfully navigated through this interactive scenario.",
-        "editScenarios": "Edit Scenarios",
-        "resetScenario": "Reset scenario",
-        "scenarioTitlePlaceholder": "Scenario Title",
-        "clickEditToConfigure": "Click \"Edit Scenarios\" to configure your interactive branching story",
-        "startOver": "Start Over",
-        "scenarioNotFound": "Scenario Not Found",
-        "scenarioNotFoundDescription": "Please check your scenario configuration and try again.",
-        "scenarioIllustrationAlt": "Scenario illustration",
-        "maxScenariosAllowed": "Maximum of 40 scenarios allowed",
-        "newScenarioText": "New scenario text...",
-        "newOptionText": "New option",
-        "interactivePreview": "Interactive Preview",
-        "reset": "Reset",
-        "backToEdit": "Back to Edit",
-        "scenarioTitleLabel": "Scenario Title",
-        "enterScenarioTitlePlaceholder": "Enter your scenario title...",
-        "preview": "Preview",
-        "add": "Add",
-        "scenarioOptionLabel": "Scenario {id}",
-        "startingPoint": "Starting Point",
-        "setAsStartingScenario": "Set as starting scenario",
-        "start": "Start",
-        "setStart": "Set Start",
-        "scenarioDescriptionLabel": "Scenario Description",
-        "describeScenarioPlaceholder": "Describe what happens in this scenario...",
-        "imageUrlLabel": "Image URL",
-        "imageUrlPlaceholder": "https://example.com/image.jpg",
-        "responseOptionsLabel": "Response Options ({count}/4)",
-        "enterResponseOptionPlaceholder": "Enter response option...",
-        "endScenarioOption": "End scenario",
-        "noScenariosYet": "No scenarios yet",
-        "createFirstScenarioDescription": "Create your first scenario to get started.",
-        "createFirstScenario": "Create First Scenario",
-        "scenarioPreviewTitle": "Scenario Preview",
-        "testYourInteractiveScenario": "Test your interactive scenario",
-        "cancel": "Cancel",
-        "saveChanges": "Save Changes"
-      },
       "BadgesExtension": {
         "deepDive": "Deep Dive",
         "discussionTopic": "Discussion Topic",
@@ -2739,9 +2697,68 @@
         "submit": "Submit",
         "title": "Quiz"
       },
+      "Scenarios": {
+        "add": "Add",
+        "addImage": "Add image",
+        "addResponseOption": "Add",
+        "atLeastOneScenarioRequired": "At least one scenario is required",
+        "backToEdit": "Back to Edit",
+        "cancel": "Cancel",
+        "clickEditToConfigure": "Click \"Edit Scenarios\" to configure your interactive branching story",
+        "createFirstScenario": "Create First Scenario",
+        "createFirstScenarioDescription": "Create your first scenario to get started.",
+        "deleteOption": "Delete option",
+        "deleteScenario": "Delete scenario",
+        "describeScenarioPlaceholder": "Describe what happens in this scenario...",
+        "editImage": "Edit image",
+        "editScenarios": "Edit Scenarios",
+        "endScenarioOption": "End scenario",
+        "enterResponseOptionPlaceholder": "Enter response option...",
+        "enterScenarioTitlePlaceholder": "Enter your scenario title...",
+        "imageUrlLabel": "Image URL",
+        "imageUrlPlaceholder": "https://example.com/image.jpg",
+        "interactivePreview": "Interactive Preview",
+        "interactiveScenario": "Interactive Scenario",
+        "maxOptionsPerScenario": "Maximum of 4 options per scenario",
+        "maxScenariosAllowed": "Maximum of 40 scenarios allowed",
+        "modal": {
+          "editDescription": "Create and manage your interactive scenarios",
+          "editTitle": "Edit Scenarios",
+          "previewDescription": "Test your interactive scenario",
+          "previewTitle": "Scenario Preview"
+        },
+        "newOptionText": "New option",
+        "newScenarioText": "New scenario text...",
+        "noScenariosYet": "No scenarios yet",
+        "preview": "Preview",
+        "reset": "Reset",
+        "resetScenario": "Reset scenario",
+        "responseOptionsLabel": "Response Options ({count}/4)",
+        "saveChanges": "Save Changes",
+        "scenarioComplete": "Scenario Complete!",
+        "scenarioCompleteDescription": "You've successfully navigated through this interactive scenario.",
+        "scenarioDescriptionLabel": "Scenario Description",
+        "scenarioIllustrationAlt": "Scenario illustration",
+        "scenarioNotFound": "Scenario Not Found",
+        "scenarioNotFoundDescription": "Please check your scenario configuration and try again.",
+        "scenarioOptionLabel": "Scenario {id}",
+        "scenarioPreviewTitle": "Scenario Preview",
+        "scenarioTitleLabel": "Scenario Title",
+        "scenarioTitlePlaceholder": "Scenario Title",
+        "setAsStartingScenario": "Set as starting scenario",
+        "setStart": "Set Start",
+        "start": "Start",
+        "startOver": "Start Over",
+        "startingPoint": "Starting Point",
+        "testYourInteractiveScenario": "Test your interactive scenario",
+        "scenariosConfigured": "{count} of {max} scenarios configured"
+      },
       "Toolbar": {
         "addColumnRight": "Add column right",
         "addRowBelow": "Add row below",
+        "aria": {
+          "insertInteractiveScenarios": "Insert interactive scenarios"
+        },
         "badge": "Badge",
         "badgePlaceholder": "This is a Badge",
         "badges": "Badges",
@@ -2774,6 +2791,33 @@
         "infoCallout": "Info Callout",
         "insertTable": "Insert new table (3×3)",
         "interactiveQuiz": "Interactive Quiz",
+        "interactiveScenarios": "Interactive Scenarios",
+        "defaultScenario": {
+          "title": "Interactive Scenario",
+          "scenarios": {
+            "1": {
+              "text": "Welcome to this interactive scenario. What would you like to do?",
+              "options": {
+                "opt1": "Continue exploring",
+                "opt2": "Learn more about the topic"
+              }
+            },
+            "2": {
+              "text": "Great choice! You are now exploring further. What's your next step?",
+              "options": {
+                "opt3": "Go back to start",
+                "opt4": "Finish scenario"
+              }
+            },
+            "3": {
+              "text": "Here's more information about the topic. This helps you understand better.",
+              "options": {
+                "opt5": "Go back to start",
+                "opt6": "Finish scenario"
+              }
+            }
+          }
+        },
         "italic": "Italic",
         "link": "Link",
         "listOptions": {

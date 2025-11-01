@@ -84,7 +84,7 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
                     <div className="pr-1">
                       <div className="flex w-full items-center space-x-2 font-bold text-white/80">
                         <Image
-                          width={28}
+                          width={18}
                           src={platformLogoLight}
                           alt={t('aiIconAlt')}
                         />
@@ -491,7 +491,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
       >
         <div className="flex justify-center">
           <Image
-            width={32}
+            width={26}
             src={platformLogoLight}
             alt="Ashyq Bilim logo"
           />

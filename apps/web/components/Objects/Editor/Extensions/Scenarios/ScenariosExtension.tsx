@@ -19,9 +19,19 @@ interface Scenario {
 }
 
 const ScenariosExtension: React.FC = (props: any) => {
-  const [title, setTitle] = useState(props.node.attrs.title);
-  const [scenarios, setScenarios] = useState<Scenario[]>(props.node.attrs.scenarios);
-  const [currentScenarioId, setCurrentScenarioId] = useState(props.node.attrs.currentScenarioId);
+  // use translations for any UI text or fallbacks
+  const t = useTranslations('DashPage.Editor.Scenarios');
+
+  // Initialize node-local state with localized fallbacks when node attrs are empty
+  const initialNodeTitle: string = props.node?.attrs?.title || '';
+  const initialNodeScenarios: Scenario[] = props.node?.attrs?.scenarios || [];
+  const initialNodeCurrentId: string = props.node?.attrs?.currentScenarioId || (initialNodeScenarios[0]?.id ?? '1');
+
+  const [title, setTitle] = useState<string>(initialNodeTitle || t('interactiveScenario'));
+  const [scenarios, setScenarios] = useState<Scenario[]>(
+    initialNodeScenarios.length > 0 ? initialNodeScenarios : [],
+  );
+  const [currentScenarioId, setCurrentScenarioId] = useState<string>(initialNodeCurrentId);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scenarioComplete, setScenarioComplete] = useState(false);
   const editorState = useEditorProvider() as any;
@@ -61,7 +71,7 @@ const ScenariosExtension: React.FC = (props: any) => {
     return String.fromCharCode('A'.charCodeAt(0) + index);
   };
 
-  const t = useTranslations('DashPage.Editor.Scenarios');
+  // NOTE: `t` is already declared above to keep hooks in order
 
   return (
     <NodeViewWrapper className="block-scenarios">
@@ -132,7 +142,7 @@ const ScenariosExtension: React.FC = (props: any) => {
               </div>
 
               <div className="mt-3 rounded-lg border-2 border-dotted border-gray-200 bg-white p-3">
-                <p className="text-center text-sm text-slate-600">{scenarios.length}/40 scenarios configured</p>
+                <p className="text-center text-sm text-slate-600">{t('scenariosConfigured', { count: scenarios.length, max: 40 })}</p>
                 <p className="mt-1 text-center text-xs text-slate-500">{t('clickEditToConfigure')}</p>
               </div>
             </div>

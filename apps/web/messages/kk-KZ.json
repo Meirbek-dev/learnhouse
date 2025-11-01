@@ -583,16 +583,16 @@
       "deleting": "Жойылуда...",
       "editContent": "Мазмұнды өңдеу",
       "noThumbnailAlt": "Әдепкі курстық нобай",
+      "openCourse": "Ашу {course}",
       "progress": "Прогресс",
+      "progressBarAria": "Курстың прогресі: {course}",
       "settings": "Параметрлер",
       "startLearning": "Оқуды бастау",
       "startLearningButton": "Оқуды бастау",
       "toastDeleteError": "Курсты жою мүмкін болмады",
       "toastDeleteSuccess": "Курс сәтті жойылды",
       "updated": "Жаңартылды",
-      "updatedDate": "Жаңартылған {updateDate, date, medium}",
-      "openCourse": "Ашу {course}",
-      "progressBarAria": "Курстың прогресі: {course}"
+      "updatedDate": "Жаңартылған {updateDate, date, medium}"
     },
     "CreateCourseModal": {
       "ariaLabel": "Жүктеу үшін курстың нобай кескінін таңдаңыз",
@@ -2532,48 +2532,6 @@
       "usersSelectedMessage": "{count, plural, one {# пайдаланушы таңдалды} other {# пайдаланушы таңдалды}}"
     },
     "Editor": {
-      "Scenarios": {
-        "interactiveScenario": "Интерактивті сценарий",
-        "scenarioComplete": "Сценарий аяқталды!",
-        "scenarioCompleteDescription": "Сіз бұл интерактивті сценарийді сәтті аяқтадыңыз.",
-        "editScenarios": "Сценарийлерді өңдеу",
-        "resetScenario": "Сценарийді қайта орнату",
-        "scenarioTitlePlaceholder": "Сценарий атауы",
-        "clickEditToConfigure": "\"Сценарийлерді өңдеу\" батырмасын басып, интерактивті оқиғаны баптаңыз",
-        "startOver": "Қайта бастау",
-        "scenarioNotFound": "Сценарий табылмады",
-        "scenarioNotFoundDescription": "Сценарий конфигурациясын тексеріп, қайта көріңіз.",
-        "scenarioIllustrationAlt": "Сценарий иллюстрациясы",
-        "maxScenariosAllowed": "Ең көбі 40 сценарийге рұқсат етіледі",
-        "newScenarioText": "Жаңа сценарий мәтіні...",
-        "newOptionText": "Жаңа нұсқа",
-        "interactivePreview": "Интерактивті алдын ала қарау",
-        "reset": "Қалпына келтіру",
-        "backToEdit": "Өңдеуге оралу",
-        "scenarioTitleLabel": "Сценарий атауы",
-        "enterScenarioTitlePlaceholder": "Сценарийдің атауын енгізіңіз...",
-        "preview": "Алдын ала қарау",
-        "add": "Қосу",
-        "scenarioOptionLabel": "Сценарий {id}",
-        "startingPoint": "Бастапқы нүкте",
-        "setAsStartingScenario": "Бастапқы сценарий ретінде орнату",
-        "start": "Бастау",
-        "setStart": "Бастапқыны орнату",
-        "scenarioDescriptionLabel": "Сценарий сипаттамасы",
-        "describeScenarioPlaceholder": "Бұл сценарийде не болатынын сипаттаңыз...",
-        "imageUrlLabel": "Сурет сілтемесі",
-        "imageUrlPlaceholder": "https://example.com/image.jpg",
-        "responseOptionsLabel": "Жауап нұсқалары ({count}/4)",
-        "enterResponseOptionPlaceholder": "Жауап нұсқасын енгізіңіз...",
-        "endScenarioOption": "Сценарийді аяқтау",
-        "noScenariosYet": "Әзірге сценарийлер жоқ",
-        "createFirstScenarioDescription": "Бастау үшін алғашқы сценарийді жасаңыз.",
-        "createFirstScenario": "Бірінші сценарийді жасау",
-        "scenarioPreviewTitle": "Сценарийді алдын ала қарау",
-        "testYourInteractiveScenario": "Интерактивті сценарийді сынап көріңіз",
-        "cancel": "Болдырмау",
-        "saveChanges": "Өзгерістерді сақтау"
-      },
       "BadgesExtension": {
         "deepDive": "Терең талдау",
         "discussionTopic": "Талқылау тақырыбы",
@@ -2739,7 +2697,93 @@
         "submit": "Жіберу",
         "title": "Тест"
       },
+      "Scenarios": {
+        "add": "Қосу",
+        "addImage": "Сурет қосу",
+        "addResponseOption": "Қосу",
+        "atLeastOneScenarioRequired": "Кемінде бір сценарий болуы қажет",
+        "backToEdit": "Өңдеуге оралу",
+        "cancel": "Болдырмау",
+        "clickEditToConfigure": "\"Сценарийлерді өңдеу\" батырмасын басып, интерактивті оқиғаны баптаңыз",
+        "createFirstScenario": "Бірінші сценарийді жасау",
+        "createFirstScenarioDescription": "Бастау үшін алғашқы сценарийді жасаңыз.",
+        "deleteOption": "Вариантты жою",
+        "deleteScenario": "Сценарийді жою",
+        "describeScenarioPlaceholder": "Бұл сценарийде не болатынын сипаттаңыз...",
+        "editImage": "Суретті өңдеу",
+        "editScenarios": "Сценарийлерді өңдеу",
+        "endScenarioOption": "Сценарийді аяқтау",
+        "enterResponseOptionPlaceholder": "Жауап нұсқасын енгізіңіз...",
+        "enterScenarioTitlePlaceholder": "Сценарийдің атауын енгізіңіз...",
+        "imageUrlLabel": "Сурет сілтемесі",
+        "imageUrlPlaceholder": "https://example.com/image.jpg",
+        "interactivePreview": "Интерактивті алдын ала қарау",
+        "interactiveScenario": "Интерактивті сценарий",
+        "maxOptionsPerScenario": "Әр сценарийге ең көп 4 вариант",
+        "maxScenariosAllowed": "Ең көбі 40 сценарийге рұқсат етіледі",
+        "modal": {
+          "editDescription": "Интерактивті сценарийлерді құру және басқару",
+          "editTitle": "Сценарийлерді өңдеу",
+          "previewDescription": "Интерактивті сценарийді тексеріңіз",
+          "previewTitle": "Сценарийді алдын ала қарау"
+        },
+        "newOptionText": "Жаңа нұсқа",
+        "newScenarioText": "Жаңа сценарий мәтіні...",
+        "noScenariosYet": "Әзірге сценарийлер жоқ",
+        "preview": "Алдын ала қарау",
+        "reset": "Қалпына келтіру",
+        "resetScenario": "Сценарийді қайта орнату",
+        "responseOptionsLabel": "Жауап нұсқалары ({count}/4)",
+        "saveChanges": "Өзгерістерді сақтау",
+        "scenarioComplete": "Сценарий аяқталды!",
+        "scenarioCompleteDescription": "Сіз бұл интерактивті сценарийді сәтті аяқтадыңыз.",
+        "scenarioDescriptionLabel": "Сценарий сипаттамасы",
+        "scenarioIllustrationAlt": "Сценарий иллюстрациясы",
+        "scenarioNotFound": "Сценарий табылмады",
+        "scenarioNotFoundDescription": "Сценарий конфигурациясын тексеріп, қайта көріңіз.",
+        "scenarioOptionLabel": "Сценарий {id}",
+        "scenarioPreviewTitle": "Сценарийді алдын ала қарау",
+        "scenarioTitleLabel": "Сценарий атауы",
+        "scenarioTitlePlaceholder": "Сценарий атауы",
+        "setAsStartingScenario": "Бастапқы сценарий ретінде орнату",
+        "setStart": "Бастапқыны орнату",
+        "start": "Бастау",
+        "startOver": "Қайта бастау",
+        "startingPoint": "Бастапқы нүкте",
+        "testYourInteractiveScenario": "Интерактивті сценарийді сынап көріңіз",
+        "scenariosConfigured": "{count} / {max} сценарий конфигурацияланды"
+      },
       "Toolbar": {
+        "interactiveScenarios": "Интерактивті сценарийлер",
+        "aria": {
+          "insertInteractiveScenarios": "Интерактивті сценарийлерді енгізу"
+        },
+        "defaultScenario": {
+          "title": "Интерактивті сценарий",
+          "scenarios": {
+            "1": {
+              "text": "Бұл интерактивті сценарийге қош келдіңіз. Не істегіңіз келеді?",
+              "options": {
+                "opt1": "Зерттеуді жалғастыру",
+                "opt2": "Тақырып туралы көбірек білу"
+              }
+            },
+            "2": {
+              "text": "Тамаша таңдау! Енді сіз әрі қарай зерттеп жатырсыз. Келесі қадамыңыз қандай?",
+              "options": {
+                "opt3": "Бастапқыға оралу",
+                "opt4": "Сценарийді аяқтау"
+              }
+            },
+            "3": {
+              "text": "Мұнда тақырып туралы қосымша ақпарат бар. Бұл сізге жақсы түсінуге көмектеседі.",
+              "options": {
+                "opt5": "Бастапқыға оралу",
+                "opt6": "Сценарийді аяқтау"
+              }
+            }
+          }
+        },
         "addColumnRight": "Оң жаққа баған қосу",
         "addRowBelow": "Төменге жол қосу",
         "badge": "Бейдж",
@@ -3821,9 +3865,11 @@
           "aria": {
             "rankings": "Пайдаланушылар көшбасшылар тақтасы"
           },
+          "clearSearch": "Таза іздеу",
           "currentUser": "Сіз",
           "failedToLoad": "Көшбасшылар тақтасын жүктеу сәтсіз аяқталды",
           "filters": {
+            "allTime": "Барлық уақыт",
             "daily": "Бүгін",
             "monthly": "Осы айда",
             "weekly": "Осы аптада"
