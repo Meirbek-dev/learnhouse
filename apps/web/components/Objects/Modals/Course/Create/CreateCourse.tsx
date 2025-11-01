@@ -179,7 +179,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
             <FormItem>
               <FormLabel>{t('labelThumbnail')}</FormLabel>
               <FormControl>
-                <div className="h-[200px] w-auto rounded-xl bg-gray-50 shadow-sm outline-gray-200">
+                <div className="bg-background h-[200px] w-auto rounded-xl shadow-sm outline-gray-200">
                   <div className="flex h-full flex-col items-center justify-center">
                     <div className="flex flex-col items-center justify-center">
                       {form.watch('thumbnail') ? (

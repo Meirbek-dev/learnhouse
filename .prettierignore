@@ -50,3 +50,4 @@ fly.toml
 .logfire
 .ruff_cache
 .venv
+next-env.d.ts
