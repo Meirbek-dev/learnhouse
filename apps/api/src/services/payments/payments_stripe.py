@@ -348,7 +348,7 @@ async def generate_stripe_connect_link(
     creds = await get_stripe_internal_credentials()
     stripe.api_key = creds.get("stripe_secret_key")
 
-    # Get openu config for client_id
+    # Get config for client_id
     platform_config = get_platform_config()
     client_id = platform_config.payments_config.stripe.stripe_client_id
 

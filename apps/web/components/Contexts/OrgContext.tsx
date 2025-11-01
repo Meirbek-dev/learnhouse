@@ -19,6 +19,7 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
   const session = usePlatformSession();
   const pathname = usePathname();
   const accessToken = session?.data?.tokens?.access_token;
+  const isAuthenticated = session.status === 'authenticated' && Boolean(accessToken);
   const t = useTranslations('Contexts.Org');
   const isAllowedPathname = ['/login', '/signup'].includes(pathname);
 
@@ -29,18 +30,31 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
     });
   };
 
-  const { data: org, error: orgError } = useSWR(`${getAPIUrl()}orgs/slug/${orgslug}`, (url) =>
-    swrFetcher(url, accessToken),
-  );
-  const { data: orgs, error: orgsError } = useSWR(`${getAPIUrl()}orgs/user/page/1/limit/20`, (url) =>
-    swrFetcher(url, accessToken),
+  const {
+    data: org,
+    error: orgError,
+    isLoading: isOrgLoading,
+  } = useSWR(`${getAPIUrl()}orgs/slug/${orgslug}`, (url) => swrFetcher(url, accessToken));
+  const {
+    data: orgs,
+    error: orgsError,
+    isLoading: isUserOrgsLoading,
+  } = useSWR(
+    // Skip user-specific org fetches when unauthenticated to prevent hammering rate-limited endpoints.
+    isAuthenticated ? `${getAPIUrl()}orgs/user/page/1/limit/20` : null,
+    (url) => swrFetcher(url, accessToken),
   );
 
-  const isLoading = !(org && orgs && session) || session.status === 'loading';
-  const hasError = orgError || orgsError;
+  const isLoading = session.status === 'loading' || isOrgLoading || (isAuthenticated && isUserOrgsLoading);
+  const hasError = Boolean(orgError) || (isAuthenticated && Boolean(orgsError));
 
   const isOrgActive = useMemo(() => org?.config?.config?.general?.enabled !== false, [org]);
-  const isUserPartOfTheOrg = useMemo(() => orgs?.some((userOrg: any) => userOrg.id === org?.id), [orgs, org?.id]);
+  const isUserPartOfTheOrg = useMemo(() => {
+    if (!isAuthenticated || !org?.id || !Array.isArray(orgs)) {
+      return false;
+    }
+    return orgs.some((userOrg: any) => userOrg.id === org.id);
+  }, [isAuthenticated, orgs, org?.id]);
 
   if (hasError) return <ErrorUI message={t('fetchError')} />;
   if (isLoading) return <PageLoading />;
