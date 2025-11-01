@@ -94,7 +94,7 @@ const UserAvatar = (props: UserAvatarProps) => {
   const getAvatarUrl = (): string => {
     // If predefined avatar is specified
     if (predefined_avatar) {
-      const avatarType = predefined_avatar === 'ai' ? 'tou_emblem_dark.webp' : 'empty_avatar.webp';
+      const avatarType = predefined_avatar === 'ai' ? 'platform_logo.svg' : 'empty_avatar.webp';
       return getUriWithOrg(params.orgslug as string, `/${avatarType}`);
     }
 

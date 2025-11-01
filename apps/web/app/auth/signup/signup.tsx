@@ -6,9 +6,9 @@ import { validateInviteCode } from '@services/organizations/invites';
 import Toast from '@components/Objects/StyledElements/Toast/Toast';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
+import platformLogoFull from 'public/platform_logo_full.svg';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { MailWarning, Ticket, UserPlus } from 'lucide-react';
-import platformLogoDark from 'public/openu_logo_dark.webp';
 import InviteOnlySignUpComponent from './InviteOnlySignUp';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -51,7 +51,7 @@ const SignUpClient = (props: SignUpClientProps) => {
               quality={100}
               width={230}
               height={100}
-              src={platformLogoDark}
+              src={platformLogoFull}
               alt="Ashyq Bilim logo"
             />
           </Link>

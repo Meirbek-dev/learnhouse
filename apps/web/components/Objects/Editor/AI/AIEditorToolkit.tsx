@@ -13,7 +13,7 @@ import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } fro
 import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
-import touEmblemLight from 'public/tou_emblem_light.webp';
+import platformLogoLight from 'public/platform_logo_light.svg';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import type { Editor } from '@tiptap/react';
@@ -85,7 +85,7 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
                       <div className="flex w-full items-center space-x-2 font-bold text-white/80">
                         <Image
                           width={28}
-                          src={touEmblemLight}
+                          src={platformLogoLight}
                           alt={t('aiIconAlt')}
                         />
                         <div className="flex items-center">{t('aiEditorTitle')}</div>
@@ -492,7 +492,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
         <div className="flex justify-center">
           <Image
             width={32}
-            src={touEmblemLight}
+            src={platformLogoLight}
             alt="Ashyq Bilim logo"
           />
         </div>

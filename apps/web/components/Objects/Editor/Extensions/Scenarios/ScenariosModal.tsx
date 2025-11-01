@@ -1,8 +1,8 @@
 import { ArrowRight, CheckCircle, GitBranch, Image, Play, Plus, RotateCcw, Save, Settings, Trash2 } from 'lucide-react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import React, { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
 import { Button } from '@components/ui/button';
+import { useTranslations } from 'next-intl';
 
 interface ScenarioOption {
   id: string;
@@ -347,7 +347,9 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                         <span className="text-sm font-bold text-slate-700">{scenarioIndex + 1}</span>
                       </div>
                       <div>
-                        <h3 className="text-base font-semibold text-slate-900">{t('scenarioOptionLabel', { id: scenario.id })}</h3>
+                        <h3 className="text-base font-semibold text-slate-900">
+                          {t('scenarioOptionLabel', { id: scenario.id })}
+                        </h3>
                         {scenario.id === currentScenarioId && (
                           <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
                             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -444,7 +446,9 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                   {/* Response Options */}
                   <div>
                     <div className="mb-3 flex items-center justify-between">
-                      <label className="text-sm font-medium text-slate-700">{t('responseOptionsLabel', { count: scenario.options.length })}</label>
+                      <label className="text-sm font-medium text-slate-700">
+                        {t('responseOptionsLabel', { count: scenario.options.length })}
+                      </label>
                       <button
                         onClick={() => addOption(scenario.id)}
                         disabled={scenario.options.length >= 4}

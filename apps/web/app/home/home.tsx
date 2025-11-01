@@ -2,7 +2,7 @@
 
 import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import platformLogoDark from 'public/openu_logo_dark.webp';
+import platformLogoFull from 'public/platform_logo_full.svg';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useTranslations } from 'next-intl';
@@ -27,7 +27,7 @@ const HomeClient = () => {
           quality={100}
           width={230}
           height={100}
-          src={platformLogoDark}
+          src={platformLogoFull}
           alt="Ashyq Bilim logo"
         />
       </div>

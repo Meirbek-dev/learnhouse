@@ -3,7 +3,7 @@
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { verifyStripeConnection } from '@services/payments/payments';
 import { AlertTriangle, Check, Loader2 } from 'lucide-react';
-import touEmblemDark from 'public/tou_emblem_dark.webp';
+import platformLogo from 'public/platform_logo.svg';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -64,7 +64,7 @@ const StripeConnectCallback = () => {
             quality={100}
             width={50}
             height={50}
-            src={touEmblemDark}
+            src={platformLogo}
             alt="Ashyq Bilim logo"
           />
         </div>

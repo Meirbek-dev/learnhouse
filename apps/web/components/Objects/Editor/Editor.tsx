@@ -16,12 +16,11 @@ import { CourseProvider } from '@components/Contexts/CourseContext';
 import EmbedObjects from './Extensions/EmbedObjects/EmbedObjects';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import InfoCallout from './Extensions/Callout/Info/InfoCallout';
+import platformLogoLight from 'public/platform_logo_light.svg';
 import WebPreview from './Extensions/WebPreview/WebPreview';
-import touEmblemLight from 'public/tou_emblem_light.webp';
 import Scenarios from './Extensions/Scenarios/Scenarios';
 import TableHeader from '@tiptap/extension-table-header';
 import { EditorContent, useEditor } from '@tiptap/react';
-import touEmblemDark from 'public/tou_emblem_dark.webp';
 import { getUriWithOrg } from '@services/config/config';
 import ts from 'highlight.js/lib/languages/typescript';
 import js from 'highlight.js/lib/languages/javascript';
@@ -31,6 +30,7 @@ import ImageBlock from './Extensions/Image/ImageBlock';
 import Flipcard from './Extensions/Flipcard/Flipcard';
 import TableCell from '@tiptap/extension-table-cell';
 import UserBlock from './Extensions/Users/UserBlock';
+import platformLogo from 'public/platform_logo.svg';
 import java from 'highlight.js/lib/languages/java';
 import Buttons from './Extensions/Buttons/Buttons';
 import TableRow from '@tiptap/extension-table-row';
@@ -233,7 +233,7 @@ const Editor = (props: EditorProps) => {
                   <EditorInfoPlatformLogo
                     width={25}
                     height={25}
-                    src={touEmblemDark}
+                    src={platformLogo}
                     alt="Ashyq Bilim logo"
                   />
                 </Link>
@@ -283,7 +283,7 @@ const Editor = (props: EditorProps) => {
                         <Image
                           className=""
                           width={24}
-                          src={touEmblemLight}
+                          src={platformLogoLight}
                           alt="AI Editor Icon"
                         />
                       </i>

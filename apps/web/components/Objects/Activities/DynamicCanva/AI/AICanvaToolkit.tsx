@@ -4,7 +4,7 @@ import { BookOpen, FormInput, Languages, MoreVertical } from 'lucide-react';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
-import touEmblemDark from 'public/tou_emblem_dark.webp';
+import platformLogo from 'public/platform_logo.svg';
 import { BubbleMenu } from '@tiptap/react/menus';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
@@ -42,7 +42,7 @@ const AICanvaToolkit = (props: AICanvaToolkitProps) => {
               <Image
                 className="rounded-lg outline-neutral-200/10"
                 width={24}
-                src={touEmblemDark}
+                src={platformLogo}
                 alt={t('aiIconAlt')}
               />
               <div>{t('aiTitle')}</div>

@@ -16,8 +16,8 @@ import {
 import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, School, Settings, Users } from 'lucide-react';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
+import platformLogoLight from '@public/platform_logo_light.svg';
 import useFeatureFlag from '@components/Hooks/useFeatureFlag';
-import platformLogoLight from '@public/openu_logo_light.webp';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useCallback, useEffect, useMemo } from 'react';

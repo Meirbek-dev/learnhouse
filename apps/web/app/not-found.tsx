@@ -1,4 +1,4 @@
-import platformLogoDark from 'public/openu_logo_dark.webp';
+import platformLogoFull from 'public/platform_logo_full.svg';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@components/ui/button';
 import Link from '@components/ui/ServerLink';
@@ -15,7 +15,7 @@ export default async function NotFound() {
           quality={100}
           width={270}
           height={100}
-          src={platformLogoDark}
+          src={platformLogoFull}
           alt="logo"
         />
       </div>

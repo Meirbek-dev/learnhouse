@@ -4,7 +4,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { AlertTriangle, Loader2, UserRoundPlus } from 'lucide-react';
 import PasswordInput from '@components/ui/custom/password-input';
-import platformLogoDark from 'public/openu_logo_dark.webp';
+import platformLogoFull from 'public/platform_logo_full.svg';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -84,7 +84,7 @@ const LoginClient = (props: LoginClientProps) => {
                 quality={100}
                 width={230}
                 height={100}
-                src={platformLogoDark}
+                src={platformLogoFull}
                 alt="Ashyq Bilim logo"
               />
             </Link>

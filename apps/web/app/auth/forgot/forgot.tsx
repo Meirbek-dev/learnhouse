@@ -1,8 +1,8 @@
 'use client';
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import platformLogoFull from 'public/platform_logo_full.svg';
 import { AlertTriangle, Info, Loader2 } from 'lucide-react';
-import platformLogoDark from 'public/openu_logo_dark.webp';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -65,7 +65,7 @@ const ForgotPasswordClient = () => {
                 quality={100}
                 width={230}
                 height={100}
-                src={platformLogoDark}
+                src={platformLogoFull}
                 alt="Ashyq Bilim logo"
               />
             </Link>

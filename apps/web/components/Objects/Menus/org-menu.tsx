@@ -7,12 +7,13 @@ import { HeaderProfileBox } from '@/components/Security/HeaderProfileBox';
 import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
 import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
 import { SearchBar } from '@/components/Objects/Search/SearchBar';
+import platformLogoFull from 'public/platform_logo_full.svg';
 import { getUriWithOrg } from '@/services/config/config';
-import { PlatformLogoSVG } from '../../svg/openuLogoSvg';
 import { Button } from '@/components/ui/button';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
+import Image from 'next/image';
 
 interface OrgMenuProps {
   orgslug: string;
@@ -177,7 +178,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
           isScrolled ? 'bg-background/97' : 'bg-background/92'
         } backdrop-blur-sm`}
       >
-        <div className="max-w-8xl mx-auto flex h-full w-full items-center justify-between px-4 sm:px-6 lg:px-10">
+        <div className="mx-auto flex h-full w-full items-center justify-between px-4 sm:px-6 lg:px-12">
           {/* Left section */}
           <div className="flex items-center gap-8 md:gap-10">
             {/* Logo */}
@@ -185,7 +186,12 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
               href={getUriWithOrg(orgslug, '/')}
               className="hover:bg-accent/60 flex items-center justify-center rounded-md p-2 transition-colors"
             >
-              <PlatformLogoSVG />
+              <Image
+                src={platformLogoFull}
+                alt="OpenU logo"
+                width={100}
+                priority={true}
+              />
             </Link>
 
             {/* Desktop Navigation */}

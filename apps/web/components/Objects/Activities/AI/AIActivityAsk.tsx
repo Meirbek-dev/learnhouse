@@ -5,7 +5,7 @@ import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AICh
 import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useEffect, useRef, useState, useTransition } from 'react';
-import touEmblemLight from 'public/tou_emblem_light.webp';
+import platformLogoLight from 'public/platform_logo_light.svg';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { ScrollArea } from '@components/ui/scroll-area';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -57,7 +57,7 @@ const AIActivityAsk = (props: AIActivityAskProps) => {
             <Image
               className="rounded-md outline-neutral-200/20"
               width={24}
-              src={touEmblemLight}
+              src={platformLogoLight}
               alt={t('askAI')}
             />
             <i className="text-xs font-bold not-italic">{t('askAI')}</i>
@@ -338,7 +338,7 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
                     aiChatBotState.isWaitingForResponse ? 'animate-pulse' : ''
                   }`}
                   width={28}
-                  src={touEmblemLight}
+                  src={platformLogoLight}
                   alt={t('askAI')}
                 />
                 <span className="text-sm font-bold text-white"> {t('AI')}</span>
