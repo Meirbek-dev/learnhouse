@@ -590,7 +590,9 @@
       "toastDeleteError": "Не удалось удалить курс. Пожалуйста, попробуйте снова.",
       "toastDeleteSuccess": "Курс успешно удалён",
       "updated": "Обновлён",
-      "updatedDate": "Обновлено {updateDate, date, medium}"
+      "updatedDate": "Обновлено {updateDate, date, medium}",
+      "openCourse": "Открыть {course}",
+      "progressBarAria": "Прогресс по курсу {course}"
     },
     "CreateCourseModal": {
       "ariaLabel": "Выберите «Конечное изображение миниатюр» для загрузки",

@@ -103,7 +103,10 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
   const courseUrl = customLink || getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`);
 
   return (
-    <Card className="group bg-card relative flex h-full w-full max-w-sm min-w-[280px] flex-col overflow-hidden border-0 p-0 shadow-sm transition-all duration-200 hover:shadow-lg">
+    <Card
+      className="group bg-card relative flex h-full w-full max-w-sm min-w-[280px] flex-col overflow-hidden border-0 p-0 shadow-md transition-all duration-200 hover:shadow-2xl"
+      tabIndex={0}
+    >
       <AdminEditOptions
         course={course}
         orgSlug={orgslug}
@@ -115,14 +118,22 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
         prefetch={false}
         href={courseUrl}
         className="relative block overflow-hidden"
+        aria-label={t('openCourse', { course: course.name })}
       >
         <div className="bg-muted relative aspect-video w-full overflow-hidden">
           <img
-            className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             src={thumbnailImage}
             alt={course.name}
             loading="lazy"
           />
+
+          {/* subtle dark gradient to improve title readability when overlayed */}
+          <div
+            className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-50"
+            aria-hidden="true"
+          />
+
           {course.update_date ? (
             <Badge
               variant="secondary"
@@ -146,8 +157,9 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
             prefetch={false}
             href={courseUrl}
             className="group-hover:text-primary block transition-colors"
+            aria-label={t('openCourse', { course: course.name })}
           >
-            <h3 className="line-clamp-2 leading-tight font-semibold tracking-tight">{course.name}</h3>
+            <h3 className="line-clamp-2 leading-tight font-semibold tracking-tight text-gray-900">{course.name}</h3>
           </Link>
           <p className="text-muted-foreground line-clamp-2 text-sm">{course.description}</p>
         </div>
@@ -191,13 +203,27 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
         {isEnrolled ? (
           <div className="w-full space-y-1.5">
             <div className="flex items-center gap-2">
-              <div className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full">
+              <div className="flex w-full items-center gap-2">
                 <div
-                  className="bg-primary h-full transition-all duration-300"
-                  style={{ width: `${progressPercentage}%` }}
-                />
+                  className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full"
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={progressPercentage}
+                  aria-label={t('progressBarAria', { course: course.name })}
+                >
+                  <div
+                    className="bg-primary h-full transition-all duration-300"
+                    style={{ width: `${progressPercentage}%` }}
+                  />
+                </div>
+                <span
+                  className="text-muted-foreground text-xs"
+                  style={{ width: 40, textAlign: 'right' }}
+                >
+                  {progressPercentage}%
+                </span>
               </div>
-              <span className="text-muted-foreground text-xs font-medium">{progressPercentage}%</span>
             </div>
             <Button
               asChild

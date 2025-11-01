@@ -590,7 +590,9 @@
       "toastDeleteError": "Курсты жою мүмкін болмады",
       "toastDeleteSuccess": "Курс сәтті жойылды",
       "updated": "Жаңартылды",
-      "updatedDate": "Жаңартылған {updateDate, date, medium}"
+      "updatedDate": "Жаңартылған {updateDate, date, medium}",
+      "openCourse": "Ашу {course}",
+      "progressBarAria": "Курстың прогресі: {course}"
     },
     "CreateCourseModal": {
       "ariaLabel": "Жүктеу үшін курстың нобай кескінін таңдаңыз",
