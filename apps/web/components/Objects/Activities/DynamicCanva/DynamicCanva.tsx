@@ -4,6 +4,7 @@ import { NoTextInput } from '@components/Objects/Editor/Extensions/NoTextInput/N
 import EmbedObjects from '@components/Objects/Editor/Extensions/EmbedObjects/EmbedObjects';
 import InfoCallout from '@components/Objects/Editor/Extensions/Callout/Info/InfoCallout';
 import WebPreview from '@components/Objects/Editor/Extensions/WebPreview/WebPreview';
+import Scenarios from '@components/Objects/Editor/Extensions/Scenarios/Scenarios';
 import VideoBlock from '@components/Objects/Editor/Extensions/Video/VideoBlock';
 import ImageBlock from '@components/Objects/Editor/Extensions/Image/ImageBlock';
 import Flipcard from '@components/Objects/Editor/Extensions/Flipcard/Flipcard';
@@ -139,6 +140,10 @@ const Canva = (props: Editor) => {
         activity: props.activity,
       }),
       Flipcard.configure({
+        editable: false,
+        activity: props.activity,
+      }),
+      Scenarios.configure({
         editable: false,
         activity: props.activity,
       }),

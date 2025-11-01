@@ -32,9 +32,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
     mutate: mutateLinkedCourses,
     error,
   } = useSWR(
-    orgId && accessToken && productId
-      ? [`/payments/${orgId}/products/${productId}/courses`, accessToken]
-      : null,
+    orgId && accessToken && productId ? [`/payments/${orgId}/products/${productId}/courses`, accessToken] : null,
     async ([, token]) => {
       const response = await getCoursesLinkedToProduct(orgId, productId, token);
       return response.data || [];

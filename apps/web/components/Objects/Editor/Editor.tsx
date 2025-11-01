@@ -18,6 +18,7 @@ import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import InfoCallout from './Extensions/Callout/Info/InfoCallout';
 import WebPreview from './Extensions/WebPreview/WebPreview';
 import touEmblemLight from 'public/tou_emblem_light.webp';
+import Scenarios from './Extensions/Scenarios/Scenarios';
 import TableHeader from '@tiptap/extension-table-header';
 import { EditorContent, useEditor } from '@tiptap/react';
 import touEmblemDark from 'public/tou_emblem_dark.webp';
@@ -165,6 +166,10 @@ const Editor = (props: EditorProps) => {
         activity: props.activity,
       }),
       Flipcard.configure({
+        editable: true,
+        activity: props.activity,
+      }),
+      Scenarios.configure({
         editable: true,
         activity: props.activity,
       }),

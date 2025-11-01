@@ -32,6 +32,7 @@ const DashMobileMenu = () => {
             <Link
               href="/"
               className="flex flex-col items-center p-2"
+              aria-label="Go to dashboard home"
             >
               <Home size={20} />
               <span className="mt-1 text-xs">{t('mobile.home')}</span>
@@ -46,6 +47,7 @@ const DashMobileMenu = () => {
             <Link
               href="/dash/courses"
               className="flex flex-col items-center p-2"
+              aria-label="Manage courses"
             >
               <BookCopy size={20} />
               <span className="mt-1 text-xs">{t('mobile.courses')}</span>
@@ -60,6 +62,7 @@ const DashMobileMenu = () => {
             <Link
               href="/dash/assignments"
               className="flex flex-col items-center p-2"
+              aria-label="Manage assignments"
             >
               <Backpack size={20} />
               <span className="mt-1 text-xs">{t('mobile.assignments')}</span>
@@ -75,6 +78,7 @@ const DashMobileMenu = () => {
               <Link
                 href="/dash/payments/customers"
                 className="flex flex-col items-center p-2"
+                aria-label="Manage payments and billing"
               >
                 <BadgeDollarSign size={20} />
                 <span className="mt-1 text-xs">{t('mobile.payments')}</span>
@@ -90,6 +94,7 @@ const DashMobileMenu = () => {
             <Link
               href="/dash/users/settings/users"
               className="flex flex-col items-center p-2"
+              aria-label="Manage users"
             >
               <Users size={20} />
               <span className="mt-1 text-xs">{t('mobile.users')}</span>
@@ -104,6 +109,7 @@ const DashMobileMenu = () => {
             <Link
               href="/dash/org/settings/general"
               className="flex flex-col items-center p-2"
+              aria-label="Organization settings"
             >
               <School size={20} />
               <span className="mt-1 text-xs">{t('mobile.org')}</span>
@@ -121,6 +127,7 @@ const DashMobileMenu = () => {
           <Link
             href="/dash/user-account/settings/general"
             className="flex flex-col items-center p-2"
+            aria-label="User account settings"
           >
             <Settings size={20} />
             <span className="mt-1 text-xs">{t('mobile.settings')}</span>

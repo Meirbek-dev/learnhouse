@@ -19,9 +19,8 @@ export default function CourseGridClient({ courses, orgslug }: CourseGridClientP
   const orgId = org?.id;
 
   // Fetch trail data to show progress on course thumbnails
-  const { data: trailData } = useSWR(
-    orgId && accessToken ? `${getAPIUrl()}trail/org/${orgId}/trail` : null,
-    (url) => swrFetcher(url, accessToken),
+  const { data: trailData } = useSWR(orgId && accessToken ? `${getAPIUrl()}trail/org/${orgId}/trail` : null, (url) =>
+    swrFetcher(url, accessToken),
   );
 
   return (

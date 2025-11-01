@@ -110,6 +110,7 @@ const Modal = (params: ModalParams) => {
             {params.addDefCloseButton ? (
               <Button
                 type="submit"
+                aria-label="Close modal"
                 className="transition-colors disabled:pointer-events-none disabled:opacity-50"
               >
                 {t('closeButtonDefault')}
