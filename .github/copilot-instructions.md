@@ -23,6 +23,7 @@ Before responding to any request, follow these steps:
    - Plan for testing and validation
 
 3. Implementation Strategy
+   - Apply cleanest long-term solutions
    - Choose appropriate design patterns
    - Consider performance implications
    - Plan for error handling and edge cases

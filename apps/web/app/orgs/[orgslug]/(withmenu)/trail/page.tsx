@@ -1,3 +1,5 @@
+import { getServerGamificationDashboard, getServerOrganizationLeaderboard } from '@/services/gamification/server';
+import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
@@ -32,11 +34,55 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
 const TrailPage = async (params: any) => {
   const { orgslug } = await params.params;
+  const session = await auth();
+  const accessToken = session?.tokens?.access_token;
 
-  return (
+  const org = await getOrganizationContextInfo(
+    orgslug,
+    {
+      revalidate: 1800,
+      tags: ['organizations'],
+    },
+    accessToken,
+  );
+
+  const orgId = Number(org?.org_id ?? org?.id ?? 0);
+  const content = (
     <div>
       <Trail orgslug={orgslug} />
     </div>
+  );
+
+  if (!orgId) {
+    return content;
+  }
+
+  const [dashboardData, leaderboardData] = await Promise.all([
+    getServerGamificationDashboard(orgId, {
+      revalidate: 30,
+      tags: [`gamification:dashboard:${orgId}`],
+    }),
+    getServerOrganizationLeaderboard(orgId, 10, {
+      revalidate: 60,
+      tags: [`gamification:leaderboard:${orgId}`],
+    }),
+  ]);
+
+  if (!dashboardData) {
+    return content;
+  }
+
+  return (
+    <GamificationProvider
+      orgId={orgId}
+      initialData={{
+        profile: dashboardData.profile,
+        dashboard: dashboardData,
+        leaderboard: leaderboardData ?? null,
+      }}
+    >
+      {content}
+    </GamificationProvider>
   );
 };
 
