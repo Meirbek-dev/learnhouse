@@ -33,9 +33,9 @@ import AuthenticatedClientElement from '@components/Security/AuthenticatedClient
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import CourseEndView from '@components/Pages/Activity/CourseEndView';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
@@ -120,7 +120,7 @@ const ActivityActions = ({
   const t = useTranslations('ActivityPage');
   const { contributorStatus } = useContributorStatus(course.course_uuid);
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 
   // Add SWR for trail data
@@ -182,7 +182,7 @@ const ActivityClient = (props: ActivityClientProps) => {
   const { activity } = props;
   const { course } = props;
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [bgColor, setBgColor] = useState('bg-white');
   const [assignment, setAssignment] = useState(null) as any;
@@ -905,7 +905,7 @@ export const MarkStatus = (props: {
 }) => {
   const { t } = props;
   const router = useRouter();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const org = useOrg() as any;
   const [isLoading, setIsLoading] = useState(false);
   const [showMarkedTooltip, setShowMarkedTooltip] = useState(false);
@@ -1314,7 +1314,7 @@ const AssignmentTools = (props: {
 }) => {
   const submissionContext = useAssignmentSubmission();
   const submission = submissionContext.submissions;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const [finalGrade, setFinalGrade] = useState(null) as any;
   const { t } = props;
 

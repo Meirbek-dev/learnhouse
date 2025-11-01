@@ -2,8 +2,8 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Toast from '@components/Objects/StyledElements/Toast/Toast';
 import { inviteBatchUsers } from '@services/organizations/invites';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
@@ -20,7 +20,7 @@ import { useState } from 'react';
 
 const OrgUsersAdd = () => {
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.UserSettings.addSection');
   const [invitedUsers, setInvitedUsers] = useState('');

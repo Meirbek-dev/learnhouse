@@ -1,7 +1,7 @@
 'use client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { updateOrganization } from '@services/settings/org';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -94,7 +94,7 @@ interface OrganizationValues {
 }
 
 const OrgEditGeneral: FC = () => {
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any;
   const t = useTranslations('DashPage.OrgSettings.General');

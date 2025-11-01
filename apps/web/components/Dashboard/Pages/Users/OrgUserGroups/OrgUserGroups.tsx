@@ -5,8 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import EditUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/EditUserGroup';
 import AddUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/AddUserGroup';
 import ManageUsers from '@components/Objects/Modals/Dash/OrgUserGroups/ManageUsers';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Loader2, Pencil, SquareUserRound, Users, X } from 'lucide-react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { deleteUserGroup } from '@services/usergroups/usergroups';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -19,7 +19,7 @@ import { useState } from 'react';
 
 const OrgUserGroups = () => {
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.UserSettings.usergroupsSection');
   const [userGroupManagementModal, setUserGroupManagementModal] = useState(false);

@@ -1,7 +1,7 @@
 'use client';
 
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ErrorUI from '@components/Objects/StyledElements/Error/Error';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
@@ -31,7 +31,7 @@ export const AssignmentProvider = ({
   children: ReactNode;
   assignment_uuid: string | undefined;
 }) => {
-  const session = useLHSession();
+  const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;
   const t = useTranslations('Contexts.Assignment');
 

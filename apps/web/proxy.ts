@@ -1,5 +1,5 @@
 import {
-  OPENU_DOMAIN,
+  PLATFORM_DOMAIN,
   getDefaultOrg,
   getTopLevelCookieDomain,
   getUriWithOrg,
@@ -110,7 +110,7 @@ export default async function proxy(req: NextRequest) {
     let orgslug: string;
 
     if (hosting_mode === 'multi') {
-      orgslug = fullhost ? fullhost.replace(`.${OPENU_DOMAIN}`, '') : (default_org as string);
+      orgslug = fullhost ? fullhost.replace(`.${PLATFORM_DOMAIN}`, '') : (default_org as string);
     } else {
       // Single hosting mode
       orgslug = default_org as string;
@@ -130,7 +130,7 @@ export default async function proxy(req: NextRequest) {
   // Multi Organization Mode
   if (hosting_mode === 'multi') {
     // Get the organization slug from the URL
-    const orgslug = fullhost ? fullhost.replace(`.${OPENU_DOMAIN}`, '') : (default_org as string);
+    const orgslug = fullhost ? fullhost.replace(`.${PLATFORM_DOMAIN}`, '') : (default_org as string);
     const response = NextResponse.rewrite(new URL(`/orgs/${orgslug}${pathname}`, req.url));
 
     // Set the cookie with the orgslug value

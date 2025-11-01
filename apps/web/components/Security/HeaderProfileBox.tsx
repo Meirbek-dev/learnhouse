@@ -9,7 +9,7 @@ import {
 } from '@components/ui/dropdown-menu';
 import { ChevronDown, Crown, LogOut, Shield, User, User as UserIcon, Users } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -36,7 +36,7 @@ interface CustomRoleInfo {
 }
 
 export const HeaderProfileBox = () => {
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const { isAdmin, loading, userRoles, rights } = useAdminStatus();
   const org = useOrg() as any;
   const t = useTranslations('Header');

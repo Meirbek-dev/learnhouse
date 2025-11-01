@@ -1,6 +1,6 @@
 'use client';
 
-import LHSessionProvider, { useLHSession } from '@components/Contexts/LHSessionContext';
+import PlatformSessionProvider, { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import StyledComponentsRegistry from '../components/Utils/libs/styled-registry';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { updateUserTheme } from '@services/users/users';
@@ -14,7 +14,7 @@ interface ClientLayoutProps {
 }
 
 function ThemeSync() {
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
 
   useEffect(() => {
     const handleThemeChange = async (event: Event) => {
@@ -47,7 +47,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
       refetchOnWindowFocus={false}
       refetchWhenOffline={false}
     >
-      <LHSessionProvider>
+      <PlatformSessionProvider>
         {/* Global SWR defaults to reduce frequent revalidation and dedupe identical requests. */}
         <SWRConfig
           value={{
@@ -61,13 +61,13 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
         >
           <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
         </SWRConfig>
-      </LHSessionProvider>
+      </PlatformSessionProvider>
     </SessionProvider>
   );
 }
 
 function ThemeProviderWrapper({ children }: { children: ReactNode }) {
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const userTheme = session?.data?.user?.theme;
 
   return (

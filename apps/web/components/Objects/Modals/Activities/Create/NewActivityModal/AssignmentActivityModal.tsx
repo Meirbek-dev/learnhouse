@@ -3,7 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { createAssignmentWithActivity } from '@services/courses/assignments';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -45,7 +45,7 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug 
   const fullLocale = useLocale();
   const locale = fullLocale.split('-')[0] ?? 'ru';
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const validationSchema = createValidationSchema(validationT);
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 

@@ -188,9 +188,9 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
             >
               <Image
                 src={platformLogoFull}
-                alt="OpenU logo"
+                alt="Ashyq Bilim logo"
                 width={100}
-                priority={true}
+                priority
               />
             </Link>
 

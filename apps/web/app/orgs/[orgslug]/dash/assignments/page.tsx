@@ -1,9 +1,9 @@
 'use client';
 
 import { EllipsisVertical, GalleryVerticalEnd, Info, Layers2, UserRoundPen } from 'lucide-react';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getAssignmentsFromACourse } from '@services/courses/assignments';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -15,7 +15,7 @@ import useSWR from 'swr';
 
 const AssignmentsHome = () => {
   const t = useTranslations('DashPage.Assignments.HomePage');
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any;
   const [courseAssignments, setCourseAssignments] = useState<any[]>([]);

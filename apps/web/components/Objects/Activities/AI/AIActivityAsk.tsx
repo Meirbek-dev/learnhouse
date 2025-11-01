@@ -3,7 +3,7 @@
 import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
 import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
 import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import platformLogoLight from 'public/platform_logo_light.svg';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -80,7 +80,7 @@ interface ActivityChatMessageBoxProps {
 
 const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
   const t = useTranslations('Activities.AIActivityAsk');
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const aiChatBotState = useAIChatBot();
   const dispatchAIChatBot = useAIChatBotDispatch();
@@ -470,7 +470,7 @@ const AIMessageComponent = (props: AIMessageComponentProps) => {
 
 const AIMessagePlaceHolder = (props: { activity_uuid: string; sendMessage: any }) => {
   const t = useTranslations('Activities.AIActivityAsk');
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const [_feedbackModal, _setFeedbackModal] = useState(false);
   const aiChatBotState = useAIChatBot();
 

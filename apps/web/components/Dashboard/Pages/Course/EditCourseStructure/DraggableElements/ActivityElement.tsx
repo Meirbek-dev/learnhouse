@@ -2,8 +2,8 @@ import { Backpack, Eye, File, FilePenLine, Globe, Loader2, Lock, Pencil, Save, S
 import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from '@services/courses/assignments';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { deleteActivity, updateActivity } from '@services/courses/activities';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -32,7 +32,7 @@ interface ModifiedActivityInterface {
 
 const ActivityElement = (props: ActivitiyElementProps) => {
   const router = useRouter();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [modifiedActivity, setModifiedActivity] = useState<ModifiedActivityInterface | undefined>();
   const [selectedActivity, setSelectedActivity] = useState<string | undefined>();
@@ -319,7 +319,7 @@ const ActivityElementOptions = ({
 }) => {
   const org = useOrg() as any;
   const course = useCourse();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 
   // Use SWR to fetch assignment UUID for TYPE_ASSIGNMENT activities

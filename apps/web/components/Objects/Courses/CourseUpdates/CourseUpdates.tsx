@@ -3,7 +3,7 @@
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useEffect, useLayoutEffect, useState } from 'react';
@@ -26,7 +26,7 @@ import { z } from 'zod';
 
 const CourseUpdates = () => {
   const course = useCourse();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const { data: updates } = useSWR(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`, (url) =>
     swrFetcher(url, access_token),
@@ -128,7 +128,7 @@ type UpdateFormValues = z.infer<ReturnType<typeof createUpdateFormSchema>>;
 const NewUpdateForm = ({ setSelectedView }: any) => {
   const org = useOrg() as any;
   const course = useCourse();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const t = useTranslations('Courses.CourseUpdates');
   const validationSchema = createUpdateFormSchema(t);
 
@@ -231,7 +231,7 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
 const UpdatesListView = () => {
   const course = useCourse();
   const adminStatus = useAdminStatus();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const { data: updates } = useSWR(`${getAPIUrl()}courses/${course?.courseStructure?.course_uuid}/updates`, (url) =>
     swrFetcher(url, access_token),
@@ -279,7 +279,7 @@ const UpdatesListView = () => {
 };
 
 const DeleteUpdateButton = ({ update }: any) => {
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const course = useCourse();
   const t = useTranslations('Courses.CourseUpdates');
 

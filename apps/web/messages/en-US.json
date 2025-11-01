@@ -8,7 +8,7 @@
       "examplesAbbr": "ex. ",
       "hello": "Hello",
       "howCanWeHelp": "how can I help?",
-      "logoAlt": "OpenU AI Logo",
+      "logoAlt": "Ashyq Bilim AI Logo",
       "placeholder": "Ask AI About this Lecture",
       "questionAbout": "What is this Activity about?",
       "questionExamples": "Explain this Activity in practical examples",
@@ -39,7 +39,7 @@
       "TranslateLabel": "Translate",
       "WriterLabel": "Writer",
       "aiEditorTitle": "AI Editor",
-      "aiIconAlt": "OpenU AI Icon",
+      "aiIconAlt": "Ashyq Bilim AI Icon",
       "applicationPending": "Contributor application pending",
       "applyToContribute": "Apply to contribute",
       "askAI": "Ask AI",
@@ -318,7 +318,7 @@
       "hasSuccessfullyCompleted": "has successfully completed",
       "instructor": "Instructor",
       "instructorName": "Dr. Jane Smith",
-      "organizationLogoAlt": "OpenU Logo",
+      "organizationLogoAlt": "Ashyq Bilim Logo",
       "scanToVerify": "Scan to verify",
       "thisIsToConfirm": "This is to confirm that"
     },
@@ -371,7 +371,7 @@
       "keywords": "{certificationName}, {courseName}, certificate, verification",
       "openGraph": {
         "description": "Check and verify the authenticity of the {certificationName} certificate for {courseName}.",
-        "siteName": "OpenU",
+        "siteName": "Ashyq Bilim",
         "title": "Verify {certificationName} Certificate — {courseName}"
       },
       "title": "Certificate Verification — {certificationName} ({courseName})",
@@ -768,12 +768,12 @@
       "nextButtonLabel": "Next",
       "onboarding": "Onboarding",
       "step10Button": "Toraighyrov University",
-      "step10Desc": "To learn more about OpenU, you can take our original courses at Toraighyrov University",
+      "step10Desc": "To learn more about Ashyq Bilim, you can take our original courses at Toraighyrov University",
       "step10Title": "To infinity and beyond",
-      "step1Desc": "Welcome to OpenU, the LMS built for simplicity, usability and performance. Meet the new way to create, share and interact with educational content.",
+      "step1Desc": "Welcome to Ashyq Bilim, the LMS built for simplicity, usability and performance. Meet the new way to create, share and interact with educational content.",
       "step1Title": "Teach the world!",
       "step2Button": "Create a new Course",
-      "step2Desc": "Courses are the main building blocks of OpenU, they always contain Chapters and Chapters contain Activities.",
+      "step2Desc": "Courses are the main building blocks of Ashyq Bilim, they always contain Chapters and Chapters contain Activities.",
       "step2Title": "Create Courses",
       "step3Button": "Learn more about Activities",
       "step3Desc": "Activities are the elements you can add to your Courses via Chapters: Dynamic Pages, Videos, Documents, Assignments and more coming soon.",
@@ -781,8 +781,8 @@
       "step4Button": "Learn more about Dynamic Pages and the Editor",
       "step4Desc": "Dynamic pages are pages with dynamic content like Notion pages, they can include different components like Quizzes, Images, Videos, Documents, etc.",
       "step4Title": "Dynamic Pages and the Editor",
-      "step5Button": "Learn more about OpenU AI",
-      "step5Desc": "Thought tools made for both teachers and students, context aware, they can answer based on your courses and the unique content you create within OpenU",
+      "step5Button": "Learn more about Ashyq Bilim AI",
+      "step5Desc": "Thought tools made for both teachers and students, context aware, they can answer based on your courses and the unique content you create within Ashyq Bilim",
       "step5Title": "Artificial Intelligence",
       "step6Button": "Create User Groups",
       "step6Desc": "With User Groups, you can divide students into Groups and provide access to Courses depending on their needs",
@@ -2304,8 +2304,7 @@
         "description": "Manage your organization's users and roles",
         "title": "Users"
       },
-      "openuLogo": "OpenU Logo",
-      "openuUniversity": "Toraighyrov University",
+      "platformLogo": "Ashyq Bilim Logo",
       "touUniversity": "Toraighyrov University"
     },
     "Components": {
@@ -2403,7 +2402,7 @@
           }
         },
         "courseOwnershipTypes": "Course Ownership Types",
-        "description": "Understanding LearnHouse permissions, roles, and access controls based on RBAC system",
+        "description": "Understanding Ashyq Bilim permissions, roles, and access controls based on RBAC system",
         "roleHierarchy": "Role Hierarchy",
         "roles": {
           "admin": {
@@ -2455,7 +2454,7 @@
       "purchasedCourses": "Courses you have purchased or subscribed to",
       "title": "Courses"
     },
-    "DashboardTitle": "OpenU Dashboard",
+    "DashboardTitle": "Ashyq Bilim Dashboard",
     "EditCourseContributors": {
       "active": "Active",
       "activeBadge": "Active",
@@ -3137,9 +3136,9 @@
           "descriptionMax": " ",
           "descriptionPlaceholder": "Brief description of your organization",
           "descriptionRequired": "Short description is required",
-          "exploreDescription": "Share your organization's courses and content with the OpenU community.<br/>Enable this to help learners discover your valuable educational resources.",
+          "exploreDescription": "Share your organization's courses and content with the Ashyq Bilim community.<br/>Enable this to help learners discover your valuable educational resources.",
           "exploreLabel": "EXPLORE",
-          "exploreTitle": "Showcase in OpenU Explore",
+          "exploreTitle": "Showcase in Ashyq Bilim Explore",
           "labelLabel": "Organization Label",
           "labelPlaceholder": "Select organization label",
           "labelRequired": "Label is required",
@@ -4927,7 +4926,6 @@
     "button": "Return to Homepage",
     "message": "We apologize for the inconvenience. It seems you are trying to access a page that has been deleted or never existed."
   },
-  "OpenuUniversity": "OpenU University",
   "RichTextEditor": {
     "addImage": "Add Image",
     "addLink": "Add Link",
@@ -4968,7 +4966,7 @@
       "collapseSidebar": "Collapse sidebar",
       "expandSidebar": "Expand sidebar",
       "goToHomepage": "Go to homepage",
-      "openuLogo": "OpenU logo",
+      "platformLogo": "Ashyq Bilim logo",
       "userSettings": "User settings"
     },
     "buttons": {
@@ -4992,7 +4990,7 @@
       "settings": "Settings",
       "users": "Users"
     },
-    "orgName": "OpenU",
+    "orgName": "Ashyq Bilim",
     "tooltips": {
       "admin": "Admin Dashboard",
       "assignments": "Assignments",
@@ -5081,7 +5079,7 @@
       "name": "Darkmatter"
     },
     "default": {
-      "description": "The default OpenU theme",
+      "description": "The default Ashyq Bilim theme",
       "name": "Default"
     },
     "doom64": {
@@ -5332,7 +5330,7 @@
   "failedToLoadUserData": "Failed to load user data.",
   "minutes": "Minutes",
   "noInviteCodesGenerated": "No invite codes generated yet.",
-  "openu-logo": "OpenU logo",
+  "platformLogo": "Ashyq Bilim logo",
   "previous": "Previous",
   "seconds": "Seconds",
   "selectDeadline": "Select a deadline for completing the task",

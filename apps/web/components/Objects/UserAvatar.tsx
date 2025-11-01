@@ -1,7 +1,7 @@
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@components/ui/avatar';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { getUserByUsername } from '@services/users/users';
 import { getUriWithOrg } from '@services/config/config';
@@ -47,7 +47,7 @@ const variantStyles = {
 
 const UserAvatar = (props: UserAvatarProps) => {
   const t = useTranslations('Components.UserAvatar');
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const params = useParams();
   const [userData, setUserData] = useState<any>(null);
 

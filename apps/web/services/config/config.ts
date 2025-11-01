@@ -1,9 +1,9 @@
-export const OPENU_HTTP_PROTOCOL =
-  process.env.NEXT_PUBLIC_OPENU_HTTPS?.toLowerCase() === 'true' ? 'https://' : 'http://';
-const OPENU_API_URL = `${process.env.NEXT_PUBLIC_OPENU_API_URL || ''}`;
-export const OPENU_BACKEND_URL = `${process.env.NEXT_PUBLIC_OPENU_BACKEND_URL || ''}`;
-export const OPENU_DOMAIN = process.env.NEXT_PUBLIC_OPENU_DOMAIN;
-export const OPENU_TOP_DOMAIN = process.env.NEXT_PUBLIC_OPENU_TOP_DOMAIN;
+export const PLATFORM_HTTP_PROTOCOL =
+  process.env.NEXT_PUBLIC_PLATFORM_HTTPS?.toLowerCase() === 'true' ? 'https://' : 'http://';
+const PLATFORM_API_URL = `${process.env.NEXT_PUBLIC_PLATFORM_API_URL || ''}`;
+export const PLATFORM_BACKEND_URL = `${process.env.NEXT_PUBLIC_PLATFORM_BACKEND_URL || ''}`;
+export const PLATFORM_DOMAIN = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN;
+export const PLATFORM_TOP_DOMAIN = process.env.NEXT_PUBLIC_PLATFORM_TOP_DOMAIN;
 
 const isLikelyIPv4 = (host: string) => {
   if (!host) return false;
@@ -26,14 +26,14 @@ const isUnsupportedCookieDomain = (host?: string | null) => {
 };
 
 export const getTopLevelCookieDomain = () =>
-  isUnsupportedCookieDomain(OPENU_TOP_DOMAIN) ? undefined : OPENU_TOP_DOMAIN;
+  isUnsupportedCookieDomain(PLATFORM_TOP_DOMAIN) ? undefined : PLATFORM_TOP_DOMAIN;
 
 /**
  * Returns the API base URL (always ending with a slash).
  * Falls back to current window origin + /api/v1/ in the browser when env is missing.
  */
 export const getAPIUrl = () => {
-  let base = OPENU_API_URL;
+  let base = PLATFORM_API_URL;
 
   // Browser fallback if env not provided at build time
   if (!base && typeof window !== 'undefined') {
@@ -50,7 +50,7 @@ export const getAPIUrl = () => {
     if (typeof window === 'undefined') {
       console.warn(
         '[Config] Using fallback API URL in server context. ' +
-          'Please set NEXT_PUBLIC_OPENU_API_URL environment variable. ' +
+          'Please set NEXT_PUBLIC_PLATFORM_API_URL environment variable. ' +
           `Current fallback: ${base}`,
       );
     }
@@ -62,20 +62,20 @@ export const getAPIUrl = () => {
   return base;
 };
 
-export const getBackendUrl = () => OPENU_BACKEND_URL;
+export const getBackendUrl = () => PLATFORM_BACKEND_URL;
 
 // Multi Organization Mode
-export const isMultiOrgModeEnabled = () => process.env.NEXT_PUBLIC_OPENU_MULTI_ORG === 'true';
+export const isMultiOrgModeEnabled = () => process.env.NEXT_PUBLIC_PLATFORM_MULTI_ORG === 'true';
 
 export const getUriWithOrg = (orgslug: string, path: string) => {
   const multi_org = isMultiOrgModeEnabled();
   if (multi_org) {
-    return `${OPENU_HTTP_PROTOCOL}${orgslug}.${OPENU_DOMAIN}${path}`;
+    return `${PLATFORM_HTTP_PROTOCOL}${orgslug}.${PLATFORM_DOMAIN}${path}`;
   }
-  return `${OPENU_HTTP_PROTOCOL}${OPENU_DOMAIN}${path}`;
+  return `${PLATFORM_HTTP_PROTOCOL}${PLATFORM_DOMAIN}${path}`;
 };
 
-export const getUriWithoutOrg = (path: string) => `${OPENU_HTTP_PROTOCOL}${OPENU_DOMAIN}${path}`;
+export const getUriWithoutOrg = (path: string) => `${PLATFORM_HTTP_PROTOCOL}${PLATFORM_DOMAIN}${path}`;
 
 export const getOrgFromUri = () => {
   const multi_org = isMultiOrgModeEnabled();
@@ -89,8 +89,8 @@ export const getOrgFromUri = () => {
   } else if (typeof window !== 'undefined') {
     const { hostname } = window.location;
 
-    return hostname.replace(`.${OPENU_DOMAIN}`, '');
+    return hostname.replace(`.${PLATFORM_DOMAIN}`, '');
   }
 };
 
-export const getDefaultOrg = () => process.env.NEXT_PUBLIC_OPENU_DEFAULT_ORG;
+export const getDefaultOrg = () => process.env.NEXT_PUBLIC_PLATFORM_DEFAULT_ORG;

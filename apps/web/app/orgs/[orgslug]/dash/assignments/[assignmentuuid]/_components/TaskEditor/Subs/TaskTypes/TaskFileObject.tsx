@@ -9,7 +9,7 @@ import { useAssignmentsTaskDispatch } from '@components/Contexts/Assignments/Ass
 import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Cloud, Download, File, Info, Loader2, UploadCloud } from 'lucide-react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getTaskFileSubmissionDir } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -30,7 +30,7 @@ interface TaskFileObjectProps {
 
 export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: TaskFileObjectProps) {
   const t = useTranslations('DashPage.Assignments.TaskFileObject');
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const org = useOrg() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [isLoading, setIsLoading] = useState(false);

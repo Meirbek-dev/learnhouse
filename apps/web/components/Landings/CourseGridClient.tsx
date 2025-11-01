@@ -1,7 +1,7 @@
 'use client';
 
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
@@ -13,7 +13,7 @@ interface CourseGridClientProps {
 }
 
 export default function CourseGridClient({ courses, orgslug }: CourseGridClientProps) {
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const org = useOrg() as any;
   const accessToken = session?.data?.tokens?.access_token;
   const orgId = org?.id;

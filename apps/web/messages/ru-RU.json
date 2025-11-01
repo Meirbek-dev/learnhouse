@@ -2304,8 +2304,7 @@
         "description": "Управляйте пользователями и ролями Ashyq Bilim",
         "title": "Пользователи"
       },
-      "openuLogo": "Логотип Ashyq Bilim",
-      "openuUniversity": "Торайгыров Университет",
+      "platformLogo": "Логотип Ashyq Bilim",
       "touUniversity": "Торайгыров Университет"
     },
     "Components": {
@@ -2403,7 +2402,7 @@
           }
         },
         "courseOwnershipTypes": "Типы владения курсом",
-        "description": "Разбор прав, ролей и доступа в LearnHouse на основе RBAC",
+        "description": "Разбор прав, ролей и доступа в Ashyq Bilim",
         "roleHierarchy": "Иерархия ролей",
         "roles": {
           "admin": {
@@ -4935,7 +4934,6 @@
     "button": "Вернуться на главную",
     "message": "Приносим извинения за неудобства. Похоже, вы пытаетесь получить доступ к странице, которая была удалена или никогда не существовала."
   },
-  "OpenuUniversity": "Торайгыров Университет",
   "RichTextEditor": {
     "addImage": "Добавить изображение",
     "addLink": "Добавить ссылку",
@@ -4976,7 +4974,7 @@
       "collapseSidebar": "Свернуть боковую панель",
       "expandSidebar": "Развернуть боковую панель",
       "goToHomepage": "Перейти на главную",
-      "openuLogo": "Логотип Ashyq Bilim",
+      "platformLogo": "Логотип Ashyq Bilim",
       "userSettings": "Настройки пользователя"
     },
     "buttons": {
@@ -5340,7 +5338,7 @@
   "failedToLoadUserData": "Не удалось загрузить данные пользователя.",
   "minutes": "Минуты",
   "noInviteCodesGenerated": "Коды приглашения еще не сгенерированы.",
-  "openu-logo": "Логотип Ashyq Bilim",
+  "platformLogo": "Логотип Ashyq Bilim",
   "previous": "Назад",
   "seconds": "Секунды",
   "selectDeadline": "Выберите дедлайн для выполнения задачи",

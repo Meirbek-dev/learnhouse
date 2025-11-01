@@ -41,16 +41,16 @@ COPY --from=frontend-deps /app/node_modules ./node_modules
 COPY apps/web .
 
 # Set environment variables for the build
-ENV NEXT_PUBLIC_OPENU_API_URL=https://cs-mooc.tou.edu.kz/api/v1/
-ENV NEXT_PUBLIC_OPENU_BACKEND_URL=https://cs-mooc.tou.edu.kz/
-ENV NEXT_PUBLIC_OPENU_DOMAIN=cs-mooc.tou.edu.kz
+ENV NEXT_PUBLIC_PLATFORM_API_URL=https://cs-mooc.tou.edu.kz/api/v1/
+ENV NEXT_PUBLIC_PLATFORM_BACKEND_URL=https://cs-mooc.tou.edu.kz/
+ENV NEXT_PUBLIC_PLATFORM_DOMAIN=cs-mooc.tou.edu.kz
 # Use localhost values for build/runtime inside the container to avoid
 # attempts to reach the external domain (which can timeout inside isolated
 # environments). These will be used by Next.js server-side fetches during
 # development or container runtime where the app and API are co-located.
-ENV NEXT_PUBLIC_OPENU_API_URL=http://localhost/api/v1/
-ENV NEXT_PUBLIC_OPENU_BACKEND_URL=http://localhost/
-ENV NEXT_PUBLIC_OPENU_DOMAIN=localhost
+ENV NEXT_PUBLIC_PLATFORM_API_URL=http://localhost/api/v1/
+ENV NEXT_PUBLIC_PLATFORM_BACKEND_URL=http://localhost/
+ENV NEXT_PUBLIC_PLATFORM_DOMAIN=localhost
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
@@ -110,7 +110,7 @@ COPY ./apps/api ./
 # Run the backend
 WORKDIR /app
 COPY ./extra/nginx.conf /etc/nginx/conf.d/default.conf
-ENV PORT=8000 OPENU_PORT=9000 HOSTNAME=0.0.0.0
+ENV PORT=8000 PLATFORM_PORT=9000 HOSTNAME=0.0.0.0
 COPY ./extra/start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 CMD ["sh", "/app/start.sh"]

@@ -1,6 +1,6 @@
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { ArrowRight, CheckCircle, GitBranch, Image, Play, Plus, RotateCcw, Save, Settings, Trash2 } from 'lucide-react';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { Textarea } from '@components/ui/textarea';
 import React, { useEffect, useState } from 'react';
 import { Button } from '@components/ui/button';
@@ -382,7 +382,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                       </Button>
                       <Button
                         size="icon-sm"
-                        variant={'ghost'}
+                        variant="ghost"
                         onClick={() => deleteScenario(scenario.id)}
                         disabled={scenarios.length <= 1}
                         className="hover:text-destructive"
@@ -463,7 +463,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                       </label>
                       <Button
                         size="sm"
-                        variant={'outline'}
+                        variant="outline"
                         onClick={() => addOption(scenario.id)}
                         disabled={scenario.options.length >= 4}
                         className="flex items-center gap-1 text-xs"
@@ -523,7 +523,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                             </div>
                             <Button
                               size="icon-sm"
-                              variant={'destructive'}
+                              variant="destructive"
                               onClick={() => deleteOption(scenario.id, option.id)}
                               disabled={scenario.options.length <= 1}
                               className="shrink-0 opacity-0 group-hover:opacity-100"

@@ -1,13 +1,13 @@
 // hooks/usePaymentsEnabled.ts
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getPaymentConfigs } from '@services/payments/payments';
 import { useOrg } from '@components/Contexts/OrgContext';
 import useSWR from 'swr';
 
 export function usePaymentsEnabled() {
   const org = useOrg() as any;
-  const session = useLHSession();
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
 
   const {

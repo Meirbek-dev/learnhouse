@@ -1,7 +1,7 @@
 'use client';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -21,7 +21,7 @@ interface TrailCourseElementProps {
 
 const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) => {
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const courseid = course.course_uuid.replace('course_', '');
   const router = useRouter();

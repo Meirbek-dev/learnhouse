@@ -2,8 +2,8 @@
 
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { deleteCollection } from '@services/courses/collections';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -77,7 +77,7 @@ const CollectionThumbnail = (props: PropsType) => {
 const CollectionAdminEditsArea = (props: any) => {
   const t = useTranslations('Components.CollectionThumbnail');
   const router = useRouter();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
 
   const deleteCollectionUI = async (collectionId: string) => {
     await deleteCollection(collectionId, session.data?.tokens?.access_token);

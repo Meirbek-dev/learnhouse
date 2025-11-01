@@ -1,4 +1,4 @@
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import type { Session } from 'next-auth';
 import { useMemo } from 'react';
@@ -98,7 +98,7 @@ function hasOrgId(org: any): org is { id: number } {
 }
 
 function useAdminStatus(): UseAdminStatusReturn {
-  const session = useLHSession();
+  const session = usePlatformSession();
   const org = useOrg();
 
   const userRoles = useMemo((): Role[] => {

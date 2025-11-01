@@ -46,7 +46,7 @@ interface SessionContextType extends ExtendedSession {
 
 export const SessionContext = createContext<SessionContextType | null>(null);
 
-const LHSessionProvider = ({ children }: { children: ReactNode }) => {
+const PlatformSessionProvider = ({ children }: { children: ReactNode }) => {
   const session = useSession();
 
   const isLoading = session.status === 'loading';
@@ -66,10 +66,10 @@ const LHSessionProvider = ({ children }: { children: ReactNode }) => {
   return <SessionContext value={extendedSession}>{children}</SessionContext>;
 };
 
-export function useLHSession(): SessionContextType {
+export function usePlatformSession(): SessionContextType {
   const context = use(SessionContext);
   if (!context) {
-    throw new Error('useLHSession must be used within a LHSessionProvider');
+    throw new Error('usePlatformSession must be used within a PlatformSessionProvider');
   }
   return context;
 }
@@ -83,7 +83,7 @@ export function isAuthenticated(session: SessionContextType): session is Session
 
 // Helper hook that ensures session data is available
 export function useAuthenticatedSession(): ExtendedSessionData {
-  const session = useLHSession();
+  const session = usePlatformSession();
 
   if (!isAuthenticated(session)) {
     throw new Error('useAuthenticatedSession must be used when user is authenticated');
@@ -111,4 +111,4 @@ export function getRoles(session: SessionContextType): string[] {
   return session.data?.roles || [];
 }
 
-export default LHSessionProvider;
+export default PlatformSessionProvider;

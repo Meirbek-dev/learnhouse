@@ -14,8 +14,8 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, School, Settings, Users } from 'lucide-react';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import platformLogoLight from '@public/platform_logo_light.svg';
 import useFeatureFlag from '@components/Hooks/useFeatureFlag';
 import { getUriWithoutOrg } from '@services/config/config';
@@ -192,7 +192,7 @@ const NavItem = ({ item, isCollapsed }: { item: NavigationItem; isCollapsed: boo
 
 const DashSidebar = ({ className }: SidebarProps) => {
   const org = useOrg() as any;
-  const session = useLHSession();
+  const session = usePlatformSession();
   const { state, toggleSidebar } = useSidebar();
   const t = useTranslations('SidebarMenu');
   const navigationItems = useNavigationItems();
@@ -272,7 +272,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
           >
             <div className="from-primary to-primary/80 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-linear-to-br p-1.5 shadow-sm">
               <Image
-                alt={t('ariaLabels.openuLogo')}
+                alt={t('ariaLabels.platformLogo')}
                 width={24}
                 height={24}
                 src={platformLogoLight}

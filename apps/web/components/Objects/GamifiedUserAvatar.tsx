@@ -1,8 +1,8 @@
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@components/ui/avatar';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getBackendUrl, getUriWithOrg } from '@services/config/config';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import type { UserGamificationProfile } from '@/types/gamification';
 import { AVATAR_UNLOCKS } from '@/lib/gamification/levels';
@@ -68,7 +68,7 @@ const levelIndicatorSizes = {
 
 const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
   const t = useTranslations('Components.UserAvatar');
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const params = useParams();
   const [userData, setUserData] = useState<any>(null);
 

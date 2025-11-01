@@ -17,7 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { getCoursesByUser } from '@services/users/users';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -79,7 +79,7 @@ const ImageModal: FC<{
 };
 
 const UserProfileClient = ({ userData, profile }: UserProfileClientProps) => {
-  const session = useLHSession();
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('UserProfilePage');
   const [selectedImage, setSelectedImage] = useState<{

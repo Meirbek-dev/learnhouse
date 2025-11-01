@@ -1,6 +1,6 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import PasswordInput from '@components/ui/custom/password-input';
 import { updatePassword } from '@services/settings/password';
@@ -37,7 +37,7 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
 type PasswordFormData = z.infer<ReturnType<typeof createValidationSchema>>;
 
 const UserEditPassword = () => {
-  const session = useLHSession();
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.Notifications');
   const tPassword = useTranslations('DashPage.UserAccountSettings.UserAccount.EditPassword');

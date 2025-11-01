@@ -17,8 +17,8 @@ import {
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { updateProfile } from '@services/settings/profile';
 import { createElement, useEffect, useState } from 'react';
 import { de, enUS, es, fr, ru } from 'date-fns/locale';
@@ -221,7 +221,7 @@ interface ProfileData {
 }
 
 const UserProfileBuilder = () => {
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.UserProfileBuilder');

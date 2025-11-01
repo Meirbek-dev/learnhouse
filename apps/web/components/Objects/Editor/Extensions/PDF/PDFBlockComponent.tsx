@@ -1,8 +1,8 @@
 import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { AlertTriangle, Download, Expand, FileText } from 'lucide-react';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { uploadNewPDFFile } from '@services/blocks/Pdf/pdf';
@@ -18,7 +18,7 @@ const PDFBlockComponent = (props: any) => {
   const t = useTranslations('DashPage.Editor.PDFBlock');
   const org = useOrg() as any;
   const course = useCourse();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [pdf, setPDF] = useState(null);
   const [isLoading, setIsLoading] = useState(false);

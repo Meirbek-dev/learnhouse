@@ -6,7 +6,7 @@ import { createContext, use } from 'react';
 import type { ReactNode } from 'react';
 import useSWR from 'swr';
 
-import { useLHSession } from '../LHSessionContext';
+import { usePlatformSession } from '../LHSessionContext';
 
 // Types for assignment submission
 export type AssignmentSubmissionStatus = 'PENDING' | 'SUBMITTED' | 'GRADED' | 'LATE' | 'NOT_SUBMITTED';
@@ -39,7 +39,7 @@ interface AssignmentSubmissionProviderProps {
 }
 
 const AssignmentSubmissionProvider = ({ children, assignment_uuid }: AssignmentSubmissionProviderProps) => {
-  const session = useLHSession();
+  const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;
 
   const {

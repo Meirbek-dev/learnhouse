@@ -11,8 +11,8 @@ import {
   Users,
 } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { removeCoursePrefix } from '../Thumbnails/CourseThumbnail';
 import type { ChangeEvent, FC, KeyboardEvent } from 'react';
 import { searchOrgContent } from '@services/search/search';
@@ -124,7 +124,7 @@ export const SearchBar: FC<SearchBarProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const session = useLHSession();
+  const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 

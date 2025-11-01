@@ -1,7 +1,7 @@
 'use client';
 
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { validateInviteCode } from '@services/organizations/invites';
 import Toast from '@components/Objects/StyledElements/Toast/Toast';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
@@ -27,7 +27,7 @@ interface SignUpClientProps {
 }
 
 const SignUpClient = (props: SignUpClientProps) => {
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const searchParams = useSearchParams();
   const inviteCodeParam = searchParams.get('inviteCode');
 
@@ -80,7 +80,7 @@ const SignUpClient = (props: SignUpClientProps) => {
 const LoggedInJoinScreen = (props: any) => {
   const t = useTranslations('Auth.Signup');
   const toastT = useTranslations('ToastMessages');
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const org = useOrg() as any;
   const [_isLoading, setIsLoading] = useState(true);
   const [isSumbitting, setIsSubmitting] = useState(false);
@@ -172,7 +172,7 @@ const LoggedInJoinScreen = (props: any) => {
 const NoTokenScreen = (_props: any) => {
   const t = useTranslations('Auth.Signup');
   const toastT = useTranslations('ToastMessages');
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const org = useOrg() as any;
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(() => {

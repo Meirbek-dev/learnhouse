@@ -1,7 +1,7 @@
 import { getBackendUrl } from '@services/config/config';
 
 function getMediaUrl(): string {
-  return process.env.NEXT_PUBLIC_OPENU_MEDIA_URL || getBackendUrl();
+  return process.env.NEXT_PUBLIC_PLATFORM_MEDIA_URL || getBackendUrl();
 }
 
 const MEDIA_URL = getMediaUrl();

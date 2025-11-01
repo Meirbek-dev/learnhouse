@@ -1,8 +1,8 @@
 import { AlertTriangle, AlignCenter, AlignLeft, AlignRight, Download, Expand, Image } from 'lucide-react';
 import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { uploadNewImageFile } from '@services/blocks/Image/images';
 import { useCourse } from '@components/Contexts/CourseContext';
@@ -20,7 +20,7 @@ const ImageBlockComponent = (props: any) => {
   const org = useOrg() as any;
   const course = useCourse();
   const editorState = useEditorProvider();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 
   const { isEditable } = editorState;

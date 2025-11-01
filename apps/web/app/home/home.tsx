@@ -1,7 +1,7 @@
 'use client';
 
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import platformLogoFull from 'public/platform_logo_full.svg';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -13,7 +13,7 @@ import useSWR from 'swr';
 
 const HomeClient = () => {
   const t = useTranslations('HomeClient');
-  const session = useLHSession();
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const { data: orgs } = useSWR(`${getAPIUrl()}orgs/user/page/1/limit/20`, (url) => swrFetcher(url, access_token), {
     revalidateOnFocus: false,

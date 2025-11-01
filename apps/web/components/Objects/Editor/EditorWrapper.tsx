@@ -1,6 +1,6 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import Toast from '@components/Objects/StyledElements/Toast/Toast';
 import { OrgProvider } from '@components/Contexts/OrgContext';
 import { updateActivity } from '@services/courses/activities';
@@ -19,7 +19,7 @@ interface EditorWrapperProps {
 
 const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
   const t = useTranslations('DashPage.Editor.EditorWrapper');
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const isReady = !session.isLoading;
 

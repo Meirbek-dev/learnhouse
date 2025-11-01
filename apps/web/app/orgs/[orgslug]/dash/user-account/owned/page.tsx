@@ -1,7 +1,7 @@
 'use client';
 
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { getOwnedCourses } from '@services/payments/payments';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -42,7 +42,7 @@ const CourseGrid = ({ ownedCourses, orgSlug }: { ownedCourses: any[]; orgSlug: s
 const OwnedCoursesPage = () => {
   const t = useTranslations('DashPage.Courses');
   const org = useOrg() as any;
-  const session = useLHSession();
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
 
   const {

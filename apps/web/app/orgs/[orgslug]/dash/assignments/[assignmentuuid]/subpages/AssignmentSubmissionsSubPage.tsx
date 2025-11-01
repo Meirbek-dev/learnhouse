@@ -3,7 +3,7 @@
 import AssignmentSubmissionProvider from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { SendHorizonal, UserCheck, X } from 'lucide-react';
@@ -18,7 +18,7 @@ import EvaluateAssignment from './Modals/EvaluateAssignment';
 
 const AssignmentSubmissionsSubPage = ({ assignment_uuid }: { assignment_uuid: string }) => {
   const t = useTranslations('DashPage.Assignments');
-  const session = useLHSession();
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
 
   const { data: assignmentSubmission, error: assignmentError } = useSWR(
@@ -74,7 +74,7 @@ const AssignmentSubmissionsSubPage = ({ assignment_uuid }: { assignment_uuid: st
 
 const SubmissionBox = ({ assignment_uuid, user_id, submission }: any) => {
   const t = useTranslations('DashPage.Assignments');
-  const session = useLHSession();
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const [gradeSudmissionModal, setGradeSubmissionModal] = useState({
     open: false,

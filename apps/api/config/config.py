@@ -167,14 +167,14 @@ def get_platform_config() -> PlatformConfig:
     # General Config
 
     # Development Mode & Install Mode
-    env_development_mode = eval(os.environ.get("OPENU_DEVELOPMENT_MODE", "None"))
+    env_development_mode = eval(os.environ.get("PLATFORM_DEVELOPMENT_MODE", "None"))
     development_mode = (
         env_development_mode
         if env_development_mode is not None
         else yaml_config.get("general", {}).get("development_mode")
     )
 
-    env_install_mode = os.environ.get("OPENU_INSTALL_MODE", "None")
+    env_install_mode = os.environ.get("PLATFORM_INSTALL_MODE", "None")
     install_mode = (
         env_install_mode
         if env_install_mode is not None
@@ -182,39 +182,39 @@ def get_platform_config() -> PlatformConfig:
     )
 
     # Logfire config
-    env_logfire_enabled = os.environ.get("OPENU_LOGFIRE_ENABLED", "None")
+    env_logfire_enabled = os.environ.get("PLATFORM_LOGFIRE_ENABLED", "None")
     logfire_enabled = (
         env_logfire_enabled.lower() == "true"
         if env_logfire_enabled != "None"
         else yaml_config.get("general", {}).get("logfire_enabled", False)
     )
     # Timezone
-    env_timezone = os.environ.get("OPENU_TIMEZONE")
+    env_timezone = os.environ.get("PLATFORM_TIMEZONE")
     timezone = env_timezone or yaml_config.get("general", {}).get("timezone", "UTC")
 
     # Security Config
-    env_auth_jwt_secret_key = os.environ.get("OPENU_AUTH_JWT_SECRET_KEY")
+    env_auth_jwt_secret_key = os.environ.get("PLATFORM_AUTH_JWT_SECRET_KEY")
     auth_jwt_secret_key = env_auth_jwt_secret_key or yaml_config.get(
         "security", {}
     ).get("auth_jwt_secret_key")
 
     # Check if environment variables are defined
-    env_site_name = os.environ.get("OPENU_SITE_NAME")
-    env_site_description = os.environ.get("OPENU_SITE_DESCRIPTION")
-    env_contact_email = os.environ.get("OPENU_CONTACT_EMAIL")
-    env_domain = os.environ.get("OPENU_DOMAIN")
-    env_ssl = os.environ.get("OPENU_SSL")
-    env_port = os.environ.get("OPENU_PORT")
-    env_use_default_org = os.environ.get("OPENU_USE_DEFAULT_ORG")
-    env_allowed_origins = os.environ.get("OPENU_ALLOWED_ORIGINS")
-    env_cookie_domain = os.environ.get("OPENU_COOKIE_DOMAIN")
+    env_site_name = os.environ.get("PLATFORM_SITE_NAME")
+    env_site_description = os.environ.get("PLATFORM_SITE_DESCRIPTION")
+    env_contact_email = os.environ.get("PLATFORM_CONTACT_EMAIL")
+    env_domain = os.environ.get("PLATFORM_DOMAIN")
+    env_ssl = os.environ.get("PLATFORM_SSL")
+    env_port = os.environ.get("PLATFORM_PORT")
+    env_use_default_org = os.environ.get("PLATFORM_USE_DEFAULT_ORG")
+    env_allowed_origins = os.environ.get("PLATFORM_ALLOWED_ORIGINS")
+    env_cookie_domain = os.environ.get("PLATFORM_COOKIE_DOMAIN")
 
     # Allowed origins should be a comma separated string
     if env_allowed_origins:
         env_allowed_origins = env_allowed_origins.split(",")
-    env_allowed_regexp = os.environ.get("OPENU_ALLOWED_REGEXP")
-    env_self_hosted = os.environ.get("OPENU_SELF_HOSTED")
-    env_sql_connection_string = os.environ.get("OPENU_SQL_CONNECTION_STRING")
+    env_allowed_regexp = os.environ.get("PLATFORM_ALLOWED_REGEXP")
+    env_self_hosted = os.environ.get("PLATFORM_SELF_HOSTED")
+    env_sql_connection_string = os.environ.get("PLATFORM_SQL_CONNECTION_STRING")
 
     # Fill in values with YAML file if they are not provided
     site_name = env_site_name or yaml_config.get("site_name")
@@ -242,14 +242,14 @@ def get_platform_config() -> PlatformConfig:
     ).get("domain")
     cookie_config = CookieConfig(domain=_normalize_cookie_domain(cookies_domain))
 
-    env_content_delivery_type = os.environ.get("OPENU_CONTENT_DELIVERY_TYPE")
+    env_content_delivery_type = os.environ.get("PLATFORM_CONTENT_DELIVERY_TYPE")
     content_delivery_type: str = env_content_delivery_type or (
         (yaml_config.get("hosting_config", {}).get("content_delivery", {}).get("type"))
         or "filesystem"
     )  # default to filesystem
 
-    env_bucket_name = os.environ.get("OPENU_S3_API_BUCKET_NAME")
-    env_endpoint_url = os.environ.get("OPENU_S3_API_ENDPOINT_URL")
+    env_bucket_name = os.environ.get("PLATFORM_S3_API_BUCKET_NAME")
+    env_endpoint_url = os.environ.get("PLATFORM_S3_API_ENDPOINT_URL")
     bucket_name = (
         yaml_config.get("hosting_config", {})
         .get("content_delivery", {})
@@ -274,10 +274,10 @@ def get_platform_config() -> PlatformConfig:
     ).get("sql_connection_string")
 
     # AI Config
-    env_openai_api_key = os.environ.get("OPENU_OPENAI_API_KEY")
-    env_is_ai_enabled = os.environ.get("OPENU_IS_AI_ENABLED")
-    env_chromadb_separate = os.environ.get("OPENU_CHROMADB_SEPARATE")
-    env_chromadb_host = os.environ.get("OPENU_CHROMADB_HOST")
+    env_openai_api_key = os.environ.get("PLATFORM_OPENAI_API_KEY")
+    env_is_ai_enabled = os.environ.get("PLATFORM_IS_AI_ENABLED")
+    env_chromadb_separate = os.environ.get("PLATFORM_CHROMADB_SEPARATE")
+    env_chromadb_host = os.environ.get("PLATFORM_CHROMADB_HOST")
 
     openai_api_key = env_openai_api_key or yaml_config.get("ai_config", {}).get(
         "openai_api_key"
@@ -293,14 +293,14 @@ def get_platform_config() -> PlatformConfig:
     ).get("db_host")
 
     # Redis config
-    env_redis_connection_string = os.environ.get("OPENU_REDIS_CONNECTION_STRING")
+    env_redis_connection_string = os.environ.get("PLATFORM_REDIS_CONNECTION_STRING")
     redis_connection_string = env_redis_connection_string or yaml_config.get(
         "redis_config", {}
     ).get("redis_connection_string")
 
     # Mailing config
-    env_resend_api_key = os.environ.get("OPENU_RESEND_API_KEY")
-    env_system_email_address = os.environ.get("OPENU_SYSTEM_EMAIL_ADDRESS")
+    env_resend_api_key = os.environ.get("PLATFORM_RESEND_API_KEY")
+    env_system_email_address = os.environ.get("PLATFORM_SYSTEM_EMAIL_ADDRESS")
     resend_api_key = env_resend_api_key or yaml_config.get("mailing_config", {}).get(
         "resend_api_key"
     )
@@ -309,15 +309,15 @@ def get_platform_config() -> PlatformConfig:
     ).get("system_email_adress")
 
     # Payments config
-    env_stripe_secret_key = os.environ.get("OPENU_STRIPE_SECRET_KEY")
-    env_stripe_publishable_key = os.environ.get("OPENU_STRIPE_PUBLISHABLE_KEY")
+    env_stripe_secret_key = os.environ.get("PLATFORM_STRIPE_SECRET_KEY")
+    env_stripe_publishable_key = os.environ.get("PLATFORM_STRIPE_PUBLISHABLE_KEY")
     env_stripe_webhook_standard_secret = os.environ.get(
-        "OPENU_STRIPE_WEBHOOK_STANDARD_SECRET"
+        "PLATFORM_STRIPE_WEBHOOK_STANDARD_SECRET"
     )
     env_stripe_webhook_connect_secret = os.environ.get(
-        "OPENU_STRIPE_WEBHOOK_CONNECT_SECRET"
+        "PLATFORM_STRIPE_WEBHOOK_CONNECT_SECRET"
     )
-    env_stripe_client_id = os.environ.get("OPENU_STRIPE_CLIENT_ID")
+    env_stripe_client_id = os.environ.get("PLATFORM_STRIPE_CLIENT_ID")
 
     stripe_secret_key = env_stripe_secret_key or yaml_config.get(
         "payments_config", {}
@@ -370,7 +370,7 @@ def get_platform_config() -> PlatformConfig:
         ),
     )
 
-    # Create OpenUConfig object
+    # Create PlatformConfig object
     return PlatformConfig(
         site_name=site_name,
         site_description=site_description,

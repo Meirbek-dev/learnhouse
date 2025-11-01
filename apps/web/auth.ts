@@ -115,8 +115,8 @@ const normalizeBoolean = (value?: string | null) => {
   return undefined;
 };
 
-const httpsFlag = normalizeBoolean(process.env.NEXT_PUBLIC_OPENU_HTTPS);
-const sslFlag = normalizeBoolean(process.env.OPENU_SSL);
+const httpsFlag = normalizeBoolean(process.env.NEXT_PUBLIC_PLATFORM_HTTPS);
+const sslFlag = normalizeBoolean(process.env.PLATFORM_SSL);
 const nextAuthUrl = process.env.NEXTAUTH_URL;
 const isHttpsUrl = typeof nextAuthUrl === 'string' && nextAuthUrl.startsWith('https://');
 const cookieSecure = !isDevEnv && (isHttpsUrl || httpsFlag === true || sslFlag === true);
@@ -185,8 +185,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
     Google({
-      clientId: process.env.OPENU_GOOGLE_CLIENT_ID,
-      clientSecret: process.env.OPENU_GOOGLE_CLIENT_SECRET,
+      clientId: process.env.PLATFORM_GOOGLE_CLIENT_ID,
+      clientSecret: process.env.PLATFORM_GOOGLE_CLIENT_SECRET,
       authorization: {
         params: {
           prompt: 'consent',

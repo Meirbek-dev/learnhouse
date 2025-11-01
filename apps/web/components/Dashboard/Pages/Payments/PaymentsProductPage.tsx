@@ -6,8 +6,8 @@ import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/Unconfigu
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { archiveProduct, getProducts, updateProduct } from '@services/payments/products';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import CreateProductForm from './SubComponents/CreateProductForm';
 import { getPaymentConfigs } from '@services/payments/payments';
@@ -54,7 +54,7 @@ type EditProductFormData = z.infer<ReturnType<typeof createValidationSchema>>;
 
 const PaymentsProductPage = () => {
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
   const orgId = org?.id;
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -288,7 +288,7 @@ const EditProductForm = ({
   onCancel: () => void;
 }) => {
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const currencies = useMemo(
     () =>
       currencyCodes.data.map((currency) => ({

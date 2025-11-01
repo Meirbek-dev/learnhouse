@@ -4,8 +4,8 @@ import UnsplashImagePicker from '@components/Dashboard/Pages/Course/EditCourseGe
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCallback, useEffect, useState, useTransition } from 'react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { Image as ImageIcon, UploadCloud } from 'lucide-react';
 import { TagsInput } from '@components/ui/custom/tags-input';
@@ -25,7 +25,7 @@ import { z } from 'zod';
 const CreateCourseModal = ({ closeModal, orgslug }: any) => {
   const t = useTranslations('Components.CreateCourseModal');
   const router = useRouter();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const [orgId, setOrgId] = useState<number | null>(null);
   const [showUnsplashPicker, setShowUnsplashPicker] = useState(false);
   const [isUploading, setIsUploading] = useState(false);

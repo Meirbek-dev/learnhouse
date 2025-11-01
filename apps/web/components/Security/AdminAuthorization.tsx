@@ -1,6 +1,6 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
@@ -26,7 +26,7 @@ const ADMIN_PATHS = [
 ];
 
 const AdminAuthorization: FC<AuthorizationProps> = ({ children, authorizationMode }) => {
-  const session = useLHSession();
+  const session = usePlatformSession();
   const org = useOrg() as any;
   const pathname = usePathname();
   const router = useRouter();

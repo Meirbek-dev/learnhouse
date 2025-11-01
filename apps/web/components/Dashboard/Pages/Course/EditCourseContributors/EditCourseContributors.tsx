@@ -10,8 +10,8 @@ import { bulkAddContributors, bulkRemoveContributors, editContributor } from '@s
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { searchOrgContent } from '@services/search/search';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -170,7 +170,7 @@ const StatusDropdown = ({
 const EditCourseContributors = (_props: EditCourseContributorsProps) => {
   const t = useTranslations('DashPage.EditCourseContributors');
   const locale = useLocale() as Locale;
-  const session = useLHSession();
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
   const { isLoading, courseStructure } = course;

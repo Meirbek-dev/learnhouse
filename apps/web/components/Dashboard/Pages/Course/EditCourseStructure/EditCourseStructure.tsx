@@ -2,7 +2,7 @@
 
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import NewChapterModal from '@components/Objects/Modals/Chapters/NewChapter';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
@@ -36,7 +36,7 @@ export type OrderPayload =
 
 const EditCourseStructure = (props: EditCourseStructureProps) => {
   const router = useRouter();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   // Check window availability - use lazy initialization
   const [winReady, setwinReady] = useState(() => typeof window !== 'undefined');

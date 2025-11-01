@@ -13,7 +13,7 @@ import {
   Users,
 } from 'lucide-react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
@@ -457,7 +457,7 @@ function EditRole(props: EditRoleProps) {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.OrgRoles.EditRole');
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [rights, setRights] = React.useState<Rights>(props.role.rights || {});

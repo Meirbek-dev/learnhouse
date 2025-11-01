@@ -1,7 +1,7 @@
 'use client';
 
 import { getCoursesLinkedToProduct, unlinkCourseFromProduct } from '@services/payments/products';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { BookOpen, Plus, Trash2 } from 'lucide-react';
@@ -19,7 +19,7 @@ interface ProductLinkedCoursesProps {
 
 export default function ProductLinkedCourses({ productId }: ProductLinkedCoursesProps) {
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const org = useOrg() as any;
   const accessToken = session?.data?.tokens?.access_token;
   const orgId = org?.id;

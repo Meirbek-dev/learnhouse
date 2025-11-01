@@ -15,7 +15,7 @@ async function DashboardHome() {
     <div className="mx-auto mb-16 flex min-h-screen flex-col items-center justify-center p-4 sm:mb-0">
       <div className="mx-auto pb-6 sm:pb-10">
         <Image
-          alt={t('openuLogo')}
+          alt={t('platformLogo')}
           width={210}
           src={platformLogoFull}
           className="w-48 pt-16 pb-24 sm:w-auto"

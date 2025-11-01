@@ -663,7 +663,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                   </div>
                 )}
               </div>
-              <div className={`text-xs ${theme.secondary} font-medium`}>{org?.name || 'LearnHouse'}</div>
+              <div className={`text-xs ${theme.secondary} font-medium`}>{org?.name || 'Ashyq Bilim'}</div>
             </div>
 
             {/* Right: Award Date */}

@@ -1,7 +1,7 @@
 'use client';
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { updateUserGroup } from '@services/usergroups/usergroups';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,7 +34,7 @@ type UserGroupFormValues = z.infer<ReturnType<typeof createValidationSchema>>;
 const EditUserGroup = (props: EditUserGroupProps) => {
   const t = useTranslations('Components.EditUserGroup');
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const validationSchema = createValidationSchema(t);
 

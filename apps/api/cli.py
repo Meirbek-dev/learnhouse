@@ -48,7 +48,7 @@ def install(
             email="meirbek.dev@gmail.com",
             logo_image="",
             thumbnail_image="",
-            label="OpenU",
+            label="Ashyq Bilim",
         )
         install_create_organization(org, db_session)
         print("Ashyq Bilim created ✅")

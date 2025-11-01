@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import LinkToUserGroup from '@components/Objects/Modals/Dash/EditCourseAccess/LinkToUserGroup';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { Globe, SquareUserRound, Users, X } from 'lucide-react';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -21,7 +21,7 @@ interface EditCourseAccessProps {
 }
 
 const EditCourseAccess = (_props: EditCourseAccessProps) => {
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
   const { isLoading, courseStructure } = course;
@@ -130,7 +130,7 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
 const UserGroupsSection = ({ usergroups }: { usergroups: any[] }) => {
   const course = useCourse();
   const [userGroupModal, setUserGroupModal] = useState(false);
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.Courses.Access');
 

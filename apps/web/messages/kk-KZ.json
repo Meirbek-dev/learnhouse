@@ -2304,8 +2304,7 @@
         "description": "Ұйым пайдаланушыларын және рөлдерін басқарыңыз",
         "title": "Пайдаланушылар"
       },
-      "openuLogo": "OpenU логотипі",
-      "openuUniversity": "Торайғыров Университеті",
+      "platformLogo": "OpenU логотипі",
       "touUniversity": "Торайғыров Университеті"
     },
     "Components": {
@@ -2403,7 +2402,7 @@
           }
         },
         "courseOwnershipTypes": "Курс иелену түрлері",
-        "description": "LearnHouse жүйесіндегі құқықтар, рөлдер және қолжетімділік (RBAC негізінде)",
+        "description": "Ashyq Bilim жүйесіндегі құқықтар, рөлдер және қолжетімділік (RBAC негізінде)",
         "roleHierarchy": "Рөл иерархиясы",
         "roles": {
           "admin": {
@@ -4937,7 +4936,6 @@
     "button": "Басты бетке оралу",
     "message": "Ыңғайсыздық үшін кешірім сұраймыз. Сіз жойылған немесе ешқашан болмаған бетке кіруге тырысып жатқан сияқтысыз."
   },
-  "OpenuUniversity": "OpenU Университеті",
   "RichTextEditor": {
     "addImage": "Сурет қосу",
     "addLink": "Сілтеме қосу",
@@ -4978,7 +4976,7 @@
       "collapseSidebar": "Бүйірлік панельді жию",
       "expandSidebar": "Бүйірлік панельді кеңейту",
       "goToHomepage": "Басты бетке өту",
-      "openuLogo": "OpenU логотипі",
+      "platformLogo": "OpenU логотипі",
       "userSettings": "Пайдаланушы параметрлері"
     },
     "buttons": {
@@ -5342,7 +5340,7 @@
   "failedToLoadUserData": "Пайдаланушы деректерін жүктеу сәтсіз аяқталды.",
   "minutes": "Минут",
   "noInviteCodesGenerated": "Шақыру кодтары әлі жасалмаған.",
-  "openu-logo": "OpenU логотипі",
+  "platformLogo": "OpenU логотипі",
   "previous": "Алдыңғы",
   "seconds": "Секунд",
   "selectDeadline": "Тапсырманы аяқтау үшін мерзімді таңдаңыз",

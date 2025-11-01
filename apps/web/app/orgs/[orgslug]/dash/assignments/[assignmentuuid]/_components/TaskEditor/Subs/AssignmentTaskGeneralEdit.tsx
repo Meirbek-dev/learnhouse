@@ -6,8 +6,8 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { updateAssignmentTask, updateReferenceFile } from '@services/courses/assignments';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Cloud, File, Info, Loader2, UploadCloud } from 'lucide-react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getActivityByID } from '@services/courses/activities';
 import { useEffect, useState, useTransition } from 'react';
 import { getTaskRefFileDir } from '@services/media/media';
@@ -37,7 +37,7 @@ type TaskFormData = z.infer<ReturnType<typeof createValidationSchema>>;
 
 export const AssignmentTaskGeneralEdit = () => {
   const t = useTranslations('DashPage.Assignments.TaskGeneralEdit');
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const assignmentTaskState = useAssignmentsTask();
   const assignmentTaskStateHook = useAssignmentsTaskDispatch();
@@ -241,7 +241,7 @@ export const AssignmentTaskGeneralEdit = () => {
 
 const UpdateTaskRef = () => {
   const t = useTranslations('DashPage.Assignments.TaskGeneralEdit');
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const org = useOrg() as any;
   const access_token = session?.data?.tokens?.access_token;
   const assignmentTaskState = useAssignmentsTask();

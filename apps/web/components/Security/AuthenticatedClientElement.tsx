@@ -1,6 +1,6 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
@@ -14,7 +14,7 @@ interface AuthenticatedClientElementProps {
 }
 
 export const AuthenticatedClientElement = (props: AuthenticatedClientElementProps) => {
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const org = useOrg() as any;
 
   const isUserAllowed = useCallback((roles: any[], action: string, resourceType: string, org_uuid: string): boolean => {

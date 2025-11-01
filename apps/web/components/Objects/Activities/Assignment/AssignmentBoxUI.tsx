@@ -2,7 +2,7 @@
 
 import { BookPlus, BookUser, EllipsisVertical, FileUp, Forward, InfoIcon, ListTodo, Save, Type } from 'lucide-react';
 import { useAssignmentSubmission } from '@components/Contexts/Assignments/AssignmentSubmissionContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
@@ -36,7 +36,7 @@ const AssignmentBoxUI = ({
   const [customGrade, setCustomGrade] = useState<number>(0);
   const submissionContext = useAssignmentSubmission();
   const submission = submissionContext.submissions;
-  const session = useLHSession();
+  const session = usePlatformSession();
 
   useEffect(() => {
     console.log(submission);

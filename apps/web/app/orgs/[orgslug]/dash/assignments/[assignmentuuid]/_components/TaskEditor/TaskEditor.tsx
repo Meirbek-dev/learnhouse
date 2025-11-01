@@ -5,8 +5,8 @@ import {
   useAssignmentsTaskDispatch,
 } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { GalleryVerticalEnd, Info, TentTree, Trash } from 'lucide-react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { deleteAssignmentTask } from '@services/courses/assignments';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
@@ -22,7 +22,7 @@ const AssignmentTaskEditor = ({ page }: any) => {
   const assignment = useAssignments();
   const assignmentTaskState = useAssignmentsTask();
   const assignmentTaskStateHook = useAssignmentsTaskDispatch();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 
   // Use key to track current task UUID and reset sub-page state when it changes

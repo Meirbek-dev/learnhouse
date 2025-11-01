@@ -3,7 +3,7 @@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertTriangle, Code2, PencilLine, Plus, Trash2 } from 'lucide-react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { updateOrganization } from '@services/settings/org';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -38,7 +38,7 @@ const getValidationSchema = (t: (key: string) => string) =>
 type ScriptFormData = z.infer<ReturnType<typeof getValidationSchema>>;
 
 const OrgEditOther: FC = () => {
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any;
   const [selectedView, setSelectedView] = useState<'list' | 'edit'>('list');

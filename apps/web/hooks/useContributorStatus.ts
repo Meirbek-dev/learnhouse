@@ -1,4 +1,4 @@
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseContributors } from '@services/courses/courses';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -12,7 +12,7 @@ interface Contributor {
 }
 
 export function useContributorStatus(courseUuid: string) {
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const [contributorStatus, setContributorStatus] = useState<ContributorStatus>('NONE');
   const [isLoading, setIsLoading] = useState(true);
   const t = useTranslations('Hooks.useContributorStatus');

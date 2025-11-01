@@ -6,7 +6,7 @@ import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCours
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -74,7 +74,7 @@ const Courses = (props: CourseProps) => {
   const isCreatingCourse = Boolean(searchParams.get('new'));
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
   const isUserAdmin = useAdminStatus();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const org = useOrg() as any;
   const access_token = session?.data?.tokens?.access_token;
 

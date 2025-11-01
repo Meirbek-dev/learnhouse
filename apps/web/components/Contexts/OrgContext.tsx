@@ -1,8 +1,8 @@
 'use client';
 
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
 import ErrorUI from '@components/Objects/StyledElements/Error/Error';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { Home, LogOut, PersonStanding } from 'lucide-react';
 import { createContext, useContext, useMemo } from 'react';
@@ -16,7 +16,7 @@ import useSWR from 'swr';
 export const OrgContext = createContext(null);
 
 export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslug: string }) => {
-  const session = useLHSession();
+  const session = usePlatformSession();
   const pathname = usePathname();
   const accessToken = session?.data?.tokens?.access_token;
   const t = useTranslations('Contexts.Org');

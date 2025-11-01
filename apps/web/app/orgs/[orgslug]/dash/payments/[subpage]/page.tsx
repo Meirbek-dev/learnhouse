@@ -3,7 +3,7 @@
 import PaymentsConfigurationPage from '@components/Dashboard/Pages/Payments/PaymentsConfigurationPage';
 import PaymentsCustomersPage from '@components/Dashboard/Pages/Payments/PaymentsCustomersPage';
 import PaymentsProductPage from '@components/Dashboard/Pages/Payments/PaymentsProductPage';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import useFeatureFlag from '@components/Hooks/useFeatureFlag';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -23,7 +23,7 @@ export interface PaymentsParams {
 const PaymentsPage = (props: { params: Promise<PaymentsParams> }) => {
   const params = use(props.params);
   const t = useTranslations('DashPage.Payments');
-  const _session = useLHSession();
+  const _session = usePlatformSession();
   const _org = useOrg() as any;
   const subpage = params.subpage || 'customers';
 

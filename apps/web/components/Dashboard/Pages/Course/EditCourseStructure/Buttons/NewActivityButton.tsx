@@ -3,7 +3,7 @@
 import { createActivity, createExternalVideoActivity, createFileActivity } from '@services/courses/activities';
 import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
 import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -24,7 +24,7 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
   const [newActivityModal, setNewActivityModal] = useState(false);
   const router = useRouter();
   const course = useCourse();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
   const t = useTranslations('CourseEdit.NewActivityModal');

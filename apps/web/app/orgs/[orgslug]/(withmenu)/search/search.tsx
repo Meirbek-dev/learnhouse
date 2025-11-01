@@ -2,7 +2,7 @@
 
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Book, GraduationCap, Search, Users } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { searchOrgContent } from '@services/search/search';
@@ -165,7 +165,7 @@ const EmptyState = ({ query, t }: { query: string; t: (key: string, params?: any
 const SearchPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const session = useLHSession();
+  const session = usePlatformSession();
   const org = useOrg() as any;
   const t = useTranslations('SearchPage');
 

@@ -4,8 +4,8 @@ import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationMo
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import OrgInviteCodeGenerate from '@components/Objects/Modals/Dash/OrgAccess/OrgInviteCodeGenerate';
 import { changeSignupMechanism, deleteInviteCode } from '@services/organizations/invites';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { Globe, Ticket, UserSquare, Users, X } from 'lucide-react';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
@@ -22,7 +22,7 @@ import Link from 'next/link';
 
 const OrgAccess = () => {
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.UserSettings.signupsSection');
   const locale = useDateFnsLocale();

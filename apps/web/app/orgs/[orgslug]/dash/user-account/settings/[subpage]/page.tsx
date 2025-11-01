@@ -4,7 +4,7 @@ import UserGamificationSettings from '@components/Dashboard/Pages/UserAccount/Us
 import UserEditPassword from '@components/Dashboard/Pages/UserAccount/UserEditPassword/UserEditPassword';
 import UserEditGeneral from '@components/Dashboard/Pages/UserAccount/UserEditGeneral/UserEditGeneral';
 import UserProfile from '@components/Dashboard/Pages/UserAccount/UserProfile/UserProfile';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Info, Lock, Trophy, User as UserIcon } from 'lucide-react';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { getUriWithOrg } from '@services/config/config';
@@ -74,7 +74,7 @@ const SettingsNavigation = ({
 const SettingsPage = ({ params }: { params: Promise<SettingsParams> }) => {
   const t = useTranslations('DashPage.UserAccountSettings');
   const { subpage, orgslug } = use(params);
-  const session = useLHSession() as Session;
+  const session = usePlatformSession() as Session;
 
   useEffect(() => {}, []);
 

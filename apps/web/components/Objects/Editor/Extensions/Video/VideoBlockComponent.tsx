@@ -2,9 +2,9 @@
 
 import { AlertCircle, ArrowLeftRight, CheckCircle2, Download, Expand, Loader2, Upload, Video, X } from 'lucide-react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { uploadNewVideoFile } from '@services/blocks/Video/video';
 import { useCourse } from '@components/Contexts/CourseContext';
@@ -137,7 +137,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
     { html: t('subtitles.kazakh'), url: '/subtitle.kz.srt' },
   ];
   const editorState = useEditorProvider();
-  const session = useLHSession() as Session;
+  const session = usePlatformSession() as Session;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadZoneRef = useRef<HTMLDivElement>(null);
 

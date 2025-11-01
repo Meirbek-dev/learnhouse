@@ -7,7 +7,7 @@ import {
   toggleDiscussionLike,
   updateDiscussion,
 } from '@services/courses/discussions';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Card, CardContent } from '@/components/ui/card';
 import DiscussionPost from './discussion-post';
@@ -85,7 +85,7 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
     return [];
   });
   const org = useOrg() as any;
-  const session = useLHSession();
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
 
   // Update posts when initialPosts changes

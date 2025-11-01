@@ -1,8 +1,8 @@
 'use client';
 
+import { usePlatformSession } from '@/components/Contexts/LHSessionContext';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
 import { Calendar, Flame, TrendingUp, Trophy, Zap } from 'lucide-react';
-import { useLHSession } from '@/components/Contexts/LHSessionContext';
 import { GlowingLevelBadge, getLevelInfo } from '@/lib/gamification';
 import type { UserGamificationProfile } from '@/types/gamification';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +29,7 @@ interface HeroSectionProps {
  */
 export function HeroSection({ profile, userRank, className }: HeroSectionProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
 
   const { xpToNext, xpProgress, dailyXpProgress, nextMilestone, streakStatus, levelInfo } = useMemo(() => {
     const xpForNext = Math.max(0, profile.xp_to_next_level || 0);

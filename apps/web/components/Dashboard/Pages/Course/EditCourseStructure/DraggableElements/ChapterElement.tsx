@@ -1,7 +1,7 @@
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { Hexagon, MoreHorizontal, MoreVertical, Pencil, Save, Trash2 } from 'lucide-react';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { deleteChapter, updateChapter } from '@services/courses/chapters';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
@@ -29,7 +29,7 @@ interface ModifiedChapterInterface {
 
 const ChapterElement = (props: ChapterElementProps) => {
   const activities = props.chapter.activities || [];
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [modifiedChapter, setModifiedChapter] = useState<ModifiedChapterInterface | undefined>();
   const [selectedChapter, setSelectedChapter] = useState<string | undefined>();

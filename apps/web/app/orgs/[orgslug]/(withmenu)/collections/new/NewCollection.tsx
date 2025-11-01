@@ -1,9 +1,9 @@
 'use client';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { createCollection } from '@services/courses/collections';
 import { Image as ImageIcon, Loader2 } from 'lucide-react';
@@ -24,7 +24,7 @@ import useSWR from 'swr';
 const NewCollection = ({ params }: { params: { orgslug: string } }) => {
   const t = useTranslations('NewCollectionPage');
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const { orgslug } = params;
   const [name, setName] = useState('');

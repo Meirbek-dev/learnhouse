@@ -1,8 +1,8 @@
 'use client';
 
 import { getCoursesLinkedToProduct, linkCourseToProduct } from '@services/payments/products';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getOrgCourses } from '@services/courses/courses';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Button } from '@components/ui/button';
@@ -82,7 +82,7 @@ const CoursePreview = ({ course, orgslug, onLink, isLinked }: CoursePreviewProps
 export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModalProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
   const orgId = org?.id;
   const tNotify = useTranslations('DashPage.Notifications');

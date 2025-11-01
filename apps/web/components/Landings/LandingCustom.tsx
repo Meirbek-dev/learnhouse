@@ -2,7 +2,7 @@
 
 import type { LandingSection } from '@components/Dashboard/Pages/Org/OrgEditLanding/landing_types';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getOrgCourses } from '@services/courses/courses';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useTranslations } from 'next-intl';
@@ -17,7 +17,7 @@ interface LandingCustomProps {
 }
 
 const LandingCustom = ({ landing, orgslug }: LandingCustomProps) => {
-  const session = useLHSession();
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('LandingCustom');
 

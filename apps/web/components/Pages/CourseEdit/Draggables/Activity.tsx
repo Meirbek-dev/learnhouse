@@ -1,7 +1,7 @@
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { Eye, File, MoreVertical, Pencil, Save, Sparkles, Video, X } from 'lucide-react';
 import { deleteActivity, updateActivity } from '@services/courses/activities';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -19,7 +19,7 @@ interface ModifiedActivityInterface {
 
 const Activity = (props: any) => {
   const router = useRouter();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const [modifiedActivity, setModifiedActivity] = useState<ModifiedActivityInterface | undefined>();
   const [selectedActivity, setSelectedActivity] = useState<string | undefined>();
   const t = useTranslations('CourseEdit');

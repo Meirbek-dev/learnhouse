@@ -1,5 +1,5 @@
 'use client';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import useSWR from 'swr';
@@ -38,7 +38,7 @@ export interface CourseRights {
 }
 
 export function useCourseRights(courseuuid: string) {
-  const session = useLHSession();
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
 
   const {

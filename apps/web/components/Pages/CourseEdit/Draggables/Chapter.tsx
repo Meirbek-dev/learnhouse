@@ -1,6 +1,6 @@
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { Hexagon, MoreVertical, Pencil, Save, Sparkles, X } from 'lucide-react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { updateChapter } from '@services/courses/chapters';
@@ -20,7 +20,7 @@ interface ModifiedChapterInterface {
 
 const Chapter = (props: any) => {
   const router = useRouter();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const t = useTranslations('CourseEdit');
   const [modifiedChapter, setModifiedChapter] = useState<ModifiedChapterInterface | undefined>();
   const [selectedChapter, setSelectedChapter] = useState<string | undefined>();

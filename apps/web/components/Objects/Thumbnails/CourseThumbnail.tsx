@@ -5,7 +5,7 @@ import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationMo
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { BookMinus, Calendar, FilePenLine, MoreVertical, Settings2 } from 'lucide-react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { deleteCourseFromBackend } from '@services/courses/courses';
 import { Card, CardContent, CardFooter } from '@components/ui/card';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -59,7 +59,7 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
   const locale = useLocale();
   const router = useRouter();
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
 
   const activeAuthors = course.authors?.filter((a) => a.authorship_status === 'ACTIVE') || [];
   const displayedAuthors = activeAuthors.slice(0, 3);

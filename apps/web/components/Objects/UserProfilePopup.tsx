@@ -16,7 +16,7 @@ import {
   Users,
 } from 'lucide-react';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Button } from '@/components/ui/button';
 import { getUser } from '@services/users/users';
 import { Badge } from '@/components/ui/badge';
@@ -69,7 +69,7 @@ const IconComponent = ({ iconName }: { iconName: string }) => {
 
 const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
   const t = useTranslations('Components.UserProfilePopup');
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const router = useRouter();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(false);

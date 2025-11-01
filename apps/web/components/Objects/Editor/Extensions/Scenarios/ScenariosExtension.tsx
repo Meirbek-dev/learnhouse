@@ -28,9 +28,7 @@ const ScenariosExtension: React.FC = (props: any) => {
   const initialNodeCurrentId: string = props.node?.attrs?.currentScenarioId || (initialNodeScenarios[0]?.id ?? '1');
 
   const [title, setTitle] = useState<string>(initialNodeTitle || t('interactiveScenario'));
-  const [scenarios, setScenarios] = useState<Scenario[]>(
-    initialNodeScenarios.length > 0 ? initialNodeScenarios : [],
-  );
+  const [scenarios, setScenarios] = useState<Scenario[]>(initialNodeScenarios.length > 0 ? initialNodeScenarios : []);
   const [currentScenarioId, setCurrentScenarioId] = useState<string>(initialNodeCurrentId);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scenarioComplete, setScenarioComplete] = useState(false);
@@ -142,7 +140,9 @@ const ScenariosExtension: React.FC = (props: any) => {
               </div>
 
               <div className="mt-3 rounded-lg border-2 border-dotted border-gray-200 bg-white p-3">
-                <p className="text-center text-sm text-slate-600">{t('scenariosConfigured', { count: scenarios.length, max: 40 })}</p>
+                <p className="text-center text-sm text-slate-600">
+                  {t('scenariosConfigured', { count: scenarios.length, max: 40 })}
+                </p>
                 <p className="mt-1 text-center text-xs text-slate-500">{t('clickEditToConfigure')}</p>
               </div>
             </div>

@@ -91,7 +91,7 @@ const OrgScripts: React.FC = () => {
           return;
         }
 
-        const safeScriptId = `learnhouse-org-script-${scriptName.toLowerCase().replaceAll(/[^\da-z]+/g, '-')}-${Math.random().toString(36).slice(2, 9)}`;
+        const safeScriptId = `ashyq-bilim-org-script-${scriptName.toLowerCase().replaceAll(/[^\da-z]+/g, '-')}-${Math.random().toString(36).slice(2, 9)}`;
 
         cleanupExistingScript(safeScriptId);
 
@@ -201,7 +201,7 @@ const OrgScripts: React.FC = () => {
       }
     });
     return () => {
-      const scripts = document.querySelectorAll('script[id^="learnhouse-org-script-"]');
+      const scripts = document.querySelectorAll('script[id^="ashyq-bilim-org-script-"]');
       scripts.forEach((script) => {
         cleanupExistingScript(script.id);
       });

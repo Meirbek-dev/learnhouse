@@ -1,9 +1,9 @@
 'use client';
 
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { updateCourseOrderStructure } from '@services/courses/chapters';
 import { updateCertification } from '@services/courses/certifications';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { Check, Loader2, SaveAllIcon, Timer } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -16,7 +16,7 @@ import { mutate } from 'swr';
 const SaveState = (props: { orgslug: string }) => {
   const [isLoading, setIsLoading] = useState(false);
   const course = useCourse();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const router = useRouter();
   const saved = course ? course.isSaved : false;
   const dispatchCourse = useCourseDispatch();

@@ -13,8 +13,8 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@components/ui/dialog';
 import { GripVertical, ImageIcon, Images, Info, Plus, StarIcon, UploadCloud, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { SiLoom, SiYoutube } from '@icons-pack/react-simple-icons';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
@@ -81,7 +81,7 @@ const getAddPreviewOptions = (t: Function, isPreviewUploading: boolean, setSelec
 
 export default function OrgEditImages() {
   const router = useRouter();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any;
   const tNotify = useTranslations('DashPage.Notifications');

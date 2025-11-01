@@ -18,9 +18,9 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { updateOrgLanding, uploadLandingContent } from '@services/organizations/orgs';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { createElement, useEffect, useState, useTransition } from 'react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getOrgLandingMediaDirectory } from '@services/media/media';
 import { getOrgCourses } from '@services/courses/courses';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -225,7 +225,7 @@ const getSectionDisplayName = (t: Function, section: LandingSection) => {
 
 const OrgEditLanding = () => {
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [isLandingEnabled, setIsLandingEnabled] = useState(false);
   const tNotify = useTranslations('DashPage.Notifications');
@@ -1419,7 +1419,7 @@ interface ImageUploaderProps {
 
 const ImageUploader: FC<ImageUploaderProps> = ({ t, onImageUploaded, className, buttonText, id }) => {
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [isUploading, setIsUploading] = useState(false);
   const tNotify = useTranslations('DashPage.Notifications');
@@ -1884,7 +1884,7 @@ const FeaturedCoursesEditor: FC<{
   onChange: (section: LandingFeaturedCourses) => void;
 }> = ({ t, section, onChange }) => {
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 
   const { data: courses } = useSWR(org?.slug ? [org.slug, access_token] : null, ([orgSlug, token]) =>

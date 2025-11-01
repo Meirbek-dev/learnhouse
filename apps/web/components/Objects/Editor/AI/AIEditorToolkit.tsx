@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
 import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import platformLogoLight from 'public/platform_logo_light.svg';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -130,7 +130,7 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
 const UserFeedbackModal = (props: AIEditorToolkitProps) => {
   const dispatchAIEditor = useAIEditorDispatch();
   const aiEditorState = useAIEditor();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('Activities.AIEditorToolkit');
 

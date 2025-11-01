@@ -6,9 +6,9 @@ import { RecentActivityFeed } from '@/components/Dashboard/Gamification/recent-a
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import { Leaderboard } from '@/components/Dashboard/Gamification/leaderboard';
 import TrailCourseElement from '@components/Pages/Trail/TrailCourseElement';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
 import UserCertificates from '@components/Pages/Trail/UserCertificates';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { removeCourse } from '@services/courses/activity';
@@ -21,7 +21,7 @@ import useSWR from 'swr';
 
 const Trail = (params: any) => {
   const { orgslug } = params;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any;
   const orgID = org?.id;

@@ -1,9 +1,9 @@
 'use client';
 
 import { AlertCircle, Loader2, LogIn, LogOut, ShoppingCart } from 'lucide-react';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { removeCourse, startCourse } from '@services/courses/activity';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useEffect, useRef, useState, useTransition } from 'react';
@@ -139,7 +139,7 @@ const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
 const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseActionsMobileProps) => {
   const t = useTranslations('Courses.CourseActionsMobile');
   const router = useRouter();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   // stable primitives to avoid effects depending on the whole session object
   const accessToken = session.data?.tokens?.access_token;
   const userId = session.data?.user?.id;

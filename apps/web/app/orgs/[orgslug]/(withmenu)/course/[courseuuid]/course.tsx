@@ -21,9 +21,9 @@ import CoursesActions from '@components/Objects/Courses/CourseActions/CoursesAct
 import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAuthors';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 // Import existing components and utilities
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getDiscussionsSwrKey } from '@services/courses/discussions';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
@@ -55,7 +55,7 @@ const CourseClient = (props: any) => {
   const { course } = props;
   const org = useOrg() as any;
   const isMobile = useIsMobile();
-  const session = useLHSession();
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
 
   const {

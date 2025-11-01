@@ -1,7 +1,7 @@
 import { AlertCircle, ArrowRight, BookOpen, ClockIcon, Loader2, ShoppingCart, UserPen } from 'lucide-react';
 import { getAPIUrl, getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { removeCourse, startCourse } from '@services/courses/activity';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getProductsByCourse } from '@services/payments/products';
@@ -55,7 +55,7 @@ interface CourseActionsProps {
 
 const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseActionsProps) => {
   const router = useRouter();
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const [linkedProducts, setLinkedProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);

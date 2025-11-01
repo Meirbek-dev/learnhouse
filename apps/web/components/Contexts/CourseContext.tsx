@@ -1,7 +1,7 @@
 'use client';
 
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ErrorUI from '@components/Objects/StyledElements/Error/Error';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { createContext, use, useEffect, useReducer } from 'react';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -87,7 +87,7 @@ export const CourseContext = createContext<CourseState | null>(null);
 export const CourseDispatchContext = createContext<CourseDispatch | null>(null);
 
 export const CourseProvider = ({ children, courseuuid, withUnpublishedActivities = false }: CourseProviderProps) => {
-  const session = useLHSession();
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('Contexts.Course');
 

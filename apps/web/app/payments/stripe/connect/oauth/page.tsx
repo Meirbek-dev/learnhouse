@@ -1,6 +1,6 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { verifyStripeConnection } from '@services/payments/payments';
 import { AlertTriangle, Check, Loader2 } from 'lucide-react';
 import platformLogo from 'public/platform_logo.svg';
@@ -14,7 +14,7 @@ import Image from 'next/image';
 const StripeConnectCallback = () => {
   const t = useTranslations('Stripe');
   const searchParams = useSearchParams();
-  const session = useLHSession();
+  const session = usePlatformSession();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [message, setMessage] = useState('');
 

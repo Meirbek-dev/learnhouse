@@ -20,8 +20,8 @@ import {
 } from 'lucide-react';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { getUriWithoutOrg } from '@services/config/config';
@@ -39,7 +39,7 @@ import { z } from 'zod';
 
 const PaymentsConfigurationPage: FC = () => {
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const {
     data: paymentConfigs,

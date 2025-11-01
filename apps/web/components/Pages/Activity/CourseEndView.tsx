@@ -1,9 +1,9 @@
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
 import { ArrowLeft, BookOpen, Download, Loader2, Shield, Target, Trophy } from 'lucide-react';
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
@@ -37,7 +37,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
 }) => {
   const { width, height } = useWindowSize();
   const org = useOrg() as any;
-  const session = useLHSession();
+  const session = usePlatformSession();
   const [userCertificate, setUserCertificate] = useState<any>(null);
   const [isLoadingCertificate, setIsLoadingCertificate] = useState(false);
   const [certificateError, setCertificateError] = useState<string | null>(null);

@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, use, useCallback, useEffect, useReducer } from 'react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getAssignmentTask } from '@services/courses/assignments';
 import { getAPIUrl } from '@services/config/config';
 import type { ReactNode } from 'react';
@@ -30,7 +30,7 @@ export const AssignmentsTaskContext = createContext<State | undefined>(undefined
 export const AssignmentsTaskDispatchContext = createContext<React.Dispatch<Action> | undefined>(undefined);
 
 export const AssignmentsTaskProvider = ({ children }: { children: ReactNode }) => {
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const assignment = useAssignments();
 

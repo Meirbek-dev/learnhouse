@@ -56,13 +56,13 @@ def _get_jwt_secret() -> str:
         generated_key = secrets.token_urlsafe(32)
         logger.warning(
             "⚠️  Using auto-generated JWT secret in development mode. "
-            "Set OPENU_AUTH_JWT_SECRET_KEY environment variable for production."
+            "Set PLATFORM_AUTH_JWT_SECRET_KEY environment variable for production."
         )
         return generated_key
 
     # Production without SECRET_KEY should fail explicitly
     msg = (
-        "OPENU_AUTH_JWT_SECRET_KEY must be set in production environment. "
+        "PLATFORM_AUTH_JWT_SECRET_KEY must be set in production environment. "
         "Generate one with: python -c 'import secrets; print(secrets.token_urlsafe(32))'"
     )
     raise ValueError(msg)

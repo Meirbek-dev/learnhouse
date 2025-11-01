@@ -364,7 +364,7 @@ def send_invite_email(
     <body>
         <p>Hello {email}</p>
         <p>You have been invited to {org.name} by @{user.username}. Your invite code is {invite["invite_code"]}.</p>
-        <p>Click <a href="{org.slug}.openu.io/signup?orgslug={org.slug}&inviteCode={invite["invite_code"]}">here</a> to sign up.</p>
+        <p>Click <a href="{org.slug}.tou.edu.kz/signup?orgslug={org.slug}&inviteCode={invite["invite_code"]}">here</a> to sign up.</p>
         <p>Thank you</p>
     </body>
 </html>

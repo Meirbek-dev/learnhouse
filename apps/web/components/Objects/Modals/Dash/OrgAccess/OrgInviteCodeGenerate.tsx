@@ -2,7 +2,7 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { createInviteCode, createInviteCodeWithUserGroup } from '@services/organizations/invites';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -20,7 +20,7 @@ interface OrgInviteCodeGenerateProps {
 const OrgInviteCodeGenerate = (props: OrgInviteCodeGenerateProps) => {
   const t = useTranslations('Components.OrgInviteCodeGenerate');
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 
   const { data: usergroups } = useSWR(org ? `${getAPIUrl()}usergroups/org/${org.id}` : null, (url) =>
