@@ -10,8 +10,8 @@ from src.security.file_validation import validate_upload
 
 
 def ensure_directory_exists(directory: str) -> None:
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+    # Use exist_ok to avoid race conditions in concurrent environments
+    os.makedirs(directory, exist_ok=True)
 
 
 async def upload_file(
