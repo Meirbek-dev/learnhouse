@@ -20,7 +20,6 @@ const nextConfig: NextConfig = {
     ];
   },
   experimental: {
-    ppr: false,
     optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
   },
   compiler: {
@@ -28,6 +27,7 @@ const nextConfig: NextConfig = {
   },
   reactCompiler: true,
   reactStrictMode: true,
+  cacheComponents: false,
   devIndicators: false,
   output: 'standalone',
 };

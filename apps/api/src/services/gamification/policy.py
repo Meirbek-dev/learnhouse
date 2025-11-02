@@ -45,7 +45,7 @@ def get_org_policy(db: Session, org_id: int) -> tuple[dict[str, int], int]:
         if isinstance(cfg.rewards, dict):
             for k, v in cfg.rewards.items():
                 try:
-                    iv = int(v)  # type: ignore[arg-type]
+                    iv = int(v)
                 except Exception:
                     continue
                 # Only accept non-positive overrides for admin_award; for other sources enforce > 0
@@ -60,7 +60,7 @@ def get_org_policy(db: Session, org_id: int) -> tuple[dict[str, int], int]:
             try:
                 dl = int(cfg.daily_xp_limit)
             except Exception:
-                dl = None  # type: ignore[assignment]
+                dl = None
             if dl is not None and dl > 0:
                 daily_limit = dl
 

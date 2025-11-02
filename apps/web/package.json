@@ -114,8 +114,5 @@
     "prettier-plugin-tailwindcss": "^0.7.1",
     "tailwindcss": "4.1.16",
     "typescript": "5.9.3"
-  },
-  "overrides": {
-    "react-is": "^19.1.1"
   }
 }

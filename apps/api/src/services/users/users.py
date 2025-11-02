@@ -545,7 +545,7 @@ def _safe_role_read(role: Role) -> RoleRead:
                 fallback_exc,
             )
 
-            return RoleRead.model_construct(  # type: ignore[arg-type]
+            return RoleRead.model_construct(
                 name=role.name,
                 description=role.description,
                 rights=_normalize_rights_schema(getattr(role, "rights", None)),

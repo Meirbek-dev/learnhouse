@@ -10,7 +10,6 @@ import { CourseProvider } from '../../../../../../../../components/Contexts/Cour
 import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { useCourseRights } from '@hooks/useCourseRights';
-import { getUriWithOrg } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
@@ -81,7 +80,7 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
     if (!(rightsLoading || hasAccessToCurrentPage) && visibleTabs.length > 0) {
       const firstAvailableTab = visibleTabs[0];
       if (firstAvailableTab) {
-        router.replace(getUriWithOrg(params.orgslug, '') + firstAvailableTab.href);
+        router.replace(`/orgs/${params.orgslug}${firstAvailableTab.href}`);
       }
     }
   }, [rightsLoading, hasAccessToCurrentPage, visibleTabs, router, params.orgslug]);
@@ -152,7 +151,7 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
               return (
                 <Link
                   key={tab.key}
-                  href={getUriWithOrg(params.orgslug, '') + tab.href}
+                  href={`/orgs/${params.orgslug}${tab.href}`}
                 >
                   <div
                     className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${

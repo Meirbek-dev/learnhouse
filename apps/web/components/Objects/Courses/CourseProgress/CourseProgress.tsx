@@ -122,7 +122,7 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onCl
                         <div className="relative">
                           <Square
                             size={18}
-                            className="stroke-[2] text-teal-600"
+                            className="stroke-2 text-teal-600"
                           />
                           <Check
                             size={18}
@@ -132,7 +132,7 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onCl
                       ) : (
                         <Square
                           size={18}
-                          className="stroke-[2] text-gray-300"
+                          className="stroke-2 text-gray-300"
                         />
                       )}
                       <div className="flex items-center space-x-2">

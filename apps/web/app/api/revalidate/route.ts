@@ -4,7 +4,11 @@ import { revalidateTag } from 'next/cache';
 
 export async function GET(request: NextRequest) {
   const tag: any = request.nextUrl.searchParams.get('tag');
-  // revalidateTag now requires a second argument describing profile/cache life per Next.js d.ts
+
+  if (!tag) {
+    return NextResponse.json({ error: 'Tag parameter is required' }, { status: 400 });
+  }
+
   revalidateTag(tag, { expire: 0 });
 
   return NextResponse.json(

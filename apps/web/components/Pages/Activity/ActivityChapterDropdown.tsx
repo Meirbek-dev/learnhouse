@@ -168,7 +168,7 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
                                 <div className="cursor-pointer text-neutral-300">
                                   <Check
                                     size={14}
-                                    className="stroke-[2]"
+                                    className="stroke-2"
                                   />
                                 </div>
                               )}

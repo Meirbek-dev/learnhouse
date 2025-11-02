@@ -172,7 +172,7 @@ def award_xp(
                 try:
                     xp_source = XPSource(source)
                 except Exception:
-                    xp_source = None  # type: ignore[assignment]
+                    xp_source = None
                 if xp_source is not None:
                     stmt = select(XPTransaction).where(
                         and_(
@@ -294,7 +294,7 @@ def get_dashboard_data(db: Session, user_id: int, org_id: int) -> dict:
         )
     )
     try:
-        higher_count = int(_res.scalar_one())  # type: ignore[attr-defined]
+        higher_count = int(_res.scalar_one())
     except Exception:
         try:
             _one = _res.one()
@@ -358,7 +358,7 @@ def get_leaderboard_read(db: Session, org_id: int, limit: int = 10, offset: int 
         .where(GamificationProfile.org_id == org_id)
     )
     try:
-        total = int(_res.scalar_one())  # type: ignore[attr-defined]
+        total = int(_res.scalar_one())
     except Exception:
         try:
             _one = _res.one()
@@ -375,7 +375,7 @@ def get_leaderboard_read(db: Session, org_id: int, limit: int = 10, offset: int 
     user_map: dict[int, DBUser] = {}
     if ids:
         try:
-            users = db.exec(select(DBUser).where(DBUser.id.in_(ids))).all()  # type: ignore[arg-type]
+            users = db.exec(select(DBUser).where(DBUser.id.in_(ids))).all()
             user_map = {u.id: u for u in users}
         except Exception:
             user_map = {}
@@ -428,7 +428,7 @@ def get_user_rank(db: Session, user_id: int, org_id: int) -> int | None:
         )
     )
     try:
-        higher_count = int(_res.scalar_one())  # type: ignore[attr-defined]
+        higher_count = int(_res.scalar_one())
     except Exception:
         try:
             _one = _res.one()

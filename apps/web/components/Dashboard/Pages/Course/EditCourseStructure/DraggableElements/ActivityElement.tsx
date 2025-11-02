@@ -117,7 +117,7 @@ const ActivityElement = (props: ActivitiyElementProps) => {
             snapshot.isDragging
               ? 'soft-shadow z-50 scale-[1.04] rotate-1 bg-white ring-2 ring-blue-500/20'
               : 'soft-shadow bg-gray-50 hover:bg-gray-100'
-          } items-center border-1 border-gray-200`}
+          } items-center border border-gray-200`}
           key={props.activity.id}
           {...provided.draggableProps}
           {...provided.dragHandleProps}

@@ -371,7 +371,7 @@ const CourseClient = (props: any) => {
                 )}
                 <div className="course_metadata_left space-y-2">
                   <div>
-                    <p className="w-full py-5 leading-relaxed tracking-normal text-pretty break-words hyphens-auto whitespace-pre-line">
+                    <p className="w-full py-5 leading-relaxed tracking-normal text-pretty wrap-break-word hyphens-auto whitespace-pre-line">
                       {course.about}
                     </p>
                   </div>
@@ -509,7 +509,7 @@ const CourseClient = (props: any) => {
                                       <div className="relative">
                                         <Square
                                           size={16}
-                                          className="stroke-[2] text-teal-600"
+                                          className="stroke-2 text-teal-600"
                                         />
                                         <Check
                                           size={16}
@@ -519,7 +519,7 @@ const CourseClient = (props: any) => {
                                     ) : (
                                       <Square
                                         size={16}
-                                        className="stroke-[2] text-neutral-300"
+                                        className="stroke-2 text-neutral-300"
                                       />
                                     )}
                                   </div>
