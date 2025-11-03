@@ -2,11 +2,6 @@ import createNextIntlPlugin from 'next-intl/plugin';
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  // Explicitly set turbopack.root so Next.js doesn't try to infer workspace root
-  // and warn when multiple lockfiles exist in the monorepo.
-  turbopack: {
-    root: '../..',
-  },
   async rewrites() {
     return [
       {

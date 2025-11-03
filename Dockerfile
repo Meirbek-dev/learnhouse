@@ -44,13 +44,6 @@ COPY apps/web .
 ENV NEXT_PUBLIC_PLATFORM_API_URL=https://cs-mooc.tou.edu.kz/api/v1/
 ENV NEXT_PUBLIC_PLATFORM_BACKEND_URL=https://cs-mooc.tou.edu.kz/
 ENV NEXT_PUBLIC_PLATFORM_DOMAIN=cs-mooc.tou.edu.kz
-# Use localhost values for build/runtime inside the container to avoid
-# attempts to reach the external domain (which can timeout inside isolated
-# environments). These will be used by Next.js server-side fetches during
-# development or container runtime where the app and API are co-located.
-ENV NEXT_PUBLIC_PLATFORM_API_URL=http://localhost/api/v1/
-ENV NEXT_PUBLIC_PLATFORM_BACKEND_URL=http://localhost/
-ENV NEXT_PUBLIC_PLATFORM_DOMAIN=localhost
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
