@@ -5,7 +5,8 @@ export const inter = Inter({
   variable: '--font-inter',
   display: 'swap',
   preload: true,
-  weight: ['400', '500', '600', '700', '800'],
+  weight: 'variable',
+  style: ['normal', 'italic'],
   fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
 });
 
