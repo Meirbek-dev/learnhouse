@@ -15,10 +15,21 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
     const session = await auth();
     const access_token = session?.tokens?.access_token;
 
-    const org = await getOrganizationContextInfo(orgslug, {
-      cache: 'no-store',
-      tags: ['organizations'],
-    });
+    // Fetch organization info with detailed error handling
+    let org;
+    try {
+      org = await getOrganizationContextInfo(orgslug, {
+        cache: 'no-store',
+        tags: ['organizations'],
+      });
+    } catch (error) {
+      console.error('[LandingContent] Failed to fetch organization info:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        cause: error instanceof Error ? error.cause : undefined,
+        orgslug,
+      });
+      throw new Error(`Unable to load organization "${orgslug}". Please check your network connection and try again.`);
+    }
 
     // Only fetch gamification data if user is authenticated
     const gamificationPromise = access_token
@@ -26,18 +37,27 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
           revalidate: 30,
           tags: [`gamification:dashboard:${org.id}`],
         }).catch((error) => {
-          console.error('[LandingContent] Gamification fetch failed:', error);
+          console.error('[LandingContent] Gamification fetch failed:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            org_id: org.id,
+          });
           return null;
         })
       : Promise.resolve(null);
 
     const [courses, collections, gamificationData] = await Promise.all([
       getOrgCourses(orgslug, { cache: 'no-store', tags: ['courses'] }, access_token || null).catch((error) => {
-        console.error('[LandingContent] Courses fetch failed:', error);
+        console.error('[LandingContent] Courses fetch failed:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          orgslug,
+        });
         return [];
       }),
       getOrgCollections(org.id, access_token, { cache: 'no-store', tags: ['courses'] }).catch((error) => {
-        console.error('[LandingContent] Collections fetch failed:', error);
+        console.error('[LandingContent] Collections fetch failed:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          org_id: org.id,
+        });
         return [];
       }),
       gamificationPromise,
@@ -65,6 +85,7 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
     console.error('[LandingContent] Critical error:', {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
+      cause: error instanceof Error ? error.cause : undefined,
       orgslug,
     });
     throw error; // Re-throw to be caught by error boundary

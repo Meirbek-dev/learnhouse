@@ -25,14 +25,20 @@ const nextConfig: NextConfig = {
   cacheComponents: false,
   devIndicators: false,
   output: 'standalone',
-  // Production source maps for better error tracking (can be disabled for security)
-  productionBrowserSourceMaps: false,
+  // Production source maps for better error tracking (enabled for debugging)
+  productionBrowserSourceMaps: true,
   // Logging configuration
   logging: {
     fetches: {
       fullUrl: true,
     },
   },
+  // Allow cross-origin requests in development
+  allowedDevOrigins: [
+    'https://cs-mooc.tou.edu.kz',
+    'http://192.168.12.35',
+    'http://192.168.1.46',
+  ],
 };
 
 const withNextIntl = createNextIntlPlugin();

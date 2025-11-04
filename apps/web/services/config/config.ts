@@ -31,8 +31,27 @@ export const getTopLevelCookieDomain = () =>
 /**
  * Returns the API base URL (always ending with a slash).
  * Falls back to current window origin + /api/v1/ in the browser when env is missing.
+ *
+ * For server-side requests in Docker, use internal container network.
+ * For client-side requests, use the public-facing URL.
  */
 export const getAPIUrl = () => {
+  // Server-side: use internal Docker network URL when available
+  if (typeof window === 'undefined') {
+    const internalUrl = process.env.PLATFORM_INTERNAL_API_URL;
+    if (internalUrl) {
+      console.log('[Config] Using internal API URL:', internalUrl);
+      return internalUrl.endsWith('/') ? internalUrl : `${internalUrl}/`;
+    }
+
+    // Fallback for Docker environment: use localhost:9000
+    if (process.env.NODE_ENV === 'production' || process.env.PLATFORM_DEVELOPMENT_MODE === 'True') {
+      console.log('[Config] Using fallback localhost:9000 for API');
+      return 'http://localhost:9000/api/v1/';
+    }
+  }
+
+  // Client-side: use public-facing URL
   let base = PLATFORM_API_URL;
 
   // Browser fallback if env not provided at build time
@@ -50,7 +69,7 @@ export const getAPIUrl = () => {
     if (typeof window === 'undefined') {
       console.warn(
         '[Config] Using fallback API URL in server context. ' +
-          'Please set NEXT_PUBLIC_PLATFORM_API_URL environment variable. ' +
+          'Please set NEXT_PUBLIC_PLATFORM_API_URL or PLATFORM_INTERNAL_API_URL environment variable. ' +
           `Current fallback: ${base}`,
       );
     }
