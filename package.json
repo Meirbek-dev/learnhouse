@@ -2,6 +2,12 @@
   "name": "ashyq-bilim",
   "packageManager": "pnpm@10.20.0",
   "private": true,
+  "pnpm": {
+    "overrides": {
+      "@types/react": "19.2.2",
+      "@types/react-dom": "19.2.2"
+    }
+  },
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
