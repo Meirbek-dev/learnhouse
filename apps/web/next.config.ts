@@ -25,6 +25,14 @@ const nextConfig: NextConfig = {
   cacheComponents: false,
   devIndicators: false,
   output: 'standalone',
+  // Production source maps for better error tracking (can be disabled for security)
+  productionBrowserSourceMaps: false,
+  // Logging configuration
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+  },
 };
 
 const withNextIntl = createNextIntlPlugin();

@@ -14,18 +14,35 @@ export async function getUserLocale() {
   try {
     const session = await auth();
     if (session?.user?.id && session?.tokens?.access_token) {
-      const response = await fetch(`${getAPIUrl()}users/id/${session.user.id}`, {
-        headers: {
-          Authorization: `Bearer ${session.tokens.access_token}`,
-        },
-        cache: 'no-store',
-      });
+      const apiUrl = getAPIUrl();
 
-      if (response.ok) {
-        const userData = await response.json();
-        if (userData.locale) {
-          return userData.locale as Locale;
+      // Validate API URL before making request
+      if (!apiUrl || apiUrl === 'undefined' || apiUrl === 'null') {
+        console.warn('[getUserLocale] API URL not configured, falling back to cookie');
+        return (await cookies()).get(COOKIE_NAME)?.value || defaultLocale;
+      }
+
+      try {
+        const response = await fetch(`${apiUrl}users/id/${session.user.id}`, {
+          headers: {
+            Authorization: `Bearer ${session.tokens.access_token}`,
+          },
+          cache: 'no-store',
+          signal: AbortSignal.timeout(5000), // 5 second timeout
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          if (userData.locale) {
+            return userData.locale as Locale;
+          }
         }
+      } catch (fetchError: any) {
+        // Log fetch errors but don't fail the entire request
+        console.warn('[getUserLocale] Failed to fetch user locale:', {
+          error: fetchError.message,
+          code: fetchError.code,
+        });
       }
     }
   } catch (error) {
@@ -39,12 +56,24 @@ export async function getUserLocale() {
     ) {
       throw error;
     }
-    // Only log actual errors, not PPR postpones
+    // Log unexpected errors in production for debugging
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[getUserLocale] Unexpected error:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+    }
     // Silently fall through to default
   }
 
   // Fallback to cookie or default
-  return (await cookies()).get(COOKIE_NAME)?.value || defaultLocale;
+  try {
+    const cookieStore = await cookies();
+    return cookieStore.get(COOKIE_NAME)?.value || defaultLocale;
+  } catch (cookieError) {
+    console.error('[getUserLocale] Cookie access failed:', cookieError);
+    return defaultLocale;
+  }
 }
 
 export async function setUserLocale(locale: Locale) {
