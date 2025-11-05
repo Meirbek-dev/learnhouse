@@ -17,9 +17,9 @@
     "start": "turbo run start"
   },
   "devDependencies": {
-    "eslint": "^9.39.0",
+    "eslint": "^9.39.1",
     "oxlint": "^1.25.0",
-    "oxlint-tsgolint": "^0.4.0",
+    "oxlint-tsgolint": "^0.5.0",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-sort-imports": "^1.8.8",

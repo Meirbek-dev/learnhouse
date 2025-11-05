@@ -37,11 +37,11 @@ export async function getUserLocale() {
             return userData.locale as Locale;
           }
         }
-      } catch (fetchError: any) {
+      } catch (error: any) {
         // Log fetch errors but don't fail the entire request
         console.warn('[getUserLocale] Failed to fetch user locale:', {
-          error: fetchError.message,
-          code: fetchError.code,
+          error: error.message,
+          code: error.code,
         });
       }
     }
@@ -70,8 +70,8 @@ export async function getUserLocale() {
   try {
     const cookieStore = await cookies();
     return cookieStore.get(COOKIE_NAME)?.value || defaultLocale;
-  } catch (cookieError) {
-    console.error('[getUserLocale] Cookie access failed:', cookieError);
+  } catch (error) {
+    console.error('[getUserLocale] Cookie access failed:', error);
     return defaultLocale;
   }
 }

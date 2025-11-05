@@ -40,7 +40,6 @@ export const getAPIUrl = () => {
   if (typeof window === 'undefined') {
     const internalUrl = process.env.PLATFORM_INTERNAL_API_URL;
     if (internalUrl) {
-      console.log('[Config] Using internal API URL:', internalUrl);
       return internalUrl.endsWith('/') ? internalUrl : `${internalUrl}/`;
     }
 
