@@ -79,7 +79,7 @@ if __name__ == "__main__":
         "host": "0.0.0.0",
         "port": platform_config.hosting_config.port,
         "reload": is_dev_mode,
-        "access_log": True,  # is_dev_mode,
+        "access_log": is_dev_mode,
     }
     uvicorn.run("app:app", **uvicorn_kwargs)
 

@@ -193,7 +193,9 @@ export const getResponseMetadata = async (response: Response): Promise<CustomRes
 };
 
 export const revalidateTags = async (tags: string[], orgslug: string) => {
-  const url = getUriWithOrg(orgslug, '');
-  const promises = tags.map((tag) => fetch(`${url}/api/revalidate?tag=${tag}`));
+  // Use relative URL to avoid mixed content issues and ensure same protocol as current page
+  // This works both server-side and client-side
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const promises = tags.map((tag) => fetch(`${baseUrl}/api/revalidate?tag=${tag}`));
   await Promise.all(promises);
 };

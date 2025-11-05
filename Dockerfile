@@ -58,6 +58,8 @@ COPY apps/web .
 ENV NEXT_PUBLIC_PLATFORM_API_URL=https://cs-mooc.tou.edu.kz/api/v1/
 ENV NEXT_PUBLIC_PLATFORM_BACKEND_URL=https://cs-mooc.tou.edu.kz/
 ENV NEXT_PUBLIC_PLATFORM_DOMAIN=cs-mooc.tou.edu.kz
+ENV NEXT_PUBLIC_PLATFORM_HTTPS=true
+ENV NEXT_PUBLIC_PLATFORM_MEDIA_URL=https://cs-mooc.tou.edu.kz/
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
