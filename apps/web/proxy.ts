@@ -34,6 +34,11 @@ export default async function proxy(req: NextRequest) {
   const fullhost = req.headers ? req.headers.get('host') : '';
   const cookie_orgslug = req.cookies.get('openu_current_orgslug')?.value;
 
+  // If path already starts with /orgs/, allow it to pass through
+  if (pathname.startsWith('/orgs/')) {
+    return NextResponse.next();
+  }
+
   // Out of orgslug paths & rewrite
   const standard_paths = ['/home'];
   const auth_paths = ['/login', '/signup', '/reset', '/forgot'];
