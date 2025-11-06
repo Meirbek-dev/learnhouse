@@ -6,10 +6,13 @@ export PYTHONIOENCODING=utf-8
 
 # Start the services
 pm2 start server.js --cwd /app/web --name ashyq-bilim-web > /dev/null 2>&1
-pm2 start uv --cwd /app/api --name ashyq-bilim-api -- run app.py
+pm2 start python --cwd /app/api --name ashyq-bilim-api -- app.py
 
 # Check if the services are running and log the status
 pm2 status
+
+# Create nginx cache directory before starting nginx
+mkdir -p /var/cache/nginx/next
 
 # Start Nginx in the background
 nginx -g 'daemon off;' &
