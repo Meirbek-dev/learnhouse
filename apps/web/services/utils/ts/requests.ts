@@ -1,5 +1,3 @@
-import { getUriWithOrg } from '@services/config/config';
-
 type FetchCacheConfig =
   | {
       revalidate?: number | null | undefined;
@@ -193,9 +191,33 @@ export const getResponseMetadata = async (response: Response): Promise<CustomRes
 };
 
 export const revalidateTags = async (tags: string[], orgslug: string) => {
-  // Use relative URL to avoid mixed content issues and ensure same protocol as current page
-  // This works both server-side and client-side
+  const uniqueTags = Array.from(new Set(tags))
+    .filter((tag): tag is string => typeof tag === 'string' && tag.trim().length > 0)
+    .map((tag) => tag.trim());
+
+  if (uniqueTags.length === 0) {
+    return;
+  }
+
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  const promises = tags.map((tag) => fetch(`${baseUrl}/api/revalidate?tag=${tag}`));
-  await Promise.all(promises);
+  const endpoint = `${baseUrl}/api/revalidate`;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ tags: uniqueTags, orgslug }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to revalidate tags (${response.status})`);
+    }
+  } catch (error) {
+    for (const tag of uniqueTags) {
+      const url = `${endpoint}?tag=${encodeURIComponent(tag)}`;
+      await fetch(url);
+    }
+  }
 };
