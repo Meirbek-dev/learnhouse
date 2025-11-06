@@ -1,9 +1,7 @@
 import {
-  PLATFORM_DOMAIN,
   getDefaultOrg,
   getTopLevelCookieDomain,
   getUriWithOrg,
-  isMultiOrgModeEnabled,
 } from './services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
@@ -21,13 +19,12 @@ export const config = {
      */
     '/((?!api|_next|fonts|umami|examples|[\\w-]+\\.\\w+).*)',
     '/sitemap.xml',
-    '/payments/stripe/connect/oauth',
   ],
 };
 
 export default async function proxy(req: NextRequest) {
   // Get initial data
-  const hosting_mode = isMultiOrgModeEnabled() ? 'multi' : 'single';
+  const hosting_mode = 'single';
   const default_org = getDefaultOrg();
   const cookieDomain = getTopLevelCookieDomain();
   const { pathname, search } = req.nextUrl;
@@ -69,27 +66,6 @@ export default async function proxy(req: NextRequest) {
     return NextResponse.rewrite(new URL(`/editor${pathname}`, req.url));
   }
 
-  // Check if the request is for the Stripe callback URL
-  if (req.nextUrl.pathname.startsWith('/payments/stripe/connect/oauth')) {
-    const searchParams = req.nextUrl.searchParams;
-    const orgslug = searchParams.get('state')?.split('_')[0]; // Assuming state parameter contains orgslug_randomstring
-
-    // Construct the new URL with the required parameters
-    const redirectUrl = new URL('/payments/stripe/connect/oauth', req.url);
-
-    // Preserve all original search parameters
-    searchParams.forEach((value, key) => {
-      redirectUrl.searchParams.append(key, value);
-    });
-
-    // Add orgslug if available
-    if (orgslug) {
-      redirectUrl.searchParams.set('orgslug', orgslug);
-    }
-
-    return NextResponse.rewrite(redirectUrl);
-  }
-
   // Health Check
   if (pathname.startsWith('/health')) {
     return NextResponse.rewrite(new URL('/api/health', req.url));
@@ -112,14 +88,7 @@ export default async function proxy(req: NextRequest) {
   }
 
   if (pathname.startsWith('/sitemap.xml')) {
-    let orgslug: string;
-
-    if (hosting_mode === 'multi') {
-      orgslug = fullhost ? fullhost.replace(`.${PLATFORM_DOMAIN}`, '') : (default_org as string);
-    } else {
-      // Single hosting mode
-      orgslug = default_org as string;
-    }
+    let orgslug: string = default_org as string;
 
     const sitemapUrl = new URL('/api/sitemap', req.url);
 
@@ -132,37 +101,18 @@ export default async function proxy(req: NextRequest) {
     return response;
   }
 
-  // Multi Organization Mode
-  if (hosting_mode === 'multi') {
-    // Get the organization slug from the URL
-    const orgslug = fullhost ? fullhost.replace(`.${PLATFORM_DOMAIN}`, '') : (default_org as string);
-    const response = NextResponse.rewrite(new URL(`/orgs/${orgslug}${pathname}`, req.url));
-
-    // Set the cookie with the orgslug value
-    response.cookies.set({
-      name: 'openu_current_orgslug',
-      value: orgslug,
-      domain: cookieDomain,
-      path: '/',
-    });
-
-    return response;
-  }
-
   // Single Organization Mode
-  if (hosting_mode === 'single') {
-    // Get the default organization slug
-    const orgslug = default_org as string;
-    const response = NextResponse.rewrite(new URL(`/orgs/${orgslug}${pathname}`, req.url));
+  // Get the default organization slug
+  const orgslug = default_org as string;
+  const response = NextResponse.rewrite(new URL(`/orgs/${orgslug}${pathname}`, req.url));
 
-    // Set the cookie with the orgslug value
-    response.cookies.set({
-      name: 'openu_current_orgslug',
-      value: orgslug,
-      domain: cookieDomain,
-      path: '/',
-    });
+  // Set the cookie with the orgslug value
+  response.cookies.set({
+    name: 'openu_current_orgslug',
+    value: orgslug,
+    domain: cookieDomain,
+    path: '/',
+  });
 
-    return response;
-  }
+  return response;
 }
