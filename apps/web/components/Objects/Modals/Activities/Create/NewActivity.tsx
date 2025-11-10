@@ -34,8 +34,7 @@ const NewActivityModal = ({
           >
             <div className="m-0.5 flex h-20 flex-col items-center justify-end rounded-lg bg-white text-center hover:cursor-pointer">
               <Image
-                unoptimized
-                quality={100}
+                quality={90}
                 alt={t('dynamicPage')}
                 src={DynamicPageActivityImage}
               />
@@ -51,8 +50,7 @@ const NewActivityModal = ({
           >
             <div className="m-0.5 flex h-20 flex-col items-center justify-end rounded-lg bg-white text-center hover:cursor-pointer">
               <Image
-                unoptimized
-                quality={100}
+                quality={90}
                 alt={t('video')}
                 src={VideoPageActivityImage}
               />
@@ -68,8 +66,7 @@ const NewActivityModal = ({
           >
             <div className="m-0.5 flex h-20 flex-col items-center justify-end rounded-lg bg-white text-center hover:cursor-pointer">
               <Image
-                unoptimized
-                quality={100}
+                quality={90}
                 alt={t('document')}
                 src={DocumentPdfPageActivityImage}
               />
@@ -85,8 +82,7 @@ const NewActivityModal = ({
           >
             <div className="m-0.5 flex h-20 flex-col items-center justify-end rounded-lg bg-white text-center hover:cursor-pointer">
               <Image
-                unoptimized
-                quality={100}
+                quality={90}
                 alt={t('assignments')}
                 src={AssignmentActivityImage}
               />

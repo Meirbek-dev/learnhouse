@@ -49,6 +49,7 @@ export const CourseOverviewTop = ({ params }: { params: CourseOverviewParams }) 
                 width={100}
                 className="size-auto h-[57px] rounded-md drop-shadow-md"
                 src={EmptyThumbnailImage}
+                loading="eager"
                 alt=""
               />
             )}
