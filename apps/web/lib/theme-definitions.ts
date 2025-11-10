@@ -599,6 +599,17 @@ export const vscodeTheme = createThemeFromCSS(
   'Developer-friendly VS Code theme with cool blues and clean code aesthetics',
 );
 
+export const sageGardenTheme = createThemeFromCSS(
+  'sage-garden',
+  'Sage Garden',
+  `
+  --primary: oklch(0.6333 0.0309 154.9039);
+  --secondary: oklch(0.8596 0.0291 119.9919);
+  --accent: oklch(0.8242 0.0221 136.6092);
+  `,
+  '',
+);
+
 export const themes = [
   defaultTheme,
   cosmicNightTheme,
@@ -654,4 +665,5 @@ export const themes = [
   vercelTheme,
   violetBloomTheme,
   vscodeTheme,
+  sageGardenTheme
 ] as const;

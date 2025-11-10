@@ -5014,6 +5014,10 @@
     "submit": "Submit"
   },
   "Themes": {
+    "sage-garden": {
+      "description": "A gentle garden theme with soft sage greens and refreshing natural accents",
+      "name": "Sage Garden"
+    },
     "amberminimal": {
       "description": "Minimalistic amber theme",
       "name": "Amber Minimal"
