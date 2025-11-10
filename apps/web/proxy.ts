@@ -1,4 +1,5 @@
 import {
+  getDefaultOrg,
   getTopLevelCookieDomain,
   getUriWithOrg,
 } from './services/config/config';
@@ -23,10 +24,12 @@ export const config = {
 
 export default async function proxy(req: NextRequest) {
   // Get initial data
-  const orgslug = "openu";
+  const hosting_mode = 'single';
+  const default_org = getDefaultOrg();
   const cookieDomain = getTopLevelCookieDomain();
   const { pathname, search } = req.nextUrl;
-  const cookie_orgslug = req.cookies.get('ashyq_bilim_orgslug')?.value;
+  const fullhost = req.headers ? req.headers.get('host') : '';
+  const cookie_orgslug = req.cookies.get('openu_current_orgslug')?.value;
 
   // If path already starts with /orgs/, allow it to pass through
   if (pathname.startsWith('/orgs/')) {
@@ -44,11 +47,17 @@ export default async function proxy(req: NextRequest) {
   if (auth_paths.includes(pathname)) {
     const response = NextResponse.rewrite(new URL(`/auth${pathname}${search}`, req.url));
 
-    response.cookies.set({
-      name: 'ashyq_bilim_orgslug',
-      value: orgslug,
-      domain: cookieDomain,
-    });
+    // Parse the search params
+    const searchParams = new URLSearchParams(search);
+    const orgslug = searchParams.get('orgslug');
+
+    if (orgslug) {
+      response.cookies.set({
+        name: 'openu_current_orgslug',
+        value: orgslug,
+        domain: cookieDomain,
+      });
+    }
     return response;
   }
 
@@ -79,6 +88,8 @@ export default async function proxy(req: NextRequest) {
   }
 
   if (pathname.startsWith('/sitemap.xml')) {
+    let orgslug: string = default_org as string;
+
     const sitemapUrl = new URL('/api/sitemap', req.url);
 
     // Create a response object
@@ -92,11 +103,12 @@ export default async function proxy(req: NextRequest) {
 
   // Single Organization Mode
   // Get the default organization slug
+  const orgslug = default_org as string;
   const response = NextResponse.rewrite(new URL(`/orgs/${orgslug}${pathname}`, req.url));
 
   // Set the cookie with the orgslug value
   response.cookies.set({
-    name: 'ashyq_bilim_orgslug',
+    name: 'openu_current_orgslug',
     value: orgslug,
     domain: cookieDomain,
     path: '/',
