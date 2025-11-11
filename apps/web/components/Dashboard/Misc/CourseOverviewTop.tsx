@@ -65,6 +65,18 @@ export const CourseOverviewTop = ({ params }: { params: CourseOverviewParams }) 
             asChild
             size="sm"
           >
+            <a
+              href="https://tou.edu.kz/ru/component/docs/?id_n=466"
+              className="gap-2"
+            >
+              <BookOpen className="size-4" />
+              <span>Скачать требования к разработке МООК</span>
+            </a>
+          </Button>
+          <Button
+            asChild
+            size="sm"
+          >
             <Link
               prefetch={false}
               href={getUriWithOrg(org?.slug, '/dash/documentation/rights')}
