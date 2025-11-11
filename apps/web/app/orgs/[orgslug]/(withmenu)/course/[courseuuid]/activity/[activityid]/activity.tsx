@@ -42,13 +42,13 @@ import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import MiniInfoTooltip from '@components/Objects/MiniInfoTooltip';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Link from '@components/ui/AppLink';
 import { toast } from 'react-hot-toast';
-import useSWR, { mutate } from 'swr';
+import { mutate } from 'swr';
+import { useTrailData } from '@/hooks/useTrailData';
 
 // Lazy load heavy components
 const Canva = lazy(() => import('@components/Objects/Activities/DynamicCanva/DynamicCanva'));
@@ -123,10 +123,8 @@ const ActivityActions = ({
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 
-  // Add SWR for trail data
-  const { data: trailData } = useSWR(`${getAPIUrl()}trail/org/${org?.id}/trail`, (url) =>
-    swrFetcher(url, access_token),
-  );
+  // Use shared trail data hook to prevent duplicate API calls
+  const { data: trailData } = useTrailData(org?.id);
 
   return (
     <div className="flex items-center space-x-2">
@@ -207,10 +205,8 @@ const ActivityClient = (props: ActivityClientProps) => {
     return format.relativeTime(date, now);
   };
 
-  // Add SWR for trail data
-  const { data: trailData } = useSWR(`${getAPIUrl()}trail/org/${org?.id}/trail`, (url) =>
-    swrFetcher(url, access_token),
-  );
+  // Use shared trail data hook to prevent duplicate API calls
+  const { data: trailData } = useTrailData(org?.id);
 
   const { allActivities, currentIndex } = useActivityPosition(course, activityid);
 

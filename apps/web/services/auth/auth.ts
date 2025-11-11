@@ -337,7 +337,8 @@ export async function getUserSession(token: string): Promise<UserSessionResponse
       headers,
       redirect: 'follow',
       credentials: 'include',
-      cache: 'no-cache',
+      cache: 'force-cache', // Cache session data to reduce API calls
+      next: { revalidate: 300 }, // Revalidate every 5 minutes
     };
 
     const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.userSession}`, requestOptions);

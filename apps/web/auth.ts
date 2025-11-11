@@ -26,7 +26,7 @@ declare global {
 }
 
 // Constants
-const CACHE_TTL = 1 * 60 * 1000; // 1 minute
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes (reduced API calls)
 const TOKEN_REFRESH_BUFFER = 2 * 60 * 1000; // 2 minutes before expiry
 const MAX_CACHE_SIZE = 1000; // Prevent memory leaks
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 days

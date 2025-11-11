@@ -26,7 +26,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getDiscussionsSwrKey } from '@services/courses/discussions';
 import { CourseProvider } from '@components/Contexts/CourseContext';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { getUriWithOrg } from '@services/config/config';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -43,6 +43,7 @@ import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { cn } from '@/lib/utils';
 import useSWR from 'swr';
+import { useTrailData } from '@/hooks/useTrailData';
 
 const CourseClient = (props: any) => {
   const t = useTranslations('CoursePage');
@@ -67,10 +68,8 @@ const CourseClient = (props: any) => {
     (url) => swrFetcher(url, access_token),
   );
 
-  // Add SWR for trail data
-  const { data: trailData } = useSWR(`${getAPIUrl()}trail/org/${org?.id}/trail`, (url) =>
-    swrFetcher(url, access_token),
-  );
+  // Use shared trail data hook to prevent duplicate API calls
+  const { data: trailData } = useTrailData(org?.id);
 
   // Normalizes various formats of `course.learnings` into an array that the UI can render
   const normalizedLearnings = useMemo(() => {
