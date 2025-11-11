@@ -203,7 +203,7 @@ const FlipcardExtension: React.FC = (props: any) => {
           {/* Front Side (Question) */}
           <div
             className={twMerge(
-              'flipcard-front nice-shadow flex flex-col items-center justify-center border-2 p-6 text-center text-white',
+              'flipcard-front soft-shadow flex flex-col items-center justify-center border-2 p-6 text-center text-white',
               getCardColor(color, false),
             )}
           >
@@ -256,7 +256,7 @@ const FlipcardExtension: React.FC = (props: any) => {
           {/* Back Side (Answer) */}
           <div
             className={twMerge(
-              'flipcard-back nice-shadow flex flex-col items-center justify-center border-2 p-6 text-center text-white',
+              'flipcard-back soft-shadow flex flex-col items-center justify-center border-2 p-6 text-center text-white',
               getCardColor(color, true),
             )}
           >
@@ -437,7 +437,7 @@ const FlipcardExtension: React.FC = (props: any) => {
           <div
             data-flipcard-ui
             ref={colorPickerRef}
-            className="nice-shadow absolute top-full left-1/2 z-10 mt-2 -translate-x-1/2 transform rounded-lg bg-white p-3"
+            className="soft-shadow absolute top-full left-1/2 z-10 mt-2 -translate-x-1/2 transform rounded-lg bg-white p-3"
             contentEditable={false}
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}

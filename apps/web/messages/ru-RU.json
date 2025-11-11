@@ -223,7 +223,7 @@
       "passwordPlaceholder": "Введите ваш пароль",
       "signInWithGoogle": "Войти с помощью Google",
       "signup": "Зарегистрироваться",
-      "title": "Вход — {orgName}",
+      "title": "Вход — Ashyq Bilim",
       "wrongCredentials": "Неверный адрес электронной почты или пароль"
     },
     "Reset": {
@@ -253,17 +253,17 @@
       "enterInviteCode": "Введите код приглашения",
       "errorSomethingWentWrong": "Что-то пошло не так",
       "hi": "Привет",
-      "inviteCodeRequired": "Для присоединения к {orgName} требуется код приглашения",
+      "inviteCodeRequired": "Для присоединения к Ashyq Bilim требуется код приглашения",
       "invitedToJoin": "Вас пригласили присоединиться",
       "join": "Присоединиться",
-      "joinQuestion": "хотите присоединиться к {orgName}?",
+      "joinQuestion": "хотите присоединиться к Ashyq Bilim?",
       "loading": "Загрузка...",
       "loginToAccount": "Войти",
       "password": "Пароль",
       "passwordPlaceholder": "Введите ваш пароль",
       "signInWithGoogle": "Войти с помощью Google",
       "submit": "Отправить",
-      "title": "Регистрация — {orgName}",
+      "title": "Регистрация — Ashyq Bilim",
       "username": "Имя пользователя",
       "usernamePlaceholder": "Введите имя пользователя"
     },
@@ -1265,7 +1265,7 @@
     "Org": {
       "fetchError": "Произошла ошибка при загрузке данных Ashyq Bilim",
       "home": "На главную",
-      "joinOrgCTA": "Присоединиться к {orgName}",
+      "joinOrgCTA": "Присоединиться к Ashyq Bilim",
       "notMemberInfo": "Вы еще не являетесь членом Ashyq Bilim",
       "signOut": "Выйти"
     }
@@ -4871,7 +4871,7 @@
   },
   "HomePage": {
     "Collections": {
-      "collectionOfCourses": "Коллекции курсов от {orgName}",
+      "collectionOfCourses": "Коллекции курсов от Ashyq Bilim",
       "newCollection": "Новая коллекция",
       "noContent": "Пока нет коллекций",
       "noContentUserAdmin": "Создавайте коллекции, чтобы группировать курсы",
@@ -5248,10 +5248,10 @@
     "errorSomethingWentWrong": "Что-то пошло не так. Пожалуйста, попробуйте позже.",
     "hi": "Здравствуйте",
     "inviteCodeInvalid": "Код приглашения недействителен",
-    "inviteCodeRequired": "Требуется код приглашения для присоединения к {orgname}",
+    "inviteCodeRequired": "Требуется код приглашения для присоединения к Ashyq Bilim",
     "inviteCodeValid": "Код приглашения действителен, вы будете перенаправлены на страницу регистрации через секунду!",
     "join": "Присоединиться ",
-    "joinQuestion": "Присоединиться к {orgname}?",
+    "joinQuestion": "Присоединиться к Ashyq Bilim?",
     "orgJoinSuccess": "Успешно присоединились к Ashyq Bilim.",
     "submit": "Отправить "
   },

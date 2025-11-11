@@ -367,7 +367,7 @@ const QuizBlockComponent = (props: any) => {
                         className="mx-2 w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 py-1.5 pr-6 text-sm font-bold text-neutral-600"
                       />
                     ) : (
-                      <p className="mx-2 w-full rounded-md bg-[#00008b00] px-3 py-1.5 pr-6 text-sm font-bold break-words text-neutral-600">
+                      <p className="mx-2 w-full rounded-md bg-[#00008b00] px-3 py-1.5 pr-6 text-sm font-bold wrap-break-word text-neutral-600">
                         {answer.answer}
                       </p>
                     )}

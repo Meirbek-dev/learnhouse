@@ -1,7 +1,7 @@
 'use client';
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { getAPIUrl, getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { validateInviteCode } from '@services/organizations/invites';
 import Toast from '@components/Objects/StyledElements/Toast/Toast';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
@@ -17,10 +17,11 @@ import { Button } from '@components/ui/button';
 import OpenSignUpComponent from './OpenSignup';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from '@components/ui/AppLink';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
+import { mutate } from 'swr';
 
 interface SignUpClientProps {
   org: any;
@@ -85,22 +86,39 @@ const LoggedInJoinScreen = (props: any) => {
   const [_isLoading, setIsLoading] = useState(true);
   const [isSumbitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const autoJoinAttempted = useRef(false);
 
-  const join = async () => {
+  const accessToken = session?.data?.tokens?.access_token;
+  const userId = session?.data?.user?.id;
+
+  const join = useCallback(async () => {
     setIsSubmitting(true);
     try {
       const res = await joinOrg(
         {
           org_id: org.id,
-          user_id: session?.data?.user?.id,
+          user_id: userId,
           invite_code: props.inviteCode,
         },
         null,
-        session.data?.tokens?.access_token,
+        accessToken,
       );
 
-      if (res.success) {
-        toast.success(res.data?.message || toastT('orgJoinSuccess'));
+      const alreadyMemberMessage = res.data?.detail;
+      const isAlreadyMember =
+        typeof alreadyMemberMessage === 'string' && alreadyMemberMessage.toLowerCase().includes('уже является частью');
+
+      if (res.success || isAlreadyMember) {
+        if (isAlreadyMember) {
+          toast.success(alreadyMemberMessage);
+        } else {
+          toast.success(res.data?.message || toastT('orgJoinSuccess'));
+        }
+
+        // Ensure org context reflects the membership change.
+        void mutate(`${getAPIUrl()}orgs/user/page/1/limit/20`);
+        void mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
+
         setTimeout(() => {
           router.push(getUriWithOrg(org.slug, '/'));
         }, 1500);
@@ -111,7 +129,7 @@ const LoggedInJoinScreen = (props: any) => {
         if (res.data?.detail) {
           errorMessage = res.data.detail;
         } else if (Array.isArray(res.data)) {
-          errorMessage = res.data.map((err) => err.msg || err.message).join(', ');
+          errorMessage = res.data.map((err: any) => err.msg || err.message).join(', ');
         }
 
         toast.error(errorMessage);
@@ -123,13 +141,23 @@ const LoggedInJoinScreen = (props: any) => {
       setIsLoading(false);
       setIsSubmitting(false);
     }
-  };
+  }, [accessToken, org.id, org.slug, props.inviteCode, router, toastT, userId]);
 
   useEffect(() => {
     if (session && org) {
       setIsLoading(false);
     }
   }, [org, session]);
+
+  useEffect(() => {
+    if (session?.status !== 'authenticated' || !org?.id || !userId || autoJoinAttempted.current) {
+      return;
+    }
+
+    autoJoinAttempted.current = true;
+    void join();
+  }, [join, org?.id, session?.status, userId]);
+
 
   return (
     <div className="mx-auto flex flex-row items-center">

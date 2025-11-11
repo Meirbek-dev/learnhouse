@@ -908,8 +908,6 @@ export const MarkStatus = (props: {
   const session = usePlatformSession() as any;
   const org = useOrg() as any;
   const [isLoading, setIsLoading] = useState(false);
-  const [showMarkedTooltip, setShowMarkedTooltip] = useState(false);
-  const [showUnmarkedTooltip, setShowUnmarkedTooltip] = useState(false);
 
   // Gamification state via unified context
   const gamificationContext = useOptionalGamificationContext();
@@ -917,53 +915,6 @@ export const MarkStatus = (props: {
 
   // Track completed activities to prevent duplicate XP toasts
   const completedActivitiesRef = useRef<Set<string>>(new Set());
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const markedTooltipCount = localStorage.getItem('activity_marked_tooltip_count');
-      const unmarkedTooltipCount = localStorage.getItem('activity_unmarked_tooltip_count');
-
-      if (!markedTooltipCount || Number.parseInt(markedTooltipCount, 10) < 3) {
-        setShowMarkedTooltip(true);
-      }
-      if (!unmarkedTooltipCount || Number.parseInt(unmarkedTooltipCount, 10) < 3) {
-        setShowUnmarkedTooltip(true);
-      }
-    }
-  }, []);
-
-  const handleMarkedTooltipClose = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('activity_marked_tooltip_count', '3');
-      setShowMarkedTooltip(false);
-    }
-  };
-
-  const handleUnmarkedTooltipClose = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('activity_unmarked_tooltip_count', '3');
-      setShowUnmarkedTooltip(false);
-    }
-  };
-
-  const infoIcon = (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle
-        cx="12"
-        cy="12"
-        r="10"
-      />
-      <path d="M12 16v-4" />
-      <path d="M12 8h.01" />
-    </svg>
-  );
 
   const areAllActivitiesCompleted = () => {
     const run = props.trailData?.runs?.find((run: any) => run.course_uuid === props.course.course_uuid);
@@ -1108,16 +1059,6 @@ export const MarkStatus = (props: {
               functionToExecute={unmarkActivityAsCompleteFront}
               status="warning"
             />
-            {showMarkedTooltip ? (
-              <MiniInfoTooltip
-                icon={infoIcon}
-                message={t('markStatus.unmarkTooltipMessage')}
-                onClose={handleMarkedTooltipClose}
-                iconColor="text-teal-600"
-                iconSize={24}
-                width="w-64"
-              />
-            ) : null}
           </div>
         </div>
       ) : (
@@ -1167,16 +1108,6 @@ export const MarkStatus = (props: {
                 <span className="min-w-[90px] text-xs font-bold">{isLoading ? t('marking') : t('markAsComplete')}</span>
               </div>
             </div>
-            {showUnmarkedTooltip ? (
-              <MiniInfoTooltip
-                icon={infoIcon}
-                message={t('markStatus.markTooltipMessage')}
-                onClose={handleUnmarkedTooltipClose}
-                iconColor="text-gray-600"
-                iconSize={24}
-                width="w-64"
-              />
-            ) : null}
           </div>
         </div>
       )}
