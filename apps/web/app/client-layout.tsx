@@ -2,7 +2,6 @@
 
 import PlatformSessionProvider, { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import StyledComponentsRegistry from '../components/Utils/libs/styled-registry';
-import { UserProfileProvider } from '@components/Contexts/UserProfileContext';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { updateUserTheme } from '@services/users/users';
 import { SessionProvider } from 'next-auth/react';
@@ -44,7 +43,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
     // Lower frequency of session refetches to avoid unnecessary periodic calls that
     // may contribute to being rate limited. Also disable refetch on window focus.
     <SessionProvider
-      refetchInterval={15 * 60_000} // 15 minutes (reduced from 5 to minimize API calls)
+      refetchInterval={5 * 60_000} // 5 minutes
       refetchOnWindowFocus={false}
       refetchWhenOffline={false}
     >
@@ -52,17 +51,15 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
         {/* Global SWR defaults to reduce frequent revalidation and dedupe identical requests. */}
         <SWRConfig
           value={{
-            dedupingInterval: 120_000, // dedupe identical requests for 2 minutes (increased from 60s)
-            focusThrottleInterval: 120_000, // throttle refetches on focus (increased from 60s)
+            dedupingInterval: 60_000, // dedupe identical requests for 60s
+            focusThrottleInterval: 60_000, // throttle refetches on focus
             revalidateOnFocus: false,
             revalidateOnReconnect: false,
             shouldRetryOnError: false,
             errorRetryCount: 1,
           }}
         >
-          <UserProfileProvider>
-            <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
-          </UserProfileProvider>
+          <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
         </SWRConfig>
       </PlatformSessionProvider>
     </SessionProvider>

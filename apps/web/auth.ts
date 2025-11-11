@@ -26,15 +26,11 @@ declare global {
 }
 
 // Constants
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutes (reduced API calls)
+const CACHE_TTL = 1 * 60 * 1000; // 1 minute
 const TOKEN_REFRESH_BUFFER = 2 * 60 * 1000; // 2 minutes before expiry
 const MAX_CACHE_SIZE = 1000; // Prevent memory leaks
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 days
 const SESSION_UPDATE_AGE = 24 * 60 * 60; // 24 hours
-
-// Exponential backoff constants for token refresh
-const MAX_RETRIES = 3;
-const INITIAL_DELAY = 1000; // 1 second
 
 // Cache implementation with size limits and cleanup
 const getSessionCache = () => {
@@ -76,22 +72,6 @@ const getSessionCache = () => {
 };
 
 export const isDevEnv = process.env.NODE_ENV !== 'production';
-
-// Helper function for token refresh with exponential backoff
-async function refreshTokenWithBackoff(refreshToken: string, attempt: number = 0): Promise<AuthTokens> {
-  try {
-    return await getNewAccessTokenUsingRefreshTokenServer(refreshToken);
-  } catch (error: any) {
-    // Retry on 429 (rate limit) errors with exponential backoff
-    if (attempt < MAX_RETRIES && (error.status === 429 || error.statusCode === 429)) {
-      const delay = INITIAL_DELAY * Math.pow(2, attempt);
-      console.warn(`Token refresh rate limited (429), retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_RETRIES})`);
-      await new Promise((resolve) => setTimeout(resolve, delay));
-      return refreshTokenWithBackoff(refreshToken, attempt + 1);
-    }
-    throw error;
-  }
-}
 
 // Helper function to validate token expiry
 const isTokenExpiringSoon = (expiry: number, bufferMs: number = TOKEN_REFRESH_BUFFER): boolean => {
@@ -310,8 +290,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               return null;
             }
 
-            // Use exponential backoff for token refresh to handle rate limits
-            const refreshedToken = await refreshTokenWithBackoff(refresh_token);
+            const refreshedToken = await getNewAccessTokenUsingRefreshTokenServer(refresh_token);
 
             if (refreshedToken?.access_token) {
               // Ensure new expiry is set and valid

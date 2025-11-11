@@ -17,7 +17,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const t = await getTranslations('General');
 
   const org = await getOrganizationContextInfo(params.orgslug, {
-    next: { revalidate: 300 }, // Cache for 5 minutes
+    cache: 'no-store',
     tags: ['organizations'],
   });
 
@@ -61,7 +61,7 @@ const CoursesPage = async (params: any) => {
   const session = await auth();
   const access_token = session?.tokens?.access_token;
 
-  const courses = await getOrgCourses(orgslug, { next: { revalidate: 180 }, tags: ['courses'] }, access_token || null);
+  const courses = await getOrgCourses(orgslug, { cache: 'no-store', tags: ['courses'] }, access_token || null);
 
   return (
     <div>

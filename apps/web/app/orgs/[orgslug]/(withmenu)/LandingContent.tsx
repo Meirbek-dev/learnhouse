@@ -15,11 +15,11 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
     const session = await auth();
     const access_token = session?.tokens?.access_token;
 
-    // Fetch organization info with ISR caching
+    // Fetch organization info with detailed error handling
     let org;
     try {
       org = await getOrganizationContextInfo(orgslug, {
-        next: { revalidate: 300 }, // Cache for 5 minutes
+        cache: 'no-store',
         tags: ['organizations'],
       });
     } catch (error) {
@@ -48,14 +48,14 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
       : Promise.resolve(null);
 
     const [courses, collections, gamificationData] = await Promise.all([
-      getOrgCourses(orgslug, { next: { revalidate: 180 }, tags: ['courses'] }, access_token || null).catch((error) => {
+      getOrgCourses(orgslug, { cache: 'no-store', tags: ['courses'] }, access_token || null).catch((error) => {
         console.error('[LandingContent] Courses fetch failed:', {
           message: error instanceof Error ? error.message : 'Unknown error',
           orgslug,
         });
         return [];
       }),
-      getOrgCollections(org.id, access_token, { next: { revalidate: 180 }, tags: ['courses'] }).catch((error) => {
+      getOrgCollections(org.id, access_token, { cache: 'no-store', tags: ['courses'] }).catch((error) => {
         console.error('[LandingContent] Collections fetch failed:', {
           message: error instanceof Error ? error.message : 'Unknown error',
           org_id: org.id,

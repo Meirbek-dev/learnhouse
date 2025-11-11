@@ -34,12 +34,7 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
     data: org,
     error: orgError,
     isLoading: isOrgLoading,
-  } = useSWR(`${getAPIUrl()}orgs/slug/${orgslug}`, (url) => swrFetcher(url, accessToken), {
-    // Cache org data for longer since it rarely changes
-    dedupingInterval: 30 * 60_000, // 30 minutes
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-  });
+  } = useSWR(`${getAPIUrl()}orgs/slug/${orgslug}`, (url) => swrFetcher(url, accessToken));
   const {
     data: orgs,
     error: orgsError,
@@ -48,12 +43,6 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
     // Skip user-specific org fetches when unauthenticated to prevent hammering rate-limited endpoints.
     isAuthenticated ? `${getAPIUrl()}orgs/user/page/1/limit/20` : null,
     (url) => swrFetcher(url, accessToken),
-    {
-      // Cache user orgs for longer since they rarely change
-      dedupingInterval: 30 * 60_000, // 30 minutes
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    },
   );
 
   const isLoading = session.status === 'loading' || isOrgLoading || (isAuthenticated && isUserOrgsLoading);

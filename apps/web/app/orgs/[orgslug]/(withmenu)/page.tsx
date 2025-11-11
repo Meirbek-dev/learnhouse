@@ -14,9 +14,9 @@ interface MetadataProps {
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
-  // Get Org context information with ISR caching
+  // Get Org context information
   const org = await getOrganizationContextInfo(params.orgslug, {
-    next: { revalidate: 300 }, // Cache for 5 minutes
+    cache: 'no-store',
     tags: ['organizations'],
   });
   const t = await getTranslations('General');
