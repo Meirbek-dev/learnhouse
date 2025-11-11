@@ -64,7 +64,7 @@ FILE_TYPES = {
     "video": {
         "extensions": [".mp4", ".webm", ".mkv"],
         "mime_types": ["video/mp4", "video/webm", "video/x-matroska"],
-        "max_size": 500 * 1024 * 1024,  # 500MB
+        "max_size": 1000 * 1024 * 1024,  # 1000MB
         "validator": validate_video_content,
     },
     "document": {

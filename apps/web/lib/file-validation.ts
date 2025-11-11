@@ -13,7 +13,7 @@ export const FILE_TYPES = {
   video: {
     extensions: ['.mp4', '.webm', '.mkv'],
     mimeTypes: ['video/mp4', 'video/webm', 'video/x-matroska'],
-    maxSize: 500 * 1024 * 1024, // 500MB
+    maxSize: 1000 * 1024 * 1024, // 1000MB
   },
   document: {
     extensions: ['.pdf'],
