@@ -16,12 +16,12 @@ import { getResponseMetadata } from '@/services/utils/ts/requests';
 declare global {
   var sessionCache:
     | Map<
-      string,
-      {
-        data: SessionData;
-        timestamp: number;
-      }
-    >
+        string,
+        {
+          data: SessionData;
+          timestamp: number;
+        }
+      >
     | undefined;
 }
 

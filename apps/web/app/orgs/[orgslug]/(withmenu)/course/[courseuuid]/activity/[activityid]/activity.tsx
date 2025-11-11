@@ -44,11 +44,11 @@ import MiniInfoTooltip from '@components/Objects/MiniInfoTooltip';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTrailData } from '@/hooks/useTrailData';
 import { useRouter } from 'next/navigation';
 import Link from '@components/ui/AppLink';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
-import { useTrailData } from '@/hooks/useTrailData';
 
 // Lazy load heavy components
 const Canva = lazy(() => import('@components/Objects/Activities/DynamicCanva/DynamicCanva'));

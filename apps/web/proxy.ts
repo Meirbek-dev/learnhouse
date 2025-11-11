@@ -1,8 +1,4 @@
-import {
-  getDefaultOrg,
-  getTopLevelCookieDomain,
-  getUriWithOrg,
-} from './services/config/config';
+import { getDefaultOrg, getTopLevelCookieDomain, getUriWithOrg } from './services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 

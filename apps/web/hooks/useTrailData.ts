@@ -1,8 +1,8 @@
 'use client';
 
-import { getAPIUrl } from '@services/config/config';
-import { swrFetcher } from '@services/utils/ts/requests';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 import useSWR from 'swr';
 
 /**

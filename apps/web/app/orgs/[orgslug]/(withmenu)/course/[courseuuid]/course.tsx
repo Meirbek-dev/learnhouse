@@ -26,7 +26,6 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getDiscussionsSwrKey } from '@services/courses/discussions';
 import { CourseProvider } from '@components/Contexts/CourseContext';
-import { getUriWithOrg } from '@services/config/config';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -34,8 +33,10 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import CourseDiscussions from '@/components/discussions';
 // Import UI components
 import { Card, CardContent } from '@/components/ui/card';
+import { getUriWithOrg } from '@services/config/config';
 import { Separator } from '@/components/ui/separator';
 import { useEffect, useMemo, useState } from 'react';
+import { useTrailData } from '@/hooks/useTrailData';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -43,7 +44,6 @@ import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { cn } from '@/lib/utils';
 import useSWR from 'swr';
-import { useTrailData } from '@/hooks/useTrailData';
 
 const CourseClient = (props: any) => {
   const t = useTranslations('CoursePage');

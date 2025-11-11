@@ -28,7 +28,9 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
         cause: error instanceof Error ? error.cause : undefined,
         orgslug,
       });
-      throw new Error(`Unable to load organization "${orgslug}". Please check your network connection and try again.`, { cause: error });
+      throw new Error(`Unable to load organization "${orgslug}". Please check your network connection and try again.`, {
+        cause: error,
+      });
     }
 
     // Only fetch gamification data if user is authenticated

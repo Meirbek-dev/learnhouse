@@ -85,7 +85,7 @@ const nextConfig: NextConfig = {
       'tailwind-merge',
       'tw-animate-css',
       'unsplash-js',
-      'zod'
+      'zod',
     ],
   },
   compiler: {
@@ -105,11 +105,7 @@ const nextConfig: NextConfig = {
     },
   },
   // Allow cross-origin requests in development
-  allowedDevOrigins: [
-    'https://cs-mooc.tou.edu.kz',
-    'http://192.168.12.35',
-    'http://192.168.1.46',
-  ],
+  allowedDevOrigins: ['https://cs-mooc.tou.edu.kz', 'http://192.168.12.35', 'http://192.168.1.46'],
 };
 
 const withNextIntl = createNextIntlPlugin();

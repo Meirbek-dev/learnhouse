@@ -1,15 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useEffect } from 'react';
 
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
+export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const t = useTranslations('Errors');
 
   useEffect(() => {
@@ -46,9 +40,7 @@ export default function Error({
               <p className="mb-2 font-mono text-sm">
                 <strong>Error:</strong> {error.message}
               </p>
-              {error.stack && (
-                <pre className="overflow-auto text-xs">{error.stack}</pre>
-              )}
+              {error.stack && <pre className="overflow-auto text-xs">{error.stack}</pre>}
             </div>
           </details>
         )}

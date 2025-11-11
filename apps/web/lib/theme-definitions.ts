@@ -665,5 +665,5 @@ export const themes = [
   vercelTheme,
   violetBloomTheme,
   vscodeTheme,
-  sageGardenTheme
+  sageGardenTheme,
 ] as const;
