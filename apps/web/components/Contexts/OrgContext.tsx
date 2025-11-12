@@ -43,6 +43,11 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
     // Skip user-specific org fetches when unauthenticated to prevent hammering rate-limited endpoints.
     isAuthenticated ? `${getAPIUrl()}orgs/user/page/1/limit/20` : null,
     (url) => swrFetcher(url, accessToken),
+    {
+      // Revalidate frequently on mount to catch post-signup scenarios
+      revalidateOnMount: true,
+      dedupingInterval: 1000,
+    },
   );
 
   const isLoading = session.status === 'loading' || isOrgLoading || (isAuthenticated && isUserOrgsLoading);

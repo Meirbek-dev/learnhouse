@@ -2,6 +2,7 @@ import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import { createHash } from 'node:crypto';
 import NextAuth from 'next-auth';
+import { cookies } from 'next/headers';
 
 import {
   getNewAccessTokenUsingRefreshTokenServer,
@@ -239,10 +240,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // Handle Google OAuth sign in
         if (account?.provider === 'google' && user?.email && account.access_token) {
           try {
+            // Try to get org_id from cookie
+            const cookieStore = await cookies();
+            const orgIdCookie = cookieStore.get('oauth_org_id');
+            const orgId = orgIdCookie?.value ? parseInt(orgIdCookie.value, 10) : undefined;
+
+            // Clear the cookie after reading it
+            if (orgIdCookie) {
+              cookieStore.delete('oauth_org_id');
+            }
+
             const unsanitized_req = await loginWithOAuthToken(
               user.email.toLowerCase().trim(),
               'google',
               account.access_token,
+              orgId,
             );
             const userFromOAuth = await getResponseMetadata(unsanitized_req);
 

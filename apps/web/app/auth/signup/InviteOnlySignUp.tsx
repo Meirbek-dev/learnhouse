@@ -16,6 +16,9 @@ import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import { z } from 'zod';
+import { useRouter } from 'next/navigation';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { mutate } from 'swr';
 
 interface InviteOnlySignUpProps {
   inviteCode: string;
@@ -45,6 +48,7 @@ const InviteOnlySignUpComponent = (props: InviteOnlySignUpProps) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Auth.Signup');
   const org = useOrg() as any;
+  const router = useRouter();
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [isPending, startTransition] = useTransition();
@@ -76,13 +80,54 @@ const InviteOnlySignUpComponent = (props: InviteOnlySignUpProps) => {
     };
 
     startTransition(async () => {
-      const res = await signUpWithInviteCode(submitValues, props.inviteCode);
-      const responseMessage = await res.json();
-      if (res.status === 200) {
-        setMessage(t('accountCreated'));
-      } else if ([401, 400, 404, 409].includes(res.status)) {
-        setError(responseMessage.detail);
-      } else {
+      try {
+        const res = await signUpWithInviteCode(submitValues, props.inviteCode);
+
+        let responseBody: any = null;
+        try {
+          responseBody = await res.json();
+        } catch {
+          responseBody = null;
+        }
+
+        if (res.status === 200) {
+          if (org?.slug) {
+            try {
+              const loginResult = await signIn('credentials', {
+                redirect: false,
+                email: submitValues.email,
+                password: submitValues.password,
+              });
+
+              if (loginResult?.ok) {
+                // Preemptively update SWR cache to include the new user-org relationship
+                await mutate(`${getAPIUrl()}orgs/user/page/1/limit/20`);
+                await mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
+
+                // Small delay to ensure session propagates
+                await new Promise((resolve) => setTimeout(resolve, 300));
+
+                const redirectTarget = org?.slug ? getUriWithOrg(org.slug, '/') : '/redirect_from_auth';
+                router.replace(redirectTarget);
+                return;
+              }
+            } catch (loginError) {
+              console.error('Auto login after invite signup failed:', loginError);
+            }
+          }
+
+          setMessage(t('accountCreated'));
+          return;
+        }
+
+        if ([401, 400, 404, 409].includes(res.status)) {
+          setError(responseBody?.detail || t('errorSomethingWentWrong'));
+          return;
+        }
+
+        setError(t('errorSomethingWentWrong'));
+      } catch (signupError) {
+        console.error('Invite signup failed:', signupError);
         setError(t('errorSomethingWentWrong'));
       }
     });
@@ -222,7 +267,17 @@ const InviteOnlySignUpComponent = (props: InviteOnlySignUpProps) => {
       <div>
         <div className="mx-10 mt-5 mb-5 flex h-0.5 rounded-2xl bg-slate-100" />
         <button
-          onClick={() => startTransition(() => signIn('google', { callbackUrl: '/redirect_from_auth' }))}
+          onClick={() =>
+            startTransition(() => {
+              // Store org_id in cookie for OAuth callback
+              if (org?.id) {
+                document.cookie = `oauth_org_id=${org.id}; path=/; max-age=600; samesite=lax`;
+              }
+              signIn('google', {
+                callbackUrl: `/redirect_from_auth?org_id=${org?.id || ''}&org_slug=${org?.slug || ''}`,
+              });
+            })
+          }
           className="flex w-full justify-center space-x-3 rounded-md border border-gray-200 bg-white p-2 py-3 text-center text-base font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           disabled={isPending}
         >

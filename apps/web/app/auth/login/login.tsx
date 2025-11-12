@@ -188,7 +188,17 @@ const LoginClient = (props: LoginClientProps) => {
                   <span>{t('signup')}</span>
                 </Link>
                 <button
-                  onClick={() => startTransition(() => signIn('google', { callbackUrl: '/redirect_from_auth' }))}
+                  onClick={() =>
+                    startTransition(() => {
+                      // Store org_id in cookie for OAuth callback
+                      if (props.org?.id) {
+                        document.cookie = `oauth_org_id=${props.org.id}; path=/; max-age=600; samesite=lax`;
+                      }
+                      signIn('google', {
+                        callbackUrl: `/redirect_from_auth?org_id=${props.org?.id || ''}&org_slug=${props.org?.slug || ''}`,
+                      });
+                    })
+                  }
                   className="flex w-full justify-center space-x-3 rounded-md border border-gray-200 bg-white p-2 py-3 text-center text-base font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:border-gray-300 hover:bg-gray-50"
                   disabled={isPending}
                 >
