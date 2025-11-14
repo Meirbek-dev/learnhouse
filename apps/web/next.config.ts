@@ -1,5 +1,8 @@
 import createNextIntlPlugin from 'next-intl/plugin';
 import type { NextConfig } from 'next';
+import webpack from 'next/dist/compiled/webpack/webpack';
+
+const LimitChunkCountPlugin = (webpack as any)?.optimize?.LimitChunkCountPlugin;
 
 const nextConfig: NextConfig = {
   async rewrites() {
@@ -49,11 +52,19 @@ const nextConfig: NextConfig = {
   // Optimize webpack bundle splitting to reduce number of chunks
   webpack: (config, { isServer }) => {
     if (!isServer) {
-      // Reduce chunk splitting to minimize simultaneous requests
+      const existingOptimization = config.optimization ?? {};
+      const existingSplitChunks = existingOptimization.splitChunks ?? {};
+
       config.optimization = {
-        ...config.optimization,
+        ...existingOptimization,
+        runtimeChunk: 'single',
         splitChunks: {
+          ...existingSplitChunks,
           chunks: 'all',
+          maxAsyncRequests: 6,
+          maxInitialRequests: 6,
+          enforceSizeThreshold: 120000,
+          minSize: 60000,
           cacheGroups: {
             // Create larger vendor chunk to reduce total chunks
             defaultVendors: {
@@ -78,11 +89,17 @@ const nextConfig: NextConfig = {
               reuseExistingChunk: true,
             },
           },
-          // Increase minimum size to create fewer, larger chunks
-          minSize: 30000,
-          maxSize: 244000, // Limit max chunk size
         },
       };
+
+      if (LimitChunkCountPlugin) {
+        config.plugins = config.plugins ?? [];
+        config.plugins.push(
+          new LimitChunkCountPlugin({
+            maxChunks: 40,
+          }),
+        );
+      }
     }
     return config;
   },

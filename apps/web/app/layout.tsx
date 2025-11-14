@@ -35,10 +35,29 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           if (typeof window === 'undefined') {
             return;
           }
+
+          const registerServiceWorker = () => {
+            if (!('serviceWorker' in navigator) || !window.isSecureContext) {
+              return;
+            }
+            const swUrl = '/sw.js';
+            navigator.serviceWorker
+              .register(swUrl, { scope: '/' })
+              .catch((error) => {
+                console.error('[sw] registration failed', error);
+              });
+          };
+
+          try {
+            registerServiceWorker();
+          } catch (error) {
+            console.error('[sw] registration error', error);
+          }
+
           const MAX_PARALLEL_CHUNK_REQUESTS = Number(
             window.__NEXT_MAX_CHUNK_REQUESTS || 3,
           );
-          const chunkPattern = /\\/_next\\/static\\/chunks\\//;
+          const chunkPattern = /\/_next\/static\/chunks\//;
           const originalHeadAppendChild = window.HTMLElement.prototype.appendChild;
           const taskQueue = [];
           let active = 0;
