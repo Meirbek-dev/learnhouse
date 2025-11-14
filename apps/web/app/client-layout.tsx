@@ -39,27 +39,6 @@ function ThemeSync() {
 }
 
 export default function ClientLayout({ children }: ClientLayoutProps) {
-  // Register service worker early to intercept chunk/static requests,
-  // apply client-side concurrency limiting and retry on 429 responses.
-  useEffect(() => {
-    if (!('serviceWorker' in navigator)) return;
-
-    const registerSW = async () => {
-      try {
-        const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-        // optional: log registration for debugging
-        // eslint-disable-next-line no-console
-        console.log('ServiceWorker registered:', reg.scope);
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error('ServiceWorker registration failed:', err);
-      }
-    };
-
-    // Try to register as soon as possible
-    registerSW();
-  }, []);
-
   return (
     // Lower frequency of session refetches to avoid unnecessary periodic calls that
     // may contribute to being rate limited. Also disable refetch on window focus.
