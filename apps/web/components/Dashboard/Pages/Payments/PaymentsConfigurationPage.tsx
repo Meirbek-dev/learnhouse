@@ -35,7 +35,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import type { FC } from 'react';
-import { z } from 'zod';
+import * as z from 'zod';
 
 const PaymentsConfigurationPage: FC = () => {
   const org = useOrg() as any;

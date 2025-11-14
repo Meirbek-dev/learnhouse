@@ -14,7 +14,7 @@ import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import * as z from 'zod';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   z

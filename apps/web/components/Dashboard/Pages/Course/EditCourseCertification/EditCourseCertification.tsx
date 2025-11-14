@@ -13,8 +13,8 @@ import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import * as z from 'zod';
 import useSWR from 'swr';
-import { z } from 'zod';
 
 interface EditCourseCertificationProps {
   orgslug: string;

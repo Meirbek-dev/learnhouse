@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { z } from 'zod';
+import * as z from 'zod';
 
 /**
  * User Profile and Level Types

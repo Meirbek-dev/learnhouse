@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { signOut } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
-import { z } from 'zod';
+import * as z from 'zod';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   z.object({

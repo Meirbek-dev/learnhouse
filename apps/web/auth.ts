@@ -1,8 +1,8 @@
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import { createHash } from 'node:crypto';
-import NextAuth from 'next-auth';
 import { cookies } from 'next/headers';
+import NextAuth from 'next-auth';
 
 import {
   getNewAccessTokenUsingRefreshTokenServer,

@@ -22,7 +22,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import useSWR, { mutate } from 'swr';
-import { z } from 'zod';
+import * as z from 'zod';
 
 const CourseUpdates = () => {
   const course = useCourse();

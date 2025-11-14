@@ -1,11 +1,12 @@
 'use client';
 
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { validateInviteCode } from '@services/organizations/invites';
 import Toast from '@components/Objects/StyledElements/Toast/Toast';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import platformLogoFull from 'public/platform_logo_full.svg';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { MailWarning, Ticket, UserPlus } from 'lucide-react';
@@ -17,7 +18,6 @@ import { Button } from '@components/ui/button';
 import OpenSignUpComponent from './OpenSignup';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from '@components/ui/AppLink';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
@@ -157,7 +157,6 @@ const LoggedInJoinScreen = (props: any) => {
     autoJoinAttempted.current = true;
     void join();
   }, [join, org?.id, session?.status, userId]);
-
 
   return (
     <div className="mx-auto flex flex-row items-center">

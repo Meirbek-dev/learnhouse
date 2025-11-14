@@ -22,7 +22,7 @@ import { useTransition } from 'react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { mutate } from 'swr';
-import { z } from 'zod';
+import * as z from 'zod';
 
 const createValidationSchema = (t: (key: string) => string) =>
   z.object({

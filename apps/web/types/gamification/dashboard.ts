@@ -1,6 +1,6 @@
 import type { StreakInfo, UserGamificationProfile } from './profile';
 import type { OrganizationLeaderboard } from './leaderboard';
-import { z } from 'zod';
+import * as z from 'zod';
 
 /**
  * Dashboard and Aggregate Types

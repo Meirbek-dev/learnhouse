@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
 import Image from 'next/image';
-import { z } from 'zod';
+import * as z from 'zod';
 
 const createValidationSchema = (t: (key: string) => string) =>
   z.object({

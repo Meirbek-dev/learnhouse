@@ -13,7 +13,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { useTransition } from 'react';
 import { mutate } from 'swr';
-import { z } from 'zod';
+import * as z from 'zod';
 
 interface EditUserGroupProps {
   usergroup: {

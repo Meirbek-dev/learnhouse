@@ -1,5 +1,5 @@
 import type { UserGamificationProfile } from './profile';
-import { z } from 'zod';
+import * as z from 'zod';
 
 /**
  * XP Transactions and Award Types

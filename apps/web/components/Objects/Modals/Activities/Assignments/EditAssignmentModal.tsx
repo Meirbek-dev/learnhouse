@@ -21,7 +21,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import type { FC } from 'react';
 import { mutate } from 'swr';
-import { z } from 'zod';
+import * as z from 'zod';
 
 interface Assignment {
   assignment_uuid: string;

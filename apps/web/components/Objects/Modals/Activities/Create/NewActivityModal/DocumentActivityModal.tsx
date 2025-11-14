@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { useTransition } from 'react';
-import { z } from 'zod';
+import * as z from 'zod';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 

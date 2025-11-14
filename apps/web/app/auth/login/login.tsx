@@ -14,7 +14,7 @@ import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
-import { z } from 'zod';
+import * as z from 'zod';
 
 interface LoginClientProps {
   org: any;

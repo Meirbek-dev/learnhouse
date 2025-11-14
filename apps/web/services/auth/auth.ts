@@ -138,7 +138,12 @@ export async function loginAndGetToken(username: any, password: any): Promise<Re
  * @param orgId - Optional organization ID to link user to
  * @returns Promise<Response> - Raw response for compatibility
  */
-export async function loginWithOAuthToken(email: string, provider: string, accessToken: string, orgId?: number): Promise<Response> {
+export async function loginWithOAuthToken(
+  email: string,
+  provider: string,
+  accessToken: string,
+  orgId?: number,
+): Promise<Response> {
   // Input validation
   if (!(email?.trim() && validateEmail(email))) {
     throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');

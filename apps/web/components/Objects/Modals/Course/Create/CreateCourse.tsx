@@ -20,7 +20,7 @@ import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import type { ChangeEvent } from 'react';
 import { toast } from 'react-hot-toast';
-import { z } from 'zod';
+import * as z from 'zod';
 
 const CreateCourseModal = ({ closeModal, orgslug }: any) => {
   const t = useTranslations('Components.CreateCourseModal');

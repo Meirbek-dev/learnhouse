@@ -16,7 +16,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import type { FC } from 'react';
 import { mutate } from 'swr';
-import { z } from 'zod';
+import * as z from 'zod';
 
 const ORG_LABELS = [
   { value: 'languages', label: '🌐 Languages' },

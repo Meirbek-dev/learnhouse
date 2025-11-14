@@ -26,7 +26,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { mutate } from 'swr';
 import React from 'react';
-import { z } from 'zod';
+import * as z from 'zod';
 
 interface EditRoleProps {
   role: {

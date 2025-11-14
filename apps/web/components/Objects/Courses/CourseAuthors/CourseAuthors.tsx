@@ -23,7 +23,7 @@ import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import useSWR, { mutate } from 'swr';
 import { useState } from 'react';
-import { z } from 'zod';
+import * as z from 'zod';
 
 interface Author {
   user: {

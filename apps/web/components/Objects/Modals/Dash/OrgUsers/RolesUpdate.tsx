@@ -16,7 +16,7 @@ import { useForm } from 'react-hook-form';
 import useSWR, { mutate } from 'swr';
 import toast from 'react-hot-toast';
 import type { FC } from 'react';
-import { z } from 'zod';
+import * as z from 'zod';
 
 interface Props {
   user: any;

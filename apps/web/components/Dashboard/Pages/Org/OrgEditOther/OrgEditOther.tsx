@@ -18,7 +18,7 @@ import { toast } from 'react-hot-toast';
 import { useState } from 'react';
 import type { FC } from 'react';
 import { mutate } from 'swr';
-import { z } from 'zod';
+import * as z from 'zod';
 
 interface Script {
   name: string;
