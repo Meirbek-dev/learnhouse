@@ -18,6 +18,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       lang={locale}
     >
       <head>
+        {/* Resource hints for better loading performance */}
+        <link rel="dns-prefetch" href="https://cs-mooc.tou.edu.kz" />
+        <link rel="preconnect" href="https://cs-mooc.tou.edu.kz" crossOrigin="anonymous" />
+        
         {isDevEnv && (
           <script
             crossOrigin="anonymous"
