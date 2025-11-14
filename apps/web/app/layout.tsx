@@ -28,6 +28,62 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           href="https://cs-mooc.tou.edu.kz"
           crossOrigin="anonymous"
         />
+        <Script
+          id="chunk-request-throttler"
+          strategy="beforeInteractive"
+        >{`(() => {
+          if (typeof window === 'undefined') {
+            return;
+          }
+          const MAX_PARALLEL_CHUNK_REQUESTS = Number(
+            window.__NEXT_MAX_CHUNK_REQUESTS || 3,
+          );
+          const chunkPattern = /\\/_next\\/static\\/chunks\\//;
+          const originalHeadAppendChild = window.HTMLElement.prototype.appendChild;
+          const taskQueue = [];
+          let active = 0;
+
+          const enqueue = (element, context) => {
+            taskQueue.push({ element, context });
+            drain();
+          };
+
+          const drain = () => {
+            if (!taskQueue.length || active >= MAX_PARALLEL_CHUNK_REQUESTS) {
+              return;
+            }
+
+            const nextTask = taskQueue.shift();
+            if (!nextTask) {
+              return;
+            }
+
+            active += 1;
+            const release = () => {
+              active = Math.max(active - 1, 0);
+              drain();
+            };
+            nextTask.element.addEventListener('load', release, { once: true });
+            nextTask.element.addEventListener('error', release, { once: true });
+            originalHeadAppendChild.call(nextTask.context, nextTask.element);
+          };
+
+          window.HTMLElement.prototype.appendChild = function patchedAppendChild(child) {
+            try {
+              if (
+                child?.tagName === 'SCRIPT' &&
+                typeof child.src === 'string' &&
+                chunkPattern.test(new URL(child.src, window.location.origin).pathname)
+              ) {
+                enqueue(child, this);
+                return child;
+              }
+            } catch (error) {
+              console.warn('[chunk-throttler]', error);
+            }
+            return originalHeadAppendChild.call(this, child);
+          };
+        })();`}</Script>
 
         {isDevEnv && (
           <script
