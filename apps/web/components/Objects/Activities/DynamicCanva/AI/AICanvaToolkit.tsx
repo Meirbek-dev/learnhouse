@@ -9,6 +9,7 @@ import { BubbleMenu } from '@tiptap/react/menus';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
+import { useEffect, useRef } from 'react';
 
 interface AICanvaToolkitProps {
   editor: Editor;
@@ -88,6 +89,25 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
   const access_token = session?.data?.tokens?.access_token;
   const dispatchAIChatBot = useAIChatBotDispatch();
   const aiChatBotState = useAIChatBot();
+  const controllerRef = useRef<AbortController | null>(null);
+  const streamingBufferRef = useRef('');
+
+  useEffect(() => () => controllerRef.current?.abort(), []);
+
+  const resetStreamingState = () => {
+    streamingBufferRef.current = '';
+    dispatchAIChatBot({ type: 'clearStreamingMessage' });
+    dispatchAIChatBot({ type: 'setStatusMessage', payload: null });
+  };
+
+  const getController = () => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    return controller;
+  };
 
   async function handleAction(label: string) {
     const selection = getTipTapEditorSelectedText();
@@ -132,8 +152,9 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
 
     await dispatchAIChatBot({ type: 'setIsWaitingForResponse' });
     await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
-
-    let streamingContent = '';
+    await dispatchAIChatBot({ type: 'setStatusMessage', payload: 'Думаю...' });
+    resetStreamingState();
+    const controller = getController();
 
     try {
       if (aiChatBotState.aichat_uuid) {
@@ -145,7 +166,8 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
           access_token,
           (chunk) => {
             if (chunk.content) {
-              streamingContent += chunk.content;
+              streamingBufferRef.current += chunk.content;
+              dispatchAIChatBot({ type: 'setStreamingMessage', payload: streamingBufferRef.current });
             }
           },
           (status) => {
@@ -154,14 +176,16 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
             if ((status as any)?.aichat_uuid) {
               dispatchAIChatBot({ type: 'setAichat_uuid', payload: (status as any).aichat_uuid });
             }
-            console.log('Status:', status.message);
+            dispatchAIChatBot({ type: 'setStatusMessage', payload: status.message ?? null });
           },
           (final) => {
             dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
             dispatchAIChatBot({
               type: 'addMessage',
-              payload: { sender: 'ai', message: final.content || streamingContent, type: 'ai' },
+              payload: { sender: 'ai', message: final.content || streamingBufferRef.current, type: 'ai' },
             });
+            resetStreamingState();
+            controllerRef.current = null;
           },
           (error) => {
             dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
@@ -173,7 +197,10 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
                 error_message: error.error || 'Streaming failed',
               },
             });
+            resetStreamingState();
+            controllerRef.current = null;
           },
+          controller.signal,
         );
       } else {
         // Start new chat session with streaming
@@ -183,14 +210,15 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
           access_token,
           (chunk) => {
             if (chunk.content) {
-              streamingContent += chunk.content;
+              streamingBufferRef.current += chunk.content;
+              dispatchAIChatBot({ type: 'setStreamingMessage', payload: streamingBufferRef.current });
             }
           },
           (status) => {
             if ((status as any)?.aichat_uuid) {
               dispatchAIChatBot({ type: 'setAichat_uuid', payload: (status as any).aichat_uuid });
             }
-            console.log('Status:', status.message);
+            dispatchAIChatBot({ type: 'setStatusMessage', payload: status.message ?? null });
           },
           (final) => {
             dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
@@ -204,8 +232,10 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
 
             dispatchAIChatBot({
               type: 'addMessage',
-              payload: { sender: 'ai', message: final.content || streamingContent, type: 'ai' },
+              payload: { sender: 'ai', message: final.content || streamingBufferRef.current, type: 'ai' },
             });
+            resetStreamingState();
+            controllerRef.current = null;
           },
           (error) => {
             dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
@@ -217,7 +247,10 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
                 error_message: error.error || 'Streaming failed',
               },
             });
+            resetStreamingState();
+            controllerRef.current = null;
           },
+          controller.signal,
         );
       }
     } catch (error) {
@@ -230,6 +263,8 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
           error_message: error instanceof Error ? error.message : 'Unknown error',
         },
       });
+      resetStreamingState();
+      controllerRef.current = null;
     }
   };
 

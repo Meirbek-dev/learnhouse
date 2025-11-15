@@ -4,7 +4,7 @@ import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } fro
 import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
 import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import platformLogoLight from 'public/platform_logo_light.svg';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { ScrollArea } from '@components/ui/scroll-area';
@@ -151,7 +151,37 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
   };
 
   const [isPending, startTransition] = useTransition();
-  const [streamingMessage, setStreamingMessage] = useState('');
+  const controllerRef = useRef<AbortController | null>(null);
+  const streamingBufferRef = useRef('');
+
+  const resetStreamingState = useCallback(async () => {
+    streamingBufferRef.current = '';
+    await dispatchAIChatBot({ type: 'clearStreamingMessage' });
+    await dispatchAIChatBot({ type: 'setStatusMessage', payload: null });
+  }, [dispatchAIChatBot]);
+
+  const startNewController = useCallback(() => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    return controller;
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      controllerRef.current?.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!aiChatBotState.isModalOpen && controllerRef.current) {
+      controllerRef.current.abort();
+      controllerRef.current = null;
+      resetStreamingState();
+    }
+  }, [aiChatBotState.isModalOpen, resetStreamingState]);
 
   const sendMessage = async (message: string) => {
     // Add user message
@@ -162,9 +192,10 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
 
     startTransition(() => dispatchAIChatBot({ type: 'setIsWaitingForResponse' }));
     await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
+    await dispatchAIChatBot({ type: 'setStatusMessage', payload: 'Думаю...' });
 
-    // Reset streaming message
-    setStreamingMessage('');
+    await resetStreamingState();
+    const controller = startNewController();
 
     try {
       if (aiChatBotState.aichat_uuid) {
@@ -177,7 +208,8 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
           // onChunk: accumulate content as it arrives
           (chunk) => {
             if (chunk.content) {
-              setStreamingMessage((prev) => prev + chunk.content);
+              streamingBufferRef.current += chunk.content;
+              dispatchAIChatBot({ type: 'setStreamingMessage', payload: streamingBufferRef.current });
             }
           },
           // onStatus: handle status updates
@@ -187,16 +219,17 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
                 dispatchAIChatBot({ type: 'setAichat_uuid', payload: (status as any).aichat_uuid }),
               );
             }
-            console.log('Status:', status.message);
+            dispatchAIChatBot({ type: 'setStatusMessage', payload: status.message ?? null });
           },
           // onComplete: finalize the message
           (final) => {
             startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
             dispatchAIChatBot({
               type: 'addMessage',
-              payload: { sender: 'ai', message: final.content || streamingMessage, type: 'ai' },
+              payload: { sender: 'ai', message: final.content || streamingBufferRef.current, type: 'ai' },
             });
-            setStreamingMessage('');
+            resetStreamingState();
+            controllerRef.current = null;
           },
           // onError: handle errors
           (error) => {
@@ -209,8 +242,10 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
                 error_message: error.error || 'Streaming failed',
               },
             });
-            setStreamingMessage('');
+            resetStreamingState();
+            controllerRef.current = null;
           },
+          controller.signal,
         );
       } else {
         // Start new chat session
@@ -221,7 +256,8 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
           // onChunk: accumulate content as it arrives
           (chunk) => {
             if (chunk.content) {
-              setStreamingMessage((prev) => prev + chunk.content);
+              streamingBufferRef.current += chunk.content;
+              dispatchAIChatBot({ type: 'setStreamingMessage', payload: streamingBufferRef.current });
             }
           },
           // onStatus: handle status updates
@@ -231,7 +267,7 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
                 dispatchAIChatBot({ type: 'setAichat_uuid', payload: (status as any).aichat_uuid }),
               );
             }
-            console.log('Status:', status.message);
+            dispatchAIChatBot({ type: 'setStatusMessage', payload: status.message ?? null });
           },
           // onComplete: finalize the message
           (final) => {
@@ -249,9 +285,10 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
 
             dispatchAIChatBot({
               type: 'addMessage',
-              payload: { sender: 'ai', message: final.content || streamingMessage, type: 'ai' },
+              payload: { sender: 'ai', message: final.content || streamingBufferRef.current, type: 'ai' },
             });
-            setStreamingMessage('');
+            resetStreamingState();
+            controllerRef.current = null;
           },
           // onError: handle errors
           (error) => {
@@ -264,8 +301,10 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
                 error_message: error.error || 'Streaming failed',
               },
             });
-            setStreamingMessage('');
+            resetStreamingState();
+            controllerRef.current = null;
           },
+          controller.signal,
         );
       }
     } catch (error) {
@@ -278,7 +317,8 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
           error_message: error instanceof Error ? error.message : 'Unknown error',
         },
       });
-      setStreamingMessage('');
+      resetStreamingState();
+      controllerRef.current = null;
     }
   };
 
@@ -344,6 +384,9 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
                 <span className="text-sm font-bold text-white"> {t('AI')}</span>
               </div>
             </div>
+            {aiChatBotState.statusMessage ? (
+              <p className="text-xs text-white/60">{aiChatBotState.statusMessage}</p>
+            ) : null}
             {aiChatBotState.messages.length > 0 && !aiChatBotState.error.isError ? (
               <ScrollArea className="h-[237px] w-full">
                 <div className="flex-col space-y-4">
@@ -356,9 +399,9 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
                       />
                     );
                   })}
-                  {streamingMessage && (
+                  {aiChatBotState.streamingMessage && (
                     <AIMessageComponent
-                      message={{ sender: 'ai', message: streamingMessage, type: 'ai' }}
+                      message={{ sender: 'ai', message: aiChatBotState.streamingMessage, type: 'ai' }}
                       animated
                     />
                   )}

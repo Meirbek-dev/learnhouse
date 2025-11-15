@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 
 from fastapi import Depends, HTTPException, Request
 from sqlmodel import Session, select
@@ -96,6 +97,7 @@ async def ai_start_activity_chat_session(
     """Optimized AI chat session start with proper error handling."""
 
     try:
+        trace_start = time.perf_counter()
         # Get cached activity data
         activity, course, org_config = await _get_activity_data(
             chat_session_object.activity_uuid, db_session
@@ -142,13 +144,14 @@ async def ai_start_activity_chat_session(
 
         response = await ask_ai(
             chat_session_object.message,
-            chat_session["message_history"],  # Use full history for agent context
+            chat_session["windowed_history"],
             ai_friendly_text,
             system_message,
             embeddings,
             ai_model,
             session_id=chat_session["aichat_uuid"],
             cancel_event=cancel_event,
+            collection_name=f"activity_{activity.activity_uuid}",
         )
 
         ai_message = response.get("output", "")
@@ -158,7 +161,9 @@ async def ai_start_activity_chat_session(
             raise AIProcessingError(msg)
 
         logger.info(
-            f"AI chat session started successfully: {chat_session['aichat_uuid']}"
+            "AI chat session %s completed in %.1fms",
+            chat_session["aichat_uuid"],
+            (time.perf_counter() - trace_start) * 1000,
         )
 
         return ActivityAIChatSessionResponse(
@@ -207,6 +212,7 @@ async def ai_send_activity_chat_message(
     """Optimized AI chat message sending with proper error handling."""
 
     try:
+        trace_start = time.perf_counter()
         # Get cached activity data
         activity, course, org_config = await _get_activity_data(
             chat_session_object.activity_uuid, db_session
@@ -257,13 +263,14 @@ async def ai_send_activity_chat_message(
 
         response = await ask_ai(
             chat_session_object.message,
-            chat_session["message_history"],
+            chat_session["windowed_history"],
             ai_friendly_text,
             system_message,
             embeddings,
             ai_model,
             session_id=chat_session["aichat_uuid"],
             cancel_event=cancel_event,
+            collection_name=f"activity_{activity.activity_uuid}",
         )
 
         ai_message = response.get("output", "")
@@ -273,7 +280,9 @@ async def ai_send_activity_chat_message(
             raise AIProcessingError(msg)
 
         logger.info(
-            f"AI chat message sent successfully: {chat_session_object.aichat_uuid}"
+            "AI chat message %s completed in %.1fms",
+            chat_session_object.aichat_uuid,
+            (time.perf_counter() - trace_start) * 1000,
         )
 
         return ActivityAIChatSessionResponse(
@@ -399,15 +408,14 @@ async def ai_start_activity_chat_session_stream(
 
         async for chunk in ask_ai_stream(
             chat_session_object.message,
-            chat_session[
-                "message_history"
-            ],  # pass the history object expected by RunnableWithMessageHistory
+            chat_session["windowed_history"],
             ai_friendly_text,
             system_message,
             embeddings,
             ai_model,
             session_id=chat_session["aichat_uuid"],
             cancel_event=cancel_event,
+            collection_name=f"activity_{activity.activity_uuid}",
         ):
             # ask_ai_stream now yields SSE-formatted strings
             yield chunk
@@ -557,15 +565,14 @@ async def ai_send_activity_chat_message_stream(
 
         async for chunk in ask_ai_stream(
             chat_session_object.message,
-            chat_session[
-                "message_history"
-            ],  # pass the history object expected by RunnableWithMessageHistory
+            chat_session["windowed_history"],
             ai_friendly_text,
             system_message,
             embeddings,
             ai_model,
             session_id=chat_session["aichat_uuid"],
             cancel_event=cancel_event,
+            collection_name=f"activity_{activity.activity_uuid}",
         ):
             yield chunk
 

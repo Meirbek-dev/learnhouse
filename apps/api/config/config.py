@@ -1,5 +1,6 @@
 import ipaddress
 import os
+from functools import lru_cache
 from typing import Literal
 
 import yaml  # PyYAML types not available
@@ -154,6 +155,7 @@ def _normalize_cookie_domain(raw_domain: str | None) -> str | None:
     return cleaned
 
 
+@lru_cache(maxsize=1)
 def get_platform_config() -> PlatformConfig:
     load_dotenv()
 
@@ -399,3 +401,8 @@ def get_platform_config() -> PlatformConfig:
             )
         ),
     )
+
+
+def reload_platform_config_cache() -> None:
+    """Clear cached platform configuration (mainly for tests or reloads)."""
+    get_platform_config.cache_clear()

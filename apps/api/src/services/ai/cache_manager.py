@@ -12,6 +12,8 @@ from typing import Any, Generic, TypeVar
 
 from cachetools import TTLCache
 
+from config.config import get_platform_config
+
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
@@ -176,10 +178,19 @@ class AICacheManager:
     def __init__(self) -> None:
         """Initialize cache manager with separate caches for different data types."""
 
+        platform_config = get_platform_config()
+        vector_config = getattr(platform_config.ai_config, "vector_store", None)
+        cache_config = getattr(platform_config.ai_config, "cache", None)
+
+        vector_ttl = getattr(vector_config, "collection_retention", 86400)
+        vector_maxsize = max(100, getattr(vector_config, "chromadb_pool_size", 10) * 10)
+
+        embedding_ttl = getattr(cache_config, "embedding_cache_ttl", 7200)
+
         # Vector store cache - large TTL, smaller size
         self.vector_store_cache: ThreadSafeCache = ThreadSafeCache(
-            maxsize=50,
-            ttl=3600,  # 1 hour
+            maxsize=vector_maxsize,
+            ttl=vector_ttl,
         )
 
         # Agent cache - medium TTL, medium size
@@ -197,11 +208,11 @@ class AICacheManager:
         # Embedding cache - long TTL, medium size
         self.embedding_cache: ThreadSafeCache = ThreadSafeCache(
             maxsize=100,
-            ttl=7200,  # 2 hours
+            ttl=embedding_ttl,
         )
 
         # LLM instance cache - long TTL, small size
-        self.llm_cache: ThreadSafeCache = ThreadSafeCache(maxsize=10, ttl=7200)
+        self.llm_cache: ThreadSafeCache = ThreadSafeCache(maxsize=10, ttl=embedding_ttl)
 
         logger.info("AI Cache Manager initialized")
 

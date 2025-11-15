@@ -5,6 +5,7 @@ Streaming AI response support for real-time user feedback.
 import asyncio
 import json
 import logging
+import time
 from collections.abc import AsyncGenerator
 from typing import Any
 
@@ -31,6 +32,7 @@ async def ask_ai_stream(
     session_id: str = "default",
     agent_executor: AgentExecutor | None = None,
     cancel_event: asyncio.Event | None = None,
+    collection_name: str | None = None,
 ) -> AsyncGenerator[dict[str, Any]]:
     """
     Stream AI responses for better perceived performance.
@@ -73,11 +75,11 @@ async def ask_ai_stream(
 
             ai_service = FastAIService()
 
-            # Get or create vector store (cached)
+            # Get or create vector store
             vector_store = await ai_service.get_or_create_vector_store(
                 documents=[text_reference],
                 embedding_model_name=embedding_model_name,
-                collection_name=f"session_{session_id}",
+                collection_name=collection_name,
             )
 
             if not vector_store:
@@ -108,15 +110,17 @@ async def ask_ai_stream(
         # Stream response chunks
         chunk_count = 0
         full_response = ""
+        start_time = time.perf_counter()
+        first_chunk_time: float | None = None
 
         # Send initial status as SSE string
         yield format_sse_message(
-            {"type": "status", "status": "processing", "message": "AI is thinking..."}
+            {"type": "status", "status": "processing", "message": "Думаю..."}
         )
 
         try:
             # Process with streaming and timeout using asyncio.timeout
-            async with asyncio.timeout(45.0):  # Reduced from 60s for faster timeout
+            async with asyncio.timeout(20.0):  # Aggressive timeout for faster failure detection
                 async for event in agent_with_history.astream_events(
                     {"input": question.strip()},
                     config={
@@ -157,6 +161,8 @@ async def ask_ai_stream(
                         chunk = event.get("data", {}).get("chunk")
                         if chunk and hasattr(chunk, "content") and chunk.content:
                             chunk_count += 1
+                            if first_chunk_time is None:
+                                first_chunk_time = time.perf_counter()
                             full_response += chunk.content
                             yield format_sse_message(
                                 {
@@ -171,6 +177,8 @@ async def ask_ai_stream(
                         token = event.get("data", {}).get("chunk")
                         if token:
                             chunk_count += 1
+                            if first_chunk_time is None:
+                                first_chunk_time = time.perf_counter()
                             full_response += str(token)
                             yield format_sse_message(
                                 {
@@ -249,7 +257,18 @@ async def ask_ai_stream(
                     "Unable to yield final SSE message to client (client disconnected?)"
                 )
 
-            logger.info(f"Streaming query completed: {chunk_count} chunks sent")
+            total_ms = (time.perf_counter() - start_time) * 1000
+            ttfb_ms = (
+                (first_chunk_time - start_time) * 1000
+                if first_chunk_time is not None
+                else total_ms
+            )
+            logger.info(
+                "Streaming query completed: %s chunks, TTFB=%.1fms, total=%.1fms",
+                chunk_count,
+                ttfb_ms,
+                total_ms,
+            )
 
         except TimeoutError as e:
             error_msg = "AI processing timed out after 60 seconds"

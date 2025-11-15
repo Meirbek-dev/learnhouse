@@ -14,6 +14,9 @@ type AIChatBotAction =
   | { type: 'setIsWaitingForResponse' }
   | { type: 'setIsNoLongerWaitingForResponse' }
   | { type: 'setChatInputValue'; payload: string }
+  | { type: 'setStreamingMessage'; payload: string }
+  | { type: 'clearStreamingMessage' }
+  | { type: 'setStatusMessage'; payload: string | null }
   | { type: 'setError'; payload: AIError };
 
 // Properly typed contexts
@@ -26,6 +29,8 @@ export interface AIChatBotStateTypes {
   aichat_uuid: string | null;
   isWaitingForResponse: boolean;
   chatInputValue: string;
+  streamingMessage: string;
+  statusMessage: string | null;
   error: AIError;
 }
 
@@ -46,6 +51,8 @@ const AIChatBotProvider = ({ children }: AIChatBotProviderProps) => {
     aichat_uuid: null,
     isWaitingForResponse: false,
     chatInputValue: '',
+    streamingMessage: '',
+    statusMessage: null,
     error: { isError: false, status: 0, error_message: '' },
   });
 
@@ -99,6 +106,15 @@ function aiChatBotReducer(state: AIChatBotStateTypes, action: AIChatBotAction): 
     }
     case 'setChatInputValue': {
       return { ...state, chatInputValue: action.payload };
+    }
+    case 'setStreamingMessage': {
+      return { ...state, streamingMessage: action.payload };
+    }
+    case 'clearStreamingMessage': {
+      return { ...state, streamingMessage: '' };
+    }
+    case 'setStatusMessage': {
+      return { ...state, statusMessage: action.payload };
     }
     case 'setError': {
       return { ...state, error: action.payload };
