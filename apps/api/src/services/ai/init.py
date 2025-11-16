@@ -88,7 +88,7 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
             request_timeout=20,  # Reduced from 30s
             retry_min_seconds=1,  # Faster retries
             retry_max_seconds=5,  # Faster max retry
-            dimensions=512,  # Reduced dimensions for faster similarity search
+            dimensions=256,  # Reduced from 512 for 2x faster similarity search
         )
 
     except Exception as e:

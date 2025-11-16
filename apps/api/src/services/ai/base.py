@@ -86,8 +86,8 @@ class OptimizedTextSplitter:
 
     def __init__(
         self,
-        chunk_size: int = 1500,  # Larger chunks = fewer embeddings (30-40% faster)
-        chunk_overlap: int = 100,  # Better context preservation
+        chunk_size: int = 3000,  # Larger chunks = fewer embeddings (50% faster, was 1500)
+        chunk_overlap: int = 200,  # Better context preservation (increased proportionally)
         length_function: callable = len,
     ) -> None:
         self.splitter = RecursiveCharacterTextSplitter(
@@ -215,11 +215,17 @@ class FastAIService:
         cached_store = self.cache_manager.vector_store_cache.get(cache_key)
         if cached_store:
             logger.info(f"✓ Cache HIT for vector store: {cache_key[:50]}...")
+            # Log cache statistics for monitoring
+            cache_stats = self.cache_manager.vector_store_cache.get_stats()
+            logger.debug(f"Vector store cache stats: {cache_stats}")
             return cached_store
 
         logger.info(
             f"✗ Cache MISS for vector store: {cache_key[:50]}..., creating new"
         )
+        # Log cache statistics for monitoring
+        cache_stats = self.cache_manager.vector_store_cache.get_stats()
+        logger.debug(f"Vector store cache stats: {cache_stats}")
 
         # Create new vector store
         vector_store = await self._create_vector_store(
@@ -363,7 +369,7 @@ class FastAIService:
             # Create highly optimized retriever with minimal results
             retriever = vector_store.as_retriever(
                 search_type="similarity",
-                search_kwargs={"k": 1},  # Only get top result for maximum speed (50% faster)
+                search_kwargs={"k": 2},  # Get top 2 results for better context (balanced speed vs quality)
             )
 
             retriever_tool = create_retriever_tool(

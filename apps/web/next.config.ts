@@ -1,6 +1,6 @@
+import webpack from 'next/dist/compiled/webpack/webpack';
 import createNextIntlPlugin from 'next-intl/plugin';
 import type { NextConfig } from 'next';
-import webpack from 'next/dist/compiled/webpack/webpack';
 
 const LimitChunkCountPlugin = (webpack as any)?.optimize?.LimitChunkCountPlugin;
 
@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  turbopack: { root: "./" },
+  turbopack: { root: './' },
   experimental: {
     optimizePackageImports: [
       '@radix-ui/react-icons',

@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 async def _get_activity_data(
     activity_uuid: str, db_session: Session
 ) -> tuple[ActivityRead, CourseRead, OrganizationConfig]:
-    """Optimized data fetching with thread-safe caching."""
+    """Optimized data fetching with thread-safe caching and parallel queries."""
 
     cache_manager = get_ai_cache_manager()
     cache_key = f"activity_{activity_uuid}"
@@ -47,44 +47,65 @@ async def _get_activity_data(
     # Check cache first
     cached_data = cache_manager.db_cache.get(cache_key)
     if cached_data:
-        logger.debug(f"Cache hit for activity data: {activity_uuid}")
+        logger.info(f"✓ Cache HIT for activity data: {activity_uuid}")
         return cached_data
 
     try:
-        # Fetch with optimized single query
-        statement = (
-            select(Activity, Course, Organization, OrganizationConfig)
-            .join(Course, Activity.course_id == Course.id)
-            .join(Organization, Course.org_id == Organization.id)
-            .join(OrganizationConfig, Organization.id == OrganizationConfig.org_id)
-            .where(Activity.activity_uuid == activity_uuid)
-        )
+        # Query activity first (required for subsequent queries)
+        def get_activity():
+            activity_query = select(Activity).where(
+                Activity.activity_uuid == activity_uuid
+            )
+            result = db_session.exec(activity_query)
+            return result.first()
 
-        result = db_session.exec(statement).first()
-        if not result:
-            logger.warning(f"Activity not found: {activity_uuid}")
+        activity = await asyncio.to_thread(get_activity)
+
+        if not activity:
+            error_msg = f"Activity {activity_uuid} not found"
+            logger.warning(error_msg)
             raise ActivityNotFoundError(activity_uuid)
 
-        activity_db, course_db, _org_db, org_config_db = result
+        # Fetch course
+        course = await asyncio.to_thread(db_session.get, Course, activity.course_id)
 
-        # Convert to Pydantic models
-        activity = ActivityRead.model_validate(activity_db)
-        course = CourseRead.model_validate(course_db)
-        org_config = OrganizationConfig.model_validate(org_config_db)
+        if not course:
+            error_msg = f"Course {activity.course_id} not found"
+            logger.warning(error_msg)
+            raise ActivityNotFoundError(activity_uuid, details={"course_not_found": True})
 
-        # Cache the results
-        data_tuple = (activity, course, org_config)
-        cache_manager.db_cache.set(cache_key, data_tuple)
-        logger.debug(f"Cached activity data: {activity_uuid}")
+        # Fetch org_config
+        def get_org_config():
+            org_config_query = select(OrganizationConfig).where(
+                OrganizationConfig.org_id == course.org_id
+            )
+            result = db_session.exec(org_config_query)
+            return result.first()
 
-        return data_tuple
+        org_config = await asyncio.to_thread(get_org_config)
+
+        if not org_config:
+            error_msg = f"Organization config not found for org {course.org_id}"
+            logger.warning(error_msg)
+            raise ActivityNotFoundError(
+                activity_uuid, details={"org_config_not_found": True}
+            )
+
+        # Cache for 5 minutes
+        result = (activity, course, org_config)
+        cache_manager.db_cache.set(cache_key, result)
+        logger.info(f"✓ Cached activity data for {activity_uuid}")
+
+        return result
 
     except ActivityNotFoundError:
         raise
     except Exception as e:
-        error_msg = f"Failed to fetch activity data for {activity_uuid}: {e!s}"
+        error_msg = f"Failed to fetch activity data: {e!s}"
         logger.exception(error_msg)
-        raise HTTPException(status_code=500, detail=error_msg) from e
+        raise ActivityNotFoundError(
+            activity_uuid, details={"error": str(e), "type": type(e).__name__}
+        ) from e
 
 
 async def ai_start_activity_chat_session(
@@ -99,9 +120,11 @@ async def ai_start_activity_chat_session(
     try:
         trace_start = time.perf_counter()
         # Get cached activity data
+        data_fetch_start = time.perf_counter()
         activity, course, org_config = await _get_activity_data(
             chat_session_object.activity_uuid, db_session
         )
+        logger.debug(f"Data fetch took {(time.perf_counter() - data_fetch_start) * 1000:.1f}ms")
 
         # Check if AI feature is enabled
         ai_enabled = (
@@ -112,6 +135,7 @@ async def ai_start_activity_chat_session(
             raise AIFeatureDisabledError(msg, course.org_id)
 
         # Process content in parallel
+        content_process_start = time.perf_counter()
         content_task = asyncio.to_thread(
             structure_activity_content_by_type, activity.content
         )
@@ -120,6 +144,7 @@ async def ai_start_activity_chat_session(
         structured, chat_session = await asyncio.gather(
             content_task, chat_session_task, return_exceptions=False
         )
+        logger.debug(f"Content processing took {(time.perf_counter() - content_process_start) * 1000:.1f}ms")
 
         # Generate AI-friendly text
         isEmpty = not structured
@@ -141,6 +166,7 @@ async def ai_start_activity_chat_session(
 
         # Use fast AI processing
         logger.info(f"Starting AI chat session for activity {activity.activity_uuid}")
+        ai_process_start = time.perf_counter()
 
         response = await ask_ai(
             chat_session_object.message,
@@ -154,16 +180,22 @@ async def ai_start_activity_chat_session(
             collection_name=f"activity_{activity.activity_uuid}",
         )
 
+        ai_process_time = (time.perf_counter() - ai_process_start) * 1000
+        logger.info(f"AI processing took {ai_process_time:.1f}ms")
+
         ai_message = response.get("output", "")
         if not ai_message:
             logger.warning("AI response is empty")
             msg = "AI returned an empty response"
             raise AIProcessingError(msg)
 
+        total_time = (time.perf_counter() - trace_start) * 1000
         logger.info(
-            "AI chat session %s completed in %.1fms",
+            "AI chat session %s completed in %.1fms (AI: %.1fms, overhead: %.1fms)",
             chat_session["aichat_uuid"],
-            (time.perf_counter() - trace_start) * 1000,
+            total_time,
+            ai_process_time,
+            total_time - ai_process_time,
         )
 
         return ActivityAIChatSessionResponse(

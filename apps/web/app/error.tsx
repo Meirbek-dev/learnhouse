@@ -35,7 +35,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 
         {process.env.NODE_ENV !== 'production' && (
           <details className="mb-4 text-left">
-            <summary className="cursor-pointer font-semibold">Technical Details</summary>
+            <summary className="cursor-pointer font-semibold">Технические детали:</summary>
             <div className="mt-2 rounded bg-red-50 p-4">
               <p className="mb-2 font-mono text-sm">
                 <strong>Error:</strong> {error.message}

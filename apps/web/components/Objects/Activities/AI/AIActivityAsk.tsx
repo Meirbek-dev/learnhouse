@@ -3,8 +3,8 @@
 import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
 import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
 import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import platformLogoLight from 'public/platform_logo_light.svg';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { ScrollArea } from '@components/ui/scroll-area';

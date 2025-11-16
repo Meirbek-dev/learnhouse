@@ -8,8 +8,8 @@ import platformLogo from 'public/platform_logo.svg';
 import { BubbleMenu } from '@tiptap/react/menus';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
 import { useEffect, useRef } from 'react';
+import Image from 'next/image';
 
 interface AICanvaToolkitProps {
   editor: Editor;
