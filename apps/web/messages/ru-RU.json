@@ -33,6 +33,7 @@
       "translateTooltip": "Переводите на разные языки с помощью ИИ"
     },
     "AIEditorToolkit": {
+      "CritisizeLabel": "Критика",
       "ContinueWritingLabel": "Продолжить писать",
       "GenerateQuizLabel": "Создать квиз",
       "MakeLongerLabel": "Удлинить",
@@ -46,13 +47,16 @@
       "continuePlaceholder": "Поместите курсор в конец предложения, чтобы продолжить писать",
       "errorTitle": "Что-то пошло не так",
       "longerPlaceholder": "Выберите текст, чтобы сделать его длиннее",
+      "critisizePlaceholder": "Выберите часть лекции для критики и улучшений",
       "prompt_continueWriting": "Продолжить писать о {selection}",
       "prompt_makeLonger": "Удлинить этот текст: {selection}",
+      "prompt_critisize": "Раскритикуй этот фрагмент лекции и предложи улучшения: {selection}",
       "prompt_translateTo": "Перевести на {language}: {selection}",
       "prompt_writer": "Написать о {selection}",
       "thinking": "Думаю...",
       "translateExample": "Японский, арабский, немецкий и т.д.",
       "translatePlaceholder": "Перевести выбранный текст на",
+      "critisizeSelectionMissing": "Выберите абзац для критики",
       "translateToLanguageMissing": "Пожалуйста, введите язык для перевода",
       "userInputPlaceholder": "Спросить ИИ",
       "writerPlaceholder": "Написать о..."

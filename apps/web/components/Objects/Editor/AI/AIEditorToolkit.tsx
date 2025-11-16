@@ -5,6 +5,7 @@ import {
   Feather,
   FileStack,
   HelpCircle,
+  Lightbulb,
   Languages,
   MoreVertical,
   X,
@@ -27,7 +28,7 @@ interface AIEditorToolkitProps {
 }
 
 interface AIPromptsLabels {
-  label: 'Writer' | 'ContinueWriting' | 'MakeLonger' | 'GenerateQuiz' | 'Translate';
+  label: 'Writer' | 'ContinueWriting' | 'MakeLonger' | 'GenerateQuiz' | 'Translate' | 'Critisize';
   selection: string;
 }
 
@@ -99,7 +100,7 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
                       <AiEditorToolButton label="Writer" />
                       <AiEditorToolButton label="ContinueWriting" />
                       <AiEditorToolButton label="MakeLonger" />
-
+                      <AiEditorToolButton label="Critisize" />
                       <AiEditorToolButton label="Translate" />
                     </div>
                     <div className="flex items-center space-x-2">
@@ -278,7 +279,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
   };
 
   const handleOperation = async (
-    label: 'Writer' | 'ContinueWriting' | 'MakeLonger' | 'GenerateQuiz' | 'Translate',
+    label: 'Writer' | 'ContinueWriting' | 'MakeLonger' | 'GenerateQuiz' | 'Translate' | 'Critisize',
     message: string,
   ) => {
     // Set selected tool
@@ -326,6 +327,18 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
       }
     } else if (label === 'GenerateQuiz') {
       // will be implemented in future stages
+    } else if (label === 'Critisize') {
+      const text_selection = getTipTapEditorSelectedTextGlobal();
+      if (!text_selection) {
+        toast.error(t('critisizeSelectionMissing'));
+        return;
+      }
+      const prompt = getPrompt({ label, selection: text_selection });
+      if (prompt) {
+        await dispatchAIEditor({ type: 'setIsWaitingForResponse' });
+        await sendReqWithMessage(prompt);
+        await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
+      }
     } else if (label === 'Translate') {
       const text_selection = getTipTapEditorSelectedText(); // Text to translate
       const targetLanguage = message; // This is aiEditorState.chatInputValue from handleOperation's 'message' param
@@ -434,6 +447,10 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
       // will be implemented in future stages
       return '';
     }
+    if (label === 'Critisize') {
+      if (selection === '') return '';
+      return t('prompt_critisize', { selection });
+    }
     if (label === 'Translate') {
       if (selection === '' || !aiEditorState.chatInputValue) return '';
       return t('prompt_translateTo', {
@@ -501,7 +518,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
             <AiEditorActionScreen handleOperation={handleOperation} />
           </div>
         </div>
-        {aiEditorState.isUserInputEnabled && !aiEditorState.error.isError ? (
+        {aiEditorState.isUserInputEnabled ? (
           <div className="flex cursor-pointer items-center space-x-2">
             <input
               onKeyDown={handleKeyPress}
@@ -531,7 +548,7 @@ const AiEditorToolButton = (props: any) => {
   const t = useTranslations('Activities.AIEditorToolkit');
 
   const handleToolButtonClick = async (
-    label: 'Writer' | 'ContinueWriting' | 'MakeLonger' | 'GenerateQuiz' | 'Translate',
+    label: 'Writer' | 'ContinueWriting' | 'MakeLonger' | 'GenerateQuiz' | 'Translate' | 'Critisize',
   ) => {
     await (label === 'Writer'
       ? dispatchAIEditor({ type: 'setIsUserInputEnabled', payload: true })
@@ -550,6 +567,7 @@ const AiEditorToolButton = (props: any) => {
       {props.label === 'MakeLonger' && <FileStack size={14} />}
       {props.label === 'GenerateQuiz' && <HelpCircle size={14} />}
       {props.label === 'Translate' && <Languages size={14} />}
+      {props.label === 'Critisize' && <Lightbulb size={14} />}
       <span>{t(`${props.label}Label`)}</span>
     </button>
   );
@@ -569,70 +587,77 @@ const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => 
 
   return (
     <div>
-      {aiEditorState.selectedTool === 'Writer' &&
-        !aiEditorState.isWaitingForResponse &&
-        !aiEditorState.error.isError && (
-          <div className="space-x-2 text-xl font-extrabold text-white/90">
-            <span>{t('writerPlaceholder')}</span>
+      {aiEditorState.selectedTool === 'Writer' && !aiEditorState.isWaitingForResponse && (
+        <div className="space-x-2 text-xl font-extrabold text-white/90">
+          <span>{t('writerPlaceholder')}</span>
+        </div>
+      )}
+      {aiEditorState.selectedTool === 'ContinueWriting' && !aiEditorState.isWaitingForResponse && (
+        <div className="mx-auto flex flex-col items-center justify-center align-middle">
+          <p className="mx-auto mt-4 flex justify-center p-2 align-middle text-sm font-bold text-white/80">
+            {t('continuePlaceholder')}
+          </p>
+          <div
+            onClick={() => {
+              handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue);
+            }}
+            className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-md bg-white/10 p-4 text-2xl font-semibold text-white/70 outline-neutral-200/20 transition-all delay-75 ease-linear hover:bg-white/20 hover:outline-neutral-200/40"
+          >
+            <FastForward size={24} />
           </div>
-        )}
-      {aiEditorState.selectedTool === 'ContinueWriting' &&
-        !aiEditorState.isWaitingForResponse &&
-        !aiEditorState.error.isError && (
-          <div className="mx-auto flex flex-col items-center justify-center align-middle">
-            <p className="mx-auto mt-4 flex justify-center p-2 align-middle text-sm font-bold text-white/80">
-              {t('continuePlaceholder')}
-            </p>
-            <div
-              onClick={() => {
-                handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue);
-              }}
-              className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-md bg-white/10 p-4 text-2xl font-semibold text-white/70 outline-neutral-200/20 transition-all delay-75 ease-linear hover:bg-white/20 hover:outline-neutral-200/40"
-            >
-              <FastForward size={24} />
-            </div>
+        </div>
+      )}
+      {aiEditorState.selectedTool === 'MakeLonger' && !aiEditorState.isWaitingForResponse && (
+        <div className="mx-auto flex flex-col items-center justify-center align-middle">
+          <p className="mx-auto mt-4 flex justify-center p-2 align-middle text-sm font-bold text-white/80">
+            {t('longerPlaceholder')}
+          </p>
+          <div
+            onClick={() => {
+              handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue);
+            }}
+            className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-md bg-white/10 p-4 text-2xl font-semibold text-white/70 outline-neutral-200/20 transition-all delay-75 ease-linear hover:bg-white/20 hover:outline-neutral-200/40"
+          >
+            <FileStack size={24} />
           </div>
-        )}
-      {aiEditorState.selectedTool === 'MakeLonger' &&
-        !aiEditorState.isWaitingForResponse &&
-        !aiEditorState.error.isError && (
-          <div className="mx-auto flex flex-col items-center justify-center align-middle">
-            <p className="mx-auto mt-4 flex justify-center p-2 align-middle text-sm font-bold text-white/80">
-              {t('longerPlaceholder')}
-            </p>
-            <div
-              onClick={() => {
-                handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue);
-              }}
-              className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-md bg-white/10 p-4 text-2xl font-semibold text-white/70 outline-neutral-200/20 transition-all delay-75 ease-linear hover:bg-white/20 hover:outline-neutral-200/40"
-            >
-              <FileStack size={24} />
-            </div>
+        </div>
+      )}
+      {aiEditorState.selectedTool === 'Critisize' && !aiEditorState.isWaitingForResponse && (
+        <div className="mx-auto flex flex-col items-center justify-center align-middle">
+          <p className="mx-auto mt-4 flex justify-center p-2 align-middle text-sm font-bold text-white/80">
+            {t('critisizePlaceholder')}
+          </p>
+          <div
+            onClick={() => {
+              handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue);
+            }}
+            className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-md bg-white/10 p-4 text-2xl font-semibold text-white/70 outline-neutral-200/20 transition-all delay-75 ease-linear hover:bg-white/20 hover:outline-neutral-200/40"
+          >
+            <Lightbulb size={24} />
           </div>
-        )}
-      {aiEditorState.selectedTool === 'Translate' &&
-        !aiEditorState.isWaitingForResponse &&
-        !aiEditorState.error.isError && (
-          <div className="mx-auto flex flex-col items-center justify-center align-middle">
-            <div className="mx-auto mt-4 flex justify-center space-x-6 p-2 align-middle text-sm font-bold text-white/80">
-              <p>{t('translatePlaceholder')}</p>
-              <input
-                value={aiEditorState.chatInputValue}
-                onChange={handleChange}
-                placeholder={t('translateExample')}
-                className="py- w-full rounded-lg bg-gray-950/20 px-4 text-sm text-white ring-1 ring-white/20 outline-hidden ring-inset placeholder:text-white/30"
-              />
-            </div>
-            <div
-              onClick={() => {
-                handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue);
-              }}
-              className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-md bg-white/10 p-4 text-2xl font-semibold text-white/70 outline-neutral-200/20 transition-all delay-75 ease-linear hover:bg-white/20 hover:outline-neutral-200/40"
-            >
-              <Languages size={24} />
-            </div>
+        </div>
+      )}
+      {aiEditorState.selectedTool === 'Translate' && !aiEditorState.isWaitingForResponse && (
+        <div className="mx-auto flex flex-col items-center justify-center align-middle">
+          <div className="mx-auto mt-4 flex justify-center space-x-6 p-2 align-middle text-sm font-bold text-white/80">
+            <p>{t('translatePlaceholder')}</p>
+            <input
+              value={aiEditorState.chatInputValue}
+              onChange={handleChange}
+              placeholder={t('translateExample')}
+              className="py- w-full rounded-lg bg-gray-950/20 px-4 text-sm text-white ring-1 ring-white/20 outline-hidden ring-inset placeholder:text-white/30"
+            />
           </div>
-        )}
+          <div
+            onClick={() => {
+              handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue);
+            }}
+            className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-md bg-white/10 p-4 text-2xl font-semibold text-white/70 outline-neutral-200/20 transition-all delay-75 ease-linear hover:bg-white/20 hover:outline-neutral-200/40"
+          >
+            <Languages size={24} />
+          </div>
+        </div>
+      )}
       {aiEditorState.isWaitingForResponse && !aiEditorState.error.isError ? (
         <div className="mx-auto flex flex-col items-center justify-center align-middle">
           <svg

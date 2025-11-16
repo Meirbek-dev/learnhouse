@@ -40,7 +40,6 @@ import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
-import MiniInfoTooltip from '@components/Objects/MiniInfoTooltip';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';

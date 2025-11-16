@@ -33,6 +33,7 @@
       "translateTooltip": "ЖИ көмегімен әртүрлі тілдерге аударыңыз"
     },
     "AIEditorToolkit": {
+      "CritisizeLabel": "Сын айту",
       "ContinueWritingLabel": "Жазуды жалғастыру",
       "GenerateQuizLabel": "Тест жасау",
       "MakeLongerLabel": "Ұзарту",
@@ -46,13 +47,16 @@
       "continuePlaceholder": "Жазуды жалғастыру үшін курсорды сөйлемнің соңына қойыңыз",
       "errorTitle": "Бірдеңе дұрыс болмады",
       "longerPlaceholder": "Ұзарту үшін мәтінді таңдаңыз",
+      "critisizePlaceholder": "Сын және жақсарту ұсыныстары үшін мәтінді таңдаңыз",
       "prompt_continueWriting": "{selection} туралы жазуды жалғастыру",
       "prompt_makeLonger": "Бұл мәтінді ұзарту: {selection}",
+      "prompt_critisize": "Осы лекция бөлігін сынап, жақсарту ұсыныстарын бер: {selection}",
       "prompt_translateTo": "{language} тіліне аудару: {selection}",
       "prompt_writer": "{selection} туралы жазу",
       "thinking": "Ойланып жатыр...",
       "translateExample": "Жапон, араб, неміс және т.б.",
       "translatePlaceholder": "Таңдалған мәтінді мынаған аудару",
+      "critisizeSelectionMissing": "Сын айту үшін абзацты таңдаңыз",
       "translateToLanguageMissing": "Аудару үшін тілді енгізіңіз",
       "userInputPlaceholder": "ЖИ-дан сұрау",
       "writerPlaceholder": "Мынау туралы жазу..."

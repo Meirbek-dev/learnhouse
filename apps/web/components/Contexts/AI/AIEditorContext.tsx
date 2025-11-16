@@ -14,7 +14,10 @@ type AIEditorAction =
   | { type: 'setIsWaitingForResponse' }
   | { type: 'setIsNoLongerWaitingForResponse' }
   | { type: 'setChatInputValue'; payload: string }
-  | { type: 'setSelectedTool'; payload: 'Writer' | 'ContinueWriting' | 'MakeLonger' | 'GenerateQuiz' | 'Translate' }
+  | {
+      type: 'setSelectedTool';
+      payload: 'Writer' | 'ContinueWriting' | 'MakeLonger' | 'GenerateQuiz' | 'Translate' | 'Critisize';
+    }
   | { type: 'setIsFeedbackModalOpen' }
   | { type: 'setIsFeedbackModalClose' }
   | { type: 'setIsUserInputEnabled'; payload: boolean }
@@ -31,7 +34,7 @@ export interface AIEditorStateTypes {
   aichat_uuid: string | null;
   isWaitingForResponse: boolean;
   chatInputValue: string;
-  selectedTool: 'Writer' | 'ContinueWriting' | 'MakeLonger' | 'GenerateQuiz' | 'Translate';
+  selectedTool: 'Writer' | 'ContinueWriting' | 'MakeLonger' | 'GenerateQuiz' | 'Translate' | 'Critisize';
   isUserInputEnabled: boolean;
   error: AIError;
 }

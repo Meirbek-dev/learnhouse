@@ -33,6 +33,7 @@
       "translateTooltip": "Translate to different languages with AI"
     },
     "AIEditorToolkit": {
+      "CritisizeLabel": "Criticize",
       "ContinueWritingLabel": "Continue Writing",
       "GenerateQuizLabel": "Generate Quiz",
       "MakeLongerLabel": "Make Longer",
@@ -46,13 +47,16 @@
       "continuePlaceholder": "Place your cursor at the end of a sentence to continue writing",
       "errorTitle": "Something wrong happened",
       "longerPlaceholder": "Select text to make longer",
+      "critisizePlaceholder": "Select a passage to get critique and improvement ideas",
       "prompt_continueWriting": "Continue writing about {selection}",
       "prompt_makeLonger": "Make this text longer: {selection}",
+      "prompt_critisize": "Critique this lecture section and suggest improvements: {selection}",
       "prompt_translateTo": "Translate to {language}: {selection}",
       "prompt_writer": "Write about {selection}",
       "thinking": "Thinking...",
       "translateExample": "Japanese, Arabic, German, etc.",
       "translatePlaceholder": "Translate selected text to",
+      "critisizeSelectionMissing": "Select a paragraph to critique",
       "translateToLanguageMissing": "Please enter a language to translate to",
       "userInputPlaceholder": "Ask AI",
       "writerPlaceholder": "Write about..."
