@@ -1,9 +1,9 @@
 import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
 import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
-import { BookOpen, FormInput, Languages, MoreVertical } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
+import { BookOpen, FormInput, Languages } from 'lucide-react';
 import platformLogo from 'public/platform_logo.svg';
 import { BubbleMenu } from '@tiptap/react/menus';
 import type { Editor } from '@tiptap/react';
@@ -35,25 +35,23 @@ const AICanvaToolkit = (props: AICanvaToolkitProps) => {
           <div
             style={{
               background:
-                'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgba(2, 1, 25, 0.98)',
+                'linear-gradient(0deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.25) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.2) 0%, rgba(0, 0, 0, 0) 100%), rgba(2, 1, 25, 0.98)',
             }}
-            className="flex h-10 w-max cursor-pointer items-center space-x-2 rounded-xl px-2 py-1 text-white antialiased shadow-md"
+            className="flex h-auto w-max cursor-pointer items-center space-x-3 rounded-xl px-3 py-2 text-white shadow-2xl ring-1 ring-white/10 backdrop-blur-sm"
           >
-            <div className="flex w-full space-x-2 font-bold text-white/80">
+            <div className="flex items-center space-x-2 font-bold text-white/90">
               <Image
-                className="rounded-lg outline-neutral-200/10"
-                width={24}
+                className="rounded-lg ring-1 ring-white/10"
+                width={22}
                 src={platformLogo}
                 alt={t('aiIconAlt')}
               />
-              <div>{t('aiTitle')}</div>
+              <div className="text-sm">{t('aiTitle')}</div>
             </div>
-            <div>
-              <MoreVertical
-                className="text-white/50"
-                size={12}
-              />
-            </div>
+            <div
+              className="flex h-4 w-px bg-white/20"
+              aria-hidden="true"
+            />
             <div className="flex space-x-2">
               <AIActionButton
                 editor={props.editor}
@@ -317,12 +315,29 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
       >
         <button
           onClick={() => handleAction(props.label)}
-          className="flex items-center space-x-1.5 rounded-md bg-white/10 px-2 py-0.5 text-sm font-semibold text-white/70 outline-neutral-200/20 transition-all delay-75 ease-linear hover:bg-white/20 hover:outline-neutral-200/40"
+          className="flex items-center space-x-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-sm font-semibold text-white/80 ring-1 ring-white/5 transition-all duration-200 hover:bg-white/20 hover:text-white hover:shadow-lg hover:ring-white/20 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95"
+          aria-label={getButtonLabel(props.label)}
+          type="button"
         >
-          {props.label === 'Explain' && <BookOpen size={16} />}
-          {props.label === 'Summarize' && <FormInput size={16} />}
-          {props.label === 'Translate' && <Languages size={16} />}
-          {props.label === 'Examples' && <div className="text-white/50">{t('examplesAbbr')}</div>}
+          {props.label === 'Explain' && (
+            <BookOpen
+              size={16}
+              className="transition-transform group-hover:scale-110"
+            />
+          )}
+          {props.label === 'Summarize' && (
+            <FormInput
+              size={16}
+              className="transition-transform group-hover:scale-110"
+            />
+          )}
+          {props.label === 'Translate' && (
+            <Languages
+              size={16}
+              className="transition-transform group-hover:scale-110"
+            />
+          )}
+          {props.label === 'Examples' && <div className="text-xs font-bold text-white/60">{t('examplesAbbr')}</div>}
           <div>{getButtonLabel(props.label)}</div>
         </button>
       </ToolTip>

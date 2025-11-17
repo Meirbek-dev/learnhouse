@@ -58,6 +58,7 @@
       "prompt_translateTo": "Перевести на {language}: {selection}",
       "prompt_writer": "Написать о {selection}",
       "thinking": "Думаю...",
+      "processingRequest": "Обрабатываю ваш запрос",
       "translateExample": "Японский, арабский, немецкий и т.д.",
       "translatePlaceholder": "Перевести выбранный текст на",
       "critisizeSelectionMissing": "Выберите абзац для критики",

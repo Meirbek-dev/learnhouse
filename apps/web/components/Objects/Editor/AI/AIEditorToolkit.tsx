@@ -106,14 +106,17 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
                       <AiEditorToolButton label="Translate" />
                     </div>
                     <div className="flex items-center space-x-2">
-                      <X
+                      <button
                         onClick={() => {
                           dispatchAIEditor({ type: 'setIsModalClose' });
                           dispatchAIEditor({ type: 'setIsFeedbackModalClose' });
                         }}
-                        size={20}
-                        className="items-center rounded-full bg-white/10 p-1 text-white/50 hover:cursor-pointer"
-                      />
+                        className="rounded-full bg-white/10 p-1.5 text-white/60 ring-1 ring-white/5 transition-all duration-200 hover:bg-white/20 hover:text-white hover:ring-white/20 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-90"
+                        aria-label="Close AI toolkit"
+                        type="button"
+                      >
+                        <X size={18} />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -519,23 +522,28 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
           </div>
         </div>
         {aiEditorState.isUserInputEnabled ? (
-          <div className="flex cursor-pointer items-center space-x-2">
+          <div className="flex items-center space-x-2">
             <input
               onKeyDown={handleKeyPress}
               value={aiEditorState.chatInputValue}
               onChange={handleChange}
               placeholder={t('askAI')}
-              className="w-full rounded-lg bg-gray-950/20 px-4 py-2 text-sm text-white ring-1 ring-white/20 outline-hidden ring-inset placeholder:text-white/30"
+              disabled={aiEditorState.isWaitingForResponse}
+              className="w-full rounded-lg bg-gray-950/30 px-4 py-2.5 text-sm text-white ring-1 ring-white/20 transition-all placeholder:text-white/40 hover:ring-white/30 focus:ring-2 focus:ring-white/40 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label={t('askAI')}
             />
-            <div
+            <button
               onClick={() => handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue)}
-              className="rounded-md bg-white/10 px-3 py-2 outline-neutral-200/20 transition-all delay-75 ease-linear hover:bg-white/20 hover:outline-neutral-200/40"
+              disabled={aiEditorState.isWaitingForResponse || !aiEditorState.chatInputValue.trim()}
+              className="rounded-lg bg-white/10 p-2.5 ring-1 ring-white/10 transition-all duration-200 hover:bg-white/20 hover:ring-white/20 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white/10"
+              aria-label="Send message"
+              type="button"
             >
               <BetweenHorizontalStart
                 size={20}
-                className="text-white/50 hover:cursor-pointer"
+                className="text-white/70"
               />
-            </div>
+            </button>
           </div>
         ) : null}
       </div>
@@ -560,14 +568,46 @@ const AiEditorToolButton = (props: any) => {
   return (
     <button
       onClick={() => handleToolButtonClick(props.label)}
-      className="flex items-center space-x-1.5 rounded-md bg-white/10 px-2 py-0.5 text-sm font-semibold text-white/70 outline-neutral-200/20 transition-all delay-75 ease-linear hover:bg-white/20 hover:outline-neutral-200/40"
+      className="flex items-center space-x-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-sm font-semibold text-white/80 ring-1 ring-white/5 transition-all duration-200 ease-out hover:bg-white/20 hover:text-white hover:shadow-lg hover:ring-white/20 focus:ring-2 focus:ring-white/40 focus:ring-offset-2 focus:ring-offset-transparent focus:outline-none active:scale-95"
+      aria-label={t(`${props.label}Label`)}
+      type="button"
     >
-      {props.label === 'Writer' && <Feather size={14} />}
-      {props.label === 'ContinueWriting' && <FastForward size={14} />}
-      {props.label === 'MakeLonger' && <FileStack size={14} />}
-      {props.label === 'GenerateQuiz' && <HelpCircle size={14} />}
-      {props.label === 'Translate' && <Languages size={14} />}
-      {props.label === 'Critisize' && <Lightbulb size={14} />}
+      {props.label === 'Writer' && (
+        <Feather
+          size={16}
+          className="transition-transform group-hover:scale-110"
+        />
+      )}
+      {props.label === 'ContinueWriting' && (
+        <FastForward
+          size={16}
+          className="transition-transform group-hover:scale-110"
+        />
+      )}
+      {props.label === 'MakeLonger' && (
+        <FileStack
+          size={16}
+          className="transition-transform group-hover:scale-110"
+        />
+      )}
+      {props.label === 'GenerateQuiz' && (
+        <HelpCircle
+          size={16}
+          className="transition-transform group-hover:scale-110"
+        />
+      )}
+      {props.label === 'Translate' && (
+        <Languages
+          size={16}
+          className="transition-transform group-hover:scale-110"
+        />
+      )}
+      {props.label === 'Critisize' && (
+        <Lightbulb
+          size={16}
+          className="transition-transform group-hover:scale-110"
+        />
+      )}
       <span>{t(`${props.label}Label`)}</span>
     </button>
   );
@@ -602,14 +642,19 @@ const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => 
           <p className="mx-auto mt-4 flex justify-center p-2 align-middle text-sm font-bold text-white/80">
             {t('continuePlaceholder')}
           </p>
-          <div
+          <button
             onClick={() => {
               handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue);
             }}
-            className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-md bg-white/10 p-4 text-2xl font-semibold text-white/70 outline-neutral-200/20 transition-all delay-75 ease-linear hover:bg-white/20 hover:outline-neutral-200/40"
+            className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-xl bg-white/10 p-4 text-2xl font-semibold text-white/80 ring-1 ring-white/10 transition-all duration-200 hover:bg-white/20 hover:text-white hover:shadow-lg hover:ring-white/20 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95"
+            aria-label={t('continuePlaceholder')}
+            type="button"
           >
-            <FastForward size={24} />
-          </div>
+            <FastForward
+              size={24}
+              className="transition-transform hover:translate-x-0.5"
+            />
+          </button>
         </div>
       )}
       {aiEditorState.selectedTool === 'MakeLonger' && !aiEditorState.isWaitingForResponse && (
@@ -617,14 +662,19 @@ const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => 
           <p className="mx-auto mt-4 flex justify-center p-2 align-middle text-sm font-bold text-white/80">
             {t('longerPlaceholder')}
           </p>
-          <div
+          <button
             onClick={() => {
               handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue);
             }}
-            className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-md bg-white/10 p-4 text-2xl font-semibold text-white/70 outline-neutral-200/20 transition-all delay-75 ease-linear hover:bg-white/20 hover:outline-neutral-200/40"
+            className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-xl bg-white/10 p-4 text-2xl font-semibold text-white/80 ring-1 ring-white/10 transition-all duration-200 hover:bg-white/20 hover:text-white hover:shadow-lg hover:ring-white/20 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95"
+            aria-label={t('longerPlaceholder')}
+            type="button"
           >
-            <FileStack size={24} />
-          </div>
+            <FileStack
+              size={24}
+              className="transition-transform hover:scale-110"
+            />
+          </button>
         </div>
       )}
       {aiEditorState.selectedTool === 'Critisize' && !aiEditorState.isWaitingForResponse && (
@@ -644,33 +694,42 @@ const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => 
                   <button
                     type="button"
                     onClick={() => dispatchAIEditor({ type: 'setCritisizeScope', payload: 'selection' })}
-                    className={`rounded-md px-3 py-1 text-sm font-semibold transition ${
+                    className={`rounded-lg px-4 py-2 text-sm font-semibold ring-1 transition-all duration-200 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95 ${
                       aiEditorState.critisizeScope === 'selection'
-                        ? 'bg-white/20 text-white'
-                        : 'bg-white/5 text-white/60'
+                        ? 'bg-white/20 text-white shadow-md ring-white/20'
+                        : 'bg-white/5 text-white/60 ring-white/10 hover:bg-white/10 hover:text-white/80'
                     }`}
+                    aria-pressed={aiEditorState.critisizeScope === 'selection'}
                   >
                     {t('critisizeScopeSelection')}
                   </button>
                   <button
                     type="button"
                     onClick={() => dispatchAIEditor({ type: 'setCritisizeScope', payload: 'lecture' })}
-                    className={`rounded-md px-3 py-1 text-sm font-semibold transition ${
-                      aiEditorState.critisizeScope === 'lecture' ? 'bg-white/20 text-white' : 'bg-white/5 text-white/60'
+                    className={`rounded-lg px-4 py-2 text-sm font-semibold ring-1 transition-all duration-200 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95 ${
+                      aiEditorState.critisizeScope === 'lecture'
+                        ? 'bg-white/20 text-white shadow-md ring-white/20'
+                        : 'bg-white/5 text-white/60 ring-white/10 hover:bg-white/10 hover:text-white/80'
                     }`}
+                    aria-pressed={aiEditorState.critisizeScope === 'lecture'}
                   >
                     {t('critisizeScopeLecture')}
                   </button>
                 </div>
               </div>
-              <div
+              <button
                 onClick={() => {
                   handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue);
                 }}
-                className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-md bg-white/10 p-4 text-2xl font-semibold text-white/70 outline-neutral-200/20 transition-all delay-75 ease-linear hover:bg-white/20 hover:outline-neutral-200/40"
+                className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-xl bg-white/10 p-4 text-2xl font-semibold text-white/80 ring-1 ring-white/10 transition-all duration-200 hover:bg-white/20 hover:text-white hover:shadow-lg hover:ring-white/20 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95"
+                aria-label={t('critisizePlaceholder')}
+                type="button"
               >
-                <Lightbulb size={24} />
-              </div>
+                <Lightbulb
+                  size={24}
+                  className="transition-transform hover:rotate-12"
+                />
+              </button>
             </>
           )}
         </div>
@@ -686,55 +745,90 @@ const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => 
               className="w-full rounded-lg bg-gray-950/20 px-4 py-2 text-sm text-white ring-1 ring-white/20 outline-hidden ring-inset placeholder:text-white/30"
             />
           </div>
-          <div
+          <button
             onClick={() => {
               handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue);
             }}
-            className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-md bg-white/10 p-4 text-2xl font-semibold text-white/70 outline-neutral-200/20 transition-all delay-75 ease-linear hover:bg-white/20 hover:outline-neutral-200/40"
+            className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-xl bg-white/10 p-4 text-2xl font-semibold text-white/80 ring-1 ring-white/10 transition-all duration-200 hover:bg-white/20 hover:text-white hover:shadow-lg hover:ring-white/20 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95"
+            aria-label={t('translatePlaceholder')}
+            type="button"
           >
-            <Languages size={24} />
-          </div>
+            <Languages
+              size={24}
+              className="transition-transform hover:scale-110"
+            />
+          </button>
         </div>
       )}
       {aiEditorState.isWaitingForResponse && !aiEditorState.error.isError ? (
-        <div className="mx-auto flex flex-col items-center justify-center align-middle">
-          <svg
-            className="mt-10 h-10 w-10 animate-spin text-white"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-          <p className="mt-4 font-bold text-white/90">{t('thinking')}</p>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mx-auto flex flex-col items-center justify-center gap-4 align-middle"
+        >
+          <div className="relative">
+            <svg
+              className="h-12 w-12 animate-spin text-white/80"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="3"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+            <div className="absolute inset-0 animate-pulse rounded-full bg-white/5 blur-xl" />
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <p className="font-bold text-white/90">{t('thinking')}</p>
+            <p className="text-xs text-white/50">{t('processingRequest')}</p>
+          </div>
+        </motion.div>
       ) : null}
 
       {aiEditorState.error.isError ? (
-        <div className="flex h-auto items-center pt-7">
-          <div className="mx-auto flex w-full flex-col space-y-2 rounded-lg bg-red-500/20 p-5 outline-red-500">
-            <AlertTriangle
-              size={20}
-              className="text-red-500"
-            />
-            <div className="flex flex-col">
-              <h3 className="font-semibold text-red-200">{t('errorTitle')}</h3>
-              <span className="text-sm text-red-100">{aiEditorState.error.error_message}</span>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex h-auto items-center pt-4"
+        >
+          <div className="mx-auto flex w-full flex-col space-y-3 rounded-xl bg-red-500/15 p-5 ring-1 ring-red-500/30 backdrop-blur-sm">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-3">
+                <AlertTriangle
+                  size={22}
+                  className="mt-0.5 flex-shrink-0 text-red-400"
+                  aria-hidden="true"
+                />
+                <div className="flex flex-col gap-1">
+                  <h3 className="font-semibold text-red-200">{t('errorTitle')}</h3>
+                  <span className="text-sm leading-relaxed text-red-100/90">{aiEditorState.error.error_message}</span>
+                </div>
+              </div>
+              <button
+                onClick={() =>
+                  dispatchAIEditor({ type: 'setError', payload: { isError: false, status: 0, error_message: '' } })
+                }
+                className="flex-shrink-0 rounded-md p-1 text-red-300/70 transition-colors hover:bg-red-500/20 hover:text-red-200 focus:ring-2 focus:ring-red-400/50 focus:outline-none"
+                aria-label="Dismiss error"
+                type="button"
+              >
+                <X size={18} />
+              </button>
             </div>
           </div>
-        </div>
+        </motion.div>
       ) : null}
     </div>
   );

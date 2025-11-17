@@ -50,17 +50,17 @@ const AIActivityAsk = (props: AIActivityAskProps) => {
                 'linear-gradient(135deg, oklch(0.25 0.15 270) 0%, oklch(0.40 0.18 260) 50%, oklch(0.32 0.16 255) 100%)',
             }}
             className={clsx(
-              'flex items-center space-x-1.5 rounded-full p-2.5 px-5 text-sm text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer',
-              { 'ring-2 ring-white/20': aiChatBotState.isModalOpen },
+              'flex items-center space-x-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-lg ring-1 ring-white/10 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:ring-white/20 focus:ring-2 focus:ring-white/30 focus:outline-none active:scale-95',
+              { 'ring-2 ring-white/30 shadow-xl': aiChatBotState.isModalOpen },
             )}
           >
             <Image
-              className="rounded-md outline-neutral-200/20"
-              width={18}
+              className="rounded-md"
+              width={20}
               src={platformLogoLight}
               alt={t('askAI')}
             />
-            <i className="text-xs font-bold not-italic">{t('askAI')}</i>
+            <span className="text-xs font-bold">{t('askAI')}</span>
           </div>
         </div>
       ) : null}
@@ -596,15 +596,17 @@ const AIChatPredefinedQuestion = (props: { sendMessage: any; label: string }) =>
   }
 
   return (
-    <div
+    <button
       onClick={() => props.sendMessage(getQuestion(props.label))}
-      className="flex cursor-pointer items-center space-x-1.5 rounded-xl bg-white/5 px-4 py-1.5 text-xs font-semibold text-white/40 outline-neutral-100/10 transition-all delay-75 ease-linear hover:bg-white/10 hover:text-white/60 hover:outline-neutral-200/40"
+      className="flex items-center space-x-2 rounded-xl bg-white/5 px-4 py-2 text-xs font-semibold text-white/50 ring-1 ring-white/10 transition-all duration-200 hover:bg-white/10 hover:text-white/70 hover:shadow-md hover:ring-white/20 focus:ring-2 focus:ring-white/30 focus:outline-none active:scale-95"
+      type="button"
+      aria-label={getQuestion(props.label)}
     >
-      {props.label === 'about' && <BadgeInfo size={15} />}
-      {props.label === 'flashcards' && <NotebookTabs size={15} />}
-      {props.label === 'examples' && <div className="text-white/50">{t('examplesAbbr')}</div>}
+      {props.label === 'about' && <BadgeInfo size={16} />}
+      {props.label === 'flashcards' && <NotebookTabs size={16} />}
+      {props.label === 'examples' && <div className="text-xs font-bold text-white/50">{t('examplesAbbr')}</div>}
       <span>{getQuestion(props.label)}</span>
-    </div>
+    </button>
   );
 };
 

@@ -58,6 +58,7 @@
       "prompt_translateTo": "Translate to {language}: {selection}",
       "prompt_writer": "Write about {selection}",
       "thinking": "Thinking...",
+      "processingRequest": "Processing your request",
       "translateExample": "Japanese, Arabic, German, etc.",
       "translatePlaceholder": "Translate selected text to",
       "critisizeSelectionMissing": "Select a paragraph to critique",

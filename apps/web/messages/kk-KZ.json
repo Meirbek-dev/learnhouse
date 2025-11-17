@@ -58,6 +58,7 @@
       "prompt_translateTo": "{language} тіліне аудару: {selection}",
       "prompt_writer": "{selection} туралы жазу",
       "thinking": "Ойланып жатыр...",
+      "processingRequest": "Сұранысыңызды өңдеп жатыр",
       "translateExample": "Жапон, араб, неміс және т.б.",
       "translatePlaceholder": "Таңдалған мәтінді мынаған аудару",
       "critisizeSelectionMissing": "Сын айту үшін абзацты таңдаңыз",
