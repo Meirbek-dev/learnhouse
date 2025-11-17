@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Tags array is required' }, { status: 400, headers: corsHeaders });
     }
 
-    const uniqueTags = Array.from(new Set(tags))
+    const uniqueTags = [...new Set(tags)]
       .filter((tag) => typeof tag === 'string' && tag.trim().length > 0)
       .map((tag) => tag.trim());
 

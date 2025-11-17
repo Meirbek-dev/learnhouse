@@ -243,7 +243,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             // Try to get org_id from cookie
             const cookieStore = await cookies();
             const orgIdCookie = cookieStore.get('oauth_org_id');
-            const orgId = orgIdCookie?.value ? parseInt(orgIdCookie.value, 10) : undefined;
+            const orgId = orgIdCookie?.value ? Number.parseInt(orgIdCookie.value, 10) : undefined;
 
             // Clear the cookie after reading it
             if (orgIdCookie) {

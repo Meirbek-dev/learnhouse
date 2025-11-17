@@ -156,11 +156,12 @@ async def ai_start_activity_chat_session(
         embeddings = "text-embedding-3-small"
         ai_model = org_config.config["features"]["ai"]["model"]
 
-        # Optimized system message
+        # Optimized system message with explicit tool usage guidance
         system_message = (
             f"You are a helpful Education Assistant for '{course.name}' course, "
             f"helping with the '{activity.name}' lecture. "
-            "Use available tools to get context and provide accurate, helpful responses. "
+            "Use the find_context_text tool ONCE to get relevant context, then provide your response immediately. "
+            "Be efficient: retrieve context first, then answer directly without additional tool calls. "
             "If context is insufficient, use your knowledge to assist the student."
         )
 
@@ -280,11 +281,12 @@ async def ai_send_activity_chat_message(
         embeddings = "text-embedding-3-small"
         ai_model = org_config.config["features"]["ai"]["model"]
 
-        # Optimized system message
+        # Optimized system message with explicit tool usage guidance
         system_message = (
             f"You are a helpful Education Assistant for '{course.name}' course, "
             f"helping with the '{activity.name}' lecture. "
-            "Use available tools to get context and provide accurate, helpful responses. "
+            "Use the find_context_text tool ONCE to get relevant context, then provide your response immediately. "
+            "Be efficient: retrieve context first, then answer directly without additional tool calls. "
             "If context is insufficient, use your knowledge to assist the student."
         )
 

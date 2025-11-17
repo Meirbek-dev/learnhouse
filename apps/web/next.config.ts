@@ -63,8 +63,8 @@ const nextConfig: NextConfig = {
           chunks: 'all',
           maxAsyncRequests: 6,
           maxInitialRequests: 6,
-          enforceSizeThreshold: 120000,
-          minSize: 60000,
+          enforceSizeThreshold: 120_000,
+          minSize: 60_000,
           cacheGroups: {
             // Create larger vendor chunk to reduce total chunks
             defaultVendors: {

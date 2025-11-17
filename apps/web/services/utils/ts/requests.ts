@@ -191,7 +191,7 @@ export const getResponseMetadata = async (response: Response): Promise<CustomRes
 };
 
 export const revalidateTags = async (tags: string[], orgslug: string) => {
-  const uniqueTags = Array.from(new Set(tags))
+  const uniqueTags = [...new Set(tags)]
     .filter((tag): tag is string => typeof tag === 'string' && tag.trim().length > 0)
     .map((tag) => tag.trim());
 
@@ -214,7 +214,7 @@ export const revalidateTags = async (tags: string[], orgslug: string) => {
     if (!response.ok) {
       throw new Error(`Failed to revalidate tags (${response.status})`);
     }
-  } catch (error) {
+  } catch {
     for (const tag of uniqueTags) {
       const url = `${endpoint}?tag=${encodeURIComponent(tag)}`;
       await fetch(url);

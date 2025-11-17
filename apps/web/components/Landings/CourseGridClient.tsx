@@ -26,7 +26,7 @@ export default function CourseGridClient({ courses, orgslug }: CourseGridClientP
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-      dedupingInterval: 60000, // 1 minute
+      dedupingInterval: 60_000, // 1 minute
     },
   );
 

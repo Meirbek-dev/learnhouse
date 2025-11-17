@@ -320,7 +320,7 @@ class FastAIService:
         llm_model_name: str,
         system_prompt: str,
         vector_store: Chroma,
-        max_iterations: int = 2,  # Optimized: tool use + final answer only
+        max_iterations: int = 12,  # Increased further for complex multi-step operations
     ) -> AgentExecutor | None:
         """Get cached agent or create new one."""
 
@@ -353,7 +353,7 @@ class FastAIService:
         llm_model_name: str,
         system_prompt: str,
         vector_store: Chroma,
-        max_iterations: int = 2,  # Optimized: tool use + final answer only
+        max_iterations: int = 12,  # Increased further for complex multi-step operations
     ) -> AgentExecutor | None:
         """Create agent with optimizations."""
         try:
@@ -369,7 +369,7 @@ class FastAIService:
             # Create highly optimized retriever with minimal results
             retriever = vector_store.as_retriever(
                 search_type="similarity",
-                search_kwargs={"k": 2},  # Get top 2 results for better context (balanced speed vs quality)
+                search_kwargs={"k": 3},  # Get top 3 results for better context in complex queries
             )
 
             retriever_tool = create_retriever_tool(
@@ -391,16 +391,16 @@ class FastAIService:
             # Create agent
             agent = create_tool_calling_agent(llm, [retriever_tool], prompt)
 
-            # Create executor with aggressive performance optimizations
+            # Create executor with optimized performance settings
             return AgentExecutor(
                 agent=agent,
                 tools=[retriever_tool],
                 verbose=True,
                 return_intermediate_steps=False,  # Reduce overhead
                 handle_parsing_errors=True,
-                max_iterations=2,  # Reduced from 3 for speed (20-30% faster)
-                max_execution_time=15,  # Aggressive timeout for faster failure detection
-                early_stopping_method="force",  # Force stop when max iterations reached
+                max_iterations=12,  # Increased for complex operations like lecture critique
+                max_execution_time=50,  # Extended timeout for thorough responses
+                early_stopping_method="generate",  # Allow partial completion instead of force stop
             )
 
         except AIProcessingError:

@@ -47,16 +47,21 @@
       "continuePlaceholder": "Поместите курсор в конец предложения, чтобы продолжить писать",
       "errorTitle": "Что-то пошло не так",
       "longerPlaceholder": "Выберите текст, чтобы сделать его длиннее",
-      "critisizePlaceholder": "Выберите часть лекции для критики и улучшений",
+      "critisizePlaceholder": "Выберите часть лекции или критикуйте всю лекцию",
+      "critisizeScopeLabel": "Что критиковать",
+      "critisizeScopeSelection": "Выделенный текст",
+      "critisizeScopeLecture": "Вся лекция",
       "prompt_continueWriting": "Продолжить писать о {selection}",
       "prompt_makeLonger": "Удлинить этот текст: {selection}",
       "prompt_critisize": "Раскритикуй этот фрагмент лекции и предложи улучшения: {selection}",
+      "prompt_critisizeLecture": "Раскритикуй лекцию целиком и предложи улучшения: {selection}",
       "prompt_translateTo": "Перевести на {language}: {selection}",
       "prompt_writer": "Написать о {selection}",
       "thinking": "Думаю...",
       "translateExample": "Японский, арабский, немецкий и т.д.",
       "translatePlaceholder": "Перевести выбранный текст на",
       "critisizeSelectionMissing": "Выберите абзац для критики",
+      "critisizeLectureMissing": "Лекция пустая, добавьте контент",
       "translateToLanguageMissing": "Пожалуйста, введите язык для перевода",
       "userInputPlaceholder": "Спросить ИИ",
       "writerPlaceholder": "Написать о..."
@@ -1018,7 +1023,7 @@
       "errorPrefix": "Ошибка",
       "loadingButton": "Загрузка...",
       "loadingRoles": "Загрузка ролей...",
-      "maintainerRole": "Сопровождающий",
+      "maintainerRole": "Модератор",
       "rolesLabel": "Роли",
       "selectRolePlaceholder": "Пожалуйста, выберите роль для пользователя",
       "toastError": "Ошибка обновления роли",
@@ -2396,7 +2401,7 @@
           },
           "maintainer": {
             "description": "Сопровождающий курса с расширенными правами",
-            "name": "Мейнтейнер",
+            "name": "Модератор",
             "permissions": {
               "cannotDeleteCourse": "Не может удалить курс",
               "changeAccessSettings": "Менять доступ",
@@ -2432,7 +2437,7 @@
           },
           "maintainer": {
             "description": "Менеджер среднего уровня с широкими правами",
-            "name": "Мейнтейнер",
+            "name": "Модератор",
             "permissions": {
               "manageAssignments": "Управлять заданиями",
               "manageCourses": "Управлять курсами",
@@ -2499,7 +2504,7 @@
       "failedToRemoveSelectedContributors": "Не удалось удалить выбранных соавторов",
       "failedToUpdateContributor": "Не удалось обновить соавтора",
       "inactive": "Неактивный",
-      "maintainer": "Сопровождающий",
+      "maintainer": "Модератор",
       "nameColumn": "Имя",
       "noUsersFoundMessage": "Пользователи не найдены",
       "openConfirmMsg": "Вы уверены, что хотите открыть этот курс для соавторов?",
@@ -2515,7 +2520,7 @@
       "role": "Роль",
       "roleColumn": "Роль",
       "roleContributor": "Соавтор",
-      "roleMaintainer": "Сопровождающий",
+      "roleMaintainer": "Модератор",
       "roleReporter": "Репортер",
       "searchUsersPlaceholder": "Искать пользователей по имени или логину для добавления в соавторы...",
       "searchingMessage": "Поиск...",
@@ -4847,11 +4852,11 @@
         },
         "instructor": {
           "description": "Может управлять своим контентом",
-          "name": "ИНСТРУКТОР"
+          "name": "ПРЕПОДАВАТЕЛЬ"
         },
         "maintainer": {
           "description": "Менеджер среднего уровня с широкими разрешениями",
-          "name": "ТЕХНИЧЕСКИЙ УПРАВЛЯЮЩИЙ"
+          "name": "МОДЕРАТОР"
         },
         "user": {
           "description": "Обучающийся с правами только для чтения",

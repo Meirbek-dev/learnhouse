@@ -1,8 +1,10 @@
 'use client';
 
 import type { AIMessage } from '@components/Objects/Activities/AI/AIActivityAsk';
-import { createContext, use, useReducer } from 'react';
+import { createContext, useContext, useReducer } from 'react';
 import type { ReactNode } from 'react';
+
+export type CritisizeScope = 'selection' | 'lecture';
 
 // Action types for the reducer
 type AIEditorAction =
@@ -21,7 +23,8 @@ type AIEditorAction =
   | { type: 'setIsFeedbackModalOpen' }
   | { type: 'setIsFeedbackModalClose' }
   | { type: 'setIsUserInputEnabled'; payload: boolean }
-  | { type: 'setError'; payload: AIError };
+  | { type: 'setError'; payload: AIError }
+  | { type: 'setCritisizeScope'; payload: CritisizeScope };
 
 // Properly typed contexts
 export const AIEditorContext = createContext<AIEditorStateTypes | null>(null);
@@ -36,6 +39,7 @@ export interface AIEditorStateTypes {
   chatInputValue: string;
   selectedTool: 'Writer' | 'ContinueWriting' | 'MakeLonger' | 'GenerateQuiz' | 'Translate' | 'Critisize';
   isUserInputEnabled: boolean;
+  critisizeScope: CritisizeScope;
   error: AIError;
 }
 
@@ -49,18 +53,21 @@ interface AIEditorProviderProps {
   children: ReactNode;
 }
 
+const initialAIEditorState: AIEditorStateTypes = {
+  messages: [],
+  isModalOpen: false,
+  isFeedbackModalOpen: false,
+  aichat_uuid: null,
+  isWaitingForResponse: false,
+  chatInputValue: '',
+  selectedTool: 'Writer',
+  isUserInputEnabled: true,
+  critisizeScope: 'selection',
+  error: { isError: false, status: 0, error_message: '' },
+};
+
 const AIEditorProvider = ({ children }: AIEditorProviderProps) => {
-  const [aIEditorState, dispatchAIEditor] = useReducer(aIEditorReducer, {
-    messages: [],
-    isModalOpen: false,
-    isFeedbackModalOpen: false,
-    aichat_uuid: null,
-    isWaitingForResponse: false,
-    chatInputValue: '',
-    selectedTool: 'Writer' as const,
-    isUserInputEnabled: true,
-    error: { isError: false, status: 0, error_message: '' },
-  });
+  const [aIEditorState, dispatchAIEditor] = useReducer(aIEditorReducer, initialAIEditorState);
 
   return (
     <AIEditorContext.Provider value={aIEditorState}>
@@ -72,7 +79,7 @@ const AIEditorProvider = ({ children }: AIEditorProviderProps) => {
 export default AIEditorProvider;
 
 export function useAIEditor(): AIEditorStateTypes {
-  const context = use(AIEditorContext);
+  const context = useContext(AIEditorContext);
   if (!context) {
     throw new Error('useAIEditor must be used within an AIEditorProvider');
   }
@@ -80,56 +87,46 @@ export function useAIEditor(): AIEditorStateTypes {
 }
 
 export function useAIEditorDispatch(): React.Dispatch<AIEditorAction> {
-  const context = use(AIEditorDispatchContext);
+  const context = useContext(AIEditorDispatchContext);
   if (!context) {
     throw new Error('useAIEditorDispatch must be used within an AIEditorProvider');
   }
   return context;
 }
 
+type AIEditorActionHandlers = {
+  [Type in AIEditorAction['type']]: (
+    state: AIEditorStateTypes,
+    action: Extract<AIEditorAction, { type: Type }>,
+  ) => AIEditorStateTypes;
+};
+
+const AI_EDITOR_ACTION_HANDLERS: AIEditorActionHandlers = {
+  setMessages: (state, action) => ({ ...state, messages: action.payload }),
+  addMessage: (state, action) => ({ ...state, messages: [...state.messages, action.payload] }),
+  setIsModalOpen: (state) => ({ ...state, isModalOpen: true }),
+  setIsModalClose: (state) => ({ ...state, isModalOpen: false }),
+  setAichat_uuid: (state, action) => ({ ...state, aichat_uuid: action.payload }),
+  setIsWaitingForResponse: (state) => ({ ...state, isWaitingForResponse: true }),
+  setIsNoLongerWaitingForResponse: (state) => ({ ...state, isWaitingForResponse: false }),
+  setChatInputValue: (state, action) => ({ ...state, chatInputValue: action.payload }),
+  setSelectedTool: (state, action) => ({ ...state, selectedTool: action.payload }),
+  setIsFeedbackModalOpen: (state) => ({ ...state, isFeedbackModalOpen: true }),
+  setIsFeedbackModalClose: (state) => ({ ...state, isFeedbackModalOpen: false }),
+  setIsUserInputEnabled: (state, action) => ({ ...state, isUserInputEnabled: action.payload }),
+  setError: (state, action) => ({ ...state, error: action.payload }),
+  setCritisizeScope: (state, action) => ({ ...state, critisizeScope: action.payload }),
+};
+
 function aIEditorReducer(state: AIEditorStateTypes, action: AIEditorAction): AIEditorStateTypes {
-  switch (action.type) {
-    case 'setMessages': {
-      return { ...state, messages: action.payload };
+  const handler = AI_EDITOR_ACTION_HANDLERS[action.type];
+
+  if (!handler) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.error(`Unhandled action type: ${String(action.type)}`);
     }
-    case 'addMessage': {
-      return { ...state, messages: [...state.messages, action.payload] };
-    }
-    case 'setIsModalOpen': {
-      return { ...state, isModalOpen: true };
-    }
-    case 'setIsModalClose': {
-      return { ...state, isModalOpen: false };
-    }
-    case 'setAichat_uuid': {
-      return { ...state, aichat_uuid: action.payload };
-    }
-    case 'setIsWaitingForResponse': {
-      return { ...state, isWaitingForResponse: true };
-    }
-    case 'setIsNoLongerWaitingForResponse': {
-      return { ...state, isWaitingForResponse: false };
-    }
-    case 'setChatInputValue': {
-      return { ...state, chatInputValue: action.payload };
-    }
-    case 'setSelectedTool': {
-      return { ...state, selectedTool: action.payload };
-    }
-    case 'setIsFeedbackModalOpen': {
-      return { ...state, isFeedbackModalOpen: true };
-    }
-    case 'setIsFeedbackModalClose': {
-      return { ...state, isFeedbackModalOpen: false };
-    }
-    case 'setIsUserInputEnabled': {
-      return { ...state, isUserInputEnabled: action.payload };
-    }
-    case 'setError': {
-      return { ...state, error: action.payload };
-    }
-    default: {
-      throw new Error(`Unhandled action type: ${(action as any).type}`);
-    }
+    return state;
   }
+
+  return handler(state, action as never);
 }

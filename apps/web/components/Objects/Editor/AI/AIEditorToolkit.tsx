@@ -5,13 +5,14 @@ import {
   Feather,
   FileStack,
   HelpCircle,
-  Lightbulb,
   Languages,
+  Lightbulb,
   MoreVertical,
   X,
 } from 'lucide-react';
 import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
 import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
+import type { CritisizeScope } from '@components/Contexts/AI/AIEditorContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import platformLogoLight from 'public/platform_logo_light.svg';
@@ -30,6 +31,7 @@ interface AIEditorToolkitProps {
 interface AIPromptsLabels {
   label: 'Writer' | 'ContinueWriting' | 'MakeLonger' | 'GenerateQuiz' | 'Translate' | 'Critisize';
   selection: string;
+  scope?: CritisizeScope;
 }
 
 const AIEditorToolkit = (props: AIEditorToolkitProps) => {
@@ -59,12 +61,12 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
                 className="fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center"
                 style={{ pointerEvents: 'none' }}
               >
-                {aiEditorState.isFeedbackModalOpen ? (
+                {aiEditorState.isFeedbackModalOpen && (
                   <UserFeedbackModal
                     activity={props.activity}
                     editor={props.editor}
                   />
-                ) : null}
+                )}
                 <div
                   style={{
                     pointerEvents: 'auto',
@@ -81,9 +83,9 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
                   }}
                   className="fixed bottom-0 left-1/2 z-50 mx-auto my-10 w-fit max-w-(--breakpoint-2xl) -translate-x-1/2 flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-white/10 ring-inset"
                 >
-                  <div className="flex space-x-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <div className="pr-1">
-                      <div className="flex w-full items-center space-x-2 font-bold text-white/80">
+                      <div className="flex w-full flex-wrap items-center gap-2 font-bold text-white/80">
                         <Image
                           width={18}
                           src={platformLogoLight}
@@ -96,7 +98,7 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
                         />
                       </div>
                     </div>
-                    <div className="tools flex space-x-2">
+                    <div className="tools flex flex-wrap gap-2">
                       <AiEditorToolButton label="Writer" />
                       <AiEditorToolButton label="ContinueWriting" />
                       <AiEditorToolButton label="MakeLonger" />
@@ -105,14 +107,10 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
                     </div>
                     <div className="flex items-center space-x-2">
                       <X
-                        onClick={() =>
-                          Promise.all([
-                            dispatchAIEditor({ type: 'setIsModalClose' }),
-                            dispatchAIEditor({
-                              type: 'setIsFeedbackModalClose',
-                            }),
-                          ])
-                        }
+                        onClick={() => {
+                          dispatchAIEditor({ type: 'setIsModalClose' });
+                          dispatchAIEditor({ type: 'setIsFeedbackModalClose' });
+                        }}
                         size={20}
                         className="items-center rounded-full bg-white/10 p-1 text-white/50 hover:cursor-pointer"
                       />
@@ -185,10 +183,8 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
                 resolve(finalMessage);
               },
               async (error) => {
-                await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
-                await dispatchAIEditor({ type: 'setIsModalClose' });
-                await new Promise((r) => setTimeout(r, 200));
-                await dispatchAIEditor({
+                dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
+                dispatchAIEditor({
                   type: 'setError',
                   payload: {
                     isError: true,
@@ -196,7 +192,8 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
                     error_message: error.error || 'Streaming failed',
                   },
                 });
-                await dispatchAIEditor({ type: 'setIsModalOpen' });
+                // Ensure feedback modal opens so the user can see the error
+                dispatchAIEditor({ type: 'setIsFeedbackModalOpen' });
                 resolve('');
               },
             );
@@ -235,10 +232,8 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
                 resolve(finalMessage);
               },
               async (error) => {
-                await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
-                await dispatchAIEditor({ type: 'setIsModalClose' });
-                await new Promise((r) => setTimeout(r, 200));
-                await dispatchAIEditor({
+                dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
+                dispatchAIEditor({
                   type: 'setError',
                   payload: {
                     isError: true,
@@ -246,16 +241,14 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
                     error_message: error.error || 'Streaming failed',
                   },
                 });
-                await dispatchAIEditor({ type: 'setIsModalOpen' });
+                dispatchAIEditor({ type: 'setIsFeedbackModalOpen' });
                 resolve('');
               },
             );
           }
         } catch (error) {
-          await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
-          await dispatchAIEditor({ type: 'setIsModalClose' });
-          await new Promise((r) => setTimeout(r, 200));
-          await dispatchAIEditor({
+          dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
+          dispatchAIEditor({
             type: 'setError',
             payload: {
               isError: true,
@@ -263,7 +256,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
               error_message: error instanceof Error ? error.message : 'Unknown error',
             },
           });
-          await dispatchAIEditor({ type: 'setIsModalOpen' });
+          dispatchAIEditor({ type: 'setIsFeedbackModalOpen' });
           resolve('');
         }
       };
@@ -328,12 +321,13 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
     } else if (label === 'GenerateQuiz') {
       // will be implemented in future stages
     } else if (label === 'Critisize') {
-      const text_selection = getTipTapEditorSelectedTextGlobal();
+      const scope = aiEditorState.critisizeScope;
+      const text_selection = scope === 'lecture' ? getTipTapEditorEntireText() : getTipTapEditorSelectedTextGlobal();
       if (!text_selection) {
-        toast.error(t('critisizeSelectionMissing'));
+        toast.error(scope === 'lecture' ? t('critisizeLectureMissing') : t('critisizeSelectionMissing'));
         return;
       }
-      const prompt = getPrompt({ label, selection: text_selection });
+      const prompt = getPrompt({ label, selection: text_selection, scope });
       if (prompt) {
         await dispatchAIEditor({ type: 'setIsWaitingForResponse' });
         await sendReqWithMessage(prompt);
@@ -363,14 +357,14 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
   };
 
   const removeSentences = async (textToRemove: string, originalText: string) => {
-    const phrase = textToRemove.toLowerCase();
-    const original = originalText.toLowerCase();
-
-    if (original.includes(phrase)) {
-      const regex = new RegExp(phrase, 'g');
-      return original.replace(regex, '');
+    // Perform case-insensitive removal while preserving the original case of the rest of the text
+    try {
+      const escaped = textToRemove.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+      const regex = new RegExp(escaped, 'gi');
+      return originalText.replace(regex, '');
+    } catch (err) {
+      return originalText;
     }
-    return originalText;
   };
 
   async function fillEditorWithText(text: string) {
@@ -429,7 +423,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
   }
 
   const getPrompt = (args: AIPromptsLabels) => {
-    const { label, selection } = args;
+    const { label, selection, scope } = args;
 
     if (label === 'Writer') {
       if (selection === '') return '';
@@ -449,6 +443,9 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
     }
     if (label === 'Critisize') {
       if (selection === '') return '';
+      if (scope === 'lecture') {
+        return t('prompt_critisizeLecture', { selection });
+      }
       return t('prompt_critisize', { selection });
     }
     if (label === 'Translate') {
@@ -461,18 +458,21 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
   };
 
   const getTipTapEditorSelectedTextGlobal = () => {
-    // Get the entire node/paragraph that the user is in
-    const { pos } = props.editor.state.selection.$from; // get the cursor position
-    const resolvedPos = props.editor.state.doc.resolve(pos); // resolve the position in the document
-    const start = resolvedPos.before(1); // get the start position of the node
-    const end = resolvedPos.after(1); // get the end position of the node
-    // get the text of the node
+    // Get the entire block (paragraph / node) the user is in using resolved positions
+    const $from = props.editor.state.selection.$from;
+    const start = $from.start($from.depth);
+    const end = $from.end($from.depth);
     return props.editor.state.doc.textBetween(start, end, '\n', '\n');
   };
 
   const getTipTapEditorSelectedText = () => {
     const { selection } = props.editor.state;
     return props.editor.state.doc.textBetween(selection.from, selection.to);
+  };
+
+  const getTipTapEditorEntireText = () => {
+    const { doc } = props.editor.state;
+    return doc.textBetween(0, doc.content.size, '\n', '\n');
   };
 
   return (
@@ -550,11 +550,11 @@ const AiEditorToolButton = (props: any) => {
   const handleToolButtonClick = async (
     label: 'Writer' | 'ContinueWriting' | 'MakeLonger' | 'GenerateQuiz' | 'Translate' | 'Critisize',
   ) => {
-    await (label === 'Writer'
-      ? dispatchAIEditor({ type: 'setIsUserInputEnabled', payload: true })
-      : dispatchAIEditor({ type: 'setIsUserInputEnabled', payload: false }));
-    await dispatchAIEditor({ type: 'setSelectedTool', payload: label });
-    await dispatchAIEditor({ type: 'setIsFeedbackModalOpen' });
+    // Ensure main modal is open, set the selected tool and show the feedback modal
+    dispatchAIEditor({ type: 'setIsModalOpen' });
+    dispatchAIEditor({ type: 'setIsUserInputEnabled', payload: label === 'Writer' });
+    dispatchAIEditor({ type: 'setSelectedTool', payload: label });
+    dispatchAIEditor({ type: 'setIsFeedbackModalOpen' });
   };
 
   return (
@@ -584,6 +584,11 @@ const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => 
       payload: event.currentTarget.value,
     });
   };
+
+  // Get the last AI message if it exists
+  // Use a more compatible approach instead of `findLast` for environments where it's unavailable
+  const lastAiMessage = [...aiEditorState.messages].reverse().find((msg) => msg.sender === 'ai');
+  const hasAiResponse = lastAiMessage && !aiEditorState.isWaitingForResponse;
 
   return (
     <div>
@@ -623,18 +628,51 @@ const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => 
         </div>
       )}
       {aiEditorState.selectedTool === 'Critisize' && !aiEditorState.isWaitingForResponse && (
-        <div className="mx-auto flex flex-col items-center justify-center align-middle">
-          <p className="mx-auto mt-4 flex justify-center p-2 align-middle text-sm font-bold text-white/80">
-            {t('critisizePlaceholder')}
-          </p>
-          <div
-            onClick={() => {
-              handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue);
-            }}
-            className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-md bg-white/10 p-4 text-2xl font-semibold text-white/70 outline-neutral-200/20 transition-all delay-75 ease-linear hover:bg-white/20 hover:outline-neutral-200/40"
-          >
-            <Lightbulb size={24} />
-          </div>
+        <div className="mx-auto flex flex-col items-center justify-center pt-2 align-middle">
+          {hasAiResponse ? (
+            <div className="max-h-[140px] w-full overflow-y-auto rounded-lg bg-white/5 p-4">
+              <div className="text-sm whitespace-pre-wrap text-white/90">{lastAiMessage.message}</div>
+            </div>
+          ) : (
+            <>
+              <p className="mx-auto mt-4 flex justify-center p-2 align-middle text-sm font-bold text-white/80">
+                {t('critisizePlaceholder')}
+              </p>
+              <div className="mt-3 flex flex-col items-center space-y-2 text-xs text-white/70">
+                <span className="font-semibold text-white/80">{t('critisizeScopeLabel')}</span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => dispatchAIEditor({ type: 'setCritisizeScope', payload: 'selection' })}
+                    className={`rounded-md px-3 py-1 text-sm font-semibold transition ${
+                      aiEditorState.critisizeScope === 'selection'
+                        ? 'bg-white/20 text-white'
+                        : 'bg-white/5 text-white/60'
+                    }`}
+                  >
+                    {t('critisizeScopeSelection')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => dispatchAIEditor({ type: 'setCritisizeScope', payload: 'lecture' })}
+                    className={`rounded-md px-3 py-1 text-sm font-semibold transition ${
+                      aiEditorState.critisizeScope === 'lecture' ? 'bg-white/20 text-white' : 'bg-white/5 text-white/60'
+                    }`}
+                  >
+                    {t('critisizeScopeLecture')}
+                  </button>
+                </div>
+              </div>
+              <div
+                onClick={() => {
+                  handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue);
+                }}
+                className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-md bg-white/10 p-4 text-2xl font-semibold text-white/70 outline-neutral-200/20 transition-all delay-75 ease-linear hover:bg-white/20 hover:outline-neutral-200/40"
+              >
+                <Lightbulb size={24} />
+              </div>
+            </>
+          )}
         </div>
       )}
       {aiEditorState.selectedTool === 'Translate' && !aiEditorState.isWaitingForResponse && (
@@ -645,7 +683,7 @@ const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => 
               value={aiEditorState.chatInputValue}
               onChange={handleChange}
               placeholder={t('translateExample')}
-              className="py- w-full rounded-lg bg-gray-950/20 px-4 text-sm text-white ring-1 ring-white/20 outline-hidden ring-inset placeholder:text-white/30"
+              className="w-full rounded-lg bg-gray-950/20 px-4 py-2 text-sm text-white ring-1 ring-white/20 outline-hidden ring-inset placeholder:text-white/30"
             />
           </div>
           <div

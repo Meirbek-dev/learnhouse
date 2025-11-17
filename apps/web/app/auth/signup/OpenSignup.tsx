@@ -107,8 +107,8 @@ const OpenSignUpComponent = () => {
                 router.replace(redirectTarget);
                 return;
               }
-            } catch (loginError) {
-              console.error('Auto login after signup failed:', loginError);
+            } catch (error) {
+              console.error('Auto login after signup failed:', error);
             }
           }
 
@@ -122,8 +122,8 @@ const OpenSignUpComponent = () => {
         }
 
         setError(t('errorSomethingWentWrong'));
-      } catch (signupError) {
-        console.error('Signup failed:', signupError);
+      } catch (error) {
+        console.error('Signup failed:', error);
         setError(t('errorSomethingWentWrong'));
       }
     });

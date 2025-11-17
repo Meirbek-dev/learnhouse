@@ -120,7 +120,7 @@ async def ask_ai_stream(
 
         try:
             # Process with streaming and timeout using asyncio.timeout
-            async with asyncio.timeout(20.0):  # Aggressive timeout for faster failure detection
+            async with asyncio.timeout(60.0):  # Increased timeout for complex operations (agent has 45s max_execution_time)
                 async for event in agent_with_history.astream_events(
                     {"input": question.strip()},
                     config={
@@ -189,23 +189,43 @@ async def ask_ai_stream(
                             )
 
                     # Handle tool outputs for context
+                    elif event_type == "on_tool_start":
+                        # Send indicator that tool is being used
+                        yield format_sse_message(
+                            {
+                                "type": "status",
+                                "status": "retrieving_context",
+                                "message": "Ищу релевантную информацию...",
+                            }
+                        )
+
                     elif event_type == "on_tool_end":
                         # Send a subtle indicator that context was retrieved
                         yield format_sse_message(
                             {
                                 "type": "status",
                                 "status": "context_retrieved",
-                                "message": "Retrieved context",
+                                "message": "Анализирую контекст...",
                             }
                         )
 
                     # Capture ONLY the final AgentExecutor output if streaming didn't work
                     elif event_type == "on_chain_end":
+                        # Check if this is the final agent output (not intermediate tool calls)
+                        event_name = event.get("name", "")
+
+                        # Only process AgentExecutor's final output
+                        if "AgentExecutor" not in event_name:
+                            continue
+
                         # Inspect the chain output payload and try to extract
                         # a final text answer. Some agents/tooling return a
                         # dict, some return a string, and some return lists
                         # of Message objects.
                         output_data = event.get("data", {}).get("output", {})
+
+                        # Log the actual output structure for debugging
+                        logger.debug(f"Chain end output_data type: {type(output_data)}, value: {str(output_data)[:200]}")
 
                         # Extract the actual text output in a tolerant way
                         output_text = ""
@@ -214,10 +234,18 @@ async def ask_ai_stream(
                                 output_data.get("output")
                                 or output_data.get("text")
                                 or output_data.get("answer")
+                                or output_data.get("result")  # Try 'result' key as well
                                 or ""
                             )
                         elif isinstance(output_data, str):
                             output_text = output_data
+                        elif isinstance(output_data, list) and output_data:
+                            # Handle list of messages - extract content from last message
+                            last_item = output_data[-1]
+                            if hasattr(last_item, 'content'):
+                                output_text = last_item.content
+                            elif isinstance(last_item, dict):
+                                output_text = last_item.get('content', '')
 
                         # Only use this fallback if:
                         # 1. We haven't streamed anything yet
@@ -225,7 +253,8 @@ async def ask_ai_stream(
                         if (
                             output_text
                             and chunk_count == 0
-                            and output_text not in ["[]", "{}", "None"]
+                            and output_text.strip()
+                            and output_text not in ["[]", "{}", "None", ""]
                         ):
                             logger.warning(
                                 "No streaming chunks received, using final output from chain_end"
@@ -240,6 +269,16 @@ async def ask_ai_stream(
             # Send final response after loop completes so clients can
             # finalize UI state (stop spinners) and persist session id.
             # Include assembled full response and metadata.
+
+            # If we didn't get any chunks, it means the agent stopped without generating output
+            if chunk_count == 0:
+                logger.error("Agent completed but produced no output - likely hit max_iterations without generating answer")
+                error_msg = "AI assistant couldn't generate a response. The query may be too complex or the context too large. Please try with a shorter text or simpler question."
+                yield format_sse_message(
+                    {"type": "error", "error": error_msg, "error_code": "NO_OUTPUT"}
+                )
+                return
+
             try:
                 yield format_sse_message(
                     {

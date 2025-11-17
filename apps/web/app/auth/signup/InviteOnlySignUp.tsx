@@ -111,8 +111,8 @@ const InviteOnlySignUpComponent = (props: InviteOnlySignUpProps) => {
                 router.replace(redirectTarget);
                 return;
               }
-            } catch (loginError) {
-              console.error('Auto login after invite signup failed:', loginError);
+            } catch (error) {
+              console.error('Auto login after invite signup failed:', error);
             }
           }
 
@@ -126,8 +126,8 @@ const InviteOnlySignUpComponent = (props: InviteOnlySignUpProps) => {
         }
 
         setError(t('errorSomethingWentWrong'));
-      } catch (signupError) {
-        console.error('Invite signup failed:', signupError);
+      } catch (error) {
+        console.error('Invite signup failed:', error);
         setError(t('errorSomethingWentWrong'));
       }
     });
