@@ -7,7 +7,6 @@ import {
   HelpCircle,
   Languages,
   Lightbulb,
-  MoreVertical,
   X,
 } from 'lucide-react';
 import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
@@ -16,6 +15,7 @@ import type { CritisizeScope } from '@components/Contexts/AI/AIEditorContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import platformLogoLight from 'public/platform_logo_light.svg';
+import { ScrollArea } from '@components/ui/scroll-area';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import type { Editor } from '@tiptap/react';
@@ -48,19 +48,32 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
           <AnimatePresence>
             {aiEditorState.isModalOpen ? (
               <motion.div
-                initial={{ y: 20, opacity: 0.3, filter: 'blur(5px)' }}
-                animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
-                exit={{ y: 50, opacity: 0, filter: 'blur(3px)' }}
+                initial={{ y: 20, opacity: 0, filter: 'blur(10px)', scale: 0.95 }}
+                animate={{ y: 0, opacity: 1, filter: 'blur(0px)', scale: 1 }}
+                exit={{ y: 30, opacity: 0, filter: 'blur(8px)', scale: 0.98 }}
                 transition={{
                   type: 'spring',
-                  bounce: 0.35,
-                  duration: 1.7,
-                  mass: 0.2,
-                  velocity: 2,
+                  bounce: 0.25,
+                  duration: 0.6,
+                  mass: 0.8,
                 }}
                 className="fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center"
                 style={{ pointerEvents: 'none' }}
               >
+                {/* Backdrop blur overlay - only blocks clicks when feedback modal is NOT open */}
+                {!aiEditorState.isFeedbackModalOpen && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 bg-black/20 backdrop-blur-sm"
+                    onClick={() => {
+                      dispatchAIEditor({ type: 'setIsModalClose' });
+                    }}
+                    style={{ pointerEvents: 'auto' }}
+                  />
+                )}
+
                 {aiEditorState.isFeedbackModalOpen && (
                   <UserFeedbackModal
                     activity={props.activity}
@@ -70,52 +83,65 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
                 <div
                   style={{
                     pointerEvents: 'auto',
-                    background: `radial-gradient(ellipse at center top,
-                    oklch(0.35 0.08 260) 0%,
-                    oklch(0.25 0.05 262) 50%,
-                    oklch(0.15 0.02 264) 100%
-                ),
-                linear-gradient(45deg,
-                    oklch(0.2 0.03 258) 0%,
-                    oklch(0.3 0.06 261) 100%
-                ),
-                radial-gradient(circle at 75% 25%, oklch(0.6231 0.188 259.8145 / 0.12) 0%, transparent 40%)`,
+                    background: `
+                      linear-gradient(135deg,
+                        rgba(255, 255, 255, 0.15) 0%,
+                        rgba(255, 255, 255, 0.08) 100%
+                      ),
+                      linear-gradient(180deg,
+                        oklch(0.35 0.15 260 / 0.7) 0%,
+                        oklch(0.28 0.12 262 / 0.6) 100%
+                      )
+                    `,
+                    backdropFilter: 'blur(32px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(32px) saturate(180%)',
                   }}
-                  className="fixed bottom-0 left-1/2 z-50 mx-auto my-10 w-fit max-w-(--breakpoint-2xl) -translate-x-1/2 flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-white/10 ring-inset"
+                  className="fixed bottom-0 left-1/2 z-40 mx-auto mb-6 w-fit max-w-[95vw] -translate-x-1/2 flex-col-reverse rounded-2xl border border-white/20 p-3 text-white shadow-2xl shadow-black/50 sm:mb-10 sm:rounded-3xl sm:p-4 md:max-w-(--breakpoint-2xl)"
                 >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="pr-1">
-                      <div className="flex w-full flex-wrap items-center gap-2 font-bold text-white/80">
+                  {/* Glass reflection effect */}
+                  <div className="pointer-events-none absolute inset-0 rounded-2xl bg-linear-to-br from-white/20 via-transparent to-transparent opacity-60 sm:rounded-3xl" />
+
+                  <div className="relative flex flex-wrap items-center gap-2 sm:gap-3">
+                    <div className="flex items-center gap-2 pr-2 sm:gap-2.5">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-white/25 to-white/10 shadow-lg backdrop-blur-sm sm:h-9 sm:w-9 sm:rounded-xl">
                         <Image
                           width={18}
+                          height={18}
                           src={platformLogoLight}
                           alt={t('aiIconAlt')}
-                        />
-                        <div className="flex items-center">{t('aiEditorTitle')}</div>
-                        <MoreVertical
-                          className="text-white/50"
-                          size={12}
+                          className="drop-shadow-lg sm:h-5 sm:w-5"
                         />
                       </div>
+                      <div className="hidden flex-col sm:flex">
+                        <span className="text-sm font-bold text-white">{t('aiEditorTitle')}</span>
+                      </div>
                     </div>
-                    <div className="tools flex flex-wrap gap-2">
+
+                    <div className="hidden h-8 w-px bg-linear-to-b from-transparent via-white/30 to-transparent sm:block" />
+
+                    <div className="tools flex flex-wrap gap-1.5 sm:gap-2">
                       <AiEditorToolButton label="Writer" />
                       <AiEditorToolButton label="ContinueWriting" />
                       <AiEditorToolButton label="MakeLonger" />
                       <AiEditorToolButton label="Critisize" />
                       <AiEditorToolButton label="Translate" />
                     </div>
-                    <div className="flex items-center space-x-2">
+
+                    <div className="ml-auto flex items-center">
                       <button
                         onClick={() => {
                           dispatchAIEditor({ type: 'setIsModalClose' });
                           dispatchAIEditor({ type: 'setIsFeedbackModalClose' });
                         }}
-                        className="rounded-full bg-white/10 p-1.5 text-white/60 ring-1 ring-white/5 transition-all duration-200 hover:bg-white/20 hover:text-white hover:ring-white/20 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-90"
-                        aria-label="Close AI toolkit"
+                        className="group relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-white/10 text-white/80 backdrop-blur-sm transition-all duration-300 hover:bg-red-500/30 hover:text-white focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95 sm:h-9 sm:w-9 sm:rounded-xl"
+                        aria-label={t('closeToolkit')}
                         type="button"
                       >
-                        <X size={18} />
+                        <div className="absolute inset-0 bg-linear-to-br from-white/15 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                        <X
+                          size={18}
+                          className="relative z-10 transition-transform group-hover:rotate-90"
+                        />
                       </button>
                     </div>
                   </div>
@@ -480,72 +506,96 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
 
   return (
     <motion.div
-      initial={{ y: 20, opacity: 0.3, filter: 'blur(5px)' }}
-      animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
-      exit={{ y: 50, opacity: 0, filter: 'blur(3px)' }}
+      initial={{ y: 30, opacity: 0, filter: 'blur(10px)', scale: 0.9 }}
+      animate={{ y: 0, opacity: 1, filter: 'blur(0px)', scale: 1 }}
+      exit={{ y: 40, opacity: 0, filter: 'blur(8px)', scale: 0.95 }}
       transition={{
         type: 'spring',
-        bounce: 0.35,
-        duration: 1.7,
-        mass: 0.2,
-        velocity: 2,
+        bounce: 0.2,
+        duration: 0.7,
       }}
-      className="fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center"
+      className="fixed top-0 left-0 z-60 flex h-full w-full items-center justify-center"
       style={{ pointerEvents: 'none' }}
     >
       <div
         style={{
           pointerEvents: 'auto',
-          background: `radial-gradient(ellipse at center bottom,
-                    oklch(0.35 0.08 260) 0%,
-                    oklch(0.25 0.05 262) 50%,
-                    oklch(0.15 0.02 264) 100%
-                ),
-                linear-gradient(45deg,
-                    oklch(0.2 0.03 258) 0%,
-                    oklch(0.3 0.06 261) 100%
-                ),
-                radial-gradient(circle at 75% 25%, oklch(0.6231 0.188 259.8145 / 0.12) 0%, transparent 40%)`,
+          background: `
+            linear-gradient(135deg,
+              rgba(255, 255, 255, 0.16) 0%,
+              rgba(255, 255, 255, 0.08) 100%
+            ),
+            linear-gradient(180deg,
+              oklch(0.36 0.16 260 / 0.75) 0%,
+              oklch(0.28 0.12 262 / 0.65) 100%
+            )
+          `,
+          backdropFilter: 'blur(48px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(48px) saturate(180%)',
         }}
-        className="fixed bottom-16 left-1/2 z-50 mx-auto my-10 h-[200px] w-[500px] max-w-(--breakpoint-2xl) -translate-x-1/2 flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-white/10 ring-inset"
+        className="fixed bottom-[120px] left-1/2 z-50 mx-auto min-h-[240px] w-[calc(100vw-2rem)] max-w-[560px] -translate-x-1/2 flex-col rounded-2xl border border-white/25 p-4 text-white shadow-2xl shadow-black/60 sm:bottom-[120px] sm:rounded-3xl sm:p-5"
       >
-        <div className="flex justify-center">
-          <Image
-            width={26}
-            src={platformLogoLight}
-            alt="Ashyq Bilim logo"
-          />
+        {/* Enhanced glass reflection */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl sm:rounded-3xl">
+          <div className="absolute inset-0 bg-linear-to-br from-white/30 via-white/10 to-transparent opacity-80" />
+          <div className="absolute top-0 left-0 h-24 w-24 bg-white/15 blur-3xl sm:h-32 sm:w-32" />
+          <div className="absolute right-0 bottom-0 h-20 w-20 bg-purple-400/20 blur-2xl sm:h-24 sm:w-24" />
         </div>
-        <div className="mx-auto flex h-[115px] justify-center antialiased">
+
+        <div className="relative flex flex-col space-y-3 sm:space-y-4">
+          {/* Header */}
           <div className="flex items-center justify-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-white/30 to-white/15 shadow-xl ring-1 ring-white/25 backdrop-blur-sm sm:h-12 sm:w-12 sm:rounded-2xl">
+              <Image
+                width={24}
+                height={24}
+                src={platformLogoLight}
+                alt={t('platformLogoAlt')}
+                className="drop-shadow-2xl sm:h-7 sm:w-7"
+              />
+            </div>
+          </div>
+
+          {/* Content area */}
+          <div className="mx-auto flex min-h-[120px] w-full items-center justify-center rounded-xl bg-black/20 p-3 backdrop-blur-sm sm:rounded-2xl sm:p-4">
             <AiEditorActionScreen handleOperation={handleOperation} />
           </div>
-        </div>
-        {aiEditorState.isUserInputEnabled ? (
-          <div className="flex items-center space-x-2">
-            <input
-              onKeyDown={handleKeyPress}
-              value={aiEditorState.chatInputValue}
-              onChange={handleChange}
-              placeholder={t('askAI')}
-              disabled={aiEditorState.isWaitingForResponse}
-              className="w-full rounded-lg bg-gray-950/30 px-4 py-2.5 text-sm text-white ring-1 ring-white/20 transition-all placeholder:text-white/40 hover:ring-white/30 focus:ring-2 focus:ring-white/40 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label={t('askAI')}
-            />
-            <button
-              onClick={() => handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue)}
-              disabled={aiEditorState.isWaitingForResponse || !aiEditorState.chatInputValue.trim()}
-              className="rounded-lg bg-white/10 p-2.5 ring-1 ring-white/10 transition-all duration-200 hover:bg-white/20 hover:ring-white/20 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white/10"
-              aria-label="Send message"
-              type="button"
+
+          {/* Input area */}
+          {aiEditorState.isUserInputEnabled ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-2"
             >
-              <BetweenHorizontalStart
-                size={20}
-                className="text-white/70"
-              />
-            </button>
-          </div>
-        ) : null}
+              <div className="relative flex-1">
+                <input
+                  onKeyDown={handleKeyPress}
+                  value={aiEditorState.chatInputValue}
+                  onChange={handleChange}
+                  placeholder={t('askAI')}
+                  disabled={aiEditorState.isWaitingForResponse}
+                  className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white shadow-inner backdrop-blur-xl transition-all placeholder:text-white/50 hover:border-white/30 hover:bg-white/15 focus:border-white/40 focus:bg-white/15 focus:ring-2 focus:ring-white/30 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 sm:rounded-xl sm:px-4 sm:py-3"
+                  aria-label={t('askAI')}
+                />
+                <div className="pointer-events-none absolute inset-0 rounded-lg bg-linear-to-r from-white/10 to-transparent sm:rounded-xl" />
+              </div>
+              <button
+                onClick={() => handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue)}
+                disabled={aiEditorState.isWaitingForResponse || !aiEditorState.chatInputValue.trim()}
+                className="group relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-linear-to-br from-white/25 to-white/15 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:from-white/35 hover:to-white/20 hover:shadow-xl focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 sm:h-11 sm:w-11 sm:rounded-xl"
+                aria-label={t('sendMessage')}
+                type="button"
+              >
+                <div className="absolute inset-0 bg-linear-to-br from-purple-400/30 to-blue-400/30 opacity-0 transition-opacity group-hover:opacity-100" />
+                <BetweenHorizontalStart
+                  size={18}
+                  className="relative z-10 text-white/90 transition-colors group-hover:text-white sm:h-5 sm:w-5"
+                />
+              </button>
+            </motion.div>
+          ) : null}
+        </div>
       </div>
     </motion.div>
   );
@@ -553,6 +603,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
 
 const AiEditorToolButton = (props: any) => {
   const dispatchAIEditor = useAIEditorDispatch();
+  const aiEditorState = useAIEditor();
   const t = useTranslations('Activities.AIEditorToolkit');
 
   const handleToolButtonClick = async (
@@ -565,51 +616,75 @@ const AiEditorToolButton = (props: any) => {
     dispatchAIEditor({ type: 'setIsFeedbackModalOpen' });
   };
 
+  const isSelected = aiEditorState.selectedTool === props.label;
+
   return (
-    <button
+    <motion.button
       onClick={() => handleToolButtonClick(props.label)}
-      className="flex items-center space-x-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-sm font-semibold text-white/80 ring-1 ring-white/5 transition-all duration-200 ease-out hover:bg-white/20 hover:text-white hover:shadow-lg hover:ring-white/20 focus:ring-2 focus:ring-white/40 focus:ring-offset-2 focus:ring-offset-transparent focus:outline-none active:scale-95"
+      whileHover={{ scale: 1.05, y: -2 }}
+      whileTap={{ scale: 0.95 }}
+      className={`group relative flex items-center gap-1.5 overflow-hidden rounded-lg px-2.5 py-1.5 text-xs font-semibold backdrop-blur-xl transition-all duration-300 focus:ring-2 focus:ring-white/40 focus:outline-none sm:gap-2 sm:rounded-xl sm:px-3.5 sm:py-2 sm:text-sm ${
+        isSelected
+          ? 'bg-white/25 text-white shadow-lg ring-1 ring-white/40'
+          : 'bg-white/12 text-white/80 ring-1 ring-white/15 hover:bg-white/20 hover:text-white hover:ring-white/25'
+      }`}
       aria-label={t(`${props.label}Label`)}
       type="button"
     >
-      {props.label === 'Writer' && (
-        <Feather
-          size={16}
-          className="transition-transform group-hover:scale-110"
+      {/* Glass shine effect */}
+      <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/30 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+
+      {/* Icon with enhanced animations */}
+      <div className="relative z-10 transition-transform group-hover:scale-110 group-hover:rotate-6">
+        {props.label === 'Writer' && (
+          <Feather
+            size={14}
+            className="drop-shadow-lg sm:h-4 sm:w-4"
+          />
+        )}
+        {props.label === 'ContinueWriting' && (
+          <FastForward
+            size={14}
+            className="drop-shadow-lg sm:h-4 sm:w-4"
+          />
+        )}
+        {props.label === 'MakeLonger' && (
+          <FileStack
+            size={14}
+            className="drop-shadow-lg sm:h-4 sm:w-4"
+          />
+        )}
+        {props.label === 'GenerateQuiz' && (
+          <HelpCircle
+            size={14}
+            className="drop-shadow-lg sm:h-4 sm:w-4"
+          />
+        )}
+        {props.label === 'Translate' && (
+          <Languages
+            size={14}
+            className="drop-shadow-lg sm:h-4 sm:w-4"
+          />
+        )}
+        {props.label === 'Critisize' && (
+          <Lightbulb
+            size={14}
+            className="drop-shadow-lg sm:h-4 sm:w-4"
+          />
+        )}
+      </div>
+
+      <span className="relative z-10 hidden drop-shadow-sm sm:inline">{t(`${props.label}Label`)}</span>
+
+      {/* Bottom glow indicator for selected state */}
+      {isSelected && (
+        <motion.div
+          layoutId="activeToolIndicator"
+          className="absolute bottom-0 left-1/2 h-0.5 w-3/4 -translate-x-1/2 rounded-full bg-linear-to-r from-transparent via-white to-transparent"
+          transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
         />
       )}
-      {props.label === 'ContinueWriting' && (
-        <FastForward
-          size={16}
-          className="transition-transform group-hover:scale-110"
-        />
-      )}
-      {props.label === 'MakeLonger' && (
-        <FileStack
-          size={16}
-          className="transition-transform group-hover:scale-110"
-        />
-      )}
-      {props.label === 'GenerateQuiz' && (
-        <HelpCircle
-          size={16}
-          className="transition-transform group-hover:scale-110"
-        />
-      )}
-      {props.label === 'Translate' && (
-        <Languages
-          size={16}
-          className="transition-transform group-hover:scale-110"
-        />
-      )}
-      {props.label === 'Critisize' && (
-        <Lightbulb
-          size={16}
-          className="transition-transform group-hover:scale-110"
-        />
-      )}
-      <span>{t(`${props.label}Label`)}</span>
-    </button>
+    </motion.button>
   );
 };
 
@@ -628,154 +703,212 @@ const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => 
   // Get the last AI message if it exists
   // Use a more compatible approach instead of `findLast` for environments where it's unavailable
   const lastAiMessage = [...aiEditorState.messages].reverse().find((msg) => msg.sender === 'ai');
-  const hasAiResponse = lastAiMessage && !aiEditorState.isWaitingForResponse;
+  const hasAiResponse =
+    lastAiMessage && !aiEditorState.isWaitingForResponse && aiEditorState.selectedTool === 'Critisize';
 
   return (
     <div>
       {aiEditorState.selectedTool === 'Writer' && !aiEditorState.isWaitingForResponse && (
-        <div className="space-x-2 text-xl font-extrabold text-white/90">
-          <span>{t('writerPlaceholder')}</span>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col items-center justify-center space-y-2 text-center"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-white/30 to-white/15 shadow-xl ring-1 ring-white/30 backdrop-blur-sm sm:h-14 sm:w-14 sm:rounded-2xl">
+            <Feather
+              size={24}
+              className="text-white drop-shadow-lg sm:h-7 sm:w-7"
+            />
+          </div>
+          <span className="text-base font-bold text-white drop-shadow-sm sm:text-lg">{t('writerPlaceholder')}</span>
+          <span className="text-xs text-white/60">{t('typePromptBelow')}</span>
+        </motion.div>
       )}
       {aiEditorState.selectedTool === 'ContinueWriting' && !aiEditorState.isWaitingForResponse && (
-        <div className="mx-auto flex flex-col items-center justify-center align-middle">
-          <p className="mx-auto mt-4 flex justify-center p-2 align-middle text-sm font-bold text-white/80">
-            {t('continuePlaceholder')}
-          </p>
-          <button
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mx-auto flex flex-col items-center justify-center space-y-3 sm:space-y-4"
+        >
+          <p className="text-center text-sm font-semibold text-white drop-shadow-sm">{t('continuePlaceholder')}</p>
+          <motion.button
             onClick={() => {
               handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue);
             }}
-            className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-xl bg-white/10 p-4 text-2xl font-semibold text-white/80 ring-1 ring-white/10 transition-all duration-200 hover:bg-white/20 hover:text-white hover:shadow-lg hover:ring-white/20 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95"
+            whileHover={{ scale: 1.1, rotate: 3 }}
+            whileTap={{ scale: 0.95 }}
+            className="group relative flex h-14 w-14 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-white/30 to-white/15 shadow-2xl ring-1 ring-white/30 backdrop-blur-sm transition-all duration-300 hover:shadow-purple-500/30 focus:ring-2 focus:ring-white/50 focus:outline-none sm:h-16 sm:w-16 sm:rounded-2xl"
             aria-label={t('continuePlaceholder')}
             type="button"
           >
+            <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-purple-400/30 to-blue-400/30 opacity-0 transition-opacity group-hover:opacity-100" />
             <FastForward
               size={24}
-              className="transition-transform hover:translate-x-0.5"
+              className="relative z-10 text-white drop-shadow-lg transition-transform group-hover:translate-x-1 sm:h-7 sm:w-7"
             />
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       )}
       {aiEditorState.selectedTool === 'MakeLonger' && !aiEditorState.isWaitingForResponse && (
-        <div className="mx-auto flex flex-col items-center justify-center align-middle">
-          <p className="mx-auto mt-4 flex justify-center p-2 align-middle text-sm font-bold text-white/80">
-            {t('longerPlaceholder')}
-          </p>
-          <button
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mx-auto flex flex-col items-center justify-center space-y-3 sm:space-y-4"
+        >
+          <p className="text-center text-sm font-semibold text-white drop-shadow-sm">{t('longerPlaceholder')}</p>
+          <motion.button
             onClick={() => {
               handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue);
             }}
-            className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-xl bg-white/10 p-4 text-2xl font-semibold text-white/80 ring-1 ring-white/10 transition-all duration-200 hover:bg-white/20 hover:text-white hover:shadow-lg hover:ring-white/20 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95"
+            whileHover={{ scale: 1.1, y: -4 }}
+            whileTap={{ scale: 0.95 }}
+            className="group relative flex h-14 w-14 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-white/30 to-white/15 shadow-2xl ring-1 ring-white/30 backdrop-blur-sm transition-all duration-300 hover:shadow-blue-500/30 focus:ring-2 focus:ring-white/50 focus:outline-none sm:h-16 sm:w-16 sm:rounded-2xl"
             aria-label={t('longerPlaceholder')}
             type="button"
           >
+            <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-blue-400/30 to-cyan-400/30 opacity-0 transition-opacity group-hover:opacity-100" />
             <FileStack
               size={24}
-              className="transition-transform hover:scale-110"
+              className="relative z-10 text-white drop-shadow-lg transition-transform group-hover:scale-110 sm:h-7 sm:w-7"
             />
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       )}
       {aiEditorState.selectedTool === 'Critisize' && !aiEditorState.isWaitingForResponse && (
-        <div className="mx-auto flex flex-col items-center justify-center pt-2 align-middle">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mx-auto flex w-full flex-col items-center justify-center space-y-3"
+        >
           {hasAiResponse ? (
-            <div className="max-h-[140px] w-full overflow-y-auto rounded-lg bg-white/5 p-4">
-              <div className="text-sm whitespace-pre-wrap text-white/90">{lastAiMessage.message}</div>
-            </div>
+            <ScrollArea className="h-[140px] w-full rounded-xl border border-white/20 bg-white/10 shadow-inner backdrop-blur-sm">
+              <div className="p-3 text-sm leading-relaxed whitespace-pre-wrap text-white sm:p-4">
+                {lastAiMessage.message}
+              </div>
+            </ScrollArea>
           ) : (
             <>
-              <p className="mx-auto mt-4 flex justify-center p-2 align-middle text-sm font-bold text-white/80">
-                {t('critisizePlaceholder')}
-              </p>
-              <div className="mt-3 flex flex-col items-center space-y-2 text-xs text-white/70">
-                <span className="font-semibold text-white/80">{t('critisizeScopeLabel')}</span>
+              <p className="text-center text-sm font-semibold text-white drop-shadow-sm">{t('critisizePlaceholder')}</p>
+              <div className="flex flex-col items-center space-y-2 sm:space-y-3">
+                <span className="text-xs font-medium text-white/70">{t('critisizeScopeLabel')}</span>
                 <div className="flex gap-2">
-                  <button
+                  <motion.button
                     type="button"
                     onClick={() => dispatchAIEditor({ type: 'setCritisizeScope', payload: 'selection' })}
-                    className={`rounded-lg px-4 py-2 text-sm font-semibold ring-1 transition-all duration-200 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95 ${
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`relative overflow-hidden rounded-lg px-3 py-1.5 text-xs font-semibold backdrop-blur-sm transition-all duration-300 focus:ring-2 focus:ring-white/40 focus:outline-none sm:rounded-xl sm:px-4 sm:py-2 sm:text-sm ${
                       aiEditorState.critisizeScope === 'selection'
-                        ? 'bg-white/20 text-white shadow-md ring-white/20'
-                        : 'bg-white/5 text-white/60 ring-white/10 hover:bg-white/10 hover:text-white/80'
+                        ? 'bg-white/30 text-white shadow-lg ring-1 ring-white/40'
+                        : 'bg-white/10 text-white/70 ring-1 ring-white/15 hover:bg-white/20 hover:text-white'
                     }`}
                     aria-pressed={aiEditorState.critisizeScope === 'selection'}
                   >
-                    {t('critisizeScopeSelection')}
-                  </button>
-                  <button
+                    {aiEditorState.critisizeScope === 'selection' && (
+                      <motion.div
+                        layoutId="critisizeScope"
+                        className="absolute inset-0 bg-linear-to-br from-white/20 to-transparent"
+                        transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                      />
+                    )}
+                    <span className="relative z-10">{t('critisizeScopeSelection')}</span>
+                  </motion.button>
+                  <motion.button
                     type="button"
                     onClick={() => dispatchAIEditor({ type: 'setCritisizeScope', payload: 'lecture' })}
-                    className={`rounded-lg px-4 py-2 text-sm font-semibold ring-1 transition-all duration-200 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95 ${
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`relative overflow-hidden rounded-lg px-3 py-1.5 text-xs font-semibold backdrop-blur-sm transition-all duration-300 focus:ring-2 focus:ring-white/40 focus:outline-none sm:rounded-xl sm:px-4 sm:py-2 sm:text-sm ${
                       aiEditorState.critisizeScope === 'lecture'
-                        ? 'bg-white/20 text-white shadow-md ring-white/20'
-                        : 'bg-white/5 text-white/60 ring-white/10 hover:bg-white/10 hover:text-white/80'
+                        ? 'bg-white/30 text-white shadow-lg ring-1 ring-white/40'
+                        : 'bg-white/10 text-white/70 ring-1 ring-white/15 hover:bg-white/20 hover:text-white'
                     }`}
                     aria-pressed={aiEditorState.critisizeScope === 'lecture'}
                   >
-                    {t('critisizeScopeLecture')}
-                  </button>
+                    {aiEditorState.critisizeScope === 'lecture' && (
+                      <motion.div
+                        layoutId="critisizeScope"
+                        className="absolute inset-0 bg-linear-to-br from-white/20 to-transparent"
+                        transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                      />
+                    )}
+                    <span className="relative z-10">{t('critisizeScopeLecture')}</span>
+                  </motion.button>
                 </div>
               </div>
-              <button
+              <motion.button
                 onClick={() => {
                   handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue);
                 }}
-                className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-xl bg-white/10 p-4 text-2xl font-semibold text-white/80 ring-1 ring-white/10 transition-all duration-200 hover:bg-white/20 hover:text-white hover:shadow-lg hover:ring-white/20 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95"
+                whileHover={{ scale: 1.1, rotate: 12 }}
+                whileTap={{ scale: 0.95 }}
+                className="group relative mt-3 flex h-14 w-14 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-white/30 to-white/15 shadow-2xl ring-1 ring-white/30 backdrop-blur-sm transition-all duration-300 hover:shadow-amber-500/30 focus:ring-2 focus:ring-white/50 focus:outline-none sm:mt-4 sm:h-16 sm:w-16 sm:rounded-2xl"
                 aria-label={t('critisizePlaceholder')}
                 type="button"
               >
+                <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-amber-400/30 to-orange-400/30 opacity-0 transition-opacity group-hover:opacity-100" />
                 <Lightbulb
                   size={24}
-                  className="transition-transform hover:rotate-12"
+                  className="relative z-10 text-white drop-shadow-lg transition-transform sm:h-7 sm:w-7"
                 />
-              </button>
+              </motion.button>
             </>
           )}
-        </div>
+        </motion.div>
       )}
       {aiEditorState.selectedTool === 'Translate' && !aiEditorState.isWaitingForResponse && (
-        <div className="mx-auto flex flex-col items-center justify-center align-middle">
-          <div className="mx-auto mt-4 flex justify-center space-x-6 p-2 align-middle text-sm font-bold text-white/80">
-            <p>{t('translatePlaceholder')}</p>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mx-auto flex w-full flex-col items-center justify-center space-y-3 sm:space-y-4"
+        >
+          <div className="flex w-full flex-col items-center gap-2 sm:gap-3">
+            <p className="text-center text-sm font-semibold text-white drop-shadow-sm">{t('translatePlaceholder')}</p>
             <input
               value={aiEditorState.chatInputValue}
               onChange={handleChange}
               placeholder={t('translateExample')}
-              className="w-full rounded-lg bg-gray-950/20 px-4 py-2 text-sm text-white ring-1 ring-white/20 outline-hidden ring-inset placeholder:text-white/30"
+              className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white shadow-inner backdrop-blur-sm transition-all placeholder:text-white/50 hover:border-white/30 hover:bg-white/15 focus:border-white/40 focus:bg-white/15 focus:ring-2 focus:ring-white/30 focus:outline-none sm:rounded-xl sm:px-4 sm:py-2.5"
             />
           </div>
-          <button
+          <motion.button
             onClick={() => {
               handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue);
             }}
-            className="mt-4 flex cursor-pointer items-center space-x-1.5 rounded-xl bg-white/10 p-4 text-2xl font-semibold text-white/80 ring-1 ring-white/10 transition-all duration-200 hover:bg-white/20 hover:text-white hover:shadow-lg hover:ring-white/20 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            className="group relative flex h-14 w-14 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-white/30 to-white/15 shadow-2xl ring-1 ring-white/30 backdrop-blur-sm transition-all duration-300 hover:shadow-green-500/30 focus:ring-2 focus:ring-white/50 focus:outline-none sm:h-16 sm:w-16 sm:rounded-2xl"
             aria-label={t('translatePlaceholder')}
             type="button"
           >
+            <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-green-400/30 to-emerald-400/30 opacity-0 transition-opacity group-hover:opacity-100" />
             <Languages
               size={24}
-              className="transition-transform hover:scale-110"
+              className="relative z-10 text-white drop-shadow-lg transition-transform group-hover:scale-110 sm:h-7 sm:w-7"
             />
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       )}
       {aiEditorState.isWaitingForResponse && !aiEditorState.error.isError ? (
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="mx-auto flex flex-col items-center justify-center gap-4 align-middle"
+          className="mx-auto flex flex-col items-center justify-center gap-5"
         >
           <div className="relative">
+            {/* Outer glow ring */}
+            <div className="absolute inset-0 animate-ping rounded-full bg-purple-400/30 blur-xl" />
+
+            {/* Spinner */}
             <svg
-              className="h-12 w-12 animate-spin text-white/80"
+              className="relative h-14 w-14 animate-spin text-white/90 drop-shadow-xl"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
               <circle
-                className="opacity-25"
+                className="opacity-20"
                 cx="12"
                 cy="12"
                 r="10"
@@ -783,15 +916,24 @@ const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => 
                 strokeWidth="3"
               />
               <path
-                className="opacity-75"
+                className="opacity-90"
                 fill="currentColor"
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               />
             </svg>
-            <div className="absolute inset-0 animate-pulse rounded-full bg-white/5 blur-xl" />
+
+            {/* Inner glow */}
+            <div className="absolute inset-2 animate-pulse rounded-full bg-linear-to-tr from-purple-400/20 to-blue-400/20 blur-md" />
           </div>
-          <div className="flex flex-col items-center gap-1">
-            <p className="font-bold text-white/90">{t('thinking')}</p>
+
+          <div className="flex flex-col items-center gap-1.5">
+            <motion.p
+              animate={{ opacity: [0.7, 1, 0.7] }}
+              transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+              className="font-bold text-white/90 drop-shadow-sm"
+            >
+              {t('thinking')}
+            </motion.p>
             <p className="text-xs text-white/50">{t('processingRequest')}</p>
           </div>
         </motion.div>
@@ -799,33 +941,46 @@ const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => 
 
       {aiEditorState.error.isError ? (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex h-auto items-center pt-4"
+          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          className="flex h-auto items-center"
         >
-          <div className="mx-auto flex w-full flex-col space-y-3 rounded-xl bg-red-500/15 p-5 ring-1 ring-red-500/30 backdrop-blur-sm">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-3">
-                <AlertTriangle
-                  size={22}
-                  className="mt-0.5 flex-shrink-0 text-red-400"
-                  aria-hidden="true"
-                />
+          <div className="relative mx-auto flex w-full flex-col space-y-2 overflow-hidden rounded-xl border border-red-500/40 bg-red-500/20 p-4 shadow-xl backdrop-blur-xl sm:space-y-3 sm:rounded-2xl sm:p-5">
+            {/* Glass effect overlay */}
+            <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-red-400/20 to-transparent" />
+
+            <div className="relative flex items-start justify-between gap-2">
+              <div className="flex items-start gap-2 sm:gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-500/30 ring-1 ring-red-500/40 sm:h-9 sm:w-9 sm:rounded-xl">
+                  <AlertTriangle
+                    size={18}
+                    className="text-red-200 sm:h-5 sm:w-5"
+                    aria-hidden="true"
+                  />
+                </div>
                 <div className="flex flex-col gap-1">
-                  <h3 className="font-semibold text-red-200">{t('errorTitle')}</h3>
-                  <span className="text-sm leading-relaxed text-red-100/90">{aiEditorState.error.error_message}</span>
+                  <h3 className="text-sm font-bold text-red-100 sm:text-base">{t('errorTitle')}</h3>
+                  <span className="text-xs leading-relaxed text-red-50/90 sm:text-sm">
+                    {aiEditorState.error.error_message}
+                  </span>
                 </div>
               </div>
-              <button
+              <motion.button
                 onClick={() =>
                   dispatchAIEditor({ type: 'setError', payload: { isError: false, status: 0, error_message: '' } })
                 }
-                className="flex-shrink-0 rounded-md p-1 text-red-300/70 transition-colors hover:bg-red-500/20 hover:text-red-200 focus:ring-2 focus:ring-red-400/50 focus:outline-none"
-                aria-label="Dismiss error"
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-red-500/30 text-red-200 transition-colors hover:bg-red-500/40 hover:text-red-100 focus:ring-2 focus:ring-red-300/50 focus:outline-none sm:h-8 sm:w-8"
+                aria-label={t('dismissError')}
                 type="button"
               >
-                <X size={18} />
-              </button>
+                <X
+                  size={14}
+                  className="sm:h-4 sm:w-4"
+                />
+              </motion.button>
             </div>
           </div>
         </motion.div>
