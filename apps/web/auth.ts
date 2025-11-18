@@ -447,7 +447,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     async signIn({ user, account, profile, isNewUser }) {
       // Log successful sign-ins for monitoring
-      console.log(`User signed in: ${user.email} via ${account?.provider}`);
+      const userWithTokens = user as unknown as UserWithTokens;
+      console.log(`User signed in: ${userWithTokens.email} via ${account?.provider}`);
     },
   },
 });
