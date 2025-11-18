@@ -58,16 +58,29 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
   // Submit File Upload
   const submitFileActivity = async (file: any, type: any, activity: any, chapterId: number) => {
     const toast_loading = toast.loading(tNotify('uploadingAndCreating'));
-    await createFileActivity(file, type, activity, chapterId, access_token);
-    mutate(
-      `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
-    );
-    setNewActivityModal(false);
-    toast.dismiss(toast_loading);
-    toast.success(tNotify('fileUploadSuccess'));
-    toast.success(tNotify('activityCreatedSuccess'));
-    await revalidateTags(['courses'], props.orgslug);
-    router.refresh();
+
+    try {
+      await createFileActivity(file, type, activity, chapterId, access_token, (progress) => {
+        // Update toast with progress
+        toast.loading(`${tNotify('uploadingAndCreating')} ${progress.percentage}%`, {
+          id: toast_loading,
+        });
+      });
+
+      mutate(
+        `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+      );
+      setNewActivityModal(false);
+      toast.dismiss(toast_loading);
+      toast.success(tNotify('fileUploadSuccess'));
+      toast.success(tNotify('activityCreatedSuccess'));
+      await revalidateTags(['courses'], props.orgslug);
+      router.refresh();
+    } catch (error) {
+      toast.dismiss(toast_loading);
+      toast.error(tNotify('uploadFailed'));
+      console.error('File upload error:', error);
+    }
   };
 
   // Submit YouTube Video Upload

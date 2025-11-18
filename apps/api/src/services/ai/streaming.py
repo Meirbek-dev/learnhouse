@@ -120,7 +120,9 @@ async def ask_ai_stream(
 
         try:
             # Process with streaming and timeout using asyncio.timeout
-            async with asyncio.timeout(60.0):  # Increased timeout for complex operations (agent has 45s max_execution_time)
+            async with asyncio.timeout(
+                60.0
+            ):  # Increased timeout for complex operations (agent has 45s max_execution_time)
                 async for event in agent_with_history.astream_events(
                     {"input": question.strip()},
                     config={
@@ -225,7 +227,9 @@ async def ask_ai_stream(
                         output_data = event.get("data", {}).get("output", {})
 
                         # Log the actual output structure for debugging
-                        logger.debug(f"Chain end output_data type: {type(output_data)}, value: {str(output_data)[:200]}")
+                        logger.debug(
+                            f"Chain end output_data type: {type(output_data)}, value: {str(output_data)[:200]}"
+                        )
 
                         # Extract the actual text output in a tolerant way
                         output_text = ""
@@ -242,10 +246,10 @@ async def ask_ai_stream(
                         elif isinstance(output_data, list) and output_data:
                             # Handle list of messages - extract content from last message
                             last_item = output_data[-1]
-                            if hasattr(last_item, 'content'):
+                            if hasattr(last_item, "content"):
                                 output_text = last_item.content
                             elif isinstance(last_item, dict):
-                                output_text = last_item.get('content', '')
+                                output_text = last_item.get("content", "")
 
                         # Only use this fallback if:
                         # 1. We haven't streamed anything yet
@@ -272,7 +276,9 @@ async def ask_ai_stream(
 
             # If we didn't get any chunks, it means the agent stopped without generating output
             if chunk_count == 0:
-                logger.error("Agent completed but produced no output - likely hit max_iterations without generating answer")
+                logger.error(
+                    "Agent completed but produced no output - likely hit max_iterations without generating answer"
+                )
                 error_msg = "AI assistant couldn't generate a response. The query may be too complex or the context too large. Please try with a shorter text or simpler question."
                 yield format_sse_message(
                     {"type": "error", "error": error_msg, "error_code": "NO_OUTPUT"}

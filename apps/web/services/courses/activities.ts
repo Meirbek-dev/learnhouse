@@ -1,8 +1,4 @@
-import {
-  RequestBodyFormWithAuthHeader,
-  RequestBodyWithAuthHeader,
-  getResponseMetadata,
-} from '@services/utils/ts/requests';
+import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 
 export async function createActivity(data: any, chapter_id: number, org_id: number, access_token: string) {
@@ -22,6 +18,7 @@ export async function createFileActivity(
   data: any,
   chapter_id: number,
   access_token: string,
+  onProgress?: (progress: { percentage: number }) => void,
 ) {
   // Send file thumbnail as form data
   const formData = new FormData();
@@ -66,8 +63,46 @@ export async function createFileActivity(
     formData.append('name', data.name);
     endpoint = `${getAPIUrl()}activities/documentpdf`;
   }
-  const result = await fetch(endpoint, RequestBodyFormWithAuthHeader('POST', formData, null, access_token));
-  return result.json();
+
+  // Use XMLHttpRequest for progress tracking
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+
+    // Track upload progress
+    if (onProgress) {
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable) {
+          const percentage = Math.round((e.loaded / e.total) * 100);
+          onProgress({ percentage });
+        }
+      });
+    }
+
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const response = JSON.parse(xhr.responseText);
+          resolve(response);
+        } catch (error) {
+          reject(new Error('Invalid JSON response'));
+        }
+      } else {
+        reject(new Error(`Upload failed with status ${xhr.status}`));
+      }
+    });
+
+    xhr.addEventListener('error', () => {
+      reject(new Error('Network error during upload'));
+    });
+
+    xhr.addEventListener('abort', () => {
+      reject(new Error('Upload cancelled'));
+    });
+
+    xhr.open('POST', endpoint);
+    xhr.setRequestHeader('Authorization', `Bearer ${access_token}`);
+    xhr.send(formData);
+  });
 }
 
 export async function createExternalVideoActivity(data: any, activity: any, chapter_id: number, access_token: string) {

@@ -220,9 +220,7 @@ class FastAIService:
             logger.debug(f"Vector store cache stats: {cache_stats}")
             return cached_store
 
-        logger.info(
-            f"✗ Cache MISS for vector store: {cache_key[:50]}..., creating new"
-        )
+        logger.info(f"✗ Cache MISS for vector store: {cache_key[:50]}..., creating new")
         # Log cache statistics for monitoring
         cache_stats = self.cache_manager.vector_store_cache.get_stats()
         logger.debug(f"Vector store cache stats: {cache_stats}")
@@ -369,7 +367,9 @@ class FastAIService:
             # Create highly optimized retriever with minimal results
             retriever = vector_store.as_retriever(
                 search_type="similarity",
-                search_kwargs={"k": 3},  # Get top 3 results for better context in complex queries
+                search_kwargs={
+                    "k": 3
+                },  # Get top 3 results for better context in complex queries
             )
 
             retriever_tool = create_retriever_tool(

@@ -33,6 +33,7 @@ from src.routers.courses import (
 from src.routers.courses.activities import activities, blocks
 from src.routers.ee import cloud_internal, payments
 from src.routers.install import install
+from src.routers.uploads import chunked_upload
 from src.routers.utils import router as utils_router
 from src.services.dev.dev import isDevModeEnabledOrRaise
 from src.services.install.install import isInstallModeEnabled
@@ -48,6 +49,7 @@ v1_router.include_router(roles.router, prefix="/roles", tags=["roles"])
 v1_router.include_router(search.router, prefix="/search", tags=["search"])
 v1_router.include_router(health.router, prefix="/health", tags=["health"])
 v1_router.include_router(utils_router, prefix="/utils", tags=["utils"])
+v1_router.include_router(chunked_upload.router, prefix="/uploads", tags=["uploads"])
 
 # Learning domain
 v1_router.include_router(blocks.router, prefix="/blocks", tags=["blocks"])

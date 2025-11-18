@@ -72,7 +72,9 @@ async def _get_activity_data(
         if not course:
             error_msg = f"Course {activity.course_id} not found"
             logger.warning(error_msg)
-            raise ActivityNotFoundError(activity_uuid, details={"course_not_found": True})
+            raise ActivityNotFoundError(
+                activity_uuid, details={"course_not_found": True}
+            )
 
         # Fetch org_config
         def get_org_config():
@@ -124,7 +126,9 @@ async def ai_start_activity_chat_session(
         activity, course, org_config = await _get_activity_data(
             chat_session_object.activity_uuid, db_session
         )
-        logger.debug(f"Data fetch took {(time.perf_counter() - data_fetch_start) * 1000:.1f}ms")
+        logger.debug(
+            f"Data fetch took {(time.perf_counter() - data_fetch_start) * 1000:.1f}ms"
+        )
 
         # Check if AI feature is enabled
         ai_enabled = (
@@ -144,7 +148,9 @@ async def ai_start_activity_chat_session(
         structured, chat_session = await asyncio.gather(
             content_task, chat_session_task, return_exceptions=False
         )
-        logger.debug(f"Content processing took {(time.perf_counter() - content_process_start) * 1000:.1f}ms")
+        logger.debug(
+            f"Content processing took {(time.perf_counter() - content_process_start) * 1000:.1f}ms"
+        )
 
         # Generate AI-friendly text
         isEmpty = not structured
