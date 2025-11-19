@@ -4,8 +4,8 @@
   "private": true,
   "pnpm": {
     "overrides": {
-      "@types/react": "19.2.2",
-      "@types/react-dom": "19.2.2"
+      "@types/react": "19.2.6",
+      "@types/react-dom": "19.2.3"
     }
   },
   "scripts": {
