@@ -848,15 +848,13 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
 
   // Debug: Log org data when component mounts or org changes
   useEffect(() => {
-    console.log('VideoModal - Organization data:', {
+    console.log('VideoModal - Context data:', {
       org,
       hasOrg: !!org,
       orgUuid: org?.org_uuid,
       orgId: org?.id,
-      course: {
-        id: course?.id,
-        uuid: course?.course_uuid,
-      },
+      courseProp: course,
+      courseData: course?.courseStructure || course,
     });
   }, [org, course]);
 
@@ -948,6 +946,15 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
       return;
     }
 
+    // Handle course data structure (it might be the context object or the course object directly)
+    const courseData = course?.courseStructure || course;
+
+    if (!courseData || !courseData.course_uuid) {
+      console.error('Course data missing:', course);
+      toast.error('Course data is missing. Please refresh the page.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -962,8 +969,8 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
             activity_sub_type: 'SUBTYPE_VIDEO_HOSTED',
             published_version: 1,
             version: 1,
-            course_id: course.id,
-            course_uuid: course.course_uuid,
+            course_id: courseData.id,
+            course_uuid: courseData.course_uuid,
             org_id: org.id,
             org_uuid: org.org_uuid,
             details: videoDetails,
