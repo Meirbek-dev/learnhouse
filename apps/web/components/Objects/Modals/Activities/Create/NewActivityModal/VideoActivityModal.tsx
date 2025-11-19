@@ -34,6 +34,7 @@ import { Input } from '@components/ui/input';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
+import { useOrg } from '@components/Contexts/OrgContext';
 
 const SUPPORTED_VIDEO_FILES = constructAcceptValue(['mp4', 'mkv', 'webm']);
 const SUPPORTED_SUBTITLE_FILES = constructAcceptValue(['srt', 'vtt']);
@@ -830,6 +831,7 @@ const VideoSettingsForm = ({
 
 const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course }: any) => {
   const t = useTranslations('Components.VideoModal');
+  const org = useOrg() as any;
   const [video, setVideo] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState('');
@@ -940,6 +942,9 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
             published_version: 1,
             version: 1,
             course_id: course.id,
+            course_uuid: course.course_uuid,
+            org_id: org?.id,
+            org_uuid: org?.org_uuid,
             details: videoDetails,
           },
           chapterId,

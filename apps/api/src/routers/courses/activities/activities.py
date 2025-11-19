@@ -122,12 +122,14 @@ async def api_create_video_activity(
     chapter_id: Annotated[str, Form()],
     details: Annotated[str, Form()] = "{}",
     video_file: UploadFile | None = None,
+    video_uploaded_path: Annotated[str | None, Form()] = None,
     subtitle_files: list[UploadFile] | None = None,
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db_session=Depends(get_db_session),
 ) -> ActivityRead:
     """
-    Create new activity with optional subtitle files
+    Create new activity with optional subtitle files.
+    Can accept either video_file for direct upload or video_uploaded_path for pre-uploaded chunked files.
     """
     if subtitle_files is None:
         subtitle_files = []
@@ -140,6 +142,7 @@ async def api_create_video_activity(
         video_file,
         details,
         subtitle_files,
+        video_uploaded_path,
     )
 
 

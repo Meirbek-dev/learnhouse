@@ -7,8 +7,8 @@
 
 import { getAPIUrl } from '@services/config/config';
 
-// Default chunk size: 5MB (adjust based on your nginx config)
-const DEFAULT_CHUNK_SIZE = 5 * 1024 * 1024;
+// Default chunk size: 2MB (small enough to bypass most nginx configs)
+const DEFAULT_CHUNK_SIZE = 2 * 1024 * 1024;
 
 export interface ChunkedUploadOptions {
   file: File;
@@ -220,9 +220,9 @@ export async function cancelUpload(uploadId: string, accessToken: string): Promi
 
 /**
  * Determine if a file should use chunked upload
- * Files larger than 10MB should use chunked upload
+ * Files larger than 5MB should use chunked upload to avoid nginx 413 errors
  */
 export function shouldUseChunkedUpload(fileSize: number): boolean {
-  const THRESHOLD = 10 * 1024 * 1024; // 10MB
+  const THRESHOLD = 5 * 1024 * 1024; // 5MB
   return fileSize > THRESHOLD;
 }

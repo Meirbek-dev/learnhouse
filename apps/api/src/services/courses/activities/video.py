@@ -78,6 +78,7 @@ async def create_video_activity(
     video_file: UploadFile | None = None,
     details: str = "{}",
     subtitle_files: list[UploadFile] | None = None,
+    video_uploaded_path: str | None = None,
 ):
     # get chapter_id
     statement = select(Chapter).where(Chapter.id == chapter_id)
@@ -118,8 +119,17 @@ async def create_video_activity(
     # generate activity_uuid
     activity_uuid = f"activity_{ULID()}"
 
-    # Validate video file and get format
-    video_format = validate_video_file(video_file)
+    # Validate video file and get format (if direct upload)
+    if video_file:
+        video_format = validate_video_file(video_file)
+    elif video_uploaded_path:
+        # Extract format from pre-uploaded path
+        video_format = video_uploaded_path.split(".")[-1]
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Either video_file or video_uploaded_path must be provided",
+        )
 
     activity_object = Activity(
         name=name,
@@ -145,13 +155,31 @@ async def create_video_activity(
 
     # upload video
     if video_file and organization and course:
-        # get videofile format
+        # Direct upload: get videofile format and upload
         await upload_video(
             video_file,
             activity.activity_uuid,
             organization.org_uuid,
             course.course_uuid,
         )
+    elif video_uploaded_path and organization and course:
+        # Pre-uploaded via chunked upload: move from temp location to final location
+        import shutil
+        from pathlib import Path
+        
+        # Parse the temp path
+        temp_path = Path(f"content/orgs/{organization.org_uuid}/{video_uploaded_path}")
+        final_path = Path(f"content/orgs/{organization.org_uuid}/courses/{course.course_uuid}/activities/{activity.activity_uuid}/video/video.{video_format}")
+        
+        # Create target directory
+        final_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Move the file
+        if temp_path.exists():
+            shutil.move(str(temp_path), str(final_path))
+            # Clean up temp directory
+            if temp_path.parent.exists():
+                shutil.rmtree(temp_path.parent, ignore_errors=True)
 
     # Process and upload subtitle files
     if subtitle_files:
