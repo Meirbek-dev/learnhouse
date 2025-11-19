@@ -24,7 +24,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import type { ChangeEvent, ComponentType, DragEvent, FormEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { constructAcceptValue } from '@/lib/constants';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Separator } from '@components/ui/separator';
 import { Checkbox } from '@components/ui/checkbox';
 import { Button } from '@components/ui/button';
@@ -846,6 +846,20 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
+  // Debug: Log org data when component mounts or org changes
+  useEffect(() => {
+    console.log('VideoModal - Organization data:', {
+      org,
+      hasOrg: !!org,
+      orgUuid: org?.org_uuid,
+      orgId: org?.id,
+      course: {
+        id: course?.id,
+        uuid: course?.course_uuid,
+      },
+    });
+  }, [org, course]);
+
   const isYouTubeUrlValid = useMemo(() => {
     if (!youtubeUrl) return false;
     const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
@@ -927,6 +941,13 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
       return;
     }
 
+    // Validate org data is available
+    if (!org || !org.org_uuid || !org.id) {
+      console.error('Organization data not available:', org);
+      toast.error('Organization data is not loaded. Please refresh the page.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -943,8 +964,8 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
             version: 1,
             course_id: course.id,
             course_uuid: course.course_uuid,
-            org_id: org?.id,
-            org_uuid: org?.org_uuid,
+            org_id: org.id,
+            org_uuid: org.org_uuid,
             details: videoDetails,
           },
           chapterId,
