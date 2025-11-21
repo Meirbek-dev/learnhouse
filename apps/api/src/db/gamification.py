@@ -229,14 +229,6 @@ class TransactionRead(PydanticStrictBaseModel):
     created_at: datetime
 
 
-class DashboardRead(PydanticStrictBaseModel):
-    """Dashboard data combining profile and recent transactions."""
-
-    profile: ProfileRead
-    recent_transactions: list[TransactionRead]
-    user_rank: int | None = None
-
-
 class LeaderboardEntryRead(PydanticStrictBaseModel):
     """Single leaderboard entry.
 
@@ -260,6 +252,15 @@ class LeaderboardRead(PydanticStrictBaseModel):
     org_id: int
     entries: list[LeaderboardEntryRead]
     total_participants: int
+
+
+class DashboardRead(PydanticStrictBaseModel):
+    """Dashboard data combining profile, transactions, and leaderboard snapshot."""
+
+    profile: ProfileRead
+    recent_transactions: list[TransactionRead]
+    user_rank: int | None = None
+    leaderboard: LeaderboardRead | None = None
 
 
 class StreakUpdateRead(PydanticStrictBaseModel):

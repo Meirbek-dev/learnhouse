@@ -26,6 +26,7 @@ from sqlmodel import Session, and_, select
 from src.core.timezone import now as tz_now
 from src.db.gamification import (
     GamificationProfile,
+    LeaderboardRead,
     StreakType,
     XPSource,
     XPTransaction,
@@ -64,6 +65,57 @@ def _update_daily_tracking_with_policy(
     else:
         profile.daily_xp_earned = amount
     profile.last_xp_award_date = now
+
+
+def _fetch_count(db: Session, stmt) -> int:
+    """Reliable count(*) helper that works across SQL backends."""
+    try:
+        value = db.scalar(stmt)
+    except Exception:
+        try:
+            result = db.exec(stmt)
+        except Exception:
+            return 0
+        first = None
+        try:
+            first = result.one_or_none()
+        except Exception:
+            try:
+                first = result.first()
+            except Exception:
+                first = None
+        if first is None:
+            return 0
+        value = first[0] if isinstance(first, (tuple, list)) else first
+    if value is None:
+        return 0
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _count_users_with_more_xp(db: Session, org_id: int, xp: int) -> int:
+    stmt = (
+        select(func.count())
+        .select_from(GamificationProfile)
+        .where(
+            and_(
+                GamificationProfile.org_id == org_id,
+                GamificationProfile.total_xp > xp,
+            )
+        )
+    )
+    return _fetch_count(db, stmt)
+
+
+def _count_profiles(db: Session, org_id: int) -> int:
+    stmt = (
+        select(func.count())
+        .select_from(GamificationProfile)
+        .where(GamificationProfile.org_id == org_id)
+    )
+    return _fetch_count(db, stmt)
 
 
 def get_profile(db: Session, user_id: int, org_id: int) -> GamificationProfile:
@@ -135,7 +187,7 @@ def award_xp(
         db.add(tx)
         db.flush()
 
-        profile = get_profile(db, user_id, org_id)
+        profile = pre_profile
         if xp_source != XPSource.ADMIN_AWARD and _exceeds_daily_limit(
             profile, resolved_amount, daily_limit
         ):
@@ -277,36 +329,17 @@ def get_recent_transactions(
     return list(db.exec(stmt).all())
 
 
-def get_dashboard_data(db: Session, user_id: int, org_id: int) -> dict:
+def get_dashboard_data(
+    db: Session, user_id: int, org_id: int, *, include_leaderboard: bool = False
+) -> dict:
     profile = get_profile(db, user_id, org_id)
     transactions = get_recent_transactions(db, user_id, org_id, limit=10)
-    leaderboard = get_leaderboard(db, org_id, limit=10)
-
     user_xp = profile.total_xp
-    _res = db.exec(
-        select(func.count())
-        .select_from(GamificationProfile)
-        .where(
-            and_(
-                GamificationProfile.org_id == org_id,
-                GamificationProfile.total_xp > user_xp,
-            )
-        )
-    )
-    try:
-        higher_count = int(_res.scalar_one())
-    except Exception:
-        try:
-            _one = _res.one()
-            higher_count = int(_one if isinstance(_one, (int, float)) else _one[0])
-        except Exception:
-            _first = _res.first()
-            higher_count = int(
-                _first
-                if isinstance(_first, (int, float))
-                else (_first[0] if _first else 0)
-            )
+    higher_count = _count_users_with_more_xp(db, org_id, user_xp)
     user_rank = higher_count + 1 if profile else None
+    leaderboard: LeaderboardRead | None = None
+    if include_leaderboard:
+        leaderboard = get_leaderboard_read(db, org_id, limit=10, offset=0)
 
     return {
         "profile": profile,
@@ -351,25 +384,7 @@ def get_leaderboard_read(db: Session, org_id: int, limit: int = 10, offset: int 
     from src.db.users import User as DBUser
 
     profiles = get_leaderboard(db, org_id, limit=limit, offset=offset)
-    # total participants
-    _res = db.exec(
-        select(func.count())
-        .select_from(GamificationProfile)
-        .where(GamificationProfile.org_id == org_id)
-    )
-    try:
-        total = int(_res.scalar_one())
-    except Exception:
-        try:
-            _one = _res.one()
-            total = int(_one if isinstance(_one, (int, float)) else _one[0])
-        except Exception:
-            _first = _res.first()
-            total = int(
-                _first
-                if isinstance(_first, (int, float))
-                else (_first[0] if _first else 0)
-            )
+    total = _count_profiles(db, org_id)
 
     ids = [p.user_id for p in profiles]
     user_map: dict[int, DBUser] = {}
@@ -417,29 +432,7 @@ def get_user_rank(db: Session, user_id: int, org_id: int) -> int | None:
     profile = get_profile(db, user_id, org_id)
     if not profile:
         return None
-    _res = db.exec(
-        select(func.count())
-        .select_from(GamificationProfile)
-        .where(
-            and_(
-                GamificationProfile.org_id == org_id,
-                GamificationProfile.total_xp > profile.total_xp,
-            )
-        )
-    )
-    try:
-        higher_count = int(_res.scalar_one())
-    except Exception:
-        try:
-            _one = _res.one()
-            higher_count = int(_one if isinstance(_one, (int, float)) else _one[0])
-        except Exception:
-            _first = _res.first()
-            higher_count = int(
-                _first
-                if isinstance(_first, (int, float))
-                else (_first[0] if _first else 0)
-            )
+    higher_count = _count_users_with_more_xp(db, org_id, profile.total_xp)
     return higher_count + 1
 
 

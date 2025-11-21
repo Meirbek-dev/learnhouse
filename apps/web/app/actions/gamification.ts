@@ -4,7 +4,6 @@ import {
   awardXPOnServer,
   getServerGamificationDashboard,
   getServerOrganizationLeaderboard,
-  revalidateGamificationTags,
   updatePreferencesOnServer,
   updateStreakOnServer,
 } from '@/services/gamification/server';
@@ -24,18 +23,15 @@ export async function getLeaderboardAction(orgId: number, limit = 20): Promise<O
 
 export async function awardXPAction(orgId: number, payload: Record<string, any>): Promise<XPAwardResponse> {
   const result = await awardXPOnServer(orgId, payload);
-  await revalidateGamificationTags(orgId);
   return result as XPAwardResponse;
 }
 
 export async function updateStreakAction(orgId: number, type: 'login' | 'learning') {
   const result = await updateStreakOnServer(orgId, type);
-  await revalidateGamificationTags(orgId);
   return result;
 }
 
 export async function updatePreferencesAction(orgId: number, preferences: Record<string, any>) {
   const result = await updatePreferencesOnServer(orgId, preferences);
-  await revalidateGamificationTags(orgId);
   return result;
 }

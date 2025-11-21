@@ -46,7 +46,11 @@ export default async function GamificationDashboard({ orgId }: GamificationDashb
     return (
       <GamificationProvider
         orgId={orgId}
-        initialData={{ dashboard: dashboardData, profile: dashboardData.profile }}
+        initialData={{
+          dashboard: dashboardData,
+          profile: dashboardData.profile,
+          leaderboard: dashboardData.leaderboard ?? null,
+        }}
       >
         <div className="space-y-6">
           {/* Hero Section - Main Profile & Stats */}

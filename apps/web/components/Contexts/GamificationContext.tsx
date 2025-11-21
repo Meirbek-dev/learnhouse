@@ -86,7 +86,9 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
   // Server-provided data (updated via props)
   const [profile, setProfile] = useState<UserGamificationProfile | null>(initialData?.dashboard?.profile || null);
   const [dashboard, setDashboard] = useState<DashboardData | null>(initialData?.dashboard || null);
-  const [leaderboard, setLeaderboard] = useState<OrganizationLeaderboard | null>(initialData?.leaderboard || null);
+  const [leaderboard, setLeaderboard] = useState<OrganizationLeaderboard | null>(
+    initialData?.dashboard?.leaderboard ?? null,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<GamificationError | null>(null);
 
@@ -106,7 +108,9 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
   useEffect(() => {
     if (initialData?.dashboard?.profile) setProfile(initialData.dashboard.profile);
     if (initialData?.dashboard) setDashboard(initialData.dashboard);
-    if (initialData?.leaderboard) setLeaderboard(initialData.leaderboard);
+    if (initialData?.dashboard?.leaderboard) {
+      setLeaderboard(initialData.dashboard?.leaderboard ?? null);
+    }
   }, [initialData]);
 
   // Fetch initial data if not provided (with circuit breaker)

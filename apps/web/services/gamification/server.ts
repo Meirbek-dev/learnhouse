@@ -5,11 +5,115 @@ import { getAPIUrl } from '@/services/config/config';
 import { gamificationTags } from '@/lib/cacheTags';
 import { revalidateTag } from 'next/cache';
 import { auth } from '@/auth';
+import { extractStreakInfo } from '@/types/gamification/profile';
 
 interface GamificationFetchOptions {
   revalidate?: number | null;
   tags?: string[];
   cache?: RequestCache | null;
+}
+
+type RawDashboardResponse = {
+  profile?: Record<string, unknown>;
+  recent_transactions?: unknown[];
+  user_rank?: number | null;
+  leaderboard?: RawLeaderboardResponse | null;
+};
+
+type RawLeaderboardResponse = {
+  entries?: unknown[];
+  total_participants?: unknown;
+  last_updated?: unknown;
+};
+
+const nowISO = () => new Date().toISOString();
+
+const numberOr = (value: unknown, fallback = 0) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const stringOrNull = (value: unknown) => (typeof value === 'string' ? value : null);
+
+const recordOrEmpty = (value: unknown): Record<string, unknown> => {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  return {};
+};
+
+function normalizeProfile(payload: Record<string, unknown> | undefined): UserGamificationProfile | null {
+  if (!payload) return null;
+  const createdAt = stringOrNull(payload.created_at) ?? nowISO();
+  const updatedAt = stringOrNull(payload.updated_at) ?? createdAt;
+
+  const profile: UserGamificationProfile = {
+    id: payload.id !== undefined ? numberOr(payload.id) : undefined,
+    user_id: numberOr(payload.user_id),
+    org_id: numberOr(payload.org_id),
+    total_xp: Math.max(0, numberOr(payload.total_xp)),
+    level: Math.max(1, numberOr(payload.level, 1)),
+    login_streak: Math.max(0, numberOr(payload.login_streak)),
+    learning_streak: Math.max(0, numberOr(payload.learning_streak)),
+    longest_login_streak: Math.max(0, numberOr(payload.longest_login_streak)),
+    longest_learning_streak: Math.max(0, numberOr(payload.longest_learning_streak)),
+    total_activities_completed: Math.max(0, numberOr(payload.total_activities_completed)),
+    total_courses_completed: Math.max(0, numberOr(payload.total_courses_completed)),
+    daily_xp_earned: Math.max(0, numberOr(payload.daily_xp_earned)),
+    xp_to_next_level: payload.xp_to_next_level !== undefined ? numberOr(payload.xp_to_next_level) : undefined,
+    level_progress_percent:
+      payload.level_progress_percent !== undefined ? numberOr(payload.level_progress_percent) : undefined,
+    xp_in_current_level: payload.xp_in_current_level !== undefined ? numberOr(payload.xp_in_current_level) : undefined,
+    last_xp_award_date: stringOrNull(payload.last_xp_award_date),
+    last_login_date: stringOrNull(payload.last_login_date),
+    last_learning_date: stringOrNull(payload.last_learning_date),
+    created_at: createdAt,
+    updated_at: updatedAt,
+    preferences: recordOrEmpty(payload.preferences),
+  };
+
+  return profile;
+}
+
+function normalizeTransactions(transactions: unknown[] | undefined) {
+  const fallbackDate = nowISO();
+  return (Array.isArray(transactions) ? transactions : []).map((tx) => {
+    const transaction = tx as Record<string, unknown>;
+    return {
+      id: numberOr(transaction.id),
+      user_id: numberOr(transaction.user_id),
+      org_id: numberOr(transaction.org_id),
+      amount: numberOr(transaction.amount),
+      source: typeof transaction.source === 'string' ? transaction.source : 'unknown',
+      source_id: transaction.source_id ?? null,
+      triggered_level_up: Boolean(transaction.triggered_level_up),
+      previous_level: numberOr(transaction.previous_level),
+      created_at: stringOrNull(transaction.created_at) ?? fallbackDate,
+    };
+  });
+}
+
+function normalizeLeaderboard(payload?: RawLeaderboardResponse | null): OrganizationLeaderboard {
+  const fallbackDate = nowISO();
+  const entries = Array.isArray(payload?.entries) ? payload?.entries : [];
+  return {
+    entries: entries.map((entry, index) => {
+      const data = entry as Record<string, unknown>;
+      return {
+        user_id: numberOr(data.user_id),
+        total_xp: Math.max(0, numberOr(data.total_xp)),
+        level: Math.max(1, numberOr(data.level, 1)),
+        rank: Math.max(1, numberOr(data.rank, index + 1)),
+        username: typeof data.username === 'string' ? data.username : null,
+        first_name: 'first_name' in data ? (data.first_name as string | null) ?? null : null,
+        last_name: 'last_name' in data ? (data.last_name as string | null) ?? null : null,
+        avatar_url: 'avatar_url' in data ? (data.avatar_url as string | null) ?? null : null,
+        rank_change: typeof data.rank_change === 'number' ? data.rank_change : undefined,
+      };
+    }),
+    total_participants: Math.max(0, numberOr(payload?.total_participants)),
+    last_updated: stringOrNull(payload?.last_updated) ?? fallbackDate,
+  };
 }
 
 /**
@@ -74,7 +178,10 @@ function buildCacheOptions(
  * Fetch unified gamification data from API
  * Returns null if user is not authenticated or if fetch fails
  */
-async function getUnifiedServerData(orgId: number, opts?: GamificationFetchOptions) {
+async function getUnifiedServerData(
+  orgId: number,
+  opts?: GamificationFetchOptions,
+): Promise<RawDashboardResponse | null> {
   // Check if user is authenticated first
   const accessToken = await getAccessToken();
   if (!accessToken) {
@@ -126,33 +233,7 @@ export async function getServerGamificationProfile(
     return null;
   }
 
-  // Transform API response to frontend UserGamificationProfile type
-  const p = json?.profile ?? json;
-  const profile: UserGamificationProfile = {
-    id: Number(p.id) || 0,
-    user_id: Number(p.user_id) || 0,
-    org_id: Number(p.org_id) || 0,
-    total_xp: Number(p.total_xp) || 0,
-    level: Number(p.level) || 1,
-    login_streak: Number(p.login_streak) || 0,
-    learning_streak: Number(p.learning_streak) || 0,
-    longest_login_streak: Number(p.longest_login_streak) || 0,
-    longest_learning_streak: Number(p.longest_learning_streak) || 0,
-    total_activities_completed: Number(p.total_activities_completed) || 0,
-    total_courses_completed: Number(p.total_courses_completed) || 0,
-    daily_xp_earned: Number(p.daily_xp_earned) || 0,
-    xp_to_next_level: p.xp_to_next_level ?? undefined,
-    level_progress_percent: p.level_progress_percent ?? undefined,
-    xp_in_current_level: p.xp_in_current_level ?? undefined,
-    last_xp_award_date: p.last_xp_award_date ?? null,
-    last_login_date: p.last_login_date ?? null,
-    last_learning_date: p.last_learning_date ?? null,
-    created_at: p.created_at,
-    updated_at: p.updated_at,
-    preferences: p.preferences || {},
-  };
-
-  return profile;
+  return normalizeProfile((json.profile ?? json) as Record<string, unknown> | undefined);
 }
 
 export async function getServerGamificationDashboard(
@@ -166,64 +247,20 @@ export async function getServerGamificationDashboard(
     return null;
   }
 
-  // Transform backend DashboardRead (profile + recent_transactions)
-  const profile = json.profile ?? {};
+  const profile = normalizeProfile(json.profile as Record<string, unknown> | undefined);
+  if (!profile) {
+    return null;
+  }
+
+  const userRank =
+    json.user_rank === null || json.user_rank === undefined ? null : numberOr(json.user_rank);
+
   const dashboardData: DashboardData = {
-    profile: {
-      id: Number(profile.id) || 0,
-      user_id: Number(profile.user_id) || 0,
-      org_id: Number(profile.org_id) || 0,
-      total_xp: Number(profile.total_xp) || 0,
-      level: Number(profile.level) || 1,
-      login_streak: Number(profile.login_streak) || 0,
-      learning_streak: Number(profile.learning_streak) || 0,
-      longest_login_streak: Number(profile.longest_login_streak) || 0,
-      longest_learning_streak: Number(profile.longest_learning_streak) || 0,
-      total_activities_completed: Number(profile.total_activities_completed) || 0,
-      total_courses_completed: Number(profile.total_courses_completed) || 0,
-      daily_xp_earned: Number(profile.daily_xp_earned) || 0,
-      xp_to_next_level: profile.xp_to_next_level ?? undefined,
-      level_progress_percent: profile.level_progress_percent ?? undefined,
-      xp_in_current_level: profile.xp_in_current_level ?? undefined,
-      last_xp_award_date: profile.last_xp_award_date ?? null,
-      last_login_date: profile.last_login_date ?? null,
-      last_learning_date: profile.last_learning_date ?? null,
-      created_at: profile.created_at || new Date().toISOString(),
-      updated_at: profile.updated_at || new Date().toISOString(),
-      preferences: profile.preferences || {},
-    },
-    recent_transactions: (json.recent_transactions || []).map((tx: any) => ({
-      id: Number(tx?.id) || 0,
-      user_id: Number(tx?.user_id) || 0,
-      org_id: Number(tx?.org_id) || 0,
-      amount: Number(tx?.amount) || 0,
-      source: String(tx?.source ?? 'unknown'),
-      source_id: tx?.source_id ?? null,
-      triggered_level_up: Boolean(tx?.triggered_level_up ?? false),
-      previous_level: Number(tx?.previous_level ?? 0),
-      created_at: tx?.created_at || new Date().toISOString(),
-    })),
-    // Keep API stable: fill optional derived sections with sane defaults
-    leaderboard: {
-      entries: [],
-      total_participants: 0,
-      last_updated: new Date().toISOString(),
-    },
-    user_rank: (() => {
-      return json.user_rank !== undefined && json.user_rank !== null ? Number(json.user_rank) : null;
-    })(),
-    streak_info: {
-      login: {
-        current: Number(profile.login_streak) || 0,
-        longest: Number(profile.longest_login_streak) || 0,
-        lastDate: profile.last_login_date ?? null,
-      },
-      learning: {
-        current: Number(profile.learning_streak) || 0,
-        longest: Number(profile.longest_learning_streak) || 0,
-        lastDate: profile.last_learning_date ?? null,
-      },
-    },
+    profile,
+    recent_transactions: normalizeTransactions(json.recent_transactions),
+    leaderboard: normalizeLeaderboard(json.leaderboard),
+    user_rank: userRank,
+    streak_info: extractStreakInfo(profile),
   };
 
   return dashboardData;
@@ -271,24 +308,8 @@ export async function getServerOrganizationLeaderboard(
       return null;
     }
 
-    const json = await res.json();
-
-    const transformed: OrganizationLeaderboard = {
-      entries: (json?.entries ?? []).map((entry: any, index: number) => ({
-        user_id: Number(entry.user_id) || 0,
-        total_xp: Number(entry.total_xp) || 0,
-        level: Number(entry.level) || 1,
-        rank: Number(entry.rank ?? index + 1),
-        username: entry.username ?? null,
-        first_name: entry.first_name ?? null,
-        last_name: entry.last_name ?? null,
-        avatar_url: entry.avatar_url ?? null,
-        rank_change: entry.rank_change,
-      })),
-      total_participants: Number(json?.total_participants) || 0,
-      last_updated: json?.last_updated || new Date().toISOString(),
-    };
-    return transformed;
+    const json = (await res.json()) as RawLeaderboardResponse;
+    return normalizeLeaderboard(json);
   } catch (error) {
     console.error('Error fetching leaderboard:', error);
     return null;
@@ -300,7 +321,7 @@ export async function revalidateGamificationTags(orgId: number) {
   if (!orgId) return;
   for (const tag of gamificationTags(orgId)) {
     // Match Next.js typings: second argument is profile string or CacheLifeConfig
-    revalidateTag(tag, { expire: 0 });
+    await revalidateTag(tag, { expire: 0 });
   }
 }
 
@@ -310,7 +331,7 @@ export async function awardXPOnServer(orgId: number, payload: Record<string, any
   const body = {
     source: payload.source,
     source_id: payload.source_id,
-    amount: payload.amount ?? payload.custom_amount,
+    custom_amount: payload.custom_amount ?? payload.amount,
     idempotency_key: payload.idempotency_key,
   };
   const res = await fetch(`${getAPIUrl()}gamification/${orgId}/xp`, {

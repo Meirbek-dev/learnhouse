@@ -96,7 +96,7 @@ async def get_unified_dashboard(
 ):
     """Unified endpoint: Get complete gamification dashboard, profile, leaderboard, and config"""
     try:
-        data = service.get_dashboard_data(db, user.id, org_id)
+        data = service.get_dashboard_data(db, user.id, org_id, include_leaderboard=True)
         # Convert to typed DashboardRead using existing serializers
         profile = _profile_to_read(data["profile"])
         recent_txs = [
@@ -113,10 +113,12 @@ async def get_unified_dashboard(
             )
             for tx in data["recent_transactions"]
         ]
+        leaderboard = data.get("leaderboard")
         return DashboardRead(
             profile=profile,
             recent_transactions=recent_txs,
             user_rank=data.get("user_rank"),
+            leaderboard=leaderboard,
         )
 
     except Exception as e:
