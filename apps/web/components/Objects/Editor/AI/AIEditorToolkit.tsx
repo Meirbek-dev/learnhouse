@@ -21,6 +21,7 @@ import type { ChangeEvent, KeyboardEvent } from 'react';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
+import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
 interface AIEditorToolkitProps {
@@ -38,35 +39,33 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
   const dispatchAIEditor = useAIEditorDispatch();
   const aiEditorState = useAIEditor();
   const t = useTranslations('Activities.AIEditorToolkit');
-  const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' });
-  const isToolkitAvailable = is_ai_feature_enabled;
+  const isToolkitAvailable = useGetAIFeatures({ feature: 'editor' });
 
   return (
     <>
       {isToolkitAvailable ? (
         <div className="flex space-x-2">
           <AnimatePresence>
-            {aiEditorState.isModalOpen ? (
+            {aiEditorState.isModalOpen && (
               <motion.div
                 initial={{ y: 20, opacity: 0, filter: 'blur(10px)', scale: 0.95 }}
                 animate={{ y: 0, opacity: 1, filter: 'blur(0px)', scale: 1 }}
                 exit={{ y: 30, opacity: 0, filter: 'blur(8px)', scale: 0.98 }}
                 transition={{
                   type: 'spring',
-                  bounce: 0.25,
-                  duration: 0.6,
-                  mass: 0.8,
+                  bounce: 0.2,
+                  duration: 0.55,
                 }}
-                className="fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center"
+                className="fixed inset-0 z-50 flex items-center justify-center"
                 style={{ pointerEvents: 'none' }}
               >
-                {/* Backdrop blur overlay - only blocks clicks when feedback modal is NOT open */}
+                {/* BACKDROP */}
                 {!aiEditorState.isFeedbackModalOpen && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 bg-black/20 backdrop-blur-sm"
+                    className="fixed inset-0 bg-black/30 backdrop-blur-sm"
                     onClick={() => {
                       dispatchAIEditor({ type: 'setIsModalClose' });
                     }}
@@ -74,18 +73,21 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
                   />
                 )}
 
+                {/* FEEDBACK MODAL */}
                 {aiEditorState.isFeedbackModalOpen && (
                   <UserFeedbackModal
                     activity={props.activity}
                     editor={props.editor}
                   />
                 )}
+
+                {/* TOOLKIT SHEET */}
                 <div
                   style={{
                     pointerEvents: 'auto',
                     background: `
                       linear-gradient(135deg,
-                        rgba(255, 255, 255, 0.15) 0%,
+                        rgba(255, 255, 255, 0.16) 0%,
                         rgba(255, 255, 255, 0.08) 100%
                       ),
                       linear-gradient(180deg,
@@ -96,30 +98,34 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
                     backdropFilter: 'blur(32px) saturate(180%)',
                     WebkitBackdropFilter: 'blur(32px) saturate(180%)',
                   }}
-                  className="fixed bottom-0 left-1/2 z-40 mx-auto mb-6 w-fit max-w-[95vw] -translate-x-1/2 flex-col-reverse rounded-2xl border border-white/20 p-3 text-white shadow-2xl shadow-black/50 sm:mb-10 sm:rounded-3xl sm:p-4 md:max-w-(--breakpoint-2xl)"
+                  className="fixed bottom-0 left-1/2 z-40 mx-auto mb-6 w-242 max-w-screen -translate-x-1/2 flex-col-reverse rounded-2xl border border-white/20 p-3 text-white shadow-2xl shadow-black/50 sm:mb-10 sm:rounded-3xl sm:p-4 md:max-w-(--breakpoint-3xl)"
                 >
-                  {/* Glass reflection effect */}
-                  <div className="pointer-events-none absolute inset-0 rounded-2xl bg-linear-to-br from-white/20 via-transparent to-transparent opacity-60 sm:rounded-3xl" />
+                  {/* Shine overlay */}
+                  <div className="pointer-events-none absolute inset-0 rounded-2xl bg-linear-to-br from-white/20 via-transparent to-transparent opacity-60" />
 
                   <div className="relative flex flex-wrap items-center gap-2 sm:gap-3">
+                    {/* LEFT: ICON + TITLE */}
                     <div className="flex items-center gap-2 pr-2 sm:gap-2.5">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-white/25 to-white/10 shadow-lg backdrop-blur-sm sm:h-9 sm:w-9 sm:rounded-xl">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 shadow-lg backdrop-blur-sm sm:h-10 sm:w-10">
                         <Image
-                          width={18}
-                          height={18}
+                          width={20}
+                          height={20}
                           src={platformLogoLight}
                           alt={t('aiIconAlt')}
-                          className="drop-shadow-lg sm:h-5 sm:w-5"
+                          className="drop-shadow-lg"
                         />
                       </div>
+
                       <div className="hidden flex-col sm:flex">
                         <span className="text-sm font-bold text-white">{t('aiEditorTitle')}</span>
                       </div>
                     </div>
 
+                    {/* VERTICAL DIVIDER */}
                     <div className="hidden h-8 w-px bg-linear-to-b from-transparent via-white/30 to-transparent sm:block" />
 
-                    <div className="tools flex flex-wrap gap-1.5 sm:gap-2">
+                    {/* MIDDLE: TOOLS */}
+                    <div className="tools flex min-w-0 flex-1 flex-wrap gap-1.5 sm:gap-2">
                       <AiEditorToolButton label="Writer" />
                       <AiEditorToolButton label="ContinueWriting" />
                       <AiEditorToolButton label="MakeLonger" />
@@ -127,27 +133,28 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
                       <AiEditorToolButton label="Translate" />
                     </div>
 
+                    {/* RIGHT: CLOSE BTN */}
                     <div className="ml-auto flex items-center">
                       <button
                         onClick={() => {
                           dispatchAIEditor({ type: 'setIsModalClose' });
                           dispatchAIEditor({ type: 'setIsFeedbackModalClose' });
                         }}
-                        className="group relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-white/10 text-white/80 backdrop-blur-sm transition-all duration-300 hover:bg-red-500/30 hover:text-white focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95 sm:h-9 sm:w-9 sm:rounded-xl"
                         aria-label={t('closeToolkit')}
                         type="button"
+                        className="group relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-white/10 text-white/80 backdrop-blur-sm transition-all duration-300 hover:bg-red-500/30 hover:text-white focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95 sm:h-10 sm:w-10"
                       >
-                        <div className="absolute inset-0 bg-linear-to-br from-white/15 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                        <div className="absolute inset-0 bg-white/15 opacity-0 transition-opacity group-hover:opacity-100" />
                         <X
-                          size={18}
                           className="relative z-10 transition-transform group-hover:rotate-90"
+                          size={20}
                         />
                       </button>
                     </div>
                   </div>
                 </div>
               </motion.div>
-            ) : null}
+            )}
           </AnimatePresence>
         </div>
       ) : null}
@@ -533,7 +540,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
           backdropFilter: 'blur(48px) saturate(180%)',
           WebkitBackdropFilter: 'blur(48px) saturate(180%)',
         }}
-        className="fixed bottom-[120px] left-1/2 z-50 mx-auto min-h-[240px] w-[calc(100vw-2rem)] max-w-[560px] -translate-x-1/2 flex-col rounded-2xl border border-white/25 p-4 text-white shadow-2xl shadow-black/60 sm:bottom-[120px] sm:rounded-3xl sm:p-5"
+        className="fixed bottom-24 left-1/2 z-50 mx-auto min-h-[200px] w-[calc(100vw-2rem)] max-w-[660px] -translate-x-1/2 flex-col rounded-2xl border border-white/25 p-4 text-white shadow-2xl shadow-black/60 sm:bottom-[120px] sm:min-h-[240px] sm:rounded-3xl sm:p-5"
       >
         {/* Enhanced glass reflection */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl sm:rounded-3xl">
@@ -557,7 +564,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
           </div>
 
           {/* Content area */}
-          <div className="mx-auto flex min-h-[120px] w-full items-center justify-center rounded-xl bg-black/20 p-3 backdrop-blur-sm sm:rounded-2xl sm:p-4">
+          <div className="mx-auto flex min-h-[100px] w-full items-center justify-center rounded-xl bg-black/20 p-3 backdrop-blur-sm sm:min-h-[120px] sm:rounded-2xl sm:p-4">
             <AiEditorActionScreen handleOperation={handleOperation} />
           </div>
 
@@ -781,7 +788,7 @@ const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => 
           className="mx-auto flex w-full flex-col items-center justify-center space-y-3"
         >
           {hasAiResponse ? (
-            <ScrollArea className="h-[140px] w-full rounded-xl border border-white/20 bg-white/10 shadow-inner backdrop-blur-sm">
+            <ScrollArea className="h-32 w-full rounded-xl border border-white/20 bg-white/10 shadow-inner backdrop-blur-sm sm:h-[140px]">
               <div className="p-3 text-sm leading-relaxed whitespace-pre-wrap text-white sm:p-4">
                 {lastAiMessage.message}
               </div>
