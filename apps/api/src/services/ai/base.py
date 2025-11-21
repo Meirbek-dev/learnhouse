@@ -318,7 +318,7 @@ class FastAIService:
         llm_model_name: str,
         system_prompt: str,
         vector_store: Chroma,
-        max_iterations: int = 12,  # Increased further for complex multi-step operations
+        max_iterations: int = 15,  # Increased further for complex multi-step operations
     ) -> AgentExecutor | None:
         """Get cached agent or create new one."""
 
@@ -351,7 +351,7 @@ class FastAIService:
         llm_model_name: str,
         system_prompt: str,
         vector_store: Chroma,
-        max_iterations: int = 12,  # Increased further for complex multi-step operations
+        max_iterations: int = 15,  # Increased further for complex multi-step operations
     ) -> AgentExecutor | None:
         """Create agent with optimizations."""
         try:
@@ -398,9 +398,9 @@ class FastAIService:
                 verbose=True,
                 return_intermediate_steps=False,  # Reduce overhead
                 handle_parsing_errors=True,
-                max_iterations=12,  # Increased for complex operations like lecture critique
-                max_execution_time=50,  # Extended timeout for thorough responses
-                early_stopping_method="generate",  # Allow partial completion instead of force stop
+                max_iterations=15,  # Increased to allow completion of complex queries
+                max_execution_time=55,  # Extended timeout for thorough responses
+                early_stopping_method="force",  # Force stop when limit reached
             )
 
         except AIProcessingError:
