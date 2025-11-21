@@ -72,6 +72,8 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
       <LandingCustom
         landing={org.config.config.landing}
         orgslug={orgslug}
+        org_id={org.id}
+        gamificationData={gamificationData}
       />
     ) : (
       <LandingClassic
@@ -79,8 +81,7 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
         collections={collections}
         orgslug={orgslug}
         org_id={org.id}
-        gamificationProfile={gamificationData?.profile}
-        userRank={gamificationData?.user_rank}
+        gamificationData={gamificationData}
       />
     );
   } catch (error) {

@@ -1,6 +1,6 @@
 {
   "name": "ashyq-bilim",
-  "packageManager": "pnpm@10.22.0",
+  "packageManager": "pnpm@10.23.0",
   "private": true,
   "pnpm": {
     "overrides": {
@@ -13,13 +13,13 @@
     "dev": "turbo run dev",
     "format": "prettier --write \"**/*.{js,ts,tsx,md,css,json}\"",
     "lint": "turbo run lint",
-    "oxlint": "oxlint --fix --fix-suggestions",
+    "oxlint": "oxlint --type-aware --fix --fix-suggestions --fix-dangerously",
     "start": "turbo run start"
   },
   "devDependencies": {
     "eslint": "^9.39.1",
     "oxlint": "^1.29.0",
-    "oxlint-tsgolint": "^0.7.1",
+    "oxlint-tsgolint": "^0.8.0",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-sort-imports": "^1.8.8",

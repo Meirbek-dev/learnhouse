@@ -103,7 +103,7 @@ export async function uploadFileChunked(options: ChunkedUploadOptions): Promise<
     console.log(`Upload initiated with ID: ${upload_id}`);
 
     // Step 2: Upload chunks sequentially
-    for (let i = 0; i < chunks.length; i++) {
+    for (let i = 0; i < chunks.length; i += 1) {
       const chunk = chunks[i];
       if (!chunk) {
         throw new Error(`Chunk ${i} is undefined`);

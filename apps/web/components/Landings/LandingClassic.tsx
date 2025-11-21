@@ -6,7 +6,9 @@ import AuthenticatedClientElement from '@components/Security/AuthenticatedClient
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import { HeroSection } from '@/components/Dashboard/Gamification/hero-section';
-import type { UserGamificationProfile } from '@/types/gamification';
+import type { DashboardData } from '@/types/gamification';
+import { GamificationProvider } from '@/components/Contexts/GamificationContext';
+import { LoginBonusHandler } from '@/app/orgs/[orgslug]/(withmenu)/_components/LoginBonusHandler';
 import { getUriWithOrg } from '@services/config/config';
 import CourseGridClient from './CourseGridClient';
 import { useTranslations } from 'next-intl';
@@ -17,8 +19,7 @@ interface LandingClassicProps {
   collections: any[];
   orgslug: string;
   org_id: number;
-  gamificationProfile?: UserGamificationProfile | null;
-  userRank?: number | null;
+  gamificationData?: DashboardData | null;
 }
 
 const EmptyCollectionsState = ({ t }: { t: any }) => (
@@ -100,13 +101,16 @@ const LandingClassic = ({
   collections,
   orgslug,
   org_id,
-  gamificationProfile,
-  userRank,
+  gamificationData,
 }: LandingClassicProps) => {
   const t = useTranslations('HomePage');
+  const gamificationProfile = gamificationData?.profile;
+  const userRank = gamificationData?.user_rank;
 
   return (
-    <div className="w-full">
+    <GamificationProvider orgId={org_id} initialData={{ dashboard: gamificationData }}>
+      <LoginBonusHandler orgId={org_id} />
+      <div className="w-full">
       <GeneralWrapperStyled>
         {/* Gamification Hero Section */}
         {gamificationProfile && (
@@ -186,6 +190,7 @@ const LandingClassic = ({
         </section>
       </GeneralWrapperStyled>
     </div>
+    </GamificationProvider>
   );
 };
 

@@ -1,9 +1,12 @@
 'use client';
 
 import type { LandingSection } from '@components/Dashboard/Pages/Org/OrgEditLanding/landing_types';
+import { LoginBonusHandler } from '@/app/orgs/[orgslug]/(withmenu)/_components/LoginBonusHandler';
+import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getOrgCourses } from '@services/courses/courses';
+import type { DashboardData } from '@/types/gamification';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useTranslations } from 'next-intl';
 import useSWR from 'swr';
@@ -14,9 +17,11 @@ interface LandingCustomProps {
     enabled: boolean;
   };
   orgslug: string;
+  org_id: number;
+  gamificationData?: DashboardData | null;
 }
 
-const LandingCustom = ({ landing, orgslug }: LandingCustomProps) => {
+const LandingCustom = ({ landing, orgslug, org_id, gamificationData }: LandingCustomProps) => {
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('LandingCustom');
@@ -287,9 +292,15 @@ const LandingCustom = ({ landing, orgslug }: LandingCustomProps) => {
   };
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-(--breakpoint-2xl) flex-col items-center justify-between px-4 sm:px-6 lg:px-16">
-      {landing.sections.map((section) => renderSection(section))}
-    </div>
+    <GamificationProvider
+      orgId={org_id}
+      initialData={{ dashboard: gamificationData }}
+    >
+      <LoginBonusHandler orgId={org_id} />
+      <div className="mx-auto flex h-full w-full max-w-(--breakpoint-2xl) flex-col items-center justify-between px-4 sm:px-6 lg:px-16">
+        {landing.sections.map((section) => renderSection(section))}
+      </div>
+    </GamificationProvider>
   );
 };
 

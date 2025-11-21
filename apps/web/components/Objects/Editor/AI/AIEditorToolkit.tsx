@@ -21,7 +21,6 @@ import type { ChangeEvent, KeyboardEvent } from 'react';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
-import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
 interface AIEditorToolkitProps {
@@ -398,7 +397,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
       const escaped = textToRemove.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
       const regex = new RegExp(escaped, 'gi');
       return originalText.replace(regex, '');
-    } catch (err) {
+    } catch {
       return originalText;
     }
   };
@@ -709,7 +708,7 @@ const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => 
 
   // Get the last AI message if it exists
   // Use a more compatible approach instead of `findLast` for environments where it's unavailable
-  const lastAiMessage = [...aiEditorState.messages].reverse().find((msg) => msg.sender === 'ai');
+  const lastAiMessage = [...aiEditorState.messages].toReversed().find((msg) => msg.sender === 'ai');
   const hasAiResponse =
     lastAiMessage && !aiEditorState.isWaitingForResponse && aiEditorState.selectedTool === 'Critisize';
 

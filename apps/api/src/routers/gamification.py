@@ -132,6 +132,7 @@ async def award_xp(
     db: Annotated[Session, Depends(get_db_session)],
 ):
     """Award XP with strong typing and idempotency."""
+    logger.info(f"Award XP request: user={user.id} org={org_id} payload={payload}")
     try:
         # Admin-only for custom amounts
         if payload.custom_amount is not None:
@@ -174,8 +175,10 @@ async def award_xp(
             is_new_transaction=is_new,
         )
     except DailyLimitExceededError as e:
+        logger.warning(f"Daily limit exceeded for user {user.id} org {org_id}: {e}")
         raise HTTPException(status_code=429, detail=str(e))
     except GamificationError as e:
+        logger.warning(f"Gamification error for user {user.id} org {org_id}: {e}")
         raise HTTPException(status_code=400, detail=str(e))
     except HTTPException:
         raise

@@ -84,7 +84,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
 
   // Server-provided data (updated via props)
-  const [profile, setProfile] = useState<UserGamificationProfile | null>(initialData?.profile || null);
+  const [profile, setProfile] = useState<UserGamificationProfile | null>(initialData?.dashboard?.profile || null);
   const [dashboard, setDashboard] = useState<DashboardData | null>(initialData?.dashboard || null);
   const [leaderboard, setLeaderboard] = useState<OrganizationLeaderboard | null>(initialData?.leaderboard || null);
   const [isLoading, setIsLoading] = useState(false);
@@ -104,7 +104,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
 
   // Update state when initialData changes (from server-side refetch)
   useEffect(() => {
-    if (initialData?.profile) setProfile(initialData.profile);
+    if (initialData?.dashboard?.profile) setProfile(initialData.dashboard.profile);
     if (initialData?.dashboard) setDashboard(initialData.dashboard);
     if (initialData?.leaderboard) setLeaderboard(initialData.leaderboard);
   }, [initialData]);

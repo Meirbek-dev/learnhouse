@@ -1,5 +1,5 @@
 import { RequestBodyFormWithAuthHeader, RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
-import { uploadFileChunked, shouldUseChunkedUpload } from '@services/utils/chunked-upload';
+import { shouldUseChunkedUpload, uploadFileChunked } from '@services/utils/chunked-upload';
 import { getAPIUrl } from '@services/config/config';
 
 export async function uploadNewVideoFile(

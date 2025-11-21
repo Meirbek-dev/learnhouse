@@ -3,7 +3,7 @@ import {
   getResponseMetadata,
 } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { uploadFileChunked, shouldUseChunkedUpload } from '@services/utils/chunked-upload';
+import { shouldUseChunkedUpload, uploadFileChunked } from '@services/utils/chunked-upload';
 
 export async function createActivity(data: any, chapter_id: number, org_id: number, access_token: string) {
   data.content = {};
@@ -185,7 +185,7 @@ export async function createFileActivity(
         try {
           const response = JSON.parse(xhr.responseText);
           resolve(response);
-        } catch (error) {
+        } catch {
           reject(new Error('Invalid JSON response'));
         }
       } else {
