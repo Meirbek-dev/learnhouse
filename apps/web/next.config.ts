@@ -61,32 +61,35 @@ const nextConfig: NextConfig = {
         splitChunks: {
           ...existingSplitChunks,
           chunks: 'all',
-          maxAsyncRequests: 6,
-          maxInitialRequests: 6,
-          enforceSizeThreshold: 120_000,
-          minSize: 60_000,
+          // Aggressively flatten chunks so initial load performs a handful of requests.
+          maxAsyncRequests: 4,
+          maxInitialRequests: 2,
+          minSize: 150_000,
+          enforceSizeThreshold: 500_000,
+          minRemainingSize: 0,
+          maxSize: 1_200_000,
           cacheGroups: {
-            // Create larger vendor chunk to reduce total chunks
-            defaultVendors: {
+            default: false,
+            vendors: {
               test: /[\\/]node_modules[\\/]/,
-              priority: -10,
-              reuseExistingChunk: true,
               name: 'vendors',
+              chunks: 'all',
+              priority: -10,
               enforce: true,
             },
-            // Combine common modules
-            common: {
-              minChunks: 2,
-              priority: -20,
-              reuseExistingChunk: true,
-              name: 'common',
+            framework: {
+              test: /[\\/]node_modules[\\/](@?next|react|react-dom)[\\/]/,
+              name: 'framework',
+              chunks: 'all',
+              priority: 20,
+              enforce: true,
             },
-            // Group UI libraries together
-            ui: {
+            uiBundle: {
               test: /[\\/]node_modules[\\/](@radix-ui|lucide-react|recharts)[\\/]/,
-              name: 'ui-libs',
-              priority: 10,
-              reuseExistingChunk: true,
+              name: 'ui-bundle',
+              chunks: 'all',
+              priority: 30,
+              enforce: true,
             },
           },
         },
@@ -96,7 +99,7 @@ const nextConfig: NextConfig = {
         config.plugins = config.plugins ?? [];
         config.plugins.push(
           new LimitChunkCountPlugin({
-            maxChunks: 40,
+            maxChunks: 18,
           }),
         );
       }
