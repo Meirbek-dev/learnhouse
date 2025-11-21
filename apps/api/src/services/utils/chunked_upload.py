@@ -27,7 +27,7 @@ class ChunkedUploadSession:
         filename: str,
         total_chunks: int,
         file_size: int,
-    ):
+    ) -> None:
         self.upload_id = upload_id
         self.directory = directory
         self.type_of_dir = type_of_dir

@@ -166,14 +166,16 @@ async def create_video_activity(
         # Pre-uploaded via chunked upload: move from temp location to final location
         import shutil
         from pathlib import Path
-        
+
         # Parse the temp path
         temp_path = Path(f"content/orgs/{organization.org_uuid}/{video_uploaded_path}")
-        final_path = Path(f"content/orgs/{organization.org_uuid}/courses/{course.course_uuid}/activities/{activity.activity_uuid}/video/video.{video_format}")
-        
+        final_path = Path(
+            f"content/orgs/{organization.org_uuid}/courses/{course.course_uuid}/activities/{activity.activity_uuid}/video/video.{video_format}"
+        )
+
         # Create target directory
         final_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Move the file
         if temp_path.exists():
             shutil.move(str(temp_path), str(final_path))

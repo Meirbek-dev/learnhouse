@@ -15,12 +15,12 @@ class TestFeaturesUtils:
     """Test cases for features_utils/usage.py module"""
 
     @pytest.fixture
-    def mock_db_session(self):
+    def mock_db_session(self) -> Mock:
         """Create a mock database session"""
         return Mock(spec=Session)
 
     @pytest.fixture
-    def mock_org_config(self):
+    def mock_org_config(self) -> Mock:
         """Create a mock organization config"""
         config = Mock(spec=OrganizationConfig)
         config.org_id = 1
@@ -42,7 +42,7 @@ class TestFeaturesUtils:
         return config
 
     @pytest.fixture
-    def mock_redis(self):
+    def mock_redis(self) -> Mock:
         """Create a mock Redis connection"""
         redis_mock = Mock()
         redis_mock.get.return_value = b"5"  # Current usage

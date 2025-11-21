@@ -63,7 +63,7 @@ async def initiate_chunked_upload(
 async def upload_chunk(
     upload_id: Annotated[str, Form()],
     chunk_index: Annotated[int, Form()],
-    chunk: UploadFile = File(...),
+    chunk: Annotated[UploadFile, File()],
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
 ):
     """

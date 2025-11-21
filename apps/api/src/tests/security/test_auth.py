@@ -24,17 +24,17 @@ class TestAuth:
     """Test cases for auth.py module"""
 
     @pytest.fixture
-    def mock_request(self):
+    def mock_request(self) -> Mock:
         """Create a mock request object"""
         return Mock(spec=Request)
 
     @pytest.fixture
-    def mock_db_session(self):
+    def mock_db_session(self) -> Mock:
         """Create a mock database session"""
         return Mock(spec=Session)
 
     @pytest.fixture
-    def mock_user(self):
+    def mock_user(self) -> Mock:
         """Create a mock user object"""
         user = Mock(spec=User)
         user.email = "test@example.com"

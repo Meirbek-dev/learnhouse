@@ -58,7 +58,9 @@ app.add_event_handler("shutdown", shutdown_app(app))
 
 # JWT Exception Handler
 @app.exception_handler(AuthJWTException)
-def authjwt_exception_handler(request: Request, exc: AuthJWTException):
+def authjwt_exception_handler(
+    request: Request, exc: AuthJWTException
+) -> ORJSONResponse:
     return ORJSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.message},

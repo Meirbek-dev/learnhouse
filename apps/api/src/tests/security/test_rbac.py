@@ -26,17 +26,17 @@ class TestRBAC:
     """Test cases for RBAC module"""
 
     @pytest.fixture
-    def mock_request(self):
+    def mock_request(self) -> Mock:
         """Create a mock request object"""
         return Mock(spec=Request)
 
     @pytest.fixture
-    def mock_db_session(self):
+    def mock_db_session(self) -> Mock:
         """Create a mock database session"""
         return Mock(spec=Session)
 
     @pytest.fixture
-    def mock_course(self):
+    def mock_course(self) -> Mock:
         """Create a mock course object"""
         course = Mock(spec=Course)
         course.course_uuid = "course_123"
@@ -44,7 +44,7 @@ class TestRBAC:
         return course
 
     @pytest.fixture
-    def mock_collection(self):
+    def mock_collection(self) -> Mock:
         """Create a mock collection object"""
         collection = Mock(spec=Collection)
         collection.collection_uuid = "collection_123"
@@ -52,7 +52,7 @@ class TestRBAC:
         return collection
 
     @pytest.fixture
-    def mock_resource_author(self):
+    def mock_resource_author(self) -> Mock:
         """Create a mock resource author object"""
         author = Mock(spec=ResourceAuthor)
         author.user_id = 1
@@ -61,7 +61,7 @@ class TestRBAC:
         return author
 
     @pytest.fixture
-    def mock_role(self):
+    def mock_role(self) -> Mock:
         """Create a mock role object"""
         from src.db.roles import (
             DashboardPermission,

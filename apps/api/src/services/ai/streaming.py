@@ -326,13 +326,16 @@ async def ask_ai_stream(
             # Handle agent configuration errors (e.g., unsupported early_stopping_method)
             if "early_stopping_method" in str(e):
                 error_msg = "AI agent configuration error. Please try again."
-                logger.error(f"Agent configuration error: {e!s}")
+                logger.exception(f"Agent configuration error: {e!s}")
                 yield format_sse_message(
                     {"type": "error", "error": error_msg, "error_code": "CONFIG_ERROR"}
                 )
                 raise AIProcessingError(
                     error_msg,
-                    details={"error_type": "agent_config_error", "session_id": session_id},
+                    details={
+                        "error_type": "agent_config_error",
+                        "session_id": session_id,
+                    },
                 ) from e
             raise
 

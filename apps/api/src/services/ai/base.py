@@ -78,7 +78,7 @@ class WindowedChatMessageHistory(BaseChatMessageHistory):
         self._messages = []
 
     def _append_to_window(self, message: BaseMessage) -> None:
-        self._messages = (self._messages + [message])[-self._window_size :]
+        self._messages = ([*self._messages, message])[-self._window_size :]
 
 
 class OptimizedTextSplitter:
