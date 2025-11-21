@@ -6,6 +6,15 @@ class PydanticStrictBaseModel(BaseModel):
     model_config = ConfigDict(
         compiled=True,
         slots=True,
+        # Use enum values, not names
+        use_enum_values=True,
+    )
+
+
+class TruePydanticStrictBaseModel(BaseModel):
+    model_config = ConfigDict(
+        compiled=True,
+        slots=True,
         # Core strictness settings
         strict=True,
         # Prevent extra fields completely
@@ -50,6 +59,12 @@ class PydanticStrictBaseModel(BaseModel):
 
 
 class SQLModelStrictBaseModel(SQLModel):
+    model_config = ConfigDict(
+        compiled=True,
+    )
+
+
+class TrueSQLModelStrictBaseModel(SQLModel):
     model_config = ConfigDict(
         compiled=True,
         # Core strictness settings
