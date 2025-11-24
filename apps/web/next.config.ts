@@ -62,12 +62,12 @@ const nextConfig: NextConfig = {
           ...existingSplitChunks,
           chunks: 'all',
           // Aggressively flatten chunks so initial load performs a handful of requests.
-          maxAsyncRequests: 4,
-          maxInitialRequests: 2,
-          minSize: 150_000,
-          enforceSizeThreshold: 500_000,
+          maxAsyncRequests: 3,
+          maxInitialRequests: 1,
+          minSize: 200_000,
+          enforceSizeThreshold: 600_000,
           minRemainingSize: 0,
-          maxSize: 1_200_000,
+          maxSize: 1_500_000,
           cacheGroups: {
             default: false,
             vendors: {
@@ -99,7 +99,7 @@ const nextConfig: NextConfig = {
         config.plugins = config.plugins ?? [];
         config.plugins.push(
           new LimitChunkCountPlugin({
-            maxChunks: 18,
+            maxChunks: 12,
           }),
         );
       }
