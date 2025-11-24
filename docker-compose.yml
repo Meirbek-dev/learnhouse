@@ -37,7 +37,7 @@ services:
     labels:
       - docker-volume-backup.stop-during-backup=true
   redis:
-    image: redis:8.2.2-bookworm
+    image: redis:8.4.0-bookworm
     restart: unless-stopped
     ports:
       - "6379:6379"
