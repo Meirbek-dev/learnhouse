@@ -1,10 +1,9 @@
 import { AlertTriangle, ChevronRight, CreditCard, Settings, ShoppingCart, Users } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import Link from '@components/ui/ServerLink';
-import { useTranslations } from 'next-intl';
-
-const UnconfiguredPaymentsDisclaimer = () => {
-  const t = useTranslations('DashPage.Payments');
+import { getTranslations } from 'next-intl/server';
+const UnconfiguredPaymentsDisclaimer = async () => {
+  const t = await getTranslations('DashPage.Payments');
 
   return (
     <div className="h-full w-full bg-[#f8f8f8]">

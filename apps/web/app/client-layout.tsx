@@ -75,9 +75,9 @@ function ServiceWorkerRegister() {
         // Best-effort: log registration state for debugging
          
         console.info('ServiceWorker registered:', registration.scope);
-      } catch (err) {
+      } catch (error) {
          
-        console.warn('ServiceWorker registration failed:', err);
+        console.warn('ServiceWorker registration failed:', error);
       }
     })();
   }, []);

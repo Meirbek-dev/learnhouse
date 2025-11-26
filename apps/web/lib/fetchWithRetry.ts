@@ -10,7 +10,7 @@ function sleep(ms: number) {
 export async function fetchWithRetry(input: RequestInfo, init?: RequestInit, opts?: FetchRetryOptions): Promise<Response> {
   const { retries = 5, baseDelay = 500 } = opts || {};
 
-  for (let attempt = 1; attempt <= retries; attempt++) {
+  for (let attempt = 1; attempt <= retries; attempt += 1) {
     try {
       const res = await fetch(input, init);
 
@@ -36,8 +36,8 @@ export async function fetchWithRetry(input: RequestInfo, init?: RequestInit, opt
       }
 
       return res;
-    } catch (err) {
-      if (attempt === retries) throw err;
+    } catch (error) {
+      if (attempt === retries) throw error;
       const wait = Math.floor(baseDelay * Math.pow(2, attempt - 1) * (0.5 + Math.random() * 0.5));
       await sleep(wait);
       continue;
