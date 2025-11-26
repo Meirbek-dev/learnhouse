@@ -1,6 +1,6 @@
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import { Slot as SlotPrimitive } from 'radix-ui';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import type { ComponentProps } from 'react';
 
 import { cn } from '@/lib/utils';
@@ -83,8 +83,8 @@ function BreadcrumbSeparator({ children, className, ...props }: ComponentProps<'
   );
 }
 
-function BreadcrumbEllipsis({ className, ...props }: ComponentProps<'span'>) {
-  const t = useTranslations('Components.Breadcrumb');
+async function BreadcrumbEllipsis({ className, ...props }: ComponentProps<'span'>) {
+  const t = await getTranslations('Components.Breadcrumb');
 
   return (
     <span

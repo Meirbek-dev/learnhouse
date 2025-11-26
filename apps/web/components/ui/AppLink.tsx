@@ -1,7 +1,5 @@
-'use client';
-
 import NextLink from 'next/link';
-import React from 'react';
+import type React from 'react';
 
 // Thin wrapper around next/link to opt out of automatic prefetching by default.
 // Prefetching many routes at once (for example, when rendering lots of cards/menus)

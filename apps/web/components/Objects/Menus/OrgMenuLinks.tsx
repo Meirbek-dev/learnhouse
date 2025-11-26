@@ -1,7 +1,7 @@
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { BookCopy, Signpost, SquareLibrary } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import Link from '@components/ui/AppLink';
 
 const MenuLinks = (props: { orgslug: string }) => {
@@ -29,8 +29,8 @@ const MenuLinks = (props: { orgslug: string }) => {
     </div>
   );
 };
-const LinkItem = (props: any) => {
-  const t = useTranslations('Components.OrgMenuLinks');
+const LinkItem = async (props: any) => {
+  const t = await getTranslations('Components.OrgMenuLinks');
   const { link } = props;
   const { orgslug } = props;
   return (

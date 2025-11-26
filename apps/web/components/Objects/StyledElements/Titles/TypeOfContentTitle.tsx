@@ -1,12 +1,12 @@
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 
 import CollectionsLogo from 'public/svg/collections.svg';
 import CoursesLogo from 'public/svg/courses.svg';
 import TrailLogo from 'public/svg/trail.svg';
 
-const TypeOfContentTitle = ({ title, type }: { title: string; type: string }) => {
-  const t = useTranslations('Components.TypeOfContentTitle');
+const TypeOfContentTitle = async ({ title, type }: { title: string; type: string }) => {
+  const t = await getTranslations('Components.TypeOfContentTitle');
 
   function getLogo() {
     if (type === 'col') return CollectionsLogo;

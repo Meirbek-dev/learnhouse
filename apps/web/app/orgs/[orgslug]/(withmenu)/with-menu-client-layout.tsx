@@ -1,8 +1,7 @@
 'use client';
 
 import OrgMenu from '@components/Objects/Menus/org-menu';
-import type { ReactElement, ReactNode } from 'react';
-import { Children, cloneElement } from 'react';
+import type { ReactNode } from 'react';
 
 interface WithMenuClientLayoutProps {
   children: ReactNode;
@@ -12,8 +11,9 @@ interface WithMenuClientLayoutProps {
 /**
  * With Menu Client Layout
  *
- * Global layout for pages with menu. Does NOT include GamificationProvider
- * to avoid unnecessary API calls and infinite retry loops.
+ * This must remain a client component because OrgMenu uses client-side hooks
+ * (useState, useEffect, useSyncExternalStore) for menu state, scroll detection,
+ * focus mode from localStorage, and event listeners.
  *
  * Gamification should be added per-page basis where needed, with proper
  * server-side data fetching and error boundaries.
@@ -21,17 +21,10 @@ interface WithMenuClientLayoutProps {
 export default function WithMenuClientLayout({ children, orgslug }: WithMenuClientLayoutProps) {
   return (
     <>
-      <OrgMenu
-        key={`${orgslug}-orgmenu`}
-        orgslug={orgslug}
-      />
+      <OrgMenu orgslug={orgslug} />
       {/* Spacer for fixed header */}
       <div className="h-[52px]" />
-      {Children.map(children, (child, index) =>
-        cloneElement(child as ReactElement, {
-          key: `${orgslug}-child-${index}`,
-        }),
-      )}
+      {children}
     </>
   );
 }

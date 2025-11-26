@@ -73,10 +73,10 @@ function ServiceWorkerRegister() {
       try {
         const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
         // Best-effort: log registration state for debugging
-        // eslint-disable-next-line no-console
+         
         console.info('ServiceWorker registered:', registration.scope);
       } catch (err) {
-        // eslint-disable-next-line no-console
+         
         console.warn('ServiceWorker registration failed:', err);
       }
     })();

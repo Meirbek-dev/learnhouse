@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { Suspense } from 'react';
 
@@ -123,7 +123,7 @@ interface PageTransitionLoaderProps {
   fullScreen?: boolean;
 }
 
-export function PageTransitionLoader({ className = '', size = 'md', fullScreen = false }: PageTransitionLoaderProps) {
+export async function PageTransitionLoader({ className = '', size = 'md', fullScreen = false }: PageTransitionLoaderProps) {
   const sizeClasses = {
     sm: 'h-1 w-16',
     md: 'h-2 w-24',
@@ -134,7 +134,7 @@ export function PageTransitionLoader({ className = '', size = 'md', fullScreen =
     ? 'fixed inset-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-50'
     : 'min-h-[200px]';
 
-  const t = useTranslations('Components.PageLoading');
+  const t = await getTranslations('Components.PageLoading');
 
   return (
     <div className={`flex items-center justify-center ${containerClasses} ${className}`}>

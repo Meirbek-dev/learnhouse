@@ -11,7 +11,7 @@ import { HeroSection } from '@/components/Dashboard/Gamification/hero-section';
 import type { DashboardData } from '@/types/gamification';
 import { getUriWithOrg } from '@services/config/config';
 import CourseGridClient from './CourseGridClient';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
 interface LandingClassicProps {
@@ -96,8 +96,8 @@ const CollectionGrid = ({ collections, orgslug, org_id }: { collections: any[]; 
 
 // CourseGrid component is now extracted to CourseGridClient.tsx
 
-const LandingClassic = ({ courses, collections, orgslug, org_id, gamificationData }: LandingClassicProps) => {
-  const t = useTranslations('HomePage');
+const LandingClassic = async ({ courses, collections, orgslug, org_id, gamificationData }: LandingClassicProps) => {
+  const t = await getTranslations('HomePage');
   const gamificationProfile = gamificationData?.profile;
   const userRank = gamificationData?.user_rank;
 
