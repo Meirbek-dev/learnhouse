@@ -52,47 +52,13 @@ const nextConfig: NextConfig = {
   // Optimize webpack bundle splitting to reduce number of chunks
   webpack: (config, { isServer }) => {
     if (!isServer) {
-      const existingOptimization = config.optimization ?? {};
-      const existingSplitChunks = existingOptimization.splitChunks ?? {};
-
       config.optimization = {
-        ...existingOptimization,
-        runtimeChunk: 'single',
-        splitChunks: {
-          ...existingSplitChunks,
-          chunks: 'all',
-          // Aggressively flatten chunks so initial load performs a handful of requests.
-          maxAsyncRequests: 3,
-          maxInitialRequests: 1,
-          minSize: 200_000,
-          enforceSizeThreshold: 600_000,
-          minRemainingSize: 0,
-          maxSize: 1_500_000,
-          cacheGroups: {
-            default: false,
-            vendors: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              chunks: 'all',
-              priority: -10,
-              enforce: true,
-            },
-            framework: {
-              test: /[\\/]node_modules[\\/](@?next|react|react-dom)[\\/]/,
-              name: 'framework',
-              chunks: 'all',
-              priority: 20,
-              enforce: true,
-            },
-            uiBundle: {
-              test: /[\\/]node_modules[\\/](@radix-ui|lucide-react|recharts)[\\/]/,
-              name: 'ui-bundle',
-              chunks: 'all',
-              priority: 30,
-              enforce: true,
-            },
-          },
-        },
+        // For the browser bundle, collapse everything into as few chunks as possible.
+        // This trades bundle size for reliability behind strict rate-limited proxies.
+        // - No runtime chunk
+        // - No splitChunks: each entry gets a single, large bundle
+        runtimeChunk: false,
+        splitChunks: false,
       };
 
       if (LimitChunkCountPlugin) {
