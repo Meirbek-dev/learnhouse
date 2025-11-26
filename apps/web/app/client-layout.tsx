@@ -15,7 +15,6 @@ interface ClientLayoutProps {
 
 function ThemeSync() {
   const session = usePlatformSession() as any;
-
   useEffect(() => {
     const handleThemeChange = async (event: Event) => {
       const customEvent = event as CustomEvent<{ theme: string }>;
@@ -34,6 +33,31 @@ function ThemeSync() {
       window.removeEventListener('themeChange', handleThemeChange);
     };
   }, [session]);
+
+  return null;
+}
+
+function ServiceWorkerCleanup() {
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) {
+      return;
+    }
+
+    // Unregister any legacy service workers that might still be controlling
+    // this origin (from older deployments that used /sw.js and request-throttler.js).
+    navigator.serviceWorker
+      .getRegistrations()
+      .then((registrations) => {
+        for (const registration of registrations) {
+          registration.unregister().catch(() => {
+            // Ignore errors – cleanup is best-effort only.
+          });
+        }
+      })
+      .catch(() => {
+        // Ignore errors – if cleanup fails, normal navigation still works.
+      });
+  }, []);
 
   return null;
 }
@@ -59,6 +83,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
             errorRetryCount: 1,
           }}
         >
+          <ServiceWorkerCleanup />
           <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
         </SWRConfig>
       </PlatformSessionProvider>

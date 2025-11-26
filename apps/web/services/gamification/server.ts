@@ -13,18 +13,18 @@ interface GamificationFetchOptions {
   cache?: RequestCache | null;
 }
 
-type RawDashboardResponse = {
+interface RawDashboardResponse {
   profile?: Record<string, unknown>;
   recent_transactions?: unknown[];
   user_rank?: number | null;
   leaderboard?: RawLeaderboardResponse | null;
-};
+}
 
-type RawLeaderboardResponse = {
+interface RawLeaderboardResponse {
   entries?: unknown[];
   total_participants?: unknown;
   last_updated?: unknown;
-};
+}
 
 const nowISO = () => new Date().toISOString();
 
