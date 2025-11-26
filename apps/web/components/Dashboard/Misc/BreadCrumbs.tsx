@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Backpack, Book, CreditCard, School, User, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import AppLink from '@/components/ui/AppLink';
 
 interface BreadCrumbsProps {
   type: 'courses' | 'user' | 'users' | 'org' | 'orgusers' | 'assignments' | 'payments';
@@ -134,13 +134,13 @@ const BreadCrumbs = (props: BreadCrumbsProps) => {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link
+              <AppLink
                 href={getBreadcrumbLink(props.type)}
                 className="flex items-center space-x-2"
               >
                 {getBreadcrumbIcon(props.type)}
                 <span>{getBreadcrumbTitle(props.type)}</span>
-              </Link>
+              </AppLink>
             </BreadcrumbLink>
           </BreadcrumbItem>
           {props.last_breadcrumb ? (

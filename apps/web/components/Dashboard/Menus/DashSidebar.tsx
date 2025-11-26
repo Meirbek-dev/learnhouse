@@ -29,7 +29,7 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
 import Image from 'next/image';
-import Link from 'next/link';
+import AppLink from '@/components/ui/AppLink';
 
 interface NavigationItem {
   title: string;
@@ -159,7 +159,7 @@ const NavItem = ({ item, isCollapsed }: { item: NavigationItem; isCollapsed: boo
       }`}
       disabled={item.disabled}
     >
-      <Link
+      <AppLink
         href={item.href}
         className={`flex min-w-0 items-center transition-all duration-200 ${
           isCollapsed ? 'h-full w-full justify-center' : 'w-full gap-3'
@@ -185,7 +185,7 @@ const NavItem = ({ item, isCollapsed }: { item: NavigationItem; isCollapsed: boo
             {item.isActive ? <div className="bg-primary ml-auto h-2 w-2 animate-pulse rounded-full" /> : null}
           </>
         )}
-      </Link>
+      </AppLink>
     </SidebarMenuButton>
   </SidebarMenuItem>
 );
@@ -263,7 +263,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
     >
       <SidebarHeader className="border-sidebar-border border-b p-4">
         <div className={`flex items-center ${isCollapsed ? 'flex-col justify-center gap-2' : 'justify-between'}`}>
-          <Link
+      <AppLink
             href="/"
             className={`focus:ring-primary -m-1 flex items-center rounded-lg p-1 transition-all duration-200 hover:opacity-80 focus:opacity-80 focus:ring-2 focus:outline-none ${
               isCollapsed ? 'gap-0' : 'gap-3'
@@ -287,7 +287,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
             >
               <h2 className="text-sidebar-foreground text-lg leading-tight font-semibold">{t('orgName')}</h2>
             </div>
-          </Link>
+          </AppLink>
 
           <SidebarTrigger
             className={`hover:bg-sidebar-accent h-8 w-8 rounded-md transition-all duration-200 ${
@@ -350,7 +350,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
                 isCollapsed ? 'w-full justify-center' : ''
               }`}
             >
-              <Link
+              <AppLink
                 href="/dash/user-account/settings/general"
                 className={`flex items-center gap-2 ${isCollapsed ? 'justify-center' : 'justify-center'}`}
                 aria-label={t('ariaLabels.userSettings')}
@@ -362,7 +362,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
                 <span className={`transition-all duration-200 ${isCollapsed ? 'sr-only' : ''}`}>
                   {t('buttons.settings')}
                 </span>
-              </Link>
+              </AppLink>
             </SidebarMenuButton>
 
             <SidebarMenuButton

@@ -4,7 +4,7 @@ import touEmblemLight from 'public/tou_emblem_light.webp';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import ServerLink from '@/components/ui/ServerLink';
 
 import platformLogoFull from '../../../../public/platform_logo_full.svg';
 
@@ -63,7 +63,7 @@ async function DashboardHome() {
         <AdminAuthorization authorizationMode="component">
           <div className="mx-auto h-1 w-[100px] rounded-full bg-neutral-200/100" />
           <div className="flex items-center justify-center">
-            <Link
+            <ServerLink
               href="https://tou.edu.kz/ru/"
               target="_blank"
               className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-sky-900 px-7 py-3 shadow-lg transition-all ease-linear hover:scale-105 sm:mt-[40px]"
@@ -74,12 +74,12 @@ async function DashboardHome() {
                 alt={t('touUniversity')}
               />
               <div className="text-sm font-bold text-gray-100/100">{t('touUniversity')}</div>
-            </Link>
+            </ServerLink>
           </div>
           <div className="mx-auto mt-4 h-1 w-28 rounded-full bg-neutral-200/100 sm:mt-[40px]" />
         </AdminAuthorization>
 
-        <Link
+        <ServerLink
           href="/dash/user-account/settings/general"
           className="bg-background mx-auto flex max-w-md cursor-pointer items-center rounded-lg p-4 shadow-lg transition-all ease-linear hover:scale-105"
         >
@@ -93,7 +93,7 @@ async function DashboardHome() {
               <p className="text-sm text-gray-400/100">{t('AccountSettings.description')}</p>
             </div>
           </div>
-        </Link>
+        </ServerLink>
       </div>
     </div>
   );
@@ -111,7 +111,7 @@ const DashboardCard = ({
   description: string;
 }) => {
   return (
-    <Link
+    <ServerLink
       href={href}
       className="bg-background mx-auto flex w-full cursor-pointer items-center rounded-lg p-6 shadow-lg transition-all ease-linear hover:scale-105 sm:w-[250px]"
     >
@@ -120,7 +120,7 @@ const DashboardCard = ({
         <div className="text-center font-bold text-gray-500/100">{title}</div>
         <p className="text-center text-sm text-gray-400/100">{description}</p>
       </div>
-    </Link>
+    </ServerLink>
   );
 };
 

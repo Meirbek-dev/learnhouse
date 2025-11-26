@@ -6,7 +6,7 @@ import { usePaymentsEnabled } from '@components/Hooks/usePaymentsEnabled';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import AppLink from '@/components/ui/AppLink';
 
 const DashMobileMenu = () => {
   const session = usePlatformSession() as any;
@@ -29,14 +29,14 @@ const DashMobileMenu = () => {
             sideOffset={8}
             side="top"
           >
-            <Link
+            <AppLink
               href="/"
               className="flex flex-col items-center p-2"
               aria-label="Go to dashboard home"
             >
               <Home size={20} />
               <span className="mt-1 text-xs">{t('mobile.home')}</span>
-            </Link>
+            </AppLink>
           </ToolTip>
           <ToolTip
             content={t('tooltips.courses')}
@@ -44,14 +44,14 @@ const DashMobileMenu = () => {
             sideOffset={8}
             side="top"
           >
-            <Link
+            <AppLink
               href="/dash/courses"
               className="flex flex-col items-center p-2"
               aria-label="Manage courses"
             >
               <BookCopy size={20} />
               <span className="mt-1 text-xs">{t('mobile.courses')}</span>
-            </Link>
+            </AppLink>
           </ToolTip>
           <ToolTip
             content={t('tooltips.assignments')}
@@ -59,14 +59,14 @@ const DashMobileMenu = () => {
             sideOffset={8}
             side="top"
           >
-            <Link
+            <AppLink
               href="/dash/assignments"
               className="flex flex-col items-center p-2"
               aria-label="Manage assignments"
             >
               <Backpack size={20} />
               <span className="mt-1 text-xs">{t('mobile.assignments')}</span>
-            </Link>
+            </AppLink>
           </ToolTip>
           {arePaymentsEnabled ? (
             <ToolTip
@@ -75,14 +75,14 @@ const DashMobileMenu = () => {
               sideOffset={8}
               side="top"
             >
-              <Link
+              <AppLink
                 href="/dash/payments/customers"
                 className="flex flex-col items-center p-2"
                 aria-label="Manage payments and billing"
               >
                 <BadgeDollarSign size={20} />
                 <span className="mt-1 text-xs">{t('mobile.payments')}</span>
-              </Link>
+              </AppLink>
             </ToolTip>
           ) : null}
           <ToolTip
@@ -91,14 +91,14 @@ const DashMobileMenu = () => {
             sideOffset={8}
             side="top"
           >
-            <Link
+            <AppLink
               href="/dash/users/settings/users"
               className="flex flex-col items-center p-2"
               aria-label="Manage users"
             >
               <Users size={20} />
               <span className="mt-1 text-xs">{t('mobile.users')}</span>
-            </Link>
+            </AppLink>
           </ToolTip>
           <ToolTip
             content={t('tooltips.organization')}
@@ -106,14 +106,14 @@ const DashMobileMenu = () => {
             sideOffset={8}
             side="top"
           >
-            <Link
+            <AppLink
               href="/dash/org/settings/general"
               className="flex flex-col items-center p-2"
               aria-label="Organization settings"
             >
               <School size={20} />
               <span className="mt-1 text-xs">{t('mobile.org')}</span>
-            </Link>
+            </AppLink>
           </ToolTip>
         </AdminAuthorization>
         <ToolTip
@@ -124,14 +124,14 @@ const DashMobileMenu = () => {
           sideOffset={8}
           side="top"
         >
-          <Link
+          <AppLink
             href="/dash/user-account/settings/general"
             className="flex flex-col items-center p-2"
             aria-label="User account settings"
           >
             <Settings size={20} />
             <span className="mt-1 text-xs">{t('mobile.settings')}</span>
-          </Link>
+          </AppLink>
         </ToolTip>
       </div>
     </div>

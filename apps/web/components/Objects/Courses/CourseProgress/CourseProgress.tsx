@@ -4,7 +4,7 @@ import { getUriWithOrg } from '@services/config/config';
 import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import type { FC } from 'react';
-import Link from 'next/link';
+import AppLink from '@/components/ui/AppLink';
 
 interface CourseProgressProps {
   course: any;
@@ -112,7 +112,7 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onCl
               const activityId = activity.activity_uuid.replace('activity_', '');
               const courseId = course.course_uuid.replace('course_', '');
               return (
-                <Link
+                <AppLink
                   key={activity.activity_uuid}
                   href={`${getUriWithOrg(orgslug, '')}/course/${courseId}/activity/${activityId}`}
                 >
@@ -145,7 +145,7 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onCl
                       className="text-gray-400 group-hover:text-gray-600"
                     />
                   </div>
-                </Link>
+                </AppLink>
               );
             })}
           </div>
