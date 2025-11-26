@@ -52,7 +52,7 @@ import { styled } from 'styled-components';
 import { motion } from 'framer-motion';
 import UserAvatar from '../UserAvatar';
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 interface EditorProps {
   content: string;

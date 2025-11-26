@@ -44,9 +44,8 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
     isAuthenticated ? `${getAPIUrl()}orgs/user/page/1/limit/20` : null,
     (url) => swrFetcher(url, accessToken),
     {
-      // Revalidate frequently on mount to catch post-signup scenarios
+      // Revalidate on mount but use global dedupingInterval (60s) to prevent hammering.
       revalidateOnMount: true,
-      dedupingInterval: 1000,
     },
   );
 

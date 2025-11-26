@@ -12,7 +12,7 @@ import { use, useEffect, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 export interface OrgParams {
   subpage: string;

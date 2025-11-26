@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { getUriWithOrg } from '@services/config/config';
 import { getTranslations } from 'next-intl/server';
-import Link from '@components/ui/ServerLink';
+import Link from '@components/ui/AppLink';
 import { Book } from 'lucide-react';
 
 interface ActivityBreadcrumbsProps {
