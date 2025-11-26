@@ -62,6 +62,29 @@ function ServiceWorkerCleanup() {
   return null;
 }
 
+function ServiceWorkerRegister() {
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return;
+
+    // Register our service worker to help cache assets and gracefully
+    // retry resource requests that may be getting 429'd by upstream nginx.
+    // We register permissively (also in non-production) so devs can test.
+    (async () => {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+        // Best-effort: log registration state for debugging
+        // eslint-disable-next-line no-console
+        console.info('ServiceWorker registered:', registration.scope);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn('ServiceWorker registration failed:', err);
+      }
+    })();
+  }, []);
+
+  return null;
+}
+
 export default function ClientLayout({ children }: ClientLayoutProps) {
   return (
     // Lower frequency of session refetches to avoid unnecessary periodic calls that
@@ -83,7 +106,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
             errorRetryCount: 1,
           }}
         >
-          <ServiceWorkerCleanup />
+          <ServiceWorkerRegister />
           <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
         </SWRConfig>
       </PlatformSessionProvider>

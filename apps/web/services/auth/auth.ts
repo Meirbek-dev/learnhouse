@@ -1,5 +1,6 @@
 import { RequestBody, getResponseMetadata } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { fetchWithRetry } from '@/lib/fetchWithRetry';
 
 interface LoginResponse {
   user: AuthUser;
@@ -121,7 +122,7 @@ export async function loginAndGetToken(username: any, password: any): Promise<Re
 
     // For backward compatibility, return raw response
     // Calling code can use handleAuthResponse if needed
-    return await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.login}`, requestOptions);
+    return await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.login}`, requestOptions);
   } catch (error) {
     if (error instanceof Error) {
       throw createAuthError(`Login request failed: ${error.message}`, undefined, 'NETWORK_ERROR');
@@ -178,7 +179,7 @@ export async function loginWithOAuthToken(
       ? `${getAPIUrl()}${AUTH_ENDPOINTS.oauth}?org_id=${orgId}`
       : `${getAPIUrl()}${AUTH_ENDPOINTS.oauth}`;
 
-    return await fetch(url, requestOptions);
+    return await fetchWithRetry(url, requestOptions);
   } catch (error) {
     if (error instanceof Error) {
       throw createAuthError(`OAuth login failed: ${error.message}`, undefined, 'OAUTH_ERROR');
@@ -206,7 +207,7 @@ export async function sendResetLink(email: string, orgId: number) {
     const sanitizedEmail = sanitizeStringInput(email);
     const url = `${getAPIUrl()}${AUTH_ENDPOINTS.resetPassword}/send_reset_code/${encodeURIComponent(sanitizedEmail)}?org_id=${orgId}`;
 
-    const result = await fetch(url, RequestBody('POST', null, null));
+    const result = await fetchWithRetry(url, RequestBody('POST', null, null));
     return await getResponseMetadata(result);
   } catch (error) {
     if (error instanceof Error) {
@@ -252,7 +253,7 @@ export async function resetPassword(email: string, newPassword: string, orgId: n
 
     const url = `${getAPIUrl()}${AUTH_ENDPOINTS.resetPassword}/change_password/${encodeURIComponent(sanitizedEmail)}?${params}`;
 
-    const result = await fetch(url, RequestBody('POST', null, null));
+    const result = await fetchWithRetry(url, RequestBody('POST', null, null));
     return await getResponseMetadata(result);
   } catch (error) {
     if (error instanceof Error) {
@@ -279,7 +280,7 @@ export async function logout(): Promise<Response> {
       credentials: 'include',
     };
 
-    return await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.logout}`, requestOptions);
+    return await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.logout}`, requestOptions);
   } catch (error) {
     if (error instanceof Error) {
       throw createAuthError(`Logout failed: ${error.message}`, undefined, 'LOGOUT_ERROR');
@@ -316,7 +317,7 @@ export async function getUserInfo(token: string): Promise<AuthUser> {
       credentials: 'include',
     };
 
-    const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.userProfile}`, requestOptions);
+    const response = await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.userProfile}`, requestOptions);
     return await handleAuthResponse<AuthUser>(response, 'get user info');
   } catch (error) {
     if (error instanceof Error) {
@@ -351,7 +352,7 @@ export async function getUserSession(token: string): Promise<UserSessionResponse
       cache: 'no-cache',
     };
 
-    const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.userSession}`, requestOptions);
+    const response = await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.userSession}`, requestOptions);
     return await handleAuthResponse<UserSessionResponse>(response, 'get user session');
   } catch (error) {
     if (error instanceof Error) {
@@ -375,7 +376,7 @@ export async function getNewAccessTokenUsingRefreshToken(): Promise<AuthTokens> 
       credentials: 'include',
     };
 
-    const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.refresh}`, requestOptions);
+    const response = await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.refresh}`, requestOptions);
     return await handleAuthResponse<AuthTokens>(response, 'refresh token');
   } catch (error) {
     if (error instanceof Error) {
@@ -414,7 +415,7 @@ export async function getNewAccessTokenUsingRefreshTokenServer(refreshToken: str
     };
 
     console.log('[Auth] Attempting token refresh at:', fullUrl);
-    const response = await fetch(fullUrl, requestOptions);
+    const response = await fetchWithRetry(fullUrl, requestOptions);
 
     if (!response.ok) {
       console.error('[Auth] Token refresh failed:', response.status, response.statusText);
@@ -517,7 +518,7 @@ export async function signup(body: NewAccountBody): Promise<Response> {
       redirect: 'follow',
     };
 
-    return await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.signup}/${org_id}`, requestOptions);
+    return await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.signup}/${org_id}`, requestOptions);
   } catch (error) {
     if (error instanceof Error) {
       throw createAuthError(`Signup failed: ${error.message}`, undefined, 'SIGNUP_ERROR');
