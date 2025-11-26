@@ -1,11 +1,11 @@
 // Server-only data fetchers with Next.js cache tags (simplified)
 
 import type { DashboardData, OrganizationLeaderboard, UserGamificationProfile } from '@/types/gamification';
+import { extractStreakInfo } from '@/types/gamification/profile';
 import { getAPIUrl } from '@/services/config/config';
 import { gamificationTags } from '@/lib/cacheTags';
 import { revalidateTag } from 'next/cache';
 import { auth } from '@/auth';
-import { extractStreakInfo } from '@/types/gamification/profile';
 
 interface GamificationFetchOptions {
   revalidate?: number | null;
@@ -105,9 +105,9 @@ function normalizeLeaderboard(payload?: RawLeaderboardResponse | null): Organiza
         level: Math.max(1, numberOr(data.level, 1)),
         rank: Math.max(1, numberOr(data.rank, index + 1)),
         username: typeof data.username === 'string' ? data.username : null,
-        first_name: 'first_name' in data ? (data.first_name as string | null) ?? null : null,
-        last_name: 'last_name' in data ? (data.last_name as string | null) ?? null : null,
-        avatar_url: 'avatar_url' in data ? (data.avatar_url as string | null) ?? null : null,
+        first_name: 'first_name' in data ? ((data.first_name as string | null) ?? null) : null,
+        last_name: 'last_name' in data ? ((data.last_name as string | null) ?? null) : null,
+        avatar_url: 'avatar_url' in data ? ((data.avatar_url as string | null) ?? null) : null,
         rank_change: typeof data.rank_change === 'number' ? data.rank_change : undefined,
       };
     }),
@@ -252,8 +252,7 @@ export async function getServerGamificationDashboard(
     return null;
   }
 
-  const userRank =
-    json.user_rank === null || json.user_rank === undefined ? null : numberOr(json.user_rank);
+  const userRank = json.user_rank === null || json.user_rank === undefined ? null : numberOr(json.user_rank);
 
   const dashboardData: DashboardData = {
     profile,

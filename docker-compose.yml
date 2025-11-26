@@ -9,8 +9,6 @@ services:
       - app_content:/app/api/content
       # Mount logs directory to persist application logs
       - app_logs:/app/api/logs
-      # Mount nginx config for easier updates
-      - ./extra/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     env_file:
       - ./extra/.env
     depends_on:

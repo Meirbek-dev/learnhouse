@@ -22,9 +22,10 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import type { ChangeEvent, ComponentType, DragEvent, FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useOrg } from '@components/Contexts/OrgContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import { constructAcceptValue } from '@/lib/constants';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Separator } from '@components/ui/separator';
 import { Checkbox } from '@components/ui/checkbox';
 import { Button } from '@components/ui/button';
@@ -34,7 +35,6 @@ import { Input } from '@components/ui/input';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
-import { useOrg } from '@components/Contexts/OrgContext';
 
 const SUPPORTED_VIDEO_FILES = constructAcceptValue(['mp4', 'mkv', 'webm']);
 const SUPPORTED_SUBTITLE_FILES = constructAcceptValue(['srt', 'vtt']);

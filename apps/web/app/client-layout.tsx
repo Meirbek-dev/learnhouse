@@ -72,69 +72,10 @@ function ThemeProviderWrapper({ children }: { children: ReactNode }) {
 
   return (
     <ThemeProvider userTheme={userTheme}>
-      <AssetServiceWorker />
       <ThemeSync />
       <StyledComponentsRegistry>
         <main className="animate-fade-in">{children}</main>
       </StyledComponentsRegistry>
     </ThemeProvider>
   );
-}
-
-function AssetServiceWorker() {
-  useEffect(() => {
-    if (typeof window === 'undefined' || process.env.NODE_ENV !== 'production') {
-      return;
-    }
-
-    if (!('serviceWorker' in navigator)) {
-      return;
-    }
-
-    const registerWorker = async () => {
-      try {
-        const registration = await navigator.serviceWorker.register('/sw.js', {
-          scope: '/',
-        });
-
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                newWorker.postMessage({ type: 'SKIP_WAITING' });
-              }
-            });
-          }
-        });
-
-        // Periodically poke the SW so Retry/Cache logic stays fresh
-        const intervalId = window.setInterval(() => {
-          registration.update().catch(() => {
-            // Ignore update errors; they are usually transient network hiccups.
-          });
-        }, 5 * 60_000);
-
-        return () => window.clearInterval(intervalId);
-      } catch (error) {
-        console.error('Failed to register asset service worker', error);
-      }
-    };
-
-    const cleanupPromise = registerWorker();
-
-    return () => {
-      cleanupPromise
-        ?.then((cleanup) => {
-          if (typeof cleanup === 'function') {
-            cleanup();
-          }
-        })
-        .catch(() => {
-          /* no-op */
-        });
-    };
-  }, []);
-
-  return null;
 }

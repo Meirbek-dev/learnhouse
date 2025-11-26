@@ -1,9 +1,6 @@
-import {
-  RequestBodyWithAuthHeader,
-  getResponseMetadata,
-} from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
+import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
 import { shouldUseChunkedUpload, uploadFileChunked } from '@services/utils/chunked-upload';
+import { getAPIUrl } from '@services/config/config';
 
 export async function createActivity(data: any, chapter_id: number, org_id: number, access_token: string) {
   data.content = {};
@@ -65,7 +62,10 @@ export async function createFileActivity(
       formData.append('name', data.name);
 
       // Add a marker that video was uploaded separately
-      formData.append('video_uploaded_path', `courses/${courseUuid}/activities/${tempActivityUuid}/video/video.${videoFormat}`);
+      formData.append(
+        'video_uploaded_path',
+        `courses/${courseUuid}/activities/${tempActivityUuid}/video/video.${videoFormat}`,
+      );
 
       // Add subtitle files if present
       if (data.details?.subtitles && Array.isArray(data.details.subtitles)) {
