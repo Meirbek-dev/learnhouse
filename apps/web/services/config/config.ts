@@ -1,5 +1,10 @@
-// Runtime configuration cache
-let runtimeConfig: Record<string, string> | null = null;
+export const PLATFORM_HTTP_PROTOCOL =
+  process.env.NEXT_PUBLIC_PLATFORM_HTTPS?.toLowerCase() === 'true' ? 'https://' : 'http://';
+const PLATFORM_API_URL = `${process.env.NEXT_PUBLIC_PLATFORM_API_URL || ''}`;
+export const PLATFORM_BACKEND_URL = `${process.env.NEXT_PUBLIC_PLATFORM_BACKEND_URL || ''}`;
+export const PLATFORM_DOMAIN = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN;
+export const PLATFORM_TOP_DOMAIN = process.env.NEXT_PUBLIC_PLATFORM_TOP_DOMAIN;
+
 const isLikelyIPv4 = (host: string) => {
   if (!host) return false;
   const parts = host.split('.');
@@ -23,104 +28,87 @@ const isUnsupportedCookieDomain = (host?: string | null) => {
 export const getTopLevelCookieDomain = () =>
   isUnsupportedCookieDomain(PLATFORM_TOP_DOMAIN) ? undefined : PLATFORM_TOP_DOMAIN;
 
-// Lazy load runtime configuration
-function loadRuntimeConfig(): Record<string, string> {
-  if (runtimeConfig !== null) {
-    return runtimeConfig;
-  }
-
-  runtimeConfig = {};
-
-  if (typeof window !== 'undefined') {
-    // Client-side: read from window.__RUNTIME_CONFIG__ if available
-    if ((window as any).__RUNTIME_CONFIG__) {
-      runtimeConfig = (window as any).__RUNTIME_CONFIG__;
+/**
+ * Returns the API base URL (always ending with a slash).
+ * Falls back to current window origin + /api/v1/ in the browser when env is missing.
+ *
+ * For server-side requests in Docker, use internal container network.
+ * For client-side requests, use the public-facing URL.
+ */
+export const getAPIUrl = () => {
+  // Server-side: use internal Docker network URL when available
+  if (typeof window === 'undefined') {
+    const internalUrl = process.env.PLATFORM_INTERNAL_API_URL;
+    if (internalUrl) {
+      return internalUrl.endsWith('/') ? internalUrl : `${internalUrl}/`;
     }
-  } else {
-    // Server-side: try to read from runtime-config.json
-    // Try multiple possible paths for standalone mode
-    try {
-      const fs = require('node:fs');
-      const path = require('node:path');
 
-      // In standalone mode, runtime-config.json is in the same directory as server.js
-      // Try common possible locations relative to the current working directory and module
-      const possiblePaths = [
-        path.join(process.cwd(), 'runtime-config.json'),
-        path.join(__dirname || process.cwd(), 'runtime-config.json'),
-        path.join(__dirname || process.cwd(), '..', 'runtime-config.json'),
-      ];
-
-      for (const configPath of possiblePaths) {
-        try {
-          if (fs.existsSync(configPath)) {
-            runtimeConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-            break;
-          }
-        } catch {
-          // Continue to next path
-        }
-      }
-    } catch {
-      // fs/path not available (client-side bundle), skip
+    // Fallback for Docker environment: use localhost:9000
+    if (process.env.NODE_ENV === 'production' || process.env.PLATFORM_DEVELOPMENT_MODE === 'True') {
+      console.log('[Config] Using fallback localhost:9000 for API');
+      return 'http://localhost:9000/api/v1/';
     }
   }
 
-  return runtimeConfig || {};
-}
+  // Client-side: use public-facing URL
+  let base = PLATFORM_API_URL;
 
-// Helper function to get config value with fallback
-export const getConfig = (key: string, defaultValue: string = ''): string => {
-  const config = loadRuntimeConfig();
-  return (config && config[key]) || process.env[key] || defaultValue;
+  // Browser fallback if env not provided at build time
+  if (!base && typeof window !== 'undefined') {
+    const { protocol, hostname, port } = window.location;
+    const portPart = port ? `:${port}` : '';
+    base = `${protocol}//${hostname}${portPart}/api/v1/`;
+  }
+
+  if (!base) {
+    // Last-resort sensible default for local dev
+    base = 'http://localhost:1338/api/v1/';
+
+    // Warn in server context when using fallback
+    if (typeof window === 'undefined') {
+      console.warn(
+        '[Config] Using fallback API URL in server context. ' +
+          'Please set NEXT_PUBLIC_PLATFORM_API_URL or PLATFORM_INTERNAL_API_URL environment variable. ' +
+          `Current fallback: ${base}`,
+      );
+    }
+  }
+
+  // Ensure trailing slash
+  if (!base.endsWith('/')) base += '/';
+
+  return base;
 };
 
-// Dynamic config getters - these are functions to ensure runtime values are used
-const getPLATFORM_HTTP_PROTOCOL = () => (getConfig('NEXT_PUBLIC_PLATFORM_HTTPS') === 'true' ? 'https://' : 'http://');
-const getPLATFORM_API_URL = () => getConfig('NEXT_PUBLIC_PLATFORM_API_URL', 'http://localhost/api/v1/');
-const getPLATFORM_BACKEND_URL = () => getConfig('NEXT_PUBLIC_PLATFORM_BACKEND_URL', 'http://localhost/');
-const getPLATFORM_DOMAIN = () => getConfig('NEXT_PUBLIC_PLATFORM_DOMAIN', 'localhost');
-const getPLATFORM_TOP_DOMAIN = () => getConfig('NEXT_PUBLIC_PLATFORM_TOP_DOMAIN', 'localhost');
+export const getBackendUrl = () => PLATFORM_BACKEND_URL;
 
-// Export getter functions for dynamic runtime configuration
-export const getPLATFORM_HTTP_PROTOCOL_VAL = getPLATFORM_HTTP_PROTOCOL;
-export const getPLATFORM_BACKEND_URL_VAL = getPLATFORM_BACKEND_URL;
-export const getPLATFORM_DOMAIN_VAL = getPLATFORM_DOMAIN;
-export const getPLATFORM_TOP_DOMAIN_VAL = getPLATFORM_TOP_DOMAIN;
-
-// Export constants for backward compatibility
-// These are computed once at module load, but getConfig uses runtime values
-// For middleware/proxy (where runtime is critical), use the getter functions instead
-export const PLATFORM_HTTP_PROTOCOL = getPLATFORM_HTTP_PROTOCOL();
-export const PLATFORM_BACKEND_URL = getPLATFORM_BACKEND_URL();
-export const PLATFORM_DOMAIN = getPLATFORM_DOMAIN();
-export const PLATFORM_TOP_DOMAIN = getPLATFORM_TOP_DOMAIN();
-
-// For direct usage, these call the getters
-export const getAPIUrl = () => getPLATFORM_API_URL();
-export const getBackendUrl = () => getPLATFORM_BACKEND_URL();
+// Multi Organization Mode
+export const isMultiOrgModeEnabled = () => process.env.NEXT_PUBLIC_PLATFORM_MULTI_ORG === 'true';
 
 export const getUriWithOrg = (orgslug: string, path: string) => {
-  const protocol = getPLATFORM_HTTP_PROTOCOL();
-  const domain = getPLATFORM_DOMAIN();
-  return `${protocol}${domain}${path}`;
+  const multi_org = isMultiOrgModeEnabled();
+  if (multi_org) {
+    return `${PLATFORM_HTTP_PROTOCOL}${orgslug}.${PLATFORM_DOMAIN}${path}`;
+  }
+  return `${PLATFORM_HTTP_PROTOCOL}${PLATFORM_DOMAIN}${path}`;
 };
 
-export const getUriWithoutOrg = (path: string) => {
-  const protocol = getPLATFORM_HTTP_PROTOCOL();
-  const domain = getPLATFORM_DOMAIN();
-  return `${protocol}${domain}${path}`;
-};
+export const getUriWithoutOrg = (path: string) => `${PLATFORM_HTTP_PROTOCOL}${PLATFORM_DOMAIN}${path}`;
 
 export const getOrgFromUri = () => {
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    const domain = getPLATFORM_DOMAIN();
+  const multi_org = isMultiOrgModeEnabled();
+  if (multi_org) {
+    // When multi-org mode is enabled, prefer the configured default org if present.
+    // Previously this function called getDefaultOrg() but didn't return its value.
+    // Return the default org from env when available, otherwise undefined in server context.
+    const def = getDefaultOrg();
+    if (def) return def;
+    return undefined;
+  } else if (typeof window !== 'undefined') {
+    const { hostname } = window.location;
 
-    return hostname.replace(`.${domain}`, '');
+    return hostname.replace(`.${PLATFORM_DOMAIN}`, '');
   }
 };
 
-export const getDefaultOrg = () => {
-  return getConfig('NEXT_PUBLIC_PLATFORM_DEFAULT_ORG', 'default');
-};
+export const getDefaultOrg = () => process.env.NEXT_PUBLIC_PLATFORM_DEFAULT_ORG;
