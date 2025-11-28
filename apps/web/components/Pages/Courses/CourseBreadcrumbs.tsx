@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Breadcrumb,
@@ -9,8 +9,8 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { getUriWithOrg } from '@services/config/config';
-import { useTranslations } from 'next-intl';
 import Link from '@components/ui/ServerLink';
+import { useTranslations } from 'next-intl';
 import { Book } from 'lucide-react';
 
 interface CourseBreadcrumbsProps {

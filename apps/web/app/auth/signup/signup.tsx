@@ -54,7 +54,7 @@ const SignUpClient = (props: SignUpClientProps) => {
               height={100}
               src={platformLogoFull}
               alt="Ashyq Bilim logo"
-                style={{ width: 'auto', height: 'auto' }}
+              style={{ width: 'auto', height: 'auto' }}
             />
           </Link>
         </div>

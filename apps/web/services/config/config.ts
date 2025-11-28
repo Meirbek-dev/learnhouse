@@ -76,8 +76,7 @@ export const getConfig = (key: string, defaultValue: string = ''): string => {
 };
 
 // Dynamic config getters - these are functions to ensure runtime values are used
-const getPLATFORM_HTTP_PROTOCOL = () =>
-  getConfig('NEXT_PUBLIC_PLATFORM_HTTPS') === 'true' ? 'https://' : 'http://';
+const getPLATFORM_HTTP_PROTOCOL = () => (getConfig('NEXT_PUBLIC_PLATFORM_HTTPS') === 'true' ? 'https://' : 'http://');
 const getPLATFORM_API_URL = () => getConfig('NEXT_PUBLIC_PLATFORM_API_URL', 'http://localhost/api/v1/');
 const getPLATFORM_BACKEND_URL = () => getConfig('NEXT_PUBLIC_PLATFORM_BACKEND_URL', 'http://localhost/');
 const getPLATFORM_DOMAIN = () => getConfig('NEXT_PUBLIC_PLATFORM_DOMAIN', 'localhost');

@@ -6,8 +6,12 @@
  * and injects them before starting the Next.js server.
  */
 
-const path = require('path');
-const fs = require('fs');
+import { fileURLToPath } from 'url';
+import path from 'path';
+import fs from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Read all NEXT_PUBLIC_* environment variables from the environment
 const env = process.env;
@@ -102,6 +106,9 @@ if (!process.env.PORT) {
   process.env.PORT = '3000';
 }
 
-// Now require and run the actual Next.js server
+// Now import and run the actual Next.js server
 // The server.js is in the same directory (standalone output)
-require('./server.js');
+import('./server.js').catch((err) => {
+  console.error('Failed to start Next.js server:', err);
+  process.exit(1);
+});
