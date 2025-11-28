@@ -83,10 +83,8 @@ const LoginClient = (props: LoginClientProps) => {
               <Image
                 quality={100}
                 width={230}
-                height={100}
                 src={platformLogoFull}
                 alt="Ashyq Bilim logo"
-                style={{ width: 'auto', height: 'auto' }}
               />
             </Link>
           </div>

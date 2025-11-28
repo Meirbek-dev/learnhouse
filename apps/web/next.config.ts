@@ -50,30 +50,6 @@ const nextConfig: NextConfig = {
     // the default smaller quality as fallback.
     qualities: [100, 75],
   },
-  /**
-   * Reduce the number of parallel JS chunk requests on initial load.
-   *
-   * The university nginx in front of this app is very aggressively rate-limiting
-   * bursts of requests, including static `.js` assets. By slightly relaxing
-   * Webpack's chunk splitting on the client, we trade a bit of caching
-   * granularity for fewer, larger bundles – which means fewer concurrent
-   * requests and a lower chance of 429 responses for JS chunks on cold loads.
-   */
-  webpack(config, { isServer }) {
-    if (!isServer && config.optimization && config.optimization.splitChunks) {
-      const splitChunks = config.optimization.splitChunks;
-      // Coerce to any because Next types don't expose all fields cleanly.
-      const clientSplitChunks = splitChunks as any;
-
-      clientSplitChunks.maxInitialRequests = Math.min(clientSplitChunks.maxInitialRequests ?? 30, 15);
-      clientSplitChunks.maxAsyncRequests = Math.min(clientSplitChunks.maxAsyncRequests ?? 30, 15);
-      // Optionally increase minimum size before a separate chunk is created,
-      // to avoid overly granular splitting for tiny modules.
-      clientSplitChunks.minSize = Math.max(clientSplitChunks.minSize ?? 20_000, 50_000);
-    }
-
-    return config;
-  },
 };
 
 const withNextIntl = createNextIntlPlugin();

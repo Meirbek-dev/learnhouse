@@ -1,6 +1,7 @@
 import { getDefaultOrg, getTopLevelCookieDomain, getUriWithOrg } from './services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+
 export const config = {
   matcher: [
     /*
@@ -19,12 +20,15 @@ export const config = {
 
 export default async function proxy(req: NextRequest) {
   // Get initial data
-  const hosting_mode = 'single';
   const default_org = getDefaultOrg();
   const cookieDomain = getTopLevelCookieDomain();
   const { pathname, search } = req.nextUrl;
-  const fullhost = req.headers ? req.headers.get('host') : '';
   const cookie_orgslug = req.cookies.get('openu_current_orgslug')?.value;
+
+  // If path already starts with /orgs/, allow it to pass through
+  if (pathname.startsWith('/orgs/')) {
+    return NextResponse.next();
+  }
 
   // Out of orgslug paths & rewrite
   const standard_paths = ['/home'];
