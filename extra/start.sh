@@ -19,7 +19,7 @@ fi
 pm2 start server-wrapper.js --cwd /app/web --name ashyq-bilim-web > /dev/null 2>&1
 # Start API with `uv` so the uv-managed environment (and installed deps) are used.
 # This runs `uv run uvicorn app:app` under pm2 so modules installed by `uv sync` are available.
-pm2 start uv --name ashyq-bilim-api -- run uvicorn app:app -- --host 0.0.0.0 --port 9000 > /dev/null 2>&1
+pm2 start uv --cwd /app/api --name ashyq-bilim-api -- run uvicorn app:app -- --host 0.0.0.0 --port 9000 > /dev/null 2>&1
 
 # Check if the services are running and log the status
 pm2 status
