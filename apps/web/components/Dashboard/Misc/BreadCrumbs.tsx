@@ -8,8 +8,8 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Backpack, Book, CreditCard, School, User, Users } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 import AppLink from '@/components/ui/AppLink';
+import { useTranslations } from 'next-intl';
 
 interface BreadCrumbsProps {
   type: 'courses' | 'user' | 'users' | 'org' | 'orgusers' | 'assignments' | 'payments';

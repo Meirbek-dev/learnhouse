@@ -10,8 +10,8 @@ import { GamificationProvider } from '@/components/Contexts/GamificationContext'
 import { HeroSection } from '@/components/Dashboard/Gamification/hero-section';
 import type { DashboardData } from '@/types/gamification';
 import { getUriWithOrg } from '@services/config/config';
-import CourseGridClient from './CourseGridClient';
 import { getTranslations } from 'next-intl/server';
+import CourseGridClient from './CourseGridClient';
 import Link from 'next/link';
 
 interface LandingClassicProps {

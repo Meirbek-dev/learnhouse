@@ -24,12 +24,12 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import UserAvatar from '../../Objects/UserAvatar';
+import AppLink from '@/components/ui/AppLink';
 import { Badge } from '@/components/ui/badge';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
 import Image from 'next/image';
-import AppLink from '@/components/ui/AppLink';
 
 interface NavigationItem {
   title: string;
@@ -263,7 +263,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
     >
       <SidebarHeader className="border-sidebar-border border-b p-4">
         <div className={`flex items-center ${isCollapsed ? 'flex-col justify-center gap-2' : 'justify-between'}`}>
-      <AppLink
+          <AppLink
             href="/"
             className={`focus:ring-primary -m-1 flex items-center rounded-lg p-1 transition-all duration-200 hover:opacity-80 focus:opacity-80 focus:ring-2 focus:outline-none ${
               isCollapsed ? 'gap-0' : 'gap-3'

@@ -49,10 +49,10 @@ import { useCallback, useMemo } from 'react';
 import { Eye, Monitor } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { styled } from 'styled-components';
+import Link from '@components/ui/AppLink';
 import { motion } from 'framer-motion';
 import UserAvatar from '../UserAvatar';
 import Image from 'next/image';
-import Link from '@components/ui/AppLink';
 
 interface EditorProps {
   content: string;

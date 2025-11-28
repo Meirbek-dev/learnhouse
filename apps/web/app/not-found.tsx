@@ -17,6 +17,7 @@ export default async function NotFound() {
           height={100}
           src={platformLogoFull}
           alt="logo"
+          style={{ width: 'auto', height: 'auto' }}
         />
       </div>
       <div className="space-y-6 text-center">

@@ -45,6 +45,11 @@ const nextConfig: NextConfig = {
     },
   },
   allowedDevOrigins: ['https://cs-mooc.tou.edu.kz', 'http://192.168.12.35', 'http://192.168.1.46'],
+  images: {
+    // Allow using quality 100 for important SVG/brand images while keeping
+    // the default smaller quality as fallback.
+    qualities: [100, 75],
+  },
   /**
    * Reduce the number of parallel JS chunk requests on initial load.
    *
@@ -60,14 +65,8 @@ const nextConfig: NextConfig = {
       // Coerce to any because Next types don't expose all fields cleanly.
       const clientSplitChunks = splitChunks as any;
 
-      clientSplitChunks.maxInitialRequests = Math.min(
-        clientSplitChunks.maxInitialRequests ?? 30,
-        15,
-      );
-      clientSplitChunks.maxAsyncRequests = Math.min(
-        clientSplitChunks.maxAsyncRequests ?? 30,
-        15,
-      );
+      clientSplitChunks.maxInitialRequests = Math.min(clientSplitChunks.maxInitialRequests ?? 30, 15);
+      clientSplitChunks.maxAsyncRequests = Math.min(clientSplitChunks.maxAsyncRequests ?? 30, 15);
       // Optionally increase minimum size before a separate chunk is created,
       // to avoid overly granular splitting for tiny modules.
       clientSplitChunks.minSize = Math.max(clientSplitChunks.minSize ?? 20_000, 50_000);

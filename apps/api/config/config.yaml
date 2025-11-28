@@ -6,7 +6,6 @@ contact_email: contact@cs-mooc.tou.edu.kz
 
 general:
   development_mode: true
-  install_mode: true
   logfire_enabled: false
   timezone: "Asia/Almaty"  # Kazakhstan (Astana) timezone
 
@@ -30,8 +29,8 @@ hosting_config:
       endpoint_url: ''
 
 mailing_config:
-  resend_api_key: ''
-  system_email_adress: ''
+  resend_api_key: ""
+  system_email_address: ""
 
 database_config:
   sql_connection_string: postgresql+psycopg://openu:openu@localhost:5432/openu
@@ -47,6 +46,8 @@ payments_config:
     stripe_client_id: ''
 
 ai_config:
+  openai_api_key: ""
+  is_ai_enabled: false
   chromadb_config:
     isSeparateDatabaseEnabled: True
-    db_host: 'localhost'
+    db_host: "localhost"

@@ -1,10 +1,10 @@
 import { ArrowRight, BookOpenCheck, Check, FileText, Folder, Layers, Square, Video } from 'lucide-react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getUriWithOrg } from '@services/config/config';
+import AppLink from '@/components/ui/AppLink';
 import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import type { FC } from 'react';
-import AppLink from '@/components/ui/AppLink';
 
 interface CourseProgressProps {
   course: any;

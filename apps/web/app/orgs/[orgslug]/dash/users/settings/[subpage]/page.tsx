@@ -11,8 +11,8 @@ import { getUriWithOrg } from '@services/config/config';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { use, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { motion } from 'framer-motion';
 import Link from '@components/ui/AppLink';
+import { motion } from 'framer-motion';
 
 export interface SettingsParams {
   subpage: string;

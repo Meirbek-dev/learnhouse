@@ -1,13 +1,11 @@
 from datetime import datetime
 
 import orjson
-from fastapi import HTTPException, Request
-from sqlalchemy import desc
+from fastapi import HTTPException
 from sqlmodel import Session, select
 from ulid import ULID
 
 from config.config import get_platform_config
-from src.db.install import Install, InstallRead
 from src.db.organization_config import (
     AIOrgConfig,
     AnalyticsOrgConfig,
@@ -38,79 +36,6 @@ from src.db.roles import (
 from src.db.user_organizations import UserOrganization
 from src.db.users import User, UserCreate, UserRead
 from src.security.security import security_hash_password
-
-
-async def isInstallModeEnabled() -> bool:
-    config = get_platform_config()
-
-    if config.general_config.install_mode:
-        return True
-    raise HTTPException(
-        status_code=403,
-        detail="Install mode is not enabled",
-    )
-
-
-async def create_install_instance(request: Request, data: dict, db_session: Session):
-    install = Install.model_validate(data)
-
-    # complete install instance
-    install.install_uuid = f"install_{ULID()}"
-    install.update_date = str(datetime.now())
-    install.creation_date = str(datetime.now())
-    install.step = 1
-    # insert install instance
-    db_session.add(install)
-
-    # commit changes
-    db_session.commit()
-
-    # refresh install instance
-    db_session.refresh(install)
-
-    return InstallRead.model_validate(install)
-
-
-async def get_latest_install_instance(request: Request, db_session: Session):
-    statement = select(Install).order_by(desc(Install.creation_date)).limit(1)
-    install = db_session.exec(statement).first()
-
-    if install is None:
-        raise HTTPException(
-            status_code=404,
-            detail="No install instance found",
-        )
-
-    return InstallRead.model_validate(install)
-
-
-async def update_install_instance(
-    request: Request, data: dict, step: int, db_session: Session
-):
-    statement = select(Install).order_by(desc(Install.creation_date)).limit(1)
-    install = db_session.exec(statement).first()
-
-    if install is None:
-        raise HTTPException(
-            status_code=404,
-            detail="No install instance found",
-        )
-
-    install.step = step
-    install.data = data
-
-    # commit changes
-    db_session.commit()
-
-    # refresh install instance
-    db_session.refresh(install)
-
-    return InstallRead.model_validate(install)
-
-
-############################################################################################################
-# Steps
-############################################################################################################
 
 
 # Install Default roles

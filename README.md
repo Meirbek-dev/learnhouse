@@ -4,7 +4,7 @@
 
 ## Progress
 
-🚧 Ashyq Bilim is still on early development (alpha), as we reach stability we will release a stable
+🚧 Ashyq Bilim is still in development (beta), as we reach stability we will release a stable
 version and add more features.
 
 ## Roadmap
@@ -71,5 +71,4 @@ LearnHouse uses a number of open source projects to work properly:
 - **FastAPI** - A high performance, async API framework for Python
 - **PostgreSQL** - SQL Database
 - **Redis** - In-Memory Database
-- **LangChain** - LangChain is a framework for developing applications powered by language models
 - **React** - duh

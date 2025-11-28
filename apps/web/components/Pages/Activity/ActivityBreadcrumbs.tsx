@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -7,7 +9,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { getUriWithOrg } from '@services/config/config';
-import { getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { Book } from 'lucide-react';
 
@@ -17,9 +19,9 @@ interface ActivityBreadcrumbsProps {
   orgslug: string;
 }
 
-export default async function ActivityBreadcrumbs({ course, activity, orgslug }: ActivityBreadcrumbsProps) {
+export default function ActivityBreadcrumbs({ course, activity, orgslug }: ActivityBreadcrumbsProps) {
   const cleanCourseUuid = course.course_uuid?.replace('course_', '');
-  const t = await getTranslations('General');
+  const t = useTranslations('General');
 
   return (
     <div className="mb-4">

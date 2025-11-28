@@ -7,7 +7,11 @@ function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-export async function fetchWithRetry(input: RequestInfo, init?: RequestInit, opts?: FetchRetryOptions): Promise<Response> {
+export async function fetchWithRetry(
+  input: RequestInfo,
+  init?: RequestInit,
+  opts?: FetchRetryOptions,
+): Promise<Response> {
   const { retries = 5, baseDelay = 500 } = opts || {};
 
   for (let attempt = 1; attempt <= retries; attempt += 1) {

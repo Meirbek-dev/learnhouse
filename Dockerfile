@@ -84,6 +84,8 @@ RUN --mount=type=cache,target=/root/.cache/uv uv sync --locked --no-dev
 # Production image, copy all the files and run next
 FROM frontend-base AS frontend-runner
 WORKDIR /app
+
+# Install curl for health checks
 RUN apk add --no-cache curl
 
 ENV NODE_ENV=production
@@ -104,6 +106,10 @@ RUN chown nextjs:nodejs .next
 COPY --from=frontend-builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=frontend-builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Copy server wrapper for runtime environment variable injection
+COPY --chown=nextjs:nodejs apps/web/server-wrapper.js ./
+RUN chmod +x server-wrapper.js
+
 # Final image combining frontend and backend
 FROM base AS runner
 
@@ -112,15 +118,29 @@ COPY --from=frontend-runner /app /app/web
 
 # Backend runtime
 WORKDIR /app/api
-COPY --link ./apps/api ./
-COPY --from=backend-deps /app/api/.venv ./.venv
-ENV PATH="/app/api/.venv/bin:${PATH}"
+COPY ./apps/api/uv.lock ./
+COPY ./apps/api/pyproject.toml ./
+RUN pip install --upgrade pip \
+    && pip install uv \
+    && uv sync
+COPY ./apps/api ./
+
+# Install curl and netcat for health checks and service waiting
+RUN apt-get update && apt-get install -y curl netcat-openbsd && rm -rf /var/lib/apt/lists/*
 
 # Run the backend
 WORKDIR /app
 COPY ./extra/nginx.conf /etc/nginx/conf.d/default.conf
 ENV PORT=8000 PLATFORM_PORT=9000 HOSTNAME=0.0.0.0
+
+# Copy entrypoint scripts
+COPY ./apps/api/docker-entrypoint.sh /app/api/docker-entrypoint.sh
+RUN chmod +x /app/api/docker-entrypoint.sh
+
 COPY ./extra/start.sh /app/start.sh
 RUN chmod +x /app/start.sh
-EXPOSE 80 443
+
+# Expose ports
+EXPOSE 80 9000
+
 CMD ["sh", "/app/start.sh"]

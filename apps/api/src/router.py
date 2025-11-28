@@ -32,11 +32,9 @@ from src.routers.courses import (
 )
 from src.routers.courses.activities import activities, blocks
 from src.routers.ee import cloud_internal, payments
-from src.routers.install import install
 from src.routers.uploads import chunked_upload
 from src.routers.utils import router as utils_router
 from src.services.dev.dev import isDevModeEnabledOrRaise
-from src.services.install.install import isInstallModeEnabled
 
 v1_router = APIRouter(prefix="/api/v1")
 
@@ -95,12 +93,6 @@ v1_router.include_router(
     prefix="/dev",
     tags=["dev"],
     dependencies=[Depends(isDevModeEnabledOrRaise)],
-)
-v1_router.include_router(
-    install.router,
-    prefix="/install",
-    tags=["install"],
-    dependencies=[Depends(isInstallModeEnabled)],
 )
 
 __all__ = ["v1_router"]

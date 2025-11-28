@@ -1,6 +1,6 @@
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
-import { Slot as SlotPrimitive } from 'radix-ui';
 import { getTranslations } from 'next-intl/server';
+import { Slot as SlotPrimitive } from 'radix-ui';
 import type { ComponentProps } from 'react';
 
 import { cn } from '@/lib/utils';

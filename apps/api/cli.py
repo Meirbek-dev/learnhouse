@@ -1,5 +1,6 @@
+from sqlalchemy.engine.base import Engine
 from typing import Annotated
-
+import os
 import typer
 from sqlalchemy import create_engine
 from sqlmodel import Session, SQLModel
@@ -7,8 +8,7 @@ from sqlmodel import Session, SQLModel
 from config.config import get_platform_config
 from src.db.organizations import OrganizationCreate
 from src.db.users import UserCreate
-from src.security.security import generate_secure_password
-from src.services.install.install import (
+from src.services.setup.setup import (
     install_create_organization,
     install_create_organization_user,
     install_default_elements,
@@ -23,7 +23,7 @@ def install(
 ) -> None:
     # Get the database session
     platform_config = get_platform_config()
-    engine = create_engine(
+    engine: Engine = create_engine(
         platform_config.database_config.sql_connection_string,
         echo=False,
         pool_pre_ping=True,
@@ -55,9 +55,25 @@ def install(
 
         # Create Organization User
         print("Creating Ashyq Bilim user...")
-        # Generate random 8 digit password
-        email = "meirbek.dev@gmail.com"
-        password = generate_secure_password(8)
+        # Use email from environment variable if provided, otherwise default to "meirbek.dev@gmail.com"
+        email: str = os.environ.get("PLATFORM_INITIAL_ADMIN_EMAIL", "meirbek.dev@gmail.com")
+        # Require password from environment variable
+        password: str | None = os.environ.get("PLATFORM_INITIAL_ADMIN_PASSWORD")
+        if not password:
+            print(
+                "❌ Error: PLATFORM_INITIAL_ADMIN_PASSWORD environment variable is required"
+            )
+            print(
+                "Please set PLATFORM_INITIAL_ADMIN_PASSWORD environment variable before running installation."
+            )
+            raise typer.Exit(code=1)
+        print(
+            "Using password from PLATFORM_INITIAL_ADMIN_PASSWORD environment variable"
+        )
+        if email != "meirbek.dev@gmail.com":
+            print(
+                f"Using email from PLATFORM_INITIAL_ADMIN_EMAIL environment variable: {email}"
+            )
         user = UserCreate(username="Meirbek", email=email, password=password)
         install_create_organization_user(user, "openu", db_session)
         print("Ashyq Bilim user created ✅")
@@ -67,7 +83,7 @@ def install(
         print()
         print("Login with the following credentials:")
         print("email: " + email)
-        print("password: " + password)
+        print("password: (the password you set in PLATFORM_INITIAL_ADMIN_PASSWORD)")
         print("⚠️ Remember to change the password after logging in ⚠️")
 
     else:

@@ -30,6 +30,7 @@ const COMMON_RULES = {
   'react/react-in-jsx-scope': 'off',
   'react/prop-types': 'off',
   'react/no-unescaped-entities': 'off',
+  '@next/next/no-page-custom-font': 'off',
   'react/jsx-no-literals': 'off',
   'react-hooks/rules-of-hooks': 'error',
   'react-hooks/exhaustive-deps': 'warn',

@@ -1,6 +1,6 @@
 import { RequestBody, getResponseMetadata } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
 import { fetchWithRetry } from '@/lib/fetchWithRetry';
+import { getAPIUrl } from '@services/config/config';
 
 interface LoginResponse {
   user: AuthUser;

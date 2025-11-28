@@ -1,7 +1,7 @@
 import { AlertTriangle, ChevronRight, CreditCard, Settings, ShoppingCart, Users } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
-import Link from '@components/ui/ServerLink';
 import { getTranslations } from 'next-intl/server';
+import Link from '@components/ui/ServerLink';
 const UnconfiguredPaymentsDisclaimer = async () => {
   const t = await getTranslations('DashPage.Payments');
 

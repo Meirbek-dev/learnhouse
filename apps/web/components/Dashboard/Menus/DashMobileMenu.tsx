@@ -5,8 +5,8 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { usePaymentsEnabled } from '@components/Hooks/usePaymentsEnabled';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
-import { useTranslations } from 'next-intl';
 import AppLink from '@/components/ui/AppLink';
+import { useTranslations } from 'next-intl';
 
 const DashMobileMenu = () => {
   const session = usePlatformSession() as any;

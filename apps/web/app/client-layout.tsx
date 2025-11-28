@@ -73,10 +73,9 @@ function ServiceWorkerRegister() {
       try {
         const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
         // Best-effort: log registration state for debugging
-         
+
         console.info('ServiceWorker registered:', registration.scope);
       } catch (error) {
-         
         console.warn('ServiceWorker registration failed:', error);
       }
     })();

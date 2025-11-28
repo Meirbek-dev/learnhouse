@@ -86,12 +86,18 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil((async () => {
-    // Cleanup old caches that do not match CACHE_NAME
-    const keys = await caches.keys();
-    await Promise.all(keys.map((k) => { if (k !== CACHE_NAME) return caches.delete(k); }));
-    await self.clients.claim();
-  })());
+  event.waitUntil(
+    (async () => {
+      // Cleanup old caches that do not match CACHE_NAME
+      const keys = await caches.keys();
+      await Promise.all(
+        keys.map((k) => {
+          if (k !== CACHE_NAME) return caches.delete(k);
+        }),
+      );
+      await self.clients.claim();
+    })(),
+  );
 });
 
 self.addEventListener('fetch', (event) => {
@@ -116,24 +122,26 @@ self.addEventListener('fetch', (event) => {
   // Handle Next.js static assets cache-first to reduce repeated downloads
   // This includes JS chunks and CSS files
   if (url.pathname.startsWith('/_next/static/')) {
-    event.respondWith((async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const cached = await cache.match(event.request);
-      if (cached) return cached;
+    event.respondWith(
+      (async () => {
+        const cache = await caches.open(CACHE_NAME);
+        const cached = await cache.match(event.request);
+        if (cached) return cached;
 
-      // Enqueue to limit concurrency and retry on 429
-      try {
-        const response = await enqueueRequest(event.request);
-        if (response && response.ok) {
-          // Clone and store non-error responses
-          cache.put(event.request, response.clone()).catch(() => {});
+        // Enqueue to limit concurrency and retry on 429
+        try {
+          const response = await enqueueRequest(event.request);
+          if (response && response.ok) {
+            // Clone and store non-error responses
+            cache.put(event.request, response.clone()).catch(() => {});
+          }
+          return response;
+        } catch (err) {
+          // Final fallback: network (may fail)
+          return fetch(event.request);
         }
-        return response;
-      } catch (err) {
-        // Final fallback: network (may fail)
-        return fetch(event.request);
-      }
-    })());
+      })(),
+    );
     return;
   }
 

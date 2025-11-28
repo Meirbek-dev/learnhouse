@@ -1,10 +1,10 @@
 import AdminAuthorization from '@components/Security/AdminAuthorization';
 import { BookCopy, School, Settings, Users } from 'lucide-react';
 import touEmblemLight from 'public/tou_emblem_light.webp';
+import ServerLink from '@/components/ui/ServerLink';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import Image from 'next/image';
-import ServerLink from '@/components/ui/ServerLink';
 
 import platformLogoFull from '../../../../public/platform_logo_full.svg';
 
@@ -19,6 +19,7 @@ async function DashboardHome() {
           width={210}
           src={platformLogoFull}
           className="w-48 pt-16 pb-24 sm:w-auto"
+          style={{ width: 'auto', height: 'auto' }}
         />
       </div>
       <AdminAuthorization authorizationMode="component">

@@ -1,5 +1,5 @@
-import { Button } from '@components/ui/button';
 import { getTranslations } from 'next-intl/server';
+import { Button } from '@components/ui/button';
 
 const NewCollectionButton = async () => {
   const t = await getTranslations('Components.Button');

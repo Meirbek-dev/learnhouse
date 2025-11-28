@@ -123,7 +123,11 @@ interface PageTransitionLoaderProps {
   fullScreen?: boolean;
 }
 
-export async function PageTransitionLoader({ className = '', size = 'md', fullScreen = false }: PageTransitionLoaderProps) {
+export async function PageTransitionLoader({
+  className = '',
+  size = 'md',
+  fullScreen = false,
+}: PageTransitionLoaderProps) {
   const sizeClasses = {
     sm: 'h-1 w-16',
     md: 'h-2 w-24',

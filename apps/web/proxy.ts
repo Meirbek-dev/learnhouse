@@ -1,7 +1,6 @@
 import { getDefaultOrg, getTopLevelCookieDomain, getUriWithOrg } from './services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-
 export const config = {
   matcher: [
     /*
@@ -26,11 +25,6 @@ export default async function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
   const fullhost = req.headers ? req.headers.get('host') : '';
   const cookie_orgslug = req.cookies.get('openu_current_orgslug')?.value;
-
-  // If path already starts with /orgs/, allow it to pass through
-  if (pathname.startsWith('/orgs/')) {
-    return NextResponse.next();
-  }
 
   // Out of orgslug paths & rewrite
   const standard_paths = ['/home'];
@@ -98,7 +92,6 @@ export default async function proxy(req: NextRequest) {
   }
 
   // Single Organization Mode
-  // Get the default organization slug
   const orgslug = default_org as string;
   const response = NextResponse.rewrite(new URL(`/orgs/${orgslug}${pathname}`, req.url));
 

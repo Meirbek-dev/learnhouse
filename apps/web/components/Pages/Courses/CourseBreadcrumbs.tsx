@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -7,8 +9,8 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { getUriWithOrg } from '@services/config/config';
+import { useTranslations } from 'next-intl';
 import Link from '@components/ui/ServerLink';
-import { getTranslations } from 'next-intl/server';
 import { Book } from 'lucide-react';
 
 interface CourseBreadcrumbsProps {
@@ -16,8 +18,8 @@ interface CourseBreadcrumbsProps {
   orgslug: string;
 }
 
-export default async function CourseBreadcrumbs({ course, orgslug }: CourseBreadcrumbsProps) {
-  const t = await getTranslations('CourseBreadcrumbs');
+export default function CourseBreadcrumbs({ course, orgslug }: CourseBreadcrumbsProps) {
+  const t = useTranslations('CourseBreadcrumbs');
   return (
     <div className="pt-2">
       <Breadcrumb>
