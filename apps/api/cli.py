@@ -1,8 +1,9 @@
-from sqlalchemy.engine.base import Engine
-from typing import Annotated
 import os
+from typing import Annotated
+
 import typer
 from sqlalchemy import create_engine
+from sqlalchemy.engine.base import Engine
 from sqlmodel import Session, SQLModel
 
 from config.config import get_platform_config
@@ -56,7 +57,9 @@ def install(
         # Create Organization User
         print("Creating Ashyq Bilim user...")
         # Use email from environment variable if provided, otherwise default to "meirbek.dev@gmail.com"
-        email: str = os.environ.get("PLATFORM_INITIAL_ADMIN_EMAIL", "meirbek.dev@gmail.com")
+        email: str = os.environ.get(
+            "PLATFORM_INITIAL_ADMIN_EMAIL", "meirbek.dev@gmail.com"
+        )
         # Require password from environment variable
         password: str | None = os.environ.get("PLATFORM_INITIAL_ADMIN_PASSWORD")
         if not password:

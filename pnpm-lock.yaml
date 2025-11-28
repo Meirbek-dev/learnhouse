@@ -17,25 +17,25 @@ importers:
         version: 9.39.1
       oxlint:
         specifier: ^1.30.0
-        version: 1.30.0(oxlint-tsgolint@0.8.2)
+        version: 1.30.0(oxlint-tsgolint@0.8.3)
       oxlint-tsgolint:
-        specifier: ^0.8.2
-        version: 0.8.2
+        specifier: ^0.8.3
+        version: 0.8.3
       prettier:
-        specifier: ^3.6.2
-        version: 3.6.2
+        specifier: ^3.7.1
+        version: 3.7.1
       prettier-plugin-organize-imports:
         specifier: ^4.3.0
-        version: 4.3.0(prettier@3.6.2)(typescript@5.9.3)
+        version: 4.3.0(prettier@3.7.1)(typescript@5.9.3)
       prettier-plugin-sort-imports:
         specifier: ^1.8.8
         version: 1.8.8(typescript@5.9.3)
       prettier-plugin-sort-json:
         specifier: ^4.1.1
-        version: 4.1.1(prettier@3.6.2)
+        version: 4.1.1(prettier@3.7.1)
       prettier-plugin-tailwindcss:
         specifier: ^0.7.1
-        version: 0.7.1(prettier-plugin-organize-imports@4.3.0(prettier@3.6.2)(typescript@5.9.3))(prettier-plugin-sort-imports@1.8.8(typescript@5.9.3))(prettier@3.6.2)
+        version: 0.7.1(prettier-plugin-organize-imports@4.3.0(prettier@3.7.1)(typescript@5.9.3))(prettier-plugin-sort-imports@1.8.8(typescript@5.9.3))(prettier@3.7.1)
       turbo:
         specifier: ^2.6.1
         version: 2.6.1
@@ -96,33 +96,33 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
-  '@oxlint-tsgolint/darwin-arm64@0.8.2':
-    resolution: {integrity: sha512-n01FG9eE1OvufW7OXC7VcILwnerEHsy0lDGBcr+ax8n/AV17A/Wksw6qyK74n19T5Xh5f6s2B/FvJo8N5Bhc8w==}
+  '@oxlint-tsgolint/darwin-arm64@0.8.3':
+    resolution: {integrity: sha512-BhCcCtddJyQL1fvkGmQqqLfZzJg3vRHMHz0x06juPJupo/3HQOEz46iUXlfLiW1SbcwiRSzxWRGLXM3TiVxNPg==}
     cpu: [arm64]
     os: [darwin]
 
-  '@oxlint-tsgolint/darwin-x64@0.8.2':
-    resolution: {integrity: sha512-BNjkcVWqvuQNDIZGJvISRyY6sRUWsH3GMJ69tbSviA3nk7zg2dkJcwDqVkfAN21xKPtZ2em34qHPLrTSN60Y2A==}
+  '@oxlint-tsgolint/darwin-x64@0.8.3':
+    resolution: {integrity: sha512-PqA/jb+zdR31fLvQnQ1TRm/pDEmYhPUn504+UxBu8EfuYWxDeRXr7E34PphJpYwE+RlqKLfthbuYVbVaGjx6yw==}
     cpu: [x64]
     os: [darwin]
 
-  '@oxlint-tsgolint/linux-arm64@0.8.2':
-    resolution: {integrity: sha512-r2ootVnS7HAy6JmLgxXshAvWyzVlmnjp/5bV68/DTq7OiC2Lua1iaIKVivD6NhzcGIsHU38aFueYg9L7v8e74Q==}
+  '@oxlint-tsgolint/linux-arm64@0.8.3':
+    resolution: {integrity: sha512-Dk62XzusCxnnEG82AB10LWpGq2ikdsjk9r0C9k5u8SUGfbXDID27Jbo9NCG0/ob+uG/SGdJKGAuY9rVYXO0/Mg==}
     cpu: [arm64]
     os: [linux]
 
-  '@oxlint-tsgolint/linux-x64@0.8.2':
-    resolution: {integrity: sha512-7I+oZKDPIweok/5LFcBig3x7wcby4htcEq/jreeq7C5Vir4sCL/xxRm5VPBtQyTwlhLTk6/HXJXlzeVqXCUOQA==}
+  '@oxlint-tsgolint/linux-x64@0.8.3':
+    resolution: {integrity: sha512-yKNhHL1r2Xl59Av8UmE0ZeA89SojTyK/ByNleFhGFhLzIvEGJHFbC7jMGHMokfnrh73tR83g8KHNEz6iP8Iw/w==}
     cpu: [x64]
     os: [linux]
 
-  '@oxlint-tsgolint/win32-arm64@0.8.2':
-    resolution: {integrity: sha512-kOpbYaMxEqztyY5tvXWOKqRCKa03a+CbbrbgUF/ALLG3QpHl0YwxW4v2g6waCJ3Ghy8jKkqXeaYTYm/RbQMwFQ==}
+  '@oxlint-tsgolint/win32-arm64@0.8.3':
+    resolution: {integrity: sha512-UC2oUZ2MtaJ7jWP0kHtzx4Rkw+nTykGtncv72xKphFooKJWXi4MSQuVQ7RTsbmZa4poPYkYW1vaQayQU8Q586Q==}
     cpu: [arm64]
     os: [win32]
 
-  '@oxlint-tsgolint/win32-x64@0.8.2':
-    resolution: {integrity: sha512-8BMc67feBJusts9F2hWrc6xnPE9CFQD5+j1k9dDHx418GSyJY/bjumPfneZtWB9qk55nEhzC3trvL8HtuIz2RA==}
+  '@oxlint-tsgolint/win32-x64@0.8.3':
+    resolution: {integrity: sha512-EACSsZjLe7l8VYXIGZGuqrJMIZymE/zDsmaQRy1MXeuWqg4F89zKh7b7KTBCiOLpkapkHiVWGCPqkoVZ2Lyvnw==}
     cpu: [x64]
     os: [win32]
 
@@ -377,8 +377,8 @@ packages:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
     engines: {node: '>= 0.8.0'}
 
-  oxlint-tsgolint@0.8.2:
-    resolution: {integrity: sha512-a60T/kPH09rroGNz1GtTWnzWANRBNS6XkoULwzgIqjNgrtxm5lKMKrFsPk7g+yKWteuGho7+JLvvLjtbl/WbEg==}
+  oxlint-tsgolint@0.8.3:
+    resolution: {integrity: sha512-R/pqgXPC4DRQyrODa5xyqiHZNiCcX+R96Bu3qsAMkeSJOKarL8wEszNVNlR+bx8gbWYjPDFuRnlYionTHNjFPA==}
     hasBin: true
 
   oxlint@1.30.0:
@@ -491,8 +491,8 @@ packages:
       prettier-plugin-svelte:
         optional: true
 
-  prettier@3.6.2:
-    resolution: {integrity: sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==}
+  prettier@3.7.1:
+    resolution: {integrity: sha512-RWKXE4qB3u5Z6yz7omJkjWwmTfLdcbv44jUVHC5NpfXwFGzvpQM798FGv/6WNK879tc+Cn0AAyherCl1KjbyZQ==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -638,22 +638,22 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@oxlint-tsgolint/darwin-arm64@0.8.2':
+  '@oxlint-tsgolint/darwin-arm64@0.8.3':
     optional: true
 
-  '@oxlint-tsgolint/darwin-x64@0.8.2':
+  '@oxlint-tsgolint/darwin-x64@0.8.3':
     optional: true
 
-  '@oxlint-tsgolint/linux-arm64@0.8.2':
+  '@oxlint-tsgolint/linux-arm64@0.8.3':
     optional: true
 
-  '@oxlint-tsgolint/linux-x64@0.8.2':
+  '@oxlint-tsgolint/linux-x64@0.8.3':
     optional: true
 
-  '@oxlint-tsgolint/win32-arm64@0.8.2':
+  '@oxlint-tsgolint/win32-arm64@0.8.3':
     optional: true
 
-  '@oxlint-tsgolint/win32-x64@0.8.2':
+  '@oxlint-tsgolint/win32-x64@0.8.3':
     optional: true
 
   '@oxlint/darwin-arm64@1.30.0':
@@ -894,16 +894,16 @@ snapshots:
       type-check: 0.4.0
       word-wrap: 1.2.5
 
-  oxlint-tsgolint@0.8.2:
+  oxlint-tsgolint@0.8.3:
     optionalDependencies:
-      '@oxlint-tsgolint/darwin-arm64': 0.8.2
-      '@oxlint-tsgolint/darwin-x64': 0.8.2
-      '@oxlint-tsgolint/linux-arm64': 0.8.2
-      '@oxlint-tsgolint/linux-x64': 0.8.2
-      '@oxlint-tsgolint/win32-arm64': 0.8.2
-      '@oxlint-tsgolint/win32-x64': 0.8.2
+      '@oxlint-tsgolint/darwin-arm64': 0.8.3
+      '@oxlint-tsgolint/darwin-x64': 0.8.3
+      '@oxlint-tsgolint/linux-arm64': 0.8.3
+      '@oxlint-tsgolint/linux-x64': 0.8.3
+      '@oxlint-tsgolint/win32-arm64': 0.8.3
+      '@oxlint-tsgolint/win32-x64': 0.8.3
 
-  oxlint@1.30.0(oxlint-tsgolint@0.8.2):
+  oxlint@1.30.0(oxlint-tsgolint@0.8.3):
     optionalDependencies:
       '@oxlint/darwin-arm64': 1.30.0
       '@oxlint/darwin-x64': 1.30.0
@@ -913,7 +913,7 @@ snapshots:
       '@oxlint/linux-x64-musl': 1.30.0
       '@oxlint/win32-arm64': 1.30.0
       '@oxlint/win32-x64': 1.30.0
-      oxlint-tsgolint: 0.8.2
+      oxlint-tsgolint: 0.8.3
 
   p-limit@3.1.0:
     dependencies:
@@ -933,28 +933,28 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier-plugin-organize-imports@4.3.0(prettier@3.6.2)(typescript@5.9.3):
+  prettier-plugin-organize-imports@4.3.0(prettier@3.7.1)(typescript@5.9.3):
     dependencies:
-      prettier: 3.6.2
+      prettier: 3.7.1
       typescript: 5.9.3
 
   prettier-plugin-sort-imports@1.8.8(typescript@5.9.3):
     dependencies:
-      prettier: 3.6.2
+      prettier: 3.7.1
       typescript: 5.9.3
 
-  prettier-plugin-sort-json@4.1.1(prettier@3.6.2):
+  prettier-plugin-sort-json@4.1.1(prettier@3.7.1):
     dependencies:
-      prettier: 3.6.2
+      prettier: 3.7.1
 
-  prettier-plugin-tailwindcss@0.7.1(prettier-plugin-organize-imports@4.3.0(prettier@3.6.2)(typescript@5.9.3))(prettier-plugin-sort-imports@1.8.8(typescript@5.9.3))(prettier@3.6.2):
+  prettier-plugin-tailwindcss@0.7.1(prettier-plugin-organize-imports@4.3.0(prettier@3.7.1)(typescript@5.9.3))(prettier-plugin-sort-imports@1.8.8(typescript@5.9.3))(prettier@3.7.1):
     dependencies:
-      prettier: 3.6.2
+      prettier: 3.7.1
     optionalDependencies:
-      prettier-plugin-organize-imports: 4.3.0(prettier@3.6.2)(typescript@5.9.3)
+      prettier-plugin-organize-imports: 4.3.0(prettier@3.7.1)(typescript@5.9.3)
       prettier-plugin-sort-imports: 1.8.8(typescript@5.9.3)
 
-  prettier@3.6.2: {}
+  prettier@3.7.1: {}
 
   punycode@2.3.1: {}
 

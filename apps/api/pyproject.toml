@@ -4,9 +4,9 @@ name = "ashyq-bilim-api"
 version = "0.1.0"
 requires-python = ">=3.13.7,<3.14.0"
 dependencies = [
-  "boto3>=1.41.2",
-  "botocore>=1.41.2",
-  "fastapi[standard-no-fastapi-cloud-cli]>=0.121.3",
+  "boto3>=1.41.5",
+  "botocore>=1.41.5",
+  "fastapi[standard-no-fastapi-cloud-cli]>=0.122.0",
   "fastapi-another-jwt-auth>=0.1.11",
   "langchain<1.0.0",
   "langchain-chroma<1.0.0",
@@ -16,7 +16,7 @@ dependencies = [
   "langchain-text-splitters<1.0.0",
   "openai>=2.8.1",
   "psycopg[binary,pool]>=3.2.13",
-  "pydantic[email]>=2.12.4",
+  "pydantic[email]>=2.12.5",
   "python-dotenv>=1.2.1",
   "pyyaml>=6.0.3",
   "redis[hiredis]>=7.1.0",
