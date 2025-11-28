@@ -308,7 +308,7 @@ def get_platform_config() -> PlatformConfig:
     )
     system_email_address = env_system_email_address or yaml_config.get(
         "mailing_config", {}
-    ).get("system_email_adress")
+    ).get("system_email_address")
 
     # Payments config
     env_stripe_secret_key = os.environ.get("PLATFORM_STRIPE_SECRET_KEY")
