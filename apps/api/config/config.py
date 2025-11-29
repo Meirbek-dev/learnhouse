@@ -27,6 +27,7 @@ class SecurityConfig(PydanticStrictBaseModel):
 class ChromaDBConfig(PydanticStrictBaseModel):
     isSeparateDatabaseEnabled: bool | None = None
     db_host: str | None = None
+    db_port: int = 8001  # Default to 8001 (Docker external port)
 
 
 class AIPerformanceConfig(PydanticStrictBaseModel):

@@ -4,15 +4,14 @@ import logging
 import os
 from typing import Any
 
+from langchain.agents import create_agent
+from langchain.tools import tool
 from langchain_chroma import Chroma
-from langchain_classic.agents import AgentExecutor, create_tool_calling_agent
-from langchain_classic.tools.retriever import create_retriever_tool
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langgraph.graph.state import CompiledStateGraph
 from ulid import ULID
 
 from config.config import get_platform_config
@@ -319,15 +318,14 @@ class FastAIService:
         system_prompt: str,
         vector_store: Chroma,
         max_iterations: int = 15,  # Increased further for complex multi-step operations
-    ) -> AgentExecutor | None:
+    ) -> CompiledStateGraph | None:
         """Get cached agent or create new one."""
 
         # Generate cache key
         prompt_hash = hashlib.md5(system_prompt.encode()).hexdigest()
         cache_key = f"{llm_model_name}_{prompt_hash}_{max_iterations}"
 
-        # Check cache - agent executors are stateless between invocations
-        # when used with RunnableWithMessageHistory wrapper
+        # Check cache - agents are stateless between invocations
         cached_agent = self.cache_manager.agent_cache.get(cache_key)
         if cached_agent:
             logger.info(f"✓ Cache HIT for agent: {cache_key[:50]}...")
@@ -352,8 +350,8 @@ class FastAIService:
         system_prompt: str,
         vector_store: Chroma,
         max_iterations: int = 15,  # Increased further for complex multi-step operations
-    ) -> AgentExecutor | None:
-        """Create agent with optimizations."""
+    ) -> CompiledStateGraph | None:
+        """Create agent using LangChain v1 create_agent API."""
         try:
             # Get cached LLM with streaming enabled
             llm = get_llm(llm_model_name, streaming=True)
@@ -372,36 +370,25 @@ class FastAIService:
                 },  # Get top 3 results for better context in complex queries
             )
 
-            retriever_tool = create_retriever_tool(
-                retriever=retriever,
-                name="find_context_text",
-                description="Find relevant context from the knowledge base",
+            # Create retriever tool using LangChain v1 @tool decorator pattern
+            @tool
+            def find_context_text(query: str) -> str:
+                """Find relevant context from the knowledge base. Use this to search for information related to the user's question."""
+                docs = retriever.invoke(query)
+                if not docs:
+                    return "No relevant context found."
+                return "\n\n".join(doc.page_content for doc in docs)
+
+            # Create agent using LangChain v1 create_agent API
+            # This returns a LangGraph-based agent with built-in streaming support
+            agent = create_agent(
+                model=llm,
+                tools=[find_context_text],
+                system_prompt=system_prompt,
             )
 
-            # Optimized prompt template
-            prompt = ChatPromptTemplate.from_messages(
-                [
-                    ("system", system_prompt),
-                    MessagesPlaceholder(variable_name="chat_history"),
-                    ("human", "{input}"),
-                    MessagesPlaceholder(variable_name="agent_scratchpad"),
-                ]
-            )
-
-            # Create agent
-            agent = create_tool_calling_agent(llm, [retriever_tool], prompt)
-
-            # Create executor with optimized performance settings
-            return AgentExecutor(
-                agent=agent,
-                tools=[retriever_tool],
-                verbose=True,
-                return_intermediate_steps=False,  # Reduce overhead
-                handle_parsing_errors=True,
-                max_iterations=15,  # Increased to allow completion of complex queries
-                max_execution_time=55,  # Extended timeout for thorough responses
-                early_stopping_method="force",  # Force stop when limit reached
-            )
+            logger.info("✓ Agent created successfully using LangChain v1 create_agent")
+            return agent
 
         except AIProcessingError:
             raise
@@ -411,6 +398,32 @@ class FastAIService:
             raise AIProcessingError(
                 error_msg, details={"error_type": type(e).__name__}
             ) from e
+
+
+def _convert_history_to_messages(
+    message_history: RedisChatMessageHistory | list,
+) -> list[dict[str, str]]:
+    """Convert message history to LangChain v1 message format."""
+    messages: list[dict[str, str]] = []
+
+    if isinstance(message_history, list):
+        # Already a list, convert to message format
+        for msg in message_history:
+            if isinstance(msg, HumanMessage):
+                messages.append({"role": "user", "content": msg.content})
+            elif isinstance(msg, AIMessage):
+                messages.append({"role": "assistant", "content": msg.content})
+            elif isinstance(msg, dict):
+                messages.append(msg)
+    elif hasattr(message_history, "messages"):
+        # RedisChatMessageHistory or similar
+        for msg in message_history.messages:
+            if isinstance(msg, HumanMessage):
+                messages.append({"role": "user", "content": msg.content})
+            elif isinstance(msg, AIMessage):
+                messages.append({"role": "assistant", "content": msg.content})
+
+    return messages
 
 
 async def ask_ai(
@@ -423,7 +436,7 @@ async def ask_ai(
     session_id: str = "default",
     collection_name: str | None = None,
 ) -> dict[str, Any]:
-    """Fast AI processing with comprehensive optimizations."""
+    """Fast AI processing using LangChain v1 create_agent API."""
 
     # Input validation
     if not question or not question.strip():
@@ -452,45 +465,60 @@ async def ask_ai(
             raise VectorStoreError(msg)
 
         # Get or create agent (cached)
-        agent_executor = await ai_service.get_or_create_agent(
+        agent = await ai_service.get_or_create_agent(
             llm_model_name=openai_model_name,
             system_prompt=message_for_the_prompt,
             vector_store=vector_store,
         )
 
-        if not agent_executor:
+        if not agent:
             msg = "Failed to create AI agent"
             raise AIProcessingError(msg)
 
-        # Create agent with history
-        agent_with_history = RunnableWithMessageHistory(
-            agent_executor,
-            lambda session_id: message_history,
-            input_messages_key="input",
-            history_messages_key="chat_history",
-        )
+        # Convert message history to LangChain v1 format
+        history_messages = _convert_history_to_messages(message_history)
 
-        # Process with timeout
+        # Add current question to messages
+        messages = [*history_messages, {"role": "user", "content": question.strip()}]
+
+        # Process with timeout using LangChain v1 agent.invoke pattern
         logger.info(f"Processing AI query: {question[:100]}...")
 
-        # Run in thread pool to avoid blocking with timeout
         try:
             result = await asyncio.wait_for(
                 asyncio.to_thread(
-                    agent_with_history.invoke,
-                    {"input": question.strip()},
-                    config={"configurable": {"session_id": session_id}},
+                    agent.invoke,
+                    {"messages": messages},
                 ),
-                timeout=15.0,  # 15 seconds timeout for faster failure detection
+                timeout=60.0,  # Increased timeout for complex operations
             )
 
+            # Extract response from result
+            output_messages = result.get("messages", [])
+            if output_messages:
+                last_message = output_messages[-1]
+                # Use .text property for LangChain v1 (replaces .text() method)
+                response_text = (
+                    last_message.text
+                    if hasattr(last_message, "text")
+                    else str(last_message.content)
+                )
+            else:
+                response_text = ""
+
+            # Update message history with new messages
+            if hasattr(message_history, "add_user_message"):
+                message_history.add_user_message(question.strip())
+            if hasattr(message_history, "add_ai_message") and response_text:
+                message_history.add_ai_message(response_text)
+
             logger.info("AI query processed successfully")
-            return result
+            return {"output": response_text, "messages": output_messages}
 
         except TimeoutError as e:
-            error_msg = "AI processing timed out after 15 seconds"
+            error_msg = "AI processing timed out after 60 seconds"
             logger.warning(error_msg)
-            raise AITimeoutError(15, details={"question_length": len(question)}) from e
+            raise AITimeoutError(60, details={"question_length": len(question)}) from e
 
     except (AIProcessingError, VectorStoreError, AITimeoutError):
         raise
@@ -514,7 +542,7 @@ async def ask_ai_stream(
     collection_name: str | None = None,
 ):
     """
-    Stream AI responses for better user experience.
+    Stream AI responses using LangChain v1 streaming API.
 
     Yields response chunks as they're generated instead of waiting for complete response.
 
@@ -562,40 +590,63 @@ async def ask_ai_stream(
             raise VectorStoreError(msg)
 
         # Get or create agent (cached)
-        agent_executor = await ai_service.get_or_create_agent(
+        agent = await ai_service.get_or_create_agent(
             llm_model_name=openai_model_name,
             system_prompt=message_for_the_prompt,
             vector_store=vector_store,
         )
 
-        if not agent_executor:
+        if not agent:
             msg = "Failed to create AI agent"
             raise AIProcessingError(msg)
 
-        # Create agent with history
-        agent_with_history = RunnableWithMessageHistory(
-            agent_executor,
-            lambda session_id: message_history,
-            input_messages_key="input",
-            history_messages_key="chat_history",
-        )
+        # Convert message history to LangChain v1 format
+        history_messages = _convert_history_to_messages(message_history)
+
+        # Add current question to messages
+        messages = [*history_messages, {"role": "user", "content": question.strip()}]
 
         logger.info(f"Streaming AI query: {question[:100]}...")
 
-        # Stream response chunks
+        # Stream response chunks using LangGraph stream_mode="messages" for LLM tokens
+        full_response = ""
         try:
-            async for chunk in agent_with_history.astream(
-                {"input": question.strip()},
-                config={"configurable": {"session_id": session_id}},
+            async for message_chunk, metadata in agent.astream(
+                {"messages": messages},
+                stream_mode="messages",
             ):
-                # Extract content from chunk
-                if isinstance(chunk, dict):
-                    if "output" in chunk:
-                        yield chunk["output"]
-                    elif "answer" in chunk:
-                        yield chunk["answer"]
-                else:
-                    yield str(chunk)
+                # Filter: only stream from the model/agent node, not tool outputs
+                node_name = metadata.get("langgraph_node", "")
+
+                # Skip tool node outputs - we only want the final AI response
+                if "tool" in node_name.lower():
+                    continue
+
+                # Skip if this is a tool message (context retrieval results)
+                if hasattr(message_chunk, "type") and message_chunk.type == "tool":
+                    continue
+
+                # Extract content from the message chunk
+                content = ""
+                if hasattr(message_chunk, "content"):
+                    # Only stream if it's an AI message chunk, not a tool response
+                    msg_type = getattr(message_chunk, "type", "")
+                    if msg_type == "tool":
+                        continue
+                    content = message_chunk.content
+                elif isinstance(message_chunk, str):
+                    content = message_chunk
+
+                # Yield content if present
+                if content:
+                    full_response += content
+                    yield content
+
+            # Update message history with new messages
+            if hasattr(message_history, "add_user_message"):
+                message_history.add_user_message(question.strip())
+            if hasattr(message_history, "add_ai_message") and full_response:
+                message_history.add_ai_message(full_response)
 
             logger.info("AI streaming completed successfully")
 

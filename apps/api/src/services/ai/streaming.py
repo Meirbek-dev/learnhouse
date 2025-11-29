@@ -1,5 +1,5 @@
 """
-Streaming AI response support for real-time user feedback.
+Streaming AI response support for real-time user feedback using LangChain v1 API.
 """
 
 import asyncio
@@ -9,9 +9,9 @@ import time
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from langchain_classic.agents import AgentExecutor
 from langchain_community.chat_message_histories import RedisChatMessageHistory
-from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_core.messages import AIMessage, HumanMessage
+from langgraph.graph.state import CompiledStateGraph
 
 from src.services.ai.exceptions import (
     AIProcessingError,
@@ -22,6 +22,32 @@ from src.services.ai.exceptions import (
 logger = logging.getLogger(__name__)
 
 
+def _convert_history_to_messages(
+    message_history: RedisChatMessageHistory | list,
+) -> list[dict[str, str]]:
+    """Convert message history to LangChain v1 message format."""
+    messages: list[dict[str, str]] = []
+
+    if isinstance(message_history, list):
+        # Already a list, convert to message format
+        for msg in message_history:
+            if isinstance(msg, HumanMessage):
+                messages.append({"role": "user", "content": msg.content})
+            elif isinstance(msg, AIMessage):
+                messages.append({"role": "assistant", "content": msg.content})
+            elif isinstance(msg, dict):
+                messages.append(msg)
+    elif hasattr(message_history, "messages"):
+        # RedisChatMessageHistory or similar
+        for msg in message_history.messages:
+            if isinstance(msg, HumanMessage):
+                messages.append({"role": "user", "content": msg.content})
+            elif isinstance(msg, AIMessage):
+                messages.append({"role": "assistant", "content": msg.content})
+
+    return messages
+
+
 async def ask_ai_stream(
     question: str,
     message_history: RedisChatMessageHistory | list,
@@ -30,14 +56,14 @@ async def ask_ai_stream(
     embedding_model_name: str,
     openai_model_name: str,
     session_id: str = "default",
-    agent_executor: AgentExecutor | None = None,
+    agent_executor: CompiledStateGraph | None = None,
     cancel_event: asyncio.Event | None = None,
     collection_name: str | None = None,
-) -> AsyncGenerator[dict[str, Any]]:
+) -> AsyncGenerator[str, None]:
     """
-    Stream AI responses for better perceived performance.
+    Stream AI responses using LangChain v1 streaming API.
 
-    Yields chunks of the response as they're generated, providing
+    Yields SSE-formatted chunks of the response as they're generated, providing
     real-time feedback to users instead of waiting for complete response.
 
     Args:
@@ -48,10 +74,12 @@ async def ask_ai_stream(
         embedding_model_name: Embedding model to use
         openai_model_name: LLM model to use
         session_id: Session identifier
-        agent_executor: Pre-created agent executor (optional)
+        agent_executor: Pre-created agent (optional)
+        cancel_event: Event to signal cancellation
+        collection_name: Collection name for vector store
 
     Yields:
-        Dictionary chunks with response data
+        SSE-formatted string chunks with response data
 
     Raises:
         AIProcessingError: If processing fails
@@ -97,13 +125,11 @@ async def ask_ai_stream(
                 msg = "Failed to create AI agent"
                 raise AIProcessingError(msg)
 
-        # Create agent with history
-        agent_with_history = RunnableWithMessageHistory(
-            agent_executor,
-            lambda session_id: message_history,
-            input_messages_key="input",
-            history_messages_key="chat_history",
-        )
+        # Convert message history to LangChain v1 format
+        history_messages = _convert_history_to_messages(message_history)
+
+        # Add current question to messages
+        messages = [*history_messages, {"role": "user", "content": question.strip()}]
 
         logger.info(f"Starting streaming AI query: {question[:100]}...")
 
@@ -120,31 +146,13 @@ async def ask_ai_stream(
 
         try:
             # Process with streaming and timeout using asyncio.timeout
-            async with asyncio.timeout(
-                60.0
-            ):  # Increased timeout for complex operations (agent has 45s max_execution_time)
-                async for event in agent_with_history.astream_events(
-                    {"input": question.strip()},
-                    config={
-                        "configurable": {"session_id": session_id},
-                        "run_name": "ai_streaming",
-                    },
-                    version="v2",  # Use v2 for better streaming performance
+            async with asyncio.timeout(60.0):
+                # Use LangGraph streaming with stream_mode="messages" for LLM tokens
+                # This streams (message_chunk, metadata) tuples for each LLM token
+                async for message_chunk, metadata in agent_executor.astream(
+                    {"messages": messages},
+                    stream_mode="messages",
                 ):
-                    # Handle different event types
-                    event_type = event.get("event", "")
-
-                    # Debug logging to understand what events we're receiving
-                    if event_type in [
-                        "on_chat_model_stream",
-                        "on_llm_new_token",
-                        "on_chain_end",
-                    ]:
-                        event_name = event.get("name", "")
-                        logger.debug(f"Event: {event_type}, Name: {event_name}")
-
-                    # Stream LLM tokens immediately as they arrive
-                    # Try multiple event types for compatibility
                     # Check cancellation at the top of the loop to abort promptly
                     if cancel_event and cancel_event.is_set():
                         logger.info(
@@ -159,132 +167,65 @@ async def ask_ai_stream(
                         )
                         return
 
-                    if event_type == "on_chat_model_stream":
-                        chunk = event.get("data", {}).get("chunk")
-                        if chunk and hasattr(chunk, "content") and chunk.content:
-                            chunk_count += 1
-                            if first_chunk_time is None:
-                                first_chunk_time = time.perf_counter()
-                            full_response += chunk.content
-                            yield format_sse_message(
-                                {
-                                    "type": "chunk",
-                                    "content": chunk.content,
-                                    "chunk_id": chunk_count,
-                                }
-                            )
+                    # Filter: only stream from the model/agent node, not tool outputs
+                    # The langgraph_node metadata tells us which node emitted this chunk
+                    node_name = metadata.get("langgraph_node", "")
 
-                    # Alternative streaming event type
-                    elif event_type == "on_llm_new_token":
-                        token = event.get("data", {}).get("chunk")
-                        if token:
-                            chunk_count += 1
-                            if first_chunk_time is None:
-                                first_chunk_time = time.perf_counter()
-                            full_response += str(token)
-                            yield format_sse_message(
-                                {
-                                    "type": "chunk",
-                                    "content": str(token),
-                                    "chunk_id": chunk_count,
-                                }
-                            )
+                    # Skip tool node outputs - we only want the final AI response
+                    if "tool" in node_name.lower():
+                        continue
 
-                    # Handle tool outputs for context
-                    elif event_type == "on_tool_start":
-                        # Send indicator that tool is being used
-                        yield format_sse_message(
-                            {
-                                "type": "status",
-                                "status": "retrieving_context",
-                                "message": "Ищу релевантную информацию...",
-                            }
-                        )
+                    # Skip if this is a tool message (context retrieval results)
+                    if hasattr(message_chunk, "type") and message_chunk.type == "tool":
+                        continue
 
-                    elif event_type == "on_tool_end":
-                        # Send a subtle indicator that context was retrieved
-                        yield format_sse_message(
-                            {
-                                "type": "status",
-                                "status": "context_retrieved",
-                                "message": "Анализирую контекст...",
-                            }
-                        )
-
-                    # Capture ONLY the final AgentExecutor output if streaming didn't work
-                    elif event_type == "on_chain_end":
-                        # Check if this is the final agent output (not intermediate tool calls)
-                        event_name = event.get("name", "")
-
-                        # Only process AgentExecutor's final output
-                        if "AgentExecutor" not in event_name:
+                    # Extract content from the message chunk
+                    content = ""
+                    if hasattr(message_chunk, "content"):
+                        # Only stream if it's an AI message chunk, not a tool response
+                        msg_type = getattr(message_chunk, "type", "")
+                        if msg_type == "tool":
                             continue
+                        content = message_chunk.content
+                    elif isinstance(message_chunk, str):
+                        content = message_chunk
 
-                        # Inspect the chain output payload and try to extract
-                        # a final text answer. Some agents/tooling return a
-                        # dict, some return a string, and some return lists
-                        # of Message objects.
-                        output_data = event.get("data", {}).get("output", {})
-
-                        # Log the actual output structure for debugging
-                        logger.debug(
-                            f"Chain end output_data type: {type(output_data)}, value: {str(output_data)[:200]}"
+                    # Stream content if present
+                    if content:
+                        chunk_count += 1
+                        if first_chunk_time is None:
+                            first_chunk_time = time.perf_counter()
+                        full_response += content
+                        yield format_sse_message(
+                            {
+                                "type": "chunk",
+                                "content": content,
+                                "chunk_id": chunk_count,
+                            }
                         )
 
-                        # Extract the actual text output in a tolerant way
-                        output_text = ""
-                        if isinstance(output_data, dict):
-                            output_text = (
-                                output_data.get("output")
-                                or output_data.get("text")
-                                or output_data.get("answer")
-                                or output_data.get("result")  # Try 'result' key as well
-                                or ""
+                        # Debug logging for first few chunks
+                        if chunk_count <= 3:
+                            logger.debug(
+                                f"Chunk {chunk_count} from node '{node_name}': {content[:50]}..."
                             )
-                        elif isinstance(output_data, str):
-                            output_text = output_data
-                        elif isinstance(output_data, list) and output_data:
-                            # Handle list of messages - extract content from last message
-                            last_item = output_data[-1]
-                            if hasattr(last_item, "content"):
-                                output_text = last_item.content
-                            elif isinstance(last_item, dict):
-                                output_text = last_item.get("content", "")
 
-                        # Only use this fallback if:
-                        # 1. We haven't streamed anything yet
-                        # 2. The output is actual text (not empty, not "[]", not intermediate data)
-                        if (
-                            output_text
-                            and chunk_count == 0
-                            and output_text.strip()
-                            and output_text not in ["[]", "{}", "None", ""]
-                        ):
-                            logger.warning(
-                                "No streaming chunks received, using final output from chain_end"
-                            )
-                            full_response = output_text
-                            # Yield the full response as a single chunk
-                            yield format_sse_message(
-                                {"type": "chunk", "content": output_text, "chunk_id": 1}
-                            )
-                            chunk_count = 1
-
-            # Send final response after loop completes so clients can
-            # finalize UI state (stop spinners) and persist session id.
-            # Include assembled full response and metadata.
-
-            # If we didn't get any chunks, it means the agent stopped without generating output
+            # Handle no output case
             if chunk_count == 0:
-                logger.error(
-                    "Agent completed but produced no output - likely hit max_iterations without generating answer"
-                )
-                error_msg = "AI assistant couldn't generate a response. The query may be too complex or the context too large. Please try with a shorter text or simpler question."
+                logger.error("Agent completed but produced no output")
+                error_msg = "AI assistant couldn't generate a response. Please try with a simpler question."
                 yield format_sse_message(
                     {"type": "error", "error": error_msg, "error_code": "NO_OUTPUT"}
                 )
                 return
 
+            # Update message history
+            if hasattr(message_history, "add_user_message"):
+                message_history.add_user_message(question.strip())
+            if hasattr(message_history, "add_ai_message") and full_response:
+                message_history.add_ai_message(full_response)
+
+            # Send final response
             try:
                 yield format_sse_message(
                     {
@@ -295,12 +236,7 @@ async def ask_ai_stream(
                     }
                 )
             except Exception:
-                # In rare cases the client may have disconnected between
-                # the last chunk and the final publication; ignore failures
-                # here but still log the completion for observability.
-                logger.debug(
-                    "Unable to yield final SSE message to client (client disconnected?)"
-                )
+                logger.debug("Unable to yield final SSE message (client disconnected?)")
 
             total_ms = (time.perf_counter() - start_time) * 1000
             ttfb_ms = (
@@ -322,22 +258,6 @@ async def ask_ai_stream(
                 {"type": "error", "error": error_msg, "error_code": "TIMEOUT"}
             )
             raise AITimeoutError(60, details={"question_length": len(question)}) from e
-        except ValueError as e:
-            # Handle agent configuration errors (e.g., unsupported early_stopping_method)
-            if "early_stopping_method" in str(e):
-                error_msg = "AI agent configuration error. Please try again."
-                logger.exception(f"Agent configuration error: {e!s}")
-                yield format_sse_message(
-                    {"type": "error", "error": error_msg, "error_code": "CONFIG_ERROR"}
-                )
-                raise AIProcessingError(
-                    error_msg,
-                    details={
-                        "error_type": "agent_config_error",
-                        "session_id": session_id,
-                    },
-                ) from e
-            raise
 
     except (AIProcessingError, VectorStoreError, AITimeoutError):
         raise

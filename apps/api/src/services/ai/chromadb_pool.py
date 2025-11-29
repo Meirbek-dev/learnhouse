@@ -53,13 +53,14 @@ class ChromaDBPool:
                 and chromadb_config.db_host
                 and getattr(chromadb_config, "isSeparateDatabaseEnabled", False)
             ):
+                port = getattr(chromadb_config, "db_port", 8001)
                 logger.info(
-                    f"Creating ChromaDB client for host: {chromadb_config.db_host}"
+                    f"Creating ChromaDB client for host: {chromadb_config.db_host}:{port}"
                 )
                 try:
                     client = chromadb.HttpClient(
                         host=chromadb_config.db_host,
-                        port=8000,
+                        port=port,
                         settings=self._settings,
                     )
                     # Test connection
