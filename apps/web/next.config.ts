@@ -35,7 +35,7 @@ const nextConfig: NextConfig = {
   },
   reactCompiler: true,
   reactStrictMode: true,
-  cacheComponents: false,
+  cacheComponents: true,
   devIndicators: false,
   output: 'standalone',
   productionBrowserSourceMaps: false,

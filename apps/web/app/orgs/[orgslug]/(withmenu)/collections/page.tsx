@@ -21,10 +21,7 @@ interface MetadataProps {
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
   const t = await getTranslations('HomePage.Collections');
-  const org = await getOrganizationContextInfo(params.orgslug, {
-    cache: 'no-store',
-    tags: ['organizations'],
-  });
+  const org = await getOrganizationContextInfo(params.orgslug);
 
   // SEO
   return {
@@ -61,15 +58,9 @@ const CollectionsPage = async (params: any) => {
   const session = await auth();
   const access_token = session?.tokens?.access_token;
   const { orgslug } = await params.params;
-  const org = await getOrganizationContextInfo(orgslug, {
-    revalidate: 1800,
-    tags: ['organizations'],
-  });
+  const org = await getOrganizationContextInfo(orgslug);
   const org_id = org.id;
-  const collections = await getOrgCollections(org_id, access_token, {
-    cache: 'no-store',
-    tags: ['collections'],
-  });
+  const collections = await getOrgCollections(org_id, access_token);
 
   return (
     <GeneralWrapperStyled>

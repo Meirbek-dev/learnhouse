@@ -12,12 +12,7 @@ interface MetadataProps {
 }
 
 export async function generateMetadata(params: MetadataProps): Promise<Metadata> {
-  const { orgslug } = await params.searchParams;
   const t = await getTranslations('Auth.Signup');
-  const org = await getOrganizationContextInfo(orgslug, {
-    cache: 'no-store',
-    tags: ['organizations'],
-  });
 
   return {
     title: t('title', { orgName: 'Ashyq Bilim' }),

@@ -27,15 +27,10 @@ export default async function GamificationDashboard({ orgId }: GamificationDashb
     }
 
     // Fetch dashboard data and leaderboard in parallel
+    // Caching is handled inside the service functions via `use cache`
     const [dashboardData, leaderboardData] = await Promise.all([
-      getServerGamificationDashboard(orgId, {
-        revalidate: 30,
-        tags: [`gamification:dashboard:${orgId}`],
-      }),
-      getServerOrganizationLeaderboard(orgId, 10, {
-        revalidate: 60,
-        tags: [`gamification:leaderboard:${orgId}`],
-      }),
+      getServerGamificationDashboard(orgId),
+      getServerOrganizationLeaderboard(orgId, 10),
     ]);
 
     // If no dashboard data (error or not available), return null silently

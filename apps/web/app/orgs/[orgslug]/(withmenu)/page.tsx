@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic';
-
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import { PageSuspense } from '@components/Utils/PageSuspense';
@@ -15,10 +13,7 @@ interface MetadataProps {
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
   // Get Org context information
-  const org = await getOrganizationContextInfo(params.orgslug, {
-    cache: 'no-store',
-    tags: ['organizations'],
-  });
+  const org = await getOrganizationContextInfo(params.orgslug);
   const t = await getTranslations('General');
 
   // SEO

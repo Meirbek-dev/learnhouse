@@ -22,7 +22,7 @@ import { getUser } from '@services/users/users';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import type { ReactNode } from 'react';
 
 interface UserProfilePopupProps {
@@ -74,8 +74,19 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Track previous inputs so we don't refetch when only `t` (translations fn) changes
+  const prevUserIdRef = useRef<number | null>(null);
+  const prevTokenRef = useRef<string | null | undefined>(null);
 
   useEffect(() => {
+    const token = session?.data?.tokens?.access_token;
+
+    const shouldFetch = prevUserIdRef.current !== userId || prevTokenRef.current !== token;
+    prevUserIdRef.current = userId ?? null;
+    prevTokenRef.current = token;
+
+    if (!shouldFetch) return;
+
     const fetchUserData = async () => {
       if (!userId) return;
 
@@ -83,7 +94,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
       setError(null);
 
       try {
-        const data = await getUser(userId, session?.data?.tokens?.access_token);
+        const data = await getUser(userId, token);
         setUserData(data);
       } catch (error) {
         setError(t('loadingError'));
@@ -94,6 +105,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
     };
 
     fetchUserData();
+    // Keep `t` in deps to avoid hook-size mismatch across renders (HMR/rehydration)
   }, [userId, session?.data?.tokens?.access_token, t]);
 
   return (

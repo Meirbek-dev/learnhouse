@@ -20,14 +20,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const t = await getTranslations('General');
 
   // Get Org context information
-  const org = await getOrganizationContextInfo(params.orgslug, {
-    revalidate: 1800,
-    tags: ['organizations'],
-  });
-  const col = await getCollectionById(params.collectionid, access_token || '', {
-    cache: 'no-store',
-    tags: ['collections'],
-  });
+  const col = await getCollectionById(params.collectionid, access_token || '');
 
   // SEO
   return {
@@ -56,15 +49,9 @@ const CollectionPage = async (params: any) => {
   const session = await auth();
   const access_token = session?.tokens?.access_token;
   const resolvedParams = await params.params;
-  const org = await getOrganizationContextInfo(resolvedParams.orgslug, {
-    revalidate: 1800,
-    tags: ['organizations'],
-  });
+  const org = await getOrganizationContextInfo(resolvedParams.orgslug);
   const { orgslug } = resolvedParams;
-  const col = await getCollectionById(resolvedParams.collectionid, access_token || '', {
-    cache: 'no-store',
-    tags: ['collections'],
-  });
+  const col = await getCollectionById(resolvedParams.collectionid, access_token || '');
 
   const removeCoursePrefix = (courseid: string) => {
     return courseid.replace('course_', '');

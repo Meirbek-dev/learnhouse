@@ -1,22 +1,42 @@
+'use server'
 import {
   RequestBodyFormWithAuthHeader,
   RequestBodyWithAuthHeader,
   errorHandling,
   getResponseMetadata,
 } from '@services/utils/ts/requests';
+import { cacheLife, cacheTag, CacheProfiles } from '@/lib/cache';
+import { tags } from '@/lib/cacheTags';
 import { getAPIUrl } from '@services/config/config';
 
 /*
- This file includes only POST, PUT, DELETE requests
- GET requests are called from the frontend using SWR (https://swr.vercel.app/)
+ This file includes POST, PUT, DELETE requests and cached GET requests
+ Client-side GET requests are called from the frontend using SWR
 */
 
-export async function getOrgCourses(org_slug: string, next: any, access_token?: any) {
-  const result: any = await fetch(
-    `${getAPIUrl()}courses/org_slug/${org_slug}/page/1/limit/128`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token),
-  );
+/**
+ * Cached fetch for organization courses
+ * Uses `use cache` directive for cacheComponents
+ */
+async function fetchOrgCourses(org_slug: string, access_token?: string) {
+  'use cache';
+  cacheTag(tags.courses);
+  cacheLife(CacheProfiles.courses);
+
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (access_token) {
+    headers['Authorization'] = `Bearer ${access_token}`;
+  }
+
+  const result = await fetch(`${getAPIUrl()}courses/org_slug/${org_slug}/page/1/limit/128`, {
+    method: 'GET',
+    headers,
+  });
   return await errorHandling(result);
+}
+
+export async function getOrgCourses(org_slug: string, _next?: any, access_token?: any) {
+  return fetchOrgCourses(org_slug, access_token);
 }
 
 export async function searchOrgCourses(
@@ -34,12 +54,28 @@ export async function searchOrgCourses(
   return await errorHandling(result);
 }
 
-export async function getCourseMetadata(course_uuid: string, next: any, access_token: string | null | undefined) {
-  const result = await fetch(
-    `${getAPIUrl()}courses/course_${course_uuid}/meta`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token || undefined),
-  );
+/**
+ * Cached fetch for course metadata
+ */
+async function fetchCourseMetadata(course_uuid: string, access_token?: string) {
+  'use cache';
+  cacheTag(tags.courses);
+  cacheLife(CacheProfiles.courses);
+
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (access_token) {
+    headers['Authorization'] = `Bearer ${access_token}`;
+  }
+
+  const result = await fetch(`${getAPIUrl()}courses/course_${course_uuid}/meta`, {
+    method: 'GET',
+    headers,
+  });
   return await errorHandling(result);
+}
+
+export async function getCourseMetadata(course_uuid: string, _next?: any, access_token?: string | null) {
+  return fetchCourseMetadata(course_uuid, access_token || undefined);
 }
 
 export async function updateCourse(course_uuid: string, data: any, access_token: string) {
@@ -57,20 +93,54 @@ export async function updateCourse(course_uuid: string, data: any, access_token:
   return await errorHandling(result);
 }
 
-export async function getCourse(course_uuid: string, next: any, access_token: string) {
-  const result: any = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token),
-  );
+/**
+ * Cached fetch for full course data
+ */
+async function fetchCourse(course_uuid: string, access_token: string) {
+  'use cache';
+  cacheTag(tags.courses);
+  cacheLife(CacheProfiles.courses);
+
+  const result = await fetch(`${getAPIUrl()}courses/${course_uuid}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${access_token}`,
+    },
+  });
   return await errorHandling(result);
 }
 
-export async function getCourseById(course_id: number, next: any, access_token: string) {
-  const result: any = await fetch(
-    `${getAPIUrl()}courses/id/${course_id}`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token),
-  );
+export async function getCourse(course_uuid: string, _next?: any, access_token?: string) {
+  if (!access_token) {
+    throw new Error('Access token required');
+  }
+  return fetchCourse(course_uuid, access_token);
+}
+
+/**
+ * Cached fetch for course by ID
+ */
+async function fetchCourseById(course_id: number, access_token: string) {
+  'use cache';
+  cacheTag(tags.courses);
+  cacheLife(CacheProfiles.courses);
+
+  const result = await fetch(`${getAPIUrl()}courses/id/${course_id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${access_token}`,
+    },
+  });
   return await errorHandling(result);
+}
+
+export async function getCourseById(course_id: number, _next?: any, access_token?: string) {
+  if (!access_token) {
+    throw new Error('Access token required');
+  }
+  return fetchCourseById(course_id, access_token);
 }
 
 export async function updateCourseThumbnail(course_uuid: string, formData: FormData, access_token: string) {

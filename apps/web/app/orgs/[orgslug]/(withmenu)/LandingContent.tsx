@@ -18,10 +18,7 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
     // Fetch organization info with detailed error handling
     let org;
     try {
-      org = await getOrganizationContextInfo(orgslug, {
-        cache: 'no-store',
-        tags: ['organizations'],
-      });
+      org = await getOrganizationContextInfo(orgslug);
     } catch (error) {
       console.error('[LandingContent] Failed to fetch organization info:', {
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -35,10 +32,7 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
 
     // Only fetch gamification data if user is authenticated
     const gamificationPromise = access_token
-      ? getServerGamificationDashboard(org.id, {
-          revalidate: 30,
-          tags: [`gamification:dashboard:${org.id}`],
-        }).catch((error) => {
+      ? getServerGamificationDashboard(org.id).catch((error) => {
           console.error('[LandingContent] Gamification fetch failed:', {
             message: error instanceof Error ? error.message : 'Unknown error',
             org_id: org.id,
@@ -48,14 +42,14 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
       : Promise.resolve(null);
 
     const [courses, collections, gamificationData] = await Promise.all([
-      getOrgCourses(orgslug, { cache: 'no-store', tags: ['courses'] }, access_token || null).catch((error) => {
+      getOrgCourses(orgslug, undefined, access_token || null).catch((error) => {
         console.error('[LandingContent] Courses fetch failed:', {
           message: error instanceof Error ? error.message : 'Unknown error',
           orgslug,
         });
         return [];
       }),
-      getOrgCollections(org.id, access_token, { cache: 'no-store', tags: ['courses'] }).catch((error) => {
+      getOrgCollections(org.id, access_token).catch((error) => {
         console.error('[LandingContent] Collections fetch failed:', {
           message: error instanceof Error ? error.message : 'Unknown error',
           org_id: org.id,

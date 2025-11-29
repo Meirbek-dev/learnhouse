@@ -20,11 +20,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const access_token = session?.tokens?.access_token;
   const t = await getTranslations('DashPage.Editor');
 
-  const course_meta = await getCourseMetadata(
-    params.courseid,
-    { revalidate: 60, tags: ['courses'] },
-    access_token ?? null,
-  );
+  const course_meta = await getCourseMetadata(params.courseid, undefined, access_token ?? null);
 
   return {
     title: t('metaTitleEdit', { activityName: course_meta.name }),
@@ -39,18 +35,11 @@ const EditActivity = async (props: { params: Promise<{ courseid: string; activit
   const { activityuuid, courseid } = params;
 
   const [courseInfo, activity] = await Promise.all([
-    getCourseMetadata(courseid, { cache: 'no-store', tags: ['courses'] }, access_token),
-    getActivityWithAuthHeader(activityuuid, { cache: 'no-store', tags: ['activities'] }, access_token),
+    getCourseMetadata(courseid, undefined, access_token),
+    getActivityWithAuthHeader(activityuuid, undefined, access_token),
   ]);
 
-  const org = await getOrganizationContextInfoWithId(
-    courseInfo.org_id,
-    {
-      revalidate: 180,
-      tags: ['organizations'],
-    },
-    access_token || '',
-  );
+  const org = await getOrganizationContextInfoWithId(courseInfo.org_id, undefined, access_token || '');
 
   return (
     <div className={jetBrainsMono.variable}>

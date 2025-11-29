@@ -6,10 +6,7 @@ import type { Metadata } from 'next';
 export async function generateMetadata({ params }: { params: Promise<{ orgslug: string }> }): Promise<Metadata> {
   const { orgslug } = await params;
   const t = await getTranslations('NewCollectionPage');
-  const org = await getOrganizationContextInfo(orgslug, {
-    cache: 'no-store',
-    tags: ['organizations'],
-  });
+  const org = await getOrganizationContextInfo(orgslug);
 
   return {
     title: `${t('metaTitle')} — Ashyq Bilim`,

@@ -13,11 +13,6 @@ export async function generateMetadata(params: MetadataProps): Promise<Metadata>
   const { orgslug } = await params.searchParams;
   const t = await getTranslations('Auth.Login');
 
-  const org = await getOrganizationContextInfo(orgslug, {
-    cache: 'no-store',
-    tags: ['organizations'],
-  });
-
   return {
     title: t('title', { orgName: 'Ashyq Bilim' }),
   };
@@ -25,10 +20,7 @@ export async function generateMetadata(params: MetadataProps): Promise<Metadata>
 
 const Login = async (params: MetadataProps) => {
   const { orgslug } = await params.searchParams;
-  const org = await getOrganizationContextInfo(orgslug, {
-    cache: 'no-store',
-    tags: ['organizations'],
-  });
+  const org = await getOrganizationContextInfo(orgslug);
 
   return (
     <div>

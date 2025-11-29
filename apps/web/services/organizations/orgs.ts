@@ -1,14 +1,18 @@
+'use server';
+
 import {
   RequestBodyFormWithAuthHeader,
   RequestBodyWithAuthHeader,
   errorHandling,
   getResponseMetadata,
 } from '@services/utils/ts/requests';
+import { cacheLife, cacheTag, CacheProfiles } from '@/lib/cache';
+import { tags } from '@/lib/cacheTags';
 import { getAPIUrl } from '@services/config/config';
 
 /*
- This file includes only POST, PUT, DELETE requests
- GET requests are called from the frontend using SWR (https://swr.vercel.app/)
+ This file includes POST, PUT, DELETE requests and cached GET requests
+ Client-side GET requests are called from the frontend using SWR
 */
 
 export async function createNewOrganization(body: any, access_token: string) {
@@ -24,38 +28,62 @@ export async function deleteOrganizationFromBackend(org_id: number, access_token
   return await errorHandling(result);
 }
 
-export async function getOrganizationContextInfo(org_slug: any, next: any, access_token?: string) {
-  const result = await fetch(
-    `${getAPIUrl()}orgs/slug/${org_slug}`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token),
-  );
-  return await errorHandling(result);
-}
+/**
+ * Cached fetch for organization context info by slug
+ * Uses `use cache` directive for cacheComponents
+ */
+async function fetchOrganizationBySlug(org_slug: string, access_token?: string) {
+  'use cache';
+  cacheTag(tags.organizations);
+  cacheLife(CacheProfiles.organization);
 
-export async function getOrganizationContextInfoWithId(org_id: number, next: any, access_token: string) {
-  const result = await fetch(
-    `${getAPIUrl()}orgs/${org_id}`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token),
-  );
-  return await errorHandling(result);
-}
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (access_token) {
+    headers['Authorization'] = `Bearer ${access_token}`;
+  }
 
-export async function getOrganizationContextInfoWithoutCredentials(org_slug: any, next: any) {
-  const HeadersConfig = new Headers({ 'Content-Type': 'application/json' });
-  const options: any = {
+  const result = await fetch(`${getAPIUrl()}orgs/slug/${org_slug}`, {
     method: 'GET',
-    headers: HeadersConfig,
-    redirect: 'follow',
-    // Next.js
-    next,
-  };
-
-  const result = await fetch(`${getAPIUrl()}orgs/slug/${org_slug}`, options);
+    headers,
+  });
   return await errorHandling(result);
 }
 
-export function getOrganizationContextInfoNoAsync(org_slug: any, next: any, access_token: string) {
-  return fetch(`${getAPIUrl()}orgs/slug/${org_slug}`, RequestBodyWithAuthHeader('GET', null, next, access_token));
+export async function getOrganizationContextInfo(org_slug: any, _next?: any, access_token?: string) {
+  return fetchOrganizationBySlug(org_slug, access_token);
+}
+
+/**
+ * Cached fetch for organization context info by ID
+ */
+async function fetchOrganizationById(org_id: number, access_token: string) {
+  'use cache';
+  cacheTag(tags.organizations);
+  cacheLife(CacheProfiles.organization);
+
+  const result = await fetch(`${getAPIUrl()}orgs/${org_id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${access_token}`,
+    },
+  });
+  return await errorHandling(result);
+}
+
+export async function getOrganizationContextInfoWithId(org_id: number, _next?: any, access_token?: string) {
+  if (!access_token) {
+    throw new Error('Access token required');
+  }
+  return await fetchOrganizationById(org_id, access_token);
+}
+
+export async function getOrganizationContextInfoWithoutCredentials(org_slug: any, _next?: any) {
+  return await fetchOrganizationBySlug(org_slug);
+}
+
+export async function getOrganizationContextInfoNoAsync(org_slug: any, next: any, access_token: string) {
+  return await fetch(`${getAPIUrl()}orgs/slug/${org_slug}`, RequestBodyWithAuthHeader('GET', null, next, access_token));
 }
 
 export async function updateUserRole(org_id: number, user_id: number, role_uuid: string, access_token: string) {

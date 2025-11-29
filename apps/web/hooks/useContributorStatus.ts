@@ -49,7 +49,8 @@ export function useContributorStatus(courseUuid: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [courseUuid, accessToken, userId, t]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseUuid, accessToken, userId]);
 
   useEffect(() => {
     if (userId) {

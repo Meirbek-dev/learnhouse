@@ -20,7 +20,7 @@ interface Session {
 
 // Add this function at the top level to avoid duplicate fetches
 async function fetchCourseMetadata(courseuuid: string, access_token: string | null | undefined) {
-  return await getCourseMetadata(courseuuid, { revalidate: 60, tags: ['courses'] }, access_token || null);
+  return await getCourseMetadata(courseuuid, undefined, access_token || null);
 }
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
@@ -35,7 +35,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const isCourseEnd = activityid === 'end';
   const activity = isCourseEnd
     ? null
-    : await getActivityWithAuthHeader(activityid, { cache: 'no-store', tags: ['activities'] }, access_token || null);
+    : await getActivityWithAuthHeader(activityid, undefined, access_token || null);
 
   // Localized page title
   const pageTitle = isCourseEnd
@@ -79,7 +79,7 @@ const ActivityPage = async (params: any) => {
     fetchCourseMetadata(courseuuid, access_token),
     isCourseEnd
       ? Promise.resolve(null)
-      : getActivityWithAuthHeader(activityid, { cache: 'no-store', tags: ['activities'] }, access_token || null),
+      : getActivityWithAuthHeader(activityid, undefined, access_token || null),
   ]);
 
   return (

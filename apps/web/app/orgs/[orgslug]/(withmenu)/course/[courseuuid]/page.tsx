@@ -17,15 +17,8 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const access_token = session?.tokens?.access_token;
 
   // Get Org context information
-  const org = await getOrganizationContextInfo(params.orgslug, {
-    revalidate: 1800,
-    tags: ['organizations'],
-  });
-  const course_meta = await getCourseMetadata(
-    params.courseuuid,
-    { cache: 'no-store', tags: ['courses'] },
-    access_token || null,
-  );
+  const org = await getOrganizationContextInfo(params.orgslug);
+  const course_meta = await getCourseMetadata(params.courseuuid, undefined, access_token || null);
 
   // SEO
   return {
@@ -68,11 +61,7 @@ const CoursePage = async (params: any) => {
   const { courseuuid, orgslug } = await params.params;
 
   // Fetch course metadata once
-  const course_meta = await getCourseMetadata(
-    courseuuid,
-    { cache: 'no-store', tags: ['courses'] },
-    access_token || null,
-  );
+  const course_meta = await getCourseMetadata(courseuuid, undefined, access_token || null);
 
   return (
     <CourseClient

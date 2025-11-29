@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Tag parameter is required' }, { status: 400, headers: corsHeaders });
   }
 
-  revalidateTag(tag, { expire: 0 });
+  revalidateTag(tag, 'max');
 
   return NextResponse.json({ revalidated: true, now: Date.now(), tag }, { status: 200, headers: corsHeaders });
 }
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     for (const tag of uniqueTags) {
-      revalidateTag(tag, { expire: 0 });
+      revalidateTag(tag, 'max');
     }
 
     return NextResponse.json(

@@ -14,10 +14,7 @@ interface MetadataProps {
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const t = await getTranslations('General');
   const params = await props.params;
-  const org = await getOrganizationContextInfo(params.orgslug, {
-    revalidate: 1800,
-    tags: ['organizations'],
-  });
+  const org = await getOrganizationContextInfo(params.orgslug);
 
   // SEO
   return {
@@ -44,13 +41,10 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
 async function CoursesPage(params: any) {
   const { orgslug } = await params.params;
-  const org = await getOrganizationContextInfo(orgslug, {
-    revalidate: 1800,
-    tags: ['organizations'],
-  });
+  const org = await getOrganizationContextInfo(orgslug);
   const session = await auth();
   const access_token = session?.tokens?.access_token;
-  const courses = await getOrgCourses(orgslug, { cache: 'no-store', tags: ['courses'] }, access_token || null);
+  const courses = await getOrgCourses(orgslug, undefined, access_token || null);
 
   return (
     <CoursesHome

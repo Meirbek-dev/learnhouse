@@ -15,10 +15,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const searchParams = await props.searchParams;
   const t = await getTranslations('General');
 
-  const org = await getOrganizationContextInfo(params.orgslug, {
-    cache: 'no-store',
-    tags: ['organizations'],
-  });
+  const org = await getOrganizationContextInfo(params.orgslug);
 
   const searchQuery = Array.isArray(searchParams.q) ? searchParams.q[0] : searchParams.q || '';
   const searchType = Array.isArray(searchParams.type) ? searchParams.type[0] : searchParams.type || 'all';

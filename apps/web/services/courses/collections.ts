@@ -1,10 +1,14 @@
+ 'use server';
+
 import { RequestBodyWithAuthHeader, errorHandling } from '@services/utils/ts/requests';
+import { cacheLife, cacheTag, CacheProfiles } from '@/lib/cache';
+import { tags } from '@/lib/cacheTags';
 
 import { getAPIUrl } from '../config/config';
 
 /*
- This file includes only POST, PUT, DELETE requests
- GET requests are called from the frontend using SWR (https://swr.vercel.app/)
+ This file includes POST, PUT, DELETE requests and cached GET requests
+ Client-side GET requests are called from the frontend using SWR
 */
 
 export async function deleteCollection(collection_uuid: string, access_token: string) {
@@ -24,18 +28,47 @@ export async function createCollection(collection: any, access_token: string) {
   return await errorHandling(result);
 }
 
-export async function getCollectionById(collection_uuid: string, access_token: string, next: any) {
-  const result: any = await fetch(
-    `${getAPIUrl()}collections/collection_${collection_uuid}`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token),
-  );
+async function fetchCollectionById(collection_uuid: string, access_token?: string) {
+  'use cache';
+  cacheTag(tags.collections);
+  cacheLife(CacheProfiles.courses);
+
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (access_token) {
+    headers['Authorization'] = `Bearer ${access_token}`;
+  }
+
+  const result = await fetch(`${getAPIUrl()}collections/collection_${collection_uuid}`, {
+    method: 'GET',
+    headers,
+  });
   return await errorHandling(result);
 }
 
-export async function getOrgCollections(org_id: number, access_token?: string, next?: any) {
-  const result: any = await fetch(
-    `${getAPIUrl()}collections/org/${org_id}/page/1/limit/10`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token),
-  );
+export async function getCollectionById(collection_uuid: string, access_token?: string, _next?: any) {
+  return fetchCollectionById(collection_uuid, access_token);
+}
+
+/**
+ * Cached fetch for organization collections
+ */
+async function fetchOrgCollections(org_id: number, access_token?: string) {
+  'use cache';
+  cacheTag(tags.collections);
+  cacheLife(CacheProfiles.courses);
+
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (access_token) {
+    headers['Authorization'] = `Bearer ${access_token}`;
+  }
+
+  const result = await fetch(`${getAPIUrl()}collections/org/${org_id}/page/1/limit/10`, {
+    method: 'GET',
+    headers,
+  });
   return await errorHandling(result);
+}
+
+export async function getOrgCollections(org_id: number, access_token?: string, _next?: any) {
+  return fetchOrgCollections(org_id, access_token);
 }

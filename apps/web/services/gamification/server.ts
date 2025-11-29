@@ -1,17 +1,14 @@
-// Server-only data fetchers with Next.js cache tags (simplified)
+'use server';
+
+// Server-only data fetchers with Next.js cacheComponents
 
 import type { DashboardData, OrganizationLeaderboard, UserGamificationProfile } from '@/types/gamification';
 import { extractStreakInfo } from '@/types/gamification/profile';
 import { getAPIUrl } from '@/services/config/config';
-import { gamificationTags } from '@/lib/cacheTags';
+import { gamificationTag, gamificationTags } from '@/lib/cacheTags';
+import { cacheLife, cacheTag, CacheProfiles } from '@/lib/cache';
 import { revalidateTag } from 'next/cache';
 import { auth } from '@/auth';
-
-interface GamificationFetchOptions {
-  revalidate?: number | null;
-  tags?: string[];
-  cache?: RequestCache | null;
-}
 
 interface RawDashboardResponse {
   profile?: Record<string, unknown>;
@@ -137,84 +134,31 @@ async function requireAccessToken(): Promise<string> {
   return token;
 }
 
-function buildCacheOptions(
-  orgId: number,
-  opts: GamificationFetchOptions | undefined,
-  fallbackRevalidate: number,
-): { next?: Record<string, any>; cache?: RequestCache } {
-  const next: Record<string, any> = {};
-  const tags = opts?.tags ?? gamificationTags(orgId);
-  if (tags?.length) {
-    next.tags = tags;
-  }
-
-  let cache: RequestCache | undefined;
-  if (opts?.cache) {
-    cache = opts.cache;
-  }
-
-  // Only set revalidate if cache is not 'no-store'
-  if (cache !== 'no-store') {
-    const revalidate = opts?.revalidate;
-    if (revalidate !== undefined && revalidate !== null) {
-      const parsed = Number(revalidate);
-      if (Number.isFinite(parsed) && parsed > 0) {
-        next.revalidate = parsed;
-      } else {
-        cache = 'no-store';
-      }
-    } else if (fallbackRevalidate > 0) {
-      next.revalidate = fallbackRevalidate;
-    }
-  }
-
-  if (Object.keys(next).length === 0) {
-    return cache ? { cache } : {};
-  }
-
-  return cache ? { next, cache } : { next };
-}
 /**
- * Fetch unified gamification data from API
- * Returns null if user is not authenticated or if fetch fails
+ * Cached fetch for unified gamification data
+ * Uses `use cache` directive for cacheComponents
  */
-async function getUnifiedServerData(
+async function fetchGamificationData(
   orgId: number,
-  opts?: GamificationFetchOptions,
+  accessToken: string,
 ): Promise<RawDashboardResponse | null> {
-  // Check if user is authenticated first
-  const accessToken = await getAccessToken();
-  if (!accessToken) {
-    return null; // Expected: user not authenticated
-  }
+  'use cache';
+  cacheTag(gamificationTag.dashboard(orgId));
+  cacheLife(CacheProfiles.realtime);
 
   try {
-    // New unified endpoint returns DashboardRead (profile + recent_transactions)
-    const { next, cache } = buildCacheOptions(orgId, opts, 30);
-    const fetchOptions: RequestInit & { next?: Record<string, any> } = {
+    const res = await fetch(`${getAPIUrl()}gamification/${orgId}`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${accessToken}` },
-    };
-    if (cache) {
-      fetchOptions.cache = cache;
-    }
-    if (next) {
-      fetchOptions.next = next;
-    }
-    const res = await fetch(`${getAPIUrl()}gamification/${orgId}`, fetchOptions);
+    });
 
     if (!res.ok) {
-      // Don't log for auth errors (expected for unauthorized users)
-      if (res.status === 401 || res.status === 403) {
-        return null;
-      }
-      // Log unexpected errors but still return null to prevent crashes
+      if (res.status === 401 || res.status === 403) return null;
       console.error(`Failed to fetch gamification data: ${res.status}`);
       return null;
     }
     return res.json();
   } catch (error) {
-    // Only log if it's not a network error (which can happen when API is down)
     if (error instanceof Error && !error.message.includes('fetch')) {
       console.error('Error fetching gamification data:', error);
     }
@@ -222,11 +166,57 @@ async function getUnifiedServerData(
   }
 }
 
-export async function getServerGamificationProfile(
+/**
+ * Cached fetch for leaderboard data
+ */
+async function fetchLeaderboardData(
   orgId: number,
-  opts?: GamificationFetchOptions,
-): Promise<UserGamificationProfile | null> {
-  const json = await getUnifiedServerData(orgId, opts);
+  limit: number,
+  accessToken: string,
+): Promise<RawLeaderboardResponse | null> {
+  'use cache';
+  cacheTag(gamificationTag.leaderboard(orgId));
+  cacheLife(CacheProfiles.realtime);
+
+  try {
+    const res = await fetch(
+      `${getAPIUrl()}gamification/${orgId}/leaderboard?limit=${encodeURIComponent(String(limit))}`,
+      {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+    );
+
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) return null;
+      console.error(`Failed to fetch leaderboard: ${res.status}`);
+      return null;
+    }
+
+    return res.json();
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+    return null;
+  }
+}
+
+/**
+ * Fetch unified gamification data from API
+ * Returns null if user is not authenticated or if fetch fails
+ */
+async function getUnifiedServerData(orgId: number): Promise<RawDashboardResponse | null> {
+  // Check if user is authenticated first
+  const accessToken = await getAccessToken();
+  if (!accessToken) {
+    return null; // Expected: user not authenticated
+  }
+
+  // Use the cached fetcher
+  return fetchGamificationData(orgId, accessToken);
+}
+
+export async function getServerGamificationProfile(orgId: number): Promise<UserGamificationProfile | null> {
+  const json = await getUnifiedServerData(orgId);
 
   // Return null if no data (unauthorized or error)
   if (!json) {
@@ -236,11 +226,8 @@ export async function getServerGamificationProfile(
   return normalizeProfile((json.profile ?? json) as Record<string, unknown> | undefined);
 }
 
-export async function getServerGamificationDashboard(
-  orgId: number,
-  opts?: GamificationFetchOptions,
-): Promise<DashboardData | null> {
-  const json = await getUnifiedServerData(orgId, opts);
+export async function getServerGamificationDashboard(orgId: number): Promise<DashboardData | null> {
+  const json = await getUnifiedServerData(orgId);
 
   // Return null if no data (unauthorized or error)
   if (!json) {
@@ -272,7 +259,6 @@ export async function getServerGamificationDashboard(
 export async function getServerOrganizationLeaderboard(
   orgId: number,
   limit = 20,
-  opts?: GamificationFetchOptions,
 ): Promise<OrganizationLeaderboard | null> {
   // Check if user is authenticated first
   const accessToken = await getAccessToken();
@@ -280,47 +266,16 @@ export async function getServerOrganizationLeaderboard(
     return null; // Expected: user not authenticated
   }
 
-  try {
-    const { next, cache } = buildCacheOptions(orgId, opts, 30);
-    const fetchOptions: RequestInit & { next?: Record<string, any> } = {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${accessToken}` },
-    };
-    if (cache) {
-      fetchOptions.cache = cache;
-    }
-    if (next) {
-      fetchOptions.next = next;
-    }
-    const res = await fetch(
-      `${getAPIUrl()}gamification/${orgId}/leaderboard?limit=${encodeURIComponent(String(limit))}`,
-      fetchOptions,
-    );
-
-    if (!res.ok) {
-      // Don't log for auth errors (expected for unauthorized users)
-      if (res.status === 401 || res.status === 403) {
-        return null;
-      }
-      // Log unexpected errors but return null
-      console.error(`Failed to fetch leaderboard: ${res.status}`);
-      return null;
-    }
-
-    const json = (await res.json()) as RawLeaderboardResponse;
-    return normalizeLeaderboard(json);
-  } catch (error) {
-    console.error('Error fetching leaderboard:', error);
-    return null;
-  }
+  // Use the cached fetcher
+  const json = await fetchLeaderboardData(orgId, limit, accessToken);
+  return normalizeLeaderboard(json);
 }
 
 // Server-only revalidation utility after successful mutations
 export async function revalidateGamificationTags(orgId: number) {
   if (!orgId) return;
   for (const tag of gamificationTags(orgId)) {
-    // Match Next.js typings: second argument is profile string or CacheLifeConfig
-    await revalidateTag(tag, { expire: 0 });
+    revalidateTag(tag, 'max');
   }
 }
 

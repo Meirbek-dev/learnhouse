@@ -1,12 +1,17 @@
+import { Suspense } from 'react';
 import { getLocale, getMessages, setRequestLocale } from 'next-intl/server';
 import { inter, jetBrainsMono } from '@/lib/fonts';
-import { NextIntlClientProvider } from 'next-intl';
+import { IntlProvider } from '@/components/providers/IntlProvider';
 import ClientLayout from './client-layout';
 import { isDevEnv } from '@/auth';
 
 import '../styles/globals.css';
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({
+  children
+}: {
+  children: React.ReactNode
+}) {
   const locale = await getLocale();
   setRequestLocale(locale);
   const messages = await getMessages();
@@ -25,13 +30,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         )}
       </head>
       <body className="bg-background/20">
-        <NextIntlClientProvider
-          messages={messages}
-          locale={locale}
-          now={new Date()}
-        >
-          <ClientLayout>{children}</ClientLayout>
-        </NextIntlClientProvider>
+        <Suspense fallback={null}>
+          <IntlProvider
+            messages={messages}
+            locale={locale}
+          >
+            <ClientLayout>{children}</ClientLayout>
+          </IntlProvider>
+        </Suspense>
       </body>
     </html>
   );

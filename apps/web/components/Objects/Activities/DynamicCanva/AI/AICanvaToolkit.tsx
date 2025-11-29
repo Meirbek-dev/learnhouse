@@ -21,6 +21,10 @@ const AICanvaToolkit = (props: AICanvaToolkitProps) => {
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'activity_ask' });
   const isBubbleMenuAvailable = is_ai_feature_enabled;
 
+  if (!props.editor) {
+    return null;
+  }
+
   return (
     <>
       {isBubbleMenuAvailable ? (

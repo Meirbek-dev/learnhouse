@@ -1,5 +1,9 @@
+'use server';
+
 import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
 import { shouldUseChunkedUpload, uploadFileChunked } from '@services/utils/chunked-upload';
+import { cacheLife, cacheTag, CacheProfiles } from '@/lib/cache';
+import { tags } from '@/lib/cacheTags';
 import { getAPIUrl } from '@services/config/config';
 
 export async function createActivity(data: any, chapter_id: number, org_id: number, access_token: string) {
@@ -235,20 +239,54 @@ export async function createExternalVideoActivity(data: any, activity: any, chap
   return result.json();
 }
 
-export async function getActivity(activity_uuid: string, next: any, access_token: string) {
-  const result = await fetch(
-    `${getAPIUrl()}activities/${activity_uuid}`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token),
-  );
+/**
+ * Cached fetch for activity by UUID
+ */
+async function fetchActivity(activity_uuid: string, access_token: string) {
+  'use cache';
+  cacheTag(tags.activities);
+  cacheLife(CacheProfiles.courses);
+
+  const result = await fetch(`${getAPIUrl()}activities/${activity_uuid}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${access_token}`,
+    },
+  });
   return result.json();
 }
 
-export async function getActivityByID(activity_id: number, next: any, access_token: string) {
-  const result = await fetch(
-    `${getAPIUrl()}activities/id/${activity_id}`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token),
-  );
+export async function getActivity(activity_uuid: string, _next?: any, access_token?: string) {
+  if (!access_token) {
+    throw new Error('Access token required');
+  }
+  return fetchActivity(activity_uuid, access_token);
+}
+
+/**
+ * Cached fetch for activity by ID
+ */
+async function fetchActivityById(activity_id: number, access_token: string) {
+  'use cache';
+  cacheTag(tags.activities);
+  cacheLife(CacheProfiles.courses);
+
+  const result = await fetch(`${getAPIUrl()}activities/id/${activity_id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${access_token}`,
+    },
+  });
   return result.json();
+}
+
+export async function getActivityByID(activity_id: number, _next?: any, access_token?: string) {
+  if (!access_token) {
+    throw new Error('Access token required');
+  }
+  return fetchActivityById(activity_id, access_token);
 }
 
 export async function deleteActivity(activity_uuid: string, access_token: string) {
@@ -259,16 +297,32 @@ export async function deleteActivity(activity_uuid: string, access_token: string
   return result.json();
 }
 
+/**
+ * Cached fetch for activity with auth header
+ */
+async function fetchActivityWithAuth(activity_uuid: string, access_token?: string) {
+  'use cache';
+  cacheTag(tags.activities);
+  cacheLife(CacheProfiles.courses);
+
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (access_token) {
+    headers['Authorization'] = `Bearer ${access_token}`;
+  }
+
+  const result = await fetch(`${getAPIUrl()}activities/activity_${activity_uuid}`, {
+    method: 'GET',
+    headers,
+  });
+  return result.json();
+}
+
 export async function getActivityWithAuthHeader(
   activity_uuid: string,
-  next: any,
-  access_token: string | null | undefined,
+  _next?: any,
+  access_token?: string | null,
 ) {
-  const result = await fetch(
-    `${getAPIUrl()}activities/activity_${activity_uuid}`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token || undefined),
-  );
-  return result.json();
+  return fetchActivityWithAuth(activity_uuid, access_token || undefined);
 }
 
 export async function updateActivity(data: any, activity_uuid: string, access_token: string) {
