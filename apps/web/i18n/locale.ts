@@ -36,9 +36,25 @@ export async function getUserLocale(cookieStore?: { get: (name: string) => { val
   return defaultLocale;
 }
 
-export async function setUserLocale() {
-  // Intentionally a no-op here. To set cookies you need access to
-  // the request/response cookie store; implement per-route when
-  // required.
-  throw new Error('setUserLocale requires a cookie store and should be implemented in-route');
+export async function setUserLocale(locale: Locale) {
+  // Client-side helper to persist locale preference in a cookie.
+  // This function is safe to call from client components. Server
+  // code should use the request/response cookie store instead.
+  if (typeof document === 'undefined') {
+    // Not running in browser — caller should handle server-side
+    // persistence separately.
+    throw new Error('setUserLocale can only be called in the browser');
+  }
+
+  try {
+    const maxAge = 30 * 24 * 60 * 60; // 30 days
+    const value = encodeURIComponent(locale as string);
+    // Use a reasonably safe cookie; avoid Secure flag here because
+    // this function can be used in development over http.
+    document.cookie = `${COOKIE_NAME}=${value}; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
+  } catch (error) {
+    // Log but don't throw further — callers may not expect failures
+    // from cookie writes in constrained environments.
+    console.error('[setUserLocale] Failed to set cookie:', error);
+  }
 }
