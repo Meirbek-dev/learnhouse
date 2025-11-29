@@ -9,7 +9,7 @@ import time
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from langchain.agents import AgentExecutor
+from langchain_classic.agents import AgentExecutor
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
 

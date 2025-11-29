@@ -4,14 +4,14 @@ import logging
 import os
 from typing import Any
 
-from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_chroma import Chroma
+from langchain_classic.agents import AgentExecutor, create_tool_calling_agent
+from langchain_classic.tools.retriever import create_retriever_tool
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_core.tools import create_retriever_tool
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from ulid import ULID
 
