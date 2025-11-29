@@ -16,14 +16,14 @@ interface LearningItem {
 }
 
 interface LearningItemsListProps {
-  value: string;
+  value?: string;
   onChange: (value: string) => void;
   error?: string;
 }
 
 const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) => {
   // Helper function to standardize items
-  const standardizeItems = useCallback((val: string): LearningItem[] => {
+  const standardizeItems = useCallback((val?: string): LearningItem[] => {
     try {
       if (val) {
         const parsedItems = JSON.parse(val);

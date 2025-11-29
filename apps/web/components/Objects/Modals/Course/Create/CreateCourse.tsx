@@ -284,7 +284,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
             <FormItem>
               <FormLabel>{t('labelVisibility')}</FormLabel>
               <Select
-                value={field.value.toString()}
+                value={String(field.value ?? true)}
                 onValueChange={(value) => {
                   field.onChange(value === 'true');
                 }}
