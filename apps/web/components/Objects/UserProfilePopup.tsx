@@ -17,12 +17,12 @@ import {
 } from 'lucide-react';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { getUser } from '@services/users/users';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState, useRef } from 'react';
 import type { ReactNode } from 'react';
 
 interface UserProfilePopupProps {

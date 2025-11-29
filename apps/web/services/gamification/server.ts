@@ -3,10 +3,10 @@
 // Server-only data fetchers with Next.js cacheComponents
 
 import type { DashboardData, OrganizationLeaderboard, UserGamificationProfile } from '@/types/gamification';
-import { extractStreakInfo } from '@/types/gamification/profile';
-import { getAPIUrl } from '@/services/config/config';
 import { gamificationTag, gamificationTags } from '@/lib/cacheTags';
-import { cacheLife, cacheTag, CacheProfiles } from '@/lib/cache';
+import { extractStreakInfo } from '@/types/gamification/profile';
+import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
+import { getAPIUrl } from '@/services/config/config';
 import { revalidateTag } from 'next/cache';
 import { auth } from '@/auth';
 
@@ -138,10 +138,7 @@ async function requireAccessToken(): Promise<string> {
  * Cached fetch for unified gamification data
  * Uses `use cache` directive for cacheComponents
  */
-async function fetchGamificationData(
-  orgId: number,
-  accessToken: string,
-): Promise<RawDashboardResponse | null> {
+async function fetchGamificationData(orgId: number, accessToken: string): Promise<RawDashboardResponse | null> {
   'use cache';
   cacheTag(gamificationTag.dashboard(orgId));
   cacheLife(CacheProfiles.realtime);

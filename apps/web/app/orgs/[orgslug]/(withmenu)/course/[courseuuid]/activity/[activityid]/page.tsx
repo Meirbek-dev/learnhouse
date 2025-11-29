@@ -33,9 +33,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
   // Don't fetch activity if it's the end page
   const isCourseEnd = activityid === 'end';
-  const activity = isCourseEnd
-    ? null
-    : await getActivityWithAuthHeader(activityid, undefined, access_token || null);
+  const activity = isCourseEnd ? null : await getActivityWithAuthHeader(activityid, undefined, access_token || null);
 
   // Localized page title
   const pageTitle = isCourseEnd
@@ -77,9 +75,7 @@ const ActivityPage = async (params: any) => {
 
   const [course_meta, activity] = await Promise.all([
     fetchCourseMetadata(courseuuid, access_token),
-    isCourseEnd
-      ? Promise.resolve(null)
-      : getActivityWithAuthHeader(activityid, undefined, access_token || null),
+    isCourseEnd ? Promise.resolve(null) : getActivityWithAuthHeader(activityid, undefined, access_token || null),
   ]);
 
   return (

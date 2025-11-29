@@ -2,9 +2,9 @@
 
 import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
 import { shouldUseChunkedUpload, uploadFileChunked } from '@services/utils/chunked-upload';
-import { cacheLife, cacheTag, CacheProfiles } from '@/lib/cache';
-import { tags } from '@/lib/cacheTags';
+import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { getAPIUrl } from '@services/config/config';
+import { tags } from '@/lib/cacheTags';
 
 export async function createActivity(data: any, chapter_id: number, org_id: number, access_token: string) {
   data.content = {};
@@ -317,11 +317,7 @@ async function fetchActivityWithAuth(activity_uuid: string, access_token?: strin
   return result.json();
 }
 
-export async function getActivityWithAuthHeader(
-  activity_uuid: string,
-  _next?: any,
-  access_token?: string | null,
-) {
+export async function getActivityWithAuthHeader(activity_uuid: string, _next?: any, access_token?: string | null) {
   return fetchActivityWithAuth(activity_uuid, access_token || undefined);
 }
 

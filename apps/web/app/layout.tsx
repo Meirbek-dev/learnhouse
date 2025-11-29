@@ -1,17 +1,13 @@
-import { Suspense } from 'react';
 import { getLocale, getMessages, setRequestLocale } from 'next-intl/server';
-import { inter, jetBrainsMono } from '@/lib/fonts';
 import { IntlProvider } from '@/components/providers/IntlProvider';
+import { inter, jetBrainsMono } from '@/lib/fonts';
 import ClientLayout from './client-layout';
 import { isDevEnv } from '@/auth';
+import { Suspense } from 'react';
 
 import '../styles/globals.css';
 
-export default async function RootLayout({
-  children
-}: {
-  children: React.ReactNode
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
   setRequestLocale(locale);
   const messages = await getMessages();

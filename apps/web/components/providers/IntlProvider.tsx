@@ -1,7 +1,8 @@
 'use client';
 
+import { NextIntlClientProvider } from 'next-intl';
+import type { AbstractIntlMessages } from 'next-intl';
 import { useState } from 'react';
-import { NextIntlClientProvider, type AbstractIntlMessages } from 'next-intl';
 
 interface IntlProviderProps {
   children: React.ReactNode;
@@ -9,11 +10,7 @@ interface IntlProviderProps {
   locale: string;
 }
 
-export function IntlProvider({
-  children,
-  messages,
-  locale,
-}: IntlProviderProps) {
+export function IntlProvider({ children, messages, locale }: IntlProviderProps) {
   // Stable initial time - only created once on mount
   const [now] = useState(() => new Date());
 

@@ -1,7 +1,7 @@
- 'use server';
+'use server';
 
 import { RequestBodyWithAuthHeader, errorHandling } from '@services/utils/ts/requests';
-import { cacheLife, cacheTag, CacheProfiles } from '@/lib/cache';
+import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { tags } from '@/lib/cacheTags';
 
 import { getAPIUrl } from '../config/config';

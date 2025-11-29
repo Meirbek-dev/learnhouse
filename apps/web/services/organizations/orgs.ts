@@ -6,9 +6,9 @@ import {
   errorHandling,
   getResponseMetadata,
 } from '@services/utils/ts/requests';
-import { cacheLife, cacheTag, CacheProfiles } from '@/lib/cache';
-import { tags } from '@/lib/cacheTags';
+import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { getAPIUrl } from '@services/config/config';
+import { tags } from '@/lib/cacheTags';
 
 /*
  This file includes POST, PUT, DELETE requests and cached GET requests

@@ -28,7 +28,7 @@ export async function getUserLocale(cookieStore?: { get: (name: string) => { val
       const c = cookieStore.get(COOKIE_NAME);
       if (c && c.value) return c.value as Locale;
     }
-  } catch (error) {
+  } catch {
     // Don't throw — callers should fall back to default locale
     // Logging omitted to avoid noisy output during static builds
   }
