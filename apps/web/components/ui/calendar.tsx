@@ -1,10 +1,9 @@
 'use client';
 
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import type { DayButton} from 'react-day-picker';
 import { DayPicker, getDefaultClassNames } from 'react-day-picker';
-import type { DayButton } from 'react-day-picker';
-import type { ComponentProps } from 'react';
-import { useEffect, useRef } from 'react';
+import * as React from 'react';
 
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -18,8 +17,8 @@ function Calendar({
   formatters,
   components,
   ...props
-}: ComponentProps<typeof DayPicker> & {
-  buttonVariant?: ComponentProps<typeof Button>['variant'];
+}: React.ComponentProps<typeof DayPicker> & {
+  buttonVariant?: React.ComponentProps<typeof Button>['variant'];
 }) {
   const defaultClassNames = getDefaultClassNames();
 
@@ -82,7 +81,10 @@ function Calendar({
         week_number_header: cn('select-none w-(--cell-size)', defaultClassNames.week_number_header),
         week_number: cn('text-[0.8rem] select-none text-muted-foreground', defaultClassNames.week_number),
         day: cn(
-          'relative w-full h-full p-0 text-center [&:first-child[data-selected=true]_button]:rounded-l-md [&:last-child[data-selected=true]_button]:rounded-r-md group/day aspect-square select-none',
+          'relative w-full h-full p-0 text-center [&:last-child[data-selected=true]_button]:rounded-r-md group/day aspect-square select-none',
+          props.showWeekNumber
+            ? '[&:nth-child(2)[data-selected=true]_button]:rounded-l-md'
+            : '[&:first-child[data-selected=true]_button]:rounded-l-md',
           defaultClassNames.day,
         ),
         range_start: cn('rounded-l-md bg-accent', defaultClassNames.range_start),
@@ -149,11 +151,11 @@ function Calendar({
   );
 }
 
-function CalendarDayButton({ className, day, modifiers, ...props }: ComponentProps<typeof DayButton>) {
+function CalendarDayButton({ className, day, modifiers, ...props }: React.ComponentProps<typeof DayButton>) {
   const defaultClassNames = getDefaultClassNames();
 
-  const ref = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
+  const ref = React.useRef<HTMLButtonElement>(null);
+  React.useEffect(() => {
     if (modifiers.focused) ref.current?.focus();
   }, [modifiers.focused]);
 

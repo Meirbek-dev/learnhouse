@@ -1,11 +1,11 @@
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
-import { getTranslations } from 'next-intl/server';
 import { Slot as SlotPrimitive } from 'radix-ui';
-import type { ComponentProps } from 'react';
+import * as React from 'react';
 
+import { getTranslations } from 'next-intl/server';
 import { cn } from '@/lib/utils';
 
-function Breadcrumb({ ...props }: ComponentProps<'nav'>) {
+function Breadcrumb({ ...props }: React.ComponentProps<'nav'>) {
   return (
     <nav
       aria-label="breadcrumb"
@@ -15,7 +15,7 @@ function Breadcrumb({ ...props }: ComponentProps<'nav'>) {
   );
 }
 
-function BreadcrumbList({ className, ...props }: ComponentProps<'ol'>) {
+function BreadcrumbList({ className, ...props }: React.ComponentProps<'ol'>) {
   return (
     <ol
       data-slot="breadcrumb-list"
@@ -28,7 +28,7 @@ function BreadcrumbList({ className, ...props }: ComponentProps<'ol'>) {
   );
 }
 
-function BreadcrumbItem({ className, ...props }: ComponentProps<'li'>) {
+function BreadcrumbItem({ className, ...props }: React.ComponentProps<'li'>) {
   return (
     <li
       data-slot="breadcrumb-item"
@@ -42,7 +42,7 @@ function BreadcrumbLink({
   asChild,
   className,
   ...props
-}: ComponentProps<'a'> & {
+}: React.ComponentProps<'a'> & {
   asChild?: boolean;
 }) {
   const Comp = asChild ? SlotPrimitive.Slot : 'a';
@@ -56,7 +56,7 @@ function BreadcrumbLink({
   );
 }
 
-function BreadcrumbPage({ className, ...props }: ComponentProps<'span'>) {
+function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
   return (
     <span
       data-slot="breadcrumb-page"
@@ -69,7 +69,7 @@ function BreadcrumbPage({ className, ...props }: ComponentProps<'span'>) {
   );
 }
 
-function BreadcrumbSeparator({ children, className, ...props }: ComponentProps<'li'>) {
+function BreadcrumbSeparator({ children, className, ...props }: React.ComponentProps<'li'>) {
   return (
     <li
       data-slot="breadcrumb-separator"
@@ -83,7 +83,7 @@ function BreadcrumbSeparator({ children, className, ...props }: ComponentProps<'
   );
 }
 
-async function BreadcrumbEllipsis({ className, ...props }: ComponentProps<'span'>) {
+async function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<'span'>) {
   const t = await getTranslations('Components.Breadcrumb');
 
   return (

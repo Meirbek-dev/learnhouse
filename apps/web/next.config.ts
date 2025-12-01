@@ -1,3 +1,4 @@
+import path from 'path';
 import createNextIntlPlugin from 'next-intl/plugin';
 import type { NextConfig } from 'next';
 
@@ -14,7 +15,9 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  turbopack: { root: './' },
+  // Point turbopack root to the workspace root so Next can be resolved
+  // correctly when using a pnpm workspace / hoisted node_modules.
+  turbopack: { root: path.resolve(__dirname, '..', '..') },
   experimental: {
     optimizePackageImports: [
       '@radix-ui/react-icons',
