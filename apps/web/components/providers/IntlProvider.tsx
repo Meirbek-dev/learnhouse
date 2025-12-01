@@ -1,7 +1,7 @@
 'use client';
 
-import { NextIntlClientProvider } from 'next-intl';
 import type { AbstractIntlMessages } from 'next-intl';
+import { NextIntlClientProvider } from 'next-intl';
 import { useState } from 'react';
 
 interface IntlProviderProps {

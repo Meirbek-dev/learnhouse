@@ -59,7 +59,7 @@ async def ask_ai_stream(
     agent_executor: CompiledStateGraph | None = None,
     cancel_event: asyncio.Event | None = None,
     collection_name: str | None = None,
-) -> AsyncGenerator[str, None]:
+) -> AsyncGenerator[str]:
     """
     Stream AI responses using LangChain v1 streaming API.
 
