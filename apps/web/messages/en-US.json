@@ -572,6 +572,7 @@
     "CourseActions": {
       "authenticateToStart": "Authenticate to start the course",
       "author": "Author",
+      "continueLearning": "Continue Learning",
       "fullAccess": "You have purchased this course and have full access to all content.",
       "leaveCourse": "Leave Course",
       "paidCourse": "Paid Course",
@@ -1667,6 +1668,7 @@
       "contributorApplicationMessage": "I would like to contribute to this course.",
       "contributorApplicationPending": "Contributor application pending",
       "contributorApplicationSuccess": "Your application to contribute has been submitted successfully",
+      "continueLearning": "Continue Learning",
       "courseProgress": "Course Progress",
       "courseRequiresPurchase": "This course requires purchase to access its content.",
       "leaveCourse": "Leave Course",

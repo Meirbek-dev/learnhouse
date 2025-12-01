@@ -572,6 +572,7 @@
     "CourseActions": {
       "authenticateToStart": "Курсты бастау үшін авторизациядан өтіңіз",
       "author": "Автор",
+      "continueLearning": "Оқуды жалғастыру",
       "fullAccess": "Сіз бұл курсты сатып алдыңыз және барлық мазмұнға толық қол жеткізе аласыз.",
       "leaveCourse": "Курстан шығу",
       "paidCourse": "Ақылы курс",
@@ -1667,6 +1668,7 @@
       "contributorApplicationMessage": "Мен бұл курсқа үлес қосқым келеді.",
       "contributorApplicationPending": "Автор ретінде қатысуға өтінім қаралуда",
       "contributorApplicationSuccess": "Қатысуға өтініміңіз сәтті жіберілді",
+      "continueLearning": "Оқуды жалғастыру",
       "courseProgress": "Курс үлгерімі",
       "courseRequiresPurchase": "Бұл курстың мазмұнына қол жеткізу үшін сатып алу қажет.",
       "leaveCourse": "Курстан шығу",

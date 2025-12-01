@@ -1,9 +1,9 @@
 'use client';
 
-import { AlertCircle, Loader2, LogIn, LogOut, ShoppingCart } from 'lucide-react';
+import { AlertCircle, BookOpen, Loader2, LogIn, ShoppingCart } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
-import { removeCourse, startCourse } from '@services/courses/activity';
+import { startCourse } from '@services/courses/activity';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useEffect, useRef, useState, useTransition } from 'react';
@@ -44,6 +44,7 @@ interface Course {
   chapters?: {
     name: string;
     activities: {
+      id: number;
       activity_uuid: string;
       name: string;
       activity_type: string;
@@ -210,29 +211,59 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
       return;
     }
 
+    // If already started, navigate to first unfinished activity
+    if (isStarted) {
+      const run = trailData?.runs?.find((r: any) => {
+        const cleanRunCourseUuid = r.course?.course_uuid?.replace('course_', '');
+        return cleanRunCourseUuid === cleanCourseUuid;
+      });
+
+      // Find first unfinished activity
+      let firstUnfinishedActivity: { id: number; activity_uuid: string } | null = null;
+
+      if (course.chapters) {
+        for (const chapter of course.chapters) {
+          for (const activity of chapter.activities) {
+            const isCompleted = run?.steps?.some(
+              (step: any) => step.activity_id === activity.id && step.complete,
+            );
+            if (!isCompleted) {
+              firstUnfinishedActivity = activity;
+              break;
+            }
+          }
+          if (firstUnfinishedActivity) break;
+        }
+      }
+
+      // If all activities are completed, go to first activity
+      const targetActivity = firstUnfinishedActivity || course.chapters?.[0]?.activities?.[0];
+
+      if (targetActivity) {
+        router.push(
+          `${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${targetActivity.activity_uuid.replace('activity_', '')}`,
+        );
+      }
+      return;
+    }
+
     startTransition(() => setIsActionLoading(true));
     try {
-      if (isStarted) {
-        await removeCourse(`course_${courseuuid}`, orgslug, session.data?.tokens?.access_token);
-        await revalidateTags(['courses'], orgslug);
-        router.refresh();
+      await startCourse(`course_${courseuuid}`, orgslug, session.data?.tokens?.access_token);
+      await revalidateTags(['courses'], orgslug);
+
+      // Get the first activity from the first chapter
+      const firstChapter = course.chapters?.[0];
+      const firstActivity = firstChapter?.activities?.[0];
+
+      if (firstActivity) {
+        // Redirect to the first activity
+        await revalidateTags(['activities'], orgslug);
+        router.push(
+          `${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
+        );
       } else {
-        await startCourse(`course_${courseuuid}`, orgslug, session.data?.tokens?.access_token);
-        await revalidateTags(['courses'], orgslug);
-
-        // Get the first activity from the first chapter
-        const firstChapter = course.chapters?.[0];
-        const firstActivity = firstChapter?.activities?.[0];
-
-        if (firstActivity) {
-          // Redirect to the first activity
-          await revalidateTags(['activities'], orgslug);
-          router.push(
-            `${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
-          );
-        } else {
-          router.refresh();
-        }
+        router.refresh();
       }
     } catch (error) {
       console.error('Failed to perform course action:', error);
@@ -292,18 +323,14 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
               <button
                 onClick={handleCourseAction}
                 disabled={isActionLoading || isPending}
-                className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
-                  isStarted
-                    ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
-                    : 'bg-primary hover:bg-primary text-white disabled:bg-neutral-700'
-                }`}
+                className="bg-primary hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors disabled:bg-neutral-700"
               >
                 {isActionLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : isStarted ? (
                   <>
-                    <LogOut className="h-4 w-4" />
-                    {t('leaveCourse')}
+                    <BookOpen className="h-4 w-4" />
+                    {t('continueLearning')}
                   </>
                 ) : (
                   <>
@@ -345,11 +372,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
           <button
             onClick={handleCourseAction}
             disabled={isActionLoading || isPending}
-            className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
-              isStarted
-                ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
-                : 'bg-primary hover:bg-primary/90 text-white disabled:bg-neutral-700'
-            }`}
+            className="bg-primary hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors disabled:bg-neutral-700"
           >
             {isActionLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -360,8 +383,8 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
               </>
             ) : isStarted ? (
               <>
-                <LogOut className="h-4 w-4" />
-                {t('leaveCourse')}
+                <BookOpen className="h-4 w-4" />
+                {t('continueLearning')}
               </>
             ) : (
               <>

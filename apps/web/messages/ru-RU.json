@@ -572,6 +572,7 @@
     "CourseActions": {
       "authenticateToStart": "Авторизуйтесь, чтобы начать курс",
       "author": "Автор",
+      "continueLearning": "Продолжить обучение",
       "fullAccess": "Вы приобрели этот курс и имеете полный доступ ко всему содержимому.",
       "leaveCourse": "Покинуть курс",
       "paidCourse": "Платный курс",
@@ -1667,6 +1668,7 @@
       "contributorApplicationMessage": "Я хотел бы внести свой вклад в этот курс.",
       "contributorApplicationPending": "Заявка на участие в качестве автора на рассмотрении",
       "contributorApplicationSuccess": "Ваша заявка на участие успешно отправлена",
+      "continueLearning": "Продолжить обучение",
       "courseProgress": "Прогресс курса",
       "courseRequiresPurchase": "Для доступа к содержимому этого курса требуется покупка.",
       "leaveCourse": "Покинуть курс",

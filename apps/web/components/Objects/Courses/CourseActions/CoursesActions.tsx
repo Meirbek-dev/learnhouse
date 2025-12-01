@@ -1,7 +1,7 @@
 import { AlertCircle, ArrowRight, BookOpen, ClockIcon, Loader2, ShoppingCart, UserPen } from 'lucide-react';
 import { getAPIUrl, getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { removeCourse, startCourse } from '@services/courses/activity';
+import { startCourse } from '@services/courses/activity';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getProductsByCourse } from '@services/payments/products';
@@ -36,6 +36,7 @@ interface Course {
   chapters?: {
     name: string;
     activities: {
+      id: number;
       activity_uuid: string;
       name: string;
       activity_type: string;
@@ -133,37 +134,66 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
       return;
     }
 
+    // If already started, navigate to first unfinished activity
+    if (isStarted) {
+      const run = trailData?.runs?.find((r: any) => {
+        const cleanRunCourseUuid = r.course?.course_uuid?.replace('course_', '');
+        return cleanRunCourseUuid === cleanCourseUuid;
+      });
+
+      // Find first unfinished activity
+      let firstUnfinishedActivity: { id: number; activity_uuid: string } | null = null;
+
+      if (course.chapters) {
+        for (const chapter of course.chapters) {
+          for (const activity of chapter.activities) {
+            const isCompleted = run?.steps?.some(
+              (step: any) => step.activity_id === activity.id && step.complete,
+            );
+            if (!isCompleted) {
+              firstUnfinishedActivity = activity;
+              break;
+            }
+          }
+          if (firstUnfinishedActivity) break;
+        }
+      }
+
+      // If all activities are completed, go to first activity
+      const targetActivity = firstUnfinishedActivity || course.chapters?.[0]?.activities?.[0];
+
+      if (targetActivity) {
+        router.push(
+          `${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${targetActivity.activity_uuid.replace('activity_', '')}`,
+        );
+      }
+      return;
+    }
+
     setIsActionLoading(true);
-    const loadingToast = toast.loading(isStarted ? t('leavingCourse') : t('startingCourse'));
+    const loadingToast = toast.loading(t('startingCourse'));
 
     try {
-      if (isStarted) {
-        await removeCourse(`course_${courseuuid}`, orgslug, session.data?.tokens?.access_token);
-        mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`);
-        toast.success(t('leftCourseSuccess'), { id: loadingToast });
-        router.refresh();
+      await startCourse(`course_${courseuuid}`, orgslug, session.data?.tokens?.access_token);
+      mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`);
+      toast.success(t('startedCourseSuccess'), { id: loadingToast });
+
+      // Get the first activity from the first chapter
+      const firstChapter = course.chapters?.[0];
+      const firstActivity = firstChapter?.activities?.[0];
+
+      if (firstActivity) {
+        // Redirect to the first activity
+        router.push(
+          `${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
+        );
       } else {
-        await startCourse(`course_${courseuuid}`, orgslug, session.data?.tokens?.access_token);
         mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`);
-        toast.success(t('startedCourseSuccess'), { id: loadingToast });
-
-        // Get the first activity from the first chapter
-        const firstChapter = course.chapters?.[0];
-        const firstActivity = firstChapter?.activities?.[0];
-
-        if (firstActivity) {
-          // Redirect to the first activity
-          router.push(
-            `${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
-          );
-        } else {
-          mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`);
-          router.refresh();
-        }
+        router.refresh();
       }
     } catch (error) {
       console.error('Failed to perform course action:', error);
-      toast.error(isStarted ? t('leaveCourseError') : t('startCourseError'), {
+      toast.error(t('startCourseError'), {
         id: loadingToast,
       });
     } finally {
@@ -197,7 +227,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
     }
   };
 
-  const renderActionButton = (action: 'start' | 'leave') => {
+  const renderActionButton = (action: 'start' | 'continue') => {
     if (!session.data?.user) {
       return (
         <>
@@ -206,7 +236,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
             variant="outline"
             predefined_avatar="empty"
           />
-          <span>{action === 'start' ? t('startCourse') : t('leaveCourse')}</span>
+          <span>{action === 'start' ? t('startCourse') : t('continueLearning')}</span>
           <ArrowRight className="h-5 w-5" />
         </>
       );
@@ -219,7 +249,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
           variant="outline"
           use_with_session
         />
-        <span>{action === 'start' ? t('startCourse') : t('leaveCourse')}</span>
+        <span>{action === 'start' ? t('startCourse') : t('continueLearning')}</span>
         <ArrowRight className="h-5 w-5" />
       </>
     );
@@ -427,16 +457,12 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
               <button
                 onClick={handleCourseAction}
                 disabled={isActionLoading}
-                className={`soft-shadow flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold transition-colors ${
-                  isStarted
-                    ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
-                    : 'bg-primary hover:bg-primary/90 text-white disabled:bg-neutral-700'
-                }`}
+                className="soft-shadow bg-primary hover:bg-primary/90 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold text-white transition-colors disabled:bg-neutral-700"
               >
                 {isActionLoading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
-                  renderActionButton(isStarted ? 'leave' : 'start')
+                  renderActionButton(isStarted ? 'continue' : 'start')
                 )}
               </button>
               {renderContributorButton()}
@@ -485,16 +511,12 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
         <button
           onClick={handleCourseAction}
           disabled={isActionLoading}
-          className={`soft-shadow flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold transition-colors ${
-            isStarted
-              ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
-              : 'bg-primary hover:bg-primary/70 text-white disabled:bg-neutral-700'
-          }`}
+          className="soft-shadow bg-primary hover:bg-primary/90 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold text-white transition-colors disabled:bg-neutral-700"
         >
           {isActionLoading ? (
             <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
-            renderActionButton(isStarted ? 'leave' : 'start')
+            renderActionButton(isStarted ? 'continue' : 'start')
           )}
         </button>
 
