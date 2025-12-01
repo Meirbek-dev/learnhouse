@@ -20,7 +20,7 @@ def auto_install() -> None:
 
     # Check if default organization exists
     default_org = db_session.exec(
-        select(Organization).where(Organization.slug == "openu")
+        select(Organization).where(Organization.slug == "ashyqbilim")
     ).first()
 
     if not default_org:
