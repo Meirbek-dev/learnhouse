@@ -4,7 +4,9 @@ export const inter = Inter({
   subsets: ['latin', 'cyrillic'],
   variable: '--font-inter',
   display: 'swap',
-  preload: true,
+  // Preloading was causing "preloaded but not used" warnings in some pages.
+  // Disable preload to avoid unnecessary early fetches of font files.
+  preload: false,
   weight: 'variable',
   style: ['normal', 'italic'],
   fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
