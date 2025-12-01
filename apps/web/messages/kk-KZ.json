@@ -4698,6 +4698,8 @@
         "removeUserModalMessage": "Бұл пайдаланушыны ұйымнан жойғыңыз келетініне сенімдісіз бе?",
         "removeUserModalTitle": "{username} жою?",
         "removingUser": "Жойылуда...",
+        "cannotEditSelf": "Сіз өз рөліңізді өзгерте алмайсыз",
+        "cannotManageHigherRole": "Сіз рөлі сізден жоғары пайдаланушыларды басқара алмайсыз",
         "roleHeader": "Рөл",
         "updateRoleModalDescription": "@{username} рөлін жаңарту",
         "updateRoleModalTitle": "Рөлді жаңарту",

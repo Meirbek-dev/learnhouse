@@ -4688,6 +4688,8 @@
         "removeUserModalMessage": "Are you sure you want remove this user from the organization?",
         "removeUserModalTitle": "Remove {username}?",
         "removingUser": "Removing...",
+        "cannotEditSelf": "You cannot change your own role",
+        "cannotManageHigherRole": "You cannot manage users with a higher role than you",
         "roleHeader": "Role",
         "updateRoleModalDescription": "Update @{username}'s role",
         "updateRoleModalTitle": "Update Role",

@@ -4696,6 +4696,8 @@
         "removeUserModalMessage": "Вы уверены, что хотите удалить этого пользователя из Ashyq Bilim?",
         "removeUserModalTitle": "Удалить {username}?",
         "removingUser": "Удаление...",
+        "cannotEditSelf": "Вы не можете изменить свою роль",
+        "cannotManageHigherRole": "Вы не можете управлять пользователями с более высокой ролью, чем у вас",
         "roleHeader": "Роль",
         "updateRoleModalDescription": "Обновить роль @{username}",
         "updateRoleModalTitle": "Обновить роль",

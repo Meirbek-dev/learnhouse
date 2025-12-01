@@ -8,6 +8,7 @@ import Toast from '@components/Objects/StyledElements/Toast/Toast';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { removeUserFromOrg } from '@services/organizations/orgs';
+import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
@@ -22,6 +23,40 @@ const OrgUsers = () => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.UserSettings.usersSection');
+  const { userRoles } = useAdminStatus();
+
+  const getRolePriority = (roleObj: any) => {
+    if (!roleObj) return 0;
+    // roleObj may be the role itself or wrapped under `role`
+    const role = roleObj.role || roleObj;
+    const role_uuid = role.role_uuid;
+    const id = role.id;
+    const name = role.name || '';
+
+    if (
+      role_uuid === 'role_global_admin' ||
+      id === 1 ||
+      name === 'Админ' ||
+      name === 'Администратор' ||
+      name === 'Admin'
+    )
+      return 4;
+    if (role_uuid === 'role_global_maintainer' || id === 2 || name === 'Maintainer' || name === 'Мейнтейнер') return 3;
+    if (role_uuid === 'role_global_instructor' || id === 3 || name === 'Instructor' || name === 'Инструктор') return 2;
+    return 1;
+  };
+
+  const currentUserPriority = (() => {
+    try {
+      if (!userRoles || userRoles.length === 0 || !org) return 0;
+      const orgRoles = userRoles.filter((r: any) => r.org?.id === org?.id);
+      if (!orgRoles || orgRoles.length === 0) return 0;
+      // return highest priority among user's roles in this org
+      return Math.max(...orgRoles.map((r: any) => getRolePriority(r.role || r)));
+    } catch {
+      return 0;
+    }
+  })();
 
   const {
     data: orgUsers,
@@ -94,70 +129,88 @@ const OrgUsers = () => {
                       <TableCell>{user.role.name}</TableCell>
                       <TableCell>
                         <div className="flex items-end space-x-2">
-                          {user.role.name !== 'Admin' ? (
-                            <>
-                              <Modal
-                                isDialogOpen={
-                                  rolesModal ? selectedUser?.user?.user_uuid === user.user.user_uuid : false
-                                }
-                                onOpenChange={(isOpen) => {
-                                  if (!isOpen) handleCloseRolesModal();
-                                }}
-                                minHeight="no-min"
-                                dialogContent={
-                                  selectedUser ? (
-                                    <RolesUpdate
-                                      alreadyAssignedRole={selectedUser.role.role_uuid}
-                                      setRolesModal={setRolesModal}
-                                      user={selectedUser}
-                                    />
-                                  ) : null
-                                }
-                                dialogTitle={t('updateRoleModalTitle')}
-                                dialogDescription={t('updateRoleModalDescription', {
-                                  username: user.user.username,
-                                })}
-                                dialogTrigger={
-                                  <span>
-                                    <button
-                                      className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer"
-                                      onClick={() => {
-                                        handleRolesModal(user);
-                                      }}
-                                    >
-                                      <KeyRound className="h-4 w-4" />
-                                      <span>{t('editRoleButton')}</span>
-                                    </button>
-                                  </span>
-                                }
-                              />
+                          {(() => {
+                            const isSelf =
+                              session?.data?.user?.user_uuid === user.user.user_uuid ||
+                              session?.data?.user?.id === user.user.id;
+                            const targetPriority = getRolePriority(user.role);
+                            const canManage =
+                              !isSelf && currentUserPriority >= targetPriority && user.role.name !== 'Админ';
 
-                              <ConfirmationModal
-                                confirmationButtonText={t('removeUserButton')}
-                                confirmationMessage={t('removeUserModalMessage')}
-                                dialogTitle={t('removeUserModalTitle', {
-                                  username: user.user.username,
-                                })}
-                                dialogTrigger={
-                                  <span>
-                                    <button
-                                      className="mr-2 flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer"
-                                      onClick={() => handleRemoveUser(user.user.id)}
-                                    >
-                                      <LogOut className="h-4 w-4" />
-                                      <span>{t('removeFromOrgButton')}</span>
-                                    </button>
-                                  </span>
-                                }
-                                functionToExecute={() => {
-                                  handleRemoveUser(user.user.id);
-                                }}
-                                status="warning"
-                              />
-                            </>
-                          ) : (
-                            <div className="text-neutral-500">{t('noActionsForAdministrators')}</div>
-                          )}
+                            if (!canManage) {
+                              // Determine specific disabled reason for clearer messaging
+                              if (user.role.name === 'Админ')
+                                return <div className="text-neutral-500">{t('noActionsForAdministrators')}</div>;
+                              if (currentUserPriority < targetPriority)
+                                return <div className="text-neutral-500">{t('cannotManageHigherRole')}</div>;
+                              if (isSelf)
+                                return <div className="text-neutral-500">{t('cannMaintainerotEditSelf')}</div>;
+                              return <div className="text-neutral-500">{t('noActionsForAdministrators')}</div>;
+                            }
+
+                            return (
+                              <>
+                                <Modal
+                                  isDialogOpen={
+                                    rolesModal ? selectedUser?.user?.user_uuid === user.user.user_uuid : false
+                                  }
+                                  onOpenChange={(isOpen) => {
+                                    if (!isOpen) handleCloseRolesModal();
+                                  }}
+                                  minHeight="no-min"
+                                  dialogContent={
+                                    selectedUser ? (
+                                      <RolesUpdate
+                                        alreadyAssignedRole={selectedUser.role.role_uuid}
+                                        setRolesModal={setRolesModal}
+                                        user={selectedUser}
+                                      />
+                                    ) : null
+                                  }
+                                  dialogTitle={t('updateRoleModalTitle')}
+                                  dialogDescription={t('updateRoleModalDescription', {
+                                    username: user.user.username,
+                                  })}
+                                  dialogTrigger={
+                                    <span>
+                                      <button
+                                        className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer"
+                                        onClick={() => {
+                                          handleRolesModal(user);
+                                        }}
+                                      >
+                                        <KeyRound className="h-4 w-4" />
+                                        <span>{t('editRoleButton')}</span>
+                                      </button>
+                                    </span>
+                                  }
+                                />
+
+                                <ConfirmationModal
+                                  confirmationButtonText={t('removeUserButton')}
+                                  confirmationMessage={t('removeUserModalMessage')}
+                                  dialogTitle={t('removeUserModalTitle', {
+                                    username: user.user.username,
+                                  })}
+                                  dialogTrigger={
+                                    <span>
+                                      <button
+                                        className="mr-2 flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer"
+                                        onClick={() => handleRemoveUser(user.user.id)}
+                                      >
+                                        <LogOut className="h-4 w-4" />
+                                        <span>{t('removeFromOrgButton')}</span>
+                                      </button>
+                                    </span>
+                                  }
+                                  functionToExecute={() => {
+                                    handleRemoveUser(user.user.id);
+                                  }}
+                                  status="warning"
+                                />
+                              </>
+                            );
+                          })()}
                         </div>
                       </TableCell>
                     </TableRow>
