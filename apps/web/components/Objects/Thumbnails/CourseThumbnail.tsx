@@ -194,7 +194,11 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
                 </div>
               )}
             </div>
-            <span className="text-muted-foreground text-xs">{t('authorLabel', { count: activeAuthors.length })}</span>
+            <span className="text-muted-foreground truncate text-xs">
+              {displayedAuthors.every((a) => a.user.first_name && a.user.last_name)
+                ? `${displayedAuthors.map((a) => `${a.user.first_name} ${a.user.last_name}`).join(', ')}${hasMoreAuthors ? ` +${remainingAuthorsCount}` : ''}`
+                : t('authorLabel', { count: activeAuthors.length })}
+            </span>
           </div>
         )}
       </CardContent>
