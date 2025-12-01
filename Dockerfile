@@ -41,7 +41,7 @@ WORKDIR /app
 COPY .npmrc ./.npmrc
 COPY pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY apps/web/package.json ./package.json
-COPY apps/web/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY pnpm-lock.yaml ./pnpm-lock.yaml
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
   pnpm install --prod --no-frozen-lockfile
 
