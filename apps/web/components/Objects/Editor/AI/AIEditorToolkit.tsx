@@ -58,20 +58,6 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
                 className="fixed inset-0 z-50 flex items-center justify-center"
                 style={{ pointerEvents: 'none' }}
               >
-                {/* BACKDROP */}
-                {!aiEditorState.isFeedbackModalOpen && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="fixed inset-0 bg-black/30 backdrop-blur-sm"
-                    onClick={() => {
-                      dispatchAIEditor({ type: 'setIsModalClose' });
-                    }}
-                    style={{ pointerEvents: 'auto' }}
-                  />
-                )}
-
                 {/* FEEDBACK MODAL */}
                 {aiEditorState.isFeedbackModalOpen && (
                   <UserFeedbackModal
@@ -94,8 +80,6 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
                         oklch(0.28 0.12 262 / 0.6) 100%
                       )
                     `,
-                    backdropFilter: 'blur(32px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(32px) saturate(180%)',
                   }}
                   className="fixed bottom-0 left-1/2 z-40 mx-auto mb-6 w-242 max-w-screen -translate-x-1/2 flex-col-reverse rounded-2xl border border-white/20 p-3 text-white shadow-2xl shadow-black/50 sm:mb-10 sm:rounded-3xl sm:p-4 md:max-w-(--breakpoint-3xl)"
                 >
@@ -536,8 +520,6 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
               oklch(0.28 0.12 262 / 0.65) 100%
             )
           `,
-          backdropFilter: 'blur(48px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(48px) saturate(180%)',
         }}
         className="fixed bottom-24 left-1/2 z-50 mx-auto min-h-[200px] w-[calc(100vw-2rem)] max-w-[660px] -translate-x-1/2 flex-col rounded-2xl border border-white/25 p-4 text-white shadow-2xl shadow-black/60 sm:bottom-[120px] sm:min-h-[240px] sm:rounded-3xl sm:p-5"
       >
