@@ -1,8 +1,8 @@
 'use client';
-import DocumentPdfPageActivityImage from 'public//activities_types/documentpdf-page-activity.webp';
-import AssignmentActivityImage from 'public//activities_types/assignment-page-activity.webp';
-import DynamicPageActivityImage from 'public/activities_types/dynamic-page-activity.webp';
-import VideoPageActivityImage from 'public//activities_types/video-page-activity.webp';
+import DocumentPdfPageActivityImage from './images/documentpdf-page-activity.webp';
+import AssignmentActivityImage from './images/assignment-page-activity.webp';
+import DynamicPageActivityImage from './images/dynamic-page-activity.webp';
+import VideoPageActivityImage from './images/video-page-activity.webp';
 import DocumentPdfModal from './NewActivityModal/DocumentActivityModal';
 import DynamicCanvaModal from './NewActivityModal/DynamicActivityModal';
 import Assignment from './NewActivityModal/AssignmentActivityModal';
