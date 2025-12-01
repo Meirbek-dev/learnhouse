@@ -38,7 +38,6 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
-COPY .npmrc ./.npmrc
 COPY pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY apps/web/package.json ./package.json
 COPY pnpm-lock.yaml ./pnpm-lock.yaml
