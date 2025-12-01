@@ -7,10 +7,11 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install dependencies
-COPY package.json pnpm-lock.yaml* ./
+COPY ../../pnpm-lock.yaml ./pnpm-lock.yaml
+COPY package.json ./package.json
 RUN \
   if [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i; \
-  else echo "Lockfile not found." && exit 1; \
+  else echo "Root pnpm-lock.yaml not found." && exit 1; \
   fi
 
 
