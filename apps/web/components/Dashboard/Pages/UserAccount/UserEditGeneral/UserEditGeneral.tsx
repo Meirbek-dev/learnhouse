@@ -79,6 +79,7 @@ interface DetailItem {
 interface FormValues {
   username: string;
   first_name: string;
+  middle_name?: string;
   last_name: string;
   email: string;
   bio?: string;
@@ -90,6 +91,10 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
     email: z.email(t('Form.invalidEmail')).min(1, t('Form.requiredField', { fieldName: 'Email' })),
     username: z.string().min(1, t('Form.requiredField', { fieldName: 'Username' })),
     first_name: z.string().min(1, t('Form.requiredField', { fieldName: 'First name' })),
+    middle_name: z
+      .string()
+      .max(100, t('Form.maxChars', { count: 100 }))
+      .optional(),
     last_name: z.string().min(1, t('Form.requiredField', { fieldName: 'Last name' })),
     bio: z
       .string()
@@ -369,6 +374,23 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
 
             <FormField
               control={form.control}
+              name="middle_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('middleName')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder={t('middleNamePlaceholder')}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="last_name"
               render={({ field }) => (
                 <FormItem>
@@ -633,6 +655,7 @@ const UserEditGeneral = () => {
     defaultValues: {
       username: '',
       first_name: '',
+      middle_name: '',
       last_name: '',
       email: '',
       bio: '',
@@ -656,6 +679,7 @@ const UserEditGeneral = () => {
           form.reset({
             username: userDataResponse.username || '',
             first_name: userDataResponse.first_name || '',
+            middle_name: userDataResponse.middle_name || '',
             last_name: userDataResponse.last_name || '',
             email: userDataResponse.email || '',
             bio: userDataResponse.bio || '',
@@ -742,7 +766,15 @@ const UserEditGeneral = () => {
     const loadingToast = toast.loading(t('updating'));
 
     try {
-      await updateProfile(values, userData.id, access_token);
+      // Combine middle name into first_name for the payload
+      const combinedFirstName = values.middle_name?.trim()
+        ? `${values.first_name} ${values.middle_name.trim()}`
+        : values.first_name;
+      const payload: any = { ...values, first_name: combinedFirstName };
+      // Remove middle_name from payload as it's been merged
+      delete payload.middle_name;
+
+      await updateProfile(payload, userData.id, access_token);
       const updatedUserData = await getUser(userData.id, access_token);
       setUserData(updatedUserData);
 
