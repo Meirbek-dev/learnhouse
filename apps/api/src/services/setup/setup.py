@@ -41,24 +41,15 @@ from src.security.security import security_hash_password
 # Install Default roles
 def install_default_elements(db_session: Session) -> bool:
     """ """
-    # remove all default roles
+    # Ensure default global roles exist. Do not delete existing roles because
+    # they may be referenced by `UserOrganization` rows (foreign key).
+    # Create missing default roles idempotently by `role_uuid`.
     statement = select(Role).where(Role.role_type == RoleTypeEnum.TYPE_GLOBAL)
-    roles = db_session.exec(statement).all()
+    existing_roles = db_session.exec(statement).all()
 
-    for role in roles:
-        db_session.delete(role)
-
-    db_session.commit()
-
-    # Check if default roles already exist
-    statement = select(Role).where(Role.role_type == RoleTypeEnum.TYPE_GLOBAL)
-    roles = db_session.exec(statement).all()
-
-    if roles and len(roles) == 4:
-        raise HTTPException(
-            status_code=409,
-            detail="Default roles already exist",
-        )
+    # If all four default roles already exist, nothing to do
+    if existing_roles and len(existing_roles) >= 4:
+        return True
 
     # Create default roles
     role_global_admin = Role(
@@ -332,16 +323,32 @@ def install_default_elements(db_session: Session) -> bool:
     role_global_user.rights = role_global_user.rights.dict()
 
     # Insert roles in DB
-    db_session.add(role_global_admin)
-    db_session.add(role_global_maintainer)
-    db_session.add(role_global_instructor)
-    db_session.add(role_global_user)
+    # Add each default role only if it doesn't already exist (by role_uuid)
+    for default_role in (
+        role_global_admin,
+        role_global_maintainer,
+        role_global_instructor,
+        role_global_user,
+    ):
+        stmt = select(Role).where(Role.role_uuid == default_role.role_uuid)
+        exists = db_session.exec(stmt).first()
+        if not exists:
+            # Avoid explicit id conflicts: let the DB assign the id if needed
+            try:
+                default_role.id = None
+            except Exception:
+                pass
+            db_session.add(default_role)
 
     # commit changes
     db_session.commit()
 
     # refresh roles
-    db_session.refresh(role_global_admin)
+    try:
+        db_session.refresh(role_global_admin)
+    except Exception:
+        # If the admin role wasn't created because it already existed, ignore
+        pass
 
     return True
 
@@ -366,7 +373,7 @@ def install_create_organization(org_object: OrganizationCreate, db_session: Sess
         features=OrgFeatureConfig(
             courses=CourseOrgConfig(enabled=True, limit=0),
             members=MemberOrgConfig(
-                enabled=True, signup_mode="open", admin_limit=0, limit=0
+                enabled=True, signup_mode="ashyqbilim", admin_limit=0, limit=0
             ),
             usergroups=UserGroupOrgConfig(enabled=True, limit=0),
             storage=StorageOrgConfig(enabled=True, limit=0),
