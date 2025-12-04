@@ -14,7 +14,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  turbopack: { root: './' },
   experimental: {
     optimizePackageImports: [
       '@radix-ui/react-icons',

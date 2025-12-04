@@ -2,9 +2,9 @@
 import DocumentPdfPageActivityImage from './images/documentpdf-page-activity.webp';
 import AssignmentActivityImage from './images/assignment-page-activity.webp';
 import DynamicPageActivityImage from './images/dynamic-page-activity.webp';
-import VideoPageActivityImage from './images/video-page-activity.webp';
 import DocumentPdfModal from './NewActivityModal/DocumentActivityModal';
 import DynamicCanvaModal from './NewActivityModal/DynamicActivityModal';
+import VideoPageActivityImage from './images/video-page-activity.webp';
 import Assignment from './NewActivityModal/AssignmentActivityModal';
 import VideoModal from './NewActivityModal/VideoActivityModal';
 import { useTranslations } from 'next-intl';

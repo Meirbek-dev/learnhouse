@@ -3,13 +3,13 @@
 import { AlertCircle, BookOpen, Loader2, LogIn, ShoppingCart } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
-import { startCourse } from '@services/courses/activity';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { getProductsByCourse } from '@services/payments/products';
 import { checkPaidAccess } from '@services/payments/payments';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { startCourse } from '@services/courses/activity';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
@@ -224,9 +224,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
       if (course.chapters) {
         for (const chapter of course.chapters) {
           for (const activity of chapter.activities) {
-            const isCompleted = run?.steps?.some(
-              (step: any) => step.activity_id === activity.id && step.complete,
-            );
+            const isCompleted = run?.steps?.some((step: any) => step.activity_id === activity.id && step.complete);
             if (!isCompleted) {
               firstUnfinishedActivity = activity;
               break;

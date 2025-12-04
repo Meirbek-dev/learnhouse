@@ -1,7 +1,6 @@
 import { AlertCircle, ArrowRight, BookOpen, ClockIcon, Loader2, ShoppingCart, UserPen } from 'lucide-react';
 import { getAPIUrl, getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { startCourse } from '@services/courses/activity';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getProductsByCourse } from '@services/payments/products';
@@ -10,6 +9,7 @@ import CourseProgress from '../CourseProgress/CourseProgress';
 import { checkPaidAccess } from '@services/payments/payments';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { startCourse } from '@services/courses/activity';
 import UserAvatar from '@components/Objects/UserAvatar';
 import CoursePaidOptions from './CoursePaidOptions';
 import { useEffect, useRef, useState } from 'react';
@@ -147,9 +147,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
       if (course.chapters) {
         for (const chapter of course.chapters) {
           for (const activity of chapter.activities) {
-            const isCompleted = run?.steps?.some(
-              (step: any) => step.activity_id === activity.id && step.complete,
-            );
+            const isCompleted = run?.steps?.some((step: any) => step.activity_id === activity.id && step.complete);
             if (!isCompleted) {
               firstUnfinishedActivity = activity;
               break;
