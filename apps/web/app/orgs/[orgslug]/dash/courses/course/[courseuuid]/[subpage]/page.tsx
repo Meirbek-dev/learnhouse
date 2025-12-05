@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import { use, useEffect } from 'react';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 export interface CourseOverviewParams {
   orgslug: string;

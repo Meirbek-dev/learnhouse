@@ -22,6 +22,7 @@ interface Author {
     user_uuid: string;
     avatar_image: string;
     first_name: string;
+    middle_name?: string;
     last_name: string;
     username: string;
   };
@@ -121,13 +122,13 @@ const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
         {authors.length === 1 ? (
           <span className="text-sm font-semibold text-neutral-800">
             {authors[0]?.user?.first_name && authors[0]?.user?.last_name
-              ? `${authors[0].user.first_name} ${authors[0].user.last_name}`
+              ? [authors[0].user.first_name, authors[0].user.middle_name, authors[0].user.last_name].filter(Boolean).join(' ')
               : `@${authors[0]?.user?.username || 'Unknown'}`}
           </span>
         ) : (
           <span className="text-sm font-semibold text-neutral-800">
             {authors[0]?.user?.first_name && authors[0]?.user?.last_name
-              ? `${authors[0].user.first_name} ${authors[0].user.last_name}`
+              ? [authors[0].user.first_name, authors[0].user.middle_name, authors[0].user.last_name].filter(Boolean).join(' ')
               : `@${authors[0]?.user?.username || 'Unknown'}`}
             {authors.length > 1 && ` ${t('moreAuthors', { count: authors.length - 1 })}`}
           </span>

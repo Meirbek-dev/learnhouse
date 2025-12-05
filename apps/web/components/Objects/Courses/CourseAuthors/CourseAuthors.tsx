@@ -31,6 +31,7 @@ interface Author {
     user_uuid: string;
     avatar_image: string;
     first_name: string;
+    middle_name?: string;
     last_name: string;
     username: string;
   };
@@ -101,7 +102,7 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
           {authors.length === 1 ? (
             <span>
               {authors[0]?.user?.first_name && authors[0]?.user?.last_name
-                ? `${authors[0].user.first_name} ${authors[0].user.last_name}`
+                ? [authors[0].user.first_name, authors[0].user.middle_name, authors[0].user.last_name].filter(Boolean).join(' ')
                 : `@${authors[0]?.user?.username || 'Unknown'}`}
             </span>
           ) : (
@@ -109,7 +110,7 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
               {displayedNames.map((author, index) => (
                 <span key={author.user.user_uuid}>
                   {author.user.first_name && author.user.last_name
-                    ? `${author.user.first_name} ${author.user.last_name}`
+                    ? [author.user.first_name, author.user.middle_name, author.user.last_name].filter(Boolean).join(' ')
                     : `@${author.user.username}`}
                   {index === 0 && authors.length > 1 && index < displayedNames.length - 1 && ' & '}
                 </span>

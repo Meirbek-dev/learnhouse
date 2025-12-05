@@ -4312,6 +4312,8 @@
         "emailPlaceholder": "Электрондық пошта мекенжайыңызды енгізіңіз",
         "firstName": "Аты",
         "firstNamePlaceholder": "Атыңызды енгізіңіз",
+        "middleName": "Әкесінің аты",
+        "middleNamePlaceholder": "Әкесінің атын енгізіңіз",
         "language": "Тіл",
         "lastName": "Тегі",
         "lastNamePlaceholder": "Тегіңізді енгізіңіз",

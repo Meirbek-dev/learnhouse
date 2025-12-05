@@ -10,7 +10,7 @@ import type { ChangeEvent } from 'react';
 import { BlockMath } from 'react-katex';
 import { motion } from 'framer-motion';
 import 'katex/dist/katex.min.css';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 // Predefined LaTeX templates
 const mathTemplates = [

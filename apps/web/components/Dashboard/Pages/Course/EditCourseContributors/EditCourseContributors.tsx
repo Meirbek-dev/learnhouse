@@ -39,6 +39,7 @@ type ContributorStatus = 'ACTIVE' | 'INACTIVE' | 'PENDING';
 interface SearchUser {
   username: string;
   first_name: string;
+  middle_name?: string;
   last_name: string;
   email: string;
   avatar_image: string;
@@ -56,6 +57,7 @@ interface Contributor {
   user: {
     username: string;
     first_name: string;
+    middle_name?: string;
     last_name: string;
     email: string;
     avatar_image: string;
@@ -556,7 +558,7 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
                               />
                               <div>
                                 <div className="font-medium text-gray-900">
-                                  {user.first_name} {user.last_name}
+                                  {[user.first_name, user.middle_name, user.last_name].filter(Boolean).join(' ')}
                                 </div>
                                 <div className="text-sm text-gray-500">@{user.username}</div>
                               </div>
@@ -682,7 +684,7 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
                             />
                           </TableCell>
                           <TableCell className="font-medium">
-                            {contributor.user.first_name} {contributor.user.last_name}
+                            {[contributor.user.first_name, contributor.user.middle_name, contributor.user.last_name].filter(Boolean).join(' ')}
                           </TableCell>
                           <TableCell className="text-gray-500">@{contributor.user.username}</TableCell>
                           <TableCell className="text-gray-500">{contributor.user.email}</TableCell>

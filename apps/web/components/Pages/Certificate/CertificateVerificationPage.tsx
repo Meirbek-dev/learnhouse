@@ -279,7 +279,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                                 key={author.user.user_uuid}
                                 className="text-neutral-600"
                               >
-                                {author.user.first_name} {author.user.last_name}
+                                {[author.user.first_name, author.user.middle_name, author.user.last_name].filter(Boolean).join(' ')}
                                 {index <
                                   Math.min(
                                     2,

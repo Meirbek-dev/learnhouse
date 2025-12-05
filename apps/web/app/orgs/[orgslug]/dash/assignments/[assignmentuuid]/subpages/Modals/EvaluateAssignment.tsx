@@ -10,7 +10,7 @@ import { getTaskRefFileDir } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 const EvaluateAssignment = ({ user_id }: any) => {
   const t = useTranslations('DashPage.Assignments.EvaluateModal');

@@ -34,6 +34,7 @@ export interface Course {
       user_uuid: string;
       avatar_image: string;
       first_name: string;
+      middle_name?: string;
       last_name: string;
       username: string;
     };
@@ -196,7 +197,7 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
             </div>
             <span className="text-muted-foreground truncate text-xs">
               {displayedAuthors.every((a) => a.user.first_name && a.user.last_name)
-                ? `${displayedAuthors.map((a) => `${a.user.first_name} ${a.user.last_name}`).join(', ')}${hasMoreAuthors ? ` +${remainingAuthorsCount}` : ''}`
+                ? `${displayedAuthors.map((a) => [a.user.first_name, a.user.middle_name, a.user.last_name].filter(Boolean).join(' ')).join(', ')}${hasMoreAuthors ? ` +${remainingAuthorsCount}` : ''}`
                 : t('authorLabel', { count: activeAuthors.length })}
             </span>
           </div>

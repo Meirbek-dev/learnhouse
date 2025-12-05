@@ -35,6 +35,7 @@ interface UserData {
   id: number;
   user_uuid: string;
   first_name: string;
+  middle_name?: string;
   last_name: string;
   username: string;
   bio?: string;
@@ -240,7 +241,7 @@ const UserBlockComponent = (props: any) => {
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex min-w-0 items-center gap-2">
                     <h4 className="truncate font-semibold text-gray-900">
-                      {userData.first_name} {userData.last_name}
+                      {[userData.first_name, userData.middle_name, userData.last_name].filter(Boolean).join(' ')}
                     </h4>
                     {userData.username ? (
                       <Badge

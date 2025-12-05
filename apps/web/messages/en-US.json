@@ -4302,6 +4302,8 @@
         "emailPlaceholder": "Enter your email",
         "firstName": "First Name",
         "firstNamePlaceholder": "Enter your first name",
+        "middleName": "Middle Name",
+        "middleNamePlaceholder": "Enter your middle name",
         "language": "Language",
         "lastName": "Last Name",
         "lastNamePlaceholder": "Enter your last name",

@@ -27,6 +27,7 @@ import UserAvatar from '../UserAvatar';
 interface User {
   username: string;
   first_name: string;
+  middle_name?: string;
   last_name: string;
   email: string;
   avatar_image: string;
@@ -399,7 +400,7 @@ export const SearchBar: FC<SearchBarProps> = ({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <h3 className="truncate text-sm font-medium text-black/80">
-                      {user.first_name} {user.last_name}
+                      {[user.first_name, user.middle_name, user.last_name].filter(Boolean).join(' ')}
                     </h3>
                     <span className="text-[10px] font-medium tracking-wide whitespace-nowrap text-black/40 uppercase">
                       {t('userType')}

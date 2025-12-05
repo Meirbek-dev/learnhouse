@@ -15,7 +15,7 @@ import { getTaskFileSubmissionDir } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 interface FileSchema {
   fileUUID: string;

@@ -15,18 +15,34 @@ const nextConfig: NextConfig = {
     ];
   },
   experimental: {
+    // Build worker improves parallelism during build but keeps client chunks consolidated
+    webpackBuildWorker: true,
     optimizePackageImports: [
+      // UI library - tree shaking
       '@radix-ui/react-icons',
       '@radix-ui/react-checkbox',
       '@radix-ui/react-form',
       '@radix-ui/react-label',
       '@radix-ui/react-slot',
       '@radix-ui/react-visually-hidden',
+      'radix-ui',
       '@icons-pack/react-simple-icons',
       'lucide-react',
+      // Heavy utility libs
       'recharts',
       'react-day-picker',
       'date-fns',
+      'framer-motion',
+      // TipTap editor (heavy)
+      '@tiptap/core',
+      '@tiptap/react',
+      '@tiptap/pm',
+      '@tiptap/starter-kit',
+      '@tiptap/extension-link',
+      '@tiptap/extension-image',
+      '@tiptap/extension-table',
+      '@tiptap/extension-youtube',
+      '@tiptap/extension-code-block-lowlight',
     ],
   },
   compiler: {

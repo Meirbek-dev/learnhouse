@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl';
 import type { ComponentType } from 'react';
 import { motion } from 'framer-motion';
 import { use, useEffect } from 'react';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 interface User {
   username: string;

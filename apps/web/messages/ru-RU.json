@@ -4310,6 +4310,8 @@
         "emailPlaceholder": "Введите ваш адрес электронной почты",
         "firstName": "Имя",
         "firstNamePlaceholder": "Введите ваше имя",
+        "middleName": "Отчество",
+        "middleNamePlaceholder": "Введите ваше отчество",
         "language": "Язык",
         "lastName": "Фамилия",
         "lastNamePlaceholder": "Введите вашу фамилию",

@@ -10,6 +10,7 @@ export interface LeaderboardEntry {
   user_id: number;
   username: string | null;
   first_name?: string | null;
+  middle_name?: string | null;
   last_name?: string | null;
   avatar_url?: string | null;
   total_xp: number;
@@ -54,6 +55,7 @@ export const LeaderboardEntrySchema = z.object({
   user_id: z.number(),
   username: z.string().nullable(),
   first_name: z.string().nullable().optional(),
+  middle_name: z.string().nullable().optional(),
   last_name: z.string().nullable().optional(),
   avatar_url: z.string().nullable().optional(),
   total_xp: z.number().min(0),

@@ -12,7 +12,7 @@ import type { DashboardData } from '@/types/gamification';
 import { getUriWithOrg } from '@services/config/config';
 import { getTranslations } from 'next-intl/server';
 import CourseGridClient from './CourseGridClient';
-import Link from 'next/link';
+import Link from '@/components/ui/ServerLink';
 
 interface LandingClassicProps {
   courses: any[];

@@ -18,7 +18,7 @@ import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import { format } from 'date-fns';
 import { useState } from 'react';
-import Link from 'next/link';
+import Link from '@components/ui/AppLink';
 
 const OrgAccess = () => {
   const org = useOrg() as any;

@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 class UserBase(SQLModelStrictBaseModel):
     username: str
     first_name: str
+    middle_name: str | None = ""
     last_name: str
     email: EmailStr
     avatar_image: str | None = ""
@@ -26,6 +27,7 @@ class UserBase(SQLModelStrictBaseModel):
 
 class UserCreate(UserBase):
     first_name: str = ""
+    middle_name: str | None = ""
     last_name: str = ""
     password: str
 
@@ -33,6 +35,7 @@ class UserCreate(UserBase):
 class UserUpdate(SQLModelStrictBaseModel):
     username: str | None = None
     first_name: str | None = None
+    middle_name: str | None = None
     last_name: str | None = None
     email: str | None = None
     avatar_image: str | None = None

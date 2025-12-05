@@ -6,7 +6,7 @@ import { getUriWithOrg } from '@services/config/config';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { auth } from '@/auth';
-import Link from 'next/link';
+import Link from '@/components/ui/ServerLink';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: number; collectionid: string }>;

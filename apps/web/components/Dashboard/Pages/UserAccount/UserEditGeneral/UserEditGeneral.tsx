@@ -766,15 +766,7 @@ const UserEditGeneral = () => {
     const loadingToast = toast.loading(t('updating'));
 
     try {
-      // Combine middle name into first_name for the payload
-      const combinedFirstName = values.middle_name?.trim()
-        ? `${values.first_name} ${values.middle_name.trim()}`
-        : values.first_name;
-      const payload: any = { ...values, first_name: combinedFirstName };
-      // Remove middle_name from payload as it's been merged
-      delete payload.middle_name;
-
-      await updateProfile(payload, userData.id, access_token);
+      await updateProfile(values, userData.id, access_token);
       const updatedUserData = await getUser(userData.id, access_token);
       setUserData(updatedUserData);
 

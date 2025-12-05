@@ -19,6 +19,7 @@ import type { FormEvent } from 'react';
 interface User {
   username: string;
   first_name: string;
+  middle_name?: string;
   last_name: string;
   email: string;
   avatar_image: string;
@@ -437,7 +438,13 @@ const SearchPage = () => {
                                 showProfilePopup={false}
                               />
                               <span className="text-xs text-black/40">
-                                {course.authors[0].user.first_name} {course.authors[0].user.last_name}
+                                {[
+                                  course.authors[0].user.first_name,
+                                  course.authors[0].user.middle_name,
+                                  course.authors[0].user.last_name,
+                                ]
+                                  .filter(Boolean)
+                                  .join(' ')}
                               </span>
                             </div>
                           ) : null}
@@ -517,7 +524,7 @@ const SearchPage = () => {
                         />
                         <div>
                           <h3 className="text-sm font-medium text-black/80">
-                            {user.first_name} {user.last_name}
+                            {[user.first_name, user.middle_name, user.last_name].filter(Boolean).join(' ')}
                           </h3>
                           <p className="text-xs text-black/50">@{user.username}</p>
                           {user.details?.title?.text ? (

@@ -167,7 +167,7 @@ const UserProfileClient = ({ userData, profile }: UserProfileClientProps) => {
             <div className="w-full pl-2 md:w-1/6">
               {/* Name */}
               <h1 className="mb-8 text-[32px] font-bold">
-                {userData.first_name} {userData.last_name}
+                {[userData.first_name, userData.middle_name, userData.last_name].filter(Boolean).join(' ')}
               </h1>
 
               {/* Details */}

@@ -120,7 +120,7 @@ const OrgUsers = () => {
                     <TableRow key={user.user.id}>
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          <span>{`${user.user.first_name} ${user.user.last_name}`}</span>
+                          <span>{[user.user.first_name, user.user.middle_name, user.user.last_name].filter(Boolean).join(' ')}</span>
                           <span className="rounded-full bg-neutral-100 p-1 px-2 text-xs font-semibold text-neutral-400">
                             @{user.user.username}
                           </span>

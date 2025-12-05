@@ -110,7 +110,7 @@ const SubmissionBox = ({ assignment_uuid, user_id, submission }: any) => {
             <div className="flex flex-col">
               {user?.first_name && user?.last_name ? (
                 <p className="text-sm font-semibold">
-                  {user?.first_name} {user?.last_name}
+                  {[user?.first_name, user?.middle_name, user?.last_name].filter(Boolean).join(' ')}
                 </p>
               ) : (
                 <p className="text-sm font-semibold">@{user?.username}</p>

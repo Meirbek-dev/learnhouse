@@ -32,6 +32,7 @@ interface UserProfilePopupProps {
 
 interface UserData {
   first_name: string;
+  middle_name?: string;
   last_name: string;
   username: string;
   bio?: string;
@@ -141,7 +142,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex min-w-0 items-center gap-2">
                         <h4 className="truncate font-semibold text-gray-900">
-                          {userData.first_name} {userData.last_name}
+                          {[userData.first_name, userData.middle_name, userData.last_name].filter(Boolean).join(' ')}
                         </h4>
                         {userData.username ? (
                           <Badge
