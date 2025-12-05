@@ -259,6 +259,7 @@
     },
     "Signup": {
       "accountCreated": "Ваш аккаунт успешно создан",
+      "goBack": "Вернуться",
       "bio": "О себе",
       "bioPlaceholder": "Расскажите что-нибудь о себе",
       "createAccount": "Создать аккаунт",

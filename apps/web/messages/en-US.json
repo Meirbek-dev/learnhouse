@@ -258,6 +258,7 @@
       "title": "Reset Password"
     },
     "Signup": {
+      "goBack": "Back to Login",
       "accountCreated": "Your account was successfully created",
       "bio": "Bio",
       "bioPlaceholder": "Tell something about yourself",

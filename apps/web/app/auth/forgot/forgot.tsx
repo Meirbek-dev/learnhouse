@@ -1,8 +1,8 @@
 'use client';
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { AlertTriangle, Info, Loader2, ArrowLeft } from 'lucide-react';
 import platformLogoFull from 'public/platform_logo_full.svg';
-import { AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -129,6 +129,16 @@ const ForgotPasswordClient = () => {
                         t('sendResetLink')
                       )}
                     </Button>
+                  </div>
+                  <div className="flex justify-center">
+                    <Link
+                      prefetch={false}
+                      href={`/login?orgslug=${org?.slug}`}
+                      className="flex items-center space-x-2 text-sm text-slate-600 hover:text-slate-800"
+                    >
+                      <ArrowLeft size={14} />
+                      <span>{t('backToLogin')}</span>
+                    </Link>
                   </div>
                 </form>
               </Form>

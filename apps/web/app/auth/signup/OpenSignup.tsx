@@ -1,8 +1,8 @@
 'use client';
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { AlertTriangle, Check, Loader2, User, ArrowLeft } from 'lucide-react';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
-import { AlertTriangle, Check, Loader2, User } from 'lucide-react';
 import PasswordInput from '@components/ui/custom/password-input';
 import { useEffect, useState, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -285,6 +285,17 @@ const OpenSignUpComponent = () => {
           />
           <span>{t('signInWithGoogle')}</span>
         </button>
+
+        {/* Back to sign in */}
+        <div className="mt-3">
+          <Link
+            href={`/login?orgslug=${org?.slug}`}
+            className="flex w-full items-center justify-center space-x-2 rounded-md border border-gray-200 bg-white p-2 py-3 text-center text-base font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:border-gray-300 hover:bg-gray-50"
+          >
+            <ArrowLeft size={16} />
+            <span>{t('goBack')}</span>
+          </Link>
+        </div>
       </div>
     </div>
   );
