@@ -65,60 +65,6 @@ const nextConfig: NextConfig = {
     // the default smaller quality as fallback.
     qualities: [100, 75],
   },
-  // Consolidate client-side chunks to reduce parallel requests on initial load.
-  // This helps avoid rate limiting from nginx proxies.
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Increase minimum chunk size to reduce number of chunks
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          ...config.optimization?.splitChunks,
-          chunks: 'all',
-          // Higher minSize = fewer, larger chunks = fewer parallel requests
-          minSize: 50000, // 50KB minimum
-          maxAsyncRequests: 10, // Limit concurrent async chunk requests
-          maxInitialRequests: 10, // Limit concurrent initial chunk requests
-          cacheGroups: {
-            ...config.optimization?.splitChunks?.cacheGroups,
-            // Bundle all UI libraries together
-            ui: {
-              test: /[\\/]node_modules[\\/](@radix-ui|lucide-react|class-variance-authority|clsx|tailwind-merge)[\\/]/,
-              name: 'ui-libs',
-              chunks: 'all',
-              priority: 30,
-              reuseExistingChunk: true,
-            },
-            // Bundle framer-motion separately (large but often used)
-            framer: {
-              test: /[\\/]node_modules[\\/]framer-motion[\\/]/,
-              name: 'framer',
-              chunks: 'all',
-              priority: 25,
-              reuseExistingChunk: true,
-            },
-            // Bundle all form/validation libs together
-            forms: {
-              test: /[\\/]node_modules[\\/](react-hook-form|@hookform|zod)[\\/]/,
-              name: 'forms',
-              chunks: 'all',
-              priority: 20,
-              reuseExistingChunk: true,
-            },
-            // Bundle date utilities together
-            dates: {
-              test: /[\\/]node_modules[\\/](date-fns|react-day-picker)[\\/]/,
-              name: 'dates',
-              chunks: 'all',
-              priority: 20,
-              reuseExistingChunk: true,
-            },
-          },
-        },
-      };
-    }
-    return config;
-  },
 };
 
 const withNextIntl = createNextIntlPlugin();
