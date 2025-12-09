@@ -15,8 +15,6 @@ const nextConfig: NextConfig = {
     ];
   },
   experimental: {
-    // Build worker improves parallelism during build but keeps client chunks consolidated
-    webpackBuildWorker: true,
     optimizePackageImports: [
       // UI library - tree shaking
       '@radix-ui/react-icons',
@@ -53,12 +51,6 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   devIndicators: false,
   output: 'standalone',
-  productionBrowserSourceMaps: false,
-  logging: {
-    fetches: {
-      fullUrl: true,
-    },
-  },
   allowedDevOrigins: ['https://cs-mooc.tou.edu.kz', 'http://192.168.12.35', 'http://192.168.1.46'],
   images: {
     // Allow using quality 100 for important SVG/brand images while keeping

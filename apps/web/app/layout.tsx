@@ -7,15 +7,26 @@ import { Suspense } from 'react';
 
 import '../styles/globals.css';
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+async function LocalizedLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
   setRequestLocale(locale);
   const messages = await getMessages();
 
   return (
+    <IntlProvider
+      messages={messages}
+      locale={locale}
+    >
+      <ClientLayout>{children}</ClientLayout>
+    </IntlProvider>
+  );
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
     <html
       className={`${inter.variable} ${jetBrainsMono.variable}`}
-      lang={locale}
+      lang="en"
     >
       <head>
         {isDevEnv && (
@@ -27,12 +38,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="bg-background/20">
         <Suspense fallback={null}>
-          <IntlProvider
-            messages={messages}
-            locale={locale}
-          >
-            <ClientLayout>{children}</ClientLayout>
-          </IntlProvider>
+          <LocalizedLayout>{children}</LocalizedLayout>
         </Suspense>
       </body>
     </html>
