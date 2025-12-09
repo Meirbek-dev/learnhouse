@@ -1,7 +1,7 @@
 'use client';
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { AlertTriangle, Info, Loader2, ArrowLeft } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Info, Loader2 } from 'lucide-react';
 import platformLogoFull from 'public/platform_logo_full.svg';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';

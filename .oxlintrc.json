@@ -45,7 +45,6 @@
     "react-perf",
     "promise",
     "node",
-    "regex"
   ],
   "rules": {
     "eslint": "warn",

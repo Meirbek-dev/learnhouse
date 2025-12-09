@@ -1,7 +1,7 @@
 'use client';
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { AlertTriangle, Check, Loader2, User, ArrowLeft } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Check, Loader2, User } from 'lucide-react';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import PasswordInput from '@components/ui/custom/password-input';
 import { useEffect, useState, useTransition } from 'react';
