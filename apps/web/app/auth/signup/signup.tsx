@@ -33,7 +33,7 @@ const SignUpClient = (props: SignUpClientProps) => {
   const inviteCodeParam = searchParams.get('inviteCode');
 
   const [joinMethod, setJoinMethod] = useState(() => {
-    return props.org?.config?.config?.features.members.signup_mode || 'open';
+    return props.org?.config?.config?.features?.members?.signup_mode || 'open';
   });
 
   const [inviteCode, setInviteCode] = useState(() => {

@@ -373,7 +373,7 @@ def install_create_organization(org_object: OrganizationCreate, db_session: Sess
         features=OrgFeatureConfig(
             courses=CourseOrgConfig(enabled=True, limit=0),
             members=MemberOrgConfig(
-                enabled=True, signup_mode="ashyqbilim", admin_limit=0, limit=0
+                enabled=True, signup_mode="open", admin_limit=0, limit=0
             ),
             usergroups=UserGroupOrgConfig(enabled=True, limit=0),
             storage=StorageOrgConfig(enabled=True, limit=0),
