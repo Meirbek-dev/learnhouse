@@ -41,7 +41,7 @@ def send_password_reset_email(
         <p>Hello {user.username}</p>
         <p>You have requested to reset your password.</p>
         <p>Here is your reset code: {generated_reset_code}</p>
-        <p>Click <a href="https://{organization.slug}.openu.io/reset?orgslug={organization.slug}&email={email}&resetCode={generated_reset_code}">here</a> to reset your password.</p>
+        <p>Click <a href="https://{organization.slug}.cs-mooc.io/reset?orgslug={organization.slug}&email={email}&resetCode={generated_reset_code}">here</a> to reset your password.</p>
     </body>
 </html>
 """,
