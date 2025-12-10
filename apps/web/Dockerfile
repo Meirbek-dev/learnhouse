@@ -1,18 +1,14 @@
-FROM node:24-alpine AS base
+FROM node:25-bookworm-slim AS base
+RUN npm install -g pnpm@latest --no-fund --unsafe-perm=true
 
 # Install dependencies only when needed
 FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install dependencies
 COPY ../../pnpm-lock.yaml ./pnpm-lock.yaml
 COPY package.json ./package.json
-RUN \
-  if [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i; \
-  else echo "Root pnpm-lock.yaml not found." && exit 1; \
-  fi
+RUN pnpm i
 
 
 # Rebuild the source code only when needed
@@ -31,17 +27,14 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Learn more about it in the Next.js documentation: https://nextjs.org/docs/basic-features/environment-variables
 RUN rm -f .env*
 
-RUN \
-  if [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+RUN pnpm run build
 
 # Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
 
 # Install curl
-RUN apk add --no-cache curl
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
 # Uncomment the following line in case you want to disable telemetry during runtime.

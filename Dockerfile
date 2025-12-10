@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:latest
 # Base image for Python backend
-FROM python:3.13.9-slim-trixie AS base
+FROM python:3.13.11-slim-trixie AS base
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -20,7 +20,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
   && rm -rf /var/lib/apt/lists/*
 
 # Bring in a reproducible Node.js toolchain and install PM2 globally
-COPY --from=node:24-bullseye-slim /usr/local /usr/local
+COPY --from=node:25-bullseye-slim /usr/local /usr/local
 RUN npm install -g pm2
 
 # Ensure uv is available for dependency management at runtime
@@ -28,13 +28,11 @@ RUN pip install --upgrade pip \
   && pip install uv
 
 # Frontend Build
-FROM node:24-alpine AS frontend-base
-RUN corepack enable pnpm
+FROM node:25-bookworm-slim AS frontend-base
+RUN npm install -g pnpm@latest --no-fund --unsafe-perm=true
 
 # Install dependencies only when needed
 FROM frontend-base AS frontend-deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
@@ -83,7 +81,7 @@ RUN --mount=type=cache,target=/root/.cache/uv uv sync --locked --no-dev
 # Production image, copy all the files and run next
 FROM frontend-base AS frontend-runner
 WORKDIR /app
-RUN apk add --no-cache curl
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
 # Uncomment the following line in case you want to disable telemetry during runtime.

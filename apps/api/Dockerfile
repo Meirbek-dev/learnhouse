@@ -1,4 +1,4 @@
-FROM python:3.13.9-slim-trixie
+FROM python:3.13.11-slim-trixie
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Set UV_COMPILE_BYTECODE to compile Python source files to bytecode for improved startup time.
