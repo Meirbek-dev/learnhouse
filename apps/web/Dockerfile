@@ -6,8 +6,8 @@ FROM base AS deps
 WORKDIR /app
 
 # Install dependencies
-COPY ../../pnpm-lock.yaml ./pnpm-lock.yaml
 COPY package.json ./package.json
+COPY ../../pnpm-lock.yaml ./pnpm-lock.yaml
 RUN pnpm i
 
 
