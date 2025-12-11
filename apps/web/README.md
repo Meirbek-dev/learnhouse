@@ -1,16 +1,13 @@
-Docker (Web) - Build & Run
-==========================
+# Docker (Web) - Build & Run
 
 This README includes minimal instructions to build and run the `apps/web` Docker image locally.
 
-Prerequisites
--------------
+## Prerequisites
 
 - Docker (or Docker Desktop)
 - PowerShell or a POSIX shell
 
-Build the web image
--------------------
+## Build the web image
 
 From repository root:
 
@@ -18,40 +15,41 @@ From repository root:
 docker build -f apps/web/Dockerfile -t learnhouse-web:local apps/web
 ```
 
-Run the web image
------------------
+## Run the web image
 
 ```powershell
 docker run -d --name learnhouse-web -p 3000:3000 learnhouse-web:local
 ```
 
-The image exposes port 3000 by default (see `ENV PORT=3000`). If you'd like to use a different port, change the container or host mapping.
+The image exposes port 3000 by default (see `ENV PORT=3000`). If you'd like to use a different port,
+change the container or host mapping.
 
-Stop and remove the container
-----------------------------
+## Stop and remove the container
 
 ```powershell
 docker stop learnhouse-web; docker rm learnhouse-web
 ```
 
-Run via root `docker compose` (recommended)
------------------------------------------
+## Run via root `docker compose` (recommended)
 
-The repo includes a root Dockerfile and compose setup that can build and run both `api` and `web` together. From the repo root:
+The repo includes a root Dockerfile and compose setup that can build and run both `api` and `web`
+together. From the repo root:
 
 ```powershell
 docker compose up -d --build app
 ```
 
-Environment variables (important)
----------------------------------
+## Environment variables (important)
 
-- The web container uses several `NEXT_PUBLIC_*` environment variables (e.g., `NEXT_PUBLIC_PLATFORM_API_URL`). These are baked into the build. If you need runtime configs, review the Dockerfile and the app’s environment usage.
+- The web container uses several `NEXT_PUBLIC_*` environment variables (e.g.,
+  `NEXT_PUBLIC_PLATFORM_API_URL`). These are baked into the build. If you need runtime configs,
+  review the Dockerfile and the app’s environment usage.
 
-Troubleshooting
----------------
+## Troubleshooting
 
-- If the build fails with package manager errors, ensure `pnpm` installed during the Docker build (the Dockerfile uses `npm install -g pnpm@latest`). If building locally you can run `pnpm install` in `apps/web` to verify your lockfile.
+- If the build fails with package manager errors, ensure `pnpm` installed during the Docker build
+  (the Dockerfile uses `npm install -g pnpm@latest`). If building locally you can run `pnpm install`
+  in `apps/web` to verify your lockfile.
 - If changes to dependencies are not picked up, re-run the build with no cache:
 
 ```powershell

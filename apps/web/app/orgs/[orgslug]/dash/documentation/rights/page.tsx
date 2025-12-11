@@ -5,8 +5,8 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
-import { motion } from 'framer-motion';
 import Link from '@components/ui/AppLink';
+import { motion } from 'framer-motion';
 
 interface RightsDocumentationProps {
   params: Promise<{ orgslug: string }>;

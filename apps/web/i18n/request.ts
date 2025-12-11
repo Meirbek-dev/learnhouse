@@ -1,6 +1,6 @@
 import { getRequestConfig } from 'next-intl/server';
-import { cookies } from 'next/headers';
 import { defaultLocale } from './config';
+import { cookies } from 'next/headers';
 import type { Locale } from './config';
 
 const COOKIE_NAME = 'NEXT_LOCALE';

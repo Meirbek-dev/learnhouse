@@ -28,7 +28,9 @@ const HomeClient = () => {
       <div className="mx-auto flex items-center space-x-4 pt-16 text-2xl font-semibold">
         <span>{t('hello')},</span> <UserAvatar />{' '}
         <span className="capitalize">
-          {[session?.data?.user.first_name, session?.data?.user.middle_name, session?.data?.user.last_name].filter(Boolean).join(' ')}
+          {[session?.data?.user.first_name, session?.data?.user.middle_name, session?.data?.user.last_name]
+            .filter(Boolean)
+            .join(' ')}
         </span>
       </div>
       <div className="mx-auto flex cursor-pointer items-center space-x-4 pt-16 text-2xl font-semibold">

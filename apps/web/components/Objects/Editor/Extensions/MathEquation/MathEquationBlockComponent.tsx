@@ -6,11 +6,11 @@ import { useEffect, useRef, useState } from 'react';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import { styled } from 'styled-components';
+import Link from '@components/ui/AppLink';
 import type { ChangeEvent } from 'react';
 import { BlockMath } from 'react-katex';
 import { motion } from 'framer-motion';
 import 'katex/dist/katex.min.css';
-import Link from '@components/ui/AppLink';
 
 // Predefined LaTeX templates
 const mathTemplates = [

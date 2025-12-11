@@ -44,7 +44,7 @@
     "nextjs",
     "react-perf",
     "promise",
-    "node",
+    "node"
   ],
   "rules": {
     "eslint": "warn",

@@ -4,9 +4,9 @@ import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getCollectionById } from '@services/courses/collections';
 import { getUriWithOrg } from '@services/config/config';
 import { getTranslations } from 'next-intl/server';
+import Link from '@/components/ui/ServerLink';
 import type { Metadata } from 'next';
 import { auth } from '@/auth';
-import Link from '@/components/ui/ServerLink';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: number; collectionid: string }>;

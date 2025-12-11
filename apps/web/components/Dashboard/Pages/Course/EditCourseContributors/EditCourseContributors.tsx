@@ -684,7 +684,9 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
                             />
                           </TableCell>
                           <TableCell className="font-medium">
-                            {[contributor.user.first_name, contributor.user.middle_name, contributor.user.last_name].filter(Boolean).join(' ')}
+                            {[contributor.user.first_name, contributor.user.middle_name, contributor.user.last_name]
+                              .filter(Boolean)
+                              .join(' ')}
                           </TableCell>
                           <TableCell className="text-gray-500">@{contributor.user.username}</TableCell>
                           <TableCell className="text-gray-500">{contributor.user.email}</TableCell>

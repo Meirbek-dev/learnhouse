@@ -1,16 +1,13 @@
-Docker (API) - Build & Run
-==========================
+# Docker (API) - Build & Run
 
 This README includes minimal instructions to build and run the `apps/api` Docker image locally.
 
-Prerequisites
--------------
+## Prerequisites
 
 - Docker (or Docker Desktop)
 - PowerShell or a POSIX shell
 
-Build the API image
--------------------
+## Build the API image
 
 Build the image for `apps/api` using the Dockerfile in that folder:
 
@@ -18,8 +15,7 @@ Build the image for `apps/api` using the Dockerfile in that folder:
 docker build -f apps/api/Dockerfile -t learnhouse-api:local apps/api
 ```
 
-Run the API image (detached)
------------------------------
+## Run the API image (detached)
 
 Run the built image and map port 8000 (or your `PORT` env variable):
 
@@ -27,26 +23,26 @@ Run the built image and map port 8000 (or your `PORT` env variable):
 docker run -d --name learnhouse-api -p 8000:8000 learnhouse-api:local
 ```
 
-Stop and remove the container
-----------------------------
+## Stop and remove the container
 
 ```powershell
 docker stop learnhouse-api; docker rm learnhouse-api
 ```
 
-Run via root `docker compose` (recommended)
------------------------------------------
+## Run via root `docker compose` (recommended)
 
-The monorepo includes a root Dockerfile and a compose setup that builds/starts both API and web. Use the compose command from the repository root to build and run the app service/manage multiple containers:
+The monorepo includes a root Dockerfile and a compose setup that builds/starts both API and web. Use
+the compose command from the repository root to build and run the app service/manage multiple
+containers:
 
 ```powershell
 docker compose up -d --build app
 ```
 
-Environment and notes
----------------------
+## Environment and notes
 
-- The API Dockerfile uses `python:3.13.11-slim-trixie` and `uv` to run FastAPI. If necessary, provide environment variables using `--env` on `docker run` or a compose `.env` file.
+- The API Dockerfile uses `python:3.13.11-slim-trixie` and `uv` to run FastAPI. If necessary,
+  provide environment variables using `--env` on `docker run` or a compose `.env` file.
 - If you modify dependencies, rebuild the image.
 - If you need to inspect logs:
 
@@ -54,8 +50,8 @@ Environment and notes
 docker logs -f learnhouse-api
 ```
 
-Troubleshooting
----------------
+## Troubleshooting
 
 - If ports conflict, use `-p <host>:<container>` to remap.
-- If dependency installation fails during the Docker build, check the `uv.lock` and `pyproject.toml` for mismatches.
+- If dependency installation fails during the Docker build, check the `uv.lock` and `pyproject.toml`
+  for mismatches.

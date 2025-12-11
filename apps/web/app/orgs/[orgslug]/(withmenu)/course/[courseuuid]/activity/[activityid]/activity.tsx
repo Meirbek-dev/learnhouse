@@ -721,7 +721,9 @@ const ActivityClient = (props: ActivityClientProps) => {
                                     .map((author: any, idx: number, arr: any[]) => (
                                       <span key={author.user.user_uuid}>
                                         {author.user.first_name && author.user.last_name
-                                          ? [author.user.first_name, author.user.middle_name, author.user.last_name].filter(Boolean).join(' ')
+                                          ? [author.user.first_name, author.user.middle_name, author.user.last_name]
+                                              .filter(Boolean)
+                                              .join(' ')
                                           : `@${author.user.username}`}
                                         {idx === 0 && arr.length > 1 ? ' & ' : ''}
                                       </span>
@@ -739,7 +741,13 @@ const ActivityClient = (props: ActivityClientProps) => {
                                                 className="py-1 text-sm text-white"
                                               >
                                                 {author.user.first_name && author.user.last_name
-                                                  ? [author.user.first_name, author.user.middle_name, author.user.last_name].filter(Boolean).join(' ')
+                                                  ? [
+                                                      author.user.first_name,
+                                                      author.user.middle_name,
+                                                      author.user.last_name,
+                                                    ]
+                                                      .filter(Boolean)
+                                                      .join(' ')
                                                   : `@${author.user.username}`}
                                               </div>
                                             ))}
