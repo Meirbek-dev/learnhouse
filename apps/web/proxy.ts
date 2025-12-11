@@ -23,7 +23,7 @@ export default async function proxy(req: NextRequest) {
   const default_org = getDefaultOrg();
   const cookieDomain = getTopLevelCookieDomain();
   const { pathname, search } = req.nextUrl;
-  const cookie_orgslug = req.cookies.get('openu_current_orgslug')?.value;
+  const cookie_orgslug = req.cookies.get('current_orgslug')?.value;
 
   // If path already starts with /orgs/, allow it to pass through
   if (pathname.startsWith('/orgs/')) {
@@ -47,7 +47,7 @@ export default async function proxy(req: NextRequest) {
 
     if (orgslug) {
       response.cookies.set({
-        name: 'openu_current_orgslug',
+        name: 'current_orgslug',
         value: orgslug,
         domain: cookieDomain,
       });
@@ -101,7 +101,7 @@ export default async function proxy(req: NextRequest) {
 
   // Set the cookie with the orgslug value
   response.cookies.set({
-    name: 'openu_current_orgslug',
+    name: 'current_orgslug',
     value: orgslug,
     domain: cookieDomain,
     path: '/',

@@ -339,30 +339,30 @@ wheels = [
 
 [[package]]
 name = "boto3"
-version = "1.42.6"
+version = "1.42.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
     { name = "jmespath" },
     { name = "s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/06/a8/e7a408127d61569df097d6c128775ffa3e609a023d4461686fd85fe5eef4/boto3-1.42.6.tar.gz", hash = "sha256:11dab889a24f378af6c93afd4aa06d7cace3866cbf02e78c7a77e9a7fb41967a", size = 112859, upload-time = "2025-12-09T23:00:33.685Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/25/f9/808ed6c387802399a9d6c3a6cc3d09d19376dbbcdf228a8ca501b7f98eda/boto3-1.42.7.tar.gz", hash = "sha256:eda49046c0f6a21ac159f9b2d609e5cc70d1dd019b7ac9618eec99285282b3db", size = 112817, upload-time = "2025-12-10T20:32:10.414Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ee/dd/af36b27e9fc004cd8ae2290d6d76a8de34d098d17a3718ae875e5e856ab1/boto3-1.42.6-py3-none-any.whl", hash = "sha256:69ff5cf6431fe7870da009f23aceabb20d56b4c9852ba9a808eaf6cc30ae02a5", size = 140574, upload-time = "2025-12-09T23:00:31.355Z" },
+    { url = "https://files.pythonhosted.org/packages/99/87/0929d68046575a2171a6ef8681a14e707c25e1dcc6db883f1729c3c111cd/boto3-1.42.7-py3-none-any.whl", hash = "sha256:c5cb2ada690c14e2dfa1e1c59ef7ef399c5e381f5514f1541d28310e35192300", size = 140573, upload-time = "2025-12-10T20:32:08.253Z" },
 ]
 
 [[package]]
 name = "botocore"
-version = "1.42.6"
+version = "1.42.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jmespath" },
     { name = "python-dateutil" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a6/28/e1ad336dd409e3cde0644cbba644056248e873b77129502f81581f5a222f/botocore-1.42.6.tar.gz", hash = "sha256:ab389c6874dfbdc4c18de9b4a02d300cb6c7f6f2d4622c73e5965aeef80e570d", size = 14851572, upload-time = "2025-12-09T23:00:21.993Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/99/76/d55a451399fa3a05a39881976dc9a02e6d60661f7e68976a387da655be5a/botocore-1.42.7.tar.gz", hash = "sha256:cc401b4836eae2a781efa1d1df88b2e92f9245885a6ae1bf9a6b26bc97b3efd2", size = 14855150, upload-time = "2025-12-10T20:31:58.665Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6c/1e/545d3ca599aea7a7aaad23735ae2d1c7280557e115086208d68af1621f93/botocore-1.42.6-py3-none-any.whl", hash = "sha256:c4aebdc391f3542270ebea8b8f0060fde514f6441de207dce862ed759887607e", size = 14527177, upload-time = "2025-12-09T23:00:17.197Z" },
+    { url = "https://files.pythonhosted.org/packages/d6/46/223f3e319a5a710bd28b4e4b5d0ba16a0ee9c858541335ef42fd14443e83/botocore-1.42.7-py3-none-any.whl", hash = "sha256:92128d56654342f026d5c20a92bf0e8b546be1eb38df2c0efc7433e8bbc39045", size = 14527904, upload-time = "2025-12-10T20:31:54.934Z" },
 ]
 
 [[package]]
@@ -465,7 +465,7 @@ wheels = [
 
 [[package]]
 name = "chromadb"
-version = "1.3.5"
+version = "1.3.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "bcrypt" },
@@ -496,13 +496,13 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "uvicorn", extra = ["standard"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/24/b9/78cc62bcfe34cebc61026fa76829bc303bb8d5fcaee5576fae3c64543452/chromadb-1.3.5.tar.gz", hash = "sha256:ca45b9423b083f5dd49373f89af23ff9d94fe6884233cd826e8b1a50abe74166", size = 1921436, upload-time = "2025-11-18T10:08:31.635Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c0/5c/c8d751b327f863c11cc51e4cd01750696bacdc65b291beda8b008917910e/chromadb-1.3.6.tar.gz", hash = "sha256:834d7d154471b36bed10ddb53fcc96dfa912d18f0d57418490d829f7aad59895", size = 1959127, upload-time = "2025-12-10T05:25:22.644Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6f/3b/1808d649037164cdf860b248a3468ab4c07b414d08d61ef39c789406cf0b/chromadb-1.3.5-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:d4e5b3bd1bf879a4fffa5644ccb175b98ee18799d8447140f3f893d350068d1b", size = 20613684, upload-time = "2025-11-18T10:08:29.376Z" },
-    { url = "https://files.pythonhosted.org/packages/ba/c7/7d251fdc15969bc00dcd70ca973ad6f1e2f1f25e8e097dbec75ffcc7a210/chromadb-1.3.5-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:59d35ea15a5765da751e2bc0804054b7ade81f564119c88a1b3310c18c696d92", size = 19897327, upload-time = "2025-11-18T10:08:26.447Z" },
-    { url = "https://files.pythonhosted.org/packages/93/11/6af17eb3eebaf9afd410b03d5bb1a8c1054bd0377502022005c22d0d949f/chromadb-1.3.5-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:38e5fad35a4e686668efa956d576e4daea511a42225dbe9c975d9b2889608f53", size = 20476163, upload-time = "2025-11-18T10:08:20.144Z" },
-    { url = "https://files.pythonhosted.org/packages/84/66/3ac136143658714adab6a8717d22a44d11e46a01bb7896add9653af39f4f/chromadb-1.3.5-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:86d33e9b1153bc1eda48f98fc9c2d54d7dac2a460198a58aec715206d234c7f1", size = 21389003, upload-time = "2025-11-18T10:08:23.293Z" },
-    { url = "https://files.pythonhosted.org/packages/e2/2b/d99e8559c6cf6d615e768367cd8c45b168cfa00cb3ac4c6032ddbcfc396d/chromadb-1.3.5-cp39-abi3-win_amd64.whl", hash = "sha256:5ecf6345025abf84095fd9a65bb9855f2019c63e0f42373720aecabadce08cf0", size = 21685628, upload-time = "2025-11-18T10:08:33.573Z" },
+    { url = "https://files.pythonhosted.org/packages/3b/6d/2a09221575a4fd7b6356c1416160d491fccd38ab6b24eee7df030552a7ac/chromadb-1.3.6-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:d80b9621af6dfdd23a4aced8e33f667ab41e8252c2a1c4f46eb27acbbb67fe48", size = 20782782, upload-time = "2025-12-10T05:25:20.205Z" },
+    { url = "https://files.pythonhosted.org/packages/bf/8e/528f64a8ec1e32b9d079c77572e0e8301e1fb461474fefca6bce7ce90f8e/chromadb-1.3.6-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:1dee1987755d1dc920d9608f76eedb0f70ae06ade020d462f3265b290ca05b65", size = 20078289, upload-time = "2025-12-10T05:25:17.621Z" },
+    { url = "https://files.pythonhosted.org/packages/33/1c/07bb66f9d8f243ae232fa9f73bcb63ae1386dc327cfa085feca7365c34ad/chromadb-1.3.6-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f1a59a2ef5121b0321ce1ffcdf84dfa1f11fba7c6734fe6b3b22a22c9c531314", size = 20703285, upload-time = "2025-12-10T05:25:11.594Z" },
+    { url = "https://files.pythonhosted.org/packages/4b/5d/210639c32d3f6f49b265c84990be5da1bb6e1b2fd31f9845abec4580e3ba/chromadb-1.3.6-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2f98ee1e180c11aaf33f0aed11a54f385def8361931fcab8c876e56e94f02699", size = 21633675, upload-time = "2025-12-10T05:25:14.759Z" },
+    { url = "https://files.pythonhosted.org/packages/59/91/bf5dfa3bd5b457a9195439e077128c274202b1a231bd3a9d4d7f3c2259a3/chromadb-1.3.6-cp39-abi3-win_amd64.whl", hash = "sha256:cde42db6c3b31b7edf75bbf60447cd83e9693fe08d2005496ae418c05cae9b3f", size = 21870402, upload-time = "2025-12-10T05:25:24.475Z" },
 ]
 
 [[package]]
@@ -673,7 +673,7 @@ wheels = [
 
 [[package]]
 name = "fastapi"
-version = "0.124.0"
+version = "0.124.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "annotated-doc" },
@@ -681,9 +681,9 @@ dependencies = [
     { name = "starlette" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/48/9c/11969bd3e3bc4aa3a711f83dd3720239d3565a934929c74fc32f6c9f3638/fastapi-0.124.0.tar.gz", hash = "sha256:260cd178ad75e6d259991f2fd9b0fee924b224850079df576a3ba604ce58f4e6", size = 357623, upload-time = "2025-12-06T13:11:35.692Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/58/b7/4dbca3f9d847ba9876dcb7098c13a4c6c86ee8db148c923fab78e27748d3/fastapi-0.124.2.tar.gz", hash = "sha256:72e188f01f360e2f59da51c8822cbe4bca210c35daaae6321b1b724109101c00", size = 361867, upload-time = "2025-12-10T12:10:10.676Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4d/29/9e1e82e16e9a1763d3b55bfbe9b2fa39d7175a1fd97685c482fa402e111d/fastapi-0.124.0-py3-none-any.whl", hash = "sha256:91596bdc6dde303c318f06e8d2bc75eafb341fc793a0c9c92c0bc1db1ac52480", size = 112505, upload-time = "2025-12-06T13:11:34.392Z" },
+    { url = "https://files.pythonhosted.org/packages/25/c5/8a5231197b81943b2df126cc8ea2083262e004bee3a39cf85a471392d145/fastapi-0.124.2-py3-none-any.whl", hash = "sha256:6314385777a507bb19b34bd064829fddaea0eea54436deb632b5de587554055c", size = 112711, upload-time = "2025-12-10T12:10:08.855Z" },
 ]
 
 [package.optional-dependencies]
@@ -968,7 +968,7 @@ wheels = [
 
 [[package]]
 name = "huggingface-hub"
-version = "1.2.1"
+version = "1.2.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "filelock" },
@@ -982,9 +982,9 @@ dependencies = [
     { name = "typer-slim" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c9/a1/397934161650e1248107fa3337f320f83f09f8113c5117ce3c2d32cfda8d/huggingface_hub-1.2.1.tar.gz", hash = "sha256:1aced061fa1bd443c0ec80a4af432b8b70041d54860f7af334ceff599611a415", size = 614603, upload-time = "2025-12-05T15:11:21.729Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/67/51/6db95c854e5eb3af8e0edfbfad7588983f63be39662054a49d5e116fb65d/huggingface_hub-1.2.2.tar.gz", hash = "sha256:b5b97bd37f4fe5b898a467373044649c94ee32006c032ce8fb835abe9d92ea28", size = 614598, upload-time = "2025-12-10T14:51:50.208Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/af/cf/ef5cc94b1ed4e1ab8a15c17937c876b9733154a746c78f4c06c2336a05e5/huggingface_hub-1.2.1-py3-none-any.whl", hash = "sha256:8c74a41a16156337dfa1090873ca11f8c1d7b6efcbac9f6673d008a740207e6a", size = 520930, upload-time = "2025-12-05T15:11:20.045Z" },
+    { url = "https://files.pythonhosted.org/packages/71/40/eb2f3a2c09bebf2fc989ba8bf701ce1f56b2f054b51e1a0fcb3e5d23f13a/huggingface_hub-1.2.2-py3-none-any.whl", hash = "sha256:0f55d7d22058fbf8b29d8095aeee80a7b695aa764f906a21e886c1f87223718f", size = 520964, upload-time = "2025-12-10T14:51:48.206Z" },
 ]
 
 [[package]]
@@ -1327,7 +1327,7 @@ wheels = [
 
 [[package]]
 name = "langsmith"
-version = "0.4.58"
+version = "0.4.59"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
@@ -1339,9 +1339,9 @@ dependencies = [
     { name = "uuid-utils" },
     { name = "zstandard" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a8/c1/a2f04ccbd5ef44b9bd41fb0174fff539b4d41f273ad3649cd656e87b44b2/langsmith-0.4.58.tar.gz", hash = "sha256:ec72e2fcfbbf90b827212c75acac8fc58bb921726f4326633bd774b50133eea3", size = 992362, upload-time = "2025-12-10T00:59:52.7Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/61/71/d61524c3205bde7ec90423d997cf1a228d8adf2811110ec91ed40c8e8a34/langsmith-0.4.59.tar.gz", hash = "sha256:6b143214c2303dafb29ab12dcd05ac50bdfc60dac01c6e0450e50cee1d2415e0", size = 992784, upload-time = "2025-12-11T02:40:52.231Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9d/69/1a48e6b6c4d1e244a272b36e029fd27a70d37c8f4f002367c3d78f6c8e1d/langsmith-0.4.58-py3-none-any.whl", hash = "sha256:f6999b2f7956f030c32a80c1d631b49677f35648560207a09973c8d5ab74279d", size = 412937, upload-time = "2025-12-10T00:59:50.827Z" },
+    { url = "https://files.pythonhosted.org/packages/63/54/4577ef9424debea2fa08af338489d593276520d2e2f8950575d292be612c/langsmith-0.4.59-py3-none-any.whl", hash = "sha256:97c26399286441a7b7b06b912e2801420fbbf3a049787e609d49dc975ab10bc5", size = 413051, upload-time = "2025-12-11T02:40:50.523Z" },
 ]
 
 [[package]]
