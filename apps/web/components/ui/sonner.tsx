@@ -1,18 +1,43 @@
 'use client';
 
 import { CircleCheckIcon, InfoIcon, Loader2Icon, OctagonXIcon, TriangleAlertIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Toaster as Sonner } from 'sonner';
 import type { ToasterProps } from 'sonner';
+import { createPortal } from 'react-dom';
 import { useTheme } from 'next-themes';
 
 const Toaster = ({ position = 'top-center', ...props }: ToasterProps) => {
   const { theme = 'system' } = useTheme();
 
-  return (
+  const toasterStyle = {
+    'zIndex': 999999,
+    '--normal-bg': 'var(--popover)',
+    '--normal-text': 'var(--popover-foreground)',
+    '--normal-border': 'var(--border)',
+    '--border-radius': 'var(--radius)',
+  } as React.CSSProperties;
+
+  const [portalEl, setPortalEl] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    setPortalEl(el);
+    return () => {
+      try {
+        document.body.removeChild(el);
+      } catch (e) {
+        /* ignore */
+      }
+    };
+  }, []);
+
+  const content = (
     <Sonner
       position={position}
       theme={theme as ToasterProps['theme']}
-      className="toaster group"
+      className="toaster group pointer-events-none"
       icons={{
         success: (
           <CircleCheckIcon
@@ -40,17 +65,16 @@ const Toaster = ({ position = 'top-center', ...props }: ToasterProps) => {
         ),
         loading: <Loader2Icon className="size-4 animate-spin" />,
       }}
-      style={
-        {
-          '--normal-bg': 'var(--popover)',
-          '--normal-text': 'var(--popover-foreground)',
-          '--normal-border': 'var(--border)',
-          '--border-radius': 'var(--radius)',
-        } as React.CSSProperties
-      }
+      style={toasterStyle}
       {...props}
     />
   );
+
+  if (portalEl) {
+    return createPortal(content, portalEl);
+  }
+
+  return content;
 };
 
 export { Toaster };
