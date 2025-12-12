@@ -37,9 +37,9 @@ import {
 } from 'lucide-react';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { SiYoutube } from '@icons-pack/react-simple-icons';
+import { useRef, useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { styled } from 'styled-components';
-import { useRef, useState } from 'react';
 
 import LinkInputTooltip from './LinkInputTooltip';
 
@@ -49,6 +49,23 @@ export const ToolbarButtons = ({ editor, props }: any) => {
   const [showListMenu, setShowListMenu] = useState(false);
   const [showLinkInput, setShowLinkInput] = useState(false);
   const linkButtonRef = useRef<HTMLDivElement>(null);
+
+  // timers to prevent dropdowns from closing too quickly when user moves cursor
+  const listHideTimerRef = useRef<any>(null);
+  const tableHideTimerRef = useRef<any>(null);
+
+  useEffect(() => {
+    return () => {
+      if (listHideTimerRef.current) {
+        clearTimeout(listHideTimerRef.current);
+        listHideTimerRef.current = null;
+      }
+      if (tableHideTimerRef.current) {
+        clearTimeout(tableHideTimerRef.current);
+        tableHideTimerRef.current = null;
+      }
+    };
+  }, []);
 
   if (!editor) {
     return null;
@@ -176,8 +193,22 @@ export const ToolbarButtons = ({ editor, props }: any) => {
         <StrikethroughIcon />
       </ToolBtn>
       <ListMenuWrapper
-        onMouseEnter={() => setShowListMenu(true)}
-        onMouseLeave={() => setShowListMenu(false)}
+        onMouseEnter={() => {
+          if (listHideTimerRef.current) {
+            clearTimeout(listHideTimerRef.current);
+            listHideTimerRef.current = null;
+          }
+          setShowListMenu(true);
+        }}
+        onMouseLeave={() => {
+          if (listHideTimerRef.current) {
+            clearTimeout(listHideTimerRef.current);
+          }
+          listHideTimerRef.current = setTimeout(() => {
+            setShowListMenu(false);
+            listHideTimerRef.current = null;
+          }, 180);
+        }}
         contentEditable={false as any}
       >
         <ToolBtn
@@ -248,8 +279,22 @@ export const ToolbarButtons = ({ editor, props }: any) => {
         <option value="6">{t('headingLevel', { level: 6 })}</option>
       </ToolSelect>
       <TableMenuWrapper
-        onMouseEnter={() => setShowTableMenu(true)}
-        onMouseLeave={() => setShowTableMenu(false)}
+        onMouseEnter={() => {
+          if (tableHideTimerRef.current) {
+            clearTimeout(tableHideTimerRef.current);
+            tableHideTimerRef.current = null;
+          }
+          setShowTableMenu(true);
+        }}
+        onMouseLeave={() => {
+          if (tableHideTimerRef.current) {
+            clearTimeout(tableHideTimerRef.current);
+          }
+          tableHideTimerRef.current = setTimeout(() => {
+            setShowTableMenu(false);
+            tableHideTimerRef.current = null;
+          }, 180);
+        }}
         contentEditable={false as any}
       >
         <ToolTip content={t('table')}>
