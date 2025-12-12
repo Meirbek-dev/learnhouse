@@ -15,7 +15,6 @@ class CookieConfig(PydanticStrictBaseModel):
 
 class GeneralConfig(PydanticStrictBaseModel):
     development_mode: bool
-    install_mode: bool
     logfire_enabled: bool
     timezone: str = "UTC"
 
@@ -169,19 +168,12 @@ def get_platform_config() -> PlatformConfig:
 
     # General Config
 
-    # Development Mode & Install Mode
+    # Development Mode
     env_development_mode = eval(os.environ.get("PLATFORM_DEVELOPMENT_MODE", "None"))
     development_mode = (
         env_development_mode
         if env_development_mode is not None
         else yaml_config.get("general", {}).get("development_mode")
-    )
-
-    env_install_mode = os.environ.get("PLATFORM_INSTALL_MODE", "None")
-    install_mode = (
-        env_install_mode
-        if env_install_mode is not None
-        else yaml_config.get("general", {}).get("install_mode")
     )
 
     # Logfire config
@@ -380,7 +372,6 @@ def get_platform_config() -> PlatformConfig:
         contact_email=contact_email,
         general_config=GeneralConfig(
             development_mode=bool(development_mode),
-            install_mode=bool(install_mode),
             logfire_enabled=bool(logfire_enabled),
             timezone=timezone,
         ),

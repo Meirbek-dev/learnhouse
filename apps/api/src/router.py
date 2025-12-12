@@ -87,7 +87,7 @@ if os.environ.get("CLOUD_INTERNAL_KEY"):
         dependencies=[Depends(cloud_internal.check_internal_cloud_key)],
     )
 
-# Dev and Install routes
+# Dev routes
 v1_router.include_router(
     dev.router,
     prefix="/dev",

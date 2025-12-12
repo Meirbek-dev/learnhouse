@@ -45,7 +45,7 @@ def install(
             name="Ashyq Bilim",
             description="Ashyq Bilim",
             about="Ashyq Bilim - Образовательная платформа для онлайн-обучения",
-            slug="ashyqbilim",
+            slug="openu",
             email="meirbek.dev@gmail.com",
             logo_image="",
             thumbnail_image="",
@@ -78,7 +78,7 @@ def install(
                 f"Using email from PLATFORM_INITIAL_ADMIN_EMAIL environment variable: {email}"
             )
         user = UserCreate(username="Meirbek", email=email, password=password)
-        install_create_organization_user(user, "ashyqbilim", db_session)
+        install_create_organization_user(user, "openu", db_session)
         print("Ashyq Bilim user created ✅")
 
         # Show the user how to login
@@ -113,7 +113,7 @@ def install(
         email = typer.prompt("What's the email for the user?")
         password = typer.prompt("What's the password for the user?", hide_input=True)
         user = UserCreate(username=username, email=email, password=password)
-        install_create_organization_user(user, "ashyqbilim", db_session)
+        install_create_organization_user(user, "openu", db_session)
         print(username + " user created ✅")
 
         # Show the user how to login

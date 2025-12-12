@@ -20,7 +20,7 @@ async def create_initial_data_for_tests(db_session: Session) -> bool:
         name="Ashyq Bilim",
         description=None,
         about=None,
-        slug="ashyqbilim",
+        slug="openu",
         email="meirbek.b2k@gmail.com",
         logo_image=None,
         thumbnail_image=None,
@@ -49,7 +49,7 @@ async def create_initial_data_for_tests(db_session: Session) -> bool:
 
     # Create 2 users in that Organization
     for user in users:
-        install_create_organization_user(user, "ashyqbilim", db_session)
+        install_create_organization_user(user, "openu", db_session)
 
     # Make robin a normal user
     statement = select(UserOrganization).join(User).where(User.username == "testo")
