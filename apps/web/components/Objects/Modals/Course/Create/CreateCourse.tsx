@@ -32,7 +32,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
 
   const validationSchema = z.object({
     name: z.string().min(1, t('schemaNameRequired')).max(100, t('schemaNameMax')),
-    description: z.string().max(1000, t('schemaDescriptionMax')).optional().or(z.literal('')),
+    description: z.string().min(10, t('schemaDescriptionMin')).max(1000, t('schemaDescriptionMax')),
     learnings: z.array(z.string()).optional(),
     tags: z.array(z.string()).optional(),
     visibility: z.boolean(),
@@ -83,7 +83,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
             orgId,
             {
               name: values.name,
-              description: values.description,
+              description: values.description || '',
               learnings: values.learnings?.join(', ') || '',
               tags: values.tags?.join(', ') || '',
               visibility: values.visibility,

@@ -624,6 +624,7 @@
       "placeholderTags": "Нажмите Enter, чтобы добавить...",
       "placeholderVisibility": "Выберите видимость",
       "schemaDescriptionMax": "Должно быть 1000 символов или меньше",
+      "schemaDescriptionMin": "Описание должно содержать не менее 10 символов",
       "schemaNameMax": "Должно быть 100 символов или меньше",
       "schemaNameRequired": "Требуется название курса",
       "selectFile": "Выберите изображение миниатюры",

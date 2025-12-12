@@ -624,6 +624,7 @@
       "placeholderTags": "Press Enter to add...",
       "placeholderVisibility": "Select Visibility",
       "schemaDescriptionMax": "Must be 1000 characters or less",
+      "schemaDescriptionMin": "Description must be at least 10 characters",
       "schemaNameMax": "Must be 100 characters or less",
       "schemaNameRequired": "Course name is required",
       "selectFile": "Select Thumbnail Image",
