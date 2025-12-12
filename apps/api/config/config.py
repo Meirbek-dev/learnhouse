@@ -26,7 +26,7 @@ class SecurityConfig(PydanticStrictBaseModel):
 class ChromaDBConfig(PydanticStrictBaseModel):
     isSeparateDatabaseEnabled: bool | None = None
     db_host: str | None = None
-    db_port: int = 8001  # Default to 8001 (Docker external port)
+    db_port: int = 8000  # Default to 8000 (Docker internal port)
 
 
 class AIPerformanceConfig(PydanticStrictBaseModel):
@@ -273,6 +273,7 @@ def get_platform_config() -> PlatformConfig:
     env_is_ai_enabled = os.environ.get("PLATFORM_IS_AI_ENABLED")
     env_chromadb_separate = os.environ.get("PLATFORM_CHROMADB_SEPARATE")
     env_chromadb_host = os.environ.get("PLATFORM_CHROMADB_HOST")
+    env_chromadb_port = os.environ.get("PLATFORM_CHROMADB_PORT")
 
     openai_api_key = env_openai_api_key or yaml_config.get("ai_config", {}).get(
         "openai_api_key"
@@ -286,6 +287,11 @@ def get_platform_config() -> PlatformConfig:
     chromadb_host = env_chromadb_host or yaml_config.get("ai_config", {}).get(
         "chromadb_config", {}
     ).get("db_host")
+    chromadb_port = int(
+        env_chromadb_port
+        or yaml_config.get("ai_config", {}).get("chromadb_config", {}).get("db_port")
+        or 8000
+    )
 
     # Redis config
     env_redis_connection_string = os.environ.get("PLATFORM_REDIS_CONNECTION_STRING")
@@ -361,7 +367,9 @@ def get_platform_config() -> PlatformConfig:
         openai_api_key=openai_api_key,
         is_ai_enabled=bool(is_ai_enabled),
         chromadb_config=ChromaDBConfig(
-            isSeparateDatabaseEnabled=bool(chromadb_separate), db_host=chromadb_host
+            isSeparateDatabaseEnabled=bool(chromadb_separate),
+            db_host=chromadb_host,
+            db_port=chromadb_port,
         ),
     )
 
