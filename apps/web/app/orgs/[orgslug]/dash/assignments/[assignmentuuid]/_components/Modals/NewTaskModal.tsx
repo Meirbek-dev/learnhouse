@@ -4,7 +4,7 @@ import { createAssignmentTask } from '@services/courses/assignments';
 import { AArrowUp, FileUp, ListTodo } from 'lucide-react';
 import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { mutate } from 'swr';
 
 const NewTaskModal = ({ closeModal, assignment_uuid }: any) => {

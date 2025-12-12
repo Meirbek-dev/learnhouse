@@ -19,7 +19,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import type { ChangeEvent } from 'react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import * as z from 'zod';
 
 const CreateCourseModal = ({ closeModal, orgslug }: any) => {
@@ -103,7 +103,16 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
               await revalidateTags(['courses'], orgslug);
             }
           } else {
-            toast.error(res.data.detail || t('toastError'));
+            toast.dismiss(toast_loading);
+            const detail = res.data.detail;
+            // Handle Pydantic validation errors (array of {type, loc, msg, input})
+            const errorMessage =
+              typeof detail === 'string'
+                ? detail
+                : Array.isArray(detail)
+                  ? detail.map((e: { msg?: string }) => e.msg).join(', ')
+                  : t('toastError');
+            toast.error(errorMessage || t('toastError'));
           }
         } catch {
           toast.error(t('toastError'));

@@ -12,7 +12,7 @@ import { getAPIUrl } from '@services/config/config';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
+import { toast } from "sonner"
 import * as z from 'zod';
 import useSWR from 'swr';
 

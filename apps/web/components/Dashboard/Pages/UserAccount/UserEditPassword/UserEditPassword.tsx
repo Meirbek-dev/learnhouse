@@ -12,7 +12,7 @@ import { AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { signOut } from 'next-auth/react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import * as z from 'zod';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
@@ -76,17 +76,10 @@ const UserEditPassword = () => {
         toast.success(t('passwordUpdateSuccess'), {
           duration: 4000,
         });
-        toast(
-          (t: any) => (
-            <div className="flex items-center gap-2">
-              <span>{t('promptLogoutOnPasswordChange')}</span>
-            </div>
-          ),
-          {
-            duration: 4000,
-            icon: '🔑',
-          },
-        );
+        toast(t('promptLogoutOnPasswordChange'), {
+          duration: 4000,
+          icon: '🔑',
+        });
 
         // Wait for 4 seconds before signing out
         await new Promise((resolve) => setTimeout(resolve, 4000));

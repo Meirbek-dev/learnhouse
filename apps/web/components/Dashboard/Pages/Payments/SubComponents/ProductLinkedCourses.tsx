@@ -8,8 +8,8 @@ import { BookOpen, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
+import { toast } from 'sonner';
 
 import LinkCourseModal from './LinkCourseModal';
 

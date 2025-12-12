@@ -13,8 +13,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import Link from '@components/ui/AppLink';
-import { toast } from 'react-hot-toast';
 import dynamic from 'next/dynamic';
+import { toast } from 'sonner';
 import { mutate } from 'swr';
 
 import AssignmentEditorSubPage from './subpages/AssignmentEditorSubPage';

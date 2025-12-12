@@ -11,8 +11,8 @@ import { getAPIUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
 import { Layers } from 'lucide-react';
+import { toast } from 'sonner';
 import { mutate } from 'swr';
 
 interface NewActivityButtonProps {

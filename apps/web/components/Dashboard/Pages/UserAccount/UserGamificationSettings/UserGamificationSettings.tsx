@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 /**
  * Gamification Settings

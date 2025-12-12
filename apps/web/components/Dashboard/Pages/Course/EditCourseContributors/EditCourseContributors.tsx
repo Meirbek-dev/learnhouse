@@ -25,8 +25,8 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { Locale } from '@/i18n/config';
-import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
+import { toast } from 'sonner';
 
 interface EditCourseContributorsProps {
   orgslug: string;

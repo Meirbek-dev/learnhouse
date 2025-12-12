@@ -13,9 +13,9 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 const OrgUserGroups = () => {
   const org = useOrg() as any;

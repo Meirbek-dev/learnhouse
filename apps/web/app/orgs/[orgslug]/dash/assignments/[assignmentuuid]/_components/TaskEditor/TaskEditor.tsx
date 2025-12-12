@@ -9,9 +9,9 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { GalleryVerticalEnd, Info, TentTree, Trash } from 'lucide-react';
 import { deleteAssignmentTask } from '@services/courses/assignments';
 import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 import { AssignmentTaskGeneralEdit } from './Subs/AssignmentTaskGeneralEdit';
 

@@ -8,10 +8,10 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
 import { Search } from 'lucide-react';
 import useSWR, { mutate } from 'swr';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface LinkCourseModalProps {
   productId: string;

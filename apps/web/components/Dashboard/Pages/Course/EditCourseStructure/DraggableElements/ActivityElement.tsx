@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import Link from '@components/ui/AppLink';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { mutate } from 'swr';
 import useSWR from 'swr';
 

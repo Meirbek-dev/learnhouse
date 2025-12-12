@@ -20,7 +20,7 @@ import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import * as z from 'zod';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf', 'docx', 'mp4', 'mkv', 'jpg', 'png', 'pptx', 'zip']);

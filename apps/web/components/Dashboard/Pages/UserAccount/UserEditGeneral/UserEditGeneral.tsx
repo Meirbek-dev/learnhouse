@@ -43,7 +43,7 @@ import type { Locale } from '@/i18n/config';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { signOut } from 'next-auth/react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import * as z from 'zod';
 
 const SUPPORTED_FILES = constructAcceptValue(['jpg', 'png', 'webp', 'gif']);
@@ -735,21 +735,10 @@ const UserEditGeneral = () => {
       duration: 4000,
     });
 
-    toast(
-      (t: any) => (
-        <div className="flex items-center gap-2">
-          <span>
-            {t('promptLogoutOnEmailChange', {
-              newEmail,
-            })}
-          </span>
-        </div>
-      ),
-      {
-        duration: 4000,
-        icon: '📧',
-      },
-    );
+    toast(t('promptLogoutOnEmailChange', { newEmail }), {
+      duration: 4000,
+      icon: '📧',
+    });
 
     // Wait for 4 seconds before signing out
     await new Promise((resolve) => setTimeout(resolve, 4000));

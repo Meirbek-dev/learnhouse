@@ -18,7 +18,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { generateUUID } from '@/lib/utils';
-import toast from 'react-hot-toast';
+import { toast } from "sonner"
 
 interface BlankSchema {
   blankUUID?: string;

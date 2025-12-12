@@ -8,8 +8,8 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { Check, Plus, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
+import { toast } from 'sonner';
 
 interface ManageUsersProps {
   usergroup_id: number;

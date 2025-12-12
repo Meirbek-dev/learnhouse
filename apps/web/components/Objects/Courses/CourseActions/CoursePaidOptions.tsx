@@ -10,7 +10,7 @@ import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import useSWR from 'swr';
 
 interface CoursePaidOptionsProps {

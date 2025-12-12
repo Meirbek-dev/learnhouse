@@ -2,7 +2,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseContributors } from '@services/courses/courses';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export type ContributorStatus = 'NONE' | 'PENDING' | 'ACTIVE' | 'INACTIVE';
 

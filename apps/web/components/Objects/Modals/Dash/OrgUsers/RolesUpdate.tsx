@@ -14,7 +14,7 @@ import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import useSWR, { mutate } from 'swr';
-import toast from 'react-hot-toast';
+import { toast } from "sonner"
 import type { FC } from 'react';
 import * as z from 'zod';
 

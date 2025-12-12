@@ -17,10 +17,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CalendarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
 import { useTransition } from 'react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import { mutate } from 'swr';
 import * as z from 'zod';
 

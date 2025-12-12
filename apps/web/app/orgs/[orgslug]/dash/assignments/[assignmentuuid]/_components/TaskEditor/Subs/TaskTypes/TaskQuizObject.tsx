@@ -18,7 +18,7 @@ import { Check, Info, Minus, Plus, PlusCircle, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { generateUUID } from '@/lib/utils';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface QuizSchema {
   questionText: string;

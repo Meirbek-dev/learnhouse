@@ -12,8 +12,8 @@ import { getAPIUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
-import { toast } from 'react-hot-toast';
 import { Hexagon } from 'lucide-react';
+import { toast } from 'sonner';
 import { mutate } from 'swr';
 
 import ChapterElement from './DraggableElements/ChapterElement';

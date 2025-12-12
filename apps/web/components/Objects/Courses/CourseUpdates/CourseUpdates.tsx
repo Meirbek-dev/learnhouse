@@ -19,9 +19,9 @@ import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import useSWR, { mutate } from 'swr';
+import { toast } from 'sonner';
 import * as z from 'zod';
 
 const CourseUpdates = () => {

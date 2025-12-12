@@ -15,7 +15,7 @@ import CoursePaidOptions from './CoursePaidOptions';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { mutate } from 'swr';
 
 interface CourseRun {

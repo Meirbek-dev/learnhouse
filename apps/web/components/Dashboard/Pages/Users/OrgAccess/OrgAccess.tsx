@@ -15,10 +15,10 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import { format } from 'date-fns';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 const OrgAccess = () => {
   const org = useOrg() as any;

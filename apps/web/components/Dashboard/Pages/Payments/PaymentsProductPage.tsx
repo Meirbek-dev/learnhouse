@@ -22,8 +22,8 @@ import { useTranslations } from 'next-intl';
 import currencyCodes from 'currency-codes';
 import { useForm } from 'react-hook-form';
 import { useMemo, useState } from 'react';
-import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
+import { toast } from 'sonner';
 import * as z from 'zod';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>

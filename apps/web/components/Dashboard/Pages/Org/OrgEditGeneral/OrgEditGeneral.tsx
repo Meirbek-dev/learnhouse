@@ -13,8 +13,8 @@ import { useMemo, useTransition } from 'react';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
 import type { FC } from 'react';
+import { toast } from 'sonner';
 import { mutate } from 'swr';
 import * as z from 'zod';
 

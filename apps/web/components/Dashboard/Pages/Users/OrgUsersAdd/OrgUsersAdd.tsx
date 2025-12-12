@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import Toast from '@components/Objects/StyledElements/Toast/Toast';
+
 import { inviteBatchUsers } from '@services/organizations/invites';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -14,9 +14,10 @@ import { Textarea } from '@components/ui/textarea';
 import { Info, UserPlus } from 'lucide-react';
 import { Label } from '@components/ui/label';
 import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import useSWR, { mutate } from 'swr';
 import { useState } from 'react';
+import { Toaster } from '@components/ui/sonner';
 
 const OrgUsersAdd = () => {
   const org = useOrg() as any;
@@ -67,7 +68,7 @@ const OrgUsersAdd = () => {
 
   return (
     <>
-      <Toast />
+      <Toaster />
       {isLoading ? (
         <PageLoading />
       ) : (

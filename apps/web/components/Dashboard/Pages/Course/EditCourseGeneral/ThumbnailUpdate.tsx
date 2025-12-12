@@ -9,8 +9,8 @@ import { getAPIUrl } from '@services/config/config';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
 import type React from 'react';
+import { toast } from 'sonner';
 import { mutate } from 'swr';
 
 const MAX_FILE_SIZE = 8_000_000; // 8MB for images

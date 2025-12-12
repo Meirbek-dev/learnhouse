@@ -7,9 +7,9 @@ import platformLogo from 'public/platform_logo.svg';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 const StripeConnectCallback = () => {
   const t = useTranslations('Stripe');

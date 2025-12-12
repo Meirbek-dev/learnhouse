@@ -20,8 +20,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 interface AIEditorToolkitProps {
   editor: Editor;

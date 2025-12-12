@@ -32,7 +32,7 @@ import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
 import type { ChangeEvent, FC } from 'react';
 import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import useSWR from 'swr';
 
 import type {

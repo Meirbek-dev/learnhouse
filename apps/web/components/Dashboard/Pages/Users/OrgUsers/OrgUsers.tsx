@@ -4,7 +4,7 @@ import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationMo
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import RolesUpdate from '@components/Objects/Modals/Dash/OrgUsers/RolesUpdate';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import Toast from '@components/Objects/StyledElements/Toast/Toast';
+
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { removeUserFromOrg } from '@services/organizations/orgs';
@@ -14,9 +14,10 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { KeyRound, LogOut } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { Toaster } from '@components/ui/sonner';
 
 const OrgUsers = () => {
   const org = useOrg() as any;
@@ -99,7 +100,7 @@ const OrgUsers = () => {
         </div>
       ) : (
         <>
-          <Toast />
+          <Toaster />
           <div className="h-6" />
           <div className="mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4 shadow-xs">
             <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">

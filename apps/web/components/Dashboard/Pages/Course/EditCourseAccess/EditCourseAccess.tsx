@@ -12,8 +12,8 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
+import { toast } from 'sonner';
 
 interface EditCourseAccessProps {
   orgslug: string;

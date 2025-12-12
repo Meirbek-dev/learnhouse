@@ -171,6 +171,9 @@ importers:
       next-intl:
         specifier: 4.5.8
         version: 4.5.8(next@16.0.10(@babel/core@7.28.5)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
+      next-themes:
+        specifier: ^0.4.6
+        version: 0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       nextjs-toploader:
         specifier: ^3.9.17
         version: 3.9.17(next@16.0.10(@babel/core@7.28.5)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -201,9 +204,6 @@ importers:
       react-hook-form:
         specifier: ^7.68.0
         version: 7.68.0(react@19.2.3)
-      react-hot-toast:
-        specifier: ^2.6.0
-        version: 2.6.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       react-katex:
         specifier: ^3.1.0
         version: 3.1.0(prop-types@15.8.1)(react@19.2.3)
@@ -216,6 +216,9 @@ importers:
       sharp:
         specifier: ^0.34.5
         version: 0.34.5
+      sonner:
+        specifier: ^2.0.7
+        version: 2.0.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       styled-components:
         specifier: ^6.1.19
         version: 6.1.19(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -2920,11 +2923,6 @@ packages:
     resolution: {integrity: sha512-DpLKbNU4WylpxJykQujfCcwYWiV/Jhm50Goo0wrVILAv5jOr9d+H+UR3PhSCD2rCCEIg0uc+G+muBTwD54JhDQ==}
     engines: {node: '>= 0.4'}
 
-  goober@2.1.18:
-    resolution: {integrity: sha512-2vFqsaDVIT9Gz7N6kAL++pLpp41l3PfDuusHcjnGLfR6+huZkl6ziX+zgVC3ZxpqWhzH6pyDdGrCeDhMIvwaxw==}
-    peerDependencies:
-      csstype: ^3.0.10
-
   gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
     engines: {node: '>= 0.4'}
@@ -3416,6 +3414,12 @@ packages:
       typescript:
         optional: true
 
+  next-themes@0.4.6:
+    resolution: {integrity: sha512-pZvgD5L0IEvX5/9GWyHMf3m8BKiVQwsCMHfoFosXtXBMnaS0ZnIJ9ST4b4NqLVKDEm8QBxoNNGNaBv2JNF6XNA==}
+    peerDependencies:
+      react: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
+      react-dom: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
+
   next@16.0.10:
     resolution: {integrity: sha512-RtWh5PUgI+vxlV3HdR+IfWA1UUHu0+Ram/JBO4vWB54cVPentCD0e+lxyAYEsDTqGGMg7qpjhKh6dc6aW7W/sA==}
     engines: {node: '>=20.9.0'}
@@ -3824,13 +3828,6 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
 
-  react-hot-toast@2.6.0:
-    resolution: {integrity: sha512-bH+2EBMZ4sdyou/DPrfgIouFpcRLCJ+HoCA32UoAYHn6T3Ur5yfcDCeSr5mwldl6pFOsiocmrXMuoCJ1vV8bWg==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      react: '>=16'
-      react-dom: '>=16'
-
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -4034,6 +4031,12 @@ packages:
 
   sister@3.0.2:
     resolution: {integrity: sha512-p19rtTs+NksBRKW9qn0UhZ8/TUI9BPw9lmtHny+Y3TinWlOa9jWh9xB0AtPSdmOy49NJJJSSe0Ey4C7h0TrcYA==}
+
+  sonner@2.0.7:
+    resolution: {integrity: sha512-W6ZN4p58k8aDKA4XPcx2hpIQXBRAgyiWVkYhT7CvK6D3iAu7xjvVyhQHg2/iaKJZ1XVJ4r7XuwGL+WGEK37i9w==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+      react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
 
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
@@ -7122,10 +7125,6 @@ snapshots:
       define-properties: 1.2.1
       gopd: 1.2.0
 
-  goober@2.1.18(csstype@3.2.3):
-    dependencies:
-      csstype: 3.2.3
-
   gopd@1.2.0: {}
 
   graceful-fs@4.2.11: {}
@@ -7594,6 +7593,11 @@ snapshots:
     transitivePeerDependencies:
       - '@swc/helpers'
 
+  next-themes@0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+    dependencies:
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+
   next@16.0.10(@babel/core@7.28.5)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
     dependencies:
       '@next/env': 16.0.10
@@ -8047,13 +8051,6 @@ snapshots:
     dependencies:
       react: 19.2.3
 
-  react-hot-toast@2.6.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
-    dependencies:
-      csstype: 3.2.3
-      goober: 2.1.18(csstype@3.2.3)
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
-
   react-is@16.13.1: {}
 
   react-is@18.3.1: {}
@@ -8310,6 +8307,11 @@ snapshots:
       side-channel-weakmap: 1.0.2
 
   sister@3.0.2: {}
+
+  sonner@2.0.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+    dependencies:
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
 
   source-map-js@1.2.1: {}
 

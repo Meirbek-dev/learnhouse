@@ -18,7 +18,7 @@ import { Input } from '@components/ui/input';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { ChangeEvent } from 'react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import useSWR from 'swr';
 
 const NewCollection = ({ params }: { params: { orgslug: string } }) => {
