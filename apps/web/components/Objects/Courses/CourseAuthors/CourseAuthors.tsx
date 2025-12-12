@@ -19,7 +19,7 @@ import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import useSWR, { mutate } from 'swr';
 import { useState } from 'react';
 import { toast } from 'sonner';

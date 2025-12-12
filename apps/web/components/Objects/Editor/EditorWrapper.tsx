@@ -8,8 +8,8 @@ import { useTranslations } from 'next-intl';
 import type { JSX } from 'react';
 import { toast } from 'sonner';
 
-import Editor from './Editor';
 import { Toaster } from '@components/ui/sonner';
+import Editor from './Editor';
 
 interface EditorWrapperProps {
   content: string;

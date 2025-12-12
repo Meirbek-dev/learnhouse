@@ -16,7 +16,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
+import { AnimatePresence, motion } from 'motion/react';
 import { animations } from '../design-tokens';
 
 // ============================================================================
@@ -192,6 +193,8 @@ export function XPNotificationContainer({
   onDismiss,
   renderNotification,
 }: XPNotificationContainerProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   const positionClasses = {
     'top-right': 'top-4 right-4',
     'top-left': 'top-4 left-4',
@@ -199,41 +202,53 @@ export function XPNotificationContainer({
     'bottom-left': 'bottom-4 left-4',
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
+  // Simplified variants for reduced motion preference
+  const containerVariants = prefersReducedMotion
+    ? {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1 },
+      }
+    : {
+        hidden: { opacity: 0 },
+        visible: {
+          opacity: 1,
+          transition: {
+            staggerChildren: 0.1,
+          },
+        },
+      };
 
-  const itemVariants = {
-    hidden: {
-      opacity: 0,
-      y: position.startsWith('bottom') ? 50 : -50,
-      scale: 0.8,
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        type: 'spring' as const,
-        stiffness: 500,
-        damping: 30,
-      },
-    },
-    exit: {
-      opacity: 0,
-      x: position.endsWith('right') ? 100 : -100,
-      scale: 0.8,
-      transition: {
-        duration: animations.duration.fast / 1000,
-      },
-    },
-  };
+  const itemVariants = prefersReducedMotion
+    ? {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { duration: 0.15 } },
+        exit: { opacity: 0, transition: { duration: 0.1 } },
+      }
+    : {
+        hidden: {
+          opacity: 0,
+          y: position.startsWith('bottom') ? 50 : -50,
+          scale: 0.8,
+        },
+        visible: {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          transition: {
+            type: 'spring' as const,
+            stiffness: 500,
+            damping: 30,
+          },
+        },
+        exit: {
+          opacity: 0,
+          x: position.endsWith('right') ? 100 : -100,
+          scale: 0.8,
+          transition: {
+            duration: animations.duration.fast / 1000,
+          },
+        },
+      };
 
   return (
     <motion.div
@@ -250,7 +265,7 @@ export function XPNotificationContainer({
             initial="hidden"
             animate="visible"
             exit="exit"
-            layout
+            layout={!prefersReducedMotion}
             className="pointer-events-auto"
           >
             {renderNotification(notification)}
@@ -271,12 +286,15 @@ interface BatchIndicatorProps {
 }
 
 export function BatchIndicator({ count, className }: BatchIndicatorProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   if (count <= 1) return null;
 
   return (
     <motion.div
-      initial={{ scale: 0 }}
-      animate={{ scale: 1 }}
+      initial={prefersReducedMotion ? { opacity: 0 } : { scale: 0 }}
+      animate={prefersReducedMotion ? { opacity: 1 } : { scale: 1 }}
+      transition={prefersReducedMotion ? { duration: 0.15 } : undefined}
       className={`bg-primary text-primary-foreground inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-bold ${className}`}
     >
       ×{count}

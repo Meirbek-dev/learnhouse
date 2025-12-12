@@ -7,7 +7,7 @@ import platformLogo from 'public/platform_logo.svg';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 

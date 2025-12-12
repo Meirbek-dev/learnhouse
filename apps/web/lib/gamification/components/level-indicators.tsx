@@ -10,7 +10,8 @@
 'use client';
 
 import type { UserGamificationProfile } from '@/types/gamification';
-import { motion, useAnimationControls } from 'framer-motion';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
+import { motion, useAnimationControls } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { Sparkles, Star } from 'lucide-react';
 import { getLevelInfo } from '../levels';
@@ -30,14 +31,19 @@ interface LevelProgressProps {
 export function LevelProgress({ profile, showMilestones = false, animated = true, className }: LevelProgressProps) {
   const previousLevelRef = useRef(profile.level);
   const controls = useAnimationControls();
+  const prefersReducedMotion = useReducedMotion();
 
   // Calculate progress
   const currentLevelXP = profile.xp_in_current_level || 0;
   const nextLevelXP = profile.xp_to_next_level || 100;
   const progress = (currentLevelXP / nextLevelXP) * 100;
 
-  // Detect level up
+  // Effective animated state (respects user preference)
+  const shouldAnimate = animated && !prefersReducedMotion;
+
+  // Detect level up (skip animation if reduced motion preferred)
   useEffect(() => {
+    if (prefersReducedMotion) return;
     if (profile.level > previousLevelRef.current && animated) {
       controls.start({
         scale: [1, 1.02, 1],
@@ -45,7 +51,7 @@ export function LevelProgress({ profile, showMilestones = false, animated = true
       });
     }
     previousLevelRef.current = profile.level;
-  }, [profile.level, controls, animated]);
+  }, [profile.level, controls, animated, prefersReducedMotion]);
 
   return (
     <motion.div
@@ -59,7 +65,7 @@ export function LevelProgress({ profile, showMilestones = false, animated = true
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{
-            duration: animated ? 0.6 : 0,
+            duration: shouldAnimate ? 0.6 : 0,
             ease: [0.4, 0, 0.2, 1],
           }}
         />
@@ -105,6 +111,7 @@ export function ParticleEffect({
   const [particles, setParticles] = useState<Particle[]>([]);
   const onCompleteRef = useRef(onComplete);
   const isAnimatingRef = useRef(false);
+  const prefersReducedMotion = useReducedMotion();
 
   // Keep ref updated
   useEffect(() => {
@@ -112,6 +119,16 @@ export function ParticleEffect({
   }, [onComplete]);
 
   useEffect(() => {
+    // Skip particle animations when reduced motion is preferred
+    if (prefersReducedMotion) {
+      if (trigger) {
+        // Still call onComplete callback but skip animation
+        const timeout = setTimeout(() => onCompleteRef.current?.(), 0);
+        return () => clearTimeout(timeout);
+      }
+      return;
+    }
+
     if (!trigger || isAnimatingRef.current) return;
 
     isAnimatingRef.current = true;
@@ -143,7 +160,7 @@ export function ParticleEffect({
       clearTimeout(startTimeout);
       clearTimeout(endTimeout);
     };
-  }, [trigger, particleCount, colors, duration]);
+  }, [trigger, particleCount, colors, duration, prefersReducedMotion]);
 
   if (particles.length === 0) return null;
 
@@ -193,6 +210,7 @@ interface GlowingLevelBadgeProps {
 
 export function GlowingLevelBadge({ level, size = 'md', animated = true, className }: GlowingLevelBadgeProps) {
   const levelInfo = getLevelInfo(level, (key: string) => key);
+  const prefersReducedMotion = useReducedMotion();
 
   const sizeClasses = {
     sm: 'h-7 w-7 text-xs',
@@ -200,10 +218,13 @@ export function GlowingLevelBadge({ level, size = 'md', animated = true, classNa
     lg: 'h-10 w-10 text-base',
   };
 
+  // Disable hover animations when reduced motion is preferred
+  const shouldAnimate = animated && !prefersReducedMotion;
+
   return (
     <motion.div
       className={cn('relative inline-flex items-center justify-center', className)}
-      whileHover={animated ? { scale: 1.08 } : undefined}
+      whileHover={shouldAnimate ? { scale: 1.08 } : undefined}
       transition={{ duration: 0.2 }}
     >
       {/* Subtle background glow */}
@@ -238,6 +259,7 @@ interface XPGainAnimationProps {
 export function XPGainAnimation({ amount, trigger, position, onComplete }: XPGainAnimationProps) {
   const [isVisible, setIsVisible] = useState(false);
   const onCompleteRef = useRef(onComplete);
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     onCompleteRef.current = onComplete;
@@ -245,6 +267,12 @@ export function XPGainAnimation({ amount, trigger, position, onComplete }: XPGai
 
   useEffect(() => {
     if (trigger) {
+      // Skip animation if reduced motion preferred, but still call callback
+      if (prefersReducedMotion) {
+        const timeout = setTimeout(() => onCompleteRef.current?.(), 0);
+        return () => clearTimeout(timeout);
+      }
+
       // Use setTimeout to break out of render phase
       const showTimeout = setTimeout(() => setIsVisible(true), 0);
       const hideTimeout = setTimeout(() => {
@@ -256,7 +284,7 @@ export function XPGainAnimation({ amount, trigger, position, onComplete }: XPGai
         clearTimeout(hideTimeout);
       };
     }
-  }, [trigger]);
+  }, [trigger, prefersReducedMotion]);
 
   if (!isVisible) return null;
 

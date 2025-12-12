@@ -24,8 +24,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import type { ChangeEvent, ComponentType, DragEvent, FormEvent } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { AnimatePresence, motion } from 'framer-motion';
 import { constructAcceptValue } from '@/lib/constants';
+import { AnimatePresence, motion } from 'motion/react';
 import { Separator } from '@components/ui/separator';
 import { Checkbox } from '@components/ui/checkbox';
 import { Button } from '@components/ui/button';

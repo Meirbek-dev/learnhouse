@@ -17,7 +17,7 @@ import {
 } from '@/app/actions/gamification';
 import React, { createContext, lazy, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useXPToast } from '@/lib/gamification/components/xp-toast';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'motion/react';
 import { useTranslations } from 'next-intl';
 
 // Lazy load the heavy celebration component
@@ -368,10 +368,11 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
       {/* XP notification container with automatic batching */}
       <ToastContainer />
       {/* Render level-up celebrations (lazy-loaded only when needed) */}
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {levelUpQueue.length > 0 && levelUpQueue[0] && (
           <React.Suspense fallback={null}>
             <LevelUpCelebration
+              key={`level-up-${levelUpQueue[0].newLevel}`}
               newLevel={levelUpQueue[0].newLevel}
               onDismiss={dismissLevelUpCelebration}
               compact={(profile?.preferences as any)?.display?.compactMode ?? false}

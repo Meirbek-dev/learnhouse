@@ -23,7 +23,7 @@ import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
-import { toast } from "sonner"
+import { toast } from 'sonner';
 import { mutate } from 'swr';
 import React from 'react';
 import * as z from 'zod';

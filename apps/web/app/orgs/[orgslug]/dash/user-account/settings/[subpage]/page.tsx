@@ -12,8 +12,8 @@ import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { ComponentType } from 'react';
 import Link from '@components/ui/AppLink';
-import { motion } from 'framer-motion';
 import { use, useEffect } from 'react';
+import { motion } from 'motion/react';
 
 interface User {
   username: string;

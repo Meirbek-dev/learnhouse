@@ -12,7 +12,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { use, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 
 export interface SettingsParams {
   subpage: string;

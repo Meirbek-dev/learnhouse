@@ -11,8 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import { animations, spacing } from '../design-tokens';
 import type { LucideIcon } from 'lucide-react';
-import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
+import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 // ============================================================================

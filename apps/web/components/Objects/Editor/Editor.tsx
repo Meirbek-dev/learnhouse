@@ -50,8 +50,8 @@ import { Eye, Monitor } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { styled } from 'styled-components';
 import Link from '@components/ui/AppLink';
-import { motion } from 'framer-motion';
 import UserAvatar from '../UserAvatar';
+import { motion } from 'motion/react';
 import Image from 'next/image';
 
 interface EditorProps {

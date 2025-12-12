@@ -12,12 +12,12 @@ import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { Toaster } from '@components/ui/sonner';
 import { KeyRound, LogOut } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Toaster } from '@components/ui/sonner';
 
 const OrgUsers = () => {
   const org = useOrg() as any;

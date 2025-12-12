@@ -15,7 +15,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 
 interface LevelUpCelebrationProps {
   newLevel: number;

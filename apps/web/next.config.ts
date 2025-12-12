@@ -30,7 +30,6 @@ const nextConfig: NextConfig = {
       'recharts',
       'react-day-picker',
       'date-fns',
-      'framer-motion',
       // TipTap editor (heavy)
       '@tiptap/core',
       '@tiptap/react',

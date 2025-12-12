@@ -9,7 +9,7 @@ import { styled } from 'styled-components';
 import Link from '@components/ui/AppLink';
 import type { ChangeEvent } from 'react';
 import { BlockMath } from 'react-katex';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import 'katex/dist/katex.min.css';
 
 // Predefined LaTeX templates

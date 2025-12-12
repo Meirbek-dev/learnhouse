@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { UserGamificationProfile } from '@/types/gamification';
 import { Calendar, Flame, Star } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
 

@@ -15,9 +15,9 @@ import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
-import { toast } from "sonner"
 import { useState } from 'react';
 import type { FC } from 'react';
+import { toast } from 'sonner';
 
 const OrgRoles: FC = () => {
   const t = useTranslations('Components.OrgRoles');

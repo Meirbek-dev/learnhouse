@@ -43,7 +43,7 @@ import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import Link from '@components/ui/AppLink';
 import useSWR, { mutate } from 'swr';

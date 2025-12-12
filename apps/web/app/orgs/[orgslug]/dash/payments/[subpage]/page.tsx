@@ -11,8 +11,8 @@ import { getUriWithOrg } from '@services/config/config';
 import { Gem, Settings, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
+import { motion } from 'motion/react';
 import { use } from 'react';
 
 export interface PaymentsParams {

@@ -13,8 +13,8 @@ import { useCourseRights } from '@hooks/useCourseRights';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import { motion } from 'framer-motion';
 import { use, useEffect } from 'react';
+import { motion } from 'motion/react';
 
 export interface CourseOverviewParams {
   orgslug: string;
