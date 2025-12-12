@@ -225,11 +225,11 @@ export async function createExternalVideoActivity(data: any, activity: any, chap
   };
   const videoDetails = data.details
     ? {
-        startTime: data.details.startTime ?? defaultDetails.startTime,
-        endTime: data.details.endTime ?? defaultDetails.endTime,
-        autoplay: data.details.autoplay ?? defaultDetails.autoplay,
-        muted: data.details.muted ?? defaultDetails.muted,
-      }
+      startTime: data.details.startTime ?? defaultDetails.startTime,
+      endTime: data.details.endTime ?? defaultDetails.endTime,
+      autoplay: data.details.autoplay ?? defaultDetails.autoplay,
+      muted: data.details.muted ?? defaultDetails.muted,
+    }
     : defaultDetails;
   data.details = JSON.stringify(videoDetails);
   const result = await fetch(
@@ -294,7 +294,16 @@ export async function deleteActivity(activity_uuid: string, access_token: string
     `${getAPIUrl()}activities/${activity_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  return result.json();
+  const data = await result.json();
+
+  // Revalidate activities cache after deletion
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.activities, 'max');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return data;
 }
 
 /**
@@ -326,7 +335,21 @@ export async function updateActivity(data: any, activity_uuid: string, access_to
     `${getAPIUrl()}activities/${activity_uuid}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
-  return getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate caches so updated content is visible to all users
+  if (metadata.success) {
+    const { revalidateTag, refresh } = await import('next/cache');
+    // Purge the activities and courses data cache for all users
+    console.log('[updateActivity] Revalidating cache tags:', tags.activities, tags.courses);
+    revalidateTag(tags.activities, 'max');
+    revalidateTag(tags.courses, 'max');
+    // Also refresh client-side router cache
+    refresh();
+    console.log('[updateActivity] Cache revalidation complete');
+  }
+
+return metadata;
 }
 
 export async function getUrlPreview(url: string) {
