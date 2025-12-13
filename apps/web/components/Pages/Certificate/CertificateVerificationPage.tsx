@@ -7,6 +7,7 @@ import { getCertificateByUuid } from '@services/courses/certifications';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
+import { Label } from '@/components/ui/label';
 import { useEffect, useState } from 'react';
 import Link from '@components/ui/AppLink';
 import type React from 'react';
@@ -342,7 +343,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
 
               <div className="space-y-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">{t('certificateId')}</label>
+                  <Label className="mb-1 block text-sm font-medium text-gray-700">{t('certificateId')}</Label>
                   <div className="rounded-lg bg-gray-50 p-3">
                     <code className="text-sm break-all text-gray-900">
                       {certificateData.certificate_user.user_certification_uuid}
@@ -351,14 +352,14 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">{t('courseName')}</label>
+                  <Label className="mb-1 block text-sm font-medium text-gray-700">{t('courseName')}</Label>
                   <div className="rounded-lg bg-gray-50 p-3">
                     <span className="text-gray-900">{certificateData.course.name}</span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">{t('certificateType')}</label>
+                  <Label className="mb-1 block text-sm font-medium text-gray-700">{t('certificateType')}</Label>
                   <div className="rounded-lg bg-gray-50 p-3">
                     <span className="text-gray-900">
                       {getCertificationTypeLabel(certificateData.certification.config.certification_type)}
@@ -367,7 +368,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">{t('completionDate')}</label>
+                  <Label className="mb-1 block text-sm font-medium text-gray-700">{t('completionDate')}</Label>
                   <div className="rounded-lg bg-gray-50 p-3">
                     <span className="text-gray-900">
                       {new Date(certificateData.certificate_user.created_at).toLocaleDateString(locale, {
@@ -383,7 +384,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
 
                 {certificateData.certification.config.certificate_instructor ? (
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">{t('instructor')}</label>
+                    <Label className="mb-1 block text-sm font-medium text-gray-700">{t('instructor')}</Label>
                     <div className="rounded-lg bg-gray-50 p-3">
                       <span className="text-gray-900">
                         {certificateData.certification.config.certificate_instructor}

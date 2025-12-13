@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import CertificatePreview from './CertificatePreview';
 import { Textarea } from '@/components/ui/textarea';
 import { getAPIUrl } from '@services/config/config';
+import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
@@ -317,7 +318,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
                 <h2 className="text-xs text-gray-500 sm:text-sm">{t('enableCertification')}</h2>
               </div>
               <div className="flex items-center space-x-3">
-                <label className="relative inline-flex cursor-pointer items-center">
+                <Label className="relative inline-flex cursor-pointer items-center">
                   <input
                     type="checkbox"
                     className="peer sr-only"
@@ -326,7 +327,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
                     disabled={isCreating}
                   />
                   <div className="peer h-6 w-11 rounded-full bg-gray-200 peer-checked:bg-blue-600 peer-focus:ring-4 peer-focus:ring-blue-300 peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white" />
-                </label>
+                </Label>
                 {isCreating ? (
                   <div className="animate-spin">
                     <Settings size={16} />

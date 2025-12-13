@@ -21,6 +21,7 @@ import { Textarea } from '@components/ui/textarea';
 import { updateRole } from '@services/roles/roles';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -148,7 +149,7 @@ const PermissionSection = ({
       </div>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {permissions.map((permission) => (
-          <label
+          <Label
             key={permission}
             className="flex cursor-pointer items-center space-x-2 rounded-md p-2 transition-colors hover:bg-gray-50"
           >
@@ -159,7 +160,7 @@ const PermissionSection = ({
               className="rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
             />
             <span className="text-sm text-gray-700 capitalize">{getPermissionLabel(permission)}</span>
-          </label>
+          </Label>
         ))}
       </div>
     </div>

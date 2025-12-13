@@ -14,6 +14,7 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import Image from 'next/image';
+import { Label } from '@/components/ui/label';
 
 interface OrgMenuProps {
   orgslug: string;
@@ -302,9 +303,9 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 px-2">
                   <div className="bg-primary h-4 w-1 rounded-full" />
-                  <label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                  <Label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                     {t('search')}
-                  </label>
+                  </Label>
                 </div>
                 <div>
                   <SearchBar
@@ -319,9 +320,9 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 px-2">
                   <div className="bg-primary h-4 w-1 rounded-full" />
-                  <label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                  <Label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                     {t('navigation')}
-                  </label>
+                  </Label>
                 </div>
                 <div className="border-border/30 bg-accent/20 rounded-xl border p-3">
                   <nav className="space-y-1">
@@ -370,9 +371,9 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
               <div className="space-y-3 sm:hidden">
                 <div className="flex items-center gap-2 px-2">
                   <div className="bg-primary h-4 w-1 rounded-full" />
-                  <label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                  <Label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                     {t('language')}
-                  </label>
+                  </Label>
                 </div>
                 <div className="border-border/30 bg-accent/20 rounded-xl border p-4">
                   <div
@@ -393,9 +394,9 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
               <div className="border-border/50 space-y-3 border-t pt-6">
                 <div className="flex items-center gap-2 px-2">
                   <div className="bg-primary h-4 w-1 rounded-full" />
-                  <label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                  <Label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                     {t('account')}
-                  </label>
+                  </Label>
                 </div>
                 <div className="border-border/30 bg-accent/20 rounded-xl border p-4">
                   <div className="flex min-h-[44px] items-center justify-center">

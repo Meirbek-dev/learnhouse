@@ -5,6 +5,7 @@ import { Textarea } from '@components/ui/textarea';
 import React, { useEffect, useState } from 'react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
 
 interface ScenarioOption {
@@ -306,7 +307,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
       <div className="-mx-2 -mt-2 mb-4 shrink-0 border-b border-slate-200 bg-white p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0 flex-1">
-            <label className="mb-2 block text-sm font-semibold text-slate-900">{t('scenarioTitleLabel')}</label>
+            <Label className="mb-2 block text-sm font-semibold text-slate-900">{t('scenarioTitleLabel')}</Label>
             <Input
               type="text"
               value={title}
@@ -399,7 +400,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                   {/* Scenario Text */}
                   <div>
                     <div className="mb-2 flex items-center justify-between">
-                      <label className="text-sm font-medium text-slate-700">{t('scenarioDescriptionLabel')}</label>
+                      <Label className="text-sm font-medium text-slate-700">{t('scenarioDescriptionLabel')}</Label>
                       <Button
                         variant={
                           showImageInputs[scenario.id] || (scenario.imageUrl && scenario.imageUrl.trim() !== '')
@@ -432,7 +433,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                   {/* Scenario Image */}
                   {showImageInputs[scenario.id] && (
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-slate-700">{t('imageUrlLabel')}</label>
+                      <Label className="mb-2 block text-sm font-medium text-slate-700">{t('imageUrlLabel')}</Label>
                       <Input
                         type="url"
                         value={scenario.imageUrl || ''}
@@ -458,9 +459,9 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                   {/* Response Options */}
                   <div>
                     <div className="mb-3 flex items-center justify-between">
-                      <label className="text-sm font-medium text-slate-700">
+                      <Label className="text-sm font-medium text-slate-700">
                         {t('responseOptionsLabel', { count: scenario.options.length })}
-                      </label>
+                      </Label>
                       <Button
                         size="sm"
                         variant="outline"

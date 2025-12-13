@@ -18,6 +18,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { createRole } from '@services/roles/roles';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -475,7 +476,7 @@ const PermissionSection = React.memo<PermissionSectionProps>(
         </div>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {permissions.map((permission) => (
-            <label
+            <Label
               key={permission}
               className="flex cursor-pointer items-center space-x-2 rounded-md p-2 transition-colors hover:bg-gray-50"
             >
@@ -486,7 +487,7 @@ const PermissionSection = React.memo<PermissionSectionProps>(
                 className="rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
               />
               <span className="text-sm text-gray-700 capitalize">{getPermissionLabel(permission)}</span>
-            </label>
+            </Label>
           ))}
         </div>
       </div>
