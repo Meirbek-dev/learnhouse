@@ -16,7 +16,15 @@ export async function deleteCollection(collection_uuid: string, access_token: st
     `${getAPIUrl()}collections/${collection_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  return await errorHandling(result);
+  const data_result = await errorHandling(result);
+
+  // Revalidate collections cache after deletion
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.collections, 'max');
+  }
+
+  return data_result;
 }
 
 // Create a new collection
@@ -25,7 +33,15 @@ export async function createCollection(collection: any, access_token: string) {
     `${getAPIUrl()}collections/`,
     RequestBodyWithAuthHeader('POST', collection, null, access_token),
   );
-  return await errorHandling(result);
+  const data_result = await errorHandling(result);
+
+  // Revalidate collections cache after creation
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.collections, 'max');
+  }
+
+  return data_result;
 }
 
 async function fetchCollectionById(collection_uuid: string, access_token?: string) {

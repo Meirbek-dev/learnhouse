@@ -1,5 +1,8 @@
+'use server';
+
 import { RequestBodyWithAuthHeader, errorHandling, getResponseMetadata } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { tags } from '@/lib/cacheTags';
 
 /*
  This file includes certification-related API calls
@@ -19,7 +22,15 @@ export async function createCertification(course_id: number, config: any, access
     `${getAPIUrl()}certifications/`,
     RequestBodyWithAuthHeader('POST', { course_id, config }, null, access_token),
   );
-  return errorHandling(result);
+  const data = await errorHandling(result);
+
+  // Revalidate courses cache after creating certification
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return data;
 }
 
 export async function updateCertification(certification_uuid: string, config: any, access_token: string) {
@@ -27,7 +38,15 @@ export async function updateCertification(certification_uuid: string, config: an
     `${getAPIUrl()}certifications/${certification_uuid}`,
     RequestBodyWithAuthHeader('PUT', { config }, null, access_token),
   );
-  return errorHandling(result);
+  const data = await errorHandling(result);
+
+  // Revalidate courses cache after updating certification
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return data;
 }
 
 export async function deleteCertification(certification_uuid: string, access_token: string) {
@@ -35,7 +54,15 @@ export async function deleteCertification(certification_uuid: string, access_tok
     `${getAPIUrl()}certifications/${certification_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  return errorHandling(result);
+  const data = await errorHandling(result);
+
+  // Revalidate courses cache after deleting certification
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return data;
 }
 
 export async function getUserCertificates(course_uuid: string, access_token: string) {

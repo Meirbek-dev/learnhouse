@@ -1,16 +1,28 @@
+'use server';
+
 import {
   RequestBodyFormWithAuthHeader,
   RequestBodyWithAuthHeader,
   getResponseMetadata,
 } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { tags } from '@/lib/cacheTags';
 
 export async function createAssignment(body: any, access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}assignments/`,
     RequestBodyWithAuthHeader('POST', body, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate activities cache after creating assignment
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.activities, 'max');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return metadata;
 }
 
 export async function updateAssignment(body: any, assignmentUUID: string, access_token: string) {
@@ -18,7 +30,15 @@ export async function updateAssignment(body: any, assignmentUUID: string, access
     `${getAPIUrl()}assignments/${assignmentUUID}`,
     RequestBodyWithAuthHeader('PUT', body, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate activities cache after updating assignment
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.activities, 'max');
+  }
+
+  return metadata;
 }
 
 export async function getAssignmentFromActivityUUID(activityUUID: string, access_token: string) {
@@ -35,7 +55,16 @@ export async function deleteAssignment(assignmentUUID: string, access_token: str
     `${getAPIUrl()}assignments/${assignmentUUID}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate activities cache after deleting assignment
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.activities, 'max');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return metadata;
 }
 
 export async function deleteAssignmentUsingActivityUUID(activityUUID: string, access_token: string) {
@@ -229,5 +258,14 @@ export async function createAssignmentWithActivity(
     `${getAPIUrl()}assignments/with-activity?chapter_id=${chapterId}&activity_name=${encodeURIComponent(activityName)}`,
     RequestBodyWithAuthHeader('POST', body, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate activities and courses cache after creating assignment with activity
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.activities, 'max');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return metadata;
 }

@@ -99,7 +99,15 @@ export async function updateOrgLanding(org_id: number, landing_object: any, acce
     `${getAPIUrl()}orgs/${org_id}/landing`,
     RequestBodyWithAuthHeader('PUT', landing_object, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate organizations cache after landing update
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+  }
+
+  return metadata;
 }
 
 export async function uploadLandingContent(org_uuid: string, content_file: File, access_token: string) {
@@ -118,7 +126,16 @@ export async function removeUserFromOrg(org_id: number, user_id: number, access_
     `${getAPIUrl()}orgs/${org_id}/users/${user_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate organizations cache after user removal
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+    revalidateTag(tags.users, 'max');
+  }
+
+  return metadata;
 }
 
 export async function joinOrg(

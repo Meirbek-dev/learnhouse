@@ -13,6 +13,14 @@ export async function createActivity(data: any, chapter_id: number, org_id: numb
 
   const result = await fetch(`${getAPIUrl()}activities/`, RequestBodyWithAuthHeader('POST', data, null, access_token));
   const metaData = await getResponseMetadata(result);
+
+  // Revalidate activities and courses cache after creating activity
+  if (metaData.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.activities, 'max');
+    revalidateTag(tags.courses, 'max');
+  }
+
   return metaData;
 }
 
@@ -245,7 +253,7 @@ export async function createExternalVideoActivity(data: any, activity: any, chap
 async function fetchActivity(activity_uuid: string, access_token: string) {
   'use cache';
   cacheTag(tags.activities);
-  cacheLife(CacheProfiles.courses);
+  cacheLife(CacheProfiles.activities);
 
   const result = await fetch(`${getAPIUrl()}activities/${activity_uuid}`, {
     method: 'GET',
@@ -270,7 +278,7 @@ export async function getActivity(activity_uuid: string, _next?: any, access_tok
 async function fetchActivityById(activity_id: number, access_token: string) {
   'use cache';
   cacheTag(tags.activities);
-  cacheLife(CacheProfiles.courses);
+  cacheLife(CacheProfiles.activities);
 
   const result = await fetch(`${getAPIUrl()}activities/id/${activity_id}`, {
     method: 'GET',
@@ -312,7 +320,7 @@ export async function deleteActivity(activity_uuid: string, access_token: string
 async function fetchActivityWithAuth(activity_uuid: string, access_token?: string) {
   'use cache';
   cacheTag(tags.activities);
-  cacheLife(CacheProfiles.courses);
+  cacheLife(CacheProfiles.activities);
 
   const headers: HeadersInit = { 'Content-Type': 'application/json' };
   if (access_token) {

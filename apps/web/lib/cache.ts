@@ -19,12 +19,14 @@ export const CacheProfiles = {
   static: { stale: 60 * 30, revalidate: 60 * 60, expire: 60 * 60 * 24 },
   // Organization metadata - updated occasionally
   organization: { stale: 60 * 5, revalidate: 60 * 10, expire: 60 * 60 },
-  // Course metadata and structure - fairly short lived
-  courses: { stale: 60, revalidate: 60 * 2, expire: 60 * 60 },
+  // Course metadata and structure - short stale for faster updates
+  courses: { stale: 15, revalidate: 60, expire: 60 * 60 },
   // Per-user dynamic data
   user: { stale: 30, revalidate: 60, expire: 60 * 5 },
   // Realtime-ish data (gamification, metrics)
   realtime: { stale: 15, revalidate: 30, expire: 60 * 2 },
+  // Activities - very short stale for content editing
+  activities: { stale: 5, revalidate: 30, expire: 60 * 30 },
 } as const;
 
 // Re-export Next.js cache helpers to provide a single import location.

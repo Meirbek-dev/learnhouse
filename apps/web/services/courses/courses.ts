@@ -90,7 +90,15 @@ export async function updateCourse(course_uuid: string, data: any, access_token:
     `${getAPIUrl()}courses/${course_uuid}`,
     RequestBodyWithAuthHeader('PUT', apiData, null, access_token),
   );
-  return await errorHandling(result);
+  const data_result = await errorHandling(result);
+
+  // Revalidate course cache after update
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return data_result;
 }
 
 /**
@@ -148,7 +156,15 @@ export async function updateCourseThumbnail(course_uuid: string, formData: FormD
     `${getAPIUrl()}courses/${course_uuid}/thumbnail`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate course cache after thumbnail update
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return metadata;
 }
 
 export async function createNewCourse(org_id: number, course_body: any, thumbnail: any, access_token: string) {
@@ -169,7 +185,15 @@ export async function createNewCourse(org_id: number, course_body: any, thumbnai
     `${getAPIUrl()}courses/?org_id=${org_id}`,
     RequestBodyFormWithAuthHeader('POST', formData, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate course cache after creating new course
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return metadata;
 }
 
 export async function deleteCourseFromBackend(course_uuid: string, access_token: string) {
@@ -177,7 +201,15 @@ export async function deleteCourseFromBackend(course_uuid: string, access_token:
     `${getAPIUrl()}courses/${course_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  return await errorHandling(result);
+  const data_result = await errorHandling(result);
+
+  // Revalidate course cache after deletion
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return data_result;
 }
 
 export async function getCourseContributors(course_uuid: string, access_token: string | null | undefined) {
