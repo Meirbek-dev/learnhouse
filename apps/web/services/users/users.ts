@@ -1,3 +1,5 @@
+'use server';
+
 import {
   RequestBody,
   RequestBodyFormWithAuthHeader,
@@ -6,6 +8,7 @@ import {
   getResponseMetadata,
 } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { tags } from '@/lib/cacheTags';
 
 export async function getUser(user_id: number, access_token?: string) {
   const result = await fetch(
@@ -37,7 +40,15 @@ export async function updateUserAvatar(user_id: number, avatar_file: any, access
     `${getAPIUrl()}users/update_avatar/${user_id}`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate users cache after updating avatar
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.users, 'max');
+  }
+
+  return metadata;
 }
 
 export async function updateUserTheme(user_id: number, theme: string, access_token: string) {
@@ -45,7 +56,15 @@ export async function updateUserTheme(user_id: number, theme: string, access_tok
     `${getAPIUrl()}users/preferences/theme/${user_id}?theme=${encodeURIComponent(theme)}`,
     RequestBodyWithAuthHeader('PUT', null, null, access_token),
   );
-  return await errorHandling(result);
+  const data = await errorHandling(result);
+
+  // Revalidate users cache after updating theme
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.users, 'max');
+  }
+
+  return data;
 }
 
 export async function updateUserLocale(user_id: number, locale: string, access_token: string) {
@@ -53,5 +72,13 @@ export async function updateUserLocale(user_id: number, locale: string, access_t
     `${getAPIUrl()}users/preferences/locale/${user_id}?locale=${encodeURIComponent(locale)}`,
     RequestBodyWithAuthHeader('PUT', null, null, access_token),
   );
-  return await errorHandling(result);
+  const data = await errorHandling(result);
+
+  // Revalidate users cache after updating locale
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.users, 'max');
+  }
+
+  return data;
 }

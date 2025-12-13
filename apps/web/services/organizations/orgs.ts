@@ -17,7 +17,15 @@ import { tags } from '@/lib/cacheTags';
 
 export async function createNewOrganization(body: any, access_token: string) {
   const result = await fetch(`${getAPIUrl()}orgs/`, RequestBodyWithAuthHeader('POST', body, null, access_token));
-  return await errorHandling(result);
+  const data = await errorHandling(result);
+
+  // Revalidate organizations cache after creating organization
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+  }
+
+  return data;
 }
 
 export async function deleteOrganizationFromBackend(org_id: number, access_token: string) {
@@ -25,7 +33,15 @@ export async function deleteOrganizationFromBackend(org_id: number, access_token
     `${getAPIUrl()}orgs/${org_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  return await errorHandling(result);
+  const data = await errorHandling(result);
+
+  // Revalidate organizations cache after deleting organization
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+  }
+
+  return data;
 }
 
 /**
@@ -91,7 +107,16 @@ export async function updateUserRole(org_id: number, user_id: number, role_uuid:
     `${getAPIUrl()}orgs/${org_id}/users/${user_id}/role/${role_uuid}`,
     RequestBodyWithAuthHeader('PUT', null, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate organizations and users cache after updating user role
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+    revalidateTag(tags.users, 'max');
+  }
+
+  return metadata;
 }
 
 export async function updateOrgLanding(org_id: number, landing_object: any, access_token: string) {
@@ -157,5 +182,14 @@ export async function joinOrg(
     `${getAPIUrl()}orgs/join`,
     RequestBodyWithAuthHeader('POST', cleanArgs, next, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate organizations and users cache after joining org
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+    revalidateTag(tags.users, 'max');
+  }
+
+  return metadata;
 }

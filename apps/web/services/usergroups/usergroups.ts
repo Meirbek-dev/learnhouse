@@ -1,5 +1,8 @@
+'use server';
+
 import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { tags } from '@/lib/cacheTags';
 
 export async function getUserGroups(org_id: number, access_token: string) {
   const result: any = await fetch(
@@ -14,7 +17,15 @@ export async function createUserGroup(body: any, access_token: string) {
     `${getAPIUrl()}usergroups/`,
     RequestBodyWithAuthHeader('POST', body, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate organizations cache after creating user group
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+  }
+
+  return metadata;
 }
 
 export async function linkUserToUserGroup(usergroup_id: number, user_id: number, access_token: string) {
@@ -22,7 +33,16 @@ export async function linkUserToUserGroup(usergroup_id: number, user_id: number,
     `${getAPIUrl()}usergroups/${usergroup_id}/add_users?user_ids=${user_id}`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate organizations and users cache after linking user to group
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+    revalidateTag(tags.users, 'max');
+  }
+
+  return metadata;
 }
 
 export async function unLinkUserToUserGroup(usergroup_id: number, user_id: number, access_token: string) {
@@ -30,7 +50,16 @@ export async function unLinkUserToUserGroup(usergroup_id: number, user_id: numbe
     `${getAPIUrl()}usergroups/${usergroup_id}/remove_users?user_ids=${user_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate organizations and users cache after unlinking user from group
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+    revalidateTag(tags.users, 'max');
+  }
+
+  return metadata;
 }
 
 export async function updateUserGroup(usergroup_id: number, access_token: string, data: any) {
@@ -38,7 +67,15 @@ export async function updateUserGroup(usergroup_id: number, access_token: string
     `${getAPIUrl()}usergroups/${usergroup_id}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate organizations cache after updating user group
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+  }
+
+  return metadata;
 }
 
 export async function deleteUserGroup(usergroup_id: number, access_token: string) {
@@ -46,7 +83,15 @@ export async function deleteUserGroup(usergroup_id: number, access_token: string
     `${getAPIUrl()}usergroups/${usergroup_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate organizations cache after deleting user group
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+  }
+
+  return metadata;
 }
 
 export async function linkResourcesToUserGroup(usergroup_id: number, resource_uuids: any, access_token: string) {
@@ -54,7 +99,16 @@ export async function linkResourcesToUserGroup(usergroup_id: number, resource_uu
     `${getAPIUrl()}usergroups/${usergroup_id}/add_resources?resource_uuids=${resource_uuids}`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate organizations and courses cache after linking resources
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return metadata;
 }
 
 export async function unLinkResourcesToUserGroup(usergroup_id: number, resource_uuids: any, access_token: string) {
@@ -62,5 +116,14 @@ export async function unLinkResourcesToUserGroup(usergroup_id: number, resource_
     `${getAPIUrl()}usergroups/${usergroup_id}/remove_resources?resource_uuids=${resource_uuids}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate organizations and courses cache after unlinking resources
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return metadata;
 }

@@ -1,5 +1,8 @@
+'use server';
+
 import { RequestBodyWithAuthHeader, errorHandling } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { tags } from '@/lib/cacheTags';
 
 /*
  This file includes POST, PUT, DELETE requests for course discussions
@@ -62,7 +65,15 @@ export async function createDiscussion(
     `${getAPIUrl()}courses/${course_uuid}/discussions`,
     RequestBodyWithAuthHeader('POST', discussion, null, access_token),
   );
-  return await errorHandling(result);
+  const data = await errorHandling(result);
+
+  // Revalidate courses cache after creating discussion
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return data;
 }
 
 /**
@@ -78,7 +89,15 @@ export async function updateDiscussion(
     `${getAPIUrl()}courses/${course_uuid}/discussions/${discussion_uuid}`,
     RequestBodyWithAuthHeader('PUT', discussion, null, access_token),
   );
-  return await errorHandling(result);
+  const data = await errorHandling(result);
+
+  // Revalidate courses cache after updating discussion
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return data;
 }
 
 /**
@@ -93,7 +112,15 @@ export async function deleteDiscussion(
     `${getAPIUrl()}courses/${course_uuid}/discussions/${discussion_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  return await errorHandling(result);
+  const data = await errorHandling(result);
+
+  // Revalidate courses cache after deleting discussion
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return data;
 }
 
 /**
@@ -104,7 +131,15 @@ export async function likeDiscussion(course_uuid: string, discussion_uuid: strin
     `${getAPIUrl()}courses/${course_uuid}/discussions/${discussion_uuid}/like`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
   );
-  return await errorHandling(result);
+  const data = await errorHandling(result);
+
+  // Revalidate courses cache after liking discussion
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return data;
 }
 
 /**
@@ -119,7 +154,15 @@ export async function toggleDiscussionLike(
     `${getAPIUrl()}courses/${course_uuid}/discussions/${discussion_uuid}/like`,
     RequestBodyWithAuthHeader('PUT', null, null, access_token),
   );
-  return await errorHandling(result);
+  const data = await errorHandling(result);
+
+  // Revalidate courses cache after toggling like
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return data;
 }
 
 /**
@@ -134,7 +177,15 @@ export async function toggleDiscussionDislike(
     `${getAPIUrl()}courses/${course_uuid}/discussions/${discussion_uuid}/dislike`,
     RequestBodyWithAuthHeader('PUT', null, null, access_token),
   );
-  return await errorHandling(result);
+  const data = await errorHandling(result);
+
+  // Revalidate courses cache after toggling dislike
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return data;
 }
 
 /**

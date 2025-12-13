@@ -231,7 +231,15 @@ export async function editContributor(
     `${getAPIUrl()}courses/${course_uuid}/contributors/${contributor_id}?authorship=${authorship}&authorship_status=${authorship_status}`,
     RequestBodyWithAuthHeader('PUT', null, null, access_token || undefined),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate courses cache after editing contributor
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return metadata;
 }
 
 export async function applyForContributor(course_uuid: string, data: any, access_token: string | null | undefined) {
@@ -239,7 +247,15 @@ export async function applyForContributor(course_uuid: string, data: any, access
     `${getAPIUrl()}courses/${course_uuid}/apply-contributor`,
     RequestBodyWithAuthHeader('POST', data, null, access_token || undefined),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate courses cache after applying for contributor
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return metadata;
 }
 
 export async function bulkAddContributors(course_uuid: string, data: any, access_token: string | null | undefined) {
@@ -247,7 +263,15 @@ export async function bulkAddContributors(course_uuid: string, data: any, access
     `${getAPIUrl()}courses/${course_uuid}/bulk-add-contributors`,
     RequestBodyWithAuthHeader('POST', data, null, access_token || undefined),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate courses cache after bulk adding contributors
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return metadata;
 }
 
 export async function bulkRemoveContributors(course_uuid: string, data: any, access_token: string | null | undefined) {
@@ -255,7 +279,15 @@ export async function bulkRemoveContributors(course_uuid: string, data: any, acc
     `${getAPIUrl()}courses/${course_uuid}/bulk-remove-contributors`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token || undefined),
   );
-  return await errorHandling(result);
+  const data_result = await errorHandling(result);
+
+  // Revalidate courses cache after bulk removing contributors
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return data_result;
 }
 
 export async function getCourseRights(course_uuid: string, access_token: string | null | undefined) {

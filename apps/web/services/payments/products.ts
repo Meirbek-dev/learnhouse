@@ -1,6 +1,7 @@
 'use server';
 import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { tags } from '@/lib/cacheTags';
 
 export async function getProducts(orgId: number, access_token: string) {
   const result = await fetch(
@@ -15,7 +16,15 @@ export async function createProduct(orgId: number, data: any, access_token: stri
     `${getAPIUrl()}payments/${orgId}/products`,
     RequestBodyWithAuthHeader('POST', data, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate courses cache after creating product
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return metadata;
 }
 
 export async function updateProduct(orgId: number, productId: string, data: any, access_token: string) {
@@ -23,7 +32,15 @@ export async function updateProduct(orgId: number, productId: string, data: any,
     `${getAPIUrl()}payments/${orgId}/products/${productId}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate courses cache after updating product
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return metadata;
 }
 
 export async function archiveProduct(orgId: number, productId: string, access_token: string) {
@@ -31,7 +48,15 @@ export async function archiveProduct(orgId: number, productId: string, access_to
     `${getAPIUrl()}payments/${orgId}/products/${productId}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate courses cache after archiving product
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return metadata;
 }
 
 export async function getProductDetails(orgId: number, productId: string, access_token: string) {
@@ -47,7 +72,15 @@ export async function linkCourseToProduct(orgId: number, productId: string, cour
     `${getAPIUrl()}payments/${orgId}/products/${productId}/courses/${courseId}`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate courses cache after linking course to product
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return metadata;
 }
 
 export async function unlinkCourseFromProduct(
@@ -60,7 +93,15 @@ export async function unlinkCourseFromProduct(
     `${getAPIUrl()}payments/${orgId}/products/${productId}/courses/${courseId}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate courses cache after unlinking course from product
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+  }
+
+  return metadata;
 }
 
 export async function getCoursesLinkedToProduct(orgId: number, productId: string, access_token: string) {

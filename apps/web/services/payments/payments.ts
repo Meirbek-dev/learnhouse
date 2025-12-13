@@ -1,6 +1,7 @@
 'use server';
 import { RequestBodyWithAuthHeader, errorHandling } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { tags } from '@/lib/cacheTags';
 
 export async function getPaymentConfigs(orgId: number, access_token: string) {
   const result = await fetch(
@@ -23,7 +24,15 @@ export async function initializePaymentConfig(orgId: number, data: any, provider
     `${getAPIUrl()}payments/${orgId}/config?provider=${provider}`,
     RequestBodyWithAuthHeader('POST', data, null, access_token),
   );
-  return await errorHandling(result);
+  const responseData = await errorHandling(result);
+
+  // Revalidate organizations cache after initializing payment config
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+  }
+
+  return responseData;
 }
 
 export async function updatePaymentConfig(orgId: number, id: string, data: any, access_token: string) {
@@ -31,7 +40,15 @@ export async function updatePaymentConfig(orgId: number, id: string, data: any, 
     `${getAPIUrl()}payments/${orgId}/config?id=${id}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
-  return await errorHandling(result);
+  const responseData = await errorHandling(result);
+
+  // Revalidate organizations cache after updating payment config
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+  }
+
+  return responseData;
 }
 
 export async function updateStripeAccountID(orgId: number, data: any, access_token: string) {
@@ -39,7 +56,15 @@ export async function updateStripeAccountID(orgId: number, data: any, access_tok
     `${getAPIUrl()}payments/${orgId}/stripe/account?stripe_account_id=${data.stripe_account_id}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
-  return await errorHandling(result);
+  const responseData = await errorHandling(result);
+
+  // Revalidate organizations cache after updating Stripe account
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+  }
+
+  return responseData;
 }
 
 export async function getStripeOnboardingLink(orgId: number, access_token: string, redirect_uri: string) {
@@ -63,7 +88,15 @@ export async function deletePaymentConfig(orgId: number, id: string, access_toke
     `${getAPIUrl()}payments/${orgId}/config?id=${id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  return await errorHandling(result);
+  const responseData = await errorHandling(result);
+
+  // Revalidate organizations cache after deleting payment config
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+  }
+
+  return responseData;
 }
 
 export async function getOrgCustomers(orgId: number, access_token: string) {

@@ -1,5 +1,8 @@
+'use server';
+
 import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { tags } from '@/lib/cacheTags';
 
 /*
   Roles service matching available endpoints:
@@ -26,7 +29,15 @@ export async function createRole(body: CreateOrUpdateRoleBody, access_token: str
     `${getAPIUrl()}roles/org/${org_id}`,
     RequestBodyWithAuthHeader('POST', payload, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate organizations cache after creating role
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+  }
+
+  return metadata;
 }
 
 export async function getRole(role_id: number | string, access_token?: string) {
@@ -42,7 +53,15 @@ export async function updateRole(role_id: number | string, body: CreateOrUpdateR
     `${getAPIUrl()}roles/${role_id}`,
     RequestBodyWithAuthHeader('PUT', body, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate organizations cache after updating role
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+  }
+
+  return metadata;
 }
 
 export async function deleteRole(role_id: number | string, _org_id: number | string | undefined, access_token: string) {
@@ -50,5 +69,13 @@ export async function deleteRole(role_id: number | string, _org_id: number | str
     `${getAPIUrl()}roles/${role_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  return await getResponseMetadata(result);
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate organizations cache after deleting role
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+  }
+
+  return metadata;
 }
