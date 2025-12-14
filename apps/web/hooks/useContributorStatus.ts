@@ -1,6 +1,7 @@
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseContributors } from '@services/courses/courses';
 import { useCallback, useEffect, useState } from 'react';
+import { useEffectEvent } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -15,16 +16,20 @@ export function useContributorStatus(courseUuid: string) {
   const session = usePlatformSession() as any;
   const [contributorStatus, setContributorStatus] = useState<ContributorStatus>('NONE');
   const [isLoading, setIsLoading] = useState(true);
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
   const t = useTranslations('Hooks.useContributorStatus');
   const accessToken = session?.data?.tokens?.access_token;
   const userId = session?.data?.user?.id;
 
-  const checkContributorStatus = useCallback(async () => {
+  // Use Effect Event for the fetch logic that should read latest values
+  // without causing the effect to re-run when accessToken or t changes
+  const onCheckStatus = useEffectEvent(async () => {
     if (!userId) {
       setIsLoading(false);
       return;
     }
 
+    setIsLoading(true);
     try {
       const response = await getCourseContributors(
         courseUuid.startsWith('course_') ? courseUuid : `course_${courseUuid}`,
@@ -32,7 +37,9 @@ export function useContributorStatus(courseUuid: string) {
       );
 
       if (response?.data && Array.isArray(response.data)) {
-        const currentUser = response.data.find((contributor: Contributor) => contributor.user_id === userId);
+        const currentUser = response.data.find(
+          (contributor: Contributor) => contributor.user_id === userId
+        );
 
         if (currentUser) {
           setContributorStatus(currentUser.authorship_status as ContributorStatus);
@@ -49,14 +56,19 @@ export function useContributorStatus(courseUuid: string) {
     } finally {
       setIsLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [courseUuid, accessToken, userId]);
+  });
 
+  // Effect runs only when userId, courseUuid, or manual refetch trigger changes
   useEffect(() => {
     if (userId) {
-      checkContributorStatus();
+      onCheckStatus();
     }
-  }, [checkContributorStatus, userId]);
+  }, [userId, courseUuid, refetchTrigger]);
 
-  return { contributorStatus, isLoading, refetch: checkContributorStatus };
+  // Stable refetch function that triggers the effect
+  const refetch = useCallback(() => {
+    setRefetchTrigger((prev) => prev + 1);
+  }, []);
+
+  return { contributorStatus, isLoading, refetch };
 }

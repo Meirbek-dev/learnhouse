@@ -18,7 +18,7 @@ const WebPreview = Node.create({
       og_type: { default: null },
       og_url: { default: null },
       alignment: { default: 'left' },
-      buttonLabel: { default: 'Visit Site' },
+      buttonLabel: { default: 'Посетить сайт' },
       showButton: { default: false },
       openInPopup: { default: false },
     };

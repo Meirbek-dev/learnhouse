@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Award,
   BookOpen,
@@ -20,7 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { updateProfile } from '@services/settings/profile';
-import { createElement, useEffect, useState } from 'react';
+import { createElement, useEffect, useState, useEffectEvent } from 'react';
 import { de, enUS, es, fr, ru } from 'date-fns/locale';
 import { useLocale, useTranslations } from 'next-intl';
 import { Textarea } from '@components/ui/textarea';
@@ -233,39 +235,39 @@ const UserProfileBuilder = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Initialize profile data from user data
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (session?.data?.user?.id && access_token) {
-        try {
-          setIsLoading(true);
-          const userData = await getUser(session.data.user.id);
+  const fetchUserDataEvent = useEffectEvent(async () => {
+    if (session?.data?.user?.id && access_token) {
+      try {
+        setIsLoading(true);
+        const userData = await getUser(session.data.user.id);
 
-          if (userData.profile) {
-            try {
-              const profileSections =
-                typeof userData.profile === 'string'
-                  ? JSON.parse(userData.profile).sections
-                  : userData.profile.sections;
+        if (userData.profile) {
+          try {
+            const profileSections =
+              typeof userData.profile === 'string'
+                ? JSON.parse(userData.profile).sections
+                : userData.profile.sections;
 
-              setProfileData({
-                sections: profileSections || [],
-              });
-            } catch (error) {
-              console.error('Error parsing profile data:', error);
-              setProfileData({ sections: [] });
-            }
+            setProfileData({
+              sections: profileSections || [],
+            });
+          } catch (error) {
+            console.error('Error parsing profile data:', error);
+            setProfileData({ sections: [] });
           }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-          toast.error(t('Errors.profileLoadFailed'));
-        } finally {
-          setIsLoading(false);
         }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        toast.error(t('Errors.profileLoadFailed'));
+      } finally {
+        setIsLoading(false);
       }
-    };
+    }
+  });
 
-    fetchUserData();
-  }, [session?.data?.user?.id, access_token, t]);
+  useEffect(() => {
+    fetchUserDataEvent();
+  }, [session?.data?.user?.id, access_token]);
 
   const createEmptySection = (t: Function, type: keyof typeof SECTION_TYPE_KEYS): ProfileSection => {
     const sectionTypesConfig = getSectionTypesConfig(t);
@@ -349,12 +351,15 @@ const UserProfileBuilder = () => {
   };
 
   const addSection = (type: keyof typeof SECTION_TYPE_KEYS) => {
-    const newSection = createEmptySection(t, type);
-    setProfileData((prev) => ({
-      ...prev,
-      sections: [...prev.sections, newSection],
-    }));
-    setSelectedSection(profileData.sections.length);
+    setProfileData((prev) => {
+      const newSection = createEmptySection(t, type);
+      const newSections = [...prev.sections, newSection];
+      setSelectedSection(newSections.length - 1);
+      return {
+        ...prev,
+        sections: newSections,
+      };
+    });
   };
 
   const updateSection = (index: number, updatedSection: ProfileSection) => {
@@ -544,7 +549,7 @@ const UserProfileBuilder = () => {
 
             <div className="pt-4">
               <Select
-                onValueChange={(value: keyof typeof SECTION_TYPE_KEYS | null) => {
+                onValueChange={(value: keyof typeof SECTION_TYPE_KEYS) => {
                   if (value) {
                     addSection(value);
                   }

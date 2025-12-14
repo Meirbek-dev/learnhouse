@@ -22,7 +22,7 @@ import {
   Utensils,
 } from 'lucide-react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useEffectEvent } from 'react';
 import { ScrollArea } from '@components/ui/scroll-area';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -107,14 +107,18 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
     [fetchImages],
   );
 
-  useEffect(() => {
-    if (query) {
-      debouncedFetchImages(query);
+  const handleQueryChange = useEffectEvent((searchQuery: string) => {
+    if (searchQuery) {
+      debouncedFetchImages(searchQuery);
     } else if (images.length > 0 || page > 1) {
       setImages([]);
       setPage(1);
     }
-  }, [query, debouncedFetchImages, page]); // eslint-disable-line react-hooks/exhaustive-deps
+  });
+
+  useEffect(() => {
+    handleQueryChange(query);
+  }, [query, page]);
 
   useEffect(() => {
     if (isOpen && images.length === 0 && !query && !loading) {

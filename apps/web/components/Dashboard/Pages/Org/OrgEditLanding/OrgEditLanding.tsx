@@ -1333,7 +1333,7 @@ const HeroSectionEditor: FC<{
                   <Label>{t('HeroEditor.Illustration.positionLabel')}</Label>
                   <Select
                     value={section.illustration?.position || 'left'}
-                    onValueChange={(value: 'left' | 'right' | null) => {
+                    onValueChange={(value: 'left' | 'right') => {
                       if (!value) return;
                       onChange({
                         ...section,
@@ -1364,7 +1364,7 @@ const HeroSectionEditor: FC<{
                   <Label>{t('HeroEditor.Illustration.sizeLabel')}</Label>
                   <Select
                     value={section.illustration?.size || 'medium'}
-                    onValueChange={(value: 'small' | 'medium' | 'large' | null) => {
+                    onValueChange={(value: 'small' | 'medium' | 'large') => {
                       if (!value) return;
                       onChange({
                         ...section,

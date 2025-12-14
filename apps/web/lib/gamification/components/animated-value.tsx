@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useEffectEvent } from 'react';
 import { animations } from '../design-tokens';
 
 interface AnimatedValueProps {
@@ -27,7 +27,7 @@ export function AnimatedValue({
   const startTimeRef = useRef<number | undefined>(undefined);
   const startValueRef = useRef(value);
 
-  useEffect(() => {
+  const runAnimation = useEffectEvent(() => {
     startValueRef.current = displayValue;
     startTimeRef.current = performance.now();
 
@@ -55,8 +55,13 @@ export function AnimatedValue({
         cancelAnimationFrame(rafRef.current);
       }
     };
-    // displayValue intentionally excluded to prevent infinite loops
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  });
+
+  useEffect(() => {
+    const cleanup = runAnimation();
+    return () => {
+      if (typeof cleanup === 'function') cleanup();
+    };
   }, [value, duration]);
 
   return <span className={className}>{format(displayValue)}</span>;

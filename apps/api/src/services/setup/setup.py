@@ -1,3 +1,4 @@
+import contextlib
 from datetime import datetime
 
 import orjson
@@ -334,10 +335,8 @@ def install_default_elements(db_session: Session) -> bool:
         exists = db_session.exec(stmt).first()
         if not exists:
             # Avoid explicit id conflicts: let the DB assign the id if needed
-            try:
+            with contextlib.suppress(Exception):
                 default_role.id = None
-            except Exception:
-                pass
             db_session.add(default_role)
 
     # commit changes

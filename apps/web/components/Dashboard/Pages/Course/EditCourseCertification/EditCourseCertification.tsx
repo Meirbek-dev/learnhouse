@@ -4,7 +4,7 @@ import { createCertification, deleteCertification } from '@services/courses/cert
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { AlertTriangle, Award, FileText, Loader2, Settings } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition, useEffectEvent } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import CertificatePreview from './CertificatePreview';
 import { Textarea } from '@/components/ui/textarea';
@@ -228,38 +228,43 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
 
   // Watch form values and update course state (debounced)
   const watchedValues = form.watch();
-  const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(null);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const debouncedUpdate = useEffectEvent(() => {
+    dispatchCourse({ type: 'setIsNotSaved' });
+
+    // Store certification data in course context so it gets saved with the main save button
+    const updatedCourse = {
+      ...courseStructure,
+      // Store certification data for the main save functionality
+      _certificationData: {
+        certification_uuid: existingCertification.certification_uuid,
+        config: {
+          certification_name: watchedValues.certification_name,
+          certification_description: watchedValues.certification_description,
+          certification_type: watchedValues.certification_type,
+          certificate_pattern: watchedValues.certificate_pattern,
+          certificate_instructor: watchedValues.certificate_instructor,
+        },
+      },
+    };
+
+    dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse });
+  });
 
   useEffect(() => {
-    if (!isLoading && hasExistingCertification && hasInitialized && watchedValues) {
+    if (!isLoading && hasExistingCertification && hasInitialized) {
       // Clear previous timeout
-      if (debounceTimeout) {
-        clearTimeout(debounceTimeout);
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
       }
 
       // Set new timeout to debounce updates
       const timeout = setTimeout(() => {
-        dispatchCourse({ type: 'setIsNotSaved' });
-
-        // Store certification data in course context so it gets saved with the main save button
-        const updatedCourse = {
-          ...courseStructure,
-          // Store certification data for the main save functionality
-          _certificationData: {
-            certification_uuid: existingCertification.certification_uuid,
-            config: {
-              certification_name: watchedValues.certification_name,
-              certification_description: watchedValues.certification_description,
-              certification_type: watchedValues.certification_type,
-              certificate_pattern: watchedValues.certificate_pattern,
-              certificate_instructor: watchedValues.certificate_instructor,
-            },
-          },
-        };
-        dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse });
+        debouncedUpdate();
       }, 300); // 300ms debounce
 
-      setDebounceTimeout(timeout);
+      debounceTimeoutRef.current = timeout;
 
       // Cleanup function
       return () => {
@@ -268,7 +273,6 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
         }
       };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     watchedValues.certification_name,
     watchedValues.certification_description,

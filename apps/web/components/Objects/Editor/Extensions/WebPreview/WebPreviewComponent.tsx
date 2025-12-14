@@ -1,6 +1,6 @@
 import { AlignCenter, AlignLeft, AlignRight, Edit2, Save, Trash, X } from 'lucide-react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getUrlPreview } from '@services/courses/activities';
 import { Checkbox } from '@components/ui/checkbox';
@@ -149,12 +149,15 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
     [t, updateAttributes],
   );
 
+  const fetchPreviewEvent = useEffectEvent((url: string) => {
+    fetchPreview(url);
+  });
+
   useEffect(() => {
     if (node.attrs.url && !hasPreview) {
-      fetchPreview(node.attrs.url);
+      fetchPreviewEvent(node.attrs.url);
     }
-    // eslint-disable-next-line
-  }, []);
+  }, [node.attrs.url, hasPreview]);
 
   useEffect(() => {
     if (editing && inputRef.current) {
