@@ -12,10 +12,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';
+import { useTransition, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { CalendarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { useTransition } from 'react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import type { FC } from 'react';
@@ -79,6 +79,11 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
   };
 
   const dateFnsLocale = getDateFnsLocale(locale);
+  const today = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(validationSchema),
@@ -158,23 +163,23 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
             <FormItem>
               <FormLabel>{t('dueDate')}</FormLabel>
               <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
+                <PopoverTrigger
+                  render={
                     <Button
                       variant="outline"
                       className={cn(
                         'w-full justify-start text-left font-normal',
                         !field.value && 'text-muted-foreground',
                       )}
-                    >
-                      {field.value ? (
-                        format(new Date(field.value), 'PPP', { locale: dateFnsLocale })
-                      ) : (
-                        <span>{t('selectDeadline')}</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
+                    />
+                  }
+                >
+                  {field.value ? (
+                    format(new Date(field.value), 'PPP', { locale: dateFnsLocale })
+                  ) : (
+                    <span>{t('selectDeadline')}</span>
+                  )}
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </PopoverTrigger>
                 <PopoverContent
                   className="w-auto p-0"
@@ -195,7 +200,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
                         field.onChange('');
                       }
                     }}
-                    disabled={false}
+                    disabled={{ before: today }}
                     locale={dateFnsLocale}
                   />
                 </PopoverContent>
@@ -213,11 +218,11 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
               <FormLabel>{t('gradingType')}</FormLabel>
               <Select
                 onValueChange={field.onChange}
-                defaultValue={field.value}
+                value={field.value}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder={t('selectGradingType')} />
+                    <SelectValue placeholder={validationT('selectGradingType')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -276,7 +281,7 @@ const EditAssignmentModal: FC<EditAssignmentModalProps> = ({ isOpen, onClose, as
       }
       dialogTitle={t('editAssignment')}
       dialogDescription={t('updateDetails')}
-      dialogTrigger={null}
+      dialogTrigger={undefined}
     />
   );
 };

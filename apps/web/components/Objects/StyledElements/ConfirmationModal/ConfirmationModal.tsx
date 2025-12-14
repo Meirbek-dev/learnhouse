@@ -8,10 +8,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { isValidElement, useCallback, useState, useTransition } from 'react';
+import { isValidElement, useCallback, useMemo, useState, useTransition } from 'react';
 import { AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
+import type { ReactElement } from 'react';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -54,17 +55,30 @@ const ConfirmationModal = (params: ModalParams) => {
   }, []);
 
   // Helper: wrap button in span if needed for proper DialogTrigger usage
-  const getSafeDialogTrigger = useCallback((trigger: ReactNode) => {
-    if (!trigger) return null;
+  const getSafeDialogTrigger = useCallback((trigger: ReactNode): ReactElement | undefined => {
+    if (!trigger) return undefined;
     if (isValidElement(trigger)) {
       const type = (trigger.type as any)?.toString?.() || '';
       // If already span/div, return as is
       if (type.includes('span') || type.includes('div')) return trigger;
       // If button, wrap in span
       if (type.includes('button')) return <span>{trigger}</span>;
+      return trigger;
     }
-    return trigger;
+    return <span>{trigger}</span>;
   }, []);
+
+  const triggerElement = useMemo(
+    () => getSafeDialogTrigger(params.dialogTrigger),
+    [getSafeDialogTrigger, params.dialogTrigger],
+  );
+
+  const triggerIsNativeButton = useMemo(() => {
+    if (!triggerElement) return false;
+    return (
+      isValidElement(triggerElement) && typeof triggerElement.type === 'string' && triggerElement.type === 'button'
+    );
+  }, [triggerElement]);
 
   const getStatusConfig = useCallback(() => {
     const isWarning = params.status === 'warning';
@@ -120,7 +134,10 @@ const ConfirmationModal = (params: ModalParams) => {
       onOpenChange={onOpenChange}
     >
       {params.dialogTrigger ? (
-        <DialogTrigger asChild>{getSafeDialogTrigger(params.dialogTrigger)}</DialogTrigger>
+        <DialogTrigger
+          nativeButton={triggerIsNativeButton}
+          render={triggerElement}
+        />
       ) : null}
       <DialogContent
         className={cn(sizeConfig)}

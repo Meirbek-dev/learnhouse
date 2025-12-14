@@ -124,12 +124,14 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
               if (!hasAccess) {
                 return (
                   <Tooltip key={tab.key}>
-                    <TooltipTrigger asChild>
-                      <div className="border-primary flex w-fit cursor-not-allowed space-x-4 py-2 text-center opacity-30 transition-all ease-linear">
-                        <div className="mx-2 flex items-center space-x-2.5">
-                          <IconComponent size={16} />
-                          <div>{tab.label}</div>
-                        </div>
+                    <TooltipTrigger
+                      render={
+                        <div className="border-primary flex w-fit cursor-not-allowed space-x-4 py-2 text-center opacity-30 transition-all ease-linear" />
+                      }
+                    >
+                      <div className="mx-2 flex items-center space-x-2.5">
+                        <IconComponent size={16} />
+                        <div>{tab.label}</div>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent

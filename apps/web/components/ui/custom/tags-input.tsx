@@ -252,8 +252,8 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
               <span>{item}</span>
               <button
                 type="button"
-                aria-label={`Remove ${item} option`}
-                aria-roledescription="button to remove option"
+                aria-label={t('removeOptionAria', { item })}
+                aria-roledescription={t('aria.removeOptionDescription')}
                 disabled={disableButton}
                 onMouseDown={mousePreventDefault}
                 onClick={() => {
@@ -268,7 +268,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
           ))}
           <Input
             tabIndex={0}
-            aria-label="input tag"
+            aria-label={t('aria.inputTag')}
             disabled={disableInput}
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}

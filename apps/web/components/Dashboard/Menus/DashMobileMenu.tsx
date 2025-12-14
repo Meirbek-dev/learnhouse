@@ -32,7 +32,7 @@ const DashMobileMenu = () => {
             <AppLink
               href="/"
               className="flex flex-col items-center p-2"
-              aria-label="Go to dashboard home"
+              aria-label={t('ariaLabels.home')}
             >
               <Home size={20} />
               <span className="mt-1 text-xs">{t('mobile.home')}</span>
@@ -47,7 +47,7 @@ const DashMobileMenu = () => {
             <AppLink
               href="/dash/courses"
               className="flex flex-col items-center p-2"
-              aria-label="Manage courses"
+              aria-label={t('ariaLabels.manageCourses')}
             >
               <BookCopy size={20} />
               <span className="mt-1 text-xs">{t('mobile.courses')}</span>
@@ -62,7 +62,7 @@ const DashMobileMenu = () => {
             <AppLink
               href="/dash/assignments"
               className="flex flex-col items-center p-2"
-              aria-label="Manage assignments"
+              aria-label={t('ariaLabels.manageAssignments')}
             >
               <Backpack size={20} />
               <span className="mt-1 text-xs">{t('mobile.assignments')}</span>
@@ -78,7 +78,7 @@ const DashMobileMenu = () => {
               <AppLink
                 href="/dash/payments/customers"
                 className="flex flex-col items-center p-2"
-                aria-label="Manage payments and billing"
+                aria-label={t('ariaLabels.managePayments')}
               >
                 <BadgeDollarSign size={20} />
                 <span className="mt-1 text-xs">{t('mobile.payments')}</span>
@@ -94,7 +94,7 @@ const DashMobileMenu = () => {
             <AppLink
               href="/dash/users/settings/users"
               className="flex flex-col items-center p-2"
-              aria-label="Manage users"
+              aria-label={t('ariaLabels.manageUsers')}
             >
               <Users size={20} />
               <span className="mt-1 text-xs">{t('mobile.users')}</span>
@@ -109,7 +109,7 @@ const DashMobileMenu = () => {
             <AppLink
               href="/dash/org/settings/general"
               className="flex flex-col items-center p-2"
-              aria-label="Organization settings"
+              aria-label={t('ariaLabels.organizationSettings')}
             >
               <School size={20} />
               <span className="mt-1 text-xs">{t('mobile.org')}</span>
@@ -127,7 +127,7 @@ const DashMobileMenu = () => {
           <AppLink
             href="/dash/user-account/settings/general"
             className="flex flex-col items-center p-2"
-            aria-label="User account settings"
+            aria-label={t('ariaLabels.userAccountSettings')}
           >
             <Settings size={20} />
             <span className="mt-1 text-xs">{t('mobile.settings')}</span>

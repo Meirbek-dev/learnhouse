@@ -250,15 +250,15 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
   useEffect(() => {
     // Student area
     if (view === 'student') {
-      void getAssignmentTaskUI();
-      void getAssignmentTaskSubmissionFromUserUI();
+      void Promise.resolve().then(() => getAssignmentTaskUI());
+      void Promise.resolve().then(() => getAssignmentTaskSubmissionFromUserUI());
     }
 
     // Grading area
     else if (view === 'custom-grading') {
-      void getAssignmentTaskUI();
+      void Promise.resolve().then(() => getAssignmentTaskUI());
       // setQuestions(assignmentTaskState.assignmentTask.contents.questions);
-      void getAssignmentTaskSubmissionFromIdentifiedUserUI();
+      void Promise.resolve().then(() => getAssignmentTaskSubmissionFromIdentifiedUserUI());
     }
   }, [
     view,

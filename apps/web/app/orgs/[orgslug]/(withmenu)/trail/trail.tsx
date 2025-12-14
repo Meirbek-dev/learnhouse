@@ -1,5 +1,16 @@
 'use client';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import { RecentActivityFeed } from '@/components/Dashboard/Gamification/recent-activity-feed';
@@ -11,12 +22,12 @@ import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
 import UserCertificates from '@components/Pages/Trail/UserCertificates';
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { AlertTriangle, BookOpen, Loader2 } from 'lucide-react';
 import { removeCourse } from '@services/courses/activity';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getAPIUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { BookOpen } from 'lucide-react';
 import useSWR from 'swr';
 
 const Trail = (params: any) => {
@@ -30,6 +41,7 @@ const Trail = (params: any) => {
   const [isQuittingAll, setIsQuittingAll] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [quittingProgress, setQuittingProgress] = useState(0);
+  const [isQuitDialogOpen, setIsQuitDialogOpen] = useState(false);
 
   const {
     data: trail,
@@ -74,6 +86,7 @@ const Trail = (params: any) => {
       await revalidateTags(['courses'], orgslug);
       router.refresh();
       await mutate();
+      setIsQuitDialogOpen(false);
     } catch (error) {
       console.error('Error quitting courses:', error);
     } finally {
@@ -92,14 +105,12 @@ const Trail = (params: any) => {
           type="tra"
         />
         {trail?.runs?.length > 0 && (
-          <ConfirmationModal
-            confirmationButtonText={
-              isQuittingAll ? t('quittingProgress', { progress: quittingProgress }) : t('quitAllCourses')
-            }
-            confirmationMessage={t('quitAllCoursesConfirmation')}
-            dialogTitle={t('quitAllCoursesDialogTitle')}
-            dialogTrigger={
-              <span>
+          <AlertDialog
+            open={isQuitDialogOpen}
+            onOpenChange={setIsQuitDialogOpen}
+          >
+            <AlertDialogTrigger
+              render={
                 <button
                   disabled={isQuittingAll || isPending}
                   className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
@@ -112,11 +123,35 @@ const Trail = (params: any) => {
                     ? t('quittingProgress', { progress: quittingProgress })
                     : t('quitAllCourses')}
                 </button>
-              </span>
-            }
-            functionToExecute={handleQuitAllCourses}
-            status="warning"
-          />
+              }
+            />
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
+                  <AlertTriangle className="size-8" />
+                </AlertDialogMedia>
+                <AlertDialogTitle>{t('quitAllCoursesDialogTitle')}</AlertDialogTitle>
+                <AlertDialogDescription>{t('quitAllCoursesConfirmation')}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel />
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={handleQuitAllCourses}
+                  disabled={isQuittingAll || isPending}
+                >
+                  {isQuittingAll || isPending ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="size-4 animate-spin" />
+                      {t('quittingProgress', { progress: quittingProgress })}
+                    </div>
+                  ) : (
+                    t('quitAllCourses')
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </div>
 

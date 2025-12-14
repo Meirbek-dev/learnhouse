@@ -1,13 +1,36 @@
 'use client';
 
-import { Archive, ChevronDown, ChevronUp, Info, Loader2, Pencil, Plus, RefreshCcw, SquareCheck } from 'lucide-react';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
+  AlertTriangle,
+  Archive,
+  ChevronDown,
+  ChevronUp,
+  Info,
+  Loader2,
+  Pencil,
+  Plus,
+  RefreshCcw,
+  SquareCheck,
+} from 'lucide-react';
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { archiveProduct, getProducts, updateProduct } from '@services/payments/products';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
+import { useCallback, useMemo, useState, useTransition } from 'react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import CreateProductForm from './SubComponents/CreateProductForm';
 import { getPaymentConfigs } from '@services/payments/payments';
@@ -21,7 +44,6 @@ import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import currencyCodes from 'currency-codes';
 import { useForm } from 'react-hook-form';
-import { useMemo, useState } from 'react';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 import * as z from 'zod';
@@ -51,6 +73,63 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
   });
 
 type EditProductFormData = z.infer<ReturnType<typeof createValidationSchema>>;
+
+interface ArchiveProductButtonProps {
+  productId: string;
+  productName: string;
+  onArchive: (productId: string) => Promise<void>;
+  t: (key: string, values?: Record<string, string>) => string;
+}
+
+function ArchiveProductButton({ productId, productName, onArchive, t }: ArchiveProductButtonProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const handleArchive = useCallback(() => {
+    startTransition(async () => {
+      await onArchive(productId);
+      setIsOpen(false);
+    });
+  }, [onArchive, productId]);
+
+  return (
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <AlertDialogTrigger
+        render={
+          <button
+            className="text-red-500 hover:text-red-700"
+            title={t('archiveButton')}
+          >
+            <Archive size={16} />
+          </button>
+        }
+      />
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogMedia>
+            <AlertTriangle className="text-destructive size-6" />
+          </AlertDialogMedia>
+          <AlertDialogTitle>{t('archiveConfirmationTitle', { productName })}</AlertDialogTitle>
+          <AlertDialogDescription>{t('archiveConfirmationMessage')}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending} />
+          <AlertDialogAction
+            variant="destructive"
+            onClick={handleArchive}
+            disabled={isPending}
+          >
+            {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {t('archiveConfirmButton')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
 const PaymentsProductPage = () => {
   const org = useOrg() as any;
@@ -183,24 +262,11 @@ const PaymentsProductPage = () => {
                       >
                         <Pencil size={16} />
                       </button>
-                      <ConfirmationModal
-                        confirmationButtonText={t('archiveConfirmButton')}
-                        confirmationMessage={t('archiveConfirmationMessage')}
-                        dialogTitle={t('archiveConfirmationTitle', {
-                          productName: product.name,
-                        })}
-                        dialogTrigger={
-                          <span>
-                            <button
-                              className="text-red-500 hover:text-red-700"
-                              title={t('archiveButton')}
-                            >
-                              <Archive size={16} />
-                            </button>
-                          </span>
-                        }
-                        functionToExecute={() => handleArchiveProduct(product.id)}
-                        status="warning"
+                      <ArchiveProductButton
+                        productId={product.id}
+                        productName={product.name}
+                        onArchive={handleArchiveProduct}
+                        t={t}
                       />
                     </div>
                   </div>
@@ -396,7 +462,7 @@ const EditProductForm = ({
                     <FormLabel>{t('currencyLabel')}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>

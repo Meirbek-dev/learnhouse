@@ -90,7 +90,7 @@ function XPToast({ notification, onDismiss }: XPToastProps) {
         <button
           onClick={onDismiss}
           className="hover:bg-muted shrink-0 rounded-md p-1.5 opacity-0 transition-opacity group-hover:opacity-100"
-          aria-label="Dismiss"
+          aria-label={t('accessibility.closeNotification')}
         >
           <X className="text-muted-foreground h-4 w-4" />
         </button>

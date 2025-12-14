@@ -33,8 +33,8 @@
       "translateTooltip": "Translate to different languages with AI"
     },
     "AIEditorToolkit": {
-      "CritisizeLabel": "Criticize",
       "ContinueWritingLabel": "Continue Writing",
+      "CritisizeLabel": "Criticize",
       "GenerateQuizLabel": "Generate Quiz",
       "MakeLongerLabel": "Make Longer",
       "TranslateLabel": "Translate",
@@ -230,12 +230,14 @@
       "email": "Email",
       "emailPlaceholder": "Enter your email",
       "forgotPassword": "Forgot Password?",
+      "hidePassword": "Hide password",
       "loading": "Loading...",
       "login": "Login",
       "loginTo": "Login to",
       "or": "OR",
       "password": "Password",
       "passwordPlaceholder": "Enter your password",
+      "showPassword": "Show password",
       "signInWithGoogle": "Sign in with Google",
       "signup": "Sign up",
       "title": "Login — {orgName}",
@@ -258,7 +260,6 @@
       "title": "Reset Password"
     },
     "Signup": {
-      "goBack": "Back to Login",
       "accountCreated": "Your account was successfully created",
       "bio": "Bio",
       "bioPlaceholder": "Tell something about yourself",
@@ -268,6 +269,7 @@
       "emailPlaceholder": "Enter your email",
       "enterInviteCode": "Enter invite code",
       "errorSomethingWentWrong": "Something went wrong",
+      "goBack": "Back to Login",
       "hi": "Hi",
       "inviteCodeRequired": "An invite code is required to join {orgName}",
       "invitedToJoin": "You've been invited to join",
@@ -531,6 +533,9 @@
   },
   "Common": {
     "close": "Close",
+    "googleLogo": "Google logo",
+    "loading": "Loading...",
+    "logoAlt": "Ashyq Bilim logo",
     "save": "Save",
     "saved": "Saved",
     "saving": "Saving...",
@@ -547,6 +552,11 @@
       "toastLoading": "Creating...",
       "toastSuccess": "New group created"
     },
+    "AlertDialog": {
+      "cancel": "Cancel",
+      "close": "Close",
+      "confirm": "Confirm"
+    },
     "AuthorsDisplay": {
       "authorTooltip": "{firstName} {lastName} - {authorship}",
       "authorsLabel": "Course authors",
@@ -554,6 +564,10 @@
         "one": "more author",
         "other": "more authors"
       }
+    },
+    "Breadcrumb": {
+      "label": "Breadcrumb",
+      "more": "More"
     },
     "Button": {
       "newCollection": "New Collection",
@@ -563,7 +577,8 @@
       "courseCount": "{count, plural, =0 {0 courses} one {# course} other {# courses}}",
       "deleteButtonText": "Delete Collection",
       "deleteConfirmationMessage": "Are you sure you want to delete this collection?",
-      "deleteConfirmationTitle": "Delete {collectionName}?"
+      "deleteConfirmationTitle": "Delete {collectionName}?",
+      "deleting": "Deleting..."
     },
     "ConfirmationModal": {
       "cancel": "Cancel",
@@ -738,6 +753,9 @@
       "userHeader": "User"
     },
     "Modal": {
+      "aria": {
+        "closeModal": "Close modal"
+      },
       "closeButtonDefault": "Close",
       "dialog": "Dialog"
     },
@@ -834,8 +852,10 @@
       "account": "Account",
       "closeMenu": "Close menu",
       "language": "Language",
+      "logoAlt": "Ashyq Bilim logo",
       "navigation": "Navigation",
       "openMenu": "Open menu",
+      "overlayClose": "Close menu overlay",
       "search": "Search"
     },
     "OrgMenuLinks": {
@@ -1027,6 +1047,13 @@
     "PageLoading": {
       "loading": "Loading..."
     },
+    "Pagination": {
+      "label": "Pagination",
+      "next": "Next",
+      "nextAria": "Go to next page",
+      "previous": "Previous",
+      "previousAria": "Go to previous page"
+    },
     "RolesUpdate": {
       "adminRole": "Admin",
       "errorPrefix": "Error",
@@ -1059,8 +1086,27 @@
     "Sidebar": {
       "toggleSidebar": "Toggle Sidebar"
     },
+    "SignIn": {
+      "emailLabel": "Email address",
+      "emailPlaceholder": "you@example.com",
+      "newToPlatform": "New to Acme?",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "rememberMe": "Remember me",
+      "resetPassword": "Reset password",
+      "signInButton": "Sign In",
+      "signUp": "Sign up",
+      "singleSignOn": "Single sign-on (SSO)",
+      "subtitle": "Welcome back! Please enter your details.",
+      "title": "Sign in"
+    },
     "TagsInput": {
+      "aria": {
+        "inputTag": "Input tag",
+        "removeOptionDescription": "Button to remove option"
+      },
       "removeOption": "Remove option",
+      "removeOptionAria": "Remove {item} option",
       "removeTag": "Remove tag"
     },
     "TaskFormObject": {
@@ -1080,6 +1126,7 @@
       "gradeError": "Error grading task, please retry later.",
       "gradedSuccessfully": "Task graded successfully with {finalGrade} points ({correctAnswers}/{totalBlanks} correct)",
       "hint": "Hint (optional)",
+      "hintIcon": "💡",
       "hintLabel": "Hint",
       "hintOptional": "Hint (optional)",
       "incorrect": "Incorrect",
@@ -1473,6 +1520,7 @@
     "deleteChapterButton": "Delete Chapter",
     "deleteChapterConfirmation": "Are you sure you want to delete this chapter?",
     "deleteChapterTitle": "Delete {name}?",
+    "deleting": "Deleting...",
     "editButton": "Edit"
   },
   "CourseEndView": {
@@ -1658,11 +1706,16 @@
       "activitiesCompleted": "{completed} of {total} activities completed",
       "applicationPending": "Contributor application pending",
       "applyToContribute": "Apply to contribute",
+      "aria": {
+        "applyToBecome": "Apply to become a course contributor",
+        "signupToApply": "Sign up to apply as course contributor"
+      },
       "authenticateToContribute": "Authenticate to contribute",
       "authenticateToStart": "Authenticate to start course",
       "author": "Author",
       "authors": "Authors",
       "completedActivities": "{completedActivities} of {totalActivities} completed",
+      "continueLearning": "Continue Learning",
       "contributeError": "Failed to submit your application. Please try again later.",
       "contributeLoading": "Submitting contributor application...",
       "contributeSuccess": "Your application to contribute has been submitted successfully",
@@ -1670,7 +1723,6 @@
       "contributorApplicationMessage": "I would like to contribute to this course.",
       "contributorApplicationPending": "Contributor application pending",
       "contributorApplicationSuccess": "Your application to contribute has been submitted successfully",
-      "continueLearning": "Continue Learning",
       "courseProgress": "Course Progress",
       "courseRequiresPurchase": "This course requires purchase to access its content.",
       "leaveCourse": "Leave Course",
@@ -1832,6 +1884,7 @@
         "averageStreak": "Average Streak",
         "averageXP": "Average XP",
         "backendImplementationRequired": "TODO: Backend implementation required for user streak categorization",
+        "dailyCapReached": "⚡ Daily cap reached!",
         "days": "days",
         "engagementLevel": "Engagement Level",
         "engagementRate": "Engagement Rate",
@@ -2333,6 +2386,7 @@
     },
     "CourseOverview": {
       "courseLabel": "Course",
+      "downloadMoocRequirements": "Download MOOC development requirements",
       "rightsGuide": "Rights Guide"
     },
     "Courses": {
@@ -2760,16 +2814,17 @@
         "scenarioNotFound": "Scenario Not Found",
         "scenarioNotFoundDescription": "Please check your scenario configuration and try again.",
         "scenarioOptionLabel": "Scenario {id}",
+        "scenarioPreviewAlt": "Scenario preview",
         "scenarioPreviewTitle": "Scenario Preview",
         "scenarioTitleLabel": "Scenario Title",
         "scenarioTitlePlaceholder": "Scenario Title",
+        "scenariosConfigured": "{count} of {max} scenarios configured",
         "setAsStartingScenario": "Set as starting scenario",
         "setStart": "Set Start",
         "start": "Start",
         "startOver": "Start Over",
         "startingPoint": "Starting Point",
-        "testYourInteractiveScenario": "Test your interactive scenario",
-        "scenariosConfigured": "{count} of {max} scenarios configured"
+        "testYourInteractiveScenario": "Test your interactive scenario"
       },
       "Toolbar": {
         "addColumnRight": "Add column right",
@@ -2791,6 +2846,32 @@
         "codeBlock": "Code Block",
         "codeInline": "Code Inline",
         "defaultInfoCalloutText": "Info",
+        "defaultScenario": {
+          "scenarios": {
+            "1": {
+              "options": {
+                "opt1": "Continue exploring",
+                "opt2": "Learn more about the topic"
+              },
+              "text": "Welcome to this interactive scenario. What would you like to do?"
+            },
+            "2": {
+              "options": {
+                "opt3": "Go back to start",
+                "opt4": "Finish scenario"
+              },
+              "text": "Great choice! You are now exploring further. What's your next step?"
+            },
+            "3": {
+              "options": {
+                "opt5": "Go back to start",
+                "opt6": "Finish scenario"
+              },
+              "text": "Here's more information about the topic. This helps you understand better."
+            }
+          },
+          "title": "Interactive Scenario"
+        },
         "defaultWarningCalloutText": "Warning!",
         "deleteColumn": "Delete current column",
         "deleteRow": "Delete current row",
@@ -2810,32 +2891,6 @@
         "insertTable": "Insert new table (3×3)",
         "interactiveQuiz": "Interactive Quiz",
         "interactiveScenarios": "Interactive Scenarios",
-        "defaultScenario": {
-          "title": "Interactive Scenario",
-          "scenarios": {
-            "1": {
-              "text": "Welcome to this interactive scenario. What would you like to do?",
-              "options": {
-                "opt1": "Continue exploring",
-                "opt2": "Learn more about the topic"
-              }
-            },
-            "2": {
-              "text": "Great choice! You are now exploring further. What's your next step?",
-              "options": {
-                "opt3": "Go back to start",
-                "opt4": "Finish scenario"
-              }
-            },
-            "3": {
-              "text": "Here's more information about the topic. This helps you understand better.",
-              "options": {
-                "opt5": "Go back to start",
-                "opt6": "Finish scenario"
-              }
-            }
-          }
-        },
         "italic": "Italic",
         "link": "Link",
         "listOptions": {
@@ -2897,6 +2952,7 @@
       "cancel": "Cancel",
       "clickAnywhereToClose": "Click anywhere to close",
       "continue": "Continue",
+      "dailyCapReached": "⚡ Daily limit reached!",
       "dangerZone": {
         "description": "Irreversible actions that affect your gamification data",
         "resetAllData": "Reset All Data",
@@ -3784,6 +3840,7 @@
           "tryAgain": "Try again"
         },
         "continue": "Continue",
+        "dailyCapReached": "⚡ Daily cap reached!",
         "dangerZone": {
           "description": "These actions cannot be undone. Proceed with caution.",
           "resetAllData": "Reset All Data",
@@ -4071,6 +4128,20 @@
         "reachedLevel": "Level {level}",
         "savePreferences": "Save Preferences",
         "saving": "Saving...",
+        "settings": {
+          "animatedEffects": "Animated effects",
+          "animatedEffectsDescription": "Enable animation to level up and gain experience",
+          "descriptionSimplified": "Customize your gamification experience with these simple options",
+          "save": "Save changes",
+          "saveFailed": "Failed to save settings",
+          "saved": "Settings saved!",
+          "saving": "Saving...",
+          "showOnLeaderboard": "Show me on the leaderboard",
+          "showOnLeaderboardDescription": "Show your progress on the organization's leaderboard",
+          "title": "Gamification settings",
+          "xpGainNotifications": "Experience Notifications",
+          "xpGainNotificationsDescription": "Show notifications when receiving experience points"
+        },
         "stats": {
           "allTime": "All time",
           "maxLevel": "Max Level!",
@@ -4226,6 +4297,7 @@
           "emailPlaceholder": "Enter your email",
           "firstNameLabel": "First Name",
           "firstNamePlaceholder": "Enter your first name",
+          "hidePassword": "Hide password",
           "languageLabel": "Language",
           "lastNameLabel": "Last Name",
           "lastNamePlaceholder": "Enter your last name",
@@ -4236,6 +4308,7 @@
           "saveChanges": "Save Changes",
           "saving": "Saving...",
           "selectFile": "Select Profile Picture",
+          "showPassword": "Show password",
           "supportedFormats": "Supported formats: JPG, PNG",
           "title": "Account Settings",
           "uploadingAvatar": "Uploading",
@@ -4303,12 +4376,12 @@
         "emailPlaceholder": "Enter your email",
         "firstName": "First Name",
         "firstNamePlaceholder": "Enter your first name",
-        "middleName": "Middle Name",
-        "middleNamePlaceholder": "Enter your middle name",
         "language": "Language",
         "lastName": "Last Name",
         "lastNamePlaceholder": "Enter your last name",
         "loadingError": "Failed to load required data",
+        "middleName": "Middle Name",
+        "middleNamePlaceholder": "Enter your middle name",
         "newDetail": "New Detail",
         "profilePicture": "Profile Picture",
         "recommendedSize": "Recommended size: 100x100",
@@ -4682,6 +4755,8 @@
       "usersSection": {
         "actionsHeader": "Actions",
         "activeUsersTitle": "Active users",
+        "cannotEditSelf": "You cannot change your own role",
+        "cannotManageHigherRole": "You cannot manage users with a higher role than you",
         "description": "Manage your organization users, assign roles and permissions",
         "editRoleButton": "Edit Role",
         "errors": {
@@ -4694,8 +4769,6 @@
         "removeUserModalMessage": "Are you sure you want remove this user from the organization?",
         "removeUserModalTitle": "Remove {username}?",
         "removingUser": "Removing...",
-        "cannotEditSelf": "You cannot change your own role",
-        "cannotManageHigherRole": "You cannot manage users with a higher role than you",
         "roleHeader": "Role",
         "updateRoleModalDescription": "Update @{username}'s role",
         "updateRoleModalTitle": "Update Role",
@@ -4707,7 +4780,10 @@
     "gamification": "Gamification"
   },
   "Errors": {
+    "errorLabel": "Error:",
+    "errorReference": "Error Reference:",
     "somethingWentWrong": "Something went wrong!",
+    "technicalDetails": "Technical details:",
     "tryAgain": "Try again"
   },
   "FixedActivitySecondaryBar": {
@@ -4989,7 +5065,14 @@
       "collapseSidebar": "Collapse sidebar",
       "expandSidebar": "Expand sidebar",
       "goToHomepage": "Go to homepage",
+      "home": "Go to dashboard home",
+      "manageAssignments": "Manage assignments",
+      "manageCourses": "Manage courses",
+      "managePayments": "Manage payments and billing",
+      "manageUsers": "Manage users",
+      "organizationSettings": "Organization settings",
       "platformLogo": "Ashyq Bilim logo",
+      "userAccountSettings": "User account settings",
       "userSettings": "User settings"
     },
     "buttons": {
@@ -5037,10 +5120,6 @@
     "submit": "Submit"
   },
   "Themes": {
-    "sage-garden": {
-      "description": "A gentle garden theme with soft sage greens and refreshing natural accents",
-      "name": "Sage Garden"
-    },
     "amberminimal": {
       "description": "Minimalistic amber theme",
       "name": "Amber Minimal"
@@ -5192,6 +5271,10 @@
     "retroArcade": {
       "description": "Bold neon-inspired palette with playful contrasts, evoking the vibrant glow of 80s arcades",
       "name": "Retro Arcade"
+    },
+    "sage-garden": {
+      "description": "A gentle garden theme with soft sage greens and refreshing natural accents",
+      "name": "Sage Garden"
     },
     "slack": {
       "description": "Collaborative Slack-inspired theme with purple accents and clean workspace aesthetics",

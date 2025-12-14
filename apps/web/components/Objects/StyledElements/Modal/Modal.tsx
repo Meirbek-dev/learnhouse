@@ -9,10 +9,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@components/ui/dialog';
-import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
+import type { ReactElement, ReactNode } from 'react';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
-import type { ReactNode } from 'react';
+import { isValidElement } from 'react';
 import { cn } from '@/lib/utils';
 
 interface ModalParams {
@@ -20,7 +20,7 @@ interface ModalParams {
   dialogDescription?: string;
   dialogContent: ReactNode;
   dialogClose?: ReactNode | null;
-  dialogTrigger?: ReactNode;
+  dialogTrigger?: ReactElement;
   addDefCloseButton?: boolean;
   onOpenChange: (open: boolean) => void;
   isDialogOpen?: boolean;
@@ -78,7 +78,19 @@ const Modal = (params: ModalParams) => {
       open={params.isDialogOpen ?? false}
       onOpenChange={params.onOpenChange}
     >
-      {params.dialogTrigger ? <DialogTrigger asChild>{params.dialogTrigger}</DialogTrigger> : null}
+      {params.dialogTrigger ? (
+        <DialogTrigger
+          // Mark as native when the trigger is a real <button> element or when
+          // the trigger is our local `Button` component (which renders a native
+          // <button>). This avoids Base UI runtime warnings about mismatched
+          // render types.
+          nativeButton={
+            isValidElement(params.dialogTrigger) &&
+            (params.dialogTrigger.type === 'button' || params.dialogTrigger.type === Button)
+          }
+          render={params.dialogTrigger}
+        />
+      ) : null}
       <DialogContent
         className={cn(
           'overflow-auto',
@@ -97,9 +109,7 @@ const Modal = (params: ModalParams) => {
           {params.dialogTitle ? (
             <DialogTitle>{params.dialogTitle}</DialogTitle>
           ) : (
-            <VisuallyHidden.Root>
-              <DialogTitle>{t('dialog')}</DialogTitle>
-            </VisuallyHidden.Root>
+            <DialogTitle>{t('dialog')}</DialogTitle>
           )}
           {params.dialogDescription ? <DialogDescription>{params.dialogDescription}</DialogDescription> : null}
         </DialogHeader>
@@ -110,7 +120,7 @@ const Modal = (params: ModalParams) => {
             {params.addDefCloseButton ? (
               <Button
                 type="submit"
-                aria-label="Close modal"
+                aria-label={t('aria.closeModal')}
                 className="transition-colors disabled:pointer-events-none disabled:opacity-50"
               >
                 {t('closeButtonDefault')}

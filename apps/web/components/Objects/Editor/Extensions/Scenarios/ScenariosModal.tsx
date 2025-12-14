@@ -4,8 +4,8 @@ import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { Textarea } from '@components/ui/textarea';
 import React, { useEffect, useState } from 'react';
 import { Button } from '@components/ui/button';
-import { Input } from '@components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 
 interface ScenarioOption {
@@ -48,11 +48,15 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
   const t = useTranslations('DashPage.Editor.Scenarios');
 
   useEffect(() => {
-    setTitle(initialTitle);
-    setScenarios(initialScenarios);
-    setCurrentScenarioId(initialCurrentScenarioId);
-    setPreviewCurrentId(initialCurrentScenarioId);
-    setShowImageInputs({});
+    // Schedule updates asynchronously to avoid synchronous setState inside an effect
+    // which can trigger cascading renders and cause lint warnings.
+    void Promise.resolve().then(() => {
+      setTitle(initialTitle);
+      setScenarios(initialScenarios);
+      setCurrentScenarioId(initialCurrentScenarioId);
+      setPreviewCurrentId(initialCurrentScenarioId);
+      setShowImageInputs({});
+    });
   }, [initialTitle, initialScenarios, initialCurrentScenarioId]);
 
   const handleSave = () => {
@@ -247,7 +251,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                   <div className="mb-4">
                     <img
                       src={previewScenario.imageUrl}
-                      alt="Scenario illustration"
+                      alt={t('scenarioIllustrationAlt')}
                       className="h-48 w-full rounded-lg border border-slate-200 object-cover"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
@@ -445,7 +449,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                         <div className="mt-2">
                           <img
                             src={scenario.imageUrl}
-                            alt="Scenario preview"
+                            alt={t('scenarioPreviewAlt')}
                             className="h-32 w-full rounded-lg border border-slate-200 object-cover"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';

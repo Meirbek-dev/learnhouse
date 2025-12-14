@@ -10,11 +10,11 @@ import { SearchBar } from '@/components/Objects/Search/SearchBar';
 import platformLogoFull from 'public/platform_logo_full.svg';
 import { getUriWithOrg } from '@/services/config/config';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import Image from 'next/image';
-import { Label } from '@/components/ui/label';
 
 interface OrgMenuProps {
   orgslug: string;
@@ -189,9 +189,10 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
             >
               <Image
                 src={platformLogoFull}
-                alt="Ashyq Bilim logo"
+                alt={t('logoAlt')}
                 width={100}
                 priority
+                loading="eager"
               />
             </Link>
 
@@ -282,7 +283,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
             }}
             role="button"
             tabIndex={-1}
-            aria-label="Close menu overlay"
+            aria-label={t('overlayClose')}
           />
 
           {/* Menu panel */}

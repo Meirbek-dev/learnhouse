@@ -119,7 +119,7 @@ const OrgEditOther: FC = () => {
               <h1 className="flex items-center space-x-2 text-xl font-bold text-gray-800">
                 <Code2 className="h-5 w-5" />
                 <span>{t('scripts')}</span>
-                <TooltipProvider delayDuration={100}>
+                <TooltipProvider delay={100}>
                   <Tooltip>
                     <TooltipTrigger>
                       <AlertTriangle className="h-4 w-4 text-orange-500 transition-colors hover:text-orange-600" />

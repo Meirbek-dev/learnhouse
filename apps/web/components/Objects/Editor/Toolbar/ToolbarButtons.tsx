@@ -37,7 +37,7 @@ import {
 } from 'lucide-react';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { SiYoutube } from '@icons-pack/react-simple-icons';
-import { useRef, useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { styled } from 'styled-components';
 

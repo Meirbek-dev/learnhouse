@@ -110,11 +110,8 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
   }, [userId, session?.data?.tokens?.access_token, t]);
 
   return (
-    <HoverCard
-      openDelay={100}
-      closeDelay={150}
-    >
-      <HoverCardTrigger asChild>{children}</HoverCardTrigger>
+    <HoverCard>
+      <HoverCardTrigger render={<span />}>{children}</HoverCardTrigger>
       <HoverCardContent className="soft-shadow w-auto max-w-196 min-w-96 bg-white/95 p-0 backdrop-blur-md">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">

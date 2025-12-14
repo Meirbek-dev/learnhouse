@@ -1,14 +1,25 @@
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import { Hexagon, MoreVertical, Pencil, Save, Sparkles, X } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { AlertTriangle, Hexagon, Loader2, MoreVertical, Pencil, Save, Sparkles, X } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { useCallback, useState, useTransition } from 'react';
 import { updateChapter } from '@services/courses/chapters';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { getAPIUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 import { mutate } from 'swr';
 
 import Activity from './Activity';
@@ -24,8 +35,17 @@ const Chapter = (props: any) => {
   const t = useTranslations('CourseEdit');
   const [modifiedChapter, setModifiedChapter] = useState<ModifiedChapterInterface | undefined>();
   const [selectedChapter, setSelectedChapter] = useState<string | undefined>();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const course = useCourse();
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
+
+  const handleDeleteChapter = useCallback(() => {
+    startTransition(async () => {
+      await props.deleteChapter(props.info.list.chapter.id);
+      setIsDeleteDialogOpen(false);
+    });
+  }, [props]);
 
   async function updateChapterName(chapterId: number) {
     if (modifiedChapter?.chapterId === chapterId) {
@@ -107,27 +127,48 @@ const Chapter = (props: any) => {
               size={15}
               className="text-gray-300"
             />
-            <ConfirmationModal
-              confirmationButtonText={t('deleteChapterButton')}
-              confirmationMessage={t('deleteChapterConfirmation')}
-              dialogTitle={t('deleteChapterTitle', {
-                name: props.info.list.chapter.name,
-              })}
-              dialogTrigger={
-                <div
-                  className="flex items-center space-x-1 rounded-md bg-red-600 p-1 px-4 text-sm text-rose-100 shadow-sm hover:cursor-pointer"
-                  rel="noopener noreferrer"
-                >
-                  <X
-                    size={15}
-                    className="font-bold text-rose-200"
-                  />
-                  <p>{t('deleteChapter')}</p>
-                </div>
-              }
-              functionToExecute={() => props.deleteChapter(props.info.list.chapter.id)}
-              status="warning"
-            />
+            <AlertDialog
+              open={isDeleteDialogOpen}
+              onOpenChange={setIsDeleteDialogOpen}
+            >
+              <AlertDialogTrigger
+                render={
+                  <div className="flex items-center space-x-1 rounded-md bg-red-600 p-1 px-4 text-sm text-rose-100 shadow-sm hover:cursor-pointer">
+                    <X
+                      size={15}
+                      className="font-bold text-rose-200"
+                    />
+                    <p>{t('deleteChapter')}</p>
+                  </div>
+                }
+              />
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
+                    <AlertTriangle className="size-8" />
+                  </AlertDialogMedia>
+                  <AlertDialogTitle>{t('deleteChapterTitle', { name: props.info.list.chapter.name })}</AlertDialogTitle>
+                  <AlertDialogDescription>{t('deleteChapterConfirmation')}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel />
+                  <AlertDialogAction
+                    variant="destructive"
+                    onClick={handleDeleteChapter}
+                    disabled={isPending}
+                  >
+                    {isPending ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="size-4 animate-spin" />
+                        {t('deleting')}
+                      </div>
+                    ) : (
+                      t('deleteChapterButton')
+                    )}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
           <Droppable
             key={props.info.list.chapter.id}

@@ -16,14 +16,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: [
-      // UI library - tree shaking
-      '@radix-ui/react-icons',
-      '@radix-ui/react-checkbox',
-      '@radix-ui/react-form',
-      '@radix-ui/react-label',
-      '@radix-ui/react-slot',
-      '@radix-ui/react-visually-hidden',
-      'radix-ui',
+      '@base-ui/react',
       '@icons-pack/react-simple-icons',
       'lucide-react',
       // Heavy utility libs

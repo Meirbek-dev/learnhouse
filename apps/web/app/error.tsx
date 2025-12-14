@@ -29,16 +29,16 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 
         {error.digest && (
           <p className="mb-4 text-sm text-gray-600">
-            Error Reference: <code className="rounded bg-gray-100 px-2 py-1">{error.digest}</code>
+            {t('errorReference')} <code className="rounded bg-gray-100 px-2 py-1">{error.digest}</code>
           </p>
         )}
 
         {process.env.NODE_ENV !== 'production' && (
           <details className="mb-4 text-left">
-            <summary className="cursor-pointer font-semibold">Технические детали:</summary>
+            <summary className="cursor-pointer font-semibold">{t('technicalDetails')}</summary>
             <div className="mt-2 rounded bg-red-50 p-4">
               <p className="mb-2 font-mono text-sm">
-                <strong>Error:</strong> {error.message}
+                <strong>{t('errorLabel')}</strong> {error.message}
               </p>
               {error.stack && <pre className="overflow-auto text-xs">{error.stack}</pre>}
             </div>

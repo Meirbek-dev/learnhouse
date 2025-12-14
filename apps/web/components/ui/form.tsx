@@ -1,7 +1,6 @@
 'use client';
 
-import type { Label as LabelPrimitive } from 'radix-ui';
-import { Slot as SlotPrimitive } from 'radix-ui';
+import { mergeProps } from '@base-ui/react/merge-props';
 import * as React from 'react';
 
 import { Controller, FormProvider, useFormContext, useFormState } from 'react-hook-form';
@@ -77,7 +76,7 @@ function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) {
+function FormLabel({ className, ...props }: React.ComponentProps<'label'>) {
   const { error, formItemId } = useFormField();
 
   return (
@@ -91,18 +90,21 @@ function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPri
   );
 }
 
-function FormControl({ ...props }: React.ComponentProps<typeof SlotPrimitive.Slot>) {
+interface FormControlProps {
+  children: React.ReactElement<Record<string, unknown>>;
+}
+
+function FormControl({ children }: FormControlProps) {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
 
-  return (
-    <SlotPrimitive.Slot
-      data-slot="form-control"
-      id={formItemId}
-      aria-describedby={!error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`}
-      aria-invalid={!!error}
-      {...props}
-    />
-  );
+  const slotProps: Record<string, unknown> = {
+    'data-slot': 'form-control',
+    'id': formItemId,
+    'aria-describedby': !error ? formDescriptionId : `${formDescriptionId} ${formMessageId}`,
+    'aria-invalid': error ? true : undefined,
+  };
+
+  return React.cloneElement(children, mergeProps(slotProps, children.props as Record<string, unknown>));
 }
 
 function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {

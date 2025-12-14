@@ -1,14 +1,26 @@
 'use client';
 
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import OrgInviteCodeGenerate from '@components/Objects/Modals/Dash/OrgAccess/OrgInviteCodeGenerate';
+import { AlertTriangle, Globe, Info, Loader2, Ticket, UserSquare, Users, X } from 'lucide-react';
 import { changeSignupMechanism, deleteInviteCode } from '@services/organizations/invites';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { Globe, Ticket, UserSquare, Users, X } from 'lucide-react';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { useCallback, useState, useTransition } from 'react';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -17,8 +29,137 @@ import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import useSWR, { mutate } from 'swr';
 import { format } from 'date-fns';
-import { useState } from 'react';
 import { toast } from 'sonner';
+
+interface JoinMethodCardProps {
+  method: 'open' | 'inviteOnly';
+  isActive: boolean;
+  title: string;
+  description: string;
+  confirmTitle: string;
+  confirmMessage: string;
+  confirmButton: string;
+  icon: React.ReactNode;
+  onConfirm: () => Promise<void>;
+}
+
+function JoinMethodCard({
+  isActive,
+  title,
+  description,
+  confirmTitle,
+  confirmMessage,
+  confirmButton,
+  icon,
+  onConfirm,
+}: JoinMethodCardProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const handleConfirm = useCallback(() => {
+    startTransition(async () => {
+      await onConfirm();
+      setIsOpen(false);
+    });
+  }, [onConfirm]);
+
+  return (
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <AlertDialogTrigger
+        render={
+          <div className="relative h-[160px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all ease-linear hover:bg-slate-200">
+            {isActive && (
+              <div className="absolute top-0 left-0 mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
+                Active
+              </div>
+            )}
+            <div className="flex h-full flex-col items-center justify-center space-y-1">
+              {icon}
+              <div className="text-2xl font-bold text-slate-700">{title}</div>
+              <div className="px-2 text-center text-gray-400">{description}</div>
+            </div>
+          </div>
+        }
+      />
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogMedia>
+            <Info className="text-primary size-6" />
+          </AlertDialogMedia>
+          <AlertDialogTitle>{confirmTitle}</AlertDialogTitle>
+          <AlertDialogDescription>{confirmMessage}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending} />
+          <AlertDialogAction
+            onClick={handleConfirm}
+            disabled={isPending}
+          >
+            {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {confirmButton}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+interface DeleteInviteButtonProps {
+  invite: { invite_code_uuid: string };
+  onDelete: (invite: { invite_code_uuid: string }) => Promise<void>;
+  t: (key: string) => string;
+}
+
+function DeleteInviteButton({ invite, onDelete, t }: DeleteInviteButtonProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const handleDelete = useCallback(() => {
+    startTransition(async () => {
+      await onDelete(invite);
+      setIsOpen(false);
+    });
+  }, [onDelete, invite]);
+
+  return (
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <AlertDialogTrigger
+        render={
+          <button className="mr-2 flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer">
+            <X className="h-4 w-4" />
+            <span>{t('deleteCodeButton')}</span>
+          </button>
+        }
+      />
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogMedia>
+            <AlertTriangle className="text-destructive size-6" />
+          </AlertDialogMedia>
+          <AlertDialogTitle>{t('deleteCodeModalTitle')}</AlertDialogTitle>
+          <AlertDialogDescription>{t('deleteCodeModalMessage')}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending} />
+          <AlertDialogAction
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={isPending}
+          >
+            {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {t('deleteCodeButton')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
 const OrgAccess = () => {
   const org = useOrg() as any;
@@ -86,57 +227,37 @@ const OrgAccess = () => {
               <h2 className="text-base text-gray-500">{t('description')}</h2>
             </div>
             <div className="mx-auto flex space-x-2">
-              <ConfirmationModal
-                confirmationButtonText={t('changeToOpenButton')}
-                confirmationMessage={t('changeToOpenConfirmation')}
-                dialogTitle={t('changeToOpenModalTitle')}
-                dialogTrigger={
-                  <div className="relative h-[160px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all ease-linear hover:bg-slate-200">
-                    {joinMethod === 'open' && (
-                      <div className="absolute top-0 left-0 mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
-                        {t('activeLabel')}
-                      </div>
-                    )}
-                    <div className="flex h-full flex-col items-center justify-center space-y-1">
-                      <Globe
-                        className="text-slate-400"
-                        size={40}
-                      />
-                      <div className="text-2xl font-bold text-slate-700">{t('openTitle')}</div>
-                      <div className="px-2 text-center text-gray-400">{t('openDescription')}</div>
-                    </div>
-                  </div>
+              <JoinMethodCard
+                method="open"
+                isActive={joinMethod === 'open'}
+                title={t('openTitle')}
+                description={t('openDescription')}
+                confirmTitle={t('changeToOpenModalTitle')}
+                confirmMessage={t('changeToOpenConfirmation')}
+                confirmButton={t('changeToOpenButton')}
+                icon={
+                  <Globe
+                    className="text-slate-400"
+                    size={40}
+                  />
                 }
-                functionToExecute={() => {
-                  changeJoinMethod('open');
-                }}
-                status="info"
+                onConfirm={() => changeJoinMethod('open')}
               />
-              <ConfirmationModal
-                confirmationButtonText={t('changeToClosedButton')}
-                confirmationMessage={t('changeToClosedConfirmation')}
-                dialogTitle={t('changeToClosedModalTitle')}
-                dialogTrigger={
-                  <div className="relative h-[160px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all ease-linear hover:bg-slate-200">
-                    {joinMethod === 'inviteOnly' && (
-                      <div className="absolute top-0 left-0 mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
-                        {t('activeLabel')}
-                      </div>
-                    )}
-                    <div className="flex h-full flex-col items-center justify-center space-y-1">
-                      <Ticket
-                        className="text-slate-400"
-                        size={40}
-                      />
-                      <div className="text-2xl font-bold text-slate-700">{t('closedTitle')}</div>
-                      <div className="px-2 text-center text-gray-400">{t('closedDescription')}</div>
-                    </div>
-                  </div>
+              <JoinMethodCard
+                method="inviteOnly"
+                isActive={joinMethod === 'inviteOnly'}
+                title={t('closedTitle')}
+                description={t('closedDescription')}
+                confirmTitle={t('changeToClosedModalTitle')}
+                confirmMessage={t('changeToClosedConfirmation')}
+                confirmButton={t('changeToClosedButton')}
+                icon={
+                  <Ticket
+                    className="text-slate-400"
+                    size={40}
+                  />
                 }
-                functionToExecute={() => {
-                  changeJoinMethod('inviteOnly');
-                }}
-                status="info"
+                onConfirm={() => changeJoinMethod('inviteOnly')}
               />
             </div>
             <div className={joinMethod !== 'inviteOnly' ? 'pointer-events-none opacity-50' : ''}>
@@ -189,22 +310,10 @@ const OrgAccess = () => {
                             : '-'}
                         </TableCell>
                         <TableCell>
-                          <ConfirmationModal
-                            confirmationButtonText={t('deleteCodeButton')}
-                            confirmationMessage={t('deleteCodeModalMessage')}
-                            dialogTitle={t('deleteCodeModalTitle')}
-                            dialogTrigger={
-                              <span>
-                                <button className="mr-2 flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer">
-                                  <X className="h-4 w-4" />
-                                  <span>{t('deleteCodeButton')}</span>
-                                </button>
-                              </span>
-                            }
-                            functionToExecute={() => {
-                              deleteInvite(invite);
-                            }}
-                            status="warning"
+                          <DeleteInviteButton
+                            invite={invite}
+                            onDelete={deleteInvite}
+                            t={t}
                           />
                         </TableCell>
                       </TableRow>

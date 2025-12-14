@@ -22,6 +22,7 @@ const HomeClient = () => {
           width={230}
           src={platformLogoFull}
           alt="Ashyq Bilim logo"
+          loading="eager"
         />
       </div>
 

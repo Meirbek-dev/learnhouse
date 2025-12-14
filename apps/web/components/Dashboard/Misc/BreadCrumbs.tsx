@@ -133,14 +133,12 @@ const BreadCrumbs = (props: BreadCrumbsProps) => {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <AppLink
-                href={getBreadcrumbLink(props.type)}
-                className="flex items-center space-x-2"
-              >
-                {getBreadcrumbIcon(props.type)}
-                <span>{getBreadcrumbTitle(props.type)}</span>
-              </AppLink>
+            <BreadcrumbLink
+              render={<AppLink href={getBreadcrumbLink(props.type)} />}
+              className="flex items-center space-x-2"
+            >
+              {getBreadcrumbIcon(props.type)}
+              <span>{getBreadcrumbTitle(props.type)}</span>
             </BreadcrumbLink>
           </BreadcrumbItem>
           {props.last_breadcrumb ? (

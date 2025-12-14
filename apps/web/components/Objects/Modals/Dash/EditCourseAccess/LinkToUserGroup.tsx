@@ -74,7 +74,7 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
             </span>
 
             <Select
-              onValueChange={(value) => setSelectedUserGroup(Number(value))}
+              onValueChange={(value) => value && setSelectedUserGroup(Number(value))}
               value={effectiveUserGroup?.toString()}
             >
               <SelectTrigger className="mx-5 mt-2 w-fit min-w-32">

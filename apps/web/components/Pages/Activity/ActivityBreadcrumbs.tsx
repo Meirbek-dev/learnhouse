@@ -28,23 +28,21 @@ export default function ActivityBreadcrumbs({ course, activity, orgslug }: Activ
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link
-                href={`${getUriWithOrg(orgslug, '')}/courses`}
-                className="flex items-center space-x-2"
-              >
-                <Book
-                  className="text-gray"
-                  size={14}
-                />
-                <span>{t('courses')}</span>
-              </Link>
+            <BreadcrumbLink
+              render={<Link href={`${getUriWithOrg(orgslug, '')}/courses`} />}
+              className="flex items-center space-x-2"
+            >
+              <Book
+                className="text-gray"
+                size={14}
+              />
+              <span>{t('courses')}</span>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href={`${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}`}>{course.name}</Link>
+            <BreadcrumbLink render={<Link href={`${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}`} />}>
+              {course.name}
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />

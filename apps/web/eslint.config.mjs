@@ -27,14 +27,14 @@ const PLUGINS = /** @type {const} */ ({
 const COMMON_RULES = {
   '@next/next/no-img-element': 'off',
   '@next/next/no-sync-scripts': 'off',
-  'react/react-in-jsx-scope': 'off',
+  'react/react-in-jsx-scope': 'warn',
   'react/prop-types': 'off',
   'react/no-unescaped-entities': 'off',
   '@next/next/no-page-custom-font': 'off',
   'react/jsx-no-literals': 'off',
   'react-hooks/rules-of-hooks': 'error',
   'react-hooks/exhaustive-deps': 'warn',
-  'react-hooks/set-state-in-effect': 'off',
+  'react-hooks/set-state-in-effect': 'warn',
   'react-hooks/incompatible-library': 'off',
   'tailwindcss/classnames-order': 'warn',
   'unused-imports/no-unused-imports': 'warn',
@@ -107,10 +107,9 @@ export default defineConfig([
     // Cast combined rules to any to satisfy TypeScript for RuleConfig
     rules: /** @type {any} */ ({
       ...COMMON_RULES,
-      // TypeScript-specific relaxations (incremental adoption)
       '@typescript-eslint/no-unsafe-function-type': 'off',
-      '@typescript-eslint/no-require-imports': 'off',
-      '@typescript-eslint/triple-slash-reference': 'off',
+      '@typescript-eslint/no-require-imports': 'warn',
+      '@typescript-eslint/triple-slash-reference': 'warn',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       'no-undef': 'off',

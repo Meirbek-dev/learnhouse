@@ -1,17 +1,29 @@
 'use client';
 
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { deleteCollection } from '@services/courses/collections';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { useCallback, useState, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { AlertTriangle, Loader2, X } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import { X } from 'lucide-react';
 
 interface PropsType {
   collection: any;
@@ -78,13 +90,17 @@ const CollectionAdminEditsArea = (props: any) => {
   const t = useTranslations('Components.CollectionThumbnail');
   const router = useRouter();
   const session = usePlatformSession() as any;
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const deleteCollectionUI = async (collectionId: string) => {
-    await deleteCollection(collectionId, session.data?.tokens?.access_token);
-    await revalidateTags(['collections'], props.orgslug);
-    // reload the page
-    router.refresh();
-  };
+  const deleteCollectionUI = useCallback(async () => {
+    startTransition(async () => {
+      await deleteCollection(props.collection_uuid, session.data?.tokens?.access_token);
+      await revalidateTags(['collections'], props.orgslug);
+      setIsOpen(false);
+      router.refresh();
+    });
+  }, [props.collection_uuid, session.data?.tokens?.access_token, props.orgslug, router]);
 
   return (
     <AuthenticatedClientElement
@@ -94,25 +110,46 @@ const CollectionAdminEditsArea = (props: any) => {
       checkMethod="roles"
     >
       <div className="z-20 px-2">
-        <ConfirmationModal
-          confirmationMessage={t('deleteConfirmationMessage')}
-          confirmationButtonText={t('deleteButtonText')}
-          dialogTitle={t('deleteConfirmationTitle', {
-            collectionName: props.collection.name,
-          })}
-          dialogTrigger={
-            <span>
-              <button
-                className="absolute top-2 right-2 rounded-full bg-red-500 p-1 text-white transition-colors duration-300 hover:bg-red-600"
-                rel="noopener noreferrer"
-              >
+        <AlertDialog
+          open={isOpen}
+          onOpenChange={setIsOpen}
+        >
+          <AlertDialogTrigger
+            render={
+              <button className="absolute top-2 right-2 rounded-full bg-red-500 p-1 text-white transition-colors duration-300 hover:bg-red-600">
                 <X size={14} />
               </button>
-            </span>
-          }
-          functionToExecute={() => deleteCollectionUI(props.collection_uuid)}
-          status="warning"
-        />
+            }
+          />
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
+                <AlertTriangle className="size-8" />
+              </AlertDialogMedia>
+              <AlertDialogTitle>
+                {t('deleteConfirmationTitle', { collectionName: props.collection.name })}
+              </AlertDialogTitle>
+              <AlertDialogDescription>{t('deleteConfirmationMessage')}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel />
+              <AlertDialogAction
+                variant="destructive"
+                onClick={deleteCollectionUI}
+                disabled={isPending}
+              >
+                {isPending ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="size-4 animate-spin" />
+                    {t('deleting')}
+                  </div>
+                ) : (
+                  t('deleteButtonText')
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AuthenticatedClientElement>
   );

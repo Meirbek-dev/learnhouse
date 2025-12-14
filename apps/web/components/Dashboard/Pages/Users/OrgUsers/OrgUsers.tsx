@@ -1,23 +1,89 @@
 'use client';
 
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import RolesUpdate from '@components/Objects/Modals/Dash/OrgUsers/RolesUpdate';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 
+import { AlertTriangle, KeyRound, Loader2, LogOut } from 'lucide-react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { removeUserFromOrg } from '@services/organizations/orgs';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
+import { useCallback, useState, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { Toaster } from '@components/ui/sonner';
-import { KeyRound, LogOut } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
-import { useState } from 'react';
 import { toast } from 'sonner';
+
+interface RemoveUserButtonProps {
+  userId: number;
+  username: string;
+  onRemove: (userId: number) => Promise<void>;
+  t: (key: string, values?: Record<string, string>) => string;
+}
+
+function RemoveUserButton({ userId, username, onRemove, t }: RemoveUserButtonProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const handleRemove = useCallback(() => {
+    startTransition(async () => {
+      await onRemove(userId);
+      setIsOpen(false);
+    });
+  }, [onRemove, userId]);
+
+  return (
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <AlertDialogTrigger
+        render={
+          <button className="mr-2 flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer">
+            <LogOut className="h-4 w-4" />
+            <span>{t('removeFromOrgButton')}</span>
+          </button>
+        }
+      />
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogMedia>
+            <AlertTriangle className="text-destructive size-6" />
+          </AlertDialogMedia>
+          <AlertDialogTitle>{t('removeUserModalTitle', { username })}</AlertDialogTitle>
+          <AlertDialogDescription>{t('removeUserModalMessage')}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending} />
+          <AlertDialogAction
+            variant="destructive"
+            onClick={handleRemove}
+            disabled={isPending}
+          >
+            {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {t('removeUserButton')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
 const OrgUsers = () => {
   const org = useOrg() as any;
@@ -191,27 +257,11 @@ const OrgUsers = () => {
                                   }
                                 />
 
-                                <ConfirmationModal
-                                  confirmationButtonText={t('removeUserButton')}
-                                  confirmationMessage={t('removeUserModalMessage')}
-                                  dialogTitle={t('removeUserModalTitle', {
-                                    username: user.user.username,
-                                  })}
-                                  dialogTrigger={
-                                    <span>
-                                      <button
-                                        className="mr-2 flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer"
-                                        onClick={() => handleRemoveUser(user.user.id)}
-                                      >
-                                        <LogOut className="h-4 w-4" />
-                                        <span>{t('removeFromOrgButton')}</span>
-                                      </button>
-                                    </span>
-                                  }
-                                  functionToExecute={() => {
-                                    handleRemoveUser(user.user.id);
-                                  }}
-                                  status="warning"
+                                <RemoveUserButton
+                                  userId={user.user.id}
+                                  username={user.user.username}
+                                  onRemove={handleRemoveUser}
+                                  t={t}
                                 />
                               </>
                             );

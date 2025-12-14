@@ -201,7 +201,7 @@ const DetailCard = ({
           <Label>{t('detailIconLabel')}</Label>
           <Select
             value={detail.icon}
-            onValueChange={handleIconChange}
+            onValueChange={(value) => value && handleIconChange(value)}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder={t('detailSelectIconPlaceholder')}>

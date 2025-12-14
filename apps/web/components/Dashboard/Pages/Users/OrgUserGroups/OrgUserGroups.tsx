@@ -1,21 +1,86 @@
 'use client';
 
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
+import { AlertTriangle, Loader2, Pencil, SquareUserRound, Users, X } from 'lucide-react';
 import EditUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/EditUserGroup';
 import AddUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/AddUserGroup';
 import ManageUsers from '@components/Objects/Modals/Dash/OrgUserGroups/ManageUsers';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { Loader2, Pencil, SquareUserRound, Users, X } from 'lucide-react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { deleteUserGroup } from '@services/usergroups/usergroups';
+import { useCallback, useState, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
-import { useState } from 'react';
 import { toast } from 'sonner';
+
+interface DeleteUserGroupButtonProps {
+  usergroupId: number;
+  onDelete: (usergroupId: number) => Promise<void>;
+  t: (key: string) => string;
+}
+
+function DeleteUserGroupButton({ usergroupId, onDelete, t }: DeleteUserGroupButtonProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const handleDelete = useCallback(() => {
+    startTransition(async () => {
+      await onDelete(usergroupId);
+      setIsOpen(false);
+    });
+  }, [onDelete, usergroupId]);
+
+  return (
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <AlertDialogTrigger
+        render={
+          <button className="flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer">
+            <X className="h-4 w-4" />
+            <span>{t('deleteButton')}</span>
+          </button>
+        }
+      />
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogMedia>
+            <AlertTriangle className="text-destructive size-6" />
+          </AlertDialogMedia>
+          <AlertDialogTitle>{t('deleteModalTitle')}</AlertDialogTitle>
+          <AlertDialogDescription>{t('deleteModalMessage')}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending} />
+          <AlertDialogAction
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={isPending}
+          >
+            {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {t('deleteModalConfirmButton')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
 const OrgUserGroups = () => {
   const org = useOrg() as any;
@@ -159,22 +224,10 @@ const OrgUserGroups = () => {
                         minWidth="sm"
                         dialogContent={selectedUserGroup ? <EditUserGroup usergroup={selectedUserGroup} /> : null}
                       />
-                      <ConfirmationModal
-                        confirmationButtonText={t('deleteModalConfirmButton')}
-                        confirmationMessage={t('deleteModalMessage')}
-                        dialogTitle={t('deleteModalTitle')}
-                        dialogTrigger={
-                          <span>
-                            <button className="flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer">
-                              <X className="h-4 w-4" />
-                              <span>{t('deleteButton')}</span>
-                            </button>
-                          </span>
-                        }
-                        functionToExecute={() => {
-                          deleteUserGroupUI(usergroup.id);
-                        }}
-                        status="warning"
+                      <DeleteUserGroupButton
+                        usergroupId={usergroup.id}
+                        onDelete={deleteUserGroupUI}
+                        t={t}
                       />
                     </div>
                   </TableCell>

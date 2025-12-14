@@ -267,7 +267,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
                   >
-                    ⚡ Daily cap reached!
+                    {t('dailyCapReached')}
                   </motion.p>
                 )}
               </div>

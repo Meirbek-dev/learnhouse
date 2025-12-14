@@ -132,16 +132,11 @@ const RightsDocumentation = ({ params }: RightsDocumentationProps) => {
         >
           <Button
             variant="ghost"
-            asChild
-            className="mb-6"
+            render={<Link href={getUriWithOrg(org?.slug, '/dash')} />}
+            className="mb-6 inline-flex items-center"
           >
-            <Link
-              href={getUriWithOrg(org?.slug, '/dash')}
-              className="inline-flex items-center"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="text-muted-foreground font-medium">{t('backToDashboard')}</span>
-            </Link>
+            <ArrowLeft className="h-4 w-4" />
+            <span className="text-muted-foreground font-medium">{t('backToDashboard')}</span>
           </Button>
           <div className="mb-4 flex items-center justify-center space-x-3">
             <h1 className="text-4xl font-bold text-gray-900">{t('title')}</h1>

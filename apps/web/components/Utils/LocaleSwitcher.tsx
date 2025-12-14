@@ -44,7 +44,7 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
   return (
     <Select
       value={currentLocale}
-      onValueChange={(value) => handleLocaleChange(value as Locale)}
+      onValueChange={(value) => value && handleLocaleChange(value as Locale)}
       disabled={isPending}
     >
       {isMobile ? (
@@ -67,9 +67,9 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
       )}
       <SelectContent
         className={cn(isMobile && 'z-80')}
-        position={isMobile ? 'popper' : 'popper'}
+        position={'popper'}
         sideOffset={4}
-        side={isMobile ? 'bottom' : 'bottom'}
+        side={'bottom'}
       >
         {locales.map((locale) => (
           <SelectItem

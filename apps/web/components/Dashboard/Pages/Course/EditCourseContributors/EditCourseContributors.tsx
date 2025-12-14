@@ -1,24 +1,35 @@
 'use client';
 
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { bulkAddContributors, bulkRemoveContributors, editContributor } from '@services/courses/courses';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Check, ChevronDown, Info, Loader2, Search, UserPen, Users } from 'lucide-react';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { searchOrgContent } from '@services/search/search';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useMemo, useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { getAPIUrl } from '@services/config/config';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -93,15 +104,17 @@ const RoleDropdown = ({
   t: any;
 }) => (
   <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button
-        variant="outline"
-        className="w-[200px] justify-between"
-        disabled={contributor.authorship === 'CREATOR'}
-      >
-        {t(contributor.authorship.toLowerCase()) || contributor.authorship}
-        <ChevronDown className="text-muted-foreground ml-2 h-4 w-4" />
-      </Button>
+    <DropdownMenuTrigger
+      render={
+        <Button
+          variant="outline"
+          className="w-[200px] justify-between"
+          disabled={contributor.authorship === 'CREATOR'}
+        />
+      }
+    >
+      {t(contributor.authorship.toLowerCase()) || contributor.authorship}
+      <ChevronDown className="text-muted-foreground ml-2 h-4 w-4" />
     </DropdownMenuTrigger>
     <DropdownMenuContent
       align="end"
@@ -137,15 +150,17 @@ const StatusDropdown = ({
   getStatusStyle: any;
 }) => (
   <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button
-        variant="outline"
-        className={`w-[200px] justify-between ${getStatusStyle(contributor.authorship_status)}`}
-        disabled={contributor.authorship === 'CREATOR'}
-      >
-        {t(contributor.authorship_status.toLowerCase()) || contributor.authorship_status}
-        <ChevronDown className="ml-2 h-4 w-4" />
-      </Button>
+    <DropdownMenuTrigger
+      render={
+        <Button
+          variant="outline"
+          className={`w-[200px] justify-between ${getStatusStyle(contributor.authorship_status)}`}
+          disabled={contributor.authorship === 'CREATOR'}
+        />
+      }
+    >
+      {t(contributor.authorship_status.toLowerCase()) || contributor.authorship_status}
+      <ChevronDown className="ml-2 h-4 w-4" />
     </DropdownMenuTrigger>
     <DropdownMenuContent
       align="end"
@@ -168,6 +183,83 @@ const StatusDropdown = ({
     </DropdownMenuContent>
   </DropdownMenu>
 );
+
+interface ContributorOptionCardProps {
+  isActive: boolean;
+  title: string;
+  description: string;
+  confirmTitle: string;
+  confirmMessage: string;
+  confirmButton: string;
+  icon: React.ReactNode;
+  onConfirm: () => void;
+}
+
+function ContributorOptionCard({
+  isActive,
+  title,
+  description,
+  confirmTitle,
+  confirmMessage,
+  confirmButton,
+  icon,
+  onConfirm,
+}: ContributorOptionCardProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const handleConfirm = useCallback(() => {
+    startTransition(() => {
+      onConfirm();
+      setIsOpen(false);
+    });
+  }, [onConfirm]);
+
+  return (
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <AlertDialogTrigger
+        render={
+          <div className="h-[200px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all hover:bg-slate-200">
+            {isActive ? (
+              <div className="absolute mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
+                Active
+              </div>
+            ) : null}
+            <div className="flex h-full flex-col items-center justify-center space-y-1 p-2 sm:p-4">
+              {icon}
+              <div className="text-xl font-bold text-slate-700 sm:text-2xl">{title}</div>
+              <div className="w-full text-center text-sm leading-5 tracking-tight text-gray-400 sm:w-[500px] sm:text-base">
+                {description}
+              </div>
+            </div>
+          </div>
+        }
+      />
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogMedia>
+            <Info className="text-primary size-6" />
+          </AlertDialogMedia>
+          <AlertDialogTitle>{confirmTitle}</AlertDialogTitle>
+          <AlertDialogDescription>{confirmMessage}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending} />
+          <AlertDialogAction
+            onClick={handleConfirm}
+            disabled={isPending}
+          >
+            {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {confirmButton}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
 const EditCourseContributors = (_props: EditCourseContributorsProps) => {
   const t = useTranslations('DashPage.EditCourseContributors');
@@ -417,63 +509,35 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
               <h2 className="text-xs text-gray-500 sm:text-sm">{t('courseContributorsSubtitle')}</h2>
             </div>
             <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
-              <ConfirmationModal
-                confirmationButtonText={t('openToContributorsButton')}
-                confirmationMessage={t('openToContributorsMessage')}
-                dialogTitle={t('openToContributorsTitle')}
-                dialogTrigger={
-                  <div className="h-[200px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all hover:bg-slate-200">
-                    {isOpenToContributors ? (
-                      <div className="absolute mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
-                        {t('activeStatus')}
-                      </div>
-                    ) : null}
-                    <div className="flex h-full flex-col items-center justify-center space-y-1 p-2 sm:p-4">
-                      <UserPen
-                        className="text-slate-400"
-                        size={32}
-                      />
-                      <div className="text-xl font-bold text-slate-700 sm:text-2xl">{t('openToContributorsTitle')}</div>
-                      <div className="w-full text-center text-sm leading-5 tracking-tight text-gray-400 sm:w-[500px] sm:text-base">
-                        {t('openToContributorsDescription')}
-                      </div>
-                    </div>
-                  </div>
+              <ContributorOptionCard
+                isActive={isOpenToContributors ?? false}
+                title={t('openToContributorsTitle')}
+                description={t('openToContributorsDescription')}
+                confirmTitle={t('openToContributorsTitle')}
+                confirmMessage={t('openToContributorsMessage')}
+                confirmButton={t('openToContributorsButton')}
+                icon={
+                  <UserPen
+                    className="text-slate-400"
+                    size={32}
+                  />
                 }
-                functionToExecute={() => {
-                  setIsOpenToContributors(true);
-                }}
-                status="info"
+                onConfirm={() => setIsOpenToContributors(true)}
               />
-              <ConfirmationModal
-                confirmationButtonText={t('closeToContributorsButton')}
-                confirmationMessage={t('closeToContributorsMessage')}
-                dialogTitle={t('closeToContributorsTitle')}
-                dialogTrigger={
-                  <div className="h-[200px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all hover:bg-slate-200">
-                    {!isOpenToContributors && (
-                      <div className="absolute mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
-                        {t('activeStatus')}
-                      </div>
-                    )}
-                    <div className="flex h-full flex-col items-center justify-center space-y-1 p-2 sm:p-4">
-                      <Users
-                        className="text-slate-400"
-                        size={32}
-                      />
-                      <div className="text-xl font-bold text-slate-700 sm:text-2xl">
-                        {t('closeToContributorsTitle')}
-                      </div>
-                      <div className="w-full text-center text-sm leading-5 tracking-tight text-gray-400 sm:w-[500px] sm:text-base">
-                        {t('closeToContributorsDescription')}
-                      </div>
-                    </div>
-                  </div>
+              <ContributorOptionCard
+                isActive={!isOpenToContributors}
+                title={t('closeToContributorsTitle')}
+                description={t('closeToContributorsDescription')}
+                confirmTitle={t('closeToContributorsTitle')}
+                confirmMessage={t('closeToContributorsMessage')}
+                confirmButton={t('closeToContributorsButton')}
+                icon={
+                  <Users
+                    className="text-slate-400"
+                    size={32}
+                  />
                 }
-                functionToExecute={() => {
-                  setIsOpenToContributors(false);
-                }}
-                status="info"
+                onConfirm={() => setIsOpenToContributors(false)}
               />
             </div>
             <div className="space-y-4">

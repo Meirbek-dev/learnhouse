@@ -320,15 +320,17 @@ export default function RichTextEditor({
           open={isLinkDialogOpen}
           onOpenChange={setIsLinkDialogOpen}
         >
-          <DialogTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-            >
-              <LinkIcon size={16} />
-            </Button>
+          <DialogTrigger
+            render={
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+              />
+            }
+          >
+            <LinkIcon size={16} />
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -370,15 +372,17 @@ export default function RichTextEditor({
           open={isImageDialogOpen}
           onOpenChange={setIsImageDialogOpen}
         >
-          <DialogTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-            >
-              <ImageIcon size={16} />
-            </Button>
+          <DialogTrigger
+            render={
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+              />
+            }
+          >
+            <ImageIcon size={16} />
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -420,15 +424,17 @@ export default function RichTextEditor({
           open={isVideoDialogOpen}
           onOpenChange={setIsVideoDialogOpen}
         >
-          <DialogTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-            >
-              <YoutubeIcon size={16} />
-            </Button>
+          <DialogTrigger
+            render={
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+              />
+            }
+          >
+            <YoutubeIcon size={16} />
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>

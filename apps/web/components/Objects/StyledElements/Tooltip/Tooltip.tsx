@@ -14,7 +14,7 @@ interface TooltipProps {
 
 const ToolTip = ({ sideOffset, content, children, side = 'bottom', slateBlack, unstyled }: TooltipProps) => (
   <Tooltip>
-    <TooltipTrigger asChild>{children}</TooltipTrigger>
+    <TooltipTrigger render={<span />}>{children}</TooltipTrigger>
     <StyledTooltipContent
       slateBlack={slateBlack}
       unstyled={unstyled}

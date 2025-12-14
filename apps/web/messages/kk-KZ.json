@@ -33,8 +33,8 @@
       "translateTooltip": "ЖИ көмегімен әртүрлі тілдерге аударыңыз"
     },
     "AIEditorToolkit": {
-      "CritisizeLabel": "Сын айту",
       "ContinueWritingLabel": "Жазуды жалғастыру",
+      "CritisizeLabel": "Сын айту",
       "GenerateQuizLabel": "Тест жасау",
       "MakeLongerLabel": "Ұзарту",
       "TranslateLabel": "Аудару",
@@ -230,12 +230,14 @@
       "email": "Электронды пошта",
       "emailPlaceholder": "Электронды поштаңызды енгізіңіз",
       "forgotPassword": "Құпия сөзді ұмыттыңыз ба?",
+      "hidePassword": "Құпия сөзді жасыру",
       "loading": "Жүктелуде...",
       "login": "Кіру",
       "loginTo": "Кіру",
       "or": "НЕМЕСЕ",
       "password": "Құпия сөз",
       "passwordPlaceholder": "Құпия сөзіңізді енгізіңіз",
+      "showPassword": "Құпия сөзді көрсету",
       "signInWithGoogle": "Google арқылы кіру",
       "signup": "Тіркелу",
       "title": "Кіру — {orgName}",
@@ -258,7 +260,6 @@
       "title": "Құпия сөзді қалпына келтіру"
     },
     "Signup": {
-      "goBack": "Кіру дегенге қайта келу",
       "accountCreated": "Аккаунтыңыз сәтті жасалды",
       "bio": "Өзім туралы",
       "bioPlaceholder": "Өзіңіз туралы бірдеңе айтыңыз",
@@ -268,6 +269,7 @@
       "emailPlaceholder": "Электронды поштаңызды енгізіңіз",
       "enterInviteCode": "Шақыру кодын енгізіңіз",
       "errorSomethingWentWrong": "Бірдеңе дұрыс болмады",
+      "goBack": "Кіру дегенге қайта келу",
       "hi": "Сәлем",
       "inviteCodeRequired": "{orgName} қосылу үшін шақыру коды қажет",
       "invitedToJoin": "Сізді қосылуға шақырды",
@@ -531,6 +533,9 @@
   },
   "Common": {
     "close": "Жабу",
+    "googleLogo": "Google логотипі",
+    "loading": "Жүктелуде...",
+    "logoAlt": "Ashyq Bilim логотипі",
     "save": "Сақтау",
     "saved": "Сақталды",
     "saving": "Сақталуда...",
@@ -547,6 +552,11 @@
       "toastLoading": "Жасалуда...",
       "toastSuccess": "Жаңа топ жасалды"
     },
+    "AlertDialog": {
+      "cancel": "Болдырмау",
+      "close": "Жабу",
+      "confirm": "Растау"
+    },
     "AuthorsDisplay": {
       "authorTooltip": "{FirstName} {LastName} - {Авторлық}",
       "authorsLabel": "Курс авторлары",
@@ -554,6 +564,10 @@
         "one": "Көбірек автор",
         "other": "Көбірек авторлар"
       }
+    },
+    "Breadcrumb": {
+      "label": "Навигация",
+      "more": "Көбірек"
     },
     "Button": {
       "newCollection": "Жаңа жинақ",
@@ -563,7 +577,8 @@
       "courseCount": "{count, plural, =0 {0 курс} one {# курс} few {# курс} other {# курс}}",
       "deleteButtonText": "Жинақты жою",
       "deleteConfirmationMessage": "Бұл жинақты жойғыңыз келетініне сенімдісіз бе?",
-      "deleteConfirmationTitle": "{collectionName} жою керек пе?"
+      "deleteConfirmationTitle": "{collectionName} жою керек пе?",
+      "deleting": "Жойылуда..."
     },
     "ConfirmationModal": {
       "cancel": "Күшін жою",
@@ -738,6 +753,9 @@
       "userHeader": "Пайдаланушы"
     },
     "Modal": {
+      "aria": {
+        "closeModal": "Модалды терезені жабу"
+      },
       "closeButtonDefault": "Жабу",
       "dialog": "Диалог"
     },
@@ -834,8 +852,10 @@
       "account": "Шот",
       "closeMenu": "Мәзірді жабыңыз",
       "language": "Тіл",
+      "logoAlt": "Ashyq Bilim логотипі",
       "navigation": "Навигация",
       "openMenu": "Ашық мәзір",
+      "overlayClose": "Мәзірді жабыңыз",
       "search": "Іздеу"
     },
     "OrgMenuLinks": {
@@ -1027,6 +1047,13 @@
     "PageLoading": {
       "loading": "Жүктелуде..."
     },
+    "Pagination": {
+      "label": "Беттеу",
+      "next": "Келесі",
+      "nextAria": "Келесі бетке өту",
+      "previous": "Алдыңғы",
+      "previousAria": "Алдыңғы бетке өту"
+    },
     "RolesUpdate": {
       "adminRole": "Әкімші",
       "errorPrefix": "Қателік",
@@ -1059,8 +1086,26 @@
     "Sidebar": {
       "toggleSidebar": "Бүйірлік панелді ауыстыру"
     },
+    "SignIn": {
+      "emailLabel": "Электрондық пошта",
+      "emailPlaceholder": "you@example.com",
+      "newToPlatform": "Ashyq Bilim жаңа?",
+      "passwordLabel": "Пароль",
+      "passwordPlaceholder": "Құпия сөзді енгізіңіз",
+      "rememberMe": "",
+      "resetPassword": "Құпия сөзді қалпына келтіріңіз",
+      "signInButton": "Кіру",
+      "signUp": "Тіркеу",
+      "singleSignOn": "Бірыңғай кіру (SSO)",
+      "subtitle": "Қош келдіңіз! Толығырақ енгізіңіз."
+    },
     "TagsInput": {
+      "aria": {
+        "inputTag": "Тег енгізу",
+        "removeOptionDescription": "Опцияны жою түймесі"
+      },
       "removeOption": "Опцияны жою",
+      "removeOptionAria": "{item} опциясын жою",
       "removeTag": "Тегті жою"
     },
     "TaskFormObject": {
@@ -1473,6 +1518,7 @@
     "deleteChapterButton": "Тарауды жою",
     "deleteChapterConfirmation": "Бұл тарауды жойғыңыз келетініне сенімдісіз бе?",
     "deleteChapterTitle": "{name} жою керек пе?",
+    "deleting": "Жойылуда...",
     "editButton": "Өңдеу"
   },
   "CourseEndView": {
@@ -1658,11 +1704,16 @@
       "activitiesCompleted": "{completed}/{total} әрекеті аяқталды",
       "applicationPending": "Автор ретінде қатысуға өтінім қаралуда",
       "applyToContribute": "Қатысуға өтінім беру",
+      "aria": {
+        "applyToBecome": "Автор ретінде қатысуға өтінім беру",
+        "signupToApply": "Қатысуға өтініш жіберу үшін тіркеліңіз"
+      },
       "authenticateToContribute": "Өзгерістер енгізу үшін авторизациядан өтіңіз",
       "authenticateToStart": "Курсты бастау үшін авторизациядан өтіңіз",
       "author": "Автор",
       "authors": "Авторлар",
       "completedActivities": "{totalActivities} белсенділіктің {completedActivities} аяқталды",
+      "continueLearning": "Оқуды жалғастыру",
       "contributeError": "Өтінім жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",
       "contributeLoading": "Қатысуға өтінім жіберілуде...",
       "contributeSuccess": "Қатысуға өтініміңіз сәтті жіберілді",
@@ -1670,7 +1721,6 @@
       "contributorApplicationMessage": "Мен бұл курсқа үлес қосқым келеді.",
       "contributorApplicationPending": "Автор ретінде қатысуға өтінім қаралуда",
       "contributorApplicationSuccess": "Қатысуға өтініміңіз сәтті жіберілді",
-      "continueLearning": "Оқуды жалғастыру",
       "courseProgress": "Курс үлгерімі",
       "courseRequiresPurchase": "Бұл курстың мазмұнына қол жеткізу үшін сатып алу қажет.",
       "leaveCourse": "Курстан шығу",
@@ -2760,50 +2810,24 @@
         "scenarioNotFound": "Сценарий табылмады",
         "scenarioNotFoundDescription": "Сценарий конфигурациясын тексеріп, қайта көріңіз.",
         "scenarioOptionLabel": "Сценарий {id}",
+        "scenarioPreviewAlt": "Сценарий алдын ала қарау",
         "scenarioPreviewTitle": "Сценарийді алдын ала қарау",
         "scenarioTitleLabel": "Сценарий атауы",
         "scenarioTitlePlaceholder": "Сценарий атауы",
+        "scenariosConfigured": "{count} / {max} сценарий конфигурацияланды",
         "setAsStartingScenario": "Бастапқы сценарий ретінде орнату",
         "setStart": "Бастапқыны орнату",
         "start": "Бастау",
         "startOver": "Қайта бастау",
         "startingPoint": "Бастапқы нүкте",
-        "testYourInteractiveScenario": "Интерактивті сценарийді сынап көріңіз",
-        "scenariosConfigured": "{count} / {max} сценарий конфигурацияланды"
+        "testYourInteractiveScenario": "Интерактивті сценарийді сынап көріңіз"
       },
       "Toolbar": {
-        "interactiveScenarios": "Интерактивті сценарийлер",
+        "addColumnRight": "Оң жаққа баған қосу",
+        "addRowBelow": "Төменге жол қосу",
         "aria": {
           "insertInteractiveScenarios": "Интерактивті сценарийлерді енгізу"
         },
-        "defaultScenario": {
-          "title": "Интерактивті сценарий",
-          "scenarios": {
-            "1": {
-              "text": "Бұл интерактивті сценарийге қош келдіңіз. Не істегіңіз келеді?",
-              "options": {
-                "opt1": "Зерттеуді жалғастыру",
-                "opt2": "Тақырып туралы көбірек білу"
-              }
-            },
-            "2": {
-              "text": "Тамаша таңдау! Енді сіз әрі қарай зерттеп жатырсыз. Келесі қадамыңыз қандай?",
-              "options": {
-                "opt3": "Бастапқыға оралу",
-                "opt4": "Сценарийді аяқтау"
-              }
-            },
-            "3": {
-              "text": "Мұнда тақырып туралы қосымша ақпарат бар. Бұл сізге жақсы түсінуге көмектеседі.",
-              "options": {
-                "opt5": "Бастапқыға оралу",
-                "opt6": "Сценарийді аяқтау"
-              }
-            }
-          }
-        },
-        "addColumnRight": "Оң жаққа баған қосу",
-        "addRowBelow": "Төменге жол қосу",
         "badge": "Бейдж",
         "badgePlaceholder": "Бұл белгі",
         "badges": "Бейдждер",
@@ -2818,6 +2842,32 @@
         "codeBlock": "Код блогы",
         "codeInline": "Желілік код",
         "defaultInfoCalloutText": "Ақпарат",
+        "defaultScenario": {
+          "scenarios": {
+            "1": {
+              "options": {
+                "opt1": "Зерттеуді жалғастыру",
+                "opt2": "Тақырып туралы көбірек білу"
+              },
+              "text": "Бұл интерактивті сценарийге қош келдіңіз. Не істегіңіз келеді?"
+            },
+            "2": {
+              "options": {
+                "opt3": "Бастапқыға оралу",
+                "opt4": "Сценарийді аяқтау"
+              },
+              "text": "Тамаша таңдау! Енді сіз әрі қарай зерттеп жатырсыз. Келесі қадамыңыз қандай?"
+            },
+            "3": {
+              "options": {
+                "opt5": "Бастапқыға оралу",
+                "opt6": "Сценарийді аяқтау"
+              },
+              "text": "Мұнда тақырып туралы қосымша ақпарат бар. Бұл сізге жақсы түсінуге көмектеседі."
+            }
+          },
+          "title": "Интерактивті сценарий"
+        },
         "defaultWarningCalloutText": "НАЗАР АУДАРЫҢЫЗ!",
         "deleteColumn": "Ағымдағы бағанды жою",
         "deleteRow": "Ағымдағы жолды жою",
@@ -2836,6 +2886,7 @@
         "infoCallout": "Ақпараттық шығару",
         "insertTable": "Жаңа кесте енгізу (3×3)",
         "interactiveQuiz": "Интерактивті тест",
+        "interactiveScenarios": "Интерактивті сценарийлер",
         "italic": "Курсив",
         "link": "Байланыс",
         "listOptions": {
@@ -2897,6 +2948,7 @@
       "cancel": "Болдырмау",
       "clickAnywhereToClose": "Жабу үшін кез келген жерді нұқыңыз",
       "continue": "Жалғастыру",
+      "dailyCapReached": "⚡ Күндік шектеу толды!",
       "dangerZone": {
         "description": "Сіздің геймификация деректеріңізге әсер ететін қайтымсыз әрекеттер",
         "resetAllData": "Барлық деректерді қалпына келтіру",
@@ -4313,12 +4365,12 @@
         "emailPlaceholder": "Электрондық пошта мекенжайыңызды енгізіңіз",
         "firstName": "Аты",
         "firstNamePlaceholder": "Атыңызды енгізіңіз",
-        "middleName": "Әкесінің аты",
-        "middleNamePlaceholder": "Әкесінің атын енгізіңіз",
         "language": "Тіл",
         "lastName": "Тегі",
         "lastNamePlaceholder": "Тегіңізді енгізіңіз",
         "loadingError": "Қажетті деректерді жүктеу мүмкін болмады",
+        "middleName": "Әкесінің аты",
+        "middleNamePlaceholder": "Әкесінің атын енгізіңіз",
         "newDetail": "Жаңа егжей-тегжей",
         "profilePicture": "Профиль суреті",
         "recommendedSize": "Ұсынылатын өлшем: 100x100",
@@ -4692,6 +4744,8 @@
       "usersSection": {
         "actionsHeader": "Әрекеттер",
         "activeUsersTitle": "Белсенді пайдаланушылар",
+        "cannotEditSelf": "Сіз өз рөліңізді өзгерте алмайсыз",
+        "cannotManageHigherRole": "Сіз рөлі сізден жоғары пайдаланушыларды басқара алмайсыз",
         "description": "Ұйымыңыздағы пайдаланушыларды басқарыңыз, рөлдер мен рұқсаттарды тағайындаңыз",
         "editRoleButton": "Рөлді өзгерту",
         "errors": {
@@ -4704,8 +4758,6 @@
         "removeUserModalMessage": "Бұл пайдаланушыны ұйымнан жойғыңыз келетініне сенімдісіз бе?",
         "removeUserModalTitle": "{username} жою?",
         "removingUser": "Жойылуда...",
-        "cannotEditSelf": "Сіз өз рөліңізді өзгерте алмайсыз",
-        "cannotManageHigherRole": "Сіз рөлі сізден жоғары пайдаланушыларды басқара алмайсыз",
         "roleHeader": "Рөл",
         "updateRoleModalDescription": "@{username} рөлін жаңарту",
         "updateRoleModalTitle": "Рөлді жаңарту",
@@ -4717,7 +4769,10 @@
     "gamification": "Ақылнама"
   },
   "Errors": {
+    "errorLabel": "Қате:",
+    "errorReference": "Қате сілтемесі:",
     "somethingWentWrong": "Бірдеңе дұрыс болмады!",
+    "technicalDetails": "Техникалық мәліметтер:",
     "tryAgain": "Қайтадан көріңіз"
   },
   "FixedActivitySecondaryBar": {
@@ -4999,7 +5054,14 @@
       "collapseSidebar": "Бүйірлік панельді жию",
       "expandSidebar": "Бүйірлік панельді кеңейту",
       "goToHomepage": "Басты бетке өту",
+      "home": "Басқару тақтасының басты бетіне өту",
+      "manageAssignments": "Тапсырмаларды басқару",
+      "manageCourses": "Курстарды басқару",
+      "managePayments": "Төлемдер мен шоттарды басқару",
+      "manageUsers": "Пайдаланушыларды басқару",
+      "organizationSettings": "Ұйым параметрлері",
       "platformLogo": "Ashyq Bilim логотипі",
+      "userAccountSettings": "Пайдаланушы шот параметрлері",
       "userSettings": "Пайдаланушы параметрлері"
     },
     "buttons": {
@@ -5047,10 +5109,6 @@
     "submit": "Жіберу"
   },
   "Themes": {
-    "sage-garden": {
-      "description": "Жұмсақ шалфей жасылдары мен сергітетін табиғи акценттері бар нәзік бақ тақырыбы",
-      "name": "Шалфей бағы"
-    },
     "amberminimal": {
       "description": "Минималистік қарағай тақырыбы",
       "name": "Қарағай минималды"
@@ -5202,6 +5260,10 @@
     "retroArcade": {
       "description": "80-ші жылдардың аркадаларының жарқын жарығын еске түсіретін ойнақы контрасттары бар батыл неонды палитра",
       "name": "Ретро аркада"
+    },
+    "sage-garden": {
+      "description": "Жұмсақ шалфей жасылдары мен сергітетін табиғи акценттері бар нәзік бақ тақырыбы",
+      "name": "Шалфей бағы"
     },
     "slack": {
       "description": "Күлгін акценттері мен таза жұмыс кеңістігі эстетикасы бар Slack-тен шабыттанған ынтымақтастық тақырыбы",

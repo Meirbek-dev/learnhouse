@@ -244,9 +244,12 @@ const OrgEditLanding = () => {
       const landingConfig = org.config.config.landing;
       setLandingData({
         sections: landingConfig.sections || [],
-        enabled: landingConfig.enabled,
+        enabled: !!landingConfig.enabled,
       });
-      setIsLandingEnabled(landingConfig.enabled);
+      // Coerce to boolean to avoid switching between controlled/uncontrolled
+      // states for the `Switch` component (React warns when checked changes
+      // between `undefined` and boolean during the component lifecycle).
+      setIsLandingEnabled(!!landingConfig.enabled);
     }
   }, [org]);
 
@@ -517,7 +520,7 @@ const OrgEditLanding = () => {
 
                 <div className="pt-4">
                   <Select
-                    onValueChange={(value: string) => {
+                    onValueChange={(value: string | null) => {
                       if (value) {
                         addSection(value);
                       }
@@ -954,7 +957,6 @@ const HeroSectionEditor: FC<{
                       <div className="flex items-center space-x-1">
                         <Input
                           type="color"
-                          value={section.background.colors?.[0] || '#ffffff'}
                           onChange={(e) => {
                             onChange({
                               ...section,
@@ -1069,10 +1071,12 @@ const HeroSectionEditor: FC<{
                   <Select
                     value={section.background.direction || '45deg'}
                     onValueChange={(value) => {
-                      onChange({
-                        ...section,
-                        background: { ...section.background, direction: value },
-                      });
+                      if (value) {
+                        onChange({
+                          ...section,
+                          background: { ...section.background, direction: value },
+                        });
+                      }
                     }}
                   >
                     <SelectTrigger>
@@ -1329,7 +1333,8 @@ const HeroSectionEditor: FC<{
                   <Label>{t('HeroEditor.Illustration.positionLabel')}</Label>
                   <Select
                     value={section.illustration?.position || 'left'}
-                    onValueChange={(value: 'left' | 'right') => {
+                    onValueChange={(value: 'left' | 'right' | null) => {
+                      if (!value) return;
                       onChange({
                         ...section,
                         illustration: {
@@ -1359,7 +1364,8 @@ const HeroSectionEditor: FC<{
                   <Label>{t('HeroEditor.Illustration.sizeLabel')}</Label>
                   <Select
                     value={section.illustration?.size || 'medium'}
-                    onValueChange={(value: 'small' | 'medium' | 'large') => {
+                    onValueChange={(value: 'small' | 'medium' | 'large' | null) => {
+                      if (!value) return;
                       onChange({
                         ...section,
                         illustration: {

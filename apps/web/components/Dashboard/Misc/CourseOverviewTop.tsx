@@ -50,6 +50,7 @@ export const CourseOverviewTop = ({ params }: { params: CourseOverviewParams }) 
                 className="size-auto h-[57px] rounded-md drop-shadow-md"
                 src={EmptyThumbnailImage}
                 alt=""
+                loading="eager"
               />
             )}
           </Link>
@@ -62,29 +63,27 @@ export const CourseOverviewTop = ({ params }: { params: CourseOverviewParams }) 
         </div>
         <div className="flex items-center gap-3">
           <Button
-            asChild
+            nativeButton={false}
+            render={<a href="https://tou.edu.kz/ru/component/docs/?id_n=466" />}
             size="sm"
+            className="gap-2"
           >
-            <a
-              href="https://tou.edu.kz/ru/component/docs/?id_n=466"
-              className="gap-2"
-            >
-              <BookOpen className="size-4" />
-              <span>Скачать требования к разработке МООК</span>
-            </a>
+            <BookOpen className="size-4" />
+            <span>{t('downloadMoocRequirements')}</span>
           </Button>
           <Button
-            asChild
+            nativeButton={false}
+            render={
+              <Link
+                prefetch={false}
+                href={getUriWithOrg(org?.slug, '/dash/documentation/rights')}
+              />
+            }
             size="sm"
+            className="gap-2"
           >
-            <Link
-              prefetch={false}
-              href={getUriWithOrg(org?.slug, '/dash/documentation/rights')}
-              className="gap-2"
-            >
-              <BookOpen className="size-4" />
-              <span>{t('rightsGuide')}</span>
-            </Link>
+            <BookOpen className="size-4" />
+            <span>{t('rightsGuide')}</span>
           </Button>
           <SaveState orgslug={params.orgslug} />
         </div>

@@ -544,7 +544,7 @@ const UserProfileBuilder = () => {
 
             <div className="pt-4">
               <Select
-                onValueChange={(value: keyof typeof SECTION_TYPE_KEYS) => {
+                onValueChange={(value: keyof typeof SECTION_TYPE_KEYS | null) => {
                   if (value) {
                     addSection(value);
                   }
@@ -620,15 +620,17 @@ const DatePicker: FC<{
       open={open}
       onOpenChange={setOpen}
     >
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className={`w-full justify-start text-left font-normal ${!value && 'text-muted-foreground'}`}
-          disabled={disabled}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {value && selectedDate ? format(selectedDate, 'PPP', { locale }) : <span>{placeholder}</span>}
-        </Button>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="outline"
+            className={`w-full justify-start text-left font-normal ${!value && 'text-muted-foreground'}`}
+            disabled={disabled}
+          />
+        }
+      >
+        <CalendarIcon className="mr-2 h-4 w-4" />
+        {value && selectedDate ? format(selectedDate, 'PPP', { locale }) : <span>{placeholder}</span>}
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
         <Calendar

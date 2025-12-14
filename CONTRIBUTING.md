@@ -27,7 +27,7 @@ Initiate a dev environment, please check the official guide
 
 - **Next.js** (15 with the App Directory) - The React Framework
 - **TailwindCSS** - Styling
-- **Radix UI** - Accessible UI Components
+- **Base UI** - Modern accessible UI Components
 - **Tiptap** - An editor framework and headless wrapper around ProseMirror
 - **PostgreSQL** - SQL Database
 - **React** - duh

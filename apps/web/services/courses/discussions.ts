@@ -187,28 +187,3 @@ export async function toggleDiscussionDislike(
 
   return data;
 }
-
-/**
- * SWR fetcher function for getting course discussions
- * Usage: useSWR(`/api/v1/courses/${course_uuid}/discussions?include_replies=true`, swrFetcher)
- */
-export const getDiscussionsSwrKey = (course_uuid: string, include_replies = false, limit = 50, offset = 0) => {
-  const params = new URLSearchParams({
-    include_replies: include_replies.toString(),
-    limit: limit.toString(),
-    offset: offset.toString(),
-  });
-  return `${getAPIUrl()}courses/${course_uuid}/discussions?${params.toString()}`;
-};
-
-/**
- * SWR fetcher function for getting discussion replies
- * Usage: useSWR(`/api/v1/courses/${course_uuid}/discussions/${discussion_uuid}/replies`, swrFetcher)
- */
-export const getDiscussionRepliesSwrKey = (course_uuid: string, discussion_uuid: string, limit = 50, offset = 0) => {
-  const params = new URLSearchParams({
-    limit: limit.toString(),
-    offset: offset.toString(),
-  });
-  return `${getAPIUrl()}courses/${course_uuid}/discussions/${discussion_uuid}/replies?${params.toString()}`;
-};

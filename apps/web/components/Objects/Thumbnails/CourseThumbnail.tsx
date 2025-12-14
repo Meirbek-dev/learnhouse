@@ -1,10 +1,21 @@
 'use client';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { AlertTriangle, BookMinus, Calendar, FilePenLine, Loader2, MoreVertical, Settings2 } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import { BookMinus, Calendar, FilePenLine, MoreVertical, Settings2 } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { deleteCourseFromBackend } from '@services/courses/courses';
 import { Card, CardContent, CardFooter } from '@components/ui/card';
@@ -13,6 +24,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
+import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useRouter } from 'next/navigation';
@@ -231,30 +243,32 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
               </div>
             </div>
             <Button
-              asChild
+              nativeButton={false}
+              render={
+                <Link
+                  prefetch={false}
+                  href={courseUrl}
+                />
+              }
               size="sm"
               className="w-full"
             >
-              <Link
-                prefetch={false}
-                href={courseUrl}
-              >
-                {t('continueLearning', { defaultValue: 'Continue Learning' })}
-              </Link>
+              {t('continueLearning', { defaultValue: 'Continue Learning' })}
             </Button>
           </div>
         ) : (
           <Button
-            asChild
+            nativeButton={false}
+            render={
+              <Link
+                prefetch={false}
+                href={courseUrl}
+              />
+            }
             size="sm"
             className="w-full"
           >
-            <Link
-              prefetch={false}
-              href={courseUrl}
-            >
-              {t('startLearning')}
-            </Link>
+            {t('startLearning')}
           </Button>
         )}
       </CardFooter>
@@ -268,6 +282,16 @@ const AdminEditOptions: FC<{
   deleteCourse: () => Promise<void>;
 }> = ({ course, orgSlug, deleteCourse }) => {
   const t = useTranslations('Components.CourseThumbnail');
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const handleDelete = () => {
+    startTransition(async () => {
+      await deleteCourse();
+      setIsDeleteDialogOpen(false);
+    });
+  };
+
   return (
     <AuthenticatedClientElement
       action="update"
@@ -277,14 +301,17 @@ const AdminEditOptions: FC<{
     >
       <div className="absolute top-2 right-2 z-20 opacity-0 transition-all duration-200 group-hover:opacity-100">
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="bg-background/90 hover:bg-background h-8 w-8 rounded-full border-0 shadow-lg backdrop-blur-md transition-all hover:scale-110"
-            >
-              <MoreVertical className="h-4 w-4" />
-            </Button>
+          <DropdownMenuTrigger
+            nativeButton
+            render={
+              <Button
+                variant="secondary"
+                size="icon"
+                className="bg-background/90 hover:bg-background h-8 w-8 rounded-full border-0 shadow-lg backdrop-blur-md transition-all hover:scale-110"
+              />
+            }
+          >
+            <MoreVertical className="h-4 w-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
@@ -292,47 +319,74 @@ const AdminEditOptions: FC<{
             sideOffset={8}
           >
             <DropdownMenuItem
-              asChild
-              className="focus:bg-muted/50 cursor-pointer"
+              nativeButton={false}
+              render={
+                <Link
+                  prefetch={false}
+                  href={getUriWithOrg(
+                    orgSlug,
+                    `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/content`,
+                  )}
+                />
+              }
+              className="focus:bg-muted/50 flex items-center hover:cursor-pointer"
             >
-              <Link
-                prefetch={false}
-                href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/content`)}
-                className="flex items-center"
-              >
-                <FilePenLine className="mr-2 h-4 w-4" /> {t('editContent')}
-              </Link>
+              <FilePenLine className="mr-2 h-4 w-4" /> {t('editContent')}
             </DropdownMenuItem>
             <DropdownMenuItem
-              asChild
-              className="focus:bg-muted/50 cursor-pointer"
+              nativeButton={false}
+              render={
+                <Link
+                  prefetch={false}
+                  href={getUriWithOrg(
+                    orgSlug,
+                    `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`,
+                  )}
+                />
+              }
+              className="focus:bg-muted/50 flex items-center hover:cursor-pointer"
             >
-              <Link
-                prefetch={false}
-                href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`)}
-                className="flex items-center"
-              >
-                <Settings2 className="mr-2 h-4 w-4" /> {t('settings')}
-              </Link>
+              <Settings2 className="mr-2 h-4 w-4" /> {t('settings')}
             </DropdownMenuItem>
-            <DropdownMenuItem
-              asChild
-              className="focus:bg-destructive/10 cursor-pointer"
-            >
-              <ConfirmationModal
-                confirmationButtonText={t('deleteButtonText')}
-                confirmationMessage={t('deleteConfirmationMessage')}
-                dialogTitle={t('deleteConfirmationTitle', {
-                  courseName: course.name,
-                })}
-                dialogTrigger={
-                  <button className="text-destructive hover:bg-destructive/10 focus:bg-destructive/10 flex w-full items-center rounded-sm py-1.5 text-left text-sm transition-all">
-                    <BookMinus className="mr-4 ml-2 h-4 w-4" /> {t('delete')}
-                  </button>
-                }
-                functionToExecute={deleteCourse}
-                status="warning"
-              />
+            <DropdownMenuItem variant="destructive" className="focus:bg-destructive/10 cursor-pointer">
+              <AlertDialog
+                open={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
+              >
+                <AlertDialogTrigger
+                  render={
+                    <button className="flex py-1.5" type="button">
+                      <BookMinus className="mr-4 h-4 w-4" /> {t('delete')}
+                    </button>
+                  }
+                />
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
+                      <AlertTriangle className="size-8" />
+                    </AlertDialogMedia>
+                    <AlertDialogTitle>{t('deleteConfirmationTitle', { courseName: course.name })}</AlertDialogTitle>
+                    <AlertDialogDescription>{t('deleteConfirmationMessage')}</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel />
+                    <AlertDialogAction
+                      variant="destructive"
+                      onClick={handleDelete}
+                      disabled={isPending}
+                    >
+                      {isPending ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="size-4 animate-spin" />
+                          {t('deleting')}
+                        </div>
+                      ) : (
+                        t('deleteButtonText')
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

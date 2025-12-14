@@ -1,14 +1,26 @@
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
+import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { useCourse } from '@components/Contexts/CourseContext';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
+import { useCallback, useState, useTransition } from 'react';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { PencilLine, Rss, TentTree } from 'lucide-react';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { format, formatDistanceToNow } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,7 +33,6 @@ import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { motion } from 'motion/react';
 import useSWR, { mutate } from 'swr';
-import { useState } from 'react';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
@@ -360,32 +371,37 @@ const DeleteUpdateButton = ({ update }: any) => {
   const session = usePlatformSession() as any;
   const course = useCourse();
   const t = useTranslations('Courses.CourseAuthors');
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const handleDelete = async () => {
-    const toast_loading = toast.loading(t('deletingUpdate'));
-    const res = await deleteCourseUpdate(
-      course.courseStructure.course_uuid,
-      update.courseupdate_uuid,
-      session.data?.tokens?.access_token,
-    );
+  const handleDelete = useCallback(() => {
+    startTransition(async () => {
+      const toast_loading = toast.loading(t('deletingUpdate'));
+      const res = await deleteCourseUpdate(
+        course.courseStructure.course_uuid,
+        update.courseupdate_uuid,
+        session.data?.tokens?.access_token,
+      );
 
-    if (res.status === 200) {
-      toast.dismiss(toast_loading);
-      toast.success(t('updateDeletedSuccess'));
-      mutate(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`);
-    } else {
-      toast.error(t('updateDeleteFailed'));
-    }
-  };
+      if (res.status === 200) {
+        toast.dismiss(toast_loading);
+        toast.success(t('updateDeletedSuccess'));
+        mutate(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`);
+        setIsOpen(false);
+      } else {
+        toast.dismiss(toast_loading);
+        toast.error(t('updateDeleteFailed'));
+      }
+    });
+  }, [course.courseStructure.course_uuid, update.courseupdate_uuid, session.data?.tokens?.access_token, t]);
 
   return (
-    <ConfirmationModal
-      confirmationButtonText={t('deleteUpdate')}
-      confirmationMessage={t('deleteUpdateConfirmation')}
-      dialogTitle={t('deleteUpdateTitle')}
-      buttonid="delete-update-button"
-      dialogTrigger={
-        <span>
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <AlertDialogTrigger
+        render={
           <button
             id="delete-update-button"
             className="rounded-full p-1.5 text-neutral-400 transition-all duration-150 hover:bg-rose-50 hover:text-rose-500"
@@ -404,11 +420,35 @@ const DeleteUpdateButton = ({ update }: any) => {
               />
             </svg>
           </button>
-        </span>
-      }
-      functionToExecute={handleDelete}
-      status="warning"
-    />
+        }
+      />
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
+            <AlertTriangle className="size-8" />
+          </AlertDialogMedia>
+          <AlertDialogTitle>{t('deleteUpdateTitle')}</AlertDialogTitle>
+          <AlertDialogDescription>{t('deleteUpdateConfirmation')}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel />
+          <AlertDialogAction
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={isPending}
+          >
+            {isPending ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="size-4 animate-spin" />
+                {t('deleting')}
+              </div>
+            ) : (
+              t('deleteUpdate')
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 

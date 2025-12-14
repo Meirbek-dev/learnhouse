@@ -40,7 +40,6 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
   });
 
   type FormValues = z.infer<typeof validationSchema>;
-
   const form = useForm<FormValues>({
     resolver: zodResolver(validationSchema),
     defaultValues: {

@@ -150,42 +150,39 @@ const useNavigationItems = () => {
 const NavItem = ({ item, isCollapsed }: { item: NavigationItem; isCollapsed: boolean }) => (
   <SidebarMenuItem className={isCollapsed ? 'flex w-full justify-center' : ''}>
     <SidebarMenuButton
-      asChild
+      render={
+        <AppLink
+          href={item.href}
+          aria-label={item.tooltip}
+          aria-current={item.isActive ? 'page' : undefined}
+        />
+      }
       tooltip={isCollapsed ? item.tooltip : undefined}
       isActive={item.isActive}
       size="default"
       className={`group hover:bg-sidebar-accent/50 relative transition-all duration-200 ${
         isCollapsed ? 'flex h-10 w-10 items-center justify-center p-0' : 'w-full'
-      }`}
+      } flex min-w-0 items-center ${isCollapsed ? 'h-full w-full justify-center' : 'w-full gap-3'}`}
       disabled={item.disabled}
     >
-      <AppLink
-        href={item.href}
-        className={`flex min-w-0 items-center transition-all duration-200 ${
-          isCollapsed ? 'h-full w-full justify-center' : 'w-full gap-3'
-        }`}
-        aria-label={item.tooltip}
-        aria-current={item.isActive ? 'page' : undefined}
-      >
-        <item.icon
-          className="h-4 w-4 shrink-0"
-          aria-hidden
-        />
-        {!isCollapsed && (
-          <>
-            <span className="truncate font-medium">{item.title}</span>
-            {item.badge ? (
-              <Badge
-                variant="secondary"
-                className="ml-auto text-xs"
-              >
-                {item.badge}
-              </Badge>
-            ) : null}
-            {item.isActive ? <div className="bg-primary ml-auto h-2 w-2 animate-pulse rounded-full" /> : null}
-          </>
-        )}
-      </AppLink>
+      <item.icon
+        className="h-4 w-4 shrink-0"
+        aria-hidden
+      />
+      {!isCollapsed && (
+        <>
+          <span className="truncate font-medium">{item.title}</span>
+          {item.badge ? (
+            <Badge
+              variant="secondary"
+              className="ml-auto text-xs"
+            >
+              {item.badge}
+            </Badge>
+          ) : null}
+          {item.isActive ? <div className="bg-primary ml-auto h-2 w-2 animate-pulse rounded-full" /> : null}
+        </>
+      )}
     </SidebarMenuButton>
   </SidebarMenuItem>
 );
@@ -343,26 +340,25 @@ const DashSidebar = ({ className }: SidebarProps) => {
           {/* Action Buttons */}
           <div className={`flex gap-2 ${isCollapsed ? 'w-full flex-col' : ''}`}>
             <SidebarMenuButton
-              asChild
+              render={
+                <AppLink
+                  href="/dash/user-account/settings/general"
+                  aria-label={t('ariaLabels.userSettings')}
+                />
+              }
               tooltip={isCollapsed ? t('tooltips.userSettings', { username: session.data.user.username }) : undefined}
               size="sm"
               className={`hover:bg-sidebar-accent/50 flex-1 transition-all duration-200 ${
                 isCollapsed ? 'w-full justify-center' : ''
-              }`}
+              } flex items-center gap-2 ${isCollapsed ? 'justify-center' : 'justify-center'}`}
             >
-              <AppLink
-                href="/dash/user-account/settings/general"
-                className={`flex items-center gap-2 ${isCollapsed ? 'justify-center' : 'justify-center'}`}
-                aria-label={t('ariaLabels.userSettings')}
-              >
-                <Settings
-                  className="h-4 w-4"
-                  aria-hidden="true"
-                />
-                <span className={`transition-all duration-200 ${isCollapsed ? 'sr-only' : ''}`}>
-                  {t('buttons.settings')}
-                </span>
-              </AppLink>
+              <Settings
+                className="h-4 w-4"
+                aria-hidden="true"
+              />
+              <span className={`transition-all duration-200 ${isCollapsed ? 'sr-only' : ''}`}>
+                {t('buttons.settings')}
+              </span>
             </SidebarMenuButton>
 
             <SidebarMenuButton

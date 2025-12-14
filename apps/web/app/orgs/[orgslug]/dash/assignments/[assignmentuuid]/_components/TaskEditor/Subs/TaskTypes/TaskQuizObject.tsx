@@ -409,13 +409,13 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
     });
     // Student area - fetch tasks and submissions
     if (view === 'student') {
-      void getAssignmentTaskUI();
-      void getAssignmentTaskSubmissionFromUserUI();
+      void Promise.resolve().then(() => getAssignmentTaskUI());
+      void Promise.resolve().then(() => getAssignmentTaskSubmissionFromUserUI());
     }
     // Grading area - fetch tasks and user submissions
     else if (view === 'grading') {
-      void getAssignmentTaskUI();
-      void getAssignmentTaskSubmissionFromIdentifiedUserUI();
+      void Promise.resolve().then(() => getAssignmentTaskUI());
+      void Promise.resolve().then(() => getAssignmentTaskSubmissionFromIdentifiedUserUI());
     }
     // Teacher area initializes from state via lazy initialization
   }, [

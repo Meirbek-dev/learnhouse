@@ -109,7 +109,9 @@ const OrgUsersAdd = () => {
                     className="w-fit min-w-32"
                   >
                     <SelectValue
-                      placeholder={invites?.length === 0 ? t('noInviteCodesAvailable') : t('selectInviteCode')}
+                      placeholder={
+                        !invites || invites.length === 0 ? t('noInviteCodesAvailable') : t('selectInviteCode')
+                      }
                     />
                   </SelectTrigger>
                   <SelectContent>

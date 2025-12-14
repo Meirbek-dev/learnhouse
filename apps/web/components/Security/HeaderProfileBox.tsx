@@ -3,7 +3,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@components/ui/dropdown-menu';
@@ -144,31 +143,25 @@ export const HeaderProfileBox = () => {
         <div className="flex grow rounded-lg p-1.5 px-2 text-sm font-bold text-gray-700">
           <ul className="flex items-center space-x-3">
             <li>
-              <Button
-                variant="ghost"
-                size="sm"
-                asChild
+              <Link
+                prefetch={false}
+                href={{ pathname: getUriWithoutOrg('/login'), query: org ? { orgslug: org.slug } : undefined }}
               >
-                <Link
-                  prefetch={false}
-                  href={{ pathname: getUriWithoutOrg('/login'), query: org ? { orgslug: org.slug } : undefined }}
+                <Button
+                  variant="ghost"
+                  size="sm"
                 >
                   {t('login')}
-                </Link>
-              </Button>
+                </Button>
+              </Link>
             </li>
             <li>
-              <Button
-                size="sm"
-                asChild
+              <Link
+                prefetch={false}
+                href={{ pathname: getUriWithoutOrg('/signup'), query: org ? { orgslug: org.slug } : undefined }}
               >
-                <Link
-                  prefetch={false}
-                  href={{ pathname: getUriWithoutOrg('/signup'), query: org ? { orgslug: org.slug } : undefined }}
-                >
-                  {t('signUp')}
-                </Link>
-              </Button>
+                <Button size="sm">{t('signUp')}</Button>
+              </Link>
             </li>
           </ul>
         </div>
@@ -177,70 +170,73 @@ export const HeaderProfileBox = () => {
         <div className="flex items-center">
           <div className="flex items-center space-x-3">
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="flex h-auto items-center space-x-1 p-2"
-                >
-                  <UserAvatar size="sm" />
-                  <div className="flex flex-col space-y-0">
-                    <div className="flex items-center space-x-2">
-                      <p className="text-sm font-semibold text-gray-900 capitalize">{session.data.user.username}</p>
-                      {userRoleInfo && userRoleInfo.name !== 'USER' && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Badge
-                              variant="secondary"
-                              className={`text-[8px] ${userRoleInfo.bgColor} ${userRoleInfo.textColor} flex w-fit items-center gap-0.5 px-1 py-0.5 font-medium`}
-                            >
-                              {userRoleInfo.icon}
-                              {userRoleInfo.name}
-                            </Badge>
-                          </TooltipTrigger>
-                          <TooltipContent
-                            side="bottom"
-                            sideOffset={15}
-                            className="max-w-56 text-wrap"
-                          >
-                            {userRoleInfo.description}
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
-                      {/* Custom roles */}
-                      {customRoles.map((customRole, index) => (
-                        <Tooltip key={index}>
-                          <TooltipTrigger asChild>
-                            <Badge
-                              variant="secondary"
-                              className="flex w-fit items-center gap-0.5 bg-gray-500 px-1 py-0.5 text-[8px] font-medium text-white"
-                            >
-                              <Shield size={12} />
-                              {customRole.name}
-                            </Badge>
-                          </TooltipTrigger>
-                          <TooltipContent
-                            side="bottom"
-                            sideOffset={15}
-                            className="max-w-56 text-wrap"
-                          >
-                            {customRole.description || `Custom role: ${customRole.name}`}
-                          </TooltipContent>
-                        </Tooltip>
-                      ))}
-                    </div>
-                    <p className="text-muted-foreground text-start text-xs">{session.data.user.email}</p>
-                  </div>
-                  <ChevronDown
-                    size={16}
-                    className="text-muted-foreground"
+              <DropdownMenuTrigger
+                nativeButton
+                render={
+                  <Button
+                    variant="ghost"
+                    className="flex h-auto items-center space-x-1 p-2"
                   />
-                </Button>
+                }
+              >
+                <UserAvatar size="sm" />
+                <div className="flex flex-col space-y-0">
+                  <div className="flex items-center space-x-2">
+                    <p className="text-sm font-semibold text-gray-900 capitalize">{session.data.user.username}</p>
+                    {userRoleInfo && userRoleInfo.name !== 'USER' && (
+                      <Tooltip>
+                        <TooltipTrigger render={<span className="inline-flex cursor-default" />}>
+                          <Badge
+                            variant="secondary"
+                            className={`text-[8px] ${userRoleInfo.bgColor} ${userRoleInfo.textColor} flex w-fit items-center gap-0.5 px-1 py-0.5 font-medium`}
+                          >
+                            {userRoleInfo.icon}
+                            {userRoleInfo.name}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="bottom"
+                          sideOffset={15}
+                          className="max-w-56 text-wrap"
+                        >
+                          {userRoleInfo.description}
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                    {/* Custom roles */}
+                    {customRoles.map((customRole, index) => (
+                      <Tooltip key={index}>
+                        <TooltipTrigger render={<span className="inline-flex cursor-default" />}>
+                          <Badge
+                            variant="secondary"
+                            className="flex w-fit items-center gap-0.5 bg-gray-500 px-1 py-0.5 text-[8px] font-medium text-white"
+                          >
+                            <Shield size={12} />
+                            {customRole.name}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="bottom"
+                          sideOffset={15}
+                          className="max-w-56 text-wrap"
+                        >
+                          {customRole.description || `Custom role: ${customRole.name}`}
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </div>
+                  <p className="text-muted-foreground text-start text-xs">{session.data.user.email}</p>
+                </div>
+                <ChevronDown
+                  size={16}
+                  className="text-muted-foreground"
+                />
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 className="w-56"
                 align="end"
               >
-                <DropdownMenuLabel>
+                <div className="px-2 py-1.5">
                   <div className="flex items-center space-x-2">
                     <UserAvatar size="sm" />
                     <div>
@@ -248,34 +244,40 @@ export const HeaderProfileBox = () => {
                       <p className="text-muted-foreground text-xs">{session.data.user.email}</p>
                     </div>
                   </div>
-                </DropdownMenuLabel>
+                </div>
                 <DropdownMenuSeparator />
                 {rights?.dashboard?.action_access && (
-                  <DropdownMenuItem asChild>
-                    <Link
-                      prefetch={false}
-                      href="/dash"
-                      className="flex items-center space-x-2"
-                    >
-                      <Shield size={16} />
-                      <span>{t('profile.dashboard')}</span>
-                    </Link>
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem asChild>
-                  <Link
-                    prefetch={false}
-                    href="/dash/user-account/settings/general"
+                  <DropdownMenuItem
+                    nativeButton={false}
+                    render={
+                      <Link
+                        prefetch={false}
+                        href="/dash"
+                      />
+                    }
                     className="flex items-center space-x-2"
                   >
-                    <UserIcon size={16} />
-                    <span>{t('profile.userSettings')}</span>
-                  </Link>
+                    <Shield size={16} />
+                    <span>{t('profile.dashboard')}</span>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  nativeButton={false}
+                  render={
+                    <Link
+                      prefetch={false}
+                      href="/dash/user-account/settings/general"
+                    />
+                  }
+                  className="flex items-center space-x-2"
+                >
+                  <UserIcon size={16} />
+                  <span>{t('profile.userSettings')}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
+                <DropdownMenuItem variant='destructive'
                   onClick={() => signOut({ callbackUrl: '/' })}
-                  className="text-destructive focus:text-destructive flex items-center space-x-2"
+                  className="flex space-x-2"
                 >
                   <LogOut size={16} />
                   <span>{t('profile.signOut')}</span>

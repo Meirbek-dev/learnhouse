@@ -22,9 +22,9 @@ import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAutho
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { getDiscussionsSwrKey } from '@services/courses/discussions-keys';
 // Import existing components and utilities
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { getDiscussionsSwrKey } from '@services/courses/discussions';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
@@ -429,17 +429,17 @@ const CourseClient = (props: any) => {
                             <Button
                               variant="link"
                               size="sm"
-                              asChild
+                              render={
+                                <a
+                                  href={href}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm"
+                                />
+                              }
                             >
-                              <a
-                                href={href}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm"
-                              >
-                                <span className="sr-only">{t('linkTo', { learningText })}</span>
-                                <ArrowRight size={14} />
-                              </a>
+                              <span className="sr-only">{t('linkTo', { learningText })}</span>
+                              <ArrowRight size={14} />
                             </Button>
                           ) : null}
                         </div>
@@ -465,30 +465,31 @@ const CourseClient = (props: any) => {
                         }));
                       }}
                     >
-                      <CollapsibleTrigger asChild>
-                        <div className="flex cursor-pointer items-start bg-neutral-50 px-4 py-4 font-semibold text-neutral-600 transition-colors hover:bg-neutral-100">
-                          <div className="mr-3 flex flex-col justify-center pt-1">
-                            <ChevronDown
-                              className={cn('h-5 w-5 transition-transform', isExpanded ? 'rotate-180' : '')}
-                            />
+                      <CollapsibleTrigger
+                        nativeButton={false}
+                        render={
+                          <div className="flex cursor-pointer items-start bg-neutral-50 px-4 py-4 font-semibold text-neutral-600 transition-colors hover:bg-neutral-100" />
+                        }
+                      >
+                        <div className="mr-3 flex flex-col justify-center pt-1">
+                          <ChevronDown className={cn('h-5 w-5 transition-transform', isExpanded ? 'rotate-180' : '')} />
+                        </div>
+                        <div className="flex w-full flex-col items-start">
+                          <div className="mb-1 flex w-full min-w-0 flex-wrap items-center">
+                            <Badge
+                              variant="secondary"
+                              className="mr-2 h-5 w-5 rounded-full p-0 text-xs"
+                            >
+                              {idx + 1}
+                            </Badge>
+                            <h3 className="min-w-0 truncate text-lg leading-tight font-semibold">{chapter.name}</h3>
                           </div>
-                          <div className="flex w-full flex-col items-start">
-                            <div className="mb-1 flex w-full min-w-0 flex-wrap items-center">
-                              <Badge
-                                variant="secondary"
-                                className="mr-2 h-5 w-5 rounded-full p-0 text-xs"
-                              >
-                                {idx + 1}
-                              </Badge>
-                              <h3 className="min-w-0 truncate text-lg leading-tight font-semibold">{chapter.name}</h3>
-                            </div>
-                            <div className="flex items-center space-x-1 text-sm font-normal text-neutral-400">
-                              <Layers
-                                size={16}
-                                className="mr-1"
-                              />
-                              <span>{t('activitiesCount', { count: chapter.activities.length })}</span>
-                            </div>
+                          <div className="flex items-center space-x-1 text-sm font-normal text-neutral-400">
+                            <Layers
+                              size={16}
+                              className="mr-1"
+                            />
+                            <span>{t('activitiesCount', { count: chapter.activities.length })}</span>
                           </div>
                         </div>
                       </CollapsibleTrigger>

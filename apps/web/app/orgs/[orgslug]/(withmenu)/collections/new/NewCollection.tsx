@@ -126,8 +126,8 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
             <div className="space-y-2">
               <Label htmlFor="collection-visibility">{t('visibilityLabel')}</Label>
               <Select
-                onValueChange={handleVisibilityChange}
-                defaultValue={String(isPublic)}
+                onValueChange={(value) => value && handleVisibilityChange(value)}
+                value={String(isPublic)}
               >
                 <SelectTrigger
                   id="collection-visibility"

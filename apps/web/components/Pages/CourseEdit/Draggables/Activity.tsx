@@ -1,15 +1,26 @@
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import { Eye, File, MoreVertical, Pencil, Save, Sparkles, Video, X } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { AlertTriangle, Eye, File, Loader2, MoreVertical, Pencil, Save, Sparkles, Video, X } from 'lucide-react';
 import { deleteActivity, updateActivity } from '@services/courses/activities';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { useCallback, useState, useTransition } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import { useState } from 'react';
 import { mutate } from 'swr';
 
 interface ModifiedActivityInterface {
@@ -22,18 +33,30 @@ const Activity = (props: any) => {
   const session = usePlatformSession() as any;
   const [modifiedActivity, setModifiedActivity] = useState<ModifiedActivityInterface | undefined>();
   const [selectedActivity, setSelectedActivity] = useState<string | undefined>();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const t = useTranslations('CourseEdit');
   const course = useCourse();
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
-  async function removeActivity() {
-    await deleteActivity(props.activity.id, session.data?.tokens?.access_token);
-    mutate(
-      `${getAPIUrl()}chapters/meta/course_${props.courseid}?with_unpublished_activities=${withUnpublishedActivities}`,
-    );
-    await revalidateTags(['courses'], props.orgslug);
-    router.refresh();
-  }
+  const removeActivity = useCallback(() => {
+    startTransition(async () => {
+      await deleteActivity(props.activity.id, session.data?.tokens?.access_token);
+      mutate(
+        `${getAPIUrl()}chapters/meta/course_${props.courseid}?with_unpublished_activities=${withUnpublishedActivities}`,
+      );
+      await revalidateTags(['courses'], props.orgslug);
+      setIsDeleteDialogOpen(false);
+      router.refresh();
+    });
+  }, [
+    props.activity.id,
+    props.courseid,
+    props.orgslug,
+    session.data?.tokens?.access_token,
+    withUnpublishedActivities,
+    router,
+  ]);
 
   async function updateActivityName(activityId: string) {
     if (modifiedActivity?.activityId === activityId && selectedActivity !== undefined) {
@@ -163,26 +186,47 @@ const Activity = (props: any) => {
               size={15}
               className="text-gray-300"
             />
-            <ConfirmationModal
-              confirmationMessage={t('deleteActivityConfirmation')}
-              confirmationButtonText={t('deleteActivityButton')}
-              dialogTitle={t('deleteActivityTitle', {
-                name: props.activity.name,
-              })}
-              dialogTrigger={
-                <div
-                  className="rounded-md bg-red-600 p-1 px-5 hover:cursor-pointer"
-                  rel="noopener noreferrer"
-                >
-                  <X
-                    size={15}
-                    className="font-bold text-rose-200"
-                  />
-                </div>
-              }
-              functionToExecute={() => removeActivity()}
-              status="warning"
-            />
+            <AlertDialog
+              open={isDeleteDialogOpen}
+              onOpenChange={setIsDeleteDialogOpen}
+            >
+              <AlertDialogTrigger
+                render={
+                  <div className="rounded-md bg-red-600 p-1 px-5 hover:cursor-pointer">
+                    <X
+                      size={15}
+                      className="font-bold text-rose-200"
+                    />
+                  </div>
+                }
+              />
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
+                    <AlertTriangle className="size-8" />
+                  </AlertDialogMedia>
+                  <AlertDialogTitle>{t('deleteActivityTitle', { name: props.activity.name })}</AlertDialogTitle>
+                  <AlertDialogDescription>{t('deleteActivityConfirmation')}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel />
+                  <AlertDialogAction
+                    variant="destructive"
+                    onClick={removeActivity}
+                    disabled={isPending}
+                  >
+                    {isPending ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="size-4 animate-spin" />
+                        {t('deleting')}
+                      </div>
+                    ) : (
+                      t('deleteActivityButton')
+                    )}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       )}

@@ -1,16 +1,27 @@
 'use client';
 
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { useCallback, useEffect, useLayoutEffect, useState, useTransition } from 'react';
 import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
+import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
-import { useEffect, useLayoutEffect, useState } from 'react';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { PencilLine, Rss, TentTree } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
@@ -282,42 +293,71 @@ const DeleteUpdateButton = ({ update }: any) => {
   const session = usePlatformSession() as any;
   const course = useCourse();
   const t = useTranslations('Courses.CourseUpdates');
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const handleDelete = async () => {
-    const res = await deleteCourseUpdate(
-      course.courseStructure.course_uuid,
-      update.courseupdate_uuid,
-      session.data?.tokens?.access_token,
-    );
-    const toast_loading = toast.loading(t('deletingUpdate'));
-    if (res.status === 200) {
-      toast.dismiss(toast_loading);
-      toast.success(t('successfullDelete'));
-      mutate(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`);
-    } else {
-      toast.error(t('failedDelete'));
-    }
-  };
+  const handleDelete = useCallback(() => {
+    startTransition(async () => {
+      const res = await deleteCourseUpdate(
+        course.courseStructure.course_uuid,
+        update.courseupdate_uuid,
+        session.data?.tokens?.access_token,
+      );
+      const toast_loading = toast.loading(t('deletingUpdate'));
+      if (res.status === 200) {
+        toast.dismiss(toast_loading);
+        toast.success(t('successfullDelete'));
+        mutate(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`);
+        setIsOpen(false);
+      } else {
+        toast.dismiss(toast_loading);
+        toast.error(t('failedDelete'));
+      }
+    });
+  }, [course.courseStructure.course_uuid, update.courseupdate_uuid, session.data?.tokens?.access_token, t]);
 
   return (
-    <ConfirmationModal
-      confirmationButtonText={t('deleteUpdate')}
-      confirmationMessage={t('areYouSureYouWantToDeleteThisUpdate')}
-      dialogTitle={t('deleteUpdate')}
-      buttonid="delete-update-button"
-      dialogTrigger={
-        <div
-          id="delete-update-button"
-          className="rounded-full bg-rose-100 px-2 py-0.5 text-xs text-rose-600 hover:cursor-pointer"
-        >
-          {t('delete')}
-        </div>
-      }
-      functionToExecute={() => {
-        handleDelete();
-      }}
-      status="warning"
-    />
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <AlertDialogTrigger
+        render={
+          <div
+            id="delete-update-button"
+            className="rounded-full bg-rose-100 px-2 py-0.5 text-xs text-rose-600 hover:cursor-pointer"
+          >
+            {t('delete')}
+          </div>
+        }
+      />
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
+            <AlertTriangle className="size-8" />
+          </AlertDialogMedia>
+          <AlertDialogTitle>{t('deleteUpdate')}</AlertDialogTitle>
+          <AlertDialogDescription>{t('areYouSureYouWantToDeleteThisUpdate')}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel />
+          <AlertDialogAction
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={isPending}
+          >
+            {isPending ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="size-4 animate-spin" />
+                {t('deleting')}
+              </div>
+            ) : (
+              t('deleteUpdate')
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 

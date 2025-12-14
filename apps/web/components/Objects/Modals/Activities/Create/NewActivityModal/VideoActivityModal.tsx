@@ -473,22 +473,24 @@ const SubtitleManager = ({
                     </p>
                     <div className="mt-1 flex items-center gap-3">
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 border-gray-200 text-xs hover:bg-gray-50"
-                          >
-                            <span className="mr-2">
-                              {getLocalizedLanguageOptions(t).find((lang) => lang.code === subtitle.language)?.flag}
-                            </span>
-                            {subtitle.label}
-                            <ChevronDown
-                              size={12}
-                              className="ml-1 opacity-50"
-                            />
-                          </Button>
-                        </DropdownMenuTrigger>
+                        <DropdownMenuTrigger
+                          render={
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 border-gray-200 text-xs hover:bg-gray-50"
+                            >
+                              <span className="mr-2">
+                                {getLocalizedLanguageOptions(t).find((lang) => lang.code === subtitle.language)?.flag}
+                              </span>
+                              {subtitle.label}
+                              <ChevronDown
+                                size={12}
+                                className="ml-1 opacity-50"
+                              />
+                            </Button>
+                          }
+                        />
                         <DropdownMenuContent
                           align="start"
                           className="w-48"
@@ -646,35 +648,37 @@ const VideoSettingsForm = ({
       onOpenChange={setIsOpen}
       className="mt-6"
     >
-      <CollapsibleTrigger asChild>
-        <Button
-          variant="outline"
-          className="flex w-full items-center justify-between border-2 p-8 transition-colors duration-200 hover:border-gray-300 hover:bg-gray-50"
-          type="button"
-        >
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-gray-100 p-2">
-              <Settings
-                size={16}
-                className="text-gray-600"
-              />
+      <CollapsibleTrigger
+        render={
+          <Button
+            variant="outline"
+            className="flex w-full items-center justify-between border-2 p-8 transition-colors duration-200 hover:border-gray-300 hover:bg-gray-50"
+            type="button"
+          >
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-gray-100 p-2">
+                <Settings
+                  size={16}
+                  className="text-gray-600"
+                />
+              </div>
+              <div className="text-left">
+                <span className="font-medium text-gray-900">{t('additionalSettings')}</span>
+                <p className="mt-0.5 text-xs text-gray-500">{t('additionalSettingsDescription')}</p>
+              </div>
+              {settingsCount > 0 && (
+                <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+                  {t('settingsActiveCount', { count: settingsCount })}
+                </Badge>
+              )}
             </div>
-            <div className="text-left">
-              <span className="font-medium text-gray-900">{t('additionalSettings')}</span>
-              <p className="mt-0.5 text-xs text-gray-500">{t('additionalSettingsDescription')}</p>
-            </div>
-            {settingsCount > 0 && (
-              <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-                {t('settingsActiveCount', { count: settingsCount })}
-              </Badge>
-            )}
-          </div>
-          <ChevronDown
-            size={18}
-            className={`text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-          />
-        </Button>
-      </CollapsibleTrigger>
+            <ChevronDown
+              size={18}
+              className={`text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+            />
+          </Button>
+        }
+      />
 
       <CollapsibleContent className="data-[state=closed]:animate-slideUp data-[state=open]:animate-slideDown overflow-hidden">
         <div className="mt-3 space-y-6 rounded-lg border-2 border-gray-100 bg-linear-to-br from-gray-50 to-white p-6 shadow-sm">

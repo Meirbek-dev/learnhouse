@@ -98,7 +98,7 @@ const RolesUpdate: FC<Props> = (props) => {
                 <FormLabel>{t('rolesLabel')}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
                   disabled={!roles || rolesError}
                 >
                   <FormControl>

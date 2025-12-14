@@ -667,23 +667,25 @@ export default function OrgEditImages() {
                                 if (!open) resetVideoDialog();
                               }}
                             >
-                              <DialogTrigger asChild>
-                                <button
-                                  className={cn(
-                                    `w-full ${PREVIEW_HEIGHT}`,
-                                    'rounded-xl border-2 border-gray-200 border-dashed',
-                                    'transition-all duration-200 hover:border-blue-300 hover:bg-blue-50/50',
-                                    'group flex flex-col items-center justify-center space-y-2',
-                                  )}
-                                >
-                                  <div className="rounded-full bg-blue-50 p-2 transition-colors duration-200 group-hover:bg-blue-100">
-                                    <Plus
-                                      size={20}
-                                      className="text-blue-500"
-                                    />
-                                  </div>
-                                  <span className="text-sm font-medium text-gray-600">{t('Buttons.addPreview')}</span>
-                                </button>
+                              <DialogTrigger
+                                render={
+                                  <button
+                                    className={cn(
+                                      `w-full ${PREVIEW_HEIGHT}`,
+                                      'rounded-xl border-2 border-gray-200 border-dashed',
+                                      'transition-all duration-200 hover:border-blue-300 hover:bg-blue-50/50',
+                                      'group flex flex-col items-center justify-center space-y-2',
+                                    )}
+                                  />
+                                }
+                              >
+                                <div className="rounded-full bg-blue-50 p-2 transition-colors duration-200 group-hover:bg-blue-100">
+                                  <Plus
+                                    size={20}
+                                    className="text-blue-500"
+                                  />
+                                </div>
+                                <span className="text-sm font-medium text-gray-600">{t('Buttons.addPreview')}</span>
                               </DialogTrigger>
                               <DialogContent className="sm:max-w-[600px]">
                                 <DialogHeader>

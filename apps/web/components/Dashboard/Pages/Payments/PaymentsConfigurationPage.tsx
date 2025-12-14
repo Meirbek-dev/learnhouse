@@ -1,6 +1,18 @@
 'use client';
 
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
   deletePaymentConfig,
   getPaymentConfigs,
   getStripeOnboardingLink,
@@ -8,6 +20,7 @@ import {
   updateStripeAccountID,
 } from '@services/payments/payments';
 import {
+  AlertTriangle,
   BarChart2,
   Coins,
   CreditCard,
@@ -18,12 +31,11 @@ import {
   Trash2,
   UnplugIcon,
 } from 'lucide-react';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { useEffect, useRef, useState, useTransition } from 'react';
 import { getUriWithoutOrg } from '@services/config/config';
 import { SiStripe } from '@icons-pack/react-simple-icons';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -36,6 +48,59 @@ import useSWR, { mutate } from 'swr';
 import type { FC } from 'react';
 import { toast } from 'sonner';
 import * as z from 'zod';
+
+interface ConfirmDeleteStripeConfigProps {
+  onDelete: () => Promise<void>;
+  t: (key: string) => string;
+}
+
+function ConfirmDeleteStripeConfig({ onDelete, t }: ConfirmDeleteStripeConfigProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const handleDelete = useCallback(() => {
+    startTransition(async () => {
+      await onDelete();
+      setIsOpen(false);
+    });
+  }, [onDelete]);
+
+  return (
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <AlertDialogTrigger
+        render={
+          <Button className="flex items-center space-x-2 rounded-full bg-red-500 text-sm text-white transition duration-300 hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50">
+            <Trash2 size={16} />
+            <span>{t('removeConnectionButton')}</span>
+          </Button>
+        }
+      />
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogMedia>
+            <AlertTriangle className="text-destructive size-6" />
+          </AlertDialogMedia>
+          <AlertDialogTitle>{t('removeConnectionTitle')}</AlertDialogTitle>
+          <AlertDialogDescription>{t('removeConnectionConfirmation')}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending} />
+          <AlertDialogAction
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={isPending}
+          >
+            {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {t('removeConnectionButton')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
 const PaymentsConfigurationPage: FC = () => {
   const org = useOrg() as any;
@@ -221,20 +286,9 @@ const PaymentsConfigurationPage: FC = () => {
                     <span className="font-semibold">{t('connectButton')}</span>
                   </Button>
                 )}
-                <ConfirmationModal
-                  confirmationButtonText={t('removeConnectionButton')}
-                  confirmationMessage={t('removeConnectionConfirmation')}
-                  dialogTitle={t('removeConnectionTitle')}
-                  dialogTrigger={
-                    <span>
-                      <Button className="flex items-center space-x-2 rounded-full bg-red-500 text-sm text-white transition duration-300 hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50">
-                        <Trash2 size={16} />
-                        <span>{t('removeConnectionButton')}</span>
-                      </Button>
-                    </span>
-                  }
-                  functionToExecute={deleteConfig}
-                  status="warning"
+                <ConfirmDeleteStripeConfig
+                  onDelete={deleteConfig}
+                  t={t}
                 />
               </div>
             </div>

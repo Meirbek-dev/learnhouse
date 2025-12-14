@@ -1,10 +1,24 @@
 'use client';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
+  AlertTriangle,
   BookOpenCheck,
   CheckCircle,
   ChevronLeft,
   ChevronRight,
   Edit2,
+  Info,
   Loader2,
   Maximize2,
   Minimize2,
@@ -20,14 +34,13 @@ import {
 } from '@services/courses/assignments';
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
 import type { AssignmentSubmission } from '@components/Contexts/Assignments/AssignmentSubmissionContext';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity';
 import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar';
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
-import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
@@ -65,6 +78,137 @@ const LoadingFallback = () => (
     <Loader2 className="h-6 w-6 animate-spin" />
   </div>
 );
+
+// AlertDialog helper for unmark activity
+interface UnmarkActivityDialogProps {
+  onConfirm: () => Promise<void> | void;
+  t: (key: string) => string;
+}
+
+function UnmarkActivityDialog({ onConfirm, t }: UnmarkActivityDialogProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const handleConfirm = useCallback(() => {
+    startTransition(async () => {
+      await onConfirm();
+      setIsOpen(false);
+    });
+  }, [onConfirm]);
+
+  return (
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <AlertDialogTrigger
+        render={
+          <div className="soft-shadow flex flex-col rounded-md bg-teal-600 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out hover:cursor-pointer">
+            <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>
+            <div className="flex items-center space-x-2">
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect
+                  x="3"
+                  y="3"
+                  width="18"
+                  height="18"
+                  rx="2"
+                />
+                <path d="M7 12l3 3 7-7" />
+              </svg>
+              <span className="text-xs font-bold">{t('statusComplete')}</span>
+            </div>
+          </div>
+        }
+      />
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogMedia>
+            <AlertTriangle className="text-destructive size-6" />
+          </AlertDialogMedia>
+          <AlertDialogTitle>{t('unmarkDialogTitle')}</AlertDialogTitle>
+          <AlertDialogDescription>{t('unmarkConfirmation')}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending} />
+          <AlertDialogAction
+            variant="destructive"
+            onClick={handleConfirm}
+            disabled={isPending}
+          >
+            {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {t('unmarkActivity')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+// AlertDialog helper for submit assignment
+interface SubmitAssignmentDialogProps {
+  onSubmit: () => Promise<void> | void;
+  t: (key: string) => string;
+}
+
+function SubmitAssignmentDialog({ onSubmit, t }: SubmitAssignmentDialogProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const handleSubmit = useCallback(() => {
+    startTransition(async () => {
+      await onSubmit();
+      setIsOpen(false);
+    });
+  }, [onSubmit]);
+
+  return (
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <AlertDialogTrigger
+        render={
+          <div className="soft-shadow flex flex-col rounded-md bg-cyan-800 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out hover:cursor-pointer">
+            <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>
+            <div className="flex items-center space-x-2">
+              <BookOpenCheck size={17} />
+              <span className="text-xs font-bold">{t('assignmentActions.submitForGrading')}</span>
+            </div>
+          </div>
+        }
+      />
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogMedia>
+            <Info className="text-primary size-6" />
+          </AlertDialogMedia>
+          <AlertDialogTitle>{t('assignmentActions.submitYourAssingmentForGrading')}</AlertDialogTitle>
+          <AlertDialogDescription>{t('assignmentActions.submitConfirm')}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending} />
+          <AlertDialogAction
+            onClick={handleSubmit}
+            disabled={isPending}
+          >
+            {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {t('assignmentActions.submit')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
 interface ActivityClientProps {
   activityid: string;
@@ -1032,39 +1176,9 @@ export const MarkStatus = (props: {
       {isActivityCompleted() ? (
         <div className="flex items-center space-x-2">
           <div className="relative">
-            <ConfirmationModal
-              confirmationButtonText={t('unmarkActivity')}
-              confirmationMessage={t('unmarkConfirmation')}
-              dialogTitle={t('unmarkDialogTitle')}
-              dialogTrigger={
-                <div className="soft-shadow flex flex-col rounded-md bg-teal-600 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out hover:cursor-pointer">
-                  <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>
-                  <div className="flex items-center space-x-2">
-                    <svg
-                      width="17"
-                      height="17"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect
-                        x="3"
-                        y="3"
-                        width="18"
-                        height="18"
-                        rx="2"
-                      />
-                      <path d="M7 12l3 3 7-7" />
-                    </svg>
-                    <span className="text-xs font-bold">{t('statusComplete')}</span>
-                  </div>
-                </div>
-              }
-              functionToExecute={unmarkActivityAsCompleteFront}
-              status="warning"
+            <UnmarkActivityDialog
+              onConfirm={unmarkActivityAsCompleteFront}
+              t={t}
             />
           </div>
         </div>
@@ -1333,21 +1447,9 @@ const AssignmentTools = (props: {
 
   if (!submission || submission.length === 0) {
     return (
-      <ConfirmationModal
-        confirmationButtonText={t('assignmentActions.submit')}
-        confirmationMessage={t('assignmentActions.submitConfirm')}
-        dialogTitle={t('assignmentActions.submitYourAssingmentForGrading')}
-        dialogTrigger={
-          <div className="soft-shadow flex flex-col rounded-md bg-cyan-800 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out hover:cursor-pointer">
-            <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>
-            <div className="flex items-center space-x-2">
-              <BookOpenCheck size={17} />
-              <span className="text-xs font-bold">{t('assignmentActions.submitForGrading')}</span>
-            </div>
-          </div>
-        }
-        functionToExecute={submitForGradingUI}
-        status="info"
+      <SubmitAssignmentDialog
+        onSubmit={submitForGradingUI}
+        t={t}
       />
     );
   }

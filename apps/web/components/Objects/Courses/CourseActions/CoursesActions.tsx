@@ -264,7 +264,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
           onClick={() => {
             router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`));
           }}
-          aria-label="Sign up to apply as course contributor"
+          aria-label={t('aria.signupToApply')}
           className="soft-shadow mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white py-3 font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
         >
           <UserPen className="h-5 w-5" />
@@ -295,7 +295,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
       <button
         onClick={handleApplyToContribute}
         disabled={isContributeLoading}
-        aria-label="Apply to become a course contributor"
+        aria-label={t('aria.applyToBecome')}
         className="soft-shadow mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-white py-3 font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed"
       >
         {isContributeLoading ? (

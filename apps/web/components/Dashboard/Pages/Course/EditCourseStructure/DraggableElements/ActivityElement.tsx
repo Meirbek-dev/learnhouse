@@ -1,9 +1,35 @@
-import { Backpack, Eye, File, FilePenLine, Globe, Loader2, Lock, Pencil, Save, Sparkles, Video, X } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
+  AlertTriangle,
+  Backpack,
+  Eye,
+  File,
+  FilePenLine,
+  Globe,
+  Loader2,
+  Lock,
+  Pencil,
+  Save,
+  Sparkles,
+  Video,
+  X,
+} from 'lucide-react';
 import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from '@services/courses/assignments';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { deleteActivity, updateActivity } from '@services/courses/activities';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -12,7 +38,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Draggable } from '@hello-pangea/dnd';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import Link from '@components/ui/AppLink';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
@@ -37,26 +62,42 @@ const ActivityElement = (props: ActivitiyElementProps) => {
   const [modifiedActivity, setModifiedActivity] = useState<ModifiedActivityInterface | undefined>();
   const [selectedActivity, setSelectedActivity] = useState<string | undefined>();
   const [isUpdatingName, setIsUpdatingName] = useState<boolean>(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const activityUUID = props.activity.activity_uuid;
   const isMobile = useIsMobile();
   const t = useTranslations('CourseEdit.ActivityElement');
   const course = useCourse();
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
-  async function deleteActivityUI() {
-    const toast_loading = toast.loading(t('deletingActivity'));
-    // Assignments
-    if (props.activity.activity_type === 'TYPE_ASSIGNMENT') {
-      await deleteAssignmentUsingActivityUUID(props.activity.activity_uuid, access_token);
-    }
+  const deleteActivityUI = useCallback(() => {
+    startTransition(async () => {
+      const toast_loading = toast.loading(t('deletingActivity'));
+      // Assignments
+      if (props.activity.activity_type === 'TYPE_ASSIGNMENT') {
+        await deleteAssignmentUsingActivityUUID(props.activity.activity_uuid, access_token);
+      }
 
-    await deleteActivity(props.activity.activity_uuid, access_token);
-    mutate(`${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`);
-    await revalidateTags(['courses'], props.orgslug);
-    toast.dismiss(toast_loading);
-    toast.success(t('activityDeletedSuccess'));
-    router.refresh();
-  }
+      await deleteActivity(props.activity.activity_uuid, access_token);
+      mutate(
+        `${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+      );
+      await revalidateTags(['courses'], props.orgslug);
+      toast.dismiss(toast_loading);
+      toast.success(t('activityDeletedSuccess'));
+      setIsDeleteDialogOpen(false);
+      router.refresh();
+    });
+  }, [
+    props.activity.activity_type,
+    props.activity.activity_uuid,
+    props.course_uuid,
+    props.orgslug,
+    access_token,
+    withUnpublishedActivities,
+    router,
+    t,
+  ]);
 
   async function changePublicStatus() {
     const toast_loading = toast.loading(t('updating'));
@@ -230,15 +271,14 @@ const ActivityElement = (props: ActivitiyElementProps) => {
               </Link>
             </ToolTip>
             {/*   Delete Button  */}
-            <ConfirmationModal
-              confirmationMessage={t('deleteConfirmation')}
-              confirmationButtonText={t('deleteButton')}
-              dialogTitle={t('deleteTitle', { name: props.activity.name })}
-              dialogTrigger={
-                <span>
+            <AlertDialog
+              open={isDeleteDialogOpen}
+              onOpenChange={setIsDeleteDialogOpen}
+            >
+              <AlertDialogTrigger
+                render={
                   <button
                     className="flex items-center space-x-1 rounded-md bg-red-600 p-1 px-2 shadow-md transition-colors duration-200 hover:bg-red-700 sm:px-3"
-                    rel="noopener noreferrer"
                     aria-label={t('deleteButton')}
                     title={t('deleteButton')}
                   >
@@ -247,11 +287,35 @@ const ActivityElement = (props: ActivitiyElementProps) => {
                       className="font-bold text-rose-200"
                     />
                   </button>
-                </span>
-              }
-              functionToExecute={() => deleteActivityUI()}
-              status="warning"
-            />
+                }
+              />
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
+                    <AlertTriangle className="size-8" />
+                  </AlertDialogMedia>
+                  <AlertDialogTitle>{t('deleteTitle', { name: props.activity.name })}</AlertDialogTitle>
+                  <AlertDialogDescription>{t('deleteConfirmation')}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel />
+                  <AlertDialogAction
+                    variant="destructive"
+                    onClick={deleteActivityUI}
+                    disabled={isPending}
+                  >
+                    {isPending ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="size-4 animate-spin" />
+                        {t('deleting')}
+                      </div>
+                    ) : (
+                      t('deleteButton')
+                    )}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       )}

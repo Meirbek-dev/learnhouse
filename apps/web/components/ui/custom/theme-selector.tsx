@@ -46,7 +46,7 @@ export function ThemeSelector({ className }: ThemeSelectorProps) {
       <div className="space-y-3">
         <Select
           value={currentTheme.name}
-          onValueChange={handleValueChange}
+          onValueChange={(value) => value && handleValueChange(value)}
         >
           <SelectTrigger
             className="w-full sm:w-[300px]"

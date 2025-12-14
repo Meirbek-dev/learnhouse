@@ -25,17 +25,15 @@ export default function CourseBreadcrumbs({ course, orgslug }: CourseBreadcrumbs
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link
-                href={`${getUriWithOrg(orgslug, '')}/courses`}
-                className="flex items-center space-x-2"
-              >
-                <Book
-                  className="text-gray"
-                  size={14}
-                />
-                <span>{t('courses')}</span>
-              </Link>
+            <BreadcrumbLink
+              render={<Link href={`${getUriWithOrg(orgslug, '')}/courses`} />}
+              className="flex items-center space-x-2"
+            >
+              <Book
+                className="text-gray"
+                size={14}
+              />
+              <span>{t('courses')}</span>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />

@@ -8,7 +8,7 @@
       "@types/react-dom": "19.2.3"
     },
     "onlyBuiltDependencies": [
-      "@swc/core",
+      "@parcel/watcher",
       "@tailwindcss/oxide",
       "core-js",
       "sharp",
@@ -24,9 +24,9 @@
     "start": "turbo run start"
   },
   "devDependencies": {
-    "eslint": "^9.39.1",
+    "eslint": "^9.39.2",
     "oxlint": "^1.32.0",
-    "oxlint-tsgolint": "^0.8.6",
+    "oxlint-tsgolint": "^0.9.0",
     "prettier": "^3.7.4",
     "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-sort-imports": "^1.8.9",

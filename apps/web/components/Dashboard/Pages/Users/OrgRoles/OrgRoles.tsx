@@ -1,23 +1,93 @@
 'use client';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
+import { AlertTriangle, Globe, Loader2, Pencil, Shield, X } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import EditRole from '@components/Objects/Modals/Dash/OrgRoles/EditRole';
 import AddRole from '@components/Objects/Modals/Dash/OrgRoles/AddRole';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { useCallback, useState, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { Globe, Pencil, Shield, X } from 'lucide-react';
 import { getAPIUrl } from '@services/config/config';
 import { deleteRole } from '@services/roles/roles';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
-import { useState } from 'react';
 import type { FC } from 'react';
 import { toast } from 'sonner';
+
+interface DeleteRoleButtonProps {
+  roleId: string;
+  onDelete: (roleId: string) => Promise<void>;
+  t: (key: string) => string;
+  variant?: 'default' | 'compact';
+}
+
+function DeleteRoleButton({ roleId, onDelete, t, variant = 'default' }: DeleteRoleButtonProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const handleDelete = useCallback(() => {
+    startTransition(async () => {
+      await onDelete(roleId);
+      setIsOpen(false);
+    });
+  }, [onDelete, roleId]);
+
+  return (
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <AlertDialogTrigger
+        render={
+          <Button
+            variant="destructive"
+            size="sm"
+            className={variant === 'default' ? 'flex-1' : ''}
+          >
+            <X className="h-4 w-4" />
+            {t('deleteRole')}
+          </Button>
+        }
+      />
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogMedia>
+            <AlertTriangle className="text-destructive size-6" />
+          </AlertDialogMedia>
+          <AlertDialogTitle>{t('deleteRoleTitle')}</AlertDialogTitle>
+          <AlertDialogDescription>{t('deleteRoleConfirmation')}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending} />
+          <AlertDialogAction
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={isPending}
+          >
+            {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {t('deleteRole')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
 const OrgRoles: FC = () => {
   const t = useTranslations('Components.OrgRoles');
@@ -147,24 +217,10 @@ const OrgRoles: FC = () => {
                             </Button>
                           }
                         />
-                        <ConfirmationModal
-                          confirmationButtonText={t('deleteRole')}
-                          confirmationMessage={t('deleteRoleConfirmation')}
-                          dialogTitle={t('deleteRoleTitle')}
-                          dialogTrigger={
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              className="flex-1"
-                            >
-                              <X className="h-4 w-4" />
-                              {t('deleteRole')}
-                            </Button>
-                          }
-                          functionToExecute={() => {
-                            deleteRoleUI(role.id);
-                          }}
-                          status="warning"
+                        <DeleteRoleButton
+                          roleId={role.id}
+                          onDelete={deleteRoleUI}
+                          t={t}
                         />
                       </>
                     ) : null}
@@ -240,23 +296,11 @@ const OrgRoles: FC = () => {
                                 </Button>
                               }
                             />
-                            <ConfirmationModal
-                              confirmationButtonText={t('deleteRole')}
-                              confirmationMessage={t('deleteRoleConfirmation')}
-                              dialogTitle={t('deleteRoleTitle')}
-                              dialogTrigger={
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                >
-                                  <X className="h-4 w-4" />
-                                  {t('deleteRole')}
-                                </Button>
-                              }
-                              functionToExecute={() => {
-                                deleteRoleUI(role.id);
-                              }}
-                              status="warning"
+                            <DeleteRoleButton
+                              roleId={role.id}
+                              onDelete={deleteRoleUI}
+                              t={t}
+                              variant="compact"
                             />
                           </>
                         ) : null}
