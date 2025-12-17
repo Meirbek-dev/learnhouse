@@ -107,11 +107,12 @@
       "video": "Видео"
     },
     "chapter": "Глава",
-    "completed": "Завершено",
+    "completed": "завершено",
     "currentActivity": "Текущая активность",
     "nextActivity": "Следующая активность",
     "notStarted": "Не завершено",
     "previousActivity": "Предыдущая активность",
+    "progress": "Прогресс",
     "unknownActivity": "Неизвестная активность"
   },
   "ActivityPage": {
@@ -291,8 +292,9 @@
   "Certificates": {
     "ActivityIndicators": {
       "certificationAvailable": "Курс завершён!",
-      "earnCertificate": "Завершите все задания, чтобы получить сертификат",
-      "viewCertificate": "Просмотрите ваш сертификат за завершение курса"
+      "completeAllActivities": "Завершите все задания для разблокировки",
+      "earnCertificate": "Получить сертификат",
+      "viewCertificate": "Просмотреть сертификат"
     },
     "CertificatePage": {
       "awarded": "Присвоен",
@@ -5400,6 +5402,7 @@
     "viewCourses": "Просмотреть курсы"
   },
   "Validation": {
+    "selectGradingType": "Выберите тип оценивания",
     "activityDescriptionRequired": "Требуется описание активности",
     "activityNameRequired": "Требуется название активности",
     "assignmentDescriptionRequired": "Требуется описание задания",

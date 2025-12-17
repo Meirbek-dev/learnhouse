@@ -108,7 +108,7 @@ export default defineConfig([
     rules: /** @type {any} */ ({
       ...COMMON_RULES,
       '@typescript-eslint/no-unsafe-function-type': 'off',
-      '@typescript-eslint/no-require-imports': 'warn',
+      '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/triple-slash-reference': 'warn',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'off',

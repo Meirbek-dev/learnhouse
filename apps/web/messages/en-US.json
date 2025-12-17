@@ -107,11 +107,12 @@
       "video": "Video"
     },
     "chapter": "Chapter",
-    "completed": "Completed",
+    "completed": "completed",
     "currentActivity": "Current Activity",
     "nextActivity": "Next activity",
     "notStarted": "Not Started",
     "previousActivity": "Previous activity",
+    "progress": "Progress",
     "unknownActivity": "Unknown Activity"
   },
   "ActivityPage": {
@@ -291,8 +292,9 @@
   "Certificates": {
     "ActivityIndicators": {
       "certificationAvailable": "Course Completed!",
-      "earnCertificate": "Complete all activities to earn a certificate",
-      "viewCertificate": "View your certificate for completing this course"
+      "completeAllActivities": "Complete all activities to unlock",
+      "earnCertificate": "Earn Certificate",
+      "viewCertificate": "View your certificate"
     },
     "CertificatePage": {
       "awarded": "Awarded",
@@ -5403,6 +5405,7 @@
     "viewCourses": "View Courses"
   },
   "Validation": {
+    "selectGradingType": "Select grading type",
     "activityDescriptionRequired": "Activity description is required",
     "activityNameRequired": "Activity name is required",
     "assignmentDescriptionRequired": "Assignment description is required",

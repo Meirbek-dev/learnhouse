@@ -1,6 +1,7 @@
 'use client';
 import { Tooltip, TooltipContent as TooltipContentPrimitive, TooltipTrigger } from '@/components/ui/tooltip';
 import styled, { css, keyframes } from 'styled-components';
+import React, { Children, cloneElement, isValidElement } from 'react';
 import type { ReactNode } from 'react';
 
 interface TooltipProps {
@@ -12,19 +13,33 @@ interface TooltipProps {
   unstyled?: boolean; // new prop to remove default styling
 }
 
-const ToolTip = ({ sideOffset, content, children, side = 'bottom', slateBlack, unstyled }: TooltipProps) => (
-  <Tooltip>
-    <TooltipTrigger render={<span />}>{children}</TooltipTrigger>
-    <StyledTooltipContent
-      slateBlack={slateBlack}
-      unstyled={unstyled}
-      side={side}
-      sideOffset={sideOffset}
-    >
-      {content}
-    </StyledTooltipContent>
-  </Tooltip>
-);
+const ToolTip = ({ sideOffset, content, children, side = 'bottom', slateBlack, unstyled }: TooltipProps) => {
+  // If caller passed a single React element, use it as the `render` prop so it becomes the trigger element
+  const singleChild = Children.count(children) === 1 ? (Children.only(children) as React.ReactElement) : null;
+
+  const triggerRender = isValidElement(singleChild) ? cloneElement(singleChild) : <span />;
+
+  return (
+    <Tooltip>
+      {isValidElement(singleChild) ? (
+        // Pass the element itself as render (no children so it won't be duplicated)
+        <TooltipTrigger render={triggerRender} />
+      ) : (
+        // Fallback: render a span wrapper and keep children inside
+        <TooltipTrigger render={<span />}>{children}</TooltipTrigger>
+      )}
+
+      <StyledTooltipContent
+        slateBlack={slateBlack}
+        unstyled={unstyled}
+        side={side}
+        sideOffset={sideOffset}
+      >
+        {content}
+      </StyledTooltipContent>
+    </Tooltip>
+  );
+};
 
 const slideUpAndFade = keyframes({
   '0%': { opacity: 0, transform: 'translateY(2px)' },

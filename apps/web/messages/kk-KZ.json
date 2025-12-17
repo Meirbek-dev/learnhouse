@@ -107,11 +107,12 @@
       "video": "Бейне"
     },
     "chapter": "Тарау",
-    "completed": "Аяқталды",
+    "completed": "аяқталды",
     "currentActivity": "Ағымдағы әрекет",
     "nextActivity": "Келесі әрекет",
     "notStarted": "Басталмаған",
     "previousActivity": "Алдыңғы әрекет",
+    "progress": "Прогресс",
     "unknownActivity": "Белгісіз әрекет"
   },
   "ActivityPage": {
@@ -291,8 +292,9 @@
   "Certificates": {
     "ActivityIndicators": {
       "certificationAvailable": "Курс аяқталды!",
-      "earnCertificate": "Сертификат алу үшін барлық тапсырмаларды аяқтаңыз",
-      "viewCertificate": "Осы курсты аяқтағаныңыз туралы сертификатты қараңыз"
+      "completeAllActivities": "Ашу үшін барлық тапсырмаларды аяқтаңыз",
+      "earnCertificate": "Сертификат алу",
+      "viewCertificate": "Сертификатты қарау"
     },
     "CertificatePage": {
       "awarded": "Берілді",
@@ -5392,6 +5394,7 @@
     "viewCourses": "Курстарды қарау"
   },
   "Validation": {
+    "selectGradingType": "Бағалау түрін таңдаңыз",
     "activityDescriptionRequired": "Белсенділік сипаттамасы қажет",
     "activityNameRequired": "Белсенділік атауы қажет",
     "assignmentDescriptionRequired": "Тапсырма сипаттамасы қажет",
