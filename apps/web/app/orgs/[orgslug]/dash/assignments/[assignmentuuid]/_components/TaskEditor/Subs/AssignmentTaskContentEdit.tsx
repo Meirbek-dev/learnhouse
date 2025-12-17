@@ -2,12 +2,9 @@ import { useAssignmentsTask } from '@components/Contexts/Assignments/Assignments
 import TaskQuizObject from './TaskTypes/TaskQuizObject';
 import TaskFormObject from './TaskTypes/TaskFormObject';
 import TaskFileObject from './TaskTypes/TaskFileObject';
-import { useEffect } from 'react';
 
 const AssignmentTaskContentEdit = () => {
   const assignment_task = useAssignmentsTask();
-
-  useEffect(() => {}, []);
 
   return (
     <div>

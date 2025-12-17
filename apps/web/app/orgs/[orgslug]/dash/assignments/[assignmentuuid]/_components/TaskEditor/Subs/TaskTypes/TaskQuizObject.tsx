@@ -402,11 +402,19 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
 
   /* GRADING VIEW CODE */
 
+  // Only set selected task UUID in teacher view (single component context)
+  // Skip for student/grading views where multiple task components render simultaneously
   useEffect(() => {
-    assignmentTaskStateHook({
-      type: 'setSelectedAssignmentTaskUUID',
-      payload: assignmentTaskUUID,
-    });
+    if (view === 'teacher' && assignmentTaskUUID) {
+      assignmentTaskStateHook({
+        type: 'setSelectedAssignmentTaskUUID',
+        payload: assignmentTaskUUID,
+      });
+    }
+  }, [view, assignmentTaskUUID, assignmentTaskStateHook]);
+
+  // Fetch data based on view
+  useEffect(() => {
     // Student area - fetch tasks and submissions
     if (view === 'student') {
       void Promise.resolve().then(() => getAssignmentTaskUI());
@@ -419,7 +427,6 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
     }
     // Teacher area initializes from state via lazy initialization
   }, [
-    assignmentTaskStateHook,
     assignmentTaskUUID,
     view,
     access_token,

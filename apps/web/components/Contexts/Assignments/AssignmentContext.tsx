@@ -85,7 +85,7 @@ export const AssignmentProvider = ({
 
   if (isLoading) return <PageLoading />;
 
-  return <AssignmentContext value={assignmentsFull}>{children}</AssignmentContext>;
+  return <AssignmentContext.Provider value={assignmentsFull}>{children}</AssignmentContext.Provider>;
 };
 
 export function useAssignments(): AssignmentContextType {

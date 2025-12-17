@@ -6,7 +6,7 @@ import { useAssignments } from '@components/Contexts/Assignments/AssignmentConte
 import { FileUp, ListTodo, PanelLeftOpen, Plus, Type } from 'lucide-react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import NewTaskModal from './Modals/NewTaskModal';
 
@@ -23,8 +23,6 @@ const AssignmentTasks = ({ assignment_uuid }: any) => {
       payload: task_uuid,
     });
   }
-
-  useEffect(() => {}, []);
 
   return (
     <div className="flex h-full w-full overflow-auto">

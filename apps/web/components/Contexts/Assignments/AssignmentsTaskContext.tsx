@@ -55,9 +55,9 @@ export const AssignmentsTaskProvider = ({ children }: { children: ReactNode }) =
   }, [state.selectedAssignmentTaskUUID, assignment.assignment_object?.assignment_uuid, fetchAssignmentTask]);
 
   return (
-    <AssignmentsTaskContext value={state}>
-      <AssignmentsTaskDispatchContext value={dispatch}>{children}</AssignmentsTaskDispatchContext>
-    </AssignmentsTaskContext>
+    <AssignmentsTaskContext.Provider value={state}>
+      <AssignmentsTaskDispatchContext.Provider value={dispatch}>{children}</AssignmentsTaskDispatchContext.Provider>
+    </AssignmentsTaskContext.Provider>
   );
 };
 

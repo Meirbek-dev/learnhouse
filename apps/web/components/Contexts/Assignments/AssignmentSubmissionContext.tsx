@@ -59,7 +59,7 @@ const AssignmentSubmissionProvider = ({ children, assignment_uuid }: AssignmentS
     error: assignmentError || null,
   };
 
-  return <AssignmentSubmissionContext value={contextValue}>{children}</AssignmentSubmissionContext>;
+  return <AssignmentSubmissionContext.Provider value={contextValue}>{children}</AssignmentSubmissionContext.Provider>;
 };
 
 export function useAssignmentSubmission(): AssignmentSubmissionContextType {

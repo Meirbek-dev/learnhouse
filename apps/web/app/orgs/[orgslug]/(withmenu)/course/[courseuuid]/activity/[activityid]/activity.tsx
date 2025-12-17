@@ -474,18 +474,16 @@ const ActivityClient = (props: ActivityClientProps) => {
   // Load assignment data when activity changes
   useEffect(() => {
     const loadAssignment = async () => {
-      if (!activity?.activity_uuid) return;
-      const assignment = await getAssignmentFromActivityUUID(activity.activity_uuid, access_token);
-      setAssignment(assignment.data);
+      if (!activity?.activity_uuid || !access_token) return;
+      const res = await getAssignmentFromActivityUUID(activity.activity_uuid, access_token);
+      setAssignment(res.data);
     };
 
     if (activity?.activity_type === 'TYPE_ASSIGNMENT') {
-      // Use setTimeout to break out of render phase
-      const timeout = setTimeout(() => setMarkStatusButtonActive(false), 0);
+      setMarkStatusButtonActive(false);
       loadAssignment();
-      return () => clearTimeout(timeout);
     }
-  }, [activity, access_token, setAssignment]);
+  }, [activity?.activity_uuid, activity?.activity_type, access_token]);
 
   return (
     <CourseProvider courseuuid={course?.course_uuid}>

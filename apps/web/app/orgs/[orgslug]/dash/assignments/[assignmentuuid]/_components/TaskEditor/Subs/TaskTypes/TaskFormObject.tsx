@@ -373,15 +373,16 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
     }
   }, [view, assignmentTaskUUID, assignment.assignment_object.assignment_uuid, access_token]);
 
-  // Set assignment task UUID in context - separate effect to avoid dependency issues
+  // Set assignment task UUID in context - only for teacher view (single component)
+  // Skip for student/grading views where multiple task components render simultaneously
   useEffect(() => {
-    if (assignmentTaskUUID) {
+    if (view === 'teacher' && assignmentTaskUUID) {
       assignmentTaskStateHook({
         type: 'setSelectedAssignmentTaskUUID',
         payload: assignmentTaskUUID,
       });
     }
-  }, [assignmentTaskUUID, assignmentTaskStateHook]);
+  }, [view, assignmentTaskUUID, assignmentTaskStateHook]);
 
   useEffect(() => {
     if (view === 'teacher') {

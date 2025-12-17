@@ -10,14 +10,11 @@ import { getTaskRefFileDir } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import { useEffect } from 'react';
 
 const AssignmentStudentActivity = () => {
   const t = useTranslations('Activities.AssignmentStudentActivity');
   const assignments = useAssignments();
   const org = useOrg() as any;
-
-  useEffect(() => {}, []);
 
   return (
     <div className="flex flex-col space-y-4 md:space-y-6">
