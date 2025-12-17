@@ -8,7 +8,10 @@ function NavigationMenu({ className, children, ...props }: NavigationMenuPrimiti
   return (
     <NavigationMenuPrimitive.Root
       data-slot="navigation-menu"
-      className={cn('max-w-max group/navigation-menu relative flex flex-1 items-center justify-center', className)}
+      className={cn(
+        'max-w-max group/navigation-menu relative flex max-w-max flex-1 items-center justify-center',
+        className,
+      )}
       {...props}
     >
       {children}

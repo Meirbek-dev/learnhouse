@@ -94,6 +94,9 @@ const Editor = (props: EditorProps) => {
     () => [
       StarterKit.configure({
         codeBlock: false,
+        // Disable the built-in `link` extension because we add a custom configured
+        // link implementation via `getLinkExtension()` to avoid duplicate names
+        link: false,
         bulletList: {
           HTMLAttributes: {
             class: 'bullet-list',

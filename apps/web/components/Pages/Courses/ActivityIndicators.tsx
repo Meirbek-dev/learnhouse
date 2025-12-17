@@ -82,19 +82,44 @@ const ActivityTypeIcon = ({ activityType, size = 14 }: { activityType: string; s
   const colorClass = getActivityTypeIconColor(activityType);
   switch (activityType) {
     case 'TYPE_VIDEO': {
-      return <Video size={size} className={colorClass} />;
+      return (
+        <Video
+          size={size}
+          className={colorClass}
+        />
+      );
     }
     case 'TYPE_DOCUMENT': {
-      return <FileText size={size} className={colorClass} />;
+      return (
+        <FileText
+          size={size}
+          className={colorClass}
+        />
+      );
     }
     case 'TYPE_DYNAMIC': {
-      return <Layers size={size} className={colorClass} />;
+      return (
+        <Layers
+          size={size}
+          className={colorClass}
+        />
+      );
     }
     case 'TYPE_ASSIGNMENT': {
-      return <BookOpenCheck size={size} className={colorClass} />;
+      return (
+        <BookOpenCheck
+          size={size}
+          className={colorClass}
+        />
+      );
     }
     default: {
-      return <FileText size={size} className={colorClass} />;
+      return (
+        <FileText
+          size={size}
+          className={colorClass}
+        />
+      );
     }
   }
 };
@@ -112,8 +137,13 @@ const ActivityTooltipContent = ({
   return (
     <div className="min-w-[220px] rounded-xl bg-white p-4 shadow-lg ring-1 ring-gray-100">
       <div className="flex items-start gap-3">
-        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${getActivityTypeBadgeColor(activity.activity_type).split(' ')[0]}`}>
-          <ActivityTypeIcon activityType={activity.activity_type} size={16} />
+        <div
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${getActivityTypeBadgeColor(activity.activity_type).split(' ')[0]}`}
+        >
+          <ActivityTypeIcon
+            activityType={activity.activity_type}
+            size={16}
+          />
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-gray-900">{activity.name}</p>
@@ -121,14 +151,21 @@ const ActivityTooltipContent = ({
         </div>
       </div>
       <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
-        <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium ${
-          isCurrent
-            ? 'bg-blue-50 text-blue-600'
-            : isDone
-              ? 'bg-emerald-50 text-emerald-600'
-              : 'bg-gray-50 text-gray-500'
-        }`}>
-          {isDone && <Check size={12} className="stroke-[2.5]" />}
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium ${
+            isCurrent
+              ? 'bg-blue-50 text-blue-600'
+              : isDone
+                ? 'bg-emerald-50 text-emerald-600'
+                : 'bg-gray-50 text-gray-500'
+          }`}
+        >
+          {isDone && (
+            <Check
+              size={12}
+              className="stroke-[2.5]"
+            />
+          )}
           {isCurrent ? t('currentActivity') : isDone ? t('completed') : t('notStarted')}
         </span>
       </div>
@@ -154,13 +191,24 @@ const ChapterTooltipContent = ({
   return (
     <div className="min-w-[200px] rounded-xl bg-white p-4 shadow-lg ring-1 ring-gray-100">
       <div className="flex items-center gap-3">
-        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-semibold ${
-          isComplete ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-600'
-        }`}>
-          {isComplete ? <Check size={16} className="stroke-[2.5]" /> : chapterNumber}
+        <div
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-semibold ${
+            isComplete ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-600'
+          }`}
+        >
+          {isComplete ? (
+            <Check
+              size={16}
+              className="stroke-[2.5]"
+            />
+          ) : (
+            chapterNumber
+          )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium text-gray-500">{t('chapter')} {chapterNumber}</p>
+          <p className="text-xs font-medium text-gray-500">
+            {t('chapter')} {chapterNumber}
+          </p>
           <p className="truncate text-sm font-medium text-gray-900">{chapter.name}</p>
         </div>
       </div>
@@ -199,10 +247,15 @@ const CertificationBadge = ({
       content={
         <div className="min-w-[200px] rounded-xl bg-white p-4 shadow-lg ring-1 ring-gray-100">
           <div className="flex items-center gap-3">
-            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-              isCompleted ? 'bg-gradient-to-br from-yellow-400 to-orange-400' : 'bg-gray-100'
-            }`}>
-              <Trophy size={20} className={isCompleted ? 'text-white' : 'text-gray-400'} />
+            <div
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                isCompleted ? 'bg-gradient-to-br from-yellow-400 to-orange-400' : 'bg-gray-100'
+              }`}
+            >
+              <Trophy
+                size={20}
+                className={isCompleted ? 'text-white' : 'text-gray-400'}
+              />
             </div>
             <div>
               <p className="text-sm font-medium text-gray-900">
@@ -231,7 +284,10 @@ const CertificationBadge = ({
               : 'bg-gray-100'
           }`}
         >
-          <Trophy size={14} className={isCompleted ? 'text-white' : 'text-gray-400'} />
+          <Trophy
+            size={14}
+            className={isCompleted ? 'text-white' : 'text-gray-400'}
+          />
         </div>
       </Link>
     </ToolTip>
@@ -336,7 +392,10 @@ const ActivityIndicators = (props: Props) => {
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-50 transition-all duration-200 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
           aria-label={t('previousActivity')}
         >
-          <ChevronLeft size={18} className="text-gray-600" />
+          <ChevronLeft
+            size={18}
+            className="text-gray-600"
+          />
         </button>
       ) : null}
 
@@ -378,16 +437,21 @@ const ActivityIndicators = (props: Props) => {
                           : 'bg-white text-gray-600 shadow-sm ring-1 ring-gray-200'
                       }`}
                     >
-                      {isChapterComplete ? <Check size={12} className="stroke-[2.5]" /> : chapterIndex + 1}
+                      {isChapterComplete ? (
+                        <Check
+                          size={12}
+                          className="stroke-[2.5]"
+                        />
+                      ) : (
+                        chapterIndex + 1
+                      )}
                     </div>
                   </Link>
                 ) : (
                   <div className="relative flex shrink-0 items-center justify-center">
                     <div
                       className={`flex h-6 w-6 cursor-not-allowed items-center justify-center rounded-full text-[10px] font-semibold ${
-                        isChapterComplete
-                          ? 'bg-emerald-500 text-white'
-                          : 'bg-white text-gray-400 ring-1 ring-gray-200'
+                        isChapterComplete ? 'bg-emerald-500 text-white' : 'bg-white text-gray-400 ring-1 ring-gray-200'
                       }`}
                     >
                       {chapterIndex + 1}
@@ -460,7 +524,10 @@ const ActivityIndicators = (props: Props) => {
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-50 transition-all duration-200 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
           aria-label={t('nextActivity')}
         >
-          <ChevronRight size={18} className="text-gray-600" />
+          <ChevronRight
+            size={18}
+            className="text-gray-600"
+          />
         </button>
       ) : null}
     </div>

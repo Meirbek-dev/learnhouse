@@ -1,7 +1,6 @@
 'use client';
 
-import type { VariantProps } from 'class-variance-authority';
-import { cva } from 'class-variance-authority';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { useMemo } from 'react';
 
 import { Separator } from '@/components/ui/separator';
@@ -165,7 +164,7 @@ function FieldError({
   errors,
   ...props
 }: React.ComponentProps<'div'> & {
-  errors?: ({ message?: string } | undefined)[];
+  errors?: Array<{ message?: string } | undefined>;
 }) {
   const content = useMemo(() => {
     if (children) {

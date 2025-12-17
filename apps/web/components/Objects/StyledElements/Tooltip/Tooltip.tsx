@@ -1,7 +1,7 @@
 'use client';
 import { Tooltip, TooltipContent as TooltipContentPrimitive, TooltipTrigger } from '@/components/ui/tooltip';
-import styled, { css, keyframes } from 'styled-components';
 import React, { Children, cloneElement, isValidElement } from 'react';
+import styled, { css, keyframes } from 'styled-components';
 import type { ReactNode } from 'react';
 
 interface TooltipProps {

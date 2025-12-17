@@ -8,7 +8,7 @@
       "@types/react-dom": "19.2.3"
     },
     "onlyBuiltDependencies": [
-      "@swc/core",
+      "@parcel/watcher",
       "@tailwindcss/oxide",
       "core-js",
       "sharp",

@@ -68,6 +68,9 @@ const Canva = (props: Editor) => {
       StarterKit.configure({
         heading: false,
         codeBlock: false,
+        // Disable the built-in `link` extension because we add a custom configured
+        // link implementation via `getLinkExtension()` to avoid duplicate names
+        link: false,
         bulletList: {
           HTMLAttributes: {
             class: 'bullet-list',
