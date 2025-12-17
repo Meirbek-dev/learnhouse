@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Award,
@@ -20,9 +20,9 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { createElement, useEffect, useState, useEffectEvent } from 'react';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { updateProfile } from '@services/settings/profile';
-import { createElement, useEffect, useState, useEffectEvent } from 'react';
 import { de, enUS, es, fr, ru } from 'date-fns/locale';
 import { useLocale, useTranslations } from 'next-intl';
 import { Textarea } from '@components/ui/textarea';
@@ -244,9 +244,7 @@ const UserProfileBuilder = () => {
         if (userData.profile) {
           try {
             const profileSections =
-              typeof userData.profile === 'string'
-                ? JSON.parse(userData.profile).sections
-                : userData.profile.sections;
+              typeof userData.profile === 'string' ? JSON.parse(userData.profile).sections : userData.profile.sections;
 
             setProfileData({
               sections: profileSections || [],

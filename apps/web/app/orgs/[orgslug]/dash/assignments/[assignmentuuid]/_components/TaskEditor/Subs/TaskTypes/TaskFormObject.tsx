@@ -538,7 +538,11 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                           <div className="mx-2 text-xs text-gray-600">
                             <span className="font-semibold">{t('expected')}</span> {blank.correctAnswer}
                           </div>
-                          {blank.hint && <div className="mx-2 text-xs text-blue-600 italic">{t('hintIcon')} {blank.hint}</div>}
+                          {blank.hint && (
+                            <div className="mx-2 text-xs text-blue-600 italic">
+                              {t('hintIcon')} {blank.hint}
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div className="flex w-full flex-col space-y-1 py-2">
@@ -560,7 +564,11 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                             data-blank-id={blank.blankUUID}
                             className="mx-2 w-full rounded-md border-2 border-gray-200 bg-[#00008b00] px-3 pr-6 text-sm font-bold text-neutral-600 transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
                           />
-                          {blank.hint && <div className="mx-2 text-xs text-blue-600 italic">{t('hintIcon')} {blank.hint}</div>}
+                          {blank.hint && (
+                            <div className="mx-2 text-xs text-blue-600 italic">
+                              {t('hintIcon')} {blank.hint}
+                            </div>
+                          )}
                         </div>
                       )}
                       {view === 'teacher' && (

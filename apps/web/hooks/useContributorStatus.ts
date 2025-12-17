@@ -1,8 +1,8 @@
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseContributors } from '@services/courses/courses';
 import { useCallback, useEffect, useState } from 'react';
-import { useEffectEvent } from 'react';
 import { useTranslations } from 'next-intl';
+import { useEffectEvent } from 'react';
 import { toast } from 'sonner';
 
 export type ContributorStatus = 'NONE' | 'PENDING' | 'ACTIVE' | 'INACTIVE';
@@ -37,9 +37,7 @@ export function useContributorStatus(courseUuid: string) {
       );
 
       if (response?.data && Array.isArray(response.data)) {
-        const currentUser = response.data.find(
-          (contributor: Contributor) => contributor.user_id === userId
-        );
+        const currentUser = response.data.find((contributor: Contributor) => contributor.user_id === userId);
 
         if (currentUser) {
           setContributorStatus(currentUser.authorship_status as ContributorStatus);

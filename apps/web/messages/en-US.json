@@ -1714,6 +1714,7 @@
       "authenticateToStart": "Authenticate to start course",
       "author": "Author",
       "authors": "Authors",
+      "completed": "Done",
       "completedActivities": "{completedActivities} of {totalActivities} completed",
       "continueLearning": "Continue Learning",
       "contributeError": "Failed to submit your application. Please try again later.",
@@ -1723,6 +1724,7 @@
       "contributorApplicationMessage": "I would like to contribute to this course.",
       "contributorApplicationPending": "Contributor application pending",
       "contributorApplicationSuccess": "Your application to contribute has been submitted successfully",
+      "courseCompleted": "Course Completed!",
       "courseProgress": "Course Progress",
       "courseRequiresPurchase": "This course requires purchase to access its content.",
       "leaveCourse": "Leave Course",
@@ -1753,7 +1755,14 @@
       "youAreAContributor": "You are a contributor",
       "youAreContributor": "You are a contributor",
       "youHavePurchasedThisCourse": "You have purchased this course and have full access to all content.",
-      "youOwnThisCourse": "You Own This Course"
+      "youOwnThisCourse": "You Own This Course",
+      "progressCard": {
+        "courseCompleted": "Course Completed!",
+        "completedAllActivities": "Great job! You have completed all activities.",
+        "activitiesCompletedLabel": "activities completed",
+        "chapterActivitiesCount": "{completed}/{total} activities",
+        "complete": "Complete"
+      }
     },
     "PaidCourseActivityDisclaimer": {
       "message": "This content requires a course purchase to access.",

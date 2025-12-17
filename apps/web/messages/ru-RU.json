@@ -1714,6 +1714,7 @@
       "authenticateToStart": "Авторизуйтесь, чтобы начать курс",
       "author": "Автор",
       "authors": "Авторы",
+      "completed": "Готово",
       "completedActivities": "Завершено {completedActivities} из {totalActivities}",
       "continueLearning": "Продолжить обучение",
       "contributeError": "Не удалось отправить заявку. Пожалуйста, повторите попытку позже.",
@@ -1723,6 +1724,7 @@
       "contributorApplicationMessage": "Я хотел бы внести свой вклад в этот курс.",
       "contributorApplicationPending": "Заявка на участие в качестве автора на рассмотрении",
       "contributorApplicationSuccess": "Ваша заявка на участие успешно отправлена",
+      "courseCompleted": "Курс завершён!",
       "courseProgress": "Прогресс курса",
       "courseRequiresPurchase": "Для доступа к содержимому этого курса требуется покупка.",
       "leaveCourse": "Покинуть курс",
@@ -1753,7 +1755,14 @@
       "youAreAContributor": "Вы являетесь автором",
       "youAreContributor": "Вы являетесь автором",
       "youHavePurchasedThisCourse": "Вы приобрели этот курс и имеете полный доступ ко всему содержимому.",
-      "youOwnThisCourse": "Вы являетесь владельцем этого курса"
+      "youOwnThisCourse": "Вы являетесь владельцем этого курса",
+      "progressCard": {
+        "courseCompleted": "Курс завершён!",
+        "completedAllActivities": "Отличная работа! Вы завершили все активности.",
+        "activitiesCompletedLabel": "активностей завершено",
+        "chapterActivitiesCount": "{completed}/{total} активностей",
+        "complete": "Завершено"
+      }
     },
     "PaidCourseActivityDisclaimer": {
       "message": "Для доступа содержимому требуется покупка курса.",

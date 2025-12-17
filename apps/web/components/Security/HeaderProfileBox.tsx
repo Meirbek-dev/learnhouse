@@ -275,7 +275,8 @@ export const HeaderProfileBox = () => {
                   <span>{t('profile.userSettings')}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant='destructive'
+                <DropdownMenuItem
+                  variant="destructive"
                   onClick={() => signOut({ callbackUrl: '/' })}
                   className="flex space-x-2"
                 >

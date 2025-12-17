@@ -1712,6 +1712,7 @@
       "authenticateToStart": "Курсты бастау үшін авторизациядан өтіңіз",
       "author": "Автор",
       "authors": "Авторлар",
+      "completed": "Дайын",
       "completedActivities": "{totalActivities} белсенділіктің {completedActivities} аяқталды",
       "continueLearning": "Оқуды жалғастыру",
       "contributeError": "Өтінім жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",
@@ -1721,6 +1722,7 @@
       "contributorApplicationMessage": "Мен бұл курсқа үлес қосқым келеді.",
       "contributorApplicationPending": "Автор ретінде қатысуға өтінім қаралуда",
       "contributorApplicationSuccess": "Қатысуға өтініміңіз сәтті жіберілді",
+      "courseCompleted": "Курс аяқталды!",
       "courseProgress": "Курс үлгерімі",
       "courseRequiresPurchase": "Бұл курстың мазмұнына қол жеткізу үшін сатып алу қажет.",
       "leaveCourse": "Курстан шығу",
@@ -1751,7 +1753,14 @@
       "youAreAContributor": "Сіз авторсыз",
       "youAreContributor": "Сіз авторсыз",
       "youHavePurchasedThisCourse": "Сіз бұл курсты сатып алдыңыз және барлық мазмұнға толық қол жеткізе аласыз.",
-      "youOwnThisCourse": "Сіз бұл курстың иесісіз"
+      "youOwnThisCourse": "Сіз бұл курстың иесісіз",
+      "progressCard": {
+        "courseCompleted": "Курс аяқталды!",
+        "completedAllActivities": "Тамаша! Сіз барлық тапсырмаларды орындадыңыз.",
+        "activitiesCompletedLabel": "тапсырма орындалды",
+        "chapterActivitiesCount": "{completed}/{total} тапсырма",
+        "complete": "Аяқталды"
+      }
     },
     "PaidCourseActivityDisclaimer": {
       "message": "Мазмұнға қол жеткізу үшін курсты сатып алу қажет.",

@@ -65,7 +65,7 @@ const ForgotPasswordClient = () => {
                 quality={100}
                 width={230}
                 src={platformLogoFull}
-            alt="Ashyq Bilim logo"
+                alt="Ashyq Bilim logo"
                 loading="eager"
               />
             </Link>

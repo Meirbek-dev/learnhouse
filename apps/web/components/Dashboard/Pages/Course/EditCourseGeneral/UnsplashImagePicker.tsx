@@ -21,8 +21,8 @@ import {
   Shirt,
   Utensils,
 } from 'lucide-react';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useCallback, useEffect, useState, useEffectEvent } from 'react';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { ScrollArea } from '@components/ui/scroll-area';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';

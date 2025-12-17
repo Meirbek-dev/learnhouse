@@ -348,14 +348,20 @@ const AdminEditOptions: FC<{
             >
               <Settings2 className="mr-2 h-4 w-4" /> {t('settings')}
             </DropdownMenuItem>
-            <DropdownMenuItem variant="destructive" className="focus:bg-destructive/10 cursor-pointer">
+            <DropdownMenuItem
+              variant="destructive"
+              className="focus:bg-destructive/10 cursor-pointer"
+            >
               <AlertDialog
                 open={isDeleteDialogOpen}
                 onOpenChange={setIsDeleteDialogOpen}
               >
                 <AlertDialogTrigger
                   render={
-                    <button className="flex py-1.5" type="button">
+                    <button
+                      className="flex py-1.5"
+                      type="button"
+                    >
                       <BookMinus className="mr-4 h-4 w-4" /> {t('delete')}
                     </button>
                   }

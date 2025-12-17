@@ -1,4 +1,16 @@
-import { AlertCircle, ArrowRight, BookOpen, ClockIcon, Loader2, ShoppingCart, UserPen } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowRight,
+  BookOpen,
+  CheckCircle2,
+  Clock,
+  Loader2,
+  PlayCircle,
+  ShoppingCart,
+  Sparkles,
+  Trophy,
+  UserPen,
+} from 'lucide-react';
 import { getAPIUrl, getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
@@ -10,11 +22,15 @@ import { checkPaidAccess } from '@services/payments/payments';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { startCourse } from '@services/courses/activity';
+import { Card, CardContent } from '@/components/ui/card';
 import UserAvatar from '@components/Objects/UserAvatar';
 import CoursePaidOptions from './CoursePaidOptions';
 import { useEffect, useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
 
@@ -226,30 +242,28 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
   };
 
   const renderActionButton = (action: 'start' | 'continue') => {
-    if (!session.data?.user) {
-      return (
-        <>
+    const isAuthenticated = !!session.data?.user;
+    const icon = action === 'start' ? <PlayCircle className="size-5" /> : <ArrowRight className="size-5" />;
+    const label = action === 'start' ? t('startCourse') : t('continueLearning');
+
+    return (
+      <div className="flex items-center gap-3">
+        {isAuthenticated ? (
+          <UserAvatar
+            size="xs"
+            variant="outline"
+            use_with_session
+          />
+        ) : (
           <UserAvatar
             size="xs"
             variant="outline"
             predefined_avatar="empty"
           />
-          <span>{action === 'start' ? t('startCourse') : t('continueLearning')}</span>
-          <ArrowRight className="h-5 w-5" />
-        </>
-      );
-    }
-
-    return (
-      <>
-        <UserAvatar
-          size="xs"
-          variant="outline"
-          use_with_session
-        />
-        <span>{action === 'start' ? t('startCourse') : t('continueLearning')}</span>
-        <ArrowRight className="h-5 w-5" />
-      </>
+        )}
+        <span className="flex-1">{label}</span>
+        {icon}
+      </div>
     );
   };
 
@@ -260,23 +274,22 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
 
     if (!session.data?.user) {
       return (
-        <button
-          onClick={() => {
-            router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`));
-          }}
+        <Button
+          variant="outline"
+          onClick={() => router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`))}
           aria-label={t('aria.signupToApply')}
-          className="soft-shadow mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white py-3 font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
+          className="w-full gap-2"
         >
-          <UserPen className="h-5 w-5" />
+          <UserPen className="size-4" />
           {t('authenticateToContribute')}
-        </button>
+        </Button>
       );
     }
 
     if (contributorStatus === 'ACTIVE') {
       return (
-        <div className="soft-shadow mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-green-200 bg-green-50 py-3 font-semibold text-green-700">
-          <UserPen className="h-5 w-5" />
+        <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-green-200 bg-green-50/50 px-4 py-3 text-sm font-medium text-green-700">
+          <CheckCircle2 className="size-4" />
           {t('youAreAContributor')}
         </div>
       );
@@ -284,29 +297,30 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
 
     if (contributorStatus === 'PENDING') {
       return (
-        <div className="soft-shadow mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 py-3 font-semibold text-amber-700">
-          <ClockIcon className="h-5 w-5" />
+        <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50/50 px-4 py-3 text-sm font-medium text-amber-700">
+          <Clock className="size-4" />
           {t('contributorApplicationPending')}
         </div>
       );
     }
 
     return (
-      <button
+      <Button
+        variant="outline"
         onClick={handleApplyToContribute}
         disabled={isContributeLoading}
         aria-label={t('aria.applyToBecome')}
-        className="soft-shadow mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-white py-3 font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed"
+        className="w-full gap-2"
       >
         {isContributeLoading ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
+          <Loader2 className="size-4 animate-spin" />
         ) : (
           <>
-            <UserPen className="h-5 w-5" />
+            <UserPen className="size-4" />
             {t('applyToContribute')}
           </>
         )}
-      </button>
+      </Button>
     );
   };
 
@@ -314,166 +328,175 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
     const totalActivities =
       course.chapters?.reduce((acc: number, chapter: any) => acc + chapter.activities.length, 0) || 0;
 
-    // Find the correct run using the cleaned UUID
     const run = trailData?.runs?.find((run: any) => {
       const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
       return cleanRunCourseUuid === cleanCourseUuid;
     });
 
     const completedActivities = run?.steps?.filter((step: any) => step.complete)?.length || 0;
-
     const progressPercentage = totalActivities === 0 ? 0 : Math.round((completedActivities / totalActivities) * 100);
+    const isCompleted = progressPercentage === 100;
 
     if (!isStarted) {
       return (
-        <div className="soft-shadow relative overflow-hidden rounded-lg bg-white">
-          <div
-            className="absolute inset-0 opacity-[0.05]"
-            style={{
-              backgroundImage: 'radial-gradient(circle at center, #101010 1px, transparent 1px)',
-              backgroundSize: '12px 12px',
-            }}
-          />
-          <div className="relative p-4">
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-4">
-                  <div className="relative h-16 w-16">
-                    <svg className="h-full w-full -rotate-90">
-                      <circle
-                        cx="32"
-                        cy="32"
-                        r="28"
-                        stroke="#e5e7eb"
-                        strokeWidth="6"
-                        fill="none"
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <BookOpen className="h-6 w-6 text-neutral-400" />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-900">{t('readyToBegin')}</div>
-                    {totalActivities > 0 && (
-                      <div className="text-sm text-gray-500">{t('startLearningJourney', { totalActivities })}</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
+        <button
+          onClick={() => setIsProgressOpen(true)}
+          className="group flex w-full items-center gap-4 rounded-xl border border-neutral-200/60 bg-gradient-to-br from-neutral-50 to-white p-4 text-left transition-all hover:border-neutral-300 hover:shadow-sm"
+        >
+          <div className="relative flex size-14 shrink-0 items-center justify-center rounded-full bg-neutral-100 transition-colors group-hover:bg-neutral-200/70">
+            <BookOpen className="size-6 text-neutral-500" />
           </div>
-        </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-neutral-900">{t('readyToBegin')}</p>
+            {totalActivities > 0 && (
+              <p className="mt-0.5 text-sm text-neutral-500">{t('startLearningJourney', { totalActivities })}</p>
+            )}
+          </div>
+          <Sparkles className="text-primary size-5" />
+        </button>
       );
     }
 
     return (
-      <div className="soft-shadow relative overflow-hidden rounded-lg bg-white">
-        <div
-          className="absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage: 'radial-gradient(circle at center, #000 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
-          }}
-        />
-        <div className="relative p-4">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-4">
-                <div className="relative h-16 w-16">
-                  <svg className="h-full w-full -rotate-90">
-                    <circle
-                      cx="32"
-                      cy="32"
-                      r="28"
-                      stroke="#e5e7eb"
-                      strokeWidth="6"
-                      fill="none"
-                    />
-                    <circle
-                      cx="32"
-                      cy="32"
-                      r="28"
-                      stroke="#10b981"
-                      strokeWidth="6"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeDasharray={2 * Math.PI * 28}
-                      strokeDashoffset={
-                        totalActivities === 0 ? 0 : 2 * Math.PI * 28 * (1 - completedActivities / totalActivities)
-                      }
-                      className="transition-all duration-500 ease-out"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-lg font-bold text-gray-800">{progressPercentage}%</span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => {
-                    setIsProgressOpen(true);
-                  }}
-                  className="flex-1 rounded-lg p-2 text-left transition-colors hover:bg-neutral-50/50"
-                >
-                  <div className="text-sm font-medium text-gray-900">{t('courseProgress')}</div>
-                  <div className="text-sm text-gray-500">
-                    {t('completedActivities', {
-                      completedActivities,
-                      totalActivities,
-                    })}
-                  </div>
-                </button>
-              </div>
-            </div>
+      <button
+        onClick={() => setIsProgressOpen(true)}
+        className={cn(
+          'group flex w-full items-center gap-4 rounded-xl border p-4 text-left transition-all hover:shadow-sm',
+          isCompleted
+            ? 'border-green-200 bg-gradient-to-br from-green-50 to-emerald-50/50 hover:border-green-300'
+            : 'border-neutral-200/60 bg-gradient-to-br from-neutral-50 to-white hover:border-neutral-300',
+        )}
+      >
+        {/* Circular progress indicator */}
+        <div className="relative size-14 shrink-0">
+          <svg
+            className="size-full -rotate-90"
+            viewBox="0 0 64 64"
+          >
+            <circle
+              cx="32"
+              cy="32"
+              r="26"
+              stroke="currentColor"
+              strokeWidth="5"
+              fill="none"
+              className="text-neutral-200"
+            />
+            <circle
+              cx="32"
+              cy="32"
+              r="26"
+              stroke="currentColor"
+              strokeWidth="5"
+              fill="none"
+              strokeLinecap="round"
+              strokeDasharray={2 * Math.PI * 26}
+              strokeDashoffset={
+                totalActivities === 0 ? 0 : 2 * Math.PI * 26 * (1 - completedActivities / totalActivities)
+              }
+              className={cn('transition-all duration-700 ease-out', isCompleted ? 'text-green-500' : 'text-primary')}
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            {isCompleted ? (
+              <Trophy className="size-5 text-green-600" />
+            ) : (
+              <span className="text-sm font-bold text-neutral-800">{progressPercentage}%</span>
+            )}
           </div>
         </div>
-      </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className={cn('text-sm font-medium', isCompleted ? 'text-green-800' : 'text-neutral-900')}>
+              {isCompleted ? t('courseCompleted') : t('courseProgress')}
+            </p>
+            {isCompleted && (
+              <Badge
+                variant="secondary"
+                className="bg-green-100 text-green-700"
+              >
+                <CheckCircle2 className="mr-1 size-3" />
+                {t('completed')}
+              </Badge>
+            )}
+          </div>
+          <p className={cn('mt-0.5 text-sm', isCompleted ? 'text-green-600' : 'text-neutral-500')}>
+            {t('completedActivities', { completedActivities, totalActivities })}
+          </p>
+        </div>
+
+        <ArrowRight
+          className={cn(
+            'size-5 transition-transform group-hover:translate-x-0.5',
+            isCompleted ? 'text-green-500' : 'text-neutral-400',
+          )}
+        />
+      </button>
     );
   };
 
   if (isLoading) {
     return (
-      <div className="soft-shadow flex h-20 items-center justify-center rounded-lg bg-gray-100">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
-      </div>
+      <Card
+        size="sm"
+        className="animate-pulse"
+      >
+        <CardContent className="flex items-center justify-center py-8">
+          <Loader2 className="size-6 animate-spin text-neutral-400" />
+        </CardContent>
+      </Card>
     );
   }
 
   if (linkedProducts.length > 0) {
     return (
-      <div className="overflow-hidden rounded-lg bg-white p-4 shadow-md shadow-gray-300/25 outline-1 outline-neutral-200/40">
-        <div className="space-y-4">
+      <Card size="sm">
+        <CardContent className="space-y-4">
           {hasAccess ? (
             <>
-              <div className="soft-shadow rounded-lg border border-green-200 bg-green-50 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-                  <h3 className="font-semibold text-green-800">{t('youOwnThisCourse')}</h3>
+              {/* Access granted banner */}
+              <div className="flex items-start gap-3 rounded-xl border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50/50 p-4">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-green-100">
+                  <CheckCircle2 className="size-4 text-green-600" />
                 </div>
-                <p className="mt-1 text-sm text-green-700">{t('youHavePurchasedThisCourse')}</p>
+                <div>
+                  <h3 className="text-sm font-semibold text-green-800">{t('youOwnThisCourse')}</h3>
+                  <p className="mt-0.5 text-sm text-green-700">{t('youHavePurchasedThisCourse')}</p>
+                </div>
               </div>
-              <button
+
+              {/* Progress section for paid courses */}
+              {renderProgressSection()}
+
+              {/* Action button */}
+              <Button
                 onClick={handleCourseAction}
                 disabled={isActionLoading}
-                className="soft-shadow bg-primary hover:bg-primary/90 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold text-white transition-colors disabled:bg-neutral-700"
+                className="h-12 w-full gap-2 text-base"
               >
                 {isActionLoading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <Loader2 className="size-5 animate-spin" />
                 ) : (
                   renderActionButton(isStarted ? 'continue' : 'start')
                 )}
-              </button>
+              </Button>
+
               {renderContributorButton()}
             </>
           ) : (
             <>
-              <div className="soft-shadow rounded-lg border border-amber-200 bg-amber-50 p-4">
-                <div className="flex items-center gap-3">
-                  <AlertCircle className="h-5 w-5 text-amber-800" />
-                  <h3 className="font-semibold text-amber-800">{t('paidCourse')}</h3>
+              {/* Payment required banner */}
+              <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50/50 p-4">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-100">
+                  <AlertCircle className="size-4 text-amber-600" />
                 </div>
-                <p className="mt-1 text-sm text-amber-700">{t('courseRequiresPurchase')}</p>
+                <div>
+                  <h3 className="text-sm font-semibold text-amber-800">{t('paidCourse')}</h3>
+                  <p className="mt-0.5 text-sm text-amber-700">{t('courseRequiresPurchase')}</p>
+                </div>
               </div>
+
               <Modal
                 isDialogOpen={isModalOpen}
                 onOpenChange={setIsModalOpen}
@@ -482,41 +505,41 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
                 dialogDescription={t('selectPaymentOption')}
                 minWidth="sm"
               />
-              <button
-                className="soft-shadow bg-primary hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-lg py-3 font-semibold text-white transition-colors"
-                onClick={() => {
-                  setIsModalOpen(true);
-                }}
+
+              <Button
+                onClick={() => setIsModalOpen(true)}
+                className="h-12 w-full gap-2 text-base"
               >
-                <ShoppingCart className="h-5 w-5" />
+                <ShoppingCart className="size-5" />
                 {t('purchaseCourse')}
-              </button>
+              </Button>
+
               {renderContributorButton()}
             </>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-lg bg-white p-4 shadow-md shadow-gray-300/25 outline-1 outline-neutral-200/40">
-      <div className="space-y-4">
+    <Card size="sm">
+      <CardContent className="space-y-4">
         {/* Progress Section */}
         {renderProgressSection()}
 
-        {/* Start/Leave Course Button */}
-        <button
+        {/* Start/Continue Course Button */}
+        <Button
           onClick={handleCourseAction}
           disabled={isActionLoading}
-          className="soft-shadow bg-primary hover:bg-primary/90 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold text-white transition-colors disabled:bg-neutral-700"
+          className="h-12 w-full gap-2 text-base"
         >
           {isActionLoading ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
+            <Loader2 className="size-5 animate-spin" />
           ) : (
             renderActionButton(isStarted ? 'continue' : 'start')
           )}
-        </button>
+        </Button>
 
         {/* Contributor Button */}
         {renderContributorButton()}
@@ -526,13 +549,11 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
           course={course}
           orgslug={orgslug}
           isOpen={isProgressOpen}
-          onClose={() => {
-            setIsProgressOpen(false);
-          }}
+          onClose={() => setIsProgressOpen(false)}
           trailData={trailData}
         />
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
