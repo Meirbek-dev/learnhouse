@@ -117,7 +117,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
-      window.removeEventListener('scroll', handleScroll, { passive: true } as any);
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 

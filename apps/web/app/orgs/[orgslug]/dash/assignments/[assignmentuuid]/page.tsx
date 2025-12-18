@@ -11,7 +11,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { getAPIUrl } from '@services/config/config';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from '@components/ui/AppLink';
 import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
@@ -109,8 +109,6 @@ export default AssignmentEdit;
 const BrdCmpx = () => {
   const assignment = useAssignments();
 
-  useEffect(() => {}, []);
-
   return (
     <BreadCrumbs
       type="assignments"
@@ -146,8 +144,6 @@ const PublishingState = () => {
       toast.error(t('updateError'));
     }
   }
-
-  useEffect(() => {}, []);
 
   return (
     <>

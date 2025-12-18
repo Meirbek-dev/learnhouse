@@ -6,7 +6,7 @@ import { AlertTriangle, Check, Loader2 } from 'lucide-react';
 import platformLogo from 'public/platform_logo.svg';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import Image from 'next/image';
 import { toast } from 'sonner';
@@ -17,9 +17,11 @@ const StripeConnectCallback = () => {
   const session = usePlatformSession();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [message, setMessage] = useState('');
+  const isMountedStripeRef = useRef<boolean>(false);
+  const closeTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const isMountedRef = { current: true };
+    isMountedStripeRef.current = true;
 
     const verifyConnection = async () => {
       try {
@@ -39,21 +41,17 @@ const StripeConnectCallback = () => {
 
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        if (!isMountedRef.current) return;
+        if (!isMountedStripeRef.current) return;
 
         setStatus('success');
         setMessage(t('connectionSuccess'));
 
-        const closeTimeout = setTimeout(() => {
+        closeTimeoutRef.current = window.setTimeout(() => {
           window.close();
-        }, 2000);
-        // ensure timer is cleared if component unmounts
-        if (!isMountedRef.current) clearTimeout(closeTimeout);
-        // store on ref for cleanup
-        (isMountedRef as any).closeTimeout = closeTimeout;
+        }, 2000) as unknown as number;
       } catch (error) {
         console.error('Error verifying Stripe connection:', error);
-        if (!isMountedRef.current) return;
+        if (!isMountedStripeRef.current) return;
         setStatus('error');
         setMessage(t('connectionFailed'));
         toast.error(t('connectError'));
@@ -66,10 +64,9 @@ const StripeConnectCallback = () => {
 
     return () => {
       // Clear timeout if present
-      const closeTimeout = (isMountedRef as any).closeTimeout as number | undefined;
-      if (closeTimeout) clearTimeout(closeTimeout);
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
 
-      isMountedRef.current = false;
+      isMountedStripeRef.current = false;
     };
   }, [session, searchParams, t]);
 

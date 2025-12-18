@@ -8,7 +8,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { Label } from '@/components/ui/label';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from '@components/ui/AppLink';
 import type React from 'react';
 
@@ -24,6 +24,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
   const org = useOrg() as any;
   const locale = useLocale();
   const t = useTranslations('Certificates.CertificateVerificationPage');
+  const isMountedVerifyRef = useRef<boolean>(false);
 
   // Certificate type translation helper
   const getCertificationTypeLabel = (type: string): string => {
@@ -33,13 +34,13 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
 
   // Fetch certificate data
   useEffect(() => {
-    const isMountedRef = { current: true };
+    isMountedVerifyRef.current = true;
 
     const fetchCertificate = async () => {
       try {
         const result = await getCertificateByUuid(certificateUuid);
 
-        if (!isMountedRef.current) return;
+        if (!isMountedVerifyRef.current) return;
 
         if (result.success && result.data) {
           setCertificateData(result.data);
@@ -50,18 +51,18 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
         }
       } catch (error) {
         console.error('Error fetching certificate:', error);
-        if (!isMountedRef.current) return;
+        if (!isMountedVerifyRef.current) return;
         setError(t('verificationFailed'));
         setVerificationStatus('invalid');
       } finally {
-        if (isMountedRef.current) setIsLoading(false);
+        if (isMountedVerifyRef.current) setIsLoading(false);
       }
     };
 
     fetchCertificate();
 
     return () => {
-      isMountedRef.current = false;
+      isMountedVerifyRef.current = false;
     };
   }, [certificateUuid, t]);
 

@@ -177,12 +177,13 @@ const FlipcardExtension: React.FC = (props: any) => {
 
   const handleQuestionEdit = () => {
     setIsEditingQuestion(true);
-    setTimeout(() => questionInputRef.current?.focus(), 0);
+    // Use rAF to focus on next frame instead of setTimeout(,0)
+    if (typeof window !== 'undefined') requestAnimationFrame(() => questionInputRef.current?.focus());
   };
 
   const handleAnswerEdit = () => {
     setIsEditingAnswer(true);
-    setTimeout(() => answerInputRef.current?.focus(), 0);
+    if (typeof window !== 'undefined') requestAnimationFrame(() => answerInputRef.current?.focus());
   };
 
   const handleQuestionBlur = () => {

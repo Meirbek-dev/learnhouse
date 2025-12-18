@@ -321,59 +321,66 @@ export function useContextualPosition(
 ): 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' {
   const [position, setPosition] = useState<'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'>('bottom-right');
 
+  // Use refs for mutable values so we can reference them from stable callbacks
+  const rafRef = useRef<number | null>(null);
+  const mountedRef = useRef<boolean>(false);
+
+  // Compute position based on element rect
+  const computePosition = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    if (!contextElement || !mountedRef.current) return;
+
+    const rect = contextElement.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+
+    const isTop = rect.top < viewportHeight / 2;
+    const isLeft = rect.left < viewportWidth / 2;
+
+    let newPosition: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+    if (isTop && isLeft) {
+      newPosition = 'bottom-right';
+    } else if (isTop && !isLeft) {
+      newPosition = 'bottom-left';
+    } else if (!isTop && isLeft) {
+      newPosition = 'top-right';
+    } else {
+      newPosition = 'top-left';
+    }
+
+    setPosition((prev) => (prev === newPosition ? prev : newPosition));
+  }, [contextElement]);
+
+  // Stable scheduler that uses requestAnimationFrame and a ref
+  const scheduleCompute = useCallback(() => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      computePosition();
+    });
+  }, [computePosition]);
+
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     if (!contextElement) return;
 
-    let rafId: number | null = null;
-    let mounted = true;
+    mountedRef.current = true;
 
-    const computePosition = () => {
-      if (!contextElement || !mounted) return;
+    // Initial compute via rAF to avoid sync setState inside effect
+    scheduleCompute();
 
-      const rect = contextElement.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const viewportWidth = window.innerWidth;
-
-      // Calculate best position based on element location
-      const isTop = rect.top < viewportHeight / 2;
-      const isLeft = rect.left < viewportWidth / 2;
-
-      let newPosition: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
-      if (isTop && isLeft) {
-        newPosition = 'bottom-right';
-      } else if (isTop && !isLeft) {
-        newPosition = 'bottom-left';
-      } else if (!isTop && isLeft) {
-        newPosition = 'top-right';
-      } else {
-        newPosition = 'top-left';
-      }
-
-      // Update state only when mounted
-      if (mounted) setPosition(newPosition);
-    };
-
-    // Initial compute
-    computePosition();
-
-    // Debounced scheduler using requestAnimationFrame
-    const scheduleCompute = () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(computePosition);
-    };
-
+    // Listen to viewport changes
     window.addEventListener('resize', scheduleCompute, { passive: true });
     window.addEventListener('scroll', scheduleCompute, { passive: true });
     window.addEventListener('orientationchange', scheduleCompute, { passive: true });
 
     return () => {
-      mounted = false;
-      if (rafId) cancelAnimationFrame(rafId);
+      mountedRef.current = false;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener('resize', scheduleCompute);
       window.removeEventListener('scroll', scheduleCompute);
       window.removeEventListener('orientationchange', scheduleCompute);
     };
-  }, [contextElement]);
+  }, [contextElement, computePosition, scheduleCompute]);
 
   return position;
 }

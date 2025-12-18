@@ -27,6 +27,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
   const locale = useLocale();
   const t = useTranslations('Certificates.CertificatePage');
   const fetchedCertificateRef = useRef<Record<string, boolean>>({});
+  const isMountedRef = useRef<boolean>(false);
 
   // Fetch user certificate
   useEffect(() => {
@@ -36,7 +37,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       return;
     }
 
-    const isMountedRef = { current: true };
+    isMountedRef.current = true;
 
     const fetchCertificate = async () => {
       fetchedCertificateRef.current[courseid] = true;

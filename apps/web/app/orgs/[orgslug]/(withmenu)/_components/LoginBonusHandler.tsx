@@ -2,7 +2,7 @@
 
 import { useGamificationContext } from '@/components/Contexts/GamificationContext';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 /**
  * LoginBonusHandler (Simplified & Subtle)
@@ -23,8 +23,13 @@ export function LoginBonusHandler({ orgId }: LoginBonusHandlerProps) {
   const { profile, updateStreak, awardXP } = useGamificationContext();
   const [showBadge, setShowBadge] = useState(false);
 
+  const timeoutRef = useRef<number | null>(null);
+  const isMountedRef = useRef<boolean>(false);
+
   useEffect(() => {
     if (!orgId || !profile) return;
+
+    isMountedRef.current = true;
 
     try {
       const todayKey = `gamification:lastLoginAward:${orgId}:${new Date().toISOString().slice(0, 10)}`;
@@ -49,9 +54,13 @@ export function LoginBonusHandler({ orgId }: LoginBonusHandlerProps) {
 
           localStorage.setItem(todayKey, '1');
 
-          // Show subtle badge indicator for 5 seconds
-          setShowBadge(true);
-          setTimeout(() => setShowBadge(false), 5000);
+          // Show subtle badge indicator for 5 seconds (if still mounted)
+          if (isMountedRef.current) {
+            setShowBadge(true);
+            timeoutRef.current = window.setTimeout(() => {
+              if (isMountedRef.current) setShowBadge(false);
+            }, 5000) as unknown as number;
+          }
         } catch (error) {
           // Non-fatal error, log and continue
           console.warn('Failed to award login bonus:', error);
@@ -61,6 +70,11 @@ export function LoginBonusHandler({ orgId }: LoginBonusHandlerProps) {
       // Ignore storage errors (e.g., SSR, private browsing)
       console.warn('localStorage not available:', error);
     }
+
+    return () => {
+      isMountedRef.current = false;
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, [orgId, profile, updateStreak, awardXP]);
 
   // Show subtle floating badge on first daily login

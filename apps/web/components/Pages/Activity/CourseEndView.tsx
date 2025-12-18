@@ -89,22 +89,23 @@ const CourseEndView: FC<CourseEndViewProps> = ({
   }, [trailData, course]);
 
   // Fetch user certificate when course is completed
+  const isMountedFetchCertificateRef = useRef<boolean>(false);
   useEffect(() => {
     // Prevent repeated requests if we've already tried fetching the certificate
     if (!isCourseCompleted || fetchedCertificateRef.current) return;
 
-    const isMountedRef = { current: true };
+    isMountedFetchCertificateRef.current = true;
 
     const fetchUserCertificate = async () => {
       // Mark as attempted to avoid loops; we can reset this manually if needed
       fetchedCertificateRef.current = true;
 
       if (!session?.data?.tokens?.access_token) {
-        if (isMountedRef.current) setCertificateError(t('authRequired'));
+        if (isMountedFetchCertificateRef.current) setCertificateError(t('authRequired'));
         return;
       }
 
-      if (isMountedRef.current) {
+      if (isMountedFetchCertificateRef.current) {
         setIsLoadingCertificate(true);
         setCertificateError(null);
       }
@@ -113,7 +114,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
         const cleanCourseUuid = courseUuid.replace('course_', '');
         const result = await getUserCertificates(`course_${cleanCourseUuid}`, session.data.tokens.access_token);
 
-        if (!isMountedRef.current) return;
+        if (!isMountedFetchCertificateRef.current) return;
 
         if (result.success && result.data && result.data.length > 0) {
           setUserCertificate(result.data[0]);
@@ -130,9 +131,9 @@ const CourseEndView: FC<CourseEndViewProps> = ({
         }
       } catch (error) {
         console.error('Error fetching user certificate:', error);
-        if (isMountedRef.current) setCertificateError(t('loadingError'));
+        if (isMountedFetchCertificateRef.current) setCertificateError(t('loadingError'));
       } finally {
-        if (isMountedRef.current) setIsLoadingCertificate(false);
+        if (isMountedFetchCertificateRef.current) setIsLoadingCertificate(false);
       }
     };
 
@@ -142,7 +143,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
     // triggering this effect when the whole context object identity changes.
 
     return () => {
-      isMountedRef.current = false;
+      isMountedFetchCertificateRef.current = false;
     };
   }, [isCourseCompleted, courseUuid, session?.data?.tokens?.access_token, t, gamificationRefetch]);
 
