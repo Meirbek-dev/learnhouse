@@ -49,8 +49,12 @@ async def upload_file_and_return_file_object(
     content = await file.read()
     ext = filename.split(".")[-1] if "." in filename else "bin"
 
+    # Use the actual saved filename (without extension) as file_id so frontend can
+    # construct the correct public URL (it expects <file_id>.<ext>)
+    saved_basename = filename.rsplit(".", 1)[0]
+
     return BlockFile(
-        file_id=file_id,
+        file_id=saved_basename,
         file_format=ext,
         file_name=file.filename,
         file_size=len(content),

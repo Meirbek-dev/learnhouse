@@ -191,6 +191,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                 src={platformLogoFull}
                 alt={t('logoAlt')}
                 width={100}
+                style={{ height: 'auto' }}
                 priority
                 loading="eager"
               />

@@ -264,11 +264,11 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
   const FileCard = ({ label }: { label: string }) => (
     <Card className="relative w-full sm:w-auto">
       <CardContent className="flex items-center gap-2 py-4">
-        <Badge
-          className="absolute -top-2 -right-2"
-          variant="secondary"
-        >
-          <Cloud size={14} />
+        <Badge className="absolute top-2 right-2 rounded-full bg-emerald-600 p-1 shadow-sm">
+          <Cloud
+            className="text-white"
+            size={16}
+          />
         </Badge>
         <File
           className="text-emerald-500"

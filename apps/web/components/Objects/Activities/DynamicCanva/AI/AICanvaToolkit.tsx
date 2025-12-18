@@ -49,6 +49,7 @@ const AICanvaToolkit = (props: AICanvaToolkitProps) => {
                 width={22}
                 src={platformLogo}
                 alt={t('aiIconAlt')}
+                style={{ height: 'auto' }}
               />
               <div className="text-sm">{t('aiTitle')}</div>
             </div>

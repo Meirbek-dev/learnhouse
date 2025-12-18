@@ -115,7 +115,7 @@ async def upload_content(
         try:
             s3.upload_file(
                 f"content/{type_of_dir}/{uuid}/{directory}/{file_and_format}",
-                "openu-media",
+                "csmooc-media",
                 f"content/{type_of_dir}/{uuid}/{directory}/{file_and_format}",
             )
         except ClientError as e:
@@ -124,7 +124,7 @@ async def upload_content(
         print("Checking if file exists in s3...")
         try:
             s3.head_object(
-                Bucket="openu-media",
+                Bucket="csmooc-media",
                 Key=f"content/{type_of_dir}/{uuid}/{directory}/{file_and_format}",
             )
             print("File upload successful!")

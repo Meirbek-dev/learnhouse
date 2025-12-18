@@ -59,6 +59,7 @@ const AIActivityAsk = (props: AIActivityAskProps) => {
               width={20}
               src={platformLogoLight}
               alt={t('askAI')}
+              style={{ height: 'auto' }}
             />
             <span className="text-xs font-bold">{t('askAI')}</span>
           </div>
@@ -380,6 +381,7 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
                   width={28}
                   src={platformLogoLight}
                   alt={t('askAI')}
+                  style={{ height: 'auto' }}
                 />
                 <span className="text-sm font-bold text-white"> {t('AI')}</span>
               </div>

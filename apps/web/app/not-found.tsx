@@ -16,6 +16,7 @@ export default async function NotFound() {
           width={270}
           src={platformLogoFull}
           alt="logo"
+          style={{ height: 'auto' }}
           loading="eager"
         />
       </div>

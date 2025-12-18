@@ -19,6 +19,7 @@ async function DashboardHome() {
           width={210}
           src={platformLogoFull}
           className="w-48 pt-16 pb-24 sm:w-auto"
+          style={{ height: 'auto' }}
           loading="eager"
         />
       </div>
