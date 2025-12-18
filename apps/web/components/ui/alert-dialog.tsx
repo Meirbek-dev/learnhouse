@@ -18,17 +18,31 @@ function AlertDialog({ ...props }: AlertDialogPrimitive.Root.Props) {
 
 function AlertDialogTrigger({ nativeButton, ...props }: AlertDialogPrimitive.Trigger.Props) {
   // If the caller explicitly provides `nativeButton`, honor it. Otherwise,
-  // attempt to detect whether the `render` prop is a native <button> element
-  // or a wrapper around a native <button> (our local `Button` component) and
-  // set `nativeButton` accordingly to avoid Base UI runtime warnings.
-  const renderProp = (props as any).render;
+  // attempt to detect whether the `render` prop or `children` is a native
+  // <button> element (string type === 'button') or a local `Button` component.
+  const renderProp = (props as any).render ?? (props as any).children;
   const isNativeRenderButton =
     React.isValidElement(renderProp) && typeof renderProp.type === 'string' && renderProp.type === 'button';
   const isLocalButtonComponent = React.isValidElement(renderProp) && renderProp.type === Button;
-  const computedNativeButton = nativeButton ?? (isNativeRenderButton || isLocalButtonComponent);
+
+  // Honor explicit prop; otherwise only set nativeButton when the render
+  // element is a raw native <button>. Do NOT auto-enable it for our local
+  // `Button` component (that would cause nested <button> elements).
+  const computedNativeButton = nativeButton ?? isNativeRenderButton;
+
+  // If the trigger's children is our local `Button` component and the caller
+  // didn't provide a `render` prop, explicitly use a non-button wrapper
+  // element (a <div>) for the trigger. This prevents the primitive from
+  // rendering an outer native <button> around the inner native <button>.
+  const shouldProvideNonButtonWrapper = isLocalButtonComponent && !(props as any).render;
+  const renderWrapper = shouldProvideNonButtonWrapper ? (
+    <div data-slot="alert-dialog-trigger" />
+  ) : (props as any).render;
 
   return (
     <AlertDialogPrimitive.Trigger
+      // Provide a non-button wrapper when appropriate to avoid nested buttons
+      {...(shouldProvideNonButtonWrapper ? { render: renderWrapper } : {})}
       data-slot="alert-dialog-trigger"
       nativeButton={computedNativeButton}
       {...props}
@@ -68,6 +82,30 @@ function AlertDialogContent({
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay />
+      {/*
+        Full-screen invisible close target placed between the backdrop and the popup.
+        This captures outside clicks and closes the AlertDialog (uses Radix/Primitive Close).
+        Use nativeButton so Base UI doesn't show a runtime warning about render types.
+      */}
+      <AlertDialogPrimitive.Close
+        data-slot="alert-dialog-outside-close"
+        // Our local button is native, so set nativeButton to true to avoid mismatch warnings.
+        nativeButton
+        // Render a full-screen button that captures clicks but does not receive focus.
+        // Prevent focus on mousedown so assistive tech won't be exposed to a focused
+        // element that may be hidden from AT. No `aria-hidden` on interactive elements.
+        render={
+          <button
+            type="button"
+            tabIndex={-1}
+            onMouseDown={(e) => {
+              // Prevent the browser from moving focus to this element when clicked
+              e.preventDefault();
+            }}
+            className="absolute inset-0 z-50"
+          />
+        }
+      />
       <AlertDialogPrimitive.Popup
         data-slot="alert-dialog-content"
         data-size={size}
