@@ -340,17 +340,8 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
                     lang: locale,
                     pip: true,
                   }}
-                  subtitle={{
-                    url: `/subtitle.${locale}.srt`,
-                    type: 'srt',
-                    style: {
-                      color: '#ffffff',
-                      fontSize: '2rem',
-                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                      textAlign: 'center',
-                    },
-                    encoding: 'utf8',
-                  }}
+                  // Do not provide a default subtitle in the editor preview —
+                  // subtitles should only be loaded when an actual file exists
                   locale={locale}
                   subtitleEntries={subtitleEntries}
                   className="aspect-video w-full rounded-lg shadow-sm"
@@ -561,17 +552,8 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
                         lang: locale,
                         pip: true,
                       }}
-                      subtitle={{
-                        url: `/subtitle.${locale}.srt`,
-                        type: 'srt',
-                        style: {
-                          color: '#ffffff',
-                          fontSize: '2rem',
-                          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                          textAlign: 'center',
-                        },
-                        encoding: 'utf8',
-                      }}
+                      // Do not provide a default subtitle in the editor preview —
+                      // subtitles should only be loaded when an actual file exists
                       locale={locale}
                       subtitleEntries={subtitleEntries}
                       className={cn(

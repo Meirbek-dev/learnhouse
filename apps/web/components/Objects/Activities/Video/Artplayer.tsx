@@ -92,17 +92,8 @@ export default function ArtPlayer({
           },
         },
       ],
-      subtitle: subtitle || {
-        url: `/subtitle.${locale}.srt`,
-        type: 'srt',
-        style: {
-          color: '#ffffff',
-          fontSize: '2.5rem',
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          textAlign: 'center',
-        },
-        encoding: 'utf8',
-      },
+      // Only include subtitle config if a subtitle prop was provided to avoid requesting a non-existent default file
+      ...(subtitle ? { subtitle } : {}),
     });
 
     if (getInstance && typeof getInstance === 'function') {
