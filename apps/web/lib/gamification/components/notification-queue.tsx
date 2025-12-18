@@ -324,28 +324,55 @@ export function useContextualPosition(
   useEffect(() => {
     if (!contextElement) return;
 
-    const rect = contextElement.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
+    let rafId: number | null = null;
+    let mounted = true;
 
-    // Calculate best position based on element location
-    const isTop = rect.top < viewportHeight / 2;
-    const isLeft = rect.left < viewportWidth / 2;
+    const computePosition = () => {
+      if (!contextElement || !mounted) return;
 
-    let newPosition: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
-    if (isTop && isLeft) {
-      newPosition = 'bottom-right';
-    } else if (isTop && !isLeft) {
-      newPosition = 'bottom-left';
-    } else if (!isTop && isLeft) {
-      newPosition = 'top-right';
-    } else {
-      newPosition = 'top-left';
-    }
+      const rect = contextElement.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
 
-    // Use setTimeout to break out of render phase
-    const timeout = setTimeout(() => setPosition(newPosition), 0);
-    return () => clearTimeout(timeout);
+      // Calculate best position based on element location
+      const isTop = rect.top < viewportHeight / 2;
+      const isLeft = rect.left < viewportWidth / 2;
+
+      let newPosition: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+      if (isTop && isLeft) {
+        newPosition = 'bottom-right';
+      } else if (isTop && !isLeft) {
+        newPosition = 'bottom-left';
+      } else if (!isTop && isLeft) {
+        newPosition = 'top-right';
+      } else {
+        newPosition = 'top-left';
+      }
+
+      // Update state only when mounted
+      if (mounted) setPosition(newPosition);
+    };
+
+    // Initial compute
+    computePosition();
+
+    // Debounced scheduler using requestAnimationFrame
+    const scheduleCompute = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(computePosition);
+    };
+
+    window.addEventListener('resize', scheduleCompute, { passive: true });
+    window.addEventListener('scroll', scheduleCompute, { passive: true });
+    window.addEventListener('orientationchange', scheduleCompute, { passive: true });
+
+    return () => {
+      mounted = false;
+      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', scheduleCompute);
+      window.removeEventListener('scroll', scheduleCompute);
+      window.removeEventListener('orientationchange', scheduleCompute);
+    };
   }, [contextElement]);
 
   return position;

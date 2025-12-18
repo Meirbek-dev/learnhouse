@@ -13,9 +13,9 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { useCallback, useEffect, useLayoutEffect, useState, useTransition } from 'react';
 import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
 import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
+import { useCallback, useLayoutEffect, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
@@ -168,8 +168,6 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
       toast.error(t('updateAddFailed'));
     }
   };
-
-  useEffect(() => {}, []);
 
   return (
     <div className="soft-shadow flex w-[700px] flex-col -space-y-2 overflow-hidden rounded-lg bg-white/95 backdrop-blur-md">

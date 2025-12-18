@@ -10,8 +10,8 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import { Resizable } from 're-resizable';
+import { useState } from 'react';
 
 const SUPPORTED_FILES = constructAcceptValue(['jpg', 'png', 'webp', 'gif']);
 
@@ -97,8 +97,6 @@ const ImageBlockComponent = (props: any) => {
         'imageBlock',
       )
     : null;
-
-  useEffect(() => {}, []);
 
   const getAlignmentClass = () => {
     switch (alignment) {

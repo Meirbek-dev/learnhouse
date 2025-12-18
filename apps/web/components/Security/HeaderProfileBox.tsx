@@ -16,10 +16,10 @@ import UserAvatar from '@components/Objects/UserAvatar';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo } from 'react';
 import Link from '@components/ui/AppLink';
 import { signOut } from 'next-auth/react';
 import type { ReactNode } from 'react';
+import { useMemo } from 'react';
 
 interface RoleInfo {
   name: string;
@@ -39,8 +39,6 @@ export const HeaderProfileBox = () => {
   const { isAdmin, loading, userRoles, rights } = useAdminStatus();
   const org = useOrg() as any;
   const t = useTranslations('Header');
-
-  useEffect(() => {}, []);
 
   const userRoleInfo = useMemo((): RoleInfo | null => {
     if (!userRoles || userRoles.length === 0) return null;

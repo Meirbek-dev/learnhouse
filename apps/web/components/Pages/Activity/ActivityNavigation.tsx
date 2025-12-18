@@ -189,18 +189,22 @@ export default function ActivityNavigation(props: ActivityNavigationProps): Reac
     const bottomNavElement = bottomNavRef.current;
     if (!bottomNavElement) return;
 
-    // Update width when component mounts and on window resize
+    // Update width when component mounts and on window resize (rAF-throttled)
+    let rafId: number | null = null;
     const updateWidth = () => {
-      if (bottomNavElement) {
-        setNavWidth(bottomNavElement.offsetWidth);
-      }
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        if (bottomNavElement) {
+          setNavWidth(bottomNavElement.offsetWidth);
+        }
+      });
     };
 
     // Initial width measurement
     updateWidth();
 
     // Set up resize listener
-    window.addEventListener('resize', updateWidth);
+    window.addEventListener('resize', updateWidth, { passive: true });
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -214,8 +218,13 @@ export default function ActivityNavigation(props: ActivityNavigationProps): Reac
     observer.observe(bottomNavElement);
 
     return () => {
+      if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener('resize', updateWidth);
-      observer.unobserve(bottomNavElement);
+      try {
+        observer.disconnect();
+      } catch (e) {
+        // ignore
+      }
     };
   }, []);
 

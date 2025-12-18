@@ -5,8 +5,8 @@ import StyledComponentsRegistry from '../components/Utils/libs/styled-registry';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { updateUserTheme } from '@services/users/users';
 import { SessionProvider } from 'next-auth/react';
+import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
-import { useEffect } from 'react';
 import { SWRConfig } from 'swr';
 
 interface ClientLayoutProps {
@@ -15,13 +15,22 @@ interface ClientLayoutProps {
 
 function ThemeSync() {
   const session = usePlatformSession() as any;
+  const sessionRef = useRef(session);
+
+  // Keep a ref to the latest session so the event listener doesn't need to be
+  // re-attached every time the session object identity changes.
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
+
   useEffect(() => {
     const handleThemeChange = async (event: Event) => {
       const customEvent = event as CustomEvent<{ theme: string }>;
-      if (session?.data?.user?.id && session?.data?.tokens?.access_token) {
+      const s = sessionRef.current;
+      if (s?.data?.user?.id && s?.data?.tokens?.access_token) {
         try {
           // Update theme on server without refreshing session (avoid unnecessary re-renders)
-          await updateUserTheme(session.data.user.id, customEvent.detail.theme, session.data.tokens.access_token);
+          await updateUserTheme(s.data.user.id, customEvent.detail.theme, s.data.tokens.access_token);
         } catch (error) {
           console.error('Failed to sync theme to server:', error);
         }
@@ -32,7 +41,7 @@ function ThemeSync() {
     return () => {
       window.removeEventListener('themeChange', handleThemeChange);
     };
-  }, [session]);
+  }, []);
 
   return null;
 }

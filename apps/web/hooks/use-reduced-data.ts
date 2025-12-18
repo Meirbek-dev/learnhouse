@@ -70,7 +70,13 @@ export function useReducedData(): boolean {
       setPrefersReducedData(event.matches);
     };
 
-    mediaQuery.addEventListener('change', handleChange);
+    if ('addEventListener' in mediaQuery) {
+      mediaQuery.addEventListener('change', handleChange);
+    } else if ('addListener' in mediaQuery) {
+      // Backwards compatibility
+      // @ts-ignore
+      mediaQuery.addListener(handleChange);
+    }
 
     // Listen for network changes
     if (connection) {
@@ -80,15 +86,40 @@ export function useReducedData(): boolean {
         setPrefersReducedData(saveData || slowConnection);
       };
 
-      connection.addEventListener('change', handleNetworkChange);
+      if ('addEventListener' in connection) {
+        connection.addEventListener('change', handleNetworkChange);
+      } else if ('onchange' in connection) {
+        // @ts-ignore
+        connection.onchange = handleNetworkChange;
+      }
 
       return () => {
-        mediaQuery.removeEventListener('change', handleChange);
-        connection.removeEventListener('change', handleNetworkChange);
+        if ('removeEventListener' in mediaQuery) {
+          mediaQuery.removeEventListener('change', handleChange);
+        } else if ('removeListener' in mediaQuery) {
+          // @ts-ignore
+          mediaQuery.removeListener(handleChange);
+        }
+
+        if (connection) {
+          if ('removeEventListener' in connection) {
+            connection.removeEventListener('change', handleNetworkChange);
+          } else if ('onchange' in connection) {
+            // @ts-ignore
+            connection.onchange = null;
+          }
+        }
       };
     }
 
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    return () => {
+      if ('removeEventListener' in mediaQuery) {
+        mediaQuery.removeEventListener('change', handleChange);
+      } else if ('removeListener' in mediaQuery) {
+        // @ts-ignore
+        mediaQuery.removeListener(handleChange);
+      }
+    };
   }, []);
 
   return prefersReducedData;

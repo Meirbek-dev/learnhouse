@@ -12,8 +12,8 @@ import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { ComponentType } from 'react';
 import Link from '@components/ui/AppLink';
-import { use, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { use } from 'react';
 
 interface User {
   username: string;
@@ -75,8 +75,6 @@ const SettingsPage = ({ params }: { params: Promise<SettingsParams> }) => {
   const t = useTranslations('DashPage.UserAccountSettings');
   const { subpage, orgslug } = use(params);
   const session = usePlatformSession() as Session;
-
-  useEffect(() => {}, []);
 
   const navigationItems: NavigationItem[] = [
     {

@@ -37,7 +37,9 @@ function AlertDialogTrigger({ nativeButton, ...props }: AlertDialogPrimitive.Tri
   const shouldProvideNonButtonWrapper = isLocalButtonComponent && !(props as any).render;
   const renderWrapper = shouldProvideNonButtonWrapper ? (
     <div data-slot="alert-dialog-trigger" />
-  ) : (props as any).render;
+  ) : (
+    (props as any).render
+  );
 
   return (
     <AlertDialogPrimitive.Trigger

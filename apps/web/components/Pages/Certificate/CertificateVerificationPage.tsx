@@ -33,9 +33,13 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
 
   // Fetch certificate data
   useEffect(() => {
+    const isMountedRef = { current: true };
+
     const fetchCertificate = async () => {
       try {
         const result = await getCertificateByUuid(certificateUuid);
+
+        if (!isMountedRef.current) return;
 
         if (result.success && result.data) {
           setCertificateData(result.data);
@@ -46,14 +50,19 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
         }
       } catch (error) {
         console.error('Error fetching certificate:', error);
+        if (!isMountedRef.current) return;
         setError(t('verificationFailed'));
         setVerificationStatus('invalid');
       } finally {
-        setIsLoading(false);
+        if (isMountedRef.current) setIsLoading(false);
       }
     };
 
     fetchCertificate();
+
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [certificateUuid, t]);
 
   const getVerificationStatusIcon = () => {

@@ -93,20 +93,27 @@ const CourseEndView: FC<CourseEndViewProps> = ({
     // Prevent repeated requests if we've already tried fetching the certificate
     if (!isCourseCompleted || fetchedCertificateRef.current) return;
 
+    const isMountedRef = { current: true };
+
     const fetchUserCertificate = async () => {
       // Mark as attempted to avoid loops; we can reset this manually if needed
       fetchedCertificateRef.current = true;
 
       if (!session?.data?.tokens?.access_token) {
-        setCertificateError(t('authRequired'));
+        if (isMountedRef.current) setCertificateError(t('authRequired'));
         return;
       }
 
-      setIsLoadingCertificate(true);
-      setCertificateError(null);
+      if (isMountedRef.current) {
+        setIsLoadingCertificate(true);
+        setCertificateError(null);
+      }
+
       try {
         const cleanCourseUuid = courseUuid.replace('course_', '');
         const result = await getUserCertificates(`course_${cleanCourseUuid}`, session.data.tokens.access_token);
+
+        if (!isMountedRef.current) return;
 
         if (result.success && result.data && result.data.length > 0) {
           setUserCertificate(result.data[0]);
@@ -123,15 +130,20 @@ const CourseEndView: FC<CourseEndViewProps> = ({
         }
       } catch (error) {
         console.error('Error fetching user certificate:', error);
-        setCertificateError(t('loadingError'));
+        if (isMountedRef.current) setCertificateError(t('loadingError'));
       } finally {
-        setIsLoadingCertificate(false);
+        if (isMountedRef.current) setIsLoadingCertificate(false);
       }
     };
 
     fetchUserCertificate();
+
     // Only depend on stable primitives and the refetch function to avoid
     // triggering this effect when the whole context object identity changes.
+
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [isCourseCompleted, courseUuid, session?.data?.tokens?.access_token, t, gamificationRefetch]);
 
   // Refetch gamification data on mount if course is completed

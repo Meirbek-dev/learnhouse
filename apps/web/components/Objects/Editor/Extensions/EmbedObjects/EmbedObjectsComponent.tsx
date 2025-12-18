@@ -174,6 +174,10 @@ const EmbedObjectsComponent = (props: any) => {
   const editorState = useEditorProvider();
   const { isEditable } = editorState;
 
+  // Refs to hold active mouse handlers for safe cleanup
+  const mouseMoveHandlerRef = useRef<((e: MouseEvent) => void) | null>(null);
+  const mouseUpHandlerRef = useRef<(() => void) | null>(null);
+
   // Add ResizeObserver to track parent container size changes
   useEffect(() => {
     const updateDimensions = () => {
@@ -403,9 +407,21 @@ const EmbedObjectsComponent = (props: any) => {
         embedWidth: dimensionsRef.current.width,
         embedHeight: dimensionsRef.current.height,
       });
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+
+      // Remove handlers and clear refs
+      if (mouseMoveHandlerRef.current) {
+        document.removeEventListener('mousemove', mouseMoveHandlerRef.current);
+        mouseMoveHandlerRef.current = null;
+      }
+      if (mouseUpHandlerRef.current) {
+        document.removeEventListener('mouseup', mouseUpHandlerRef.current);
+        mouseUpHandlerRef.current = null;
+      }
     };
+
+    // Register handlers and keep references so we can clean up on unmount
+    mouseMoveHandlerRef.current = handleMouseMove;
+    mouseUpHandlerRef.current = handleMouseUp;
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
@@ -493,6 +509,20 @@ const EmbedObjectsComponent = (props: any) => {
       setActiveInput('none');
     }
   };
+
+  // Ensure we clean up any active document handlers if component unmounts
+  useEffect(() => {
+    return () => {
+      if (mouseMoveHandlerRef.current) {
+        document.removeEventListener('mousemove', mouseMoveHandlerRef.current);
+        mouseMoveHandlerRef.current = null;
+      }
+      if (mouseUpHandlerRef.current) {
+        document.removeEventListener('mouseup', mouseUpHandlerRef.current);
+        mouseUpHandlerRef.current = null;
+      }
+    };
+  }, []);
 
   // Handle opening documentation
   const handleOpenDocs = (guide: string) => {

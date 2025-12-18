@@ -73,8 +73,6 @@ const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) =
     fetchCourseCertificate();
   }, [access_token, course_progress, course.course_uuid]);
 
-  useEffect(() => {}, []);
-
   return (
     <div
       className="trailcoursebox flex rounded-xl bg-white p-3"

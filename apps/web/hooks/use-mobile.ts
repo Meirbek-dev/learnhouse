@@ -13,8 +13,22 @@ export function useIsMobile() {
     const onChange = () => {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
     };
-    mql.addEventListener('change', onChange);
-    return () => mql.removeEventListener('change', onChange);
+    if ('addEventListener' in mql) {
+      mql.addEventListener('change', onChange);
+    } else if ('addListener' in mql) {
+      // backwards compatibility
+      // @ts-ignore - addListener exists on older MediaQueryList implementations
+      mql.addListener(onChange);
+    }
+
+    return () => {
+      if ('removeEventListener' in mql) {
+        mql.removeEventListener('change', onChange);
+      } else if ('removeListener' in mql) {
+        // @ts-ignore - removeListener exists on older MediaQueryList implementations
+        mql.removeListener(onChange);
+      }
+    };
   }, []);
 
   return !!isMobile;

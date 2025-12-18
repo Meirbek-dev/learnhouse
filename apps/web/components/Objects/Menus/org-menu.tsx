@@ -114,10 +114,10 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
       setIsScrolled(scrollY > 20);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', handleScroll, { passive: true } as any);
     };
   }, []);
 
@@ -151,16 +151,23 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
       const timeoutId = setTimeout(() => {
         document.addEventListener('click', handleClickOutside);
       }, 100);
+
+      const previousOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
 
       return () => {
         clearTimeout(timeoutId);
         document.removeEventListener('keydown', handleEscape);
         document.removeEventListener('click', handleClickOutside);
-        document.body.style.overflow = 'unset';
+        // Restore previous overflow value to avoid interfering with other components
+        document.body.style.overflow = previousOverflow || '';
       };
     }
-    document.body.style.overflow = 'unset';
+
+    // Ensure we don't overwrite other components' overflow state when closed
+    if (document.body.style.overflow === 'hidden') {
+      document.body.style.overflow = '';
+    }
   }, [isMenuOpen]);
 
   // Hide menu in focus mode during activities

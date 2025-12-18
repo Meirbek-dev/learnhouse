@@ -10,8 +10,8 @@ import { revalidateTags } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import { Layers } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
 
@@ -96,8 +96,6 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
     await revalidateTags(['courses'], props.orgslug);
     router.refresh();
   };
-
-  useEffect(() => {}, []);
 
   return (
     <div className="flex justify-center">

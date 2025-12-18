@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import Link from '@components/ui/ServerLink';
 import { useTranslations } from 'next-intl';
 import { BookOpen } from 'lucide-react';
-import { useEffect } from 'react';
 import Image from 'next/image';
 
 import EmptyThumbnailImage from '../../../public/empty_thumbnail.webp';
@@ -19,8 +18,6 @@ export const CourseOverviewTop = ({ params }: { params: CourseOverviewParams }) 
   const course = useCourse();
   const org = useOrg() as any;
   const t = useTranslations('DashPage.CourseOverview');
-
-  useEffect(() => {}, []);
 
   return (
     <>

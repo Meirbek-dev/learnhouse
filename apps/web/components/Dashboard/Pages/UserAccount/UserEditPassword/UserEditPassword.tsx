@@ -1,10 +1,10 @@
 'use client';
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useEffect, useMemo, useState, useTransition } from 'react';
 import PasswordInput from '@components/ui/custom/password-input';
 import { updatePassword } from '@services/settings/password';
 import { getUriWithoutOrg } from '@services/config/config';
+import { useMemo, useState, useTransition } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
@@ -96,8 +96,6 @@ const UserEditPassword = () => {
       startTransition(() => setIsProcessing(false));
     }
   };
-
-  useEffect(() => {}, []);
 
   return (
     <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">

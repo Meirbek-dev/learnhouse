@@ -62,7 +62,6 @@ interface PlatformSession {
 }
 
 const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: ChapterElementProps) => {
-
   // Hooks
   const session = usePlatformSession() as PlatformSession;
   const access_token = session?.data?.tokens?.access_token;

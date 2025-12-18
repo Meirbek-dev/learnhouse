@@ -8,12 +8,12 @@ import { useAssignments } from '@components/Contexts/Assignments/AssignmentConte
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { GalleryVerticalEnd, Info, TentTree, Trash } from 'lucide-react';
 import { deleteAssignmentTask } from '@services/courses/assignments';
+import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
+import { useSWRConfig } from 'swr';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useSWRConfig } from 'swr';
-import { getAPIUrl } from '@services/config/config';
 
 import { AssignmentTaskGeneralEdit } from './Subs/AssignmentTaskGeneralEdit';
 

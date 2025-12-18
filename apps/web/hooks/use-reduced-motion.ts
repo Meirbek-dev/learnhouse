@@ -22,8 +22,22 @@ export function useReducedMotion(): boolean {
       setPrefersReducedMotion(event.matches);
     };
 
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    if ('addEventListener' in mediaQuery) {
+      mediaQuery.addEventListener('change', handleChange);
+    } else if ('addListener' in mediaQuery) {
+      // Backwards compatibility
+      // @ts-ignore
+      mediaQuery.addListener(handleChange);
+    }
+
+    return () => {
+      if ('removeEventListener' in mediaQuery) {
+        mediaQuery.removeEventListener('change', handleChange);
+      } else if ('removeListener' in mediaQuery) {
+        // @ts-ignore
+        mediaQuery.removeListener(handleChange);
+      }
+    };
   }, []);
 
   return prefersReducedMotion;

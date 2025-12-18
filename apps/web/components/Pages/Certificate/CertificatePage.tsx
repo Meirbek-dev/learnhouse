@@ -36,18 +36,24 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       return;
     }
 
+    const isMountedRef = { current: true };
+
     const fetchCertificate = async () => {
       fetchedCertificateRef.current[courseid] = true;
 
       if (!session?.data?.tokens?.access_token) {
-        setError(t('errorAuth'));
-        setIsLoading(false);
+        if (isMountedRef.current) {
+          setError(t('errorAuth'));
+          setIsLoading(false);
+        }
         return;
       }
 
       try {
         const cleanCourseId = courseid.replace('course_', '');
         const result = await getUserCertificates(`course_${cleanCourseId}`, session.data.tokens.access_token);
+
+        if (!isMountedRef.current) return;
 
         if (result.success && result.data && result.data.length > 0) {
           setUserCertificate(result.data[0]);
@@ -56,13 +62,17 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
         }
       } catch (error) {
         console.error('Error fetching certificate:', error);
-        setError(t('error'));
+        if (isMountedRef.current) setError(t('error'));
       } finally {
-        setIsLoading(false);
+        if (isMountedRef.current) setIsLoading(false);
       }
     };
 
     fetchCertificate();
+
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [courseid, session?.data?.tokens?.access_token, t]);
 
   // Certificate type translation helper

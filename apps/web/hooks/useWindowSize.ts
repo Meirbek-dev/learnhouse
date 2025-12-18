@@ -8,17 +8,23 @@ export function useWindowSize() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    let rafId: number | null = null;
     function handleResize() {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        setWindowSize({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
       });
     }
-    window.addEventListener('resize', handleResize);
+
+    window.addEventListener('resize', handleResize, { passive: true });
 
     // Call handler right away so state gets updated with initial window size
     handleResize();
     return () => {
+      if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener('resize', handleResize);
     };
   }, []);

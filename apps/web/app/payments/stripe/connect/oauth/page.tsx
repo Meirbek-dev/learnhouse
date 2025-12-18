@@ -19,6 +19,8 @@ const StripeConnectCallback = () => {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
+    const isMountedRef = { current: true };
+
     const verifyConnection = async () => {
       try {
         const code = searchParams.get('code');
@@ -37,14 +39,21 @@ const StripeConnectCallback = () => {
 
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
+        if (!isMountedRef.current) return;
+
         setStatus('success');
         setMessage(t('connectionSuccess'));
 
-        setTimeout(() => {
+        const closeTimeout = setTimeout(() => {
           window.close();
         }, 2000);
+        // ensure timer is cleared if component unmounts
+        if (!isMountedRef.current) clearTimeout(closeTimeout);
+        // store on ref for cleanup
+        (isMountedRef as any).closeTimeout = closeTimeout;
       } catch (error) {
         console.error('Error verifying Stripe connection:', error);
+        if (!isMountedRef.current) return;
         setStatus('error');
         setMessage(t('connectionFailed'));
         toast.error(t('connectError'));
@@ -54,6 +63,14 @@ const StripeConnectCallback = () => {
     if (session) {
       verifyConnection();
     }
+
+    return () => {
+      // Clear timeout if present
+      const closeTimeout = (isMountedRef as any).closeTimeout as number | undefined;
+      if (closeTimeout) clearTimeout(closeTimeout);
+
+      isMountedRef.current = false;
+    };
   }, [session, searchParams, t]);
 
   return (

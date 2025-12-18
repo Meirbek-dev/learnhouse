@@ -10,7 +10,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 
@@ -81,8 +81,6 @@ const PDFBlockComponent = (props: any) => {
         'pdfBlock',
       )
     : null;
-
-  useEffect(() => {}, []);
 
   return (
     <>

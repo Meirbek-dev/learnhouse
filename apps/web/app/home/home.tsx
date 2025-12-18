@@ -6,14 +6,12 @@ import { getUriWithoutOrg } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
-import { useEffect } from 'react';
 import Image from 'next/image';
 
 const HomeClient = () => {
   const t = useTranslations('HomeClient');
   const session = usePlatformSession();
 
-  useEffect(() => {}, []);
   return (
     <div className="flex flex-col">
       <div className="mx-auto flex items-center space-x-4 rounded-b-2xl pt-16 text-3xl font-semibold">

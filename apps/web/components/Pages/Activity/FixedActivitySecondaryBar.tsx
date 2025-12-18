@@ -166,8 +166,12 @@ export default function FixedActivitySecondaryBar(props: FixedActivitySecondaryB
   };
 
   useEffect(() => {
+    let rafId: number | null = null;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0);
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        setIsScrolled(window.scrollY > 0);
+      });
     };
 
     const observer = new IntersectionObserver(
@@ -188,12 +192,15 @@ export default function FixedActivitySecondaryBar(props: FixedActivitySecondaryB
       observer.observe(mainActivityInfo);
     }
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
+      if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener('scroll', handleScroll);
-      if (mainActivityInfoRef.current) {
-        observer.unobserve(mainActivityInfoRef.current);
+      try {
+        observer.disconnect();
+      } catch (e) {
+        // ignore
       }
     };
   }, []);
