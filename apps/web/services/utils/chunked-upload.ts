@@ -70,6 +70,14 @@ export async function uploadFileChunked(options: ChunkedUploadOptions): Promise<
   } = options;
 
   try {
+    if (!accessToken) {
+      throw new Error('accessToken is required for chunked uploads');
+    }
+
+    if (typeOfDir === 'orgs' && !uuid) {
+      throw new Error('uuid (org_uuid) is required when typeOfDir is "orgs"');
+    }
+
     // Split file into chunks
     const chunks = splitFileIntoChunks(file, chunkSize);
     const totalChunks = chunks.length;
@@ -95,8 +103,15 @@ export async function uploadFileChunked(options: ChunkedUploadOptions): Promise<
     });
 
     if (!initiateResponse.ok) {
-      const error = await initiateResponse.json();
-      throw new Error(error.detail || 'Failed to initiate upload');
+      const body = await initiateResponse.json().catch(() => null);
+      console.error('Failed to initiate chunked upload', {
+        status: initiateResponse.status,
+        body,
+      });
+      // Throw a clearer error message for the caller
+      throw new Error(
+        body && body.detail ? JSON.stringify(body.detail) : `Failed to initiate upload (status ${initiateResponse.status})`,
+      );
     }
 
     const { upload_id } = await initiateResponse.json();
@@ -123,8 +138,11 @@ export async function uploadFileChunked(options: ChunkedUploadOptions): Promise<
       });
 
       if (!chunkResponse.ok) {
-        const error = await chunkResponse.json();
-        throw new Error(error.detail || `Failed to upload chunk ${i}`);
+        const body = await chunkResponse.json().catch(() => null);
+        console.error(`Failed to upload chunk ${i}`, { status: chunkResponse.status, body });
+        throw new Error(
+          body && body.detail ? JSON.stringify(body.detail) : `Failed to upload chunk ${i} (status ${chunkResponse.status})`,
+        );
       }
 
       uploadedBytes += chunk.size;
@@ -160,8 +178,9 @@ export async function uploadFileChunked(options: ChunkedUploadOptions): Promise<
     });
 
     if (!completeResponse.ok) {
-      const error = await completeResponse.json();
-      throw new Error(error.detail || 'Failed to complete upload');
+      const body = await completeResponse.json().catch(() => null);
+      console.error('Failed to complete upload', { status: completeResponse.status, body });
+      throw new Error(body && body.detail ? JSON.stringify(body.detail) : `Failed to complete upload (status ${completeResponse.status})`);
     }
 
     const result = await completeResponse.json();

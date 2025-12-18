@@ -6,17 +6,34 @@ export async function uploadNewVideoFile(
   file: File,
   activity_uuid: string,
   access_token: string,
+  org_uuid?: string,
+  course_uuid?: string,
+  block_uuid?: string,
   onProgress?: (progress: { percentage: number; currentChunk: number; totalChunks: number }) => void,
 ) {
   // For large files, use chunked upload
   if (shouldUseChunkedUpload(file.size)) {
     console.log('Using chunked upload for large file');
+
+    if (!org_uuid) {
+      throw new Error('org_uuid is required for chunked uploads. Please provide organization uuid');
+    }
+
+    if (!course_uuid) {
+      throw new Error('course_uuid is required for chunked uploads');
+    }
+
+    if (!block_uuid) {
+      throw new Error('block_uuid is required for chunked uploads');
+    }
+
     try {
       const result = await uploadFileChunked({
         file,
-        directory: `activities/${activity_uuid}/dynamic/blocks/videoBlock`,
+        // Use full courses path and include the block folder so the saved file is where the editor expects it
+        directory: `courses/${course_uuid}/activities/${activity_uuid}/dynamic/blocks/videoBlock/${block_uuid}`,
         typeOfDir: 'orgs',
-        uuid: '', // This will need to be passed from context
+        uuid: org_uuid,
         filename: `block_${Date.now()}.${file.name.split('.').pop()}`,
         accessToken: access_token,
         onProgress: onProgress
@@ -28,10 +45,31 @@ export async function uploadNewVideoFile(
               })
           : undefined,
       });
-      return { success: true, filename: result.filename };
-    } catch (error) {
+
+      // The uploads `/complete` returns the saved filename (e.g. block_xxx.mp4).
+      // Construct a block-like object to match the shape returned by the backend
+      // so the editor can display the uploaded video immediately.
+      const savedFilename = result.filename;
+      const dotIndex = savedFilename.lastIndexOf('.');
+      const fileFormat = dotIndex !== -1 ? savedFilename.slice(dotIndex + 1) : 'bin';
+      const fileId = dotIndex !== -1 ? savedFilename.slice(0, dotIndex) : savedFilename;
+
+      return {
+        block_uuid: block_uuid,
+        content: {
+          file_id: fileId,
+          file_format: fileFormat,
+          file_name: file.name,
+          file_size: file.size,
+          file_type: file.type,
+          activity_uuid: activity_uuid,
+        },
+      };
+    } catch (error: any) {
       console.error('Chunked upload error:', error);
-      throw error;
+      // Try to expose a readable message
+      const message = error?.message || JSON.stringify(error);
+      throw new Error(message);
     }
   }
 

@@ -226,7 +226,26 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
         setUploadProgress((prev) => Math.min(prev + 10, 90));
       }, 200);
 
-      const object = await uploadNewVideoFile(file, extension.options.activity.activity_uuid, access_token);
+      const tempBlockUuid = `block_temp_${Date.now()}`;
+
+      const object = await uploadNewVideoFile(
+        file,
+        extension.options.activity.activity_uuid,
+        access_token,
+        org?.org_uuid,
+        course?.courseStructure.course_uuid,
+        tempBlockUuid,
+      );
+
+      // If we got a temporary block, set it immediately so UI updates predictably
+      if (object && object.block_uuid && object.content) {
+        const optimisticBlock = {
+          ...object,
+          size: selectedSize,
+        };
+        setBlockObject(optimisticBlock as any);
+        updateAttributes({ blockObject: optimisticBlock });
+      }
 
       clearInterval(progressInterval);
       setUploadProgress(100);
@@ -243,8 +262,9 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
       setTimeout(() => {
         setUploadProgress(0);
       }, 1000);
-    } catch {
-      setError(t('errorUpload'));
+    } catch (err: any) {
+      console.error('Upload failed', err);
+      setError(err?.message || t('errorUpload'));
     } finally {
       setIsLoading(false);
     }
