@@ -91,6 +91,7 @@ const LoggedInJoinScreen = (props: any) => {
 
   const accessToken = session?.data?.tokens?.access_token;
   const userId = session?.data?.user?.id;
+  const redirectTimeoutRef = useRef<number | null>(null);
 
   const join = useCallback(async () => {
     setIsSubmitting(true);
@@ -120,7 +121,7 @@ const LoggedInJoinScreen = (props: any) => {
         void mutate(`${getAPIUrl()}orgs/user/page/1/limit/20`);
         void mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
 
-        setTimeout(() => {
+        redirectTimeoutRef.current = window.setTimeout(() => {
           router.push(getUriWithOrg(org.slug, '/'));
         }, 1500);
       } else {
@@ -143,6 +144,12 @@ const LoggedInJoinScreen = (props: any) => {
       setIsSubmitting(false);
     }
   }, [accessToken, org.id, org.slug, props.inviteCode, router, toastT, userId]);
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimeoutRef.current) clearTimeout(redirectTimeoutRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (session && org) {
@@ -207,6 +214,8 @@ const NoTokenScreen = (_props: any) => {
     // Check if session and org are already available
     return !(session && org);
   });
+  const initialLoadingRafRef = useRef<number | null>(null);
+  const validateRedirectTimeoutRef = useRef<number | null>(null);
   const [inviteCode, setInviteCode] = useState('');
 
   const handleInviteCodeChange = (e: any) => {
@@ -219,7 +228,8 @@ const NoTokenScreen = (_props: any) => {
     // wait for 1.5s
     if (res.success) {
       toast.success(toastT('inviteCodeValid'));
-      setTimeout(() => {
+      if (validateRedirectTimeoutRef.current) clearTimeout(validateRedirectTimeoutRef.current);
+      validateRedirectTimeoutRef.current = window.setTimeout(() => {
         router.push(getUriWithoutOrg(`/signup?inviteCode=${inviteCode}&orgslug=${org.slug}`));
       }, 1500);
     } else {
@@ -230,10 +240,17 @@ const NoTokenScreen = (_props: any) => {
 
   useEffect(() => {
     if (session && org) {
-      // Use setTimeout to break out of render phase
-      const timeout = setTimeout(() => setIsLoading(false), 0);
-      return () => clearTimeout(timeout);
+      // Use rAF to break out of render phase
+      if (initialLoadingRafRef.current) cancelAnimationFrame(initialLoadingRafRef.current);
+      initialLoadingRafRef.current = requestAnimationFrame(() => setIsLoading(false));
+      return () => {
+        if (initialLoadingRafRef.current) cancelAnimationFrame(initialLoadingRafRef.current);
+      };
     }
+
+    return () => {
+      if (validateRedirectTimeoutRef.current) clearTimeout(validateRedirectTimeoutRef.current);
+    };
   }, [org, session]);
 
   return (

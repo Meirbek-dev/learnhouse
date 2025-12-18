@@ -15,7 +15,7 @@ import DiscussionForm from './discussion-form';
 import { Badge } from '@/components/ui/badge';
 import { MessageCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface DiscussionListProps {
   initialPosts: any[];
@@ -87,17 +87,24 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
   const org = useOrg() as any;
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
+  const postsRafRef = useRef<number | null>(null);
 
   // Update posts when initialPosts changes
   useEffect(() => {
     if (Array.isArray(initialPosts)) {
       const transformedPosts = initialPosts.map(transformDiscussionToPost);
-      // Use setTimeout to break out of render phase
-      const timeout = setTimeout(() => setPosts(transformedPosts), 0);
-      return () => clearTimeout(timeout);
+      // Schedule update on next animation frame to avoid synchronous update in render
+      if (postsRafRef.current) cancelAnimationFrame(postsRafRef.current);
+      postsRafRef.current = requestAnimationFrame(() => setPosts(transformedPosts));
+      return () => {
+        if (postsRafRef.current) cancelAnimationFrame(postsRafRef.current);
+      };
     } else {
-      const timeout = setTimeout(() => setPosts([]), 0);
-      return () => clearTimeout(timeout);
+      if (postsRafRef.current) cancelAnimationFrame(postsRafRef.current);
+      postsRafRef.current = requestAnimationFrame(() => setPosts([]));
+      return () => {
+        if (postsRafRef.current) cancelAnimationFrame(postsRafRef.current);
+      };
     }
   }, [initialPosts]);
 

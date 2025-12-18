@@ -67,8 +67,8 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
         }
       })();
     if (needsSync) {
-      // Schedule sync after mount
-      setTimeout(() => onChange(JSON.stringify(standardized)), 0);
+      // Schedule sync after mount on next animation frame
+      initialSyncRafRef.current = requestAnimationFrame(() => onChange(JSON.stringify(standardized)));
     }
     return standardized;
   });
@@ -82,6 +82,9 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
   const linkInputFieldRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isMountedRef = useRef(true);
+  const initialSyncRafRef = useRef<number | null>(null);
+  const focusRafRef = useRef<number | null>(null);
+  const emojiFocusRafRef = useRef<number | null>(null);
   const t = useTranslations('CourseEdit.General.LearningItems');
 
   // Cleanup on unmount
@@ -89,6 +92,9 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
+      if (initialSyncRafRef.current) cancelAnimationFrame(initialSyncRafRef.current);
+      if (focusRafRef.current) cancelAnimationFrame(focusRafRef.current);
+      if (emojiFocusRafRef.current) cancelAnimationFrame(emojiFocusRafRef.current);
     };
   }, []);
 
@@ -104,7 +110,9 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
     onChange(JSON.stringify(newItems));
 
     // Use timeout to ensure DOM has updated
-    const timeoutId = setTimeout(() => {
+    // Schedule focus/scroll on next animation frame
+    if (focusRafRef.current) cancelAnimationFrame(focusRafRef.current);
+    focusRafRef.current = requestAnimationFrame(() => {
       if (!isMountedRef.current) return;
 
       const inputEl = inputRefs.current[newItem.id];
@@ -117,9 +125,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
       if (scrollEl && newItems.length > 5) {
         scrollEl.scrollTop = scrollEl.scrollHeight;
       }
-    }, 0);
-
-    return () => clearTimeout(timeoutId);
+    });
   }, [items, onChange]);
 
   // Remove an item
@@ -151,7 +157,8 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
       onChange(JSON.stringify(newItems));
       setShowEmojiPicker(null);
 
-      const timeoutId = setTimeout(() => {
+      if (emojiFocusRafRef.current) cancelAnimationFrame(emojiFocusRafRef.current);
+      emojiFocusRafRef.current = requestAnimationFrame(() => {
         if (!isMountedRef.current) return;
 
         const inputEl = inputRefs.current[id];
@@ -159,9 +166,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
           inputEl.focus();
           setFocusedItemId(id);
         }
-      }, 0);
-
-      return () => clearTimeout(timeoutId);
+      });
     },
     [items, onChange],
   );
@@ -180,7 +185,8 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
   useEffect(() => {
     if (!(focusedItemId && isMountedRef.current)) return;
 
-    const timeoutId = setTimeout(() => {
+    if (focusRafRef.current) cancelAnimationFrame(focusRafRef.current);
+    focusRafRef.current = requestAnimationFrame(() => {
       if (!isMountedRef.current) return;
 
       if (showLinkInput === focusedItemId) {
@@ -206,9 +212,11 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
           }
         }
       }
-    }, 0);
+    });
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      if (focusRafRef.current) cancelAnimationFrame(focusRafRef.current);
+    };
   }, [focusedItemId, showLinkInput, items.length]);
 
   // Handle clicks outside of emoji picker and link input

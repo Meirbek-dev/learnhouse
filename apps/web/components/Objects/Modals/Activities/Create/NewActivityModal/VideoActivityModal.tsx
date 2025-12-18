@@ -198,7 +198,7 @@ const SubtitleManager = ({
 
       try {
         // Simulate file processing
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
         const newSubtitle: SubtitleFile = {
           id: fileId,

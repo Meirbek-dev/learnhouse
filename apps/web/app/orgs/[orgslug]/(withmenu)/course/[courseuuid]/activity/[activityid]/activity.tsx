@@ -436,6 +436,7 @@ const ActivityClient = (props: ActivityClientProps) => {
   );
 
   // Save focus mode to localStorage when it changes
+  const initialRenderRafRef = useRef<number | null>(null);
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('globalFocusMode', isFocusMode.toString());
@@ -447,8 +448,11 @@ const ActivityClient = (props: ActivityClientProps) => {
       );
       // Mark as no longer initial render after first change
       if (isInitialRender) {
-        const timeout = setTimeout(() => setIsInitialRender(false), 0);
-        return () => clearTimeout(timeout);
+        if (initialRenderRafRef.current) cancelAnimationFrame(initialRenderRafRef.current);
+        initialRenderRafRef.current = requestAnimationFrame(() => setIsInitialRender(false));
+        return () => {
+          if (initialRenderRafRef.current) cancelAnimationFrame(initialRenderRafRef.current);
+        };
       }
     }
   }, [isFocusMode, isInitialRender]);

@@ -53,6 +53,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
   // timers to prevent dropdowns from closing too quickly when user moves cursor
   const listHideTimerRef = useRef<any>(null);
   const tableHideTimerRef = useRef<any>(null);
+  const linkSelectionRafRef = useRef<number | null>(null);
 
   useEffect(() => {
     return () => {
@@ -63,6 +64,10 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       if (tableHideTimerRef.current) {
         clearTimeout(tableHideTimerRef.current);
         tableHideTimerRef.current = null;
+      }
+      if (linkSelectionRafRef.current) {
+        cancelAnimationFrame(linkSelectionRafRef.current);
+        linkSelectionRafRef.current = null;
       }
     };
   }, []);
@@ -136,10 +141,11 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       setShowLinkInput(true);
     }
 
-    // Restore the selection after a small delay to ensure the tooltip is rendered
-    setTimeout(() => {
+    // Restore the selection on next animation frame to ensure the tooltip is rendered
+    if (linkSelectionRafRef.current) cancelAnimationFrame(linkSelectionRafRef.current);
+    linkSelectionRafRef.current = requestAnimationFrame(() => {
       editor.commands.setTextSelection({ from, to });
-    }, 0);
+    });
   };
 
   const getCurrentLinkUrl = () => {

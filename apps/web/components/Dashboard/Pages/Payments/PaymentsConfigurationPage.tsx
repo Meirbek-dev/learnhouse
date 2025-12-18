@@ -358,19 +358,21 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ orgId, configId
   });
 
   const fetchedConfigRef = useRef<Record<string, boolean>>({});
+  const mountedRef = useRef<boolean>(true);
 
   useEffect(() => {
     const key = `${isOpen ? 'open' : 'closed'}:${configId}:${accessToken || 'no-token'}`;
+    mountedRef.current = true;
     const fetchConfig = async () => {
       try {
         const config = await getPaymentConfigs(orgId, accessToken);
         const stripeConfig = config.find((c: any) => c.id === configId);
-        if (stripeConfig?.provider_specific_id) {
+        if (mountedRef.current && stripeConfig?.provider_specific_id) {
           form.setValue('stripeAccountId', stripeConfig.provider_specific_id || '');
         }
       } catch (error) {
         console.error('Error fetching Stripe configuration:', error);
-        toast.error(t('errors.loadStripeConfigFailed'));
+        if (mountedRef.current) toast.error(t('errors.loadStripeConfigFailed'));
       }
     };
 
@@ -378,6 +380,10 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ orgId, configId
       fetchedConfigRef.current[key] = true;
       fetchConfig();
     }
+
+    return () => {
+      mountedRef.current = false;
+    };
   }, [isOpen, orgId, configId, accessToken, t, form]);
 
   const handleSubmit = async (values: StripeConfigFormValues) => {

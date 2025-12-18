@@ -6,11 +6,11 @@ import { GamificationProfileSection } from '@/components/Dashboard/Gamification'
 import { updatePreferencesAction } from '@/app/actions/gamification';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Check, Loader2, Save } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 /**
@@ -45,7 +45,7 @@ export default function UserGamificationSettings() {
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-
+  const saveSuccessTimeoutRef = useRef<number | null>(null);
   // Load preferences from profile
   useEffect(() => {
     if (profile?.preferences) {
@@ -92,7 +92,8 @@ export default function UserGamificationSettings() {
       toast.success(t('settings.saved'));
 
       // Reset success indicator after 2 seconds
-      setTimeout(() => {
+      if (saveSuccessTimeoutRef.current) clearTimeout(saveSuccessTimeoutRef.current);
+      saveSuccessTimeoutRef.current = window.setTimeout(() => {
         setSaveSuccess(false);
       }, 2000);
     } catch (error) {
@@ -102,6 +103,12 @@ export default function UserGamificationSettings() {
       setIsSaving(false);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (saveSuccessTimeoutRef.current) clearTimeout(saveSuccessTimeoutRef.current);
+    };
+  }, []);
 
   if (!orgId) {
     return (

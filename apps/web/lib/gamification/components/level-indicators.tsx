@@ -111,6 +111,8 @@ export function ParticleEffect({
   const [particles, setParticles] = useState<Particle[]>([]);
   const onCompleteRef = useRef(onComplete);
   const isAnimatingRef = useRef(false);
+  const startRafRef = useRef<number | null>(null);
+  const endTimeoutRef = useRef<number | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
   // Keep ref updated
@@ -122,9 +124,9 @@ export function ParticleEffect({
     // Skip particle animations when reduced motion is preferred
     if (prefersReducedMotion) {
       if (trigger) {
-        // Still call onComplete callback but skip animation
-        const timeout = setTimeout(() => onCompleteRef.current?.(), 0);
-        return () => clearTimeout(timeout);
+        // Still call onComplete callback but skip animation next frame
+        const rafId = requestAnimationFrame(() => onCompleteRef.current?.());
+        return () => cancelAnimationFrame(rafId);
       }
       return;
     }
@@ -145,20 +147,20 @@ export function ParticleEffect({
       };
     });
 
-    // Use setTimeout to break out of render phase
-    const startTimeout = setTimeout(() => {
+    // Schedule particles on next animation frame and clear later
+    startRafRef.current = requestAnimationFrame(() => {
       setParticles(newParticles);
-    }, 0);
+    });
 
-    const endTimeout = setTimeout(() => {
+    endTimeoutRef.current = window.setTimeout(() => {
       setParticles([]);
       isAnimatingRef.current = false;
       onCompleteRef.current?.();
     }, duration + 400);
 
     return () => {
-      clearTimeout(startTimeout);
-      clearTimeout(endTimeout);
+      if (startRafRef.current) cancelAnimationFrame(startRafRef.current);
+      if (endTimeoutRef.current) clearTimeout(endTimeoutRef.current);
     };
   }, [trigger, particleCount, colors, duration, prefersReducedMotion]);
 
@@ -259,6 +261,8 @@ interface XPGainAnimationProps {
 export function XPGainAnimation({ amount, trigger, position, onComplete }: XPGainAnimationProps) {
   const [isVisible, setIsVisible] = useState(false);
   const onCompleteRef = useRef(onComplete);
+  const showRafRef = useRef<number | null>(null);
+  const hideTimeoutRef = useRef<number | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
@@ -269,19 +273,23 @@ export function XPGainAnimation({ amount, trigger, position, onComplete }: XPGai
     if (trigger) {
       // Skip animation if reduced motion preferred, but still call callback
       if (prefersReducedMotion) {
-        const timeout = setTimeout(() => onCompleteRef.current?.(), 0);
-        return () => clearTimeout(timeout);
+        const rafId = requestAnimationFrame(() => onCompleteRef.current?.());
+        return () => cancelAnimationFrame(rafId);
       }
 
-      // Use setTimeout to break out of render phase
-      const showTimeout = setTimeout(() => setIsVisible(true), 0);
-      const hideTimeout = setTimeout(() => {
+      // Use rAF to break out of render phase and schedule hide after duration
+      if (showRafRef.current) cancelAnimationFrame(showRafRef.current);
+      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+
+      showRafRef.current = requestAnimationFrame(() => setIsVisible(true));
+      hideTimeoutRef.current = window.setTimeout(() => {
         setIsVisible(false);
         onCompleteRef.current?.();
       }, 1200);
+
       return () => {
-        clearTimeout(showTimeout);
-        clearTimeout(hideTimeout);
+        if (showRafRef.current) cancelAnimationFrame(showRafRef.current);
+        if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
       };
     }
   }, [trigger, prefersReducedMotion]);

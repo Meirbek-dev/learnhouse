@@ -177,6 +177,7 @@ const EmbedObjectsComponent = (props: any) => {
   // Refs to hold active mouse handlers for safe cleanup
   const mouseMoveHandlerRef = useRef<((e: MouseEvent) => void) | null>(null);
   const mouseUpHandlerRef = useRef<(() => void) | null>(null);
+  const urlInputFocusTimeoutRef = useRef<number | null>(null);
 
   // Add ResizeObserver to track parent container size changes
   useEffect(() => {
@@ -488,7 +489,8 @@ const EmbedObjectsComponent = (props: any) => {
     setSelectedProduct(product);
 
     // Focus the URL input after a short delay to allow rendering
-    setTimeout(() => {
+    if (urlInputFocusTimeoutRef.current) clearTimeout(urlInputFocusTimeoutRef.current);
+    urlInputFocusTimeoutRef.current = window.setTimeout(() => {
       if (urlInputRef.current) {
         urlInputRef.current.focus();
       }
@@ -520,6 +522,10 @@ const EmbedObjectsComponent = (props: any) => {
       if (mouseUpHandlerRef.current) {
         document.removeEventListener('mouseup', mouseUpHandlerRef.current);
         mouseUpHandlerRef.current = null;
+      }
+      if (urlInputFocusTimeoutRef.current) {
+        clearTimeout(urlInputFocusTimeoutRef.current);
+        urlInputFocusTimeoutRef.current = null;
       }
     };
   }, []);

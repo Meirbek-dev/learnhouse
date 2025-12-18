@@ -153,6 +153,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const uploadResetTimeoutRef = useRef<number | null>(null);
   const [blockObject, setBlockObject] = useState<VideoBlockObject | null>(initialBlockObject || null);
   const [selectedSize, setSelectedSize] = useState<VideoSize>(initialBlockObject?.size || 'medium');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -216,13 +217,15 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
   const handleUpload = async (file: File) => {
     if (!access_token) return;
 
+    let progressInterval: number | null = null;
+
     try {
       setIsLoading(true);
       setError(null);
       setUploadProgress(0);
 
       // Simulate upload progress
-      const progressInterval = setInterval(() => {
+      progressInterval = window.setInterval(() => {
         setUploadProgress((prev) => Math.min(prev + 10, 90));
       }, 200);
 
@@ -259,13 +262,16 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
       setVideo(null);
 
       // Reset progress after a delay
-      setTimeout(() => {
+      uploadResetTimeoutRef.current = window.setTimeout(() => {
         setUploadProgress(0);
       }, 1000);
     } catch (err: any) {
       console.error('Upload failed', err);
       setError(err?.message || t('errorUpload'));
     } finally {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
       setIsLoading(false);
     }
   };
@@ -281,6 +287,15 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
   const handleSizeChange = (size: VideoSize) => {
     setSelectedSize(size);
   };
+  // Clear any pending timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (uploadResetTimeoutRef.current) {
+        clearTimeout(uploadResetTimeoutRef.current);
+        uploadResetTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   const videoUrl =
     blockObject && org?.org_uuid && course?.courseStructure.course_uuid

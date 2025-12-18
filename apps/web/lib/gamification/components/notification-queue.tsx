@@ -129,12 +129,16 @@ export function useXPNotificationQueue(options: XPNotificationQueueOptions = {})
   );
 
   // Update visible list whenever queue changes
+  const visibleRafRef = useRef<number | null>(null);
   useEffect(() => {
-    // Use setTimeout to break out of render phase
-    const timeout = setTimeout(() => {
+    // Schedule update on next animation frame to avoid synchronous update in render
+    if (visibleRafRef.current) cancelAnimationFrame(visibleRafRef.current);
+    visibleRafRef.current = requestAnimationFrame(() => {
       setVisible(queue.slice(0, opts.maxVisible));
-    }, 0);
-    return () => clearTimeout(timeout);
+    });
+    return () => {
+      if (visibleRafRef.current) cancelAnimationFrame(visibleRafRef.current);
+    };
   }, [queue, opts.maxVisible]);
 
   // Cleanup timeouts on unmount
