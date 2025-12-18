@@ -52,7 +52,7 @@ export const AssignmentsTaskProvider = ({ children }: { children: ReactNode }) =
       fetchAssignmentTask(state.selectedAssignmentTaskUUID);
       mutate(`${getAPIUrl()}assignments/${assignment.assignment_object?.assignment_uuid}/tasks`);
     }
-  }, [state.selectedAssignmentTaskUUID, assignment.assignment_object?.assignment_uuid, fetchAssignmentTask]);
+  }, [state.selectedAssignmentTaskUUID, state.reloadTrigger, assignment.assignment_object?.assignment_uuid, fetchAssignmentTask]);
 
   return (
     <AssignmentsTaskContext.Provider value={state}>

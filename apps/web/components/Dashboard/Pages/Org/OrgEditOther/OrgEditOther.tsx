@@ -121,9 +121,9 @@ const OrgEditOther: FC = () => {
                 <span>{t('scripts')}</span>
                 <TooltipProvider delay={100}>
                   <Tooltip>
-                    <TooltipTrigger>
-                      <AlertTriangle className="h-4 w-4 text-orange-500 transition-colors hover:text-orange-600" />
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={<AlertTriangle className="h-4 w-4 text-orange-500 transition-colors hover:text-orange-600" />}
+                    />
                     <TooltipContent
                       className="data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1 max-w-[400px] border-orange-100 bg-orange-50 text-orange-900 [&>p]:text-orange-800"
                       sideOffset={8}

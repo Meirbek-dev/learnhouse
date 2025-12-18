@@ -25,8 +25,8 @@ const ToolTip = ({ sideOffset, content, children, side = 'bottom', slateBlack, u
         // Pass the element itself as render (no children so it won't be duplicated)
         <TooltipTrigger render={triggerRender} />
       ) : (
-        // Fallback: render a span wrapper and keep children inside
-        <TooltipTrigger render={<span />}>{children}</TooltipTrigger>
+        // Fallback: keep children as-is and render them as the trigger
+        <TooltipTrigger>{children}</TooltipTrigger>
       )}
 
       <StyledTooltipContent

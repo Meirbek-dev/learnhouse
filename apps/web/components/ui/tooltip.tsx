@@ -2,6 +2,7 @@
 
 import { Tooltip as TooltipPrimitive } from '@base-ui/react/tooltip';
 
+import { Children, type ReactElement } from 'react';
 import { cn } from '@/lib/utils';
 
 function TooltipProvider({ delay = 0, ...props }: TooltipPrimitive.Provider.Props) {
@@ -25,7 +26,23 @@ function Tooltip({ ...props }: TooltipPrimitive.Root.Props) {
   );
 }
 
-function TooltipTrigger({ ...props }: TooltipPrimitive.Trigger.Props) {
+function TooltipTrigger({ children, ...props }: TooltipPrimitive.Trigger.Props) {
+  // Support both `render` prop and single-child usage. If a single child element is provided,
+  // pass it as the `render` prop so it becomes the trigger element (and avoid duplication).
+  const singleChild = Children.count(children) === 1 ? (Children.only(children) as ReactElement) : null;
+
+  // If a single child was passed as children (and no explicit `render` prop), use it as the `render` prop.
+  // This prevents Base UI from rendering its own wrapper (which could be a <button>) and thus avoids nested <button> elements.
+  if (singleChild && !(props as any).render) {
+    return (
+      <TooltipPrimitive.Trigger
+        data-slot="tooltip-trigger"
+        render={singleChild}
+        {...props}
+      />
+    );
+  }
+
   return (
     <TooltipPrimitive.Trigger
       data-slot="tooltip-trigger"

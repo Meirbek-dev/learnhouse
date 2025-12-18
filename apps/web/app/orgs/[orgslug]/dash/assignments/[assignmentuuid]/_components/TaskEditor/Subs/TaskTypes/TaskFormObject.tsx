@@ -1,5 +1,10 @@
 'use client';
 
+import { Check, ChevronDown, GripVertical, Info, Lightbulb, Loader2, Plus, Trash2, Type, X } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
+
 import {
   getAssignmentTask,
   getAssignmentTaskSubmissionsMe,
@@ -13,12 +18,25 @@ import {
 } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { Check, Info, Minus, Plus, PlusCircle, Type, X } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useTranslations } from 'next-intl';
 import { generateUUID } from '@/lib/utils';
-import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Progress } from '@/components/ui/progress';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface BlankSchema {
   blankUUID?: string;
@@ -45,310 +63,819 @@ interface FormSubmitSchema {
   assignment_task_submission_uuid?: string;
 }
 
-// Helper functions for data normalization
-const normalizeQuestion = (question: Partial<FormSchema>): FormSchema => ({
-  questionText: question.questionText || '',
-  questionUUID: question.questionUUID || `question_${generateUUID()}`,
-  blanks: Array.isArray(question.blanks) ? question.blanks : [],
-});
-
-const normalizeQuestions = (questions: any[]): FormSchema[] => {
-  if (!Array.isArray(questions)) return [];
-  return questions.map(normalizeQuestion);
-};
-
-const normalizeSubmissions = (data: any): FormSubmitSchema => ({
-  questions: normalizeQuestions(data?.questions),
-  submissions: Array.isArray(data?.submissions) ? data.submissions : [],
-  assignment_task_submission_uuid: data?.assignment_task_submission_uuid,
-});
-
 interface TaskFormObjectProps {
   view: 'teacher' | 'student' | 'grading';
   assignmentTaskUUID: string;
   user_id?: number;
 }
 
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+const normalizeQuestion = (question: Partial<FormSchema>): FormSchema => ({
+  questionText: question.questionText || '',
+  questionUUID: question.questionUUID || `question_${generateUUID()}`,
+  blanks: Array.isArray(question.blanks)
+    ? (question.blanks as Partial<BlankSchema>[]).map((b) => ({
+        placeholder: b?.placeholder ?? '',
+        correctAnswer: b?.correctAnswer ?? '',
+        hint: b?.hint ?? '',
+        blankUUID: b?.blankUUID ?? `blank_${generateUUID()}`,
+      }))
+    : [],
+});
+
+const normalizeQuestions = (questions: unknown): FormSchema[] => {
+  if (!Array.isArray(questions)) return [];
+  return (questions as unknown[]).map((q) => normalizeQuestion(q as Partial<FormSchema>));
+};
+
+const normalizeSubmissions = (data: {
+  questions?: unknown[];
+  submissions?: SubmissionItem[];
+  assignment_task_submission_uuid?: string;
+}): FormSubmitSchema => ({
+  questions: normalizeQuestions(data?.questions ?? []),
+  submissions: Array.isArray(data?.submissions) ? data.submissions : [],
+  assignment_task_submission_uuid: data?.assignment_task_submission_uuid,
+});
+
+const createDefaultBlank = (placeholder?: string): BlankSchema => ({
+  placeholder: placeholder ?? '',
+  correctAnswer: '',
+  hint: '',
+  blankUUID: `blank_${generateUUID()}`,
+});
+
+const createDefaultQuestion = (placeholder?: string): FormSchema => ({
+  questionText: '',
+  questionUUID: `question_${generateUUID()}`,
+  blanks: [createDefaultBlank(placeholder)],
+});
+
+// ============================================================================
+// Sub-Components
+// ============================================================================
+
+interface GradingSummaryProps {
+  totalBlanks: number;
+  correctCount: number;
+}
+
+function GradingSummary({ totalBlanks, correctCount }: GradingSummaryProps) {
+  const t = useTranslations('Components.TaskFormObject');
+  const incorrectCount = totalBlanks - correctCount;
+  const percentage = totalBlanks > 0 ? (correctCount / totalBlanks) * 100 : 0;
+
+  return (
+    <Card className="mb-6 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-semibold">{t('submissionSummary')}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Progress
+          value={percentage}
+          className="h-2"
+        />
+        <div className="grid grid-cols-3 gap-4 text-center text-sm">
+          <div>
+            <p className="text-2xl font-bold text-blue-600">{totalBlanks}</p>
+            <p className="text-muted-foreground text-xs">{t('totalBlanks')}</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-green-600">{correctCount}</p>
+            <p className="text-muted-foreground text-xs">{t('correct')}</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-red-600">{incorrectCount}</p>
+            <p className="text-muted-foreground text-xs">{t('incorrect')}</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface AnswerStatusBadgeProps {
+  isCorrect: boolean;
+  view: 'student' | 'grading';
+  hasAnswer: boolean;
+}
+
+function AnswerStatusBadge({ isCorrect, view, hasAnswer }: AnswerStatusBadgeProps) {
+  const t = useTranslations('Components.TaskFormObject');
+
+  if (view === 'grading') {
+    return (
+      <Badge
+        variant={isCorrect ? 'default' : 'destructive'}
+        className="gap-1"
+      >
+        {isCorrect ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+        {isCorrect ? t('correct') : t('incorrect')}
+      </Badge>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        'flex h-6 w-6 items-center justify-center rounded-full transition-colors',
+        hasAnswer ? 'bg-green-100 text-green-600' : 'bg-muted text-muted-foreground',
+      )}
+    >
+      {hasAnswer ? <Check className="h-3.5 w-3.5" /> : <X className="h-3.5 w-3.5" />}
+    </div>
+  );
+}
+
+interface HintDisplayProps {
+  hint: string;
+}
+
+function HintDisplay({ hint }: HintDisplayProps) {
+  if (!hint) return null;
+
+  return (
+    <div className="flex items-center gap-1.5 text-xs text-blue-600">
+      <Lightbulb className="h-3 w-3" />
+      <span className="italic">{hint}</span>
+    </div>
+  );
+}
+
+interface BlankInputTeacherProps {
+  blank: BlankSchema;
+  qIndex: number;
+  bIndex: number;
+  isLast: boolean;
+  canAddMore: boolean;
+  canRemove: boolean;
+  onBlankChange: (
+    qIndex: number,
+    bIndex: number,
+    field: 'placeholder' | 'correctAnswer' | 'hint',
+    value: string,
+  ) => void;
+  onAddBlank: (qIndex: number) => void;
+  onRemoveBlank: (qIndex: number, bIndex: number) => void;
+}
+
+function BlankInputTeacher({
+  blank,
+  qIndex,
+  bIndex,
+  isLast,
+  canAddMore,
+  canRemove,
+  onBlankChange,
+  onAddBlank,
+  onRemoveBlank,
+}: BlankInputTeacherProps) {
+  const t = useTranslations('Components.TaskFormObject');
+
+  return (
+    <div className="flex items-start gap-2">
+      <Card className="flex-1 transition-shadow hover:shadow-md">
+        <CardContent className="flex items-start gap-3 p-3">
+          <div className="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded-md">
+            <Type className="text-muted-foreground h-4 w-4" />
+          </div>
+          <div className="min-w-0 flex-1 space-y-2">
+            <div className="space-y-1">
+              <Label className="text-muted-foreground text-xs">{t('placeholderText')}</Label>
+              <Input
+                value={blank.placeholder}
+                onChange={(e) => onBlankChange(qIndex, bIndex, 'placeholder', e.target.value)}
+                placeholder={t('placeholderText')}
+                className="placeholder:text-muted-foreground h-8 rounded-md border bg-white px-2 text-sm focus-visible:ring-2 focus-visible:ring-blue-500"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs text-green-600">{t('correctAnswerPlaceholder')}</Label>
+              <Input
+                value={blank.correctAnswer}
+                onChange={(e) => onBlankChange(qIndex, bIndex, 'correctAnswer', e.target.value)}
+                placeholder={t('correctAnswerPlaceholder')}
+                className="h-8 border-green-200 bg-green-50 focus-visible:ring-green-500"
+              />
+            </div>
+            <Collapsible>
+              <CollapsibleTrigger
+                nativeButton={false}
+                render={
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    className={cn(
+                      buttonVariants({ variant: 'ghost', size: 'sm' }),
+                      'h-6 gap-1 px-2 text-xs flex items-center',
+                    )}
+                  >
+                    <Lightbulb className="h-3 w-3" />
+                    {t('hintOptional')}
+                    <ChevronDown className="h-3 w-3" />
+                  </div>
+                }
+              />
+              <CollapsibleContent className="pt-2">
+                <Input
+                  value={blank.hint || ''}
+                  onChange={(e) => onBlankChange(qIndex, bIndex, 'hint', e.target.value)}
+                  placeholder={t('hintOptional')}
+                  className="h-8 border-blue-200 bg-blue-50 text-sm focus-visible:ring-blue-500"
+                />
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 shrink-0 text-red-500 hover:bg-red-50 hover:text-red-600"
+                    onClick={() => onRemoveBlank(qIndex, bIndex)}
+                    disabled={!canRemove}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                }
+              ></TooltipTrigger>
+              <TooltipContent>{t('removeBlank')}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </CardContent>
+      </Card>
+      {isLast && canAddMore && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="mt-3 h-10 w-10 shrink-0"
+                  onClick={() => onAddBlank(qIndex)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              }
+            />
+            <TooltipContent>{t('addBlank')}</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+    </div>
+  );
+}
+
+interface BlankInputStudentProps {
+  blank: BlankSchema;
+  questionUUID: string;
+  userAnswer: string;
+  onAnswerChange: (questionUUID: string, blankUUID: string, answer: string) => void;
+  onAnswerBlur: (questionUUID: string, blankUUID: string, answer: string) => void;
+}
+
+function BlankInputStudent({ blank, questionUUID, userAnswer, onAnswerChange, onAnswerBlur }: BlankInputStudentProps) {
+  return (
+    <Card className="transition-all focus-within:ring-2 focus-within:ring-blue-200 hover:shadow-md">
+      <CardContent className="flex items-center gap-3 p-3">
+        <div className="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded-md">
+          <Type className="text-muted-foreground h-4 w-4" />
+        </div>
+        <div className="min-w-0 flex-1 space-y-1">
+          <Input
+            value={userAnswer}
+            onChange={(e) => onAnswerChange(questionUUID, blank.blankUUID!, e.target.value)}
+            onBlur={(e) => onAnswerBlur(questionUUID, blank.blankUUID!, e.target.value)}
+            placeholder={blank.placeholder}
+            data-blank-id={blank.blankUUID}
+            className="placeholder:text-muted-foreground h-10 rounded-md border bg-white px-3 text-sm shadow-sm focus-visible:ring-2 focus-visible:ring-blue-500"
+          />
+          <HintDisplay hint={blank.hint || ''} />
+        </div>
+        <AnswerStatusBadge
+          isCorrect={false}
+          view="student"
+          hasAnswer={!!userAnswer?.trim()}
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
+interface BlankInputGradingProps {
+  blank: BlankSchema;
+  questionUUID: string;
+  userAnswer: string;
+}
+
+function BlankInputGrading({ blank, questionUUID, userAnswer }: BlankInputGradingProps) {
+  const t = useTranslations('Components.TaskFormObject');
+  const isCorrect = (userAnswer ?? '').toLowerCase().trim() === (blank.correctAnswer ?? '').toLowerCase().trim();
+
+  return (
+    <Card
+      className={cn('transition-all', isCorrect ? 'border-green-200 bg-green-50/50' : 'border-red-200 bg-red-50/50')}
+    >
+      <CardContent className="flex items-center gap-3 p-3">
+        <div
+          className={cn(
+            'flex h-10 w-10 shrink-0 items-center justify-center rounded-md',
+            isCorrect ? 'bg-green-100' : 'bg-red-100',
+          )}
+        >
+          <Type className={cn('h-4 w-4', isCorrect ? 'text-green-600' : 'text-red-600')} />
+        </div>
+        <div className="min-w-0 flex-1 space-y-1">
+          <p className="truncate font-medium">{userAnswer || '—'}</p>
+          <p className="text-muted-foreground text-xs">
+            <span className="font-semibold">{t('expected')}</span> {blank.correctAnswer}
+          </p>
+          <HintDisplay hint={blank.hint || ''} />
+        </div>
+        <AnswerStatusBadge
+          isCorrect={isCorrect}
+          view="grading"
+          hasAnswer
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
+interface QuestionCardProps {
+  question: FormSchema;
+  qIndex: number;
+  view: 'teacher' | 'student' | 'grading';
+  userSubmissions: FormSubmitSchema;
+  onQuestionChange?: (index: number, value: string) => void;
+  onBlankChange?: (
+    qIndex: number,
+    bIndex: number,
+    field: 'placeholder' | 'correctAnswer' | 'hint',
+    value: string,
+  ) => void;
+  onAddBlank?: (qIndex: number) => void;
+  onRemoveBlank?: (qIndex: number, bIndex: number) => void;
+  onRemoveQuestion?: (qIndex: number) => void;
+  onUserAnswerChange?: (questionUUID: string, blankUUID: string, answer: string) => void;
+  onUserAnswerBlur?: (questionUUID: string, blankUUID: string, answer: string) => void;
+}
+
+function QuestionCard({
+  question,
+  qIndex,
+  view,
+  userSubmissions,
+  onQuestionChange,
+  onBlankChange,
+  onAddBlank,
+  onRemoveBlank,
+  onRemoveQuestion,
+  onUserAnswerChange,
+  onUserAnswerBlur,
+}: QuestionCardProps) {
+  const t = useTranslations('Components.TaskFormObject');
+
+  const getUserAnswer = (blankUUID: string) =>
+    userSubmissions.submissions.find((s) => s.questionUUID === question.questionUUID && s.blankUUID === blankUUID)
+      ?.answer || '';
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-start gap-2">
+          {view === 'teacher' && <GripVertical className="text-muted-foreground mt-2 h-5 w-5 shrink-0 cursor-grab" />}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="outline"
+                className="shrink-0"
+              >
+                Q{qIndex + 1}
+              </Badge>
+              {view === 'teacher' ? (
+                <Input
+                  value={question.questionText}
+                  onChange={(e) => onQuestionChange?.(qIndex, e.target.value)}
+                  placeholder={t('questionPlaceholder')}
+                  className="placeholder:text-muted-foreground h-9 rounded-md border bg-white px-3 font-medium focus-visible:ring-2 focus-visible:ring-blue-500"
+                />
+              ) : (
+                <CardTitle className="text-base">{question.questionText || t('noQuestionText')}</CardTitle>
+              )}
+            </div>
+            {view === 'teacher' && (
+              <CardDescription className="mt-1">
+                {t('blanksCount', { count: question.blanks.length })}
+              </CardDescription>
+            )}
+          </div>
+          {view === 'teacher' && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0 text-red-500 hover:bg-red-50 hover:text-red-600"
+                      onClick={() => onRemoveQuestion?.(qIndex)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  }
+                />
+                <TooltipContent>{t('removeQuestion')}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+      </CardHeader>
+      <Separator />
+      <CardContent className="space-y-3 pt-4">
+        {question.blanks.map((blank, bIndex) => {
+          if (view === 'teacher') {
+            return (
+              <BlankInputTeacher
+                key={blank.blankUUID || bIndex}
+                blank={blank}
+                qIndex={qIndex}
+                bIndex={bIndex}
+                isLast={bIndex === question.blanks.length - 1}
+                canAddMore={question.blanks.length < 5}
+                canRemove={question.blanks.length > 1}
+                onBlankChange={onBlankChange!}
+                onAddBlank={onAddBlank!}
+                onRemoveBlank={onRemoveBlank!}
+              />
+            );
+          }
+
+          if (view === 'grading') {
+            return (
+              <BlankInputGrading
+                key={blank.blankUUID || bIndex}
+                blank={blank}
+                questionUUID={question.questionUUID!}
+                userAnswer={getUserAnswer(blank.blankUUID!)}
+              />
+            );
+          }
+
+          return (
+            <BlankInputStudent
+              key={blank.blankUUID || bIndex}
+              blank={blank}
+              questionUUID={question.questionUUID!}
+              userAnswer={getUserAnswer(blank.blankUUID!)}
+              onAnswerChange={onUserAnswerChange!}
+              onAnswerBlur={onUserAnswerBlur!}
+            />
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-4">
+      {[1, 2].map((i) => (
+        <Card key={i}>
+          <CardHeader>
+            <Skeleton className="h-6 w-3/4" />
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
 function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectProps) {
   const t = useTranslations('Components.TaskFormObject');
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession() as {
+    data?: { tokens?: { access_token?: string } };
+  };
   const access_token = session?.data?.tokens?.access_token;
   const assignmentTaskState = useAssignmentsTask();
   const assignmentTaskStateHook = useAssignmentsTaskDispatch();
   const assignment = useAssignments();
 
-  /* TEACHER VIEW CODE */
+  // Loading states
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Form state
   const [questions, setQuestions] = useState<FormSchema[]>(() => {
     if (view === 'teacher') {
       const savedQuestions = assignmentTaskState.assignmentTask.contents?.questions;
       if (savedQuestions) {
         return normalizeQuestions(savedQuestions);
       }
-      return [
-        {
-          questionText: '',
-          questionUUID: `question_${generateUUID()}`,
-          blanks: [
-            {
-              placeholder: t('blankPlaceholder'),
-              correctAnswer: '',
-              hint: '',
-              blankUUID: `blank_${generateUUID()}`,
-            },
-          ],
-        },
-      ];
+      return [createDefaultQuestion(t('blankPlaceholder'))];
     }
     return [];
   });
 
-  const handleQuestionChange = (index: number, value: string) => {
-    const updatedQuestions = [...questions];
-    if (updatedQuestions[index]) {
-      updatedQuestions[index].questionText = value;
-      setQuestions(updatedQuestions);
-    }
-  };
-
-  const handleBlankChange = (
-    qIndex: number,
-    bIndex: number,
-    field: 'placeholder' | 'correctAnswer' | 'hint',
-    value: string,
-  ) => {
-    const updatedQuestions = [...questions];
-    if (updatedQuestions[qIndex]?.blanks[bIndex]) {
-      updatedQuestions[qIndex].blanks[bIndex][field] = value;
-      setQuestions(updatedQuestions);
-    }
-  };
-
-  const addBlank = (qIndex: number) => {
-    const updatedQuestions = [...questions];
-    if (updatedQuestions[qIndex]) {
-      updatedQuestions[qIndex].blanks.push({
-        placeholder: t('blankPlaceholder'),
-        correctAnswer: '',
-        hint: '',
-        blankUUID: `blank_${generateUUID()}`,
-      });
-      setQuestions(updatedQuestions);
-    }
-  };
-
-  const removeBlank = (qIndex: number, bIndex: number) => {
-    const updatedQuestions = [...questions];
-    if (updatedQuestions[qIndex] && updatedQuestions[qIndex].blanks.length > 1) {
-      updatedQuestions[qIndex].blanks.splice(bIndex, 1);
-      setQuestions(updatedQuestions);
-    } else {
-      toast.error(t('removeBlankError'));
-    }
-  };
-
-  const addQuestion = () => {
-    setQuestions([
-      ...questions,
-      {
-        questionText: '',
-        questionUUID: `question_${generateUUID()}`,
-        blanks: [
-          {
-            placeholder: t('blankPlaceholder'),
-            correctAnswer: '',
-            hint: '',
-            blankUUID: `blank_${generateUUID()}`,
-          },
-        ],
-      },
-    ]);
-  };
-
-  const removeQuestion = (qIndex: number) => {
-    const updatedQuestions = [...questions];
-    updatedQuestions.splice(qIndex, 1);
-    setQuestions(updatedQuestions);
-  };
-
-  const saveFC = async () => {
-    // Save the form to the server
-    const values = {
-      contents: {
-        questions,
-      },
-    };
-    const res = await updateAssignmentTask(
-      values,
-      assignmentTaskState.assignmentTask.assignment_task_uuid,
-      assignment.assignment_object.assignment_uuid,
-      access_token,
-    );
-    if (res) {
-      assignmentTaskStateHook({
-        type: 'reload',
-      });
-      toast.success(t('savedSuccessfully'));
-    } else {
-      console.error('Save error:', res);
-      toast.error(t('saveError'));
-    }
-  };
-
-  /* STUDENT VIEW CODE */
   const [userSubmissions, setUserSubmissions] = useState<FormSubmitSchema>(normalizeSubmissions({}));
   const [initialUserSubmissions, setInitialUserSubmissions] = useState<FormSubmitSchema>(normalizeSubmissions({}));
-  const [assignmentTaskOutsideProvider, setAssignmentTaskOutsideProvider] = useState<any>(null);
-  const [userSubmissionObject, setUserSubmissionObject] = useState<any>(null);
+  const [assignmentTaskOutsideProvider, setAssignmentTaskOutsideProvider] = useState<{
+    max_grade_value?: number;
+  } | null>(null);
+  const [userSubmissionObject, setUserSubmissionObject] = useState<{
+    grade?: number;
+  } | null>(null);
 
-  const showSavingDisclaimer = useMemo(() => {
-    return JSON.stringify(userSubmissions) !== JSON.stringify(initialUserSubmissions);
-  }, [userSubmissions, initialUserSubmissions]);
+  // Computed values
+  const showSavingDisclaimer = useMemo(
+    () => JSON.stringify(userSubmissions) !== JSON.stringify(initialUserSubmissions),
+    [userSubmissions, initialUserSubmissions],
+  );
 
-  const handleUserAnswerChange = (questionUUID: string, blankUUID: string, answer: string) => {
-    setUserSubmissions((prev) => {
-      const updatedSubmissions = [...prev.submissions];
-      const existingIndex = updatedSubmissions.findIndex(
-        (submission) => submission.questionUUID === questionUUID && submission.blankUUID === blankUUID,
+  const gradingStats = useMemo(() => {
+    const allBlanks = questions.flatMap((q) => q.blanks.map((blank) => ({ ...blank, questionUUID: q.questionUUID })));
+    const correctCount = allBlanks.filter((blank) => {
+      const userAnswer = userSubmissions.submissions.find(
+        (s) => s.questionUUID === blank.questionUUID && s.blankUUID === blank.blankUUID,
       );
+      return (userAnswer?.answer ?? '').toLowerCase().trim() === (blank.correctAnswer ?? '').toLowerCase().trim();
+    }).length;
+    return { totalBlanks: allBlanks.length, correctCount };
+  }, [questions, userSubmissions]);
 
-      if (existingIndex !== -1 && updatedSubmissions[existingIndex]) {
-        updatedSubmissions[existingIndex]!.answer = answer;
-      } else {
-        updatedSubmissions.push({ questionUUID, blankUUID, answer });
+  // Teacher handlers
+  const handleQuestionChange = useCallback((index: number, value: string) => {
+    setQuestions((prev) => {
+      const updated = [...prev];
+      if (updated[index]) {
+        updated[index] = { ...updated[index], questionText: value };
       }
+      return updated;
+    });
+  }, []);
 
+  const handleBlankChange = useCallback(
+    (qIndex: number, bIndex: number, field: 'placeholder' | 'correctAnswer' | 'hint', value: string) => {
+      setQuestions((prev) => {
+        const updated = [...prev];
+        if (updated[qIndex]?.blanks[bIndex]) {
+          updated[qIndex] = {
+            ...updated[qIndex],
+            blanks: updated[qIndex].blanks.map((b, i) => (i === bIndex ? { ...b, [field]: value } : b)),
+          };
+        }
+        return updated;
+      });
+    },
+    [],
+  );
+
+  const addBlank = useCallback(
+    (qIndex: number) => {
+      setQuestions((prev) => {
+        if (!prev[qIndex]) return prev;
+        return prev.map((q, i) =>
+          i === qIndex ? { ...q, blanks: [...q.blanks, createDefaultBlank(t('blankPlaceholder'))] } : q,
+        );
+      });
+    },
+    [t],
+  );
+
+  const removeBlank = useCallback(
+    (qIndex: number, bIndex: number) => {
+      setQuestions((prev) => {
+        const q = prev[qIndex];
+        if (!q) return prev;
+        if (q.blanks.length === 1) {
+          toast.error(t('removeBlankError'));
+          return prev;
+        }
+        return prev.map((item, i) =>
+          i === qIndex ? { ...item, blanks: item.blanks.filter((_, j) => j !== bIndex) } : item,
+        );
+      });
+    },
+    [t],
+  );
+
+  const addQuestion = useCallback(() => {
+    setQuestions((prev) => [...prev, createDefaultQuestion(t('blankPlaceholder'))]);
+  }, [t]);
+
+  const removeQuestion = useCallback((qIndex: number) => {
+    setQuestions((prev) => prev.filter((_, i) => i !== qIndex));
+  }, []);
+
+  // Student handlers
+  const handleUserAnswerChange = useCallback((questionUUID: string, blankUUID: string, answer: string) => {
+    setUserSubmissions((prev) => {
+      const existingIndex = prev.submissions.findIndex(
+        (s) => s.questionUUID === questionUUID && s.blankUUID === blankUUID,
+      );
+      const updatedSubmissions =
+        existingIndex !== -1
+          ? prev.submissions.map((s, i) => (i === existingIndex ? { ...s, answer } : s))
+          : [...prev.submissions, { questionUUID, blankUUID, answer }];
       return { ...prev, submissions: updatedSubmissions };
     });
-  };
+  }, []);
 
-  const handleUserAnswerBlur = (questionUUID: string, blankUUID: string, answer: string) => {
-    if (!answer.trim() || view !== 'student') return;
+  const handleUserAnswerBlur = useCallback(
+    (questionUUID: string, blankUUID: string, answer: string) => {
+      if (!answer.trim() || view !== 'student') return;
 
-    const allBlanks = questions.flatMap((q) =>
-      q.blanks.map((b) => ({ questionUUID: q.questionUUID, blankUUID: b.blankUUID })),
-    );
-    const currentIndex = allBlanks.findIndex((b) => b.questionUUID === questionUUID && b.blankUUID === blankUUID);
-    const nextBlank = allBlanks[currentIndex + 1];
+      const allBlanks = questions.flatMap((q) =>
+        q.blanks.map((b) => ({
+          questionUUID: q.questionUUID,
+          blankUUID: b.blankUUID,
+        })),
+      );
+      const currentIndex = allBlanks.findIndex((b) => b.questionUUID === questionUUID && b.blankUUID === blankUUID);
+      const nextBlank = allBlanks[currentIndex + 1];
 
-    if (nextBlank) {
-      setTimeout(() => {
-        const nextInput = document.querySelector(`[data-blank-id="${nextBlank.blankUUID}"]`) as HTMLInputElement;
-        nextInput?.focus();
-      }, 100);
+      if (nextBlank && nextBlank.blankUUID) {
+        setTimeout(() => {
+          const nextInput = document.querySelector(`[data-blank-id="${nextBlank.blankUUID}"]`) as HTMLInputElement;
+          nextInput?.focus();
+        }, 100);
+      }
+    },
+    [questions, view],
+  );
+
+  // API handlers
+  const saveFC = useCallback(async () => {
+    if (!access_token) {
+      toast.error(t('authRequired') || 'Authentication required');
+      return;
     }
-  };
+    if (!assignmentTaskState.assignmentTask.assignment_task_uuid || !assignment.assignment_object.assignment_uuid) {
+      console.error('Missing assignment task or assignment UUID for save');
+      toast.error(t('saveError'));
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const res = await updateAssignmentTask(
+        { contents: { questions } },
+        assignmentTaskState.assignmentTask.assignment_task_uuid,
+        assignment.assignment_object.assignment_uuid,
+        access_token,
+      );
+      if (res) {
+        assignmentTaskStateHook({ type: 'reload' });
+        toast.success(t('savedSuccessfully'));
+      } else {
+        toast.error(t('saveError'));
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  }, [
+    questions,
+    assignmentTaskState.assignmentTask.assignment_task_uuid,
+    assignment.assignment_object.assignment_uuid,
+    access_token,
+    assignmentTaskStateHook,
+    t,
+  ]);
 
-  const submitFC = async () => {
+  const submitFC = useCallback(async () => {
     if (userSubmissions.submissions.length === 0) {
       toast.error(t('fillBlanksError'));
       return;
     }
-
-    const values = {
-      assignment_task_submission_uuid: userSubmissions.assignment_task_submission_uuid || null,
-      task_submission: userSubmissions,
-      grade: 0,
-      task_submission_grade_feedback: '',
-    };
-
-    const res = await handleAssignmentTaskSubmission(
-      values,
-      assignmentTaskUUID,
-      assignment.assignment_object.assignment_uuid,
-      access_token,
-    );
-
-    if (res) {
-      toast.success(t('submittedSuccessfully'));
-      // Update userSubmissions with the returned UUID for future updates
-      const updatedUserSubmissions = {
-        ...userSubmissions,
-        assignment_task_submission_uuid:
-          res.data?.assignment_task_submission_uuid || userSubmissions.assignment_task_submission_uuid,
-      };
-      setUserSubmissions(updatedUserSubmissions);
-      setInitialUserSubmissions(updatedUserSubmissions);
-      // showSavingDisclaimer will automatically become false when submissions match
-    } else {
-      console.error('Submission error:', res);
-      toast.error(t('submitError'));
+    if (!access_token) {
+      toast.error(t('authRequired') || 'Authentication required');
+      return;
     }
-  };
+    if (!assignmentTaskUUID || !assignment.assignment_object.assignment_uuid) {
+      console.error('Missing assignmentTaskUUID or assignment UUID for submit');
+      toast.error(t('submitError'));
+      return;
+    }
 
-  const gradeFC = async () => {
+    setIsSubmitting(true);
+    try {
+      const res = await handleAssignmentTaskSubmission(
+        {
+          assignment_task_submission_uuid: userSubmissions.assignment_task_submission_uuid || null,
+          task_submission: userSubmissions,
+          grade: 0,
+          task_submission_grade_feedback: '',
+        },
+        assignmentTaskUUID,
+        assignment.assignment_object.assignment_uuid,
+        access_token,
+      );
+
+      if (res) {
+        const updatedSubmissions = {
+          ...userSubmissions,
+          assignment_task_submission_uuid:
+            res.data?.assignment_task_submission_uuid || userSubmissions.assignment_task_submission_uuid,
+        };
+        setUserSubmissions(updatedSubmissions);
+        setInitialUserSubmissions(updatedSubmissions);
+        toast.success(t('submittedSuccessfully'));
+      } else {
+        toast.error(t('submitError'));
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [userSubmissions, assignmentTaskUUID, assignment.assignment_object.assignment_uuid, access_token, t]);
+
+  const gradeFC = useCallback(async () => {
     if (!user_id) {
       toast.error(t('userIdRequired'));
       return;
     }
 
-    // Calculate grade based on correct answers
-    const allBlanks = questions.flatMap((q) => q.blanks.map((blank) => ({ ...blank, questionUUID: q.questionUUID })));
-
-    const correctAnswers = allBlanks.filter((blank) => {
-      const userAnswer = userSubmissions.submissions.find(
-        (s) => s.questionUUID === blank.questionUUID && s.blankUUID === blank.blankUUID,
-      );
-      return userAnswer?.answer.toLowerCase().trim() === blank.correctAnswer.toLowerCase().trim();
-    }).length;
-
-    const maxPoints = assignmentTaskOutsideProvider?.max_grade_value || 100;
-    const finalGrade = allBlanks.length > 0 ? Math.round((correctAnswers / allBlanks.length) * maxPoints) : 0;
-
-    // Save the grade to the server
-    const values = {
-      assignment_task_submission_uuid: userSubmissions.assignment_task_submission_uuid,
-      task_submission: userSubmissions,
-      grade: finalGrade,
-      task_submission_grade_feedback: t('autoGradedBySystem'),
-    };
-
-    const res = await handleAssignmentTaskSubmission(
-      values,
-      assignmentTaskUUID,
-      assignment.assignment_object.assignment_uuid,
-      access_token,
-    );
-    if (res) {
-      getAssignmentTaskSubmissionFromIdentifiedUserUI();
-      toast.success(t('gradedSuccessfully', { finalGrade, correctAnswers, totalBlanks: allBlanks.length }));
-    } else {
-      toast.error(t('gradeError'));
+    if (!access_token) {
+      toast.error(t('authRequired') || 'Authentication required');
+      return;
     }
-  };
-
-  const getAssignmentTaskSubmissionFromIdentifiedUserUI = useCallback(async () => {
-    if (!(access_token && user_id)) {
+    if (!assignmentTaskUUID || !assignment.assignment_object.assignment_uuid) {
+      console.error('Missing assignmentTaskUUID or assignment UUID for grade');
+      toast.error(t('gradeError'));
       return;
     }
 
-    if (assignmentTaskUUID) {
-      const res = await getAssignmentTaskSubmissionsUser(
+    setIsSubmitting(true);
+    try {
+      const maxPoints = assignmentTaskOutsideProvider?.max_grade_value || 100;
+      const finalGrade =
+        gradingStats.totalBlanks > 0
+          ? Math.round((gradingStats.correctCount / gradingStats.totalBlanks) * maxPoints)
+          : 0;
+
+      const res = await handleAssignmentTaskSubmission(
+        {
+          assignment_task_submission_uuid: userSubmissions.assignment_task_submission_uuid,
+          task_submission: userSubmissions,
+          grade: finalGrade,
+          task_submission_grade_feedback: t('autoGradedBySystem'),
+        },
         assignmentTaskUUID,
-        user_id,
         assignment.assignment_object.assignment_uuid,
         access_token,
       );
-      if (res.success) {
-        const normalizedData = normalizeSubmissions({
-          ...res.data.task_submission,
-          assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
-        });
-        setUserSubmissions(normalizedData);
-        setInitialUserSubmissions(normalizedData);
-        setUserSubmissionObject(res.data);
-      }
-    }
-  }, [access_token, user_id, assignmentTaskUUID, assignment.assignment_object.assignment_uuid]);
 
+      if (res) {
+        toast.success(
+          t('gradedSuccessfully', {
+            finalGrade,
+            correctAnswers: gradingStats.correctCount,
+            totalBlanks: gradingStats.totalBlanks,
+          }),
+        );
+      } else {
+        toast.error(t('gradeError'));
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [
+    user_id,
+    assignmentTaskOutsideProvider,
+    gradingStats,
+    userSubmissions,
+    assignmentTaskUUID,
+    assignment.assignment_object.assignment_uuid,
+    access_token,
+    t,
+  ]);
+
+  // Data loading
   const loadAssignmentTask = useCallback(async () => {
     if (!assignmentTaskUUID) return;
+    if (!access_token) {
+      console.warn('Missing access token for loadAssignmentTask');
+      return;
+    }
 
     const res = await getAssignmentTask(assignmentTaskUUID, access_token);
     if (res.success) {
       setAssignmentTaskOutsideProvider(res.data);
       const normalizedQuestions = normalizeQuestions(res.data.contents?.questions);
-
-      // Only update questions for student/grading view, or if teacher has saved questions
       if (view !== 'teacher' || normalizedQuestions.length > 0) {
         setQuestions(normalizedQuestions);
       }
@@ -357,6 +884,10 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
 
   const loadUserSubmissions = useCallback(async () => {
     if (view !== 'student' || !assignmentTaskUUID) return;
+    if (!access_token) {
+      console.warn('Missing access token for loadUserSubmissions');
+      return;
+    }
 
     const res = await getAssignmentTaskSubmissionsMe(
       assignmentTaskUUID,
@@ -364,17 +895,36 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
       access_token,
     );
     if (res.success) {
-      const normalizedData = normalizeSubmissions({
+      const normalized = normalizeSubmissions({
         ...res.data.task_submission,
         assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
       });
-      setUserSubmissions(normalizedData);
-      setInitialUserSubmissions(normalizedData);
+      setUserSubmissions(normalized);
+      setInitialUserSubmissions(normalized);
     }
   }, [view, assignmentTaskUUID, assignment.assignment_object.assignment_uuid, access_token]);
 
-  // Set assignment task UUID in context - only for teacher view (single component)
-  // Skip for student/grading views where multiple task components render simultaneously
+  const loadUserSubmissionsForGrading = useCallback(async () => {
+    if (!access_token || !user_id || !assignmentTaskUUID) return;
+
+    const res = await getAssignmentTaskSubmissionsUser(
+      assignmentTaskUUID,
+      user_id,
+      assignment.assignment_object.assignment_uuid,
+      access_token,
+    );
+    if (res.success) {
+      const normalized = normalizeSubmissions({
+        ...res.data.task_submission,
+        assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
+      });
+      setUserSubmissions(normalized);
+      setInitialUserSubmissions(normalized);
+      setUserSubmissionObject(res.data);
+    }
+  }, [access_token, user_id, assignmentTaskUUID, assignment.assignment_object.assignment_uuid]);
+
+  // Effects
   useEffect(() => {
     if (view === 'teacher' && assignmentTaskUUID) {
       assignmentTaskStateHook({
@@ -385,322 +935,105 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
   }, [view, assignmentTaskUUID, assignmentTaskStateHook]);
 
   useEffect(() => {
-    if (view === 'teacher') {
-      // Questions are initialized via lazy initialization in useState
-      // Only load task if no saved questions exist
-      if (!assignmentTaskState.assignmentTask.contents?.questions) {
-        void Promise.resolve().then(() => loadAssignmentTask());
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        if (view === 'teacher') {
+          if (!assignmentTaskState.assignmentTask.contents?.questions) {
+            await loadAssignmentTask();
+          }
+        } else if (view === 'student') {
+          await Promise.all([loadAssignmentTask(), loadUserSubmissions()]);
+        } else if (view === 'grading') {
+          await Promise.all([loadAssignmentTask(), loadUserSubmissionsForGrading()]);
+        }
+      } finally {
+        setIsLoading(false);
       }
-    } else if (view === 'student') {
-      void Promise.resolve().then(() => loadAssignmentTask());
-      void Promise.resolve().then(() => loadUserSubmissions());
-    } else if (view === 'grading') {
-      void Promise.resolve().then(() => loadAssignmentTask());
-      void Promise.resolve().then(() => getAssignmentTaskSubmissionFromIdentifiedUserUI());
-    }
+    };
+
+    void loadData();
   }, [
-    assignmentTaskState.assignmentTask.contents?.questions,
     view,
-    assignmentTaskUUID,
-    user_id,
-    access_token,
-    assignment.assignment_object.assignment_uuid,
+    assignmentTaskState.assignmentTask.contents?.questions,
     loadAssignmentTask,
     loadUserSubmissions,
-    getAssignmentTaskSubmissionFromIdentifiedUserUI,
+    loadUserSubmissionsForGrading,
   ]);
 
-  // Show main UI for teacher view (always has at least the default question)
-  // or when questions exist for other views
-  if (view === 'teacher' || (questions && questions.length > 0)) {
+  // Render
+  if (isLoading) {
     return (
       <AssignmentBoxUI
         submitFC={submitFC}
         saveFC={saveFC}
         gradeFC={gradeFC}
         view={view}
-        currentPoints={userSubmissionObject?.grade}
-        maxPoints={assignmentTaskOutsideProvider?.max_grade_value}
-        showSavingDisclaimer={showSavingDisclaimer}
         type="form"
       >
-        {view === 'grading' &&
-          (() => {
-            const allBlanks = questions.flatMap((q) => q.blanks);
-            const correctCount = allBlanks.filter((blank) => {
-              const userAnswer = userSubmissions.submissions.find((s) => s.blankUUID === blank.blankUUID);
-              return userAnswer?.answer.toLowerCase().trim() === blank.correctAnswer.toLowerCase().trim();
-            }).length;
-
-            return (
-              <div className="mb-6 rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
-                <h3 className="mb-2 text-sm font-semibold text-gray-800">{t('submissionSummary')}</h3>
-                <div className="grid grid-cols-3 gap-4 text-sm">
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-blue-600">{allBlanks.length}</div>
-                    <div className="text-gray-600">{t('totalBlanks')}</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-green-600">{correctCount}</div>
-                    <div className="text-gray-600">{t('correct')}</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-red-600">{allBlanks.length - correctCount}</div>
-                    <div className="text-gray-600">{t('incorrect')}</div>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
-        <div className="flex flex-col space-y-6">
-          {questions?.map((question, qIndex) => (
-            <div
-              key={qIndex}
-              className="flex flex-col space-y-1.5"
-            >
-              <div className="flex items-center space-x-2">
-                {view === 'teacher' ? (
-                  <input
-                    value={question.questionText}
-                    onChange={(e) => handleQuestionChange(qIndex, e.target.value)}
-                    placeholder={t('questionPlaceholder')}
-                    className="w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 text-sm font-bold text-neutral-600"
-                  />
-                ) : (
-                  <p className="w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 text-sm font-bold text-neutral-600">
-                    {question.questionText}
-                  </p>
-                )}
-                {view === 'teacher' && (
-                  <div
-                    className="flex h-[20px] w-[20px] flex-none cursor-pointer items-center rounded-lg bg-slate-200/60 text-sm text-slate-500 transition-all ease-linear hover:bg-slate-300"
-                    onClick={() => removeQuestion(qIndex)}
-                  >
-                    <Minus
-                      size={12}
-                      className="mx-auto"
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Blanks section */}
-              <div className="flex flex-col space-y-2">
-                {question.blanks.map((blank, bIndex) => (
-                  <div
-                    key={bIndex}
-                    className="flex"
-                  >
-                    <div
-                      className={
-                        'blank-item soft-shadow flex min-h-[40px] w-full items-center space-x-2 rounded-lg bg-white pr-2 text-sm shadow-sm outline-3 outline-white duration-150 ease-linear hover:bg-opacity-100 hover:shadow-md' +
-                        (view === 'student' ? 'active:scale-105' : '')
-                      }
-                    >
-                      <div className="flex h-full w-[40px] items-center justify-center rounded-l-md bg-slate-100/80 text-base font-bold text-slate-800">
-                        <Type size={14} />
-                      </div>
-                      {view === 'teacher' ? (
-                        <div className="flex w-full flex-col space-y-1 py-2">
-                          <input
-                            value={blank.placeholder}
-                            onChange={(e) => handleBlankChange(qIndex, bIndex, 'placeholder', e.target.value)}
-                            placeholder={t('placeholderText')}
-                            className="mx-2 w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 pr-6 text-sm font-bold text-neutral-600"
-                          />
-                          <input
-                            value={blank.correctAnswer}
-                            onChange={(e) => handleBlankChange(qIndex, bIndex, 'correctAnswer', e.target.value)}
-                            placeholder={t('correctAnswerPlaceholder')}
-                            className="mx-2 w-full rounded-md border-2 border-dotted border-lime-200 bg-lime-50 px-3 pr-6 text-sm font-bold text-neutral-600"
-                          />
-                          <input
-                            value={blank.hint || ''}
-                            onChange={(e) => handleBlankChange(qIndex, bIndex, 'hint', e.target.value)}
-                            placeholder={t('hintOptional')}
-                            className="mx-2 w-full rounded-md border-2 border-dotted border-blue-200 bg-blue-50 px-3 pr-6 text-xs text-neutral-600"
-                          />
-                        </div>
-                      ) : view === 'grading' ? (
-                        <div className="flex w-full flex-col space-y-1 py-2">
-                          <div className="mx-2 flex w-full items-center space-x-2">
-                            <input
-                              value={
-                                userSubmissions.submissions.find(
-                                  (submission) =>
-                                    submission.questionUUID === question.questionUUID &&
-                                    submission.blankUUID === blank.blankUUID,
-                                )?.answer || ''
-                              }
-                              readOnly
-                              className="flex-1 rounded-md border-2 border-gray-200 bg-gray-50 px-3 pr-6 text-sm font-bold text-neutral-600"
-                            />
-                          </div>
-                          <div className="mx-2 text-xs text-gray-600">
-                            <span className="font-semibold">{t('expected')}</span> {blank.correctAnswer}
-                          </div>
-                          {blank.hint && (
-                            <div className="mx-2 text-xs text-blue-600 italic">
-                              {t('hintIcon')} {blank.hint}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="flex w-full flex-col space-y-1 py-2">
-                          <input
-                            value={
-                              userSubmissions.submissions.find(
-                                (submission) =>
-                                  submission.questionUUID === question.questionUUID &&
-                                  submission.blankUUID === blank.blankUUID,
-                              )?.answer || ''
-                            }
-                            onChange={(e) =>
-                              handleUserAnswerChange(question.questionUUID!, blank.blankUUID!, e.target.value)
-                            }
-                            onBlur={(e) =>
-                              handleUserAnswerBlur(question.questionUUID!, blank.blankUUID!, e.target.value)
-                            }
-                            placeholder={blank.placeholder}
-                            data-blank-id={blank.blankUUID}
-                            className="mx-2 w-full rounded-md border-2 border-gray-200 bg-[#00008b00] px-3 pr-6 text-sm font-bold text-neutral-600 transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
-                          />
-                          {blank.hint && (
-                            <div className="mx-2 text-xs text-blue-600 italic">
-                              {t('hintIcon')} {blank.hint}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      {view === 'teacher' && (
-                        <div
-                          className="flex h-[20px] w-[20px] flex-none cursor-pointer items-center rounded-lg bg-slate-200/60 text-sm text-slate-500 transition-all ease-linear hover:bg-slate-300"
-                          onClick={() => removeBlank(qIndex, bIndex)}
-                        >
-                          <Minus
-                            size={12}
-                            className="mx-auto"
-                          />
-                        </div>
-                      )}
-                      {view === 'grading' && (
-                        <div
-                          className={`flex h-fit w-fit flex-none items-center space-x-1 rounded-lg px-2 py-0.5 text-xs ${
-                            userSubmissions.submissions
-                              .find(
-                                (submission) =>
-                                  submission.questionUUID === question.questionUUID &&
-                                  submission.blankUUID === blank.blankUUID,
-                              )
-                              ?.answer?.toLowerCase()
-                              .trim() === blank.correctAnswer.toLowerCase().trim()
-                              ? 'bg-lime-200 text-lime-600'
-                              : 'bg-rose-200/60 text-rose-500'
-                          } text-sm`}
-                        >
-                          {userSubmissions.submissions
-                            .find(
-                              (submission) =>
-                                submission.questionUUID === question.questionUUID &&
-                                submission.blankUUID === blank.blankUUID,
-                            )
-                            ?.answer?.toLowerCase()
-                            .trim() === blank.correctAnswer.toLowerCase().trim() ? (
-                            <>
-                              <Check
-                                size={12}
-                                className="mx-auto"
-                              />
-                              <p className="mx-auto text-xs font-bold">{t('correct')}</p>
-                            </>
-                          ) : (
-                            <>
-                              <X
-                                size={12}
-                                className="mx-auto"
-                              />
-                              <p className="mx-auto text-xs font-bold">{t('incorrect')}</p>
-                            </>
-                          )}
-                        </div>
-                      )}
-                      {view === 'student' && (
-                        <div
-                          className={`flex h-[20px] w-[20px] flex-none items-center rounded-lg ${
-                            userSubmissions.submissions
-                              .find(
-                                (submission) =>
-                                  submission.questionUUID === question.questionUUID &&
-                                  submission.blankUUID === blank.blankUUID,
-                              )
-                              ?.answer?.trim()
-                              ? 'bg-green-200/60 text-green-500'
-                              : 'bg-slate-200/60 text-slate-500'
-                          } text-sm transition-all ease-linear`}
-                        >
-                          {userSubmissions.submissions
-                            .find(
-                              (submission) =>
-                                submission.questionUUID === question.questionUUID &&
-                                submission.blankUUID === blank.blankUUID,
-                            )
-                            ?.answer?.trim() ? (
-                            <Check
-                              size={12}
-                              className="mx-auto"
-                            />
-                          ) : (
-                            <X
-                              size={12}
-                              className="mx-auto"
-                            />
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    {view === 'teacher' && bIndex === question.blanks.length - 1 && question.blanks.length <= 4 && (
-                      <div className="mx-auto flex justify-center px-2">
-                        <div
-                          className="soft-shadow hover:bg-opacity-100 flex h-[40px] w-full cursor-pointer items-center rounded-lg bg-white px-2 shadow-sm outline-3 outline-white duration-150 ease-linear hover:shadow-md"
-                          onClick={() => addBlank(qIndex)}
-                        >
-                          <Plus
-                            size={14}
-                            className="inline-block"
-                          />
-                          <span />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-        {view === 'teacher' && questions.length <= 5 && (
-          <div className="mx-auto flex justify-center px-2">
-            <div
-              className="soft-shadow text-slate my-2 flex w-full cursor-pointer items-center space-x-3 rounded-md bg-white px-4 py-2 text-xs transition duration-150 ease-linear hover:shadow-xs"
-              onClick={addQuestion}
-            >
-              <PlusCircle
-                size={14}
-                className="inline-block"
-              />
-              <span>{t('addQuestion')}</span>
-            </div>
-          </div>
-        )}
+        <LoadingSkeleton />
       </AssignmentBoxUI>
     );
   }
 
+  if (view !== 'teacher' && (!questions || questions.length === 0)) {
+    return (
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertDescription>{t('noQuestionsFound')}</AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
-    <div className="flex flex-row items-center space-x-2 text-sm">
-      <Info size={12} />
-      <p>{t('noQuestionsFound')}</p>
-    </div>
+    <AssignmentBoxUI
+      submitFC={submitFC}
+      saveFC={saveFC}
+      gradeFC={gradeFC}
+      view={view}
+      currentPoints={userSubmissionObject?.grade}
+      maxPoints={assignmentTaskOutsideProvider?.max_grade_value}
+      showSavingDisclaimer={showSavingDisclaimer}
+      type="form"
+    >
+      {view === 'grading' && (
+        <GradingSummary
+          totalBlanks={gradingStats.totalBlanks}
+          correctCount={gradingStats.correctCount}
+        />
+      )}
+
+      <div className="space-y-4">
+        {questions.map((question, qIndex) => (
+          <QuestionCard
+            key={question.questionUUID || qIndex}
+            question={question}
+            qIndex={qIndex}
+            view={view}
+            userSubmissions={userSubmissions}
+            onQuestionChange={handleQuestionChange}
+            onBlankChange={handleBlankChange}
+            onAddBlank={addBlank}
+            onRemoveBlank={removeBlank}
+            onRemoveQuestion={removeQuestion}
+            onUserAnswerChange={handleUserAnswerChange}
+            onUserAnswerBlur={handleUserAnswerBlur}
+          />
+        ))}
+      </div>
+
+      {view === 'teacher' && questions.length < 6 && (
+        <Button
+          variant="outline"
+          className="mt-4 w-full"
+          onClick={addQuestion}
+          disabled={isSaving}
+        >
+          {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+          {t('addQuestion')}
+        </Button>
+      )}
+    </AssignmentBoxUI>
   );
 }
 

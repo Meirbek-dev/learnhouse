@@ -6,9 +6,9 @@ import {
   updateSubFile,
 } from '@services/courses/assignments';
 import { useAssignmentsTaskDispatch } from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import { Cloud, Download, File, Info, Loader2, UploadCloud, AlertCircle } from 'lucide-react';
 import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { Cloud, Download, File, Info, Loader2, UploadCloud } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getTaskFileSubmissionDir } from '@services/media/media';
@@ -17,426 +17,381 @@ import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { toast } from 'sonner';
 
-interface FileSchema {
+// shadcn/ui
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+
+// ================= Types =================
+type ViewType = 'teacher' | 'student' | 'grading' | 'custom-grading';
+
+interface FileSubmission {
   fileUUID: string;
   assignment_task_submission_uuid?: string;
 }
 
+interface AssignmentTask {
+  assignment_task_uuid: string;
+  max_grade_value: number;
+  contents?: { questions?: unknown[] };
+}
+
+interface UserSubmissionObject {
+  grade: number;
+  task_submission: FileSubmission;
+  assignment_task_submission_uuid: string;
+}
+
 interface TaskFileObjectProps {
-  view: 'teacher' | 'student' | 'grading' | 'custom-grading';
+  view: ViewType;
   assignmentTaskUUID?: string;
   user_id?: number;
 }
 
+interface Session {
+  data?: {
+    tokens?: { access_token?: string };
+    user?: { username: string };
+  };
+}
+
+interface Org {
+  org_uuid: string;
+}
+
+interface Assignment {
+  assignment_object: { assignment_uuid: string };
+  course_object: { course_uuid: string };
+  activity_object: { activity_uuid: string };
+}
+
+// ================= Constants =================
+const UPLOAD_DELAY_MS = 1500;
+const MAX_FILENAME_LENGTH = 20;
+const UUID_PREVIEW_START = 8;
+const UUID_PREVIEW_END = 4;
+
+// ================= Utils =================
+const truncateFilename = (filename: string): string => {
+  if (filename.length <= MAX_FILENAME_LENGTH) return filename;
+  const half = MAX_FILENAME_LENGTH / 2;
+  return `${filename.slice(0, half)}...${filename.slice(-half)}`;
+};
+
+const formatUUID = (uuid: string): string => `${uuid.slice(0, UUID_PREVIEW_START)}...${uuid.slice(-UUID_PREVIEW_END)}`;
+
+// ================= Component =================
 export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: TaskFileObjectProps) {
   const t = useTranslations('DashPage.Assignments.TaskFileObject');
-  const session = usePlatformSession() as any;
-  const org = useOrg() as any;
-  const access_token = session?.data?.tokens?.access_token;
+  const session = usePlatformSession() as Session | null;
+  const org = useOrg() as Org | null;
+  const assignment = useAssignments() as Assignment | null;
+  const assignmentTaskDispatch = useAssignmentsTaskDispatch();
+
+  const accessToken = session?.data?.tokens?.access_token;
+  const username = session?.data?.user?.username;
+
   const [isLoading, setIsLoading] = useState(false);
   const [localUploadFile, setLocalUploadFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [assignmentTask, setAssignmentTask] = useState<any>(null);
-  const assignmentTaskStateHook = useAssignmentsTaskDispatch();
-  const assignment = useAssignments();
+  const [assignmentTask, setAssignmentTask] = useState<AssignmentTask | null>(null);
+  const [userSubmissions, setUserSubmissions] = useState<FileSubmission>({ fileUUID: '' });
+  const [initialUserSubmissions, setInitialUserSubmissions] = useState<FileSubmission>({ fileUUID: '' });
+  const [userSubmissionObject, setUserSubmissionObject] = useState<UserSubmissionObject | null>(null);
 
-  /* TEACHER VIEW CODE */
-  /* TEACHER VIEW CODE */
+  const showSavingDisclaimer = useMemo(
+    () => userSubmissions.fileUUID !== initialUserSubmissions.fileUUID,
+    [userSubmissions.fileUUID, initialUserSubmissions.fileUUID],
+  );
 
-  /* STUDENT VIEW CODE */
-  const [userSubmissions, setUserSubmissions] = useState<FileSchema>({
-    fileUUID: '',
-  });
-  const [initialUserSubmissions, setInitialUserSubmissions] = useState<FileSchema>({
-    fileUUID: '',
-  });
+  const assignmentUUID = assignment?.assignment_object?.assignment_uuid;
+  const courseUUID = assignment?.course_object?.course_uuid;
+  const activityUUID = assignment?.activity_object?.activity_uuid;
+  const orgUUID = org?.org_uuid;
 
-  // Detect changes using useMemo instead of setState in effect
-  const showSavingDisclaimer = useMemo(() => {
-    return userSubmissions.fileUUID !== initialUserSubmissions.fileUUID;
-  }, [userSubmissions.fileUUID, initialUserSubmissions.fileUUID]);
-
-  /* GRADING VIEW CODE */
-  const [userSubmissionObject, setUserSubmissionObject] = useState<any>(null);
-  const [assignmentTaskOutsideProvider, setAssignmentTaskOutsideProvider] = useState<any>(null);
-
-  const handleFileChange = async (event: any) => {
-    // Check if user is authenticated
-    if (!access_token) {
+  // ================= Handlers =================
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!accessToken) {
       setError(t('authRequiredUpload'));
       return;
     }
+    if (!assignmentTaskUUID || !assignmentUUID) {
+      setError(t('missingAssignmentInfo'));
+      return;
+    }
 
-    const file = event.target.files[0];
+    const file = event.target.files?.[0];
+    if (!file) return;
 
     setLocalUploadFile(file);
     setIsLoading(true);
-    const res = await updateSubFile(
-      file,
-      assignmentTask.assignment_task_uuid,
-      assignment.assignment_object.assignment_uuid,
-      access_token,
-    );
+    setError(null);
 
-    // wait for 1.5 second to show loading animation
-    await new Promise((r) => setTimeout(r, 1500));
-    if (!res.success) {
-      setError(res.data.detail);
-      setIsLoading(false);
-    } else {
-      assignmentTaskStateHook({ type: 'reload' });
+    try {
+      const res = await updateSubFile(file, assignmentTaskUUID, assignmentUUID, accessToken);
+      await new Promise((r) => setTimeout(r, UPLOAD_DELAY_MS));
+
+      if (!res.success) {
+        setError(res.data?.detail || t('uploadFailed'));
+        return;
+      }
+
+      assignmentTaskDispatch({ type: 'reload' });
       setUserSubmissions({
         fileUUID: res.data.file_uuid,
         assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
       });
+    } catch (err) {
+      setError(t('uploadUnexpectedError'));
+      console.error(err);
+    } finally {
       setIsLoading(false);
-      setError('');
     }
   };
 
-  const getAssignmentTaskSubmissionFromUserUI = useCallback(async () => {
-    if (!access_token) {
-      // Silently fail if not authenticated
-      return;
-    }
+  const submitFile = async () => {
+    if (!accessToken) return toast.error(t('authRequiredSubmit'));
+    if (!assignmentTaskUUID || !assignmentUUID) return toast.error(t('missingAssignmentInfo'));
 
-    if (assignmentTaskUUID) {
-      const res = await getAssignmentTaskSubmissionsMe(
-        assignmentTaskUUID,
-        assignment.assignment_object.assignment_uuid,
-        access_token,
-      );
-      if (res.success && res.data?.task_submission) {
-        setUserSubmissions({
-          ...res.data.task_submission,
-          assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
-        });
-        setInitialUserSubmissions({
-          ...res.data.task_submission,
-          assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
-        });
-      } else {
-        // No submission yet, reset state
-        setUserSubmissions({ fileUUID: '' });
-        setInitialUserSubmissions({ fileUUID: '' });
-      }
-    }
-  }, [assignmentTaskUUID, assignment.assignment_object.assignment_uuid, access_token]);
-
-  async function submitFC() {
-    // Check if user is authenticated
-    if (!access_token) {
-      toast.error(t('authRequiredSubmit'));
-      return;
-    }
-
-    // Save the file submission to the server
     const values = {
       assignment_task_submission_uuid: userSubmissions.assignment_task_submission_uuid || null,
       task_submission: userSubmissions,
       grade: 0,
       task_submission_grade_feedback: '',
     };
-    if (assignmentTaskUUID) {
-      const res = await handleAssignmentTaskSubmission(
-        values,
-        assignmentTaskUUID,
-        assignment.assignment_object.assignment_uuid,
-        access_token,
-      );
-      if (res) {
-        assignmentTaskStateHook({
-          type: 'reload',
-        });
-        toast.success(t('saveSuccess'));
-        // showSavingDisclaimer will automatically become false when submissions match
-        // Update userSubmissions with the returned UUID for future updates
-        const updatedUserSubmissions = {
-          ...userSubmissions,
-          assignment_task_submission_uuid:
-            res.data?.assignment_task_submission_uuid || userSubmissions.assignment_task_submission_uuid,
-        };
-        setUserSubmissions(updatedUserSubmissions);
-        setInitialUserSubmissions(updatedUserSubmissions);
-      } else {
-        toast.error(t('errorSaving'));
-      }
-    }
-  }
 
-  const getAssignmentTaskUI = useCallback(async () => {
-    if (!access_token) {
-      // Silently fail if not authenticated
-      return;
-    }
+    try {
+      const res = await handleAssignmentTaskSubmission(values, assignmentTaskUUID, assignmentUUID, accessToken);
+      if (!res) return toast.error(t('errorSaving'));
 
-    if (assignmentTaskUUID) {
-      const res = await getAssignmentTask(assignmentTaskUUID, access_token);
-      if (res.success) {
-        setAssignmentTask(res.data);
-        setAssignmentTaskOutsideProvider(res.data);
-      }
-    }
-  }, [assignmentTaskUUID, access_token]);
+      assignmentTaskDispatch({ type: 'reload' });
+      toast.success(t('saveSuccess'));
 
-  const getAssignmentTaskSubmissionFromIdentifiedUserUI = useCallback(async () => {
-    if (!access_token) {
-      // Silently fail if not authenticated
-      return;
-    }
-
-    if (assignmentTaskUUID && user_id) {
-      const res = await getAssignmentTaskSubmissionsUser(
-        assignmentTaskUUID,
-        user_id,
-        assignment.assignment_object.assignment_uuid,
-        access_token,
-      );
-      if (res.success && res.data?.task_submission) {
-        setUserSubmissions({
-          ...res.data.task_submission,
-          assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
-        });
-        setUserSubmissionObject(res.data);
-        setInitialUserSubmissions({
-          ...res.data.task_submission,
-          assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
-        });
-      } else {
-        // No submission yet, reset state
-        setUserSubmissions({ fileUUID: '' });
-        setInitialUserSubmissions({ fileUUID: '' });
-        setUserSubmissionObject(null);
-      }
-    }
-  }, [assignmentTaskUUID, user_id, assignment.assignment_object.assignment_uuid, access_token]);
-
-  async function gradeCustomFC(grade: number) {
-    if (assignmentTaskUUID) {
-      if (grade > assignmentTaskOutsideProvider.max_grade_value) {
-        toast.error(
-          t('gradeRangeError', {
-            maxGradeValue: assignmentTaskOutsideProvider.max_grade_value,
-          }),
-        );
-        return;
-      }
-
-      // Save the grade to the server
-      const values = {
-        assignment_task_submission_uuid: userSubmissions.assignment_task_submission_uuid,
-        task_submission: userSubmissions,
-        grade,
-        task_submission_grade_feedback: t('gradedByTeacher', {
-          username: session.data.user.username,
-        }),
+      const updated = {
+        ...userSubmissions,
+        assignment_task_submission_uuid:
+          res.data?.assignment_task_submission_uuid || userSubmissions.assignment_task_submission_uuid,
       };
-
-      const res = await handleAssignmentTaskSubmission(
-        values,
-        assignmentTaskUUID,
-        assignment.assignment_object.assignment_uuid,
-        access_token,
-      );
-      if (res) {
-        getAssignmentTaskSubmissionFromIdentifiedUserUI();
-        toast.success(t('gradeSuccess', { grade }));
-      } else {
-        toast.error(t('gradeError'));
-      }
+      setUserSubmissions(updated);
+      setInitialUserSubmissions(updated);
+    } catch (err) {
+      toast.error(t('errorSaving'));
+      console.error(err);
     }
-  }
+  };
+
+  const gradeSubmission = async (grade: number) => {
+    if (!assignmentTaskUUID || !assignmentUUID || !accessToken || !assignmentTask || !username) {
+      return toast.error(t('missingGradingInfo'));
+    }
+    if (grade > assignmentTask.max_grade_value) {
+      return toast.error(t('gradeRangeError', { maxGradeValue: assignmentTask.max_grade_value }));
+    }
+
+    const values = {
+      assignment_task_submission_uuid: userSubmissions.assignment_task_submission_uuid,
+      task_submission: userSubmissions,
+      grade,
+      task_submission_grade_feedback: t('gradedByTeacher', { username }),
+    };
+
+    try {
+      const res = await handleAssignmentTaskSubmission(values, assignmentTaskUUID, assignmentUUID, accessToken);
+      if (!res) return toast.error(t('gradeError'));
+      await fetchUserSubmission();
+      toast.success(t('gradeSuccess', { grade }));
+    } catch (err) {
+      toast.error(t('gradeError'));
+      console.error(err);
+    }
+  };
+
+  // ================= Fetching =================
+  const fetchAssignmentTask = useCallback(async () => {
+    if (!accessToken || !assignmentTaskUUID) return;
+    const res = await getAssignmentTask(assignmentTaskUUID, accessToken);
+    if (res.success && res.data) setAssignmentTask(res.data);
+  }, [assignmentTaskUUID, accessToken]);
+
+  const fetchMySubmission = useCallback(async () => {
+    if (!accessToken || !assignmentTaskUUID || !assignmentUUID) return;
+    const res = await getAssignmentTaskSubmissionsMe(assignmentTaskUUID, assignmentUUID, accessToken);
+    if (res.success && res.data?.task_submission) {
+      const sub = {
+        ...res.data.task_submission,
+        assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
+      };
+      setUserSubmissions(sub);
+      setInitialUserSubmissions(sub);
+    } else {
+      setUserSubmissions({ fileUUID: '' });
+      setInitialUserSubmissions({ fileUUID: '' });
+    }
+  }, [assignmentTaskUUID, assignmentUUID, accessToken]);
+
+  const fetchUserSubmission = useCallback(async () => {
+    if (!accessToken || !assignmentTaskUUID || !assignmentUUID || !user_id) return;
+    const res = await getAssignmentTaskSubmissionsUser(assignmentTaskUUID, user_id, assignmentUUID, accessToken);
+    if (res.success && res.data?.task_submission) {
+      const sub = {
+        ...res.data.task_submission,
+        assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
+      };
+      setUserSubmissions(sub);
+      setInitialUserSubmissions(sub);
+      setUserSubmissionObject(res.data);
+    } else {
+      setUserSubmissions({ fileUUID: '' });
+      setInitialUserSubmissions({ fileUUID: '' });
+      setUserSubmissionObject(null);
+    }
+  }, [assignmentTaskUUID, user_id, assignmentUUID, accessToken]);
 
   useEffect(() => {
-    // Student area
     if (view === 'student') {
-      void Promise.resolve().then(() => getAssignmentTaskUI());
-      void Promise.resolve().then(() => getAssignmentTaskSubmissionFromUserUI());
+      fetchAssignmentTask();
+      fetchMySubmission();
+    }
+    if (view === 'custom-grading') {
+      fetchAssignmentTask();
+      fetchUserSubmission();
+    }
+  }, [view, fetchAssignmentTask, fetchMySubmission, fetchUserSubmission]);
+
+  // ================= Render helpers =================
+  const FileCard = ({ label }: { label: string }) => (
+    <Card className="relative w-full sm:w-auto">
+      <CardContent className="flex items-center gap-2 py-4">
+        <Badge
+          className="absolute -top-2 -right-2"
+          variant="secondary"
+        >
+          <Cloud size={14} />
+        </Badge>
+        <File
+          className="text-emerald-500"
+          size={18}
+        />
+        <span className="text-xs font-medium break-all uppercase sm:text-sm">{label}</span>
+      </CardContent>
+    </Card>
+  );
+
+  const renderTeacherView = () => (
+    <Alert>
+      <Info className="h-4 w-4" />
+      <AlertTitle>{t('teacherViewInfo')}</AlertTitle>
+    </Alert>
+  );
+
+  const renderGradingView = () => {
+    if (!userSubmissions.fileUUID || isLoading || !assignmentTaskUUID) return null;
+    if (!orgUUID || !courseUUID || !activityUUID || !assignmentUUID) {
+      return (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{t('missingOrgCourseInfo')}</AlertDescription>
+        </Alert>
+      );
     }
 
-    // Grading area
-    else if (view === 'custom-grading') {
-      void Promise.resolve().then(() => getAssignmentTaskUI());
-      // setQuestions(assignmentTaskState.assignmentTask.contents.questions);
-      void Promise.resolve().then(() => getAssignmentTaskSubmissionFromIdentifiedUserUI());
-    }
-  }, [
-    view,
-    assignmentTaskUUID,
-    user_id,
-    access_token,
-    assignment.assignment_object.assignment_uuid,
-    getAssignmentTaskUI,
-    getAssignmentTaskSubmissionFromUserUI,
-    getAssignmentTaskSubmissionFromIdentifiedUserUI,
-  ]);
+    const fileUrl = getTaskFileSubmissionDir(
+      orgUUID,
+      courseUUID,
+      activityUUID,
+      assignmentUUID,
+      assignmentTaskUUID,
+      userSubmissions.fileUUID,
+    );
 
+    return (
+      <div className="space-y-3">
+        <Alert>
+          <Download className="h-4 w-4" />
+          <AlertTitle>{t('gradingViewInfo')}</AlertTitle>
+        </Alert>
+        <Link
+          href={fileUrl}
+          target="_blank"
+        >
+          <FileCard label={formatUUID(userSubmissions.fileUUID)} />
+        </Link>
+      </div>
+    );
+  };
+
+  const renderStudentView = () => (
+    <Card className="min-h-[200px]">
+      <CardContent className="flex flex-col items-center gap-4 py-6">
+        {error && (
+          <Alert
+            variant="destructive"
+            className="w-full sm:w-auto"
+          >
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {localUploadFile && !isLoading && <FileCard label={truncateFilename(localUploadFile.name)} />}
+        {userSubmissions.fileUUID && !isLoading && !localUploadFile && (
+          <FileCard label={formatUUID(userSubmissions.fileUUID)} />
+        )}
+
+        <Alert className="w-full sm:w-auto">
+          <Info className="h-4 w-4" />
+          <AlertDescription>{t('allowedFormats')}</AlertDescription>
+        </Alert>
+
+        {!accessToken ? (
+          <Alert className="w-full sm:w-auto">
+            <Info className="h-4 w-4" />
+            <AlertDescription>{t('signInToUpload')}</AlertDescription>
+          </Alert>
+        ) : isLoading ? (
+          <Button
+            disabled
+            variant="secondary"
+          >
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {t('loading')}
+          </Button>
+        ) : (
+          <>
+            <Input
+              type="file"
+              id={`fileInput_${assignmentTaskUUID}`}
+              className="hidden"
+              onChange={handleFileChange}
+              aria-label={t('ariaLabel')}
+              title={t('selectFile')}
+            />
+            <Button onClick={() => document.getElementById(`fileInput_${assignmentTaskUUID}`)?.click()}>
+              <UploadCloud className="mr-2 h-4 w-4" />
+              {t('submitFile')}
+            </Button>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  // ================= Main =================
   return (
     <AssignmentBoxUI
-      submitFC={submitFC}
+      submitFC={submitFile}
       showSavingDisclaimer={showSavingDisclaimer}
       view={view}
-      gradeCustomFC={gradeCustomFC}
+      gradeCustomFC={gradeSubmission}
       currentPoints={userSubmissionObject?.grade}
-      maxPoints={assignmentTaskOutsideProvider?.max_grade_value}
+      maxPoints={assignmentTask?.max_grade_value}
       type="file"
     >
-      {view === 'teacher' && (
-        <div className="mx-auto flex flex-col justify-center space-y-2 rounded-lg border border-slate-100 bg-slate-50 px-4 py-5 text-center text-xs text-slate-600 sm:flex-row sm:space-y-0 sm:space-x-3 sm:px-2 sm:py-6 sm:text-left sm:text-sm">
-          <Info
-            size={18}
-            className="mx-auto text-slate-500 sm:mx-0"
-          />
-          <p className="ml-1">{t('teacherViewInfo')}</p>
-        </div>
-      )}
-      {view === 'custom-grading' && (
-        <div className="flex w-full flex-col space-y-4 px-2 sm:px-0">
-          <div className="mx-auto flex flex-col justify-center space-y-2 rounded-lg border border-slate-100 bg-slate-50 px-4 py-5 text-center text-xs text-slate-600 sm:flex-row sm:space-y-0 sm:space-x-3 sm:px-2 sm:py-6 sm:text-left sm:text-sm">
-            <Download
-              size={18}
-              className="mx-auto text-slate-500 sm:mx-0"
-            />
-            <p>{t('gradingViewInfo')}</p>
-          </div>
-          {userSubmissions.fileUUID && !isLoading && assignmentTaskUUID ? (
-            <Link
-              href={getTaskFileSubmissionDir(
-                org?.org_uuid,
-                assignment.course_object.course_uuid,
-                assignment.activity_object.activity_uuid,
-                assignment.assignment_object.assignment_uuid,
-                assignmentTaskUUID,
-                userSubmissions.fileUUID,
-              )}
-              target="_blank"
-              className="relative mx-auto flex w-full flex-col items-center space-y-1 rounded-lg border border-gray-100 bg-white px-4 py-4 text-gray-500 shadow-xs transition-shadow hover:shadow-md sm:w-auto sm:px-5"
-            >
-              <div className="absolute top-0 right-0 flex translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-emerald-500 p-1.5 text-white shadow-xs">
-                <Cloud size={14} />
-              </div>
-
-              <div className="mt-2 flex items-center space-x-2">
-                <File
-                  size={18}
-                  className="text-emerald-500"
-                />
-                <div className="text-xs font-medium break-all uppercase sm:text-sm">
-                  {`${userSubmissions.fileUUID.slice(0, 8)}...${userSubmissions.fileUUID.slice(-4)}`}
-                </div>
-              </div>
-            </Link>
-          ) : null}
-        </div>
-      )}
-      {view === 'student' && (
-        <div className="min-h-[200px] w-full rounded-lg border border-gray-100 bg-white px-4 py-5 shadow-xs sm:px-6 sm:py-6">
-          <div className="flex h-full w-full flex-col items-center justify-center">
-            <div className="flex w-full max-w-full flex-col items-center justify-center">
-              <div className="flex w-full flex-col items-center justify-center">
-                {error ? (
-                  <div className="mb-4 flex w-full items-center justify-center space-x-2 rounded-md border border-red-100 bg-red-50 p-3 text-red-600 shadow-xs transition-all sm:w-auto">
-                    <div className="text-xs font-medium sm:text-sm">{error}</div>
-                  </div>
-                ) : null}
-              </div>
-              {localUploadFile && !isLoading ? (
-                <div className="relative mt-3 flex w-full flex-col items-center space-y-1 rounded-lg border border-gray-100 bg-white px-4 py-4 text-gray-500 shadow-xs sm:w-auto sm:px-5">
-                  <div className="absolute top-0 right-0 flex translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-emerald-500 p-1.5 text-white shadow-xs">
-                    <Cloud size={14} />
-                  </div>
-
-                  <div className="mt-2 flex items-center space-x-2">
-                    <File
-                      size={18}
-                      className="text-emerald-500"
-                    />
-                    <div className="text-xs font-medium break-all uppercase sm:text-sm">
-                      {localUploadFile.name.length > 20
-                        ? `${localUploadFile.name.slice(0, 10)}...${localUploadFile.name.slice(-10)}`
-                        : localUploadFile.name}
-                    </div>
-                  </div>
-                </div>
-              ) : null}
-              {userSubmissions.fileUUID && !isLoading && !localUploadFile ? (
-                <div className="relative mt-3 flex w-full flex-col items-center space-y-1 rounded-lg border border-gray-100 bg-white px-4 py-4 text-gray-500 shadow-xs sm:w-auto sm:px-5">
-                  <div className="absolute top-0 right-0 flex translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-emerald-500 p-1.5 text-white shadow-xs">
-                    <Cloud size={14} />
-                  </div>
-
-                  <div className="mt-2 flex items-center space-x-2">
-                    <File
-                      size={18}
-                      className="text-emerald-500"
-                    />
-                    <div className="text-xs font-medium break-all uppercase sm:text-sm">
-                      {`${userSubmissions.fileUUID.slice(0, 8)}...${userSubmissions.fileUUID.slice(-4)}`}
-                    </div>
-                  </div>
-                </div>
-              ) : null}
-              <div className="mt-5 flex w-full flex-col items-center space-y-1 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 pt-5 text-center text-xs font-medium text-slate-500 sm:w-auto sm:flex-row sm:space-y-0 sm:space-x-2 sm:text-left">
-                <Info
-                  size={15}
-                  className="mx-auto text-slate-400 sm:mx-0"
-                />
-                <p>{t('allowedFormats')}</p>
-              </div>
-              {!access_token ? (
-                <div className="mt-5 flex w-full items-center justify-center">
-                  <div className="flex w-full items-center justify-center space-x-2 rounded-md border border-amber-100 bg-amber-50 p-3 text-amber-600 shadow-xs transition-all sm:w-auto">
-                    <Info
-                      size={15}
-                      className="text-amber-500"
-                    />
-                    <div className="text-xs font-medium sm:text-sm">{t('signInToUpload')}</div>
-                  </div>
-                </div>
-              ) : isLoading ? (
-                <div className="mt-5 flex w-full items-center justify-center">
-                  <input
-                    type="file"
-                    id="fileInput"
-                    style={{ display: 'none' }}
-                    onChange={handleFileChange}
-                    aria-label={t('ariaLabel')}
-                    title={t('selectFile')}
-                  />
-                  <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-4 py-2.5 text-xs font-medium text-slate-600 antialiased sm:px-5 sm:text-sm">
-                    <Loader2
-                      size={15}
-                      className="mr-2"
-                    />
-                    <span>{t('loading')}</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-5 flex w-full items-center justify-center">
-                  <input
-                    type="file"
-                    id={`fileInput_${assignmentTaskUUID}`}
-                    style={{ display: 'none' }}
-                    onChange={handleFileChange}
-                    aria-label={t('ariaLabel')}
-                    title={t('selectFile')}
-                  />
-                  <button
-                    className="flex items-center rounded-md bg-emerald-500 px-4 py-2.5 text-xs font-medium text-white antialiased shadow-xs transition-colors hover:bg-emerald-600 sm:px-5 sm:text-sm"
-                    onClick={() => document.getElementById(`fileInput_${assignmentTaskUUID}`)?.click()}
-                  >
-                    <UploadCloud
-                      size={15}
-                      className="mr-2"
-                    />
-                    <span>{t('submitFile')}</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {view === 'teacher' && renderTeacherView()}
+      {view === 'custom-grading' && renderGradingView()}
+      {view === 'student' && renderStudentView()}
     </AssignmentBoxUI>
   );
 }

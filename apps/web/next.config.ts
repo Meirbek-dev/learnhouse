@@ -34,7 +34,13 @@ const nextConfig: NextConfig = {
       '@tiptap/extension-youtube',
       '@tiptap/extension-code-block-lowlight',
     ],
+    // Configure Server Actions body size limit (default is 1mb)
+    serverActions: {
+      bodySizeLimit: '5mb',
+      // allowedOrigins: ['https://example.com'], // add if you call Server Actions from other origins
+    },
   },
+
   compiler: {
     styledComponents: true,
   },

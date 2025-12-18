@@ -1,4 +1,3 @@
-/* eslint-disable tailwindcss/classnames-order */
 import { ArrowRight, BookOpenCheck, Check, ChevronDown, Circle, FileText, Layers, Trophy, Video } from 'lucide-react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -176,7 +175,7 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onCl
 
       {/* Chapters List */}
       <ScrollArea className="max-h-[400px]">
-        <div className="flex flex-col gap-3 p-0.5 mb-4">
+        <div className="mb-4 flex flex-col gap-3 p-0.5">
           {course.chapters.map((chapter: any, chapterIndex: number) => {
             const chapterStats = chapterProgress[chapter.chapter_uuid];
             const isChapterComplete = chapterStats?.completed === chapterStats?.total;

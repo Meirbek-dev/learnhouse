@@ -649,12 +649,9 @@ const VideoSettingsForm = ({
       className="mt-6"
     >
       <CollapsibleTrigger
+        nativeButton={false}
         render={
-          <Button
-            variant="outline"
-            className="flex w-full items-center justify-between border-2 p-8 transition-colors duration-200 hover:border-gray-300 hover:bg-gray-50"
-            type="button"
-          >
+          <div className="flex w-full items-center justify-between border-2 p-8 transition-colors duration-200 hover:border-gray-300 hover:bg-gray-50">
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-gray-100 p-2">
                 <Settings
@@ -676,7 +673,7 @@ const VideoSettingsForm = ({
               size={18}
               className={`text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
             />
-          </Button>
+          </div>
         }
       />
 

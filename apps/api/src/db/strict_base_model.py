@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict
 from sqlmodel import SQLModel
 
 
-class PydanticStrictBaseModel(BaseModel):
+class FalsePydanticStrictBaseModel(BaseModel):
     model_config = ConfigDict(
         compiled=True,
         slots=True,
@@ -11,7 +11,7 @@ class PydanticStrictBaseModel(BaseModel):
     )
 
 
-class TruePydanticStrictBaseModel(BaseModel):
+class PydanticStrictBaseModel(BaseModel):
     model_config = ConfigDict(
         compiled=True,
         slots=True,

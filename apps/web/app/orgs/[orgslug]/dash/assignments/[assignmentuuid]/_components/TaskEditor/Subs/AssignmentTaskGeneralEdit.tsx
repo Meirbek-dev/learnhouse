@@ -4,19 +4,22 @@ import {
   useAssignmentsTaskDispatch,
 } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { AlertCircle, Cloud, Download, File, Info, Loader2, UploadCloud } from 'lucide-react';
 import { updateAssignmentTask, updateReferenceFile } from '@services/courses/assignments';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { Cloud, File, Info, Loader2, UploadCloud } from 'lucide-react';
-import { getActivityByID } from '@services/courses/activities';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition, useRef } from 'react';
+import { Alert, AlertDescription } from '@components/ui/alert';
 import { getTaskRefFileDir } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { DragDropContext } from '@hello-pangea/dnd';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
+import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
+import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
@@ -28,7 +31,7 @@ const SUPPORTED_FILES = constructAcceptValue(['pdf', 'docx', 'mp4', 'mkv', 'jpg'
 const createValidationSchema = (t: (key: string) => string) =>
   z.object({
     title: z.string().min(1, t('titleRequired')),
-    description: z.string().min(1, t('descriptionRequired')),
+    description: z.string().optional(),
     hint: z.string().optional(),
     max_grade_value: z.number().min(20, t('gradeValidationError')).max(100, t('gradeValidationError')),
   });
@@ -238,144 +241,229 @@ export const AssignmentTaskGeneralEdit = () => {
     </Form>
   );
 };
-
 const UpdateTaskRef = () => {
   const t = useTranslations('DashPage.Assignments.TaskGeneralEdit');
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession();
   const org = useOrg() as any;
   const access_token = session?.data?.tokens?.access_token;
   const assignmentTaskState = useAssignmentsTask();
   const assignmentTaskStateHook = useAssignmentsTaskDispatch();
   const assignment = useAssignments();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('') as any;
-  const [_localRefFile, setLocalRefFile] = useState(null) as any;
-  const [_activity, setActivity] = useState('') as any;
 
-  const handleFileChange = async (event: any) => {
-    const file = event.target.files[0];
-    setLocalRefFile(file);
-    setIsLoading(true);
-    const res = await updateReferenceFile(
-      file,
-      assignmentTaskState.assignmentTask.assignment_task_uuid,
-      assignment.assignment_object.assignment_uuid,
-      access_token,
-    );
-    assignmentTaskStateHook({ type: 'reload' });
-    // wait for 1.5 second to show loading animation
-    await new Promise((r) => setTimeout(r, 1500));
-    if (!res.success) {
-      setError(res.data.detail);
-      setIsLoading(false);
-    } else {
-      toast.success(t('refFileUpdateSuccess'));
-      setIsLoading(false);
-      setError('');
-    }
-  };
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const hasReferenceFile = Boolean(assignmentTaskState.assignmentTask?.reference_file);
+  const fileName = assignmentTaskState.assignmentTask?.reference_file;
+  const fileExtension = fileName?.split('.').pop()?.toUpperCase();
+
+  const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+  const ALLOWED_EXT = ['pdf', 'docx', 'mp4', 'mkv', 'jpg', 'png', 'pptx', 'zip'];
 
   const getTaskRefDirUI = () => {
+    if (!fileName) return '';
     return getTaskRefFileDir(
-      org?.org_uuid,
+      org?.org_uuid || '',
       assignment.course_object.course_uuid,
       assignment.activity_object.activity_uuid,
       assignment.assignment_object.assignment_uuid,
-      assignmentTaskState.assignmentTask.assignment_task_uuid,
-      assignmentTaskState.assignmentTask.reference_file,
+      assignmentTaskState.assignmentTask!.assignment_task_uuid,
+      fileName,
     );
   };
 
-  useEffect(() => {
-    const getActivityUI = async () => {
-      const res = await getActivityByID(assignment.assignment_object.activity_id, null, access_token);
-      setActivity(res.data);
-    };
-    getActivityUI();
-  }, [assignment.assignment_object.activity_id, access_token, setActivity]);
+  const validateFile = (file: File | null) => {
+    if (!file) return 'noFile';
+    if (file.size > MAX_FILE_SIZE) return 'fileTooLarge';
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    if (!ALLOWED_EXT.includes(ext)) return 'unsupportedFormat';
+    return null;
+  };
+  const handleFileUpload = async (file: File) => {
+    if (!access_token) {
+      setError(t('authRequiredUpload'));
+      return;
+    }
+    if (!assignmentTaskState.assignmentTask || !assignment) {
+      setError(t('missingAssignmentInfo'));
+      return;
+    }
+
+    const validationError = validateFile(file);
+    if (validationError) {
+      setError(t(validationError) || validationError);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const res = await updateReferenceFile(
+        file,
+        assignmentTaskState.assignmentTask.assignment_task_uuid,
+        assignment.assignment_object.assignment_uuid,
+        access_token,
+      );
+
+      if (!res.success) {
+        setError(res.data?.detail || t('uploadFailed'));
+        return;
+      }
+
+      assignmentTaskStateHook({ type: 'reload' });
+      toast.success(t('fileUploadSuccess'));
+    } catch (err) {
+      console.error(err);
+      setError(t('uploadFailed'));
+    } finally {
+      setIsLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    void handleFileUpload(file);
+  };
+
+  const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true);
+    else if (e.type === 'dragleave') setDragActive(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    const file = e.dataTransfer?.files?.[0] ?? null;
+    if (file) void handleFileUpload(file);
+  };
 
   return (
-    <div className="h-[200px] w-auto rounded-xl bg-gray-50 shadow-sm outline-gray-200">
-      <div className="flex h-full flex-col items-center justify-center">
-        <div className="flex flex-col items-center justify-center">
-          <div className="flex flex-col items-center justify-center">
-            {error ? (
-              <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-2 text-red-950 shadow-xs transition-all">
-                <div className="text-sm font-semibold">{error}</div>
-              </div>
-            ) : null}
-          </div>
-          {assignmentTaskState.assignmentTask.reference_file && !isLoading ? (
-            <div className="soft-shadow relative flex flex-col items-center space-y-1 rounded-lg bg-white px-5 py-3 text-gray-400 shadow-lg">
-              <div className="absolute top-0 right-0 flex translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-green-500 px-1.5 py-1.5 text-white">
-                <Cloud size={15} />
-              </div>
-              <File
-                size={20}
-                className=""
-              />
-              <div className="text-sm font-semibold uppercase">
-                {assignmentTaskState.assignmentTask.reference_file.split('.').pop()}
-              </div>
-              <div className="mt-2 flex space-x-2">
-                <Link
-                  href={getTaskRefDirUI()}
-                  download
-                  target="_blank"
-                  className="rounded-full bg-blue-500 px-3 py-1 text-xs font-semibold text-white"
-                >
-                  {t('download')}
-                </Link>
-                {/** <button onClick={() => deleteReferenceFile()}
-                                    className='bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold'>{t('delete')}</button> */}
-              </div>
-            </div>
-          ) : null}
+    <DragDropContext onDragEnd={() => {}}>
+      <div
+        onDragEnter={handleDrag}
+        onDragLeave={handleDrag}
+        onDragOver={handleDrag}
+        onDrop={handleDrop}
+        className={[
+          'relative rounded-xl border-2 border-dashed transition-colors',
+          'bg-background',
+          'min-h-[200px]',
+          dragActive && 'border-primary bg-primary/5',
+          error && 'border-destructive bg-destructive/5',
+        ].join(' ')}
+      >
+        {/* content wrapper */}
+        <div className="flex h-full flex-col justify-center gap-4 px-6 py-6 text-center">
+          {/* error */}
+          {error && (
+            <Alert
+              variant="destructive"
+              className="mx-auto w-full max-w-md"
+            >
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-          {isLoading ? (
-            <div className="flex items-center justify-center">
-              <input
-                type="file"
-                accept={SUPPORTED_FILES}
-                id="fileInput"
-                style={{ display: 'none' }}
-                onChange={handleFileChange}
-                aria-label={t('ariaLabel')}
-                title={t('chooseFile')}
-              />
-              <div className="text-gray mt-4 flex animate-pulse items-center rounded-md bg-slate-200 px-4 py-2 text-sm font-bold antialiased">
-                <Loader2
-                  size={16}
-                  className="mr-2 animate-spin"
-                />
-                <span>{t('loading')}</span>
+          {/* loading */}
+          {isLoading && (
+            <div className="flex flex-col items-center gap-3">
+              <Loader2 className="text-primary h-8 w-8 animate-spin" />
+              <p className="text-muted-foreground text-sm">{t('uploading')}</p>
+            </div>
+          )}
+
+          {/* uploaded state */}
+          {!isLoading && hasReferenceFile && (
+            <div className="bg-card mx-auto flex w-full max-w-md flex-col gap-4 rounded-lg border p-5 shadow-sm">
+              <div className="flex items-center justify-between">
+                <Badge
+                  variant="secondary"
+                  className="gap-1"
+                >
+                  <Cloud className="h-3 w-3" />
+                  {t('uploaded')}
+                </Badge>
+                {fileExtension && <Badge variant="outline">{fileExtension}</Badge>}
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="bg-primary/10 rounded-lg p-3">
+                  <File className="text-primary h-6 w-6" />
+                </div>
+                <p className="flex-1 truncate text-sm font-medium">{fileName}</p>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button>
+                  <Link
+                    href={getTaskRefDirUI()}
+                    download
+                    target="_blank"
+                    className="flex"
+                  >
+                    <Download className="mr-1.5 h-4" />
+                    {t('download')}
+                  </Link>
+                </Button>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                >
+                  <Label>
+                    <UploadCloud className="mr-1.5 h-4 w-4" />
+                    {t('replace')}
+                    <input
+                      type="file"
+                      hidden
+                      accept={SUPPORTED_FILES}
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                    />
+                  </Label>
+                </Button>
               </div>
             </div>
-          ) : (
-            <div className="flex items-center justify-center">
-              <input
-                type="file"
-                accept={SUPPORTED_FILES}
-                id="fileInput"
-                style={{ display: 'none' }}
-                onChange={handleFileChange}
-                aria-label={t('ariaLabel')}
-                title={t('chooseFile')}
-              />
-              <button
-                className="text-gray mt-6 flex items-center rounded-md px-4 text-sm font-semibold antialiased"
-                onClick={() => document.getElementById('fileInput')?.click()}
-              >
-                <UploadCloud
-                  size={16}
-                  className="mr-2"
-                />
-                <span>{t('changeRefFile')}</span>
-              </button>
+          )}
+
+          {/* empty state */}
+          {!isLoading && !hasReferenceFile && (
+            <div className="flex flex-col items-center gap-4">
+              <div className="bg-muted rounded-full p-4">
+                <UploadCloud className="text-muted-foreground h-7 w-7" />
+              </div>
+
+              <div>
+                <p className="text-sm font-medium">{t('dragDropFile')}</p>
+                <p className="text-muted-foreground mt-1 text-xs">{t('orClickToSelect')}</p>
+              </div>
+
+              <Button variant="default">
+                <Label>
+                  {t('chooseFile')}
+                  <input
+                    type="file"
+                    hidden
+                    accept={SUPPORTED_FILES}
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                  />
+                </Label>
+              </Button>
+
+              <p className="text-muted-foreground text-xs">{t('maxFileSize')}</p>
             </div>
           )}
         </div>
       </div>
-    </div>
+    </DragDropContext>
   );
 };
