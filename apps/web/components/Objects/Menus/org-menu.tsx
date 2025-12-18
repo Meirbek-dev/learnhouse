@@ -114,10 +114,11 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
       setIsScrolled(scrollY > 20);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    const listenerOptions = { passive: true } as any;
+    window.addEventListener('scroll', handleScroll, listenerOptions);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', handleScroll, listenerOptions);
     };
   }, []);
 

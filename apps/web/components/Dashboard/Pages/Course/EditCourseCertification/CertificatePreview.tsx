@@ -33,6 +33,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
   const t = useTranslations('Certificates.CertificatePreview');
 
   // Generate QR code
+  // MANUAL REVIEW: QRCode.toDataURL runs on the main thread and can be CPU-intensive; consider web worker or server-side generation if this becomes a performance issue.
   useEffect(() => {
     const generateQRCode = async () => {
       try {

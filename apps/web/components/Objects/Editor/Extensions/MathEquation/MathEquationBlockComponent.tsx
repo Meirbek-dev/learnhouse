@@ -277,12 +277,13 @@ const MathEquationBlockComponent = (props: any) => {
     });
 
     // Focus the input and place cursor after the inserted symbol
-    setTimeout(() => {
+    // Use rAF instead of setTimeout(,0) for more predictable scheduling
+    window.requestAnimationFrame(() => {
       if (inputRef.current) {
         inputRef.current.focus();
         inputRef.current.setSelectionRange(cursorPosition + symbol.length, cursorPosition + symbol.length);
       }
-    }, 0);
+    });
   };
 
   return (

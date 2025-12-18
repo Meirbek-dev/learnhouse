@@ -19,13 +19,14 @@ export function useWindowSize() {
       });
     }
 
-    window.addEventListener('resize', handleResize, { passive: true });
+    const listenerOptions = { passive: true } as any;
+    window.addEventListener('resize', handleResize, listenerOptions);
 
     // Call handler right away so state gets updated with initial window size
     handleResize();
     return () => {
       if (rafId) cancelAnimationFrame(rafId);
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', handleResize, listenerOptions);
     };
   }, []);
 

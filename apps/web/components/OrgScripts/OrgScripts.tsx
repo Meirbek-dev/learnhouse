@@ -186,6 +186,8 @@ const OrgScripts: React.FC = () => {
   );
 
   useEffect(() => {
+    // MANUAL REVIEW: This injects and executes arbitrary org-provided scripts into document.body.
+    // Consider CSP, sandboxing, and stricter validation before adding new script sources.
     if (!(org?.scripts?.scripts && Array.isArray(org.scripts.scripts))) {
       return;
     }

@@ -204,7 +204,8 @@ export default function ActivityNavigation(props: ActivityNavigationProps): Reac
     updateWidth();
 
     // Set up resize listener
-    window.addEventListener('resize', updateWidth, { passive: true });
+    const listenerOptions = { passive: true } as any;
+    window.addEventListener('resize', updateWidth, listenerOptions);
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -219,7 +220,7 @@ export default function ActivityNavigation(props: ActivityNavigationProps): Reac
 
     return () => {
       if (rafId) cancelAnimationFrame(rafId);
-      window.removeEventListener('resize', updateWidth);
+      window.removeEventListener('resize', updateWidth, listenerOptions);
       try {
         observer.disconnect();
       } catch (e) {

@@ -26,6 +26,7 @@ import { useTranslations } from 'next-intl';
 import DOMPurify from 'dompurify';
 
 // Add new type for script-based embeds
+// MANUAL REVIEW: Script-based embeds may load remote scripts. Ensure CSP and sanitization are sufficient; consider lazy-loading and cleanup of injected scripts.
 const SCRIPT_BASED_EMBEDS = {
   twitter: {
     src: 'https://platform.twitter.com/widgets.js',
@@ -489,11 +490,15 @@ const EmbedObjectsComponent = (props: any) => {
     setSelectedProduct(product);
 
     // Focus the URL input after a short delay to allow rendering
+    // MANUAL REVIEW: We use a short timeout here to wait for rendering; consider switching to requestAnimationFrame or a more explicit signal if race conditions appear.
     if (urlInputFocusTimeoutRef.current) clearTimeout(urlInputFocusTimeoutRef.current);
     urlInputFocusTimeoutRef.current = window.setTimeout(() => {
-      if (urlInputRef.current) {
-        urlInputRef.current.focus();
-      }
+      // Schedule focus on next paint to be robust against layout changes
+      window.requestAnimationFrame(() => {
+        if (urlInputRef.current) {
+          urlInputRef.current.focus();
+        }
+      });
     }, 50);
   };
 

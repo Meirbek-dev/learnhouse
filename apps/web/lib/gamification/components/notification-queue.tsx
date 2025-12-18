@@ -372,17 +372,22 @@ export function useContextualPosition(
     // Initial compute via rAF to avoid sync setState inside effect
     scheduleCompute();
 
+    // Use a single shared options object so add/removeEventListener use the exact same reference
+    const listenerOptions = { passive: true } as any;
+
     // Listen to viewport changes
-    window.addEventListener('resize', scheduleCompute, { passive: true });
-    window.addEventListener('scroll', scheduleCompute, { passive: true });
-    window.addEventListener('orientationchange', scheduleCompute, { passive: true });
+    window.addEventListener('resize', scheduleCompute, listenerOptions);
+    window.addEventListener('scroll', scheduleCompute, listenerOptions);
+    window.addEventListener('orientationchange', scheduleCompute, listenerOptions);
 
     return () => {
       mountedRef.current = false;
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      window.removeEventListener('resize', scheduleCompute);
-      window.removeEventListener('scroll', scheduleCompute);
-      window.removeEventListener('orientationchange', scheduleCompute);
+      // Remove listeners using the same options reference to ensure handlers are removed reliably in all browsers
+      window.removeEventListener('resize', scheduleCompute, listenerOptions);
+      window.removeEventListener('scroll', scheduleCompute, listenerOptions);
+      window.removeEventListener('orientationchange', scheduleCompute, listenerOptions);
+      // Note: if the element can be inside a scrollable container, consider listening on the nearest scroll container or using IntersectionObserver — manual review may be needed.
     };
   }, [contextElement, computePosition, scheduleCompute]);
 

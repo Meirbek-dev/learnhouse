@@ -192,11 +192,12 @@ export default function FixedActivitySecondaryBar(props: FixedActivitySecondaryB
       observer.observe(mainActivityInfo);
     }
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    const listenerOptions = { passive: true } as any;
+    window.addEventListener('scroll', handleScroll, listenerOptions);
 
     return () => {
       if (rafId) cancelAnimationFrame(rafId);
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', handleScroll, listenerOptions);
       try {
         observer.disconnect();
       } catch (e) {

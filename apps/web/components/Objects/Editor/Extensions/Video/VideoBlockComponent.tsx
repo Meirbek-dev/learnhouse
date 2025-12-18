@@ -214,18 +214,19 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
     }
   };
 
+  // MANUAL REVIEW: progressIntervalRef tracks simulated upload progress. If uploads can be aborted, ensure abort handling clears intervals and timeouts as well.
+  const progressIntervalRef = useRef<number | null>(null);
+
   const handleUpload = async (file: File) => {
     if (!access_token) return;
-
-    let progressInterval: number | null = null;
 
     try {
       setIsLoading(true);
       setError(null);
       setUploadProgress(0);
 
-      // Simulate upload progress
-      progressInterval = window.setInterval(() => {
+      // Simulate upload progress — store interval id in a ref so we can clear it on unmount
+      progressIntervalRef.current = window.setInterval(() => {
         setUploadProgress((prev) => Math.min(prev + 10, 90));
       }, 200);
 
@@ -250,7 +251,10 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
         updateAttributes({ blockObject: optimisticBlock });
       }
 
-      clearInterval(progressInterval);
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
       setUploadProgress(100);
 
       const newBlockObject = {
@@ -269,8 +273,9 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
       console.error('Upload failed', err);
       setError(err?.message || t('errorUpload'));
     } finally {
-      if (progressInterval) {
-        clearInterval(progressInterval);
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
       }
       setIsLoading(false);
     }
@@ -287,12 +292,17 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
   const handleSizeChange = (size: VideoSize) => {
     setSelectedSize(size);
   };
-  // Clear any pending timeouts on unmount
+  // Clear any pending timeouts or intervals on unmount
   useEffect(() => {
     return () => {
       if (uploadResetTimeoutRef.current) {
         clearTimeout(uploadResetTimeoutRef.current);
         uploadResetTimeoutRef.current = null;
+      }
+      // Ensure any progress simulation interval is cleared on unmount
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
       }
     };
   }, []);
