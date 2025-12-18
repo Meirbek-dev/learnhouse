@@ -40,8 +40,6 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
     isMountedRef.current = true;
 
     const fetchCertificate = async () => {
-      fetchedCertificateRef.current[courseid] = true;
-
       if (!session?.data?.tokens?.access_token) {
         if (isMountedRef.current) {
           setError(t('errorAuth'));
@@ -49,6 +47,9 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
         }
         return;
       }
+
+      // Mark that we've attempted fetching this course for the current session
+      fetchedCertificateRef.current[courseid] = true;
 
       try {
         const cleanCourseId = courseid.replace('course_', '');

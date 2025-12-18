@@ -146,16 +146,22 @@ export const SearchBar: FC<SearchBarProps> = ({
   }, []);
 
   useEffect(() => {
-    const fetchResults = async () => {
-      if (debouncedSearch.trim().length === 0) {
-        setSearchResults({ courses: [], collections: [], users: [] });
-        setIsLoading(false);
-        return;
-      }
+    let active = true;
+    const currentQuery = debouncedSearch.trim();
 
-      setIsLoading(true);
+    if (currentQuery.length === 0) {
+      setSearchResults({ courses: [], collections: [], users: [] });
+      setIsLoading(false);
+      setIsInitialLoad(false);
+      return;
+    }
+
+    setIsLoading(true);
+
+    (async () => {
       try {
-        const response = await searchOrgContent(orgslug, debouncedSearch, 1, 3, null, accessToken);
+        const response = await searchOrgContent(orgslug, currentQuery, 1, 3, null, accessToken);
+        if (!active) return;
 
         // Type assertion and safe access
         const typedResponse = response.data;
@@ -168,16 +174,21 @@ export const SearchBar: FC<SearchBarProps> = ({
         };
 
         setSearchResults(processedResults);
-      } catch (error) {
+      } catch (error: any) {
+        if (!active) return;
+        if (error?.name === 'AbortError') return;
         console.error('Error searching content:', error);
         setSearchResults({ courses: [], collections: [], users: [] });
       } finally {
+        if (!active) return;
         setIsLoading(false);
         setIsInitialLoad(false);
       }
-    };
+    })();
 
-    fetchResults();
+    return () => {
+      active = false;
+    };
   }, [debouncedSearch, orgslug, accessToken]);
 
   const MemoizedEmptyState = useMemo(() => {

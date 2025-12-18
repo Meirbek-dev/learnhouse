@@ -232,19 +232,6 @@ const DashSidebar = ({ className }: SidebarProps) => {
     };
   }, [toggleSidebar]);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        // Simulate async loading with timeout
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      } catch (error) {
-        console.error('Failed to load sidebar data:', error);
-      }
-    };
-
-    loadData();
-  }, []);
-
   if (!session.data?.user) {
     return <SidebarSkeleton />;
   }
