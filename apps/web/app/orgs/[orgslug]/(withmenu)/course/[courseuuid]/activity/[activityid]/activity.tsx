@@ -328,7 +328,6 @@ const ActivityClient = (props: ActivityClientProps) => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [assignment, setAssignment] = useState(null) as any;
-  const [_markStatusButtonActive, setMarkStatusButtonActive] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('globalFocusMode');
@@ -480,7 +479,6 @@ const ActivityClient = (props: ActivityClientProps) => {
     };
 
     if (activity?.activity_type === 'TYPE_ASSIGNMENT') {
-      setMarkStatusButtonActive(false);
       loadAssignment();
     }
   }, [activity?.activity_uuid, activity?.activity_type, access_token]);

@@ -635,15 +635,17 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                       className="flex-1 border-dashed font-medium"
                     />
                     <AlertDialog>
-                      <AlertDialogTrigger>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-muted-foreground hover:text-destructive size-8 shrink-0"
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </AlertDialogTrigger>
+                      <AlertDialogTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-destructive size-8 shrink-0"
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        }
+                      />
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>{t('deleteQuestionTitle')}</AlertDialogTitle>

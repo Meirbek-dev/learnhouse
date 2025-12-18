@@ -12,6 +12,8 @@ import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useSWRConfig } from 'swr';
+import { getAPIUrl } from '@services/config/config';
 
 import { AssignmentTaskGeneralEdit } from './Subs/AssignmentTaskGeneralEdit';
 
@@ -24,6 +26,7 @@ const AssignmentTaskEditor = ({ page }: any) => {
   const assignmentTaskStateHook = useAssignmentsTaskDispatch();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
+  const { mutate } = useSWRConfig();
 
   // Use key to track current task UUID and reset sub-page state when it changes
   const [taskUUIDKey, setTaskUUIDKey] = useState(assignmentTaskState.assignmentTask.assignment_task_uuid);
@@ -49,8 +52,8 @@ const AssignmentTaskEditor = ({ page }: any) => {
     const toastId = toast.loading(t('deletingTask'));
     try {
       await deleteAssignmentTask(
-        assignment.assignment_object.assignment_uuid,
         assignmentTaskState.assignmentTask.assignment_task_uuid,
+        assignment.assignment_object.assignment_uuid,
         access_token,
       );
       assignmentTaskStateHook({
@@ -61,6 +64,15 @@ const AssignmentTaskEditor = ({ page }: any) => {
         type: 'setSelectedAssignmentTaskUUID',
         payload: '',
       });
+
+      // Revalidate assignment tasks list so UI updates immediately after deletion ✅
+      try {
+        await mutate(`${getAPIUrl()}assignments/${assignment.assignment_object.assignment_uuid}/tasks`);
+      } catch (err) {
+        // non-fatal: if revalidation fails, UI will update on next SWR refresh
+        console.warn('Failed to revalidate assignment tasks after delete', err);
+      }
+
       toast.success(t('deleteSuccess'), { id: toastId });
     } catch {
       toast.error(t('deleteError'));

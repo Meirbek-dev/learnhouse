@@ -25,11 +25,11 @@ import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
-import { Button, buttonVariants } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -471,9 +471,7 @@ function QuestionCard({
               )}
             </div>
             {view === 'teacher' && (
-              <CardDescription className="mt-1">
-                {t('blanksCount', { count: question.blanks.length })}
-              </CardDescription>
+              <CardDescription className="mt-1">{t('blanksCount', { count: question.blanks.length })}</CardDescription>
             )}
           </div>
           {view === 'teacher' && (
