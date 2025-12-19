@@ -30,7 +30,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { archiveProduct, getProducts, updateProduct } from '@services/payments/products';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
-import { useCallback, useMemo, useState, useTransition } from 'react';
+import { useCallback, useState, useTransition } from 'react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import CreateProductForm from './SubComponents/CreateProductForm';
 import { getPaymentConfigs } from '@services/payments/payments';
@@ -154,11 +154,7 @@ const PaymentsProductPage = () => {
     ([_url, token]) => getPaymentConfigs(orgId, token),
   );
 
-  const isStripeEnabled = useMemo(() => {
-    if (!paymentConfigs) return false;
-    const stripeConfig = paymentConfigs.find((config: any) => config.provider === 'stripe');
-    return Boolean(stripeConfig);
-  }, [paymentConfigs]);
+  const isStripeEnabled = paymentConfigs ? Boolean(paymentConfigs.find((config: any) => config.provider === 'stripe')) : false;
 
   const handleArchiveProduct = async (productId: string) => {
     try {
@@ -355,16 +351,12 @@ const EditProductForm = ({
 }) => {
   const org = useOrg() as any;
   const session = usePlatformSession() as any;
-  const currencies = useMemo(
-    () =>
-      currencyCodes.data.map((currency) => ({
-        code: currency.code,
-        name: `${currency.code} - ${currency.currency}`,
-      })),
-    [],
-  );
+  const currencies = currencyCodes.data.map((currency) => ({
+    code: currency.code,
+    name: `${currency.code} - ${currency.currency}`,
+  }));
   const t = useTranslations('DashPage.Payments.ProductPage.editForm');
-  const validationSchema = useMemo(() => createValidationSchema(t), [t]);
+  const validationSchema = createValidationSchema(t);
 
   const form = useForm<EditProductFormData>({
     resolver: zodResolver(validationSchema),

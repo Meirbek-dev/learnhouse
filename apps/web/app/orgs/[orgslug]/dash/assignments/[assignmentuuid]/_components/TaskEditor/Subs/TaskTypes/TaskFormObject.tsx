@@ -1,7 +1,7 @@
 'use client';
 
 import { Check, ChevronDown, GripVertical, Info, Lightbulb, Loader2, Plus, Trash2, Type, X } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -601,12 +601,9 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
   } | null>(null);
 
   // Computed values
-  const showSavingDisclaimer = useMemo(
-    () => JSON.stringify(userSubmissions) !== JSON.stringify(initialUserSubmissions),
-    [userSubmissions, initialUserSubmissions],
-  );
+  const showSavingDisclaimer = JSON.stringify(userSubmissions) !== JSON.stringify(initialUserSubmissions);
 
-  const gradingStats = useMemo(() => {
+  const gradingStats = (() => {
     const allBlanks = questions.flatMap((q) => q.blanks.map((blank) => ({ ...blank, questionUUID: q.questionUUID })));
     const correctCount = allBlanks.filter((blank) => {
       const userAnswer = userSubmissions.submissions.find(
@@ -615,7 +612,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
       return (userAnswer?.answer ?? '').toLowerCase().trim() === (blank.correctAnswer ?? '').toLowerCase().trim();
     }).length;
     return { totalBlanks: allBlanks.length, correctCount };
-  }, [questions, userSubmissions]);
+  })();
 
   // Teacher handlers
   const handleQuestionChange = useCallback((index: number, value: string) => {

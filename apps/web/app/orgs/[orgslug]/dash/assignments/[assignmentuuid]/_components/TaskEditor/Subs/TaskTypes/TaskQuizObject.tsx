@@ -1,7 +1,7 @@
 'use client';
 
 import { Check, Info, Loader2, Minus, Plus, PlusCircle, Trash2, X } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -216,10 +216,7 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
   const [userSubmissionObject, setUserSubmissionObject] = useState<any>(null);
 
   // Computed values
-  const showSavingDisclaimer = useMemo(
-    () => JSON.stringify(initialUserSubmissions.submissions) !== JSON.stringify(userSubmissions.submissions),
-    [userSubmissions, initialUserSubmissions.submissions],
-  );
+  const showSavingDisclaimer = JSON.stringify(initialUserSubmissions.submissions) !== JSON.stringify(userSubmissions.submissions);
 
   const canAddQuestion = (questions?.length ?? 0) < MAX_QUESTIONS;
 

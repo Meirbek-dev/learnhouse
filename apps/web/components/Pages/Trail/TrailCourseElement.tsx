@@ -4,7 +4,7 @@ import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Award, ExternalLink, Loader2 } from 'lucide-react';
 import { removeCourse } from '@services/courses/activity';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -29,10 +29,7 @@ const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) =
   const orgID = org?.id;
   const { course_total_steps } = run;
   const course_completed_steps = run.steps.length;
-  const course_progress = useMemo(
-    () => (course_total_steps > 0 ? Math.round((course_completed_steps / course_total_steps) * 100) : 0),
-    [course_total_steps, course_completed_steps],
-  );
+  const course_progress = course_total_steps > 0 ? Math.round((course_completed_steps / course_total_steps) * 100) : 0;
   const [courseCertificate, setCourseCertificate] = useState<any>(null);
   const [isLoadingCertificate, setIsLoadingCertificate] = useState(false);
   const fetchedCourseCertificateRef = useRef<Record<string, boolean>>({});

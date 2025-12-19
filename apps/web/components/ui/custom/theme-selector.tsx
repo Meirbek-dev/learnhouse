@@ -3,7 +3,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTheme } from '@/components/providers/theme-provider';
 import { getThemePreviewColors } from '@/lib/theme-color-utils';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
 import { themes } from '@/lib/themes';
@@ -19,11 +19,9 @@ export function ThemeSelector({ className }: ThemeSelectorProps) {
   const t = useTranslations('DashPage.UserAccountSettings.generalSection.themeSelector');
   const tThemes = useTranslations('Themes');
 
-  // Memoize theme list to prevent re-renders
-  const themeList = useMemo(() => themes, []);
-
-  // Memoize current theme colors for preview
-  const currentColors = useMemo(() => getThemePreviewColors(currentTheme), [currentTheme]);
+  // Theme list (plain constant) and current theme colors
+  const themeList = themes;
+  const currentColors = getThemePreviewColors(currentTheme);
 
   const handleValueChange = useCallback(
     async (value: string) => {

@@ -4,7 +4,7 @@ import { useOptionalGamificationContext } from '@/components/Contexts/Gamificati
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
@@ -58,7 +58,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
   const refetchedOnMountRef = useRef(false);
 
   // Check if course is actually completed
-  const isCourseCompleted = useMemo(() => {
+  const isCourseCompleted = (() => {
     if (!(trailData && course)) return false;
 
     // Flatten all activities
@@ -86,7 +86,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
     const totalActivities = allActivities.length;
     const completedActivities = allActivities.filter((activity: any) => isActivityDone(activity)).length;
     return totalActivities > 0 && completedActivities === totalActivities;
-  }, [trailData, course]);
+  })();
 
   // Fetch user certificate when course is completed
   const isMountedFetchCertificateRef = useRef<boolean>(false);
@@ -548,7 +548,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
   };
 
   // Calculate progress for incomplete courses
-  const progressInfo = useMemo(() => {
+  const progressInfo = (() => {
     if (!(trailData && course) || isCourseCompleted) return null;
 
     const allActivities = course.chapters.flatMap((chapter: any) =>
@@ -580,7 +580,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
       total: totalActivities,
       percentage: progressPercentage,
     };
-  }, [trailData, course, isCourseCompleted]);
+  })();
 
   if (isCourseCompleted) {
     // Show congratulations for completed course

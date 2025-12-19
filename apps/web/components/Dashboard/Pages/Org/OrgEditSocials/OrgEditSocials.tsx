@@ -5,7 +5,7 @@ import { SiFacebook, SiInstagram, SiTiktok, SiX, SiYoutube } from '@icons-pack/r
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { updateOrganization } from '@services/settings/org';
-import { useCallback, useMemo, useTransition } from 'react';
+import { useCallback, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getAPIUrl } from '@services/config/config';
 import { Plus, X as XIcon } from 'lucide-react';
@@ -36,13 +36,10 @@ export default function OrgEditSocials() {
   const org = useOrg() as any;
   const t = useTranslations('DashPage.OrgSettings.Socials');
 
-  const defaultValues = useMemo(
-    () => ({
-      socials: org?.socials || {},
-      links: org?.links || {},
-    }),
-    [org?.socials, org?.links],
-  );
+  const defaultValues = {
+    socials: org?.socials || {},
+    links: org?.links || {},
+  };
 
   const form = useForm<OrganizationValues>({
     defaultValues,
@@ -96,58 +93,55 @@ export default function OrgEditSocials() {
     form.setValue('links', newLinks);
   }, [form, t]);
 
-  const linksEntries = useMemo(() => Object.entries(links || {}), [links]);
+  const linksEntries = Object.entries(links || {});
 
-  const socialFields = useMemo(
-    () => [
-      {
-        name: 'socials.instagram' as const,
-        placeholder: t('Form.instagramPlaceholder'),
-        icon: (
-          <SiInstagram
-            size={16}
-            color="#E4405F"
-          />
-        ),
-        bgColor: 'bg-[#E4405F]/10',
-      },
-      {
-        name: 'socials.facebook' as const,
-        placeholder: t('Form.facebookPlaceholder'),
-        icon: (
-          <SiFacebook
-            size={16}
-            color="#1877F2"
-          />
-        ),
-        bgColor: 'bg-[#1877F2]/10',
-      },
-      {
-        name: 'socials.youtube' as const,
-        placeholder: t('Form.youtubePlaceholder'),
-        icon: (
-          <SiYoutube
-            size={16}
-            color="#FF0000"
-          />
-        ),
-        bgColor: 'bg-[#FF0000]/10',
-      },
-      {
-        name: 'socials.tiktok' as const,
-        placeholder: t('Form.tiktokPlaceholder'),
-        icon: <SiTiktok size={16} />,
-        bgColor: 'bg-[#82878a]/10',
-      },
-      {
-        name: 'socials.twitter' as const,
-        placeholder: t('Form.xPlaceholder'),
-        icon: <SiX size={16} />,
-        bgColor: 'bg-[#707577]/10',
-      },
-    ],
-    [t],
-  );
+  const socialFields = [
+    {
+      name: 'socials.instagram' as const,
+      placeholder: t('Form.instagramPlaceholder'),
+      icon: (
+        <SiInstagram
+          size={16}
+          color="#E4405F"
+        />
+      ),
+      bgColor: 'bg-[#E4405F]/10',
+    },
+    {
+      name: 'socials.facebook' as const,
+      placeholder: t('Form.facebookPlaceholder'),
+      icon: (
+        <SiFacebook
+          size={16}
+          color="#1877F2"
+        />
+      ),
+      bgColor: 'bg-[#1877F2]/10',
+    },
+    {
+      name: 'socials.youtube' as const,
+      placeholder: t('Form.youtubePlaceholder'),
+      icon: (
+        <SiYoutube
+          size={16}
+          color="#FF0000"
+        />
+      ),
+      bgColor: 'bg-[#FF0000]/10',
+    },
+    {
+      name: 'socials.tiktok' as const,
+      placeholder: t('Form.tiktokPlaceholder'),
+      icon: <SiTiktok size={16} />,
+      bgColor: 'bg-[#82878a]/10',
+    },
+    {
+      name: 'socials.twitter' as const,
+      placeholder: t('Form.xPlaceholder'),
+      icon: <SiX size={16} />,
+      bgColor: 'bg-[#707577]/10',
+    },
+  ];
 
   return (
     <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">

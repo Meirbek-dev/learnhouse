@@ -22,7 +22,7 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import type { ChangeEvent, ComponentType, DragEvent, FormEvent } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState, useId } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import { AnimatePresence, motion } from 'motion/react';
@@ -307,7 +307,7 @@ const SubtitleManager = ({
     setDragOver(false);
   }, []);
 
-  const fileInputId = useMemo(() => `subtitle-upload-${Date.now()}`, []);
+  const fileInputId = `subtitle-upload-${useId()}`;
 
   return (
     <div className="space-y-4">
@@ -625,7 +625,7 @@ const VideoSettingsForm = ({
     [videoDetails, setVideoDetails, convertToSeconds],
   );
 
-  const settingsCount = useMemo(() => {
+  const settingsCount = (() => {
     let count = 0;
     if (videoDetails.startTime > 0) count += 1;
     if (videoDetails.endTime) count += 1;
@@ -633,11 +633,9 @@ const VideoSettingsForm = ({
     if (videoDetails.muted) count += 1;
     if (subtitles.length > 0) count += 1;
     return count;
-  }, [videoDetails, subtitles.length]);
+  })();
 
-  const hasTimingErrors = useMemo(() => {
-    return Boolean(videoDetails.endTime && videoDetails.endTime <= videoDetails.startTime);
-  }, [videoDetails.startTime, videoDetails.endTime]);
+  const hasTimingErrors = Boolean(videoDetails.endTime && videoDetails.endTime <= videoDetails.startTime);
 
   return (
     <Collapsible
@@ -856,11 +854,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
     });
   }, [org, course]);
 
-  const isYouTubeUrlValid = useMemo(() => {
-    if (!youtubeUrl) return false;
-    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
-    return youtubeRegex.test(youtubeUrl);
-  }, [youtubeUrl]);
+  const isYouTubeUrlValid = youtubeUrl ? /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/.test(youtubeUrl) : false;
 
   const validateForm = useCallback(() => {
     const newErrors: { [key: string]: string } = {};
@@ -922,12 +916,12 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
     [name, t],
   );
 
-  const canSubmit = useMemo(() => {
+  const canSubmit = (() => {
     if (!name.trim()) return false;
     if (selectedView === 'file') return !!video;
     if (selectedView === 'youtube') return isYouTubeUrlValid;
     return false;
-  }, [name, selectedView, video, isYouTubeUrlValid]);
+  })();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -998,7 +992,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
     }
   };
 
-  const fileInputId = useMemo(() => `video-activity-file-${Date.now()}`, []);
+  const fileInputId = `video-activity-file-${useId()}`;
 
   return (
     <div className="mx-auto max-w-4xl">

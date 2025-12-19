@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
 import { AlignCenter, AlignLeft, AlignRight, Edit2, Save, Trash, X } from 'lucide-react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
@@ -98,18 +98,15 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
   const editorContext = useEditorProvider();
   const isEditable = editorContext?.isEditable ?? true;
 
-  const previewData = useMemo(
-    () => ({
-      title: node.attrs.title,
-      description: node.attrs.description,
-      og_image: node.attrs.og_image,
-      favicon: node.attrs.favicon,
-      og_type: node.attrs.og_type,
-      og_url: node.attrs.og_url,
-      url: node.attrs.url,
-    }),
-    [node.attrs],
-  );
+  const previewData = {
+    title: node.attrs.title,
+    description: node.attrs.description,
+    og_image: node.attrs.og_image,
+    favicon: node.attrs.favicon,
+    og_type: node.attrs.og_type,
+    og_url: node.attrs.og_url,
+    url: node.attrs.url,
+  };
 
   const alignment = node.attrs.alignment || 'left';
   const hasPreview = Boolean(previewData.title);
@@ -224,12 +221,12 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
     }
   };
 
-  const alignClass = useMemo(() => {
+  const alignClass = (() => {
     const alignment = node.attrs.alignment || 'left';
     if (alignment === 'center') return 'justify-center';
     if (alignment === 'right') return 'justify-end';
     return 'justify-start';
-  }, [node.attrs.alignment]);
+  })();
 
   return (
     <NodeViewWrapper className="web-preview-block relative">

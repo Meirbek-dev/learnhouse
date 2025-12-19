@@ -11,7 +11,6 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
-import { useMemo } from 'react';
 
 interface GamificationProfileSectionProps {
   orgId: number;
@@ -34,7 +33,7 @@ export function GamificationProfileSection({
   const ctx = useOptionalGamificationContext();
   const profile = data ?? ctx?.profile ?? null;
   const isLoading = !profile && !!ctx?.isLoading;
-  const { levelInfo, nextMilestone, unlockedFrames, unlockedAccessories } = useMemo(() => {
+  const { levelInfo, nextMilestone, unlockedFrames, unlockedAccessories } = (() => {
     if (!profile) {
       return {
         levelInfo: null as any,
@@ -49,7 +48,7 @@ export function GamificationProfileSection({
       unlockedFrames: AVATAR_UNLOCKS.frames.filter((f) => profile.level >= f.level),
       unlockedAccessories: AVATAR_UNLOCKS.accessories.filter((a) => profile.level >= a.level),
     };
-  }, [profile, t]);
+  })();
 
   if (isLoading) {
     return (

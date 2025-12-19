@@ -1,7 +1,7 @@
 'use client';
 
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
@@ -133,7 +133,7 @@ export default function FixedActivitySecondaryBar(props: FixedActivitySecondaryB
   const mainActivityInfoRef = useRef<HTMLDivElement | null>(null);
   const org = useOrg() as any;
 
-  const { allActivities, currentIndex } = useMemo(() => {
+  const { allActivities, currentIndex } = (() => {
     const allActivities: any[] = [];
     let currentIndex = -1;
 
@@ -153,7 +153,7 @@ export default function FixedActivitySecondaryBar(props: FixedActivitySecondaryB
     });
 
     return { allActivities, currentIndex };
-  }, [props.course, props.currentActivityId]);
+  })();
 
   const prevActivity = currentIndex > 0 ? allActivities[currentIndex - 1] : null;
   const nextActivity = currentIndex < allActivities.length - 1 ? allActivities[currentIndex + 1] : null;

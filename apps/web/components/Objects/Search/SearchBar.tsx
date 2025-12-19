@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { removeCoursePrefix } from '../Thumbnails/CourseThumbnail';
 import type { ChangeEvent, FC, KeyboardEvent } from 'react';
 import { searchOrgContent } from '@services/search/search';
@@ -191,25 +191,20 @@ export const SearchBar: FC<SearchBarProps> = ({
     };
   }, [debouncedSearch, orgslug, accessToken]);
 
-  const MemoizedEmptyState = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return (
-        <div className="px-4 py-8">
-          <div className="flex flex-col items-center text-center">
-            <div className="mb-4 rounded-full bg-black/5 p-3">
-              <Sparkles className="h-6 w-6 text-black/70" />
-            </div>
-            <h3 className="mb-1 text-sm font-medium text-black/80">{t('discoverTitle')}</h3>
-            <p className="max-w-[240px] text-xs text-black/50">{t('discoverSubtitle')}</p>
-          </div>
+  const MemoizedEmptyState = !searchQuery.trim() ? (
+    <div className="px-4 py-8">
+      <div className="flex flex-col items-center text-center">
+        <div className="mb-4 rounded-full bg-black/5 p-3">
+          <Sparkles className="h-6 w-6 text-black/70" />
         </div>
-      );
-    }
-    return null;
-  }, [searchQuery, t]);
+        <h3 className="mb-1 text-sm font-medium text-black/80">{t('discoverTitle')}</h3>
+        <p className="max-w-[240px] text-xs text-black/50">{t('discoverSubtitle')}</p>
+      </div>
+    </div>
+  ) : null;
 
   // Calculate if we should show the dropdown
-  const shouldShowDropdown = useMemo(() => {
+  const shouldShowDropdown = (() => {
     if (!showResults) return false;
 
     // Show if there's a search query with content
@@ -219,78 +214,70 @@ export const SearchBar: FC<SearchBarProps> = ({
     if (!isInitialLoad && showResults) return true;
 
     return false;
-  }, [showResults, searchQuery, isInitialLoad]);
+  })();
 
-  const searchTerms = useMemo(
-    () => [
-      {
-        term: searchQuery,
-        type: 'exact',
-        icon: (
-          <Search
-            size={14}
-            className="text-black/40"
-          />
-        ),
-      },
-      {
-        term: `${searchQuery} ${t('coursesSection').toLowerCase()}`,
-        type: 'courses',
-        icon: (
-          <GraduationCap
-            size={14}
-            className="text-black/40"
-          />
-        ),
-      },
-      {
-        term: `${searchQuery} ${t('collectionsSection').toLowerCase()}`,
-        type: 'collections',
-        icon: (
-          <Book
-            size={14}
-            className="text-black/40"
-          />
-        ),
-      },
-    ],
-    [searchQuery, t],
-  );
+  const searchTerms = [
+    {
+      term: searchQuery,
+      type: 'exact',
+      icon: (
+        <Search
+          size={14}
+          className="text-black/40"
+        />
+      ),
+    },
+    {
+      term: `${searchQuery} ${t('coursesSection').toLowerCase()}`,
+      type: 'courses',
+      icon: (
+        <GraduationCap
+          size={14}
+          className="text-black/40"
+        />
+      ),
+    },
+    {
+      term: `${searchQuery} ${t('collectionsSection').toLowerCase()}`,
+      type: 'collections',
+      icon: (
+        <Book
+          size={14}
+          className="text-black/40"
+        />
+      ),
+    },
+  ];
 
-  const MemoizedSearchSuggestions = useMemo(() => {
-    if (searchQuery.trim()) {
-      return (
-        <div className="p-2">
-          <div className="flex items-center gap-2 px-2 py-2 text-sm text-black/50">
-            <ScanSearch size={16} />
-            <span className="font-medium">{t('suggestionsTitle')}</span>
-          </div>
-          <div className="space-y-1">
-            {searchTerms.map(({ term, type, icon }) => (
-              <Link
-                prefetch={false}
-                key={`${term}-${type}`}
-                href={getUriWithOrg(orgslug, `/search?q=${encodeURIComponent(term)}`)}
-                className="group flex items-center rounded-lg px-3 py-2 transition-colors hover:bg-black/2"
-              >
-                <div className="flex flex-1 items-center gap-2">
-                  {icon}
-                  <span className="text-sm text-black/70">{term}</span>
-                </div>
-                <ArrowUpRight
-                  size={14}
-                  className="text-black/30 transition-colors group-hover:text-black/50"
-                />
-              </Link>
-            ))}
-          </div>
-        </div>
-      );
-    }
-    return null;
-  }, [searchQuery, searchTerms, orgslug, t]);
+  const MemoizedSearchSuggestions = searchQuery.trim() ? (
+    <div className="p-2">
+      <div className="flex items-center gap-2 px-2 py-2 text-sm text-black/50">
+        <ScanSearch size={16} />
+        <span className="font-medium">{t('suggestionsTitle')}</span>
+      </div>
+      <div className="space-y-1">
+        {searchTerms.map(({ term, type, icon }) => (
+          <Link
+            prefetch={false}
+            key={`${term}-${type}`}
+            href={getUriWithOrg(orgslug, `/search?q=${encodeURIComponent(term)}`)}
+            className="group flex items-center rounded-lg px-3 py-2 transition-colors hover:bg-black/2"
+          >
+            <div className="flex flex-1 items-center gap-2">
+              {icon}
+              <span className="text-sm text-black/70">{term}</span>
+            </div>
+            <ArrowUpRight
+              size={14}
+              className="text-black/30 transition-colors group-hover:text-black/50"
+            />
+          </Link>
+        ))}
+      </div>
+    </div>
+  ) : null;
 
-  const MemoizedQuickResults = useMemo(() => {
+  const MemoizedQuickResults = (() => {
     const hasResults =
       searchResults.courses.length > 0 || searchResults.collections.length > 0 || searchResults.users.length > 0;
 
@@ -425,7 +412,7 @@ export const SearchBar: FC<SearchBarProps> = ({
         )}
       </div>
     );
-  }, [searchResults, orgslug, org?.org_uuid, t]);
+  })();
 
   const handleSearchChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);

@@ -24,7 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUser, updateUserAvatar } from '@services/users/users';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { updateProfile } from '@services/settings/profile';
 import { getUriWithoutOrg } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -258,50 +258,42 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
   const tTemplates = useTranslations('DashPage.UserAccountSettings.generalSection.detailTemplateLabels');
   const t = useTranslations('DashPage.UserAccountSettings.generalSection');
 
-  const AVAILABLE_ICONS = useMemo(
-    () =>
-      [
-        { name: 'briefcase', label: tIcons('briefcase'), component: Briefcase },
-        { name: 'graduation-cap', label: tIcons('graduation-cap'), component: GraduationCap },
-        { name: 'map-pin', label: tIcons('map-pin'), component: MapPin },
-        { name: 'building-2', label: tIcons('building-2'), component: Building2 },
-        { name: 'speciality', label: tIcons('speciality'), component: Lightbulb },
-        { name: 'globe', label: tIcons('globe'), component: Globe },
-        { name: 'laptop-2', label: tIcons('laptop-2'), component: Laptop2 },
-        { name: 'award', label: tIcons('award'), component: Award },
-        { name: 'book-open', label: tIcons('book-open'), component: BookOpen },
-        { name: 'link', label: tIcons('link'), component: Link },
-        { name: 'users', label: tIcons('users'), component: Users },
-        { name: 'calendar', label: tIcons('calendar'), component: Calendar },
-      ] as const,
-    [tIcons],
-  );
+  const AVAILABLE_ICONS = [
+    { name: 'briefcase', label: tIcons('briefcase'), component: Briefcase },
+    { name: 'graduation-cap', label: tIcons('graduation-cap'), component: GraduationCap },
+    { name: 'map-pin', label: tIcons('map-pin'), component: MapPin },
+    { name: 'building-2', label: tIcons('building-2'), component: Building2 },
+    { name: 'speciality', label: tIcons('speciality'), component: Lightbulb },
+    { name: 'globe', label: tIcons('globe'), component: Globe },
+    { name: 'laptop-2', label: tIcons('laptop-2'), component: Laptop2 },
+    { name: 'award', label: tIcons('award'), component: Award },
+    { name: 'book-open', label: tIcons('book-open'), component: BookOpen },
+    { name: 'link', label: tIcons('link'), component: Link },
+    { name: 'users', label: tIcons('users'), component: Users },
+    { name: 'calendar', label: tIcons('calendar'), component: Calendar },
+  ] as const;
 
-  const DETAIL_TEMPLATES = useMemo(
-    () =>
-      ({
-        general: [
-          { id: 'title', label: tTemplates('title'), icon: 'briefcase', text: '' },
-          { id: 'affiliation', label: tTemplates('affiliation'), icon: 'building-2', text: '' },
-          { id: 'location', label: tTemplates('location'), icon: 'map-pin', text: '' },
-          { id: 'website', label: tTemplates('website'), icon: 'globe', text: '' },
-          { id: 'linkedin', label: tTemplates('linkedin'), icon: 'link', text: '' },
-        ],
-        academic: [
-          { id: 'institution', label: tTemplates('institution'), icon: 'building-2', text: '' },
-          { id: 'department', label: tTemplates('department'), icon: 'graduation-cap', text: '' },
-          { id: 'research', label: tTemplates('research'), icon: 'book-open', text: '' },
-          { id: 'academic-title', label: tTemplates('academic-title'), icon: 'award', text: '' },
-        ],
-        professional: [
-          { id: 'company', label: tTemplates('company'), icon: 'building-2', text: '' },
-          { id: 'industry', label: tTemplates('industry'), icon: 'briefcase', text: '' },
-          { id: 'expertise', label: tTemplates('expertise'), icon: 'laptop-2', text: '' },
-          { id: 'community', label: tTemplates('community'), icon: 'users', text: '' },
-        ],
-      }) as const,
-    [tTemplates],
-  );
+  const DETAIL_TEMPLATES = ({
+    general: [
+      { id: 'title', label: tTemplates('title'), icon: 'briefcase', text: '' },
+      { id: 'affiliation', label: tTemplates('affiliation'), icon: 'building-2', text: '' },
+      { id: 'location', label: tTemplates('location'), icon: 'map-pin', text: '' },
+      { id: 'website', label: tTemplates('website'), icon: 'globe', text: '' },
+      { id: 'linkedin', label: tTemplates('linkedin'), icon: 'link', text: '' },
+    ],
+    academic: [
+      { id: 'institution', label: tTemplates('institution'), icon: 'building-2', text: '' },
+      { id: 'department', label: tTemplates('department'), icon: 'graduation-cap', text: '' },
+      { id: 'research', label: tTemplates('research'), icon: 'book-open', text: '' },
+      { id: 'academic-title', label: tTemplates('academic-title'), icon: 'award', text: '' },
+    ],
+    professional: [
+      { id: 'company', label: tTemplates('company'), icon: 'building-2', text: '' },
+      { id: 'industry', label: tTemplates('industry'), icon: 'briefcase', text: '' },
+      { id: 'expertise', label: tTemplates('expertise'), icon: 'laptop-2', text: '' },
+      { id: 'community', label: tTemplates('community'), icon: 'users', text: '' },
+    ],
+  } as const);
 
   const details = form.watch('details');
 
@@ -648,7 +640,7 @@ const UserEditGeneral = () => {
   const [currentLocale, setCurrentLocale] = useState<Locale | null>(null);
   const [initialLoading, setInitialLoading] = useState<boolean>(true);
   const t = useTranslations('DashPage.Notifications');
-  const validationSchema = useMemo(() => createValidationSchema(t), [t]);
+  const validationSchema = createValidationSchema(t);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(validationSchema),

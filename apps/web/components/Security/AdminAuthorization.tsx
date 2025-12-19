@@ -2,7 +2,7 @@
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -34,7 +34,7 @@ const AdminAuthorization: FC<AuthorizationProps> = ({ children, authorizationMod
   const [isAuthorized, setIsAuthorized] = useState(false);
   const t = useTranslations('Security');
 
-  const isUserAuthenticated = useMemo(() => session.status === 'authenticated', [session.status]);
+  const isUserAuthenticated = session.status === 'authenticated';
 
   const checkPathname = useCallback((pattern: string, pathname: string) => {
     if (typeof pattern !== 'string' || typeof pathname !== 'string') return false;
@@ -44,9 +44,7 @@ const AdminAuthorization: FC<AuthorizationProps> = ({ children, authorizationMod
     return regexPattern.test(pathname);
   }, []);
 
-  const isAdminPath = useMemo(() => {
-    return ADMIN_PATHS.some((path) => checkPathname(path, pathname));
-  }, [pathname, checkPathname]);
+  const isAdminPath = ADMIN_PATHS.some((path) => checkPathname(path, pathname));
 
   const authorizeUser = useCallback(() => {
     if (loading) return;

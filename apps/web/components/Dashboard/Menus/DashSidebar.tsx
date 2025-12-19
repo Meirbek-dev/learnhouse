@@ -20,7 +20,7 @@ import platformLogoLight from '@public/platform_logo_light.svg';
 import useFeatureFlag from '@components/Hooks/useFeatureFlag';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import UserAvatar from '../../Objects/UserAvatar';
@@ -93,57 +93,54 @@ const useNavigationItems = () => {
     defaultValue: false,
   });
 
-  return useMemo(
-    (): NavigationItem[] => [
-      {
-        title: t('tooltips.home'),
-        href: '/dash',
-        icon: Home,
-        tooltip: t('tooltips.home'),
-        isActive: pathname === '/dash',
-      },
-      {
-        title: t('tooltips.courses'),
-        href: '/dash/courses',
-        icon: BookCopy,
-        tooltip: t('tooltips.courses'),
-        isActive: pathname.startsWith('/dash/courses'),
-      },
-      {
-        title: t('tooltips.assignments'),
-        href: '/dash/assignments',
-        icon: Backpack,
-        tooltip: t('tooltips.assignments'),
-        isActive: pathname.startsWith('/dash/assignments'),
-      },
-      {
-        title: t('tooltips.users'),
-        href: '/dash/users/settings/users',
-        icon: Users,
-        tooltip: t('tooltips.users'),
-        isActive: pathname.startsWith('/dash/users'),
-      },
-      ...(isPaymentsEnabled
-        ? [
-            {
-              title: t('tooltips.payments'),
-              href: '/dash/payments/customers',
-              icon: BadgeDollarSign,
-              tooltip: t('tooltips.payments'),
-              isActive: pathname.startsWith('/dash/payments'),
-            },
-          ]
-        : []),
-      {
-        title: t('tooltips.organization'),
-        href: '/dash/org/settings/general',
-        icon: School,
-        tooltip: t('tooltips.organization'),
-        isActive: pathname.startsWith('/dash/org'),
-      },
-    ],
-    [pathname, t, isPaymentsEnabled],
-  );
+  return [
+    {
+      title: t('tooltips.home'),
+      href: '/dash',
+      icon: Home,
+      tooltip: t('tooltips.home'),
+      isActive: pathname === '/dash',
+    },
+    {
+      title: t('tooltips.courses'),
+      href: '/dash/courses',
+      icon: BookCopy,
+      tooltip: t('tooltips.courses'),
+      isActive: pathname.startsWith('/dash/courses'),
+    },
+    {
+      title: t('tooltips.assignments'),
+      href: '/dash/assignments',
+      icon: Backpack,
+      tooltip: t('tooltips.assignments'),
+      isActive: pathname.startsWith('/dash/assignments'),
+    },
+    {
+      title: t('tooltips.users'),
+      href: '/dash/users/settings/users',
+      icon: Users,
+      tooltip: t('tooltips.users'),
+      isActive: pathname.startsWith('/dash/users'),
+    },
+    ...(isPaymentsEnabled
+      ? [
+          {
+            title: t('tooltips.payments'),
+            href: '/dash/payments/customers',
+            icon: BadgeDollarSign,
+            tooltip: t('tooltips.payments'),
+            isActive: pathname.startsWith('/dash/payments'),
+          },
+        ]
+      : []),
+    {
+      title: t('tooltips.organization'),
+      href: '/dash/org/settings/general',
+      icon: School,
+      tooltip: t('tooltips.organization'),
+      isActive: pathname.startsWith('/dash/org'),
+    },
+  ];
 };
 
 // Navigation item component

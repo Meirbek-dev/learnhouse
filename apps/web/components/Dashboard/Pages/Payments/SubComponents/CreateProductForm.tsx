@@ -6,7 +6,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { createProduct } from '@services/payments/products';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -43,7 +43,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   const [currencies, setCurrencies] = useState<{ code: string; name: string }[]>([]);
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('Payments.ProductForm');
-  const validationSchema = useMemo(() => createValidationSchema(t), [t]);
+  const validationSchema = createValidationSchema(t);
 
   useEffect(() => {
     const allCurrencies = currencyCodes.data.map((currency) => ({

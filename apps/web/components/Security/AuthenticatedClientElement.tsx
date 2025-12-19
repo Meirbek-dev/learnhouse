@@ -2,7 +2,7 @@
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import type { ReactNode } from 'react';
 
 interface AuthenticatedClientElementProps {
@@ -38,7 +38,7 @@ export const AuthenticatedClientElement = (props: AuthenticatedClientElementProp
   }, []);
 
   // Compute authorization result as derived state
-  const isAllowed = useMemo(() => {
+  const isAllowed = (() => {
     if (session.status === 'loading' || session.status === 'unauthenticated') {
       return false;
     }
@@ -55,15 +55,7 @@ export const AuthenticatedClientElement = (props: AuthenticatedClientElementProp
     }
 
     return false;
-  }, [
-    session.status,
-    session?.data?.roles,
-    props.checkMethod,
-    props.action,
-    props.ressourceType,
-    org?.org_uuid,
-    isUserAllowed,
-  ]);
+  })();
 
   return <>{isAllowed ? props.children : null}</>;
 };

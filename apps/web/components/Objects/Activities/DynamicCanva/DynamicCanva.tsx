@@ -36,7 +36,18 @@ import { Table } from '@tiptap/extension-table';
 import TableOfContents from './TableOfContents';
 import StarterKit from '@tiptap/starter-kit';
 import { styled } from 'styled-components';
-import { useMemo } from 'react';
+
+// Lowlight initialization at module scope (one-time)
+const LOWLIGHT = (() => {
+  const lowlight = createLowlight(common);
+  lowlight.register('html', html);
+  lowlight.register('css', css);
+  lowlight.register('js', js);
+  lowlight.register('ts', ts);
+  lowlight.register('python', python);
+  lowlight.register('java', java);
+  return lowlight;
+})();
 
 interface Editor {
   content: string;
@@ -52,110 +63,98 @@ const Canva = (props: Editor) => {
   const isEditable = true;
   const isMobile = useIsMobile();
 
-  const lowlightConfig = useMemo(() => {
-    const lowlight = createLowlight(common);
-    lowlight.register('html', html);
-    lowlight.register('css', css);
-    lowlight.register('js', js);
-    lowlight.register('ts', ts);
-    lowlight.register('python', python);
-    lowlight.register('java', java);
-    return lowlight;
-  }, []);
+  const lowlightConfig = LOWLIGHT;
 
-  const extensions = useMemo(
-    () => [
-      StarterKit.configure({
-        heading: false,
-        codeBlock: false,
-        // Disable the built-in `link` extension because we add a custom configured
-        // link implementation via `getLinkExtension()` to avoid duplicate names
-        link: false,
-        bulletList: {
-          HTMLAttributes: {
-            class: 'bullet-list',
-          },
+  const extensions = [
+    StarterKit.configure({
+      heading: false,
+      codeBlock: false,
+      // Disable the built-in `link` extension because we add a custom configured
+      // link implementation via `getLinkExtension()` to avoid duplicate names
+      link: false,
+      bulletList: {
+        HTMLAttributes: {
+          class: 'bullet-list',
         },
-        orderedList: {
-          HTMLAttributes: {
-            class: 'ordered-list',
-          },
+      },
+      orderedList: {
+        HTMLAttributes: {
+          class: 'ordered-list',
         },
-      }),
-      CustomHeading,
-      NoTextInput,
-      // Custom Extensions
-      InfoCallout.configure({
-        editable: isEditable,
-      }),
-      WarningCallout.configure({
-        editable: isEditable,
-      }),
-      ImageBlock.configure({
-        editable: isEditable,
-        activity: props.activity,
-      }),
-      VideoBlock.configure({
-        editable: true,
-        activity: props.activity,
-      }),
-      MathEquationBlock.configure({
-        editable: false,
-        activity: props.activity,
-      }),
-      PDFBlock.configure({
-        editable: true,
-        activity: props.activity,
-      }),
-      QuizBlock.configure({
-        editable: isEditable,
-        activity: props.activity,
-      }),
-      Youtube.configure({
-        controls: true,
-        modestBranding: true,
-      }),
-      CodeBlockLowlight.configure({
-        lowlight: lowlightConfig,
-      }),
-      EmbedObjects.configure({
-        editable: isEditable,
-        activity: props.activity,
-      }),
-      Badges.configure({
-        editable: isEditable,
-        activity: props.activity,
-      }),
-      Buttons.configure({
-        editable: isEditable,
-        activity: props.activity,
-      }),
-      UserBlock.configure({
-        editable: isEditable,
-        activity: props.activity,
-      }),
-      Table.configure({
-        resizable: true,
-      }),
-      getLinkExtension(),
-      WebPreview.configure({
-        editable: true,
-        activity: props.activity,
-      }),
-      Flipcard.configure({
-        editable: false,
-        activity: props.activity,
-      }),
-      Scenarios.configure({
-        editable: false,
-        activity: props.activity,
-      }),
-      TableRow,
-      TableHeader,
-      TableCell,
-    ],
-    [props.activity, lowlightConfig, isEditable],
-  );
+      },
+    }),
+    CustomHeading,
+    NoTextInput,
+    // Custom Extensions
+    InfoCallout.configure({
+      editable: isEditable,
+    }),
+    WarningCallout.configure({
+      editable: isEditable,
+    }),
+    ImageBlock.configure({
+      editable: isEditable,
+      activity: props.activity,
+    }),
+    VideoBlock.configure({
+      editable: true,
+      activity: props.activity,
+    }),
+    MathEquationBlock.configure({
+      editable: false,
+      activity: props.activity,
+    }),
+    PDFBlock.configure({
+      editable: true,
+      activity: props.activity,
+    }),
+    QuizBlock.configure({
+      editable: isEditable,
+      activity: props.activity,
+    }),
+    Youtube.configure({
+      controls: true,
+      modestBranding: true,
+    }),
+    CodeBlockLowlight.configure({
+      lowlight: lowlightConfig,
+    }),
+    EmbedObjects.configure({
+      editable: isEditable,
+      activity: props.activity,
+    }),
+    Badges.configure({
+      editable: isEditable,
+      activity: props.activity,
+    }),
+    Buttons.configure({
+      editable: isEditable,
+      activity: props.activity,
+    }),
+    UserBlock.configure({
+      editable: isEditable,
+      activity: props.activity,
+    }),
+    Table.configure({
+      resizable: true,
+    }),
+    getLinkExtension(),
+    WebPreview.configure({
+      editable: true,
+      activity: props.activity,
+    }),
+    Flipcard.configure({
+      editable: false,
+      activity: props.activity,
+    }),
+    Scenarios.configure({
+      editable: false,
+      activity: props.activity,
+    }),
+    TableRow,
+    TableHeader,
+    TableCell,
+  ];
 
   const editor: any = useEditor({
     editable: isEditable,

@@ -9,7 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
-import { useMemo, useTransition } from 'react';
+import { useTransition } from 'react';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
@@ -98,7 +98,7 @@ const OrgEditGeneral: FC = () => {
   const access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any;
   const t = useTranslations('DashPage.OrgSettings.General');
-  const validationSchema = useMemo(() => createValidationSchema(t), [t]);
+  const validationSchema = createValidationSchema(t);
 
   const form = useForm<OrganizationValues>({
     resolver: zodResolver(validationSchema),

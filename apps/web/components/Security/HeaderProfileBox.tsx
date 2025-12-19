@@ -19,7 +19,6 @@ import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { signOut } from 'next-auth/react';
 import type { ReactNode } from 'react';
-import { useMemo } from 'react';
 
 interface RoleInfo {
   name: string;

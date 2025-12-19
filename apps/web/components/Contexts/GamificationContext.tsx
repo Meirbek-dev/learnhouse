@@ -164,15 +164,12 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
   }, [orgId, profile, isLoading, initialData, fetchAttempts, lastFetchTime]);
 
   // Computed streaks
-  const streaks = useMemo(
-    () => ({
-      login: profile?.login_streak || 0,
-      learning: profile?.learning_streak || 0,
-      maxLogin: profile?.longest_login_streak || 0,
-      maxLearning: profile?.longest_learning_streak || 0,
-    }),
-    [profile],
-  );
+  const streaks = {
+    login: profile?.login_streak || 0,
+    learning: profile?.learning_streak || 0,
+    maxLogin: profile?.longest_login_streak || 0,
+    maxLearning: profile?.longest_learning_streak || 0,
+  };
 
   // Refetch function (triggers server data refresh)
   const refetch = useCallback(async () => {

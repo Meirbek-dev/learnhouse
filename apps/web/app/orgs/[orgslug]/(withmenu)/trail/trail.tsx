@@ -24,7 +24,7 @@ import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { AlertTriangle, BookOpen, Loader2 } from 'lucide-react';
 import { removeCourse } from '@services/courses/activity';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useMemo, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { getAPIUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';

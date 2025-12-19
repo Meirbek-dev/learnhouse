@@ -2,7 +2,7 @@ import { ArrowRight, BookOpenCheck, Check, ChevronDown, Circle, FileText, Layers
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getUriWithOrg } from '@services/config/config';
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
 import AppLink from '@/components/ui/AppLink';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
@@ -21,44 +21,38 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onCl
   const t = useTranslations('Courses.CoursesActions');
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
 
-  const isActivityDone = useCallback(
-    (activity: any) => {
-      const cleanCourseUuid = course.course_uuid?.replace('course_', '');
-      const run = trailData?.runs?.find((run: any) => {
-        const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
-        return cleanRunCourseUuid === cleanCourseUuid;
-      });
-      if (run) {
-        return run.steps.find((step: any) => step.activity_id === activity.id && step.complete === true);
+  function isActivityDone(activity: any) {
+    const cleanCourseUuid = course.course_uuid?.replace('course_', '');
+    const run = trailData?.runs?.find((run: any) => {
+      const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
+      return cleanRunCourseUuid === cleanCourseUuid;
+    });
+    if (run) {
+      return run.steps.find((step: any) => step.activity_id === activity.id && step.complete === true);
+    }
+    return false;
+  }
+
+  // Compute progress
+  let totalActivities = 0;
+  let completedActivities = 0;
+  const chapterProgress: Record<string, { completed: number; total: number }> = {};
+
+  course.chapters.forEach((chapter: any) => {
+    let chapterCompleted = 0;
+    let chapterTotal = 0;
+
+    chapter.activities.forEach((activity: any) => {
+      totalActivities += 1;
+      chapterTotal += 1;
+      if (isActivityDone(activity)) {
+        completedActivities += 1;
+        chapterCompleted += 1;
       }
-      return false;
-    },
-    [course.course_uuid, trailData?.runs],
-  );
-
-  const { completedActivities, totalActivities, chapterProgress } = useMemo(() => {
-    let total = 0;
-    let completed = 0;
-    const progress: Record<string, { completed: number; total: number }> = {};
-
-    course.chapters.forEach((chapter: any) => {
-      let chapterCompleted = 0;
-      let chapterTotal = 0;
-
-      chapter.activities.forEach((activity: any) => {
-        total += 1;
-        chapterTotal += 1;
-        if (isActivityDone(activity)) {
-          completed += 1;
-          chapterCompleted += 1;
-        }
-      });
-
-      progress[chapter.chapter_uuid] = { completed: chapterCompleted, total: chapterTotal };
     });
 
-    return { completedActivities: completed, totalActivities: total, chapterProgress: progress };
-  }, [course.chapters, isActivityDone]);
+    chapterProgress[chapter.chapter_uuid] = { completed: chapterCompleted, total: chapterTotal };
+  });
 
   const progressPercentage = totalActivities === 0 ? 0 : Math.round((completedActivities / totalActivities) * 100);
 

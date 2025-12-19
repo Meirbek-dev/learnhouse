@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { isValidElement, useCallback, useMemo, useState, useTransition } from 'react';
+import { isValidElement, useCallback, useState, useTransition } from 'react';
 import { AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
@@ -68,17 +68,14 @@ const ConfirmationModal = (params: ModalParams) => {
     return <span>{trigger}</span>;
   }, []);
 
-  const triggerElement = useMemo(
-    () => getSafeDialogTrigger(params.dialogTrigger),
-    [getSafeDialogTrigger, params.dialogTrigger],
-  );
+  const triggerElement = getSafeDialogTrigger(params.dialogTrigger);
 
-  const triggerIsNativeButton = useMemo(() => {
-    if (!triggerElement) return false;
-    return (
-      isValidElement(triggerElement) && typeof triggerElement.type === 'string' && triggerElement.type === 'button'
-    );
-  }, [triggerElement]);
+  const triggerIsNativeButton = !!(
+    triggerElement &&
+    isValidElement(triggerElement) &&
+    typeof triggerElement.type === 'string' &&
+    triggerElement.type === 'button'
+  );
 
   const getStatusConfig = useCallback(() => {
     const isWarning = params.status === 'warning';

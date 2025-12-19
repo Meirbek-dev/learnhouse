@@ -4,7 +4,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PasswordInput from '@components/ui/custom/password-input';
 import { updatePassword } from '@services/settings/password';
 import { getUriWithoutOrg } from '@services/config/config';
-import { useMemo, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
@@ -41,7 +41,7 @@ const UserEditPassword = () => {
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.Notifications');
   const tPassword = useTranslations('DashPage.UserAccountSettings.UserAccount.EditPassword');
-  const validationSchema = useMemo(() => createValidationSchema(t), [t]);
+  const validationSchema = createValidationSchema(t);
 
   const {
     register,

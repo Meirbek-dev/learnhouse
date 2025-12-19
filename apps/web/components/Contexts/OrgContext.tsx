@@ -5,7 +5,7 @@ import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
 import ErrorUI from '@components/Objects/StyledElements/Error/Error';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { Home, LogOut, PersonStanding } from 'lucide-react';
-import { createContext, useContext, useMemo } from 'react';
+import { createContext, useContext } from 'react';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -52,13 +52,13 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
   const isLoading = session.status === 'loading' || isOrgLoading || (isAuthenticated && isUserOrgsLoading);
   const hasError = Boolean(orgError) || (isAuthenticated && Boolean(orgsError));
 
-  const isOrgActive = useMemo(() => org?.config?.config?.general?.enabled !== false, [org]);
-  const isUserPartOfTheOrg = useMemo(() => {
+  const isOrgActive = org?.config?.config?.general?.enabled !== false;
+  const isUserPartOfTheOrg = (() => {
     if (!isAuthenticated || !org?.id || !Array.isArray(orgs)) {
       return false;
     }
     return orgs.some((userOrg: any) => userOrg.id === org.id);
-  }, [isAuthenticated, orgs, org?.id]);
+  })();
 
   if (hasError) return <ErrorUI message={t('fetchError')} />;
   if (isLoading) return <PageLoading />;

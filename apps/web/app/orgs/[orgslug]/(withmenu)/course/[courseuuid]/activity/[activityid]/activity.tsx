@@ -229,27 +229,25 @@ interface ActivityActionsProps {
 
 // Custom hook for activity position
 function useActivityPosition(course: any, activityId: string) {
-  return useMemo(() => {
-    const allActivities: any[] = [];
-    let currentIndex = -1;
+  const allActivities: any[] = [];
+  let currentIndex = -1;
 
-    course.chapters.forEach((chapter: any) => {
-      chapter.activities.forEach((activity: any) => {
-        const cleanActivityUuid = activity.activity_uuid?.replace('activity_', '');
-        allActivities.push({
-          ...activity,
-          cleanUuid: cleanActivityUuid,
-          chapterName: chapter.name,
-        });
-
-        if (cleanActivityUuid === activityId.replace('activity_', '')) {
-          currentIndex = allActivities.length - 1;
-        }
+  course.chapters.forEach((chapter: any) => {
+    chapter.activities.forEach((activity: any) => {
+      const cleanActivityUuid = activity.activity_uuid?.replace('activity_', '');
+      allActivities.push({
+        ...activity,
+        cleanUuid: cleanActivityUuid,
+        chapterName: chapter.name,
       });
-    });
 
-    return { allActivities, currentIndex };
-  }, [course, activityId]);
+      if (cleanActivityUuid === activityId.replace('activity_', '')) {
+        currentIndex = allActivities.length - 1;
+      }
+    });
+  });
+
+  return { allActivities, currentIndex };
 }
 
 const ActivityActions = ({
@@ -343,14 +341,14 @@ const ActivityClient = (props: ActivityClientProps) => {
   const format = useFormatter();
 
   // Derive bgColor from activity type and focus mode - use useMemo instead of state
-  const bgColor = useMemo(() => {
+  const bgColor = (() => {
     if (!activity) return 'bg-white';
 
     if (activity.activity_type === 'TYPE_DYNAMIC' || activity.activity_type === 'TYPE_ASSIGNMENT') {
       return isFocusMode ? 'bg-white' : 'bg-white soft-shadow';
     }
     return isFocusMode ? 'bg-zinc-950' : 'bg-zinc-950 soft-shadow';
-  }, [activity, isFocusMode]);
+  })();
 
   // Helper to get relative time using next-intl
   const getRelativeTimeIntl = (date: Date) => {
@@ -369,7 +367,7 @@ const ActivityClient = (props: ActivityClientProps) => {
   const prevActivity = currentIndex > 0 ? allActivities[currentIndex - 1] : null;
   const nextActivity = currentIndex < allActivities.length - 1 ? allActivities[currentIndex + 1] : null;
 
-  const activityContent = useMemo(() => {
+  const activityContent = (() => {
     if (!activity?.published || activity?.content?.paid_access === false) {
       return null;
     }
@@ -422,7 +420,7 @@ const ActivityClient = (props: ActivityClientProps) => {
         return null;
       }
     }
-  }, [activity, course, assignment]);
+  })();
 
   // Navigate to an activity - memoized to prevent rerenders
   const navigateToActivity = useCallback(
@@ -1172,7 +1170,7 @@ export const MarkStatus = (props: {
     t,
   ]);
 
-  const isActivityCompleted = useMemo(() => {
+  const isActivityCompleted = (() => {
     // Clean up course UUID by removing 'course_' prefix if it exists
     const cleanCourseUuid = props.course.course_uuid?.replace('course_', '');
 
@@ -1186,7 +1184,7 @@ export const MarkStatus = (props: {
       return run.steps.find((step: any) => step.activity_id === props.activity.id && step.complete === true);
     }
     return false;
-  }, [props.trailData, props.course.course_uuid, props.activity.id]);
+  })();
 
   // Don't render until we have trail data
   if (!props.trailData) {
@@ -1270,7 +1268,7 @@ const NextActivityButton = ({
   const router = useRouter();
   const t = useTranslations('ActivityPage');
 
-  const nextActivity = useMemo(() => {
+  const nextActivity = (() => {
     const allActivities: any[] = [];
     let currentIndex = -1;
 
@@ -1293,7 +1291,7 @@ const NextActivityButton = ({
 
     // Get next activity
     return currentIndex < allActivities.length - 1 ? allActivities[currentIndex + 1] : null;
-  }, [course.chapters, currentActivityId]);
+  })();
 
   const navigateToActivity = useCallback(() => {
     if (!nextActivity) return;
@@ -1329,7 +1327,7 @@ const PreviousActivityButton = ({
   const router = useRouter();
   const t = useTranslations('ActivityPage');
 
-  const previousActivity = useMemo(() => {
+  const previousActivity = (() => {
     const allActivities: any[] = [];
     let currentIndex = -1;
 
@@ -1352,7 +1350,7 @@ const PreviousActivityButton = ({
 
     // Get previous activity
     return currentIndex > 0 ? allActivities[currentIndex - 1] : null;
-  }, [course.chapters, currentActivityId]);
+  })();
 
   const navigateToActivity = useCallback(() => {
     if (!previousActivity) return;

@@ -45,8 +45,31 @@ import Youtube from '@tiptap/extension-youtube';
 import { Table } from '@tiptap/extension-table';
 import { getLinkExtension } from './EditorConf';
 import StarterKit from '@tiptap/starter-kit';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { Eye, Monitor } from 'lucide-react';
+
+// Initialize lowlight once at module load
+const LOWLIGHT = (() => {
+  const lowlight = createLowlight(common);
+  lowlight.register('html', html);
+  lowlight.register('css', css);
+  lowlight.register('js', js);
+  lowlight.register('ts', ts);
+  lowlight.register('python', python);
+  lowlight.register('java', java);
+  return lowlight;
+})();
+
+// Editor extensions static configuration
+const EDITOR_EXTENSIONS = [
+  StarterKit.configure({
+    codeBlock: false,
+    link: false,
+    bulletList: { HTMLAttributes: { class: 'bullet-list' } },
+    orderedList: { HTMLAttributes: { class: 'ordered-list' } },
+  }),
+  // other extensions can be added here if needed
+];
 import { useTranslations } from 'next-intl';
 import { styled } from 'styled-components';
 import Link from '@components/ui/AppLink';
@@ -76,109 +99,34 @@ const Editor = (props: EditorProps) => {
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' });
   const isButtonAvailable = is_ai_feature_enabled;
 
-  const courseUuid = useMemo(() => props.course.course_uuid.slice(7), [props.course.course_uuid]);
-  const activityUuid = useMemo(() => props.activity.activity_uuid.slice(9), [props.activity.activity_uuid]);
+  const courseUuid = props.course.course_uuid.slice(7);
+  const activityUuid = props.activity.activity_uuid.slice(9);
 
-  const lowlightConfig = useMemo(() => {
-    const lowlight = createLowlight(common);
-    lowlight.register('html', html);
-    lowlight.register('css', css);
-    lowlight.register('js', js);
-    lowlight.register('ts', ts);
-    lowlight.register('python', python);
-    lowlight.register('java', java);
-    return lowlight;
-  }, []);
-
-  const extensions = useMemo(
-    () => [
-      StarterKit.configure({
-        codeBlock: false,
-        // Disable the built-in `link` extension because we add a custom configured
-        // link implementation via `getLinkExtension()` to avoid duplicate names
-        link: false,
-        bulletList: {
-          HTMLAttributes: {
-            class: 'bullet-list',
-          },
-        },
-        orderedList: {
-          HTMLAttributes: {
-            class: 'ordered-list',
-          },
-        },
-      }),
-      InfoCallout.configure({
-        editable: true,
-      }),
-      WarningCallout.configure({
-        editable: true,
-      }),
-      ImageBlock.configure({
-        editable: true,
-        activity: props.activity,
-      }),
-      VideoBlock.configure({
-        editable: true,
-        activity: props.activity,
-      }),
-      MathEquationBlock.configure({
-        editable: true,
-        activity: props.activity,
-      }),
-      PDFBlock.configure({
-        editable: true,
-        activity: props.activity,
-      }),
-      QuizBlock.configure({
-        editable: true,
-        activity: props.activity,
-      }),
-      Youtube.configure({
-        controls: true,
-        modestBranding: true,
-      }),
-      CodeBlockLowlight.configure({
-        lowlight: lowlightConfig,
-      }),
-      EmbedObjects.configure({
-        editable: true,
-        activity: props.activity,
-      }),
-      Badges.configure({
-        editable: true,
-        activity: props.activity,
-      }),
-      Buttons.configure({
-        editable: true,
-        activity: props.activity,
-      }),
-      UserBlock.configure({
-        editable: true,
-        activity: props.activity,
-      }),
-      Table.configure({
-        resizable: true,
-      }),
-      TableRow,
-      TableHeader,
-      TableCell,
-      getLinkExtension(),
-      WebPreview.configure({
-        editable: true,
-        activity: props.activity,
-      }),
-      Flipcard.configure({
-        editable: true,
-        activity: props.activity,
-      }),
-      Scenarios.configure({
-        editable: true,
-        activity: props.activity,
-      }),
-    ],
-    [props.activity, lowlightConfig],
-  );
+  const lowlightConfig = LOWLIGHT;
+  const extensions = [
+    ...EDITOR_EXTENSIONS,
+    InfoCallout.configure({ editable: true }),
+    WarningCallout.configure({ editable: true }),
+    ImageBlock.configure({ editable: true, activity: props.activity }),
+    VideoBlock.configure({ editable: true, activity: props.activity }),
+    MathEquationBlock.configure({ editable: true, activity: props.activity }),
+    PDFBlock.configure({ editable: true, activity: props.activity }),
+    QuizBlock.configure({ editable: true, activity: props.activity }),
+    Youtube.configure({ controls: true, modestBranding: true }),
+    CodeBlockLowlight.configure({ lowlight: lowlightConfig }),
+    EmbedObjects.configure({ editable: true, activity: props.activity }),
+    Badges.configure({ editable: true, activity: props.activity }),
+    Buttons.configure({ editable: true, activity: props.activity }),
+    UserBlock.configure({ editable: true, activity: props.activity }),
+    Table.configure({ resizable: true }),
+    TableRow,
+    TableHeader,
+    TableCell,
+    getLinkExtension(),
+    WebPreview.configure({ editable: true, activity: props.activity }),
+    Flipcard.configure({ editable: true, activity: props.activity }),
+    Scenarios.configure({ editable: true, activity: props.activity }),
+  ];
 
   const editor: any = useEditor({
     editable: true,

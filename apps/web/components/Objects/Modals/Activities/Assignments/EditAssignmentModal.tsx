@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';
-import { useTransition, useMemo } from 'react';
+import { useTransition, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { CalendarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -79,11 +79,14 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
   };
 
   const dateFnsLocale = getDateFnsLocale(locale);
-  const today = useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, []);
+  const todayRef = useRef<Date>(
+    (() => {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      return d;
+    })(),
+  );
+  const today = todayRef.current;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(validationSchema),

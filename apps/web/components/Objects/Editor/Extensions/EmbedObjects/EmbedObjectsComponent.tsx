@@ -18,7 +18,7 @@ import {
 import type { CSSProperties, ChangeEvent, FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
 import { AlignCenter, Code, GripHorizontal, GripVertical, Link as LinkIcon } from 'lucide-react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { Textarea } from '@components/ui/textarea';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { NodeViewWrapper } from '@tiptap/react';
@@ -302,15 +302,9 @@ const EmbedObjectsComponent = (props: any) => {
     },
   ];
 
-  const sanitizedEmbedCode = useMemo(() => {
-    if (embedType === 'code' && embedCode) {
-      return DOMPurify.sanitize(embedCode, {
-        ADD_TAGS: ['iframe'],
-        ADD_ATTR: ['*'],
-      });
-    }
-    return '';
-  }, [embedCode, embedType]);
+  const sanitizedEmbedCode = embedType === 'code' && embedCode
+    ? DOMPurify.sanitize(embedCode, { ADD_TAGS: ['iframe'], ADD_ATTR: ['*'] })
+    : '';
 
   const handleUrlChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newUrl = event.target.value;
@@ -459,18 +453,10 @@ const EmbedObjectsComponent = (props: any) => {
     return styles;
   };
 
-  const embedContent = useMemo(
-    () =>
-      !isResizing && (embedUrl || sanitizedEmbedCode) ? (
-        <EmbedContent
-          embedUrl={embedUrl}
-          sanitizedEmbedCode={sanitizedEmbedCode}
-          embedType={embedType}
-        />
-      ) : (
-        <div className="h-full w-full bg-gray-200" />
-      ),
-    [embedUrl, sanitizedEmbedCode, embedType, isResizing],
+  const embedContent = !isResizing && (embedUrl || sanitizedEmbedCode) ? (
+    <EmbedContent embedUrl={embedUrl} sanitizedEmbedCode={sanitizedEmbedCode} embedType={embedType} />
+  ) : (
+    <div className="h-full w-full bg-gray-200" />
   );
 
   // Input states

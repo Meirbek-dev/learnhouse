@@ -8,7 +8,7 @@ import { getActivityBlockMediaDirectory } from '@services/media/media';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { uploadNewVideoFile } from '@services/blocks/Video/video';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import { AnimatePresence, motion } from 'motion/react';
@@ -141,12 +141,13 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadZoneRef = useRef<HTMLDivElement>(null);
 
-  const initialBlockObject = useMemo(() => {
+  const initialBlockObject = (() => {
     if (!node.attrs.blockObject) return null;
     if ('size' in node.attrs.blockObject && typeof node.attrs.blockObject.size === 'string') {
       return node.attrs.blockObject as VideoBlockObject;
     }
-  }, [node.attrs.blockObject]);
+    return null;
+  })();
 
   const [_video, setVideo] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);

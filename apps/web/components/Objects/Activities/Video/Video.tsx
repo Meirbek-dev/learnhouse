@@ -4,7 +4,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import type ArtplayerType from 'artplayer';
 import { useLocale } from 'next-intl';
 import YouTube from 'react-youtube';
-import { useMemo } from 'react';
+
 
 // Function to extract YouTube video ID from various YouTube URL formats
 function getYouTubeID(url: string): string | null {
@@ -55,29 +55,21 @@ const VideoActivity = ({ activity, course }: VideoActivityProps) => {
   const locale = fullLocale.split('-')[0];
 
   // Extract YouTube ID from activity content
-  const videoId = useMemo(() => {
-    if (activity?.content?.uri) {
-      return getYouTubeID(activity.content.uri) || '';
-    }
-    return '';
-  }, [activity]);
+  const videoId = activity?.content?.uri ? getYouTubeID(activity.content.uri) || '' : '';
 
   // Generate subtitle entries from activity details
-  const subtitleEntries: SubtitleEntry[] = useMemo(() => {
-    const subtitles = activity?.details?.subtitles || [];
-    return subtitles
-      .map((subtitle) => {
-        const url = getActivityMediaDirectory(
-          org?.org_uuid,
-          course?.course_uuid,
-          activity.activity_uuid,
-          subtitle.filename,
-          'video',
-        );
-        return url ? { html: subtitle.label, url } : null;
-      })
-      .filter((entry): entry is SubtitleEntry => entry !== null);
-  }, [activity, org, course]);
+  const subtitleEntries: SubtitleEntry[] = (activity?.details?.subtitles || [])
+    .map((subtitle) => {
+      const url = getActivityMediaDirectory(
+        org?.org_uuid,
+        course?.course_uuid,
+        activity.activity_uuid,
+        subtitle.filename,
+        'video',
+      );
+      return url ? { html: subtitle.label, url } : null;
+    })
+    .filter((entry): entry is SubtitleEntry => entry !== null);
 
   // Get default subtitle URL for current locale
   const getDefaultSubtitleUrl = () => {

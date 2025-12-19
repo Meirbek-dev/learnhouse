@@ -29,13 +29,13 @@ function Calendar({
 
   // Default `toDate` to 50 years in the future so the year dropdown and navigation
   // don't stop at the end of the current year (e.g. 31.12.2025)
-  const defaultMaxDate = React.useMemo(() => {
+  const defaultMaxDate = (() => {
     const d = maxDate ? new Date(maxDate) : new Date();
     if (!maxDate) d.setFullYear(2077);
     d.setMonth(11);
     d.setDate(31);
     return d;
-  }, [maxDate]);
+  })();
 
   return (
     <DayPicker

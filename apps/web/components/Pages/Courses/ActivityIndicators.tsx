@@ -3,7 +3,7 @@
 import { BookOpenCheck, Check, ChevronLeft, ChevronRight, FileText, Layers, Trophy, Video } from 'lucide-react';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { getUriWithOrg } from '@services/config/config';
-import { Fragment, useCallback, useMemo } from 'react';
+import { Fragment, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -303,51 +303,37 @@ const ActivityIndicators = (props: Props) => {
   const router = useRouter();
 
   // Flatten all activities for navigation and rendering
-  const allActivities = useMemo(() => {
-    return course.chapters.flatMap((chapter: any) =>
-      chapter.activities.map((activity: any) => ({
-        ...activity,
-        chapterId: chapter.id,
-      })),
-    );
-  }, [course.chapters]);
+  const allActivities = course.chapters.flatMap((chapter: any) =>
+    chapter.activities.map((activity: any) => ({
+      ...activity,
+      chapterId: chapter.id,
+    })),
+  );
 
   // Find current activity index
-  const currentActivityIndex = useMemo(() => {
-    if (!props.current_activity) return -1;
-    return allActivities.findIndex(
-      (activity: any) => activity.activity_uuid.replace('activity_', '') === props.current_activity,
-    );
-  }, [allActivities, props.current_activity]);
+  const currentActivityIndex = props.current_activity
+    ? allActivities.findIndex((activity: any) => activity.activity_uuid.replace('activity_', '') === props.current_activity)
+    : -1;
 
-  const isActivityDone = useMemo(
-    () => (activity: any) => {
-      // Clean up course UUID by removing 'course_' prefix if it exists
-      const cleanCourseUuid = course.course_uuid?.replace('course_', '');
+  function isActivityDone(activity: any) {
+    // Clean up course UUID by removing 'course_' prefix if it exists
+    const cleanCourseUuid = course.course_uuid?.replace('course_', '');
 
-      const run = props.trailData?.runs?.find((run: any) => {
-        const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
-        return cleanRunCourseUuid === cleanCourseUuid;
-      });
+    const run = props.trailData?.runs?.find((run: any) => {
+      const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
+      return cleanRunCourseUuid === cleanCourseUuid;
+    });
 
-      if (run) {
-        return run.steps.find((step: any) => step.activity_id === activity.id && step.complete === true);
-      }
-      return false;
-    },
-    [props.trailData, course.course_uuid],
-  );
+    if (run) {
+      return run.steps.find((step: any) => step.activity_id === activity.id && step.complete === true);
+    }
+    return false;
+  }
 
-  const isActivityCurrent = useMemo(
-    () => (activity: any) => {
-      const activity_uuid = activity.activity_uuid.replace('activity_', '');
-      if (props.current_activity && props.current_activity === activity_uuid) {
-        return true;
-      }
-      return false;
-    },
-    [props.current_activity],
-  );
+  function isActivityCurrent(activity: any) {
+    const activity_uuid = activity.activity_uuid.replace('activity_', '');
+    return Boolean(props.current_activity && props.current_activity === activity_uuid);
+  }
 
   // Keep the allActivities array for navigation purposes only
   const navigateToPrevious = useCallback(() => {
@@ -367,21 +353,14 @@ const ActivityIndicators = (props: Props) => {
   }, [currentActivityIndex, allActivities, orgslug, courseid, router]);
 
   // Add function to count completed activities in a chapter
-  const getChapterProgress = useMemo(
-    () => (chapterActivities: any[]) => {
-      return chapterActivities.reduce((acc, activity) => {
-        return acc + (isActivityDone(activity) ? 1 : 0);
-      }, 0);
-    },
-    [isActivityDone],
-  );
+  function getChapterProgress(chapterActivities: any[]) {
+    return chapterActivities.reduce((acc, activity) => acc + (isActivityDone(activity) ? 1 : 0), 0);
+  }
 
   // Check if all activities are completed
-  const isCourseCompleted = useMemo(() => {
-    const totalActivities = allActivities.length;
-    const completedActivities = allActivities.filter((activity: any) => isActivityDone(activity)).length;
-    return totalActivities > 0 && completedActivities === totalActivities;
-  }, [allActivities, isActivityDone]);
+  const totalActivitiesCount = allActivities.length;
+  const completedActivities = allActivities.filter((activity: any) => isActivityDone(activity)).length;
+  const isCourseCompleted = totalActivitiesCount > 0 && completedActivities === totalActivitiesCount;
 
   return (
     <div className="flex items-center gap-3">

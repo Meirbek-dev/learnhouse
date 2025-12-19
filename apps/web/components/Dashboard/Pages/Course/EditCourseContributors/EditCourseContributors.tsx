@@ -22,7 +22,7 @@ import { bulkAddContributors, bulkRemoveContributors, editContributor } from '@s
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Check, ChevronDown, Info, Loader2, Search, UserPen, Users } from 'lucide-react';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
-import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { searchOrgContent } from '@services/search/search';
@@ -338,11 +338,11 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
   }, [debouncedSearch, org?.slug, access_token, t]);
 
   // Derive master checkbox state from contributors and selected contributors
-  const masterCheckboxChecked = useMemo(() => {
+  const masterCheckboxChecked = (() => {
     if (!contributors) return false;
     const nonCreatorContributors = contributors.filter((c) => c.authorship !== 'CREATOR');
     return nonCreatorContributors.length > 0 && selectedContributors.length === nonCreatorContributors.length;
-  }, [contributors, selectedContributors]);
+  })();
 
   const handleUserSelect = (username: string) => {
     setSelectedUsers((prev) => {
