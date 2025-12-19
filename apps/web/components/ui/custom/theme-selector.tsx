@@ -3,11 +3,11 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTheme } from '@/components/providers/theme-provider';
 import { getThemePreviewColors } from '@/lib/theme-color-utils';
-import { useCallback, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
 import { themes } from '@/lib/themes';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 interface ThemeSelectorProps {
   className?: string;
@@ -23,19 +23,16 @@ export function ThemeSelector({ className }: ThemeSelectorProps) {
   const themeList = themes;
   const currentColors = getThemePreviewColors(currentTheme);
 
-  const handleValueChange = useCallback(
-    async (value: string) => {
-      setIsLoading(true);
-      try {
-        await setTheme(value);
-      } catch (error) {
-        console.error('Failed to change theme:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [setTheme],
-  );
+  async function handleValueChange(value: string) {
+    setIsLoading(true);
+    try {
+      await setTheme(value);
+    } catch (error) {
+      console.error('Failed to change theme:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
     <div className={cn('space-y-4', className)}>

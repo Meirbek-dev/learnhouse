@@ -2,8 +2,8 @@
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useCallback } from 'react';
 import type { ReactNode } from 'react';
+
 
 interface AuthenticatedClientElementProps {
   children: ReactNode;
@@ -17,7 +17,7 @@ export const AuthenticatedClientElement = (props: AuthenticatedClientElementProp
   const session = usePlatformSession() as any;
   const org = useOrg() as any;
 
-  const isUserAllowed = useCallback((roles: any[], action: string, resourceType: string, org_uuid: string): boolean => {
+  function isUserAllowed(roles: any[], action: string, resourceType: string, org_uuid: string): boolean {
     // Iterate over the user's roles
     for (const role of roles) {
       // Check if the role is for the right organization
@@ -35,7 +35,7 @@ export const AuthenticatedClientElement = (props: AuthenticatedClientElementProp
 
     // If no role matches the organization, resource type, and action, return false
     return false;
-  }, []);
+  }
 
   // Compute authorization result as derived state
   const isAllowed = (() => {

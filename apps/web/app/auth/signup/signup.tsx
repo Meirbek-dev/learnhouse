@@ -5,7 +5,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { validateInviteCode } from '@services/organizations/invites';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import platformLogoFull from 'public/platform_logo_full.svg';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { MailWarning, Ticket, UserPlus } from 'lucide-react';
@@ -93,7 +93,7 @@ const LoggedInJoinScreen = (props: any) => {
   const userId = session?.data?.user?.id;
   const redirectTimeoutRef = useRef<number | null>(null);
 
-  const join = useCallback(async () => {
+  async function join() {
     setIsSubmitting(true);
     try {
       const res = await joinOrg(
@@ -143,7 +143,7 @@ const LoggedInJoinScreen = (props: any) => {
       setIsLoading(false);
       setIsSubmitting(false);
     }
-  }, [accessToken, org.id, org.slug, props.inviteCode, router, toastT, userId]);
+  }
 
   useEffect(() => {
     return () => {
@@ -163,8 +163,58 @@ const LoggedInJoinScreen = (props: any) => {
     }
 
     autoJoinAttempted.current = true;
-    void join();
-  }, [join, org?.id, session?.status, userId]);
+
+    // Inline auto-join logic to avoid a function identity dependency on `join`
+    (async () => {
+      setIsSubmitting(true);
+      try {
+        const res = await joinOrg(
+          {
+            org_id: org.id,
+            user_id: userId,
+            invite_code: props.inviteCode,
+          },
+          null,
+          accessToken,
+        );
+
+        const alreadyMemberMessage = res.data?.detail;
+        const isAlreadyMember =
+          typeof alreadyMemberMessage === 'string' && alreadyMemberMessage.toLowerCase().includes('уже является частью');
+
+        if (res.success || isAlreadyMember) {
+          if (isAlreadyMember) {
+            toast.success(alreadyMemberMessage);
+          } else {
+            toast.success(res.data?.message || toastT('orgJoinSuccess'));
+          }
+
+          void mutate(`${getAPIUrl()}orgs/user/page/1/limit/20`);
+          void mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
+
+          window.setTimeout(() => {
+            router.push(getUriWithOrg(org.slug, '/'));
+          }, 1500);
+        } else {
+          let errorMessage = toastT('errorSomethingWentWrong');
+
+          if (res.data?.detail) {
+            errorMessage = res.data.detail;
+          } else if (Array.isArray(res.data)) {
+            errorMessage = res.data.map((err: any) => err.msg || err.message).join(', ');
+          }
+
+          toast.error(errorMessage);
+        }
+      } catch (error: any) {
+        console.error('Join org error:', error);
+        toast.error(error.message || toastT('errorSomethingWentWrong'));
+      } finally {
+        setIsLoading(false);
+        setIsSubmitting(false);
+      }
+    })();
+  }, [org?.id, session?.status, userId, accessToken, props.inviteCode, router, toastT, org?.slug]);
 
   return (
     <div className="mx-auto flex flex-row items-center">

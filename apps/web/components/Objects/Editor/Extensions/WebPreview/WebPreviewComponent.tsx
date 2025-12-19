@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
 import { AlignCenter, AlignLeft, AlignRight, Edit2, Save, Trash, X } from 'lucide-react';
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getUrlPreview } from '@services/courses/activities';

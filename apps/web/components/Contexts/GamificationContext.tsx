@@ -15,7 +15,7 @@ import {
   updatePreferencesAction,
   updateStreakAction,
 } from '@/app/actions/gamification';
-import React, { createContext, lazy, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, lazy, useContext, useEffect, useState } from 'react';
 import { useXPToast } from '@/lib/gamification/components/xp-toast';
 import { AnimatePresence } from 'motion/react';
 import { useTranslations } from 'next-intl';
@@ -100,8 +100,8 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
 
   // XP notification system with automatic batching - MUST be stable reference
   const xpToastSystem = useXPToast();
-  const showEnhancedXPToast = useMemo(() => xpToastSystem.showXPToast, [xpToastSystem.showXPToast]);
-  const ToastContainer = useMemo(() => xpToastSystem.ToastContainer, [xpToastSystem.ToastContainer]);
+  const showEnhancedXPToast = xpToastSystem.showXPToast;
+  const ToastContainer = xpToastSystem.ToastContainer;
   const [levelUpQueue, setLevelUpQueue] = useState<{ newLevel: number }[]>([]);
 
   // Update state when initialData changes (from server-side refetch)
@@ -172,7 +172,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
   };
 
   // Refetch function (triggers server data refresh)
-  const refetch = useCallback(async () => {
+  async function refetch() {
     // Fetch fresh data from server without full page reload
     setIsLoading(true);
     try {
@@ -193,156 +193,144 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
     } finally {
       setIsLoading(false);
     }
-  }, [orgId]);
+  }
 
   // Award XP with optimistic update (supports silent mode)
-  const awardXP = useCallback(
-    async (payload: XPAwardRequest, options?: { silent?: boolean }): Promise<XPAwardResponse> => {
-      setError(null);
-      const isSilent = options?.silent ?? false;
+  async function awardXP(payload: XPAwardRequest, options?: { silent?: boolean }): Promise<XPAwardResponse> {
+    setError(null);
+    const isSilent = options?.silent ?? false;
 
-      try {
-        // Call Server Action
-        const result = await awardXPAction(orgId, payload);
+    try {
+      // Call Server Action
+      const result = await awardXPAction(orgId, payload);
 
-        // Optimistically update local state
-        if (result.profile) {
-          setProfile(result.profile);
-          // Update dashboard if needed
-          if (dashboard) {
-            setDashboard({
-              ...dashboard,
-              profile: result.profile,
-            });
-          }
-
-          // Show notification ONLY if not silent
-          if (!isSilent && result.transaction.amount > 0) {
-            showEnhancedXPToast({
-              amount: result.transaction.amount,
-              source: payload.source,
-            });
-
-            // Check for level up
-            if (result.triggered_level_up) {
-              setLevelUpQueue((prev) => [...prev, { newLevel: result.profile.level }]);
-            }
-          }
+      // Optimistically update local state
+      if (result.profile) {
+        setProfile(result.profile);
+        // Update dashboard if needed
+        if (dashboard) {
+          setDashboard({
+            ...dashboard,
+            profile: result.profile,
+          });
         }
 
-        return result;
-      } catch (error) {
-        // Normalize unknown thrown values into our GamificationError shape
-        const message =
-          (error && typeof (error as any).message === 'string' && (error as any).message) || t('error.awardXPFailed');
-        const statusCode = (error && typeof (error as any).statusCode === 'number' && (error as any).statusCode) || 500;
-        const gamificationError: GamificationError = {
-          type: 'SERVER_ERROR',
-          message,
-          timestamp: new Date().toISOString(),
-          statusCode,
-        };
-        setError(gamificationError);
-        throw gamificationError;
+        // Show notification ONLY if not silent
+        if (!isSilent && result.transaction.amount > 0) {
+          showEnhancedXPToast({
+            amount: result.transaction.amount,
+            source: payload.source,
+          });
+
+          // Check for level up
+          if (result.triggered_level_up) {
+            setLevelUpQueue((prev) => [...prev, { newLevel: result.profile.level }]);
+          }
+        }
       }
-    },
-    [orgId, dashboard, t, showEnhancedXPToast],
-  );
+
+      return result;
+    } catch (error) {
+      // Normalize unknown thrown values into our GamificationError shape
+      const message =
+        (error && typeof (error as any).message === 'string' && (error as any).message) || t('error.awardXPFailed');
+      const statusCode = (error && typeof (error as any).statusCode === 'number' && (error as any).statusCode) || 500;
+      const gamificationError: GamificationError = {
+        type: 'SERVER_ERROR',
+        message,
+        timestamp: new Date().toISOString(),
+        statusCode,
+      };
+      setError(gamificationError);
+      throw gamificationError;
+    }
+  }
 
   // Update streak
-  const updateStreak = useCallback(
-    async (type: 'login' | 'learning') => {
-      setError(null);
-      try {
-        const result = await updateStreakAction(orgId, type);
+  async function updateStreak(type: 'login' | 'learning') {
+    setError(null);
+    try {
+      const result = await updateStreakAction(orgId, type);
 
-        // Optimistically update local profile
-        if (result) {
-          setProfile((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  ...(type === 'login'
-                    ? {
-                        login_streak: result.current_streak,
-                        longest_login_streak: result.longest_streak,
-                      }
-                    : {
-                        learning_streak: result.current_streak,
-                        longest_learning_streak: result.longest_streak,
-                      }),
-                }
-              : null,
-          );
-        }
-      } catch (error) {
-        const message =
-          (error && typeof (error as any).message === 'string' && (error as any).message) ||
-          t('error.updateStreakFailed');
-        const statusCode = (error && typeof (error as any).statusCode === 'number' && (error as any).statusCode) || 500;
-        const gamificationError: GamificationError = {
-          type: 'SERVER_ERROR',
-          message,
-          timestamp: new Date().toISOString(),
-          statusCode,
-        };
-        setError(gamificationError);
-        throw gamificationError;
-      }
-    },
-    [orgId, t],
-  );
-
-  // Update preferences
-  const updatePreferences = useCallback(
-    async (preferences: Record<string, any>) => {
-      setError(null);
-      try {
-        await updatePreferencesAction(orgId, preferences);
-
-        // Optimistically update local profile
+      // Optimistically update local profile
+      if (result) {
         setProfile((prev) =>
           prev
             ? {
                 ...prev,
-                preferences: { ...prev.preferences, ...preferences },
+                ...(type === 'login'
+                  ? {
+                      login_streak: result.current_streak,
+                      longest_login_streak: result.longest_streak,
+                    }
+                  : {
+                      learning_streak: result.current_streak,
+                      longest_learning_streak: result.longest_streak,
+                    }),
               }
             : null,
         );
-      } catch (error) {
-        const message =
-          (error && typeof (error as any).message === 'string' && (error as any).message) ||
-          t('error.updatePreferencesFailed');
-        const statusCode = (error && typeof (error as any).statusCode === 'number' && (error as any).statusCode) || 500;
-        const gamificationError: GamificationError = {
-          type: 'SERVER_ERROR',
-          message,
-          timestamp: new Date().toISOString(),
-          statusCode,
-        };
-        setError(gamificationError);
-        throw gamificationError;
       }
-    },
-    [orgId, t],
-  );
+    } catch (error) {
+      const message =
+        (error && typeof (error as any).message === 'string' && (error as any).message) ||
+        t('error.updateStreakFailed');
+      const statusCode = (error && typeof (error as any).statusCode === 'number' && (error as any).statusCode) || 500;
+      const gamificationError: GamificationError = {
+        type: 'SERVER_ERROR',
+        message,
+        timestamp: new Date().toISOString(),
+        statusCode,
+      };
+      setError(gamificationError);
+      throw gamificationError;
+    }
+  }
+
+  // Update preferences
+  async function updatePreferences(preferences: Record<string, any>) {
+    setError(null);
+    try {
+      await updatePreferencesAction(orgId, preferences);
+
+      // Optimistically update local profile
+      setProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              preferences: { ...prev.preferences, ...preferences },
+            }
+          : null,
+      );
+    } catch (error) {
+      const message =
+        (error && typeof (error as any).message === 'string' && (error as any).message) ||
+        t('error.updatePreferencesFailed');
+      const statusCode = (error && typeof (error as any).statusCode === 'number' && (error as any).statusCode) || 500;
+      const gamificationError: GamificationError = {
+        type: 'SERVER_ERROR',
+        message,
+        timestamp: new Date().toISOString(),
+        statusCode,
+      };
+      setError(gamificationError);
+      throw gamificationError;
+    }
+  }
 
   // XP Toast handlers using notification system with automatic batching
-  const showXPToast = useCallback(
-    (amount: number, source?: string, triggeredLevelUp?: boolean) => {
-      showEnhancedXPToast({ amount, source, triggeredLevelUp });
-    },
-    [showEnhancedXPToast],
-  );
+  function showXPToast(amount: number, source?: string, triggeredLevelUp?: boolean) {
+    showEnhancedXPToast({ amount, source, triggeredLevelUp });
+  }
 
-  const showLevelUpCelebration = useCallback((newLevel: number) => {
+  function showLevelUpCelebration(newLevel: number) {
     // Only show one level-up at a time
     setLevelUpQueue([{ newLevel }]);
-  }, []);
+  }
 
-  const dismissLevelUpCelebration = useCallback(() => {
+  function dismissLevelUpCelebration() {
     setLevelUpQueue([]);
-  }, []);
+  }
 
   const value: GamificationContextValue = {
     profile,

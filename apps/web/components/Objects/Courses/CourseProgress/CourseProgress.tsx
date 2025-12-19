@@ -2,11 +2,11 @@ import { ArrowRight, BookOpenCheck, Check, ChevronDown, Circle, FileText, Layers
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getUriWithOrg } from '@services/config/config';
-import { useState } from 'react';
 import AppLink from '@/components/ui/AppLink';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 import type { FC } from 'react';
 
 interface CourseProgressProps {

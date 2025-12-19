@@ -50,40 +50,31 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
     const parseMinItems = minItems ?? 0;
     const parseMaxItems = maxItems ?? 30;
 
-    const onValueChangeHandler = React.useCallback(
-      (val: string) => {
-        if (!value.includes(val) && value.length < parseMaxItems) {
-          onValueChange([...value, val]);
-        }
-      },
-      [value, onValueChange, parseMaxItems],
-    );
+    function onValueChangeHandler(val: string) {
+      if (!value.includes(val) && value.length < parseMaxItems) {
+        onValueChange([...value, val]);
+      }
+    }
 
-    const RemoveValue = React.useCallback(
-      (val: string) => {
-        if (value.includes(val) && value.length > parseMinItems) {
-          onValueChange(value.filter((item) => item !== val));
-        }
-      },
-      [value, onValueChange, parseMinItems],
-    );
+    function RemoveValue(val: string) {
+      if (value.includes(val) && value.length > parseMinItems) {
+        onValueChange(value.filter((item) => item !== val));
+      }
+    }
 
-    const handlePaste = React.useCallback(
-      (e: React.ClipboardEvent<HTMLInputElement>) => {
-        e.preventDefault();
-        const tags = e.clipboardData.getData('text').split(SPLITTER_REGEX);
-        const newValue = [...value];
-        tags.forEach((item) => {
-          const parsedItem = item.replaceAll(FORMATTING_REGEX, '').trim();
-          if (parsedItem.length > 0 && !newValue.includes(parsedItem) && newValue.length < parseMaxItems) {
-            newValue.push(parsedItem);
-          }
-        });
-        onValueChange(newValue);
-        setInputValue('');
-      },
-      [value, onValueChange, parseMaxItems],
-    );
+    function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
+      e.preventDefault();
+      const tags = e.clipboardData.getData('text').split(SPLITTER_REGEX);
+      const newValue = [...value];
+      tags.forEach((item) => {
+        const parsedItem = item.replaceAll(FORMATTING_REGEX, '').trim();
+        if (parsedItem.length > 0 && !newValue.includes(parsedItem) && newValue.length < parseMaxItems) {
+          newValue.push(parsedItem);
+        }
+      });
+      onValueChange(newValue);
+      setInputValue('');
+    }
 
     const handleSelect = React.useCallback(
       (e: React.SyntheticEvent<HTMLInputElement>) => {
@@ -122,99 +113,96 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
       onValueChange([...value, ...defaultOptions]);
     }, []); */
 
-    const handleKeyDown = React.useCallback(
-      async (e: React.KeyboardEvent<HTMLInputElement>) => {
-        e.stopPropagation();
+    function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+      e.stopPropagation();
 
-        const moveNext = () => {
-          const nextIndex = activeIndex + 1 > value.length - 1 ? -1 : activeIndex + 1;
-          setActiveIndex(nextIndex);
-        };
+      const moveNext = () => {
+        const nextIndex = activeIndex + 1 > value.length - 1 ? -1 : activeIndex + 1;
+        setActiveIndex(nextIndex);
+      };
 
-        const movePrev = () => {
-          const prevIndex = activeIndex - 1 < 0 ? value.length - 1 : activeIndex - 1;
-          setActiveIndex(prevIndex);
-        };
+      const movePrev = () => {
+        const prevIndex = activeIndex - 1 < 0 ? value.length - 1 : activeIndex - 1;
+        setActiveIndex(prevIndex);
+      };
 
-        const moveCurrent = () => {
-          const newIndex = activeIndex - 1 <= 0 ? (value.length - 1 === 0 ? -1 : 0) : activeIndex - 1;
-          setActiveIndex(newIndex);
-        };
-        const target = e.currentTarget;
+      const moveCurrent = () => {
+        const newIndex = activeIndex - 1 <= 0 ? (value.length - 1 === 0 ? -1 : 0) : activeIndex - 1;
+        setActiveIndex(newIndex);
+      };
+      const target = e.currentTarget;
 
-        // ? Suggest : the multi select should support the same pattern
+      // ? Suggest : the multi select should support the same pattern
 
-        switch (e.key) {
-          case 'ArrowLeft': {
-            if (dir === 'rtl') {
-              if (value.length > 0 && activeIndex !== -1) {
-                moveNext();
-              }
-            } else if (value.length > 0 && target.selectionStart === 0) {
-              movePrev();
-            }
-            break;
-          }
-
-          case 'ArrowRight': {
-            if (dir === 'rtl') {
-              if (value.length > 0 && target.selectionStart === 0) {
-                movePrev();
-              }
-            } else if (value.length > 0 && activeIndex !== -1) {
+      switch (e.key) {
+        case 'ArrowLeft': {
+          if (dir === 'rtl') {
+            if (value.length > 0 && activeIndex !== -1) {
               moveNext();
             }
-            break;
+          } else if (value.length > 0 && target.selectionStart === 0) {
+            movePrev();
           }
+          break;
+        }
 
-          case 'Backspace':
-          case 'Delete': {
-            if (value.length > 0) {
-              if (activeIndex !== -1 && activeIndex < value.length) {
-                const tag = value[activeIndex];
-                if (typeof tag === 'string') {
-                  RemoveValue(tag);
-                }
-                moveCurrent();
-              } else if (target.selectionStart === 0) {
-                if (selectedValue === inputValue || isValueSelected) {
-                  const lastTag = value[value.length - 1];
-                  if (typeof lastTag === 'string') {
-                    RemoveValue(lastTag);
-                  }
+        case 'ArrowRight': {
+          if (dir === 'rtl') {
+            if (value.length > 0 && target.selectionStart === 0) {
+              movePrev();
+            }
+          } else if (value.length > 0 && activeIndex !== -1) {
+            moveNext();
+          }
+          break;
+        }
+
+        case 'Backspace':
+        case 'Delete': {
+          if (value.length > 0) {
+            if (activeIndex !== -1 && activeIndex < value.length) {
+              const tag = value[activeIndex];
+              if (typeof tag === 'string') {
+                RemoveValue(tag);
+              }
+              moveCurrent();
+            } else if (target.selectionStart === 0) {
+              if (selectedValue === inputValue || isValueSelected) {
+                const lastTag = value[value.length - 1];
+                if (typeof lastTag === 'string') {
+                  RemoveValue(lastTag);
                 }
               }
             }
-            break;
           }
-
-          case 'Escape': {
-            const newIndex = activeIndex === -1 ? value.length - 1 : -1;
-            setActiveIndex(newIndex);
-            break;
-          }
-
-          case 'Enter': {
-            if (inputValue.trim() !== '') {
-              e.preventDefault();
-              onValueChangeHandler(inputValue);
-              setInputValue('');
-            }
-            break;
-          }
+          break;
         }
-      },
-      [activeIndex, value, inputValue, RemoveValue, dir, selectedValue, isValueSelected, onValueChangeHandler],
-    );
 
-    const mousePreventDefault = React.useCallback((e: React.MouseEvent) => {
+        case 'Escape': {
+          const newIndex = activeIndex === -1 ? value.length - 1 : -1;
+          setActiveIndex(newIndex);
+          break;
+        }
+
+        case 'Enter': {
+          if (inputValue.trim() !== '') {
+            e.preventDefault();
+            onValueChangeHandler(inputValue);
+            setInputValue('');
+          }
+          break;
+        }
+      }
+    }
+
+    function mousePreventDefault(e: React.MouseEvent) {
       e.preventDefault();
       e.stopPropagation();
-    }, []);
+    }
 
-    const handleChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
       setInputValue(e.currentTarget.value);
-    }, []);
+    }
 
     return (
       <TagInputContext.Provider

@@ -16,7 +16,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { useCallback, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -39,7 +39,7 @@ const Activity = (props: any) => {
   const course = useCourse();
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
-  const removeActivity = useCallback(() => {
+  function removeActivity() {
     startTransition(async () => {
       await deleteActivity(props.activity.id, session.data?.tokens?.access_token);
       mutate(
@@ -49,14 +49,7 @@ const Activity = (props: any) => {
       setIsDeleteDialogOpen(false);
       router.refresh();
     });
-  }, [
-    props.activity.id,
-    props.courseid,
-    props.orgslug,
-    session.data?.tokens?.access_token,
-    withUnpublishedActivities,
-    router,
-  ]);
+  }
 
   async function updateActivityName(activityId: string) {
     if (modifiedActivity?.activityId === activityId && selectedActivity !== undefined) {

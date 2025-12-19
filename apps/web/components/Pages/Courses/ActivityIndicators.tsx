@@ -3,7 +3,7 @@
 import { BookOpenCheck, Check, ChevronLeft, ChevronRight, FileText, Layers, Trophy, Video } from 'lucide-react';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { getUriWithOrg } from '@services/config/config';
-import { Fragment, useCallback } from 'react';
+import { Fragment } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -312,7 +312,9 @@ const ActivityIndicators = (props: Props) => {
 
   // Find current activity index
   const currentActivityIndex = props.current_activity
-    ? allActivities.findIndex((activity: any) => activity.activity_uuid.replace('activity_', '') === props.current_activity)
+    ? allActivities.findIndex(
+        (activity: any) => activity.activity_uuid.replace('activity_', '') === props.current_activity,
+      )
     : -1;
 
   function isActivityDone(activity: any) {
@@ -336,21 +338,21 @@ const ActivityIndicators = (props: Props) => {
   }
 
   // Keep the allActivities array for navigation purposes only
-  const navigateToPrevious = useCallback(() => {
+  function navigateToPrevious() {
     if (currentActivityIndex > 0) {
       const prevActivity = allActivities[currentActivityIndex - 1];
       const activityId = prevActivity.activity_uuid.replace('activity_', '');
       router.push(`${getUriWithOrg(orgslug, '')}/course/${courseid}/activity/${activityId}`);
     }
-  }, [currentActivityIndex, allActivities, orgslug, courseid, router]);
+  }
 
-  const navigateToNext = useCallback(() => {
+  function navigateToNext() {
     if (currentActivityIndex < allActivities.length - 1) {
       const nextActivity = allActivities[currentActivityIndex + 1];
       const activityId = nextActivity.activity_uuid.replace('activity_', '');
       router.push(`${getUriWithOrg(orgslug, '')}/course/${courseid}/activity/${activityId}`);
     }
-  }, [currentActivityIndex, allActivities, orgslug, courseid, router]);
+  }
 
   // Add function to count completed activities in a chapter
   function getChapterProgress(chapterActivities: any[]) {

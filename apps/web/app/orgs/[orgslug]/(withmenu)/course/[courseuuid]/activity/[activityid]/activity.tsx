@@ -34,7 +34,7 @@ import {
 } from '@services/courses/assignments';
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
 import type { AssignmentSubmission } from '@components/Contexts/Assignments/AssignmentSubmissionContext';
-import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState, useTransition } from 'react';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
@@ -89,12 +89,12 @@ function UnmarkActivityDialog({ onConfirm, t }: UnmarkActivityDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handleConfirm = useCallback(() => {
+  const handleConfirm = () => {
     startTransition(async () => {
       await onConfirm();
       setIsOpen(false);
     });
-  }, [onConfirm]);
+  };
 
   return (
     <AlertDialog
@@ -164,12 +164,12 @@ function SubmitAssignmentDialog({ onSubmit, t }: SubmitAssignmentDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = () => {
     startTransition(async () => {
       await onSubmit();
       setIsOpen(false);
     });
-  }, [onSubmit]);
+  };
 
   return (
     <AlertDialog
@@ -340,7 +340,6 @@ const ActivityClient = (props: ActivityClientProps) => {
   const locale = useLocale();
   const format = useFormatter();
 
-  // Derive bgColor from activity type and focus mode - use useMemo instead of state
   const bgColor = (() => {
     if (!activity) return 'bg-white';
 
@@ -422,16 +421,13 @@ const ActivityClient = (props: ActivityClientProps) => {
     }
   })();
 
-  // Navigate to an activity - memoized to prevent rerenders
-  const navigateToActivity = useCallback(
-    (activityToNavigate: any) => {
-      if (!activityToNavigate) return;
+  // Navigate to an activity
+  const navigateToActivity = (activityToNavigate: any) => {
+    if (!activityToNavigate) return;
 
-      const cleanCourseUuid = course.course_uuid?.replace('course_', '');
-      router.push(`${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}/activity/${activityToNavigate.cleanUuid}`);
-    },
-    [course.course_uuid, orgslug, router],
-  );
+    const cleanCourseUuid = course.course_uuid?.replace('course_', '');
+    router.push(`${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}/activity/${activityToNavigate.cleanUuid}`);
+  };
 
   // Save focus mode to localStorage when it changes
   const initialRenderRafRef = useRef<number | null>(null);
@@ -455,22 +451,18 @@ const ActivityClient = (props: ActivityClientProps) => {
     }
   }, [isFocusMode, isInitialRender]);
 
-  // Memoize chapter name lookup to prevent rerenders
-  const getChapterNameByActivityId = useCallback(
-    (courseData: any, activity_id: number) => {
-      for (let i = 0; i < courseData.chapters.length; i += 1) {
-        const chapter = courseData.chapters[i];
-        for (let j = 0; j < chapter.activities.length; j += 1) {
-          const activityItem = chapter.activities[j];
-          if (activityItem.id === activity_id) {
-            return `${t('chapter')} ${i + 1} : ${chapter.name}`;
-          }
+  const getChapterNameByActivityId = (courseData: any, activity_id: number) => {
+    for (let i = 0; i < courseData.chapters.length; i += 1) {
+      const chapter = courseData.chapters[i];
+      for (let j = 0; j < chapter.activities.length; j += 1) {
+        const activityItem = chapter.activities[j];
+        if (activityItem.id === activity_id) {
+          return `${t('chapter')} ${i + 1} : ${chapter.name}`;
         }
       }
-      return null;
-    },
-    [t],
-  );
+    }
+    return null;
+  };
 
   // Load assignment data when activity changes
   useEffect(() => {
@@ -1060,15 +1052,12 @@ export const MarkStatus = (props: {
 
   // Gamification state via unified context
   const gamificationContext = useOptionalGamificationContext();
-  const refetchGamification = useMemo(
-    () => gamificationContext?.refetch ?? (async () => {}),
-    [gamificationContext?.refetch],
-  );
+  const refetchGamification = gamificationContext?.refetch ?? (async () => {});
 
   // Track completed activities to prevent duplicate XP toasts
   const completedActivitiesRef = useRef<Set<string>>(new Set());
 
-  const areAllActivitiesCompleted = useCallback(() => {
+  const areAllActivitiesCompleted = () => {
     const run = props.trailData?.runs?.find((run: any) => run.course_uuid === props.course.course_uuid);
     if (!run) return false;
 
@@ -1088,9 +1077,9 @@ export const MarkStatus = (props: {
     });
 
     return completedActivities >= totalActivities - 1;
-  }, [props.trailData, props.course.course_uuid, props.course.chapters]);
+  };
 
-  const markActivityAsCompleteFront = useCallback(async () => {
+  const markActivityAsCompleteFront = async () => {
     try {
       const willCompleteAll = areAllActivitiesCompleted();
       setIsLoading(true);
@@ -1131,21 +1120,9 @@ export const MarkStatus = (props: {
     } finally {
       setIsLoading(false);
     }
-  }, [
-    areAllActivitiesCompleted,
-    props.orgslug,
-    props.course.course_uuid,
-    props.activity.activity_uuid,
-    props.activity.id,
-    session.data?.tokens?.access_token,
-    org?.id,
-    gamificationContext,
-    refetchGamification,
-    t,
-    router,
-  ]);
+  };
 
-  const unmarkActivityAsCompleteFront = useCallback(async () => {
+  const unmarkActivityAsCompleteFront = async () => {
     try {
       setIsLoading(true);
       await unmarkActivityAsComplete(
@@ -1161,14 +1138,7 @@ export const MarkStatus = (props: {
     } finally {
       setIsLoading(false);
     }
-  }, [
-    props.orgslug,
-    props.course.course_uuid,
-    props.activity.activity_uuid,
-    session.data?.tokens?.access_token,
-    org?.id,
-    t,
-  ]);
+  };
 
   const isActivityCompleted = (() => {
     // Clean up course UUID by removing 'course_' prefix if it exists
@@ -1293,11 +1263,11 @@ const NextActivityButton = ({
     return currentIndex < allActivities.length - 1 ? allActivities[currentIndex + 1] : null;
   })();
 
-  const navigateToActivity = useCallback(() => {
+  function navigateToActivity() {
     if (!nextActivity) return;
     const cleanCourseUuid = course.course_uuid?.replace('course_', '');
     router.push(`${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}/activity/${nextActivity.cleanUuid}`);
-  }, [course.course_uuid, orgslug, router, nextActivity]);
+  }
 
   if (!nextActivity) return null;
 
@@ -1352,17 +1322,17 @@ const PreviousActivityButton = ({
     return currentIndex > 0 ? allActivities[currentIndex - 1] : null;
   })();
 
-  const navigateToActivity = useCallback(() => {
+  function navigateToActivityPrevious() {
     if (!previousActivity) return;
     const cleanCourseUuid = course.course_uuid?.replace('course_', '');
     router.push(`${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}/activity/${previousActivity.cleanUuid}`);
-  }, [course.course_uuid, orgslug, router, previousActivity]);
+  }
 
   if (!previousActivity) return null;
 
   return (
     <div
-      onClick={navigateToActivity}
+      onClick={navigateToActivityPrevious}
       className="soft-shadow flex flex-col rounded-md bg-white p-2.5 px-4 text-gray-600 transition delay-150 duration-300 ease-in-out hover:cursor-pointer"
     >
       <span className="mb-1 text-[10px] font-bold text-gray-500 uppercase">{t('previous')}</span>
@@ -1388,7 +1358,7 @@ const AssignmentTools = (props: {
   const [finalGrade, setFinalGrade] = useState(null) as any;
   const { t } = props;
 
-  const submitForGradingUI = useCallback(async () => {
+  async function submitForGradingUI() {
     if (props.assignment) {
       const res = await submitAssignmentForGrading(
         props.assignment?.assignment_uuid,
@@ -1401,17 +1371,7 @@ const AssignmentTools = (props: {
         toast.error(t('submitErrorToast'));
       }
     }
-  }, [props.assignment, session.data?.tokens?.access_token, t]);
-
-  // Helper function to convert numeric grade to alphabet grade
-  const convertNumericToAlphabet = useCallback((grade: number, maxGrade: number) => {
-    const percentage = (grade / maxGrade) * 100;
-    if (percentage >= 90) return 'A';
-    if (percentage >= 80) return 'B';
-    if (percentage >= 70) return 'C';
-    if (percentage >= 60) return 'D';
-    return 'F';
-  }, []);
+  }
 
   // Load final grade when submission is graded
   useEffect(() => {
@@ -1420,6 +1380,13 @@ const AssignmentTools = (props: {
     }
 
     const loadGrade = async () => {
+      const convertNumericToAlphabet = (grade: number, maxGrade: number) => {
+        if (maxGrade <= 0) return '-';
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        const idx = Math.round((grade / maxGrade) * (alphabet.length - 1));
+        return alphabet[Math.min(Math.max(0, idx), alphabet.length - 1)] ?? '-';
+      };
+
       const res = await getFinalGrade(
         session.data?.user?.id,
         props.assignment?.assignment_uuid,
@@ -1459,7 +1426,6 @@ const AssignmentTools = (props: {
     props.assignment?.assignment_uuid,
     session.data?.tokens?.access_token,
     t,
-    convertNumericToAlphabet,
     setFinalGrade,
   ]);
 

@@ -2,11 +2,11 @@
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { useCallback, useEffect, useState } from 'react';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { FC, ReactNode } from 'react';
 
@@ -36,22 +36,23 @@ const AdminAuthorization: FC<AuthorizationProps> = ({ children, authorizationMod
 
   const isUserAuthenticated = session.status === 'authenticated';
 
-  const checkPathname = useCallback((pattern: string, pathname: string) => {
+  function checkPathname(pattern: string, pathname: string) {
     if (typeof pattern !== 'string' || typeof pathname !== 'string') return false;
     const regexPattern = new RegExp(
-      `^${pattern.replaceAll(/[$()+./?[\\\]^{|}]/g, String.raw`\$&`).replaceAll(String.raw`\*`, '.*')}$`,
+      `^${pattern.replaceAll(/[$()+./?[\\]^{|}]/g, String.raw`\$&`).replaceAll(String.raw`\*`, '.*')}$`,
     );
     return regexPattern.test(pathname);
-  }, []);
+  }
 
   const isAdminPath = ADMIN_PATHS.some((path) => checkPathname(path, pathname));
 
-  const authorizeUser = useCallback(() => {
+  useEffect(() => {
     if (loading) return;
     if (!isUserAuthenticated) {
       router.push(getUriWithoutOrg(`/login?orgslug=${org?.slug ?? ''}`));
       return;
     }
+
     if (authorizationMode === 'page') {
       if (isAdminPath) {
         if (isAdmin) {
@@ -67,10 +68,6 @@ const AdminAuthorization: FC<AuthorizationProps> = ({ children, authorizationMod
       setIsAuthorized(isAdmin);
     }
   }, [loading, isUserAuthenticated, isAdmin, isAdminPath, authorizationMode, router, org?.slug]);
-
-  useEffect(() => {
-    authorizeUser();
-  }, [authorizeUser]);
 
   if (loading) {
     return (

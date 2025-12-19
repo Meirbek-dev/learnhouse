@@ -216,7 +216,8 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
   const [userSubmissionObject, setUserSubmissionObject] = useState<any>(null);
 
   // Computed values
-  const showSavingDisclaimer = JSON.stringify(initialUserSubmissions.submissions) !== JSON.stringify(userSubmissions.submissions);
+  const showSavingDisclaimer =
+    JSON.stringify(initialUserSubmissions.submissions) !== JSON.stringify(userSubmissions.submissions);
 
   const canAddQuestion = (questions?.length ?? 0) < MAX_QUESTIONS;
 

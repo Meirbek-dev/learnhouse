@@ -8,7 +8,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useCallback, useSyncExternalStore } from 'react';
+import { useSyncExternalStore } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
@@ -32,12 +32,12 @@ export function CollapsibleSection({
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
 
   // Use useSyncExternalStore for SSR-safe localStorage access
-  const subscribe = useCallback((callback: () => void) => {
+  function subscribe(callback: () => void) {
     window.addEventListener('storage', callback);
     return () => window.removeEventListener('storage', callback);
-  }, []);
+  }
 
-  const getSnapshot = useCallback(() => {
+  function getSnapshot() {
     try {
       const savedState = localStorage.getItem(storageKey);
       return savedState !== null ? savedState : String(defaultExpanded);
@@ -45,11 +45,11 @@ export function CollapsibleSection({
       console.warn('Failed to load collapse state:', error);
       return String(defaultExpanded);
     }
-  }, [storageKey, defaultExpanded]);
+  }
 
-  const getServerSnapshot = useCallback(() => {
+  function getServerSnapshot() {
     return String(defaultExpanded);
-  }, [defaultExpanded]);
+  }
 
   const isExpandedString = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const isExpanded = isExpandedString === 'true';

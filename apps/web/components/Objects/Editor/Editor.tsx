@@ -45,8 +45,8 @@ import Youtube from '@tiptap/extension-youtube';
 import { Table } from '@tiptap/extension-table';
 import { getLinkExtension } from './EditorConf';
 import StarterKit from '@tiptap/starter-kit';
-import { useCallback } from 'react';
 import { Eye, Monitor } from 'lucide-react';
+import { useCallback } from 'react';
 
 // Initialize lowlight once at module load
 const LOWLIGHT = (() => {

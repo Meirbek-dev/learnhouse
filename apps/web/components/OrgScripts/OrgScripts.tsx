@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import DOMPurify from 'dompurify';
 import type React from 'react';
@@ -12,7 +12,7 @@ const OrgScripts: React.FC = () => {
   const t = useTranslations('DashPage.OrgScripts');
 
   // Function to cleanup existing scripts
-  const cleanupExistingScript = useCallback((scriptId: string) => {
+  function cleanupExistingScript(scriptId: string) {
     const existingScript = document.getElementById(scriptId);
     if (existingScript) {
       const parent = existingScript.parentNode;
@@ -32,64 +32,73 @@ const OrgScripts: React.FC = () => {
         parent.removeChild(existingScript);
       }
     }
-  }, []);
+  }
+
+  // we will move sanitize/load helpers inside useEffect to avoid stale-dep lint issues.
 
   // Function to check if script is already loaded
-  const isScriptLoaded = useCallback((scriptName: string): boolean => {
+  function isScriptLoaded(scriptName: string): boolean {
     const scripts = document.querySelectorAll(`script[data-script-name="${scriptName}"]`);
     return scripts.length > 0;
-  }, []);
+  }
 
-  // Function to sanitize script content using DOMPurify
-  const sanitizeScriptContent = useCallback((content: string): string => {
-    if (typeof window === 'undefined') {
-      return content;
-    }
 
-    DOMPurify.addHook('afterSanitizeAttributes', (node) => {
-      if (node.nodeName === 'SCRIPT') {
-        node.setAttribute('type', 'text/javascript');
-      }
-    });
 
-    const purifyConfig = {
-      ALLOWED_TAGS: ['script'],
-      ALLOWED_ATTR: [
-        'src',
-        'async',
-        'defer',
-        'crossorigin',
-        'integrity',
-        'type',
-        'nonce',
-        'id',
-        'data-*',
-        'referrerpolicy',
-      ],
-      ADD_TAGS: ['script'],
-      WHOLE_DOCUMENT: false,
-      RETURN_DOM: false,
-      RETURN_DOM_FRAGMENT: false,
-      FORCE_BODY: true,
-    };
 
-    if (content.trim().toLowerCase().startsWith('<script')) {
-      return DOMPurify.sanitize(content, purifyConfig);
-    }
-    return DOMPurify.sanitize(content, {
-      ALLOWED_TAGS: [],
-      ALLOWED_ATTR: [],
-      WHOLE_DOCUMENT: false,
-    });
-  }, []);
 
-  // Function to safely load and execute a script
-  const loadScript = useCallback(
-    (scriptContent: string, scriptName: string) => {
-      try {
-        if (isScriptLoaded(scriptName) || !scriptContent.trim()) {
-          return;
+  useEffect(() => {
+    // Local helpers to avoid stale-dep lint warnings
+    function sanitizeScriptContent(content: string): string {
+      if (typeof window === 'undefined') return '';
+
+      DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+        if (node.nodeName === 'SCRIPT') {
+          node.setAttribute('type', 'text/javascript');
         }
+      });
+
+      const purifyConfig = {
+        ALLOWED_TAGS: ['script'],
+        ALLOWED_ATTR: [
+          'src',
+          'async',
+          'defer',
+          'crossorigin',
+          'integrity',
+          'type',
+          'nonce',
+          'id',
+          'data-*',
+          'referrerpolicy',
+        ],
+        ADD_TAGS: ['script'],
+        WHOLE_DOCUMENT: false,
+        RETURN_DOM: false,
+        RETURN_DOM_FRAGMENT: false,
+        FORCE_BODY: true,
+      };
+
+      if (content.trim().toLowerCase().startsWith('<script')) {
+        return String(DOMPurify.sanitize(content, purifyConfig as any));
+      }
+
+      return String(
+        DOMPurify.sanitize(content, {
+          ALLOWED_TAGS: [],
+          ALLOWED_ATTR: [],
+          WHOLE_DOCUMENT: false,
+        }),
+      );
+    }
+
+    function isScriptLoadedLocally(scriptName: string): boolean {
+      const scripts = document.querySelectorAll(`script[data-script-name="${scriptName}"]`);
+      return scripts.length > 0;
+    }
+
+    function loadScriptLocal(scriptContent: string, scriptName: string) {
+      try {
+        if (isScriptLoadedLocally(scriptName) || !scriptContent.trim()) return;
 
         const safeScriptId = `ashyq-bilim-org-script-${scriptName.toLowerCase().replaceAll(/[^\da-z]+/g, '-')}-${Math.random().toString(36).slice(2, 9)}`;
 
@@ -101,14 +110,10 @@ const OrgScripts: React.FC = () => {
           div.innerHTML = sanitizedHtml;
           const scriptTag = div.querySelector('script');
 
-          if (!scriptTag) {
-            return;
-          }
+          if (!scriptTag) return;
 
           const scriptElement = document.createElement('script');
-          [...scriptTag.attributes].forEach((attr) => {
-            scriptElement.setAttribute(attr.name, attr.value);
-          });
+          [...scriptTag.attributes].forEach((attr) => scriptElement.setAttribute(attr.name, attr.value));
 
           if (scriptTag.src) {
             try {
@@ -128,16 +133,16 @@ const OrgScripts: React.FC = () => {
           } else {
             const sanitizedContent = sanitizeScriptContent(scriptTag.textContent || '');
             scriptElement.textContent = `
-            /* Ashyq Bilim Organization Script - ${scriptName} */
-            try {
-              (function() {
-                'use strict';
-                ${sanitizedContent}
-              })();
-            } catch (error) {
-              console.error(t('scriptError', { scriptName }), error);
-            }
-          `;
+              /* Ashyq Bilim Organization Script - ${scriptName} */
+              try {
+                (function() {
+                  'use strict';
+                  ${sanitizedContent}
+                })();
+              } catch (error) {
+                console.error('${t('scriptError', { scriptName })}', error);
+              }
+            `;
           }
 
           scriptElement.id = safeScriptId;
@@ -156,16 +161,16 @@ const OrgScripts: React.FC = () => {
 
           const sanitizedContent = sanitizeScriptContent(scriptContent);
           scriptElement.textContent = `
-          /* Ashyq Bilim Organization Script - ${scriptName} */
-          try {
-            (function() {
-              'use strict';
-              ${sanitizedContent}
-            })();
-          } catch (error) {
-            console.error(t('scriptError', { scriptName }), error)
-          }
-        `;
+            /* Ashyq Bilim Organization Script - ${scriptName} */
+            try {
+              (function() {
+                'use strict';
+                ${sanitizedContent}
+              })();
+            } catch (error) {
+              console.error('${t('scriptError', { scriptName })}', error)
+            }
+          `;
 
           scriptElement.id = safeScriptId;
           scriptElement.dataset.scriptName = scriptName;
@@ -181,11 +186,8 @@ const OrgScripts: React.FC = () => {
       } catch (error) {
         console.error(t('failedToLoadScript', { scriptName }), error);
       }
-    },
-    [t, org, cleanupExistingScript, isScriptLoaded, sanitizeScriptContent],
-  );
+    }
 
-  useEffect(() => {
     // MANUAL REVIEW: This injects and executes arbitrary org-provided scripts into document.body.
     // Consider CSP, sandboxing, and stricter validation before adding new script sources.
     if (!(org?.scripts?.scripts && Array.isArray(org.scripts.scripts))) {
@@ -199,7 +201,7 @@ const OrgScripts: React.FC = () => {
 
       if (!loadedScripts.has(scriptName) && script.content) {
         loadedScripts.set(scriptName, true);
-        loadScript(script.content, scriptName);
+        loadScriptLocal(script.content, scriptName);
       }
     });
     return () => {
@@ -208,7 +210,7 @@ const OrgScripts: React.FC = () => {
         cleanupExistingScript(script.id);
       });
     };
-  }, [org, loadScript, cleanupExistingScript]);
+  }, [org, t]);
 
   return null;
 };

@@ -8,7 +8,7 @@ import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import useSWR from 'swr';
@@ -24,13 +24,7 @@ const AssignmentsHome = () => {
     swrFetcher(url, access_token),
   );
 
-  const getAvailableAssignmentsForCourse = useCallback(
-    async (course_uuid: string) => {
-      const res = await getAssignmentsFromACourse(course_uuid, access_token);
-      return res.data;
-    },
-    [access_token],
-  );
+
 
   function removeAssignmentPrefix(assignment_uuid: string) {
     return assignment_uuid.replace('assignment_', '');
@@ -41,16 +35,15 @@ const AssignmentsHome = () => {
   }
 
   useEffect(() => {
-    if (courses) {
-      const course_uuids = courses.map((course: any) => course.course_uuid);
-      const courseAssignmentsPromises = course_uuids.map((course_uuid: string) =>
-        getAvailableAssignmentsForCourse(course_uuid),
-      );
-      Promise.all(courseAssignmentsPromises).then((results) => {
-        setCourseAssignments(results);
-      });
-    }
-  }, [courses, getAvailableAssignmentsForCourse]);
+    if (!courses) return;
+
+    const courseAssignmentsPromises = courses.map(async (course: any) => {
+      const res = await getAssignmentsFromACourse(course.course_uuid, access_token);
+      return res.data;
+    });
+
+    Promise.all(courseAssignmentsPromises).then((results) => setCourseAssignments(results));
+  }, [courses, access_token]);
 
   return (
     <div className="flex min-h-screen w-full">

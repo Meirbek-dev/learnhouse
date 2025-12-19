@@ -1,6 +1,6 @@
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseContributors } from '@services/courses/courses';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useEffectEvent } from 'react';
 import { toast } from 'sonner';
@@ -64,9 +64,9 @@ export function useContributorStatus(courseUuid: string) {
   }, [userId, courseUuid, refetchTrigger]);
 
   // Stable refetch function that triggers the effect
-  const refetch = useCallback(() => {
+  function refetch() {
     setRefetchTrigger((prev) => prev + 1);
-  }, []);
+  }
 
   return { contributorStatus, isLoading, refetch };
 }

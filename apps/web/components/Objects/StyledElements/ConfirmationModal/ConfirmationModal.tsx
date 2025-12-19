@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { isValidElement, useCallback, useState, useTransition } from 'react';
+import { isValidElement, useState, useTransition } from 'react';
 import { AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
@@ -49,13 +49,13 @@ const ConfirmationModal = (params: ModalParams) => {
   const [isPending, startTransition] = useTransition();
   const t = useTranslations('Components.ConfirmationModal');
 
-  const onOpenChange = useCallback((open: boolean) => {
+  function onOpenChange(open: boolean) {
     // allow opening/closing while a transition is pending so users can cancel/close the dialog
     setIsDialogOpen(open);
-  }, []);
+  }
 
   // Helper: wrap button in span if needed for proper DialogTrigger usage
-  const getSafeDialogTrigger = useCallback((trigger: ReactNode): ReactElement | undefined => {
+  function getSafeDialogTrigger(trigger: ReactNode): ReactElement | undefined {
     if (!trigger) return undefined;
     if (isValidElement(trigger)) {
       const type = (trigger.type as any)?.toString?.() || '';
@@ -66,7 +66,7 @@ const ConfirmationModal = (params: ModalParams) => {
       return trigger;
     }
     return <span>{trigger}</span>;
-  }, []);
+  }
 
   const triggerElement = getSafeDialogTrigger(params.dialogTrigger);
 
@@ -77,7 +77,7 @@ const ConfirmationModal = (params: ModalParams) => {
     triggerElement.type === 'button'
   );
 
-  const getStatusConfig = useCallback(() => {
+  function getStatusConfig() {
     const isWarning = params.status === 'warning';
     return {
       iconBg: isWarning
@@ -86,9 +86,9 @@ const ConfirmationModal = (params: ModalParams) => {
       buttonVariant: isWarning ? 'destructive' : 'default',
       icon: isWarning ? AlertTriangle : Info,
     };
-  }, [params.status]);
+  }
 
-  const getSizeConfig = useCallback(() => {
+  function getSizeConfig() {
     switch (params.size) {
       case 'sm': {
         return 'sm:max-w-sm';
@@ -100,9 +100,9 @@ const ConfirmationModal = (params: ModalParams) => {
         return 'sm:max-w-md';
       }
     }
-  }, [params.size]);
+  }
 
-  const handleExecute = useCallback(() => {
+  function handleExecute() {
     if (params.disabled || isPending) return;
 
     // Use startTransition to mark the UI work as non-urgent and show pending state
@@ -119,7 +119,7 @@ const ConfirmationModal = (params: ModalParams) => {
         }
       })();
     });
-  }, [params, isPending]);
+  }
 
   const statusConfig = getStatusConfig();
   const sizeConfig = getSizeConfig();

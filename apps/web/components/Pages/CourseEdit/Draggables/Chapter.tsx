@@ -14,7 +14,7 @@ import { AlertTriangle, Hexagon, Loader2, MoreVertical, Pencil, Save, Sparkles, 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { useCallback, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { updateChapter } from '@services/courses/chapters';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { getAPIUrl } from '@services/config/config';
@@ -40,12 +40,12 @@ const Chapter = (props: any) => {
   const course = useCourse();
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
-  const handleDeleteChapter = useCallback(() => {
+  function handleDeleteChapter() {
     startTransition(async () => {
       await props.deleteChapter(props.info.list.chapter.id);
       setIsDeleteDialogOpen(false);
     });
-  }, [props]);
+  }
 
   async function updateChapterName(chapterId: number) {
     if (modifiedChapter?.chapterId === chapterId) {

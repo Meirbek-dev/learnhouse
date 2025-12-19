@@ -15,9 +15,9 @@
 
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { AnimatePresence, motion } from 'motion/react';
+import { useEffect, useRef, useState } from 'react';
 import { animations } from '../design-tokens';
 
 // ============================================================================
@@ -62,71 +62,68 @@ export function useXPNotificationQueue(options: XPNotificationQueueOptions = {})
   const timeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
   // Add notification to queue with batching logic
-  const addNotification = useCallback(
-    (notification: Omit<XPNotification, 'id' | 'timestamp'>) => {
-      const newNotification: XPNotification = {
-        ...notification,
-        id: `${Date.now()}-${Math.random()}`,
-        timestamp: Date.now(),
-      };
+  function addNotification(notification: Omit<XPNotification, 'id' | 'timestamp'>) {
+    const newNotification: XPNotification = {
+      ...notification,
+      id: `${Date.now()}-${Math.random()}`,
+      timestamp: Date.now(),
+    };
 
-      setQueue((prev) => {
-        // Try to batch with recent similar notifications
-        const recentSimilar = prev.find(
-          (n) =>
-            n.source === newNotification.source && Date.now() - n.timestamp < opts.batchWindowMs && !n.triggeredLevelUp,
-        );
+    setQueue((prev) => {
+      // Try to batch with recent similar notifications
+      const recentSimilar = prev.find(
+        (n) =>
+          n.source === newNotification.source && Date.now() - n.timestamp < opts.batchWindowMs && !n.triggeredLevelUp,
+      );
 
-        if (recentSimilar) {
-          // Clear existing timeout for this notification
-          const existingTimeout = timeoutsRef.current.get(recentSimilar.id);
-          if (existingTimeout) {
-            clearTimeout(existingTimeout);
-          }
-
-          // Batch with existing notification
-          const updated = prev.map((n) =>
-            n.id === recentSimilar.id
-              ? {
-                  ...n,
-                  batchCount: n.batchCount + 1,
-                  totalAmount: n.totalAmount + newNotification.amount,
-                  timestamp: Date.now(), // Reset timestamp for batched notification
-                }
-              : n,
-          );
-
-          // Set new timeout for batched notification
-          const timeout = setTimeout(() => {
-            setQueue((q) => q.filter((n) => n.id !== recentSimilar.id));
-            setVisible((v) => v.filter((n) => n.id !== recentSimilar.id));
-            timeoutsRef.current.delete(recentSimilar.id);
-          }, opts.displayDurationMs);
-          timeoutsRef.current.set(recentSimilar.id, timeout);
-
-          return updated;
+      if (recentSimilar) {
+        // Clear existing timeout for this notification
+        const existingTimeout = timeoutsRef.current.get(recentSimilar.id);
+        if (existingTimeout) {
+          clearTimeout(existingTimeout);
         }
 
-        // Add as new notification
-        const batched: BatchedNotification = {
-          ...newNotification,
-          batchCount: 1,
-          totalAmount: newNotification.amount,
-        };
+        // Batch with existing notification
+        const updated = prev.map((n) =>
+          n.id === recentSimilar.id
+            ? {
+                ...n,
+                batchCount: n.batchCount + 1,
+                totalAmount: n.totalAmount + newNotification.amount,
+                timestamp: Date.now(), // Reset timestamp for batched notification
+              }
+            : n,
+        );
 
-        // Schedule automatic dismissal
+        // Set new timeout for batched notification
         const timeout = setTimeout(() => {
-          setQueue((q) => q.filter((n) => n.id !== batched.id));
-          setVisible((v) => v.filter((n) => n.id !== batched.id));
-          timeoutsRef.current.delete(batched.id);
+          setQueue((q) => q.filter((n) => n.id !== recentSimilar.id));
+          setVisible((v) => v.filter((n) => n.id !== recentSimilar.id));
+          timeoutsRef.current.delete(recentSimilar.id);
         }, opts.displayDurationMs);
-        timeoutsRef.current.set(batched.id, timeout);
+        timeoutsRef.current.set(recentSimilar.id, timeout);
 
-        return [...prev, batched];
-      });
-    },
-    [opts.batchWindowMs, opts.displayDurationMs],
-  );
+        return updated;
+      }
+
+      // Add as new notification
+      const batched: BatchedNotification = {
+        ...newNotification,
+        batchCount: 1,
+        totalAmount: newNotification.amount,
+      };
+
+      // Schedule automatic dismissal
+      const timeout = setTimeout(() => {
+        setQueue((q) => q.filter((n) => n.id !== batched.id));
+        setVisible((v) => v.filter((n) => n.id !== batched.id));
+        timeoutsRef.current.delete(batched.id);
+      }, opts.displayDurationMs);
+      timeoutsRef.current.set(batched.id, timeout);
+
+      return [...prev, batched];
+    });
+  }
 
   // Update visible list whenever queue changes
   const visibleRafRef = useRef<number | null>(null);
@@ -151,7 +148,7 @@ export function useXPNotificationQueue(options: XPNotificationQueueOptions = {})
   }, []);
 
   // Manually dismiss a notification
-  const dismissNotification = useCallback((id: string) => {
+  function dismissNotification(id: string) {
     // Clear timeout if exists
     const timeout = timeoutsRef.current.get(id);
     if (timeout) {
@@ -160,16 +157,16 @@ export function useXPNotificationQueue(options: XPNotificationQueueOptions = {})
     }
     setQueue((prev) => prev.filter((n) => n.id !== id));
     setVisible((prev) => prev.filter((n) => n.id !== id));
-  }, []);
+  }
 
   // Clear all notifications
-  const clearAll = useCallback(() => {
+  function clearAll() {
     // Clear all timeouts
     timeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
     timeoutsRef.current.clear();
     setQueue([]);
     setVisible([]);
-  }, []);
+  }
 
   return {
     notifications: visible,
@@ -330,7 +327,7 @@ export function useContextualPosition(
   const mountedRef = useRef<boolean>(false);
 
   // Compute position based on element rect
-  const computePosition = useCallback(() => {
+  function computePosition() {
     if (typeof window === 'undefined') return;
     if (!contextElement || !mountedRef.current) return;
 
@@ -353,21 +350,54 @@ export function useContextualPosition(
     }
 
     setPosition((prev) => (prev === newPosition ? prev : newPosition));
-  }, [contextElement]);
+  }
 
-  // Stable scheduler that uses requestAnimationFrame and a ref
-  const scheduleCompute = useCallback(() => {
+  // Scheduler that uses requestAnimationFrame and a ref
+  function scheduleCompute() {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     rafRef.current = requestAnimationFrame(() => {
       computePosition();
     });
-  }, [computePosition]);
+  }
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!contextElement) return;
 
     mountedRef.current = true;
+
+    // Define computePosition and scheduler here so listeners can add/remove reliably
+    const computePosition = () => {
+      if (typeof window === 'undefined') return;
+      if (!contextElement || !mountedRef.current) return;
+
+      const rect = contextElement.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+
+      const isTop = rect.top < viewportHeight / 2;
+      const isLeft = rect.left < viewportWidth / 2;
+
+      let newPosition: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+      if (isTop && isLeft) {
+        newPosition = 'bottom-right';
+      } else if (isTop && !isLeft) {
+        newPosition = 'bottom-left';
+      } else if (!isTop && isLeft) {
+        newPosition = 'top-right';
+      } else {
+        newPosition = 'top-left';
+      }
+
+      setPosition((prev) => (prev === newPosition ? prev : newPosition));
+    };
+
+    const scheduleCompute = () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => {
+        computePosition();
+      });
+    };
 
     // Initial compute via rAF to avoid sync setState inside effect
     scheduleCompute();
@@ -389,7 +419,7 @@ export function useContextualPosition(
       window.removeEventListener('orientationchange', scheduleCompute, listenerOptions);
       // Note: if the element can be inside a scrollable container, consider listening on the nearest scroll container or using IntersectionObserver — manual review may be needed.
     };
-  }, [contextElement, computePosition, scheduleCompute]);
+  }, [contextElement]);
 
   return position;
 }

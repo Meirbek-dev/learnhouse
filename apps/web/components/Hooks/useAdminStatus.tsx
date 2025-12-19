@@ -2,7 +2,6 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import type { Session } from 'next-auth';
 
-
 interface Role {
   org: { id: number; org_uuid: string };
   role: {
@@ -103,7 +102,6 @@ function useAdminStatus(): UseAdminStatusReturn {
 
   const userRoles: Role[] = hasRoles(session.data) ? session.data.roles : [];
 
-  // Extract rights using useMemo instead of useState + useEffect
   let rights: Rights | null = null;
   if (session.status === 'authenticated' && hasOrgId(org) && userRoles && userRoles.length > 0) {
     // Find roles for the current organization

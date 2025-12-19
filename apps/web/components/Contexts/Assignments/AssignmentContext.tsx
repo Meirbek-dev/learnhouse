@@ -5,8 +5,8 @@ import ErrorUI from '@components/Objects/StyledElements/Error/Error';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { createContext, use, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
+import { createContext, use } from 'react';
 import type { ReactNode } from 'react';
 import useSWR from 'swr';
 
@@ -59,23 +59,21 @@ export const AssignmentProvider = ({
     (url) => swrFetcher(url, accessToken),
   );
 
-  // Derive assignmentsFull using useMemo instead of setState in effect
-  const assignmentsFull = useMemo<AssignmentContextType>(() => {
-    if (assignment && assignment_tasks && (!course_id || course_object) && (!activity_id || activity_object)) {
-      return {
-        assignment_object: assignment,
-        assignment_tasks,
-        course_object,
-        activity_object,
-      };
-    }
-    return {
-      assignment_object: null,
-      assignment_tasks: null,
-      course_object: null,
-      activity_object: null,
-    };
-  }, [assignment, assignment_tasks, course_object, activity_object, course_id, activity_id]);
+  // Derive assignmentsFull (no explicit memoization — cheap computation)
+  const assignmentsFull: AssignmentContextType =
+    assignment && assignment_tasks && (!course_id || course_object) && (!activity_id || activity_object)
+      ? {
+          assignment_object: assignment,
+          assignment_tasks,
+          course_object,
+          activity_object,
+        }
+      : {
+          assignment_object: null,
+          assignment_tasks: null,
+          course_object: null,
+          activity_object: null,
+        };
 
   const isLoading =
     !(assignment && assignment_tasks) || (course_id && !course_object) || (activity_id && !activity_object);

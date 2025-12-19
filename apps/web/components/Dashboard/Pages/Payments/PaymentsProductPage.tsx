@@ -30,11 +30,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { archiveProduct, getProducts, updateProduct } from '@services/payments/products';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
-import { useCallback, useState, useTransition } from 'react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import CreateProductForm from './SubComponents/CreateProductForm';
 import { getPaymentConfigs } from '@services/payments/payments';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
+import { useCallback, useState, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '@components/ui/textarea';
@@ -154,7 +154,9 @@ const PaymentsProductPage = () => {
     ([_url, token]) => getPaymentConfigs(orgId, token),
   );
 
-  const isStripeEnabled = paymentConfigs ? Boolean(paymentConfigs.find((config: any) => config.provider === 'stripe')) : false;
+  const isStripeEnabled = paymentConfigs
+    ? Boolean(paymentConfigs.find((config: any) => config.provider === 'stripe'))
+    : false;
 
   const handleArchiveProduct = async (productId: string) => {
     try {

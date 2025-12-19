@@ -2,7 +2,7 @@
 
 import AuthenticatedClientElement from '@/components/Security/AuthenticatedClientElement';
 import { NavigationMenu, NavigationMenuList } from '@/components/ui/navigation-menu';
-import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { HeaderProfileBox } from '@/components/Security/HeaderProfileBox';
 import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
 import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
@@ -68,41 +68,38 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
   // Use useSyncExternalStore for focus mode from localStorage
   const isOnActivityPage = pathname?.includes('/activity/') ?? false;
 
-  const subscribe = useCallback(
-    (callback: () => void) => {
-      const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === 'globalFocusMode' && isOnActivityPage) {
-          callback();
-        }
-      };
+  function subscribe(callback: () => void) {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'globalFocusMode' && isOnActivityPage) {
+        callback();
+      }
+    };
 
-      const handleFocusModeChange = (e: CustomEvent) => {
-        if (isOnActivityPage) {
-          callback();
-        }
-      };
+    const handleFocusModeChange = (e: CustomEvent) => {
+      if (isOnActivityPage) {
+        callback();
+      }
+    };
 
-      window.addEventListener('storage', handleStorageChange);
-      window.addEventListener('focusModeChange', handleFocusModeChange as EventListener);
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('focusModeChange', handleFocusModeChange as EventListener);
 
-      return () => {
-        window.removeEventListener('storage', handleStorageChange);
-        window.removeEventListener('focusModeChange', handleFocusModeChange as EventListener);
-      };
-    },
-    [isOnActivityPage],
-  );
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focusModeChange', handleFocusModeChange as EventListener);
+    };
+  }
 
-  const getSnapshot = useCallback(() => {
+  function getSnapshot() {
     if (!isOnActivityPage) return 'false';
     try {
       return localStorage.getItem('globalFocusMode') ?? 'false';
     } catch {
       return 'false';
     }
-  }, [isOnActivityPage]);
+  }
 
-  const getServerSnapshot = useCallback(() => 'false', []);
+  function getServerSnapshot() { return 'false'; }
 
   const isFocusModeString = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const isFocusMode = isFocusModeString === 'true';

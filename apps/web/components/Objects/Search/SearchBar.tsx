@@ -12,12 +12,12 @@ import {
 } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { removeCoursePrefix } from '../Thumbnails/CourseThumbnail';
 import type { ChangeEvent, FC, KeyboardEvent } from 'react';
 import { searchOrgContent } from '@services/search/search';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
+import { useEffect, useRef, useState } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
@@ -414,20 +414,17 @@ export const SearchBar: FC<SearchBarProps> = ({
     );
   })();
 
-  const handleSearchChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  function handleSearchChange(e: ChangeEvent<HTMLInputElement>) {
     setSearchQuery(e.target.value);
     setShowResults(true);
-  }, []);
+  }
 
   // handler for Enter key press
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && searchQuery.trim().length > 0) {
-        window.location.href = getUriWithOrg(orgslug, `/search?q=${encodeURIComponent(searchQuery)}`);
-      }
-    },
-    [searchQuery, orgslug],
-  );
+  function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter' && searchQuery.trim().length > 0) {
+      window.location.href = getUriWithOrg(orgslug, `/search?q=${encodeURIComponent(searchQuery)}`);
+    }
+  }
 
   return (
     <div

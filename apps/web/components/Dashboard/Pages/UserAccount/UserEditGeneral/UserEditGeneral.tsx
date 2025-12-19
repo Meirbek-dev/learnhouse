@@ -24,9 +24,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUser, updateUserAvatar } from '@services/users/users';
-import { useCallback, useEffect, useState } from 'react';
 import { updateProfile } from '@services/settings/profile';
 import { getUriWithoutOrg } from '@services/config/config';
+import { useCallback, useEffect, useState } from 'react';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { constructAcceptValue } from '@/lib/constants';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -273,7 +273,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
     { name: 'calendar', label: tIcons('calendar'), component: Calendar },
   ] as const;
 
-  const DETAIL_TEMPLATES = ({
+  const DETAIL_TEMPLATES = {
     general: [
       { id: 'title', label: tTemplates('title'), icon: 'briefcase', text: '' },
       { id: 'affiliation', label: tTemplates('affiliation'), icon: 'building-2', text: '' },
@@ -293,7 +293,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
       { id: 'expertise', label: tTemplates('expertise'), icon: 'laptop-2', text: '' },
       { id: 'community', label: tTemplates('community'), icon: 'users', text: '' },
     ],
-  } as const);
+  } as const;
 
   const details = form.watch('details');
 

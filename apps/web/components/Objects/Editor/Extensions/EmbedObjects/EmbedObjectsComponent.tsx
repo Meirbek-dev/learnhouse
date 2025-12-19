@@ -302,9 +302,8 @@ const EmbedObjectsComponent = (props: any) => {
     },
   ];
 
-  const sanitizedEmbedCode = embedType === 'code' && embedCode
-    ? DOMPurify.sanitize(embedCode, { ADD_TAGS: ['iframe'], ADD_ATTR: ['*'] })
-    : '';
+  const sanitizedEmbedCode =
+    embedType === 'code' && embedCode ? DOMPurify.sanitize(embedCode, { ADD_TAGS: ['iframe'], ADD_ATTR: ['*'] }) : '';
 
   const handleUrlChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newUrl = event.target.value;
@@ -453,11 +452,16 @@ const EmbedObjectsComponent = (props: any) => {
     return styles;
   };
 
-  const embedContent = !isResizing && (embedUrl || sanitizedEmbedCode) ? (
-    <EmbedContent embedUrl={embedUrl} sanitizedEmbedCode={sanitizedEmbedCode} embedType={embedType} />
-  ) : (
-    <div className="h-full w-full bg-gray-200" />
-  );
+  const embedContent =
+    !isResizing && (embedUrl || sanitizedEmbedCode) ? (
+      <EmbedContent
+        embedUrl={embedUrl}
+        sanitizedEmbedCode={sanitizedEmbedCode}
+        embedType={embedType}
+      />
+    ) : (
+      <div className="h-full w-full bg-gray-200" />
+    );
 
   // Input states
   const [activeInput, setActiveInput] = useState<'none' | 'url' | 'code'>('none');

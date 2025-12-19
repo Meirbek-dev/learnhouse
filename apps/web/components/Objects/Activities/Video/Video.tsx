@@ -5,7 +5,6 @@ import type ArtplayerType from 'artplayer';
 import { useLocale } from 'next-intl';
 import YouTube from 'react-youtube';
 
-
 // Function to extract YouTube video ID from various YouTube URL formats
 function getYouTubeID(url: string): string | null {
   if (!url) return null;
