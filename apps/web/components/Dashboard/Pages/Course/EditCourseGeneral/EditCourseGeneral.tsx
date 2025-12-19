@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { AlertTriangle, BookOpen, Image as ImageIcon, Loader2, Tag, Video } from 'lucide-react';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader } from '@components/ui/card';
 import { TagsInput } from '@components/ui/custom/tags-input';
 import { Separator } from '@components/ui/separator';
@@ -77,7 +77,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
   const { isLoading, courseStructure } = course;
   const formId = useId();
 
-  const getInitialValues = useCallback((): FormValues => {
+  const getInitialValues = (): FormValues => {
     const initializeLearnings = (learnings: any) => {
       if (!learnings) return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
       try {
@@ -112,7 +112,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
       public: courseStructure?.public ?? false,
       thumbnail_type: courseStructure?.thumbnail_type || 'image',
     };
-  }, [courseStructure]);
+  };
 
   const form = useForm<FormValues>({
     defaultValues: getInitialValues(),
@@ -124,12 +124,47 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
   // Reset when backend data changes
   useEffect(() => {
     if (!isLoading && courseStructure) {
-      const vals = getInitialValues();
+      // Inline initial values computation to avoid adding a non-stable function to deps
+      const initializeLearnings = (learnings: any) => {
+        if (!learnings) return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
+        try {
+          const parsed = JSON.parse(learnings);
+          if (Array.isArray(parsed)) return learnings;
+        } catch {
+          if (typeof learnings === 'string') {
+            return JSON.stringify([{ id: generateId(), text: learnings, emoji: '📝' }]);
+          }
+        }
+        return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
+      };
+
+      const parseTags = (raw: any): string[] => {
+        if (!raw) return [];
+        if (Array.isArray(raw)) return raw as string[];
+        if (typeof raw === 'string') {
+          return raw
+            .split(',')
+            .map((t: string) => t.trim())
+            .filter(Boolean);
+        }
+        return [];
+      };
+
+      const vals: FormValues = {
+        name: courseStructure?.name || '',
+        description: courseStructure?.description || '',
+        about: courseStructure?.about || '',
+        learnings: initializeLearnings(courseStructure?.learnings || ''),
+        tags: parseTags(courseStructure?.tags),
+        public: courseStructure?.public ?? false,
+        thumbnail_type: courseStructure?.thumbnail_type || 'image',
+      };
+
       form.reset(vals);
       initialRef.current = vals;
       setError('');
     }
-  }, [isLoading, courseStructure, form, getInitialValues]);
+  }, [isLoading, courseStructure, form]);
 
   // Watch for unsaved changes & sync context
   useEffect(() => {

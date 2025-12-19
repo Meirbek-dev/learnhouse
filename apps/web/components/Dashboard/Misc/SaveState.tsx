@@ -5,7 +5,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { updateCourseOrderStructure } from '@services/courses/chapters';
 import { updateCertification } from '@services/courses/certifications';
 import { Check, Loader2, SaveAllIcon, Timer } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { updateCourse } from '@services/courses/courses';
 import { getAPIUrl } from '@services/config/config';
@@ -88,50 +88,29 @@ const SaveState = (props: { orgslug: string }) => {
     }
   };
 
-  const handleCourseOrder = useCallback(
-    (course_structure: any) => {
-      const { chapters } = course_structure;
-      const chapter_order_by_ids = chapters.map((chapter: any) => {
-        return {
-          chapter_id: chapter.id,
-          activities_order_by_ids: chapter.activities.map((activity: any) => {
-            return {
-              activity_id: activity.id,
-            };
-          }),
-        };
-      });
-      dispatchCourse({
-        type: 'setCourseOrder',
-        payload: { chapter_order_by_ids },
-      });
-      dispatchCourse({ type: 'setIsNotSaved' });
-    },
-    [dispatchCourse],
-  );
-
-  const initOrderPayload = useCallback(() => {
-    if (course_structure?.chapters) {
-      handleCourseOrder(course_structure);
-    }
-  }, [course_structure, handleCourseOrder]);
-
-  const changeOrderPayload = useCallback(() => {
-    if (course_structure?.chapters) {
-      handleCourseOrder(course_structure);
-      dispatchCourse({ type: 'setIsNotSaved' });
-    }
-  }, [course_structure, handleCourseOrder, dispatchCourse]);
-
   useEffect(() => {
-    if (course_structure?.chapters && !isInitialized.current) {
-      initOrderPayload();
+    if (!course_structure?.chapters) return;
+
+    const { chapters } = course_structure;
+    const chapter_order_by_ids = chapters.map((chapter: any) => ({
+      chapter_id: chapter.id,
+      activities_order_by_ids: chapter.activities.map((activity: any) => ({ activity_id: activity.id })),
+    }));
+
+    // Initialize order payload once
+    if (!isInitialized.current) {
+      dispatchCourse({ type: 'setCourseOrder', payload: { chapter_order_by_ids } });
+      dispatchCourse({ type: 'setIsNotSaved' });
       isInitialized.current = true;
+      return;
     }
-    if (course_structure?.chapters && !saved) {
-      changeOrderPayload();
+
+    // If there are updates and course is not saved, update order payload
+    if (!saved) {
+      dispatchCourse({ type: 'setCourseOrder', payload: { chapter_order_by_ids } });
+      dispatchCourse({ type: 'setIsNotSaved' });
     }
-  }, [course_structure, saved, initOrderPayload, changeOrderPayload]);
+  }, [course_structure, saved, dispatchCourse]);
 
   return (
     <div className="flex space-x-4">

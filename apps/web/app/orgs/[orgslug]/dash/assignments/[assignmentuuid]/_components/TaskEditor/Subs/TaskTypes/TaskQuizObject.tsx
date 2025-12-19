@@ -1,8 +1,8 @@
 'use client';
 
 import { Check, Info, Loader2, Minus, Plus, PlusCircle, Trash2, X } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -222,17 +222,14 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
   const canAddQuestion = (questions?.length ?? 0) < MAX_QUESTIONS;
 
   // Helper to check if option is selected
-  const isOptionSelected = useCallback(
-    (questionUUID?: string, optionUUID?: string) => {
-      return userSubmissions.submissions.some(
-        (s) => s.questionUUID === questionUUID && s.optionUUID === optionUUID && s.answer,
-      );
-    },
-    [userSubmissions.submissions],
-  );
+  function isOptionSelected(questionUUID?: string, optionUUID?: string) {
+    return userSubmissions.submissions.some(
+      (s) => s.questionUUID === questionUUID && s.optionUUID === optionUUID && s.answer,
+    );
+  }
 
   // Question handlers
-  const handleQuestionChange = useCallback((index: number, value: string) => {
+  function handleQuestionChange(index: number, value: string) {
     setQuestions((prev) => {
       const updated = [...prev];
       if (updated[index]) {
@@ -240,9 +237,9 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
       }
       return updated;
     });
-  }, []);
+  }
 
-  const handleOptionChange = useCallback((qIndex: number, oIndex: number, value: string) => {
+  function handleOptionChange(qIndex: number, oIndex: number, value: string) {
     setQuestions((prev) => {
       const updated = [...prev];
       if (updated[qIndex]?.options[oIndex]) {
@@ -253,9 +250,9 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
       }
       return updated;
     });
-  }, []);
+  }
 
-  const addOption = useCallback((qIndex: number) => {
+  function addOption(qIndex: number) {
     setQuestions((prev) => {
       const updated = [...prev];
       if (updated[qIndex] && (updated[qIndex].options?.length ?? 0) < MAX_OPTIONS) {
@@ -266,37 +263,34 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
       }
       return updated;
     });
-  }, []);
+  }
 
-  const removeOption = useCallback(
-    (qIndex: number, oIndex: number) => {
-      setQuestions((prev) => {
-        const updated = [...prev];
-        if (updated[qIndex] && (updated[qIndex].options?.length ?? 0) > 1) {
-          updated[qIndex] = {
-            ...updated[qIndex],
-            options: updated[qIndex].options!.filter((_, i) => i !== oIndex),
-          };
-          return updated;
-        }
-        toast.error(t('optionDeleteError'));
-        return prev;
-      });
-    },
-    [t],
-  );
+  function removeOption(qIndex: number, oIndex: number) {
+    setQuestions((prev) => {
+      const updated = [...prev];
+      if (updated[qIndex] && (updated[qIndex].options?.length ?? 0) > 1) {
+        updated[qIndex] = {
+          ...updated[qIndex],
+          options: updated[qIndex].options!.filter((_, i) => i !== oIndex),
+        };
+        return updated;
+      }
+      toast.error(t('optionDeleteError'));
+      return prev;
+    });
+  }
 
-  const addQuestion = useCallback(() => {
+  function addQuestion() {
     if (canAddQuestion) {
       setQuestions((prev) => [...prev, createQuestion()]);
     }
-  }, [canAddQuestion]);
+  }
 
-  const removeQuestion = useCallback((qIndex: number) => {
+  function removeQuestion(qIndex: number) {
     setQuestions((prev) => prev.filter((_, i) => i !== qIndex));
-  }, []);
+  }
 
-  const toggleOption = useCallback((qIndex: number, oIndex: number) => {
+  function toggleOption(qIndex: number, oIndex: number) {
     setQuestions((prev) => {
       const updated = [...prev];
       if (updated[qIndex]?.options[oIndex]) {
@@ -309,79 +303,39 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
       }
       return updated;
     });
-  }, []);
+  }
 
   // Student: choose option
-  const chooseOption = useCallback(
-    (qIndex: number, oIndex: number) => {
-      const question = questions[qIndex];
-      const option = question?.options[oIndex];
+  function chooseOption(qIndex: number, oIndex: number) {
+    const question = questions[qIndex];
+    const option = question?.options[oIndex];
 
-      if (!question?.questionUUID || !option?.optionUUID) return;
+    if (!question?.questionUUID || !option?.optionUUID) return;
 
-      const { questionUUID } = question;
-      const { optionUUID } = option;
+    const { questionUUID } = question;
+    const { optionUUID } = option;
 
-      setUserSubmissions((prev) => {
-        const existing = prev.submissions.find((s) => s.questionUUID === questionUUID && s.optionUUID === optionUUID);
+    setUserSubmissions((prev) => {
+      const existing = prev.submissions.find((s) => s.questionUUID === questionUUID && s.optionUUID === optionUUID);
 
-        if (!existing) {
-          return {
-            ...prev,
-            submissions: [...prev.submissions, { questionUUID, optionUUID, answer: true }],
-          };
-        }
-
+      if (!existing) {
         return {
           ...prev,
-          submissions: prev.submissions.map((s) =>
-            s.questionUUID === questionUUID && s.optionUUID === optionUUID ? { ...s, answer: !s.answer } : s,
-          ),
+          submissions: [...prev.submissions, { questionUUID, optionUUID, answer: true }],
         };
-      });
-    },
-    [questions],
-  );
-
-  // API calls
-  const fetchAssignmentTask = useCallback(async () => {
-    if (!assignmentTaskUUID) return;
-
-    const res = await getAssignmentTask(assignmentTaskUUID, access_token);
-    if (res.success) {
-      setAssignmentTaskOutsideProvider(res.data);
-      // If payload doesn't include questions, set an empty array for student/grading views so they show the "no questions" UI
-      if (!res.data?.contents?.questions) {
-        if (view !== 'teacher') setQuestions([]);
-        return;
       }
-      setQuestions(res.data.contents.questions);
-    }
-  }, [assignmentTaskUUID, access_token, view]);
 
-  const fetchUserSubmission = useCallback(async () => {
-    if (!assignmentTaskUUID) return;
-
-    const res = await getAssignmentTaskSubmissionsMe(
-      assignmentTaskUUID,
-      assignment.assignment_object.assignment_uuid,
-      access_token,
-    );
-
-    if (res.success && res.data?.task_submission) {
-      const submission = {
-        ...res.data.task_submission,
-        assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
+      return {
+        ...prev,
+        submissions: prev.submissions.map((s) =>
+          s.questionUUID === questionUUID && s.optionUUID === optionUUID ? { ...s, answer: !s.answer } : s,
+        ),
       };
-      setUserSubmissions(submission);
-      setInitialUserSubmissions(submission);
-    } else {
-      setUserSubmissions({ questions: [], submissions: [] });
-      setInitialUserSubmissions({ questions: [], submissions: [] });
-    }
-  }, [assignmentTaskUUID, assignment.assignment_object.assignment_uuid, access_token]);
+    });
+  }
 
-  const fetchIdentifiedUserSubmission = useCallback(async () => {
+  // API calls (kept as functions where needed for on-demand use)
+  async function fetchIdentifiedUserSubmission() {
     if (!assignmentTaskUUID || !user_id) return;
 
     const res = await getAssignmentTaskSubmissionsUser(
@@ -404,9 +358,77 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
       setInitialUserSubmissions({ questions: [], submissions: [] });
       setUserSubmissionObject(null);
     }
-  }, [assignmentTaskUUID, user_id, assignment.assignment_object.assignment_uuid, access_token]);
+  }
 
-  // Save/Submit handlers
+  // Effects: inline initial loading (don't depend on non-memoized functions)
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        if (view === 'student') {
+          if (assignmentTaskUUID) {
+            const res = await getAssignmentTask(assignmentTaskUUID, access_token);
+            if (res.success) {
+              setAssignmentTaskOutsideProvider(res.data);
+              setQuestions(res.data.contents?.questions ?? []);
+            }
+
+            if (assignmentTaskUUID && assignment.assignment_object?.assignment_uuid) {
+              const sres = await getAssignmentTaskSubmissionsMe(
+                assignmentTaskUUID,
+                assignment.assignment_object.assignment_uuid,
+                access_token,
+              );
+              if (sres.success && sres.data?.task_submission) {
+                const submission = {
+                  ...sres.data.task_submission,
+                  assignment_task_submission_uuid: sres.data.assignment_task_submission_uuid,
+                };
+                setUserSubmissions(submission);
+                setInitialUserSubmissions(submission);
+              } else {
+                setUserSubmissions({ questions: [], submissions: [] });
+                setInitialUserSubmissions({ questions: [], submissions: [] });
+              }
+            }
+          }
+        } else if (view === 'grading') {
+          if (assignmentTaskUUID) {
+            const res = await getAssignmentTask(assignmentTaskUUID, access_token);
+            if (res.success) setAssignmentTaskOutsideProvider(res.data);
+          }
+
+          if (assignmentTaskUUID && user_id && assignment.assignment_object?.assignment_uuid) {
+            const sres = await getAssignmentTaskSubmissionsUser(
+              assignmentTaskUUID,
+              user_id,
+              assignment.assignment_object.assignment_uuid,
+              access_token,
+            );
+            if (sres.success && sres.data?.task_submission) {
+              const submission = {
+                ...sres.data.task_submission,
+                assignment_task_submission_uuid: sres.data.assignment_task_submission_uuid,
+              };
+              setUserSubmissions(submission);
+              setInitialUserSubmissions(submission);
+              setUserSubmissionObject(sres.data);
+            } else {
+              setUserSubmissions({ questions: [], submissions: [] });
+              setInitialUserSubmissions({ questions: [], submissions: [] });
+              setUserSubmissionObject(null);
+            }
+          }
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (view !== 'teacher') {
+      void loadData();
+    }
+  }, [view, assignmentTaskUUID, access_token, assignment.assignment_object?.assignment_uuid, user_id]);
   const saveFC = async () => {
     setIsSaving(true);
     try {
@@ -560,9 +582,59 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
       setIsLoading(true);
       try {
         if (view === 'student') {
-          await Promise.all([fetchAssignmentTask(), fetchUserSubmission()]);
+          if (assignmentTaskUUID) {
+            const res = await getAssignmentTask(assignmentTaskUUID, access_token);
+            if (res.success) {
+              setAssignmentTaskOutsideProvider(res.data);
+              setQuestions(res.data.contents?.questions ?? []);
+            }
+
+            if (assignment.assignment_object?.assignment_uuid) {
+              const sres = await getAssignmentTaskSubmissionsMe(
+                assignmentTaskUUID,
+                assignment.assignment_object.assignment_uuid,
+                access_token,
+              );
+              if (sres.success && sres.data?.task_submission) {
+                const submission = {
+                  ...sres.data.task_submission,
+                  assignment_task_submission_uuid: sres.data.assignment_task_submission_uuid,
+                };
+                setUserSubmissions(submission);
+                setInitialUserSubmissions(submission);
+              } else {
+                setUserSubmissions({ questions: [], submissions: [] });
+                setInitialUserSubmissions({ questions: [], submissions: [] });
+              }
+            }
+          }
         } else if (view === 'grading') {
-          await Promise.all([fetchAssignmentTask(), fetchIdentifiedUserSubmission()]);
+          if (assignmentTaskUUID) {
+            const res = await getAssignmentTask(assignmentTaskUUID, access_token);
+            if (res.success) setAssignmentTaskOutsideProvider(res.data);
+          }
+
+          if (assignmentTaskUUID && user_id && assignment.assignment_object?.assignment_uuid) {
+            const sres = await getAssignmentTaskSubmissionsUser(
+              assignmentTaskUUID,
+              user_id,
+              assignment.assignment_object.assignment_uuid,
+              access_token,
+            );
+            if (sres.success && sres.data?.task_submission) {
+              const submission = {
+                ...sres.data.task_submission,
+                assignment_task_submission_uuid: sres.data.assignment_task_submission_uuid,
+              };
+              setUserSubmissions(submission);
+              setInitialUserSubmissions(submission);
+              setUserSubmissionObject(sres.data);
+            } else {
+              setUserSubmissions({ questions: [], submissions: [] });
+              setInitialUserSubmissions({ questions: [], submissions: [] });
+              setUserSubmissionObject(null);
+            }
+          }
         }
       } finally {
         setIsLoading(false);
@@ -570,9 +642,9 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
     };
 
     if (view !== 'teacher') {
-      loadData();
+      void loadData();
     }
-  }, [view, fetchAssignmentTask, fetchUserSubmission, fetchIdentifiedUserSubmission]);
+  }, [view, assignmentTaskUUID, access_token, assignment.assignment_object?.assignment_uuid, user_id]);
 
   // Render
   if (isLoading) {

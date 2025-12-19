@@ -1,7 +1,7 @@
 'use client';
 
 import { Check, ChevronDown, GripVertical, Info, Lightbulb, Loader2, Plus, Trash2, Type, X } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -615,7 +615,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
   })();
 
   // Teacher handlers
-  const handleQuestionChange = useCallback((index: number, value: string) => {
+  const handleQuestionChange = (index: number, value: string) => {
     setQuestions((prev) => {
       const updated = [...prev];
       if (updated[index]) {
@@ -623,100 +623,85 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
       }
       return updated;
     });
-  }, []);
+  };
 
-  const handleBlankChange = useCallback(
-    (qIndex: number, bIndex: number, field: 'placeholder' | 'correctAnswer' | 'hint', value: string) => {
-      setQuestions((prev) => {
-        const updated = [...prev];
-        if (updated[qIndex]?.blanks[bIndex]) {
-          updated[qIndex] = {
-            ...updated[qIndex],
-            blanks: updated[qIndex].blanks.map((b, i) => (i === bIndex ? { ...b, [field]: value } : b)),
-          };
-        }
-        return updated;
-      });
-    },
-    [],
-  );
+  const handleBlankChange = (
+    qIndex: number,
+    bIndex: number,
+    field: 'placeholder' | 'correctAnswer' | 'hint',
+    value: string,
+  ) => {
+    setQuestions((prev) => {
+      const updated = [...prev];
+      if (updated[qIndex]?.blanks[bIndex]) {
+        updated[qIndex] = {
+          ...updated[qIndex],
+          blanks: updated[qIndex].blanks.map((b, i) => (i === bIndex ? { ...b, [field]: value } : b)),
+        };
+      }
+      return updated;
+    });
+  };
 
-  const addBlank = useCallback(
-    (qIndex: number) => {
-      setQuestions((prev) => {
-        if (!prev[qIndex]) return prev;
-        return prev.map((q, i) =>
-          i === qIndex ? { ...q, blanks: [...q.blanks, createDefaultBlank(t('blankPlaceholder'))] } : q,
-        );
-      });
-    },
-    [t],
-  );
+  const addBlank = (qIndex: number) => {
+    setQuestions((prev) => {
+      if (!prev[qIndex]) return prev;
+      return prev.map((q, i) => (i === qIndex ? { ...q, blanks: [...q.blanks, createDefaultBlank(t('blankPlaceholder'))] } : q));
+    });
+  };
 
-  const removeBlank = useCallback(
-    (qIndex: number, bIndex: number) => {
-      setQuestions((prev) => {
-        const q = prev[qIndex];
-        if (!q) return prev;
-        if (q.blanks.length === 1) {
-          toast.error(t('removeBlankError'));
-          return prev;
-        }
-        return prev.map((item, i) =>
-          i === qIndex ? { ...item, blanks: item.blanks.filter((_, j) => j !== bIndex) } : item,
-        );
-      });
-    },
-    [t],
-  );
+  const removeBlank = (qIndex: number, bIndex: number) => {
+    setQuestions((prev) => {
+      const q = prev[qIndex];
+      if (!q) return prev;
+      if (q.blanks.length === 1) {
+        toast.error(t('removeBlankError'));
+        return prev;
+      }
+      return prev.map((item, i) => (i === qIndex ? { ...item, blanks: item.blanks.filter((_, j) => j !== bIndex) } : item));
+    });
+  };
 
-  const addQuestion = useCallback(() => {
+  const addQuestion = () => {
     setQuestions((prev) => [...prev, createDefaultQuestion(t('blankPlaceholder'))]);
-  }, [t]);
+  };
 
-  const removeQuestion = useCallback((qIndex: number) => {
+  const removeQuestion = (qIndex: number) => {
     setQuestions((prev) => prev.filter((_, i) => i !== qIndex));
-  }, []);
+  };
 
   // Student handlers
-  const handleUserAnswerChange = useCallback((questionUUID: string, blankUUID: string, answer: string) => {
+  const handleUserAnswerChange = (questionUUID: string, blankUUID: string, answer: string) => {
     setUserSubmissions((prev) => {
-      const existingIndex = prev.submissions.findIndex(
-        (s) => s.questionUUID === questionUUID && s.blankUUID === blankUUID,
-      );
+      const existingIndex = prev.submissions.findIndex((s) => s.questionUUID === questionUUID && s.blankUUID === blankUUID);
       const updatedSubmissions =
-        existingIndex !== -1
-          ? prev.submissions.map((s, i) => (i === existingIndex ? { ...s, answer } : s))
-          : [...prev.submissions, { questionUUID, blankUUID, answer }];
+        existingIndex !== -1 ? prev.submissions.map((s, i) => (i === existingIndex ? { ...s, answer } : s)) : [...prev.submissions, { questionUUID, blankUUID, answer }];
       return { ...prev, submissions: updatedSubmissions };
     });
-  }, []);
+  };
 
-  const handleUserAnswerBlur = useCallback(
-    (questionUUID: string, blankUUID: string, answer: string) => {
-      if (!answer.trim() || view !== 'student') return;
+  const handleUserAnswerBlur = (questionUUID: string, blankUUID: string, answer: string) => {
+    if (!answer.trim() || view !== 'student') return;
 
-      const allBlanks = questions.flatMap((q) =>
-        q.blanks.map((b) => ({
-          questionUUID: q.questionUUID,
-          blankUUID: b.blankUUID,
-        })),
-      );
-      const currentIndex = allBlanks.findIndex((b) => b.questionUUID === questionUUID && b.blankUUID === blankUUID);
-      const nextBlank = allBlanks[currentIndex + 1];
+    const allBlanks = questions.flatMap((q) =>
+      q.blanks.map((b) => ({
+        questionUUID: q.questionUUID,
+        blankUUID: b.blankUUID,
+      })),
+    );
+    const currentIndex = allBlanks.findIndex((b) => b.questionUUID === questionUUID && b.blankUUID === blankUUID);
+    const nextBlank = allBlanks[currentIndex + 1];
 
-      if (nextBlank && nextBlank.blankUUID) {
-        setTimeout(() => {
-          const nextInput = document.querySelector(`[data-blank-id="${nextBlank.blankUUID}"]`) as HTMLInputElement;
-          nextInput?.focus();
-        }, 100);
-      }
-    },
-    [questions, view],
-  );
+    if (nextBlank && nextBlank.blankUUID) {
+      setTimeout(() => {
+        const nextInput = document.querySelector(`[data-blank-id="${nextBlank.blankUUID}"]`) as HTMLInputElement;
+        nextInput?.focus();
+      }, 100);
+    }
+  };
 
   // API handlers
-  const saveFC = useCallback(async () => {
+  const saveFC = async () => {
     if (!access_token) {
       toast.error(t('authRequired') || 'Authentication required');
       return;
@@ -743,16 +728,9 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
     } finally {
       setIsSaving(false);
     }
-  }, [
-    questions,
-    assignmentTaskState.assignmentTask.assignment_task_uuid,
-    assignment.assignment_object.assignment_uuid,
-    access_token,
-    assignmentTaskStateHook,
-    t,
-  ]);
+  };
 
-  const submitFC = useCallback(async () => {
+  const submitFC = async () => {
     if (userSubmissions.submissions.length === 0) {
       toast.error(t('fillBlanksError'));
       return;
@@ -796,9 +774,9 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
     } finally {
       setIsSubmitting(false);
     }
-  }, [userSubmissions, assignmentTaskUUID, assignment.assignment_object.assignment_uuid, access_token, t]);
+  };
 
-  const gradeFC = useCallback(async () => {
+  const gradeFC = async () => {
     if (!user_id) {
       toast.error(t('userIdRequired'));
       return;
@@ -848,76 +826,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
     } finally {
       setIsSubmitting(false);
     }
-  }, [
-    user_id,
-    assignmentTaskOutsideProvider,
-    gradingStats,
-    userSubmissions,
-    assignmentTaskUUID,
-    assignment.assignment_object.assignment_uuid,
-    access_token,
-    t,
-  ]);
-
-  // Data loading
-  const loadAssignmentTask = useCallback(async () => {
-    if (!assignmentTaskUUID) return;
-    if (!access_token) {
-      console.warn('Missing access token for loadAssignmentTask');
-      return;
-    }
-
-    const res = await getAssignmentTask(assignmentTaskUUID, access_token);
-    if (res.success) {
-      setAssignmentTaskOutsideProvider(res.data);
-      const normalizedQuestions = normalizeQuestions(res.data.contents?.questions);
-      if (view !== 'teacher' || normalizedQuestions.length > 0) {
-        setQuestions(normalizedQuestions);
-      }
-    }
-  }, [assignmentTaskUUID, access_token, view]);
-
-  const loadUserSubmissions = useCallback(async () => {
-    if (view !== 'student' || !assignmentTaskUUID) return;
-    if (!access_token) {
-      console.warn('Missing access token for loadUserSubmissions');
-      return;
-    }
-
-    const res = await getAssignmentTaskSubmissionsMe(
-      assignmentTaskUUID,
-      assignment.assignment_object.assignment_uuid,
-      access_token,
-    );
-    if (res.success) {
-      const normalized = normalizeSubmissions({
-        ...res.data.task_submission,
-        assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
-      });
-      setUserSubmissions(normalized);
-      setInitialUserSubmissions(normalized);
-    }
-  }, [view, assignmentTaskUUID, assignment.assignment_object.assignment_uuid, access_token]);
-
-  const loadUserSubmissionsForGrading = useCallback(async () => {
-    if (!access_token || !user_id || !assignmentTaskUUID) return;
-
-    const res = await getAssignmentTaskSubmissionsUser(
-      assignmentTaskUUID,
-      user_id,
-      assignment.assignment_object.assignment_uuid,
-      access_token,
-    );
-    if (res.success) {
-      const normalized = normalizeSubmissions({
-        ...res.data.task_submission,
-        assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
-      });
-      setUserSubmissions(normalized);
-      setInitialUserSubmissions(normalized);
-      setUserSubmissionObject(res.data);
-    }
-  }, [access_token, user_id, assignmentTaskUUID, assignment.assignment_object.assignment_uuid]);
+  };
 
   // Effects
   useEffect(() => {
@@ -933,14 +842,73 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
     const loadData = async () => {
       setIsLoading(true);
       try {
+        // Helper to load assignment task
+        const fetchAssignmentTask = async () => {
+          if (!assignmentTaskUUID) return;
+          if (!access_token) {
+            console.warn('Missing access token for loadAssignmentTask');
+            return;
+          }
+          const res = await getAssignmentTask(assignmentTaskUUID, access_token);
+          if (res.success) {
+            setAssignmentTaskOutsideProvider(res.data);
+            const normalizedQuestions = normalizeQuestions(res.data.contents?.questions);
+            if (view !== 'teacher' || normalizedQuestions.length > 0) {
+              setQuestions(normalizedQuestions);
+            }
+          }
+        };
+
+        // Helper to load current user's submissions
+        const fetchUserSubmissions = async () => {
+          if (view !== 'student' || !assignmentTaskUUID) return;
+          if (!access_token) {
+            console.warn('Missing access token for loadUserSubmissions');
+            return;
+          }
+          const res = await getAssignmentTaskSubmissionsMe(
+            assignmentTaskUUID,
+            assignment.assignment_object.assignment_uuid,
+            access_token,
+          );
+          if (res.success) {
+            const normalized = normalizeSubmissions({
+              ...res.data.task_submission,
+              assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
+            });
+            setUserSubmissions(normalized);
+            setInitialUserSubmissions(normalized);
+          }
+        };
+
+        // Helper to load submissions for grading
+        const fetchUserSubmissionsForGrading = async () => {
+          if (!access_token || !user_id || !assignmentTaskUUID) return;
+          const res = await getAssignmentTaskSubmissionsUser(
+            assignmentTaskUUID,
+            user_id,
+            assignment.assignment_object.assignment_uuid,
+            access_token,
+          );
+          if (res.success) {
+            const normalized = normalizeSubmissions({
+              ...res.data.task_submission,
+              assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
+            });
+            setUserSubmissions(normalized);
+            setInitialUserSubmissions(normalized);
+            setUserSubmissionObject(res.data);
+          }
+        };
+
         if (view === 'teacher') {
           if (!assignmentTaskState.assignmentTask.contents?.questions) {
-            await loadAssignmentTask();
+            await fetchAssignmentTask();
           }
         } else if (view === 'student') {
-          await Promise.all([loadAssignmentTask(), loadUserSubmissions()]);
+          await Promise.all([fetchAssignmentTask(), fetchUserSubmissions()]);
         } else if (view === 'grading') {
-          await Promise.all([loadAssignmentTask(), loadUserSubmissionsForGrading()]);
+          await Promise.all([fetchAssignmentTask(), fetchUserSubmissionsForGrading()]);
         }
       } finally {
         setIsLoading(false);
@@ -951,9 +919,10 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
   }, [
     view,
     assignmentTaskState.assignmentTask.contents?.questions,
-    loadAssignmentTask,
-    loadUserSubmissions,
-    loadUserSubmissionsForGrading,
+    assignmentTaskUUID,
+    access_token,
+    assignment.assignment_object.assignment_uuid,
+    user_id,
   ]);
 
   // Render

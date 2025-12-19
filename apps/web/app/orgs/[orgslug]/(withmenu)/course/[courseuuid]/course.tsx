@@ -35,11 +35,11 @@ import CourseDiscussions from '@/components/discussions';
 // Import UI components
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { useEffect, useMemo, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import Link from '@components/ui/AppLink';
 import { cn } from '@/lib/utils';
 import useSWR from 'swr';
@@ -73,7 +73,7 @@ const CourseClient = (props: any) => {
   );
 
   // Normalizes various formats of `course.learnings` into an array that the UI can render
-  const normalizedLearnings = useMemo(() => {
+  const normalizedLearnings = (() => {
     const normalize = (input: unknown): any[] => {
       if (!input) return [];
 
@@ -117,28 +117,28 @@ const CourseClient = (props: any) => {
         const looksJson = raw.startsWith('[') || raw.startsWith('{');
         if (looksJson) {
           try {
-            const parsed = JSON.parse(raw);
-            return normalize(parsed);
-          } catch {
-            // fall through to plain-text handling
+              const parsed = JSON.parse(raw);
+              return normalize(parsed);
+            } catch {
+              // fall through to plain-text handling
+            }
           }
+          // Legacy: plain text list. Prefer newlines/semicolons/bullets; avoid splitting on commas aggressively.
+          const parts = raw
+            .split(/\r?\n|\u2022|\u2023|\u25E6|;|\||·|–|—/)
+            .map((s) => s.replace(/^[-*\s]+/, '').trim())
+            .filter((s) => s.length > 0 && s.toLowerCase() !== 'null' && s.toLowerCase() !== 'undefined');
+          // If nothing split out meaningfully, keep as single item
+          if (parts.length === 0) return [raw];
+          return parts;
         }
-        // Legacy: plain text list. Prefer newlines/semicolons/bullets; avoid splitting on commas aggressively.
-        const parts = raw
-          .split(/\r?\n|\u2022|\u2023|\u25E6|;|\||·|–|—/)
-          .map((s) => s.replace(/^[-*\s]+/, '').trim())
-          .filter((s) => s.length > 0 && s.toLowerCase() !== 'null' && s.toLowerCase() !== 'undefined');
-        // If nothing split out meaningfully, keep as single item
-        if (parts.length === 0) return [raw];
-        return parts;
-      }
 
-      return [];
-    };
+        return [];
+      };
 
-    const src = course?.learnings as unknown;
-    return normalize(src);
-  }, [course?.learnings]);
+      const src = course?.learnings as unknown;
+      return normalize(src);
+    })();
 
   useEffect(() => {
     setLearnings(normalizedLearnings);
