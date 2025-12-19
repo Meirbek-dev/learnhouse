@@ -23,7 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { useCallback, useEffect, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import Youtube from '@tiptap/extension-youtube';
 import { Button } from '@/components/ui/button';
@@ -152,7 +152,7 @@ export default function RichTextEditor({
     }
   }, [editor, content]);
 
-  const addLink = useCallback(() => {
+  const addLink = () => {
     if (!(editor && linkUrl)) return;
 
     const { from, to } = editor.state.selection;
@@ -166,18 +166,18 @@ export default function RichTextEditor({
 
     setLinkUrl('');
     setIsLinkDialogOpen(false);
-  }, [editor, linkUrl]);
+  };
 
-  const addImage = useCallback(() => {
+  const addImage = () => {
     if (!(editor && imageUrl)) return;
 
     editor.chain().focus().setImage({ src: imageUrl, alt: 'Uploaded image' }).run();
 
     setImageUrl('');
     setIsImageDialogOpen(false);
-  }, [editor, imageUrl]);
+  };
 
-  const addVideo = useCallback(() => {
+  const addVideo = () => {
     if (!(editor && videoUrl)) return;
 
     // Extract YouTube video ID from URL
@@ -193,35 +193,32 @@ export default function RichTextEditor({
 
     setVideoUrl('');
     setIsVideoDialogOpen(false);
-  }, [editor, videoUrl]);
+  };
 
-  const handleFileUpload = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!(file && editor)) return;
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!(file && editor)) return;
 
-      startTransition(() => setIsUploading(true));
+    startTransition(() => setIsUploading(true));
 
-      try {
-        // Create a temporary URL for the file
-        const tempUrl = URL.createObjectURL(file);
+    try {
+      // Create a temporary URL for the file
+      const tempUrl = URL.createObjectURL(file);
 
-        if (file.type.startsWith('image/')) {
-          editor.chain().focus().setImage({ src: tempUrl, alt: file.name }).run();
-        } else {
-          // For non-image files, insert as a link
-          editor.chain().focus().insertContent(`<a href="${tempUrl}" target="_blank">${file.name}</a>`).run();
-        }
-      } catch (error) {
-        console.error('Error uploading file:', error);
-      } finally {
-        startTransition(() => setIsUploading(false));
-        // Clear the input
-        e.target.value = '';
+      if (file.type.startsWith('image/')) {
+        editor.chain().focus().setImage({ src: tempUrl, alt: file.name }).run();
+      } else {
+        // For non-image files, insert as a link
+        editor.chain().focus().insertContent(`<a href="${tempUrl}" target="_blank">${file.name}</a>`).run();
       }
-    },
-    [editor],
-  );
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    } finally {
+      startTransition(() => setIsUploading(false));
+      // Clear the input
+      e.target.value = '';
+    }
+  };
 
   if (!editor) {
     return null;

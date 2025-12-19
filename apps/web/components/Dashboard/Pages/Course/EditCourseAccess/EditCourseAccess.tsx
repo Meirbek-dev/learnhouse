@@ -18,8 +18,8 @@ import { AlertTriangle, Globe, Info, Loader2, SquareUserRound, Users, X } from '
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useCallback, useEffect, useState, useTransition } from 'react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { useEffect, useState, useTransition } from 'react';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
@@ -56,12 +56,12 @@ const AccessOptionCard = ({
   const [isPending, startTransition] = useTransition();
   const t = useTranslations('Components.ConfirmationModal');
 
-  const handleConfirm = useCallback(() => {
+  const handleConfirm = () => {
     startTransition(() => {
       onConfirm();
       setIsOpen(false);
     });
-  }, [onConfirm]);
+  };
 
   const isInfo = status === 'info';
   const IconComponent = isInfo ? Info : AlertTriangle;
@@ -277,7 +277,7 @@ const UnlinkUserGroupRow = ({
   const [isPending, startTransition] = useTransition();
   const t = useTranslations('DashPage.Courses.Access');
 
-  const removeUserGroupLink = useCallback(() => {
+  const removeUserGroupLink = () => {
     startTransition(async () => {
       try {
         const res = await unLinkResourcesToUserGroup(usergroup.id, courseUuid, accessToken);
@@ -292,7 +292,7 @@ const UnlinkUserGroupRow = ({
         toast.error(t('unlinkUserGroupErrorGeneric'));
       }
     });
-  }, [usergroup.id, courseUuid, accessToken, t]);
+  };
 
   return (
     <TableRow>

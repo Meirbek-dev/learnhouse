@@ -21,8 +21,8 @@ import {
   Shirt,
   Utensils,
 } from 'lucide-react';
-import { useCallback, useEffect, useState, useEffectEvent } from 'react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { useEffect, useState, useEffectEvent } from 'react';
 import { ScrollArea } from '@components/ui/scroll-area';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -79,7 +79,7 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
     key,
   }));
 
-  const fetchImages = useCallback(async (searchQuery: string, pageNum: number) => {
+  const fetchImages = async (searchQuery: string, pageNum: number) => {
     setLoading(true);
     try {
       const result = await unsplash.search.getPhotos({
@@ -97,15 +97,12 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
-  const debouncedFetchImages = useCallback(
-    (searchQuery: string) => {
-      setPage(1);
-      fetchImages(searchQuery, 1);
-    },
-    [fetchImages],
-  );
+  const debouncedFetchImages = (searchQuery: string) => {
+    setPage(1);
+    fetchImages(searchQuery, 1);
+  };
 
   const handleQueryChange = useEffectEvent((searchQuery: string) => {
     if (searchQuery) {
@@ -122,9 +119,25 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
 
   useEffect(() => {
     if (isOpen && images.length === 0 && !query && !loading) {
-      fetchImages('course', 1);
+      (async () => {
+        setLoading(true);
+        try {
+          const result = await unsplash.search.getPhotos({
+            query: 'course',
+            page: 1,
+            perPage: IMAGES_PER_PAGE,
+          });
+          if (result?.response) {
+            setImages(result.response.results);
+          }
+        } catch (error) {
+          console.error('Error fetching images:', error);
+        } finally {
+          setLoading(false);
+        }
+      })();
     }
-  }, [isOpen, images.length, query, loading, fetchImages]);
+  }, [isOpen, images.length, query, loading]);
 
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);

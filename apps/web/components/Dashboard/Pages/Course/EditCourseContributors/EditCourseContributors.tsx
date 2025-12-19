@@ -23,9 +23,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Check, ChevronDown, Info, Loader2, Search, UserPen, Users } from 'lucide-react';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useCallback, useEffect, useState, useTransition } from 'react';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { searchOrgContent } from '@services/search/search';
+import { useEffect, useState, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -208,12 +208,12 @@ function ContributorOptionCard({
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handleConfirm = useCallback(() => {
+  const handleConfirm = () => {
     startTransition(() => {
       onConfirm();
       setIsOpen(false);
     });
-  }, [onConfirm]);
+  };
 
   return (
     <AlertDialog

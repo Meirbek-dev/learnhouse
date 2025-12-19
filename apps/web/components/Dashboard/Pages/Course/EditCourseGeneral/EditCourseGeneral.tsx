@@ -77,33 +77,33 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
   const { isLoading, courseStructure } = course;
   const formId = useId();
 
-  const initializeLearnings = useCallback((learnings: any) => {
-    if (!learnings) return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
-    try {
-      const parsed = JSON.parse(learnings);
-      if (Array.isArray(parsed)) return learnings;
-    } catch {
-      if (typeof learnings === 'string') {
-        return JSON.stringify([{ id: generateId(), text: learnings, emoji: '📝' }]);
+  const getInitialValues = useCallback((): FormValues => {
+    const initializeLearnings = (learnings: any) => {
+      if (!learnings) return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
+      try {
+        const parsed = JSON.parse(learnings);
+        if (Array.isArray(parsed)) return learnings;
+      } catch {
+        if (typeof learnings === 'string') {
+          return JSON.stringify([{ id: generateId(), text: learnings, emoji: '📝' }]);
+        }
       }
-    }
-    return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
-  }, []);
+      return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
+    };
 
-  const parseTags = useCallback((raw: any): string[] => {
-    if (!raw) return [];
-    if (Array.isArray(raw)) return raw as string[];
-    if (typeof raw === 'string') {
-      return raw
-        .split(',')
-        .map((t: string) => t.trim())
-        .filter(Boolean);
-    }
-    return [];
-  }, []);
+    const parseTags = (raw: any): string[] => {
+      if (!raw) return [];
+      if (Array.isArray(raw)) return raw as string[];
+      if (typeof raw === 'string') {
+        return raw
+          .split(',')
+          .map((t: string) => t.trim())
+          .filter(Boolean);
+      }
+      return [];
+    };
 
-  const getInitialValues = useCallback(
-    (): FormValues => ({
+    return {
       name: courseStructure?.name || '',
       description: courseStructure?.description || '',
       about: courseStructure?.about || '',
@@ -111,9 +111,8 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
       tags: parseTags(courseStructure?.tags),
       public: courseStructure?.public ?? false,
       thumbnail_type: courseStructure?.thumbnail_type || 'image',
-    }),
-    [courseStructure, initializeLearnings, parseTags],
-  );
+    };
+  }, [courseStructure]);
 
   const form = useForm<FormValues>({
     defaultValues: getInitialValues(),

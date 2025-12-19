@@ -26,7 +26,6 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUser, updateUserAvatar } from '@services/users/users';
 import { updateProfile } from '@services/settings/profile';
 import { getUriWithoutOrg } from '@services/config/config';
-import { useCallback, useEffect, useState } from 'react';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { constructAcceptValue } from '@/lib/constants';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -41,6 +40,7 @@ import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
 import type { Locale } from '@/i18n/config';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { signOut } from 'next-auth/react';
 import { toast } from 'sonner';
@@ -136,45 +136,33 @@ const DetailCard = ({
   const t = useTranslations('DashPage.UserAccountSettings.generalSection');
 
   // Create a stable callback for label changes - only for user input
-  const stableLabelChangeCallback = useCallback(
-    (newLabel: string) => {
-      if (isUserInput && newLabel !== detail.label) {
-        onLabelChange(id, newLabel);
-      }
-    },
-    [id, onLabelChange, detail.label, isUserInput],
-  );
+  const stableLabelChangeCallback = (newLabel: string) => {
+    if (isUserInput && newLabel !== detail.label) {
+      onLabelChange(id, newLabel);
+    }
+  };
 
   // Debounce the label change handler
   const debouncedLabelChange = useDebounce(stableLabelChangeCallback, 500);
 
-  const handleLabelChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const newLabel = e.target.value;
-      setLocalLabel(newLabel);
-      setIsUserInput(true);
-      debouncedLabelChange(newLabel);
-    },
-    [debouncedLabelChange],
-  );
+  const handleLabelChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const newLabel = e.target.value;
+    setLocalLabel(newLabel);
+    setIsUserInput(true);
+    debouncedLabelChange(newLabel);
+  };
 
-  const handleIconChange = useCallback(
-    (value: string) => {
-      onUpdate(id, 'icon', value);
-    },
-    [id, onUpdate],
-  );
+  const handleIconChange = (value: string) => {
+    onUpdate(id, 'icon', value);
+  };
 
-  const handleTextChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      onUpdate(id, 'text', e.target.value);
-    },
-    [id, onUpdate],
-  );
+  const handleTextChange = (e: ChangeEvent<HTMLInputElement>) => {
+    onUpdate(id, 'text', e.target.value);
+  };
 
-  const handleRemove = useCallback(() => {
+  const handleRemove = () => {
     onRemove(id);
-  }, [id, onRemove]);
+  };
 
   return (
     <div className="space-y-2 rounded-lg border bg-white p-4 shadow-sm">

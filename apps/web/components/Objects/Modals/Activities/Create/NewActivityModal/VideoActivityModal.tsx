@@ -22,12 +22,12 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import type { ChangeEvent, ComponentType, DragEvent, FormEvent } from 'react';
-import { useCallback, useEffect, useState, useId } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import { AnimatePresence, motion } from 'motion/react';
 import { Separator } from '@components/ui/separator';
 import { Checkbox } from '@components/ui/checkbox';
+import { useEffect, useState, useId } from 'react';
 import { Button } from '@components/ui/button';
 import { cn, generateUUID } from '@/lib/utils';
 import { Label } from '@components/ui/label';
@@ -157,155 +157,135 @@ const SubtitleManager = ({
   const [dragOver, setDragOver] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState<string[]>([]);
 
-  const validateSubtitleFile = useCallback(
-    (file: File): { valid: boolean; error?: string } => {
-      // Check file type
-      if (!(file.name.toLowerCase().endsWith('.srt') || file.name.toLowerCase().endsWith('.vtt'))) {
-        return { valid: false, error: t('errorSubtitleFileType') };
-      }
+  function validateSubtitleFile(file: File): { valid: boolean; error?: string } {
+    // Check file type
+    if (!(file.name.toLowerCase().endsWith('.srt') || file.name.toLowerCase().endsWith('.vtt'))) {
+      return { valid: false, error: t('errorSubtitleFileType') };
+    }
 
-      // Check file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        return { valid: false, error: t('errorSubtitleFileSize') };
-      }
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      return { valid: false, error: t('errorSubtitleFileSize') };
+    }
 
-      // Check if language already exists
+    // Check if language already exists
+    const fileName = file.name.toLowerCase();
+    const potentialLang = fileName.split('.').slice(-2, -1)[0];
+    const existingLang = subtitles.find((s) => s.language === potentialLang || s.file.name.toLowerCase() === fileName);
+
+    if (existingLang) {
+      return { valid: false, error: t('errorSubtitleLanguageExists', { language: potentialLang }) };
+    }
+
+    return { valid: true };
+  }
+
+  async function addSubtitle(file: File, language: string, label: string) {
+    const validation = validateSubtitleFile(file);
+    if (!validation.valid) {
+      toast.error(validation.error || t('errorInvalidSubtitleFile'));
+      return;
+    }
+
+    const fileId = generateUUID();
+    setUploadingFiles((prev) => [...prev, fileId]);
+
+    try {
+      const newSubtitle: SubtitleFile = {
+        id: fileId,
+        file,
+        language,
+        label,
+      };
+
+      setSubtitles([...subtitles, newSubtitle]);
+      toast.success(t('successSubtitleAdded', { label }));
+    } catch {
+      toast.error(t('errorFailedToAddSubtitle'));
+    } finally {
+      setUploadingFiles((prev) => prev.filter((id) => id !== fileId));
+    }
+  }
+
+  function removeSubtitle(id: string) {
+    const subtitleToRemove = subtitles.find((s) => s.id === id);
+    setSubtitles(subtitles.filter((subtitle) => subtitle.id !== id));
+    if (subtitleToRemove) {
+      toast.success(t('successSubtitleRemoved', { label: subtitleToRemove.label }));
+    }
+  }
+
+  function updateSubtitle(id: string, language: string, label: string) {
+    setSubtitles(subtitles.map((s) => (s.id === id ? { ...s, language, label } : s)));
+    toast.success(t('successSubtitleLanguageUpdated'));
+  }
+
+  function handleSubtitleUpload(event: ChangeEvent<HTMLInputElement>) {
+    const files = [...(event.target.files || [])];
+
+    if (files.length === 0) return;
+
+    files.forEach((file) => {
+      // language detection
       const fileName = file.name.toLowerCase();
-      const potentialLang = fileName.split('.').slice(-2, -1)[0];
-      const existingLang = subtitles.find(
-        (s) => s.language === potentialLang || s.file.name.toLowerCase() === fileName,
+      const parts = fileName.split('.');
+      const potentialLang = parts.length > 2 ? parts[parts.length - 2] : '';
+      const detectedLang = getLocalizedLanguageOptions(t).find(
+        (lang) => lang.code === potentialLang || fileName.includes(lang.code),
       );
 
-      if (existingLang) {
-        return { valid: false, error: t('errorSubtitleLanguageExists', { language: potentialLang }) };
-      }
+      const defaultLang = detectedLang ? detectedLang.code : 'en';
+      const defaultLabel = detectedLang ? detectedLang.label : t('languageEnglish');
 
-      return { valid: true };
-    },
-    [subtitles, t],
-  );
+      addSubtitle(file, defaultLang, defaultLabel);
+    });
 
-  const addSubtitle = useCallback(
-    async (file: File, language: string, label: string) => {
-      const validation = validateSubtitleFile(file);
-      if (!validation.valid) {
-        toast.error(validation.error || t('errorInvalidSubtitleFile'));
-        return;
-      }
+    event.target.value = '';
+  }
 
-      const fileId = generateUUID();
-      setUploadingFiles((prev) => [...prev, fileId]);
-
-      try {
-        const newSubtitle: SubtitleFile = {
-          id: fileId,
-          file,
-          language,
-          label,
-        };
-
-        setSubtitles([...subtitles, newSubtitle]);
-        toast.success(t('successSubtitleAdded', { label }));
-      } catch {
-        toast.error(t('errorFailedToAddSubtitle'));
-      } finally {
-        setUploadingFiles((prev) => prev.filter((id) => id !== fileId));
-      }
-    },
-    [subtitles, setSubtitles, validateSubtitleFile, t],
-  );
-
-  const removeSubtitle = useCallback(
-    (id: string) => {
-      const subtitleToRemove = subtitles.find((s) => s.id === id);
-      setSubtitles(subtitles.filter((subtitle) => subtitle.id !== id));
-      if (subtitleToRemove) {
-        toast.success(t('successSubtitleRemoved', { label: subtitleToRemove.label }));
-      }
-    },
-    [subtitles, setSubtitles, t],
-  );
-
-  const updateSubtitle = useCallback(
-    (id: string, language: string, label: string) => {
-      setSubtitles(subtitles.map((s) => (s.id === id ? { ...s, language, label } : s)));
-      toast.success(t('successSubtitleLanguageUpdated'));
-    },
-    [subtitles, setSubtitles, t],
-  );
-
-  const handleSubtitleUpload = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const files = [...(event.target.files || [])];
-
-      if (files.length === 0) return;
-
-      files.forEach((file) => {
-        // language detection
-        const fileName = file.name.toLowerCase();
-        const parts = fileName.split('.');
-        const potentialLang = parts.length > 2 ? parts[parts.length - 2] : '';
-        const detectedLang = getLocalizedLanguageOptions(t).find(
-          (lang) => lang.code === potentialLang || fileName.includes(lang.code),
-        );
-
-        const defaultLang = detectedLang ? detectedLang.code : 'en';
-        const defaultLabel = detectedLang ? detectedLang.label : t('languageEnglish');
-
-        addSubtitle(file, defaultLang, defaultLabel);
-      });
-
-      event.target.value = '';
-    },
-    [addSubtitle, t],
-  );
-
-  const handleDrop = useCallback(
-    (event: DragEvent<HTMLDivElement>) => {
-      event.preventDefault();
-      setDragOver(false);
-
-      const files = [...event.dataTransfer.files];
-      const subtitleFiles = files.filter(
-        (file) => file.name.toLowerCase().endsWith('.srt') || file.name.toLowerCase().endsWith('.vtt'),
-      );
-
-      if (subtitleFiles.length === 0) {
-        toast.error(t('errorDropSubtitleFilesOnly'));
-        return;
-      }
-
-      if (subtitleFiles.length > 5) {
-        toast.error(t('errorMaxSubtitleFiles'));
-        return;
-      }
-
-      subtitleFiles.forEach((file) => {
-        const fileName = file.name.toLowerCase();
-        const parts = fileName.split('.');
-        const potentialLang = parts.length > 2 ? parts[parts.length - 2] : '';
-        const detectedLang = getLocalizedLanguageOptions(t).find(
-          (lang) => lang.code === potentialLang || fileName.includes(lang.code),
-        );
-
-        const defaultLang = detectedLang ? detectedLang.code : 'en';
-        const defaultLabel = detectedLang ? detectedLang.label : t('languageEnglish');
-
-        addSubtitle(file, defaultLang, defaultLabel);
-      });
-    },
-    [addSubtitle, t],
-  );
-
-  const handleDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setDragOver(true);
-  }, []);
-
-  const handleDragLeave = useCallback((event: DragEvent<HTMLDivElement>) => {
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
     setDragOver(false);
-  }, []);
+
+    const files = [...event.dataTransfer.files];
+    const subtitleFiles = files.filter(
+      (file) => file.name.toLowerCase().endsWith('.srt') || file.name.toLowerCase().endsWith('.vtt'),
+    );
+
+    if (subtitleFiles.length === 0) {
+      toast.error(t('errorDropSubtitleFilesOnly'));
+      return;
+    }
+
+    if (subtitleFiles.length > 5) {
+      toast.error(t('errorMaxSubtitleFiles'));
+      return;
+    }
+
+    subtitleFiles.forEach((file) => {
+      const fileName = file.name.toLowerCase();
+      const parts = fileName.split('.');
+      const potentialLang = parts.length > 2 ? parts[parts.length - 2] : '';
+      const detectedLang = getLocalizedLanguageOptions(t).find(
+        (lang) => lang.code === potentialLang || fileName.includes(lang.code),
+      );
+
+      const defaultLang = detectedLang ? detectedLang.code : 'en';
+      const defaultLabel = detectedLang ? detectedLang.label : t('languageEnglish');
+
+      addSubtitle(file, defaultLang, defaultLabel);
+    });
+  }
+
+  function handleDragOver(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setDragOver(true);
+  }
+
+  function handleDragLeave(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setDragOver(false);
+  }
 
   const fileInputId = `subtitle-upload-${useId()}`;
 
@@ -576,54 +556,45 @@ const VideoSettingsForm = ({
   const [isOpen, setIsOpen] = useState(false);
   const subtitles = videoDetails.subtitles || [];
 
-  const setSubtitles = useCallback(
-    (newSubtitles: SubtitleFile[]) => {
-      setVideoDetails({
-        ...videoDetails,
-        subtitles: newSubtitles,
-      });
-    },
-    [videoDetails, setVideoDetails],
-  );
+  const setSubtitles = (newSubtitles: SubtitleFile[]) => {
+    setVideoDetails({
+      ...videoDetails,
+      subtitles: newSubtitles,
+    });
+  };
 
-  const convertToSeconds = useCallback((minutes: number, seconds: number) => {
+  const convertToSeconds = (minutes: number, seconds: number) => {
     return minutes * 60 + seconds;
-  }, []);
+  };
 
-  const convertFromSeconds = useCallback((totalSeconds: number) => {
+  const convertFromSeconds = (totalSeconds: number) => {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     return { minutes, seconds };
-  }, []);
+  };
 
   const startTimeParts = convertFromSeconds(videoDetails.startTime);
   const endTimeParts = videoDetails.endTime ? convertFromSeconds(videoDetails.endTime) : { minutes: 0, seconds: 0 };
 
-  const updateStartTime = useCallback(
-    (minutes: number, seconds: number) => {
-      const newStartTime = convertToSeconds(minutes, seconds);
+  const updateStartTime = (minutes: number, seconds: number) => {
+    const newStartTime = convertToSeconds(minutes, seconds);
+    setVideoDetails({
+      ...videoDetails,
+      startTime: newStartTime,
+      // Auto-adjust end time if it's now invalid
+      endTime: videoDetails.endTime && videoDetails.endTime <= newStartTime ? null : videoDetails.endTime,
+    });
+  };
+
+  const updateEndTime = (minutes: number, seconds: number) => {
+    const totalSeconds = convertToSeconds(minutes, seconds);
+    if (totalSeconds > videoDetails.startTime) {
       setVideoDetails({
         ...videoDetails,
-        startTime: newStartTime,
-        // Auto-adjust end time if it's now invalid
-        endTime: videoDetails.endTime && videoDetails.endTime <= newStartTime ? null : videoDetails.endTime,
+        endTime: totalSeconds,
       });
-    },
-    [videoDetails, setVideoDetails, convertToSeconds],
-  );
-
-  const updateEndTime = useCallback(
-    (minutes: number, seconds: number) => {
-      const totalSeconds = convertToSeconds(minutes, seconds);
-      if (totalSeconds > videoDetails.startTime) {
-        setVideoDetails({
-          ...videoDetails,
-          endTime: totalSeconds,
-        });
-      }
-    },
-    [videoDetails, setVideoDetails, convertToSeconds],
-  );
+    }
+  };
 
   const settingsCount = (() => {
     let count = 0;
@@ -856,7 +827,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
 
   const isYouTubeUrlValid = youtubeUrl ? /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/.test(youtubeUrl) : false;
 
-  const validateForm = useCallback(() => {
+  const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
 
     if (!name.trim()) {
@@ -881,40 +852,37 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [name, selectedView, video, youtubeUrl, videoDetails, isYouTubeUrlValid, t]);
+  };
 
-  const handleVideoChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const selectedFile = event.target.files?.[0];
-      if (selectedFile) {
-        // Validate file size (max 1000MB)
-        if (selectedFile.size > 1000 * 1024 * 1024) {
-          toast.error(t('errorFileSizeLimit'));
-          return;
-        }
-
-        // Validate file type
-        const validTypes = ['video/mp4', 'video/webm', 'video/x-matroska'];
-        if (!validTypes.includes(selectedFile.type)) {
-          toast.error(t('errorInvalidVideoFileType'));
-          return;
-        }
-
-        setVideo(selectedFile);
-        setErrors((prev) => ({ ...prev, video: '' }));
-
-        // Auto-populate name if empty
-        if (!name) {
-          const fileName = selectedFile.name.replace(/\.[^/.]+$/, '');
-          setName(fileName);
-          setErrors((prev) => ({ ...prev, name: '' }));
-        }
-
-        toast.success(t('successVideoFileSelected'));
+  const handleVideoChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (selectedFile) {
+      // Validate file size (max 1000MB)
+      if (selectedFile.size > 1000 * 1024 * 1024) {
+        toast.error(t('errorFileSizeLimit'));
+        return;
       }
-    },
-    [name, t],
-  );
+
+      // Validate file type
+      const validTypes = ['video/mp4', 'video/webm', 'video/x-matroska'];
+      if (!validTypes.includes(selectedFile.type)) {
+        toast.error(t('errorInvalidVideoFileType'));
+        return;
+      }
+
+      setVideo(selectedFile);
+      setErrors((prev) => ({ ...prev, video: '' }));
+
+      // Auto-populate name if empty
+      if (!name) {
+        const fileName = selectedFile.name.replace(/\.[^/.]+$/, '');
+        setName(fileName);
+        setErrors((prev) => ({ ...prev, name: '' }));
+      }
+
+      toast.success(t('successVideoFileSelected'));
+    }
+  };
 
   const canSubmit = (() => {
     if (!name.trim()) return false;

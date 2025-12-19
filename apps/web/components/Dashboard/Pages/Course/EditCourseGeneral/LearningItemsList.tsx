@@ -1,9 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EmojiClickData } from 'emoji-picker-react';
 import { Link as LinkIcon, Plus, X } from 'lucide-react';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
+import { useEffect, useRef, useState } from 'react';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { generateUUID } from '@/lib/utils';
@@ -23,7 +23,7 @@ interface LearningItemsListProps {
 
 const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) => {
   // Helper function to standardize items
-  const standardizeItems = useCallback((val?: string): LearningItem[] => {
+  const standardizeItems = (val?: string): LearningItem[] => {
     try {
       if (val) {
         const parsedItems = JSON.parse(val);
@@ -50,7 +50,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
         emoji: '📝',
       },
     ];
-  }, []);
+  };
 
   // Use lazy initialization to parse and standardize items once
   const [items, setItems] = useState<LearningItem[]>(() => {
@@ -99,7 +99,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
   }, []);
 
   // Add a new empty item
-  const addItem = useCallback(() => {
+  const addItem = () => {
     const newItem: LearningItem = {
       id: generateUUID(),
       text: '',
@@ -126,60 +126,48 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
         scrollEl.scrollTop = scrollEl.scrollHeight;
       }
     });
-  }, [items, onChange]);
+  };
 
   // Remove an item
-  const removeItem = useCallback(
-    (id: string) => {
-      if (focusedItemId === id) {
-        setFocusedItemId(null);
+  const removeItem = (id: string) => {
+    if (focusedItemId === id) {
+      setFocusedItemId(null);
+    }
+    const newItems = items.filter((item) => item.id !== id);
+    setItems(newItems);
+    onChange(JSON.stringify(newItems));
+  };
+
+  const updateItemText = (id: string, text: string) => {
+    const newItems = items.map((item) => (item.id === id ? { ...item, text } : item));
+    setItems(newItems);
+    onChange(JSON.stringify(newItems));
+  };
+
+  const updateItemEmoji = (id: string, emoji: string) => {
+    const newItems = items.map((item) => (item.id === id ? { ...item, emoji } : item));
+    setItems(newItems);
+    onChange(JSON.stringify(newItems));
+    setShowEmojiPicker(null);
+
+    if (emojiFocusRafRef.current) cancelAnimationFrame(emojiFocusRafRef.current);
+    emojiFocusRafRef.current = requestAnimationFrame(() => {
+      if (!isMountedRef.current) return;
+
+      const inputEl = inputRefs.current[id];
+      if (inputEl) {
+        inputEl.focus();
+        setFocusedItemId(id);
       }
-      const newItems = items.filter((item) => item.id !== id);
-      setItems(newItems);
-      onChange(JSON.stringify(newItems));
-    },
-    [items, focusedItemId, onChange],
-  );
-
-  const updateItemText = useCallback(
-    (id: string, text: string) => {
-      const newItems = items.map((item) => (item.id === id ? { ...item, text } : item));
-      setItems(newItems);
-      onChange(JSON.stringify(newItems));
-    },
-    [items, onChange],
-  );
-
-  const updateItemEmoji = useCallback(
-    (id: string, emoji: string) => {
-      const newItems = items.map((item) => (item.id === id ? { ...item, emoji } : item));
-      setItems(newItems);
-      onChange(JSON.stringify(newItems));
-      setShowEmojiPicker(null);
-
-      if (emojiFocusRafRef.current) cancelAnimationFrame(emojiFocusRafRef.current);
-      emojiFocusRafRef.current = requestAnimationFrame(() => {
-        if (!isMountedRef.current) return;
-
-        const inputEl = inputRefs.current[id];
-        if (inputEl) {
-          inputEl.focus();
-          setFocusedItemId(id);
-        }
-      });
-    },
-    [items, onChange],
-  );
+    });
+  };
 
   // Update item link
-  const updateItemLink = useCallback(
-    (id: string, link: string) => {
-      const newItems = items.map((item) => (item.id === id ? { ...item, link: link.trim() || undefined } : item));
-      setItems(newItems);
-      onChange(JSON.stringify(newItems));
-    },
-    [items, onChange],
-  );
+  const updateItemLink = (id: string, link: string) => {
+    const newItems = items.map((item) => (item.id === id ? { ...item, link: link.trim() || undefined } : item));
+    setItems(newItems);
+    onChange(JSON.stringify(newItems));
+  };
 
   // Restore focus after re-render if an item was focused
   useEffect(() => {
@@ -247,12 +235,9 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
     };
   }, [showLinkInput]);
 
-  const handleEmojiSelect = useCallback(
-    (id: string, emojiData: EmojiClickData) => {
-      updateItemEmoji(id, emojiData.emoji);
-    },
-    [updateItemEmoji],
-  );
+  const handleEmojiSelect = (id: string, emojiData: EmojiClickData) => {
+    updateItemEmoji(id, emojiData.emoji);
+  };
 
   const handleInputFocus = (id: string) => {
     setFocusedItemId(id);
