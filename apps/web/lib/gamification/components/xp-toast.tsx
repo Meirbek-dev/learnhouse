@@ -16,7 +16,7 @@ import { ParticleEffect } from '@/lib/gamification/components/level-indicators';
 import { AnimatedValue } from '@/lib/gamification/components/animated-value';
 import { useReducedData } from '@/hooks/use-reduced-data';
 import { getXPSourceTheme } from '@/lib/gamification';
-import { useCallback, useMemo } from 'react';
+
 import { useTranslations } from 'next-intl';
 import { motion } from 'motion/react';
 import { X } from 'lucide-react';
@@ -133,42 +133,32 @@ export function useXPToast() {
     position: 'bottom-right',
   });
 
-  const showXPToast = useCallback(
-    ({ amount, source = 'default', triggeredLevelUp = false }: ShowXPToastOptions) => {
-      addNotification({
-        amount,
-        source,
-        triggeredLevelUp,
-      });
-    },
-    [addNotification],
+  const showXPToast = ({ amount, source = 'default', triggeredLevelUp = false }: ShowXPToastOptions) => {
+    addNotification({
+      amount,
+      source,
+      triggeredLevelUp,
+    });
+  };
+
+  const renderNotification = (notification: any) => (
+    <XPToast
+      notification={notification}
+      onDismiss={() => dismissNotification(notification.id)}
+    />
   );
 
-  const renderNotification = useCallback(
-    (notification: any) => (
-      <XPToast
-        notification={notification}
-        onDismiss={() => dismissNotification(notification.id)}
+  // ToastContainer component
+  const ToastContainer = () => {
+    return (
+      <XPNotificationContainer
+        notifications={notifications}
+        position="bottom-right"
+        onDismiss={dismissNotification}
+        renderNotification={renderNotification}
       />
-    ),
-    [dismissNotification],
-  );
-
-  // Memoize ToastContainer to prevent re-mounting on every render
-  const ToastContainer = useMemo(
-    () =>
-      function ToastContainerComponent() {
-        return (
-          <XPNotificationContainer
-            notifications={notifications}
-            position="bottom-right"
-            onDismiss={dismissNotification}
-            renderNotification={renderNotification}
-          />
-        );
-      },
-    [notifications, dismissNotification, renderNotification],
-  );
+    );
+  };
 
   return {
     showXPToast,

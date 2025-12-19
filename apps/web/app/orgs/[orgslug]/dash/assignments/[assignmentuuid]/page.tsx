@@ -11,9 +11,9 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { getAPIUrl } from '@services/config/config';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 import Link from '@components/ui/AppLink';
 import dynamic from 'next/dynamic';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
 

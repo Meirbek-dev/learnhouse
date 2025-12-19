@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { applyTheme, getStoredTheme, getTheme } from '@/lib/themes';
 import { loadTheme } from '@/lib/theme-lazy-loader';
 import type { Theme } from '@/lib/themes';
@@ -35,14 +35,14 @@ export function ThemeProvider({ children, defaultThemeName = 'default', userThem
   const [isLoading, setIsLoading] = useState(false);
   const serverSyncTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
-  // Memoize theme object to prevent unnecessary re-renders
-  const theme = useMemo(() => getTheme(themeName), [themeName]);
+  // Theme object
+  const theme = getTheme(themeName);
 
   // Track pending theme sync
   const pendingThemeSyncRef = useRef<string | null>(null);
 
   // Debounced server sync function
-  const debouncedServerSync = useCallback((theme: string) => {
+  const debouncedServerSync = (theme: string) => {
     pendingThemeSyncRef.current = theme;
 
     // Clear existing timeout
@@ -61,7 +61,7 @@ export function ThemeProvider({ children, defaultThemeName = 'default', userThem
         pendingThemeSyncRef.current = null;
       }
     }, 1000);
-  }, []);
+  };
 
   // Sync pending theme on page unload
   useEffect(() => {
@@ -82,39 +82,33 @@ export function ThemeProvider({ children, defaultThemeName = 'default', userThem
     };
   }, []);
 
-  const setTheme = useCallback(
-    async (newThemeName: string, syncToServer = true) => {
-      // Lazy load theme (uses cache for core themes like 'default' and 'black')
-      const newTheme = await loadTheme(newThemeName);
+  const setTheme = async (newThemeName: string, syncToServer = true) => {
+    // Lazy load theme (uses cache for core themes like 'default' and 'black')
+    const newTheme = await loadTheme(newThemeName);
 
-      if (newTheme) {
-        setThemeName(newThemeName);
-        applyTheme(newTheme);
+    if (newTheme) {
+      setThemeName(newThemeName);
+      applyTheme(newTheme);
 
-        // Debounced sync to server
-        if (syncToServer) {
-          debouncedServerSync(newThemeName);
-        }
-      } else {
-        // Fallback to default theme if load fails
-        console.warn(`Failed to load theme: ${newThemeName}, falling back to default`);
-        const fallbackTheme = getTheme('default');
-        setThemeName('default');
-        applyTheme(fallbackTheme);
+      // Debounced sync to server
+      if (syncToServer) {
+        debouncedServerSync(newThemeName);
       }
-    },
-    [debouncedServerSync],
-  );
+    } else {
+      // Fallback to default theme if load fails
+      console.warn(`Failed to load theme: ${newThemeName}, falling back to default`);
+      const fallbackTheme = getTheme('default');
+      setThemeName('default');
+      applyTheme(fallbackTheme);
+    }
+  };
 
-  // Memoize context value to prevent re-renders
-  const contextValue = useMemo(
-    () => ({
-      theme,
-      setTheme,
-      isLoading,
-    }),
-    [theme, setTheme, isLoading],
-  );
+  // Context value (no memo)
+  const contextValue = {
+    theme,
+    setTheme,
+    isLoading,
+  };
 
   return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>;
 }

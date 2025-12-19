@@ -10,7 +10,6 @@ import { Card } from '@/components/ui/card';
 import { useTranslations } from 'next-intl';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { useMemo } from 'react';
 
 interface HeroSectionProps {
   profile: UserGamificationProfile;
@@ -31,36 +30,27 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const session = usePlatformSession() as any;
 
-  const { xpToNext, xpProgress, dailyXpProgress, nextMilestone, streakStatus, levelInfo } = useMemo(() => {
-    const xpForNext = Math.max(0, profile.xp_to_next_level || 0);
-    const currentLevelXp = profile.xp_in_current_level || 0;
-    const progress = xpForNext > 0 ? (currentLevelXp / (currentLevelXp + xpForNext)) * 100 : 0;
+  const xpToNext = Math.max(0, profile.xp_to_next_level || 0);
+  const currentLevelXp = profile.xp_in_current_level || 0;
+  const xpProgress = xpToNext > 0 ? (currentLevelXp / (currentLevelXp + xpToNext)) * 100 : 0;
 
-    // Daily XP progress (out of cap - hardcoded for now, will be added to backend)
-    const dailyCap = 500;
-    const dailyEarned = profile.daily_xp_earned || 0;
-    const dailyProgress = Math.min((dailyEarned / dailyCap) * 100, 100);
+  // Daily XP progress (out of cap - hardcoded for now, will be added to backend)
+  const dailyCap = 500;
+  const dailyEarned = profile.daily_xp_earned || 0;
+  const dailyXpProgress = Math.min((dailyEarned / dailyCap) * 100, 100);
 
-    // Next milestone
-    const nextLevel = [5, 10, 15, 25, 50, 100].find((l) => l > profile.level);
+  // Next milestone
+  const nextMilestone = [5, 10, 15, 25, 50, 100].find((l) => l > profile.level);
 
-    // Streak status
-    const loginStreak = profile.login_streak || 0;
-    const learningStreak = profile.learning_streak || 0;
-    const maxStreak = Math.max(loginStreak, learningStreak);
+  // Streak status
+  const streakStatus = {
+    login: profile.login_streak || 0,
+    learning: profile.learning_streak || 0,
+    max: Math.max(profile.login_streak || 0, profile.learning_streak || 0),
+  };
 
-    // Get level info
-    const info = getLevelInfo(profile.level, t);
-
-    return {
-      xpToNext: xpForNext,
-      xpProgress: progress,
-      dailyXpProgress: dailyProgress,
-      nextMilestone: nextLevel,
-      streakStatus: { login: loginStreak, learning: learningStreak, max: maxStreak },
-      levelInfo: info,
-    };
-  }, [profile, t]);
+  // Get level info
+  const levelInfo = getLevelInfo(profile.level, t);
 
   // Get display name from session
   const displayName = session?.data?.user?.first_name

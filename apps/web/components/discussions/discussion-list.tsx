@@ -10,12 +10,12 @@ import {
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Card, CardContent } from '@/components/ui/card';
+import { useEffect, useRef, useState } from 'react';
 import DiscussionPost from './discussion-post';
 import DiscussionForm from './discussion-form';
 import { Badge } from '@/components/ui/badge';
 import { MessageCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
 
 interface DiscussionListProps {
   initialPosts: any[];

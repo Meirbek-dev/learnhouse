@@ -15,7 +15,6 @@ import { Calendar, Flame, Star } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { useMemo } from 'react';
 
 interface EngagementStreakProps {
   profile: UserGamificationProfile;
@@ -26,25 +25,20 @@ export function EngagementStreak({ profile, className }: EngagementStreakProps) 
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
 
   // Calculate unified engagement streak (max of login or learning)
-  const engagement = useMemo(() => {
-    const loginStreak = profile.login_streak || 0;
-    const learningStreak = profile.learning_streak || 0;
-    const longestLogin = profile.longest_login_streak || 0;
-    const longestLearning = profile.longest_learning_streak || 0;
+  const loginStreak = profile.login_streak || 0;
+  const learningStreak = profile.learning_streak || 0;
+  const longestLogin = profile.longest_login_streak || 0;
+  const longestLearning = profile.longest_learning_streak || 0;
 
-    // Use the higher streak as "engagement"
-    const current = Math.max(loginStreak, learningStreak);
-    const longest = Math.max(longestLogin, longestLearning);
-    const isActive = current > 0;
-    const isRecord = current === longest && current > 0;
-
-    return {
-      current,
-      longest,
-      isActive,
-      isRecord,
-    };
-  }, [profile]);
+  // Use the higher streak as "engagement"
+  const engagement = {
+    current: Math.max(loginStreak, learningStreak),
+    longest: Math.max(longestLogin, longestLearning),
+    isActive: Math.max(loginStreak, learningStreak) > 0,
+    isRecord:
+      Math.max(loginStreak, learningStreak) === Math.max(longestLogin, longestLearning) &&
+      Math.max(loginStreak, learningStreak) > 0,
+  };
 
   const getMessage = (days: number): string => {
     if (days === 0) return t('engagement.getStarted');

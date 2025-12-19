@@ -7,8 +7,8 @@ import { getCertificateByUuid } from '@services/courses/certifications';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
-import { Label } from '@/components/ui/label';
 import { useEffect, useRef, useState } from 'react';
+import { Label } from '@/components/ui/label';
 import Link from '@components/ui/AppLink';
 import type React from 'react';
 

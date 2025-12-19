@@ -51,14 +51,11 @@ const Trail = (params: any) => {
 
   // Use gamification context (already available from parent layout)
   const gamificationContext = useOptionalGamificationContext();
-  const gamificationData = useMemo(
-    () => ({
-      profile: gamificationContext?.profile,
-      recent_transactions: gamificationContext?.dashboard?.recent_transactions || [],
-      user_rank: gamificationContext?.dashboard?.user_rank,
-    }),
-    [gamificationContext?.profile, gamificationContext?.dashboard],
-  );
+  const gamificationData = {
+    profile: gamificationContext?.profile,
+    recent_transactions: gamificationContext?.dashboard?.recent_transactions || [],
+    user_rank: gamificationContext?.dashboard?.user_rank,
+  };
   const isGamificationLoading = gamificationContext?.isLoading || false;
 
   const { data: leaderboardData, isLoading: isLeaderboardLoading } = useSWR(

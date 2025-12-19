@@ -9,9 +9,9 @@ import { getRankTheme } from '@/lib/gamification';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 interface LeaderboardProps {
   entries: LeaderboardEntry[];
@@ -34,17 +34,15 @@ export function Leaderboard({ entries, currentUserId, userRank, className }: Lea
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const [showFull, setShowFull] = useState(false);
 
-  const { displayEntries, currentUserEntry, rankContext } = useMemo(() => {
-    const userEntry = entries.find((e) => e.user_id === currentUserId);
+  const userEntry = entries.find((e) => e.user_id === currentUserId);
 
-    if (!userEntry || !userRank || showFull) {
-      return {
-        displayEntries: entries.slice(0, showFull ? undefined : 10),
-        currentUserEntry: userEntry,
-        rankContext: null,
-      };
-    }
+  let displayEntries, currentUserEntry, rankContext;
 
+  if (!userEntry || !userRank || showFull) {
+    displayEntries = entries.slice(0, showFull ? undefined : 10);
+    currentUserEntry = userEntry;
+    rankContext = null;
+  } else {
     // Show top 3 + user's context (±2 ranks)
     const top3 = entries.slice(0, 3);
     const userRankIndex = userRank - 1;
@@ -58,16 +56,14 @@ export function Leaderboard({ entries, currentUserId, userRank, className }: Lea
     const nextRankEntry = entries[userRankIndex - 1];
     const xpToNext = nextRankEntry ? nextRankEntry.total_xp - userEntry.total_xp : 0;
 
-    return {
-      displayEntries: userRank <= 3 ? top3 : [...top3, ...contextEntries],
-      currentUserEntry: userEntry,
-      rankContext: {
-        rank: userRank,
-        xpToNext,
-        nextRankUsername: nextRankEntry?.username || null,
-      },
+    displayEntries = userRank <= 3 ? top3 : [...top3, ...contextEntries];
+    currentUserEntry = userEntry;
+    rankContext = {
+      rank: userRank,
+      xpToNext,
+      nextRankUsername: nextRankEntry?.username || null,
     };
-  }, [entries, currentUserId, userRank, showFull]);
+  }
 
   return (
     <Card className={className}>

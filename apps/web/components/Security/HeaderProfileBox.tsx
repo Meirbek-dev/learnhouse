@@ -40,100 +40,91 @@ export const HeaderProfileBox = () => {
   const org = useOrg() as any;
   const t = useTranslations('Header');
 
-  const userRoleInfo = useMemo((): RoleInfo | null => {
-    if (!userRoles || userRoles.length === 0) return null;
-
+  let userRoleInfo: RoleInfo | null = null;
+  if (userRoles && userRoles.length > 0) {
     // Find the highest priority role for the current organization
     const orgRoles = userRoles.filter((role: any) => role.org.id === org?.id);
 
-    if (orgRoles.length === 0) return null;
+    if (orgRoles.length > 0) {
+      // Sort by role priority (admin > maintainer > instructor > user)
+      const sortedRoles = orgRoles.toSorted((a: any, b: any) => {
+        const getRolePriority = (role: any) => {
+          if (role.role.role_uuid === 'role_global_admin' || role.role.id === 1) return 4;
+          if (role.role.role_uuid === 'role_global_maintainer' || role.role.id === 2) return 3;
+          if (role.role.role_uuid === 'role_global_instructor' || role.role.id === 3) return 2;
+          return 1;
+        };
+        return getRolePriority(b) - getRolePriority(a);
+      });
 
-    // Sort by role priority (admin > maintainer > instructor > user)
-    const sortedRoles = orgRoles.toSorted((a: any, b: any) => {
-      const getRolePriority = (role: any) => {
-        if (role.role.role_uuid === 'role_global_admin' || role.role.id === 1) return 4;
-        if (role.role.role_uuid === 'role_global_maintainer' || role.role.id === 2) return 3;
-        if (role.role.role_uuid === 'role_global_instructor' || role.role.id === 3) return 2;
-        return 1;
-      };
-      return getRolePriority(b) - getRolePriority(a);
-    });
+      const highestRole = sortedRoles[0];
 
-    const highestRole = sortedRoles[0];
+      if (highestRole) {
+        // Define role configurations based on actual database roles
+        const roleConfigs: { [key: string]: RoleInfo } = {
+          role_global_admin: {
+            name: t('profile.roles.admin.name'),
+            icon: <Crown size={12} />,
+            bgColor: 'bg-purple-600',
+            textColor: 'text-white',
+            description: t('profile.roles.admin.description'),
+          },
+          role_global_maintainer: {
+            name: t('profile.roles.maintainer.name'),
+            icon: <Shield size={12} />,
+            bgColor: 'bg-blue-600',
+            textColor: 'text-white',
+            description: t('profile.roles.maintainer.description'),
+          },
+          role_global_instructor: {
+            name: t('profile.roles.instructor.name'),
+            icon: <Users size={12} />,
+            bgColor: 'bg-green-600',
+            textColor: 'text-white',
+            description: t('profile.roles.instructor.description'),
+          },
+          role_global_user: {
+            name: t('profile.roles.user.name'),
+            icon: <User size={12} />,
+            bgColor: 'bg-gray-500',
+            textColor: 'text-white',
+            description: t('profile.roles.user.description'),
+          },
+        };
 
-    if (!highestRole) return null;
+        // Determine role based on role_uuid or id
+        let roleKey = 'role_global_user'; // default
+        if (highestRole.role.role_uuid) {
+          roleKey = highestRole.role.role_uuid;
+        } else if (highestRole.role.id === 1) {
+          roleKey = 'role_global_admin';
+        } else if (highestRole.role.id === 2) {
+          roleKey = 'role_global_maintainer';
+        } else if (highestRole.role.id === 3) {
+          roleKey = 'role_global_instructor';
+        }
 
-    // Define role configurations based on actual database roles
-    const roleConfigs: { [key: string]: RoleInfo } = {
-      role_global_admin: {
-        name: t('profile.roles.admin.name'),
-        icon: <Crown size={12} />,
-        bgColor: 'bg-purple-600',
-        textColor: 'text-white',
-        description: t('profile.roles.admin.description'),
-      },
-      role_global_maintainer: {
-        name: t('profile.roles.maintainer.name'),
-        icon: <Shield size={12} />,
-        bgColor: 'bg-blue-600',
-        textColor: 'text-white',
-        description: t('profile.roles.maintainer.description'),
-      },
-      role_global_instructor: {
-        name: t('profile.roles.instructor.name'),
-        icon: <Users size={12} />,
-        bgColor: 'bg-green-600',
-        textColor: 'text-white',
-        description: t('profile.roles.instructor.description'),
-      },
-      role_global_user: {
-        name: t('profile.roles.user.name'),
-        icon: <User size={12} />,
-        bgColor: 'bg-gray-500',
-        textColor: 'text-white',
-        description: t('profile.roles.user.description'),
-      },
-    };
-
-    // Determine role based on role_uuid or id
-    let roleKey = 'role_global_user'; // default
-    if (highestRole.role.role_uuid) {
-      roleKey = highestRole.role.role_uuid;
-    } else if (highestRole.role.id === 1) {
-      roleKey = 'role_global_admin';
-    } else if (highestRole.role.id === 2) {
-      roleKey = 'role_global_maintainer';
-    } else if (highestRole.role.id === 3) {
-      roleKey = 'role_global_instructor';
+        userRoleInfo = roleConfigs[roleKey] || roleConfigs.role_global_user || null;
+      }
     }
+  }
 
-    return roleConfigs[roleKey] || roleConfigs.role_global_user || null;
-  }, [userRoles, org?.id, t]);
+  const customRoles: CustomRoleInfo[] =
+    userRoles && userRoles.length > 0
+      ? (userRoles.filter((role: any) => role.org.id === org?.id) ?? [])
+          .filter((role: any) => {
+            const isSystemRole =
+              role.role.role_uuid?.startsWith('role_global_') ||
+              [1, 2, 3, 4].includes(role.role.id) ||
+              ['Admin', 'Maintainer', 'Instructor', 'User'].includes(role.role.name);
 
-  const customRoles = useMemo((): CustomRoleInfo[] => {
-    if (!userRoles || userRoles.length === 0) return [];
-
-    // Find roles for the current organization
-    const orgRoles = userRoles.filter((role: any) => role.org.id === org?.id);
-
-    if (orgRoles.length === 0) return [];
-
-    // Filter for custom roles (not system roles)
-    const customRoles = orgRoles.filter((role: any) => {
-      // Check if it's a system role
-      const isSystemRole =
-        role.role.role_uuid?.startsWith('role_global_') ||
-        [1, 2, 3, 4].includes(role.role.id) ||
-        ['Admin', 'Maintainer', 'Instructor', 'User'].includes(role.role.name);
-
-      return !isSystemRole;
-    });
-
-    return customRoles.map((role: any) => ({
-      name: role.role.name || t('profile.customRole'),
-      description: role.role.description,
-    }));
-  }, [userRoles, org?.id, t]);
+            return !isSystemRole;
+          })
+          .map((role: any) => ({
+            name: role.role.name || t('profile.customRole'),
+            description: role.role.description,
+          }))
+      : [];
 
   return (
     <div className="flex items-center">
