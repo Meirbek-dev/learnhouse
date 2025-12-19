@@ -3,10 +3,10 @@
 import { BookOpenCheck, Check, ChevronLeft, ChevronRight, FileText, Layers, Trophy, Video } from 'lucide-react';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { getUriWithOrg } from '@services/config/config';
-import { Fragment } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
+import { Fragment } from 'react';
 
 interface Props {
   course: any;

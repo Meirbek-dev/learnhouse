@@ -4,7 +4,6 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import type { ReactNode } from 'react';
 
-
 interface AuthenticatedClientElementProps {
   children: ReactNode;
   checkMethod: 'authentication' | 'roles';

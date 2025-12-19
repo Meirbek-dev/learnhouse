@@ -5,7 +5,6 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { validateInviteCode } from '@services/organizations/invites';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
-import { useEffect, useRef, useState } from 'react';
 import platformLogoFull from 'public/platform_logo_full.svg';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { MailWarning, Ticket, UserPlus } from 'lucide-react';
@@ -13,6 +12,7 @@ import InviteOnlySignUpComponent from './InviteOnlySignUp';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { joinOrg } from '@services/organizations/orgs';
+import { useEffect, useRef, useState } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { Button } from '@components/ui/button';
 import OpenSignUpComponent from './OpenSignup';
@@ -180,7 +180,8 @@ const LoggedInJoinScreen = (props: any) => {
 
         const alreadyMemberMessage = res.data?.detail;
         const isAlreadyMember =
-          typeof alreadyMemberMessage === 'string' && alreadyMemberMessage.toLowerCase().includes('уже является частью');
+          typeof alreadyMemberMessage === 'string' &&
+          alreadyMemberMessage.toLowerCase().includes('уже является частью');
 
         if (res.success || isAlreadyMember) {
           if (isAlreadyMember) {

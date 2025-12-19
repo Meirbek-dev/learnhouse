@@ -8,8 +8,8 @@ import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import Link from '@components/ui/AppLink';
 import useSWR from 'swr';
 
@@ -23,8 +23,6 @@ const AssignmentsHome = () => {
   const { data: courses } = useSWR(`${getAPIUrl()}courses/org_slug/${org?.slug}/page/1/limit/128`, (url) =>
     swrFetcher(url, access_token),
   );
-
-
 
   function removeAssignmentPrefix(assignment_uuid: string) {
     return assignment_uuid.replace('assignment_', '');

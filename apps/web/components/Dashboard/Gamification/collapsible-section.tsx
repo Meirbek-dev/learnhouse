@@ -8,9 +8,9 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useSyncExternalStore } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useSyncExternalStore } from 'react';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 

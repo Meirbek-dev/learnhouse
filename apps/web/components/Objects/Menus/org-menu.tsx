@@ -2,11 +2,11 @@
 
 import AuthenticatedClientElement from '@/components/Security/AuthenticatedClientElement';
 import { NavigationMenu, NavigationMenuList } from '@/components/ui/navigation-menu';
-import { useEffect, useState, useSyncExternalStore } from 'react';
 import { HeaderProfileBox } from '@/components/Security/HeaderProfileBox';
 import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
 import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
 import { SearchBar } from '@/components/Objects/Search/SearchBar';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import platformLogoFull from 'public/platform_logo_full.svg';
 import { getUriWithOrg } from '@/services/config/config';
 import { Button } from '@/components/ui/button';
@@ -99,7 +99,9 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
     }
   }
 
-  function getServerSnapshot() { return 'false'; }
+  function getServerSnapshot() {
+    return 'false';
+  }
 
   const isFocusModeString = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const isFocusMode = isFocusModeString === 'true';

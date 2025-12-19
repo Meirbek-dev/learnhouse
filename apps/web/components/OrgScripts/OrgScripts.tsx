@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import DOMPurify from 'dompurify';
+import { useEffect } from 'react';
 import type React from 'react';
 
 import { useOrg } from '@/components/Contexts/OrgContext';
@@ -41,10 +41,6 @@ const OrgScripts: React.FC = () => {
     const scripts = document.querySelectorAll(`script[data-script-name="${scriptName}"]`);
     return scripts.length > 0;
   }
-
-
-
-
 
   useEffect(() => {
     // Local helpers to avoid stale-dep lint warnings

@@ -1,7 +1,7 @@
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseContributors } from '@services/courses/courses';
-import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import { useEffectEvent } from 'react';
 import { toast } from 'sonner';
 

@@ -6,8 +6,8 @@ import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 
 interface AuthorizationProps {

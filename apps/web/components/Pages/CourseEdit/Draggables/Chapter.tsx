@@ -14,10 +14,10 @@ import { AlertTriangle, Hexagon, Loader2, MoreVertical, Pencil, Save, Sparkles, 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { useState, useTransition } from 'react';
 import { updateChapter } from '@services/courses/chapters';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { getAPIUrl } from '@services/config/config';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { mutate } from 'swr';

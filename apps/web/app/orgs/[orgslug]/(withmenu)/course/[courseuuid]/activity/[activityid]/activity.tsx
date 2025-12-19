@@ -34,7 +34,6 @@ import {
 } from '@services/courses/assignments';
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
 import type { AssignmentSubmission } from '@components/Contexts/Assignments/AssignmentSubmissionContext';
-import { Suspense, lazy, useEffect, useRef, useState, useTransition } from 'react';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
@@ -44,6 +43,7 @@ import { useOptionalGamificationContext } from '@/components/Contexts/Gamificati
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
+import { Suspense, lazy, useEffect, useRef, useState, useTransition } from 'react';
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
