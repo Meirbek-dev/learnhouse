@@ -20,10 +20,10 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { useCallback, useState, useTransition } from 'react';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -56,12 +56,12 @@ function JoinMethodCard({
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handleConfirm = useCallback(() => {
+  function handleConfirm() {
     startTransition(async () => {
       await onConfirm();
       setIsOpen(false);
     });
-  }, [onConfirm]);
+  }
 
   return (
     <AlertDialog
@@ -117,12 +117,12 @@ function DeleteInviteButton({ invite, onDelete, t }: DeleteInviteButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handleDelete = useCallback(() => {
+  function handleDelete() {
     startTransition(async () => {
       await onDelete(invite);
       setIsOpen(false);
     });
-  }, [onDelete, invite]);
+  }
 
   return (
     <AlertDialog

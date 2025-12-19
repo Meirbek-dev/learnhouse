@@ -23,12 +23,12 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import UserAvatar from '../../Objects/UserAvatar';
-import { useCallback, useEffect } from 'react';
 import AppLink from '@/components/ui/AppLink';
 import { Badge } from '@/components/ui/badge';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
+import { useEffect } from 'react';
 import Image from 'next/image';
 
 interface NavigationItem {
@@ -194,7 +194,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
   const isCollapsed = state === 'collapsed';
   const isExpanded = state === 'expanded';
 
-  const handleLogout = useCallback(async () => {
+  async function handleLogout() {
     try {
       await signOut({
         redirect: true,
@@ -204,7 +204,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
       console.error('Logout failed:', error);
       // Could add toast notification here
     }
-  }, [org]);
+  }
 
   // Keyboard shortcut handler
   useEffect(() => {

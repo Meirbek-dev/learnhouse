@@ -18,7 +18,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import EditRole from '@components/Objects/Modals/Dash/OrgRoles/EditRole';
 import AddRole from '@components/Objects/Modals/Dash/OrgRoles/AddRole';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { useCallback, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
@@ -41,12 +41,12 @@ function DeleteRoleButton({ roleId, onDelete, t, variant = 'default' }: DeleteRo
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = () => {
     startTransition(async () => {
       await onDelete(roleId);
       setIsOpen(false);
     });
-  }, [onDelete, roleId]);
+  };
 
   return (
     <AlertDialog

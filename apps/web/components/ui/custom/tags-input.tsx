@@ -76,16 +76,13 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
       setInputValue('');
     }
 
-    const handleSelect = React.useCallback(
-      (e: React.SyntheticEvent<HTMLInputElement>) => {
-        const target = e.currentTarget;
-        const selection = target.value.substring(target.selectionStart ?? 0, target.selectionEnd ?? 0);
+    function handleSelect(e: React.SyntheticEvent<HTMLInputElement>) {
+      const target = e.currentTarget;
+      const selection = target.value.substring(target.selectionStart ?? 0, target.selectionEnd ?? 0);
 
-        setSelectedValue(selection);
-        setIsValueSelected(selection === inputValue);
-      },
-      [inputValue],
-    );
+      setSelectedValue(selection);
+      setIsValueSelected(selection === inputValue);
+    }
 
     // ? suggest : a refactor rather then using a useEffect
 

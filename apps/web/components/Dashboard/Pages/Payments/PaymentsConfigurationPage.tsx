@@ -32,7 +32,7 @@ import {
   UnplugIcon,
 } from 'lucide-react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
@@ -58,12 +58,12 @@ function ConfirmDeleteStripeConfig({ onDelete, t }: ConfirmDeleteStripeConfigPro
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = () => {
     startTransition(async () => {
       await onDelete();
       setIsOpen(false);
     });
-  }, [onDelete]);
+  };
 
   return (
     <AlertDialog

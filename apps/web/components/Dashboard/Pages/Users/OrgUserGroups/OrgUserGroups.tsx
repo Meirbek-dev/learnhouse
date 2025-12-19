@@ -20,10 +20,10 @@ import ManageUsers from '@components/Objects/Modals/Dash/OrgUserGroups/ManageUse
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { deleteUserGroup } from '@services/usergroups/usergroups';
-import { useCallback, useState, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
@@ -38,12 +38,12 @@ function DeleteUserGroupButton({ usergroupId, onDelete, t }: DeleteUserGroupButt
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handleDelete = useCallback(() => {
+  function handleDelete() {
     startTransition(async () => {
       await onDelete(usergroupId);
       setIsOpen(false);
     });
-  }, [onDelete, usergroupId]);
+  }
 
   return (
     <AlertDialog

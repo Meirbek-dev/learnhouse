@@ -7,7 +7,7 @@ import { revalidateTags } from '@services/utils/ts/requests';
 import { updateOrganization } from '@services/settings/org';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getAPIUrl } from '@services/config/config';
-import { useCallback, useTransition } from 'react';
+import { useTransition } from 'react';
 import { Plus, X as XIcon } from 'lucide-react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -48,50 +48,41 @@ export default function OrgEditSocials() {
   const links = form.watch('links');
   const [isPending, startTransition] = useTransition();
 
-  const updateOrg = useCallback(
-    async (values: OrganizationValues) => {
-      const loadingToast = toast.loading(t('updatingOrg'));
-      try {
-        await updateOrganization(org.id, values, access_token);
-        await revalidateTags(['organizations'], org.slug);
-        mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
-        toast.success(t('orgUpdatedSuccess'), { id: loadingToast });
-      } catch {
-        toast.error(t('orgUpdateFailed'), { id: loadingToast });
-      }
-    },
-    [org.id, org.slug, access_token, t],
-  );
+  const updateOrg = async (values: OrganizationValues) => {
+    const loadingToast = toast.loading(t('updatingOrg'));
+    try {
+      await updateOrganization(org.id, values, access_token);
+      await revalidateTags(['organizations'], org.slug);
+      mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
+      toast.success(t('orgUpdatedSuccess'), { id: loadingToast });
+    } catch {
+      toast.error(t('orgUpdateFailed'), { id: loadingToast });
+    }
+  };
 
-  const handleLinkChange = useCallback(
-    (oldKey: string, newKey: string, value: string) => {
-      const currentLinks = form.getValues('links');
-      const newLinks = { ...currentLinks };
-      if (oldKey !== newKey) {
-        delete newLinks[oldKey];
-      }
-      newLinks[newKey] = value;
-      form.setValue('links', newLinks);
-    },
-    [form],
-  );
+  const handleLinkChange = (oldKey: string, newKey: string, value: string) => {
+    const currentLinks = form.getValues('links');
+    const newLinks = { ...currentLinks };
+    if (oldKey !== newKey) {
+      delete newLinks[oldKey];
+    }
+    newLinks[newKey] = value;
+    form.setValue('links', newLinks);
+  };
 
-  const removeLink = useCallback(
-    (key: string) => {
-      const currentLinks = form.getValues('links');
-      const newLinks = { ...currentLinks };
-      delete newLinks[key];
-      form.setValue('links', newLinks);
-    },
-    [form],
-  );
+  const removeLink = (key: string) => {
+    const currentLinks = form.getValues('links');
+    const newLinks = { ...currentLinks };
+    delete newLinks[key];
+    form.setValue('links', newLinks);
+  };
 
-  const addNewLink = useCallback(() => {
+  const addNewLink = () => {
     const currentLinks = form.getValues('links');
     const newLinks = { ...currentLinks };
     newLinks[`${t('Form.newCustomLinkDefaultLabel')} ${Object.keys(newLinks).length + 1}`] = '';
     form.setValue('links', newLinks);
-  }, [form, t]);
+  };
 
   const linksEntries = Object.entries(links || {});
 

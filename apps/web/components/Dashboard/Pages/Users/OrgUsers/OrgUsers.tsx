@@ -21,11 +21,11 @@ import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { removeUserFromOrg } from '@services/organizations/orgs';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
-import { useCallback, useState, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { Toaster } from '@components/ui/sonner';
+import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
@@ -41,12 +41,12 @@ function RemoveUserButton({ userId, username, onRemove, t }: RemoveUserButtonPro
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handleRemove = useCallback(() => {
+  function handleRemove() {
     startTransition(async () => {
       await onRemove(userId);
       setIsOpen(false);
     });
-  }, [onRemove, userId]);
+  }
 
   return (
     <AlertDialog

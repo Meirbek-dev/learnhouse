@@ -3,8 +3,8 @@
 import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
 import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
 import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import platformLogoLight from 'public/platform_logo_light.svg';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { ScrollArea } from '@components/ui/scroll-area';
@@ -155,20 +155,20 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
   const controllerRef = useRef<AbortController | null>(null);
   const streamingBufferRef = useRef('');
 
-  const resetStreamingState = useCallback(async () => {
+  async function resetStreamingState() {
     streamingBufferRef.current = '';
     await dispatchAIChatBot({ type: 'clearStreamingMessage' });
     await dispatchAIChatBot({ type: 'setStatusMessage', payload: null });
-  }, [dispatchAIChatBot]);
+  }
 
-  const startNewController = useCallback(() => {
+  function startNewController() {
     if (controllerRef.current) {
       controllerRef.current.abort();
     }
     const controller = new AbortController();
     controllerRef.current = controller;
     return controller;
-  }, []);
+  }
 
   useEffect(() => {
     return () => {
@@ -180,9 +180,13 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
     if (!aiChatBotState.isModalOpen && controllerRef.current) {
       controllerRef.current.abort();
       controllerRef.current = null;
-      resetStreamingState();
+      (async () => {
+        streamingBufferRef.current = '';
+        await dispatchAIChatBot({ type: 'clearStreamingMessage' });
+        await dispatchAIChatBot({ type: 'setStatusMessage', payload: null });
+      })();
     }
-  }, [aiChatBotState.isModalOpen, resetStreamingState]);
+  }, [aiChatBotState.isModalOpen, dispatchAIChatBot]);
 
   const sendMessage = async (message: string) => {
     // Add user message

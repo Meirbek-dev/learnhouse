@@ -34,7 +34,7 @@ import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import CreateProductForm from './SubComponents/CreateProductForm';
 import { getPaymentConfigs } from '@services/payments/payments';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
-import { useCallback, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '@components/ui/textarea';
@@ -85,12 +85,12 @@ function ArchiveProductButton({ productId, productName, onArchive, t }: ArchiveP
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handleArchive = useCallback(() => {
+  const handleArchive = () => {
     startTransition(async () => {
       await onArchive(productId);
       setIsOpen(false);
     });
-  }, [onArchive, productId]);
+  };
 
   return (
     <AlertDialog

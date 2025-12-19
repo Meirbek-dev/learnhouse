@@ -17,10 +17,10 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { deleteCollection } from '@services/courses/collections';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { useCallback, useState, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { AlertTriangle, Loader2, X } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -93,14 +93,14 @@ const CollectionAdminEditsArea = (props: any) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const deleteCollectionUI = useCallback(async () => {
+  async function deleteCollectionUI() {
     startTransition(async () => {
       await deleteCollection(props.collection_uuid, session.data?.tokens?.access_token);
       await revalidateTags(['collections'], props.orgslug);
       setIsOpen(false);
       router.refresh();
     });
-  }, [props.collection_uuid, session.data?.tokens?.access_token, props.orgslug, router]);
+  }
 
   return (
     <AuthenticatedClientElement

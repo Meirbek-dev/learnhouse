@@ -12,8 +12,8 @@ import { useAssignments } from '@components/Contexts/Assignments/AssignmentConte
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getTaskFileSubmissionDir } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import Link from '@components/ui/AppLink';
 import { toast } from 'sonner';
 
@@ -206,29 +206,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
   };
 
   // ================= Fetching =================
-  const fetchAssignmentTask = useCallback(async () => {
-    if (!accessToken || !assignmentTaskUUID) return;
-    const res = await getAssignmentTask(assignmentTaskUUID, accessToken);
-    if (res.success && res.data) setAssignmentTask(res.data);
-  }, [assignmentTaskUUID, accessToken]);
-
-  const fetchMySubmission = useCallback(async () => {
-    if (!accessToken || !assignmentTaskUUID || !assignmentUUID) return;
-    const res = await getAssignmentTaskSubmissionsMe(assignmentTaskUUID, assignmentUUID, accessToken);
-    if (res.success && res.data?.task_submission) {
-      const sub = {
-        ...res.data.task_submission,
-        assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
-      };
-      setUserSubmissions(sub);
-      setInitialUserSubmissions(sub);
-    } else {
-      setUserSubmissions({ fileUUID: '' });
-      setInitialUserSubmissions({ fileUUID: '' });
-    }
-  }, [assignmentTaskUUID, assignmentUUID, accessToken]);
-
-  const fetchUserSubmission = useCallback(async () => {
+  async function fetchUserSubmission() {
     if (!accessToken || !assignmentTaskUUID || !assignmentUUID || !user_id) return;
     const res = await getAssignmentTaskSubmissionsUser(assignmentTaskUUID, user_id, assignmentUUID, accessToken);
     if (res.success && res.data?.task_submission) {
@@ -244,18 +222,65 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
       setInitialUserSubmissions({ fileUUID: '' });
       setUserSubmissionObject(null);
     }
-  }, [assignmentTaskUUID, user_id, assignmentUUID, accessToken]);
+  }
 
   useEffect(() => {
-    if (view === 'student') {
-      fetchAssignmentTask();
-      fetchMySubmission();
-    }
-    if (view === 'custom-grading') {
-      fetchAssignmentTask();
-      fetchUserSubmission();
-    }
-  }, [view, fetchAssignmentTask, fetchMySubmission, fetchUserSubmission]);
+    const loadIfNeeded = async () => {
+      setIsLoading(true);
+      try {
+        if (view === 'student') {
+          if (accessToken && assignmentTaskUUID) {
+            const res = await getAssignmentTask(assignmentTaskUUID, accessToken);
+            if (res.success && res.data) setAssignmentTask(res.data);
+          }
+          if (accessToken && assignmentTaskUUID && assignmentUUID) {
+            const res = await getAssignmentTaskSubmissionsMe(assignmentTaskUUID, assignmentUUID, accessToken);
+            if (res.success && res.data?.task_submission) {
+              const sub = {
+                ...res.data.task_submission,
+                assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
+              };
+              setUserSubmissions(sub);
+              setInitialUserSubmissions(sub);
+            } else {
+              setUserSubmissions({ fileUUID: '' });
+              setInitialUserSubmissions({ fileUUID: '' });
+            }
+          }
+        } else if (view === 'custom-grading') {
+          if (accessToken && assignmentTaskUUID) {
+            const res = await getAssignmentTask(assignmentTaskUUID, accessToken);
+            if (res.success && res.data) setAssignmentTask(res.data);
+          }
+          if (accessToken && assignmentTaskUUID && assignmentUUID && user_id) {
+            const res = await getAssignmentTaskSubmissionsUser(
+              assignmentTaskUUID,
+              user_id,
+              assignmentUUID,
+              accessToken,
+            );
+            if (res.success && res.data?.task_submission) {
+              const sub = {
+                ...res.data.task_submission,
+                assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
+              };
+              setUserSubmissions(sub);
+              setInitialUserSubmissions(sub);
+              setUserSubmissionObject(res.data);
+            } else {
+              setUserSubmissions({ fileUUID: '' });
+              setInitialUserSubmissions({ fileUUID: '' });
+              setUserSubmissionObject(null);
+            }
+          }
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void loadIfNeeded();
+  }, [view, accessToken, assignmentTaskUUID, assignmentUUID, user_id]);
 
   // ================= Render helpers =================
   const FileCard = ({ label }: { label: string }) => (

@@ -34,7 +34,7 @@ import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { useCallback, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -129,17 +129,17 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
   const courseMetaUrl = `${getAPIUrl()}courses/${course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`;
 
   // Handlers
-  const handleStartEdit = useCallback(() => {
+  const handleStartEdit = () => {
     setIsEditing(true);
     setEditedName(activity.name);
-  }, [activity.name]);
+  };
 
-  const handleCancelEdit = useCallback(() => {
+  const handleCancelEdit = () => {
     setIsEditing(false);
     setEditedName(activity.name);
-  }, [activity.name]);
+  };
 
-  const handleSaveEdit = useCallback(async () => {
+  const handleSaveEdit = async () => {
     if (!access_token) {
       toast.error(t('noAccessToken', { default: 'Authentication required' }));
       return;
@@ -165,9 +165,9 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
         setEditedName(activity.name);
       }
     });
-  }, [access_token, editedName, activity, courseMetaUrl, orgslug, router, handleCancelEdit, t]);
+  };
 
-  const handleTogglePublish = useCallback(async () => {
+  const handleTogglePublish = async () => {
     if (!access_token) {
       toast.error(t('noAccessToken', { default: 'Authentication required' }));
       return;
@@ -189,9 +189,9 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
       toast.dismiss(toastId);
       setIsUpdatingPublish(false);
     }
-  }, [access_token, activity, courseMetaUrl, orgslug, router, t]);
+  };
 
-  const handleDeleteActivity = useCallback(async () => {
+  const handleDeleteActivity = async () => {
     if (!access_token) {
       toast.error(t('noAccessToken', { default: 'Authentication required' }));
       return;
@@ -219,20 +219,17 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
         toast.dismiss(toastId);
       }
     });
-  }, [access_token, activity.activity_type, activity.activity_uuid, courseMetaUrl, orgslug, router, t]);
+  };
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        handleSaveEdit();
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        handleCancelEdit();
-      }
-    },
-    [handleSaveEdit, handleCancelEdit],
-  );
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSaveEdit();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleCancelEdit();
+    }
+  };
 
   // Early validation (moved below hooks to satisfy Rules of Hooks)
   if (!activity?.activity_uuid) {

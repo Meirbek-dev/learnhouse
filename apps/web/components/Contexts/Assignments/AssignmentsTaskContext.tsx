@@ -1,8 +1,8 @@
 'use client';
 
-import { createContext, use, useCallback, useEffect, useReducer } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getAssignmentTask } from '@services/courses/assignments';
+import { createContext, use, useEffect, useReducer } from 'react';
 import { getAPIUrl } from '@services/config/config';
 import type { ReactNode } from 'react';
 import { mutate } from 'swr';
@@ -36,27 +36,29 @@ export const AssignmentsTaskProvider = ({ children }: { children: ReactNode }) =
 
   const [state, dispatch] = useReducer(assignmentsTaskReducer, initialState);
 
-  const fetchAssignmentTask = useCallback(
-    async (assignmentTaskUUID: string) => {
-      const res = await getAssignmentTask(assignmentTaskUUID, access_token);
+  async function fetchAssignmentTask(assignmentTaskUUID: string) {
+    const res = await getAssignmentTask(assignmentTaskUUID, access_token);
 
-      if (res.success) {
-        dispatch({ type: 'setAssignmentTask', payload: res.data });
-      }
-    },
-    [access_token],
-  );
+    if (res.success) {
+      dispatch({ type: 'setAssignmentTask', payload: res.data });
+    }
+  }
 
   useEffect(() => {
-    if (state.selectedAssignmentTaskUUID) {
-      fetchAssignmentTask(state.selectedAssignmentTaskUUID);
-      mutate(`${getAPIUrl()}assignments/${assignment.assignment_object?.assignment_uuid}/tasks`);
-    }
+    const loadIfNeeded = async () => {
+      if (state.selectedAssignmentTaskUUID) {
+        const res = await getAssignmentTask(state.selectedAssignmentTaskUUID, access_token);
+        if (res.success) dispatch({ type: 'setAssignmentTask', payload: res.data });
+        mutate(`${getAPIUrl()}assignments/${assignment.assignment_object?.assignment_uuid}/tasks`);
+      }
+    };
+
+    void loadIfNeeded();
   }, [
     state.selectedAssignmentTaskUUID,
     state.reloadTrigger,
     assignment.assignment_object?.assignment_uuid,
-    fetchAssignmentTask,
+    access_token,
   ]);
 
   return (

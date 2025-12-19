@@ -15,7 +15,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { deleteChapter, updateChapter } from '@services/courses/chapters';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { useCallback, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';
@@ -81,17 +81,17 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
   const courseMetaUrl = `${getAPIUrl()}courses/${course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`;
 
   // Handlers
-  const handleStartEdit = useCallback(() => {
+  const handleStartEdit = () => {
     setIsEditing(true);
     setEditedName(chapter.name);
-  }, [chapter.name]);
+  };
 
-  const handleCancelEdit = useCallback(() => {
+  const handleCancelEdit = () => {
     setIsEditing(false);
     setEditedName(chapter.name);
-  }, [chapter.name]);
+  };
 
-  const handleSaveEdit = useCallback(async () => {
+  const handleSaveEdit = async () => {
     if (!access_token) {
       console.error('No access token available');
       return;
@@ -116,9 +116,9 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
         setEditedName(chapter.name);
       }
     });
-  }, [access_token, editedName, chapter.id, chapter.name, courseMetaUrl, orgslug, router, handleCancelEdit]);
+  };
 
-  const handleDeleteChapter = useCallback(async () => {
+  const handleDeleteChapter = async () => {
     if (!access_token) {
       console.error('No access token available');
       return;
@@ -136,20 +136,17 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
         setIsDeleteDialogOpen(false);
       }
     });
-  }, [access_token, chapter.id, courseMetaUrl, orgslug, router]);
+  };
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        handleSaveEdit();
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        handleCancelEdit();
-      }
-    },
-    [handleSaveEdit, handleCancelEdit],
-  );
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSaveEdit();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleCancelEdit();
+    }
+  };
 
   // Early validation (moved below all hooks to satisfy Rules of Hooks)
   if (!chapter?.chapter_uuid) {

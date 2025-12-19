@@ -15,8 +15,8 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
 import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
-import { useCallback, useLayoutEffect, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { useLayoutEffect, useState, useTransition } from 'react';
 import { useCourse } from '@components/Contexts/CourseContext';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
@@ -294,7 +294,7 @@ const DeleteUpdateButton = ({ update }: any) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handleDelete = useCallback(() => {
+  function handleDelete() {
     startTransition(async () => {
       const res = await deleteCourseUpdate(
         course.courseStructure.course_uuid,
@@ -312,7 +312,7 @@ const DeleteUpdateButton = ({ update }: any) => {
         toast.error(t('failedDelete'));
       }
     });
-  }, [course.courseStructure.course_uuid, update.courseupdate_uuid, session.data?.tokens?.access_token, t]);
+  }
 
   return (
     <AlertDialog

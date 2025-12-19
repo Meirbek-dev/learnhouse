@@ -17,7 +17,6 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { useCourse } from '@components/Contexts/CourseContext';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
-import { useCallback, useState, useTransition } from 'react';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -27,6 +26,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
@@ -374,7 +374,7 @@ const DeleteUpdateButton = ({ update }: any) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handleDelete = useCallback(() => {
+  function handleDelete() {
     startTransition(async () => {
       const toast_loading = toast.loading(t('deletingUpdate'));
       const res = await deleteCourseUpdate(
@@ -393,7 +393,7 @@ const DeleteUpdateButton = ({ update }: any) => {
         toast.error(t('updateDeleteFailed'));
       }
     });
-  }, [course.courseStructure.course_uuid, update.courseupdate_uuid, session.data?.tokens?.access_token, t]);
+  }
 
   return (
     <AlertDialog

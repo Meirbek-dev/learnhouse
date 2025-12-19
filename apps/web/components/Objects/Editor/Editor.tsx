@@ -46,7 +46,7 @@ import { Table } from '@tiptap/extension-table';
 import { getLinkExtension } from './EditorConf';
 import StarterKit from '@tiptap/starter-kit';
 import { Eye, Monitor } from 'lucide-react';
-import { useCallback } from 'react';
+import {} from 'react';
 
 // Initialize lowlight once at module load
 const LOWLIGHT = (() => {
@@ -138,11 +138,11 @@ const Editor = (props: EditorProps) => {
   // Destructure setContent for stable reference
   const { setContent } = props;
 
-  const handleContentSave = useCallback(() => {
+  function handleContentSave() {
     if (editor) {
       setContent(editor.getJSON());
     }
-  }, [editor, setContent]);
+  }
 
   const isMobile = useIsMobile();
   if (isMobile) {

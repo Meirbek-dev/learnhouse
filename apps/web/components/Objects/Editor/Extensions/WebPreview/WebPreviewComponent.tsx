@@ -1,6 +1,6 @@
 import { AlignCenter, AlignLeft, AlignRight, Edit2, Save, Trash, X } from 'lucide-react';
-import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getUrlPreview } from '@services/courses/activities';
 import { Checkbox } from '@components/ui/checkbox';
@@ -117,34 +117,31 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
   const [popupOpen, setPopupOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(!node.attrs.url);
 
-  const fetchPreview = useCallback(
-    async (url: string) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await getUrlPreview(url);
-        if (!res) throw new Error(t('errorFetchingPreview'));
-        const data = res;
+  async function fetchPreview(url: string) {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await getUrlPreview(url);
+      if (!res) throw new Error(t('errorFetchingPreview'));
+      const data = res;
 
-        // Check if metadata is insufficient (only has basic fields like favicon/url but no title/description)
-        const hasMinimalMetadata = !(data.title || data.description || data.og_image);
+      // Check if metadata is insufficient (only has basic fields like favicon/url but no title/description)
+      const hasMinimalMetadata = !(data.title || data.description || data.og_image);
 
-        if (hasMinimalMetadata) {
-          toast.error('Unable to get metadata from this website. The preview card may appear incomplete.', {
-            duration: 4000,
-          });
-        }
-
-        updateAttributes({ ...data, url });
-        setEditing(false);
-      } catch (error: any) {
-        setError(error.message || t('errorFetchingPreview'));
-      } finally {
-        setLoading(false);
+      if (hasMinimalMetadata) {
+        toast.error('Unable to get metadata from this website. The preview card may appear incomplete.', {
+          duration: 4000,
+        });
       }
-    },
-    [t, updateAttributes],
-  );
+
+      updateAttributes({ ...data, url });
+      setEditing(false);
+    } catch (error: any) {
+      setError(error.message || t('errorFetchingPreview'));
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const fetchPreviewEvent = useEffectEvent((url: string) => {
     fetchPreview(url);
@@ -174,12 +171,9 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
     }
   }, [node.attrs.url]);
 
-  const handleAlignmentChange = useCallback(
-    (value: string) => {
-      updateAttributes({ alignment: value });
-    },
-    [updateAttributes],
-  );
+  function handleAlignmentChange(value: string) {
+    updateAttributes({ alignment: value });
+  }
 
   const handleEdit = () => {
     setEditing(true);
