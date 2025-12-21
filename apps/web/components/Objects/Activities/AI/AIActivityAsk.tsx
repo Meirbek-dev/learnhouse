@@ -31,7 +31,7 @@ interface AIActivityAskProps {
   activity: Activity;
 }
 
-interface AIMessage {
+export interface AIMessage {
   sender: 'ai' | 'user';
   message: string;
   type: 'ai' | 'user';
