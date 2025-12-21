@@ -4,108 +4,143 @@ import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } fro
 import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
 import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
+import { useEffect, useRef, useTransition, useCallback } from 'react';
 import platformLogoLight from 'public/platform_logo_light.svg';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { ScrollArea } from '@components/ui/scroll-area';
+import { Card, CardContent } from '@components/ui/card';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
+import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import clsx from 'clsx';
 
 import useGetAIFeatures from '../../../Hooks/useGetAIFeatures';
 
-interface AIActivityAskProps {
-  activity: any;
+// Type definitions
+interface Activity {
+  activity_uuid: string;
+  [key: string]: any;
 }
 
-const AIActivityAsk = (props: AIActivityAskProps) => {
+interface AIActivityAskProps {
+  activity: Activity;
+}
+
+interface AIMessage {
+  sender: 'ai' | 'user';
+  message: string;
+  type: 'ai' | 'user';
+}
+
+interface ErrorState {
+  isError: boolean;
+  status?: number;
+  error_message?: string;
+}
+
+interface Session {
+  status: string;
+  data?: {
+    tokens?: {
+      access_token?: string;
+    };
+    user?: {
+      first_name?: string;
+      username?: string;
+    };
+  };
+}
+
+type PredefinedQuestionType = 'about' | 'flashcards' | 'examples';
+
+// Main Component
+const AIActivityAsk = ({ activity }: AIActivityAskProps) => {
   const t = useTranslations('Activities.AIActivityAsk');
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'activity_ask' });
-  const isButtonAvailable = is_ai_feature_enabled;
   const dispatchAIChatBot = useAIChatBotDispatch();
   const aiChatBotState = useAIChatBot();
 
+  if (!is_ai_feature_enabled) {
+    return null;
+  }
+
+  const handleToggleModal = () => {
+    dispatchAIChatBot({
+      type: aiChatBotState.isModalOpen ? 'setIsModalClose' : 'setIsModalOpen',
+    });
+  };
+
+  const handleKeyDown = (e: any) => {
+    const key = e?.key ?? e?.nativeEvent?.key;
+    if (key === 'Enter' || key === ' ') {
+      e?.preventDefault?.();
+      handleToggleModal();
+    }
+  };
+
   return (
     <>
-      {isButtonAvailable ? (
-        <div>
-          <ActivityChatMessageBox activity={props.activity} />
-          <div
-            role="button"
-            tabIndex={0}
-            aria-pressed={aiChatBotState.isModalOpen}
-            onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                dispatchAIChatBot({ type: aiChatBotState.isModalOpen ? 'setIsModalClose' : 'setIsModalOpen' });
-              }
-            }}
-            onClick={() =>
-              dispatchAIChatBot({ type: aiChatBotState.isModalOpen ? 'setIsModalClose' : 'setIsModalOpen' })
-            }
-            style={{
-              background:
-                'linear-gradient(135deg, oklch(0.25 0.15 270) 0%, oklch(0.40 0.18 260) 50%, oklch(0.32 0.16 255) 100%)',
-            }}
-            className={clsx(
-              'flex items-center space-x-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-lg ring-1 ring-white/10 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:ring-white/20 focus:ring-2 focus:ring-white/30 focus:outline-none active:scale-95',
-              { 'ring-2 ring-white/30 shadow-xl': aiChatBotState.isModalOpen },
-            )}
-          >
-            <Image
-              className="rounded-md"
-              width={20}
-              src={platformLogoLight}
-              alt={t('askAI')}
-              style={{ height: 'auto' }}
-            />
-            <span className="text-xs font-bold">{t('askAI')}</span>
-          </div>
-        </div>
-      ) : null}
+      <ActivityChatMessageBox activity={activity} />
+      <Button
+        variant="ghost"
+        size="sm"
+        role="button"
+        tabIndex={0}
+        aria-pressed={aiChatBotState.isModalOpen}
+        onKeyDown={handleKeyDown}
+        onClick={handleToggleModal}
+        style={{
+          background:
+            'linear-gradient(135deg, oklch(0.25 0.15 270) 0%, oklch(0.40 0.18 260) 50%, oklch(0.32 0.16 255) 100%)',
+        }}
+        className={cn(
+          'h-10 flex items-center space-x-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white hover:text-white shadow-lg ring-1 ring-white/10 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:ring-white/20 focus:ring-2 focus:ring-white/30 focus:outline-none active:scale-95',
+          { 'ring-2 ring-white/30 shadow-xl': aiChatBotState.isModalOpen },
+        )}
+      >
+        <Image
+          className="rounded-md"
+          width={20}
+          height={20}
+          src={platformLogoLight}
+          alt={t('askAI')}
+        />
+        <span className="text-xs font-bold">{t('askAI')}</span>
+      </Button>
     </>
   );
 };
 
-export interface AIMessage {
-  sender: string;
-  message: any;
-  type: 'ai' | 'user';
-}
-
+// Chat Message Box Component
 interface ActivityChatMessageBoxProps {
-  activity: any;
+  activity: Activity;
 }
 
-const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
+const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
   const t = useTranslations('Activities.AIActivityAsk');
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession() as Session | null;
   const access_token = session?.data?.tokens?.access_token;
   const aiChatBotState = useAIChatBot();
   const dispatchAIChatBot = useAIChatBotDispatch();
 
-  // TODO : come up with a better way to handle this
-  const inputClass = clsx(
-    'w-full rounded-lg bg-gray-950/40 px-4 py-2 text-sm text-white ring-1 ring-white/10 outline-hidden ring-inset placeholder:text-white/30',
-    { 'opacity-30': aiChatBotState.isWaitingForResponse },
-  );
-
-  // Keep the background scrollable on desktop while still preventing
-  // background scroll on small screens (mobile) where the fixed modal can
-  // produce awkward scrolling behaviour. We also preserve the current
-  // scroll position when locking and restore it on close.
+  const [isPending, startTransition] = useTransition();
+  const controllerRef = useRef<AbortController | null>(null);
+  const streamingBufferRef = useRef('');
   const scrollYRef = useRef<number>(0);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Lock scroll on mobile when modal is open
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const isSmallViewport = window.matchMedia('(max-width: 767px)').matches;
 
     if (aiChatBotState.isModalOpen && isSmallViewport) {
-      // Save current scroll position and lock the body so the underlying
-      // content doesn't move on mobile devices.
       scrollYRef.current = window.scrollY || window.pageYOffset || 0;
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollYRef.current}px`;
@@ -113,21 +148,18 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
       document.body.style.right = '0';
       document.body.style.overflow = 'hidden';
     } else {
-      // Restore body styles for desktop or when modal is closed.
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.left = '';
       document.body.style.right = '';
       document.body.style.overflow = '';
 
-      // If we were previously locked on mobile, restore the scroll pos.
       if (!aiChatBotState.isModalOpen && isSmallViewport) {
         window.scrollTo(0, scrollYRef.current || 0);
       }
     }
 
     return () => {
-      // Cleanup in case the component is unmounted while modal is open.
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.left = '';
@@ -137,375 +169,323 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
     };
   }, [aiChatBotState.isModalOpen]);
 
-  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === 'Enter') {
-      // Perform the sending action here
-      sendMessage(event.currentTarget.value);
-    }
-  }
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [aiChatBotState.messages, aiChatBotState.streamingMessage]);
 
-  const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    await dispatchAIChatBot({
-      type: 'setChatInputValue',
-      payload: event.currentTarget.value,
-    });
-  };
-
-  const [isPending, startTransition] = useTransition();
-  const controllerRef = useRef<AbortController | null>(null);
-  const streamingBufferRef = useRef('');
-
-  async function resetStreamingState() {
-    streamingBufferRef.current = '';
-    await dispatchAIChatBot({ type: 'clearStreamingMessage' });
-    await dispatchAIChatBot({ type: 'setStatusMessage', payload: null });
-  }
-
-  function startNewController() {
-    if (controllerRef.current) {
-      controllerRef.current.abort();
-    }
-    const controller = new AbortController();
-    controllerRef.current = controller;
-    return controller;
-  }
-
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       controllerRef.current?.abort();
     };
   }, []);
 
+  // Abort and reset when modal closes
   useEffect(() => {
     if (!aiChatBotState.isModalOpen && controllerRef.current) {
       controllerRef.current.abort();
       controllerRef.current = null;
-      (async () => {
-        streamingBufferRef.current = '';
-        await dispatchAIChatBot({ type: 'clearStreamingMessage' });
-        await dispatchAIChatBot({ type: 'setStatusMessage', payload: null });
-      })();
+      streamingBufferRef.current = '';
+      dispatchAIChatBot({ type: 'clearStreamingMessage' });
+      dispatchAIChatBot({ type: 'setStatusMessage', payload: null });
     }
   }, [aiChatBotState.isModalOpen, dispatchAIChatBot]);
 
-  const sendMessage = async (message: string) => {
-    // Add user message
-    await dispatchAIChatBot({
-      type: 'addMessage',
-      payload: { sender: 'user', message, type: 'user' },
-    });
+  const resetStreamingState = useCallback(async () => {
+    streamingBufferRef.current = '';
+    await dispatchAIChatBot({ type: 'clearStreamingMessage' });
+    await dispatchAIChatBot({ type: 'setStatusMessage', payload: null });
+  }, [dispatchAIChatBot]);
 
-    startTransition(() => dispatchAIChatBot({ type: 'setIsWaitingForResponse' }));
-    await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
-    await dispatchAIChatBot({ type: 'setStatusMessage', payload: 'Думаю...' });
+  const startNewController = useCallback(() => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    return controller;
+  }, []);
 
-    await resetStreamingState();
-    const controller = startNewController();
+  const sendMessage = useCallback(
+    async (message: string) => {
+      if (!message.trim() || !access_token) return;
 
-    try {
-      if (aiChatBotState.aichat_uuid) {
-        // Send message to existing chat
-        await sendActivityAIChatMessageStream(
-          message,
-          aiChatBotState.aichat_uuid,
-          props.activity.activity_uuid,
-          access_token,
-          // onChunk: accumulate content as it arrives
-          (chunk) => {
-            if (chunk.content) {
-              streamingBufferRef.current += chunk.content;
-              dispatchAIChatBot({ type: 'setStreamingMessage', payload: streamingBufferRef.current });
-            }
-          },
-          // onStatus: handle status updates
-          (status) => {
-            if ((status as any)?.aichat_uuid) {
-              startTransition(() =>
-                dispatchAIChatBot({ type: 'setAichat_uuid', payload: (status as any).aichat_uuid }),
-              );
-            }
-            dispatchAIChatBot({ type: 'setStatusMessage', payload: status.message ?? null });
-          },
-          // onComplete: finalize the message
-          (final) => {
-            startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
-            dispatchAIChatBot({
-              type: 'addMessage',
-              payload: { sender: 'ai', message: final.content || streamingBufferRef.current, type: 'ai' },
-            });
-            resetStreamingState();
-            controllerRef.current = null;
-          },
-          // onError: handle errors
-          (error) => {
-            startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
-            dispatchAIChatBot({
-              type: 'setError',
-              payload: {
-                isError: true,
-                status: 500,
-                error_message: error.error || 'Streaming failed',
-              },
-            });
-            resetStreamingState();
-            controllerRef.current = null;
-          },
-          controller.signal,
-        );
-      } else {
-        // Start new chat session
-        await startActivityAIChatSessionStream(
-          message,
-          props.activity.activity_uuid,
-          access_token,
-          // onChunk: accumulate content as it arrives
-          (chunk) => {
-            if (chunk.content) {
-              streamingBufferRef.current += chunk.content;
-              dispatchAIChatBot({ type: 'setStreamingMessage', payload: streamingBufferRef.current });
-            }
-          },
-          // onStatus: handle status updates
-          (status) => {
-            if ((status as any)?.aichat_uuid) {
-              startTransition(() =>
-                dispatchAIChatBot({ type: 'setAichat_uuid', payload: (status as any).aichat_uuid }),
-              );
-            }
-            dispatchAIChatBot({ type: 'setStatusMessage', payload: status.message ?? null });
-          },
-          // onComplete: finalize the message
-          (final) => {
-            startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
-
-            // Extract aichat_uuid from final response if available
-            if ((final as any).aichat_uuid) {
-              startTransition(() =>
-                dispatchAIChatBot({
-                  type: 'setAichat_uuid',
-                  payload: (final as any).aichat_uuid,
-                }),
-              );
-            }
-
-            dispatchAIChatBot({
-              type: 'addMessage',
-              payload: { sender: 'ai', message: final.content || streamingBufferRef.current, type: 'ai' },
-            });
-            resetStreamingState();
-            controllerRef.current = null;
-          },
-          // onError: handle errors
-          (error) => {
-            startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
-            dispatchAIChatBot({
-              type: 'setError',
-              payload: {
-                isError: true,
-                status: 500,
-                error_message: error.error || 'Streaming failed',
-              },
-            });
-            resetStreamingState();
-            controllerRef.current = null;
-          },
-          controller.signal,
-        );
-      }
-    } catch (error) {
-      startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
-      dispatchAIChatBot({
-        type: 'setError',
-        payload: {
-          isError: true,
-          status: 500,
-          error_message: error instanceof Error ? error.message : 'Unknown error',
-        },
+      // Add user message
+      await dispatchAIChatBot({
+        type: 'addMessage',
+        payload: { sender: 'user', message, type: 'user' },
       });
-      resetStreamingState();
-      controllerRef.current = null;
+
+      startTransition(() => dispatchAIChatBot({ type: 'setIsWaitingForResponse' }));
+      await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
+      await dispatchAIChatBot({ type: 'setStatusMessage', payload: 'Thinking...' });
+
+      await resetStreamingState();
+      const controller = startNewController();
+
+      const handleChunk = (chunk: { content?: string }) => {
+        if (chunk.content) {
+          streamingBufferRef.current += chunk.content;
+          dispatchAIChatBot({ type: 'setStreamingMessage', payload: streamingBufferRef.current });
+        }
+      };
+
+      const handleStatus = (status: { aichat_uuid?: string; message?: string }) => {
+        if (status.aichat_uuid) {
+          startTransition(() =>
+            dispatchAIChatBot({ type: 'setAichat_uuid', payload: (status.aichat_uuid ?? null) as string | null }),
+          );
+        }
+        dispatchAIChatBot({ type: 'setStatusMessage', payload: (status.message ?? null) as string | null });
+      };
+
+      const handleComplete = (final: { content?: string; aichat_uuid?: string }) => {
+        startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
+
+        if (final.aichat_uuid) {
+          startTransition(() =>
+            dispatchAIChatBot({ type: 'setAichat_uuid', payload: (final.aichat_uuid ?? null) as string | null }),
+          );
+        }
+
+        dispatchAIChatBot({
+          type: 'addMessage',
+          payload: {
+            sender: 'ai',
+            message: final.content || streamingBufferRef.current,
+            type: 'ai',
+          },
+        });
+
+        resetStreamingState();
+        controllerRef.current = null;
+      };
+
+      const handleError = (error: { error?: string }) => {
+        startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
+        dispatchAIChatBot({
+          type: 'setError',
+          payload: {
+            isError: true,
+            status: 500,
+            error_message: error.error || 'Streaming failed',
+          },
+        });
+        resetStreamingState();
+        controllerRef.current = null;
+      };
+
+      try {
+        if (aiChatBotState.aichat_uuid) {
+          await sendActivityAIChatMessageStream(
+            message,
+            aiChatBotState.aichat_uuid,
+            activity.activity_uuid,
+            access_token,
+            handleChunk,
+            handleStatus,
+            handleComplete,
+            handleError,
+            controller.signal,
+          );
+        } else {
+          await startActivityAIChatSessionStream(
+            message,
+            activity.activity_uuid,
+            access_token,
+            handleChunk,
+            handleStatus,
+            handleComplete,
+            handleError,
+            controller.signal,
+          );
+        }
+      } catch (error) {
+        handleError({
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
+    },
+    [
+      access_token,
+      activity.activity_uuid,
+      aiChatBotState.aichat_uuid,
+      dispatchAIChatBot,
+      resetStreamingState,
+      startNewController,
+    ],
+  );
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' && !aiChatBotState.isWaitingForResponse) {
+      sendMessage(event.currentTarget.value);
     }
   };
 
-  function closeModal() {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    dispatchAIChatBot({
+      type: 'setChatInputValue',
+      payload: event.currentTarget.value,
+    });
+  };
+
+  const closeModal = () => {
     dispatchAIChatBot({ type: 'setIsModalClose' });
+  };
+
+  if (!aiChatBotState.isModalOpen) {
+    return null;
   }
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, []);
+  const hasMessages = aiChatBotState.messages.length > 0;
+  const isDisabled = aiChatBotState.isWaitingForResponse || isPending;
 
   return (
     <AnimatePresence>
-      {aiChatBotState.isModalOpen ? (
-        <motion.div
-          initial={{ y: 20, opacity: 0.3, filter: 'blur(5px)' }}
-          animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
-          exit={{ y: 50, opacity: 0, filter: 'blur(25px)' }}
-          transition={{
-            type: 'spring',
-            bounce: 0.35,
-            duration: 1.7,
-            mass: 0.2,
-            velocity: 2,
-          }}
-          className="fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center"
-          style={{ pointerEvents: 'none' }}
-        >
-          <div
-            style={{
-              pointerEvents: 'auto',
-              background: `linear-gradient(160deg, #0c1222 0%, #1a2332 30%, #2d3748 60%, #4a5568 100%),
-                       radial-gradient(ellipse at top left, rgba(99, 179, 237, 0.12) 0%, transparent 60%),
-                       radial-gradient(ellipse at bottom right, rgba(167, 139, 250, 0.08) 0%, transparent 60%)`,
-            }}
-            className="fixed bottom-0 left-1/2 z-50 mx-auto my-10 h-[350px] w-10/12 max-w-(--breakpoint-2xl) -translate-x-1/2 flex-col-reverse rounded-2xl bg-black p-4 text-white shadow-lg ring-1 ring-white/10 ring-inset"
-          >
-            <div className="flex flex-row-reverse items-center justify-between pb-3">
-              <div className="flex items-center space-x-2">
-                <X
-                  size={20}
-                  className="items-center rounded-full bg-white/10 p-1 text-white/50 hover:cursor-pointer"
-                  onClick={closeModal}
-                />
-              </div>
-              <div
-                className={`ml-[-120px] flex items-center space-x-1 ${
-                  aiChatBotState.isWaitingForResponse ? 'animate-pulse' : ''
-                }`}
-              >
+      <motion.div
+        initial={{ y: 20, opacity: 0.3, filter: 'blur(5px)' }}
+        animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+        exit={{ y: 50, opacity: 0, filter: 'blur(25px)' }}
+        transition={{
+          type: 'spring',
+          bounce: 0.35,
+          duration: 1.7,
+          mass: 0.2,
+          velocity: 2,
+        }}
+        className="fixed bottom-4 left-1/2 z-50 w-[95%] max-w-4xl -translate-x-1/2"
+        style={{ pointerEvents: 'auto' }}
+      >
+        <Card className="relative h-[300px] overflow-hidden border-white/10 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-0 shadow-2xl ring-1 ring-white/10">
+          <CardContent className="flex h-full flex-col p-4">
+            {/* Header */}
+            <div className="mb-3 flex items-center justify-between">
+              <div className={cn('flex items-center gap-2', aiChatBotState.isWaitingForResponse && 'animate-pulse')}>
                 <Image
-                  className={`rounded-lg outline-neutral-200/20 ${
-                    aiChatBotState.isWaitingForResponse ? 'animate-pulse' : ''
-                  }`}
+                  className="rounded-lg"
                   width={28}
+                  height={28}
                   src={platformLogoLight}
-                  alt={t('askAI')}
-                  style={{ height: 'auto' }}
+                  alt={t('AI')}
                 />
-                <span className="text-sm font-bold text-white"> {t('AI')}</span>
+                <span className="text-sm font-bold text-white">{t('AI')}</span>
               </div>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={closeModal}
+                className="h-8 w-8 rounded-full bg-white/10 text-white/50 hover:bg-white/20 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
-            {aiChatBotState.statusMessage ? (
-              <p className="text-xs text-white/60">{aiChatBotState.statusMessage}</p>
-            ) : null}
-            {aiChatBotState.messages.length > 0 && !aiChatBotState.error.isError ? (
-              <ScrollArea className="h-[237px] w-full">
-                <div className="flex-col space-y-4">
-                  {aiChatBotState.messages.map((message: AIMessage, index: number) => {
-                    return (
+
+            {/* Status Message */}
+            {aiChatBotState.statusMessage && (
+              <p className="mb-2 text-xs text-white/60">{aiChatBotState.statusMessage}</p>
+            )}
+
+            {/* Messages Area */}
+            <div className="mb-3 flex-1 overflow-hidden">
+              {hasMessages && !aiChatBotState.error.isError ? (
+                <ScrollArea className="h-full pr-4">
+                  <div className="space-y-4">
+                    {aiChatBotState.messages.map((message: AIMessage, index: number) => (
                       <AIMessageComponent
-                        key={index}
+                        key={`${message.sender}-${index}`}
                         message={message}
                         animated={message.sender === 'ai'}
                       />
-                    );
-                  })}
-                  {aiChatBotState.streamingMessage && (
-                    <AIMessageComponent
-                      message={{ sender: 'ai', message: aiChatBotState.streamingMessage, type: 'ai' }}
-                      animated
-                    />
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea>
-            ) : (
-              <AIMessagePlaceHolder
-                sendMessage={sendMessage}
-                activity_uuid={props.activity.activity_uuid}
-              />
-            )}
-            {aiChatBotState.error.isError ? (
-              <div className="flex h-[237px] items-center">
-                <div className="mx-auto flex w-[600px] flex-col space-y-2 rounded-lg bg-red-500/20 p-5 outline-red-500">
-                  <AlertTriangle
-                    size={20}
-                    className="text-red-500"
-                  />
-                  <div className="flex flex-col">
-                    <h3 className="font-semibold text-red-200">{t('errorTitle')}</h3>
-                    <span className="text-sm text-red-100">{aiChatBotState.error.error_message}</span>
+                    ))}
+                    {aiChatBotState.streamingMessage && (
+                      <AIMessageComponent
+                        message={{
+                          sender: 'ai',
+                          message: aiChatBotState.streamingMessage,
+                          type: 'ai',
+                        }}
+                        animated
+                      />
+                    )}
+                    <div ref={messagesEndRef} />
                   </div>
-                </div>
-              </div>
-            ) : null}
-            <div className="flex items-center space-x-2">
-              <div className="">
-                <UserAvatar
-                  size="sm"
-                  variant="outline"
+                </ScrollArea>
+              ) : aiChatBotState.error.isError ? (
+                <ErrorDisplay
+                  error={aiChatBotState.error}
+                  t={t}
                 />
-              </div>
-              <div className="w-full">
-                <input
-                  onKeyDown={handleKeyDown}
-                  onChange={handleChange}
-                  disabled={aiChatBotState.isWaitingForResponse || isPending}
-                  value={aiChatBotState.chatInputValue}
-                  placeholder={t('placeholder')}
-                  type="text"
-                  className={inputClass}
-                  name=""
-                  id=""
+              ) : (
+                <AIMessagePlaceHolder
+                  sendMessage={sendMessage}
+                  activity={activity}
+                  session={session}
                 />
-              </div>
-              <div className="">
-                <MessageCircle
-                  size={20}
-                  className="text-white/50 hover:cursor-pointer"
-                  onClick={() => sendMessage(aiChatBotState.chatInputValue)}
-                />
-              </div>
+              )}
             </div>
-          </div>
-        </motion.div>
-      ) : null}
+
+            {/* Input Area */}
+            <div className="flex items-center gap-2">
+              <UserAvatar
+                size="sm"
+                variant="outline"
+              />
+              <Input
+                onKeyDown={handleKeyDown}
+                onChange={handleChange}
+                disabled={isDisabled}
+                value={aiChatBotState.chatInputValue}
+                placeholder={t('placeholder')}
+                className={cn(
+                  'flex-1 border-white/10 bg-slate-950/40 text-white placeholder:text-white/30',
+                  isDisabled && 'opacity-30',
+                )}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => sendMessage(aiChatBotState.chatInputValue)}
+                disabled={isDisabled || !aiChatBotState.chatInputValue.trim()}
+                className="text-white/50 hover:text-white disabled:opacity-30"
+              >
+                <MessageCircle className="h-5 w-5" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </AnimatePresence>
   );
 };
 
+// AI Message Component
 interface AIMessageComponentProps {
   message: AIMessage;
   animated: boolean;
 }
 
-const AIMessageComponent = (props: AIMessageComponentProps) => {
-  const words = props.message.message.split(' ');
+const AIMessageComponent = ({ message, animated }: AIMessageComponentProps) => {
+  const words = message.message.split(' ');
 
   return (
-    <div className="flex w-full space-x-2 font-medium antialiased">
-      <div className="">
-        {props.message.sender === 'ai' ? (
-          <UserAvatar
-            size="sm"
-            variant="outline"
-            predefined_avatar="ai"
-          />
-        ) : (
-          <UserAvatar
-            size="sm"
-            variant="outline"
-          />
-        )}
-      </div>
-      <div className="w-full">
-        <p
-          className="w-full rounded-lg px-2 py-1 text-base text-white outline-hidden placeholder:text-white/30"
-          id=""
-        >
+    <div className="flex gap-2">
+      <UserAvatar
+        size="sm"
+        variant="outline"
+        predefined_avatar={message.sender === 'ai' ? 'ai' : undefined}
+      />
+      <div className="flex-1 rounded-lg bg-white/5 px-3 py-2">
+        <p className="text-sm leading-relaxed text-white">
           <AnimatePresence>
             {words.map((word: string, i: number) => (
               <motion.span
-                key={i}
-                initial={props.animated ? { opacity: 0, y: -10 } : { opacity: 1, y: 0 }}
+                key={`${word}-${i}`}
+                initial={animated ? { opacity: 0, y: -10 } : { opacity: 1, y: 0 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={props.animated ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
-                transition={props.animated ? { delay: i * 0.1 } : {}}
+                exit={animated ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
+                transition={animated ? { delay: i * 0.05 } : {}}
               >
                 {`${word} `}
               </motion.span>
@@ -517,102 +497,129 @@ const AIMessageComponent = (props: AIMessageComponentProps) => {
   );
 };
 
-const AIMessagePlaceHolder = (props: { activity_uuid: string; sendMessage: any }) => {
-  const t = useTranslations('Activities.AIActivityAsk');
-  const session = usePlatformSession() as any;
-  const [_feedbackModal, _setFeedbackModal] = useState(false);
-  const aiChatBotState = useAIChatBot();
+// Error Display Component
+interface ErrorDisplayProps {
+  error: ErrorState;
+  t: (key: string) => string;
+}
 
-  if (!aiChatBotState.error.isError) {
-    return (
-      <div className="h-[237px] w-full flex-col">
-        <div className="flex flex-col justify-center pt-12 text-center">
-          <motion.div
-            initial={{ y: 20, opacity: 0, filter: 'blur(5px)' }}
-            animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
-            exit={{ y: 50, opacity: 0 }}
-            transition={{
-              type: 'spring',
-              bounce: 0.35,
-              duration: 1.7,
-              mass: 0.2,
-              velocity: 2,
-              delay: 0.17,
-            }}
-          >
-            <p className="flex items-center justify-center space-x-2 pt-4 text-2xl font-semibold text-white/70">
-              <span className="items-center">{t('hello')}</span>
-              <span className="flex items-center space-x-2 capitalize">
-                <UserAvatar
-                  size="sm"
-                  variant="outline"
-                />
-                <span>{session.data.user.first_name ?? session.data.user.username},</span>
-              </span>
-              <span>{t('howCanWeHelp')}</span>
-            </p>
-          </motion.div>
-          <motion.div
-            initial={{ y: 20, opacity: 0, filter: 'blur(5px)' }}
-            animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
-            exit={{ y: 50, opacity: 0 }}
-            transition={{
-              type: 'spring',
-              bounce: 0.35,
-              duration: 1.7,
-              mass: 0.2,
-              velocity: 2,
-              delay: 0.27,
-            }}
-            className="questions mx-auto flex flex-wrap justify-center space-x-3 pt-6"
-          >
-            <AIChatPredefinedQuestion
-              sendMessage={props.sendMessage}
-              label="about"
-            />
-            <AIChatPredefinedQuestion
-              sendMessage={props.sendMessage}
-              label="flashcards"
-            />
-            <AIChatPredefinedQuestion
-              sendMessage={props.sendMessage}
-              label="examples"
-            />
-          </motion.div>
-        </div>
-      </div>
-    );
-  }
-};
+const ErrorDisplay = ({ error, t }: ErrorDisplayProps) => (
+  <div className="flex h-full items-center justify-center">
+    <Alert
+      variant="destructive"
+      className="max-w-md"
+    >
+      <AlertTriangle className="h-4 w-4" />
+      <AlertTitle>{t('errorTitle')}</AlertTitle>
+      <AlertDescription>{error.error_message}</AlertDescription>
+    </Alert>
+  </div>
+);
 
-const AIChatPredefinedQuestion = (props: { sendMessage: any; label: string }) => {
+// Placeholder Component
+interface AIMessagePlaceHolderProps {
+  activity: Activity;
+  sendMessage: (message: string) => void;
+  session: Session | null;
+}
+
+const AIMessagePlaceHolder = ({ sendMessage, session }: AIMessagePlaceHolderProps) => {
   const t = useTranslations('Activities.AIActivityAsk');
 
-  function getQuestion(label: string) {
-    if (label === 'about') {
-      return t('questionAbout');
-    }
-    if (label === 'flashcards') {
-      return t('questionFlashcards');
-    }
-    if (label === 'examples') {
-      return t('questionExamples');
-    }
-    return '';
-  }
+  const userName = session?.data?.user?.first_name || session?.data?.user?.username || 'Пользователь';
 
   return (
-    <button
-      onClick={() => props.sendMessage(getQuestion(props.label))}
-      className="flex items-center space-x-2 rounded-xl bg-white/5 px-4 py-2 text-xs font-semibold text-white/50 ring-1 ring-white/10 transition-all duration-200 hover:bg-white/10 hover:text-white/70 hover:shadow-md hover:ring-white/20 focus:ring-2 focus:ring-white/30 focus:outline-none active:scale-95"
-      type="button"
-      aria-label={getQuestion(props.label)}
+    <div className="flex h-full flex-col items-center justify-center space-y-6">
+      <motion.div
+        initial={{ y: 20, opacity: 0, filter: 'blur(5px)' }}
+        animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+        transition={{
+          type: 'spring',
+          bounce: 0.35,
+          duration: 1.7,
+          delay: 0.17,
+        }}
+        className="text-center"
+      >
+        <p className="flex flex-wrap items-center justify-center gap-2 text-xl font-semibold text-white/70">
+          <span>{t('hello')}</span>
+          <span className="flex items-center gap-2 capitalize">
+            <UserAvatar
+              size="sm"
+              variant="outline"
+            />
+            <span>{userName},</span>
+          </span>
+          <span>{t('howCanWeHelp')}</span>
+        </p>
+      </motion.div>
+
+      <motion.div
+        initial={{ y: 20, opacity: 0, filter: 'blur(5px)' }}
+        animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+        transition={{
+          type: 'spring',
+          bounce: 0.35,
+          duration: 1.7,
+          delay: 0.27,
+        }}
+        className="flex flex-wrap justify-center gap-2"
+      >
+        <AIChatPredefinedQuestion
+          sendMessage={sendMessage}
+          label="about"
+        />
+        <AIChatPredefinedQuestion
+          sendMessage={sendMessage}
+          label="flashcards"
+        />
+        <AIChatPredefinedQuestion
+          sendMessage={sendMessage}
+          label="examples"
+        />
+      </motion.div>
+    </div>
+  );
+};
+
+// Predefined Question Component
+interface AIChatPredefinedQuestionProps {
+  sendMessage: (message: string) => void;
+  label: PredefinedQuestionType;
+}
+
+const AIChatPredefinedQuestion = ({ sendMessage, label }: AIChatPredefinedQuestionProps) => {
+  const t = useTranslations('Activities.AIActivityAsk');
+
+  const getQuestion = (questionLabel: PredefinedQuestionType): string => {
+    const questions = {
+      about: t('questionAbout'),
+      flashcards: t('questionFlashcards'),
+      examples: t('questionExamples'),
+    };
+    return questions[questionLabel] || '';
+  };
+
+  const getIcon = (iconLabel: PredefinedQuestionType) => {
+    const icons = {
+      about: <BadgeInfo className="h-4 w-4" />,
+      flashcards: <NotebookTabs className="h-4 w-4" />,
+      examples: <span className="text-xs font-bold">{t('examplesAbbr')}</span>,
+    };
+    return icons[iconLabel];
+  };
+
+  const question = getQuestion(label);
+
+  return (
+    <Badge
+      variant="outline"
+      className="cursor-pointer gap-2 border-white/10 bg-white/5 text-white/50 transition-all hover:bg-white/10 hover:text-white/70"
+      onClick={() => sendMessage(question)}
     >
-      {props.label === 'about' && <BadgeInfo size={16} />}
-      {props.label === 'flashcards' && <NotebookTabs size={16} />}
-      {props.label === 'examples' && <div className="text-xs font-bold text-white/50">{t('examplesAbbr')}</div>}
-      <span>{getQuestion(props.label)}</span>
-    </button>
+      {getIcon(label)}
+      <span className="text-xs">{question}</span>
+    </Badge>
   );
 };
 
