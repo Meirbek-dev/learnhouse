@@ -13,7 +13,7 @@ import { useEffect, useRef, useState } from 'react';
 import { LevelProgress } from '@/lib/gamification';
 import Link from '@components/ui/ServerLink';
 import ReactConfetti from 'react-confetti';
-import html2canvas from 'html2canvas';
+// html2canvas is dynamically imported where needed to reduce bundle size
 import type { FC } from 'react';
 import QRCode from 'qrcode';
 import jsPDF from 'jspdf';
@@ -502,7 +502,8 @@ const CourseEndView: FC<CourseEndViewProps> = ({
       // Add to document temporarily
       document.body.appendChild(certificateDiv);
 
-      // Convert to canvas
+      // Convert to canvas (dynamically import to reduce bundle size)
+      const { default: html2canvas } = await import('html2canvas');
       const canvas = await html2canvas(certificateDiv, {
         width: 800,
         height: 600,

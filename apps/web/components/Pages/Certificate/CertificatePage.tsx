@@ -8,7 +8,7 @@ import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import html2canvas from 'html2canvas';
+// html2canvas is dynamically imported where needed to reduce bundle size
 import type React from 'react';
 import QRCode from 'qrcode';
 import jsPDF from 'jspdf';
@@ -389,7 +389,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       // Add to document temporarily
       document.body.appendChild(certificateDiv);
 
-      // Convert to canvas
+      // Convert to canvas (dynamically import to reduce bundle size)
+      const { default: html2canvas } = await import('html2canvas');
       const canvas = await html2canvas(certificateDiv, {
         width: 800,
         height: 600,
