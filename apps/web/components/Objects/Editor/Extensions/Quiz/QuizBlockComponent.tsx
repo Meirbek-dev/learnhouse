@@ -4,10 +4,11 @@ import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { BadgeHelp, Check, Minus, Plus, RefreshCcw } from 'lucide-react';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
-import ReactConfetti from 'react-confetti';
+// Lazy-load react-confetti to avoid adding it to the initial bundle
+const LazyReactConfetti = lazy(() => import('react-confetti'));
 import { generateUUID } from '@/lib/utils';
 import { twMerge } from 'tailwind-merge';
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 
 interface Answer {
   answer_id: string;
@@ -193,11 +194,13 @@ const QuizBlockComponent = (props: any) => {
         {/* Header section */}
         <div className="flex flex-wrap items-center gap-2 pt-1 text-sm">
           {submitted && submissionMessage === t('allCorrect') ? (
-            <ReactConfetti
-              numberOfPieces={submitted ? 1400 : 0}
-              recycle={false}
-              className="h-screen w-full"
-            />
+            <Suspense fallback={null}>
+              <LazyReactConfetti
+                numberOfPieces={submitted ? 1400 : 0}
+                recycle={false}
+                className="h-screen w-full"
+              />
+            </Suspense>
           ) : null}
           <div className="flex items-center space-x-2 text-sm">
             <BadgeHelp

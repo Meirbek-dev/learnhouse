@@ -1,3 +1,4 @@
+'use client';
 import {
   Bike,
   Book,
@@ -28,11 +29,18 @@ import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import type { ChangeEvent, FC } from 'react';
 import { useTranslations } from 'next-intl';
-import { createApi } from 'unsplash-js';
 
-const unsplash = createApi({
-  accessKey: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY as string,
-});
+// Dynamically import `unsplash-js` when needed to avoid including it in the initial bundle.
+let unsplashClient: any | null = null;
+const getUnsplash = async () => {
+  if (!unsplashClient) {
+    const { createApi } = await import('unsplash-js');
+    unsplashClient = createApi({
+      accessKey: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY as string,
+    });
+  }
+  return unsplashClient;
+};
 
 const IMAGES_PER_PAGE = 20;
 
@@ -82,7 +90,8 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
   const fetchImages = async (searchQuery: string, pageNum: number) => {
     setLoading(true);
     try {
-      const result = await unsplash.search.getPhotos({
+      const client = await getUnsplash();
+      const result = await client.search.getPhotos({
         query: searchQuery,
         page: pageNum,
         perPage: IMAGES_PER_PAGE,
@@ -122,7 +131,8 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
       (async () => {
         setLoading(true);
         try {
-          const result = await unsplash.search.getPhotos({
+          const client = await getUnsplash();
+          const result = await client.search.getPhotos({
             query: 'course',
             page: 1,
             perPage: IMAGES_PER_PAGE,
