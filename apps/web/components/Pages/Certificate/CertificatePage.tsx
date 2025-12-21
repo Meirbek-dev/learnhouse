@@ -11,7 +11,7 @@ import Link from '@components/ui/AppLink';
 // html2canvas is dynamically imported where needed to reduce bundle size
 import type React from 'react';
 import QRCode from 'qrcode';
-import jsPDF from 'jspdf';
+import { createPDF } from '../../../lib/loadJsPDF';
 
 interface CertificatePageProps {
   orgslug: string;
@@ -406,7 +406,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
 
       // Create PDF
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('landscape', 'mm', 'a4');
+      const pdf = await createPDF('landscape', 'mm', 'a4');
 
       // Calculate dimensions to center the certificate
       const pdfWidth = pdf.internal.pageSize.getWidth();
