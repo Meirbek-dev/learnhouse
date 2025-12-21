@@ -1,8 +1,8 @@
 'use client';
 
 import { Check, ChevronDown, GripVertical, Info, Lightbulb, Loader2, Plus, Trash2, Type, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -303,7 +303,7 @@ function BlankInputTeacher({
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 }
-              ></TooltipTrigger>
+              />
               <TooltipContent>{t('removeBlank')}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -361,7 +361,7 @@ function BlankInputStudent({ blank, questionUUID, userAnswer, onAnswerChange, on
         <AnswerStatusBadge
           isCorrect={false}
           view="student"
-          hasAnswer={!!userAnswer?.trim()}
+          hasAnswer={Boolean(userAnswer?.trim())}
         />
       </CardContent>
     </Card>
@@ -646,7 +646,9 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
   const addBlank = (qIndex: number) => {
     setQuestions((prev) => {
       if (!prev[qIndex]) return prev;
-      return prev.map((q, i) => (i === qIndex ? { ...q, blanks: [...q.blanks, createDefaultBlank(t('blankPlaceholder'))] } : q));
+      return prev.map((q, i) =>
+        i === qIndex ? { ...q, blanks: [...q.blanks, createDefaultBlank(t('blankPlaceholder'))] } : q,
+      );
     });
   };
 
@@ -658,7 +660,9 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
         toast.error(t('removeBlankError'));
         return prev;
       }
-      return prev.map((item, i) => (i === qIndex ? { ...item, blanks: item.blanks.filter((_, j) => j !== bIndex) } : item));
+      return prev.map((item, i) =>
+        i === qIndex ? { ...item, blanks: item.blanks.filter((_, j) => j !== bIndex) } : item,
+      );
     });
   };
 
@@ -673,9 +677,13 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
   // Student handlers
   const handleUserAnswerChange = (questionUUID: string, blankUUID: string, answer: string) => {
     setUserSubmissions((prev) => {
-      const existingIndex = prev.submissions.findIndex((s) => s.questionUUID === questionUUID && s.blankUUID === blankUUID);
+      const existingIndex = prev.submissions.findIndex(
+        (s) => s.questionUUID === questionUUID && s.blankUUID === blankUUID,
+      );
       const updatedSubmissions =
-        existingIndex !== -1 ? prev.submissions.map((s, i) => (i === existingIndex ? { ...s, answer } : s)) : [...prev.submissions, { questionUUID, blankUUID, answer }];
+        existingIndex !== -1
+          ? prev.submissions.map((s, i) => (i === existingIndex ? { ...s, answer } : s))
+          : [...prev.submissions, { questionUUID, blankUUID, answer }];
       return { ...prev, submissions: updatedSubmissions };
     });
   };

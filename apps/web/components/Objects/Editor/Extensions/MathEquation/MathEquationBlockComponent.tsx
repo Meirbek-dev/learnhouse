@@ -2,7 +2,7 @@
 
 import { BookOpen, ChevronDown, ExternalLink, Lightbulb, Save, Sigma } from 'lucide-react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import { styled } from 'styled-components';
@@ -220,19 +220,19 @@ const MathEquationBlockComponent = (props: any) => {
   const helpRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (templatesRef.current && !templatesRef.current.contains(event.target as Node)) {
-        setShowTemplates(false);
-      }
-      if (symbolsRef.current && !symbolsRef.current.contains(event.target as Node)) {
-        setShowSymbols(false);
-      }
-      if (helpRef.current && !helpRef.current.contains(event.target as Node)) {
-        setShowHelp(false);
-      }
+  const handleClickOutside = useEffectEvent((event: MouseEvent) => {
+    if (templatesRef.current && !templatesRef.current.contains(event.target as Node)) {
+      setShowTemplates(false);
     }
+    if (symbolsRef.current && !symbolsRef.current.contains(event.target as Node)) {
+      setShowSymbols(false);
+    }
+    if (helpRef.current && !helpRef.current.contains(event.target as Node)) {
+      setShowHelp(false);
+    }
+  });
 
+  useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);

@@ -1,7 +1,7 @@
 'use client';
 import { ArrowRight, Backpack, Check, FileText, ListTree, StickyNote, Video, X } from 'lucide-react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { getUriWithOrg } from '@services/config/config';
-import { useEffect, useRef, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -24,12 +24,13 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
   const cleanCourseUuid = props.course.course_uuid?.replace('course_', '');
 
   // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
+  const handleClickOutside = useEffectEvent((event: MouseEvent) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      setIsOpen(false);
     }
+  });
+
+  useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);

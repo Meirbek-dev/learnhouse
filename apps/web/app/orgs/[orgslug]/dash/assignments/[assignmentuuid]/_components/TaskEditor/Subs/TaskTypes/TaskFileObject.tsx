@@ -6,7 +6,7 @@ import {
   updateSubFile,
 } from '@services/courses/assignments';
 import { useAssignmentsTaskDispatch } from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import { Cloud, Download, File, Info, Loader2, UploadCloud, AlertCircle } from 'lucide-react';
+import { AlertCircle, Cloud, Download, File, Info, Loader2, UploadCloud } from 'lucide-react';
 import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
@@ -140,9 +140,9 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
         fileUUID: res.data.file_uuid,
         assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
       });
-    } catch (err) {
+    } catch (error) {
       setError(t('uploadUnexpectedError'));
-      console.error(err);
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -173,9 +173,9 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
       };
       setUserSubmissions(updated);
       setInitialUserSubmissions(updated);
-    } catch (err) {
+    } catch (error) {
       toast.error(t('errorSaving'));
-      console.error(err);
+      console.error(error);
     }
   };
 
@@ -199,9 +199,9 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
       if (!res) return toast.error(t('gradeError'));
       await fetchUserSubmission();
       toast.success(t('gradeSuccess', { grade }));
-    } catch (err) {
+    } catch (error) {
       toast.error(t('gradeError'));
-      console.error(err);
+      console.error(error);
     }
   };
 

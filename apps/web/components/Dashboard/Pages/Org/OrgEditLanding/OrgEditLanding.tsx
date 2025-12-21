@@ -244,12 +244,12 @@ const OrgEditLanding = () => {
       const landingConfig = org.config.config.landing;
       setLandingData({
         sections: landingConfig.sections || [],
-        enabled: !!landingConfig.enabled,
+        enabled: Boolean(landingConfig.enabled),
       });
       // Coerce to boolean to avoid switching between controlled/uncontrolled
       // states for the `Switch` component (React warns when checked changes
       // between `undefined` and boolean during the component lifecycle).
-      setIsLandingEnabled(!!landingConfig.enabled);
+      setIsLandingEnabled(Boolean(landingConfig.enabled));
     }
   }, [org]);
 

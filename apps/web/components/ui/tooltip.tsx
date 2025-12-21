@@ -2,8 +2,9 @@
 
 import { Tooltip as TooltipPrimitive } from '@base-ui/react/tooltip';
 
-import { Children, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { cn } from '@/lib/utils';
+import { Children } from 'react';
 
 function TooltipProvider({ delay = 0, ...props }: TooltipPrimitive.Provider.Props) {
   return (

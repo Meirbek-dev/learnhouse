@@ -32,10 +32,10 @@ import {
   UnplugIcon,
 } from 'lucide-react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { useEffect, useEffectEvent, useRef, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { useEffect, useRef, useState, useTransition } from 'react';
 import { getUriWithoutOrg } from '@services/config/config';
 import { SiStripe } from '@icons-pack/react-simple-icons';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -358,32 +358,33 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ orgId, configId
   });
 
   const fetchedConfigRef = useRef<Record<string, boolean>>({});
-  const mountedRef = useRef<boolean>(true);
+
+  const fetchConfigEvent = useEffectEvent(async (signal?: AbortSignal) => {
+    try {
+      const config = await getPaymentConfigs(orgId, accessToken);
+      if (signal?.aborted) return;
+      const stripeConfig = config.find((c: any) => c.id === configId);
+      if (stripeConfig?.provider_specific_id) {
+        form.setValue('stripeAccountId', stripeConfig.provider_specific_id || '');
+      }
+    } catch (error) {
+      if (signal?.aborted) return;
+      console.error('Error fetching Stripe configuration:', error);
+      toast.error(t('errors.loadStripeConfigFailed'));
+    }
+  });
 
   useEffect(() => {
     const key = `${isOpen ? 'open' : 'closed'}:${configId}:${accessToken || 'no-token'}`;
-    mountedRef.current = true;
-    const fetchConfig = async () => {
-      try {
-        const config = await getPaymentConfigs(orgId, accessToken);
-        const stripeConfig = config.find((c: any) => c.id === configId);
-        if (mountedRef.current && stripeConfig?.provider_specific_id) {
-          form.setValue('stripeAccountId', stripeConfig.provider_specific_id || '');
-        }
-      } catch (error) {
-        console.error('Error fetching Stripe configuration:', error);
-        if (mountedRef.current) toast.error(t('errors.loadStripeConfigFailed'));
-      }
-    };
 
     if (isOpen && !fetchedConfigRef.current[key]) {
       fetchedConfigRef.current[key] = true;
-      fetchConfig();
+      const controller = new AbortController();
+      fetchConfigEvent(controller.signal);
+      return () => controller.abort();
     }
 
-    return () => {
-      mountedRef.current = false;
-    };
+    return;
   }, [isOpen, orgId, configId, accessToken, t, form]);
 
   const handleSubmit = async (values: StripeConfigFormValues) => {

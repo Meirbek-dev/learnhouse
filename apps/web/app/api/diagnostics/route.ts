@@ -11,11 +11,11 @@ export async function GET() {
     // Check environment variables
     diagnostics.checks.envVars = {
       status: 'checking',
-      NEXT_PUBLIC_PLATFORM_API_URL: !!process.env.NEXT_PUBLIC_PLATFORM_API_URL,
-      NEXT_PUBLIC_PLATFORM_BACKEND_URL: !!process.env.NEXT_PUBLIC_PLATFORM_BACKEND_URL,
-      NEXT_PUBLIC_PLATFORM_DOMAIN: !!process.env.NEXT_PUBLIC_PLATFORM_DOMAIN,
-      NEXTAUTH_SECRET: !!process.env.NEXTAUTH_SECRET,
-      NEXTAUTH_URL: !!process.env.NEXTAUTH_URL,
+      NEXT_PUBLIC_PLATFORM_API_URL: Boolean(process.env.NEXT_PUBLIC_PLATFORM_API_URL),
+      NEXT_PUBLIC_PLATFORM_BACKEND_URL: Boolean(process.env.NEXT_PUBLIC_PLATFORM_BACKEND_URL),
+      NEXT_PUBLIC_PLATFORM_DOMAIN: Boolean(process.env.NEXT_PUBLIC_PLATFORM_DOMAIN),
+      NEXTAUTH_SECRET: Boolean(process.env.NEXTAUTH_SECRET),
+      NEXTAUTH_URL: Boolean(process.env.NEXTAUTH_URL),
     };
 
     // Check backend connectivity
@@ -78,8 +78,8 @@ export async function GET() {
       const session = await auth();
       diagnostics.checks.auth = {
         status: 'working',
-        hasSession: !!session,
-        hasUser: !!session?.user,
+        hasSession: Boolean(session),
+        hasUser: Boolean(session?.user),
       };
     } catch (error: any) {
       diagnostics.checks.auth = {

@@ -3,12 +3,12 @@
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserCertificates } from '@services/courses/certifications';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
 import Link from '@components/ui/AppLink';
-import html2canvas from 'html2canvas-pro';
+import html2canvas from 'html2canvas';
 import type React from 'react';
 import QRCode from 'qrcode';
 import jsPDF from 'jspdf';
@@ -27,7 +27,36 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
   const locale = useLocale();
   const t = useTranslations('Certificates.CertificatePage');
   const fetchedCertificateRef = useRef<Record<string, boolean>>({});
-  const isMountedRef = useRef<boolean>(false);
+
+  // Use useEffectEvent to define a stable async fetch routine
+  const fetchCertificateEvent = useEffectEvent(async (signal?: AbortSignal) => {
+    if (!session?.data?.tokens?.access_token) {
+      setError(t('errorAuth'));
+      setIsLoading(false);
+      return;
+    }
+
+    // Mark that we've attempted fetching this course for the current session
+    fetchedCertificateRef.current[courseid] = true;
+
+    try {
+      const cleanCourseId = courseid.replace('course_', '');
+      const result = await getUserCertificates(`course_${cleanCourseId}`, session.data.tokens.access_token);
+
+      if (signal?.aborted) return;
+
+      if (result.success && result.data && result.data.length > 0) {
+        setUserCertificate(result.data[0]);
+      } else {
+        setError(t('noCertificate'));
+      }
+    } catch (error) {
+      console.error('Error fetching certificate:', error);
+      if (!signal?.aborted) setError(t('error'));
+    } finally {
+      if (!signal?.aborted) setIsLoading(false);
+    }
+  });
 
   // Fetch user certificate
   useEffect(() => {
@@ -37,44 +66,13 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       return;
     }
 
-    isMountedRef.current = true;
+    const controller = new AbortController();
+    setIsLoading(true);
+    setError(null);
 
-    const fetchCertificate = async () => {
-      if (!session?.data?.tokens?.access_token) {
-        if (isMountedRef.current) {
-          setError(t('errorAuth'));
-          setIsLoading(false);
-        }
-        return;
-      }
+    fetchCertificateEvent(controller.signal);
 
-      // Mark that we've attempted fetching this course for the current session
-      fetchedCertificateRef.current[courseid] = true;
-
-      try {
-        const cleanCourseId = courseid.replace('course_', '');
-        const result = await getUserCertificates(`course_${cleanCourseId}`, session.data.tokens.access_token);
-
-        if (!isMountedRef.current) return;
-
-        if (result.success && result.data && result.data.length > 0) {
-          setUserCertificate(result.data[0]);
-        } else {
-          setError(t('noCertificate'));
-        }
-      } catch (error) {
-        console.error('Error fetching certificate:', error);
-        if (isMountedRef.current) setError(t('error'));
-      } finally {
-        if (isMountedRef.current) setIsLoading(false);
-      }
-    };
-
-    fetchCertificate();
-
-    return () => {
-      isMountedRef.current = false;
-    };
+    return () => controller.abort();
   }, [courseid, session?.data?.tokens?.access_token, t]);
 
   // Certificate type translation helper

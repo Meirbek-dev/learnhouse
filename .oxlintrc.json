@@ -65,6 +65,7 @@
     "eslint/yoda": "off",
     "eslint/vars-on-top": "off",
     "eslint/no-var": "off",
+    "eslint/capitalized-comments": "off",
     "import": "warn",
     "import/no-default-export": "off",
     "import/order": "warn",

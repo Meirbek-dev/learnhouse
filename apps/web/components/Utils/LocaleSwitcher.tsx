@@ -67,9 +67,9 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
       )}
       <SelectContent
         className={cn(isMobile && 'z-80')}
-        position={'popper'}
+        position="popper"
         sideOffset={4}
-        side={'bottom'}
+        side="bottom"
       >
         {locales.map((locale) => (
           <SelectItem

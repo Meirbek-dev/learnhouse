@@ -270,9 +270,9 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
       uploadResetTimeoutRef.current = window.setTimeout(() => {
         setUploadProgress(0);
       }, 1000);
-    } catch (err: any) {
-      console.error('Upload failed', err);
-      setError(err?.message || t('errorUpload'));
+    } catch (error: any) {
+      console.error('Upload failed', error);
+      setError(error?.message || t('errorUpload'));
     } finally {
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);

@@ -69,7 +69,7 @@ export async function uploadNewVideoFile(
       console.error('Chunked upload error:', error);
       // Try to expose a readable message
       const message = error?.message || JSON.stringify(error);
-      throw new Error(message);
+      throw new Error(message, { cause: error });
     }
   }
 

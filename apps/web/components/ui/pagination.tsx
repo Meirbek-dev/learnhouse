@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils';
 function Pagination({ className, ...props }: React.ComponentProps<'nav'>) {
   return (
     <nav
-      role="navigation"
       aria-label="pagination"
       data-slot="pagination"
       className={cn('mx-auto flex w-full justify-center', className)}
@@ -92,10 +91,7 @@ function PaginationEllipsis({ className, ...props }: React.ComponentProps<'span'
     <span
       aria-hidden
       data-slot="pagination-ellipsis"
-      className={cn(
-        "size-9 items-center justify-center [&_svg:not([class*='size-'])]:size-4 flex items-center justify-center",
-        className,
-      )}
+      className={cn("size-9 [&_svg:not([class*='size-'])]:size-4 flex items-center justify-center", className)}
       {...props}
     >
       <MoreHorizontalIcon />

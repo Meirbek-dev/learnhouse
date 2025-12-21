@@ -278,7 +278,6 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
                   onKeyDown={handleKeyDown}
                   placeholder={t('activityNamePlaceholder')}
                   className="h-8 text-sm"
-                  autoFocus
                   disabled={isPending}
                 />
                 <Button

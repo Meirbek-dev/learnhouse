@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useEffect, useRef, useState, useEffectEvent } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { animations } from '../design-tokens';
 
 interface AnimatedValueProps {

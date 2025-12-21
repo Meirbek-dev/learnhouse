@@ -1,9 +1,9 @@
 'use client';
 
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import type { EmojiClickData } from 'emoji-picker-react';
 import { Link as LinkIcon, Plus, X } from 'lucide-react';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
-import { useEffect, useRef, useState } from 'react';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { generateUUID } from '@/lib/utils';
@@ -81,17 +81,14 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
   const linkInputFieldRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const isMountedRef = useRef(true);
   const initialSyncRafRef = useRef<number | null>(null);
   const focusRafRef = useRef<number | null>(null);
   const emojiFocusRafRef = useRef<number | null>(null);
   const t = useTranslations('CourseEdit.General.LearningItems');
 
-  // Cleanup on unmount
+  // Cleanup on unmount — cancel any scheduled animation frames
   useEffect(() => {
-    isMountedRef.current = true;
     return () => {
-      isMountedRef.current = false;
       if (initialSyncRafRef.current) cancelAnimationFrame(initialSyncRafRef.current);
       if (focusRafRef.current) cancelAnimationFrame(focusRafRef.current);
       if (emojiFocusRafRef.current) cancelAnimationFrame(emojiFocusRafRef.current);
@@ -113,8 +110,6 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
     // Schedule focus/scroll on next animation frame
     if (focusRafRef.current) cancelAnimationFrame(focusRafRef.current);
     focusRafRef.current = requestAnimationFrame(() => {
-      if (!isMountedRef.current) return;
-
       const inputEl = inputRefs.current[newItem.id];
       if (inputEl) {
         inputEl.focus();
@@ -152,8 +147,6 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
 
     if (emojiFocusRafRef.current) cancelAnimationFrame(emojiFocusRafRef.current);
     emojiFocusRafRef.current = requestAnimationFrame(() => {
-      if (!isMountedRef.current) return;
-
       const inputEl = inputRefs.current[id];
       if (inputEl) {
         inputEl.focus();
@@ -171,12 +164,10 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
 
   // Restore focus after re-render if an item was focused
   useEffect(() => {
-    if (!(focusedItemId && isMountedRef.current)) return;
+    if (!focusedItemId) return;
 
     if (focusRafRef.current) cancelAnimationFrame(focusRafRef.current);
     focusRafRef.current = requestAnimationFrame(() => {
-      if (!isMountedRef.current) return;
-
       if (showLinkInput === focusedItemId) {
         linkInputFieldRefs.current[focusedItemId]?.focus();
       } else {
@@ -208,32 +199,32 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
   }, [focusedItemId, showLinkInput, items.length]);
 
   // Handle clicks outside of emoji picker and link input
+  const handleClickOutside = useEffectEvent((event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+
+    // Close emoji picker if clicking outside
+    if (pickerRef.current && !pickerRef.current.contains(target)) {
+      setShowEmojiPicker(null);
+    }
+
+    // Close link input if clicking outside (but not on the link icon itself)
+    if (linkInputRef.current && !linkInputRef.current.contains(target)) {
+      const clickedLinkIcon = target.closest('[data-role="link-icon"]');
+      const linkInputItemId = target.closest('[data-itemid]')?.getAttribute('data-itemid');
+
+      // Only close if not clicking the link icon for the currently open link input
+      if (!clickedLinkIcon || linkInputItemId !== showLinkInput) {
+        setShowLinkInput(null);
+      }
+    }
+  });
+
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-
-      // Close emoji picker if clicking outside
-      if (pickerRef.current && !pickerRef.current.contains(target)) {
-        setShowEmojiPicker(null);
-      }
-
-      // Close link input if clicking outside (but not on the link icon itself)
-      if (linkInputRef.current && !linkInputRef.current.contains(target)) {
-        const clickedLinkIcon = target.closest('[data-role="link-icon"]');
-        const linkInputItemId = target.closest('[data-itemid]')?.getAttribute('data-itemid');
-
-        // Only close if not clicking the link icon for the currently open link input
-        if (!clickedLinkIcon || linkInputItemId !== showLinkInput) {
-          setShowLinkInput(null);
-        }
-      }
-    };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showLinkInput]);
+  }, []);
 
   const handleEmojiSelect = (id: string, emojiData: EmojiClickData) => {
     updateItemEmoji(id, emojiData.emoji);
@@ -243,10 +234,11 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
     setFocusedItemId(id);
   };
 
-  const handleInputBlur = () => {
-    const timeoutId = setTimeout(() => {
-      if (!isMountedRef.current) return;
+  const blurTimeoutRef = useRef<number | null>(null);
 
+  const handleInputBlur = () => {
+    if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
+    blurTimeoutRef.current = window.setTimeout(() => {
       const activeEl = document.activeElement;
       const isStillInComponent =
         activeEl?.classList.contains('learning-item-input') || activeEl?.closest('[data-emoji-picker="true"]');
@@ -254,10 +246,15 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
       if (!isStillInComponent) {
         setShowLinkInput(null);
       }
-    }, 100);
-
-    return () => clearTimeout(timeoutId);
+    }, 100) as unknown as number;
   };
+
+  // Ensure blur timeout cleared on unmount
+  useEffect(() => {
+    return () => {
+      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
+    };
+  }, []);
 
   const setInputRef = (id: string) => (el: HTMLInputElement | null) => {
     inputRefs.current[id] = el;
@@ -333,9 +330,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
 
                     if (isOpening) {
                       setTimeout(() => {
-                        if (isMountedRef.current) {
-                          linkInputFieldRefs.current[item.id]?.focus();
-                        }
+                        linkInputFieldRefs.current[item.id]?.focus();
                       }, 0);
                     }
                   }}

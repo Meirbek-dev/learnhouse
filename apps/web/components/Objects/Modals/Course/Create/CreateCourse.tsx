@@ -5,12 +5,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { Image as ImageIcon, UploadCloud } from 'lucide-react';
 import { TagsInput } from '@components/ui/custom/tags-input';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { createNewCourse } from '@services/courses/courses';
-import { useEffect, useState, useTransition } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
@@ -29,6 +29,8 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
   const [orgId, setOrgId] = useState<number | null>(null);
   const [showUnsplashPicker, setShowUnsplashPicker] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+
+  const unsplashFetchControllerRef = useRef<AbortController | null>(null);
 
   const validationSchema = z.object({
     name: z.string().min(1, t('schemaNameRequired')).max(100, t('schemaNameMax')),
@@ -61,8 +63,8 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
             tags: ['organizations'],
           });
           setOrgId(org.id);
-        } catch (err) {
-          console.error('Failed to load org metadata', err);
+        } catch (error) {
+          console.error('Failed to load org metadata', error);
         }
       })();
     }
@@ -130,20 +132,35 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
   };
 
   const handleUnsplashSelect = async (imageUrl: string) => {
+    // Abort previous fetch if any and create new controller
+    unsplashFetchControllerRef.current?.abort();
+    const controller = new AbortController();
+    unsplashFetchControllerRef.current = controller;
+
     setIsUploading(true);
     try {
-      const response = await fetch(imageUrl);
+      const response = await fetch(imageUrl, { signal: controller.signal });
+      if (controller.signal.aborted) return;
       const blob = await response.blob();
+      if (controller.signal.aborted) return;
       const file = new File([blob], 'unsplash_image.jpg', {
         type: 'image/jpeg',
       });
       form.setValue('thumbnail', file);
-    } catch {
+    } catch (error: any) {
+      if (error?.name === 'AbortError') return;
       toast.error(t('toastErrorUnsplash'));
     } finally {
       setIsUploading(false);
     }
   };
+
+  // Cleanup if component unmounts while an Unsplash fetch is in-flight
+  useEffect(() => {
+    return () => {
+      unsplashFetchControllerRef.current?.abort();
+    };
+  }, []);
 
   return (
     <Form {...form}>

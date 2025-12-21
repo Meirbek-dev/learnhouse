@@ -193,7 +193,7 @@ const LoggedInJoinScreen = (props: any) => {
           void mutate(`${getAPIUrl()}orgs/user/page/1/limit/20`);
           void mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
 
-          window.setTimeout(() => {
+          redirectTimeoutRef.current = window.setTimeout(() => {
             router.push(getUriWithOrg(org.slug, '/'));
           }, 1500);
         } else {

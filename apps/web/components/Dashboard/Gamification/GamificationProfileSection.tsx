@@ -32,7 +32,7 @@ export function GamificationProfileSection({
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const ctx = useOptionalGamificationContext();
   const profile = data ?? ctx?.profile ?? null;
-  const isLoading = !profile && !!ctx?.isLoading;
+  const isLoading = !profile && Boolean(ctx?.isLoading);
   const { levelInfo, nextMilestone, unlockedFrames, unlockedAccessories } = (() => {
     if (!profile) {
       return {

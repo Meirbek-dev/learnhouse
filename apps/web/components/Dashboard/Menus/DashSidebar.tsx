@@ -23,12 +23,12 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import UserAvatar from '../../Objects/UserAvatar';
+import { useEffect, useEffectEvent } from 'react';
 import AppLink from '@/components/ui/AppLink';
 import { Badge } from '@/components/ui/badge';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
-import { useEffect } from 'react';
 import Image from 'next/image';
 
 interface NavigationItem {
@@ -206,28 +206,25 @@ const DashSidebar = ({ className }: SidebarProps) => {
     }
   }
 
-  // Keyboard shortcut handler
+  // Keyboard shortcut handler — useEffectEvent so the handler is stable and reads latest toggleSidebar
+  const handleKeyDown = useEffectEvent((event: KeyboardEvent) => {
+    // Check for Ctrl+B (or Cmd+B on Mac)
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'b') {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (typeof toggleSidebar === 'function') toggleSidebar();
+    }
+  });
+
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Check for Ctrl+B (or Cmd+B on Mac)
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'b') {
-        event.preventDefault();
-        event.stopPropagation();
-
-        // Use the sidebar context toggle function
-        if (typeof toggleSidebar === 'function') {
-          toggleSidebar();
-        }
-      }
-    };
-
     // Add event listener with capture to ensure it fires before other handlers
     document.addEventListener('keydown', handleKeyDown, true);
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown, true);
     };
-  }, [toggleSidebar]);
+  }, []);
 
   if (!session.data?.user) {
     return <SidebarSkeleton />;

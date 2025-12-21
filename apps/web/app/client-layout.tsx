@@ -24,16 +24,18 @@ function ThemeSync() {
   }, [session]);
 
   useEffect(() => {
-    const handleThemeChange = async (event: Event) => {
-      const customEvent = event as CustomEvent<{ theme: string }>;
+    if (typeof window === 'undefined') return;
+
+    const handleThemeChange = (event: Event) => {
+      const customEvent = event as CustomEvent<{ theme?: string }>;
+      const theme = customEvent?.detail?.theme;
+      if (!theme) return;
       const s = sessionRef.current;
       if (s?.data?.user?.id && s?.data?.tokens?.access_token) {
-        try {
-          // Update theme on server without refreshing session (avoid unnecessary re-renders)
-          await updateUserTheme(s.data.user.id, customEvent.detail.theme, s.data.tokens.access_token);
-        } catch (error) {
-          console.error('Failed to sync theme to server:', error);
-        }
+        // Fire-and-forget and surface failures to console to avoid unhandled rejections
+        updateUserTheme(s.data.user.id, theme, s.data.tokens.access_token).catch((error) =>
+          console.error('Failed to sync theme to server:', error),
+        );
       }
     };
 

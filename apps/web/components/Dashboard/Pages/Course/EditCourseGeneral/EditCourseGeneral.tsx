@@ -4,9 +4,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { AlertTriangle, BookOpen, Image as ImageIcon, Loader2, Tag, Video } from 'lucide-react';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
-import { useEffect, useId, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader } from '@components/ui/card';
 import { TagsInput } from '@components/ui/custom/tags-input';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Separator } from '@components/ui/separator';
 import LearningItemsList from './LearningItemsList';
 import { Textarea } from '@components/ui/textarea';

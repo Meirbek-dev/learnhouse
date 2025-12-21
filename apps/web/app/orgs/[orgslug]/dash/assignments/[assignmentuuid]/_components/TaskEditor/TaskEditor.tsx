@@ -68,9 +68,9 @@ const AssignmentTaskEditor = ({ page }: any) => {
       // Revalidate assignment tasks list so UI updates immediately after deletion ✅
       try {
         await mutate(`${getAPIUrl()}assignments/${assignment.assignment_object.assignment_uuid}/tasks`);
-      } catch (err) {
+      } catch (error) {
         // non-fatal: if revalidation fails, UI will update on next SWR refresh
-        console.warn('Failed to revalidate assignment tasks after delete', err);
+        console.warn('Failed to revalidate assignment tasks after delete', error);
       }
 
       toast.success(t('deleteSuccess'), { id: toastId });

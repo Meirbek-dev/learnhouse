@@ -27,7 +27,7 @@ import { constructAcceptValue } from '@/lib/constants';
 import { AnimatePresence, motion } from 'motion/react';
 import { Separator } from '@components/ui/separator';
 import { Checkbox } from '@components/ui/checkbox';
-import { useEffect, useState, useId } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { Button } from '@components/ui/button';
 import { cn, generateUUID } from '@/lib/utils';
 import { Label } from '@components/ui/label';
@@ -817,7 +817,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
   useEffect(() => {
     console.log('VideoModal - Context data:', {
       org,
-      hasOrg: !!org,
+      hasOrg: Boolean(org),
       orgUuid: org?.org_uuid,
       orgId: org?.id,
       courseProp: course,
@@ -886,7 +886,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
 
   const canSubmit = (() => {
     if (!name.trim()) return false;
-    if (selectedView === 'file') return !!video;
+    if (selectedView === 'file') return Boolean(video);
     if (selectedView === 'youtube') return isYouTubeUrlValid;
     return false;
   })();

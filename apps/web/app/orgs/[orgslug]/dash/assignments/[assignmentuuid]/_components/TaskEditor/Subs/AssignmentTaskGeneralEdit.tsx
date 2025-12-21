@@ -8,7 +8,7 @@ import { AlertCircle, Cloud, Download, File, Info, Loader2, UploadCloud } from '
 import { updateAssignmentTask, updateReferenceFile } from '@services/courses/assignments';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useEffect, useState, useTransition, useRef } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { Alert, AlertDescription } from '@components/ui/alert';
 import { getTaskRefFileDir } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -260,7 +260,7 @@ const UpdateTaskRef = () => {
   const fileExtension = fileName?.split('.').pop()?.toUpperCase();
 
   const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
-  const ALLOWED_EXT = ['pdf', 'docx', 'mp4', 'mkv', 'jpg', 'png', 'pptx', 'zip'];
+  const ALLOWED_EXT = new Set(['pdf', 'docx', 'mp4', 'mkv', 'jpg', 'png', 'pptx', 'zip']);
 
   const getTaskRefDirUI = () => {
     if (!fileName) return '';
@@ -278,7 +278,7 @@ const UpdateTaskRef = () => {
     if (!file) return 'noFile';
     if (file.size > MAX_FILE_SIZE) return 'fileTooLarge';
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
-    if (!ALLOWED_EXT.includes(ext)) return 'unsupportedFormat';
+    if (!ALLOWED_EXT.has(ext)) return 'unsupportedFormat';
     return null;
   };
   const handleFileUpload = async (file: File) => {
@@ -315,8 +315,8 @@ const UpdateTaskRef = () => {
 
       assignmentTaskStateHook({ type: 'reload' });
       toast.success(t('fileUploadSuccess'));
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
       setError(t('uploadFailed'));
     } finally {
       setIsLoading(false);

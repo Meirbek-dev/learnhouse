@@ -200,7 +200,7 @@ export default function FixedActivitySecondaryBar(props: FixedActivitySecondaryB
       window.removeEventListener('scroll', handleScroll, listenerOptions);
       try {
         observer.disconnect();
-      } catch (e) {
+      } catch {
         // ignore
       }
     };

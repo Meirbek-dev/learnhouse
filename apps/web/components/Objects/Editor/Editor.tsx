@@ -46,7 +46,6 @@ import { Table } from '@tiptap/extension-table';
 import { getLinkExtension } from './EditorConf';
 import StarterKit from '@tiptap/starter-kit';
 import { Eye, Monitor } from 'lucide-react';
-import {} from 'react';
 
 // Initialize lowlight once at module load
 const LOWLIGHT = (() => {

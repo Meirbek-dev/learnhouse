@@ -1,40 +1,51 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Function debouncing
 type AnyFunction = (...args: any[]) => any;
 
 // Implementation
 export function useDebounce<T>(valueOrCallback: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState(valueOrCallback);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const callbackRef = useRef<AnyFunction | null>(null);
+
+  // keep latest callback reference (safe to call on every render)
+  useEffect(() => {
+    if (typeof valueOrCallback === 'function') callbackRef.current = valueOrCallback as AnyFunction;
+  }, [valueOrCallback]);
+
+  // stable debounced function
+  const debouncedFn = useCallback(
+    (...args: any[]) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current as ReturnType<typeof setTimeout>);
+      timeoutRef.current = setTimeout(() => {
+        if (callbackRef.current) callbackRef.current(...args);
+      }, delay);
+    },
+    [delay],
+  );
+
+  // value debouncing state
+  const [debouncedValue, setDebouncedValue] = useState<T>(valueOrCallback);
 
   useEffect(() => {
-    // If it's a function, return a debounced version of it
-    if (typeof valueOrCallback === 'function') {
-      return () => {
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      };
-    }
+    if (typeof valueOrCallback === 'function') return; // nothing for function case
 
-    // For values, update the debounced value after the delay
-    timeoutRef.current = setTimeout(() => {
-      setDebouncedValue(valueOrCallback);
-    }, delay);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current as ReturnType<typeof setTimeout>);
+    timeoutRef.current = setTimeout(() => setDebouncedValue(valueOrCallback), delay);
+
     return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current as ReturnType<typeof setTimeout>);
     };
   }, [valueOrCallback, delay]);
 
-  // If it's a function, return a debounced version
-  if (typeof valueOrCallback === 'function') {
-    return ((...args: any[]) => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => {
-        (valueOrCallback as AnyFunction)(...args);
-      }, delay);
-    }) as T;
-  }
+  // Ensure cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current as ReturnType<typeof setTimeout>);
+    };
+  }, []);
 
-  // For values, return the debounced value
+  // return appropriate type
+  if (typeof valueOrCallback === 'function') return debouncedFn as unknown as T;
   return debouncedValue;
 }

@@ -72,16 +72,21 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onCl
     const iconClass = cn('size-4 shrink-0', isDone ? 'text-teal-600' : 'text-muted-foreground');
 
     switch (activityType) {
-      case 'TYPE_VIDEO':
+      case 'TYPE_VIDEO': {
         return <Video className={iconClass} />;
-      case 'TYPE_DOCUMENT':
+      }
+      case 'TYPE_DOCUMENT': {
         return <FileText className={iconClass} />;
-      case 'TYPE_DYNAMIC':
+      }
+      case 'TYPE_DYNAMIC': {
         return <Layers className={iconClass} />;
-      case 'TYPE_ASSIGNMENT':
+      }
+      case 'TYPE_ASSIGNMENT': {
         return <BookOpenCheck className={iconClass} />;
-      default:
+      }
+      default: {
         return <FileText className={iconClass} />;
+      }
     }
   };
 

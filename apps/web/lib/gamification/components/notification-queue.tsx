@@ -59,7 +59,7 @@ export function useXPNotificationQueue(options: XPNotificationQueueOptions = {})
   const opts = { ...DEFAULT_OPTIONS, ...options };
   const [queue, setQueue] = useState<BatchedNotification[]>([]);
   const [visible, setVisible] = useState<BatchedNotification[]>([]);
-  const timeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const timeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   // Add notification to queue with batching logic
   function addNotification(notification: Omit<XPNotification, 'id' | 'timestamp'>) {
@@ -326,39 +326,8 @@ export function useContextualPosition(
   const rafRef = useRef<number | null>(null);
   const mountedRef = useRef<boolean>(false);
 
-  // Compute position based on element rect
-  function computePosition() {
-    if (typeof window === 'undefined') return;
-    if (!contextElement || !mountedRef.current) return;
-
-    const rect = contextElement.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
-
-    const isTop = rect.top < viewportHeight / 2;
-    const isLeft = rect.left < viewportWidth / 2;
-
-    let newPosition: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
-    if (isTop && isLeft) {
-      newPosition = 'bottom-right';
-    } else if (isTop && !isLeft) {
-      newPosition = 'bottom-left';
-    } else if (!isTop && isLeft) {
-      newPosition = 'top-right';
-    } else {
-      newPosition = 'top-left';
-    }
-
-    setPosition((prev) => (prev === newPosition ? prev : newPosition));
-  }
-
-  // Scheduler that uses requestAnimationFrame and a ref
-  function scheduleCompute() {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    rafRef.current = requestAnimationFrame(() => {
-      computePosition();
-    });
-  }
+  // computePosition and scheduleCompute are declared inside the effect to keep
+  // listener references stable and avoid stale-closure issues; see useEffect below.
 
   useEffect(() => {
     if (typeof window === 'undefined') return;

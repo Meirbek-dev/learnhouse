@@ -15,8 +15,8 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
 import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
+import { useEffectEvent, useLayoutEffect, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useLayoutEffect, useState, useTransition } from 'react';
 import { useCourse } from '@components/Contexts/CourseContext';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
@@ -50,11 +50,12 @@ const CourseUpdates = () => {
   }
 
   // if user clicks outside the model, close the model
+  const handleClickOutside = useEffectEvent((event: any) => {
+    if (event.target.closest('.bg-white') || event.target.id === 'delete-update-button') return;
+    setIsModelOpen(false);
+  });
+
   useLayoutEffect(() => {
-    function handleClickOutside(event: any) {
-      if (event.target.closest('.bg-white') || event.target.id === 'delete-update-button') return;
-      setIsModelOpen(false);
-    }
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);

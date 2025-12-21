@@ -10,7 +10,7 @@ import {
   Square,
 } from 'lucide-react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import { twMerge } from 'tailwind-merge';
@@ -33,13 +33,13 @@ const FlipcardExtension: React.FC = (props: any) => {
   const editorState = useEditorProvider() as any;
   const isEditable = editorState.isEditable;
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node)) {
-        setShowColorPicker(false);
-      }
-    };
+  const handleClickOutside = useEffectEvent((event: MouseEvent) => {
+    if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node)) {
+      setShowColorPicker(false);
+    }
+  });
 
+  useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);

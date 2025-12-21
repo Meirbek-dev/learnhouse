@@ -12,12 +12,12 @@ import {
 } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { removeCoursePrefix } from '../Thumbnails/CourseThumbnail';
 import type { ChangeEvent, FC, KeyboardEvent } from 'react';
 import { searchOrgContent } from '@services/search/search';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
-import { useEffect, useRef, useState } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
@@ -132,13 +132,13 @@ export const SearchBar: FC<SearchBarProps> = ({
   // Debounce the search query value
   const debouncedSearch = useDebounce(searchQuery, 300);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowResults(false);
-      }
-    };
+  const handleClickOutside = useEffectEvent((event: MouseEvent) => {
+    if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      setShowResults(false);
+    }
+  });
 
+  useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -146,14 +146,14 @@ export const SearchBar: FC<SearchBarProps> = ({
   }, []);
 
   useEffect(() => {
-    let active = true;
+    const controller = new AbortController();
     const currentQuery = debouncedSearch.trim();
 
     if (currentQuery.length === 0) {
       setSearchResults({ courses: [], collections: [], users: [] });
       setIsLoading(false);
       setIsInitialLoad(false);
-      return;
+      return () => {};
     }
 
     setIsLoading(true);
@@ -161,7 +161,7 @@ export const SearchBar: FC<SearchBarProps> = ({
     (async () => {
       try {
         const response = await searchOrgContent(orgslug, currentQuery, 1, 3, null, accessToken);
-        if (!active) return;
+        if (controller.signal.aborted) return;
 
         // Type assertion and safe access
         const typedResponse = response.data;
@@ -175,19 +175,19 @@ export const SearchBar: FC<SearchBarProps> = ({
 
         setSearchResults(processedResults);
       } catch (error: any) {
-        if (!active) return;
+        if (controller.signal.aborted) return;
         if (error?.name === 'AbortError') return;
         console.error('Error searching content:', error);
         setSearchResults({ courses: [], collections: [], users: [] });
       } finally {
-        if (!active) return;
+        if (controller.signal.aborted) return;
         setIsLoading(false);
         setIsInitialLoad(false);
       }
     })();
 
     return () => {
-      active = false;
+      controller.abort();
     };
   }, [debouncedSearch, orgslug, accessToken]);
 

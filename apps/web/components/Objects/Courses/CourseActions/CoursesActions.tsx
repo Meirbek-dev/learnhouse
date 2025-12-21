@@ -242,7 +242,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
   };
 
   const renderActionButton = (action: 'start' | 'continue') => {
-    const isAuthenticated = !!session.data?.user;
+    const isAuthenticated = Boolean(session.data?.user);
     const icon = action === 'start' ? <PlayCircle className="size-5" /> : <ArrowRight className="size-5" />;
     const label = action === 'start' ? t('startCourse') : t('continueLearning');
 

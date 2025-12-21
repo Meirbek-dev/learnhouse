@@ -2,9 +2,9 @@
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { verifyStripeConnection } from '@services/payments/payments';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { AlertTriangle, Check, Loader2 } from 'lucide-react';
 import platformLogo from 'public/platform_logo.svg';
-import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { motion } from 'motion/react';
@@ -17,56 +17,55 @@ const StripeConnectCallback = () => {
   const session = usePlatformSession();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [message, setMessage] = useState('');
-  const isMountedStripeRef = useRef<boolean>(false);
   const closeTimeoutRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    isMountedStripeRef.current = true;
+  const verifyConnectionEvent = useEffectEvent(async (signal?: AbortSignal) => {
+    try {
+      const code = searchParams.get('code');
+      const state = searchParams.get('state');
+      const orgId = state?.split('=')[1]; // Extract org_id value after '='
 
-    const verifyConnection = async () => {
-      try {
-        const code = searchParams.get('code');
-        const state = searchParams.get('state');
-        const orgId = state?.split('=')[1]; // Extract org_id value after '='
-
-        if (!(code && orgId && session?.data?.tokens?.access_token)) {
-          throw new Error(t('missingParameters'));
-        }
-
-        const _response = await verifyStripeConnection(
-          Number.parseInt(orgId, 10),
-          code,
-          session.data.tokens.access_token,
-        );
-
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        if (!isMountedStripeRef.current) return;
-
-        setStatus('success');
-        setMessage(t('connectionSuccess'));
-
-        closeTimeoutRef.current = window.setTimeout(() => {
-          window.close();
-        }, 2000) as unknown as number;
-      } catch (error) {
-        console.error('Error verifying Stripe connection:', error);
-        if (!isMountedStripeRef.current) return;
-        setStatus('error');
-        setMessage(t('connectionFailed'));
-        toast.error(t('connectError'));
+      if (!(code && orgId && session?.data?.tokens?.access_token)) {
+        throw new Error(t('missingParameters'));
       }
-    };
 
-    if (session) {
-      verifyConnection();
+      const _response = await verifyStripeConnection(
+        Number.parseInt(orgId, 10),
+        code,
+        session.data.tokens.access_token,
+      );
+
+      // small delay for UX
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      if (signal?.aborted) return;
+
+      setStatus('success');
+      setMessage(t('connectionSuccess'));
+
+      closeTimeoutRef.current = window.setTimeout(() => {
+        window.close();
+      }, 2000) as unknown as number;
+    } catch (error) {
+      console.error('Error verifying Stripe connection:', error);
+      if (signal?.aborted) return;
+      setStatus('error');
+      setMessage(t('connectionFailed'));
+      toast.error(t('connectError'));
     }
+  });
+
+  useEffect(() => {
+    if (!session) return;
+
+    const controller = new AbortController();
+    verifyConnectionEvent(controller.signal);
 
     return () => {
       // Clear timeout if present
       if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
 
-      isMountedStripeRef.current = false;
+      controller.abort();
     };
   }, [session, searchParams, t]);
 

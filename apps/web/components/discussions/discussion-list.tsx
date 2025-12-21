@@ -110,7 +110,7 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
 
   const handleSubmitDiscussion = async (content: string) => {
     if (!(access_token && org?.id)) {
-      console.error('Missing access token or org ID:', { access_token: !!access_token, org_id: org?.id });
+      console.error('Missing access token or org ID:', { access_token: Boolean(access_token), org_id: org?.id });
       return;
     }
 
@@ -162,7 +162,7 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
 
   const handleSubmitReply = async (postId: string, replyContent: string) => {
     if (!(access_token && org?.id)) {
-      console.error('Missing access token or org ID:', { access_token: !!access_token, org_id: org?.id });
+      console.error('Missing access token or org ID:', { access_token: Boolean(access_token), org_id: org?.id });
       return;
     }
 

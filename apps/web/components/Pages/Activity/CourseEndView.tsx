@@ -13,7 +13,7 @@ import { useEffect, useRef, useState } from 'react';
 import { LevelProgress } from '@/lib/gamification';
 import Link from '@components/ui/ServerLink';
 import ReactConfetti from 'react-confetti';
-import html2canvas from 'html2canvas-pro';
+import html2canvas from 'html2canvas';
 import type { FC } from 'react';
 import QRCode from 'qrcode';
 import jsPDF from 'jspdf';
@@ -89,23 +89,22 @@ const CourseEndView: FC<CourseEndViewProps> = ({
   })();
 
   // Fetch user certificate when course is completed
-  const isMountedFetchCertificateRef = useRef<boolean>(false);
   useEffect(() => {
     // Prevent repeated requests if we've already tried fetching the certificate
     if (!isCourseCompleted || fetchedCertificateRef.current) return;
 
-    isMountedFetchCertificateRef.current = true;
+    const controller = new AbortController();
 
-    const fetchUserCertificate = async () => {
+    const fetchUserCertificateEvent = async (signal?: AbortSignal) => {
       // Mark as attempted to avoid loops; we can reset this manually if needed
       fetchedCertificateRef.current = true;
 
       if (!session?.data?.tokens?.access_token) {
-        if (isMountedFetchCertificateRef.current) setCertificateError(t('authRequired'));
+        if (!signal?.aborted) setCertificateError(t('authRequired'));
         return;
       }
 
-      if (isMountedFetchCertificateRef.current) {
+      if (!signal?.aborted) {
         setIsLoadingCertificate(true);
         setCertificateError(null);
       }
@@ -114,7 +113,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
         const cleanCourseUuid = courseUuid.replace('course_', '');
         const result = await getUserCertificates(`course_${cleanCourseUuid}`, session.data.tokens.access_token);
 
-        if (!isMountedFetchCertificateRef.current) return;
+        if (signal?.aborted) return;
 
         if (result.success && result.data && result.data.length > 0) {
           setUserCertificate(result.data[0]);
@@ -127,24 +126,19 @@ const CourseEndView: FC<CourseEndViewProps> = ({
           }
         } else {
           console.warn('No certificate found. Result:', result);
-          setCertificateError(t('noCertificateFound'));
+          if (!signal?.aborted) setCertificateError(t('noCertificateFound'));
         }
       } catch (error) {
         console.error('Error fetching user certificate:', error);
-        if (isMountedFetchCertificateRef.current) setCertificateError(t('loadingError'));
+        if (!signal?.aborted) setCertificateError(t('loadingError'));
       } finally {
-        if (isMountedFetchCertificateRef.current) setIsLoadingCertificate(false);
+        if (!signal?.aborted) setIsLoadingCertificate(false);
       }
     };
 
-    fetchUserCertificate();
+    fetchUserCertificateEvent(controller.signal);
 
-    // Only depend on stable primitives and the refetch function to avoid
-    // triggering this effect when the whole context object identity changes.
-
-    return () => {
-      isMountedFetchCertificateRef.current = false;
-    };
+    return () => controller.abort();
   }, [isCourseCompleted, courseUuid, session?.data?.tokens?.access_token, t, gamificationRefetch]);
 
   // Refetch gamification data on mount if course is completed

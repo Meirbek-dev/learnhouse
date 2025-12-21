@@ -1,8 +1,8 @@
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { ChevronDown, ChevronRight, Palette } from 'lucide-react';
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
-import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { twMerge } from 'tailwind-merge';
 import type { FC } from 'react';
@@ -19,17 +19,17 @@ const BadgesExtension: FC = (props: any) => {
   const editorState = useEditorProvider();
   const { isEditable } = editorState;
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        (pickerRef.current && !pickerRef.current.contains(event.target as Node)) ||
-        (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node))
-      ) {
-        setShowEmojiPicker(false);
-        setShowColorPicker(false);
-      }
-    };
+  const handleClickOutside = useEffectEvent((event: MouseEvent) => {
+    if (
+      (pickerRef.current && !pickerRef.current.contains(event.target as Node)) ||
+      (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node))
+    ) {
+      setShowEmojiPicker(false);
+      setShowColorPicker(false);
+    }
+  });
 
+  useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);

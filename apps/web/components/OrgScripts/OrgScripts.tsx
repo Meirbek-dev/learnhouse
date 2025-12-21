@@ -47,11 +47,13 @@ const OrgScripts: React.FC = () => {
     function sanitizeScriptContent(content: string): string {
       if (typeof window === 'undefined') return '';
 
-      DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+      // Register a removable hook to ensure we don't leak hooks when effect re-runs
+      const afterSanitizeAttributesHook = (node: any) => {
         if (node.nodeName === 'SCRIPT') {
           node.setAttribute('type', 'text/javascript');
         }
-      });
+      };
+      DOMPurify.addHook('afterSanitizeAttributes', afterSanitizeAttributesHook);
 
       const purifyConfig = {
         ALLOWED_TAGS: ['script'],
@@ -201,6 +203,14 @@ const OrgScripts: React.FC = () => {
       }
     });
     return () => {
+      // Remove the DOMPurify hook we registered above to avoid leaking the hook when effect re-runs
+      try {
+        // @ts-ignore - removeHook may not be typed exactly in our environment
+        DOMPurify.removeHook('afterSanitizeAttributes', afterSanitizeAttributesHook);
+      } catch (e) {
+        // ignore if removeHook not available or fails
+      }
+
       const scripts = document.querySelectorAll('script[id^="ashyq-bilim-org-script-"]');
       scripts.forEach((script) => {
         cleanupExistingScript(script.id);

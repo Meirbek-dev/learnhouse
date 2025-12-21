@@ -13,7 +13,7 @@ import {
 import { getTopLevelCookieDomain, getUriWithOrg } from '@/services/config/config';
 import { getResponseMetadata } from '@/services/utils/ts/requests';
 
-// Session cache with TTL and size limits
+// session cache with TTL and size limits
 declare global {
   var sessionCache:
     | Map<

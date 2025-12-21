@@ -475,7 +475,7 @@ const ActivityClient = (props: ActivityClientProps) => {
     if (activity?.activity_type === 'TYPE_ASSIGNMENT') {
       loadAssignment();
     }
-  }, [activity?.activity_uuid, activity?.activity_type, access_token]);
+  }, [activity?.activity_uuid, activity?.activity_type, access_token, setAssignment]);
 
   return (
     <CourseProvider courseuuid={course?.course_uuid}>
@@ -1382,7 +1382,7 @@ const AssignmentTools = (props: {
     const loadGrade = async () => {
       const convertNumericToAlphabet = (grade: number, maxGrade: number) => {
         if (maxGrade <= 0) return '-';
-        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        const alphabet = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
         const idx = Math.round((grade / maxGrade) * (alphabet.length - 1));
         return alphabet[Math.min(Math.max(0, idx), alphabet.length - 1)] ?? '-';
       };

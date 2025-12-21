@@ -70,11 +70,11 @@ const ConfirmationModal = (params: ModalParams) => {
 
   const triggerElement = getSafeDialogTrigger(params.dialogTrigger);
 
-  const triggerIsNativeButton = !!(
+  const triggerIsNativeButton = Boolean(
     triggerElement &&
     isValidElement(triggerElement) &&
     typeof triggerElement.type === 'string' &&
-    triggerElement.type === 'button'
+    triggerElement.type === 'button',
   );
 
   function getStatusConfig() {

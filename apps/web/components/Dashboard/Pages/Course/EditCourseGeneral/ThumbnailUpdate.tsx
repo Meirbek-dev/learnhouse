@@ -37,6 +37,10 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
     null,
   );
   const [isLoading, setIsLoading] = useState(false);
+
+  // Abort controller for in-flight Unsplash fetch and timeout ref for cancellable delays
+  const unsplashFetchControllerRef = useRef<AbortController | null>(null);
+  const thumbnailDelayRef = useRef<number | null>(null);
   const [showUnsplashPicker, setShowUnsplashPicker] = useState(false);
   const t = useTranslations('CourseEdit.General.Thumbnail');
   const [activeTab, setActiveTab] = useState<TabType>('image');
@@ -120,10 +124,19 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
   };
 
   const handleUnsplashSelect = async (imageUrl: string) => {
+    // Abort any previous fetch
+    unsplashFetchControllerRef.current?.abort();
+    const controller = new AbortController();
+    unsplashFetchControllerRef.current = controller;
+
     try {
       setIsLoading(true);
-      const response = await fetch(imageUrl);
+
+      const response = await fetch(imageUrl, { signal: controller.signal });
+      if (controller.signal.aborted) return;
+
       const blob = await response.blob();
+      if (controller.signal.aborted) return;
 
       if (!VALID_IMAGE_MIME_TYPES.includes(blob.type as ValidImageMimeType)) {
         throw new Error(t('errors.unsplashInvalidFormat'));
@@ -138,8 +151,13 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
       const blobUrl = URL.createObjectURL(file);
       setLocalThumbnail({ file, url: blobUrl, type: 'image' });
       await updateThumbnail(file, 'image');
-    } catch {
+    } catch (error: any) {
+      if (error?.name === 'AbortError') {
+        // Fetch was aborted — ignore
+        return;
+      }
       showError(t('errors.unsplashProcessFailed'));
+    } finally {
       setIsLoading(false);
     }
   };
@@ -160,7 +178,16 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
       await mutate(
         `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
       );
-      await new Promise((r) => setTimeout(r, 1500));
+      // Wait for backend to stabilize; track timeout so we can clear on unmount
+      await new Promise((r) => {
+        thumbnailDelayRef.current = window.setTimeout(r, 1500) as unknown as number;
+      });
+
+      // Clear tracked timeout reference after it resolved
+      if (thumbnailDelayRef.current) {
+        clearTimeout(thumbnailDelayRef.current);
+        thumbnailDelayRef.current = null;
+      }
 
       if (!res.success) {
         showError(res.HTTPmessage);
@@ -196,6 +223,17 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
         )
       : undefined;
   };
+
+  // Cleanup in case the component unmounts while we have in-flight work
+  useEffect(() => {
+    return () => {
+      unsplashFetchControllerRef.current?.abort();
+      if (thumbnailDelayRef.current) {
+        clearTimeout(thumbnailDelayRef.current);
+        thumbnailDelayRef.current = null;
+      }
+    };
+  }, []);
 
   const renderThumbnailPreview = () => {
     if (localThumbnail) {

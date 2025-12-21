@@ -14,6 +14,20 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
     });
   }, [error]);
 
+  const handleRetry = () => {
+    if (typeof window === 'undefined') {
+      reset();
+      return;
+    }
+
+    // If a chunk failed to load (often due to 429 or stale assets), reload the page to recover
+    if (error?.name === 'ChunkLoadError' || /Failed to load chunk/.test(error?.message || '')) {
+      window.location.reload();
+    } else {
+      reset();
+    }
+  };
+
   return (
     <html lang="en">
       <body>
@@ -30,7 +44,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
             </details>
           )}
           <button
-            onClick={() => reset()}
+            onClick={handleRetry}
             style={{
               marginTop: '20px',
               padding: '10px 20px',

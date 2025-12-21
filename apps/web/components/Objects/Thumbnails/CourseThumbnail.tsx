@@ -85,7 +85,7 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
     const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
     return cleanRunCourseUuid === cleanCourseUuid;
   });
-  const isEnrolled = !!courseRun;
+  const isEnrolled = Boolean(courseRun);
 
   // Use course_total_steps from the run (backend provides this) or fallback to counting from chapters
   const totalActivities =

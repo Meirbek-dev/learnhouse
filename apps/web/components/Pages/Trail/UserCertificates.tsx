@@ -97,6 +97,8 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
+            // Use Almaty timezone to avoid ENVIRONMENT_FALLBACK errors and match org locale
+            timeZone: 'Asia/Almaty',
           });
 
           return (

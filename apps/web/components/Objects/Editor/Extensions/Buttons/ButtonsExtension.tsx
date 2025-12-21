@@ -1,8 +1,8 @@
 import { AlignCenter, AlignLeft, AlignRight, ArrowRight, ChevronDown, Link, Palette } from 'lucide-react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
-import { useEffect, useRef, useState } from 'react';
 import type { ChangeEvent, FC } from 'react';
 import { useTranslations } from 'next-intl';
 import { twMerge } from 'tailwind-merge';
@@ -22,19 +22,19 @@ const ButtonsExtension: FC = (props: any) => {
   const editorState = useEditorProvider();
   const { isEditable } = editorState;
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-        setShowEmojiPicker(false);
-      }
-      if (linkInputRef.current && !linkInputRef.current.contains(event.target as Node)) {
-        setShowLinkInput(false);
-      }
-      if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node)) {
-        setShowColorPicker(false);
-      }
-    };
+  const handleClickOutside = useEffectEvent((event: MouseEvent) => {
+    if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
+      setShowEmojiPicker(false);
+    }
+    if (linkInputRef.current && !linkInputRef.current.contains(event.target as Node)) {
+      setShowLinkInput(false);
+    }
+    if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node)) {
+      setShowColorPicker(false);
+    }
+  });
 
+  useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);

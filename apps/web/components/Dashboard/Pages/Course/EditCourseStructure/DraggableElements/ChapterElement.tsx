@@ -201,7 +201,6 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
                       onKeyDown={handleKeyDown}
                       placeholder={t('chapterNamePlaceholder')}
                       className="h-8 text-sm"
-                      autoFocus
                       disabled={isPending}
                     />
                     <Button

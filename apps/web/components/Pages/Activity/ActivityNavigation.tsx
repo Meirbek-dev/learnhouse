@@ -223,7 +223,7 @@ export default function ActivityNavigation(props: ActivityNavigationProps): Reac
       window.removeEventListener('resize', updateWidth, listenerOptions);
       try {
         observer.disconnect();
-      } catch (e) {
+      } catch {
         // ignore
       }
     };
