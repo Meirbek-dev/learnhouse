@@ -4,144 +4,264 @@ import TaskFormObject from '@/app/orgs/[orgslug]/dash/assignments/[assignmentuui
 import TaskQuizObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskQuizObject';
 import TaskFileObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { Backpack, Calendar, Download, EllipsisVertical, Info } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
+import { Backpack, Calendar, Download, Info } from 'lucide-react';
 import { getTaskRefFileDir } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { Card, CardContent } from '@components/ui/card';
+import { Separator } from '@components/ui/separator';
+import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
+import { useMemo } from 'react';
+
+// Type definitions
+type AssignmentType = 'QUIZ' | 'FILE_SUBMISSION' | 'FORM';
+
+interface AssignmentTask {
+  id: number;
+  assignment_task_uuid: string;
+  description: string;
+  hint?: string | null;
+  reference_file?: string | null;
+  assignment_type: AssignmentType;
+}
+
+interface AssignmentObject {
+  assignment_uuid: string;
+  due_date?: string | null;
+  description?: string | null;
+}
+
+interface CourseObject {
+  course_uuid: string;
+}
+
+interface ActivityObject {
+  activity_uuid: string;
+}
+
+interface OrgData {
+  org_uuid: string;
+}
+
+interface AssignmentsData {
+  assignment_object?: AssignmentObject | null;
+  assignment_tasks?: AssignmentTask[] | null;
+  course_object?: CourseObject | null;
+  activity_object?: ActivityObject | null;
+}
 
 const AssignmentStudentActivity = () => {
   const t = useTranslations('Activities.AssignmentStudentActivity');
-  const assignments = useAssignments();
-  const org = useOrg() as any;
+  const assignments = useAssignments() as AssignmentsData | null;
+  const org = useOrg() as OrgData | null;
+
+  // Early returns for loading/error states
+  if (!assignments) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-sm text-slate-500">{t('loading', { default: 'Loading assignment...' })}</p>
+      </div>
+    );
+  }
+
+  if (!assignments.assignment_object) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-sm text-slate-500">{t('noAssignment', { default: 'No assignment found' })}</p>
+      </div>
+    );
+  }
+
+  const { assignment_object, assignment_tasks, course_object, activity_object } = assignments;
+
+  // Sort tasks (plain computation — avoid conditional hooks)
+  const sortedTasks: AssignmentTask[] = assignment_tasks ? [...assignment_tasks].sort((a, b) => a.id - b.id) : [];
+
+  const hasTasks = sortedTasks.length > 0;
 
   return (
-    <div className="flex flex-col space-y-4 md:space-y-6">
-      <div className="flex flex-col items-center justify-center space-y-3 md:flex-row md:space-y-0 md:space-x-3">
-        <div className="flex h-fit items-center space-x-3 text-xs">
-          <div className="soft-shadow flex h-fit items-center gap-2 rounded-full bg-slate-100/5 px-4 py-2 text-sm text-slate-700 md:px-5">
-            <Backpack
-              size={14}
-              className="md:size-[14px]"
-            />
-            <p className="font-semibold">{t('assignment')}</p>
-          </div>
-        </div>
-        <div>
-          <div className="flex items-center gap-2">
-            <EllipsisVertical
-              className="hidden text-slate-400 md:block"
-              size={18}
-            />
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 text-xs text-slate-400 md:space-x-2">
-                <Calendar size={14} />
-                <p className="font-semibold">
-                  {t('dueDate')}
-                  {': '}
-                  {assignments?.assignment_object?.due_date}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {assignments?.assignment_object?.description ? (
-        <div className="soft-shadow flex flex-col space-y-2 rounded-md bg-slate-100/30 p-4 md:p-6">
-          <div className="flex flex-col space-y-3">
-            <div className="flex items-center gap-2 text-slate-700">
-              <Info
-                size={16}
-                className="text-slate-500"
-              />
-              <h3 className="text-sm font-semibold">{t('descriptionTitle')}</h3>
-            </div>
-            <div className="pl-6">
-              <p className="text-sm leading-relaxed text-slate-600">{assignments.assignment_object.description}</p>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {assignments?.assignment_tasks
-        ?.toSorted((a: any, b: any) => a.id - b.id)
-        .map((task: any, index: number) => {
-          return (
-            <div
-              className="flex flex-col space-y-2"
-              key={task.assignment_task_uuid}
+    <div className="flex flex-col gap-6">
+      {/* Header Section */}
+      <Card className="border-slate-200 bg-gradient-to-br from-slate-50 to-white">
+        <CardContent className="p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <Badge
+              variant="secondary"
+              className="h-7 w-fit gap-2 px-4 py-2"
             >
-              <div className="flex flex-col space-y-2 py-2 md:flex-row md:justify-between md:space-y-0">
-                <div className="flex flex-wrap space-x-2 font-semibold text-slate-800">
-                  <p>{t('task', { index: index + 1 })} : </p>
-                  <p className="break-words text-slate-500">{task.description}</p>
+              <Backpack className="h-4 w-4" />
+              <span className="font-semibold">{t('assignment')}</span>
+            </Badge>
+
+            {assignment_object.due_date && (
+              <>
+                <Separator
+                  orientation="vertical"
+                  className="hidden h-6 sm:block"
+                />
+                <div className="flex items-center gap-2 text-sm text-slate-600">
+                  <Calendar className="h-4 w-4" />
+                  <span className="font-medium">
+                    {t('dueDate')}: {assignment_object.due_date}
+                  </span>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {task.hint ? (
-                    <Popover>
-                      <PopoverTrigger className="soft-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-amber-50/40 px-3 py-1 text-amber-900">
-                        <Info size={13} />
-                        <p className="text-xs font-semibold">{t('hint')}</p>
-                      </PopoverTrigger>
-                      <PopoverContent className="max-h-[200px] overflow-y-auto">{task.hint}</PopoverContent>
-                    </Popover>
-                  ) : null}
-                  {task.reference_file ? (
-                    <Link
-                      href={getTaskRefFileDir(
-                        org?.org_uuid,
-                        assignments?.course_object.course_uuid,
-                        assignments?.activity_object.activity_uuid,
-                        assignments?.assignment_object.assignment_uuid,
-                        task.assignment_task_uuid,
-                        task.reference_file,
-                      )}
-                      target="_blank"
-                      download
-                      className="soft-shadow flex cursor-pointer items-center space-x-1 rounded-full bg-cyan-50/40 px-3 py-1 text-cyan-900 md:space-x-2"
-                    >
-                      <Download size={13} />
-                      <div className="flex items-center space-x-1 md:space-x-2">
-                        {task.reference_file ? (
-                          <span className="relative">
-                            <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white" />
-                          </span>
-                        ) : null}
-                        <p className="text-xs font-semibold">{t('referenceDocument')}</p>
-                      </div>
-                    </Link>
-                  ) : null}
+              </>
+            )}
+          </div>
+
+          {assignment_object.description && (
+            <>
+              <Separator className="my-4" />
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-slate-700">
+                  <Info className="h-4 w-4 text-slate-500" />
+                  <h3 className="text-sm font-semibold">{t('descriptionTitle')}</h3>
                 </div>
+                <p className="pl-6 text-sm leading-relaxed text-slate-600">{assignment_object.description}</p>
               </div>
-              <div className="w-full">
-                {task.assignment_type === 'QUIZ' && (
-                  <TaskQuizObject
-                    key={task.assignment_task_uuid}
-                    view="student"
-                    assignmentTaskUUID={task.assignment_task_uuid}
-                  />
-                )}
-                {task.assignment_type === 'FILE_SUBMISSION' && (
-                  <TaskFileObject
-                    key={task.assignment_task_uuid}
-                    view="student"
-                    assignmentTaskUUID={task.assignment_task_uuid}
-                  />
-                )}
-                {task.assignment_type === 'FORM' && (
-                  <TaskFormObject
-                    key={task.assignment_task_uuid}
-                    view="student"
-                    assignmentTaskUUID={task.assignment_task_uuid}
-                  />
-                )}
-              </div>
-            </div>
-          );
-        })}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Tasks Section */}
+      {!hasTasks ? (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <p className="text-sm text-slate-500">{t('noTasks', { default: 'No tasks available' })}</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-6">
+          {sortedTasks.map((task, index) => (
+            <TaskCard
+              key={task.assignment_task_uuid}
+              task={task}
+              index={index}
+              org={org}
+              assignments={assignments}
+              t={t}
+            />
+          ))}
+        </div>
+      )}
     </div>
+  );
+};
+
+// Extracted TaskCard component for better organization
+interface TaskCardProps {
+  task: AssignmentTask;
+  index: number;
+  org: OrgData | null;
+  assignments: AssignmentsData;
+  t: ReturnType<typeof useTranslations>;
+}
+
+const TaskCard = ({ task, index, org, assignments, t }: TaskCardProps) => {
+  const hasHint = Boolean(task.hint);
+  const hasReferenceFile = Boolean(task.reference_file);
+
+  const referenceFileUrl = useMemo(() => {
+    if (
+      !hasReferenceFile ||
+      !org ||
+      !assignments.course_object ||
+      !assignments.activity_object ||
+      !assignments.assignment_object
+    ) {
+      return null;
+    }
+
+    return getTaskRefFileDir(
+      org.org_uuid,
+      assignments.course_object.course_uuid,
+      assignments.activity_object.activity_uuid,
+      assignments.assignment_object.assignment_uuid,
+      task.assignment_task_uuid,
+      task.reference_file!,
+    );
+  }, [hasReferenceFile, org, assignments, task]);
+
+  return (
+    <Card>
+      <CardContent className="p-6">
+        {/* Task Header */}
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-wrap gap-2 text-sm">
+            <span className="font-semibold text-slate-800">{t('task', { index: index + 1 })}:</span>
+            <span className="break-words text-slate-600">{task.description}</span>
+          </div>
+
+          {/* Task Actions */}
+          {(hasHint || hasReferenceFile) && (
+            <div className="flex flex-wrap gap-2">
+              {hasHint && (
+                <Popover>
+                  <PopoverTrigger>
+                    <Badge
+                      variant="outline"
+                      className="h-7 cursor-pointer gap-2 border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100"
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <Info className="h-3 w-3" />
+                      <span className="text-xs font-semibold">{t('hint')}</span>
+                    </Badge>
+                  </PopoverTrigger>
+                  <PopoverContent className="max-h-[200px] overflow-y-auto">
+                    <p className="text-sm text-slate-700">{task.hint}</p>
+                  </PopoverContent>
+                </Popover>
+              )}
+
+              {hasReferenceFile && referenceFileUrl && (
+                <Link
+                  href={referenceFileUrl}
+                  target="_blank"
+                  download
+                  className="inline-flex"
+                >
+                  <Badge
+                    variant="outline"
+                    className="h-7 cursor-pointer gap-2 border-cyan-200 bg-cyan-50 text-cyan-900 hover:bg-cyan-100"
+                  >
+                    <Download className="h-3 w-3" />
+                    <span className="text-xs font-semibold">{t('referenceDocument')}</span>
+                  </Badge>
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
+
+        <Separator className="mb-4" />
+
+        {/* Task Content */}
+        <div className="w-full">
+          {task.assignment_type === 'QUIZ' && (
+            <TaskQuizObject
+              view="student"
+              assignmentTaskUUID={task.assignment_task_uuid}
+            />
+          )}
+          {task.assignment_type === 'FILE_SUBMISSION' && (
+            <TaskFileObject
+              view="student"
+              assignmentTaskUUID={task.assignment_task_uuid}
+            />
+          )}
+          {task.assignment_type === 'FORM' && (
+            <TaskFormObject
+              view="student"
+              assignmentTaskUUID={task.assignment_task_uuid}
+            />
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

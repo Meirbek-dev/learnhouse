@@ -1,15 +1,25 @@
 'use client';
 
-import { BookPlus, BookUser, EllipsisVertical, FileUp, Forward, InfoIcon, ListTodo, Save, Type } from 'lucide-react';
 import { useAssignmentSubmission } from '@components/Contexts/Assignments/AssignmentSubmissionContext';
+import { BookPlus, BookUser, FileUp, Forward, InfoIcon, ListTodo, Save, Type } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { Card, CardContent, CardHeader } from '@components/ui/card';
+import { Alert, AlertDescription } from '@components/ui/alert';
+import { Separator } from '@components/ui/separator';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useState } from 'react';
+
+// Type definitions
+type AssignmentType = 'quiz' | 'file' | 'form';
+type ViewMode = 'teacher' | 'student' | 'grading' | 'custom-grading';
 
 interface AssignmentBoxProps {
-  type: 'quiz' | 'file' | 'form';
-  view?: 'teacher' | 'student' | 'grading' | 'custom-grading';
+  type: AssignmentType;
+  view?: ViewMode;
   maxPoints?: number;
   currentPoints?: number;
   saveFC?: () => void;
@@ -22,147 +32,298 @@ interface AssignmentBoxProps {
 
 const AssignmentBoxUI = ({
   type,
-  view,
-  currentPoints,
+  view = 'student',
+  currentPoints = 0,
   maxPoints,
   saveFC,
   submitFC,
   gradeFC,
   gradeCustomFC,
-  showSavingDisclaimer,
+  showSavingDisclaimer = false,
   children,
 }: AssignmentBoxProps) => {
   const t = useTranslations('Activities.AssignmentBoxUI');
-  const [customGrade, setCustomGrade] = useState<number>(0);
+  const [customGrade, setCustomGrade] = useState<string>('');
   const submissionContext = useAssignmentSubmission();
-  const submission = submissionContext.submissions;
   const session = usePlatformSession();
 
-  useEffect(() => {
-    console.log(submission);
-  }, [submission]);
-
-  // Check if user is authenticated
+  const submissions = submissionContext?.submissions ?? [];
   const isAuthenticated = session?.status === 'authenticated';
+  const hasNoSubmissions = submissions.length === 0;
+  const showStudentSubmitButton = view === 'student' && isAuthenticated && hasNoSubmissions;
+
+  const handleCustomGradeSubmit = () => {
+    if (!gradeCustomFC || !customGrade) return;
+
+    const grade = Number.parseInt(customGrade, 10);
+    if (isNaN(grade) || grade < 0) return;
+
+    if (maxPoints && grade > maxPoints) {
+      // Optionally handle grade exceeding max points
+      return;
+    }
+
+    gradeCustomFC(grade);
+  };
+
+  const handleCustomGradeChange = (value: string) => {
+    // Only allow valid number input
+    if (value === '' || /^\d+$/.test(value)) {
+      setCustomGrade(value);
+    }
+  };
 
   return (
-    <div className="soft-shadow flex flex-col rounded-md bg-slate-100/30 px-3 py-4 sm:px-6">
-      <div className="flex flex-col pb-2 text-slate-400 sm:flex-row sm:items-center sm:justify-between sm:space-x-2">
-        {/* Left side with type and badges */}
-        <div className="mb-2 flex flex-wrap items-center gap-2 sm:mb-0">
-          <div className="text-lg font-semibold">
-            {type === 'quiz' && (
-              <div className="flex items-center space-x-1.5">
-                <ListTodo size={17} />
-                <p>{t('quizTitle')}</p>
-              </div>
-            )}
-            {type === 'file' && (
-              <div className="flex items-center space-x-1.5">
-                <FileUp size={17} />
-                <p>{t('fileSubmissionTitle')}</p>
-              </div>
-            )}
-            {type === 'form' && (
-              <div className="flex items-center space-x-1.5">
-                <Type size={17} />
-                <p>{t('formTitle')}</p>
-              </div>
+    <Card className="border-slate-200 bg-slate-50/50">
+      <CardHeader className="pb-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* Left side - Type and badges */}
+          <div className="flex flex-wrap items-center gap-2">
+            <TypeBadge
+              type={type}
+              t={t}
+            />
+            <Separator
+              orientation="vertical"
+              className="hidden h-5 sm:block"
+            />
+            {view === 'teacher' && <TeacherViewBadge t={t} />}
+            {maxPoints !== undefined && (
+              <PointsBadge
+                points={maxPoints}
+                t={t}
+              />
             )}
           </div>
 
-          <div className="flex items-center space-x-1">
-            <EllipsisVertical size={15} />
+          {/* Right side - Actions */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            {showSavingDisclaimer && <SavingDisclaimerAlert t={t} />}
+
+            {view === 'teacher' && (
+              <TeacherActions
+                saveFC={saveFC}
+                t={t}
+              />
+            )}
+
+            {showStudentSubmitButton && (
+              <StudentActions
+                submitFC={submitFC}
+                t={t}
+              />
+            )}
+
+            {view === 'grading' && (
+              <GradingActions
+                currentPoints={currentPoints}
+                gradeFC={gradeFC}
+                t={t}
+              />
+            )}
+
+            {view === 'custom-grading' && maxPoints !== undefined && (
+              <CustomGradingActions
+                currentPoints={currentPoints}
+                maxPoints={maxPoints}
+                customGrade={customGrade}
+                onGradeChange={handleCustomGradeChange}
+                onSubmit={handleCustomGradeSubmit}
+                t={t}
+              />
+            )}
           </div>
-          {view === 'teacher' && (
-            <div className="flex items-center space-x-1 rounded-full bg-amber-200/20 px-2 py-0.5 text-xs font-bold text-amber-600 outline-amber-300/40">
-              <BookUser size={12} />
-              <p>{t('teacherView')}</p>
-            </div>
-          )}
-          {maxPoints ? (
-            <div className="flex items-center space-x-1 rounded-full bg-emerald-200/20 px-2 py-0.5 text-xs font-bold text-emerald-600 outline-emerald-300/40">
-              <BookPlus size={12} />
-              <p>{t('points', { count: maxPoints })}</p>
-            </div>
-          ) : null}
         </div>
+      </CardHeader>
 
-        {/* Right side with buttons and actions */}
-        <div className="flex flex-wrap items-center gap-2">
-          {showSavingDisclaimer ? (
-            <div className="mb-2 flex w-full items-center space-x-2 rounded-full px-3 py-1 font-semibold text-red-400 outline-red-200 outline-dashed sm:mr-5 sm:mb-0 sm:w-auto">
-              <InfoIcon size={14} />
-              <p className="text-xs">{t('savingDisclaimer')}</p>
-            </div>
-          ) : null}
+      <Separator />
 
-          {/* Teacher button */}
-          {view === 'teacher' && (
-            <div
-              onClick={() => saveFC?.()}
-              className="linear flex cursor-pointer items-center space-x-2 rounded-md bg-emerald-300/20 bg-linear-to-bl px-2 py-1 text-emerald-700 outline-offset-2 outline-emerald-500/60 transition-all outline-dashed hover:bg-emerald-300/10 hover:outline-offset-4 active:outline-offset-1"
-            >
-              <Save size={14} />
-              <p className="text-xs font-semibold">{t('save')}</p>
-            </div>
-          )}
+      <CardContent className="pt-4">{children}</CardContent>
+    </Card>
+  );
+};
 
-          {/* Student button - only show if authenticated */}
-          {view === 'student' && isAuthenticated && submission && submission.length <= 0 ? (
-            <div
-              onClick={() => submitFC?.()}
-              className="linear mx-auto flex w-full cursor-pointer items-center justify-center space-x-2 rounded-md bg-emerald-300/20 bg-linear-to-bl px-2 py-1 text-emerald-700 outline-offset-2 outline-emerald-500/60 transition-all outline-dashed hover:bg-emerald-300/10 hover:outline-offset-4 active:outline-offset-1 sm:w-auto"
-            >
-              <Forward size={14} />
-              <p className="text-xs font-semibold">{t('saveProgress')}</p>
-            </div>
-          ) : null}
+// Extracted sub-components for better organization
 
-          {/* Grading button */}
-          {view === 'grading' && (
-            <div className="linear flex w-full cursor-pointer flex-wrap items-center gap-2 rounded-md bg-linear-to-bl px-0.5 py-0.5 outline-offset-2 outline-orange-500/60 transition-all outline-dashed hover:outline-offset-4 active:outline-offset-1 sm:w-auto sm:flex-nowrap sm:space-x-2">
-              <p className="px-2 text-xs font-semibold text-orange-700">
-                {t('currentPoints', { points: currentPoints ?? 0 })}
-              </p>
-              <div
-                onClick={() => gradeFC?.()}
-                className="ml-auto flex items-center space-x-2 rounded-md bg-orange-300/20 bg-linear-to-bl px-2 py-1 text-orange-700 hover:bg-orange-300/10"
-              >
-                <BookPlus size={14} />
-                <p className="text-xs font-semibold">{t('grade')}</p>
-              </div>
-            </div>
-          )}
+interface TypeBadgeProps {
+  type: AssignmentType;
+  t: ReturnType<typeof useTranslations>;
+}
 
-          {/* CustomGrading button */}
-          {view === 'custom-grading' && maxPoints ? (
-            <div className="linear flex w-full cursor-pointer flex-wrap items-center gap-2 rounded-md bg-linear-to-bl px-0.5 py-0.5 outline-offset-2 outline-orange-500/60 transition-all outline-dashed hover:outline-offset-4 active:outline-offset-1 sm:w-auto sm:flex-nowrap sm:space-x-2">
-              <p className="w-full px-2 text-xs font-semibold text-orange-700 sm:w-auto">
-                {t('currentPoints', { points: currentPoints ?? 0 })}
-              </p>
-              <div className="flex w-full items-center gap-2 sm:w-auto">
-                <input
-                  onChange={(e) => {
-                    setCustomGrade(Number.parseInt(e.target.value, 10));
-                  }}
-                  placeholder={maxPoints.toString()}
-                  className="subtle-shadow w-full rounded-lg px-2 py-0.5 text-sm outline outline-gray-200 sm:w-[100px]"
-                  type="number"
-                />
-                <div
-                  onClick={() => gradeCustomFC?.(customGrade)}
-                  className="flex items-center space-x-2 rounded-md bg-orange-300/20 bg-linear-to-bl px-2 py-1 whitespace-nowrap text-orange-700 hover:bg-orange-300/10"
-                >
-                  <BookPlus size={14} />
-                  <p className="text-xs font-semibold">{t('grade')}</p>
-                </div>
-              </div>
-            </div>
-          ) : null}
-        </div>
+const TypeBadge = ({ type, t }: TypeBadgeProps) => {
+  const config = {
+    quiz: { icon: ListTodo, label: t('quizTitle') },
+    file: { icon: FileUp, label: t('fileSubmissionTitle') },
+    form: { icon: Type, label: t('formTitle') },
+  };
+
+  const { icon: Icon, label } = config[type];
+
+  return (
+    <div className="flex items-center gap-2 text-slate-700">
+      <Icon className="h-4 w-4" />
+      <span className="text-sm font-semibold">{label}</span>
+    </div>
+  );
+};
+
+interface TeacherViewBadgeProps {
+  t: ReturnType<typeof useTranslations>;
+}
+
+const TeacherViewBadge = ({ t }: TeacherViewBadgeProps) => (
+  <Badge
+    variant="outline"
+    className="gap-1.5 border-amber-200 bg-amber-50 text-amber-700"
+  >
+    <BookUser className="h-3 w-3" />
+    <span className="text-xs">{t('teacherView')}</span>
+  </Badge>
+);
+
+interface PointsBadgeProps {
+  points: number;
+  t: ReturnType<typeof useTranslations>;
+}
+
+const PointsBadge = ({ points, t }: PointsBadgeProps) => (
+  <Badge
+    variant="outline"
+    className="gap-1.5 border-emerald-200 bg-emerald-50 text-emerald-700"
+  >
+    <BookPlus className="h-3 w-3" />
+    <span className="text-xs">{t('points', { count: points })}</span>
+  </Badge>
+);
+
+interface SavingDisclaimerAlertProps {
+  t: ReturnType<typeof useTranslations>;
+}
+
+const SavingDisclaimerAlert = ({ t }: SavingDisclaimerAlertProps) => (
+  <Alert
+    variant="destructive"
+    className="py-2"
+  >
+    <InfoIcon className="h-4 w-4" />
+    <AlertDescription className="text-xs font-medium">{t('savingDisclaimer')}</AlertDescription>
+  </Alert>
+);
+
+interface TeacherActionsProps {
+  saveFC?: () => void;
+  t: ReturnType<typeof useTranslations>;
+}
+
+const TeacherActions = ({ saveFC, t }: TeacherActionsProps) => {
+  if (!saveFC) return null;
+
+  return (
+    <Button
+      onClick={saveFC}
+      variant="outline"
+      size="sm"
+      className="gap-2 border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
+    >
+      <Save className="h-4 w-4" />
+      <span className="text-xs font-semibold">{t('save')}</span>
+    </Button>
+  );
+};
+
+interface StudentActionsProps {
+  submitFC?: () => void;
+  t: ReturnType<typeof useTranslations>;
+}
+
+const StudentActions = ({ submitFC, t }: StudentActionsProps) => {
+  if (!submitFC) return null;
+
+  return (
+    <Button
+      onClick={submitFC}
+      variant="outline"
+      size="sm"
+      className="w-full gap-2 border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 sm:w-auto"
+    >
+      <Forward className="h-4 w-4" />
+      <span className="text-xs font-semibold">{t('saveProgress')}</span>
+    </Button>
+  );
+};
+
+interface GradingActionsProps {
+  currentPoints: number;
+  gradeFC?: () => void;
+  t: ReturnType<typeof useTranslations>;
+}
+
+const GradingActions = ({ currentPoints, gradeFC, t }: GradingActionsProps) => {
+  if (!gradeFC) return null;
+
+  return (
+    <div className="flex w-full items-center gap-2 rounded-lg border border-orange-200 bg-orange-50/50 p-1 sm:w-auto">
+      <span className="px-2 text-xs font-semibold text-orange-700">
+        {t('currentPoints', { points: currentPoints })}
+      </span>
+      <Button
+        onClick={gradeFC}
+        variant="ghost"
+        size="sm"
+        className="ml-auto gap-2 bg-orange-100 text-orange-700 hover:bg-orange-200 hover:text-orange-800"
+      >
+        <BookPlus className="h-4 w-4" />
+        <span className="text-xs font-semibold">{t('grade')}</span>
+      </Button>
+    </div>
+  );
+};
+
+interface CustomGradingActionsProps {
+  currentPoints: number;
+  maxPoints: number;
+  customGrade: string;
+  onGradeChange: (value: string) => void;
+  onSubmit: () => void;
+  t: ReturnType<typeof useTranslations>;
+}
+
+const CustomGradingActions = ({
+  currentPoints,
+  maxPoints,
+  customGrade,
+  onGradeChange,
+  onSubmit,
+  t,
+}: CustomGradingActionsProps) => {
+  const isValidGrade =
+    customGrade !== '' && !isNaN(Number(customGrade)) && Number(customGrade) >= 0 && Number(customGrade) <= maxPoints;
+
+  return (
+    <div className="flex w-full flex-col gap-2 rounded-lg border border-orange-200 bg-orange-50/50 p-2 sm:w-auto sm:flex-row sm:items-center">
+      <span className="text-xs font-semibold text-orange-700">{t('currentPoints', { points: currentPoints })}</span>
+
+      <div className="flex items-center gap-2">
+        <Input
+          type="number"
+          value={customGrade}
+          onChange={(e) => onGradeChange(e.target.value)}
+          placeholder={maxPoints.toString()}
+          min={0}
+          max={maxPoints}
+          className="h-8 w-24 text-sm"
+        />
+        <Button
+          onClick={onSubmit}
+          disabled={!isValidGrade}
+          variant="ghost"
+          size="sm"
+          className="gap-2 bg-orange-100 whitespace-nowrap text-orange-700 hover:bg-orange-200 hover:text-orange-800 disabled:opacity-50"
+        >
+          <BookPlus className="h-4 w-4" />
+          <span className="text-xs font-semibold">{t('grade')}</span>
+        </Button>
       </div>
-      {children}
     </div>
   );
 };
