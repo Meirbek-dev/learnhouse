@@ -5,7 +5,7 @@ import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AICh
 import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
-import { useEffect, useRef, useTransition, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useTransition } from 'react';
 import platformLogoLight from 'public/platform_logo_light.svg';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { ScrollArea } from '@components/ui/scroll-area';

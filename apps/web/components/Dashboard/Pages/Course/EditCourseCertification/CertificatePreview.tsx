@@ -4,7 +4,6 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import type React from 'react';
-import QRCode from 'qrcode';
 
 interface CertificatePreviewProps {
   certificationName: string;
@@ -38,7 +37,8 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
     const generateQRCode = async () => {
       try {
         const certificateData = qrCodeLink || `${certificateId}`;
-        const qrUrl = await QRCode.toDataURL(certificateData, {
+        const { toDataURL } = await import('qrcode');
+        const qrUrl = await toDataURL(certificateData, {
           width: 185,
           margin: 1,
           color: {

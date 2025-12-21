@@ -207,7 +207,7 @@ const OrgScripts: React.FC = () => {
       try {
         // @ts-ignore - removeHook may not be typed exactly in our environment
         DOMPurify.removeHook('afterSanitizeAttributes', afterSanitizeAttributesHook);
-      } catch (e) {
+      } catch {
         // ignore if removeHook not available or fails
       }
 

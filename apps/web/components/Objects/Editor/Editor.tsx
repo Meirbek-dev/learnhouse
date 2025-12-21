@@ -63,7 +63,6 @@ const LOWLIGHT = (() => {
 const EDITOR_EXTENSIONS = [
   StarterKit.configure({
     codeBlock: false,
-    link: false,
     bulletList: { HTMLAttributes: { class: 'bullet-list' } },
     orderedList: { HTMLAttributes: { class: 'ordered-list' } },
   }),

@@ -10,7 +10,6 @@ import { useLocale, useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 // html2canvas is dynamically imported where needed to reduce bundle size
 import type React from 'react';
-import QRCode from 'qrcode';
 import { createPDF } from '../../../lib/loadJsPDF';
 
 interface CertificatePageProps {
@@ -232,8 +231,9 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       const certificateUUID = userCertificate.certificate_user.user_certification_uuid;
       const qrCodeData = qrCodeLink;
 
-      // Generate QR code
-      const qrCodeDataUrl = await QRCode.toDataURL(qrCodeData, {
+      // Generate QR code (dynamically import to avoid bundling on initial load)
+      const { toDataURL } = await import('qrcode');
+      const qrCodeDataUrl = await toDataURL(qrCodeData, {
         width: 120,
         margin: 2,
         color: {

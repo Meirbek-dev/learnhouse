@@ -41,6 +41,7 @@ interface JoinMethodCardProps {
   confirmButton: string;
   icon: React.ReactNode;
   onConfirm: () => Promise<void>;
+  activeLabel?: string;
 }
 
 function JoinMethodCard({
@@ -52,6 +53,7 @@ function JoinMethodCard({
   confirmButton,
   icon,
   onConfirm,
+  activeLabel,
 }: JoinMethodCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -73,7 +75,7 @@ function JoinMethodCard({
           <div className="relative h-[160px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all ease-linear hover:bg-slate-200">
             {isActive && (
               <div className="absolute top-0 left-0 mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
-                Active
+                {activeLabel}
               </div>
             )}
             <div className="flex h-full flex-col items-center justify-center space-y-1">
@@ -242,6 +244,7 @@ const OrgAccess = () => {
                   />
                 }
                 onConfirm={() => changeJoinMethod('open')}
+                activeLabel={t('activeLabel')}
               />
               <JoinMethodCard
                 method="inviteOnly"
@@ -258,6 +261,7 @@ const OrgAccess = () => {
                   />
                 }
                 onConfirm={() => changeJoinMethod('inviteOnly')}
+                activeLabel={t('activeLabel')}
               />
             </div>
             <div className={joinMethod !== 'inviteOnly' ? 'pointer-events-none opacity-50' : ''}>

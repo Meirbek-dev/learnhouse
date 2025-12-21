@@ -2636,7 +2636,7 @@
       "statusActive": "Active",
       "statusColumn": "Status",
       "statusInactive": "Inactive",
-      "statusPending": "Peding",
+      "statusPending": "Pending",
       "successfullyAddedContributors": "Successfully added {count, plural, one {# contributor} other {# contributors}}",
       "successfullyRemovedContributors": "Successfully removed {count, plural, one {# contributor} other {# contributors}}",
       "successfullyUpdatedContributor": "Successfully updated contributor",

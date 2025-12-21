@@ -8,7 +8,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { useWindowSize } from '@/hooks/useWindowSize';
-import { useEffect, useRef, useState, lazy, Suspense } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 // Gamification imports
 import { LevelProgress } from '@/lib/gamification';
 import Link from '@components/ui/ServerLink';
@@ -16,7 +16,6 @@ import Link from '@components/ui/ServerLink';
 const LazyReactConfetti = lazy(() => import('react-confetti'));
 // html2canvas is dynamically imported where needed to reduce bundle size
 import type { FC } from 'react';
-import QRCode from 'qrcode';
 import { createPDF } from '../../../lib/loadJsPDF';
 
 interface CourseEndViewProps {
@@ -346,8 +345,9 @@ const CourseEndView: FC<CourseEndViewProps> = ({
       const certificateId = userCertificate.certificate_user.user_certification_uuid;
       const qrCodeData = qrCodeLink;
 
-      // Generate QR code
-      const qrCodeDataUrl = await QRCode.toDataURL(qrCodeData, {
+      // Generate QR code (dynamically import to avoid bundling on initial load)
+      const { toDataURL } = await import('qrcode');
+      const qrCodeDataUrl = await toDataURL(qrCodeData, {
         width: 120,
         margin: 2,
         color: {

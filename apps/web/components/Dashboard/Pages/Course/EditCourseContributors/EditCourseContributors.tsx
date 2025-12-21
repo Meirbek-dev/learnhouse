@@ -193,6 +193,7 @@ interface ContributorOptionCardProps {
   confirmButton: string;
   icon: React.ReactNode;
   onConfirm: () => void;
+  activeLabel?: string;
 }
 
 function ContributorOptionCard({
@@ -204,6 +205,7 @@ function ContributorOptionCard({
   confirmButton,
   icon,
   onConfirm,
+  activeLabel,
 }: ContributorOptionCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -225,7 +227,7 @@ function ContributorOptionCard({
           <div className="h-[200px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all hover:bg-slate-200">
             {isActive ? (
               <div className="absolute mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
-                Active
+                {activeLabel}
               </div>
             ) : null}
             <div className="flex h-full flex-col items-center justify-center space-y-1 p-2 sm:p-4">
@@ -523,6 +525,7 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
                   />
                 }
                 onConfirm={() => setIsOpenToContributors(true)}
+                activeLabel={t('activeBadge')}
               />
               <ContributorOptionCard
                 isActive={!isOpenToContributors}
@@ -538,6 +541,7 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
                   />
                 }
                 onConfirm={() => setIsOpenToContributors(false)}
+                activeLabel={t('activeBadge')}
               />
             </div>
             <div className="space-y-4">

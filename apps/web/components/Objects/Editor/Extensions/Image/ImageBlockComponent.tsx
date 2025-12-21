@@ -9,7 +9,7 @@ import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 // Lazy-load re-resizable to avoid adding it to the initial bundle
-import { useState, lazy, Suspense } from 'react';
+import { Suspense, lazy, useState } from 'react';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 const LazyResizable = lazy(() => import('re-resizable').then((mod) => ({ default: mod.Resizable })));
