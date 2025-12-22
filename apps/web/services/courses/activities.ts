@@ -385,45 +385,11 @@ export async function getActivityWithAuthHeader(activity_uuid: string, _next?: a
 }
 
 export async function updateActivity(data: any, activity_uuid: string, access_token: string) {
-  // Debug: FIRST THING - log what the server action receives
-  try {
-    const receivedStr = JSON.stringify(data);
-    const contentStr = JSON.stringify(data.content);
-    console.info('[updateActivity] RECEIVED by server action', {
-      activity_uuid,
-      dataKeys: Object.keys(data),
-      receivedSize: receivedStr.length,
-      contentSize: contentStr.length,
-      contentSnippet: contentStr.slice(0, 500),
-    });
-  } catch (e) {
-    console.error('[updateActivity] Error inspecting received data', e);
-  }
-
-  // Debug: inspect content payload before sending to API
-  try {
-    const payloadStr = JSON.stringify(data);
-    const contentStr = JSON.stringify(data.content);
-    const containsEmbed = payloadStr.includes('blockEmbed');
-    console.info('[updateActivity] Sending payload', {
-      activity_uuid,
-      containsEmbed,
-      payloadSize: payloadStr.length,
-      contentSize: contentStr.length,
-      contentSnippet: contentStr.slice(0, 500),
-    });
-  } catch (e) {
-    console.error('[updateActivity] Error serializing payload for debug', e);
-  }
-
   const result = await fetch(
     `${getAPIUrl()}activities/${activity_uuid}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
   const metadata = await getResponseMetadata(result);
-
-  // Debug: log metadata and revalidation decisions
-  console.info('[updateActivity] Response metadata', metadata);
 
   // Revalidate caches so updated content is visible to all users
   if (metadata.success) {

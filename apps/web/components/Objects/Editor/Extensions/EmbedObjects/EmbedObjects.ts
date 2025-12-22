@@ -6,61 +6,26 @@ import EmbedObjectsComponent from './EmbedObjectsComponent';
 export default Node.create({
   name: 'blockEmbed',
   group: 'block',
-  atom: true,
-  draggable: false,
 
   addAttributes() {
     return {
       embedUrl: {
-        default: '',
-        keepOnSplit: false,
-        parseHTML: (element) => element.getAttribute('data-embed-url') || '',
-        renderHTML: (attributes) => {
-          return { 'data-embed-url': attributes.embedUrl || '' };
-        },
+        default: null,
       },
       embedCode: {
-        default: '',
-        keepOnSplit: false,
-        parseHTML: (element) => element.getAttribute('data-embed-code') || '',
-        renderHTML: (attributes) => {
-          return { 'data-embed-code': attributes.embedCode || '' };
-        },
+        default: null,
       },
       embedType: {
-        default: 'url',
-        keepOnSplit: false,
-        parseHTML: (element) => element.getAttribute('data-embed-type') || 'url',
-        renderHTML: (attributes) => {
-          return { 'data-embed-type': attributes.embedType || 'url' };
-        },
+        default: null,
       },
       embedHeight: {
         default: 300,
-        keepOnSplit: false,
-        parseHTML: (element) => {
-          const height = element.getAttribute('data-embed-height');
-          return height ? Number.parseInt(height, 10) : 300;
-        },
-        renderHTML: (attributes) => {
-          return { 'data-embed-height': String(attributes.embedHeight || 300) };
-        },
       },
       embedWidth: {
         default: '100%',
-        keepOnSplit: false,
-        parseHTML: (element) => element.getAttribute('data-embed-width') || '100%',
-        renderHTML: (attributes) => {
-          return { 'data-embed-width': attributes.embedWidth || '100%' };
-        },
       },
       alignment: {
         default: 'left',
-        keepOnSplit: false,
-        parseHTML: (element) => element.getAttribute('data-alignment') || 'left',
-        renderHTML: (attributes) => {
-          return { 'data-alignment': attributes.alignment || 'left' };
-        },
       },
     };
   },

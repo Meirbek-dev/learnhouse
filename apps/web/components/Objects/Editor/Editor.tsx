@@ -138,12 +138,6 @@ const Editor = (props: EditorProps) => {
 
   function handleContentSave() {
     if (editor) {
-      try {
-        const snapshot = editor.getJSON();
-        console.info('[Editor] handleContentSave snapshotSize=', JSON.stringify(snapshot).length, 'snippet=', JSON.stringify(snapshot).slice(0, 1000));
-      } catch (e) {
-        console.info('[Editor] handleContentSave error serializing snapshot', e);
-      }
       setContent(editor.getJSON());
     }
   }

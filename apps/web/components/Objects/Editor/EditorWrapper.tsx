@@ -32,27 +32,8 @@ const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
     const plainContent = JSON.parse(JSON.stringify(content));
     const updatedActivity = { ...activity, content: plainContent };
 
-    // Debug: log whether the content contains blockEmbed nodes and the outgoing content size + snippet
-    try {
-      const payloadStr = JSON.stringify(content);
-      const updatedStr = JSON.stringify(updatedActivity.content);
-      const containsEmbed = payloadStr.includes('blockEmbed');
-      console.info('[EditorWrapper] Saving activity', {
-        activity_uuid: activity.activity_uuid,
-        containsEmbed,
-        originalContentSize: payloadStr.length,
-        updatedActivityContentSize: updatedStr.length,
-        contentSnippet: payloadStr.slice(0, 500),
-        updatedActivitySnippet: updatedStr.slice(0, 500),
-      });
-    } catch (e) {
-      console.info('[EditorWrapper] Error serializing content for debug', e);
-    }
-
     toast.promise(
       updateActivity(updatedActivity, activity.activity_uuid, access_token).then((res) => {
-        // Debug: log server response metadata for investigation
-        console.info('[EditorWrapper] updateActivity response', res);
         if (!res.success) {
           throw res;
         }

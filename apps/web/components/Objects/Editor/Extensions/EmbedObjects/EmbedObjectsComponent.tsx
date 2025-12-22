@@ -338,12 +338,6 @@ const EmbedObjectsComponent = (props: any) => {
       }
 
       setEmbedUrl(validatedUrl);
-      // Debug: log updateAttributes calls for URL
-      try {
-        console.info('[EmbedObjects] updateAttributes (url)', { validatedUrl });
-      } catch (err) {
-        /* no-op */
-      }
       props.updateAttributes({
         embedUrl: validatedUrl,
         embedType: 'url',
@@ -357,12 +351,6 @@ const EmbedObjectsComponent = (props: any) => {
     // Only update if code is not just whitespace
     if (newCode === '' || trimmedCode) {
       setEmbedCode(newCode);
-      // Debug: log updateAttributes calls for code input
-      try {
-        console.info('[EmbedObjects] updateAttributes (code)', { snippet: newCode.slice(0, 200) });
-      } catch (err) {
-        /* no-op */
-      }
       props.updateAttributes({
         embedCode: newCode,
         embedType: 'code',
@@ -507,94 +495,6 @@ const EmbedObjectsComponent = (props: any) => {
   // Handle input submission
   const handleInputSubmit = (e: FormEvent) => {
     e.preventDefault();
-
-    // Debug: log current values and ensure attributes are applied to the node
-    try {
-      console.info('[EmbedObjects] Applying input', {
-        embedType,
-        embedUrl,
-        embedCode: embedCode ? embedCode.slice(0, 200) : '',
-        embedWidth,
-        embedHeight,
-        alignment,
-      });
-    } catch (err) {
-      console.info('[EmbedObjects] error while logging apply', err);
-    }
-
-    // Apply attributes explicitly to ensure they are persisted to the document
-    try {
-      console.info('[EmbedObjects] node.attrs before apply', props.node?.attrs);
-    } catch (err) {
-      /* no-op */
-    }
-
-    props.updateAttributes({
-      embedType,
-      embedUrl,
-      embedCode,
-      embedHeight,
-      embedWidth,
-      alignment,
-    });
-
-    // Fallback: if updateAttributes does not immediately set the node attributes (some NodeView setups
-    // sometimes require using editor commands), apply attributes via the editor command API as well.
-    try {
-      const ed = (props as any).editor;
-      if (ed) {
-        // Try to focus and set node selection to ensure updateAttributes targets this node
-        try {
-          if (typeof (props as any).getPos === 'function' && typeof ed.commands.setNodeSelection === 'function') {
-            const pos = (props as any).getPos();
-            console.info('[EmbedObjects] setting node selection to pos', pos);
-            ed.commands.focus();
-            ed.commands.setNodeSelection(pos);
-          } else if (typeof ed.commands.focus === 'function') {
-            ed.commands.focus();
-          }
-        } catch (selErr) {
-          console.info('[EmbedObjects] node selection setup failed', selErr);
-        }
-
-        if (ed.commands && typeof ed.commands.updateAttributes === 'function') {
-          console.info('[EmbedObjects] applying attributes via editor.commands.updateAttributes');
-          try {
-            ed.commands.updateAttributes('blockEmbed', {
-              embedType,
-              embedUrl,
-              embedCode,
-              embedHeight,
-              embedWidth,
-              alignment,
-            });
-          } catch (cmdErr) {
-            console.info('[EmbedObjects] editor.commands.updateAttributes failed', cmdErr);
-          }
-        }
-      }
-    } catch (err) {
-      console.info('[EmbedObjects] error while invoking editor command fallback', err);
-    }
-
-    // Allow a short tick to let the transaction apply and then inspect node.attrs
-    setTimeout(() => {
-      try {
-        console.info('[EmbedObjects] node.attrs after apply', props.node?.attrs);
-        // If editor is available, log current document snapshot for verification
-        if ((props as any).editor) {
-          try {
-            console.info('[EmbedObjects] editor.getJSON after apply', (props as any).editor.getJSON());
-          } catch (e) {
-            /* no-op */
-          }
-        }
-      } catch (err) {
-        /* no-op */
-      }
-    }, 50);
-
-    // Close the input overlay
     startTransition(() => {
       setActiveInput('none');
     });
