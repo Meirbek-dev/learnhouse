@@ -1,8 +1,12 @@
 from datetime import datetime
+import logging
+import json
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
 from ulid import ULID
+
+logger = logging.getLogger(__name__)
 
 from src.db.courses.activities import (
     Activity,
@@ -136,6 +140,18 @@ async def get_activity(
         activity_read.content if has_paid_access else {"paid_access": False}
     )
 
+    # Log what we're returning to help diagnose missing embeds after refresh
+    try:
+        logger.info("[get_activity] returning activity %s has_paid_access=%s", activity.activity_uuid, bool(has_paid_access))
+        serialized = json.dumps(activity_read.content)
+        logger.info(
+            "[get_activity] returning content has_blockEmbed=%s size=%d",
+            "blockEmbed" in serialized,
+            len(serialized),
+        )
+    except Exception as e:
+        logger.exception("[get_activity] failed to serialize returning content: %s", e)
+
     return activity_read
 
 
@@ -197,6 +213,24 @@ async def update_activity(
 
     # Update only the fields that were passed in
     update_data = activity_object.model_dump(exclude_unset=True)
+
+    # Log incoming update data for debugging embed persistence issues
+    try:
+        logger.info("[update_activity] update_data keys=%s", list(update_data.keys()))
+        incoming_content = update_data.get("content")
+        if incoming_content is not None:
+            incoming_serialized = json.dumps(incoming_content)
+            logger.info(
+                "[update_activity] incoming content has_blockEmbed=%s size=%d snippet=%s",
+                "blockEmbed" in incoming_serialized,
+                len(incoming_serialized),
+                incoming_serialized[:1000],
+            )
+        else:
+            logger.info("[update_activity] incoming content is None or not provided")
+    except Exception as e:
+        logger.exception("[update_activity] failed to serialize incoming content: %s", e)
+
     for field, value in update_data.items():
         if value is not None:
             setattr(activity, field, value)
@@ -206,6 +240,17 @@ async def update_activity(
     db_session.add(activity)
     db_session.commit()
     db_session.refresh(activity)
+
+    # Log persisted content after commit to confirm storage
+    try:
+        saved_serialized = json.dumps(activity.content)
+        logger.info(
+            "[update_activity] saved activity content has_blockEmbed=%s size=%d",
+            "blockEmbed" in saved_serialized,
+            len(saved_serialized),
+        )
+    except Exception as e:
+        logger.exception("[update_activity] failed to serialize saved content: %s", e)
 
     return ActivityRead.model_validate(activity)
 
