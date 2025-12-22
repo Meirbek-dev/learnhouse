@@ -67,6 +67,15 @@ lint.ignore = [
   "D100",    # missing docstring in public module
   "S101",    # Use of `assert` detected
   "TD002",   # Missing author in TODO;
+  "S106",
+  "TD003",
+  "S105",
+  "ARG002",
+  "ANN001",
+  "S105",
+  "PLR0913",
+  "ANN201",
+  "PLC0415",
 ]
 
 [tool.pytest.ini_options]

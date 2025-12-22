@@ -7,10 +7,10 @@ import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
+import { createPDF } from '../../../lib/loadJsPDF';
 import Link from '@components/ui/AppLink';
 // html2canvas is dynamically imported where needed to reduce bundle size
 import type React from 'react';
-import { createPDF } from '../../../lib/loadJsPDF';
 
 interface CertificatePageProps {
   orgslug: string;

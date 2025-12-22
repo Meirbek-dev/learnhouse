@@ -6,9 +6,9 @@ import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 // Lazy-load react-confetti to avoid adding it to the initial bundle
 const LazyReactConfetti = lazy(() => import('react-confetti'));
+import { useState, lazy, Suspense } from 'react';
 import { generateUUID } from '@/lib/utils';
 import { twMerge } from 'tailwind-merge';
-import { useState, lazy, Suspense } from 'react';
 
 interface Answer {
   answer_id: string;

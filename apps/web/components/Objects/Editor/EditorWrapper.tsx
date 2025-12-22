@@ -29,7 +29,7 @@ const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
 
     // CRITICAL: Deep clone and ensure plain object before server action call
     // Next.js server action serialization can corrupt Tiptap JSON if not plain
-    const plainContent = JSON.parse(JSON.stringify(content));
+    const plainContent = structuredClone(content);
     const updatedActivity = { ...activity, content: plainContent };
 
     toast.promise(

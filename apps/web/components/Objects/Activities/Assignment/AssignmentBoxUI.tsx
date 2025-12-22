@@ -297,7 +297,10 @@ const CustomGradingActions = ({
   t,
 }: CustomGradingActionsProps) => {
   const isValidGrade =
-    customGrade !== '' && !Number.isNaN(Number(customGrade)) && Number(customGrade) >= 0 && Number(customGrade) <= maxPoints;
+    customGrade !== '' &&
+    !Number.isNaN(Number(customGrade)) &&
+    Number(customGrade) >= 0 &&
+    Number(customGrade) <= maxPoints;
 
   return (
     <div className="flex w-full flex-col gap-2 rounded-lg border border-orange-200 bg-orange-50/50 p-2 sm:w-auto sm:flex-row sm:items-center">

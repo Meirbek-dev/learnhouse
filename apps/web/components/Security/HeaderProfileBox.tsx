@@ -173,15 +173,17 @@ export const HeaderProfileBox = () => {
                     <p className="text-sm font-semibold text-gray-900 capitalize">{session.data.user.username}</p>
                     {userRoleInfo && userRoleInfo.name !== 'USER' && (
                       <Tooltip>
-                        <TooltipTrigger render={<span className="inline-flex cursor-default" />}>
-                          <Badge
-                            variant="secondary"
-                            className={`text-[8px] ${userRoleInfo.bgColor} ${userRoleInfo.textColor} flex w-fit items-center gap-0.5 px-1 py-0.5 font-medium`}
-                          >
-                            {userRoleInfo.icon}
-                            {userRoleInfo.name}
-                          </Badge>
-                        </TooltipTrigger>
+                        <TooltipTrigger
+                          render={
+                            <Badge
+                              variant="secondary"
+                              className={`text-[8px] ${userRoleInfo.bgColor} ${userRoleInfo.textColor} flex w-fit items-center gap-0.5 px-1 py-0.5 font-medium`}
+                            >
+                              {userRoleInfo.icon}
+                              {userRoleInfo.name}
+                            </Badge>
+                          }
+                        />
                         <TooltipContent
                           side="bottom"
                           sideOffset={15}
@@ -194,15 +196,17 @@ export const HeaderProfileBox = () => {
                     {/* Custom roles */}
                     {customRoles.map((customRole, index) => (
                       <Tooltip key={index}>
-                        <TooltipTrigger render={<span className="inline-flex cursor-default" />}>
-                          <Badge
-                            variant="secondary"
-                            className="flex w-fit items-center gap-0.5 bg-gray-500 px-1 py-0.5 text-[8px] font-medium text-white"
-                          >
-                            <Shield size={12} />
-                            {customRole.name}
-                          </Badge>
-                        </TooltipTrigger>
+                        <TooltipTrigger
+                          render={
+                            <Badge
+                              variant="secondary"
+                              className="flex w-fit items-center gap-0.5 bg-gray-500 px-1 py-0.5 text-[8px] font-medium text-white"
+                            >
+                              <Shield size={12} />
+                              {customRole.name}
+                            </Badge>
+                          }
+                        />
                         <TooltipContent
                           side="bottom"
                           sideOffset={15}

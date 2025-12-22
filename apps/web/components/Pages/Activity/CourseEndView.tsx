@@ -4,19 +4,19 @@ import { useOptionalGamificationContext } from '@/components/Contexts/Gamificati
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { useWindowSize } from '@/hooks/useWindowSize';
-import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 // Gamification imports
 import { LevelProgress } from '@/lib/gamification';
 import Link from '@components/ui/ServerLink';
 // Lazy-load react-confetti to avoid including it in the initial bundle
 const LazyReactConfetti = lazy(() => import('react-confetti'));
 // html2canvas is dynamically imported where needed to reduce bundle size
-import type { FC } from 'react';
 import { createPDF } from '../../../lib/loadJsPDF';
+import type { FC } from 'react';
 
 interface CourseEndViewProps {
   courseName: string;
