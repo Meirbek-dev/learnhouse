@@ -4,6 +4,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import type React from 'react';
+import QRCode from 'qrcode';
 
 interface CertificatePreviewProps {
   certificationName: string;
@@ -32,13 +33,11 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
   const t = useTranslations('Certificates.CertificatePreview');
 
   // Generate QR code
-  // MANUAL REVIEW: QRCode.toDataURL runs on the main thread and can be CPU-intensive; consider web worker or server-side generation if this becomes a performance issue.
   useEffect(() => {
     const generateQRCode = async () => {
       try {
         const certificateData = qrCodeLink || `${certificateId}`;
-        const { toDataURL } = await import('qrcode');
-        const qrUrl = await toDataURL(certificateData, {
+        const qrUrl = await QRCode.toDataURL(certificateData, {
           width: 185,
           margin: 1,
           color: {

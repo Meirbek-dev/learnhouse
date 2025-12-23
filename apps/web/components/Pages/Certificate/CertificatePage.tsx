@@ -3,14 +3,15 @@
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserCertificates } from '@services/courses/certifications';
-import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
-import { createPDF } from '../../../lib/loadJsPDF';
+import { useEffect, useRef, useState } from 'react';
 import Link from '@components/ui/AppLink';
-// html2canvas is dynamically imported where needed to reduce bundle size
+import html2canvas from 'html2canvas';
 import type React from 'react';
+import QRCode from 'qrcode';
+import jsPDF from 'jspdf';
 
 interface CertificatePageProps {
   orgslug: string;
@@ -27,36 +28,6 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
   const t = useTranslations('Certificates.CertificatePage');
   const fetchedCertificateRef = useRef<Record<string, boolean>>({});
 
-  // Use useEffectEvent to define a stable async fetch routine
-  const fetchCertificateEvent = useEffectEvent(async (signal?: AbortSignal) => {
-    if (!session?.data?.tokens?.access_token) {
-      setError(t('errorAuth'));
-      setIsLoading(false);
-      return;
-    }
-
-    // Mark that we've attempted fetching this course for the current session
-    fetchedCertificateRef.current[courseid] = true;
-
-    try {
-      const cleanCourseId = courseid.replace('course_', '');
-      const result = await getUserCertificates(`course_${cleanCourseId}`, session.data.tokens.access_token);
-
-      if (signal?.aborted) return;
-
-      if (result.success && result.data && result.data.length > 0) {
-        setUserCertificate(result.data[0]);
-      } else {
-        setError(t('noCertificate'));
-      }
-    } catch (error) {
-      console.error('Error fetching certificate:', error);
-      if (!signal?.aborted) setError(t('error'));
-    } finally {
-      if (!signal?.aborted) setIsLoading(false);
-    }
-  });
-
   // Fetch user certificate
   useEffect(() => {
     // Avoid repeated fetches if access token refreshes or session object changes
@@ -65,13 +36,33 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       return;
     }
 
-    const controller = new AbortController();
-    setIsLoading(true);
-    setError(null);
+    const fetchCertificate = async () => {
+      fetchedCertificateRef.current[courseid] = true;
 
-    fetchCertificateEvent(controller.signal);
+      if (!session?.data?.tokens?.access_token) {
+        setError(t('errorAuth'));
+        setIsLoading(false);
+        return;
+      }
 
-    return () => controller.abort();
+      try {
+        const cleanCourseId = courseid.replace('course_', '');
+        const result = await getUserCertificates(`course_${cleanCourseId}`, session.data.tokens.access_token);
+
+        if (result.success && result.data && result.data.length > 0) {
+          setUserCertificate(result.data[0]);
+        } else {
+          setError(t('noCertificate'));
+        }
+      } catch (error) {
+        console.error('Error fetching certificate:', error);
+        setError(t('error'));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCertificate();
   }, [courseid, session?.data?.tokens?.access_token, t]);
 
   // Certificate type translation helper
@@ -231,9 +222,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       const certificateUUID = userCertificate.certificate_user.user_certification_uuid;
       const qrCodeData = qrCodeLink;
 
-      // Generate QR code (dynamically import to avoid bundling on initial load)
-      const { toDataURL } = await import('qrcode');
-      const qrCodeDataUrl = await toDataURL(qrCodeData, {
+      // Generate QR code
+      const qrCodeDataUrl = await QRCode.toDataURL(qrCodeData, {
         width: 120,
         margin: 2,
         color: {
@@ -389,8 +379,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       // Add to document temporarily
       document.body.appendChild(certificateDiv);
 
-      // Convert to canvas (dynamically import to reduce bundle size)
-      const { default: html2canvas } = await import('html2canvas');
+      // Convert to canvas
       const canvas = await html2canvas(certificateDiv, {
         width: 800,
         height: 600,
@@ -406,7 +395,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
 
       // Create PDF
       const imgData = canvas.toDataURL('image/png');
-      const pdf = await createPDF('landscape', 'mm', 'a4');
+      const pdf = new jsPDF('landscape', 'mm', 'a4');
 
       // Calculate dimensions to center the certificate
       const pdfWidth = pdf.internal.pageSize.getWidth();

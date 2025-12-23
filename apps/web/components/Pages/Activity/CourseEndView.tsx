@@ -4,7 +4,7 @@ import { useOptionalGamificationContext } from '@/components/Contexts/Gamificati
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
-import { Suspense, lazy, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
@@ -12,11 +12,12 @@ import { useWindowSize } from '@/hooks/useWindowSize';
 // Gamification imports
 import { LevelProgress } from '@/lib/gamification';
 import Link from '@components/ui/ServerLink';
+import html2canvas from 'html2canvas';
+import type { FC } from 'react';
+import QRCode from 'qrcode';
+import jsPDF from 'jspdf';
 // Lazy-load react-confetti to avoid including it in the initial bundle
 const LazyReactConfetti = lazy(() => import('react-confetti'));
-// html2canvas is dynamically imported where needed to reduce bundle size
-import { createPDF } from '../../../lib/loadJsPDF';
-import type { FC } from 'react';
 
 interface CourseEndViewProps {
   courseName: string;
@@ -93,27 +94,20 @@ const CourseEndView: FC<CourseEndViewProps> = ({
     // Prevent repeated requests if we've already tried fetching the certificate
     if (!isCourseCompleted || fetchedCertificateRef.current) return;
 
-    const controller = new AbortController();
-
-    const fetchUserCertificateEvent = async (signal?: AbortSignal) => {
+    const fetchUserCertificate = async () => {
       // Mark as attempted to avoid loops; we can reset this manually if needed
       fetchedCertificateRef.current = true;
 
       if (!session?.data?.tokens?.access_token) {
-        if (!signal?.aborted) setCertificateError(t('authRequired'));
+        setCertificateError(t('authRequired'));
         return;
       }
 
-      if (!signal?.aborted) {
-        setIsLoadingCertificate(true);
-        setCertificateError(null);
-      }
-
+      setIsLoadingCertificate(true);
+      setCertificateError(null);
       try {
         const cleanCourseUuid = courseUuid.replace('course_', '');
         const result = await getUserCertificates(`course_${cleanCourseUuid}`, session.data.tokens.access_token);
-
-        if (signal?.aborted) return;
 
         if (result.success && result.data && result.data.length > 0) {
           setUserCertificate(result.data[0]);
@@ -126,19 +120,19 @@ const CourseEndView: FC<CourseEndViewProps> = ({
           }
         } else {
           console.warn('No certificate found. Result:', result);
-          if (!signal?.aborted) setCertificateError(t('noCertificateFound'));
+          setCertificateError(t('noCertificateFound'));
         }
       } catch (error) {
         console.error('Error fetching user certificate:', error);
-        if (!signal?.aborted) setCertificateError(t('loadingError'));
+        setCertificateError(t('loadingError'));
       } finally {
-        if (!signal?.aborted) setIsLoadingCertificate(false);
+        setIsLoadingCertificate(false);
       }
     };
 
-    fetchUserCertificateEvent(controller.signal);
-
-    return () => controller.abort();
+    fetchUserCertificate();
+    // Only depend on stable primitives and the refetch function to avoid
+    // triggering this effect when the whole context object identity changes.
   }, [isCourseCompleted, courseUuid, session?.data?.tokens?.access_token, t, gamificationRefetch]);
 
   // Refetch gamification data on mount if course is completed
@@ -345,9 +339,8 @@ const CourseEndView: FC<CourseEndViewProps> = ({
       const certificateId = userCertificate.certificate_user.user_certification_uuid;
       const qrCodeData = qrCodeLink;
 
-      // Generate QR code (dynamically import to avoid bundling on initial load)
-      const { toDataURL } = await import('qrcode');
-      const qrCodeDataUrl = await toDataURL(qrCodeData, {
+      // Generate QR code
+      const qrCodeDataUrl = await QRCode.toDataURL(qrCodeData, {
         width: 120,
         margin: 2,
         color: {
@@ -503,8 +496,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
       // Add to document temporarily
       document.body.appendChild(certificateDiv);
 
-      // Convert to canvas (dynamically import to reduce bundle size)
-      const { default: html2canvas } = await import('html2canvas');
+      // Convert to canvas
       const canvas = await html2canvas(certificateDiv, {
         width: 800,
         height: 600,
@@ -520,7 +512,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
 
       // Create PDF
       const imgData = canvas.toDataURL('image/png');
-      const pdf = await createPDF('landscape', 'mm', 'a4');
+      const pdf = new jsPDF('landscape', 'mm', 'a4');
 
       // Calculate dimensions to center the certificate
       const pdfWidth = pdf.internal.pageSize.getWidth();
