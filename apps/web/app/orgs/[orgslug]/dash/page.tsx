@@ -1,6 +1,6 @@
 import AdminAuthorization from '@components/Security/AdminAuthorization';
 import { BookCopy, School, Settings, Users } from 'lucide-react';
-import touEmblemLight from 'public/tou_emblem_light.webp';
+import touEmblemLight from './images/tou_emblem_light.webp';
 import ServerLink from '@/components/ui/ServerLink';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
