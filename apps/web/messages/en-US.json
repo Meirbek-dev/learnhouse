@@ -1366,12 +1366,15 @@
       "editAssignmentButton": "Edit Assignment",
       "editPageButton": "Edit Page",
       "failedToUpdateActivityName": "Failed to update activity name",
+      "updateFailed": "Failed to update activity",
       "previewTooltip": "Preview Activity",
       "publish": "Publish",
       "publishButton": "Publish",
       "unpublish": "Unpublish",
       "unpublishButton": "Unpublish",
-      "updating": "Updating activity..."
+      "updating": "Updating activity...",
+      "noAccessToken": "Authentication required",
+      "deleteFailed": "Failed to delete activity"
     },
     "ChapterElement": {
       "chapterNamePlaceholder": "Chapter name",
@@ -1522,6 +1525,7 @@
     },
     "addActivityButton": "Add Activity",
     "chapterNamePlaceholder": "Chapter name",
+    "noActivities": "No activities yet",
     "deleteActivityButton": "Delete Activity",
     "deleteActivityConfirmation": "Are you sure you want to delete this activity?",
     "deleteActivityTitle": "Delete {name}?",

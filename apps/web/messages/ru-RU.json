@@ -1366,12 +1366,15 @@
       "editAssignmentButton": "Редактировать задание",
       "editPageButton": "Редактировать страницу",
       "failedToUpdateActivityName": "Не удалось обновить название активности",
+      "updateFailed": "Не удалось обновить активность",
       "previewTooltip": "Предварительный просмотр активности",
       "publish": "Опубликовать",
       "publishButton": "Опубликовать",
       "unpublish": "Снять с публикации",
       "unpublishButton": "Снять с публикации",
-      "updating": "Обновление активности..."
+      "updating": "Обновление активности...",
+      "noAccessToken": "Требуется аутентификация",
+      "deleteFailed": "Не удалось удалить активность"
     },
     "ChapterElement": {
       "chapterNamePlaceholder": "Название главы",
@@ -1522,6 +1525,7 @@
     },
     "addActivityButton": "Добавить активность",
     "chapterNamePlaceholder": "Название главы",
+    "noActivities": "Пока нет активностей",
     "deleteActivityButton": "Удалить активность",
     "deleteActivityConfirmation": "Вы уверены, что хотите удалить эту активность?",
     "deleteActivityTitle": "Удалить {name}?",

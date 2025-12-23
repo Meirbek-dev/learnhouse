@@ -1365,12 +1365,15 @@
       "editAssignmentButton": "Тапсырманы өңдеу",
       "editPageButton": "Бетті өңдеу",
       "failedToUpdateActivityName": "Белсенділік атауын жаңарту мүмкін болмады",
+      "updateFailed": "Белсенділікті жаңарту мүмкін болмады",
       "previewTooltip": "Белсенділікті алдын ала қарау",
       "publish": "Жариялау",
       "publishButton": "Жариялау",
       "unpublish": "Жариялаудан алу",
       "unpublishButton": "Жариялаудан алу",
-      "updating": "Белсенділік жаңартылуда..."
+      "updating": "Белсенділік жаңартылуда...",
+      "noAccessToken": "Аутентификация қажет",
+      "deleteFailed": "Белсенділікті жою мүмкін болмады"
     },
     "ChapterElement": {
       "chapterNamePlaceholder": "Тарау атауы",
@@ -1521,6 +1524,7 @@
     },
     "addActivityButton": "Белсенділік қосу",
     "chapterNamePlaceholder": "Тарау атауы",
+    "noActivities": "Белсенділіктер әлі жоқ",
     "deleteActivityButton": "Белсенділікті жою",
     "deleteActivityConfirmation": "Бұл белсенділікті жойғыңыз келетініне сенімдісіз бе?",
     "deleteActivityTitle": "{name} жою керек пе?",
