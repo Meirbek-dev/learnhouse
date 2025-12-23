@@ -1373,49 +1373,65 @@ const AssignmentTools = (props: {
     }
   }
 
-  // Load final grade when submission is graded
+  // Load final grade when submission is graded — only fetch once and guard against unmounted component
   useEffect(() => {
     if (!(submission && submission.length > 0 && submission[0]?.submission_status === 'GRADED')) {
       return;
     }
 
+    // If we've already loaded the final grade, skip re-fetching (prevents repeated renders)
+    if (finalGrade !== null) return;
+
+    let mounted = true;
+
     const loadGrade = async () => {
-      const res = await getFinalGrade(
-        session.data?.user?.id,
-        props.assignment?.assignment_uuid,
-        session.data?.tokens?.access_token,
-      );
+      try {
+        const res = await getFinalGrade(
+          session.data?.user?.id,
+          props.assignment?.assignment_uuid,
+          session.data?.tokens?.access_token,
+        );
 
-      if (res.success) {
-        const { grade, max_grade, grading_type } = res.data;
-        let displayGrade: string;
+        if (mounted && res.success) {
+          const { grade, max_grade, grading_type } = res.data;
+          let displayGrade: string;
 
-        switch (grading_type) {
-          case 'NUMERIC': {
-            displayGrade = `${grade}/${max_grade}`;
-            break;
+          switch (grading_type) {
+            case 'NUMERIC': {
+              displayGrade = `${grade}/${max_grade}`;
+              break;
+            }
+            case 'PERCENTAGE': {
+              const percentage = (grade / max_grade) * 100;
+              displayGrade = `${percentage.toFixed(2)}%`;
+              break;
+            }
+            default: {
+              // Fallback static label to avoid pulling in possibly unstable `t` identity in deps
+              displayGrade = t('unknownGradingType');
+            }
           }
-          case 'PERCENTAGE': {
-            const percentage = (grade / max_grade) * 100;
-            displayGrade = `${percentage.toFixed(2)}%`;
-            break;
-          }
-          default: {
-            displayGrade = t('unknownGradingType');
-          }
+
+          setFinalGrade(displayGrade);
         }
-        setFinalGrade(displayGrade);
+      } catch (err) {
+        // Fail silently — keep `finalGrade` null so we can retry if submission changes
+        console.error('Failed to load final grade:', err);
       }
     };
 
     loadGrade();
+
+    return () => {
+      mounted = false;
+    };
   }, [
     submission,
     session.data?.user?.id,
     props.assignment?.assignment_uuid,
     session.data?.tokens?.access_token,
     t,
-    setFinalGrade,
+    finalGrade,
   ]);
 
   if (!submission || submission.length === 0) {
