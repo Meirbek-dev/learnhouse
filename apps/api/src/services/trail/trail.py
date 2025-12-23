@@ -235,7 +235,7 @@ async def add_activity_to_trail(
             org_id=course.org_id,
             complete=True,
             teacher_verified=False,
-            grade="",
+            grade=0,
             user_id=user.id,
             creation_date=str(datetime.now()),
             update_date=str(datetime.now()),

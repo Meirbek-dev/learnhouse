@@ -1342,7 +1342,7 @@ async def create_assignment_submission(
             org_id=course.org_id,
             complete=True,
             teacher_verified=False,
-            grade="",
+            grade=0,
             user_id=user.id,
             creation_date=datetime.now().isoformat(),
             update_date=datetime.now().isoformat(),

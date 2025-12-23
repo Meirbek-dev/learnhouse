@@ -455,7 +455,7 @@
       "basicInfoDesc": "Настройте основные сведения о сертификации",
       "certificateDesign": "Дизайн сертификата",
       "certificateDesignDesc": "Выберите декоративный шаблон для сертификата",
-      "certificateInstructor": "Имя преподавателя (необязательно)",
+      "certificateInstructor": "Имя преподавателя",
       "certificateInstructorPlaceholder": "например, Иван Петров",
       "certificatePattern": "Шаблон сертификата",
       "certificatePatternDescriptions": {
