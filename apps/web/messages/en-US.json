@@ -1086,6 +1086,8 @@
       "viewAllResults": "View all results"
     },
     "Sidebar": {
+      "sidebar": "Sidebar",
+      "displaysMobileSidebar": "Displays the mobile sidebar",
       "toggleSidebar": "Toggle Sidebar"
     },
     "SignIn": {

@@ -1086,6 +1086,8 @@
       "viewAllResults": "Барлық нәтижелерді көру"
     },
     "Sidebar": {
+      "sidebar": "Бүйірлік панель",
+      "displaysMobileSidebar": "Мобильді құрылғыларда бүйірлік панельді көрсетеді",
       "toggleSidebar": "Бүйірлік панелді ауыстыру"
     },
     "SignIn": {

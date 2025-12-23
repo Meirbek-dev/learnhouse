@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import Field as PydanticField
+from pydantic import Field as PydanticField, field_validator
 from sqlalchemy import JSON, Column, ForeignKey, Integer
 from sqlmodel import Field
 
@@ -25,7 +25,9 @@ class TrailStep(SQLModelStrictBaseModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     complete: bool = Field()
     teacher_verified: bool = Field()
-    grade: int = Field(sa_column=Column(Integer))
+    # Allow a default value for `grade` to avoid Pydantic errors when legacy rows
+    # contain empty strings. Database column remains Integer.
+    grade: int = Field(default=0, sa_column=Column(Integer))
     data: dict[str, Any] = Field(
         default_factory=dict,
         sa_column=Column(JSON),
@@ -60,7 +62,8 @@ class TrailStepRead(PydanticStrictBaseModel):
     id: int | None = PydanticField(default=None)
     complete: bool
     teacher_verified: bool
-    grade: int
+    # Make grade tolerant: accept strings/empty values and coerce to int (default 0)
+    grade: int = PydanticField(default=0)
     data: dict[str, Any] = PydanticField(default_factory=dict)
     trailrun_id: int
     trail_id: int
@@ -71,6 +74,25 @@ class TrailStepRead(PydanticStrictBaseModel):
     creation_date: str | None = None
     update_date: str | None = None
     activity: dict[str, Any] | None = None
+
+    @field_validator("grade", mode="before")
+    @classmethod
+    def _validate_grade(cls, v):
+        # Normalize empty strings and non-int strings to 0, preserve ints
+        if v is None:
+            return 0
+        if isinstance(v, str):
+            v = v.strip()
+            if v == "":
+                return 0
+            try:
+                return int(v)
+            except ValueError:
+                return 0
+        try:
+            return int(v)
+        except Exception:
+            return 0
 
 
 # note : prepare assignments support

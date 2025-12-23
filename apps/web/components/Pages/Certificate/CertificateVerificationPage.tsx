@@ -59,7 +59,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
     setIsLoading(true);
     fetchCertificateEvent(controller.signal);
     return () => controller.abort();
-  }, [certificateUuid, t]);
+  }, [certificateUuid]);
 
   const getVerificationStatusIcon = () => {
     switch (verificationStatus) {
