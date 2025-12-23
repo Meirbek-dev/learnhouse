@@ -620,6 +620,8 @@
       "openCourse": "Open {course}",
       "progress": "Progress",
       "progressBarAria": "Progress for {course}",
+      "progressLoading": "Loading progress…",
+      "loading": "Loading…",
       "settings": "Settings",
       "startLearning": "Start Learning",
       "startLearningButton": "Start Learning",

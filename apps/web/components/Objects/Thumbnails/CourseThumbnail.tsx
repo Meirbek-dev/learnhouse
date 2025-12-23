@@ -1,4 +1,5 @@
 'use client';
+import { Play } from 'lucide-react';
 
 import {
   AlertDialog,
@@ -63,16 +64,24 @@ export interface PropsType {
   orgslug: string;
   customLink?: string;
   trailData?: any;
+  trailLoading?: boolean; // true when trail progress is being fetched
 }
 
 export const removeCoursePrefix = (course_uuid: string) => course_uuid.replace('course_', '');
 
-const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData }: PropsType) => {
+const CourseThumbnail: FC<PropsType> = ({
+  course,
+  orgslug,
+  customLink,
+  trailData,
+  trailLoading = false,
+}: PropsType) => {
   const t = useTranslations('Components.CourseThumbnail');
   const locale = useLocale();
   const router = useRouter();
   const org = useOrg() as any;
   const session = usePlatformSession() as any;
+  const isTrailLoading = Boolean(trailLoading);
 
   const activeAuthors = course.authors?.filter((a) => a.authorship_status === 'ACTIVE') || [];
   const displayedAuthors = activeAuthors.slice(0, 3);
@@ -86,6 +95,7 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
     return cleanRunCourseUuid === cleanCourseUuid;
   });
   const isEnrolled = Boolean(courseRun);
+  const titleId = `course-title-${removeCoursePrefix(course.course_uuid)}`;
 
   // Use course_total_steps from the run (backend provides this) or fallback to counting from chapters
   const totalActivities =
@@ -117,7 +127,9 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
 
   return (
     <Card
-      className="group bg-card relative flex h-full w-full max-w-sm min-w-[280px] flex-col overflow-hidden border-0 p-0 shadow-md transition-all duration-200 hover:shadow-2xl"
+      role="article"
+      aria-labelledby={titleId}
+      className="group bg-card focus-visible:ring-primary/60 relative flex h-full w-full max-w-sm min-w-[260px] flex-col overflow-hidden border-0 p-0 shadow-md transition-all duration-200 hover:shadow-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
       tabIndex={0}
     >
       <AdminEditOptions
@@ -139,6 +151,9 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
             src={thumbnailImage}
             alt={course.name}
             loading="lazy"
+            decoding="async"
+            fetchPriority="low"
+            role="img"
           />
 
           {/* subtle dark gradient to improve title readability when overlayed */}
@@ -207,7 +222,14 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
                 </div>
               )}
             </div>
-            <span className="text-muted-foreground truncate text-xs">
+            <span
+              className="text-muted-foreground truncate text-xs"
+              aria-label={
+                displayedAuthors.every((a) => a.user.first_name && a.user.last_name)
+                  ? `${displayedAuthors.map((a) => [a.user.first_name, a.user.middle_name, a.user.last_name].filter(Boolean).join(' ')).join(', ')}${hasMoreAuthors ? ` +${remainingAuthorsCount}` : ''}`
+                  : t('authorLabel', { count: activeAuthors.length })
+              }
+            >
               {displayedAuthors.every((a) => a.user.first_name && a.user.last_name)
                 ? `${displayedAuthors.map((a) => [a.user.first_name, a.user.middle_name, a.user.last_name].filter(Boolean).join(' ')).join(', ')}${hasMoreAuthors ? ` +${remainingAuthorsCount}` : ''}`
                 : t('authorLabel', { count: activeAuthors.length })}
@@ -250,10 +272,45 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
                   href={courseUrl}
                 />
               }
+              aria-label={t('continueLearning', { defaultValue: 'Continue Learning' })}
               size="sm"
               className="w-full"
             >
+              <Play className="mr-2 h-4 w-4" />
               {t('continueLearning', { defaultValue: 'Continue Learning' })}
+            </Button>
+          </div>
+        ) : isTrailLoading ? (
+          <div className="w-full space-y-1.5">
+            <div className="flex items-center gap-2">
+              <div className="flex w-full items-center gap-2">
+                <div
+                  className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full"
+                  role="progressbar"
+                  aria-busy="true"
+                  aria-label={t('progressLoading', { course: course.name, defaultValue: 'Loading progress…' })}
+                >
+                  <div
+                    className="bg-muted/70 h-full animate-pulse"
+                    style={{ width: '60%' }}
+                  />
+                </div>
+                <span
+                  className="text-muted-foreground text-xs"
+                  style={{ width: 40, textAlign: 'right' }}
+                >
+                  —%
+                </span>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              className="w-full"
+              disabled
+              aria-disabled
+            >
+              <Play className="mr-2 h-4 w-4 opacity-60" />
+              {t('loading', { defaultValue: 'Loading…' })}
             </Button>
           </div>
         ) : (
@@ -265,9 +322,11 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
                 href={courseUrl}
               />
             }
+            aria-label={t('startLearning')}
             size="sm"
             className="w-full"
           >
+            <Play className="mr-2 h-4 w-4" />
             {t('startLearning')}
           </Button>
         )}

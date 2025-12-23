@@ -620,6 +620,8 @@
       "openCourse": "Ашу {course}",
       "progress": "Прогресс",
       "progressBarAria": "Курстың прогресі: {course}",
+      "progressLoading": "Прогресс жүктелуде…",
+      "loading": "Жүктелуде…",
       "settings": "Параметрлер",
       "startLearning": "Оқуды бастау",
       "startLearningButton": "Оқуды бастау",

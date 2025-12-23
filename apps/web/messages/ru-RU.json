@@ -620,6 +620,8 @@
       "openCourse": "Открыть {course}",
       "progress": "Прогресс",
       "progressBarAria": "Прогресс по курсу {course}",
+      "progressLoading": "Загрузка прогресса…",
+      "loading": "Загрузка…",
       "settings": "Настройки",
       "startLearning": "Начать обучение",
       "startLearningButton": "Начать обучение",

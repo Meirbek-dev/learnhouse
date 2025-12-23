@@ -1414,9 +1414,9 @@ const AssignmentTools = (props: {
 
           setFinalGrade(displayGrade);
         }
-      } catch (err) {
+      } catch (error) {
         // Fail silently — keep `finalGrade` null so we can retry if submission changes
-        console.error('Failed to load final grade:', err);
+        console.error('Failed to load final grade:', error);
       }
     };
 
@@ -1426,13 +1426,14 @@ const AssignmentTools = (props: {
       mounted = false;
     };
   }, [
-    submission,
-    session.data?.user?.id,
-    props.assignment?.assignment_uuid,
-    session.data?.tokens?.access_token,
-    t,
-    finalGrade,
-  ]);
+	submission,
+	session.data?.user?.id,
+	props.assignment?.assignment_uuid,
+	session.data?.tokens?.access_token,
+	t,
+	finalGrade,
+	setFinalGrade
+]);
 
   if (!submission || submission.length === 0) {
     return (

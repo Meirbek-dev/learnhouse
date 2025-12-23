@@ -803,9 +803,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
     setIsSubmitting(true);
     try {
       const finalGrade =
-        gradingStats.totalBlanks > 0
-          ? Math.round((gradingStats.correctCount / gradingStats.totalBlanks) * 100)
-          : 0;
+        gradingStats.totalBlanks > 0 ? Math.round((gradingStats.correctCount / gradingStats.totalBlanks) * 100) : 0;
 
       const res = await handleAssignmentTaskSubmission(
         {

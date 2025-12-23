@@ -5,7 +5,7 @@ import { createCertification, deleteCertification } from '@services/courses/cert
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { AlertTriangle, Award, FileText, Loader2, Sparkles } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -166,7 +166,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
           } else {
             throw new Error('Failed to create certification');
           }
-        } catch (err) {
+        } catch {
           setError(t('certificationError'));
           toast.error(t('certificationError'));
           form.setValue('enable_certification', false);
@@ -184,7 +184,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
           } else {
             throw new Error('Failed to delete certification');
           }
-        } catch (err) {
+        } catch {
           setError(t('certificationRemoveError'));
           toast.error(t('certificationRemoveError'));
           form.setValue('enable_certification', true);
@@ -316,7 +316,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="text-muted-foreground flex items-center gap-2">
-          <Spinner className='size-6' />
+          <Spinner className="size-6" />
           <span>{t('loading')}</span>
         </div>
       </div>
