@@ -9,7 +9,6 @@ from src.db.strict_base_model import SQLModelStrictBaseModel
 
 ## Assignment ##
 class GradingTypeEnum(str, Enum):
-    ALPHABET = "ALPHABET"
     NUMERIC = "NUMERIC"
     PERCENTAGE = "PERCENTAGE"
 
@@ -346,7 +345,7 @@ class AssignmentUserSubmissionUpdate(SQLModelStrictBaseModel):
     model_config = ConfigDict(use_enum_values=True)
 
     submission_status: AssignmentUserSubmissionStatus | None = None
-    grade: str | None = None  # TODO: Should be string or int?
+    grade: int | None = None
     user_id: int | None = None
     assignment_id: int | None = None
 

@@ -25,7 +25,7 @@ class TrailStep(SQLModelStrictBaseModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     complete: bool = Field()
     teacher_verified: bool = Field()
-    grade: str = Field()
+    grade: int = Field(sa_column=Column(Integer))
     data: dict[str, Any] = Field(
         default_factory=dict,
         sa_column=Column(JSON),
@@ -60,7 +60,7 @@ class TrailStepRead(PydanticStrictBaseModel):
     id: int | None = PydanticField(default=None)
     complete: bool
     teacher_verified: bool
-    grade: str
+    grade: int
     data: dict[str, Any] = PydanticField(default_factory=dict)
     trailrun_id: int
     trail_id: int

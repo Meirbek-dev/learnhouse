@@ -29,14 +29,14 @@ const createValidationSchema = (t: (key: string) => string) =>
     name: z.string().min(1, t('assignmentTitleRequired')),
     description: z.string().min(1, t('assignmentDescriptionRequired')),
     dueDate: z.string().optional(),
-    gradingType: z.enum(['ALPHABET', 'NUMERIC', 'PERCENTAGE']),
+    gradingType: z.enum(['NUMERIC', 'PERCENTAGE']),
   });
 
 interface FormValues {
   name: string;
   description: string;
   dueDate?: string;
-  gradingType: 'ALPHABET' | 'NUMERIC' | 'PERCENTAGE';
+  gradingType: 'NUMERIC' | 'PERCENTAGE';
 }
 
 const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug }: any) => {
@@ -244,7 +244,6 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug 
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="ALPHABET">{t('alphabet')}</SelectItem>
                   <SelectItem value="NUMERIC">{t('numeric')}</SelectItem>
                   <SelectItem value="PERCENTAGE">{t('percentage')}</SelectItem>
                 </SelectContent>

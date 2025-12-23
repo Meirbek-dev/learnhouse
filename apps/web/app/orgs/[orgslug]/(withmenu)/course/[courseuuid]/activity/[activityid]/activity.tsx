@@ -1380,13 +1380,6 @@ const AssignmentTools = (props: {
     }
 
     const loadGrade = async () => {
-      const convertNumericToAlphabet = (grade: number, maxGrade: number) => {
-        if (maxGrade <= 0) return '-';
-        const alphabet = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
-        const idx = Math.round((grade / maxGrade) * (alphabet.length - 1));
-        return alphabet[Math.min(Math.max(0, idx), alphabet.length - 1)] ?? '-';
-      };
-
       const res = await getFinalGrade(
         session.data?.user?.id,
         props.assignment?.assignment_uuid,
@@ -1398,10 +1391,6 @@ const AssignmentTools = (props: {
         let displayGrade: string;
 
         switch (grading_type) {
-          case 'ALPHABET': {
-            displayGrade = convertNumericToAlphabet(grade, max_grade);
-            break;
-          }
           case 'NUMERIC': {
             displayGrade = `${grade}/${max_grade}`;
             break;

@@ -28,7 +28,7 @@ interface Assignment {
   title: string;
   description: string;
   due_date?: string;
-  grading_type?: 'ALPHABET' | 'NUMERIC' | 'PERCENTAGE';
+  grading_type?: 'NUMERIC' | 'PERCENTAGE';
 }
 
 interface EditAssignmentFormProps {
@@ -48,7 +48,7 @@ interface FormValues {
   title: string;
   description: string;
   due_date: string;
-  grading_type: 'ALPHABET' | 'NUMERIC' | 'PERCENTAGE';
+  grading_type: 'NUMERIC' | 'PERCENTAGE';
 }
 
 const createValidationSchema = (t: (key: string) => string) =>
@@ -56,7 +56,7 @@ const createValidationSchema = (t: (key: string) => string) =>
     title: z.string().min(1, t('assignmentTitleRequired')),
     description: z.string().min(1, t('assignmentDescriptionRequired')),
     due_date: z.string(),
-    grading_type: z.enum(['ALPHABET', 'NUMERIC', 'PERCENTAGE']),
+    grading_type: z.enum(['NUMERIC', 'PERCENTAGE']),
   });
 
 const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, accessToken }) => {
@@ -94,7 +94,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
       title: assignment.title || '',
       description: assignment.description || '',
       due_date: assignment.due_date || '',
-      grading_type: assignment.grading_type || 'ALPHABET',
+      grading_type: assignment.grading_type || 'NUMERIC',
     },
   });
 
@@ -229,7 +229,6 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="ALPHABET">{t('alphabet')}</SelectItem>
                   <SelectItem value="NUMERIC">{t('numeric')}</SelectItem>
                   <SelectItem value="PERCENTAGE">{t('percentage')}</SelectItem>
                 </SelectContent>
