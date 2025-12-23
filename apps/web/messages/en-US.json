@@ -2293,7 +2293,7 @@
         "chooseFile": "Choose File",
         "errorSaving": "Error saving task, please try again later.",
         "gradeError": "Error grading task, please try again later.",
-        "gradeRangeError": "Grade cannot be more than {maxGradeValue} points",
+        "gradeRangeError": "Grade must be between 0 and {maxGradeValue} points",
         "gradeSuccess": "Task graded successfully with {grade} points",
         "gradedByTeacher": "Graded by teacher: @{username}",
         "gradingViewInfo": "Please download the file and grade it manually, then enter the grade above",

@@ -1103,6 +1103,28 @@ async def update_assignment_task_submission(
     # Update only the fields that were passed in using model_dump with exclude_unset
     update_data = assignment_task_submission_object.model_dump(exclude_unset=True)
     for field, value in update_data.items():
+        # Validate grade range strictly (0-100)
+        if field == "grade" and value is not None:
+            try:
+                val = int(value)
+            except Exception:
+                raise HTTPException(status_code=400, detail="Grade must be an integer between 0 and 100")
+            if val < 0 or val > 100:
+                raise HTTPException(status_code=400, detail=f"Grade {val} is out of range (0-100)")
+            setattr(assignment_task_submission, field, val)
+            continue
+
+        # Validate grade range strictly (0-100)
+        if field == "grade" and value is not None:
+            try:
+                val = int(value)
+            except Exception:
+                raise HTTPException(status_code=400, detail="Grade must be an integer between 0 and 100")
+            if val < 0 or val > 100:
+                raise HTTPException(status_code=400, detail=f"Grade {val} is out of range (0-100)")
+            setattr(assignment_task_submission, field, val)
+            continue
+
         setattr(assignment_task_submission, field, value)
 
     assignment_task_submission.update_date = datetime.now().isoformat()
@@ -1491,6 +1513,17 @@ async def update_assignment_submission(
     # Update only the fields that were passed in using model_dump with exclude_unset
     update_data = assignment_user_submission_object.model_dump(exclude_unset=True)
     for field, value in update_data.items():
+        # Validate grade range strictly (0-100)
+        if field == "grade" and value is not None:
+            try:
+                val = int(value)
+            except Exception:
+                raise HTTPException(status_code=400, detail="Grade must be an integer between 0 and 100")
+            if val < 0 or val > 100:
+                raise HTTPException(status_code=400, detail=f"Grade {val} is out of range (0-100)")
+            setattr(assignment_user_submission, field, val)
+            continue
+
         setattr(assignment_user_submission, field, value)
 
     assignment_user_submission.update_date = datetime.now().isoformat()
@@ -1602,20 +1635,37 @@ async def grade_assignment_submission(
             detail="Assignment User Submission not found",
         )
 
-    # Get all the task submissions for the user
-    task_subs = select(AssignmentTaskSubmission).where(
-        AssignmentTaskSubmission.user_id == user_id,
-        AssignmentTaskSubmission.activity_id == assignment.activity_id,
-    )
-    task_submissions = db_session.exec(task_subs).all()
+    # Calculate final grade as the rounded average of all assignment tasks (scores must be 0-100)
+    statement = select(AssignmentTask).where(AssignmentTask.assignment_id == assignment.id)
+    assignment_tasks = db_session.exec(statement).all()
 
-    # Calculate the grade
-    grade = 0
-    for task_submission in task_submissions:
-        grade += task_submission.grade
+    if not assignment_tasks:
+        raise HTTPException(status_code=400, detail="Assignment has no tasks to grade")
 
-    # Update the assignment user submission
-    assignment_user_submission.grade = grade
+    total = 0
+    for task in assignment_tasks:
+        # Find user's submission for this task (if missing treat as 0)
+        statement = select(AssignmentTaskSubmission).where(
+            AssignmentTaskSubmission.assignment_task_id == task.id,
+            AssignmentTaskSubmission.user_id == user_id,
+        )
+        submission = db_session.exec(statement).first()
+        task_grade = 0
+        if submission:
+            # Validate range
+            try:
+                task_grade = int(submission.grade)
+            except Exception:
+                raise HTTPException(status_code=400, detail=f"Invalid grade value for task {task.id}")
+            if task_grade < 0 or task_grade > 100:
+                raise HTTPException(status_code=400, detail=f"Task {task.id} grade {task_grade} is out of range (0-100)")
+        total += task_grade
+
+    average = total / len(assignment_tasks)
+    rounded = int(round(average))
+
+    # Update the assignment user submission with the final rounded average
+    assignment_user_submission.grade = rounded
 
     # Insert Assignment User Submission in DB
     db_session.add(assignment_user_submission)
@@ -1631,7 +1681,7 @@ async def grade_assignment_submission(
     db_session.refresh(assignment_user_submission)
 
     # return OK
-    return {"message": "Задание оценено на " + str(grade) + " баллов"}
+    return {"message": "Задание оценено на " + str(rounded) + " баллов"}
 
 
 async def get_grade_assignment_submission(
@@ -1664,15 +1714,13 @@ async def get_grade_assignment_submission(
             detail="Assignment User Submission not found",
         )
 
-    # Get the max grade value from the sum of every assignmenttask
+    # Determine number of tasks and normalize max grade to 100 (final grade is 0-100)
     statement = select(AssignmentTask).where(
         AssignmentTask.assignment_id == assignment.id
     )
     assignment_tasks = db_session.exec(statement).all()
-    max_grade = 0
 
-    for task in assignment_tasks:
-        max_grade += task.max_grade_value
+    max_grade = 100 if assignment_tasks else 0
 
     # Now get the grade from the user submission
     statement = select(AssignmentUserSubmission).where(

@@ -802,10 +802,9 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
 
     setIsSubmitting(true);
     try {
-      const maxPoints = assignmentTaskOutsideProvider?.max_grade_value || 100;
       const finalGrade =
         gradingStats.totalBlanks > 0
-          ? Math.round((gradingStats.correctCount / gradingStats.totalBlanks) * maxPoints)
+          ? Math.round((gradingStats.correctCount / gradingStats.totalBlanks) * 100)
           : 0;
 
       const res = await handleAssignmentTaskSubmission(

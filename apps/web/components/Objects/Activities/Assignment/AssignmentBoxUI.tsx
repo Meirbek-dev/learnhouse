@@ -3,7 +3,7 @@
 import { useAssignmentSubmission } from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import { BookPlus, BookUser, FileUp, Forward, InfoIcon, ListTodo, Save, Type } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { Card, CardContent, CardHeader } from '@components/ui/card';
+import { CardContent, CardHeader } from '@components/ui/card';
 import { Alert, AlertDescription } from '@components/ui/alert';
 import { Separator } from '@components/ui/separator';
 import { Button } from '@components/ui/button';
@@ -12,6 +12,7 @@ import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 // Type definitions
 type AssignmentType = 'quiz' | 'file' | 'form';
@@ -56,10 +57,13 @@ const AssignmentBoxUI = ({
     if (!gradeCustomFC || !customGrade) return;
 
     const grade = Number.parseInt(customGrade, 10);
-    if (Number.isNaN(grade) || grade < 0) return;
+    if (Number.isNaN(grade) || grade < 0 || grade > 100) {
+      toast.error(t('gradeRangeError', { maxGradeValue: 100 }));
+      return;
+    }
 
     if (maxPoints && grade > maxPoints) {
-      // Optionally handle grade exceeding max points
+      toast.error(t('gradeRangeError', { maxGradeValue: Math.min(maxPoints, 100) }));
       return;
     }
 
@@ -74,8 +78,8 @@ const AssignmentBoxUI = ({
   };
 
   return (
-    <Card className="border-slate-200 bg-slate-50/50">
-      <CardHeader className="pb-3">
+    <div>
+      <CardHeader className="pb-2">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {/* Left side - Type and badges */}
           <div className="flex flex-wrap items-center gap-2">
@@ -139,7 +143,7 @@ const AssignmentBoxUI = ({
       <Separator />
 
       <CardContent className="pt-4">{children}</CardContent>
-    </Card>
+    </div>
   );
 };
 

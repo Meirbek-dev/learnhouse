@@ -183,8 +183,8 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
     if (!assignmentTaskUUID || !assignmentUUID || !accessToken || !assignmentTask || !username) {
       return toast.error(t('missingGradingInfo'));
     }
-    if (grade > assignmentTask.max_grade_value) {
-      return toast.error(t('gradeRangeError', { maxGradeValue: assignmentTask.max_grade_value }));
+    if (grade < 0 || grade > 100) {
+      return toast.error(t('gradeRangeError', { maxGradeValue: 100 }));
     }
 
     const values = {

@@ -187,11 +187,11 @@ const TaskCard = ({ task, index, org, assignments, t }: TaskCardProps) => {
 
   return (
     <Card>
-      <CardContent className="p-6">
+      <CardContent className="p-6 pt-0">
         {/* Task Header */}
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex flex-wrap gap-2 text-sm">
-            <span className="font-semibold text-slate-800">{t('task', { index: index + 1 })}:</span>
+            <span className="text-lg font-semibold text-slate-800">{t('task', { index: index + 1 })}:</span>
             <span className="break-words text-slate-600">{task.description}</span>
           </div>
 
@@ -236,8 +236,6 @@ const TaskCard = ({ task, index, org, assignments, t }: TaskCardProps) => {
             </div>
           )}
         </div>
-
-        <Separator className="mb-4" />
 
         {/* Task Content */}
         <div className="w-full">

@@ -519,7 +519,6 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
 
     setIsSaving(true);
     try {
-      const maxPoints = assignmentTaskOutsideProvider?.max_grade_value || 100;
       const totalOptions = questions.reduce((total, q) => total + (q.options?.length ?? 0), 0);
 
       // Early-return if there are no options to grade (avoid division by zero)
@@ -540,7 +539,8 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
         });
       });
 
-      const finalGrade = Math.round((correctAnswers / totalOptions) * maxPoints);
+      // Normalise to 0-100 range regardless of task.max_grade_value
+      const finalGrade = Math.round((correctAnswers / totalOptions) * 100);
 
       const values = {
         assignment_task_submission_uuid: userSubmissions.assignment_task_submission_uuid,
