@@ -1,5 +1,5 @@
 'use client';
-import { Loader2 } from 'lucide-react';
+import { Spinner } from '@components/ui/spinner';
 import { motion } from 'motion/react';
 
 const PageLoading = () => {
@@ -33,7 +33,7 @@ const PageLoading = () => {
           },
         }}
       >
-        <Loader2 className="h-10 w-10 animate-spin text-gray-400" />
+        <Spinner className="size-10" />
       </motion.div>
     </div>
   );
