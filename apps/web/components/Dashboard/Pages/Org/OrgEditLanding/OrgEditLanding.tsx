@@ -8,6 +8,7 @@ import {
   ImageIcon,
   LayoutTemplate,
   Link,
+  MousePointerClick,
   Plus,
   Save,
   TextIcon,
@@ -25,7 +26,7 @@ import { getOrgLandingMediaDirectory } from '@services/media/media';
 import { getOrgCourses } from '@services/courses/courses';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Textarea } from '@components/ui/textarea';
-import { ButtonIcon } from '@radix-ui/react-icons';
+
 import { Switch } from '@components/ui/switch';
 import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
@@ -532,7 +533,7 @@ const OrgEditLanding = () => {
                     >
                       <div className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap text-white transition-all outline-none">
                         <Plus
-                          size="8"
+                          size={14}
                           color="white"
                         />
                         {t('SectionsPanel.addSectionButton')}
@@ -714,7 +715,7 @@ const HeroSectionEditor: FC<{
               value="buttons"
               className="flex items-center space-x-1"
             >
-              <ButtonIcon className="h-4 w-4" />
+              <MousePointerClick className="h-4 w-4" />
               <span>{t('HeroEditor.Tabs.buttons')}</span>
             </TabsTrigger>
             <TabsTrigger

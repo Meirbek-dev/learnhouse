@@ -2,7 +2,6 @@
 import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
 import type { AIEditorStateTypes } from '@components/Contexts/AI/AIEditorContext';
 
-import { DividerVerticalIcon, SlashIcon } from '@radix-ui/react-icons';
 import { ToolbarButtons } from './Toolbar/ToolbarButtons';
 // Extensions
 import QuizBlock from './Extensions/Quiz/QuizBlock';
@@ -12,6 +11,7 @@ import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import WarningCallout from './Extensions/Callout/Warning/WarningCallout';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import DividerVerticalIcon from '@components/svg/DividerVerticalIcon';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import EmbedObjects from './Extensions/EmbedObjects/EmbedObjects';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
@@ -204,7 +204,7 @@ const Editor = (props: EditorProps) => {
                   />
                 </Link>
                 <EditorInfoDocName>
-                  <b>{props.course.name}</b> <SlashIcon /> {props.activity.name}{' '}
+                  <b>{props.course.name}</b> <DividerVerticalIcon className='size-7' /> {props.activity.name}{' '}
                 </EditorInfoDocName>
               </EditorInfoWrapper>
               <EditorButtonsWrapper>
@@ -262,7 +262,7 @@ const Editor = (props: EditorProps) => {
                     <div className="flex h-9 items-center justify-center rounded-lg bg-neutral-600 px-3 py-2 text-sm font-bold text-neutral-100 shadow-sm transition-all ease-linear hover:cursor-pointer hover:bg-neutral-700">
                       <Eye
                         className="mx-auto items-center"
-                        size={15}
+                        size={14}
                       />
                     </div>
                   </Link>

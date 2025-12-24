@@ -3,19 +3,19 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
-import { useEffect, useRef, useState, useTransition, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { Image as ImageIcon, UploadCloud, Loader2, X } from 'lucide-react';
+import { Image as ImageIcon, Loader2, UploadCloud, X } from 'lucide-react';
 import { TagsInput } from '@components/ui/custom/tags-input';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { createNewCourse } from '@services/courses/courses';
+import { Card, CardFooter } from '@components/ui/card';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Card, CardFooter } from '@components/ui/card';
 import { useForm } from 'react-hook-form';
 import type { ChangeEvent } from 'react';
 import { toast } from 'sonner';
@@ -195,8 +195,6 @@ const CreateCourseModal = ({ closeModal, orgslug }: CreateCourseModalProps) => {
     [form, thumbnailPreview, t],
   );
 
-
-
   const removeThumbnail = useCallback(() => {
     if (thumbnailPreview) {
       URL.revokeObjectURL(thumbnailPreview);
@@ -304,7 +302,6 @@ const CreateCourseModal = ({ closeModal, orgslug }: CreateCourseModalProps) => {
                       <UploadCloud className="mr-2 h-4 w-4" />
                       {t('thumbnailUpload')}
                     </Button>
-
                   </CardFooter>
                 </Card>
               </FormControl>
@@ -397,8 +394,6 @@ const CreateCourseModal = ({ closeModal, orgslug }: CreateCourseModalProps) => {
             )}
           </Button>
         </div>
-
-
       </form>
     </Form>
   );

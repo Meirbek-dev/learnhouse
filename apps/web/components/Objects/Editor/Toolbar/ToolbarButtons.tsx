@@ -1,21 +1,17 @@
 'use client';
 
 import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  ChevronDownIcon,
-  ColumnsIcon,
-  ContainerIcon,
-  DividerVerticalIcon,
-  FontBoldIcon,
-  FontItalicIcon,
-  ListBulletIcon,
-  RowsIcon,
-  SectionIcon,
-  StrikethroughIcon,
-  TableIcon,
-} from '@radix-ui/react-icons';
-import {
+  ArrowLeft,
+  ArrowRight,
+  ChevronDown,
+  Columns,
+  Table,
+  Plus,
+  Minus,
+  Trash2,
+  Bold,
+  Italic,
+  List,
   AlertCircle,
   AlertTriangle,
   BadgeHelp,
@@ -26,7 +22,6 @@ import {
   Globe,
   ImagePlus,
   Link2,
-  List,
   ListOrdered,
   MousePointerClick,
   RotateCw,
@@ -41,6 +36,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { styled } from 'styled-components';
 
+import DividerVerticalIcon from '@components/svg/DividerVerticalIcon';
 import LinkInputTooltip from './LinkInputTooltip';
 
 export const ToolbarButtons = ({ editor, props }: any) => {
@@ -79,27 +75,27 @@ export const ToolbarButtons = ({ editor, props }: any) => {
   const tableOptions = [
     {
       label: t('insertTable'),
-      icon: <TableIcon />,
+      icon: <Table size={16} />,
       action: () => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
     },
     {
       label: t('addRowBelow'),
-      icon: <RowsIcon />,
+      icon: <Plus size={16} />,
       action: () => editor.chain().focus().addRowAfter().run(),
     },
     {
       label: t('addColumnRight'),
-      icon: <ColumnsIcon />,
+      icon: <Columns size={16} />,
       action: () => editor.chain().focus().addColumnAfter().run(),
     },
     {
       label: t('deleteRow'),
-      icon: <SectionIcon />,
+      icon: <Minus size={16} />,
       action: () => editor.chain().focus().deleteRow().run(),
     },
     {
       label: t('deleteColumn'),
-      icon: <ContainerIcon />,
+      icon: <Trash2 size={16} />,
       action: () => editor.chain().focus().deleteColumn().run(),
     },
   ];
@@ -107,7 +103,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
   const listOptions = [
     {
       label: t('listOptions.bulletList'),
-      icon: <List size={15} />,
+      icon: <List size={16} />,
       action: () => {
         if (editor.isActive('bulletList')) {
           editor.chain().focus().toggleBulletList().run();
@@ -119,7 +115,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
     },
     {
       label: t('listOptions.orderedList'),
-      icon: <ListOrdered size={15} />,
+      icon: <ListOrdered size={16} />,
       action: () => {
         if (editor.isActive('orderedList')) {
           editor.chain().focus().toggleOrderedList().run();
@@ -175,28 +171,28 @@ export const ToolbarButtons = ({ editor, props }: any) => {
   return (
     <ToolButtonsWrapper>
       <ToolBtn onClick={() => editor.chain().focus().undo().run()}>
-        <ArrowLeftIcon />
+        <ArrowLeft size={16} />
       </ToolBtn>
       <ToolBtn onClick={() => editor.chain().focus().redo().run()}>
-        <ArrowRightIcon />
+        <ArrowRight size={16} />
       </ToolBtn>
       <ToolBtn
         onClick={() => editor.chain().focus().toggleBold().run()}
         className={editor.isActive('bold') ? 'is-active' : ''}
       >
-        <FontBoldIcon />
+        <Bold size={16} />
       </ToolBtn>
       <ToolBtn
         onClick={() => editor.chain().focus().toggleItalic().run()}
         className={editor.isActive('italic') ? 'is-active' : ''}
       >
-        <FontItalicIcon />
+        <Italic size={16} />
       </ToolBtn>
       <ToolBtn
         onClick={() => editor.chain().focus().toggleStrike().run()}
         className={editor.isActive('strike') ? 'is-active' : ''}
       >
-        <StrikethroughIcon />
+        <Minus size={16} />
       </ToolBtn>
       <ListMenuWrapper
         onMouseEnter={() => {
@@ -223,8 +219,8 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           }}
           className={showListMenu || editor.isActive('bulletList') || editor.isActive('orderedList') ? 'is-active' : ''}
         >
-          <ListBulletIcon />
-          <ChevronDownIcon />
+          <List size={16} />
+          <ChevronDown size={16} />
         </ToolBtn>
         {showListMenu ? (
           <ListDropdown>
@@ -310,8 +306,8 @@ export const ToolbarButtons = ({ editor, props }: any) => {
             }}
             className={showTableMenu ? 'is-active' : ''}
           >
-            <TableIcon width={18} />
-            <ChevronDownIcon />
+            <Table size={16} />
+            <ChevronDown size={16} />
           </ToolBtn>
         </ToolTip>
         {showTableMenu ? (
@@ -350,7 +346,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
               .run()
           }
         >
-          <AlertCircle size={15} />
+          <AlertCircle size={16} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('warningCallout')}>
@@ -371,7 +367,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
               .run()
           }
         >
-          <AlertTriangle size={15} />
+          <AlertTriangle size={16} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('link')}>
@@ -381,7 +377,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
             onClick={handleLinkClick}
             className={editor.isActive('link') ? 'is-active' : ''}
           >
-            <Link2 size={15} />
+            <Link2 size={16} />
           </ToolBtn>
           {showLinkInput ? (
             <LinkInputTooltip
@@ -404,7 +400,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
               .run()
           }
         >
-          <ImagePlus size={15} />
+          <ImagePlus size={16} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('video')}>
@@ -419,12 +415,12 @@ export const ToolbarButtons = ({ editor, props }: any) => {
               .run()
           }
         >
-          <Video size={15} />
+          <Video size={16} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('youtubeVideo')}>
         <ToolBtn onClick={() => editor.chain().focus().insertContent({ type: 'blockEmbed' }).run()}>
-          <SiYoutube size={15} />
+          <SiYoutube size={16} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('mathEquation')}>
@@ -439,7 +435,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
               .run()
           }
         >
-          <Sigma size={15} />
+          <Sigma size={16} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('pdfDocument')}>
@@ -454,7 +450,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
               .run()
           }
         >
-          <FileText size={15} />
+          <FileText size={16} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('interactiveQuiz')}>
@@ -469,7 +465,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
               .run()
           }
         >
-          <BadgeHelp size={15} />
+          <BadgeHelp size={16} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('codeBlock')}>
@@ -477,12 +473,12 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           onClick={() => editor.chain().focus().toggleCodeBlock().run()}
           className={editor.isActive('codeBlock') ? 'is-active' : ''}
         >
-          <Code size={15} />
+          <Code size={16} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('externalObject')}>
         <ToolBtn onClick={() => editor.chain().focus().insertContent({ type: 'blockEmbed' }).run()}>
-          <Cuboid size={15} />
+          <Cuboid size={16} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('badges')}>
@@ -503,7 +499,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
               .run()
           }
         >
-          <Tags size={15} />
+          <Tags size={16} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('button')}>
@@ -524,12 +520,12 @@ export const ToolbarButtons = ({ editor, props }: any) => {
               .run()
           }
         >
-          <MousePointerClick size={15} />
+          <MousePointerClick size={16} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('user')}>
         <ToolBtn onClick={() => editor.chain().focus().insertContent({ type: 'blockUser' }).run()}>
-          <User size={15} />
+          <User size={16} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('webPreview')}>
@@ -544,7 +540,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
               .run()
           }
         >
-          <Globe size={15} />
+          <Globe size={16} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('flipcard')}>
@@ -566,7 +562,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
               .run()
           }
         >
-          <RotateCw size={15} />
+          <RotateCw size={16} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('interactiveScenarios')}>
@@ -615,7 +611,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           }
           aria-label={t('aria.insertInteractiveScenarios')}
         >
-          <GitBranch size={15} />
+          <GitBranch size={16} />
         </ToolBtn>
       </ToolTip>
     </ToolButtonsWrapper>

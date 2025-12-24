@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { updateCourseThumbnail } from '@services/courses/courses';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Card, CardContent } from '@components/ui/card';
@@ -178,8 +178,6 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
     },
     [showError, validateFile, updateThumbnail, t],
   );
-
-
 
   const getThumbnailUrl = useCallback(
     (type: 'image' | 'video') => {
@@ -364,8 +362,6 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
               <p className="text-muted-foreground text-center text-xs">{t('supportedVideoFormats')}</p>
             </TabsContent>
           </Tabs>
-
-
         </CardContent>
       </Card>
     );
@@ -391,8 +387,6 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
         <p className="text-muted-foreground text-center text-xs">
           {thumbnailType === 'image' ? t('supportedFormats') : t('supportedVideoFormats')}
         </p>
-
-
       </CardContent>
     </Card>
   );

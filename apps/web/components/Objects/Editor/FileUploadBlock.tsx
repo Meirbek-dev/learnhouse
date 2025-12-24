@@ -1,9 +1,9 @@
 'use client';
 
 import type { ButtonHTMLAttributes, FC, HTMLAttributes, InputHTMLAttributes, ReactNode } from 'react';
-import { UploadIcon } from '@radix-ui/react-icons';
 import { useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
+import { Upload } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -41,7 +41,7 @@ const FileUploadBlockButton: FC<ButtonHTMLAttributes<HTMLButtonElement>> = ({ on
       onClick={onClick}
       {...props}
     >
-      <UploadIcon />
+      <Upload />
       <p>{t('submit')}</p>
     </button>
   );
