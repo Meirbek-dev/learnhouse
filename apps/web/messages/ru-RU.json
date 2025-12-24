@@ -657,7 +657,6 @@
       "toastError": "Не удалось создать курс",
       "toastErrorOrgLoad": "Не удалось загрузить организацию",
       "toastErrorOrgMissing": "Информация отсутствует",
-      "toastErrorUnsplash": "Не удалось получить изображение из Unsplash",
       "toastLoading": "Создание курса...",
       "toastSuccess": "Курс успешно создан",
       "creating": "Создание...",
@@ -1415,8 +1414,6 @@
           "invalidMimeType": "Недопустимый тип файла: {fileType}. Пожалуйста, загружайте изображения PNG или JPG/JPEG",
           "invalidVideoMimeType": "Недопустимый тип файла: {fileType}. Пожалуйста, загружайте видео MP4, MKV или WebM",
           "pleaseSelectAFile": "Пожалуйста, выберите файл",
-          "unsplashInvalidFormat": "Недопустимый формат изображения из Unsplash",
-          "unsplashProcessFailed": "Не удалось обработать изображение из галереи",
           "updateFailed": "Не удалось обновить миниатюру",
           "videoFileTooLarge": "Размер файла ({fileSize}МБ) превышает лимит в 100МБ"
         },
@@ -1437,35 +1434,7 @@
         "uploading": "Загрузка...",
         "video": "Видео"
       },
-      "UnsplashPicker": {
-        "Labels": {
-          "architecture": "Архитектура",
-          "art": "Искусство",
-          "biology": "Биология",
-          "business": "Бизнес",
-          "education": "Образование",
-          "fashion": "Мода",
-          "finance": "Финансы",
-          "fitness": "Фитнес",
-          "food": "Еда",
-          "gaming": "Игры",
-          "health": "Здоровье",
-          "history": "История",
-          "lifestyle": "Образ жизни",
-          "music": "Музыка",
-          "nature": "Природа",
-          "photography": "Фотография",
-          "science": "Наука",
-          "sports": "Спорт",
-          "technology": "Технологии",
-          "travel": "Путешествия"
-        },
-        "loadMoreButton": "Загрузить ещё",
-        "loading": "Загрузка...",
-        "modalTitle": "Выберите изображение из Unsplash",
-        "noResults": "Нет результатов",
-        "searchPlaceholder": "Поиск бесплатных фотографий с высоким разрешением..."
-      },
+
       "about": {
         "label": "О курсе"
       },

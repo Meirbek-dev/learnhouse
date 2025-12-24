@@ -6,7 +6,6 @@ import { updateCourseThumbnail } from '@services/courses/courses';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
-import UnsplashImagePicker from './UnsplashImagePicker';
 import { Card, CardContent } from '@components/ui/card';
 import { getAPIUrl } from '@services/config/config';
 import { Button } from '@components/ui/button';
@@ -38,7 +37,6 @@ interface LocalThumbnail {
 const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
-  const unsplashFetchControllerRef = useRef<AbortController | null>(null);
   const thumbnailDelayRef = useRef<number | null>(null);
 
   const course = useCourse();
@@ -48,7 +46,6 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
 
   const [localThumbnail, setLocalThumbnail] = useState<LocalThumbnail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showUnsplashPicker, setShowUnsplashPicker] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>(thumbnailType === 'video' ? 'video' : 'image');
 
   const withUnpublishedActivities = course?.withUnpublishedActivities ?? false;
@@ -65,7 +62,6 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      unsplashFetchControllerRef.current?.abort();
       if (thumbnailDelayRef.current) {
         clearTimeout(thumbnailDelayRef.current);
       }
@@ -183,45 +179,7 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
     [showError, validateFile, updateThumbnail, t],
   );
 
-  const handleUnsplashSelect = useCallback(
-    async (imageUrl: string) => {
-      unsplashFetchControllerRef.current?.abort();
-      const controller = new AbortController();
-      unsplashFetchControllerRef.current = controller;
 
-      try {
-        setIsLoading(true);
-
-        const response = await fetch(imageUrl, { signal: controller.signal });
-        if (controller.signal.aborted) return;
-
-        const blob = await response.blob();
-        if (controller.signal.aborted) return;
-
-        if (!VALID_IMAGE_MIME_TYPES.includes(blob.type as ValidImageMimeType)) {
-          throw new Error(t('errors.unsplashInvalidFormat'));
-        }
-
-        const file = new File([blob], `unsplash_${Date.now()}.jpg`, { type: blob.type });
-
-        if (!validateFile(file, 'image')) {
-          return;
-        }
-
-        const blobUrl = URL.createObjectURL(file);
-        setLocalThumbnail({ file, url: blobUrl, type: 'image' });
-        await updateThumbnail(file, 'image');
-      } catch (error: any) {
-        if (error?.name === 'AbortError') {
-          return;
-        }
-        showError(t('errors.unsplashProcessFailed'));
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [validateFile, updateThumbnail, showError, t],
-  );
 
   const getThumbnailUrl = useCallback(
     (type: 'image' | 'video') => {
@@ -312,17 +270,6 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
       >
         <UploadCloud className="mr-2 h-4 w-4" />
         {t('uploadImageButton')}
-      </Button>
-      <Button
-        type="button"
-        variant="outline"
-        size="default"
-        disabled={isLoading}
-        onClick={() => setShowUnsplashPicker(true)}
-        className="flex-1"
-      >
-        <ImageIcon className="mr-2 h-4 w-4" />
-        {t('gallery')}
       </Button>
     </>
   );
@@ -418,12 +365,7 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
             </TabsContent>
           </Tabs>
 
-          {showUnsplashPicker && (
-            <UnsplashImagePicker
-              onSelect={handleUnsplashSelect}
-              onClose={() => setShowUnsplashPicker(false)}
-            />
-          )}
+
         </CardContent>
       </Card>
     );
@@ -450,12 +392,7 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
           {thumbnailType === 'image' ? t('supportedFormats') : t('supportedVideoFormats')}
         </p>
 
-        {showUnsplashPicker && thumbnailType === 'image' && (
-          <UnsplashImagePicker
-            onSelect={handleUnsplashSelect}
-            onClose={() => setShowUnsplashPicker(false)}
-          />
-        )}
+
       </CardContent>
     </Card>
   );

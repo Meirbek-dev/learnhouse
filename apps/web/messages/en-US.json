@@ -657,7 +657,6 @@
       "toastError": "Failed to create course",
       "toastErrorOrgLoad": "Failed to load organization",
       "toastErrorOrgMissing": "Organization information is missing",
-      "toastErrorUnsplash": "Failed to fetch image from Unsplash",
       "toastLoading": "Creating course...",
       "toastSuccess": "Course created successfully",
       "creating": "Creating...",
@@ -1414,8 +1413,6 @@
           "invalidMimeType": "Invalid file type: {fileType}. Please upload only PNG or JPG/JPEG images",
           "invalidVideoMimeType": "Invalid file type: {fileType}. Please upload only MP4, MKV or WebM videos",
           "pleaseSelectAFile": "Please select a file",
-          "unsplashInvalidFormat": "Invalid image format from Unsplash",
-          "unsplashProcessFailed": "Failed to process image from gallery",
           "updateFailed": "Failed to update thumbnail",
           "videoFileTooLarge": "File size ({fileSize}MB) exceeds the 100MB limit"
         },
@@ -1436,35 +1433,7 @@
         "uploading": "Uploading...",
         "video": "Video"
       },
-      "UnsplashPicker": {
-        "Labels": {
-          "architecture": "Architecture",
-          "art": "Art",
-          "biology": "Biology",
-          "business": "Business",
-          "education": "Education",
-          "fashion": "Fashion",
-          "finance": "Finance",
-          "fitness": "Fitness",
-          "food": "Food",
-          "gaming": "Gaming",
-          "health": "Health",
-          "history": "History",
-          "lifestyle": "Lifestyle",
-          "music": "Music",
-          "nature": "Nature",
-          "photography": "Photography",
-          "science": "Science",
-          "sports": "Sports",
-          "technology": "Technology",
-          "travel": "Travel"
-        },
-        "loadMoreButton": "Load More",
-        "loading": "Loading...",
-        "modalTitle": "Select Image from Unsplash",
-        "noResults": "No results",
-        "searchPlaceholder": "Search free high-resolution photos..."
-      },
+
       "about": {
         "label": "About"
       },

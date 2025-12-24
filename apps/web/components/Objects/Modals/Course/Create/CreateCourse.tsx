@@ -1,6 +1,5 @@
 'use client';
 
-import UnsplashImagePicker from '@components/Dashboard/Pages/Course/EditCourseGeneral/UnsplashImagePicker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
@@ -35,10 +34,8 @@ const CreateCourseModal = ({ closeModal, orgslug }: CreateCourseModalProps) => {
   const router = useRouter();
   const session = usePlatformSession() as any;
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const unsplashFetchControllerRef = useRef<AbortController | null>(null);
 
   const [orgId, setOrgId] = useState<number | null>(null);
-  const [showUnsplashPicker, setShowUnsplashPicker] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
@@ -103,7 +100,6 @@ const CreateCourseModal = ({ closeModal, orgslug }: CreateCourseModalProps) => {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      unsplashFetchControllerRef.current?.abort();
       if (thumbnailPreview) {
         URL.revokeObjectURL(thumbnailPreview);
       }
@@ -199,42 +195,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: CreateCourseModalProps) => {
     [form, thumbnailPreview, t],
   );
 
-  const handleUnsplashSelect = useCallback(
-    async (imageUrl: string) => {
-      unsplashFetchControllerRef.current?.abort();
-      const controller = new AbortController();
-      unsplashFetchControllerRef.current = controller;
 
-      setIsUploading(true);
-      try {
-        const response = await fetch(imageUrl, { signal: controller.signal });
-        if (controller.signal.aborted) return;
-
-        const blob = await response.blob();
-        if (controller.signal.aborted) return;
-
-        const file = new File([blob], `unsplash_${Date.now()}.jpg`, {
-          type: 'image/jpeg',
-        });
-
-        // Revoke previous preview URL
-        if (thumbnailPreview) {
-          URL.revokeObjectURL(thumbnailPreview);
-        }
-
-        const previewUrl = URL.createObjectURL(file);
-        setThumbnailPreview(previewUrl);
-        form.setValue('thumbnail', file, { shouldValidate: true });
-        setShowUnsplashPicker(false);
-      } catch (error: any) {
-        if (error?.name === 'AbortError') return;
-        toast.error(t('toastErrorUnsplash') || 'Failed to load image from Unsplash');
-      } finally {
-        setIsUploading(false);
-      }
-    },
-    [form, thumbnailPreview, t],
-  );
 
   const removeThumbnail = useCallback(() => {
     if (thumbnailPreview) {
@@ -343,17 +304,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: CreateCourseModalProps) => {
                       <UploadCloud className="mr-2 h-4 w-4" />
                       {t('thumbnailUpload')}
                     </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => setShowUnsplashPicker(true)}
-                      disabled={isUploading}
-                    >
-                      <ImageIcon className="mr-2 h-4 w-4" />
-                      {t('thumbnailChoose')}
-                    </Button>
+
                   </CardFooter>
                 </Card>
               </FormControl>
@@ -447,12 +398,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: CreateCourseModalProps) => {
           </Button>
         </div>
 
-        {showUnsplashPicker && (
-          <UnsplashImagePicker
-            onSelect={handleUnsplashSelect}
-            onClose={() => setShowUnsplashPicker(false)}
-          />
-        )}
+
       </form>
     </Form>
   );

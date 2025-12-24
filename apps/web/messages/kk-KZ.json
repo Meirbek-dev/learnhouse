@@ -657,7 +657,6 @@
       "toastError": "Курсты жасау мүмкін болмады",
       "toastErrorOrgLoad": "Ұйымды жүктеу мүмкін болмады",
       "toastErrorOrgMissing": "Ұйым туралы ақпарат жоқ",
-      "toastErrorUnsplash": "Unsplash-тен суретті алу мүмкін болмады",
       "toastLoading": "Курс жасалуда...",
       "toastSuccess": "Курс сәтті жасалды",
       "creating": "Жасалуда...",
@@ -1413,8 +1412,6 @@
           "invalidMimeType": "Жарамсыз файл түрі: {fileType}. Тек PNG немесе JPG/JPEG кескіндерін жүктеңіз",
           "invalidVideoMimeType": "Жарамсыз файл түрі: {fileType}. Тек MP4, MKV немесе WebM бейнелерін жүктеңіз",
           "pleaseSelectAFile": "Файлды таңдаңыз",
-          "unsplashInvalidFormat": "Unsplash-тен жарамсыз кескін пішімі",
-          "unsplashProcessFailed": "Галереядан кескінді өңдеу сәтсіз аяқталды",
           "updateFailed": "Нобайды жаңарту сәтсіз аяқталды",
           "videoFileTooLarge": "Файл өлшемі ({fileSize}МБ) 100МБ шегінен асады"
         },
@@ -1435,35 +1432,7 @@
         "uploading": "Жүктелуде...",
         "video": "Бейне"
       },
-      "UnsplashPicker": {
-        "Labels": {
-          "architecture": "Сәулет",
-          "art": "Өнер",
-          "biology": "Биология",
-          "business": "Бизнес",
-          "education": "Білім",
-          "fashion": "Сән",
-          "finance": "Қаржы",
-          "fitness": "Фитнес",
-          "food": "Тамақ",
-          "gaming": "Ойындар",
-          "health": "Денсаулық",
-          "history": "Тарих",
-          "lifestyle": "Өмір салты",
-          "music": "Музыка",
-          "nature": "Табиғат",
-          "photography": "Фотосурет",
-          "science": "Ғылым",
-          "sports": "Спорт",
-          "technology": "Технология",
-          "travel": "Саяхат"
-        },
-        "loadMoreButton": "Көбірек жүктеу",
-        "loading": "Жүктелуде...",
-        "modalTitle": "Unsplash-тен кескін таңдаңыз",
-        "noResults": "Нәтиже жоқ",
-        "searchPlaceholder": "Жоғары ажыратымдылықтағы тегін фотосуреттерді іздеу..."
-      },
+
       "about": {
         "label": "Сипаттамасы"
       },
