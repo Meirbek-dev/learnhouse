@@ -1,20 +1,22 @@
 'use client';
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Image as ImageIcon, Loader2, Globe, Lock, CheckCircle2, Search } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { createCollection } from '@services/courses/collections';
-import { Image as ImageIcon, Loader2 } from 'lucide-react';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { ScrollArea } from '@components/ui/scroll-area';
-import { Textarea } from '@components/ui/textarea';
-import { Checkbox } from '@components/ui/checkbox';
-import { useState, useTransition } from 'react';
-import { Button } from '@components/ui/button';
-import { Label } from '@components/ui/label';
-import { Input } from '@components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useState, useTransition, useMemo } from 'react';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { ChangeEvent } from 'react';
@@ -29,9 +31,10 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
   const { orgslug } = params;
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedCourses, setSelectedCourses] = useState([]) as any;
+  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
   const {
     data: courses,
@@ -39,6 +42,14 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
     isLoading,
   } = useSWR(`${getAPIUrl()}courses/org_slug/${orgslug}/page/1/limit/20`, (url) => swrFetcher(url, access_token));
   const [isPublic, setIsPublic] = useState(true);
+
+  const filteredCourses = useMemo(() => {
+    if (!courses || !searchQuery.trim()) return courses || [];
+    const query = searchQuery.toLowerCase();
+    return courses.filter(
+      (course: any) => course.name.toLowerCase().includes(query) || course.description?.toLowerCase().includes(query),
+    );
+  }, [courses, searchQuery]);
 
   const handleVisibilityChange = (value: string) => {
     setIsPublic(value === 'true');
@@ -90,137 +101,268 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
     }
   };
 
+  const toggleCourse = (courseId: string) => {
+    setSelectedCourses((prev) =>
+      prev.includes(courseId) ? prev.filter((id) => id !== courseId) : [...prev, courseId],
+    );
+  };
+
+  const selectAll = () => {
+    if (filteredCourses.length === 0) return;
+    const allIds = filteredCourses.map((c: any) => c.id);
+    setSelectedCourses(allIds);
+  };
+
+  const deselectAll = () => {
+    setSelectedCourses([]);
+  };
+
   if (error) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-        <div className="text-red-500">{t('errorLoadingCourses')}</div>
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-red-600">{t('errorTitle')}</CardTitle>
+            <CardDescription>{t('errorLoadingCourses')}</CardDescription>
+          </CardHeader>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12">
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-          <p className="mt-2 text-sm text-gray-600">{t('description')}</p>
-        </div>
+    <div className="bg-background mx-auto p-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+        <p className="text-muted-foreground mt-2">{t('description')}</p>
+      </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-6"
-        >
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="collection-name">{t('nameLabel')}</Label>
-              <Input
-                id="collection-name"
-                type="text"
-                placeholder={t('namePlaceholder')}
-                value={name}
-                onChange={handleNameChange}
-                maxLength={100}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="collection-visibility">{t('visibilityLabel')}</Label>
-              <Select
-                onValueChange={(value) => value && handleVisibilityChange(value)}
-                value={String(isPublic)}
-              >
-                <SelectTrigger
-                  id="collection-visibility"
-                  className="mt-1"
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6"
+      >
+        {/* Collection Details Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">{t('detailsTitle')}</CardTitle>
+            <CardDescription>{t('detailsDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="collection-name"
+                  className="text-sm font-medium"
                 >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="true">{t('visibilityPublic')}</SelectItem>
-                  <SelectItem value="false">{t('visibilityPrivate')}</SelectItem>
-                </SelectContent>
-              </Select>
+                  {t('nameLabel')} <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="collection-name"
+                  type="text"
+                  placeholder={t('namePlaceholder')}
+                  value={name}
+                  onChange={handleNameChange}
+                  maxLength={100}
+                  className="h-10"
+                />
+                <p className="text-muted-foreground text-xs">{t('nameChars', { current: name.length, max: 100 })}</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="collection-visibility"
+                  className="text-sm font-medium"
+                >
+                  {t('visibilityLabel')} <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  onValueChange={handleVisibilityChange}
+                  value={String(isPublic)}
+                >
+                  <SelectTrigger
+                    id="collection-visibility"
+                    className="h-10"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">
+                      <div className="flex items-center gap-2">
+                        <Globe className="h-4 w-4" />
+                        <span>{t('visibilityPublic')}</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="false">
+                      <div className="flex items-center gap-2">
+                        <Lock className="h-4 w-4" />
+                        <span>{t('visibilityPrivate')}</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="collection-description">{t('descriptionLabel')}</Label>
+              <Label
+                htmlFor="collection-description"
+                className="text-sm font-medium"
+              >
+                {t('descriptionLabel')} <span className="text-red-500">*</span>
+              </Label>
               <Textarea
                 id="collection-description"
                 placeholder={t('descriptionPlaceholder')}
                 value={description}
                 onChange={handleDescriptionChange}
                 rows={4}
-                className="mt-1"
                 maxLength={500}
+                className="resize-none"
               />
+              <p className="text-muted-foreground text-xs">
+                {t('descriptionChars', { current: description.length, max: 500 })}
+              </p>
             </div>
+          </CardContent>
+        </Card>
 
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">{t('selectCoursesLabel')}</Label>
-              {isLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
-                </div>
-              ) : courses?.length === 0 ? (
-                <p className="py-4 text-sm text-gray-500">{t('noCoursesAvailable')}</p>
-              ) : (
-                <div className="mt-2 rounded-lg border border-gray-200 bg-gray-50">
-                  <ScrollArea className="max-h-[400px] space-y-3 overflow-y-auto p-4">
-                    {courses?.map((course: any) => (
-                      <Label
-                        key={course.id}
-                        className="relative flex cursor-pointer items-center gap-4 rounded-md bg-white p-4 transition hover:bg-gray-50"
-                      >
-                        <Checkbox
-                          checked={selectedCourses.includes(course.id)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setSelectedCourses([...selectedCourses, course.id]);
-                            } else {
-                              setSelectedCourses(selectedCourses.filter((id: any) => id !== course.id));
-                            }
-                          }}
-                        />
-                        <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-md bg-gray-100">
-                          {course.thumbnail_image ? (
-                            <img
-                              src={getCourseThumbnailMediaDirectory(
-                                org.org_uuid,
-                                course.course_uuid,
-                                course.thumbnail_image,
-                              )}
-                              alt={course.name}
-                              className="object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center">
-                              <ImageIcon className="h-6 w-6 text-gray-400" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h3 className="truncate text-sm font-medium text-gray-900">{course.name}</h3>
-                          {course.description ? (
-                            <p className="mt-1 line-clamp-2 text-xs text-gray-500">{course.description}</p>
-                          ) : null}
-                        </div>
-                      </Label>
-                    ))}
-                  </ScrollArea>
-                  <div className="border-t border-gray-200 bg-gray-50 px-4 py-3">
-                    <p className="text-xs text-gray-500">{t('selectedCount', { count: selectedCourses.length })}</p>
-                  </div>
-                </div>
+        {/* Course Selection Card */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg">
+                  {t('selectCoursesLabel')} <span className="text-red-500">*</span>
+                </CardTitle>
+                <CardDescription>{t('selectCoursesDescription')}</CardDescription>
+              </div>
+              {selectedCourses.length > 0 && (
+                <Badge
+                  variant="secondary"
+                  className="ml-auto"
+                >
+                  {t('selectedCount', { count: selectedCourses.length })}
+                </Badge>
               )}
             </div>
-          </div>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <Loader2 className="text-primary mx-auto h-8 w-8 animate-spin" />
+                  <p className="text-muted-foreground mt-2 text-sm">{t('loadingCourses')}</p>
+                </div>
+              </div>
+            ) : courses?.length === 0 ? (
+              <div className="rounded-lg border border-dashed py-12 text-center">
+                <ImageIcon className="text-muted-foreground mx-auto h-12 w-12" />
+                <p className="text-muted-foreground mt-2 text-sm">{t('noCoursesAvailable')}</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Search and Actions */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="relative flex-1">
+                    <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                    <Input
+                      placeholder={t('searchPlaceholder')}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={selectAll}
+                      disabled={filteredCourses.length === 0}
+                    >
+                      {t('selectAllButton')}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={deselectAll}
+                      disabled={selectedCourses.length === 0}
+                    >
+                      {t('clearButton')}
+                    </Button>
+                  </div>
+                </div>
 
-          <div className="flex items-center justify-end space-x-4">
+                {/* Course List */}
+                <ScrollArea className="h-[400px] rounded-lg border">
+                  <div className="space-y-2 p-4">
+                    {filteredCourses.length === 0 ? (
+                      <div className="text-muted-foreground py-8 text-center text-sm">
+                        {t('noCoursesFound', { query: searchQuery })}
+                      </div>
+                    ) : (
+                      filteredCourses.map((course: any) => {
+                        const isSelected = selectedCourses.includes(course.id);
+                        return (
+                          <div
+                            key={course.id}
+                            onClick={() => toggleCourse(course.id)}
+                            className={`group hover:border-primary hover:bg-accent relative flex cursor-pointer items-start gap-4 rounded-lg border p-4 transition-all ${
+                              isSelected ? 'border-primary bg-accent' : ''
+                            }`}
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              className="mt-1"
+                              onCheckedChange={() => toggleCourse(course.id)}
+                            />
+                            <div className="bg-muted relative h-20 w-32 shrink-0 overflow-hidden rounded-md border">
+                              {course.thumbnail_image ? (
+                                <img
+                                  src={getCourseThumbnailMediaDirectory(
+                                    org.org_uuid,
+                                    course.course_uuid,
+                                    course.thumbnail_image,
+                                  )}
+                                  alt={course.name}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center">
+                                  <ImageIcon className="text-muted-foreground h-8 w-8" />
+                                </div>
+                              )}
+                              {isSelected && (
+                                <div className="bg-primary/20 absolute inset-0 flex items-center justify-center">
+                                  <CheckCircle2 className="text-primary h-6 w-6" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h3 className="text-foreground leading-tight font-medium">{course.name}</h3>
+                              {course.description && (
+                                <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">{course.description}</p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Form Actions */}
+        <div className="bg-muted/50 flex items-center justify-between rounded-lg border p-4">
+          <p className="text-muted-foreground text-sm">{t('selectedCount', { count: selectedCourses.length })}</p>
+          <div className="flex gap-3">
             <Button
               type="button"
-              onClick={() => {
-                router.back();
-              }}
+              onClick={() => router.back()}
               variant="outline"
             >
               {t('cancelButton')}
@@ -228,14 +370,20 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
             <Button
               type="submit"
               disabled={isSubmitting || isPending}
-              className="flex items-center space-x-2 px-6 py-2"
+              className="min-w-[120px]"
             >
-              {isSubmitting || isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              <span>{isSubmitting || isPending ? t('creatingButton') : t('createButton')}</span>
+              {isSubmitting || isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t('creatingButton')}
+                </>
+              ) : (
+                t('createButton')
+              )}
             </Button>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 };
