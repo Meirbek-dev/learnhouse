@@ -1,12 +1,14 @@
 import { ArrowBigUpDash, Image as ImageIcon, UploadCloud, Video } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { updateCourseThumbnail } from '@services/courses/courses';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UnsplashImagePicker from './UnsplashImagePicker';
+import { Card, CardContent } from '@components/ui/card';
 import { getAPIUrl } from '@services/config/config';
-import { useEffect, useRef, useState } from 'react';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -27,35 +29,31 @@ interface ThumbnailUpdateProps {
 
 type TabType = 'image' | 'video';
 
+interface LocalThumbnail {
+  file: File;
+  url: string;
+  type: 'image' | 'video';
+}
+
 const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const unsplashFetchControllerRef = useRef<AbortController | null>(null);
+  const thumbnailDelayRef = useRef<number | null>(null);
+
   const course = useCourse();
   const session = usePlatformSession() as any;
   const org = useOrg() as any;
-  const [localThumbnail, setLocalThumbnail] = useState<{ file: File; url: string; type: 'image' | 'video' } | null>(
-    null,
-  );
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Abort controller for in-flight Unsplash fetch and timeout ref for cancellable delays
-  const unsplashFetchControllerRef = useRef<AbortController | null>(null);
-  const thumbnailDelayRef = useRef<number | null>(null);
-  const [showUnsplashPicker, setShowUnsplashPicker] = useState(false);
   const t = useTranslations('CourseEdit.General.Thumbnail');
-  const [activeTab, setActiveTab] = useState<TabType>('image');
-  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
-  // Set initial active tab based on thumbnailType
-  useEffect(() => {
-    if (thumbnailType === 'video') {
-      setActiveTab('video');
-    } else {
-      setActiveTab('image');
-    }
-  }, [thumbnailType]);
+  const [localThumbnail, setLocalThumbnail] = useState<LocalThumbnail | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showUnsplashPicker, setShowUnsplashPicker] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>(thumbnailType === 'video' ? 'video' : 'image');
 
-  // Cleanup blob URLs when component unmounts or when thumbnail changes
+  const withUnpublishedActivities = course?.withUnpublishedActivities ?? false;
+
+  // Cleanup blob URLs
   useEffect(() => {
     return () => {
       if (localThumbnail?.url) {
@@ -64,357 +62,402 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
     };
   }, [localThumbnail]);
 
-  const showError = (message: string) => {
-    toast.error(message, {
-      duration: 3000,
-      position: 'top-center',
-    });
-  };
-
-  const validateFile = (file: File, type: 'image' | 'video'): boolean => {
-    if (type === 'image') {
-      if (!VALID_IMAGE_MIME_TYPES.includes(file.type as ValidImageMimeType)) {
-        showError(t('errors.invalidMimeType', { fileType: file.type }));
-        return false;
-      }
-
-      if (file.size > MAX_FILE_SIZE) {
-        showError(
-          t('errors.fileTooLarge', {
-            fileSize: (file.size / 1024 / 1024).toFixed(2),
-          }),
-        );
-        return false;
-      }
-    } else {
-      if (!VALID_VIDEO_MIME_TYPES.includes(file.type as ValidVideoMimeType)) {
-        showError(t('errors.invalidVideoMimeType', { fileType: file.type }));
-        return false;
-      }
-
-      if (file.size > MAX_VIDEO_FILE_SIZE) {
-        showError(
-          t('errors.videoFileTooLarge', {
-            fileSize: (file.size / 1024 / 1024).toFixed(2),
-          }),
-        );
-        return false;
-      }
-    }
-
-    return true;
-  };
-
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video') => {
-    const file = event.target.files?.[0];
-
-    if (!file) {
-      showError(t('errors.pleaseSelectAFile'));
-      return;
-    }
-
-    if (!validateFile(file, type)) {
-      event.target.value = '';
-      return;
-    }
-
-    const blobUrl = URL.createObjectURL(file);
-    setLocalThumbnail({ file, url: blobUrl, type });
-    await updateThumbnail(file, type);
-  };
-
-  const handleUnsplashSelect = async (imageUrl: string) => {
-    // Abort any previous fetch
-    unsplashFetchControllerRef.current?.abort();
-    const controller = new AbortController();
-    unsplashFetchControllerRef.current = controller;
-
-    try {
-      setIsLoading(true);
-
-      const response = await fetch(imageUrl, { signal: controller.signal });
-      if (controller.signal.aborted) return;
-
-      const blob = await response.blob();
-      if (controller.signal.aborted) return;
-
-      if (!VALID_IMAGE_MIME_TYPES.includes(blob.type as ValidImageMimeType)) {
-        throw new Error(t('errors.unsplashInvalidFormat'));
-      }
-
-      const file = new File([blob], `unsplash_${Date.now()}.jpg`, { type: blob.type });
-
-      if (!validateFile(file, 'image')) {
-        return;
-      }
-
-      const blobUrl = URL.createObjectURL(file);
-      setLocalThumbnail({ file, url: blobUrl, type: 'image' });
-      await updateThumbnail(file, 'image');
-    } catch (error: any) {
-      if (error?.name === 'AbortError') {
-        // Fetch was aborted — ignore
-        return;
-      }
-      showError(t('errors.unsplashProcessFailed'));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const updateThumbnail = async (file: File, type: 'image' | 'video') => {
-    setIsLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append('thumbnail', file);
-      formData.append('thumbnail_type', type);
-
-      const res = await updateCourseThumbnail(
-        course.courseStructure.course_uuid,
-        formData,
-        session.data?.tokens?.access_token,
-      );
-
-      await mutate(
-        `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
-      );
-      // Wait for backend to stabilize; track timeout so we can clear on unmount
-      await new Promise((r) => {
-        thumbnailDelayRef.current = window.setTimeout(r, 1500) as unknown as number;
-      });
-
-      // Clear tracked timeout reference after it resolved
-      if (thumbnailDelayRef.current) {
-        clearTimeout(thumbnailDelayRef.current);
-        thumbnailDelayRef.current = null;
-      }
-
-      if (!res.success) {
-        showError(res.HTTPmessage);
-      } else {
-        setLocalThumbnail(null);
-        toast.success(t('thumbnailUpdatedSuccessfully'), {
-          duration: 3000,
-          position: 'top-center',
-        });
-      }
-    } catch {
-      showError(t('errors.updateFailed'));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getThumbnailUrl = (type: 'image' | 'video') => {
-    if (type === 'image') {
-      return course.courseStructure.thumbnail_image
-        ? getCourseThumbnailMediaDirectory(
-            org?.org_uuid,
-            course.courseStructure.course_uuid,
-            course.courseStructure.thumbnail_image,
-          )
-        : '/empty_thumbnail.webp';
-    }
-    return course.courseStructure.thumbnail_video
-      ? getCourseThumbnailMediaDirectory(
-          org?.org_uuid,
-          course.courseStructure.course_uuid,
-          course.courseStructure.thumbnail_video,
-        )
-      : undefined;
-  };
-
-  // Cleanup in case the component unmounts while we have in-flight work
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       unsplashFetchControllerRef.current?.abort();
       if (thumbnailDelayRef.current) {
         clearTimeout(thumbnailDelayRef.current);
-        thumbnailDelayRef.current = null;
       }
     };
   }, []);
 
-  const renderThumbnailPreview = () => {
-    if (localThumbnail) {
-      if (localThumbnail.type === 'video') {
-        return (
-          <div className="mx-auto max-w-[480px]">
-            <video
-              src={localThumbnail.url}
-              className={`${isLoading ? 'animate-pulse' : ''} aspect-video w-full rounded-lg border border-gray-200 object-cover`}
-              controls
-            />
-          </div>
-        );
+  const showError = useCallback((message: string) => {
+    toast.error(message, {
+      duration: 3000,
+      position: 'top-center',
+    });
+  }, []);
+
+  const validateFile = useCallback(
+    (file: File, type: 'image' | 'video'): boolean => {
+      if (type === 'image') {
+        if (!VALID_IMAGE_MIME_TYPES.includes(file.type as ValidImageMimeType)) {
+          showError(t('errors.invalidMimeType', { fileType: file.type }));
+          return false;
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+          showError(
+            t('errors.fileTooLarge', {
+              fileSize: (file.size / 1024 / 1024).toFixed(2),
+            }),
+          );
+          return false;
+        }
+      } else {
+        if (!VALID_VIDEO_MIME_TYPES.includes(file.type as ValidVideoMimeType)) {
+          showError(t('errors.invalidVideoMimeType', { fileType: file.type }));
+          return false;
+        }
+
+        if (file.size > MAX_VIDEO_FILE_SIZE) {
+          showError(
+            t('errors.videoFileTooLarge', {
+              fileSize: (file.size / 1024 / 1024).toFixed(2),
+            }),
+          );
+          return false;
+        }
       }
+
+      return true;
+    },
+    [showError, t],
+  );
+
+  const updateThumbnail = useCallback(
+    async (file: File, type: 'image' | 'video') => {
+      setIsLoading(true);
+      try {
+        const formData = new FormData();
+        formData.append('thumbnail', file);
+        formData.append('thumbnail_type', type);
+
+        const res = await updateCourseThumbnail(
+          course.courseStructure.course_uuid,
+          formData,
+          session.data?.tokens?.access_token,
+        );
+
+        await mutate(
+          `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+        );
+
+        // Wait for backend to stabilize
+        await new Promise((resolve) => {
+          thumbnailDelayRef.current = window.setTimeout(resolve, 1500) as unknown as number;
+        });
+
+        if (thumbnailDelayRef.current) {
+          clearTimeout(thumbnailDelayRef.current);
+          thumbnailDelayRef.current = null;
+        }
+
+        if (!res.success) {
+          showError(res.HTTPmessage);
+        } else {
+          setLocalThumbnail(null);
+          toast.success(t('thumbnailUpdatedSuccessfully'), {
+            duration: 3000,
+            position: 'top-center',
+          });
+        }
+      } catch {
+        showError(t('errors.updateFailed'));
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [course, session, withUnpublishedActivities, showError, t],
+  );
+
+  const handleFileChange = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video') => {
+      const file = event.target.files?.[0];
+
+      if (!file) {
+        showError(t('errors.pleaseSelectAFile'));
+        return;
+      }
+
+      if (!validateFile(file, type)) {
+        event.target.value = '';
+        return;
+      }
+
+      const blobUrl = URL.createObjectURL(file);
+      setLocalThumbnail({ file, url: blobUrl, type });
+      await updateThumbnail(file, type);
+    },
+    [showError, validateFile, updateThumbnail, t],
+  );
+
+  const handleUnsplashSelect = useCallback(
+    async (imageUrl: string) => {
+      unsplashFetchControllerRef.current?.abort();
+      const controller = new AbortController();
+      unsplashFetchControllerRef.current = controller;
+
+      try {
+        setIsLoading(true);
+
+        const response = await fetch(imageUrl, { signal: controller.signal });
+        if (controller.signal.aborted) return;
+
+        const blob = await response.blob();
+        if (controller.signal.aborted) return;
+
+        if (!VALID_IMAGE_MIME_TYPES.includes(blob.type as ValidImageMimeType)) {
+          throw new Error(t('errors.unsplashInvalidFormat'));
+        }
+
+        const file = new File([blob], `unsplash_${Date.now()}.jpg`, { type: blob.type });
+
+        if (!validateFile(file, 'image')) {
+          return;
+        }
+
+        const blobUrl = URL.createObjectURL(file);
+        setLocalThumbnail({ file, url: blobUrl, type: 'image' });
+        await updateThumbnail(file, 'image');
+      } catch (error: any) {
+        if (error?.name === 'AbortError') {
+          return;
+        }
+        showError(t('errors.unsplashProcessFailed'));
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [validateFile, updateThumbnail, showError, t],
+  );
+
+  const getThumbnailUrl = useCallback(
+    (type: 'image' | 'video') => {
+      if (type === 'image') {
+        return course.courseStructure.thumbnail_image
+          ? getCourseThumbnailMediaDirectory(
+              org?.org_uuid,
+              course.courseStructure.course_uuid,
+              course.courseStructure.thumbnail_image,
+            )
+          : '/empty_thumbnail.webp';
+      }
+      return course.courseStructure.thumbnail_video
+        ? getCourseThumbnailMediaDirectory(
+            org?.org_uuid,
+            course.courseStructure.course_uuid,
+            course.courseStructure.thumbnail_video,
+          )
+        : undefined;
+    },
+    [course, org],
+  );
+
+  const renderThumbnailPreview = useCallback(() => {
+    const thumbnailToShow = localThumbnail || {
+      url: getThumbnailUrl(activeTab),
+      type: activeTab,
+    };
+
+    if (!thumbnailToShow.url) {
       return (
-        <div className="mx-auto max-w-[480px]">
-          <img
-            src={localThumbnail.url}
-            alt={t('thumbnailPreviewAlt')}
-            className={`${isLoading ? 'animate-pulse' : ''} aspect-video w-full rounded-lg border border-gray-200 object-cover`}
-          />
+        <div className="mx-auto flex h-[270px] max-w-[480px] items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50">
+          <div className="text-center">
+            <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
+            <p className="mt-2 text-sm text-gray-500">
+              {activeTab === 'image' ? t('noImageThumbnail') : t('noVideoThumbnail')}
+            </p>
+          </div>
         </div>
       );
     }
 
-    const currentThumbnailUrl = getThumbnailUrl(activeTab);
-    if (activeTab === 'video' && currentThumbnailUrl) {
+    if (thumbnailToShow.type === 'video' || activeTab === 'video') {
       return (
         <div className="mx-auto max-w-[480px]">
           <video
-            src={currentThumbnailUrl}
-            className="aspect-video w-full rounded-lg border border-gray-200 object-cover"
+            src={thumbnailToShow.url}
+            className={`aspect-video w-full rounded-lg border border-gray-200 object-cover shadow-sm ${
+              isLoading ? 'animate-pulse' : ''
+            }`}
             controls
           />
         </div>
       );
     }
-    if (currentThumbnailUrl) {
-      return (
-        <div className="mx-auto max-w-[480px]">
-          <img
-            src={currentThumbnailUrl}
-            alt={t('currentThumbnailAlt')}
-            className="aspect-video w-full rounded-lg border border-gray-200 object-cover"
-          />
-        </div>
-      );
-    }
-
-    return null;
-  };
-
-  const renderTabContent = () => {
-    if (isLoading) {
-      return (
-        <div className="mt-4 flex items-center justify-center">
-          <div className="flex items-center rounded-full bg-green-50 px-4 py-2 text-sm font-medium text-green-800">
-            <ArrowBigUpDash
-              size={16}
-              className="mr-2 animate-bounce"
-            />
-            {t('uploading')}
-          </div>
-        </div>
-      );
-    }
-
-    if (activeTab === 'image') {
-      return (
-        <div className="mt-4 flex justify-center gap-2">
-          <input
-            ref={imageInputRef}
-            type="file"
-            className="hidden"
-            accept=".jpg,.jpeg,.png"
-            onChange={(e) => handleFileChange(e, 'image')}
-            aria-label={t('ariaLabelImage')}
-            title={t('selectImageFile')}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            className="flex items-center gap-2 px-4 py-2"
-            onClick={() => imageInputRef.current?.click()}
-          >
-            <UploadCloud size={16} />
-            {t('uploadImageButton')}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="flex items-center gap-2 px-4 py-2"
-            onClick={() => {
-              setShowUnsplashPicker(true);
-            }}
-          >
-            <ImageIcon size={16} />
-            {t('gallery')}
-          </Button>
-        </div>
-      );
-    }
 
     return (
-      <div className="mt-4 flex justify-center gap-2">
-        <input
-          ref={videoInputRef}
-          type="file"
-          className="hidden"
-          accept=".mp4,.webm,.mkv"
-          onChange={(e) => handleFileChange(e, 'video')}
-          aria-label={t('ariaLabelVideo')}
-          title={t('selectVideoFile')}
+      <div className="mx-auto max-w-[480px]">
+        <img
+          src={thumbnailToShow.url}
+          alt={localThumbnail ? t('thumbnailPreviewAlt') : t('currentThumbnailAlt')}
+          className={`aspect-video w-full rounded-lg border border-gray-200 object-cover shadow-sm ${
+            isLoading ? 'animate-pulse' : ''
+          }`}
         />
-        <button
-          type="button"
-          className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
-          onClick={() => videoInputRef.current?.click()}
-        >
-          <Video size={16} />
-          {t('uploadVideo')}
-        </button>
       </div>
     );
-  };
+  }, [localThumbnail, activeTab, getThumbnailUrl, isLoading, t]);
 
+  const renderImageControls = () => (
+    <>
+      <input
+        ref={imageInputRef}
+        type="file"
+        className="hidden"
+        accept=".jpg,.jpeg,.png"
+        onChange={(e) => handleFileChange(e, 'image')}
+        aria-label={t('ariaLabelImage')}
+        disabled={isLoading}
+      />
+      <Button
+        type="button"
+        variant="outline"
+        size="default"
+        disabled={isLoading}
+        onClick={() => imageInputRef.current?.click()}
+        className="flex-1"
+      >
+        <UploadCloud className="mr-2 h-4 w-4" />
+        {t('uploadImageButton')}
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        size="default"
+        disabled={isLoading}
+        onClick={() => setShowUnsplashPicker(true)}
+        className="flex-1"
+      >
+        <ImageIcon className="mr-2 h-4 w-4" />
+        {t('gallery')}
+      </Button>
+    </>
+  );
+
+  const renderVideoControls = () => (
+    <>
+      <input
+        ref={videoInputRef}
+        type="file"
+        className="hidden"
+        accept=".mp4,.webm,.mkv"
+        onChange={(e) => handleFileChange(e, 'video')}
+        aria-label={t('ariaLabelVideo')}
+        disabled={isLoading}
+      />
+      <Button
+        type="button"
+        variant="outline"
+        size="default"
+        disabled={isLoading}
+        onClick={() => videoInputRef.current?.click()}
+        className="flex-1"
+      >
+        <Video className="mr-2 h-4 w-4" />
+        {t('uploadVideo')}
+      </Button>
+    </>
+  );
+
+  if (thumbnailType === 'both') {
+    return (
+      <Card className="w-full">
+        <CardContent className="p-6">
+          <Tabs
+            value={activeTab}
+            onValueChange={(v) => setActiveTab(v as TabType)}
+          >
+            <TabsList className="mb-6 grid w-full grid-cols-2">
+              <TabsTrigger
+                value="image"
+                disabled={isLoading}
+              >
+                <ImageIcon className="mr-2 h-4 w-4" />
+                {t('image')}
+              </TabsTrigger>
+              <TabsTrigger
+                value="video"
+                disabled={isLoading}
+              >
+                <Video className="mr-2 h-4 w-4" />
+                {t('video')}
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent
+              value="image"
+              className="space-y-6"
+            >
+              {renderThumbnailPreview()}
+
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 text-sm font-medium text-green-700">
+                    <ArrowBigUpDash className="h-4 w-4 animate-bounce" />
+                    {t('uploading')}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex gap-2">{renderImageControls()}</div>
+              )}
+
+              <p className="text-muted-foreground text-center text-xs">{t('supportedFormats')}</p>
+            </TabsContent>
+
+            <TabsContent
+              value="video"
+              className="space-y-6"
+            >
+              {renderThumbnailPreview()}
+
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 text-sm font-medium text-green-700">
+                    <ArrowBigUpDash className="h-4 w-4 animate-bounce" />
+                    {t('uploading')}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex gap-2">{renderVideoControls()}</div>
+              )}
+
+              <p className="text-muted-foreground text-center text-xs">{t('supportedVideoFormats')}</p>
+            </TabsContent>
+          </Tabs>
+
+          {showUnsplashPicker && (
+            <UnsplashImagePicker
+              onSelect={handleUnsplashSelect}
+              onClose={() => setShowUnsplashPicker(false)}
+            />
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Single tab view (image or video only)
   return (
-    <div className="w-full justify-center rounded-xl bg-white">
-      {/* Tabs Navigation */}
-      {thumbnailType === 'both' && (
-        <div className="flex justify-center border-b border-gray-100">
-          <button
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
-              activeTab === 'image'
-                ? 'border-b-2 border-blue-600 bg-blue-50/50 text-blue-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-            onClick={() => {
-              setActiveTab('image');
-            }}
-          >
-            <ImageIcon size={16} />
-            {t('image')}
-          </button>
-          <button
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
-              activeTab === 'video'
-                ? 'border-b-2 border-blue-600 bg-blue-50/50 text-blue-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-            onClick={() => {
-              setActiveTab('video');
-            }}
-          >
-            <Video size={16} />
-            {t('video')}
-          </button>
-        </div>
-      )}
+    <Card className="w-full">
+      <CardContent className="space-y-6 p-6">
+        {renderThumbnailPreview()}
 
-      <div className="pt-2 pb-6">
-        <div className="space-y-6">
-          {renderThumbnailPreview()}
-          {renderTabContent()}
+        {isLoading ? (
+          <div className="flex items-center justify-center">
+            <div className="flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 text-sm font-medium text-green-700">
+              <ArrowBigUpDash className="h-4 w-4 animate-bounce" />
+              {t('uploading')}
+            </div>
+          </div>
+        ) : (
+          <div className="flex gap-2">{thumbnailType === 'image' ? renderImageControls() : renderVideoControls()}</div>
+        )}
 
-          <p className="text-center text-sm text-gray-500">
-            {activeTab === 'image' && t('supportedFormats')}
-            {activeTab === 'video' && t('supportedVideoFormats')}
-          </p>
-        </div>
-      </div>
+        <p className="text-muted-foreground text-center text-xs">
+          {thumbnailType === 'image' ? t('supportedFormats') : t('supportedVideoFormats')}
+        </p>
 
-      {showUnsplashPicker ? (
-        <UnsplashImagePicker
-          onSelect={handleUnsplashSelect}
-          onClose={() => {
-            setShowUnsplashPicker(false);
-          }}
-        />
-      ) : null}
-    </div>
+        {showUnsplashPicker && thumbnailType === 'image' && (
+          <UnsplashImagePicker
+            onSelect={handleUnsplashSelect}
+            onClose={() => setShowUnsplashPicker(false)}
+          />
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

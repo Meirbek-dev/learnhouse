@@ -631,7 +631,7 @@
       "updatedDate": "Обновлено {updateDate, date, medium}"
     },
     "CreateCourseModal": {
-      "ariaLabel": "Выберите «Конечное изображение миниатюр» для загрузки",
+      "ariaLabel": "Выберите миниатюру курса для загрузки",
       "createCourse": "Создать курс",
       "labelDescription": "Описание",
       "labelLearnings": "Изучаемые темы курса (Чему научит курс?)",
@@ -647,17 +647,25 @@
       "schemaNameMax": "Должно быть 100 символов или меньше",
       "schemaNameRequired": "Требуется название курса",
       "selectFile": "Выберите изображение миниатюры",
-      "supportedFormats": "Поддерживаемые форматы: JPG, PNG",
+      "supportedFormats": "Поддерживаемые форматы: JPG, PNG, WEBP, GIF",
       "thumbnailChoose": "Выбрать из галереи",
       "thumbnailUpload": "Загрузить изображение",
+      "thumbnailTooLarge": "Размер файла должен быть меньше 8 МБ",
+      "thumbnailInvalidType": "Недопустимый тип файла. Пожалуйста, выберите изображение (jpeg, jpg, png, webp, gif).",
+      "thumbnailPreviewAlt": "Предпросмотр миниатюры курса",
+      "noThumbnail": "Миниатюра не выбрана",
       "toastError": "Не удалось создать курс",
+      "toastErrorOrgLoad": "Не удалось загрузить организацию",
       "toastErrorOrgMissing": "Информация отсутствует",
       "toastErrorUnsplash": "Не удалось получить изображение из Unsplash",
       "toastLoading": "Создание курса...",
       "toastSuccess": "Курс успешно создан",
+      "creating": "Создание...",
       "visibilityItemPrivate": "Приватный (Доступен только авторизованным пользователям)",
-      "visibilityItemPublic": "Публичный (Доступен всем для просмотра)"
+      "visibilityItemPublic": "Публичный (Доступен всем для просмотра)",
+      "cancel": "Отмена"
     },
+
     "Dialog": {
       "cancel": "Отмена",
       "close": "Закрыть"
@@ -1399,13 +1407,13 @@
         "searchEmojis": "Искать эмодзи..."
       },
       "Thumbnail": {
-        "ariaLabelImage": "Выберите «Конечное изображение миниатюр» для загрузки",
-        "ariaLabelVideo": "Выберите «Миниатюрный видео», чтобы загрузить",
+        "ariaLabelImage": "Выберите миниатюру курса для загрузки",
+        "ariaLabelVideo": "Выберите миниатюрное видео для загрузки",
         "currentThumbnailAlt": "Текущая миниатюра курса",
         "errors": {
           "fileTooLarge": "Размер файла ({fileSize}МБ) превышает лимит в 8МБ",
           "invalidMimeType": "Недопустимый тип файла: {fileType}. Пожалуйста, загружайте изображения PNG или JPG/JPEG",
-          "invalidVideoMimeType": "Недопустимый тип файла: ${file.type}. Пожалуйста, загружайте видео MP4, MKVV или WebM",
+          "invalidVideoMimeType": "Недопустимый тип файла: {fileType}. Пожалуйста, загружайте видео MP4, MKV или WebM",
           "pleaseSelectAFile": "Пожалуйста, выберите файл",
           "unsplashInvalidFormat": "Недопустимый формат изображения из Unsplash",
           "unsplashProcessFailed": "Не удалось обработать изображение из галереи",
@@ -1415,11 +1423,13 @@
         "gallery": "Галерея",
         "image": "Изображение",
         "imageAltText": "Миниатюра курса",
+        "noImageThumbnail": "Нет миниатюры изображения",
+        "noVideoThumbnail": "Нет миниатюры видео",
         "pleaseSelectAFile": "Пожалуйста, выберите файл",
         "selectImageFile": "Выберите файл изображения",
         "selectVideoFile": "Выберите видеофайл",
         "supportedFormats": "Поддерживаемые форматы: JPG, PNG (макс. 8МБ)",
-        "supportedVideoFormats": "Поддерживаемые форматы: MP4, MKV, WebM (макс. 1000МБ)",
+        "supportedVideoFormats": "Поддерживаемые форматы: MP4, MKV, WebM (макс. 100МБ)",
         "thumbnailPreviewAlt": "Предварительный просмотр миниатюры курса",
         "thumbnailUpdatedSuccessfully": "Миниатюра успешно обновлена",
         "uploadImageButton": "Загрузить изображение",
