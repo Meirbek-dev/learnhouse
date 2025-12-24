@@ -21,6 +21,14 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
+    # Allow NULL values temporarily so we can sanitize problematic rows
+    op.alter_column(
+        "trailstep",
+        "grade",
+        existing_type=sa.VARCHAR(),
+        nullable=True,
+    )
+
     # Sanitize existing values: set blank or non-integer grades to NULL so ALTER ... USING succeeds
     op.execute(
         "UPDATE trailstep SET grade = NULL WHERE trim(COALESCE(grade, '')) = '' OR grade !~ '^[0-9]+$'"
