@@ -11,7 +11,6 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
-import { Toaster } from '@components/ui/sonner';
 import { Info, UserPlus } from 'lucide-react';
 import { Label } from '@components/ui/label';
 import { useTranslations } from 'next-intl';
@@ -68,7 +67,6 @@ const OrgUsersAdd = () => {
 
   return (
     <>
-      <Toaster />
       {isLoading ? (
         <PageLoading />
       ) : (

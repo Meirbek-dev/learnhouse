@@ -24,7 +24,6 @@ import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { Toaster } from '@components/ui/sonner';
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
@@ -166,7 +165,6 @@ const OrgUsers = () => {
         </div>
       ) : (
         <>
-          <Toaster />
           <div className="h-6" />
           <div className="mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4 shadow-xs">
             <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">

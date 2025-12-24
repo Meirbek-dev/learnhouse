@@ -1426,14 +1426,14 @@ const AssignmentTools = (props: {
       mounted = false;
     };
   }, [
-	submission,
-	session.data?.user?.id,
-	props.assignment?.assignment_uuid,
-	session.data?.tokens?.access_token,
-	t,
-	finalGrade,
-	setFinalGrade
-]);
+    submission,
+    session.data?.user?.id,
+    props.assignment?.assignment_uuid,
+    session.data?.tokens?.access_token,
+    t,
+    finalGrade,
+    setFinalGrade,
+  ]);
 
   if (!submission || submission.length === 0) {
     return (

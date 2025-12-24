@@ -4,7 +4,7 @@ import { useOptionalGamificationContext } from '@/components/Contexts/Gamificati
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';

@@ -5,6 +5,7 @@ import StyledComponentsRegistry from '../components/Utils/libs/styled-registry';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { updateUserTheme } from '@services/users/users';
 import { SessionProvider } from 'next-auth/react';
+import { Toaster } from '@/components/ui/sonner';
 import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { SWRConfig } from 'swr';
@@ -85,6 +86,7 @@ function ThemeProviderWrapper({ children }: { children: ReactNode }) {
       <ThemeSync />
       <StyledComponentsRegistry>
         <main className="animate-fade-in">{children}</main>
+        <Toaster />
       </StyledComponentsRegistry>
     </ThemeProvider>
   );

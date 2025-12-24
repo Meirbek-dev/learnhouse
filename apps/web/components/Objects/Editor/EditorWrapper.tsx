@@ -8,7 +8,6 @@ import { useTranslations } from 'next-intl';
 import type { JSX } from 'react';
 import { toast } from 'sonner';
 
-import { Toaster } from '@components/ui/sonner';
 import Editor from './Editor';
 
 interface EditorWrapperProps {
@@ -52,21 +51,18 @@ const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
   }
 
   return (
-    <>
-      <Toaster />
-      <OrgProvider orgslug={props.org.slug}>
-        {isReady ? (
-          <Editor
-            org={props.org}
-            course={props.course}
-            activity={props.activity}
-            content={props.content}
-            setContent={setContent}
-            session={session}
-          />
-        ) : null}
-      </OrgProvider>
-    </>
+    <OrgProvider orgslug={props.org.slug}>
+      {isReady ? (
+        <Editor
+          org={props.org}
+          course={props.course}
+          activity={props.activity}
+          content={props.content}
+          setContent={setContent}
+          session={session}
+        />
+      ) : null}
+    </OrgProvider>
   );
 };
 

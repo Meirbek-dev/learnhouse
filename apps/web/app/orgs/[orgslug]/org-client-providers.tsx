@@ -2,7 +2,6 @@
 
 import { useTheme } from '@/components/providers/theme-provider';
 import { OrgProvider } from '@components/Contexts/OrgContext';
-import { Toaster } from '@/components/ui/sonner';
 import NextTopLoader from 'nextjs-toploader';
 import type { ReactNode } from 'react';
 
@@ -30,7 +29,6 @@ export default function OrgClientProviders({ children, orgslug }: OrgClientProvi
   return (
     <OrgProvider orgslug={orgslug}>
       <NextTopLoader {...topLoaderProps} />
-      <Toaster />
       {children}
     </OrgProvider>
   );

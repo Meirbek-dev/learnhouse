@@ -1,8 +1,7 @@
 'use client';
 
+import { BookOpen, Layers, Map } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Layers, BookOpen, Map } from 'lucide-react';
-
 
 const TypeOfContentTitle = ({ title, type }: { title: string; type: string }) => {
   const t = useTranslations('Components.TypeOfContentTitle');
@@ -23,7 +22,12 @@ const TypeOfContentTitle = ({ title, type }: { title: string; type: string }) =>
   return (
     <div className="home_category_title my-5 flex items-center">
       <div className="my-auto mr-4 ml-2 rounded-full p-2 shadow-inner ring-1 ring-slate-900/5">
-        <Icon size={20} aria-label={logoAlt} role="img" className="text-slate-900" />
+        <Icon
+          size={20}
+          aria-label={logoAlt}
+          role="img"
+          className="text-slate-900"
+        />
       </div>
       <h1 className="text-2xl font-bold">{title}</h1>
     </div>

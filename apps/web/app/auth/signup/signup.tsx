@@ -13,7 +13,6 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { joinOrg } from '@services/organizations/orgs';
 import { useEffect, useRef, useState } from 'react';
-import { Toaster } from '@/components/ui/sonner';
 import { Button } from '@components/ui/button';
 import OpenSignUpComponent from './OpenSignup';
 import { Input } from '@components/ui/input';
@@ -219,7 +218,6 @@ const LoggedInJoinScreen = (props: any) => {
 
   return (
     <div className="mx-auto flex flex-row items-center">
-      <Toaster />
       <div className="flex flex-col items-center justify-center space-y-7">
         <p className="flex items-center justify-center space-x-2 pt-3 text-2xl font-semibold text-black/70">
           <span className="items-center">{t('hi')}</span>
@@ -306,7 +304,6 @@ const NoTokenScreen = (_props: any) => {
 
   return (
     <div className="mx-auto flex flex-row items-center">
-      <Toaster />
       {isLoading ? (
         <div className="flex w-[300px] flex-col items-center justify-center space-y-7">
           <PageLoading />

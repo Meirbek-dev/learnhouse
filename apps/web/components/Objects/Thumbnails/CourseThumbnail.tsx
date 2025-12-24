@@ -1,7 +1,7 @@
 'use client';
 
-import { Play, Calendar, MoreVertical, FilePenLine, Settings2, BookMinus, AlertTriangle, Loader2 } from 'lucide-react';
-import { useState, useTransition, useMemo } from 'react';
+import { AlertTriangle, BookMinus, Calendar, FilePenLine, Loader2, MoreVertical, Play, Settings2 } from 'lucide-react';
+import { useMemo, useState, useTransition } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import type { FC } from 'react';
