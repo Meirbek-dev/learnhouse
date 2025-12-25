@@ -13,6 +13,12 @@ from src.services.blocks.block_types.pdfBlock.pdfBlock import (
     create_pdf_block,
     get_pdf_block,
 )
+from src.services.blocks.block_types.quizBlock.quizBlock import (
+    get_quiz_attempts,
+    get_quiz_stats,
+    submit_quiz,
+)
+from src.db.courses.quiz import QuizSubmissionRequest
 from src.services.blocks.block_types.videoBlock.videoBlock import (
     create_video_block,
     get_video_block,
@@ -115,3 +121,66 @@ async def api_get_pdf_file_block(
     Get pdf file
     """
     return await get_pdf_block(request, block_uuid, current_user, db_session)
+
+
+####################
+# Quiz Block
+####################
+
+
+@router.post("/quiz/{activity_id}")
+async def api_submit_quiz(
+    request: Request,
+    activity_id: int,
+    submission: QuizSubmissionRequest,
+    db_session=Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
+):
+    """
+    Submit a quiz attempt and receive grading results.
+    """
+    return await submit_quiz(
+        request=request,
+        activity_id=activity_id,
+        submission=submission,
+        current_user=current_user,
+        db_session=db_session,
+    )
+
+
+@router.get("/quiz/{activity_id}/attempts")
+async def api_get_quiz_attempts(
+    request: Request,
+    activity_id: int,
+    user_id: int | None = None,
+    db_session=Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
+):
+    """
+    Get quiz attempts for an activity.
+    """
+    return await get_quiz_attempts(
+        request=request,
+        activity_id=activity_id,
+        current_user=current_user,
+        db_session=db_session,
+        user_id=user_id,
+    )
+
+
+@router.get("/quiz/{activity_id}/stats")
+async def api_get_quiz_stats(
+    request: Request,
+    activity_id: int,
+    db_session=Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
+):
+    """
+    Get per-question statistics for a quiz (teachers only).
+    """
+    return await get_quiz_stats(
+        request=request,
+        activity_id=activity_id,
+        current_user=current_user,
+        db_session=db_session,
+    )
