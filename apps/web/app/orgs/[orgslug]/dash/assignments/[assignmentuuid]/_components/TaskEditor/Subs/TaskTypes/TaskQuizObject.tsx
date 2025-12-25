@@ -18,7 +18,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { cn, generateUUID } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -38,6 +37,7 @@ import {
 import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import QuizSkeleton from '@components/Objects/Quiz/QuizSkeleton';
 
 // Types
 interface QuizOption {
@@ -160,26 +160,6 @@ const SelectionIndicator = ({ isSelected, onClick, interactive = false }: Select
   >
     {isSelected ? <Check className="size-3.5" /> : <X className="size-3.5 opacity-50" />}
   </button>
-);
-
-// Loading skeleton
-const QuizSkeleton = () => (
-  <div className="space-y-6">
-    {[1, 2].map((q) => (
-      <div
-        key={q}
-        className="space-y-3"
-      >
-        <Skeleton className="h-10 w-full" />
-        {[1, 2, 3].map((o) => (
-          <Skeleton
-            key={o}
-            className="h-12 w-full"
-          />
-        ))}
-      </div>
-    ))}
-  </div>
 );
 
 // Main component
