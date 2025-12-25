@@ -1,10 +1,15 @@
 from pydantic import BaseModel, ConfigDict
 from sqlmodel import SQLModel
+import os
 
-from config.config import PlatformConfig, get_platform_config
-
-platform_config: PlatformConfig = get_platform_config()
-is_dev_mode = platform_config.general_config.development_mode
+# Determine development mode from environment to avoid importing config at module import
+# time (which would create a circular import with config.config).
+_env_dev = os.environ.get("PLATFORM_DEVELOPMENT_MODE", None)
+if _env_dev is not None:
+    is_dev_mode = bool(eval(_env_dev))
+else:
+    # Default to False (production) if not explicitly set.
+    is_dev_mode = False
 
 
 class FalsePydanticStrictBaseModel(BaseModel):
@@ -126,10 +131,15 @@ SQLModelDefaultBase: (
     type[FalseSQLModelStrictBaseModel] | type[TrueSQLModelStrictBaseModel]
 ) = TrueSQLModelStrictBaseModel if is_dev_mode else FalseSQLModelStrictBaseModel
 
+# Backwards-compatible alias: some modules import SQLModelStrictBaseModel
+SQLModelStrictBaseModel = SQLModelDefaultBase
+
 __all__: list[str] = [
     "FalsePydanticStrictBaseModel",
     "TruePydanticStrictBaseModel",
+    "FalseSQLModelStrictBaseModel",
     "TrueSQLModelStrictBaseModel",
     "PydanticStrictBaseModel",
     "SQLModelDefaultBase",
+    "SQLModelStrictBaseModel",
 ]
