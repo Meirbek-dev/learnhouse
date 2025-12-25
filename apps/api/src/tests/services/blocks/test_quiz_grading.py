@@ -288,6 +288,113 @@ class TestAttemptPenalty:
         # 15th attempt = 14 penalties = max 0% (not negative)
         assert score == 0.0
 
+    def test_penalty_with_partial_score(self):
+        """Test penalty application on partial scores"""
+        score = apply_attempt_penalty(60.0, 2, 10.0)
+        # 2nd attempt max = 90%, user got 60%, keep 60%
+        assert score == 60.0
+
+    def test_penalty_with_high_rate(self):
+        """Test high penalty rate"""
+        score = apply_attempt_penalty(100.0, 2, 50.0)
+        # 2nd attempt = max 50%
+        assert score == 50.0
+
+    def test_penalty_zero_rate(self):
+        """Test zero penalty rate"""
+        score = apply_attempt_penalty(100.0, 5, 0.0)
+        # No penalty even on 5th attempt
+        assert score == 100.0
+
+    def test_penalty_fractional_rates(self):
+        """Test fractional penalty rates"""
+        score = apply_attempt_penalty(100.0, 2, 7.5)
+        # 2nd attempt = max 92.5%
+        assert score == 92.5
+
+
+class TestQuizEdgeCases:
+    """Test edge cases and boundary conditions"""
+
+    def test_empty_questions_list(self):
+        """Test grading with no questions"""
+        result = grade_quiz([], [], 100.0)
+        assert result["total_score"] == 0.0
+        assert result["percentage"] == 0.0
+        assert result["passed"] is False
+
+    def test_no_user_answers(self):
+        """Test when user submits without answering"""
+        questions = [
+            {
+                "question_id": "q1",
+                "type": "multiple_choice",
+                "points": 50.0,
+                "options": [
+                    {"option_id": "a", "correct": True},
+                    {"option_id": "b", "correct": False},
+                ],
+            }
+        ]
+        result = grade_quiz(questions, [], 100.0)
+        assert result["total_score"] == 0.0
+
+    def test_answer_to_nonexistent_question(self):
+        """Test answer for question that doesn't exist"""
+        questions = [
+            {
+                "question_id": "q1",
+                "type": "multiple_choice",
+                "points": 100.0,
+                "options": [
+                    {"option_id": "a", "correct": True},
+                ],
+            }
+        ]
+        user_answers = [{"question_id": "q999", "selected_options": ["a"]}]
+        result = grade_quiz(questions, user_answers, 100.0)
+        # Should only grade q1, which wasn't answered
+        assert result["total_score"] == 0.0
+
+    def test_max_score_distribution(self):
+        """Test that max_score is properly distributed"""
+        questions = [
+            {
+                "question_id": "q1",
+                "type": "multiple_choice",
+                "points": 30.0,
+                "options": [{"option_id": "a", "correct": True}],
+            },
+            {
+                "question_id": "q2",
+                "type": "multiple_choice",
+                "points": 70.0,
+                "options": [{"option_id": "a", "correct": True}],
+            },
+        ]
+        user_answers = [
+            {"question_id": "q1", "selected_options": ["a"]},
+            {"question_id": "q2", "selected_options": ["a"]},
+        ]
+        result = grade_quiz(questions, user_answers, 100.0)
+        assert result["total_score"] == 100.0
+
+    def test_custom_answer_needs_grading_flag(self):
+        """Test that custom answer questions are flagged for manual grading"""
+        questions = [
+            {
+                "question_id": "q1",
+                "type": "custom_answer",
+                "points": 100.0,
+            }
+        ]
+        user_answers = [{"question_id": "q1", "answer_text": "My answer"}]
+        result = grade_quiz(questions, user_answers, 100.0)
+
+        assert len(result["per_question"]) == 1
+        assert result["per_question"][0]["needs_grading"] is True
+        assert result["per_question"][0]["score"] == 0.0
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

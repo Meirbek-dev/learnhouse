@@ -1433,7 +1433,6 @@
         "uploading": "Uploading...",
         "video": "Video"
       },
-
       "about": {
         "label": "About"
       },
@@ -2366,7 +2365,66 @@
         "saveError": "Error saving task, please try again later.",
         "saveSuccess": "Task saved successfully",
         "saving": "Saving...",
-        "true": "True"
+        "testStarted": "Test started successfully!",
+        "timerStarted": "Timer started: {minutes} minutes",
+        "noTimeLimit": "No time limit for this test",
+        "timeExpired": "Time's up! Submitting your answers...",
+        "true": "True",
+        "settings": {
+          "title": "Quiz Settings",
+          "description": "Configure time limits, attempts, penalties, and anti-cheat measures",
+          "maxAttempts": "Maximum Attempts",
+          "unlimited": "Unlimited",
+          "timeLimit": "Time Limit",
+          "noLimit": "No time limit",
+          "minutes": "minutes",
+          "attemptPenalty": "Score Penalty per Attempt",
+          "attemptPenaltyHint": "Reduce maximum possible score for each retry attempt",
+          "antiCheat": "Anti-Cheat Settings",
+          "preventCopy": "Prevent copy/paste",
+          "trackViolations": "Track violations",
+          "maxViolations": "Maximum violations before auto-submit",
+          "blockOnViolations": "Auto-submit on max violations"
+        },
+        "startTest": {
+          "title": "Ready to Start?",
+          "description": "Review the test information below before starting",
+          "questions": "Total Questions",
+          "timeLimit": "Time Limit",
+          "attemptsRemaining": "Attempts Remaining",
+          "penalty": "Score Penalty",
+          "perAttempt": "per attempt",
+          "antiCheat": "Anti-Cheat Protection Active",
+          "antiCheatDescription": "Copy/paste disabled. Violations will be tracked.",
+          "button": "Start Test",
+          "noAttemptsLeft": "No Attempts Left",
+          "contactInstructor": "Contact your instructor for additional attempts",
+          "review": {
+            "title": "Submission under review",
+            "subtitle": "Your submission has been received and is being reviewed by the instructor.",
+            "description": "We will notify you when your submission is graded. You can view your submitted answers and status below.",
+            "refresh": "Refresh status"
+          },
+          "graded": {
+            "title": "Assignment graded",
+            "subtitle": "Your submission has been evaluated.",
+            "score": "Score: {score}",
+            "description": "Review your grade and feedback below.",
+            "points": "points",
+            "refresh": "Refresh"
+          }
+        },
+        "timer": {
+          "remaining": "Time Remaining",
+          "violations": "violations",
+          "attempt": "Attempt {current} of {total}",
+          "penaltyApplied": "-{penalty}% penalty applied"
+        },
+        "violation": {
+          "detected": "Violation detected: {type}",
+          "warning": "Total violations: {count}. Test may be auto-submitted.",
+          "blocked": "Maximum violations reached. Submitting test..."
+        }
       },
       "Tasks": {
         "addTask": "Add Task",

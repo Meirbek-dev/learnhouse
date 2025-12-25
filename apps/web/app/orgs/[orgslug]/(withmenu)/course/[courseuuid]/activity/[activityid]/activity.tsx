@@ -333,6 +333,16 @@ const ActivityClient = (props: ActivityClientProps) => {
     }
     return false;
   });
+
+  // Track whether focus mode was auto-initiated (e.g., by starting a quiz) so we can hide manual toggles
+  const [isAutoFocusInitiated, setIsAutoFocusInitiated] = useState(() => {
+    try {
+      return typeof window !== 'undefined' && localStorage.getItem('globalFocusModeInitiated') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
   const [isInitialRender, setIsInitialRender] = useState(true);
   const { contributorStatus } = useContributorStatus(courseuuid);
   const router = useRouter();
@@ -450,6 +460,28 @@ const ActivityClient = (props: ActivityClientProps) => {
       }
     }
   }, [isFocusMode, isInitialRender]);
+
+  // Listen for the auto-initiated flag to hide manual toggles immediately
+  useEffect(() => {
+    const handler = () => {
+      try {
+        setIsAutoFocusInitiated(localStorage.getItem('globalFocusModeInitiated') === 'true');
+      } catch {
+        setIsAutoFocusInitiated(false);
+      }
+    };
+
+    window.addEventListener('focusModeChange', handler as EventListener);
+    window.addEventListener('storage', handler);
+
+    // Run once to initialize
+    handler();
+
+    return () => {
+      window.removeEventListener('focusModeChange', handler as EventListener);
+      window.removeEventListener('storage', handler);
+    };
+  }, []);
 
   const getChapterNameByActivityId = (courseData: any, activity_id: number) => {
     for (let i = 0; i < courseData.chapters.length; i += 1) {
@@ -964,23 +996,25 @@ const ActivityClient = (props: ActivityClientProps) => {
                         <PaidCourseActivityDisclaimer course={course} />
                       ) : (
                         <div className={`rounded-lg p-7 drop-shadow-xs ${bgColor} relative`}>
-                          <button
-                            onClick={() => {
-                              setIsFocusMode(true);
-                            }}
-                            className="soft-shadow group pointer-events-auto absolute top-4 right-4 z-50 cursor-pointer overflow-hidden rounded-full bg-white/80 p-2 transition-all duration-200 hover:bg-white"
-                            title={t('enterFocusMode')}
-                          >
-                            <div className="flex items-center">
-                              <Maximize2
-                                size={16}
-                                className="text-gray-700"
-                              />
-                              <span className="w-0 text-xs font-bold whitespace-nowrap text-gray-700 opacity-0 transition-all duration-200 group-hover:ml-2 group-hover:w-auto group-hover:opacity-100">
-                                {t('focusMode')}
-                              </span>
-                            </div>
-                          </button>
+                          {!isAutoFocusInitiated && (
+                            <button
+                              onClick={() => {
+                                setIsFocusMode(true);
+                              }}
+                              className="soft-shadow group pointer-events-auto absolute top-4 right-4 z-50 cursor-pointer overflow-hidden rounded-full bg-white/80 p-2 transition-all duration-200 hover:bg-white"
+                              title={t('enterFocusMode')}
+                            >
+                              <div className="flex items-center">
+                                <Maximize2
+                                  size={16}
+                                  className="text-gray-700"
+                                />
+                                <span className="w-0 text-xs font-bold whitespace-nowrap text-gray-700 opacity-0 transition-all duration-200 group-hover:ml-2 group-hover:w-auto group-hover:opacity-100">
+                                  {t('focusMode')}
+                                </span>
+                              </div>
+                            </button>
+                          )}
                           {activityContent}
                         </div>
                       )
