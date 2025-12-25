@@ -1108,9 +1108,13 @@ async def update_assignment_task_submission(
             try:
                 val = int(value)
             except Exception:
-                raise HTTPException(status_code=400, detail="Grade must be an integer between 0 and 100")
+                raise HTTPException(
+                    status_code=400, detail="Grade must be an integer between 0 and 100"
+                )
             if val < 0 or val > 100:
-                raise HTTPException(status_code=400, detail=f"Grade {val} is out of range (0-100)")
+                raise HTTPException(
+                    status_code=400, detail=f"Grade {val} is out of range (0-100)"
+                )
             setattr(assignment_task_submission, field, val)
             continue
 
@@ -1119,9 +1123,13 @@ async def update_assignment_task_submission(
             try:
                 val = int(value)
             except Exception:
-                raise HTTPException(status_code=400, detail="Grade must be an integer between 0 and 100")
+                raise HTTPException(
+                    status_code=400, detail="Grade must be an integer between 0 and 100"
+                )
             if val < 0 or val > 100:
-                raise HTTPException(status_code=400, detail=f"Grade {val} is out of range (0-100)")
+                raise HTTPException(
+                    status_code=400, detail=f"Grade {val} is out of range (0-100)"
+                )
             setattr(assignment_task_submission, field, val)
             continue
 
@@ -1518,9 +1526,13 @@ async def update_assignment_submission(
             try:
                 val = int(value)
             except Exception:
-                raise HTTPException(status_code=400, detail="Grade must be an integer between 0 and 100")
+                raise HTTPException(
+                    status_code=400, detail="Grade must be an integer between 0 and 100"
+                )
             if val < 0 or val > 100:
-                raise HTTPException(status_code=400, detail=f"Grade {val} is out of range (0-100)")
+                raise HTTPException(
+                    status_code=400, detail=f"Grade {val} is out of range (0-100)"
+                )
             setattr(assignment_user_submission, field, val)
             continue
 
@@ -1636,7 +1648,9 @@ async def grade_assignment_submission(
         )
 
     # Calculate final grade as the rounded average of all assignment tasks (scores must be 0-100)
-    statement = select(AssignmentTask).where(AssignmentTask.assignment_id == assignment.id)
+    statement = select(AssignmentTask).where(
+        AssignmentTask.assignment_id == assignment.id
+    )
     assignment_tasks = db_session.exec(statement).all()
 
     if not assignment_tasks:
@@ -1656,9 +1670,14 @@ async def grade_assignment_submission(
             try:
                 task_grade = int(submission.grade)
             except Exception:
-                raise HTTPException(status_code=400, detail=f"Invalid grade value for task {task.id}")
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid grade value for task {task.id}"
+                )
             if task_grade < 0 or task_grade > 100:
-                raise HTTPException(status_code=400, detail=f"Task {task.id} grade {task_grade} is out of range (0-100)")
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Task {task.id} grade {task_grade} is out of range (0-100)",
+                )
         total += task_grade
 
     average = total / len(assignment_tasks)
