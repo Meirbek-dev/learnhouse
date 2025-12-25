@@ -1,6 +1,11 @@
 from pydantic import BaseModel, ConfigDict
 from sqlmodel import SQLModel
 
+from config.config import PlatformConfig, get_platform_config
+
+platform_config: PlatformConfig = get_platform_config()
+is_dev_mode = platform_config.general_config.development_mode
+
 
 class FalsePydanticStrictBaseModel(BaseModel):
     model_config = ConfigDict(
@@ -11,7 +16,7 @@ class FalsePydanticStrictBaseModel(BaseModel):
     )
 
 
-class PydanticStrictBaseModel(BaseModel):
+class TruePydanticStrictBaseModel(BaseModel):
     model_config = ConfigDict(
         compiled=True,
         slots=True,
@@ -58,7 +63,7 @@ class PydanticStrictBaseModel(BaseModel):
     )
 
 
-class SQLModelStrictBaseModel(SQLModel):
+class FalseSQLModelStrictBaseModel(SQLModel):
     model_config = ConfigDict(
         compiled=True,
     )
@@ -108,3 +113,23 @@ class TrueSQLModelStrictBaseModel(SQLModel):
         # Validation settings
         hide_input_in_errors=False,
     )
+
+
+# Default aliases selected by environment
+# Use strict variants during development for maximum feedback
+# and lighter (less-strict) variants in production for robustness.
+PydanticStrictBaseModel: (
+    type[FalsePydanticStrictBaseModel] | type[TruePydanticStrictBaseModel]
+) = TruePydanticStrictBaseModel if is_dev_mode else FalsePydanticStrictBaseModel
+
+SQLModelDefaultBase: (
+    type[FalseSQLModelStrictBaseModel] | type[TrueSQLModelStrictBaseModel]
+) = TrueSQLModelStrictBaseModel if is_dev_mode else FalseSQLModelStrictBaseModel
+
+__all__: list[str] = [
+    "FalsePydanticStrictBaseModel",
+    "TruePydanticStrictBaseModel",
+    "TrueSQLModelStrictBaseModel",
+    "PydanticStrictBaseModel",
+    "SQLModelDefaultBase",
+]
