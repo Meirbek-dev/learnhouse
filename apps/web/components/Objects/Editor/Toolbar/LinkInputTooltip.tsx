@@ -1,5 +1,5 @@
-import { Check, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { Check, X } from 'lucide-react';
 import { useState } from 'react';
 import type React from 'react';
 
@@ -57,7 +57,7 @@ const LinkInputTooltip: React.FC<LinkInputTooltipProps> = ({ onSave, onCancel, c
             className="flex cursor-pointer items-center justify-center rounded bg-red-50 p-1 text-red-600 transition-colors hover:bg-red-100"
             title={t('cancel')}
           >
-            <X size={18}/>
+            <X size={18} />
           </button>
         </div>
       </form>

@@ -4,20 +4,19 @@ import { useOptionalGamificationContext } from '@/components/Contexts/Gamificati
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
-import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { useWindowSize } from '@/hooks/useWindowSize';
+import { useEffect, useRef, useState } from 'react';
 // Gamification imports
 import { LevelProgress } from '@/lib/gamification';
 import Link from '@components/ui/ServerLink';
+import ReactConfetti from 'react-confetti';
 import html2canvas from 'html2canvas';
 import type { FC } from 'react';
 import QRCode from 'qrcode';
 import jsPDF from 'jspdf';
-// Lazy-load react-confetti to avoid including it in the initial bundle
-const LazyReactConfetti = lazy(() => import('react-confetti'));
 
 interface CourseEndViewProps {
   courseName: string;
@@ -575,15 +574,13 @@ const CourseEndView: FC<CourseEndViewProps> = ({
     return (
       <div className="relative flex min-h-[70vh] flex-col items-center justify-center overflow-hidden px-4 text-center">
         <div className="pointer-events-none fixed inset-0">
-          <Suspense fallback={null}>
-            <LazyReactConfetti
-              width={width}
-              height={height}
-              numberOfPieces={200}
-              recycle={false}
-              colors={['#6366f1', '#10b981', '#3b82f6']}
-            />
-          </Suspense>
+          <ReactConfetti
+            width={width}
+            height={height}
+            numberOfPieces={200}
+            recycle={false}
+            colors={['#6366f1', '#10b981', '#3b82f6']}
+          />
         </div>
 
         <div className="soft-shadow relative z-10 mb-2 w-full space-y-6 rounded-2xl bg-white p-8">

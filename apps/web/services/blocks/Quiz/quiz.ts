@@ -13,11 +13,7 @@ interface QuizSubmissionPayload {
   violations?: Record<string, any>;
 }
 
-export async function submitQuizBlock(
-  activity_id: number,
-  data: QuizSubmissionPayload,
-  access_token: string,
-) {
+export async function submitQuizBlock(activity_id: number, data: QuizSubmissionPayload, access_token: string) {
   try {
     const result = await fetch(
       `${getAPIUrl()}blocks/quiz/${activity_id}`,

@@ -204,7 +204,7 @@ const Editor = (props: EditorProps) => {
                   />
                 </Link>
                 <EditorInfoDocName>
-                  <b>{props.course.name}</b> <DividerVerticalIcon className='size-7' /> {props.activity.name}{' '}
+                  <b>{props.course.name}</b> <DividerVerticalIcon className="size-7" /> {props.activity.name}{' '}
                 </EditorInfoDocName>
               </EditorInfoWrapper>
               <EditorButtonsWrapper>

@@ -2,7 +2,7 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Image as ImageIcon, Loader2, Globe, Lock, CheckCircle2, Search } from 'lucide-react';
+import { CheckCircle2, Globe, Image as ImageIcon, Loader2, Lock, Search } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
@@ -10,7 +10,7 @@ import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { createCollection } from '@services/courses/collections';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useState, useTransition, useMemo } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';

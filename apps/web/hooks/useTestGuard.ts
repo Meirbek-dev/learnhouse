@@ -43,7 +43,7 @@ export function useTestGuard({
   useEffect(() => {
     if (!enabled) return;
 
-    const handlers: Array<() => void> = [];
+    const handlers: (() => void)[] = [];
 
     const report = (type: ViolationType) => {
       if (locked.current || !enabled) return;
@@ -89,8 +89,7 @@ export function useTestGuard({
         const widthDiff = window.outerWidth - window.innerWidth;
         const heightDiff = window.outerHeight - window.innerHeight;
         const sizeChange =
-          Math.abs(window.outerWidth - lastWidth) > 100 ||
-          Math.abs(window.outerHeight - lastHeight) > 100;
+          Math.abs(window.outerWidth - lastWidth) > 100 || Math.abs(window.outerHeight - lastHeight) > 100;
 
         if ((widthDiff > threshold || heightDiff > threshold) && sizeChange) {
           report('DEVTOOLS');
@@ -126,10 +125,7 @@ export function useTestGuard({
 
       // 4. Keyboard shortcuts
       const keydown = (e: KeyboardEvent) => {
-        if (
-          (e.ctrlKey || e.metaKey) &&
-          ['c', 'a', 'u', 's', 'p', 'x'].includes(e.key.toLowerCase())
-        ) {
+        if ((e.ctrlKey || e.metaKey) && ['c', 'a', 'u', 's', 'p', 'x'].includes(e.key.toLowerCase())) {
           e.preventDefault();
           report('KEYDOWN');
         }
