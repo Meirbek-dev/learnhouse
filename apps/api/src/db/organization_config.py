@@ -50,6 +50,11 @@ class AssignmentOrgConfig(PydanticStrictBaseModel):
     limit: int = 10
 
 
+class ExamOrgConfig(PydanticStrictBaseModel):
+    enabled: bool = False
+    limit: int = 10
+
+
 class PaymentOrgConfig(PydanticStrictBaseModel):
     enabled: bool = True
 
@@ -81,6 +86,7 @@ class OrgFeatureConfig(PydanticStrictBaseModel):
     storage: StorageOrgConfig = StorageOrgConfig()
     ai: AIOrgConfig = AIOrgConfig()
     assignments: AssignmentOrgConfig = AssignmentOrgConfig()
+    exams: ExamOrgConfig = ExamOrgConfig()
     payments: PaymentOrgConfig = PaymentOrgConfig()
     discussions: DiscussionOrgConfig = DiscussionOrgConfig()
     analytics: AnalyticsOrgConfig = AnalyticsOrgConfig()

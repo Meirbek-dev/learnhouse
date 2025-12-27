@@ -1681,7 +1681,7 @@ async def grade_assignment_submission(
         total += task_grade
 
     average = total / len(assignment_tasks)
-    rounded = int(round(average))
+    rounded = round(average)
 
     # Update the assignment user submission with the final rounded average
     assignment_user_submission.grade = rounded

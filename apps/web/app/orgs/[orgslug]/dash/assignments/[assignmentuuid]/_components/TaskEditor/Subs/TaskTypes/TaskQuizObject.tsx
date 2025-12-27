@@ -1,21 +1,21 @@
 'use client';
 
 import {
+  AlertTriangle,
   Check,
+  ChevronDown,
+  Clock,
   Info,
   Loader2,
   Minus,
+  PlayCircle,
   Plus,
   PlusCircle,
-  Trash2,
-  X,
+  RefreshCcw,
   Settings,
   Shield,
-  Clock,
-  AlertTriangle,
-  PlayCircle,
-  ChevronDown,
-  RefreshCcw,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -35,7 +35,7 @@ import {
 import { useAssignmentSubmission } from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
@@ -418,7 +418,7 @@ const QuizSettingsPanel = ({ settings, onSettingsChange, isOpen, onOpenChange, t
                 max="5"
                 placeholder={t('settings.unlimited')}
                 value={settings.max_attempts ?? ''}
-                onChange={(e) => updateSetting('max_attempts', e.target.value ? parseInt(e.target.value) : null)}
+                onChange={(e) => updateSetting('max_attempts', e.target.value ? Number.parseInt(e.target.value) : null)}
               />
             </div>
 
@@ -441,7 +441,7 @@ const QuizSettingsPanel = ({ settings, onSettingsChange, isOpen, onOpenChange, t
                   placeholder={t('settings.noLimit')}
                   value={settings.time_limit_seconds ? settings.time_limit_seconds / 60 : ''}
                   onChange={(e) =>
-                    updateSetting('time_limit_seconds', e.target.value ? parseInt(e.target.value) * 60 : null)
+                    updateSetting('time_limit_seconds', e.target.value ? Number.parseInt(e.target.value) * 60 : null)
                   }
                 />
                 <span className="text-muted-foreground text-sm">{t('settings.minutes')}</span>
@@ -466,7 +466,7 @@ const QuizSettingsPanel = ({ settings, onSettingsChange, isOpen, onOpenChange, t
                   placeholder="0"
                   value={settings.max_score_penalty_per_attempt ?? ''}
                   onChange={(e) =>
-                    updateSetting('max_score_penalty_per_attempt', e.target.value ? parseFloat(e.target.value) : null)
+                    updateSetting('max_score_penalty_per_attempt', e.target.value ? Number.parseFloat(e.target.value) : null)
                   }
                 />
                 <span className="text-muted-foreground text-sm">%</span>
@@ -527,7 +527,7 @@ const QuizSettingsPanel = ({ settings, onSettingsChange, isOpen, onOpenChange, t
                         min="1"
                         max="10"
                         value={settings.max_violations ?? DEFAULT_MAX_VIOLATIONS}
-                        onChange={(e) => updateSetting('max_violations', parseInt(e.target.value))}
+                        onChange={(e) => updateSetting('max_violations', Number.parseInt(e.target.value))}
                       />
                     </div>
 
@@ -1002,9 +1002,9 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
         window.dispatchEvent(new CustomEvent('focusModeChange'));
         prevFocusModeRef.current = null;
       }
-    } catch (err) {
+    } catch (error) {
       // ignore storage errors
-      console.warn('Focus mode toggle failed', err);
+      console.warn('Focus mode toggle failed', error);
     }
 
     // Cleanup: restore on unmount if test was still active
@@ -1016,7 +1016,9 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
           window.dispatchEvent(new CustomEvent('focusModeChange'));
           prevFocusModeRef.current = null;
         }
-      } catch (err) { /* ignore restore errors */ }
+      } catch {
+        /* ignore restore errors */
+      }
     };
   }, [testStarted, view]);
 

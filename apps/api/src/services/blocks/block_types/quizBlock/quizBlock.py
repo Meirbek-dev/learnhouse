@@ -2,7 +2,7 @@
 Quiz block service for handling quiz submissions and analytics.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
@@ -126,8 +126,8 @@ async def submit_quiz(
         violations_exceeded = False
 
     # Calculate timing
-    start_ts = submission.start_ts or datetime.now(timezone.utc)
-    end_ts = submission.end_ts or datetime.now(timezone.utc)
+    start_ts = submission.start_ts or datetime.now(UTC)
+    end_ts = submission.end_ts or datetime.now(UTC)
     duration_seconds = int((end_ts - start_ts).total_seconds())
 
     # Check time limit
@@ -177,8 +177,8 @@ async def submit_quiz(
         answers={"answers": submission.answers},
         grading_result=grading_result,
         idempotency_key=submission.idempotency_key,
-        creation_date=str(datetime.now(timezone.utc)),
-        update_date=str(datetime.now(timezone.utc)),
+        creation_date=str(datetime.now(UTC)),
+        update_date=str(datetime.now(UTC)),
     )
 
     db_session.add(quiz_attempt)
@@ -361,8 +361,8 @@ async def _update_question_stats(
                 total_attempts=0,
                 correct_count=0,
                 avg_time_seconds=None,
-                creation_date=str(datetime.now(timezone.utc)),
-                update_date=str(datetime.now(timezone.utc)),
+                creation_date=str(datetime.now(UTC)),
+                update_date=str(datetime.now(UTC)),
             )
             db_session.add(stat)
 
@@ -371,6 +371,6 @@ async def _update_question_stats(
         if result.get("correct"):
             stat.correct_count += 1
 
-        stat.update_date = str(datetime.now(timezone.utc))
+        stat.update_date = str(datetime.now(UTC))
 
     db_session.commit()

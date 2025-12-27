@@ -6,6 +6,7 @@ import {
   Backpack,
   Check,
   ChevronDown,
+  ClipboardList,
   File,
   ImageIcon,
   Layers,
@@ -173,6 +174,9 @@ const CourseClient = (props: any) => {
       }
       case 'TYPE_ASSIGNMENT': {
         return t('assignment');
+      }
+      case 'TYPE_EXAM': {
+        return t('exam');
       }
       default: {
         return t('learningMaterial');
@@ -543,6 +547,7 @@ const CourseClient = (props: any) => {
                                       {activity.activity_type === 'TYPE_VIDEO' && <Video size={10} />}
                                       {activity.activity_type === 'TYPE_DOCUMENT' && <File size={10} />}
                                       {activity.activity_type === 'TYPE_ASSIGNMENT' && <Backpack size={10} />}
+                                      {activity.activity_type === 'TYPE_EXAM' && <ClipboardList size={10} />}
                                       <span className="text-xs font-medium">
                                         {getActivityTypeLabel(activity.activity_type)}
                                       </span>

@@ -18,6 +18,7 @@ XP_REWARDS = {
     "login_bonus": 10,
     "quiz_completion": 30,
     "assignment_submission": 75,
+    "exam_completion": 50,
     "streak_bonus": 50,
     "admin_award": 0,  # Custom amount required
 }
@@ -34,6 +35,7 @@ class XPSource(str, Enum):
     LOGIN_BONUS = "login_bonus"
     QUIZ_COMPLETION = "quiz_completion"
     ASSIGNMENT_SUBMISSION = "assignment_submission"
+    EXAM_COMPLETION = "exam_completion"
     STREAK_BONUS = "streak_bonus"
     ADMIN_AWARD = "admin_award"
 

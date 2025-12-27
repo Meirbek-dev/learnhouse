@@ -138,8 +138,8 @@ class QuizSettings(PydanticStrictBaseModel):
     Stored in the Block.content JSON field.
     """
 
-    max_attempts: int | None = PydanticField(default=None, ge=1, le=10)
-    time_limit_seconds: int | None = PydanticField(default=None, ge=60)
+    max_attempts: int | None = PydanticField(default=None, ge=1, le=5)
+    time_limit_seconds: int | None = PydanticField(default=None, ge=50)
     max_score_penalty_per_attempt: float | None = PydanticField(
         default=None, ge=0.0, le=100.0
     )
@@ -147,7 +147,7 @@ class QuizSettings(PydanticStrictBaseModel):
     # Anti-cheat settings
     prevent_copy: bool = PydanticField(default=True)
     track_violations: bool = PydanticField(default=True)
-    max_violations: int = PydanticField(default=2, ge=1, le=5)
+    max_violations: int = PydanticField(default=3, ge=1, le=10)
     block_on_violations: bool = PydanticField(default=True)
 
 

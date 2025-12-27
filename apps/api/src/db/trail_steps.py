@@ -1,7 +1,8 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import Field as PydanticField, field_validator
+from pydantic import Field as PydanticField
+from pydantic import field_validator
 from sqlalchemy import JSON, Column, ForeignKey, Integer
 from sqlmodel import Field
 

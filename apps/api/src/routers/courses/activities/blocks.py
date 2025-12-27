@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Form, Request, UploadFile
 
 from src.core.events.database import get_db_session
 from src.db.courses.blocks import BlockRead
+from src.db.courses.quiz import QuizSubmissionRequest
 from src.security.auth import get_current_user
 from src.services.blocks.block_types.imageBlock.imageBlock import (
     create_image_block,
@@ -18,7 +19,6 @@ from src.services.blocks.block_types.quizBlock.quizBlock import (
     get_quiz_stats,
     submit_quiz,
 )
-from src.db.courses.quiz import QuizSubmissionRequest
 from src.services.blocks.block_types.videoBlock.videoBlock import (
     create_video_block,
     get_video_block,

@@ -69,6 +69,7 @@ const DocumentPdfActivity = lazy(() => import('@components/Objects/Activities/Do
 const AssignmentStudentActivity = lazy(
   () => import('@components/Objects/Activities/Assignment/AssignmentStudentActivity'),
 );
+const ExamActivity = lazy(() => import('@components/Activities/ExamActivity/ExamActivity'));
 const AIActivityAsk = lazy(() => import('@components/Objects/Activities/AI/AIActivityAsk'));
 const AIChatBotProvider = lazy(() => import('@components/Contexts/AI/AIChatBotContext'));
 
@@ -271,7 +272,9 @@ const ActivityActions = ({
 
   return (
     <div className="flex items-center space-x-2">
-      {activity && activity.published === true && activity.content.paid_access !== false ? (
+      {activity &&
+      (activity.published === true || contributorStatus === 'ACTIVE') &&
+      (activity.content.paid_access !== false || contributorStatus === 'ACTIVE') ? (
         <AuthenticatedClientElement checkMethod="authentication">
           {activity.activity_type !== 'TYPE_ASSIGNMENT' && (
             <MarkStatus
@@ -356,7 +359,7 @@ const ActivityClient = (props: ActivityClientProps) => {
     if (activity.activity_type === 'TYPE_DYNAMIC' || activity.activity_type === 'TYPE_ASSIGNMENT') {
       return isFocusMode ? 'bg-white' : 'bg-white soft-shadow';
     }
-    return isFocusMode ? 'bg-zinc-950' : 'bg-zinc-950 soft-shadow';
+    return isFocusMode ? 'bg-background' : 'bg-background soft-shadow';
   })();
 
   // Helper to get relative time using next-intl
@@ -377,7 +380,11 @@ const ActivityClient = (props: ActivityClientProps) => {
   const nextActivity = currentIndex < allActivities.length - 1 ? allActivities[currentIndex + 1] : null;
 
   const activityContent = (() => {
-    if (!activity?.published || activity?.content?.paid_access === false) {
+    // Allow teachers (ACTIVE contributors) to view content even when unpublished or paid-locked
+    if (!activity?.published && contributorStatus !== 'ACTIVE') {
+      return null;
+    }
+    if (activity?.content?.paid_access === false && contributorStatus !== 'ACTIVE') {
       return null;
     }
 
@@ -424,6 +431,17 @@ const ActivityClient = (props: ActivityClientProps) => {
             </AssignmentProvider>
           </Suspense>
         ) : null;
+      }
+      case 'TYPE_EXAM': {
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <ExamActivity
+              activity={activity}
+              course={course}
+              orgslug={orgslug}
+            />
+          </Suspense>
+        );
       }
       default: {
         return null;
@@ -671,8 +689,8 @@ const ActivityClient = (props: ActivityClientProps) => {
                 {/* Focus Mode Content */}
                 <div className="h-full overflow-auto pt-16 pb-20">
                   <div className="container mx-auto px-4">
-                    {activity && activity.published === true ? (
-                      activity.content.paid_access === false ? (
+                    {activity && (activity.published === true || contributorStatus === 'ACTIVE') ? (
+                      activity.content.paid_access === false && contributorStatus !== 'ACTIVE' ? (
                         <PaidCourseActivityDisclaimer course={course} />
                       ) : (
                         <motion.div
@@ -690,7 +708,9 @@ const ActivityClient = (props: ActivityClientProps) => {
                 </div>
 
                 {/* Focus Mode Bottom Bar */}
-                {activity && activity.published === true && activity.content.paid_access !== false ? (
+                {activity &&
+                (activity.published === true || contributorStatus === 'ACTIVE') &&
+                (activity.content.paid_access !== false || contributorStatus === 'ACTIVE') ? (
                   <motion.div
                     initial={isInitialRender ? false : { y: 100 }}
                     animate={{ y: 0 }}
@@ -950,7 +970,9 @@ const ActivityClient = (props: ActivityClientProps) => {
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          {activity && activity.published === true && activity.content.paid_access !== false ? (
+                          {activity &&
+                          (activity.published === true || contributorStatus === 'ACTIVE') &&
+                          (activity.content.paid_access !== false || contributorStatus === 'ACTIVE') ? (
                             <AuthenticatedClientElement checkMethod="authentication">
                               {activity.activity_type !== 'TYPE_ASSIGNMENT' && (
                                 <>
@@ -983,7 +1005,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                       </div>
                     </div>
 
-                    {activity && activity.published === false ? (
+                    {activity && activity.published === false && contributorStatus !== 'ACTIVE' ? (
                       <div className="rounded-lg bg-gray-800 p-7 drop-shadow-xs">
                         <div className="text-white">
                           <h1 className="text-2xl font-bold">{t('activityNotPublished')}</h1>
@@ -991,7 +1013,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                       </div>
                     ) : null}
 
-                    {activity && activity.published === true ? (
+                    {activity && (activity.published === true || contributorStatus === 'ACTIVE') ? (
                       activity.content.paid_access === false ? (
                         <PaidCourseActivityDisclaimer course={course} />
                       ) : (
@@ -1021,7 +1043,9 @@ const ActivityClient = (props: ActivityClientProps) => {
                     ) : null}
 
                     {/* Activity Actions below the content box */}
-                    {activity && activity.published === true && activity.content.paid_access !== false ? (
+                    {activity &&
+                    (activity.published === true || contributorStatus === 'ACTIVE') &&
+                    (activity.content.paid_access !== false || contributorStatus === 'ACTIVE') ? (
                       <div className="mt-4 flex w-full items-center justify-between">
                         <div>
                           <PreviousActivityButton
@@ -1049,7 +1073,9 @@ const ActivityClient = (props: ActivityClientProps) => {
                     ) : null}
 
                     {/* Fixed Activity Secondary Bar */}
-                    {activity && activity.published === true && activity.content.paid_access !== false ? (
+                    {activity &&
+                    (activity.published === true || contributorStatus === 'ACTIVE') &&
+                    (activity.content.paid_access !== false || contributorStatus === 'ACTIVE') ? (
                       <FixedActivitySecondaryBar
                         course={course}
                         currentActivityId={activityid}

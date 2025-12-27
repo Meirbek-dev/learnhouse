@@ -1,0 +1,1057 @@
+import random
+from datetime import datetime
+
+from fastapi import HTTPException, Request
+from sqlmodel import Session, select
+from ulid import ULID
+
+from src.db.courses.activities import (
+    Activity,
+    ActivitySubTypeEnum,
+    ActivityTypeEnum,
+)
+from src.db.courses.chapter_activities import ChapterActivity
+from src.db.courses.courses import Course
+from src.db.courses.exams import (
+    AccessModeEnum,
+    AttemptStatusEnum,
+    Exam,
+    ExamAttempt,
+    ExamAttemptCreate,
+    ExamAttemptRead,
+    ExamAttemptUpdate,
+    ExamCreate,
+    ExamCreateWithActivity,
+    ExamRead,
+    ExamUpdate,
+    Question,
+    QuestionCreate,
+    QuestionRead,
+    QuestionUpdate,
+)
+from src.db.organizations import Organization
+from src.db.trail_runs import TrailRun
+from src.db.trail_steps import TrailStep
+from src.db.users import AnonymousUser, PublicUser, User
+from src.security.courses_security import courses_rbac_check_for_assignments
+
+
+## > Exams CRUD
+
+
+async def create_exam(
+    request: Request,
+    exam_object: ExamCreate,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> ExamRead:
+    """Create a new exam"""
+
+    # Verify org, course, chapter, activity exist
+    org = db_session.get(Organization, exam_object.org_id)
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+
+    course = db_session.get(Course, exam_object.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    activity = db_session.get(Activity, exam_object.activity_id)
+    if not activity:
+        raise HTTPException(status_code=404, detail="Activity not found")
+
+    # RBAC check: ensure user can create content in this course
+    course = db_session.get(Course, exam_object.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "create", db_session
+    )
+
+    # Validate settings against ExamSettingsBase so frontend limits are enforced server-side
+    from src.db.courses.exams import ExamSettingsBase
+
+    try:
+        validated_settings = ExamSettingsBase.model_validate(exam_object.settings or {})
+        settings_dict = validated_settings.model_dump()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid settings: {e}")
+
+    # Create exam
+    exam_uuid = f"exam_{ULID()}"
+    now = datetime.now().isoformat()
+
+    exam = Exam(
+        exam_uuid=exam_uuid,
+        title=exam_object.title,
+        description=exam_object.description,
+        published=exam_object.published,
+        org_id=exam_object.org_id,
+        course_id=exam_object.course_id,
+        chapter_id=exam_object.chapter_id,
+        activity_id=exam_object.activity_id,
+        settings=settings_dict,
+        creation_date=now,
+        update_date=now,
+    )
+
+    db_session.add(exam)
+    db_session.commit()
+    db_session.refresh(exam)
+
+    return ExamRead.model_validate(exam)
+
+
+async def read_exam(
+    request: Request,
+    exam_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> ExamRead:
+    """Read an exam by UUID"""
+    statement = select(Exam).where(Exam.exam_uuid == exam_uuid)
+    exam = db_session.exec(statement).first()
+
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    # RBAC check
+    course = db_session.get(Course, exam.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
+    )
+
+    return ExamRead.model_validate(exam)
+
+
+async def read_exam_from_activity_uuid(
+    request: Request,
+    activity_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> ExamRead:
+    """Read an exam by activity UUID"""
+    statement = select(Activity).where(Activity.activity_uuid == activity_uuid)
+    activity = db_session.exec(statement).first()
+
+    if not activity:
+        raise HTTPException(status_code=404, detail="Activity not found")
+
+    statement = select(Exam).where(Exam.activity_id == activity.id)
+    exam = db_session.exec(statement).first()
+
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    # RBAC check
+    course = db_session.get(Course, exam.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
+    )
+
+    return ExamRead.model_validate(exam)
+
+
+async def update_exam(
+    request: Request,
+    exam_uuid: str,
+    exam_object: ExamUpdate,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> ExamRead:
+    """Update an exam"""
+
+    statement = select(Exam).where(Exam.exam_uuid == exam_uuid)
+    exam = db_session.exec(statement).first()
+
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    # RBAC check
+    course = db_session.get(Course, exam.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "update", db_session
+    )
+
+    # Update fields
+    update_data = exam_object.model_dump(exclude_unset=True)
+
+    # If settings are provided, validate them and replace with normalized dict
+    if "settings" in update_data:
+        from src.db.courses.exams import ExamSettingsBase
+
+        try:
+            validated_settings = ExamSettingsBase.model_validate(update_data.get("settings") or {})
+            update_data["settings"] = validated_settings.model_dump()
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid settings: {e}")
+
+    for key, value in update_data.items():
+        setattr(exam, key, value)
+
+    exam.update_date = datetime.now().isoformat()
+
+    db_session.add(exam)
+    db_session.commit()
+    db_session.refresh(exam)
+
+    return ExamRead.model_validate(exam)
+
+
+async def delete_exam(
+    request: Request,
+    exam_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> dict[str, str]:
+    """Delete an exam"""
+
+    statement = select(Exam).where(Exam.exam_uuid == exam_uuid)
+    exam = db_session.exec(statement).first()
+
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    # RBAC check
+    course = db_session.get(Course, exam.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "delete", db_session
+    )
+
+    db_session.delete(exam)
+    db_session.commit()
+
+    return {"message": "Exam deleted successfully"}
+
+
+async def create_exam_with_activity(
+    request: Request,
+    exam_object: ExamCreateWithActivity,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> dict:
+    """Create an exam with associated activity in one request"""
+
+    # Get chapter to determine course and org
+    from src.db.courses.chapters import Chapter
+
+    chapter = db_session.get(Chapter, exam_object.chapter_id)
+    if not chapter:
+        raise HTTPException(status_code=404, detail="Chapter not found")
+
+    course = db_session.get(Course, chapter.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    # RBAC check: ensure user can create content in this course
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "create", db_session
+    )
+
+    # Create activity
+    activity_uuid = f"activity_{ULID()}"
+    now = datetime.now().isoformat()
+
+    activity = Activity(
+        activity_uuid=activity_uuid,
+        name=exam_object.activity_name,
+        activity_type=ActivityTypeEnum.TYPE_EXAM,
+        activity_sub_type=ActivitySubTypeEnum.SUBTYPE_EXAM_STANDARD,
+        content={},
+        details={},
+        published=False,
+        org_id=course.org_id,
+        course_id=course.id,
+        creation_date=now,
+        update_date=now,
+    )
+
+    db_session.add(activity)
+    db_session.flush()
+
+    # Link activity to chapter
+    # Determine next "order" value for the chapter
+    statement = select(ChapterActivity).where(ChapterActivity.chapter_id == chapter.id).order_by(ChapterActivity.order.desc())
+    last_chapter_activity = db_session.exec(statement).first()
+    next_order = 1
+    if last_chapter_activity and getattr(last_chapter_activity, "order", None) is not None:
+        next_order = last_chapter_activity.order + 1
+
+    chapter_activity = ChapterActivity(
+        chapter_id=chapter.id,
+        activity_id=activity.id,
+        course_id=course.id,
+        org_id=course.org_id,
+        order=next_order,
+        creation_date=now,
+        update_date=now,
+    )
+    db_session.add(chapter_activity)
+    db_session.flush()
+
+    # Create exam
+    exam_uuid = f"exam_{ULID()}"
+
+    exam = Exam(
+        exam_uuid=exam_uuid,
+        title=exam_object.exam_title,
+        description=exam_object.exam_description,
+        published=False,
+        org_id=course.org_id,
+        course_id=course.id,
+        chapter_id=chapter.id,
+        activity_id=activity.id,
+        settings=exam_object.settings,
+        creation_date=now,
+        update_date=now,
+    )
+
+    db_session.add(exam)
+    db_session.commit()
+    db_session.refresh(exam)
+    db_session.refresh(activity)
+
+    return {
+        "exam": ExamRead.model_validate(exam),
+        "activity_uuid": activity.activity_uuid,
+    }
+
+
+## > Questions CRUD
+
+
+async def create_question(
+    request: Request,
+    exam_uuid: str,
+    question_object: QuestionCreate,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> QuestionRead:
+    """Create a question for an exam"""
+
+    statement = select(Exam).where(Exam.exam_uuid == exam_uuid)
+    exam = db_session.exec(statement).first()
+
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    # RBAC check
+    course = db_session.get(Course, exam.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "create", db_session
+    )
+
+    # Create question
+    question_uuid = f"question_{ULID()}"
+    now = datetime.now().isoformat()
+
+    question = Question(
+        question_uuid=question_uuid,
+        question_text=question_object.question_text,
+        question_type=question_object.question_type,
+        points=question_object.points,
+        explanation=question_object.explanation,
+        order_index=question_object.order_index,
+        answer_options=question_object.answer_options,
+        exam_id=exam.id,
+        org_id=exam.org_id,
+        creation_date=now,
+        update_date=now,
+    )
+
+    db_session.add(question)
+    db_session.commit()
+    db_session.refresh(question)
+
+    return QuestionRead.model_validate(question)
+
+
+async def read_questions(
+    request: Request,
+    exam_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> list[QuestionRead]:
+    """Read all questions for an exam"""
+    statement = select(Exam).where(Exam.exam_uuid == exam_uuid)
+    exam = db_session.exec(statement).first()
+
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    # RBAC check
+    course = db_session.get(Course, exam.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
+    )
+
+    statement = (
+        select(Question)
+        .where(Question.exam_id == exam.id)
+        .order_by(Question.order_index)
+    )
+    questions = db_session.exec(statement).all()
+
+    return [QuestionRead.model_validate(q) for q in questions]
+
+
+async def update_question(
+    request: Request,
+    question_uuid: str,
+    question_object: QuestionUpdate,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> QuestionRead:
+    """Update a question"""
+
+    statement = select(Question).where(Question.question_uuid == question_uuid)
+    question = db_session.exec(statement).first()
+
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+
+    exam = db_session.get(Exam, question.exam_id)
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    # RBAC check
+    course = db_session.get(Course, exam.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "update", db_session
+    )
+
+    # Update fields
+    update_data = question_object.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(question, key, value)
+
+    question.update_date = datetime.now().isoformat()
+
+    db_session.add(question)
+    db_session.commit()
+    db_session.refresh(question)
+
+    return QuestionRead.model_validate(question)
+
+
+async def delete_question(
+    request: Request,
+    question_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> dict[str, str]:
+    """Delete a question"""
+
+    statement = select(Question).where(Question.question_uuid == question_uuid)
+    question = db_session.exec(statement).first()
+
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+
+    exam = db_session.get(Exam, question.exam_id)
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    # RBAC check
+    course = db_session.get(Course, exam.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "delete", db_session
+    )
+
+    db_session.delete(question)
+    db_session.commit()
+
+    return {"message": "Question deleted successfully"}
+
+
+## > Exam Attempts
+
+
+async def start_exam_attempt(
+    request: Request,
+    exam_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> ExamAttemptRead:
+    """Start a new exam attempt for the current user"""
+    if isinstance(current_user, AnonymousUser):
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    statement = select(Exam).where(Exam.exam_uuid == exam_uuid)
+    exam = db_session.exec(statement).first()
+
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    # Check access
+    settings = exam.settings or {}
+    access_mode = settings.get("access_mode", "NO_ACCESS")
+
+    if access_mode == "NO_ACCESS":
+        raise HTTPException(status_code=403, detail="Exam is not accessible")
+
+    if access_mode == "WHITELIST":
+        whitelist = settings.get("whitelist_user_ids", [])
+        if current_user.id not in whitelist:
+            raise HTTPException(
+                status_code=403, detail="You are not authorized to access this exam"
+            )
+
+    # Check attempt limit
+    attempt_limit = settings.get("attempt_limit")
+    if attempt_limit is not None:
+        # validate configured value against allowed bounds
+        from src.db.courses.exams import ATTEMPT_LIMIT_MIN, ATTEMPT_LIMIT_MAX, QUESTION_LIMIT_MIN
+
+        if not (ATTEMPT_LIMIT_MIN <= attempt_limit <= ATTEMPT_LIMIT_MAX):
+            raise HTTPException(status_code=400, detail="Invalid attempt_limit configured for exam")
+
+        statement = select(ExamAttempt).where(
+            ExamAttempt.exam_id == exam.id,
+            ExamAttempt.user_id == current_user.id,
+        )
+        existing_attempts = db_session.exec(statement).all()
+        if len(existing_attempts) >= attempt_limit:
+            raise HTTPException(status_code=403, detail="Attempt limit reached")
+
+    # Validate question_limit if present
+    question_limit = settings.get("question_limit")
+    if question_limit is not None:
+        if question_limit < QUESTION_LIMIT_MIN:
+            raise HTTPException(status_code=400, detail="Invalid question_limit configured for exam")
+
+    # Get all questions for this exam
+    statement = (
+        select(Question)
+        .where(Question.exam_id == exam.id)
+        .order_by(Question.order_index)
+    )
+    all_questions = list(db_session.exec(statement).all())
+
+    if not all_questions:
+        raise HTTPException(status_code=400, detail="Exam has no questions")
+
+    # Apply question limit if configured
+    question_limit = settings.get("question_limit")
+    if question_limit and question_limit < len(all_questions):
+        selected_questions = random.sample(all_questions, question_limit)
+    else:
+        selected_questions = all_questions
+
+    # Shuffle questions if configured
+    if settings.get("shuffle_questions", True):
+        random.shuffle(selected_questions)
+
+    question_order = [q.id for q in selected_questions]
+
+    # Create attempt
+    attempt_uuid = f"attempt_{ULID()}"
+    now = datetime.now().isoformat()
+
+    attempt = ExamAttempt(
+        attempt_uuid=attempt_uuid,
+        exam_id=exam.id,
+        user_id=current_user.id,
+        org_id=exam.org_id,
+        status=AttemptStatusEnum.IN_PROGRESS,
+        question_order=question_order,
+        answers={},
+        violations=[],
+        started_at=now,
+        creation_date=now,
+        update_date=now,
+    )
+
+    db_session.add(attempt)
+    db_session.commit()
+    db_session.refresh(attempt)
+
+    return ExamAttemptRead.model_validate(attempt)
+
+
+async def submit_exam_attempt(
+    request: Request,
+    attempt_uuid: str,
+    answers: dict,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> ExamAttemptRead:
+    """Submit an exam attempt"""
+    if isinstance(current_user, AnonymousUser):
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    statement = select(ExamAttempt).where(ExamAttempt.attempt_uuid == attempt_uuid)
+    attempt = db_session.exec(statement).first()
+
+    if not attempt:
+        raise HTTPException(status_code=404, detail="Attempt not found")
+
+    if attempt.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    if attempt.status != AttemptStatusEnum.IN_PROGRESS:
+        raise HTTPException(status_code=400, detail="Attempt already submitted")
+
+    # Calculate score
+    total_score = 0
+    max_score = 0
+
+    for question_id in attempt.question_order:
+        question = db_session.get(Question, question_id)
+        if not question:
+            continue
+
+        max_score += question.points
+
+        user_answer = answers.get(str(question_id))
+        if user_answer is None:
+            continue
+
+        # Check answer correctness based on question type
+        is_correct = check_answer_correctness(question, user_answer)
+        if is_correct:
+            total_score += question.points
+
+    # Update attempt
+    attempt.answers = answers
+    attempt.score = total_score
+    attempt.max_score = max_score
+    attempt.status = AttemptStatusEnum.SUBMITTED
+    attempt.submitted_at = datetime.now().isoformat()
+    attempt.update_date = datetime.now().isoformat()
+
+    db_session.add(attempt)
+    db_session.commit()
+    db_session.refresh(attempt)
+
+    # Mark activity as complete
+    exam = db_session.get(Exam, attempt.exam_id)
+    if exam:
+        await mark_exam_complete(request, exam.activity_id, current_user.id, db_session)
+
+    return ExamAttemptRead.model_validate(attempt)
+
+
+async def record_violation(
+    request: Request,
+    attempt_uuid: str,
+    violation_type: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> ExamAttemptRead:
+    """Record a violation during an exam attempt"""
+    if isinstance(current_user, AnonymousUser):
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    statement = select(ExamAttempt).where(ExamAttempt.attempt_uuid == attempt_uuid)
+    attempt = db_session.exec(statement).first()
+
+    if not attempt:
+        raise HTTPException(status_code=404, detail="Attempt not found")
+
+    if attempt.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    # Add violation
+    violation = {
+        "type": violation_type,
+        "timestamp": datetime.now().isoformat(),
+    }
+
+    violations = attempt.violations or []
+    violations.append(violation)
+    attempt.violations = violations
+    attempt.update_date = datetime.now().isoformat()
+
+    # Check violation threshold
+    exam = db_session.get(Exam, attempt.exam_id)
+    if exam:
+        settings = exam.settings or {}
+        threshold = settings.get("violation_threshold")
+        if threshold and len(violations) >= threshold:
+            # Auto-submit
+            attempt.status = AttemptStatusEnum.AUTO_SUBMITTED
+            attempt.submitted_at = datetime.now().isoformat()
+
+    db_session.add(attempt)
+    db_session.commit()
+    db_session.refresh(attempt)
+
+    return ExamAttemptRead.model_validate(attempt)
+
+
+async def get_user_attempts(
+    request: Request,
+    exam_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> list[ExamAttemptRead]:
+    """Get all attempts for current user"""
+    if isinstance(current_user, AnonymousUser):
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    statement = select(Exam).where(Exam.exam_uuid == exam_uuid)
+    exam = db_session.exec(statement).first()
+
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    statement = (
+        select(ExamAttempt)
+        .where(
+            ExamAttempt.exam_id == exam.id,
+            ExamAttempt.user_id == current_user.id,
+        )
+        .order_by(ExamAttempt.creation_date.desc())
+    )
+
+    attempts = db_session.exec(statement).all()
+    return [ExamAttemptRead.model_validate(a) for a in attempts]
+
+
+## > Helper Functions
+
+
+def check_answer_correctness(question: Question, user_answer: any) -> bool:
+    """Check if a user's answer is correct"""
+    from src.db.courses.exams import QuestionTypeEnum
+
+    if question.question_type == QuestionTypeEnum.SINGLE_CHOICE:
+        # user_answer is an index
+        correct_indices = [
+            i for i, opt in enumerate(question.answer_options) if opt.get("is_correct")
+        ]
+        return user_answer in correct_indices
+
+    if question.question_type == QuestionTypeEnum.MULTIPLE_CHOICE:
+        # user_answer is a list of indices
+        if not isinstance(user_answer, list):
+            return False
+        correct_indices = {
+            i for i, opt in enumerate(question.answer_options) if opt.get("is_correct")
+        }
+        user_indices = set(user_answer)
+        return correct_indices == user_indices
+
+    if question.question_type == QuestionTypeEnum.TRUE_FALSE:
+        # user_answer is 0 or 1 (True/False index)
+        correct_indices = [
+            i for i, opt in enumerate(question.answer_options) if opt.get("is_correct")
+        ]
+        return user_answer in correct_indices
+
+    if question.question_type == QuestionTypeEnum.MATCHING:
+        # user_answer is a dict mapping left to right
+        if not isinstance(user_answer, dict):
+            return False
+        # Check if all pairs match
+        for option in question.answer_options:
+            left = option.get("left")
+            right = option.get("right")
+            if user_answer.get(left) != right:
+                return False
+        return True
+
+    return False
+
+
+async def mark_exam_complete(
+    request: Request,
+    activity_id: int,
+    user_id: int,
+    db_session: Session,
+):
+    """Mark exam activity as complete in trail steps"""
+    # Find trail step for this activity and user
+    statement = select(TrailStep).where(
+        TrailStep.activity_id == activity_id,
+        TrailStep.user_id == user_id,
+    )
+    trail_step = db_session.exec(statement).first()
+
+    if trail_step:
+        trail_step.complete = True
+        trail_step.update_date = datetime.now().isoformat()
+        db_session.add(trail_step)
+        db_session.commit()
+
+
+async def get_all_exam_attempts(
+    request: Request,
+    exam_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> list[dict]:
+    """Get all exam attempts for teacher results dashboard"""
+    # Get exam and verify permissions
+    exam_statement = select(Exam).where(Exam.exam_uuid == exam_uuid)
+    exam = db_session.exec(exam_statement).first()
+
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    # Get activity to check permissions
+    activity_statement = select(Activity).where(Activity.id == exam.activity_id)
+    activity = db_session.exec(activity_statement).first()
+
+    if not activity:
+        raise HTTPException(status_code=404, detail="Activity not found")
+
+    # Verify user is course contributor/teacher
+    course = db_session.get(Course, activity.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
+    )
+
+    # Get all attempts with user info
+    attempts_statement = (
+        select(ExamAttempt)
+        .where(ExamAttempt.exam_id == exam.id)
+        .order_by(ExamAttempt.started_at.desc())
+    )
+    attempts = db_session.exec(attempts_statement).all()
+
+    # Fetch user details
+    result = []
+    for attempt in attempts:
+        user_statement = select(User).where(User.id == attempt.user_id)
+        user = db_session.exec(user_statement).first()
+
+        if not user:
+            continue
+
+        # Calculate duration
+        duration_minutes = None
+        if attempt.finished_at and attempt.started_at:
+            try:
+                start = datetime.fromisoformat(attempt.started_at)
+                end = datetime.fromisoformat(attempt.finished_at)
+                duration_minutes = int((end - start).total_seconds() / 60)
+            except Exception:
+                pass
+
+        result.append(
+            {
+                "attempt_uuid": attempt.attempt_uuid,
+                "user_id": user.id,
+                "user_name": f"{user.name} {user.surname}".strip() or user.username,
+                "user_email": user.email,
+                "started_at": attempt.started_at,
+                "finished_at": attempt.finished_at,
+                "duration_minutes": duration_minutes,
+                "status": attempt.status,
+                "score": attempt.score,
+                "max_score": attempt.max_score,
+                "percentage": round(
+                    (attempt.score / attempt.max_score * 100)
+                    if attempt.max_score > 0
+                    else 0,
+                    1,
+                ),
+                "violations": attempt.violations,
+                "violation_count": len(attempt.violations) if attempt.violations else 0,
+            }
+        )
+
+    return result
+
+
+async def export_questions_csv(
+    request: Request,
+    exam_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> str:
+    """Export questions to CSV format"""
+    # Get exam and verify permissions
+    exam_statement = select(Exam).where(Exam.exam_uuid == exam_uuid)
+    exam = db_session.exec(exam_statement).first()
+
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    # Get activity to check permissions
+    activity_statement = select(Activity).where(Activity.id == exam.activity_id)
+    activity = db_session.exec(activity_statement).first()
+
+    if not activity:
+        raise HTTPException(status_code=404, detail="Activity not found")
+
+    # Verify user is course contributor/teacher
+    course = db_session.get(Course, activity.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
+    )
+
+    # Get questions
+    questions_statement = (
+        select(Question)
+        .where(Question.exam_id == exam.id)
+        .order_by(Question.order_index)
+    )
+    questions = db_session.exec(questions_statement).all()
+
+    # Build CSV
+    import csv
+    import io
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Header
+    writer.writerow(
+        [
+            "Question Text",
+            "Type",
+            "Points",
+            "Answer Options (JSON)",
+            "Explanation",
+            "Order Index",
+        ]
+    )
+
+    # Data
+    import json
+
+    for q in questions:
+        writer.writerow(
+            [
+                q.question_text,
+                q.question_type,
+                q.points,
+                json.dumps(q.answer_options),
+                q.explanation or "",
+                q.order_index,
+            ]
+        )
+
+    return output.getvalue()
+
+
+async def import_questions_csv(
+    request: Request,
+    exam_uuid: str,
+    csv_content: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> dict:
+    """Import questions from CSV format"""
+    # Get exam and verify permissions
+    exam_statement = select(Exam).where(Exam.exam_uuid == exam_uuid)
+    exam = db_session.exec(exam_statement).first()
+
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    # Get activity to check permissions
+    activity_statement = select(Activity).where(Activity.id == exam.activity_id)
+    activity = db_session.exec(activity_statement).first()
+
+    if not activity:
+        raise HTTPException(status_code=404, detail="Activity not found")
+
+    # Verify user is course contributor/teacher
+    course = db_session.get(Course, activity.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "create", db_session
+    )
+
+    # Parse CSV
+    import csv
+    import io
+    import json
+
+    csv_file = io.StringIO(csv_content)
+    reader = csv.DictReader(csv_file)
+
+    imported_count = 0
+    errors = []
+
+    # Get max order_index
+    max_order_statement = (
+        select(Question)
+        .where(Question.exam_id == exam.id)
+        .order_by(Question.order_index.desc())
+    )
+    max_question = db_session.exec(max_order_statement).first()
+    next_order_index = (max_question.order_index + 1) if max_question else 0
+
+    for row_num, row in enumerate(reader, start=2):  # Start at 2 to account for header
+        try:
+            question_text = row.get("Question Text", "").strip()
+            question_type = row.get("Type", "").strip()
+            points = int(row.get("Points", 1))
+            answer_options_json = row.get("Answer Options (JSON)", "[]")
+            explanation = row.get("Explanation", "").strip() or None
+
+            # Validate
+            if not question_text:
+                errors.append(f"Row {row_num}: Question text is required")
+                continue
+
+            if question_type not in [
+                "SINGLE_CHOICE",
+                "MULTIPLE_CHOICE",
+                "TRUE_FALSE",
+                "MATCHING",
+            ]:
+                errors.append(f"Row {row_num}: Invalid question type '{question_type}'")
+                continue
+
+            # Parse answer options
+            try:
+                answer_options = json.loads(answer_options_json)
+            except json.JSONDecodeError:
+                errors.append(f"Row {row_num}: Invalid JSON in answer options")
+                continue
+
+            # Create question
+            new_question = Question(
+                exam_id=exam.id,
+                question_uuid=str(ULID()),
+                question_text=question_text,
+                question_type=question_type,
+                points=points,
+                answer_options=answer_options,
+                explanation=explanation,
+                order_index=next_order_index,
+                creation_date=datetime.now().isoformat(),
+                update_date=datetime.now().isoformat(),
+            )
+
+            db_session.add(new_question)
+            imported_count += 1
+            next_order_index += 1
+
+        except Exception as e:
+            errors.append(f"Row {row_num}: {e!s}")
+
+    db_session.commit()
+
+    return {
+        "imported": imported_count,
+        "errors": errors,
+        "total_rows": row_num - 1 if "row_num" in locals() else 0,
+    }

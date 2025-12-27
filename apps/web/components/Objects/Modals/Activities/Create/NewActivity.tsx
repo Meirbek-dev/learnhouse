@@ -7,6 +7,7 @@ import DynamicCanvaModal from './NewActivityModal/DynamicActivityModal';
 import VideoPageActivityImage from './images/video-page-activity.webp';
 import Assignment from './NewActivityModal/AssignmentActivityModal';
 import VideoModal from './NewActivityModal/VideoActivityModal';
+import Exam from './NewActivityModal/ExamActivityModal';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import Image from 'next/image';
@@ -91,6 +92,22 @@ const NewActivityModal = ({
               {t('assignments')}
             </div>
           </ActivityOption>
+          <ActivityOption
+            onClick={() => {
+              setSelectedView('exams');
+            }}
+          >
+            <div className="m-0.5 flex h-20 flex-col items-center justify-end rounded-lg bg-white text-center hover:cursor-pointer">
+              <Image
+                quality={100}
+                alt={t('exams')}
+                src={AssignmentActivityImage}
+              />
+            </div>
+            <div className="flex h-5 items-center justify-center text-center text-sm font-medium text-gray-500">
+              {t('exams')}
+            </div>
+          </ActivityOption>
         </div>
       )}
 
@@ -121,6 +138,16 @@ const NewActivityModal = ({
 
       {selectedView === 'assignments' && (
         <Assignment
+          submitActivity={submitActivity}
+          chapterId={chapterId}
+          course={course}
+          closeModal={closeModal}
+          orgslug={orgslug}
+        />
+      )}
+
+      {selectedView === 'exams' && (
+        <Exam
           submitActivity={submitActivity}
           chapterId={chapterId}
           course={course}

@@ -1,6 +1,7 @@
+import os
+
 from pydantic import BaseModel, ConfigDict
 from sqlmodel import SQLModel
-import os
 
 # Determine development mode from environment to avoid importing config at module import
 # time (which would create a circular import with config.config).
@@ -123,23 +124,23 @@ class TrueSQLModelStrictBaseModel(SQLModel):
 # Default aliases selected by environment
 # Use strict variants during development for maximum feedback
 # and lighter (less-strict) variants in production for robustness.
-PydanticStrictBaseModel: (
-    type[FalsePydanticStrictBaseModel] | type[TruePydanticStrictBaseModel]
-) = TruePydanticStrictBaseModel if is_dev_mode else FalsePydanticStrictBaseModel
+PydanticStrictBaseModel: type[
+    FalsePydanticStrictBaseModel | TruePydanticStrictBaseModel
+] = TruePydanticStrictBaseModel if is_dev_mode else FalsePydanticStrictBaseModel
 
-SQLModelDefaultBase: (
-    type[FalseSQLModelStrictBaseModel] | type[TrueSQLModelStrictBaseModel]
-) = TrueSQLModelStrictBaseModel if is_dev_mode else FalseSQLModelStrictBaseModel
+SQLModelDefaultBase: type[
+    FalseSQLModelStrictBaseModel | TrueSQLModelStrictBaseModel
+] = TrueSQLModelStrictBaseModel if is_dev_mode else FalseSQLModelStrictBaseModel
 
 # Backwards-compatible alias: some modules import SQLModelStrictBaseModel
 SQLModelStrictBaseModel = SQLModelDefaultBase
 
 __all__: list[str] = [
     "FalsePydanticStrictBaseModel",
-    "TruePydanticStrictBaseModel",
     "FalseSQLModelStrictBaseModel",
-    "TrueSQLModelStrictBaseModel",
     "PydanticStrictBaseModel",
     "SQLModelDefaultBase",
     "SQLModelStrictBaseModel",
+    "TruePydanticStrictBaseModel",
+    "TrueSQLModelStrictBaseModel",
 ]

@@ -29,6 +29,7 @@ from src.routers.courses import (
     collections,
     courses,
     discussions,
+    exams,
 )
 from src.routers.courses.activities import activities, blocks
 from src.routers.ee import cloud_internal, payments
@@ -58,6 +59,7 @@ v1_router.include_router(activities.router, prefix="/activities", tags=["activit
 v1_router.include_router(
     assignments.router, prefix="/assignments", tags=["assignments"]
 )
+v1_router.include_router(exams.router, prefix="/exams", tags=["exams"])
 v1_router.include_router(
     certifications.router, prefix="/certifications", tags=["certifications"]
 )
