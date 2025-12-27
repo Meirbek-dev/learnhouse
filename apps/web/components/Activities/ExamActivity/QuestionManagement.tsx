@@ -502,7 +502,7 @@ function QuestionEditor({ question, examUuid, accessToken, onSave, onCancel }: Q
                       onCheckedChange={(checked) => updateOption(index, { is_correct: checked })}
                     />
                     <Input
-                      placeholder={t('optionText')}
+                      placeholder={t('optionText', { number: index + 1 })}
                       value={option.text}
                       onChange={(e) => updateOption(index, { text: e.target.value })}
                       className="flex-1"

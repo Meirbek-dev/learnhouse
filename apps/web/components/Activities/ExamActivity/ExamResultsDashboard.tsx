@@ -17,6 +17,7 @@ interface AttemptData {
   started_at: string;
   finished_at: string | null;
   duration_minutes: number | null;
+  duration_seconds?: number | null;
   status: string;
   score: number;
   max_score: number;
@@ -51,10 +52,21 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
       avgScore: scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
       highestScore: scores.length > 0 ? Math.max(...scores) : 0,
       lowestScore: scores.length > 0 ? Math.min(...scores) : 0,
-      avgTime:
+      avgTimeSeconds:
         submitted.length > 0
           ? Math.round(
-              submitted.filter((a) => a.duration_minutes !== null).reduce((a, b) => a + (b.duration_minutes || 0), 0) /
+              submitted
+                .filter((a) => a.duration_seconds !== null || a.duration_minutes !== null)
+                .reduce(
+                  (acc, b) =>
+                    acc +
+                    (b.duration_seconds != null
+                      ? b.duration_seconds
+                      : b.duration_minutes != null
+                      ? Math.round(b.duration_minutes * 60)
+                      : 0),
+                  0,
+                ) /
                 submitted.length,
             )
           : 0,
@@ -115,24 +127,27 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
       t('exportHeaders.email'),
       t('exportHeaders.startedAt'),
       t('exportHeaders.finishedAt'),
-      t('exportHeaders.durationMinutes'),
+      t('exportHeaders.duration'),
       t('exportHeaders.status'),
       t('exportHeaders.score'),
       t('exportHeaders.percentage'),
       t('exportHeaders.violations'),
     ];
 
-    const rows = filteredAttempts.map((a) => [
-      a.user_name,
-      a.user_email,
-      a.started_at,
-      a.finished_at || '',
-      a.duration_minutes?.toString() || '',
-      getStatusLabel(a.status),
-      `${a.score}/${a.max_score}`,
-      `${a.percentage}%`,
-      a.violation_count.toString(),
-    ]);
+    const rows = filteredAttempts.map((a) => {
+      const durationSeconds = a.duration_seconds != null ? a.duration_seconds : a.duration_minutes != null ? Math.round(a.duration_minutes * 60) : null;
+      return [
+        a.user_name,
+        a.user_email,
+        a.started_at,
+        a.finished_at || '',
+        durationSeconds !== null ? formatDuration(durationSeconds) : '',
+        getStatusLabel(a.status),
+        `${a.score}/${a.max_score}`,
+        `${a.percentage}%`,
+        a.violation_count.toString(),
+      ];
+    });
 
     const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -159,6 +174,13 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
         return <Badge variant="outline">{status}</Badge>;
       }
     }
+  };
+
+  const formatDuration = (seconds: number | null | undefined) => {
+    if (seconds === null || seconds === undefined) return '-';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins} ${t('minutes')} ${secs} ${t('seconds')}`;
   };
 
   return (
@@ -197,9 +219,7 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
             <Clock className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {stats.avgTime} {t('minutes')}
-            </div>
+            <div className="text-2xl font-bold">{formatDuration(stats.avgTimeSeconds || 0)}</div>
             <p className="text-muted-foreground text-xs">
               {t('submitted')}: {stats.submitted}
             </p>
@@ -315,7 +335,10 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
                       </TableCell>
                       <TableCell>{new Date(attempt.started_at).toLocaleString()}</TableCell>
                       <TableCell>
-                        {attempt.duration_minutes !== null ? `${attempt.duration_minutes} ${t('minutes')}` : '-'}
+                        {(() => {
+                          const durationSeconds = attempt.duration_seconds != null ? attempt.duration_seconds : attempt.duration_minutes != null ? Math.round(attempt.duration_minutes * 60) : null;
+                          return durationSeconds !== null ? formatDuration(durationSeconds) : '-';
+                        })()}
                       </TableCell>
                       <TableCell>{getStatusBadge(attempt.status)}</TableCell>
                       <TableCell>

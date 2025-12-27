@@ -169,7 +169,15 @@
       "devToolsDetected": "Developer tools detected — violation recorded",
       "violationDialogTitle": "Security violation detected",
       "violationDialogDescription": "A {type} violation was detected (occurrence {count}/{max}). This has been recorded and may lead to auto-submission.",
-      "violationDialogAcknowledge": "Acknowledge"
+      "violationDialogAcknowledge": "Acknowledge",
+      "reviewAndSubmit": "Review & Submit",
+      "confirmSubmission": "Confirm Submission",
+      "confirmSubmissionMessage": "Please review your exam before submitting. This action cannot be undone.",
+      "flagged": "Flagged",
+      "reviewQuestions": "Review Questions",
+      "confirmAndSubmit": "Confirm & Submit",
+      "unansweredQuestionsWarning": "You have {count} unanswered questions. Are you sure you want to submit?",
+      "keyboardShortcutsHelp": "Shortcuts: ← / → navigate questions, 1-9 select answers, Ctrl/Cmd+Enter open submit confirmation, ? show this message"
     }
   },
   "ActivityIndicators": {
@@ -1008,6 +1016,7 @@
       "range": "Range",
       "averageTime": "Average Time",
       "minutes": "min",
+      "seconds": "sec",
       "submitted": "Submitted",
       "completionRate": "Completion Rate",
       "inProgress": "In Progress",
@@ -1034,7 +1043,7 @@
         "email": "Email",
         "startedAt": "Started At",
         "finishedAt": "Finished At",
-        "durationMinutes": "Duration (min)",
+        "duration": "Duration" ,
         "status": "Status",
         "score": "Score",
         "percentage": "Percentage",

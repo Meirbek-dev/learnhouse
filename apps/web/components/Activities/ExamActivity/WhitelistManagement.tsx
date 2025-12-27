@@ -58,7 +58,10 @@ export default function WhitelistManagement({
       const studentsData = data.map((enrollment: any) => ({
         id: enrollment.id,
         user_id: enrollment.user_id,
-        user_name: enrollment.user?.name || enrollment.user_email,
+        user_name:
+          (enrollment.user && ((enrollment.user.first_name || '') + ' ' + (enrollment.user.last_name || '')).trim()) ||
+          enrollment.user?.username ||
+          enrollment.user_email,
         user_email: enrollment.user?.email || enrollment.user_email,
       }));
 

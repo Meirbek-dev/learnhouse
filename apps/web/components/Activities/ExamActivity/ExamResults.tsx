@@ -163,7 +163,7 @@ export default function ExamResults({ exam, attempt, questions, onReturnToCourse
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-6">
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
       {/* Score Card */}
       <Card>
         <CardHeader className="text-center">
@@ -179,7 +179,7 @@ export default function ExamResults({ exam, attempt, questions, onReturnToCourse
           <div className="text-center">
             <div className="mb-2 text-6xl font-bold text-blue-600">{percentage}%</div>
             <div className="text-xl text-gray-600">
-              {attempt.score} / {attempt.max_score} {t('points', { count: attempt.max_score })}
+              {attempt.score} / {t('points', { count: attempt.max_score })}
             </div>
           </div>
 

@@ -170,7 +170,15 @@
       "devToolsDetected": "Обнаружены инструменты разработчика — нарушение зарегистрировано",
       "violationDialogTitle": "Обнаружено нарушение безопасности",
       "violationDialogDescription": "Обнаружено нарушение {type} (раз {count}/{max}). Оно зафиксировано и может привести к автоматической отправке.",
-      "violationDialogAcknowledge": "Понятно"
+      "violationDialogAcknowledge": "Понятно",
+      "reviewAndSubmit": "Проверить и отправить",
+      "confirmSubmission": "Подтвердить отправку",
+      "confirmSubmissionMessage": "Пожалуйста, проверьте экзамен перед отправкой. Это действие нельзя отменить.",
+      "flagged": "Помечено",
+      "reviewQuestions": "Просмотреть вопросы",
+      "confirmAndSubmit": "Подтвердить и отправить",
+      "unansweredQuestionsWarning": "У вас {count} вопросов без ответа. Вы уверены, что хотите отправить?",
+      "keyboardShortcutsHelp": "Сочетания клавиш: ← / → навигация, 1-9 выбор ответа, Ctrl/Cmd+Enter открыть подтверждение отправки, ? показать это сообщение"
     }
   },
   "ActivityIndicators": {
@@ -1008,6 +1016,7 @@
       "range": "Диапазон",
       "averageTime": "Среднее время",
       "minutes": "мин",
+      "seconds": "сек",
       "submitted": "Отправлено",
       "completionRate": "Процент завершения",
       "inProgress": "В процессе",
@@ -1034,7 +1043,7 @@
         "email": "Email",
         "startedAt": "Начато",
         "finishedAt": "Завершено",
-        "durationMinutes": "Длительность (мин)",
+        "duration": "Длительность",
         "status": "Статус",
         "score": "Баллы",
         "percentage": "Процент",

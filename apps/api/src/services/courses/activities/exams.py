@@ -919,12 +919,15 @@ async def get_all_exam_attempts(
             continue
 
         # Calculate duration
+        duration_seconds = None
         duration_minutes = None
         if attempt.submitted_at and attempt.started_at:
             try:
                 start = datetime.fromisoformat(attempt.started_at)
                 end = datetime.fromisoformat(attempt.submitted_at)
-                duration_minutes = int((end - start).total_seconds() / 60)
+                total_seconds = int((end - start).total_seconds())
+                duration_seconds = total_seconds
+                duration_minutes = int(total_seconds / 60)
             except Exception:
                 pass
 
@@ -932,11 +935,12 @@ async def get_all_exam_attempts(
             {
                 "attempt_uuid": attempt.attempt_uuid,
                 "user_id": user.id,
-                "user_name": f"{user.name} {user.surname}".strip() or user.username,
+                "user_name": (f"{getattr(user, 'first_name', '')} {getattr(user, 'middle_name', '')} {getattr(user, 'last_name', '')}".replace("  ", " ").strip()) or user.username,
                 "user_email": user.email,
                 "started_at": attempt.started_at,
                 "finished_at": attempt.submitted_at,  # Map submitted_at to finished_at for frontend compatibility
                 "duration_minutes": duration_minutes,
+                "duration_seconds": duration_seconds,
                 "status": attempt.status,
                 "score": attempt.score,
                 "max_score": attempt.max_score,

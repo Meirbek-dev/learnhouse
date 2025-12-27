@@ -170,7 +170,15 @@
       "devToolsDetected": "Әзірлеуші құралдары анықталды — бұзушылық тіркелді",
       "violationDialogTitle": "Қауіпсіздік бұзушылығы анықталды",
       "violationDialogDescription": "{type} бұзушылығы анықталды ({count}/{max}). Бұл тіркелді және автоматты түрде тапсырылуы мүмкін.",
-      "violationDialogAcknowledge": "Түсінікті"
+      "violationDialogAcknowledge": "Түсінікті",
+      "reviewAndSubmit": "Қарап шығу және тапсыру",
+      "confirmSubmission": "Тапсыруды растау",
+      "confirmSubmissionMessage": "Тапсырмас бұрын емтиханыңызды қарап шығыңыз. Бұл әрекетті болдырмауға болмайды.",
+      "flagged": "Белгіленген",
+      "reviewQuestions": "Сұрақтарды қарау",
+      "confirmAndSubmit": "Растау және тапсыру",
+      "unansweredQuestionsWarning": "Сізде {count} жауапсыз сұрақ бар. Тапсырғыңыз келетініне сенімдісіз бе?",
+      "keyboardShortcutsHelp": "Оңтайлы пернелер: ← / → сұрақтар арасында өту, 1-9 жауап таңдау, Ctrl/Cmd+Enter - тапсырманы растау, ? - бұл хабарды көрсету"
     }
   },
   "ActivityIndicators": {
@@ -1008,6 +1016,7 @@
       "range": "Диапазон",
       "averageTime": "Орташа уақыт",
       "minutes": "мин",
+      "seconds": "сек",
       "submitted": "Тапсырылған",
       "completionRate": "Аяқтау деңгейі",
       "inProgress": "Орындалуда",
@@ -1034,7 +1043,7 @@
         "email": "Email",
         "startedAt": "Басталды",
         "finishedAt": "Аяқталды",
-        "durationMinutes": "Ұзақтығы (мин)",
+        "duration": "Ұзақтығы",
         "status": "Мәртебе",
         "score": "Ұпайлар",
         "percentage": "Процент",

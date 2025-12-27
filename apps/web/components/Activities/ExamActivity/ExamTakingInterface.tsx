@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useState, useEffectEvent, useRef } from 'react';
-import { AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
+import { useCallback, useEffect, useState, useRef } from 'react';
+import { AlertTriangle, CheckCircle2 } from 'lucide-react';
+import ExamTimer from './ExamTimer';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -64,7 +65,7 @@ export default function ExamTakingInterface({
   const t = useTranslations('Activities.ExamActivity');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, any>>({});
-  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [violationCount, setViolationCount] = useState(0);
   const [violationDialogOpen, setViolationDialogOpen] = useState(false);
@@ -110,10 +111,6 @@ export default function ExamTakingInterface({
     [isSubmitting, answers, accessToken, exam.exam_uuid, attempt.attempt_uuid, onComplete, t],
   );
 
-  const handleAutoSubmitEvent = useEffectEvent((reason: string) => {
-    toast.error(t('autoSubmitting', { reason }));
-    void handleSubmit(true);
-  });
 
   // Anti-cheating with useTestGuard
   const handleViolation = useCallback(
@@ -158,27 +155,7 @@ export default function ExamTakingInterface({
     onViolation: handleViolation,
   });
 
-  // Initialize timer (uses effect event to call auto-submit safely)
-  useEffect(() => {
-    if (settings.time_limit && attempt.started_at) {
-      const startTime = new Date(attempt.started_at).getTime();
-      const endTime = startTime + settings.time_limit * 60 * 1000;
 
-      const updateTimer = () => {
-        const now = Date.now();
-        const remaining = Math.max(0, endTime - now);
-        setTimeRemaining(Math.floor(remaining / 1000));
-
-        if (remaining <= 0) {
-          handleAutoSubmitEvent('Time expired');
-        }
-      };
-
-      updateTimer();
-      const interval = setInterval(updateTimer, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [settings.time_limit, attempt.started_at]);
 
   // Fullscreen enforcement
   useEffect(() => {
@@ -221,11 +198,7 @@ export default function ExamTakingInterface({
     setAnswers((prev) => ({ ...prev, [questionId]: answer }));
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+
 
   const renderQuestion = (question: Question) => {
     const questionId = question.id;
@@ -239,12 +212,13 @@ export default function ExamTakingInterface({
             onValueChange={(value) =>
               handleAnswerChange(questionId, typeof value === 'string' ? parseInt(value, 10) : Number(value))
             }
-            className="space-y-3"
+            className="space-y-2"
+            aria-labelledby={`question-title-${questionId}`}
           >
             {question.answer_options.map((option, index) => (
               <div
                 key={index}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-gray-300 hover:bg-gray-50"
               >
                 <RadioGroupItem
                   value={index.toString()}
@@ -252,7 +226,7 @@ export default function ExamTakingInterface({
                 />
                 <Label
                   htmlFor={`q${questionId}-${index}`}
-                  className="cursor-pointer"
+                  className="flex-1 cursor-pointer text-base leading-relaxed"
                 >
                   {option.text}
                 </Label>
@@ -265,11 +239,11 @@ export default function ExamTakingInterface({
       case 'MULTIPLE_CHOICE': {
         const selectedAnswers = answers[questionId] || [];
         return (
-          <div className="space-y-3">
+          <div className="space-y-2" role="group" aria-labelledby={`question-title-${questionId}`}>
             {question.answer_options.map((option, index) => (
               <div
                 key={index}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-gray-300 hover:bg-gray-50"
               >
                 <Checkbox
                   id={`q${questionId}-${index}`}
@@ -283,7 +257,7 @@ export default function ExamTakingInterface({
                 />
                 <Label
                   htmlFor={`q${questionId}-${index}`}
-                  className="cursor-pointer"
+                  className="flex-1 cursor-pointer text-base leading-relaxed"
                 >
                   {option.text}
                 </Label>
@@ -296,14 +270,14 @@ export default function ExamTakingInterface({
       case 'MATCHING': {
         const matchAnswers = answers[questionId] || {};
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {question.answer_options.map((option, index) => (
               <div
                 key={index}
-                className="flex items-center gap-4"
+                className="flex items-center gap-4 rounded-lg border border-gray-200 p-4"
               >
-                <span className="min-w-[200px] font-medium">{option.left}</span>
-                <span>→</span>
+                <span className="min-w-[200px] text-base font-medium">{option.left}</span>
+                <span className="text-gray-400">→</span>
                 <select
                   value={matchAnswers[option.left || ''] || ''}
                   onChange={(e) => {
@@ -312,7 +286,7 @@ export default function ExamTakingInterface({
                       [option.left || '']: e.target.value,
                     });
                   }}
-                  className="flex-1 rounded-md border border-gray-300 p-2"
+                  className="flex-1 rounded-md border border-gray-300 bg-white p-3 text-base transition-colors hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                 >
                   <option value="">{t('selectMatch')}</option>
                   {question.answer_options.map((opt, idx) => (
@@ -349,12 +323,12 @@ export default function ExamTakingInterface({
   return (
     <div
       ref={examContainerRef}
-      className="mx-auto max-w-4xl space-y-6 p-6"
+      className="mx-auto max-w-full space-y-6 p-4 md:p-6"
     >
       {/* Header with Timer and Progress */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-2xl font-bold">{exam.title}</h2>
+          <h2 id={`exam-title-${attempt.attempt_uuid}`} className="text-xl font-bold md:text-2xl">{exam.title}</h2>
           <p className="text-sm text-gray-600">
             {t('questionProgress', {
               current: currentQuestionIndex + 1,
@@ -362,17 +336,26 @@ export default function ExamTakingInterface({
             })}
           </p>
         </div>
-        {timeRemaining !== null && (
-          <div className="flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-2">
-            <Clock className="h-5 w-5 text-blue-600" />
-            <span className="text-lg font-semibold text-blue-900">{formatTime(timeRemaining)}</span>
-          </div>
+        {settings.time_limit && attempt.started_at && (
+          <ExamTimer
+            startedAt={attempt.started_at}
+            timeLimitMinutes={settings.time_limit}
+            onExpire={() => {
+              toast.error(t('autoSubmitting', { reason: 'Time expired' }));
+              void handleSubmit(true);
+            }}
+          />
         )}
       </div>
 
       <Progress
         value={progress}
-        className="h-2"
+        className="h-2 transition-all duration-500 ease-out"
+        role="progressbar"
+        aria-valuenow={Math.round(progress)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={t('questionProgress', { current: currentQuestionIndex + 1, total: orderedQuestions.length })}
       />
 
       {/* Violation Warning */}
@@ -413,73 +396,171 @@ export default function ExamTakingInterface({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Question Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>{t('questionNumber', { number: currentQuestionIndex + 1 })}</span>
-            <span className="text-sm font-normal text-gray-500">
-              {t('points', { count: currentQuestion?.points ?? 0 })}
-            </span>
-          </CardTitle>
-          <CardDescription className="text-base text-gray-900">{currentQuestion?.question_text}</CardDescription>
-        </CardHeader>
-        <CardContent>{currentQuestion && renderQuestion(currentQuestion)}</CardContent>
-      </Card>
+      {/* Main Layout with Sidebar */}
+      <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
+        {/* Main Content */}
+        <div className="space-y-6">
+          {/* Question Card */}
+          <Card role="group" aria-labelledby={`question-title-${currentQuestion?.id}`}>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span id={`question-title-${currentQuestion?.id}`}>{t('questionNumber', { number: currentQuestionIndex + 1 })}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-normal text-gray-500">
+                    {t('points', { count: currentQuestion?.points ?? 0 })}
+                  </span>
+                </div>
+              </CardTitle>
+              <CardDescription className="mt-4 text-lg leading-relaxed text-gray-900">
+                {currentQuestion?.question_text}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">{currentQuestion && renderQuestion(currentQuestion)}</CardContent>
+          </Card>
 
-      {/* Navigation */}
-      <div className="flex items-center justify-between">
-        <Button
-          variant="outline"
-          onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
-          disabled={currentQuestionIndex === 0}
-        >
-          {t('previous')}
-        </Button>
+          {/* Navigation */}
+          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+            <Button
+              variant="outline"
+              onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
+              disabled={currentQuestionIndex === 0}
+              className="w-full md:w-auto"
+            >
+              {t('previous')}
+            </Button>
 
-        <div className="text-sm text-gray-600">
-          {t('answeredCount', { answered: answeredCount, total: orderedQuestions.length })}
+            <div className="text-sm text-gray-600">
+              {t('answeredCount', { answered: answeredCount, total: orderedQuestions.length })}
+            </div>
+
+            {currentQuestionIndex < orderedQuestions.length - 1 ? (
+              <Button
+                onClick={() => setCurrentQuestionIndex((prev) => prev + 1)}
+                className="w-full md:w-auto"
+              >
+                {t('next')}
+              </Button>
+            ) : (
+              <Button
+                onClick={() => setShowConfirmation(true)}
+                disabled={isSubmitting}
+                className="w-full bg-green-600 hover:bg-green-700 md:w-auto"
+              >
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                {t('reviewAndSubmit')}
+              </Button>
+            )}
+          </div>
         </div>
 
-        {currentQuestionIndex < orderedQuestions.length - 1 ? (
-          <Button onClick={() => setCurrentQuestionIndex((prev) => prev + 1)}>{t('next')}</Button>
-        ) : (
-          <Button
-            onClick={() => handleSubmit(false)}
-            disabled={isSubmitting}
-            className="bg-green-600 hover:bg-green-700"
-          >
-            <CheckCircle2 className="mr-2 h-4 w-4" />
-            {isSubmitting ? t('submitting') : t('submitExam')}
-          </Button>
-        )}
+        {/* Question Navigation Sidebar */}
+        <div className="order-first lg:order-last">
+          <Card className="sticky top-6">
+            <CardHeader>
+              <CardTitle className="text-base">Questions</CardTitle>
+              <CardDescription className="text-xs">
+                Click to jump to any question
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-5 gap-2 md:grid-cols-8 lg:grid-cols-5">
+                {orderedQuestions.map((question, index) => {
+                  const answered = isAnswered(question.id);
+                  const current = index === currentQuestionIndex;
+
+                  let bgColor = 'bg-gray-100 hover:bg-gray-200';
+                  let textColor = 'text-gray-600';
+
+                  if (current) {
+                    bgColor = 'bg-blue-500 hover:bg-blue-600';
+                    textColor = 'text-white';
+                  } else if (answered) {
+                    bgColor = 'bg-green-100 hover:bg-green-200';
+                    textColor = 'text-green-700';
+                  }
+
+                  return (
+                    <button
+                      key={question.id}
+                      onClick={() => setCurrentQuestionIndex(index)}
+                      className={`relative flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition-colors ${bgColor} ${textColor}`}
+                      aria-label={`Question ${index + 1}${answered ? ' answered' : ''}`}
+                    >
+                      {index + 1}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Legend */}
+              <div className="mt-4 space-y-2 border-t pt-4 text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 rounded bg-green-100"></div>
+                  <span className="text-gray-600">Answered</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 rounded bg-blue-500"></div>
+                  <span className="text-gray-600">Current</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 rounded bg-gray-100"></div>
+                  <span className="text-gray-600">Unanswered</span>
+                </div>
+
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      {/* Question Navigator */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{t('questionNavigator')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-10 gap-2">
-            {orderedQuestions.map((q, index) => (
-              <button
-                key={q.id}
-                onClick={() => setCurrentQuestionIndex(index)}
-                className={`rounded p-2 text-sm font-medium transition ${
-                  index === currentQuestionIndex
-                    ? 'bg-blue-600 text-white'
-                    : isAnswered(q.id)
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-600'
-                }`}
-              >
-                {index + 1}
-              </button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Confirmation Dialog */}
+      <AlertDialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia>
+              <CheckCircle2 className="size-6 text-green-600" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>{t('confirmSubmission')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              <div className="space-y-3">
+                <p>{t('confirmSubmissionMessage')}</p>
+                <div className="rounded-lg border bg-gray-50 p-4">
+                  <div className="grid gap-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{t('totalQuestions')}:</span>
+                      <span className="font-semibold">{orderedQuestions.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-green-600">{t('answered')}:</span>
+                      <span className="font-semibold text-green-600">{answeredCount}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{t('unanswered')}:</span>
+                      <span className="font-semibold">{orderedQuestions.length - answeredCount}</span>
+                    </div>
+
+                  </div>
+                </div>
+                {answeredCount < orderedQuestions.length && (
+                  <p className="text-sm text-orange-600">
+                    ⚠️ {t('unansweredQuestionsWarning', { count: orderedQuestions.length - answeredCount })}
+                  </p>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSubmitting}>{t('reviewQuestions')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => handleSubmit(false)}
+              disabled={isSubmitting}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {isSubmitting ? t('submitting') : t('confirmAndSubmit')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
