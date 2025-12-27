@@ -141,8 +141,11 @@
       "previousAttempts": "Алдыңғы әрекеттер",
       "questions": "Сұрақтар",
       "questionNavigator": "Сұрақтар навигаторы",
+      "questionNavigatorDescription": "Кез келген сұраққа өту үшін басыңыз",
+      "questionAriaLabel": "Сұрақ {number}{answered, select, true { — жауап берілді} other {}}",
       "questionNumber": "{number} сұрағы",
       "questionProgress": "{total}-дің {current} сұрағы",
+      "current": "Ағымдағы",
       "results": "Нәтижелер",
       "returnToCourse": "Курсқа оралу",
       "selectMatch": "Сәйкестікті таңдаңыз",
@@ -641,7 +644,9 @@
     "AlertDialog": {
       "cancel": "Болдырмау",
       "close": "Жабу",
-      "confirm": "Растау"
+      "confirm": "Растау",
+      "ok": "ОК",
+      "title": "Хабарлама"
     },
     "AuthorsDisplay": {
       "authorTooltip": "{FirstName} {LastName} - {Авторлық}",
@@ -917,6 +922,7 @@
       "true_false": "Ақиқат/Жалған",
       "matching": "Сәйкестендіру",
       "confirmDelete": "Бұл сұрақты жоюға сенімдісіз бе?",
+      "delete": "Жою",
       "questionDeleted": "Сұрақ сәтті жойылды",
       "errorDeletingQuestion": "Сұрақты жою сәтсіз аяқталды",
       "questionsReordered": "Сұрақтар сәтті қайта реттелді",

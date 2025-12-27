@@ -137,6 +137,10 @@ class TestViolationRecording:
         pass
 
 
+from unittest.mock import Mock
+from types import SimpleNamespace
+
+
 class TestExamSubmission:
     """Test exam submission and grading"""
 
@@ -145,9 +149,115 @@ class TestExamSubmission:
         # Test SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE, MATCHING
         pass
 
-    def test_submit_exam_marks_trail_step_complete(self):
-        """Verify trail step is marked complete on submission"""
-        pass
+    @pytest.fixture
+    def mock_db_session(self) -> Mock:
+        return Mock(spec=Session)
+
+    @pytest.mark.asyncio
+    async def test_submit_exam_marks_trail_step_complete(self, monkeypatch, mock_db_session):
+        """Verify trail step is marked complete on submission when score > 50%"""
+        from src.services.courses.activities.exams import submit_exam_attempt
+        from src.db.courses.exams import Question, AttemptStatusEnum
+
+        # Prepare current user and attempt
+        current_user = SimpleNamespace(id=1)
+        attempt = SimpleNamespace(
+            attempt_uuid="att1",
+            user_id=1,
+            status=AttemptStatusEnum.IN_PROGRESS,
+            question_order=[1],
+            exam_id=1,
+            violations=[],
+            started_at=datetime.now().isoformat(),
+            answers={},
+        )
+
+        # Mock DB to return our attempt
+        mock_db_session.exec.return_value.first.return_value = attempt
+
+        # Mock question: single choice, correct answer at index 0, 10 points
+        q = Question(
+            question_text="Q",
+            question_type="SINGLE_CHOICE",
+            points=10,
+            answer_options=[{"text": "A", "is_correct": True}, {"text": "B", "is_correct": False}],
+            exam_id=1,
+        )
+
+        # Mock db_session.get to return question and exam
+        def _get(cls, id=None):
+            if cls == Question:
+                return q
+            return SimpleNamespace(activity_id=42)
+
+        mock_db_session.get.side_effect = _get
+
+        # Patch mark_exam_complete to assert it is called
+        called = {"val": False}
+
+        async def fake_mark_exam_complete(request, activity_id, user_id, db_session):
+            called["val"] = True
+
+        monkeypatch.setattr("src.services.courses.activities.exams.mark_exam_complete", fake_mark_exam_complete)
+
+        # Submit with correct answer (index 0) -> 100%
+        result = await submit_exam_attempt(Mock(), "att1", {"1": 0}, current_user, mock_db_session)
+        assert called["val"] is True
+
+    @pytest.mark.asyncio
+    async def test_submit_exam_does_not_mark_trail_step_below_threshold(self, monkeypatch, mock_db_session):
+        """Verify trail step is NOT marked complete when score <= 50%"""
+        from src.services.courses.activities.exams import submit_exam_attempt
+        from src.db.courses.exams import Question, AttemptStatusEnum
+
+        current_user = SimpleNamespace(id=2)
+        attempt = SimpleNamespace(
+            attempt_uuid="att2",
+            user_id=2,
+            status=AttemptStatusEnum.IN_PROGRESS,
+            question_order=[1, 2],
+            exam_id=2,
+            violations=[],
+            started_at=datetime.now().isoformat(),
+            answers={},
+        )
+
+        mock_db_session.exec.return_value.first.return_value = attempt
+
+        # Two questions, total points 10 + 10 = 20, user gets 10 -> 50%
+        q1 = Question(
+            question_text="Q1",
+            question_type="SINGLE_CHOICE",
+            points=10,
+            answer_options=[{"text": "A", "is_correct": True}, {"text": "B", "is_correct": False}],
+            exam_id=2,
+        )
+        q2 = Question(
+            question_text="Q2",
+            question_type="SINGLE_CHOICE",
+            points=10,
+            answer_options=[{"text": "A", "is_correct": True}, {"text": "B", "is_correct": False}],
+            exam_id=2,
+        )
+
+        def _get(cls, id=None):
+            if cls == Question:
+                # Return q1 for id==1, q2 for id==2
+                return q1 if id == 1 else q2
+            return SimpleNamespace(activity_id=84)
+
+        mock_db_session.get.side_effect = _get
+
+        called = {"val": False}
+
+        async def fake_mark_exam_complete(request, activity_id, user_id, db_session):
+            called["val"] = True
+
+        monkeypatch.setattr("src.services.courses.activities.exams.mark_exam_complete", fake_mark_exam_complete)
+
+        # Submit: answer q1 correct (index 0), q2 missing -> score = 10/20 = 50%
+        result = await submit_exam_attempt(Mock(), "att2", {"1": 0}, current_user, mock_db_session)
+        assert called["val"] is False
 
     def test_time_limit_auto_submits(self):
         """Verify time expiration triggers auto-submit"""

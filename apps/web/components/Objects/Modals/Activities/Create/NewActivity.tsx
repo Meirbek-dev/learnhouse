@@ -27,7 +27,7 @@ const NewActivityModal = ({
   return (
     <>
       {selectedView === 'home' && (
-        <div className="mt-2.5 grid w-full grid-cols-4 gap-2">
+        <div className="mt-2 grid w-full grid-cols-5 gap-4">
           <ActivityOption
             onClick={() => {
               setSelectedView('dynamic');

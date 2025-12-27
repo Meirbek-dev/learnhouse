@@ -141,8 +141,11 @@
       "previousAttempts": "Предыдущие попытки",
       "questions": "Вопросы",
       "questionNavigator": "Навигатор вопросов",
+      "questionNavigatorDescription": "Нажмите, чтобы перейти к любому вопросу",
+      "questionAriaLabel": "Вопрос {number}{answered, select, true { — отвечено} other {}}",
       "questionNumber": "Вопрос {number}",
       "questionProgress": "Вопрос {current} из {total}",
+      "current": "Текущий",
       "returnToCourse": "Вернуться к курсу",
       "results": "Результаты",
       "selectMatch": "Выберите соответствие",
@@ -641,7 +644,9 @@
     "AlertDialog": {
       "cancel": "Отмена",
       "confirm": "Подтвердить",
-      "close": "Закрыть"
+      "close": "Закрыть",
+      "ok": "ОК",
+      "title": "Внимание"
     },
     "AuthorsDisplay": {
       "authorTooltip": "{firstName} {lastName} — {authorship}",
@@ -857,7 +862,8 @@
       "assignments": "Задания",
       "document": "Документ",
       "dynamicPage": "Динамическая страница",
-      "video": "Видео"
+      "video": "Видео",
+      "exams": "Экзамены"
     },
     "NewAssignmentModal": {
       "alphabet": "Алфавитный",
@@ -917,6 +923,7 @@
       "true_false": "Правда/Ложь",
       "matching": "Сопоставление",
       "confirmDelete": "Вы уверены, что хотите удалить этот вопрос?",
+      "delete": "Удалить",
       "questionDeleted": "Вопрос успешно удален",
       "errorDeletingQuestion": "Не удалось удалить вопрос",
       "questionsReordered": "Вопросы успешно переупорядочены",
@@ -5764,6 +5771,8 @@
     "activityNameRequired": "Требуется название активности",
     "assignmentDescriptionRequired": "Требуется описание задания",
     "assignmentTitleRequired": "Требуется название задания",
+    "examTitleRequired": "Требуется название экзамена",
+    "examDescriptionRequired": "Требуется описание экзамена",
     "chapterDescriptionRequired": "Требуется описание главы",
     "chapterNameRequired": "Требуется название главы",
     "contentRequired": "Требуется контент",

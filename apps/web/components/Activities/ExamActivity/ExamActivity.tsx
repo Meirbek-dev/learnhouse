@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useEffect, useState, useMemo } from 'react';
 import { toast } from 'sonner';
-import useSWR from 'swr';
+import useSWR, { mutate } from 'swr';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -129,6 +129,22 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
   const handleCompleteExam = async () => {
     // Refresh attempts data
     await mutateAttempts();
+
+    // Revalidate trail data so UI reflects newly completed activity (if server marked it)
+    try {
+      await mutate(`${getAPIUrl()}trail/org/${exam?.org_id}/trail`);
+    } catch (err) {
+      // Non-fatal — continue flow even if revalidation fails
+      console.warn('Failed to revalidate trail after exam completion', err);
+    }
+
+    // Also revalidate course meta so activity completion status is reflected in UI
+    try {
+      const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
+      await mutate(`${getAPIUrl()}courses/${course?.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`);
+    } catch (err) {
+      console.warn('Failed to revalidate course meta after exam completion', err);
+    }
 
     // Find the just-completed attempt
     const completedAttempt = await fetch(`${getAPIUrl()}exams/${examUuid}/attempts/me`, {

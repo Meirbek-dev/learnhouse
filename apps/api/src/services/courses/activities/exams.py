@@ -690,9 +690,10 @@ async def submit_exam_attempt(
     db_session.commit()
     db_session.refresh(attempt)
 
-    # Mark activity as complete
+    # Mark activity as complete only if score percentage exceeds 50%
+    percentage = (attempt.score / attempt.max_score * 100) if attempt.max_score and attempt.max_score > 0 else 0
     exam = db_session.get(Exam, attempt.exam_id)
-    if exam:
+    if exam and percentage > 50:
         await mark_exam_complete(request, exam.activity_id, current_user.id, db_session)
 
     return ExamAttemptRead.model_validate(attempt)

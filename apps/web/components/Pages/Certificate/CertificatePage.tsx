@@ -12,6 +12,7 @@ import html2canvas from 'html2canvas';
 import type React from 'react';
 import QRCode from 'qrcode';
 import jsPDF from 'jspdf';
+import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 
 interface CertificatePageProps {
   orgslug: string;
@@ -26,6 +27,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
   const [error, setError] = useState<string | null>(null);
   const locale = useLocale();
   const t = useTranslations('Certificates.CertificatePage');
+  const [dialogAlertOpen, setDialogAlertOpen] = useState(false);
+  const [dialogAlertMessage, setDialogAlertMessage] = useState('');
   const fetchedCertificateRef = useRef<Record<string, boolean>>({});
 
   // Fetch user certificate
@@ -414,7 +417,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       pdf.save(fileName);
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert(t('errorGeneratingPDF'));
+      setDialogAlertMessage(t('errorGeneratingPDF'));
+      setDialogAlertOpen(true);
     }
   };
 
@@ -474,6 +478,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
+      <SimpleAlertDialog open={dialogAlertOpen} onOpenChange={setDialogAlertOpen} description={dialogAlertMessage} />
       <div className="mx-auto max-w-4xl px-4">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">

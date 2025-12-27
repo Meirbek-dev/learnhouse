@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@components/ui/radio-group';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@components/ui/select';
 import { Alert, AlertDescription } from '@components/ui/alert';
 import {
   AlertDialog,
@@ -278,26 +279,28 @@ export default function ExamTakingInterface({
               >
                 <span className="min-w-[200px] text-base font-medium">{option.left}</span>
                 <span className="text-gray-400">→</span>
-                <select
-                  value={matchAnswers[option.left || ''] || ''}
-                  onChange={(e) => {
-                    handleAnswerChange(questionId, {
-                      ...matchAnswers,
-                      [option.left || '']: e.target.value,
-                    });
-                  }}
-                  className="flex-1 rounded-md border border-gray-300 bg-white p-3 text-base transition-colors hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-                >
-                  <option value="">{t('selectMatch')}</option>
-                  {question.answer_options.map((opt, idx) => (
-                    <option
-                      key={idx}
-                      value={opt.right}
-                    >
-                      {opt.right}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex-1">
+                  <Select
+                    value={matchAnswers[option.left || ''] || ''}
+                    onValueChange={(val) =>
+                      handleAnswerChange(questionId, {
+                        ...matchAnswers,
+                        [option.left || '']: val,
+                      })
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t('selectMatch')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {question.answer_options.map((opt, idx) => (
+                        <SelectItem key={idx} value={opt.right ?? ''}>
+                          {opt.right}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             ))}
           </div>
@@ -457,9 +460,9 @@ export default function ExamTakingInterface({
         <div className="order-first lg:order-last">
           <Card className="sticky top-6">
             <CardHeader>
-              <CardTitle className="text-base">Questions</CardTitle>
+              <CardTitle className="text-base">{t('questions')}</CardTitle>
               <CardDescription className="text-xs">
-                Click to jump to any question
+                {t('questionNavigatorDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -484,7 +487,7 @@ export default function ExamTakingInterface({
                       key={question.id}
                       onClick={() => setCurrentQuestionIndex(index)}
                       className={`relative flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition-colors ${bgColor} ${textColor}`}
-                      aria-label={`Question ${index + 1}${answered ? ' answered' : ''}`}
+                      aria-label={t('questionAriaLabel', { number: index + 1, answered: answered ? 'true' : 'false' })}
                     >
                       {index + 1}
                     </button>
@@ -496,15 +499,15 @@ export default function ExamTakingInterface({
               <div className="mt-4 space-y-2 border-t pt-4 text-xs">
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 rounded bg-green-100"></div>
-                  <span className="text-gray-600">Answered</span>
+                  <span className="text-gray-600">{t('answered')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 rounded bg-blue-500"></div>
-                  <span className="text-gray-600">Current</span>
+                  <span className="text-gray-600">{t('current')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 rounded bg-gray-100"></div>
-                  <span className="text-gray-600">Unanswered</span>
+                  <span className="text-gray-600">{t('unanswered')}</span>
                 </div>
 
               </div>

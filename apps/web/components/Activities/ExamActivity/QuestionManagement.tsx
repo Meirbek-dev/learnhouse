@@ -7,6 +7,14 @@ import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '@components/ui/alert-dialog';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -50,6 +58,9 @@ export default function QuestionManagement({
   const t = useTranslations('Components.QuestionManagement');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [pendingDeleteUuid, setPendingDeleteUuid] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddQuestion = () => {
@@ -140,11 +151,22 @@ export default function QuestionManagement({
     setIsDialogOpen(true);
   };
 
-  const handleDeleteQuestion = async (questionUuid: string) => {
-    if (!confirm(t('confirmDelete'))) return;
+  const promptDeleteQuestion = (questionUuid: string) => {
+    setPendingDeleteUuid(questionUuid);
+    setDeleteDialogOpen(true);
+  };
 
+  const handleDeleteQuestion = async (questionUuid?: string) => {
+    const uuid = questionUuid ?? pendingDeleteUuid;
+    if (!uuid) {
+      setDeleteDialogOpen(false);
+      setPendingDeleteUuid(null);
+      return;
+    }
+
+    setIsDeleting(true);
     try {
-      const response = await fetch(`${getAPIUrl()}exams/questions/${questionUuid}`, {
+      const response = await fetch(`${getAPIUrl()}exams/questions/${uuid}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -158,6 +180,10 @@ export default function QuestionManagement({
     } catch (error) {
       console.error('Error deleting question:', error);
       toast.error(t('errorDeletingQuestion'));
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setPendingDeleteUuid(null);
     }
   };
 
@@ -194,6 +220,36 @@ export default function QuestionManagement({
 
   return (
     <div className="space-y-4">
+      <AlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteDialogOpen(false);
+            setPendingDeleteUuid(null);
+          } else setDeleteDialogOpen(open);
+        }}
+      >
+        <AlertDialogContent size="default">
+          <AlertDialogTitle>{t('confirmDelete')}</AlertDialogTitle>
+          <AlertDialogDescription>{t('confirmDelete')}</AlertDialogDescription>
+          <div className="mt-4 flex justify-end gap-2">
+            <AlertDialogCancel
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setPendingDeleteUuid(null);
+              }}
+            >
+              {t('cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => void handleDeleteQuestion()}
+            >
+              {t('delete')}
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">{t('questionBank')}</h2>
         <div className="flex gap-2">
@@ -306,7 +362,8 @@ export default function QuestionManagement({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDeleteQuestion(question.question_uuid!)}
+                              onClick={() => promptDeleteQuestion(question.question_uuid!)}
+                              disabled={isDeleting}
                             >
                               <Trash2 className="h-4 w-4 text-red-600" />
                             </Button>

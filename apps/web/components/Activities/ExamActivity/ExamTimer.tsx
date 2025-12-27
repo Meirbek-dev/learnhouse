@@ -18,9 +18,13 @@ export default function ExamTimer({ startedAt, timeLimitMinutes, onExpire, class
 
   useEffect(() => {
     if (!startedAt || !timeLimitMinutes) {
-      setRemaining(null);
+      // Schedule clearing remaining asynchronously to avoid synchronous setState within effect
+      void Promise.resolve().then(() => setRemaining(null));
       return;
     }
+
+    // Reset expire flag when timer params change
+    calledExpire.current = false;
 
     const startTs = new Date(startedAt).getTime();
     const endTs = startTs + (timeLimitMinutes || 0) * 60 * 1000;

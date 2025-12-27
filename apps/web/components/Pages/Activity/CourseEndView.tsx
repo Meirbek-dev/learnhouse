@@ -17,6 +17,7 @@ import html2canvas from 'html2canvas';
 import type { FC } from 'react';
 import QRCode from 'qrcode';
 import jsPDF from 'jspdf';
+import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 
 interface CourseEndViewProps {
   courseName: string;
@@ -43,6 +44,8 @@ const CourseEndView: FC<CourseEndViewProps> = ({
   const [certificateError, setCertificateError] = useState<string | null>(null);
   const locale = useLocale();
   const t = useTranslations('Certificates.CourseEndView');
+  const [dialogAlertOpen, setDialogAlertOpen] = useState(false);
+  const [dialogAlertMessage, setDialogAlertMessage] = useState('');
   const qrCodeLink = getUriWithOrg(
     orgslug,
     `/certificates/${userCertificate?.certificate_user.user_certification_uuid}/verify`,
@@ -530,7 +533,8 @@ const CourseEndView: FC<CourseEndViewProps> = ({
       pdf.save(fileName);
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert(t('errorGeneratingPDF'));
+      setDialogAlertMessage(t('errorGeneratingPDF'));
+      setDialogAlertOpen(true);
     }
   };
 
@@ -583,7 +587,8 @@ const CourseEndView: FC<CourseEndViewProps> = ({
           />
         </div>
 
-        <div className="soft-shadow relative z-10 mb-2 w-full space-y-6 rounded-2xl bg-white p-8">
+        <SimpleAlertDialog open={dialogAlertOpen} onOpenChange={setDialogAlertOpen} description={dialogAlertMessage} />
+      <div className="soft-shadow relative z-10 mb-2 w-full space-y-6 rounded-2xl bg-white p-8">
           <div className="flex flex-col items-center space-y-6">
             {thumbnailImage ? (
               <img
@@ -719,7 +724,8 @@ const CourseEndView: FC<CourseEndViewProps> = ({
   // Show progress and encouragement for incomplete course
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 text-center">
-      <div className="soft-shadow w-full max-w-2xl space-y-6 rounded-2xl bg-white p-8">
+      <SimpleAlertDialog open={dialogAlertOpen} onOpenChange={setDialogAlertOpen} description={dialogAlertMessage} />
+    <div className="soft-shadow w-full max-w-2xl space-y-6 rounded-2xl bg-white p-8">
         <div className="flex flex-col items-center space-y-6">
           {thumbnailImage ? (
             <img

@@ -7,6 +7,7 @@ import { Button } from '@components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
+import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 
 interface ScenarioOption {
   id: string;
@@ -46,6 +47,8 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
   const [showImageInputs, setShowImageInputs] = useState<Record<string, boolean>>({});
 
   const t = useTranslations('DashPage.Editor.Scenarios');
+  const [dialogAlertOpen, setDialogAlertOpen] = useState(false);
+  const [dialogAlertMessage, setDialogAlertMessage] = useState('');
 
   useEffect(() => {
     // Schedule updates asynchronously to avoid synchronous setState inside an effect
@@ -83,7 +86,8 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
 
   const addNewScenario = () => {
     if (scenarios.length >= 40) {
-      alert(t('maxScenariosAllowed'));
+      setDialogAlertMessage(t('maxScenariosAllowed'));
+      setDialogAlertOpen(true);
       return;
     }
 
@@ -102,7 +106,8 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
 
   const deleteScenario = (scenarioId: string) => {
     if (scenarios.length <= 1) {
-      alert(t('atLeastOneScenarioRequired'));
+      setDialogAlertMessage(t('atLeastOneScenarioRequired'));
+      setDialogAlertOpen(true);
       return;
     }
 
@@ -131,7 +136,8 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
   const addOption = (scenarioId: string) => {
     const scenario = scenarios.find((s) => s.id === scenarioId);
     if (!scenario || scenario.options.length >= 4) {
-      alert(t('maxOptionsPerScenario'));
+      setDialogAlertMessage(t('maxOptionsPerScenario'));
+      setDialogAlertOpen(true);
       return;
     }
 
@@ -149,7 +155,8 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
   const deleteOption = (scenarioId: string, optionId: string) => {
     const scenario = scenarios.find((s) => s.id === scenarioId);
     if (!scenario || scenario.options.length <= 1) {
-      alert('At least one option is required per scenario');
+      setDialogAlertMessage('At least one option is required per scenario');
+      setDialogAlertOpen(true);
       return;
     }
 
@@ -573,7 +580,9 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
   );
 
   return (
-    <Modal
+    <>
+      <SimpleAlertDialog open={dialogAlertOpen} onOpenChange={setDialogAlertOpen} description={dialogAlertMessage} />
+      <Modal
       isDialogOpen={isOpen}
       onOpenChange={handleClose}
       dialogTitle={showPreview ? t('modal.previewTitle') : t('modal.editTitle')}
@@ -582,7 +591,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
       customWidth="!w-[70vw] !max-w-[70vw] !sm:w-[70vw] !sm:max-w-[70vw] !md:w-[70vw] !md:max-w-[70vw] !lg:max-w-[70vw] !xl:max-w-[70vw]"
       dialogContent={showPreview ? renderPreviewContent() : renderEditContent()}
       dialogClose={
-        <>
+        <div className="flex items-center gap-2">
           <Button onClick={handleClose}>{t('cancel')}</Button>
           {!showPreview && (
             <Button onClick={handleSave}>
@@ -592,9 +601,10 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
               </div>
             </Button>
           )}
-        </>
+        </div>
       }
     />
+    </>
   );
 };
 
