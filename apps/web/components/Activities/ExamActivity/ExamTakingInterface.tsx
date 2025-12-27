@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState, useEffectEvent } from 'react';
+import { useCallback, useEffect, useState, useEffectEvent, useRef } from 'react';
 import { AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -8,6 +8,17 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@components/ui/radio-group';
 import { Alert, AlertDescription } from '@components/ui/alert';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { getAPIUrl } from '@/services/config/config';
 import { useTestGuard } from '@/hooks/useTestGuard';
 import { Progress } from '@components/ui/progress';
@@ -56,6 +67,10 @@ export default function ExamTakingInterface({
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [violationCount, setViolationCount] = useState(0);
+  const [violationDialogOpen, setViolationDialogOpen] = useState(false);
+  const [currentViolation, setCurrentViolation] = useState<{ type: string; count: number } | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const examContainerRef = useRef<HTMLDivElement>(null);
 
   const settings = exam.settings || {};
   const orderedQuestions = attempt.question_order
@@ -77,7 +92,7 @@ export default function ExamTakingInterface({
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${accessToken}`,
           },
-          body: JSON.stringify({ answers }),
+          body: JSON.stringify(answers),
         });
 
         if (!response.ok) {
@@ -104,6 +119,8 @@ export default function ExamTakingInterface({
   const handleViolation = useCallback(
     async (type: string, count: number) => {
       setViolationCount(count);
+      setCurrentViolation({ type, count });
+      setViolationDialogOpen(true);
 
       // Record violation on server
       try {
@@ -116,11 +133,11 @@ export default function ExamTakingInterface({
           body: JSON.stringify({ type }),
         });
 
-        toast.warning(t('violationDetected', { type, count }));
-
         // Check if threshold reached
         const threshold = settings.violation_threshold;
         if (threshold && count >= threshold) {
+          // Close dialog (we will auto-submit immediately)
+          setViolationDialogOpen(false);
           toast.error(t('autoSubmitting', { reason: 'Violation threshold exceeded' }));
           void handleSubmit(true);
         }
@@ -134,6 +151,7 @@ export default function ExamTakingInterface({
   useTestGuard({
     enabled: true,
     preventCopy: settings.copy_paste_protection,
+    preventRightClick: settings.right_click_disable,
     trackBlur: settings.tab_switch_detection,
     trackDevTools: settings.devtools_detection,
     maxViolations: settings.violation_threshold || 999,
@@ -161,6 +179,43 @@ export default function ExamTakingInterface({
       return () => clearInterval(interval);
     }
   }, [settings.time_limit, attempt.started_at]);
+
+  // Fullscreen enforcement
+  useEffect(() => {
+    if (!settings.fullscreen_enforcement) return;
+
+    const requestFullscreen = async () => {
+      try {
+        if (examContainerRef.current && !document.fullscreenElement) {
+          await examContainerRef.current.requestFullscreen();
+          setIsFullscreen(true);
+        }
+      } catch (error) {
+        console.warn('Fullscreen request failed:', error);
+        toast.warning(t('fullscreenNotSupported'));
+      }
+    };
+
+    const handleFullscreenChange = async () => {
+      const inFullscreen = !!document.fullscreenElement;
+      setIsFullscreen(inFullscreen);
+
+      if (!inFullscreen && settings.fullscreen_enforcement) {
+        toast.warning(t('fullscreenExited'));
+        await handleViolation('FULLSCREEN_EXIT', violationCount + 1);
+      }
+    };
+
+    void requestFullscreen();
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      if (document.fullscreenElement) {
+        void document.exitFullscreen();
+      }
+    };
+  }, [settings.fullscreen_enforcement, handleViolation, t, violationCount]);
 
   const handleAnswerChange = (questionId: number, answer: any) => {
     setAnswers((prev) => ({ ...prev, [questionId]: answer }));
@@ -292,7 +347,10 @@ export default function ExamTakingInterface({
   const answeredCount = orderedQuestions.filter((q) => isAnswered(q.id)).length;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-6">
+    <div
+      ref={examContainerRef}
+      className="mx-auto max-w-4xl space-y-6 p-6"
+    >
       {/* Header with Timer and Progress */}
       <div className="flex items-center justify-between">
         <div>
@@ -329,6 +387,31 @@ export default function ExamTakingInterface({
           </AlertDescription>
         </Alert>
       )}
+
+      {/* Violation Dialog */}
+      <AlertDialog open={violationDialogOpen} onOpenChange={setViolationDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia>
+              <AlertTriangle className="text-destructive size-6" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>{t('violationDialogTitle', { type: currentViolation?.type ?? '' })}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('violationDialogDescription', {
+                type: currentViolation?.type ?? '',
+                count: currentViolation?.count ?? 0,
+                max: settings.violation_threshold || t('unlimited'),
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel />
+            <AlertDialogAction onClick={() => setViolationDialogOpen(false)}>
+              {t('violationDialogAcknowledge')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Question Card */}
       <Card>

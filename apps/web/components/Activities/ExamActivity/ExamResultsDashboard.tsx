@@ -96,17 +96,30 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
     return filtered;
   }, [attempts, searchQuery, statusFilter, sortBy, sortOrder]);
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'SUBMITTED':
+        return t('submitted');
+      case 'AUTO_SUBMITTED':
+        return t('autoSubmitted');
+      case 'IN_PROGRESS':
+        return t('inProgress');
+      default:
+        return status;
+    }
+  };
+
   const handleExportCSV = () => {
     const headers = [
-      'Student Name',
-      'Email',
-      'Started At',
-      'Finished At',
-      'Duration (min)',
-      'Status',
-      'Score',
-      'Percentage',
-      'Violations',
+      t('exportHeaders.studentName'),
+      t('exportHeaders.email'),
+      t('exportHeaders.startedAt'),
+      t('exportHeaders.finishedAt'),
+      t('exportHeaders.durationMinutes'),
+      t('exportHeaders.status'),
+      t('exportHeaders.score'),
+      t('exportHeaders.percentage'),
+      t('exportHeaders.violations'),
     ];
 
     const rows = filteredAttempts.map((a) => [
@@ -115,7 +128,7 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
       a.started_at,
       a.finished_at || '',
       a.duration_minutes?.toString() || '',
-      a.status,
+      getStatusLabel(a.status),
       `${a.score}/${a.max_score}`,
       `${a.percentage}%`,
       a.violation_count.toString(),

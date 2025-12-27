@@ -460,7 +460,7 @@ function QuestionEditor({ question, examUuid, accessToken, onSave, onCancel }: Q
           </div>
 
           <div>
-            <Label htmlFor="points">{t('points')}</Label>
+            <Label htmlFor="points">{t('pointsLabel')}</Label>
             <Input
               id="points"
               type="number"

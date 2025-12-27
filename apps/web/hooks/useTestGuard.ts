@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 
-type ViolationType = 'BLUR' | 'DEVTOOLS' | 'COPY' | 'RESIZE' | 'CONTEXTMENU' | 'KEYDOWN';
+type ViolationType = 'BLUR' | 'DEVTOOLS' | 'COPY' | 'RESIZE' | 'CONTEXTMENU' | 'KEYDOWN' | 'FULLSCREEN_EXIT';
 
 interface Violation {
   type: ViolationType;
@@ -14,6 +14,7 @@ interface UseTestGuardOptions {
   maxViolations?: number;
   enabled?: boolean;
   preventCopy?: boolean;
+  preventRightClick?: boolean;
   trackBlur?: boolean;
   trackDevTools?: boolean;
 }
@@ -34,6 +35,7 @@ export function useTestGuard({
   maxViolations = 2,
   enabled = true,
   preventCopy = true,
+  preventRightClick = true,
   trackBlur = true,
   trackDevTools = true,
 }: UseTestGuardOptions) {
@@ -52,6 +54,18 @@ export function useTestGuard({
         type,
         timestamp: Date.now(),
       };
+
+      // Debug logging to help diagnose false positives
+      try {
+        if (process.env.NODE_ENV !== 'production') {
+          // Capture helpful context: active element and simple stack
+          const active = document.activeElement;
+          console.debug('[useTestGuard] report', { type, activeTag: active?.tagName, activeId: (active as HTMLElement | null)?.id, activeClasses: (active as HTMLElement | null)?.className });
+        }
+      } catch (err) {
+        // ignore logging errors
+        void err;
+      }
 
       violations.current.push(violation);
       const count = violations.current.length;
@@ -103,28 +117,65 @@ export function useTestGuard({
       handlers.push(() => clearInterval(interval));
     }
 
-    // 3. Copy/Paste/Context menu prevention
-    if (preventCopy) {
-      const prevent = (e: Event) => {
+    // 3. Copy/Paste/Context menu prevention (hardened to reduce false positives)
+    if (preventCopy || preventRightClick) {
+      const preventClipboard = (e: ClipboardEvent) => {
+        try {
+          // Only consider clipboard events if there is an actual selection or pasted text
+          if (e.type === 'copy' || e.type === 'cut') {
+            const sel = typeof window.getSelection === 'function' ? window.getSelection()?.toString() : '';
+            if (!sel) return;
+          }
+          if (e.type === 'paste') {
+            const data = e.clipboardData?.getData('text') ?? '';
+            if (!data) return;
+          }
+        } catch {
+          // In case of unexpected environment, be conservative and ignore
+          return;
+        }
+
         e.preventDefault();
-        const eventType = e.type.toUpperCase() as ViolationType;
-        report(eventType === 'CONTEXTMENU' ? 'CONTEXTMENU' : 'COPY');
+        report('COPY');
       };
 
-      document.addEventListener('copy', prevent);
-      document.addEventListener('cut', prevent);
-      document.addEventListener('paste', prevent);
-      document.addEventListener('contextmenu', prevent);
+      if (preventCopy) {
+        document.addEventListener('copy', preventClipboard);
+        document.addEventListener('cut', preventClipboard);
+        document.addEventListener('paste', preventClipboard);
 
-      handlers.push(() => {
-        document.removeEventListener('copy', prevent);
-        document.removeEventListener('cut', prevent);
-        document.removeEventListener('paste', prevent);
-        document.removeEventListener('contextmenu', prevent);
-      });
+        handlers.push(() => {
+          document.removeEventListener('copy', preventClipboard);
+          document.removeEventListener('cut', preventClipboard);
+          document.removeEventListener('paste', preventClipboard);
+        });
+      }
 
-      // 4. Keyboard shortcuts
+      if (preventRightClick) {
+        const preventContext = (e: MouseEvent) => {
+          // Only treat real right-clicks (button === 2) as violations; ignore synthetic or left-click contextmenu
+          if (typeof e.button === 'number' && e.button !== 2) return;
+          e.preventDefault();
+          report('CONTEXTMENU');
+        };
+        document.addEventListener('contextmenu', preventContext);
+        handlers.push(() => {
+          document.removeEventListener('contextmenu', preventContext);
+        });
+      }
+
+      // 4. Keyboard shortcuts - only when not typing in an input/textarea/contentEditable
       const keydown = (e: KeyboardEvent) => {
+        const active = document.activeElement as HTMLElement | null;
+        const isEditable =
+          !!active &&
+          (active.tagName === 'INPUT' ||
+            active.tagName === 'TEXTAREA' ||
+            // contentEditable check
+            (active.getAttribute && active.getAttribute('contenteditable') === 'true'));
+
+        if (isEditable) return;
+
         if ((e.ctrlKey || e.metaKey) && ['c', 'a', 'u', 's', 'p', 'x'].includes(e.key.toLowerCase())) {
           e.preventDefault();
           report('KEYDOWN');
@@ -132,7 +183,6 @@ export function useTestGuard({
       };
 
       document.addEventListener('keydown', keydown);
-
       handlers.push(() => {
         document.removeEventListener('keydown', keydown);
       });
@@ -151,7 +201,7 @@ export function useTestGuard({
     return () => {
       handlers.forEach((cleanup) => cleanup());
     };
-  }, [enabled, preventCopy, trackBlur, trackDevTools, maxViolations, onViolation]);
+  }, [enabled, preventCopy, preventRightClick, trackBlur, trackDevTools, maxViolations, onViolation]);
 
   return {
     isLocked: () => locked.current,

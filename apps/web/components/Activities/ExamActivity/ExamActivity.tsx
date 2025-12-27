@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import useSWR from 'swr';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
@@ -60,13 +61,13 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
     swrFetcher(url, accessToken),
   );
 
-  // Fetch user's attempts (only for students)
+  // Fetch user's attempts (fetch for both students and teachers now)
   const {
     data: userAttempts,
     error: attemptsError,
     mutate: mutateAttempts,
   } = useSWR(
-    examUuid && accessToken && !isTeacher ? `${getAPIUrl()}exams/${examUuid}/attempts/me` : null,
+    examUuid && accessToken ? `${getAPIUrl()}exams/${examUuid}/attempts/me` : null,
     (url) => swrFetcher(url, accessToken),
   );
 
@@ -78,10 +79,11 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
 
   // Derive state from inputs to avoid setState-in-effect and setTimeout usage
   const derivedState = useMemo<ExamState>(() => {
-    if (examError || questionsError || (attemptsError && !isTeacher)) return 'error';
+    if (examError || questionsError || attemptsError) return 'error';
     if (!exam || !questions) return 'loading';
 
-    if (isTeacher) return 'manage';
+    // Teachers can see management view or take the exam
+    if (isTeacher && !currentAttempt) return 'manage';
 
     if (!userAttempts) return 'pre-exam';
 
@@ -95,7 +97,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
     }
 
     return 'pre-exam';
-  }, [exam, questions, userAttempts, examError, questionsError, attemptsError, isTeacher]);
+  }, [exam, questions, userAttempts, examError, questionsError, attemptsError, isTeacher, currentAttempt]);
 
   const currentState = overrideState ?? derivedState;
 
@@ -108,11 +110,14 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
 
   // Clear manual override when derived state changes (but don't clear while loading)
   useEffect(() => {
+    // Don't clear override when teacher intentionally switches to pre-exam or taking mode
+    const isTeacherPreviewMode = isTeacher && (overrideState === 'pre-exam' || overrideState === 'taking');
+
     // If we're temporarily loading data, keep the manual override (prevents flicker back to loading)
-    if (overrideState && overrideState !== derivedState && derivedState !== 'loading') {
+    if (overrideState && overrideState !== derivedState && derivedState !== 'loading' && !isTeacherPreviewMode) {
       setOverrideState(null);
     }
-  }, [overrideState, derivedState]);
+  }, [overrideState, derivedState, isTeacher]);
 
   const handleStartExam = (attempt: any) => {
     setCurrentAttempt(attempt);
@@ -139,7 +144,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
 
   const handleReturnToCourse = () => {
     const courseuuid = course.course_uuid?.replace('course_', '');
-    window.location.href = `/${orgslug}/course/${courseuuid}`;
+    window.location.href = `/course/${courseuuid}`;
   };
 
   if (currentState === 'loading' || !exam || !questions) {
@@ -150,9 +155,17 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
   if (currentState === 'manage' && isTeacher) {
     return (
       <div className="mx-auto max-w-6xl space-y-6 p-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold">{activity.name}</h1>
-          <p className="text-muted-foreground">{t('manageExam')}</p>
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold">{activity.name}</h1>
+            <p className="text-muted-foreground">{t('manageExam')}</p>
+          </div>
+          <Button
+            onClick={() => setOverrideState('pre-exam')}
+            variant="outline"
+          >
+            {t('previewExam')}
+          </Button>
         </div>
 
         <Tabs
@@ -199,7 +212,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
                 attempts={allAttempts}
                 onViewAttempt={(attemptUuid) => {
                   // TODO: Navigate to attempt detail view
-                  toast.info(`View attempt: ${attemptUuid}`);
+                  toast.info(t('viewAttempt', { attempt: attemptUuid }));
                 }}
               />
             )}
@@ -218,6 +231,8 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
         userAttempts={userAttempts || []}
         accessToken={accessToken!}
         onStartExam={handleStartExam}
+        isTeacher={isTeacher}
+        onBackToManage={isTeacher ? () => setOverrideState(null) : undefined}
       />
     );
   }
@@ -234,6 +249,34 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
     );
   }
 
+  const handleRetry = async () => {
+    // Start a new attempt if allowed
+    try {
+      const response = await fetch(`${getAPIUrl()}exams/${exam.exam_uuid}/attempts/start`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({} as any));
+        toast.error(error.detail || t('errorStartingExam'));
+        return;
+      }
+
+      const attempt = await response.json();
+      toast.success(t('examStarted'));
+      handleStartExam(attempt);
+    } catch (err) {
+      console.error('Failed to start retry attempt:', err);
+      toast.error(t('errorStartingExam'));
+    }
+  };
+
+  const remainingAttempts = isTeacher ? null : (exam?.settings?.attempt_limit && exam.settings.attempt_limit > 0 ? exam.settings.attempt_limit - (userAttempts?.length || 0) : null);
+
   if (currentState === 'results' && currentAttempt) {
     return (
       <ExamResults
@@ -241,6 +284,9 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
         attempt={currentAttempt}
         questions={questions}
         onReturnToCourse={handleReturnToCourse}
+        onRetry={handleRetry}
+        remainingAttempts={remainingAttempts}
+        isTeacher={isTeacher}
       />
     );
   }

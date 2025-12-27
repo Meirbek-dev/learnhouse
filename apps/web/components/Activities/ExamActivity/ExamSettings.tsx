@@ -31,7 +31,7 @@ const createValidationSchema = (
     time_limit: z.number().min(limits.time_limit.min).max(limits.time_limit.max).optional().nullable(),
     attempt_limit: z.number().min(limits.attempt_limit.min).max(limits.attempt_limit.max).optional().nullable(),
     shuffle_questions: z.boolean(),
-    shuffle_answers: z.boolean(),
+    // shuffle_answers is always true (enforced server-side)
     question_limit: z.number().min(limits.question_limit.min).optional().nullable(),
     access_mode: z.enum(['NO_ACCESS', 'WHITELIST', 'ALL_ENROLLED']),
     allow_result_review: z.boolean(),
@@ -77,7 +77,6 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
       time_limit: settings.time_limit || null,
       attempt_limit: settings.attempt_limit || null,
       shuffle_questions: settings.shuffle_questions ?? true,
-      shuffle_answers: settings.shuffle_answers ?? true,
       question_limit: settings.question_limit || null,
       access_mode: settings.access_mode || 'NO_ACCESS',
       allow_result_review: settings.allow_result_review ?? true,
@@ -123,6 +122,8 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
     startTransition(() => {
       void (async () => {
         try {
+          // Always enforce shuffle_answers=true
+          const payload = { ...values, shuffle_answers: true };
           const response = await fetch(`${getAPIUrl()}exams/${exam.exam_uuid}`, {
             method: 'PUT',
             headers: {
@@ -130,7 +131,7 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
               'Authorization': `Bearer ${accessToken}`,
             },
             body: JSON.stringify({
-              settings: values,
+              settings: payload,
             }),
           });
 

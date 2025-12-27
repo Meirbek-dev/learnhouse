@@ -34,6 +34,44 @@ from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User
 from src.security.courses_security import courses_rbac_check_for_assignments
+from src.db.resource_authors import (
+    ResourceAuthor,
+    ResourceAuthorshipEnum,
+    ResourceAuthorshipStatusEnum,
+)
+
+
+## > Helper Functions
+
+
+async def is_course_contributor_or_admin(
+    user_id: int,
+    course: Course,
+    db_session: Session,
+) -> bool:
+    """
+    Check if user is a course contributor (teacher) or admin.
+    Teachers/contributors should have unlimited exam attempts for preview/testing.
+    """
+    # Check if user is course contributor (CREATOR, MAINTAINER, CONTRIBUTOR)
+    statement = select(ResourceAuthor).where(
+        ResourceAuthor.resource_uuid == course.course_uuid,
+        ResourceAuthor.user_id == user_id,
+    )
+    resource_author = db_session.exec(statement).first()
+
+    if resource_author and (
+        resource_author.authorship
+        in (
+            ResourceAuthorshipEnum.CREATOR,
+            ResourceAuthorshipEnum.MAINTAINER,
+            ResourceAuthorshipEnum.CONTRIBUTOR,
+        )
+        and resource_author.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE
+    ):
+        return True
+
+    return False
 
 
 ## > Exams CRUD
@@ -499,36 +537,48 @@ async def start_exam_attempt(
     if not exam:
         raise HTTPException(status_code=404, detail="Exam not found")
 
-    # Check access
+    # Get course to check contributor status
+    course = db_session.get(Course, exam.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    # Check if user is a teacher/contributor (teachers have unlimited attempts)
+    is_teacher = await is_course_contributor_or_admin(
+        current_user.id, course, db_session
+    )
+
+    # Check access (teachers bypass access restrictions for preview/testing)
     settings = exam.settings or {}
     access_mode = settings.get("access_mode", "NO_ACCESS")
 
-    if access_mode == "NO_ACCESS":
-        raise HTTPException(status_code=403, detail="Exam is not accessible")
+    if not is_teacher:
+        if access_mode == "NO_ACCESS":
+            raise HTTPException(status_code=403, detail="Exam is not accessible")
 
-    if access_mode == "WHITELIST":
-        whitelist = settings.get("whitelist_user_ids", [])
-        if current_user.id not in whitelist:
-            raise HTTPException(
-                status_code=403, detail="You are not authorized to access this exam"
+        if access_mode == "WHITELIST":
+            whitelist = settings.get("whitelist_user_ids", [])
+            if current_user.id not in whitelist:
+                raise HTTPException(
+                    status_code=403, detail="You are not authorized to access this exam"
+                )
+
+    # Check attempt limit (teachers have unlimited attempts)
+    if not is_teacher:
+        attempt_limit = settings.get("attempt_limit")
+        if attempt_limit is not None:
+            # validate configured value against allowed bounds
+            from src.db.courses.exams import ATTEMPT_LIMIT_MIN, ATTEMPT_LIMIT_MAX, QUESTION_LIMIT_MIN
+
+            if not (ATTEMPT_LIMIT_MIN <= attempt_limit <= ATTEMPT_LIMIT_MAX):
+                raise HTTPException(status_code=400, detail="Invalid attempt_limit configured for exam")
+
+            statement = select(ExamAttempt).where(
+                ExamAttempt.exam_id == exam.id,
+                ExamAttempt.user_id == current_user.id,
             )
-
-    # Check attempt limit
-    attempt_limit = settings.get("attempt_limit")
-    if attempt_limit is not None:
-        # validate configured value against allowed bounds
-        from src.db.courses.exams import ATTEMPT_LIMIT_MIN, ATTEMPT_LIMIT_MAX, QUESTION_LIMIT_MIN
-
-        if not (ATTEMPT_LIMIT_MIN <= attempt_limit <= ATTEMPT_LIMIT_MAX):
-            raise HTTPException(status_code=400, detail="Invalid attempt_limit configured for exam")
-
-        statement = select(ExamAttempt).where(
-            ExamAttempt.exam_id == exam.id,
-            ExamAttempt.user_id == current_user.id,
-        )
-        existing_attempts = db_session.exec(statement).all()
-        if len(existing_attempts) >= attempt_limit:
-            raise HTTPException(status_code=403, detail="Attempt limit reached")
+            existing_attempts = db_session.exec(statement).all()
+            if len(existing_attempts) >= attempt_limit:
+                raise HTTPException(status_code=403, detail="Attempt limit reached")
 
     # Validate question_limit if present
     question_limit = settings.get("question_limit")
@@ -679,6 +729,22 @@ async def record_violation(
     attempt.violations = violations
     attempt.update_date = datetime.now().isoformat()
 
+    # Structured logging for violation events
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.warning(
+        "Exam violation recorded",
+        extra={
+            "event": "exam_violation",
+            "attempt_uuid": attempt_uuid,
+            "user_id": current_user.id,
+            "exam_id": attempt.exam_id,
+            "violation_type": violation_type,
+            "violation_count": len(violations),
+            "timestamp": violation["timestamp"],
+        }
+    )
+
     # Check violation threshold
     exam = db_session.get(Exam, attempt.exam_id)
     if exam:
@@ -688,6 +754,20 @@ async def record_violation(
             # Auto-submit
             attempt.status = AttemptStatusEnum.AUTO_SUBMITTED
             attempt.submitted_at = datetime.now().isoformat()
+
+            # Log auto-submit event
+            logger.warning(
+                "Exam auto-submitted due to violation threshold",
+                extra={
+                    "event": "exam_auto_submitted",
+                    "attempt_uuid": attempt_uuid,
+                    "user_id": current_user.id,
+                    "exam_id": attempt.exam_id,
+                    "violation_count": len(violations),
+                    "threshold": threshold,
+                    "timestamp": datetime.now().isoformat(),
+                }
+            )
 
     db_session.add(attempt)
     db_session.commit()
@@ -840,10 +920,10 @@ async def get_all_exam_attempts(
 
         # Calculate duration
         duration_minutes = None
-        if attempt.finished_at and attempt.started_at:
+        if attempt.submitted_at and attempt.started_at:
             try:
                 start = datetime.fromisoformat(attempt.started_at)
-                end = datetime.fromisoformat(attempt.finished_at)
+                end = datetime.fromisoformat(attempt.submitted_at)
                 duration_minutes = int((end - start).total_seconds() / 60)
             except Exception:
                 pass
@@ -855,7 +935,7 @@ async def get_all_exam_attempts(
                 "user_name": f"{user.name} {user.surname}".strip() or user.username,
                 "user_email": user.email,
                 "started_at": attempt.started_at,
-                "finished_at": attempt.finished_at,
+                "finished_at": attempt.submitted_at,  # Map submitted_at to finished_at for frontend compatibility
                 "duration_minutes": duration_minutes,
                 "status": attempt.status,
                 "score": attempt.score,

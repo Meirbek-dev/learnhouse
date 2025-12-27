@@ -108,6 +108,7 @@
       "attemptNumber": "Attempt #{number}",
       "attemptsRemaining": "Attempts Remaining",
       "autoSubmitting": "Auto-submitting exam: {reason}",
+      "backToManagement": "Back to Management",
       "correct": "Correct",
       "correctAnswer": "Correct Answer",
       "errorLoadingExam": "Failed to load exam",
@@ -134,7 +135,9 @@
       "pleaseRefresh": "Please refresh the page and try again",
       "points": "{count, plural, =0 {# points} one {# point} other {# points}}",
       "pointsValue": "Worth {points} points",
+      "previewExam": "Preview Exam",
       "previous": "Previous",
+      "previousAttempts": "Previous Attempts",
       "questions": "Questions",
       "questionNavigator": "Question Navigator",
       "questionNumber": "Question {number}",
@@ -147,15 +150,26 @@
       "startExam": "Start Exam",
       "submitExam": "Submit Exam",
       "submitting": "Submitting...",
+      "teacherPreview": "Teacher Preview",
       "timeLimit": "Time Limit",
       "totalQuestions": "Total Questions",
       "unanswered": "Unanswered",
       "unlimited": "Unlimited",
+      "unlimitedAttempts": "Unlimited Attempts",
       "unsupportedQuestionType": "Unsupported question type",
       "violationDetected": "Warning: {type} violation detected ({count} total)",
+      "retryExam": "Retry Exam",
+      "retryExamRemaining": "Retry Exam ({remaining} left)",
       "violationsRecorded": "{count} violations recorded during this exam",
       "violationWarning": "Violations: {count}/{max}. Your exam may be auto-submitted if you exceed the limit.",
-      "yourAnswer": "Your Answer"
+      "yourAnswer": "Your Answer",
+      "fullscreenNotSupported": "Fullscreen mode not supported by your browser",
+      "fullscreenExited": "Fullscreen exited — violation recorded",
+      "rightClickDisabled": "Right-click is disabled during the exam",
+      "devToolsDetected": "Developer tools detected — violation recorded",
+      "violationDialogTitle": "Security violation detected",
+      "violationDialogDescription": "A {type} violation was detected (occurrence {count}/{max}). This has been recorded and may lead to auto-submission.",
+      "violationDialogAcknowledge": "Acknowledge"
     }
   },
   "ActivityIndicators": {
@@ -889,6 +903,7 @@
       "noQuestions": "No questions added yet. Click 'Add Question' to get started.",
       "questionNumber": "Question {number}",
       "pointsValue": "{points} {points, plural, one {point} other {points}}",
+      "pointsLabel": "Points",
       "single_choice": "Single Choice",
       "multiple_choice": "Multiple Choice",
       "true_false": "True/False",
@@ -1013,7 +1028,18 @@
       "violations": "Violations",
       "actions": "Actions",
       "noAttempts": "No attempts found",
-      "view": "View"
+      "view": "View",
+      "exportHeaders": {
+        "studentName": "Student Name",
+        "email": "Email",
+        "startedAt": "Started At",
+        "finishedAt": "Finished At",
+        "durationMinutes": "Duration (min)",
+        "status": "Status",
+        "score": "Score",
+        "percentage": "Percentage",
+        "violations": "Violations"
+      }
     },
     "WhitelistManagement": {
       "manageWhitelist": "Manage Whitelist",

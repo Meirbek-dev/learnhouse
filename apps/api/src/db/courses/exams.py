@@ -40,7 +40,7 @@ class ExamSettingsBase(SQLModelStrictBaseModel):
 
     # Question Behavior
     shuffle_questions: bool = True
-    shuffle_answers: bool = True  # Always ON, non-configurable
+    shuffle_answers: bool = True  # Always ON, non-configurable (enforced by validator)
     question_limit: int | None = None  # None = show all questions
 
     # Access Control
@@ -101,6 +101,12 @@ class ExamSettingsBase(SQLModelStrictBaseModel):
         if isinstance(v, str):
             return AccessModeEnum(v)
         return v
+
+    @field_validator("shuffle_answers", mode="before")
+    @classmethod
+    def validate_shuffle_answers(cls, v):
+        # Always enforce shuffle_answers=True for security
+        return True
 
 
 class ExamBase(SQLModelStrictBaseModel):

@@ -1,10 +1,38 @@
 # Exam Activity — Implementation Plan
 
+## Status: ✅ IMPLEMENTED (Dec 27, 2025)
+
+All planned features have been implemented. See [exam-implementation-notes.md](exam-implementation-notes.md) for details.
+
 ## Overview
 
 Add a secure, configurable exam/test activity type to the LMS. This feature allows teachers to
 create question banks, configure exam parameters, control student access, and review results.
 Students take exams under optional anti-cheating measures and can review results if permitted.
+
+## Implementation Status
+
+### ✅ Completed Features
+
+- Exam CRUD operations (create, read, update, delete)
+- Question bank management with all 4 question types (SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE, MATCHING)
+- CSV import/export for questions
+- Attempt lifecycle (start, submit, auto-submit on time/violations)
+- Violation recording with structured logging
+- Access control (NO_ACCESS, WHITELIST, ALL_ENROLLED)
+- Anti-cheat enforcement (copy-paste, tab-switch, DevTools, right-click, fullscreen)
+- Teacher results dashboard with statistics
+- Student results review (when allowed by settings)
+- RBAC checks for all operations
+- **Shuffle answers always enforced** (non-configurable, server-validated)
+- **Right-click/context menu enforcement** (granular control)
+- **Fullscreen enforcement and detection** (with browser compatibility handling)
+- **Localization** (EN, KK, RU) for all new messages
+
+### 📝 Test Coverage
+
+- Test scaffold created in `apps/api/src/tests/test_exams.py`
+- Recommended tests documented in implementation notes
 
 ---
 

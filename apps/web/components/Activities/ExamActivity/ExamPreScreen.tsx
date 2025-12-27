@@ -16,6 +16,8 @@ interface ExamPreScreenProps {
   userAttempts: any[];
   accessToken: string;
   onStartExam: (attempt: any) => void;
+  isTeacher?: boolean;
+  onBackToManage?: () => void;
 }
 
 export default function ExamPreScreen({
@@ -24,6 +26,8 @@ export default function ExamPreScreen({
   userAttempts,
   accessToken,
   onStartExam,
+  isTeacher = false,
+  onBackToManage,
 }: ExamPreScreenProps) {
   const t = useTranslations('Activities.ExamActivity');
   const [isStarting, setIsStarting] = useState(false);
@@ -31,9 +35,10 @@ export default function ExamPreScreen({
   const settings = exam.settings || {};
   const attemptLimit = settings.attempt_limit;
   const timeLimit = settings.time_limit;
-  const remainingAttempts = attemptLimit && attemptLimit > 0 ? attemptLimit - userAttempts.length : null;
+  const remainingAttempts = isTeacher ? null : (attemptLimit && attemptLimit > 0 ? attemptLimit - userAttempts.length : null);
 
-  const canTakeExam = !attemptLimit || attemptLimit === 0 || userAttempts.length < attemptLimit;
+  // Teachers can always take exams (unlimited attempts for preview/testing)
+  const canTakeExam = isTeacher || !attemptLimit || attemptLimit === 0 || userAttempts.length < attemptLimit;
 
   const handleStartExam = async () => {
     if (!canTakeExam) {
@@ -96,7 +101,7 @@ export default function ExamPreScreen({
               </div>
             </div>
 
-            {attemptLimit && attemptLimit > 0 && (
+            {attemptLimit && attemptLimit > 0 && !isTeacher && (
               <div className="flex items-start gap-3 rounded-lg border p-4">
                 <Users className="mt-1 h-5 w-5 text-purple-600" />
                 <div>
@@ -104,6 +109,16 @@ export default function ExamPreScreen({
                   <p className="text-2xl font-bold text-purple-600">
                     {remainingAttempts !== null ? remainingAttempts : t('unlimited')}
                   </p>
+                </div>
+              </div>
+            )}
+
+            {isTeacher && (
+              <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
+                <Users className="mt-1 h-5 w-5 text-blue-600" />
+                <div>
+                  <p className="font-semibold text-blue-900">{t('teacherPreview')}</p>
+                  <p className="text-sm text-blue-700">{t('unlimitedAttempts')}</p>
                 </div>
               </div>
             )}
@@ -182,7 +197,16 @@ export default function ExamPreScreen({
           )}
 
           {/* Start Button */}
-          <div className="flex justify-center pt-4">
+          <div className="flex justify-center gap-3 pt-4">
+            {isTeacher && onBackToManage && (
+              <Button
+                size="lg"
+                onClick={onBackToManage}
+                variant="outline"
+              >
+                {t('backToManagement')}
+              </Button>
+            )}
             {canTakeExam ? (
               <Button
                 size="lg"

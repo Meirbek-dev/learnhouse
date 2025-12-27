@@ -22,9 +22,12 @@ interface ExamResultsProps {
   attempt: any;
   questions: Question[];
   onReturnToCourse: () => void;
+  onRetry?: () => void;
+  remainingAttempts?: number | null;
+  isTeacher?: boolean;
 }
 
-export default function ExamResults({ exam, attempt, questions, onReturnToCourse }: ExamResultsProps) {
+export default function ExamResults({ exam, attempt, questions, onReturnToCourse, onRetry, remainingAttempts = null, isTeacher = false }: ExamResultsProps) {
   const t = useTranslations('Activities.ExamActivity');
 
   const settings = exam.settings || {};
@@ -176,7 +179,7 @@ export default function ExamResults({ exam, attempt, questions, onReturnToCourse
           <div className="text-center">
             <div className="mb-2 text-6xl font-bold text-blue-600">{percentage}%</div>
             <div className="text-xl text-gray-600">
-              {attempt.score} / {attempt.max_score} {t('points')}
+              {attempt.score} / {attempt.max_score} {t('points', { count: attempt.max_score })}
             </div>
           </div>
 
@@ -280,7 +283,22 @@ export default function ExamResults({ exam, attempt, questions, onReturnToCourse
       )}
 
       {/* Actions */}
-      <div className="flex justify-center">
+      <div className="flex items-center justify-center space-x-4">
+        {onRetry && (
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={onRetry}
+            disabled={!isTeacher && remainingAttempts !== null && remainingAttempts <= 0}
+            aria-disabled={!isTeacher && remainingAttempts !== null && remainingAttempts <= 0}
+            title={(!isTeacher && remainingAttempts !== null && remainingAttempts <= 0) ? t('noAttemptsRemaining') : undefined}
+          >
+            {remainingAttempts !== null && remainingAttempts !== undefined
+              ? t('retryExamRemaining', { remaining: remainingAttempts })
+              : t('retryExam')}
+          </Button>
+        )}
+
         <Button
           size="lg"
           onClick={onReturnToCourse}
