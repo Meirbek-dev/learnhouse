@@ -17,18 +17,26 @@ interface UseTestGuardOptions {
   preventRightClick?: boolean;
   trackBlur?: boolean;
   trackDevTools?: boolean;
+  // New debounce options to prevent false positives
+  blurDebounceMs?: number; // Debounce blur events (default: 500ms)
+  devToolsThreshold?: number; // Pixels to consider DevTools open (default: 160)
+  devToolsCheckIntervalMs?: number; // How often to check for DevTools (default: 1000ms)
 }
 
 /**
- * React hook for quiz anti-cheat protection.
+ * React hook for quiz/exam anti-cheat protection with debouncing.
  *
  * Features:
- * - Tracks tab blur/focus loss
- * - Detects DevTools opening (heuristic)
- * - Prevents copy/paste
- * - Blocks context menu
- * - Intercepts common keyboard shortcuts
+ * - Tracks tab blur/focus loss (with debounce to avoid false positives)
+ * - Detects DevTools opening (heuristic with configurable threshold)
+ * - Prevents copy/paste (only reports if actual content selected/pasted)
+ * - Blocks context menu (only on right-click, not synthetic events)
+ * - Intercepts common keyboard shortcuts (skips editable fields)
  * - Maintains violation count and history
+ * - Debouncing to prevent false positives from rapid events
+ *
+ * @param options Configuration options for test guard
+ * @returns Methods to check lock status, count, violations, and reset
  */
 export function useTestGuard({
   onViolation,
@@ -38,9 +46,13 @@ export function useTestGuard({
   preventRightClick = true,
   trackBlur = true,
   trackDevTools = true,
+  blurDebounceMs = 500,
+  devToolsThreshold = 160,
+  devToolsCheckIntervalMs = 1000,
 }: UseTestGuardOptions) {
   const violations = useRef<Violation[]>([]);
   const locked = useRef(false);
+  const blurTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!enabled) return;
@@ -77,27 +89,59 @@ export function useTestGuard({
       }
     };
 
-    // 1. Blur/Focus tracking
+    // 1. Blur/Focus tracking with debounce to prevent false positives
     if (trackBlur) {
-      const onBlur = () => report('BLUR');
-      const onVisibility = () => {
-        if (document.hidden) report('BLUR');
+      const handleBlur = () => {
+        // Clear any existing timeout
+        if (blurTimeout.current) {
+          clearTimeout(blurTimeout.current);
+        }
+
+        // Debounce: only report if focus doesn't return within debounceMs
+        blurTimeout.current = setTimeout(() => {
+          // Double-check we're still blurred
+          if (document.hidden || !document.hasFocus()) {
+            report('BLUR');
+          }
+        }, blurDebounceMs);
       };
 
-      window.addEventListener('blur', onBlur);
+      const handleFocus = () => {
+        // User returned to tab - cancel pending blur report
+        if (blurTimeout.current) {
+          clearTimeout(blurTimeout.current);
+          blurTimeout.current = null;
+        }
+      };
+
+      const onVisibility = () => {
+        if (document.hidden) {
+          handleBlur();
+        } else {
+          handleFocus();
+        }
+      };
+
+      window.addEventListener('blur', handleBlur);
+      window.addEventListener('focus', handleFocus);
       document.addEventListener('visibilitychange', onVisibility);
 
       handlers.push(() => {
-        window.removeEventListener('blur', onBlur);
+        if (blurTimeout.current) {
+          clearTimeout(blurTimeout.current);
+        }
+        window.removeEventListener('blur', handleBlur);
+        window.removeEventListener('focus', handleFocus);
         document.removeEventListener('visibilitychange', onVisibility);
       });
     }
 
-    // 2. DevTools detection (heuristic)
+    // 2. DevTools detection (heuristic with configurable threshold)
     if (trackDevTools) {
-      const threshold = 160;
       let lastWidth = window.outerWidth;
       let lastHeight = window.outerHeight;
+      let devToolsViolationCount = 0;
+      const requiredConsistentChecks = 2; // Require 2 consistent checks before reporting
 
       const checkDevTools = () => {
         const widthDiff = window.outerWidth - window.innerWidth;
@@ -105,14 +149,25 @@ export function useTestGuard({
         const sizeChange =
           Math.abs(window.outerWidth - lastWidth) > 100 || Math.abs(window.outerHeight - lastHeight) > 100;
 
-        if ((widthDiff > threshold || heightDiff > threshold) && sizeChange) {
-          report('DEVTOOLS');
+        // Only report if threshold exceeded and significant size change
+        if ((widthDiff > devToolsThreshold || heightDiff > devToolsThreshold) && sizeChange) {
+          devToolsViolationCount++;
+
+          // Require multiple consistent checks to reduce false positives
+          if (devToolsViolationCount >= requiredConsistentChecks) {
+            report('DEVTOOLS');
+            devToolsViolationCount = 0; // Reset after reporting
+          }
+
           lastWidth = window.outerWidth;
           lastHeight = window.outerHeight;
+        } else {
+          // Reset count if conditions not met
+          devToolsViolationCount = 0;
         }
       };
 
-      const interval = setInterval(checkDevTools, 1000);
+      const interval = setInterval(checkDevTools, devToolsCheckIntervalMs);
 
       handlers.push(() => clearInterval(interval));
     }
@@ -201,7 +256,18 @@ export function useTestGuard({
     return () => {
       handlers.forEach((cleanup) => cleanup());
     };
-  }, [enabled, preventCopy, preventRightClick, trackBlur, trackDevTools, maxViolations, onViolation]);
+  }, [
+    enabled,
+    preventCopy,
+    preventRightClick,
+    trackBlur,
+    trackDevTools,
+    maxViolations,
+    onViolation,
+    blurDebounceMs,
+    devToolsThreshold,
+    devToolsCheckIntervalMs,
+  ]);
 
   return {
     isLocked: () => locked.current,

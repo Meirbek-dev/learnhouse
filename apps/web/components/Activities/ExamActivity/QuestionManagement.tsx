@@ -14,22 +14,11 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from '@components/ui/alert-dialog';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Dialog, DialogContent } from '@components/ui/dialog';
+import QuestionEditor from './QuestionEditor';
 import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
 import { getAPIUrl } from '@/services/config/config';
-import { Textarea } from '@components/ui/textarea';
-import { Checkbox } from '@components/ui/checkbox';
 import { Button } from '@components/ui/button';
-import { Label } from '@components/ui/label';
-import { Input } from '@components/ui/input';
 
 interface Question {
   id?: number;
@@ -58,6 +47,8 @@ export default function QuestionManagement({
   const t = useTranslations('Components.QuestionManagement');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+  const [inlineEditorOpen, setInlineEditorOpen] = useState(false);
+  const inlineEditorRef = useRef<HTMLDivElement>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [pendingDeleteUuid, setPendingDeleteUuid] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -72,7 +63,9 @@ export default function QuestionManagement({
       answer_options: [{ text: '', is_correct: false }],
       order_index: questions.length,
     });
-    setIsDialogOpen(true);
+    setInlineEditorOpen(true);
+    // scroll the inline editor into view after render
+    setTimeout(() => inlineEditorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
   };
 
   const handleExportCSV = async () => {
@@ -276,18 +269,7 @@ export default function QuestionManagement({
             onChange={handleImportCSV}
             className="hidden"
           />
-          <Dialog
-            open={isDialogOpen}
-            onOpenChange={setIsDialogOpen}
-          >
-            <DialogTrigger
-              render={
-                <Button onClick={handleAddQuestion}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t('addQuestion')}
-                </Button>
-              }
-            />
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
               <QuestionEditor
                 question={editingQuestion}
@@ -302,6 +284,7 @@ export default function QuestionManagement({
                   setIsDialogOpen(false);
                   setEditingQuestion(null);
                 }}
+                autoFocus
               />
             </DialogContent>
           </Dialog>
@@ -311,6 +294,34 @@ export default function QuestionManagement({
       {questions.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-gray-500">{t('noQuestions')}</CardContent>
+          <div className="flex justify-center p-4">
+            {inlineEditorOpen ? (
+              <Card>
+                <CardContent ref={inlineEditorRef}>
+                  <QuestionEditor
+                    question={editingQuestion}
+                    examUuid={examUuid}
+                    accessToken={accessToken}
+                    onSave={() => {
+                      setInlineEditorOpen(false);
+                      setEditingQuestion(null);
+                      onQuestionsChange();
+                    }}
+                    onCancel={() => {
+                      setInlineEditorOpen(false);
+                      setEditingQuestion(null);
+                    }}
+                    autoFocus
+                  />
+                </CardContent>
+              </Card>
+            ) : (
+              <Button variant="outline" onClick={handleAddQuestion}>
+                <Plus className="mr-2 h-4 w-4" />
+                {t('addQuestion')}
+              </Button>
+            )}
+          </div>
         </Card>
       ) : (
         <DragDropContext onDragEnd={handleDragEnd}>
@@ -374,6 +385,38 @@ export default function QuestionManagement({
                   </Draggable>
                 ))}
                 {provided.placeholder}
+
+                {/* Inline add button / editor */}
+                <div className="pt-2">
+                  {inlineEditorOpen ? (
+                    <Card>
+                      <CardContent ref={inlineEditorRef}>
+                        <QuestionEditor
+                          question={editingQuestion}
+                          examUuid={examUuid}
+                          accessToken={accessToken}
+                          onSave={() => {
+                            setInlineEditorOpen(false);
+                            setEditingQuestion(null);
+                            onQuestionsChange();
+                          }}
+                          onCancel={() => {
+                            setInlineEditorOpen(false);
+                            setEditingQuestion(null);
+                          }}
+                          autoFocus
+                        />
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <div className="flex justify-center">
+                      <Button variant="outline" size="sm" onClick={handleAddQuestion}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        {t('addQuestion')}
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </Droppable>
@@ -383,239 +426,4 @@ export default function QuestionManagement({
   );
 }
 
-interface QuestionEditorProps {
-  question: Question | null;
-  examUuid: string;
-  accessToken: string;
-  onSave: () => void;
-  onCancel: () => void;
-}
 
-function QuestionEditor({ question, examUuid, accessToken, onSave, onCancel }: QuestionEditorProps) {
-  const t = useTranslations('Components.QuestionManagement');
-  const [formData, setFormData] = useState<Question>(
-    question || {
-      question_text: '',
-      question_type: 'SINGLE_CHOICE',
-      points: 1,
-      explanation: '',
-      answer_options: [{ text: '', is_correct: false }],
-      order_index: 0,
-    },
-  );
-  const [isSaving, setIsSaving] = useState(false);
-
-  const handleSave = async () => {
-    if (!formData.question_text.trim()) {
-      toast.error(t('questionTextRequired'));
-      return;
-    }
-
-    if (formData.answer_options.length === 0) {
-      toast.error(t('atLeastOneOption'));
-      return;
-    }
-
-    setIsSaving(true);
-
-    try {
-      const isEditing = Boolean(formData.question_uuid);
-      const url = isEditing
-        ? `${getAPIUrl()}exams/questions/${formData.question_uuid}`
-        : `${getAPIUrl()}exams/${examUuid}/questions`;
-
-      const response = await fetch(url, {
-        method: isEditing ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          question_text: formData.question_text,
-          question_type: formData.question_type,
-          points: formData.points,
-          explanation: formData.explanation,
-          answer_options: formData.answer_options,
-          order_index: formData.order_index,
-        }),
-      });
-
-      if (!response.ok) throw new Error('Failed to save question');
-
-      toast.success(isEditing ? t('questionUpdated') : t('questionCreated'));
-      onSave();
-    } catch (error) {
-      console.error('Error saving question:', error);
-      toast.error(t('errorSavingQuestion'));
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const addOption = () => {
-    setFormData({
-      ...formData,
-      answer_options: [
-        ...formData.answer_options,
-        formData.question_type === 'MATCHING' ? { left: '', right: '' } : { text: '', is_correct: false },
-      ],
-    });
-  };
-
-  const removeOption = (index: number) => {
-    setFormData({
-      ...formData,
-      answer_options: formData.answer_options.filter((_, i) => i !== index),
-    });
-  };
-
-  const updateOption = (
-    index: number,
-    updates: Partial<{ text?: string; is_correct?: boolean; left?: string; right?: string }>,
-  ) => {
-    const newOptions = [...formData.answer_options];
-    newOptions[index] = { ...newOptions[index], ...updates };
-    setFormData({ ...formData, answer_options: newOptions });
-  };
-
-  return (
-    <>
-      <DialogHeader>
-        <DialogTitle>{formData.question_uuid ? t('editQuestion') : t('addNewQuestion')}</DialogTitle>
-        <DialogDescription>{t('fillInQuestionDetails')}</DialogDescription>
-      </DialogHeader>
-
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="question-text">{t('questionText')}</Label>
-          <Textarea
-            id="question-text"
-            value={formData.question_text}
-            onChange={(e) => setFormData({ ...formData, question_text: e.target.value })}
-            placeholder={t('questionTextPlaceholder')}
-            rows={3}
-          />
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="question-type">{t('questionType')}</Label>
-            <Select
-              value={formData.question_type}
-              onValueChange={(value: any) => setFormData({ ...formData, question_type: value })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="SINGLE_CHOICE">{t('single_choice')}</SelectItem>
-                <SelectItem value="MULTIPLE_CHOICE">{t('multiple_choice')}</SelectItem>
-                <SelectItem value="TRUE_FALSE">{t('true_false')}</SelectItem>
-                <SelectItem value="MATCHING">{t('matching')}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="points">{t('pointsLabel')}</Label>
-            <Input
-              id="points"
-              type="number"
-              min="1"
-              value={formData.points}
-              onChange={(e) => setFormData({ ...formData, points: Number.parseInt(e.target.value) })}
-            />
-          </div>
-        </div>
-
-        <div>
-          <Label>{t('answerOptions')}</Label>
-          <div className="mt-2 space-y-2">
-            {formData.answer_options.map((option, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-2"
-              >
-                {formData.question_type === 'MATCHING' ? (
-                  <>
-                    <Input
-                      placeholder={t('leftSide')}
-                      value={option.left || ''}
-                      onChange={(e) => updateOption(index, { left: e.target.value })}
-                      className="flex-1"
-                    />
-                    <span className="pt-2">→</span>
-                    <Input
-                      placeholder={t('rightSide')}
-                      value={option.right || ''}
-                      onChange={(e) => updateOption(index, { right: e.target.value })}
-                      className="flex-1"
-                    />
-                  </>
-                ) : (
-                  <>
-                    <Checkbox
-                      checked={option.is_correct}
-                      onCheckedChange={(checked) => updateOption(index, { is_correct: checked })}
-                    />
-                    <Input
-                      placeholder={t('optionText', { number: index + 1 })}
-                      value={option.text}
-                      onChange={(e) => updateOption(index, { text: e.target.value })}
-                      className="flex-1"
-                    />
-                  </>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeOption(index)}
-                  disabled={formData.answer_options.length === 1}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={addOption}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              {t('addOption')}
-            </Button>
-          </div>
-        </div>
-
-        <div>
-          <Label htmlFor="explanation">
-            {t('explanation')} {t('optional')}
-          </Label>
-          <Textarea
-            id="explanation"
-            value={formData.explanation || ''}
-            onChange={(e) => setFormData({ ...formData, explanation: e.target.value })}
-            placeholder={t('explanationPlaceholder')}
-            rows={2}
-          />
-        </div>
-
-        <div className="flex justify-end gap-2">
-          <Button
-            variant="outline"
-            onClick={onCancel}
-            disabled={isSaving}
-          >
-            {t('cancel')}
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={isSaving}
-          >
-            {isSaving ? t('saving') : t('save')}
-          </Button>
-        </div>
-      </div>
-    </>
-  );
-}

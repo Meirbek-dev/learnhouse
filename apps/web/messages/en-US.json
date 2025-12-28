@@ -167,6 +167,7 @@
       "violationWarning": "Violations: {count}/{max}. Your exam may be auto-submitted if you exceed the limit.",
       "yourAnswer": "Your Answer",
       "fullscreenNotSupported": "Fullscreen mode not supported by your browser",
+      "fullscreenRecommended": "Fullscreen mode is recommended for this exam",
       "fullscreenExited": "Fullscreen exited — violation recorded",
       "rightClickDisabled": "Right-click is disabled during the exam",
       "devToolsDetected": "Developer tools detected — violation recorded",

@@ -154,23 +154,40 @@ export default function ExamTakingInterface({
     trackDevTools: settings.devtools_detection,
     maxViolations: settings.violation_threshold || 999,
     onViolation: handleViolation,
+    // Debounce options to reduce false positives
+    blurDebounceMs: 500, // Wait 500ms before reporting blur (user might switch back quickly)
+    devToolsThreshold: 180, // More conservative threshold for DevTools detection
+    devToolsCheckIntervalMs: 2000, // Check less frequently to avoid performance impact
   });
 
 
 
-  // Fullscreen enforcement
+  // Fullscreen enforcement with grace period and better UX
   useEffect(() => {
     if (!settings.fullscreen_enforcement) return;
+
+    let fullscreenExitTimeout: NodeJS.Timeout | null = null;
+    let fullscreenSupported = true;
+    let userInitiatedExit = false;
 
     const requestFullscreen = async () => {
       try {
         if (examContainerRef.current && !document.fullscreenElement) {
           await examContainerRef.current.requestFullscreen();
           setIsFullscreen(true);
+          fullscreenSupported = true;
         }
-      } catch (error) {
+      } catch (error: any) {
         console.warn('Fullscreen request failed:', error);
-        toast.warning(t('fullscreenNotSupported'));
+        fullscreenSupported = false;
+
+        // Show warning but don't penalize if browser doesn't support fullscreen
+        if (error.name === 'TypeError' || error.message?.includes('not supported')) {
+          toast.warning(t('fullscreenNotSupported'));
+        } else {
+          // User denied or other error - show message but allow exam to continue
+          toast.info(t('fullscreenRecommended'));
+        }
       }
     };
 
@@ -178,19 +195,47 @@ export default function ExamTakingInterface({
       const inFullscreen = !!document.fullscreenElement;
       setIsFullscreen(inFullscreen);
 
-      if (!inFullscreen && settings.fullscreen_enforcement) {
-        toast.warning(t('fullscreenExited'));
-        await handleViolation('FULLSCREEN_EXIT', violationCount + 1);
+      if (!inFullscreen && settings.fullscreen_enforcement && fullscreenSupported) {
+        // Clear any existing timeout
+        if (fullscreenExitTimeout) {
+          clearTimeout(fullscreenExitTimeout);
+        }
+
+        // Grace period: give user 3 seconds to return to fullscreen before reporting violation
+        fullscreenExitTimeout = setTimeout(() => {
+          // Only report if still not in fullscreen after grace period
+          if (!document.fullscreenElement && !userInitiatedExit) {
+            toast.warning(t('fullscreenExited'));
+            void handleViolation('FULLSCREEN_EXIT', violationCount + 1);
+
+            // Optionally try to re-enter fullscreen
+            if (settings.fullscreen_enforcement) {
+              void requestFullscreen();
+            }
+          }
+        }, 3000); // 3 second grace period
+      } else if (inFullscreen && fullscreenExitTimeout) {
+        // User returned to fullscreen within grace period - cancel violation
+        clearTimeout(fullscreenExitTimeout);
+        fullscreenExitTimeout = null;
       }
     };
 
+    // Request fullscreen on mount
     void requestFullscreen();
     document.addEventListener('fullscreenchange', handleFullscreenChange);
 
     return () => {
+      if (fullscreenExitTimeout) {
+        clearTimeout(fullscreenExitTimeout);
+      }
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      // Mark exit as user-initiated when component unmounts (exam ended)
+      userInitiatedExit = true;
       if (document.fullscreenElement) {
-        void document.exitFullscreen();
+        void document.exitFullscreen().catch(() => {
+          /* ignore errors on cleanup */
+        });
       }
     };
   }, [settings.fullscreen_enforcement, handleViolation, t, violationCount]);
