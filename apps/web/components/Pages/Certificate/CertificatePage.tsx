@@ -3,6 +3,7 @@
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserCertificates } from '@services/courses/certifications';
+import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
@@ -12,7 +13,6 @@ import html2canvas from 'html2canvas';
 import type React from 'react';
 import QRCode from 'qrcode';
 import jsPDF from 'jspdf';
-import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 
 interface CertificatePageProps {
   orgslug: string;
@@ -478,7 +478,11 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <SimpleAlertDialog open={dialogAlertOpen} onOpenChange={setDialogAlertOpen} description={dialogAlertMessage} />
+      <SimpleAlertDialog
+        open={dialogAlertOpen}
+        onOpenChange={setDialogAlertOpen}
+        description={dialogAlertMessage}
+      />
       <div className="mx-auto max-w-4xl px-4">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">

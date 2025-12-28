@@ -27,7 +27,15 @@ interface ExamResultsProps {
   isTeacher?: boolean;
 }
 
-export default function ExamResults({ exam, attempt, questions, onReturnToCourse, onRetry, remainingAttempts = null, isTeacher = false }: ExamResultsProps) {
+export default function ExamResults({
+  exam,
+  attempt,
+  questions,
+  onReturnToCourse,
+  onRetry,
+  remainingAttempts = null,
+  isTeacher = false,
+}: ExamResultsProps) {
   const t = useTranslations('Activities.ExamActivity');
 
   const settings = exam.settings || {};
@@ -162,6 +170,31 @@ export default function ExamResults({ exam, attempt, questions, onReturnToCourse
     }
   };
 
+  const handleExportCSV = () => {
+    const headers = [t('question'), t('yourAnswer'), t('correctAnswer'), t('status'), t('points')];
+    const rows = orderedQuestions.map((q) => {
+      const status = getAnswerStatus(q);
+      const your = renderUserAnswer(q);
+      const correct = showCorrectAnswers ? (Array.isArray(renderCorrectAnswer(q)) ? renderCorrectAnswer(q) : '') : '';
+      const yourText =
+        typeof your === 'string' ? your : your === null ? '' : typeof your === 'object' ? JSON.stringify(your) : '';
+      const correctText =
+        typeof correct === 'string' ? correct : typeof correct === 'object' ? JSON.stringify(correct) : '';
+      return [q.question_text.replace(/\n/g, ' '), yourText, correctText, status, String(q.points)];
+    });
+
+    const csv = [headers, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${exam.title}-results.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       {/* Score Card */}
@@ -284,6 +317,14 @@ export default function ExamResults({ exam, attempt, questions, onReturnToCourse
 
       {/* Actions */}
       <div className="flex items-center justify-center space-x-4">
+        <Button
+          size="lg"
+          variant="outline"
+          onClick={handleExportCSV}
+        >
+          {t('downloadCsv')}
+        </Button>
+
         {onRetry && (
           <Button
             size="lg"
@@ -291,7 +332,9 @@ export default function ExamResults({ exam, attempt, questions, onReturnToCourse
             onClick={onRetry}
             disabled={!isTeacher && remainingAttempts !== null && remainingAttempts <= 0}
             aria-disabled={!isTeacher && remainingAttempts !== null && remainingAttempts <= 0}
-            title={(!isTeacher && remainingAttempts !== null && remainingAttempts <= 0) ? t('noAttemptsRemaining') : undefined}
+            title={
+              !isTeacher && remainingAttempts !== null && remainingAttempts <= 0 ? t('noAttemptsRemaining') : undefined
+            }
           >
             {remainingAttempts !== null && remainingAttempts !== undefined
               ? t('retryExamRemaining', { remaining: remainingAttempts })

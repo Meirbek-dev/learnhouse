@@ -1,26 +1,27 @@
 'use client';
 
+import { useCallback, useEffect, useReducer, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useReducer, useCallback, useState } from 'react';
-import { toast } from 'sonner';
 import useSWR, { mutate } from 'swr';
+import { toast } from 'sonner';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import type { AttemptData } from './state/examFlowReducer';
 import { swrFetcher } from '@/services/utils/ts/requests';
+import { examFlowReducer } from './state/examFlowReducer';
 import ExamResultsDashboard from './ExamResultsDashboard';
 import ExamTakingInterface from './ExamTakingInterface';
 import QuestionManagement from './QuestionManagement';
 import { getAPIUrl } from '@/services/config/config';
+import { examActions } from './state/examActions';
+import { Button } from '@/components/ui/button';
 import ExamPreScreen from './ExamPreScreen';
 import ExamSettings from './ExamSettings';
 import ExamResults from './ExamResults';
-import { examFlowReducer } from './state/examFlowReducer';
-import { examActions } from './state/examActions';
-import type { AttemptData } from './state/examFlowReducer';
+import ExamLayout from './ExamLayout';
 
 interface ExamActivityProps {
   activity: any;
@@ -52,7 +53,6 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
   // Safe exam uuid reference to avoid accessing property on undefined
   const examUuid = exam?.exam_uuid ?? null;
 
-
   // Fetch questions
   const {
     data: questions,
@@ -67,9 +67,8 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
     data: userAttempts,
     error: attemptsError,
     mutate: mutateAttempts,
-  } = useSWR(
-    examUuid && accessToken ? `${getAPIUrl()}exams/${examUuid}/attempts/me` : null,
-    (url) => swrFetcher(url, accessToken),
+  } = useSWR(examUuid && accessToken ? `${getAPIUrl()}exams/${examUuid}/attempts/me` : null, (url) =>
+    swrFetcher(url, accessToken),
   );
 
   // Fetch all attempts for teachers
@@ -113,10 +112,13 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
     }
   }, [exam, questions, userAttempts, examError, questionsError, attemptsError, isTeacher, t, state.phase]);
 
-  const handleStartExam = useCallback((attempt: AttemptData) => {
-    dispatch(examActions.startExam(attempt));
-    void mutateQuestions?.();
-  }, [mutateQuestions]);
+  const handleStartExam = useCallback(
+    (attempt: AttemptData) => {
+      dispatch(examActions.startExam(attempt));
+      void mutateQuestions?.();
+    },
+    [mutateQuestions],
+  );
 
   const handleCompleteExam = useCallback(async () => {
     // Refresh attempts data
@@ -125,16 +127,18 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
     // Revalidate trail data
     try {
       await mutate(`${getAPIUrl()}trail/org/${exam?.org_id}/trail`);
-    } catch (err) {
-      console.warn('Failed to revalidate trail after exam completion', err);
+    } catch (error) {
+      console.warn('Failed to revalidate trail after exam completion', error);
     }
 
     // Revalidate course meta
     try {
       const withUnpublishedActivities = course?.withUnpublishedActivities || false;
-      await mutate(`${getAPIUrl()}courses/${course?.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`);
-    } catch (err) {
-      console.warn('Failed to revalidate course meta after exam completion', err);
+      await mutate(
+        `${getAPIUrl()}courses/${course?.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+      );
+    } catch (error) {
+      console.warn('Failed to revalidate course meta after exam completion', error);
     }
 
     // Fetch the completed attempt
@@ -167,7 +171,10 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <p className="text-destructive">{t('errorLoadingExam')}</p>
-          <Button onClick={() => dispatch(examActions.retry())} className="mt-4">
+          <Button
+            onClick={() => dispatch(examActions.retry())}
+            className="mt-4"
+          >
             {t('tryAgain')}
           </Button>
         </div>
@@ -177,99 +184,127 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
 
   // Teacher management view
   if (state.phase === 'manage' && isTeacher) {
+    const totalQuestions = state.questions?.length ?? 0;
+    const totalAttempts = allAttempts?.length ?? 0;
+    const avgScore =
+      allAttempts && allAttempts.length > 0
+        ? Math.round(allAttempts.reduce((s: number, a: any) => s + (a.percentage || 0), 0) / allAttempts.length)
+        : 0;
+
     return (
-      <div className="mx-auto max-w-6xl space-y-6 p-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold">{activity.name}</h1>
-            <p className="text-muted-foreground">{t('manageExam')}</p>
+      <ExamLayout title={activity.name}>
+        <div className="space-y-6 p-0">
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold">{activity.name}</h1>
+              <p className="text-muted-foreground">{t('manageExam')}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => setActiveTab('questions')}
+                variant="outline"
+              >
+                {t('manageQuestions')}
+              </Button>
+              <Button
+                onClick={() => dispatch(examActions.exitManagementMode(userAttempts || []))}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {t('previewExam')}
+              </Button>
+            </div>
           </div>
-          <Button
-            onClick={() => dispatch(examActions.exitManagementMode(userAttempts || []))}
-            variant="outline"
-          >
-            {t('previewExam')}
-          </Button>
-        </div>
 
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-        >
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="questions">{t('questions')}</TabsTrigger>
-            <TabsTrigger value="settings">{t('settings')}</TabsTrigger>
-            <TabsTrigger value="results">{t('results')}</TabsTrigger>
-          </TabsList>
-
-          <TabsContent
-            value="questions"
-            className="mt-6"
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
           >
-            <QuestionManagement
-              examUuid={examUuid}
-              questions={questions}
-              accessToken={accessToken!}
-              onQuestionsChange={() => mutateQuestions()}
-            />
-          </TabsContent>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="questions">{t('questions')}</TabsTrigger>
+              <TabsTrigger value="settings">{t('settings')}</TabsTrigger>
+              <TabsTrigger value="results">{t('results')}</TabsTrigger>
+            </TabsList>
 
-          <TabsContent
-            value="settings"
-            className="mt-6"
-          >
-            <ExamSettings
-              exam={exam}
-              courseId={course.id}
-              accessToken={accessToken!}
-              onSettingsUpdated={() => mutateExam()}
-            />
-          </TabsContent>
-
-          <TabsContent
-            value="results"
-            className="mt-6"
-          >
-            {allAttempts && (
-              <ExamResultsDashboard
+            <TabsContent
+              value="questions"
+              className="mt-6"
+            >
+              <QuestionManagement
                 examUuid={examUuid}
-                attempts={allAttempts}
-                onViewAttempt={(attemptUuid) => {
-                  // TODO: Navigate to attempt detail view
-                  toast.info(t('viewAttempt', { attempt: attemptUuid }));
-                }}
+                questions={questions}
+                accessToken={accessToken!}
+                onQuestionsChange={() => mutateQuestions()}
               />
-            )}
-          </TabsContent>
-        </Tabs>
-      </div>
+            </TabsContent>
+
+            <TabsContent
+              value="settings"
+              className="mt-6"
+            >
+              <ExamSettings
+                exam={exam}
+                courseId={course.id}
+                accessToken={accessToken!}
+                onSettingsUpdated={() => mutateExam()}
+              />
+            </TabsContent>
+
+            <TabsContent
+              value="results"
+              className="mt-6"
+            >
+              {allAttempts && (
+                <ExamResultsDashboard
+                  examUuid={examUuid}
+                  attempts={allAttempts}
+                  onViewAttempt={(attemptUuid) => {
+                    toast.info(t('viewAttempt', { attempt: attemptUuid }));
+                  }}
+                />
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
+      </ExamLayout>
     );
   }
 
   // Student views
   if (state.phase === 'pre-exam') {
     return (
-      <ExamPreScreen
-        exam={state.exam}
-        questionCount={state.questions.length}
-        userAttempts={state.userAttempts}
-        accessToken={accessToken!}
-        onStartExam={handleStartExam}
-        isTeacher={isTeacher}
-        onBackToManage={isTeacher ? () => dispatch(examActions.enterManagementMode()) : undefined}
-      />
+      <ExamLayout
+        title={state.exam.title}
+        startedAt={undefined}
+        timeLimitMinutes={state.exam.settings?.time_limit ?? null}
+      >
+        <ExamPreScreen
+          exam={state.exam}
+          questionCount={state.questions.length}
+          userAttempts={state.userAttempts}
+          accessToken={accessToken!}
+          onStartExam={handleStartExam}
+          isTeacher={isTeacher}
+          onBackToManage={isTeacher ? () => dispatch(examActions.enterManagementMode()) : undefined}
+        />
+      </ExamLayout>
     );
   }
 
   if (state.phase === 'taking') {
     return (
-      <ExamTakingInterface
-        exam={state.exam}
-        questions={state.questions}
-        attempt={state.attempt}
-        accessToken={accessToken!}
-        onComplete={handleCompleteExam}
-      />
+      <ExamLayout
+        title={state.exam.title}
+        startedAt={state.attempt?.started_at}
+        timeLimitMinutes={state.exam.settings?.time_limit ?? null}
+      >
+        <ExamTakingInterface
+          exam={state.exam}
+          questions={state.questions}
+          attempt={state.attempt}
+          accessToken={accessToken!}
+          onComplete={handleCompleteExam}
+        />
+      </ExamLayout>
     );
   }
 
@@ -280,12 +315,12 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({} as any));
+        const error = await response.json().catch(() => ({}) as any);
         toast.error(error.detail || t('errorStartingExam'));
         return;
       }
@@ -293,8 +328,8 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
       const attempt = await response.json();
       toast.success(t('examStarted'));
       handleStartExam(attempt);
-    } catch (err) {
-      console.error('Failed to start retry attempt:', err);
+    } catch (error) {
+      console.error('Failed to start retry attempt:', error);
       toast.error(t('errorStartingExam'));
     }
   };
@@ -307,15 +342,21 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
         : state.exam.settings.attempt_limit - attempts.length;
 
     return (
-      <ExamResults
-        exam={state.exam}
-        attempt={state.attempt}
-        questions={state.questions}
-        onReturnToCourse={handleReturnToCourse}
-        onRetry={handleRetry}
-        remainingAttempts={remainingAttempts}
-        isTeacher={isTeacher}
-      />
+      <ExamLayout
+        title={state.exam.title}
+        startedAt={state.attempt?.started_at ?? undefined}
+        timeLimitMinutes={state.exam.settings?.time_limit ?? null}
+      >
+        <ExamResults
+          exam={state.exam}
+          attempt={state.attempt}
+          questions={state.questions}
+          onReturnToCourse={handleReturnToCourse}
+          onRetry={handleRetry}
+          remainingAttempts={remainingAttempts}
+          isTeacher={isTeacher}
+        />
+      </ExamLayout>
     );
   }
 

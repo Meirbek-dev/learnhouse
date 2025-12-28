@@ -4,7 +4,8 @@
 
 ### 1. ✅ Shuffle Answers Always ON (Enforced)
 
-- **Backend**: Field validator in `ExamSettingsBase` forces `shuffle_answers=True` regardless of input
+- **Backend**: Field validator in `ExamSettingsBase` forces `shuffle_answers=True` regardless of
+  input
 - **Frontend**: Removed UI toggle from `ExamSettings.tsx` and `ExamActivityModal.tsx`
 - **Behavior**: All exam submissions automatically have `shuffle_answers: true` enforced server-side
 - **Files Modified**:
@@ -24,11 +25,13 @@
 
 ### 3. ✅ Fullscreen Enforcement and Detection
 
-- **Implementation**: `ExamTakingInterface` requests fullscreen on mount when `settings.fullscreen_enforcement=true`
+- **Implementation**: `ExamTakingInterface` requests fullscreen on mount when
+  `settings.fullscreen_enforcement=true`
 - **Detection**: Listens to `fullscreenchange` events
 - **Violation**: Reports `FULLSCREEN_EXIT` violation when student exits fullscreen
 - **Auto-Submit**: Triggers auto-submit via same violation threshold logic
-- **Browser Compatibility**: Gracefully handles browsers that block fullscreen requests with warning toast
+- **Browser Compatibility**: Gracefully handles browsers that block fullscreen requests with warning
+  toast
 - **Cleanup**: Exits fullscreen on component unmount
 - **Files Modified**:
   - `apps/web/components/Activities/ExamActivity/ExamTakingInterface.tsx`
@@ -101,8 +104,10 @@
 
 ## Security Considerations
 
-1. **Client-Side Enforcement**: All anti-cheat measures are client-side and can be bypassed by determined students
-2. **Server-Side Validation**: Critical data (scores, time limits, violations) are validated server-side
+1. **Client-Side Enforcement**: All anti-cheat measures are client-side and can be bypassed by
+   determined students
+2. **Server-Side Validation**: Critical data (scores, time limits, violations) are validated
+   server-side
 3. **Violation Logging**: All violations are timestamped and stored for review
 4. **Teacher Review**: Teachers can view violation logs in results dashboard
 5. **Proctoring**: For high-stakes exams, consider adding webcam proctoring or in-person supervision

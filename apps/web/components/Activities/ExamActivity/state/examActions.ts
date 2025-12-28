@@ -1,4 +1,4 @@
-import type { ExamFlowAction, ExamData, QuestionData, AttemptData, ErrorInfo } from './examFlowReducer';
+import type { AttemptData, ErrorInfo, ExamData, ExamFlowAction, QuestionData } from './examFlowReducer';
 
 export const examActions = {
   setLoading: (): ExamFlowAction => ({

@@ -23,13 +23,7 @@ export interface Question {
   order_index: number;
 }
 
-export type QuestionEditorMode =
-  | 'idle'
-  | 'editing-inline'
-  | 'editing-modal'
-  | 'deleting'
-  | 'importing'
-  | 'exporting';
+export type QuestionEditorMode = 'idle' | 'editing-inline' | 'editing-modal' | 'deleting' | 'importing' | 'exporting';
 
 export type QuestionEditorState =
   | { mode: 'idle' }
@@ -52,12 +46,9 @@ export type QuestionEditorAction =
   | { type: 'FINISH_EXPORT' }
   | { type: 'RESET_TO_IDLE' };
 
-export function questionEditorReducer(
-  state: QuestionEditorState,
-  action: QuestionEditorAction
-): QuestionEditorState {
+export function questionEditorReducer(state: QuestionEditorState, action: QuestionEditorAction): QuestionEditorState {
   switch (action.type) {
-    case 'START_INLINE_EDIT':
+    case 'START_INLINE_EDIT': {
       // Can only start editing from idle state
       if (state.mode !== 'idle') return state;
 
@@ -65,8 +56,9 @@ export function questionEditorReducer(
         mode: 'editing-inline',
         question: action.question,
       };
+    }
 
-    case 'START_MODAL_EDIT':
+    case 'START_MODAL_EDIT': {
       // Can only start editing from idle state
       if (state.mode !== 'idle') return state;
 
@@ -74,14 +66,16 @@ export function questionEditorReducer(
         mode: 'editing-modal',
         question: action.question,
       };
+    }
 
-    case 'CANCEL_EDIT':
+    case 'CANCEL_EDIT': {
       // Can cancel from any editing mode
       if (state.mode !== 'editing-inline' && state.mode !== 'editing-modal') return state;
 
       return { mode: 'idle' };
+    }
 
-    case 'START_DELETE':
+    case 'START_DELETE': {
       // Can only delete from idle state
       if (state.mode !== 'idle') return state;
 
@@ -90,8 +84,9 @@ export function questionEditorReducer(
         questionUuid: action.questionUuid,
         isDeleting: false,
       };
+    }
 
-    case 'CONFIRM_DELETE':
+    case 'CONFIRM_DELETE': {
       // Can only confirm from deleting state
       if (state.mode !== 'deleting') return state;
 
@@ -99,14 +94,16 @@ export function questionEditorReducer(
         ...state,
         isDeleting: true,
       };
+    }
 
-    case 'CANCEL_DELETE':
+    case 'CANCEL_DELETE': {
       // Can only cancel from deleting state
       if (state.mode !== 'deleting') return state;
 
       return { mode: 'idle' };
+    }
 
-    case 'START_IMPORT':
+    case 'START_IMPORT': {
       // Can only import from idle state
       if (state.mode !== 'idle') return state;
 
@@ -114,30 +111,36 @@ export function questionEditorReducer(
         mode: 'importing',
         file: action.file,
       };
+    }
 
-    case 'FINISH_IMPORT':
+    case 'FINISH_IMPORT': {
       // Can only finish from importing state
       if (state.mode !== 'importing') return state;
 
       return { mode: 'idle' };
+    }
 
-    case 'START_EXPORT':
+    case 'START_EXPORT': {
       // Can only export from idle state
       if (state.mode !== 'idle') return state;
 
       return { mode: 'exporting' };
+    }
 
-    case 'FINISH_EXPORT':
+    case 'FINISH_EXPORT': {
       // Can only finish from exporting state
       if (state.mode !== 'exporting') return state;
 
       return { mode: 'idle' };
+    }
 
-    case 'RESET_TO_IDLE':
+    case 'RESET_TO_IDLE': {
       return { mode: 'idle' };
+    }
 
-    default:
+    default: {
       return state;
+    }
   }
 }
 

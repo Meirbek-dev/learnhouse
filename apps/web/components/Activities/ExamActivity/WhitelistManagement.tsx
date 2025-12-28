@@ -1,8 +1,8 @@
 'use client';
 
+import { useEffect, useEffectEvent, useState } from 'react';
 import { Search, UserCheck, UserX } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState, useEffect, useEffectEvent } from 'react';
 import { toast } from 'sonner';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';

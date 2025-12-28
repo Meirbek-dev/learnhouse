@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 interface PersistedExamData {
   attemptUuid: string;
@@ -58,7 +58,7 @@ export function useExamPersistence({
       const expirationMs = expirationHours * 60 * 60 * 1000;
       const keysToRemove: string[] = [];
 
-      for (let i = 0; i < localStorage.length; i++) {
+      for (let i = 0; i < localStorage.length; i += 1) {
         const key = localStorage.key(i);
         if (!key?.startsWith(STORAGE_KEY_PREFIX)) continue;
 

@@ -2,7 +2,8 @@
 
 ## Status: ✅ IMPLEMENTED (Dec 27, 2025)
 
-All planned features have been implemented. See [exam-implementation-notes.md](exam-implementation-notes.md) for details.
+All planned features have been implemented. See
+[exam-implementation-notes.md](exam-implementation-notes.md) for details.
 
 ## Overview
 
@@ -15,7 +16,8 @@ Students take exams under optional anti-cheating measures and can review results
 ### ✅ Completed Features
 
 - Exam CRUD operations (create, read, update, delete)
-- Question bank management with all 4 question types (SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE, MATCHING)
+- Question bank management with all 4 question types (SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE,
+  MATCHING)
 - CSV import/export for questions
 - Attempt lifecycle (start, submit, auto-submit on time/violations)
 - Violation recording with structured logging

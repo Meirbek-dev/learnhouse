@@ -1,13 +1,25 @@
 'use client';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock, Download, Eye, TrendingDown, TrendingUp, Users } from 'lucide-react';
+import { getAPIUrl } from '@/services/config/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 interface AttemptData {
   attempt_uuid: string;
@@ -29,7 +41,8 @@ interface AttemptData {
 interface ExamResultsDashboardProps {
   examUuid: string;
   attempts: AttemptData[];
-  onViewAttempt: (attemptUuid: string) => void;
+  // optional callback for parent-level navigation; dashboard also provides internal modal
+  onViewAttempt?: (attemptUuid: string) => void;
 }
 
 export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt }: ExamResultsDashboardProps) {
@@ -63,11 +76,10 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
                     (b.duration_seconds != null
                       ? b.duration_seconds
                       : b.duration_minutes != null
-                      ? Math.round(b.duration_minutes * 60)
-                      : 0),
+                        ? Math.round(b.duration_minutes * 60)
+                        : 0),
                   0,
-                ) /
-                submitted.length,
+                ) / submitted.length,
             )
           : 0,
     };
@@ -121,6 +133,8 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
     }
   };
 
+  const escapeCsv = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+
   const handleExportCSV = () => {
     const headers = [
       t('exportHeaders.studentName'),
@@ -135,21 +149,26 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
     ];
 
     const rows = filteredAttempts.map((a) => {
-      const durationSeconds = a.duration_seconds != null ? a.duration_seconds : a.duration_minutes != null ? Math.round(a.duration_minutes * 60) : null;
+      const durationSeconds =
+        a.duration_seconds != null
+          ? a.duration_seconds
+          : a.duration_minutes != null
+            ? Math.round(a.duration_minutes * 60)
+            : null;
       return [
-        a.user_name,
-        a.user_email,
-        a.started_at,
-        a.finished_at || '',
-        durationSeconds !== null ? formatDuration(durationSeconds) : '',
-        getStatusLabel(a.status),
-        `${a.score}/${a.max_score}`,
-        `${a.percentage}%`,
-        a.violation_count.toString(),
+        escapeCsv(a.user_name),
+        escapeCsv(a.user_email),
+        escapeCsv(a.started_at),
+        escapeCsv(a.finished_at || ''),
+        escapeCsv(durationSeconds !== null ? formatDuration(durationSeconds) : ''),
+        escapeCsv(getStatusLabel(a.status)),
+        escapeCsv(`${a.score}/${a.max_score}`),
+        escapeCsv(`${a.percentage}%`),
+        escapeCsv(a.violation_count.toString()),
       ];
     });
 
-    const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
+    const csv = [headers.map(escapeCsv).join(','), ...rows.map((row) => row.join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -157,6 +176,7 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
     link.download = `exam-results-${examUuid}-${new Date().toISOString()}.csv`;
     link.click();
     URL.revokeObjectURL(url);
+    toast.success(t('exportStarted'));
   };
 
   const getStatusBadge = (status: string) => {
@@ -174,6 +194,35 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
         return <Badge variant="outline">{status}</Badge>;
       }
     }
+  };
+
+  // Attempt detail modal state
+  const [selectedAttemptUuid, setSelectedAttemptUuid] = useState<string | null>(null);
+  const [selectedAttempt, setSelectedAttempt] = useState<any | null>(null);
+  const [isAttemptLoading, setIsAttemptLoading] = useState(false);
+
+  const handleOpenAttempt = async (attemptUuid: string) => {
+    setSelectedAttemptUuid(attemptUuid);
+    setSelectedAttempt(null);
+    setIsAttemptLoading(true);
+
+    try {
+      const res = await fetch(`${getAPIUrl()}exams/${examUuid}/attempts/${attemptUuid}`);
+      if (!res.ok) throw new Error('Failed to fetch attempt');
+      const data = await res.json();
+      setSelectedAttempt(data);
+    } catch (err) {
+      console.error('Failed to load attempt detail', err);
+      setSelectedAttempt(null);
+    } finally {
+      setIsAttemptLoading(false);
+    }
+  };
+
+  const handleCloseAttempt = () => {
+    setSelectedAttemptUuid(null);
+    setSelectedAttempt(null);
+    setIsAttemptLoading(false);
   };
 
   const formatDuration = (seconds: number | null | undefined) => {
@@ -262,6 +311,7 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
           <div className="flex gap-4">
             <Input
               placeholder={t('searchStudents')}
+              aria-label={t('searchStudents')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="max-w-sm"
@@ -298,80 +348,276 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
               variant="outline"
               size="sm"
               onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              aria-label={t('toggleSortOrder')}
+              title={t('toggleSortOrder')}
             >
               {sortOrder === 'asc' ? '↑' : '↓'}
             </Button>
           </div>
 
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('student')}</TableHead>
-                  <TableHead>{t('startedAt')}</TableHead>
-                  <TableHead>{t('duration')}</TableHead>
-                  <TableHead>{t('status')}</TableHead>
-                  <TableHead>{t('score')}</TableHead>
-                  <TableHead>{t('violations')}</TableHead>
-                  <TableHead className="text-right">{t('actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredAttempts.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={7}
-                      className="text-muted-foreground text-center"
-                    >
-                      {t('noAttempts')}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredAttempts.map((attempt) => (
-                    <TableRow key={attempt.attempt_uuid}>
-                      <TableCell>
+          <div>
+            {/* Small screen: stacked list */}
+            <div className="space-y-3 md:hidden">
+              {filteredAttempts.length === 0 ? (
+                <div className="text-muted-foreground text-center">{t('noAttempts')}</div>
+              ) : (
+                filteredAttempts.map((attempt) => (
+                  <div
+                    key={attempt.attempt_uuid}
+                    className="rounded-lg border p-3"
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleOpenAttempt(attempt.attempt_uuid);
+                      }
+                    }}
+                    onClick={() => handleOpenAttempt(attempt.attempt_uuid)}
+                    aria-label={t('openAttemptCard', { name: attempt.user_name })}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
                         <div className="font-medium">{attempt.user_name}</div>
-                        <div className="text-muted-foreground text-sm">{attempt.user_email}</div>
-                      </TableCell>
-                      <TableCell>{new Date(attempt.started_at).toLocaleString()}</TableCell>
-                      <TableCell>
-                        {(() => {
-                          const durationSeconds = attempt.duration_seconds != null ? attempt.duration_seconds : attempt.duration_minutes != null ? Math.round(attempt.duration_minutes * 60) : null;
-                          return durationSeconds !== null ? formatDuration(durationSeconds) : '-';
-                        })()}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(attempt.status)}</TableCell>
-                      <TableCell>
-                        <div className="font-medium">
+                        <div className="text-sm text-gray-500">{attempt.user_email}</div>
+                        <div className="mt-2 text-sm text-gray-600">
+                          {t('startedAt')}: {new Date(attempt.started_at).toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-semibold">{attempt.percentage}%</div>
+                        <div className="text-sm text-gray-500">
                           {attempt.score}/{attempt.max_score}
                         </div>
-                        <div className="text-muted-foreground text-sm">{attempt.percentage}%</div>
-                      </TableCell>
-                      <TableCell>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {getStatusBadge(attempt.status)}
                         {attempt.violation_count > 0 ? (
                           <Badge variant="destructive">{attempt.violation_count}</Badge>
                         ) : (
-                          <span className="text-muted-foreground">0</span>
+                          <span className="text-sm text-gray-500">0</span>
                         )}
-                      </TableCell>
-                      <TableCell className="text-right">
+                      </div>
+
+                      <div>
                         <Button
-                          variant="ghost"
                           size="sm"
-                          onClick={() => onViewAttempt(attempt.attempt_uuid)}
+                          variant="ghost"
+                          onClick={() => handleOpenAttempt(attempt.attempt_uuid)}
+                          aria-label={t('viewAttemptAria', { name: attempt.user_name })}
                         >
-                          <Eye className="mr-2 h-4 w-4" />
                           {t('view')}
                         </Button>
-                      </TableCell>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Medium+ screens: table */}
+            <Card className="hidden md:block">
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead
+                        role="columnheader"
+                        aria-sort={sortBy === 'user_name' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+                      >
+                        {t('student')}
+                      </TableHead>
+                      <TableHead
+                        role="columnheader"
+                        aria-sort={
+                          sortBy === 'started_at' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'
+                        }
+                      >
+                        {t('startedAt')}
+                      </TableHead>
+                      <TableHead role="columnheader">{t('duration')}</TableHead>
+                      <TableHead role="columnheader">{t('status')}</TableHead>
+                      <TableHead
+                        role="columnheader"
+                        aria-sort={
+                          sortBy === 'percentage' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'
+                        }
+                      >
+                        {t('score')}
+                      </TableHead>
+                      <TableHead role="columnheader">{t('violations')}</TableHead>
+                      <TableHead
+                        className="text-right"
+                        role="columnheader"
+                      >
+                        {t('actions')}
+                      </TableHead>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredAttempts.length === 0 ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={7}
+                          className="text-muted-foreground text-center"
+                        >
+                          {t('noAttempts')}
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredAttempts.map((attempt) => (
+                        <TableRow key={attempt.attempt_uuid}>
+                          <TableCell>
+                            <div className="font-medium">{attempt.user_name}</div>
+                            <div className="text-muted-foreground text-sm">{attempt.user_email}</div>
+                          </TableCell>
+                          <TableCell>{new Date(attempt.started_at).toLocaleString()}</TableCell>
+                          <TableCell>
+                            {(() => {
+                              const durationSeconds =
+                                attempt.duration_seconds != null
+                                  ? attempt.duration_seconds
+                                  : attempt.duration_minutes != null
+                                    ? Math.round(attempt.duration_minutes * 60)
+                                    : null;
+                              return durationSeconds !== null ? formatDuration(durationSeconds) : '-';
+                            })()}
+                          </TableCell>
+                          <TableCell>{getStatusBadge(attempt.status)}</TableCell>
+                          <TableCell>
+                            <div className="font-medium">
+                              {attempt.score}/{attempt.max_score}
+                            </div>
+                            <div className="text-muted-foreground text-sm">{attempt.percentage}%</div>
+                          </TableCell>
+                          <TableCell>
+                            {attempt.violation_count > 0 ? (
+                              <Badge variant="destructive">{attempt.violation_count}</Badge>
+                            ) : (
+                              <span className="text-muted-foreground">0</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleOpenAttempt(attempt.attempt_uuid)}
+                              aria-label={t('viewAttemptAria', { name: attempt.user_name })}
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              {t('view')}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </div>
         </CardContent>
       </Card>
+
+      {/* Attempt Detail Modal */}
+      <AlertDialog
+        open={!!selectedAttemptUuid}
+        onOpenChange={(open) => !open && handleCloseAttempt()}
+      >
+        <AlertDialogContent className="max-w-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {selectedAttempt ? `${selectedAttempt.user_name} — ${selectedAttempt.percentage}%` : t('loadingAttempt')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedAttempt ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600">{t('startedAt')}</div>
+                    <div className="font-semibold">{new Date(selectedAttempt.started_at).toLocaleString()}</div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600">{t('finishedAt')}</div>
+                    <div className="font-semibold">
+                      {selectedAttempt.finished_at ? new Date(selectedAttempt.finished_at).toLocaleString() : '-'}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600">{t('duration')}</div>
+                    <div className="font-semibold">
+                      {(() => {
+                        const durationSeconds =
+                          selectedAttempt.duration_seconds != null
+                            ? selectedAttempt.duration_seconds
+                            : selectedAttempt.duration_minutes != null
+                              ? Math.round(selectedAttempt.duration_minutes * 60)
+                              : null;
+                        return durationSeconds !== null ? formatDuration(durationSeconds) : '-';
+                      })()}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600">{t('status')}</div>
+                    <div>{getStatusBadge(selectedAttempt.status)}</div>
+                  </div>
+
+                  {selectedAttempt.violation_count > 0 && (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-2">
+                      <div className="text-sm font-semibold text-amber-900">
+                        {t('violationsRecorded', { count: selectedAttempt.violation_count })}
+                      </div>
+                      <ul className="mt-2 list-disc pl-4 text-sm text-gray-700">
+                        {selectedAttempt.violations?.map((v: any, idx: number) => (
+                          <li key={idx}>
+                            {v.type} — {new Date(v.timestamp).toLocaleString()}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {selectedAttempt.answers && (
+                    <div>
+                      <div className="text-sm font-semibold text-gray-600">{t('answersPreview')}</div>
+                      <pre className="mt-2 max-h-40 overflow-auto rounded bg-gray-50 p-3 text-xs">
+                        {JSON.stringify(selectedAttempt.answers, null, 2)}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div>{t('loading')}</div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => handleCloseAttempt()}>{t('close')}</AlertDialogCancel>
+            {selectedAttempt && (
+              <AlertDialogAction
+                onClick={() => {
+                  const payload = JSON.stringify(selectedAttempt, null, 2);
+                  const blob = new Blob([payload], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `attempt-${selectedAttempt.attempt_uuid}.json`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  toast.success(t('downloadStarted'));
+                }}
+              >
+                {t('downloadJson')}
+              </AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

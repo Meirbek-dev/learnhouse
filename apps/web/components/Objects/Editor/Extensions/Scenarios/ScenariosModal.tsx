@@ -1,5 +1,6 @@
 import { ArrowRight, CheckCircle, GitBranch, Image, Play, Plus, RotateCcw, Save, Settings, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { Textarea } from '@components/ui/textarea';
 import React, { useEffect, useState } from 'react';
@@ -7,7 +8,6 @@ import { Button } from '@components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
-import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 
 interface ScenarioOption {
   id: string;
@@ -581,29 +581,33 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
 
   return (
     <>
-      <SimpleAlertDialog open={dialogAlertOpen} onOpenChange={setDialogAlertOpen} description={dialogAlertMessage} />
+      <SimpleAlertDialog
+        open={dialogAlertOpen}
+        onOpenChange={setDialogAlertOpen}
+        description={dialogAlertMessage}
+      />
       <Modal
-      isDialogOpen={isOpen}
-      onOpenChange={handleClose}
-      dialogTitle={showPreview ? t('modal.previewTitle') : t('modal.editTitle')}
-      dialogDescription={showPreview ? t('modal.previewDescription') : t('modal.editDescription')}
-      customHeight="max-h-[75vh]"
-      customWidth="!w-[70vw] !max-w-[70vw] !sm:w-[70vw] !sm:max-w-[70vw] !md:w-[70vw] !md:max-w-[70vw] !lg:max-w-[70vw] !xl:max-w-[70vw]"
-      dialogContent={showPreview ? renderPreviewContent() : renderEditContent()}
-      dialogClose={
-        <div className="flex items-center gap-2">
-          <Button onClick={handleClose}>{t('cancel')}</Button>
-          {!showPreview && (
-            <Button onClick={handleSave}>
-              <div className="flex items-center gap-2">
-                <Save size={16} />
-                {t('saveChanges')}
-              </div>
-            </Button>
-          )}
-        </div>
-      }
-    />
+        isDialogOpen={isOpen}
+        onOpenChange={handleClose}
+        dialogTitle={showPreview ? t('modal.previewTitle') : t('modal.editTitle')}
+        dialogDescription={showPreview ? t('modal.previewDescription') : t('modal.editDescription')}
+        customHeight="max-h-[75vh]"
+        customWidth="!w-[70vw] !max-w-[70vw] !sm:w-[70vw] !sm:max-w-[70vw] !md:w-[70vw] !md:max-w-[70vw] !lg:max-w-[70vw] !xl:max-w-[70vw]"
+        dialogContent={showPreview ? renderPreviewContent() : renderEditContent()}
+        dialogClose={
+          <div className="flex items-center gap-2">
+            <Button onClick={handleClose}>{t('cancel')}</Button>
+            {!showPreview && (
+              <Button onClick={handleSave}>
+                <div className="flex items-center gap-2">
+                  <Save size={16} />
+                  {t('saveChanges')}
+                </div>
+              </Button>
+            )}
+          </div>
+        }
+      />
     </>
   );
 };

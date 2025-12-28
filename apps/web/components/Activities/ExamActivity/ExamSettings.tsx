@@ -3,12 +3,13 @@
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { swrFetcher } from '@services/utils/ts/requests';
 import WhitelistManagement from './WhitelistManagement';
 import { Separator } from '@/components/ui/separator';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
-import { useTransition, useEffect } from 'react';
+import { useEffect, useTransition } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -150,6 +151,28 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
     });
   };
 
+  // Reset to sane defaults (uses server-provided limits when available)
+  const resetToDefaults = () => {
+    const defaults = {
+      time_limit: limits?.time_limit?.min ?? 60,
+      attempt_limit: null,
+      shuffle_questions: true,
+      question_limit: null,
+      access_mode: 'NO_ACCESS',
+      allow_result_review: true,
+      show_correct_answers: true,
+      copy_paste_protection: true,
+      tab_switch_detection: true,
+      devtools_detection: true,
+      right_click_disable: true,
+      fullscreen_enforcement: true,
+      violation_threshold: null,
+    } as const;
+
+    form.reset(defaults);
+    toast.success(t('settingsReset'));
+  };
+
   const hasTimeLimit = form.watch('time_limit') !== null;
   const hasAttemptLimit = form.watch('attempt_limit') !== null;
   const hasQuestionLimit = form.watch('question_limit') !== null;
@@ -160,6 +183,8 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
     form.watch('devtools_detection') ||
     form.watch('right_click_disable') ||
     form.watch('fullscreen_enforcement');
+
+  const initialAccessMode = settings.access_mode || 'NO_ACCESS';
 
   return (
     <Card>
@@ -366,6 +391,14 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
                   </FormItem>
                 )}
               />
+
+              {/* Warning if switching away from whitelist - stored list will remain but be ignored */}
+              {initialAccessMode === 'WHITELIST' && form.watch('access_mode') !== 'WHITELIST' && (
+                <Alert>
+                  <AlertTitle>{t('whitelistWillBeIgnored')}</AlertTitle>
+                  <AlertDescription>{t('whitelistWillBeIgnoredDescription')}</AlertDescription>
+                </Alert>
+              )}
 
               {/* Whitelist Management - Only show when access mode is WHITELIST */}
               {form.watch('access_mode') === 'WHITELIST' && (
@@ -581,6 +614,12 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
             </div>
 
             <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={resetToDefaults}
+              >
+                {t('resetDefaults')}
+              </Button>
               <Button
                 type="submit"
                 disabled={isPending}

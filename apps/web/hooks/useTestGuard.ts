@@ -72,7 +72,12 @@ export function useTestGuard({
         if (process.env.NODE_ENV !== 'production') {
           // Capture helpful context: active element and simple stack
           const active = document.activeElement;
-          console.debug('[useTestGuard] report', { type, activeTag: active?.tagName, activeId: (active as HTMLElement | null)?.id, activeClasses: (active as HTMLElement | null)?.className });
+          console.debug('[useTestGuard] report', {
+            type,
+            activeTag: active?.tagName,
+            activeId: (active as HTMLElement | null)?.id,
+            activeClasses: (active as HTMLElement | null)?.className,
+          });
         }
       } catch (err) {
         // ignore logging errors

@@ -1,17 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useState, useRef, useReducer } from 'react';
-import { AlertTriangle, CheckCircle2 } from 'lucide-react';
-import ExamTimer from './ExamTimer';
-import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
+import { createInitialTakingState, examTakingReducer } from './state/examTakingReducer';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useExamPersistence } from '@/hooks/useExamPersistence';
-import { examTakingReducer, createInitialTakingState } from './state/examTakingReducer';
+import { AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import ExamTimer from './ExamTimer';
+import { toast } from 'sonner';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@components/ui/radio-group';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@components/ui/select';
-import { Alert, AlertDescription } from '@components/ui/alert';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +19,10 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@components/ui/radio-group';
+import { Alert, AlertDescription } from '@components/ui/alert';
 import { getAPIUrl } from '@/services/config/config';
 import { useTestGuard } from '@/hooks/useTestGuard';
 import { Progress } from '@components/ui/progress';
@@ -70,7 +70,7 @@ export default function ExamTakingInterface({
   // Centralized state management with reducer
   const [state, dispatch] = useReducer(
     examTakingReducer,
-    createInitialTakingState(0, {}, attempt.violations?.length || 0)
+    createInitialTakingState(0, {}, attempt.violations?.length || 0),
   );
 
   // Fullscreen state (separate from main state machine)
@@ -84,7 +84,13 @@ export default function ExamTakingInterface({
     expirationHours: 24,
     onRestore: (recoveredAnswers) => {
       // Offer recovery on mount if no current answers and we have recovered data
-      const currentAnswers = state.mode === 'answering' || state.mode === 'confirming-submit' || state.mode === 'violation-warning' || state.mode === 'fullscreen-warning' ? state.answers : {};
+      const currentAnswers =
+        state.mode === 'answering' ||
+        state.mode === 'confirming-submit' ||
+        state.mode === 'violation-warning' ||
+        state.mode === 'fullscreen-warning'
+          ? state.answers
+          : {};
       if (Object.keys(currentAnswers).length === 0 && Object.keys(recoveredAnswers).length > 0) {
         dispatch({ type: 'SHOW_RECOVERY_PROMPT', recoveredAnswers });
       }
@@ -98,7 +104,7 @@ export default function ExamTakingInterface({
 
   // Extract current state
   const currentIndex = state.mode === 'submitting' ? 0 : state.currentIndex;
-  const answers = state.mode === 'submitting' ? state.answers : (state.mode === 'recovery-prompt' ? {} : state.answers);
+  const answers = state.mode === 'submitting' ? state.answers : state.mode === 'recovery-prompt' ? {} : state.answers;
   const isSubmitting = state.mode === 'submitting';
   const showConfirmation = state.mode === 'confirming-submit';
   const violationCount = state.violationCount;
@@ -144,7 +150,6 @@ export default function ExamTakingInterface({
     [state, accessToken, exam.exam_uuid, attempt.attempt_uuid, onComplete, t, persistence],
   );
 
-
   // Anti-cheating with useTestGuard
   const handleViolation = useCallback(
     async (type: string, count: number) => {
@@ -172,7 +177,7 @@ export default function ExamTakingInterface({
         console.error('Failed to record violation:', error);
       }
     },
-    [state, accessToken, exam.exam_uuid, attempt.attempt_uuid, settings.violation_threshold, handleSubmit, t],
+    [accessToken, exam.exam_uuid, attempt.attempt_uuid, settings.violation_threshold, handleSubmit, t],
   );
 
   useTestGuard({
@@ -188,8 +193,6 @@ export default function ExamTakingInterface({
     devToolsThreshold: 180, // More conservative threshold for DevTools detection
     devToolsCheckIntervalMs: 2000, // Check less frequently to avoid performance impact
   });
-
-
 
   // Fullscreen enforcement with grace period and better UX
   useEffect(() => {
@@ -221,7 +224,7 @@ export default function ExamTakingInterface({
     };
 
     const handleFullscreenChange = async () => {
-      const inFullscreen = !!document.fullscreenElement;
+      const inFullscreen = Boolean(document.fullscreenElement);
       setIsFullscreen(inFullscreen);
 
       if (!inFullscreen && settings.fullscreen_enforcement && fullscreenSupported) {
@@ -272,12 +275,13 @@ export default function ExamTakingInterface({
   const handleAnswerChange = (questionId: number, answer: any) => {
     dispatch({ type: 'ANSWER_QUESTION', questionId, answer });
     // Persist answers to localStorage
-    const currentAnswers = state.mode === 'answering' || state.mode === 'violation-warning' || state.mode === 'fullscreen-warning' ? state.answers : {};
+    const currentAnswers =
+      state.mode === 'answering' || state.mode === 'violation-warning' || state.mode === 'fullscreen-warning'
+        ? state.answers
+        : {};
     const updated = { ...currentAnswers, [questionId]: answer };
     persistence.saveAnswers(updated);
   };
-
-
 
   const renderQuestion = (question: Question) => {
     const questionId = question.id;
@@ -289,7 +293,7 @@ export default function ExamTakingInterface({
           <RadioGroup
             value={answers[questionId]?.toString()}
             onValueChange={(value) =>
-              handleAnswerChange(questionId, typeof value === 'string' ? parseInt(value, 10) : Number(value))
+              handleAnswerChange(questionId, typeof value === 'string' ? Number.parseInt(value, 10) : Number(value))
             }
             className="space-y-2"
             aria-labelledby={`question-title-${questionId}`}
@@ -318,7 +322,11 @@ export default function ExamTakingInterface({
       case 'MULTIPLE_CHOICE': {
         const selectedAnswers = answers[questionId] || [];
         return (
-          <div className="space-y-2" role="group" aria-labelledby={`question-title-${questionId}`}>
+          <div
+            className="space-y-2"
+            role="group"
+            aria-labelledby={`question-title-${questionId}`}
+          >
             {question.answer_options.map((option, index) => (
               <div
                 key={index}
@@ -372,7 +380,10 @@ export default function ExamTakingInterface({
                     </SelectTrigger>
                     <SelectContent>
                       {question.answer_options.map((opt, idx) => (
-                        <SelectItem key={idx} value={opt.right ?? ''}>
+                        <SelectItem
+                          key={idx}
+                          value={opt.right ?? ''}
+                        >
                           {opt.right}
                         </SelectItem>
                       ))}
@@ -400,17 +411,24 @@ export default function ExamTakingInterface({
   };
 
   const answeredCount = orderedQuestions.filter((q) => isAnswered(q.id)).length;
-  const remainingViolations = settings.violation_threshold ? Math.max(settings.violation_threshold - violationCount, 0) : undefined;
+  const remainingViolations = settings.violation_threshold
+    ? Math.max(settings.violation_threshold - violationCount, 0)
+    : undefined;
 
   return (
     <div
       ref={examContainerRef}
       className="mx-auto max-w-full space-y-6 p-4 md:p-6"
     >
-      {/* Header with Timer and Progress */}
+      {/* Header with Timer, Progress, and primary actions */}
       <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 id={`exam-title-${attempt.attempt_uuid}`} className="text-xl font-bold md:text-2xl">{exam.title}</h2>
+          <h2
+            id={`exam-title-${attempt.attempt_uuid}`}
+            className="text-xl font-bold md:text-2xl"
+          >
+            {exam.title}
+          </h2>
           <p className="text-sm text-gray-600">
             {t('questionProgress', {
               current: currentIndex + 1,
@@ -418,16 +436,33 @@ export default function ExamTakingInterface({
             })}
           </p>
         </div>
-        {settings.time_limit && attempt.started_at && (
-          <ExamTimer
-            startedAt={attempt.started_at}
-            timeLimitMinutes={settings.time_limit}
-            onExpire={() => {
-              toast.error(t('autoSubmitting', { reason: 'Time expired' }));
-              void handleSubmit(true);
+
+        <div className="flex items-center gap-3">
+          {settings.time_limit && attempt.started_at && (
+            <ExamTimer
+              startedAt={attempt.started_at}
+              timeLimitMinutes={settings.time_limit}
+              onExpire={() => {
+                toast.error(t('autoSubmitting', { reason: 'Time expired' }));
+                void handleSubmit(true);
+              }}
+            />
+          )}
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              const unansweredQuestions = orderedQuestions
+                .map((q, idx) => (!isAnswered(q.id) ? idx + 1 : null))
+                .filter((n): n is number => n !== null);
+              dispatch({ type: 'SHOW_SUBMIT_CONFIRMATION', unansweredQuestions });
             }}
-          />
-        )}
+            className="hidden md:inline-flex"
+          >
+            {t('reviewAndSubmit')}
+          </Button>
+        </div>
       </div>
 
       <Progress
@@ -442,7 +477,11 @@ export default function ExamTakingInterface({
 
       {/* Violation Warning */}
       {violationCount > 0 && (
-        <Alert variant="destructive" role="status" aria-live="polite">
+        <Alert
+          variant="destructive"
+          role="status"
+          aria-live="polite"
+        >
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             {t('violationWarning', {
@@ -456,7 +495,10 @@ export default function ExamTakingInterface({
       )}
 
       {/* Violation Dialog */}
-      <AlertDialog open={violationDialogOpen} onOpenChange={(open) => !open && dispatch({ type: 'DISMISS_VIOLATION' })}>
+      <AlertDialog
+        open={violationDialogOpen}
+        onOpenChange={(open) => !open && dispatch({ type: 'DISMISS_VIOLATION' })}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogMedia>
@@ -481,7 +523,10 @@ export default function ExamTakingInterface({
       </AlertDialog>
 
       {/* Recovery Dialog */}
-      <AlertDialog open={showRecoveryDialog} onOpenChange={(open) => !open && dispatch({ type: 'REJECT_RECOVERY' })}>
+      <AlertDialog
+        open={showRecoveryDialog}
+        onOpenChange={(open) => !open && dispatch({ type: 'REJECT_RECOVERY' })}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogMedia>
@@ -525,17 +570,22 @@ export default function ExamTakingInterface({
         {/* Main Content */}
         <div className="space-y-6">
           {/* Question Card */}
-          <Card role="group" aria-labelledby={`question-title-${currentQuestion?.id}`}>
+          <Card
+            role="group"
+            aria-labelledby={`question-title-${currentQuestion?.id}`}
+          >
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span id={`question-title-${currentQuestion?.id}`}>{t('questionNumber', { number: currentIndex + 1 })}</span>
+                <span id={`question-title-${currentQuestion?.id}`}>
+                  {t('questionNumber', { number: currentIndex + 1 })}
+                </span>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-normal text-gray-500">
                     {t('points', { count: currentQuestion?.points ?? 0 })}
                   </span>
                 </div>
               </CardTitle>
-              <CardDescription className="mt-4 text-lg leading-relaxed text-gray-900">
+              <CardDescription className="mt-4 text-xl leading-relaxed text-gray-900">
                 {currentQuestion?.question_text}
               </CardDescription>
             </CardHeader>
@@ -587,9 +637,7 @@ export default function ExamTakingInterface({
           <Card className="sticky top-6">
             <CardHeader>
               <CardTitle className="text-base">{t('questions')}</CardTitle>
-              <CardDescription className="text-xs">
-                {t('questionNavigatorDescription')}
-              </CardDescription>
+              <CardDescription className="text-xs">{t('questionNavigatorDescription')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-5 gap-2 md:grid-cols-8 lg:grid-cols-5">
@@ -624,26 +672,69 @@ export default function ExamTakingInterface({
               {/* Legend */}
               <div className="mt-4 space-y-2 border-t pt-4 text-xs">
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded bg-green-100"></div>
+                  <div className="h-4 w-4 rounded bg-green-100" />
                   <span className="text-gray-600">{t('answered')}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded bg-blue-500"></div>
+                  <div className="h-4 w-4 rounded bg-blue-500" />
                   <span className="text-gray-600">{t('current')}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded bg-gray-100"></div>
+                  <div className="h-4 w-4 rounded bg-gray-100" />
                   <span className="text-gray-600">{t('unanswered')}</span>
                 </div>
-
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
 
+      {/* Mobile bottom nav */}
+      <div className="fixed right-0 bottom-0 left-0 z-50 border-t bg-white lg:hidden">
+        <div className="px-4 py-3">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => dispatch({ type: 'NAVIGATE_TO_QUESTION', index: Math.max(0, currentIndex - 1) })}
+              disabled={currentIndex === 0}
+              className="flex-1"
+            >
+              {t('previous')}
+            </Button>
+
+            {currentIndex < orderedQuestions.length - 1 ? (
+              <Button
+                size="sm"
+                onClick={() => dispatch({ type: 'NAVIGATE_TO_QUESTION', index: currentIndex + 1 })}
+                className="flex-1"
+              >
+                {t('next')}
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                onClick={() => {
+                  const unansweredQuestions = orderedQuestions
+                    .map((q, idx) => (!isAnswered(q.id) ? idx + 1 : null))
+                    .filter((n): n is number => n !== null);
+                  dispatch({ type: 'SHOW_SUBMIT_CONFIRMATION', unansweredQuestions });
+                }}
+                className="flex-1 bg-green-600 hover:bg-green-700"
+                disabled={isSubmitting}
+              >
+                {t('reviewAndSubmit')}
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Confirmation Dialog */}
-      <AlertDialog open={showConfirmation} onOpenChange={(open) => !open && dispatch({ type: 'CANCEL_SUBMIT' })}>
+      <AlertDialog
+        open={showConfirmation}
+        onOpenChange={(open) => !open && dispatch({ type: 'CANCEL_SUBMIT' })}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogMedia>
@@ -667,7 +758,6 @@ export default function ExamTakingInterface({
                     <span className="text-gray-600">{t('unanswered')}:</span>
                     <span className="font-semibold">{orderedQuestions.length - answeredCount}</span>
                   </div>
-
                 </div>
               </div>
               {answeredCount < orderedQuestions.length && (

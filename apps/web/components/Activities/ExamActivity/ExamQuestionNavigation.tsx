@@ -1,9 +1,9 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { CheckCircle2, Circle, Flag } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
@@ -34,9 +34,7 @@ export default function ExamQuestionNavigation({
     <Card className={cn('lg:sticky lg:top-6', className)}>
       <CardHeader className="pb-3">
         <CardTitle className="text-base">{t('questionNavigator')}</CardTitle>
-        <CardDescription className="text-xs">
-          {t('questionNavigatorDescription')}
-        </CardDescription>
+        <CardDescription className="text-xs">{t('questionNavigatorDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Progress Summary */}
@@ -47,7 +45,10 @@ export default function ExamQuestionNavigation({
               {answeredCount}/{totalQuestions}
             </span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress
+            value={progress}
+            className="h-2"
+          />
         </div>
 
         {/* Question Grid */}
@@ -79,7 +80,7 @@ export default function ExamQuestionNavigation({
                 key={index}
                 onClick={() => onQuestionSelect(index)}
                 className={cn(
-                  'relative flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-medium transition-all',
+                  'relative inline-flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-1',
                   bgColor,
                   textColor,
                   borderColor,
@@ -88,7 +89,8 @@ export default function ExamQuestionNavigation({
                   number: questionNumber,
                   answered: isAnswered ? 'true' : 'false',
                 })}
-                aria-current={isCurrent ? 'step' : undefined}
+                aria-pressed={isCurrent}
+                title={t('questionAriaLabel', { number: questionNumber, answered: isAnswered ? 'true' : 'false' })}
               >
                 {questionNumber}
                 {isFlagged && (
@@ -132,7 +134,10 @@ export default function ExamQuestionNavigation({
           {flaggedCount > 0 && (
             <div className="flex items-center gap-2">
               <div className="flex h-6 w-6 items-center justify-center rounded border-2 border-orange-400">
-                <Flag className="h-3 w-3 text-orange-500" fill="currentColor" />
+                <Flag
+                  className="h-3 w-3 text-orange-500"
+                  fill="currentColor"
+                />
               </div>
               <span className="text-gray-600">
                 {t('flagged')} ({flaggedCount})
@@ -187,7 +192,10 @@ export function ExamQuestionNavigationMobile({
               {answeredCount}/{totalQuestions}
             </span>
           </div>
-          <Progress value={progress} className="h-1.5" />
+          <Progress
+            value={progress}
+            className="h-1.5"
+          />
         </div>
 
         {/* Navigation buttons */}
@@ -198,6 +206,7 @@ export function ExamQuestionNavigationMobile({
             onClick={onPrevious}
             disabled={!canGoPrevious}
             className="flex-1"
+            aria-label={t('previous')}
           >
             {t('previous')}
           </Button>
@@ -230,6 +239,7 @@ export function ExamQuestionNavigationMobile({
               onClick={onNext}
               disabled={!canGoNext}
               className="flex-1"
+              aria-label={t('next')}
             >
               {t('next')}
             </Button>

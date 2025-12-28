@@ -466,7 +466,10 @@ const QuizSettingsPanel = ({ settings, onSettingsChange, isOpen, onOpenChange, t
                   placeholder="0"
                   value={settings.max_score_penalty_per_attempt ?? ''}
                   onChange={(e) =>
-                    updateSetting('max_score_penalty_per_attempt', e.target.value ? Number.parseFloat(e.target.value) : null)
+                    updateSetting(
+                      'max_score_penalty_per_attempt',
+                      e.target.value ? Number.parseFloat(e.target.value) : null,
+                    )
                   }
                 />
                 <span className="text-muted-foreground text-sm">%</span>

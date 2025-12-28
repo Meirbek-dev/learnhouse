@@ -1,13 +1,13 @@
 'use client';
 
+import { swrFetcher } from '@services/utils/ts/requests';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { SubmitHandler } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { useTransition } from 'react';
-import useSWR from 'swr';
-import { swrFetcher } from '@services/utils/ts/requests';
 import { toast } from 'sonner';
+import useSWR from 'swr';
 import { z } from 'zod';
 
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
@@ -23,7 +23,11 @@ const createValidationSchema = (t: (key: string) => string, limits?: any) =>
     exam_title: z.string().min(1, t('examTitleRequired')),
     activity_name: z.string().min(1, t('activityNameRequired')),
     exam_description: z.string().min(1, t('examDescriptionRequired')),
-    time_limit: z.number().min(limits?.time_limit?.min ?? 1).max(limits?.time_limit?.max ?? 180).optional(),
+    time_limit: z
+      .number()
+      .min(limits?.time_limit?.min ?? 1)
+      .max(limits?.time_limit?.max ?? 180)
+      .optional(),
     has_time_limit: z.boolean(),
     shuffle_questions: z.boolean(),
     allow_result_review: z.boolean(),
@@ -242,7 +246,12 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal, orgslug }: any
                     max={limits?.time_limit?.max ?? 180}
                     placeholder="60"
                     {...field}
-                    onChange={(e) => field.onChange(Number.parseInt(e.target.value) || Math.min(Math.max(50, limits?.time_limit?.min ?? 1), limits?.time_limit?.max ?? 180))}
+                    onChange={(e) =>
+                      field.onChange(
+                        Number.parseInt(e.target.value) ||
+                          Math.min(Math.max(50, limits?.time_limit?.min ?? 1), limits?.time_limit?.max ?? 180),
+                      )
+                    }
                   />
                 </FormControl>
                 <FormDescription>{t('timeLimitMinutesDescription')}</FormDescription>

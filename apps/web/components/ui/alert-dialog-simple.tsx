@@ -2,10 +2,10 @@
 
 import {
   AlertDialog,
-  AlertDialogContent,
-  AlertDialogTitle,
-  AlertDialogDescription,
   AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useTranslations } from 'next-intl';
 

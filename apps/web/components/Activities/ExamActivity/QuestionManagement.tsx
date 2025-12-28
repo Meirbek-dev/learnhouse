@@ -1,26 +1,26 @@
 'use client';
 
+import { createInitialEditorState, questionEditorReducer } from './state/questionEditorReducer';
 import { Download, Edit2, GripVertical, Plus, Trash2, Upload } from 'lucide-react';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
-import { useTranslations } from 'next-intl';
-import { useRef, useReducer } from 'react';
-import { toast } from 'sonner';
-import { questionEditorReducer, createInitialEditorState } from './state/questionEditorReducer';
 import type { Question } from './state/questionEditorReducer';
+import { useTranslations } from 'next-intl';
+import { useReducer, useRef } from 'react';
+import { toast } from 'sonner';
 
 import {
   AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogTitle,
-  AlertDialogAction,
-  AlertDialogCancel,
 } from '@components/ui/alert-dialog';
-import { Dialog, DialogContent } from '@components/ui/dialog';
-import QuestionEditor from './QuestionEditor';
 import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
+import { Dialog, DialogContent } from '@components/ui/dialog';
 import { getAPIUrl } from '@/services/config/config';
 import { Button } from '@components/ui/button';
+import QuestionEditor from './QuestionEditor';
 
 interface QuestionManagementProps {
   examUuid: string;
@@ -261,7 +261,10 @@ export default function QuestionManagement({
             onChange={handleImportCSV}
             className="hidden"
           />
-          <Dialog open={isDialogOpen} onOpenChange={(open) => !open && dispatch({ type: 'CANCEL_EDIT' })}>
+          <Dialog
+            open={isDialogOpen}
+            onOpenChange={(open) => !open && dispatch({ type: 'CANCEL_EDIT' })}
+          >
             <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
               <QuestionEditor
                 question={editingQuestion}
@@ -274,7 +277,7 @@ export default function QuestionManagement({
                 onCancel={() => {
                   dispatch({ type: 'CANCEL_EDIT' });
                 }}
-                autoFocus
+                
               />
             </DialogContent>
           </Dialog>
@@ -299,12 +302,15 @@ export default function QuestionManagement({
                     onCancel={() => {
                       dispatch({ type: 'CANCEL_EDIT' });
                     }}
-                    autoFocus
+                    
                   />
                 </CardContent>
               </Card>
             ) : (
-              <Button variant="outline" onClick={handleAddQuestion}>
+              <Button
+                variant="outline"
+                onClick={handleAddQuestion}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 {t('addQuestion')}
               </Button>
@@ -390,13 +396,17 @@ export default function QuestionManagement({
                           onCancel={() => {
                             dispatch({ type: 'CANCEL_EDIT' });
                           }}
-                          autoFocus
+                          
                         />
                       </CardContent>
                     </Card>
                   ) : (
                     <div className="flex justify-center">
-                      <Button variant="outline" size="sm" onClick={handleAddQuestion}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleAddQuestion}
+                      >
                         <Plus className="mr-2 h-4 w-4" />
                         {t('addQuestion')}
                       </Button>
@@ -411,5 +421,3 @@ export default function QuestionManagement({
     </div>
   );
 }
-
-

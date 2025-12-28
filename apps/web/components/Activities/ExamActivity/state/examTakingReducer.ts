@@ -80,12 +80,9 @@ export type ExamTakingAction =
   | { type: 'DISMISS_FULLSCREEN_WARNING' }
   | { type: 'RESET_TO_ANSWERING' };
 
-export function examTakingReducer(
-  state: ExamTakingState,
-  action: ExamTakingAction
-): ExamTakingState {
+export function examTakingReducer(state: ExamTakingState, action: ExamTakingAction): ExamTakingState {
   switch (action.type) {
-    case 'NAVIGATE_TO_QUESTION':
+    case 'NAVIGATE_TO_QUESTION': {
       // Only allow navigation in answering mode
       if (state.mode !== 'answering') return state;
 
@@ -93,8 +90,9 @@ export function examTakingReducer(
         ...state,
         currentIndex: action.index,
       };
+    }
 
-    case 'ANSWER_QUESTION':
+    case 'ANSWER_QUESTION': {
       // Can answer in answering or recovery-prompt mode
       if (state.mode !== 'answering' && state.mode !== 'recovery-prompt') return state;
 
@@ -108,8 +106,9 @@ export function examTakingReducer(
           [action.questionId]: action.answer,
         },
       };
+    }
 
-    case 'CLEAR_ANSWER':
+    case 'CLEAR_ANSWER': {
       if (state.mode !== 'answering') return state;
 
       const newAnswers = { ...state.answers };
@@ -119,8 +118,9 @@ export function examTakingReducer(
         ...state,
         answers: newAnswers,
       };
+    }
 
-    case 'SHOW_SUBMIT_CONFIRMATION':
+    case 'SHOW_SUBMIT_CONFIRMATION': {
       if (state.mode !== 'answering') return state;
 
       return {
@@ -130,8 +130,9 @@ export function examTakingReducer(
         unansweredQuestions: action.unansweredQuestions,
         violationCount: state.violationCount,
       };
+    }
 
-    case 'CANCEL_SUBMIT':
+    case 'CANCEL_SUBMIT': {
       if (state.mode !== 'confirming-submit') return state;
 
       return {
@@ -140,8 +141,9 @@ export function examTakingReducer(
         answers: state.answers,
         violationCount: state.violationCount,
       };
+    }
 
-    case 'START_SUBMIT':
+    case 'START_SUBMIT': {
       if (state.mode !== 'confirming-submit') return state;
 
       return {
@@ -149,12 +151,14 @@ export function examTakingReducer(
         answers: state.answers,
         violationCount: state.violationCount,
       };
+    }
 
-    case 'RECORD_VIOLATION':
+    case 'RECORD_VIOLATION': {
       // Can record violations in any mode except submitting
       if (state.mode === 'submitting') return state;
 
-      const baseAnswersForViolation = state.mode === 'recovery-prompt' ? state.recoveredAnswers : ('answers' in state ? state.answers : {});
+      const baseAnswersForViolation =
+        state.mode === 'recovery-prompt' ? state.recoveredAnswers : 'answers' in state ? state.answers : {};
 
       return {
         mode: 'violation-warning',
@@ -163,8 +167,9 @@ export function examTakingReducer(
         answers: baseAnswersForViolation,
         violationCount: action.violation.count,
       };
+    }
 
-    case 'DISMISS_VIOLATION':
+    case 'DISMISS_VIOLATION': {
       if (state.mode !== 'violation-warning') return state;
 
       return {
@@ -173,8 +178,9 @@ export function examTakingReducer(
         answers: state.answers,
         violationCount: state.violationCount,
       };
+    }
 
-    case 'SHOW_RECOVERY_PROMPT':
+    case 'SHOW_RECOVERY_PROMPT': {
       // Only show recovery if in answering mode with no answers yet
       if (state.mode !== 'answering') return state;
       if (Object.keys(state.answers).length > 0) return state;
@@ -185,8 +191,9 @@ export function examTakingReducer(
         currentIndex: state.currentIndex,
         violationCount: state.violationCount,
       };
+    }
 
-    case 'ACCEPT_RECOVERY':
+    case 'ACCEPT_RECOVERY': {
       if (state.mode !== 'recovery-prompt') return state;
 
       return {
@@ -195,8 +202,9 @@ export function examTakingReducer(
         answers: state.recoveredAnswers,
         violationCount: state.violationCount,
       };
+    }
 
-    case 'REJECT_RECOVERY':
+    case 'REJECT_RECOVERY': {
       if (state.mode !== 'recovery-prompt') return state;
 
       return {
@@ -205,8 +213,9 @@ export function examTakingReducer(
         answers: {},
         violationCount: state.violationCount,
       };
+    }
 
-    case 'SHOW_FULLSCREEN_WARNING':
+    case 'SHOW_FULLSCREEN_WARNING': {
       if (state.mode !== 'answering') return state;
 
       return {
@@ -215,8 +224,9 @@ export function examTakingReducer(
         answers: state.answers,
         violationCount: state.violationCount,
       };
+    }
 
-    case 'DISMISS_FULLSCREEN_WARNING':
+    case 'DISMISS_FULLSCREEN_WARNING': {
       if (state.mode !== 'fullscreen-warning') return state;
 
       return {
@@ -225,25 +235,29 @@ export function examTakingReducer(
         answers: state.answers,
         violationCount: state.violationCount,
       };
+    }
 
-    case 'RESET_TO_ANSWERING':
-      const safeAnswers = state.mode === 'recovery-prompt' ? state.recoveredAnswers : ('answers' in state ? state.answers : {});
+    case 'RESET_TO_ANSWERING': {
+      const safeAnswers =
+        state.mode === 'recovery-prompt' ? state.recoveredAnswers : 'answers' in state ? state.answers : {};
       return {
         mode: 'answering',
         currentIndex: state.mode === 'answering' ? state.currentIndex : 0,
         answers: safeAnswers,
         violationCount: state.violationCount,
       };
+    }
 
-    default:
+    default: {
       return state;
+    }
   }
 }
 
 export function createInitialTakingState(
-  initialIndex: number = 0,
+  initialIndex = 0,
   initialAnswers: Record<number, any> = {},
-  initialViolationCount: number = 0
+  initialViolationCount = 0,
 ): ExamTakingState {
   return {
     mode: 'answering',

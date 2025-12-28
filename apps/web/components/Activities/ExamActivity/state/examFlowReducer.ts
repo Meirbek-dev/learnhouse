@@ -76,18 +76,20 @@ export type ExamFlowAction =
 
 export function examFlowReducer(state: ExamFlowState, action: ExamFlowAction): ExamFlowState {
   switch (action.type) {
-    case 'SET_LOADING':
+    case 'SET_LOADING': {
       return { phase: 'loading' };
+    }
 
-    case 'SET_PRE_EXAM':
+    case 'SET_PRE_EXAM': {
       return {
         phase: 'pre-exam',
         exam: action.payload.exam,
         questions: action.payload.questions,
         userAttempts: action.payload.userAttempts,
       };
+    }
 
-    case 'START_EXAM':
+    case 'START_EXAM': {
       // Allow starting an exam from pre-exam, management mode, or results (retry flow)
       if (state.phase !== 'pre-exam' && state.phase !== 'manage' && state.phase !== 'results') {
         console.warn('Cannot start exam from phase:', state.phase);
@@ -99,8 +101,9 @@ export function examFlowReducer(state: ExamFlowState, action: ExamFlowAction): E
         questions: state.questions,
         attempt: action.payload.attempt,
       };
+    }
 
-    case 'SUBMIT_EXAM':
+    case 'SUBMIT_EXAM': {
       if (state.phase !== 'taking') {
         console.warn('Cannot submit exam from phase:', state.phase);
         return state;
@@ -111,8 +114,9 @@ export function examFlowReducer(state: ExamFlowState, action: ExamFlowAction): E
         questions: state.questions,
         attempt: action.payload.attempt,
       };
+    }
 
-    case 'VIEW_RESULTS':
+    case 'VIEW_RESULTS': {
       if (state.phase !== 'pre-exam' && state.phase !== 'manage') {
         console.warn('Cannot view results from phase:', state.phase);
         return state;
@@ -123,8 +127,9 @@ export function examFlowReducer(state: ExamFlowState, action: ExamFlowAction): E
         questions: state.questions,
         attempt: action.payload.attempt,
       };
+    }
 
-    case 'BACK_TO_PRE_EXAM':
+    case 'BACK_TO_PRE_EXAM': {
       if (state.phase !== 'results' && state.phase !== 'manage') {
         console.warn('Cannot go back to pre-exam from phase:', state.phase);
         return state;
@@ -135,8 +140,9 @@ export function examFlowReducer(state: ExamFlowState, action: ExamFlowAction): E
         questions: state.questions,
         userAttempts: action.payload.userAttempts,
       };
+    }
 
-    case 'ENTER_MANAGEMENT_MODE':
+    case 'ENTER_MANAGEMENT_MODE': {
       if (state.phase !== 'pre-exam') {
         console.warn('Cannot enter management mode from phase:', state.phase);
         return state;
@@ -147,8 +153,9 @@ export function examFlowReducer(state: ExamFlowState, action: ExamFlowAction): E
         questions: state.questions,
         userAttempts: state.userAttempts,
       };
+    }
 
-    case 'EXIT_MANAGEMENT_MODE':
+    case 'EXIT_MANAGEMENT_MODE': {
       if (state.phase !== 'manage') {
         console.warn('Cannot exit management mode from phase:', state.phase);
         return state;
@@ -159,21 +166,25 @@ export function examFlowReducer(state: ExamFlowState, action: ExamFlowAction): E
         questions: state.questions,
         userAttempts: action.payload.userAttempts,
       };
+    }
 
-    case 'SET_ERROR':
+    case 'SET_ERROR': {
       return {
         phase: 'error',
         error: action.payload.error,
       };
+    }
 
-    case 'RETRY':
+    case 'RETRY': {
       if (state.phase !== 'error') {
         console.warn('Cannot retry from phase:', state.phase);
         return state;
       }
       return { phase: 'loading' };
+    }
 
-    default:
+    default: {
       return state;
+    }
   }
 }

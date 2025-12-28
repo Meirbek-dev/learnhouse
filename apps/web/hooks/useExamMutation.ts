@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 export interface MutationOptions<TData, TVariables> {
@@ -34,9 +34,7 @@ export interface MutationState<TData> {
  *
  * @param options Mutation configuration
  */
-export function useExamMutation<TData = unknown, TVariables = void>(
-  options: MutationOptions<TData, TVariables>,
-) {
+export function useExamMutation<TData = unknown, TVariables = void>(options: MutationOptions<TData, TVariables>) {
   const {
     mutationFn,
     onSuccess,
@@ -44,7 +42,7 @@ export function useExamMutation<TData = unknown, TVariables = void>(
     onSettled,
     onMutate,
     retry = 3,
-    retryDelay = (attemptIndex: number) => Math.min(1000 * Math.pow(2, attemptIndex), 30000),
+    retryDelay = (attemptIndex: number) => Math.min(1000 * Math.pow(2, attemptIndex), 30_000),
   } = options;
 
   const [state, setState] = useState<MutationState<TData>>({
@@ -145,7 +143,7 @@ export function useExamMutation<TData = unknown, TVariables = void>(
               throw lastError;
             }
 
-            currentFailureCount++;
+            currentFailureCount += 1;
 
             // Update failure count in state
             if (isMountedRef.current) {
@@ -162,7 +160,7 @@ export function useExamMutation<TData = unknown, TVariables = void>(
 
             // Check if aborted during sleep
             if (abortControllerRef.current?.signal.aborted) {
-              throw new Error('Mutation aborted');
+              throw new Error('Mutation aborted', { cause: error });
             }
           }
         }
@@ -218,7 +216,11 @@ export function useExamMutation<TData = unknown, TVariables = void>(
  */
 export function useExamSubmission(accessToken: string, onSuccess?: () => void) {
   const mutation = useExamMutation({
-    mutationFn: async ({ examUuid, attemptUuid, answers }: {
+    mutationFn: async ({
+      examUuid,
+      attemptUuid,
+      answers,
+    }: {
       examUuid: string;
       attemptUuid: string;
       answers: Record<number, any>;
@@ -243,7 +245,7 @@ export function useExamSubmission(accessToken: string, onSuccess?: () => void) {
       return response.json();
     },
     retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * Math.pow(2, attemptIndex), 30000),
+    retryDelay: (attemptIndex) => Math.min(1000 * Math.pow(2, attemptIndex), 30_000),
     onSuccess: (data, variables) => {
       toast.success('Exam submitted successfully');
       onSuccess?.();

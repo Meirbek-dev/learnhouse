@@ -5,15 +5,15 @@
 **Current State:** 8+ useState hooks managing interdependent state
 
 ```typescript
-- currentQuestionIndex
-- answers
-- showConfirmation
-- isSubmitting
-- violationCount
-- violationDialogOpen
-- currentViolation
-- isFullscreen
-- showRecoveryDialog
+-currentQuestionIndex -
+  answers -
+  showConfirmation -
+  isSubmitting -
+  violationCount -
+  violationDialogOpen -
+  currentViolation -
+  isFullscreen -
+  showRecoveryDialog;
 ```
 
 **Issues:**
@@ -28,11 +28,16 @@
 ```typescript
 type TakingState =
   | { mode: 'answering'; currentIndex: number; answers: Record<number, any> }
-  | { mode: 'confirming-submit'; currentIndex: number; answers: Record<number, any>; unanswered: number[] }
+  | {
+      mode: 'confirming-submit';
+      currentIndex: number;
+      answers: Record<number, any>;
+      unanswered: number[];
+    }
   | { mode: 'submitting'; answers: Record<number, any> }
   | { mode: 'violation-warning'; violation: Violation; count: number; currentIndex: number }
   | { mode: 'recovery-prompt'; recoveredAnswers: Record<number, any>; currentIndex: number }
-  | { mode: 'fullscreen-warning' }
+  | { mode: 'fullscreen-warning' };
 ```
 
 **Benefits:**
@@ -49,12 +54,12 @@ type TakingState =
 **Current State:** 6 useState hooks for UI modes
 
 ```typescript
-- isDialogOpen
-- editingQuestion
-- inlineEditorOpen
-- deleteDialogOpen
-- pendingDeleteUuid
-- isDeleting
+-isDialogOpen -
+  editingQuestion -
+  inlineEditorOpen -
+  deleteDialogOpen -
+  pendingDeleteUuid -
+  isDeleting;
 ```
 
 **Issues:**
@@ -72,7 +77,7 @@ type EditorState =
   | { mode: 'editing-modal'; question: Question }
   | { mode: 'deleting'; questionUuid: string }
   | { mode: 'importing'; file: File }
-  | { mode: 'exporting' }
+  | { mode: 'exporting' };
 ```
 
 **Benefits:**
@@ -90,15 +95,13 @@ type EditorState =
 **Current State:** 4 useState hooks for table controls
 
 ```typescript
-- searchQuery
-- statusFilter
-- sortBy
-- sortOrder
+-searchQuery - statusFilter - sortBy - sortOrder;
 ```
 
 **Complexity:** Low (independent state, no interdependencies)
 
-**Verdict:** Current implementation is fine. Reducer would add complexity without significant benefit since filters don't have invalid state combinations.
+**Verdict:** Current implementation is fine. Reducer would add complexity without significant
+benefit since filters don't have invalid state combinations.
 
 ---
 

@@ -2,7 +2,9 @@
 
 ## Executive Summary
 
-The exam module is **functionally complete** but has significant **workflow complexity, UX friction, and technical debt**. Students face unnecessary cognitive load, teachers have cumbersome question management, and the codebase has scattered state management and inconsistent error handling.
+The exam module is **functionally complete** but has significant **workflow complexity, UX friction,
+and technical debt**. Students face unnecessary cognitive load, teachers have cumbersome question
+management, and the codebase has scattered state management and inconsistent error handling.
 
 ---
 
@@ -83,13 +85,9 @@ The exam module is **functionally complete** but has significant **workflow comp
 
 ## 🟢 What Works Well
 
-✅ Comprehensive violation tracking (7 types)
-✅ Flexible question types (4 types supported)
-✅ CSV import/export for bulk operations
-✅ Whitelist management for access control
-✅ Server-side answer shuffling (enforced)
-✅ Auto-submit on timeout/violations
-✅ RBAC permissions properly enforced
+✅ Comprehensive violation tracking (7 types) ✅ Flexible question types (4 types supported) ✅ CSV
+import/export for bulk operations ✅ Whitelist management for access control ✅ Server-side answer
+shuffling (enforced) ✅ Auto-submit on timeout/violations ✅ RBAC permissions properly enforced
 
 ---
 
@@ -151,7 +149,7 @@ showAlert({
   title: t('warning'),
   message: t('unsavedChanges'),
   variant: 'warning',
-  confirmLabel: t('continue')
+  confirmLabel: t('continue'),
 });
 ```
 
@@ -263,7 +261,7 @@ const useExamMutation = () => {
     onError: (error) => {
       // Show retry UI with exponential backoff
       // Preserve answers in localStorage
-    }
+    },
   });
 };
 ```
@@ -328,4 +326,3 @@ components/Activities/ExamActivity/
     ├── useExamMutation.ts (NEW)
     └── useTestGuard.ts
 ```
-

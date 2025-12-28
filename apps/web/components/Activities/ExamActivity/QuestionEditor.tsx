@@ -6,12 +6,12 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { getAPIUrl } from '@/services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { Checkbox } from '@components/ui/checkbox';
 import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
-import { getAPIUrl } from '@/services/config/config';
 
 interface Question {
   id?: number;
@@ -33,7 +33,14 @@ interface QuestionEditorProps {
   autoFocus?: boolean;
 }
 
-export default function QuestionEditor({ question, examUuid, accessToken, onSave, onCancel, autoFocus }: QuestionEditorProps) {
+export default function QuestionEditor({
+  question,
+  examUuid,
+  accessToken,
+  onSave,
+  onCancel,
+  autoFocus,
+}: QuestionEditorProps) {
   const t = useTranslations('Components.QuestionManagement');
   const [formData, setFormData] = useState<Question>(
     question || {
@@ -197,7 +204,7 @@ export default function QuestionEditor({ question, examUuid, accessToken, onSave
             {formData.answer_options.map((option, index) => (
               <div
                 key={index}
-                className="flex items-start gap-2"
+                className="flex items-center gap-2"
               >
                 {formData.question_type === 'MATCHING' ? (
                   <>

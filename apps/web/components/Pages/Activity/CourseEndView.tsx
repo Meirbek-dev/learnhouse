@@ -4,6 +4,7 @@ import { useOptionalGamificationContext } from '@/components/Contexts/Gamificati
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
+import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
@@ -17,7 +18,6 @@ import html2canvas from 'html2canvas';
 import type { FC } from 'react';
 import QRCode from 'qrcode';
 import jsPDF from 'jspdf';
-import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 
 interface CourseEndViewProps {
   courseName: string;
@@ -587,8 +587,12 @@ const CourseEndView: FC<CourseEndViewProps> = ({
           />
         </div>
 
-        <SimpleAlertDialog open={dialogAlertOpen} onOpenChange={setDialogAlertOpen} description={dialogAlertMessage} />
-      <div className="soft-shadow relative z-10 mb-2 w-full space-y-6 rounded-2xl bg-white p-8">
+        <SimpleAlertDialog
+          open={dialogAlertOpen}
+          onOpenChange={setDialogAlertOpen}
+          description={dialogAlertMessage}
+        />
+        <div className="soft-shadow relative z-10 mb-2 w-full space-y-6 rounded-2xl bg-white p-8">
           <div className="flex flex-col items-center space-y-6">
             {thumbnailImage ? (
               <img
@@ -724,8 +728,12 @@ const CourseEndView: FC<CourseEndViewProps> = ({
   // Show progress and encouragement for incomplete course
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 text-center">
-      <SimpleAlertDialog open={dialogAlertOpen} onOpenChange={setDialogAlertOpen} description={dialogAlertMessage} />
-    <div className="soft-shadow w-full max-w-2xl space-y-6 rounded-2xl bg-white p-8">
+      <SimpleAlertDialog
+        open={dialogAlertOpen}
+        onOpenChange={setDialogAlertOpen}
+        description={dialogAlertMessage}
+      />
+      <div className="soft-shadow w-full max-w-2xl space-y-6 rounded-2xl bg-white p-8">
         <div className="flex flex-col items-center space-y-6">
           {thumbnailImage ? (
             <img
