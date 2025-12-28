@@ -188,20 +188,23 @@ export default function QuestionManagement({
     if (!reorderedItem) return;
     items.splice(result.destination.index, 0, reorderedItem);
 
-    // Update order_index for all questions
+    // Update order_index for all questions using bulk endpoint
+    const questionOrder = items.map((question, index) => ({
+      question_uuid: question.question_uuid,
+      order_index: index,
+    }));
+
     try {
-      await Promise.all(
-        items.map((question, index) =>
-          fetch(`${getAPIUrl()}exams/questions/${question.question_uuid}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify({ order_index: index }),
-          }),
-        ),
-      );
+      const response = await fetch(`${getAPIUrl()}exams/${examUuid}/questions/reorder`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(questionOrder),
+      });
+
+      if (!response.ok) throw new Error('Failed to reorder questions');
 
       toast.success(t('questionsReordered'));
       onQuestionsChange();

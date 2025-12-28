@@ -182,7 +182,16 @@
       "reviewQuestions": "Просмотреть вопросы",
       "confirmAndSubmit": "Подтвердить и отправить",
       "unansweredQuestionsWarning": "У вас {count} вопросов без ответа. Вы уверены, что хотите отправить?",
-      "keyboardShortcutsHelp": "Сочетания клавиш: ← / → навигация, 1-9 выбор ответа, Ctrl/Cmd+Enter открыть подтверждение отправки, ? показать это сообщение"
+      "keyboardShortcutsHelp": "Сочетания клавиш: ← / → навигация, 1-9 выбор ответа, Ctrl/Cmd+Enter открыть подтверждение отправки, ? показать это сообщение",
+      "recoverPreviousAnswers": "Восстановить предыдущие ответы?",
+      "recoverPreviousAnswersDescription": "Мы нашли сохраненные ответы от {time}. Хотите восстановить их или начать заново?",
+      "startFresh": "Начать заново",
+      "recoverAnswers": "Восстановить ответы",
+      "answersRecovered": "Ваши предыдущие ответы восстановлены",
+      "progress": "Прогресс",
+      "flaggedForReview": "Отмечено для проверки",
+      "confirmSubmissionCheckbox": "Я подтверждаю, что готов отправить этот экзамен. Я понимаю, что это действие нельзя отменить.",
+      "confirmSubmissionHint": "Пожалуйста, установите флажок выше, чтобы включить отправку"
     }
   },
   "ActivityIndicators": {

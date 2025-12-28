@@ -181,7 +181,16 @@
       "reviewQuestions": "Review Questions",
       "confirmAndSubmit": "Confirm & Submit",
       "unansweredQuestionsWarning": "You have {count} unanswered questions. Are you sure you want to submit?",
-      "keyboardShortcutsHelp": "Shortcuts: ← / → navigate questions, 1-9 select answers, Ctrl/Cmd+Enter open submit confirmation, ? show this message"
+      "keyboardShortcutsHelp": "Shortcuts: ← / → navigate questions, 1-9 select answers, Ctrl/Cmd+Enter open submit confirmation, ? show this message",
+      "recoverPreviousAnswers": "Recover Previous Answers?",
+      "recoverPreviousAnswersDescription": "We found saved answers from {time}. Would you like to recover them or start fresh?",
+      "startFresh": "Start Fresh",
+      "recoverAnswers": "Recover Answers",
+      "answersRecovered": "Your previous answers have been recovered",
+      "progress": "Progress",
+      "flaggedForReview": "Flagged for review",
+      "confirmSubmissionCheckbox": "I confirm that I am ready to submit this exam. I understand that this action cannot be undone.",
+      "confirmSubmissionHint": "Please check the box above to enable submission"
     }
   },
   "ActivityIndicators": {

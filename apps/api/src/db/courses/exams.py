@@ -281,6 +281,9 @@ class ExamAttemptBase(SQLModelStrictBaseModel):
     # Violation tracking
     violations: list[dict] = Field(default_factory=list, sa_column=Column(JSON))
 
+    # Preview mode flag (teacher testing, exclude from analytics)
+    is_preview: bool = Field(default=False)
+
     started_at: str | None = None
     submitted_at: str | None = None
 

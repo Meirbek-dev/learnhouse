@@ -623,6 +623,7 @@ async def start_exam_attempt(
         question_order=question_order,
         answers={},
         violations=[],
+        is_preview=is_teacher,  # Mark teacher attempts as preview (exclude from analytics)
         started_at=now,
         creation_date=now,
         update_date=now,
@@ -689,6 +690,38 @@ async def submit_exam_attempt(
     db_session.add(attempt)
     db_session.commit()
     db_session.refresh(attempt)
+
+    # Award gamification XP (skip preview attempts to avoid gaming the system)
+    if not attempt.is_preview:
+        percentage = (attempt.score / attempt.max_score * 100) if attempt.max_score and attempt.max_score > 0 else 0
+
+        # Award base XP for exam completion (50 XP as defined in XP_REWARDS)
+        try:
+            from src.services.gamification.service import award_xp
+            award_xp(
+                db=db_session,
+                user_id=current_user.id,
+                org_id=attempt.org_id,
+                source="exam_completion",
+                source_id=f"exam_{attempt_uuid}",
+                idempotency_key=f"exam_completion_{attempt_uuid}",
+            )
+
+            # Award streak bonus for perfect score (50 bonus XP)
+            if percentage == 100:
+                award_xp(
+                    db=db_session,
+                    user_id=current_user.id,
+                    org_id=attempt.org_id,
+                    source="streak_bonus",
+                    source_id=f"exam_perfect_{attempt_uuid}",
+                    idempotency_key=f"exam_perfect_{attempt_uuid}",
+                )
+        except Exception as e:
+            # Log error but don't fail the submission
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to award XP for exam {attempt_uuid}: {e}")
 
     # Mark activity as complete only if score percentage exceeds 50%
     percentage = (attempt.score / attempt.max_score * 100) if attempt.max_score and attempt.max_score > 0 else 0
@@ -902,10 +935,10 @@ async def get_all_exam_attempts(
         request, course.course_uuid, current_user, "read", db_session
     )
 
-    # Get all attempts with user info
+    # Get all attempts with user info (exclude preview attempts from analytics)
     attempts_statement = (
         select(ExamAttempt)
-        .where(ExamAttempt.exam_id == exam.id)
+        .where(ExamAttempt.exam_id == exam.id, ExamAttempt.is_preview == False)
         .order_by(ExamAttempt.started_at.desc())
     )
     attempts = db_session.exec(attempts_statement).all()
@@ -1140,3 +1173,48 @@ async def import_questions_csv(
         "errors": errors,
         "total_rows": row_num - 1 if "row_num" in locals() else 0,
     }
+
+
+async def reorder_questions(
+    request: Request,
+    exam_uuid: str,
+    question_order: list[dict],
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> dict:
+    """Bulk update question order for drag-and-drop reordering"""
+    statement = select(Exam).where(Exam.exam_uuid == exam_uuid)
+    exam = db_session.exec(statement).first()
+
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    # RBAC check
+    course = db_session.get(Course, exam.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "update", db_session
+    )
+
+    # Update order_index for each question
+    updated_count = 0
+    for item in question_order:
+        question_uuid = item.get("question_uuid")
+        new_order = item.get("order_index")
+
+        if not question_uuid or new_order is None:
+            continue
+
+        question_statement = select(Question).where(Question.question_uuid == question_uuid)
+        question = db_session.exec(question_statement).first()
+
+        if question and question.exam_id == exam.id:
+            question.order_index = new_order
+            question.update_date = datetime.now().isoformat()
+            updated_count += 1
+
+    db_session.commit()
+
+    return {"updated": updated_count, "total": len(question_order)}
+

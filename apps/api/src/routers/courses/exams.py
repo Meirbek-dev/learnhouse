@@ -274,3 +274,17 @@ async def api_import_questions_csv(
     return await import_questions_csv(
         request, exam_uuid, csv_content, current_user, db_session
     )
+
+
+@router.post("/{exam_uuid}/questions/reorder")
+async def api_reorder_questions(
+    request: Request,
+    exam_uuid: str,
+    question_order: list[dict],  # [{"question_uuid": str, "order_index": int}, ...]
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+) -> dict:
+    """Bulk update question order"""
+    from src.services.courses.activities.exams import reorder_questions
+    return await reorder_questions(request, exam_uuid, question_order, current_user, db_session)
+

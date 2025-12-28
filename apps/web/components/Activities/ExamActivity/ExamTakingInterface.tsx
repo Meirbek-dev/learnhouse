@@ -5,6 +5,7 @@ import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import ExamTimer from './ExamTimer';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import { useExamPersistence } from '@/hooks/useExamPersistence';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@components/ui/radio-group';
@@ -72,7 +73,21 @@ export default function ExamTakingInterface({
   const [violationDialogOpen, setViolationDialogOpen] = useState(false);
   const [currentViolation, setCurrentViolation] = useState<{ type: string; count: number } | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showRecoveryDialog, setShowRecoveryDialog] = useState(false);
   const examContainerRef = useRef<HTMLDivElement>(null);
+
+  // Answer persistence with auto-save and recovery
+  const persistence = useExamPersistence({
+    attemptUuid: attempt.attempt_uuid,
+    autoSaveInterval: 5000, // Auto-save every 5 seconds
+    expirationHours: 24,
+    onRestore: (recoveredAnswers) => {
+      // Offer recovery on mount if stale data found
+      if (Object.keys(answers).length === 0 && Object.keys(recoveredAnswers).length > 0) {
+        setShowRecoveryDialog(true);
+      }
+    },
+  });
 
   const settings = exam.settings || {};
   const orderedQuestions = attempt.question_order
@@ -101,6 +116,9 @@ export default function ExamTakingInterface({
           throw new Error('Failed to submit exam');
         }
 
+        // Clear saved answers on successful submission
+        persistence.clearSavedAnswers();
+
         toast.success(t('examSubmittedSuccessfully'));
         onComplete();
       } catch (error) {
@@ -109,7 +127,7 @@ export default function ExamTakingInterface({
         setIsSubmitting(false);
       }
     },
-    [isSubmitting, answers, accessToken, exam.exam_uuid, attempt.attempt_uuid, onComplete, t],
+    [isSubmitting, answers, accessToken, exam.exam_uuid, attempt.attempt_uuid, onComplete, t, persistence],
   );
 
 
@@ -241,7 +259,12 @@ export default function ExamTakingInterface({
   }, [settings.fullscreen_enforcement, handleViolation, t, violationCount]);
 
   const handleAnswerChange = (questionId: number, answer: any) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: answer }));
+    setAnswers((prev) => {
+      const updated = { ...prev, [questionId]: answer };
+      // Persist answers to localStorage
+      persistence.saveAnswers(updated);
+      return updated;
+    });
   };
 
 
@@ -439,6 +462,47 @@ export default function ExamTakingInterface({
             <AlertDialogCancel />
             <AlertDialogAction onClick={() => setViolationDialogOpen(false)}>
               {t('violationDialogAcknowledge')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Recovery Dialog */}
+      <AlertDialog open={showRecoveryDialog} onOpenChange={setShowRecoveryDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia>
+              <AlertTriangle className="size-6 text-orange-500" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>{t('recoverPreviousAnswers')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('recoverPreviousAnswersDescription', {
+                time: persistence.getRecoverableData()
+                  ? new Date(persistence.getRecoverableData()!.lastSaved).toLocaleTimeString()
+                  : '',
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                persistence.clearSavedAnswers();
+                setShowRecoveryDialog(false);
+              }}
+            >
+              {t('startFresh')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const data = persistence.getRecoverableData();
+                if (data) {
+                  setAnswers(data.answers);
+                  toast.success(t('answersRecovered'));
+                }
+                setShowRecoveryDialog(false);
+              }}
+            >
+              {t('recoverAnswers')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useReducer, useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import useSWR, { mutate } from 'swr';
 
@@ -18,6 +18,9 @@ import { getAPIUrl } from '@/services/config/config';
 import ExamPreScreen from './ExamPreScreen';
 import ExamSettings from './ExamSettings';
 import ExamResults from './ExamResults';
+import { examFlowReducer } from './state/examFlowReducer';
+import { examActions } from './state/examActions';
+import type { AttemptData } from './state/examFlowReducer';
 
 interface ExamActivityProps {
   activity: any;
@@ -25,17 +28,15 @@ interface ExamActivityProps {
   orgslug: string;
 }
 
-type ExamState = 'loading' | 'pre-exam' | 'taking' | 'results' | 'error' | 'manage';
-
 export default function ExamActivity({ activity, course, orgslug }: ExamActivityProps) {
   const t = useTranslations('Activities.ExamActivity');
   const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;
   const { contributorStatus } = useContributorStatus(course.course_uuid);
 
-  const [currentAttempt, setCurrentAttempt] = useState<any>(null);
+  // Centralized state management with reducer
+  const [state, dispatch] = useReducer(examFlowReducer, { phase: 'loading' });
   const [activeTab, setActiveTab] = useState('questions');
-  const [overrideState, setOverrideState] = useState<ExamState | null>(null);
 
   const isTeacher = contributorStatus === 'ACTIVE';
 
@@ -77,98 +78,105 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
     (url) => swrFetcher(url, accessToken),
   );
 
-  // Derive state from inputs to avoid setState-in-effect and setTimeout usage
-  const derivedState = useMemo<ExamState>(() => {
-    if (examError || questionsError || attemptsError) return 'error';
-    if (!exam || !questions) return 'loading';
-
-    // Teachers can see management view or take the exam
-    if (isTeacher && !currentAttempt) return 'manage';
-
-    if (!userAttempts) return 'pre-exam';
-
-    const inProgressAttempt = userAttempts.find((a: any) => a.status === 'IN_PROGRESS');
-    if (inProgressAttempt) return 'taking';
-
-    const lastAttempt = userAttempts[0];
-    if (lastAttempt && (lastAttempt.status === 'SUBMITTED' || lastAttempt.status === 'AUTO_SUBMITTED')) {
-      const submittedAt = new Date(lastAttempt.submitted_at).getTime();
-      if (Date.now() - submittedAt < 5 * 60 * 1000) return 'results';
-    }
-
-    return 'pre-exam';
-  }, [exam, questions, userAttempts, examError, questionsError, attemptsError, isTeacher, currentAttempt]);
-
-  const currentState = overrideState ?? derivedState;
-
-  // Show a loading/error toast as needed
+  // Update state based on loaded data
   useEffect(() => {
-    if (examError || questionsError || (attemptsError && !isTeacher)) {
+    if (examError || questionsError || attemptsError) {
+      dispatch(examActions.setError({ message: t('errorLoadingExam'), retryable: true }));
       toast.error(t('errorLoadingExam'));
+      return;
     }
-  }, [examError, questionsError, attemptsError, isTeacher, t]);
 
-  // Clear manual override when derived state changes (but don't clear while loading)
-  useEffect(() => {
-    // Don't clear override when teacher intentionally switches to pre-exam or taking mode
-    const isTeacherPreviewMode = isTeacher && (overrideState === 'pre-exam' || overrideState === 'taking');
-
-    // If we're temporarily loading data, keep the manual override (prevents flicker back to loading)
-    if (overrideState && overrideState !== derivedState && derivedState !== 'loading' && !isTeacherPreviewMode) {
-      setOverrideState(null);
+    if (!exam || !questions) {
+      dispatch(examActions.setLoading());
+      return;
     }
-  }, [overrideState, derivedState, isTeacher]);
 
-  const handleStartExam = (attempt: any) => {
-    setCurrentAttempt(attempt);
-    setOverrideState('taking');
-    // Ensure question list is fresh before rendering taking UI
+    const userAttemptsList = userAttempts || [];
+
+    // Check for in-progress attempt
+    const inProgressAttempt = userAttemptsList.find((a: AttemptData) => a.status === 'IN_PROGRESS');
+    if (inProgressAttempt && state.phase !== 'taking') {
+      dispatch(examActions.startExam(inProgressAttempt));
+      return;
+    }
+
+    // If teacher and no active attempt, show management
+    if (isTeacher && state.phase === 'loading') {
+      dispatch(examActions.setPreExam(exam, questions, userAttemptsList));
+      dispatch(examActions.enterManagementMode());
+      return;
+    }
+
+    // Default to pre-exam if we're not in a specific state
+    if (state.phase === 'loading') {
+      dispatch(examActions.setPreExam(exam, questions, userAttemptsList));
+    }
+  }, [exam, questions, userAttempts, examError, questionsError, attemptsError, isTeacher, t, state.phase]);
+
+  const handleStartExam = useCallback((attempt: AttemptData) => {
+    dispatch(examActions.startExam(attempt));
     void mutateQuestions?.();
-  };
+  }, [mutateQuestions]);
 
-  const handleCompleteExam = async () => {
+  const handleCompleteExam = useCallback(async () => {
     // Refresh attempts data
     await mutateAttempts();
 
-    // Revalidate trail data so UI reflects newly completed activity (if server marked it)
+    // Revalidate trail data
     try {
       await mutate(`${getAPIUrl()}trail/org/${exam?.org_id}/trail`);
     } catch (err) {
-      // Non-fatal — continue flow even if revalidation fails
       console.warn('Failed to revalidate trail after exam completion', err);
     }
 
-    // Also revalidate course meta so activity completion status is reflected in UI
+    // Revalidate course meta
     try {
-      const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
+      const withUnpublishedActivities = course?.withUnpublishedActivities || false;
       await mutate(`${getAPIUrl()}courses/${course?.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`);
     } catch (err) {
       console.warn('Failed to revalidate course meta after exam completion', err);
     }
 
-    // Find the just-completed attempt
+    // Fetch the completed attempt
     const completedAttempt = await fetch(`${getAPIUrl()}exams/${examUuid}/attempts/me`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers: { Authorization: `Bearer ${accessToken}` },
     }).then((res) => res.json());
 
     const lastAttempt = completedAttempt[0];
-    setCurrentAttempt(lastAttempt);
-    setOverrideState('results');
-  };
+    dispatch(examActions.submitExam(lastAttempt));
+  }, [mutateAttempts, exam, course, examUuid, accessToken]);
 
-  const handleReturnToCourse = () => {
+  const handleReturnToCourse = useCallback(() => {
     const courseuuid = course.course_uuid?.replace('course_', '');
     window.location.href = `/course/${courseuuid}`;
-  };
+  }, [course]);
 
-  if (currentState === 'loading' || !exam || !questions) {
+  const handleBackToPreExam = useCallback(() => {
+    if (state.phase === 'results' || state.phase === 'manage') {
+      dispatch(examActions.backToPreExam(userAttempts || []));
+    }
+  }, [state.phase, userAttempts]);
+
+  if (state.phase === 'loading' || !exam || !questions) {
     return <PageLoading />;
   }
 
+  // Error state
+  if (state.phase === 'error') {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <p className="text-destructive">{t('errorLoadingExam')}</p>
+          <Button onClick={() => dispatch(examActions.retry())} className="mt-4">
+            {t('tryAgain')}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   // Teacher management view
-  if (currentState === 'manage' && isTeacher) {
+  if (state.phase === 'manage' && isTeacher) {
     return (
       <div className="mx-auto max-w-6xl space-y-6 p-6">
         <div className="flex items-center justify-between">
@@ -177,7 +185,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
             <p className="text-muted-foreground">{t('manageExam')}</p>
           </div>
           <Button
-            onClick={() => setOverrideState('pre-exam')}
+            onClick={() => dispatch(examActions.exitManagementMode(userAttempts || []))}
             variant="outline"
           >
             {t('previewExam')}
@@ -239,26 +247,26 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
   }
 
   // Student views
-  if (currentState === 'pre-exam') {
+  if (state.phase === 'pre-exam') {
     return (
       <ExamPreScreen
-        exam={exam}
-        questionCount={questions.length}
-        userAttempts={userAttempts || []}
+        exam={state.exam}
+        questionCount={state.questions.length}
+        userAttempts={state.userAttempts}
         accessToken={accessToken!}
         onStartExam={handleStartExam}
         isTeacher={isTeacher}
-        onBackToManage={isTeacher ? () => setOverrideState(null) : undefined}
+        onBackToManage={isTeacher ? () => dispatch(examActions.enterManagementMode()) : undefined}
       />
     );
   }
 
-  if (currentState === 'taking' && currentAttempt) {
+  if (state.phase === 'taking') {
     return (
       <ExamTakingInterface
-        exam={exam}
-        questions={questions}
-        attempt={currentAttempt}
+        exam={state.exam}
+        questions={state.questions}
+        attempt={state.attempt}
         accessToken={accessToken!}
         onComplete={handleCompleteExam}
       />
@@ -291,14 +299,18 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
     }
   };
 
-  const remainingAttempts = isTeacher ? null : (exam?.settings?.attempt_limit && exam.settings.attempt_limit > 0 ? exam.settings.attempt_limit - (userAttempts?.length || 0) : null);
+  if (state.phase === 'results') {
+    const attempts = userAttempts || [];
+    const remainingAttempts =
+      isTeacher || !state.exam?.settings?.attempt_limit || state.exam.settings.attempt_limit === 0
+        ? null
+        : state.exam.settings.attempt_limit - attempts.length;
 
-  if (currentState === 'results' && currentAttempt) {
     return (
       <ExamResults
-        exam={exam}
-        attempt={currentAttempt}
-        questions={questions}
+        exam={state.exam}
+        attempt={state.attempt}
+        questions={state.questions}
         onReturnToCourse={handleReturnToCourse}
         onRetry={handleRetry}
         remainingAttempts={remainingAttempts}
