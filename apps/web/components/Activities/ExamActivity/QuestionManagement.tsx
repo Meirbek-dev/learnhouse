@@ -3,8 +3,10 @@
 import { Download, Edit2, GripVertical, Plus, Trash2, Upload } from 'lucide-react';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { useTranslations } from 'next-intl';
-import { useRef, useState } from 'react';
+import { useRef, useReducer } from 'react';
 import { toast } from 'sonner';
+import { questionEditorReducer, createInitialEditorState } from './state/questionEditorReducer';
+import type { Question } from './state/questionEditorReducer';
 
 import {
   AlertDialog,
@@ -20,17 +22,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
 import { getAPIUrl } from '@/services/config/config';
 import { Button } from '@components/ui/button';
 
-interface Question {
-  id?: number;
-  question_uuid?: string;
-  question_text: string;
-  question_type: 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'MATCHING';
-  points: number;
-  explanation?: string;
-  answer_options: { text?: string; is_correct?: boolean; left?: string; right?: string }[];
-  order_index: number;
-}
-
 interface QuestionManagementProps {
   examUuid: string;
   questions: Question[];
@@ -45,25 +36,30 @@ export default function QuestionManagement({
   onQuestionsChange,
 }: QuestionManagementProps) {
   const t = useTranslations('Components.QuestionManagement');
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
-  const [inlineEditorOpen, setInlineEditorOpen] = useState(false);
+
+  // Centralized state management with reducer
+  const [state, dispatch] = useReducer(questionEditorReducer, createInitialEditorState());
   const inlineEditorRef = useRef<HTMLDivElement>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [pendingDeleteUuid, setPendingDeleteUuid] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Extract current state
+  const isDialogOpen = state.mode === 'editing-modal';
+  const inlineEditorOpen = state.mode === 'editing-inline';
+  const editingQuestion = state.mode === 'editing-inline' || state.mode === 'editing-modal' ? state.question : null;
+  const deleteDialogOpen = state.mode === 'deleting';
+  const pendingDeleteUuid = state.mode === 'deleting' ? state.questionUuid : null;
+  const isDeleting = state.mode === 'deleting' ? state.isDeleting : false;
+
   const handleAddQuestion = () => {
-    setEditingQuestion({
+    const newQuestion: Question = {
       question_text: '',
       question_type: 'SINGLE_CHOICE',
       points: 1,
       explanation: '',
       answer_options: [{ text: '', is_correct: false }],
       order_index: questions.length,
-    });
-    setInlineEditorOpen(true);
+    };
+    dispatch({ type: 'START_INLINE_EDIT', question: newQuestion });
     // scroll the inline editor into view after render
     setTimeout(() => inlineEditorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
   };
@@ -140,24 +136,21 @@ export default function QuestionManagement({
   };
 
   const handleEditQuestion = (question: Question) => {
-    setEditingQuestion(question);
-    setIsDialogOpen(true);
+    dispatch({ type: 'START_MODAL_EDIT', question });
   };
 
   const promptDeleteQuestion = (questionUuid: string) => {
-    setPendingDeleteUuid(questionUuid);
-    setDeleteDialogOpen(true);
+    dispatch({ type: 'START_DELETE', questionUuid });
   };
 
   const handleDeleteQuestion = async (questionUuid?: string) => {
     const uuid = questionUuid ?? pendingDeleteUuid;
     if (!uuid) {
-      setDeleteDialogOpen(false);
-      setPendingDeleteUuid(null);
+      dispatch({ type: 'CANCEL_DELETE' });
       return;
     }
 
-    setIsDeleting(true);
+    dispatch({ type: 'CONFIRM_DELETE' });
     try {
       const response = await fetch(`${getAPIUrl()}exams/questions/${uuid}`, {
         method: 'DELETE',
@@ -174,9 +167,7 @@ export default function QuestionManagement({
       console.error('Error deleting question:', error);
       toast.error(t('errorDeletingQuestion'));
     } finally {
-      setIsDeleting(false);
-      setDeleteDialogOpen(false);
-      setPendingDeleteUuid(null);
+      dispatch({ type: 'RESET_TO_IDLE' });
     }
   };
 
@@ -220,9 +211,8 @@ export default function QuestionManagement({
         open={deleteDialogOpen}
         onOpenChange={(open) => {
           if (!open) {
-            setDeleteDialogOpen(false);
-            setPendingDeleteUuid(null);
-          } else setDeleteDialogOpen(open);
+            dispatch({ type: 'CANCEL_DELETE' });
+          }
         }}
       >
         <AlertDialogContent size="default">
@@ -231,8 +221,7 @@ export default function QuestionManagement({
           <div className="mt-4 flex justify-end gap-2">
             <AlertDialogCancel
               onClick={() => {
-                setDeleteDialogOpen(false);
-                setPendingDeleteUuid(null);
+                dispatch({ type: 'CANCEL_DELETE' });
               }}
             >
               {t('cancel')}
@@ -272,20 +261,18 @@ export default function QuestionManagement({
             onChange={handleImportCSV}
             className="hidden"
           />
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog open={isDialogOpen} onOpenChange={(open) => !open && dispatch({ type: 'CANCEL_EDIT' })}>
             <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
               <QuestionEditor
                 question={editingQuestion}
                 examUuid={examUuid}
                 accessToken={accessToken}
                 onSave={() => {
-                  setIsDialogOpen(false);
-                  setEditingQuestion(null);
+                  dispatch({ type: 'RESET_TO_IDLE' });
                   onQuestionsChange();
                 }}
                 onCancel={() => {
-                  setIsDialogOpen(false);
-                  setEditingQuestion(null);
+                  dispatch({ type: 'CANCEL_EDIT' });
                 }}
                 autoFocus
               />
@@ -306,13 +293,11 @@ export default function QuestionManagement({
                     examUuid={examUuid}
                     accessToken={accessToken}
                     onSave={() => {
-                      setInlineEditorOpen(false);
-                      setEditingQuestion(null);
+                      dispatch({ type: 'RESET_TO_IDLE' });
                       onQuestionsChange();
                     }}
                     onCancel={() => {
-                      setInlineEditorOpen(false);
-                      setEditingQuestion(null);
+                      dispatch({ type: 'CANCEL_EDIT' });
                     }}
                     autoFocus
                   />
@@ -399,13 +384,11 @@ export default function QuestionManagement({
                           examUuid={examUuid}
                           accessToken={accessToken}
                           onSave={() => {
-                            setInlineEditorOpen(false);
-                            setEditingQuestion(null);
+                            dispatch({ type: 'RESET_TO_IDLE' });
                             onQuestionsChange();
                           }}
                           onCancel={() => {
-                            setInlineEditorOpen(false);
-                            setEditingQuestion(null);
+                            dispatch({ type: 'CANCEL_EDIT' });
                           }}
                           autoFocus
                         />

@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef, useReducer } from 'react';
 import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import ExamTimer from './ExamTimer';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { useExamPersistence } from '@/hooks/useExamPersistence';
+import { examTakingReducer, createInitialTakingState } from './state/examTakingReducer';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@components/ui/radio-group';
@@ -65,15 +66,15 @@ export default function ExamTakingInterface({
   onComplete,
 }: ExamTakingInterfaceProps) {
   const t = useTranslations('Activities.ExamActivity');
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, any>>({});
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [violationCount, setViolationCount] = useState(0);
-  const [violationDialogOpen, setViolationDialogOpen] = useState(false);
-  const [currentViolation, setCurrentViolation] = useState<{ type: string; count: number } | null>(null);
+  
+  // Centralized state management with reducer
+  const [state, dispatch] = useReducer(
+    examTakingReducer,
+    createInitialTakingState(0, {}, attempt.violations?.length || 0)
+  );
+  
+  // Fullscreen state (separate from main state machine)
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showRecoveryDialog, setShowRecoveryDialog] = useState(false);
   const examContainerRef = useRef<HTMLDivElement>(null);
 
   // Answer persistence with auto-save and recovery
@@ -82,9 +83,10 @@ export default function ExamTakingInterface({
     autoSaveInterval: 5000, // Auto-save every 5 seconds
     expirationHours: 24,
     onRestore: (recoveredAnswers) => {
-      // Offer recovery on mount if stale data found
-      if (Object.keys(answers).length === 0 && Object.keys(recoveredAnswers).length > 0) {
-        setShowRecoveryDialog(true);
+      // Offer recovery on mount if no current answers and we have recovered data
+      const currentAnswers = state.mode === 'answering' || state.mode === 'confirming-submit' || state.mode === 'violation-warning' || state.mode === 'fullscreen-warning' ? state.answers : {};
+      if (Object.keys(currentAnswers).length === 0 && Object.keys(recoveredAnswers).length > 0) {
+        dispatch({ type: 'SHOW_RECOVERY_PROMPT', recoveredAnswers });
       }
     },
   });
@@ -94,22 +96,34 @@ export default function ExamTakingInterface({
     .map((id) => questions.find((q) => q.id === id))
     .filter(Boolean) as Question[];
 
-  const currentQuestion = orderedQuestions[currentQuestionIndex];
-  const progress = ((currentQuestionIndex + 1) / orderedQuestions.length) * 100;
+  // Extract current state
+  const currentIndex = state.mode === 'submitting' ? 0 : state.currentIndex;
+  const answers = state.mode === 'submitting' ? state.answers : (state.mode === 'recovery-prompt' ? {} : state.answers);
+  const isSubmitting = state.mode === 'submitting';
+  const showConfirmation = state.mode === 'confirming-submit';
+  const violationCount = state.violationCount;
+  const violationDialogOpen = state.mode === 'violation-warning';
+  const currentViolation = state.mode === 'violation-warning' ? state.violation : null;
+  const showRecoveryDialog = state.mode === 'recovery-prompt';
+
+  const currentQuestion = orderedQuestions[currentIndex];
+  const progress = ((currentIndex + 1) / orderedQuestions.length) * 100;
 
   const handleSubmit = useCallback(
     async (isAutoSubmit = false) => {
-      if (isSubmitting) return;
-      setIsSubmitting(true);
+      if (state.mode === 'submitting') return;
+      
+      dispatch({ type: 'START_SUBMIT' });
 
       try {
+        const submitAnswers = state.mode === 'confirming-submit' ? state.answers : {};
         const response = await fetch(`${getAPIUrl()}exams/${exam.exam_uuid}/attempts/${attempt.attempt_uuid}/submit`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${accessToken}`,
           },
-          body: JSON.stringify(answers),
+          body: JSON.stringify(submitAnswers),
         });
 
         if (!response.ok) {
@@ -124,19 +138,17 @@ export default function ExamTakingInterface({
       } catch (error) {
         console.error('Error submitting exam:', error);
         toast.error(t('errorSubmittingExam'));
-        setIsSubmitting(false);
+        dispatch({ type: 'RESET_TO_ANSWERING' });
       }
     },
-    [isSubmitting, answers, accessToken, exam.exam_uuid, attempt.attempt_uuid, onComplete, t, persistence],
+    [state, accessToken, exam.exam_uuid, attempt.attempt_uuid, onComplete, t, persistence],
   );
 
 
   // Anti-cheating with useTestGuard
   const handleViolation = useCallback(
     async (type: string, count: number) => {
-      setViolationCount(count);
-      setCurrentViolation({ type, count });
-      setViolationDialogOpen(true);
+      dispatch({ type: 'RECORD_VIOLATION', violation: { type, count } });
 
       // Record violation on server
       try {
@@ -152,8 +164,7 @@ export default function ExamTakingInterface({
         // Check if threshold reached
         const threshold = settings.violation_threshold;
         if (threshold && count >= threshold) {
-          // Close dialog (we will auto-submit immediately)
-          setViolationDialogOpen(false);
+          // Auto-submit on threshold
           toast.error(t('autoSubmitting', { reason: 'Violation threshold exceeded' }));
           void handleSubmit(true);
         }
@@ -161,7 +172,7 @@ export default function ExamTakingInterface({
         console.error('Failed to record violation:', error);
       }
     },
-    [exam.exam_uuid, attempt.attempt_uuid, accessToken, settings.violation_threshold, t, handleSubmit],
+    [state, accessToken, exam.exam_uuid, attempt.attempt_uuid, settings.violation_threshold, handleSubmit, t],
   );
 
   useTestGuard({
@@ -224,7 +235,7 @@ export default function ExamTakingInterface({
           // Only report if still not in fullscreen after grace period
           if (!document.fullscreenElement && !userInitiatedExit) {
             toast.warning(t('fullscreenExited'));
-            void handleViolation('FULLSCREEN_EXIT', violationCount + 1);
+            void handleViolation('FULLSCREEN_EXIT', state.violationCount + 1);
 
             // Optionally try to re-enter fullscreen
             if (settings.fullscreen_enforcement) {
@@ -256,15 +267,14 @@ export default function ExamTakingInterface({
         });
       }
     };
-  }, [settings.fullscreen_enforcement, handleViolation, t, violationCount]);
+  }, [settings.fullscreen_enforcement, handleViolation, t, state.violationCount]);
 
   const handleAnswerChange = (questionId: number, answer: any) => {
-    setAnswers((prev) => {
-      const updated = { ...prev, [questionId]: answer };
-      // Persist answers to localStorage
-      persistence.saveAnswers(updated);
-      return updated;
-    });
+    dispatch({ type: 'ANSWER_QUESTION', questionId, answer });
+    // Persist answers to localStorage
+    const currentAnswers = state.mode === 'answering' || state.mode === 'violation-warning' || state.mode === 'fullscreen-warning' ? state.answers : {};
+    const updated = { ...currentAnswers, [questionId]: answer };
+    persistence.saveAnswers(updated);
   };
 
 
@@ -402,7 +412,7 @@ export default function ExamTakingInterface({
           <h2 id={`exam-title-${attempt.attempt_uuid}`} className="text-xl font-bold md:text-2xl">{exam.title}</h2>
           <p className="text-sm text-gray-600">
             {t('questionProgress', {
-              current: currentQuestionIndex + 1,
+              current: currentIndex + 1,
               total: orderedQuestions.length,
             })}
           </p>
@@ -426,7 +436,7 @@ export default function ExamTakingInterface({
         aria-valuenow={Math.round(progress)}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label={t('questionProgress', { current: currentQuestionIndex + 1, total: orderedQuestions.length })}
+        aria-label={t('questionProgress', { current: currentIndex + 1, total: orderedQuestions.length })}
       />
 
       {/* Violation Warning */}
@@ -443,7 +453,7 @@ export default function ExamTakingInterface({
       )}
 
       {/* Violation Dialog */}
-      <AlertDialog open={violationDialogOpen} onOpenChange={setViolationDialogOpen}>
+      <AlertDialog open={violationDialogOpen} onOpenChange={(open) => !open && dispatch({ type: 'DISMISS_VIOLATION' })}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogMedia>
@@ -460,7 +470,7 @@ export default function ExamTakingInterface({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel />
-            <AlertDialogAction onClick={() => setViolationDialogOpen(false)}>
+            <AlertDialogAction onClick={() => dispatch({ type: 'DISMISS_VIOLATION' })}>
               {t('violationDialogAcknowledge')}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -468,7 +478,7 @@ export default function ExamTakingInterface({
       </AlertDialog>
 
       {/* Recovery Dialog */}
-      <AlertDialog open={showRecoveryDialog} onOpenChange={setShowRecoveryDialog}>
+      <AlertDialog open={showRecoveryDialog} onOpenChange={(open) => !open && dispatch({ type: 'REJECT_RECOVERY' })}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogMedia>
@@ -487,7 +497,7 @@ export default function ExamTakingInterface({
             <AlertDialogCancel
               onClick={() => {
                 persistence.clearSavedAnswers();
-                setShowRecoveryDialog(false);
+                dispatch({ type: 'REJECT_RECOVERY' });
               }}
             >
               {t('startFresh')}
@@ -496,10 +506,9 @@ export default function ExamTakingInterface({
               onClick={() => {
                 const data = persistence.getRecoverableData();
                 if (data) {
-                  setAnswers(data.answers);
+                  dispatch({ type: 'ACCEPT_RECOVERY' });
                   toast.success(t('answersRecovered'));
                 }
-                setShowRecoveryDialog(false);
               }}
             >
               {t('recoverAnswers')}
@@ -516,7 +525,7 @@ export default function ExamTakingInterface({
           <Card role="group" aria-labelledby={`question-title-${currentQuestion?.id}`}>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span id={`question-title-${currentQuestion?.id}`}>{t('questionNumber', { number: currentQuestionIndex + 1 })}</span>
+                <span id={`question-title-${currentQuestion?.id}`}>{t('questionNumber', { number: currentIndex + 1 })}</span>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-normal text-gray-500">
                     {t('points', { count: currentQuestion?.points ?? 0 })}
@@ -534,8 +543,8 @@ export default function ExamTakingInterface({
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <Button
               variant="outline"
-              onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
-              disabled={currentQuestionIndex === 0}
+              onClick={() => dispatch({ type: 'NAVIGATE_TO_QUESTION', index: Math.max(0, currentIndex - 1) })}
+              disabled={currentIndex === 0}
               className="w-full md:w-auto"
             >
               {t('previous')}
@@ -545,16 +554,21 @@ export default function ExamTakingInterface({
               {t('answeredCount', { answered: answeredCount, total: orderedQuestions.length })}
             </div>
 
-            {currentQuestionIndex < orderedQuestions.length - 1 ? (
+            {currentIndex < orderedQuestions.length - 1 ? (
               <Button
-                onClick={() => setCurrentQuestionIndex((prev) => prev + 1)}
+                onClick={() => dispatch({ type: 'NAVIGATE_TO_QUESTION', index: currentIndex + 1 })}
                 className="w-full md:w-auto"
               >
                 {t('next')}
               </Button>
             ) : (
               <Button
-                onClick={() => setShowConfirmation(true)}
+                onClick={() => {
+                  const unansweredQuestions = orderedQuestions
+                    .map((q, idx) => (!answers[q.id] ? idx + 1 : null))
+                    .filter((n): n is number => n !== null);
+                  dispatch({ type: 'SHOW_SUBMIT_CONFIRMATION', unansweredQuestions });
+                }}
                 disabled={isSubmitting}
                 className="w-full bg-green-600 hover:bg-green-700 md:w-auto"
               >
@@ -578,7 +592,7 @@ export default function ExamTakingInterface({
               <div className="grid grid-cols-5 gap-2 md:grid-cols-8 lg:grid-cols-5">
                 {orderedQuestions.map((question, index) => {
                   const answered = isAnswered(question.id);
-                  const current = index === currentQuestionIndex;
+                  const current = index === currentIndex;
 
                   let bgColor = 'bg-gray-100 hover:bg-gray-200';
                   let textColor = 'text-gray-600';
@@ -594,7 +608,7 @@ export default function ExamTakingInterface({
                   return (
                     <button
                       key={question.id}
-                      onClick={() => setCurrentQuestionIndex(index)}
+                      onClick={() => dispatch({ type: 'NAVIGATE_TO_QUESTION', index })}
                       className={`relative flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition-colors ${bgColor} ${textColor}`}
                       aria-label={t('questionAriaLabel', { number: index + 1, answered: answered ? 'true' : 'false' })}
                     >
@@ -626,7 +640,7 @@ export default function ExamTakingInterface({
       </div>
 
       {/* Confirmation Dialog */}
-      <AlertDialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+      <AlertDialog open={showConfirmation} onOpenChange={(open) => !open && dispatch({ type: 'CANCEL_SUBMIT' })}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogMedia>
