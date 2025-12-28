@@ -129,7 +129,7 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
       const hasMinimalMetadata = !(data.title || data.description || data.og_image);
 
       if (hasMinimalMetadata) {
-        toast.error('Unable to get metadata from this website. The preview card may appear incomplete.', {
+        toast.error(t('metadataIncomplete'), {
           duration: 4000,
         });
       }

@@ -377,14 +377,14 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
                   <button
                     onClick={handleExpand}
                     className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
-                    title="Expand video"
+                    title={t('expand')}
                   >
                     <Expand className="h-4 w-4 text-white" />
                   </button>
                   <button
                     onClick={handleDownload}
                     className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
-                    title="Download video"
+                    title={t('download')}
                   >
                     <Download className="h-4 w-4 text-white" />
                   </button>

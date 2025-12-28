@@ -54,17 +54,17 @@ export function ThemeSelector({ className }: ThemeSelectorProps) {
                   <div
                     className="border-border h-4 w-4 shrink-0 rounded border"
                     style={{ backgroundColor: currentColors.primary }}
-                    title="Primary color"
+                    title={t('primaryColor')}
                   />
                   <div
                     className="border-border h-4 w-4 shrink-0 rounded border"
                     style={{ backgroundColor: currentColors.secondary }}
-                    title="Secondary color"
+                    title={t('secondaryColor')}
                   />
                   <div
                     className="border-border h-4 w-4 shrink-0 rounded border"
                     style={{ backgroundColor: currentColors.accent }}
-                    title="Accent color"
+                    title={t('accentColor')}
                   />
                 </div>
                 <span className="font-medium">{tThemes(`${currentTheme.name}.name`)}</span>
@@ -85,12 +85,12 @@ export function ThemeSelector({ className }: ThemeSelectorProps) {
                       <div
                         className="border-border h-4 w-4 shrink-0 rounded border"
                         style={{ backgroundColor: colors.primary }}
-                        title="Primary"
+                        title={t('primary')}
                       />
                       <div
                         className="border-border h-4 w-4 shrink-0 rounded border"
                         style={{ backgroundColor: colors.secondary }}
-                        title="Secondary"
+                        title={t('secondary')}
                       />
                       <div
                         className="border-border h-4 w-4 shrink-0 rounded border"

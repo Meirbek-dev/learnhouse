@@ -108,6 +108,10 @@
       "attemptNumber": "Attempt #{number}",
       "attemptsRemaining": "Attempts Remaining",
       "autoSubmitting": "Auto-submitting exam: {reason}",
+      "autoSubmittingReason": {
+        "violationThresholdExceeded": "violation threshold exceeded",
+        "timeExpired": "time expired"
+      },
       "backToManagement": "Back to Management",
       "correct": "Correct",
       "correctAnswer": "Correct Answer",
@@ -117,6 +121,7 @@
       "examCompleted": "Exam Completed!",
       "examStarted": "Exam started successfully",
       "examSubmittedSuccessfully": "Exam submitted successfully",
+      "downloadCsv": "Download CSV",
       "explanation": "Explanation",
       "incorrect": "Incorrect",
       "instruction1": "Read each question carefully before answering",
@@ -134,11 +139,15 @@
       "notSet": "Not set",
       "pleaseRefresh": "Please refresh the page and try again",
       "points": "{count, plural, =0 {# points} one {# point} other {# points}}",
+      "pointsLabel": "Points",
       "pointsValue": "Worth {points} points",
       "previewExam": "Preview Exam",
+      "readyToStart": "Ready to Start",
+      "readyToStartSubtitle": "Review details and start the exam when you're ready.",
       "previous": "Previous",
       "previousAttempts": "Previous Attempts",
       "questions": "Questions",
+      "manageQuestions": "Manage Questions",
       "questionNavigator": "Question Navigator",
       "questionNavigatorDescription": "Click to jump to any question",
       "questionAriaLabel": "Question {number}{answered, select, true { — answered} other {}}",
@@ -689,6 +698,7 @@
     },
     "CourseActions": {
       "authenticateToStart": "Authenticate to start the course",
+      "errorCheckingCourseAccess": "Failed to check course access. Please try again later.",
       "author": "Author",
       "continueLearning": "Continue Learning",
       "fullAccess": "You have purchased this course and have full access to all content.",
@@ -1025,7 +1035,8 @@
       "saving": "Saving...",
       "savingSettings": "Saving settings...",
       "settingsUpdated": "Settings updated successfully",
-      "errorUpdatingSettings": "Failed to update settings"
+      "errorUpdatingSettings": "Failed to update settings",
+      "resetDefaults": "Reset to defaults"
     },
     "ExamResultsDashboard": {
       "totalStudents": "Total Students",
@@ -1056,6 +1067,16 @@
       "actions": "Actions",
       "noAttempts": "No attempts found",
       "view": "View",
+      "openAttemptCard": "Open attempt by {name}",
+      "viewAttemptAria": "View attempt by {name}",
+      "loadingAttempt": "Loading attempt...",
+      "errorLoadingAttempt": "Failed to load attempt details",
+      "downloadJson": "Download JSON",
+      "downloadStarted": "Download started",
+      "answersPreview": "Answers preview",
+      "toggleSortOrder": "Toggle sort order",
+      "loading": "Loading...",
+      "close": "Close",
       "exportHeaders": {
         "studentName": "Student Name",
         "email": "Email",
@@ -1529,6 +1550,8 @@
       "createActivity": "Create Activity",
       "createVideoActivity": "Create Video Activity",
       "createVideoActivityDescription": "Upload a video file or link to a YouTube video to create an interactive learning activity",
+      "organizationDataNotLoaded": "Organization data is not loaded. Please refresh the page.",
+      "courseDataMissing": "Course data is missing. Please refresh the page.",
       "creating": "Creating...",
       "dragAdditionalSubtitles": "Drag additional subtitle files here or use the + button above",
       "dragDropSubtitlesInstruction": "Drag and drop subtitle files here, or click the button above",
@@ -1595,12 +1618,14 @@
       "youtubeVideo": "YouTube Video"
     },
     "WebPreview": {
+      "embeddedContent": "Embedded Content",
       "align": "Align",
       "alignOption": "Align {value}",
       "alignment": "Alignment",
       "buttonLabel": "Button label",
       "buttonLabelPlaceholder": "Button label",
       "buttonOptions": "Button Options",
+      "metadataIncomplete": "Unable to get metadata from this website. The preview card may appear incomplete.",
       "cancel": "Cancel",
       "center": "Center",
       "deleteCard": "Delete Card",
@@ -4787,7 +4812,13 @@
         "selectFile": "Select Image File",
         "themeSelector": {
           "beta": "BETA",
-          "title": "Color Theme"
+          "title": "Color Theme",
+          "primaryColor": "Primary color",
+          "secondaryColor": "Secondary color",
+          "accentColor": "Accent color",
+          "primary": "Primary",
+          "secondary": "Secondary",
+          "accent": "Accent"
         },
         "title": "Account Settings",
         "uploadingAvatar": "Uploading",

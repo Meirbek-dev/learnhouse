@@ -108,6 +108,10 @@
       "attemptNumber": "Попытка №{number}",
       "attemptsRemaining": "Осталось попыток",
       "autoSubmitting": "Автоматическая отправка экзамена: {reason}",
+      "autoSubmittingReason": {
+        "violationThresholdExceeded": "превышение порога нарушений",
+        "timeExpired": "время истекло"
+      },
       "backToManagement": "Вернуться к управлению",
       "correct": "Правильно",
       "correctAnswer": "Правильный ответ",
@@ -117,6 +121,7 @@
       "examCompleted": "Экзамен завершен!",
       "examStarted": "Экзамен успешно начат",
       "examSubmittedSuccessfully": "Экзамен успешно отправлен",
+      "downloadCsv": "Скачать CSV",
       "viewAttempt": "Просмотреть попытку: {attempt}",
       "explanation": "Объяснение",
       "incorrect": "Неправильно",
@@ -135,11 +140,17 @@
       "notSet": "Не установлено",
       "pleaseRefresh": "Пожалуйста, обновите страницу и попробуйте снова",
       "points": "{count, plural, =0 {# баллов} one {# балл} few {# балла} other {# баллов}}",
+      "pointsLabel": "Баллы",
       "pointsValue": "{points} балл",
       "previewExam": "Предпросмотр экзамена",
+      "question": "Вопрос",
+      "status": "Статус",
+      "readyToStart": "Готовы начать",
+      "readyToStartSubtitle": "Просмотрите детали и начните экзамен, когда будете готовы.",
       "previous": "Предыдущий",
       "previousAttempts": "Предыдущие попытки",
       "questions": "Вопросы",
+      "manageQuestions": "Управлять вопросами",
       "questionNavigator": "Навигатор вопросов",
       "questionNavigatorDescription": "Нажмите, чтобы перейти к любому вопросу",
       "questionAriaLabel": "Вопрос {number}{answered, select, true { — отвечено} other {}}",
@@ -689,6 +700,7 @@
       "loading": "Загрузка..."
     },
     "CourseActions": {
+      "errorCheckingCourseAccess": "Не удалось проверить доступ к курсу. Пожалуйста, повторите попытку позже.",
       "authenticateToStart": "Авторизуйтесь, чтобы начать курс",
       "author": "Автор",
       "continueLearning": "Продолжить обучение",
@@ -1026,9 +1038,20 @@
       "saving": "Сохранение...",
       "savingSettings": "Сохранение настроек...",
       "settingsUpdated": "Настройки успешно обновлены",
-      "errorUpdatingSettings": "Не удалось обновить настройки"
+      "errorUpdatingSettings": "Не удалось обновить настройки",
+      "resetDefaults": "Сбросить настройки по умолчанию"
     },
     "ExamResultsDashboard": {
+      "openAttemptCard": "Открыть попытку {name}",
+      "viewAttemptAria": "Просмотр попытки {name}",
+      "loadingAttempt": "Загрузка попытки...",
+      "errorLoadingAttempt": "Не удалось загрузить детали попытки",
+      "downloadJson": "Скачать JSON",
+      "downloadStarted": "Загрузка начата",
+      "answersPreview": "Просмотр ответов",
+      "toggleSortOrder": "Переключить порядок сортировки",
+      "loading": "Загрузка...",
+      "close": "Закрыть",
       "totalStudents": "Всего студентов",
       "totalAttempts": "Всего попыток",
       "averageScore": "Средний балл",
@@ -1516,6 +1539,8 @@
       "loadingError": "Не удалось загрузить данные пользователя"
     },
     "VideoModal": {
+      "organizationDataNotLoaded": "Данные организации не загружены. Пожалуйста, обновите страницу.",
+      "courseDataMissing": "Данные курса отсутствуют. Пожалуйста, обновите страницу.",
       "activityName": "Название активности",
       "activityNamePlaceholder": "Введите название активности...",
       "addSubtitle": "Добавить субтитры",
@@ -1596,6 +1621,8 @@
       "youtubeVideo": "YouTube видео"
     },
     "WebPreview": {
+      "embeddedContent": "Встроенный контент",
+      "metadataIncomplete": "Не удалось получить метаданные с этого сайта. Карточка предварительного просмотра может быть неполной.",
       "align": "Выровнять",
       "alignOption": "Выровнять {value}",
       "alignment": "Выравнивание",

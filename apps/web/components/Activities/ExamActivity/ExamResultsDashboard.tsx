@@ -1,13 +1,13 @@
 'use client';
 import {
   AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogAction,
   AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -69,7 +69,7 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
         submitted.length > 0
           ? Math.round(
               submitted
-                .filter((a) => a.duration_seconds !== null || a.duration_minutes !== null)
+                .filter((a) => a.duration_seconds != null || a.duration_minutes != null)
                 .reduce(
                   (acc, b) =>
                     acc +
@@ -104,17 +104,19 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
 
     // Sort
     filtered.sort((a, b) => {
-      let aVal: any = a[sortBy as keyof AttemptData];
-      let bVal: any = b[sortBy as keyof AttemptData];
+      // dynamic key lookups can be undefined; coalesce to null and handle accordingly
+      let aVal: any = a[sortBy as keyof AttemptData] ?? null;
+      let bVal: any = b[sortBy as keyof AttemptData] ?? null;
 
-      if (aVal === null) aVal = sortOrder === 'asc' ? Infinity : -Infinity;
-      if (bVal === null) bVal = sortOrder === 'asc' ? Infinity : -Infinity;
+      if (aVal == null) aVal = sortOrder === 'asc' ? Infinity : -Infinity;
+      if (bVal == null) bVal = sortOrder === 'asc' ? Infinity : -Infinity;
 
       if (typeof aVal === 'string') {
-        return sortOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        // ensure we have string operands
+        return sortOrder === 'asc' ? aVal.localeCompare(bVal ?? '') : (bVal ?? '').localeCompare(aVal);
       }
 
-      return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
+      return sortOrder === 'asc' ? (aVal as number) - (bVal as number) : (bVal as number) - (aVal as number);
     });
 
     return filtered;
@@ -122,14 +124,18 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'SUBMITTED':
+      case 'SUBMITTED': {
         return t('submitted');
-      case 'AUTO_SUBMITTED':
+      }
+      case 'AUTO_SUBMITTED': {
         return t('autoSubmitted');
-      case 'IN_PROGRESS':
+      }
+      case 'IN_PROGRESS': {
         return t('inProgress');
-      default:
+      }
+      default: {
         return status;
+      }
     }
   };
 
@@ -150,9 +156,9 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
 
     const rows = filteredAttempts.map((a) => {
       const durationSeconds =
-        a.duration_seconds != null
+        a.duration_seconds !== null
           ? a.duration_seconds
-          : a.duration_minutes != null
+          : a.duration_minutes !== null
             ? Math.round(a.duration_minutes * 60)
             : null;
       return [
@@ -211,8 +217,9 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
       if (!res.ok) throw new Error('Failed to fetch attempt');
       const data = await res.json();
       setSelectedAttempt(data);
-    } catch (err) {
-      console.error('Failed to load attempt detail', err);
+    } catch (error) {
+      console.error('Failed to load attempt detail', error);
+      toast.error(t('errorLoadingAttempt'));
       setSelectedAttempt(null);
     } finally {
       setIsAttemptLoading(false);
@@ -478,9 +485,9 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
                           <TableCell>
                             {(() => {
                               const durationSeconds =
-                                attempt.duration_seconds != null
+                                attempt.duration_seconds !== null
                                   ? attempt.duration_seconds
-                                  : attempt.duration_minutes != null
+                                  : attempt.duration_minutes !== null
                                     ? Math.round(attempt.duration_minutes * 60)
                                     : null;
                               return durationSeconds !== null ? formatDuration(durationSeconds) : '-';
@@ -524,7 +531,7 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
 
       {/* Attempt Detail Modal */}
       <AlertDialog
-        open={!!selectedAttemptUuid}
+        open={Boolean(selectedAttemptUuid)}
         onOpenChange={(open) => !open && handleCloseAttempt()}
       >
         <AlertDialogContent className="max-w-3xl">
@@ -532,70 +539,72 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
             <AlertDialogTitle>
               {selectedAttempt ? `${selectedAttempt.user_name} — ${selectedAttempt.percentage}%` : t('loadingAttempt')}
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              {selectedAttempt ? (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">{t('startedAt')}</div>
-                    <div className="font-semibold">{new Date(selectedAttempt.started_at).toLocaleString()}</div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">{t('finishedAt')}</div>
-                    <div className="font-semibold">
-                      {selectedAttempt.finished_at ? new Date(selectedAttempt.finished_at).toLocaleString() : '-'}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">{t('duration')}</div>
-                    <div className="font-semibold">
-                      {(() => {
-                        const durationSeconds =
-                          selectedAttempt.duration_seconds != null
-                            ? selectedAttempt.duration_seconds
-                            : selectedAttempt.duration_minutes != null
-                              ? Math.round(selectedAttempt.duration_minutes * 60)
-                              : null;
-                        return durationSeconds !== null ? formatDuration(durationSeconds) : '-';
-                      })()}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">{t('status')}</div>
-                    <div>{getStatusBadge(selectedAttempt.status)}</div>
-                  </div>
-
-                  {selectedAttempt.violation_count > 0 && (
-                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-2">
-                      <div className="text-sm font-semibold text-amber-900">
-                        {t('violationsRecorded', { count: selectedAttempt.violation_count })}
-                      </div>
-                      <ul className="mt-2 list-disc pl-4 text-sm text-gray-700">
-                        {selectedAttempt.violations?.map((v: any, idx: number) => (
-                          <li key={idx}>
-                            {v.type} — {new Date(v.timestamp).toLocaleString()}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {selectedAttempt.answers && (
-                    <div>
-                      <div className="text-sm font-semibold text-gray-600">{t('answersPreview')}</div>
-                      <pre className="mt-2 max-h-40 overflow-auto rounded bg-gray-50 p-3 text-xs">
-                        {JSON.stringify(selectedAttempt.answers, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div>{t('loading')}</div>
-              )}
-            </AlertDialogDescription>
+            {/* Keep the dialog description minimal to avoid block-level children inside the rendered <p> */}
+            <AlertDialogDescription>{selectedAttempt ? '' : t('loading')}</AlertDialogDescription>
           </AlertDialogHeader>
+
+          {/* Moved detailed content outside of AlertDialogDescription to avoid <div> inside <p> */}
+          {selectedAttempt ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600">{t('startedAt')}</div>
+                <div className="font-semibold">{new Date(selectedAttempt.started_at).toLocaleString()}</div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600">{t('finishedAt')}</div>
+                <div className="font-semibold">
+                  {selectedAttempt.finished_at ? new Date(selectedAttempt.finished_at).toLocaleString() : '-'}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600">{t('duration')}</div>
+                <div className="font-semibold">
+                  {(() => {
+                    const durationSeconds =
+                      selectedAttempt.duration_seconds != null
+                        ? selectedAttempt.duration_seconds
+                        : selectedAttempt.duration_minutes != null
+                          ? Math.round(selectedAttempt.duration_minutes * 60)
+                          : null;
+                    return durationSeconds != null ? formatDuration(durationSeconds) : '-';
+                  })()}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600">{t('status')}</div>
+                <div>{getStatusBadge(selectedAttempt.status)}</div>
+              </div>
+
+              {selectedAttempt.violation_count > 0 && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-2">
+                  <div className="text-sm font-semibold text-amber-900">
+                    {t('violationsRecorded', { count: selectedAttempt.violation_count })}
+                  </div>
+                  <ul className="mt-2 list-disc pl-4 text-sm text-gray-700">
+                    {selectedAttempt.violations?.map((v: any, idx: number) => (
+                      <li key={idx}>
+                        {v.type} — {new Date(v.timestamp).toLocaleString()}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {selectedAttempt.answers && (
+                <div>
+                  <div className="text-sm font-semibold text-gray-600">{t('answersPreview')}</div>
+                  <pre className="mt-2 max-h-40 overflow-auto rounded bg-gray-50 p-3 text-xs">
+                    {JSON.stringify(selectedAttempt.answers, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div>{t('loading')}</div>
+          )}
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => handleCloseAttempt()}>{t('close')}</AlertDialogCancel>
             {selectedAttempt && (

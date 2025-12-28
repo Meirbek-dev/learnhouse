@@ -131,7 +131,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
         setHasAccess(response.has_access);
       } catch {
         console.error('Failed to check course access');
-        toast.error('Failed to check course access. Please try again later.');
+        toast.error(t('errorCheckingCourseAccess'));
         setHasAccess(false);
       }
     };
@@ -142,7 +142,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
     if (checkedAccessRef.current[checkKey]) return;
     checkedAccessRef.current[checkKey] = true;
     checkAccess();
-  }, [course.id, course.org_id, accessToken, userId, linkedProducts]);
+  }, [course.id, course.org_id, accessToken, userId, linkedProducts, t]);
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {

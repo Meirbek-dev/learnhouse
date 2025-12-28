@@ -171,7 +171,7 @@ export default function ExamResults({
   };
 
   const handleExportCSV = () => {
-    const headers = [t('question'), t('yourAnswer'), t('correctAnswer'), t('status'), t('points')];
+    const headers = [t('question'), t('yourAnswer'), t('correctAnswer'), t('status'), t('pointsLabel')];
     const rows = orderedQuestions.map((q) => {
       const status = getAnswerStatus(q);
       const your = renderUserAnswer(q);

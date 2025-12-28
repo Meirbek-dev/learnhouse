@@ -79,9 +79,9 @@ export function useTestGuard({
             activeClasses: (active as HTMLElement | null)?.className,
           });
         }
-      } catch (err) {
+      } catch (error) {
         // ignore logging errors
-        void err;
+        void error;
       }
 
       violations.current.push(violation);
@@ -156,7 +156,7 @@ export function useTestGuard({
 
         // Only report if threshold exceeded and significant size change
         if ((widthDiff > devToolsThreshold || heightDiff > devToolsThreshold) && sizeChange) {
-          devToolsViolationCount++;
+          devToolsViolationCount += 1;
 
           // Require multiple consistent checks to reduce false positives
           if (devToolsViolationCount >= requiredConsistentChecks) {
@@ -228,13 +228,13 @@ export function useTestGuard({
       const keydown = (e: KeyboardEvent) => {
         const active = document.activeElement as HTMLElement | null;
         const isEditable =
-          !!active &&
+          active !== null &&
           (active.tagName === 'INPUT' ||
             active.tagName === 'TEXTAREA' ||
             // contentEditable check
-            (active.getAttribute && active.getAttribute('contenteditable') === 'true'));
+            active.getAttribute?.('contenteditable') === 'true');
 
-        if (isEditable) return;
+        if (isEditable) return; 
 
         if ((e.ctrlKey || e.metaKey) && ['c', 'a', 'u', 's', 'p', 'x'].includes(e.key.toLowerCase())) {
           e.preventDefault();

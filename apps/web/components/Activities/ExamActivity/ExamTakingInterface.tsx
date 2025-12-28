@@ -170,7 +170,7 @@ export default function ExamTakingInterface({
         const threshold = settings.violation_threshold;
         if (threshold && count >= threshold) {
           // Auto-submit on threshold
-          toast.error(t('autoSubmitting', { reason: 'Violation threshold exceeded' }));
+          toast.error(t('autoSubmitting', { reason: t('autoSubmittingReason.violationThresholdExceeded') }));
           void handleSubmit(true);
         }
       } catch (error) {
@@ -443,7 +443,7 @@ export default function ExamTakingInterface({
               startedAt={attempt.started_at}
               timeLimitMinutes={settings.time_limit}
               onExpire={() => {
-                toast.error(t('autoSubmitting', { reason: 'Time expired' }));
+                toast.error(t('autoSubmitting', { reason: t('autoSubmittingReason.timeExpired') }));
                 void handleSubmit(true);
               }}
             />

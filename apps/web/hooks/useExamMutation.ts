@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useCallback, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -215,7 +216,10 @@ export function useExamMutation<TData = unknown, TVariables = void>(options: Mut
  * Helper hook specifically for exam submission with built-in error handling
  */
 export function useExamSubmission(accessToken: string, onSuccess?: () => void) {
+  const t = useTranslations('Activities.ExamActivity');
+
   const mutation = useExamMutation({
+
     mutationFn: async ({
       examUuid,
       attemptUuid,
@@ -247,12 +251,12 @@ export function useExamSubmission(accessToken: string, onSuccess?: () => void) {
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * Math.pow(2, attemptIndex), 30_000),
     onSuccess: (data, variables) => {
-      toast.success('Exam submitted successfully');
+      toast.success(t('examSubmittedSuccessfully'));
       onSuccess?.();
     },
     onError: (error, variables, context) => {
       console.error('Exam submission error:', error);
-      toast.error(error.message || 'Failed to submit exam. Please try again.');
+      toast.error(error.message || t('errorSubmittingExam'));
     },
   });
 

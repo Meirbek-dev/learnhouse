@@ -902,7 +902,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
     // Validate org data is available
     if (!org || !org.org_uuid || !org.id) {
       console.error('Organization data not available:', org);
-      toast.error('Organization data is not loaded. Please refresh the page.');
+      toast.error(t('organizationDataNotLoaded'));
       return;
     }
 
@@ -911,7 +911,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
 
     if (!courseData || !courseData.course_uuid) {
       console.error('Course data missing:', course);
-      toast.error('Course data is missing. Please refresh the page.');
+      toast.error(t('courseDataMissing'));
       return;
     }
 

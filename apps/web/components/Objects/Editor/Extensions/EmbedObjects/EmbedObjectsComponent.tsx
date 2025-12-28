@@ -86,10 +86,12 @@ const EmbedContent = ({
   embedUrl,
   sanitizedEmbedCode,
   embedType,
+  embeddedTitle,
 }: {
   embedUrl: string;
   sanitizedEmbedCode: string;
   embedType: 'url' | 'code';
+  embeddedTitle?: string;
 }) => {
   useEffect(() => {
     if (embedType === 'code' && sanitizedEmbedCode) {
@@ -140,7 +142,7 @@ const EmbedContent = ({
         src={processedUrl}
         className="h-full w-full border-0"
         allowFullScreen
-        title="Embedded Content"
+        title={embeddedTitle ?? ''}
       />
     );
   }
@@ -458,6 +460,7 @@ const EmbedObjectsComponent = (props: any) => {
         embedUrl={embedUrl}
         sanitizedEmbedCode={sanitizedEmbedCode}
         embedType={embedType}
+        embeddedTitle={t('embeddedContent')}
       />
     ) : (
       <div className="h-full w-full bg-gray-200" />
