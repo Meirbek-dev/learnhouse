@@ -75,124 +75,120 @@ export default function ExamSubmissionReview({
             )}
           </AlertDialogMedia>
           <AlertDialogTitle>{t('confirmSubmission')}</AlertDialogTitle>
-          <AlertDialogDescription
-            render={
-              <div className="space-y-4 text-left">
-                <p className="text-sm text-gray-600">{t('confirmSubmissionMessage')}</p>
+          <AlertDialogDescription>{t('confirmSubmissionMessage')}</AlertDialogDescription>
 
-                {/* Summary Stats */}
-                <div className="rounded-lg border bg-gray-50 p-4">
-                  <div className="grid gap-3 text-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">{t('totalQuestions')}:</span>
-                      <span className="font-semibold">{totalQuestions}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        <span className="text-green-600">{t('answered')}:</span>
-                      </div>
-                      <span className="font-semibold text-green-600">{answeredCount}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <AlertTriangle className="h-4 w-4 text-gray-500" />
-                        <span className="text-gray-600">{t('unanswered')}:</span>
-                      </div>
-                      <span className="font-semibold text-gray-600">{unansweredQuestions.length}</span>
-                    </div>
-                    {hasFlagged && (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Flag className="h-4 w-4 text-orange-500" />
-                          <span className="text-orange-600">{t('flagged')}:</span>
-                        </div>
-                        <span className="font-semibold text-orange-600">{flaggedQuestions.length}</span>
-                      </div>
-                    )}
-                  </div>
+          <div className="space-y-4 text-left">
+            {/* Summary Stats */}
+            <div className="rounded-lg border bg-gray-50 p-4">
+              <div className="grid gap-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">{t('totalQuestions')}:</span>
+                  <span className="font-semibold">{totalQuestions}</span>
                 </div>
-
-                {/* Unanswered Questions List */}
-                {hasUnanswered && (
-                  <div className="rounded-lg border border-orange-200 bg-orange-50 p-4">
-                    <div className="mb-2 flex items-start gap-2">
-                      <AlertTriangle className="mt-0.5 h-4 w-4 text-orange-600" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-orange-800">
-                          {t('unansweredQuestionsWarning', { count: unansweredQuestions.length })}
-                        </p>
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {unansweredQuestions.slice(0, 20).map((questionNum) => (
-                            <span
-                              key={questionNum}
-                              className="inline-flex h-6 w-6 items-center justify-center rounded bg-orange-100 text-xs font-medium text-orange-700"
-                            >
-                              {questionNum}
-                            </span>
-                          ))}
-                          {unansweredQuestions.length > 20 && (
-                            <span className="inline-flex items-center px-2 text-xs text-orange-700">
-                              +{unansweredQuestions.length - 20} more
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <span className="text-green-600">{t('answered')}:</span>
                   </div>
-                )}
-
-                {/* Flagged Questions List */}
+                  <span className="font-semibold text-green-600">{answeredCount}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-gray-500" />
+                    <span className="text-gray-600">{t('unanswered')}:</span>
+                  </div>
+                  <span className="font-semibold text-gray-600">{unansweredQuestions.length}</span>
+                </div>
                 {hasFlagged && (
-                  <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                    <div className="mb-2 flex items-start gap-2">
-                      <Flag className="mt-0.5 h-4 w-4 text-blue-600" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-blue-800">
-                          {t('flaggedForReview')}: {flaggedQuestions.length}
-                        </p>
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {flaggedQuestions.slice(0, 20).map((questionNum) => (
-                            <span
-                              key={questionNum}
-                              className="inline-flex h-6 w-6 items-center justify-center rounded bg-blue-100 text-xs font-medium text-blue-700"
-                            >
-                              {questionNum}
-                            </span>
-                          ))}
-                          {flaggedQuestions.length > 20 && (
-                            <span className="inline-flex items-center px-2 text-xs text-blue-700">
-                              +{flaggedQuestions.length - 20} more
-                            </span>
-                          )}
-                        </div>
-                      </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Flag className="h-4 w-4 text-orange-500" />
+                      <span className="text-orange-600">{t('flagged')}:</span>
                     </div>
+                    <span className="font-semibold text-orange-600">{flaggedQuestions.length}</span>
                   </div>
                 )}
+              </div>
+            </div>
 
-                {/* Confirmation Checkbox */}
-                <div className="rounded-lg border-2 border-gray-300 bg-white p-4">
-                  <div className="flex items-start gap-3">
-                    <Checkbox
-                      id="confirm-submission"
-                      checked={confirmChecked}
-                      onCheckedChange={(checked) => setConfirmChecked(checked === true)}
-                      className="mt-0.5"
-                    />
-                    <Label
-                      htmlFor="confirm-submission"
-                      className="cursor-pointer text-sm leading-relaxed font-medium"
-                    >
-                      {t('confirmSubmissionCheckbox')}
-                    </Label>
+            {/* Unanswered Questions List */}
+            {hasUnanswered && (
+              <div className="rounded-lg border border-orange-200 bg-orange-50 p-4">
+                <div className="mb-2 flex items-start gap-2">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 text-orange-600" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-orange-800">
+                      {t('unansweredQuestionsWarning', { count: unansweredQuestions.length })}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {unansweredQuestions.slice(0, 20).map((questionNum) => (
+                        <span
+                          key={questionNum}
+                          className="inline-flex h-6 w-6 items-center justify-center rounded bg-orange-100 text-xs font-medium text-orange-700"
+                        >
+                          {questionNum}
+                        </span>
+                      ))}
+                      {unansweredQuestions.length > 20 && (
+                        <span className="inline-flex items-center px-2 text-xs text-orange-700">
+                          +{unansweredQuestions.length - 20} more
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-
-                {!confirmChecked && <p className="text-xs text-gray-500">{t('confirmSubmissionHint')}</p>}
               </div>
-            }
-          />
+            )}
+
+            {/* Flagged Questions List */}
+            {hasFlagged && (
+              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                <div className="mb-2 flex items-start gap-2">
+                  <Flag className="mt-0.5 h-4 w-4 text-blue-600" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-800">
+                      {t('flaggedForReview')}: {flaggedQuestions.length}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {flaggedQuestions.slice(0, 20).map((questionNum) => (
+                        <span
+                          key={questionNum}
+                          className="inline-flex h-6 w-6 items-center justify-center rounded bg-blue-100 text-xs font-medium text-blue-700"
+                        >
+                          {questionNum}
+                        </span>
+                      ))}
+                      {flaggedQuestions.length > 20 && (
+                        <span className="inline-flex items-center px-2 text-xs text-blue-700">
+                          +{flaggedQuestions.length - 20} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Confirmation Checkbox */}
+            <div className="rounded-lg border-2 border-gray-300 bg-white p-4">
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="confirm-submission"
+                  checked={confirmChecked}
+                  onCheckedChange={(checked) => setConfirmChecked(checked === true)}
+                  className="mt-0.5"
+                />
+                <Label
+                  htmlFor="confirm-submission"
+                  className="cursor-pointer text-sm leading-relaxed font-medium"
+                >
+                  {t('confirmSubmissionCheckbox')}
+                </Label>
+              </div>
+            </div>
+
+            {!confirmChecked && <p className="text-xs text-gray-500">{t('confirmSubmissionHint')}</p>}
+          </div>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isSubmitting}>{t('reviewQuestions')}</AlertDialogCancel>

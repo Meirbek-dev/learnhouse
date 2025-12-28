@@ -66,13 +66,13 @@ export default function ExamTakingInterface({
   onComplete,
 }: ExamTakingInterfaceProps) {
   const t = useTranslations('Activities.ExamActivity');
-  
+
   // Centralized state management with reducer
   const [state, dispatch] = useReducer(
     examTakingReducer,
     createInitialTakingState(0, {}, attempt.violations?.length || 0)
   );
-  
+
   // Fullscreen state (separate from main state machine)
   const [isFullscreen, setIsFullscreen] = useState(false);
   const examContainerRef = useRef<HTMLDivElement>(null);
@@ -112,7 +112,7 @@ export default function ExamTakingInterface({
   const handleSubmit = useCallback(
     async (isAutoSubmit = false) => {
       if (state.mode === 'submitting') return;
-      
+
       dispatch({ type: 'START_SUBMIT' });
 
       try {
@@ -400,6 +400,7 @@ export default function ExamTakingInterface({
   };
 
   const answeredCount = orderedQuestions.filter((q) => isAnswered(q.id)).length;
+  const remainingViolations = settings.violation_threshold ? Math.max(settings.violation_threshold - violationCount, 0) : undefined;
 
   return (
     <div
@@ -441,12 +442,14 @@ export default function ExamTakingInterface({
 
       {/* Violation Warning */}
       {violationCount > 0 && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" role="status" aria-live="polite">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             {t('violationWarning', {
               count: violationCount,
               max: settings.violation_threshold || t('unlimited'),
+              remaining: remainingViolations ?? '',
+              appealLink: t('appealLinkText'),
             })}
           </AlertDescription>
         </Alert>
@@ -647,33 +650,32 @@ export default function ExamTakingInterface({
               <CheckCircle2 className="size-6 text-green-600" />
             </AlertDialogMedia>
             <AlertDialogTitle>{t('confirmSubmission')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              <div className="space-y-3">
-                <p>{t('confirmSubmissionMessage')}</p>
-                <div className="rounded-lg border bg-gray-50 p-4">
-                  <div className="grid gap-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{t('totalQuestions')}:</span>
-                      <span className="font-semibold">{orderedQuestions.length}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-green-600">{t('answered')}:</span>
-                      <span className="font-semibold text-green-600">{answeredCount}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{t('unanswered')}:</span>
-                      <span className="font-semibold">{orderedQuestions.length - answeredCount}</span>
-                    </div>
+            <AlertDialogDescription>{t('confirmSubmissionMessage')}</AlertDialogDescription>
 
+            <div className="space-y-3">
+              <div className="rounded-lg border bg-gray-50 p-4">
+                <div className="grid gap-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">{t('totalQuestions')}:</span>
+                    <span className="font-semibold">{orderedQuestions.length}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-green-600">{t('answered')}:</span>
+                    <span className="font-semibold text-green-600">{answeredCount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">{t('unanswered')}:</span>
+                    <span className="font-semibold">{orderedQuestions.length - answeredCount}</span>
+                  </div>
+
                 </div>
-                {answeredCount < orderedQuestions.length && (
-                  <p className="text-sm text-orange-600">
-                    ⚠️ {t('unansweredQuestionsWarning', { count: orderedQuestions.length - answeredCount })}
-                  </p>
-                )}
               </div>
-            </AlertDialogDescription>
+              {answeredCount < orderedQuestions.length && (
+                <p className="text-sm text-orange-600">
+                  ⚠️ {t('unansweredQuestionsWarning', { count: orderedQuestions.length - answeredCount })}
+                </p>
+              )}
+            </div>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isSubmitting}>{t('reviewQuestions')}</AlertDialogCancel>

@@ -88,7 +88,8 @@ export function examFlowReducer(state: ExamFlowState, action: ExamFlowAction): E
       };
 
     case 'START_EXAM':
-      if (state.phase !== 'pre-exam' && state.phase !== 'manage') {
+      // Allow starting an exam from pre-exam, management mode, or results (retry flow)
+      if (state.phase !== 'pre-exam' && state.phase !== 'manage' && state.phase !== 'results') {
         console.warn('Cannot start exam from phase:', state.phase);
         return state;
       }
