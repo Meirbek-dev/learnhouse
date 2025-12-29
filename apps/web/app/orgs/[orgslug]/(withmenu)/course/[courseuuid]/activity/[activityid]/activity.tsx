@@ -55,8 +55,8 @@ import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { getTrailSwrKey } from '@services/courses/keys';
 import UserAvatar from '@components/Objects/UserAvatar';
+import { getTrailSwrKey } from '@services/courses/keys';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import Link from '@components/ui/AppLink';
@@ -268,7 +268,9 @@ const ActivityActions = ({
 
   // Add SWR for trail data
   const TRAIL_KEY = org?.id ? getTrailSwrKey(org?.id) : null;
-  const { data: trailData } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) => swrFetcher(url, token));
+  const { data: trailData } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) =>
+    swrFetcher(url, token),
+  );
 
   return (
     <div className="flex items-center space-x-2">
@@ -370,7 +372,9 @@ const ActivityClient = (props: ActivityClientProps) => {
 
   // Add SWR for trail data
   const TRAIL_KEY = org?.id ? getTrailSwrKey(org?.id) : null;
-  const { data: trailData } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) => swrFetcher(url, token));
+  const { data: trailData } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) =>
+    swrFetcher(url, token),
+  );
 
   const { allActivities, currentIndex } = useActivityPosition(course, activityid);
 

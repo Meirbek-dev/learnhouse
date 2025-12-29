@@ -17,7 +17,7 @@ import {
   Trash2,
   Trophy,
 } from 'lucide-react';
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { createElement, useEffect, useEffectEvent, useState } from 'react';
@@ -92,13 +92,20 @@ const getSectionTypesConfig = (t: Function) => ({
     label: t('SectionTypes.courses.label'),
     description: t('SectionTypes.courses.description'),
   },
-  // TODO: gamification section is broken
   'gamification': {
     icon: Trophy,
     label: t('SectionTypes.gamification.label'),
     description: t('SectionTypes.gamification.description'),
   },
 });
+
+// Skill level items helper
+const skillLevelItems = (t: Function) => [
+  { value: 'beginner', label: t('SkillsEditor.levelBeginner') },
+  { value: 'intermediate', label: t('SkillsEditor.levelIntermediate') },
+  { value: 'advanced', label: t('SkillsEditor.levelAdvanced') },
+  { value: 'expert', label: t('SkillsEditor.levelExpert') },
+];
 
 // Type definitions
 interface ProfileImage {
@@ -552,6 +559,7 @@ const UserProfileBuilder = () => {
                     addSection(value as keyof typeof SECTION_TYPE_KEYS);
                   }
                 }}
+                items={Object.entries(getSectionTypesConfig(t)).map(([type, { label }]) => ({ value: type, label }))}
               >
                 <SelectTrigger
                   className="bg-primary w-full border-0 p-0"
@@ -1037,16 +1045,21 @@ const SkillsEditor: FC<{
                     };
                     onChange({ ...section, skills: newSkills });
                   }}
+                  items={skillLevelItems(t)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder={t('SkillsEditor.selectLevelPlaceholder')} />
                   </SelectTrigger>
                   <SelectPositioner>
                     <SelectContent>
-                      <SelectItem value="beginner">{t('SkillsEditor.levelBeginner')}</SelectItem>
-                      <SelectItem value="intermediate">{t('SkillsEditor.levelIntermediate')}</SelectItem>
-                      <SelectItem value="advanced">{t('SkillsEditor.levelAdvanced')}</SelectItem>
-                      <SelectItem value="expert">{t('SkillsEditor.levelExpert')}</SelectItem>
+                      {skillLevelItems(t).map((item) => (
+                        <SelectItem
+                          key={item.value}
+                          value={item.value}
+                        >
+                          {item.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </SelectPositioner>
                 </Select>

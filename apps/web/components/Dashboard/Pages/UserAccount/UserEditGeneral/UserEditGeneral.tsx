@@ -20,7 +20,7 @@ import {
   UploadCloud,
   Users,
 } from 'lucide-react';
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUser, updateUserAvatar } from '@services/users/users';
@@ -135,6 +135,16 @@ const DetailCard = ({
   const [isUserInput, setIsUserInput] = useState(false);
   const t = useTranslations('DashPage.UserAccountSettings.generalSection');
 
+  const iconItems = availableIcons.map((icon) => ({
+    value: icon.name,
+    label: (
+      <div className="flex items-center gap-2">
+        <icon.component className="h-4 w-4" />
+        <span>{icon.label}</span>
+      </div>
+    ),
+  }));
+
   // Create a stable callback for label changes - only for user input
   const stableLabelChangeCallback = (newLabel: string) => {
     if (isUserInput && newLabel !== detail.label) {
@@ -190,6 +200,7 @@ const DetailCard = ({
           <Select
             value={detail.icon}
             onValueChange={(value) => value && handleIconChange(value)}
+            items={iconItems}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder={t('detailSelectIconPlaceholder')}>
@@ -203,15 +214,12 @@ const DetailCard = ({
             </SelectTrigger>
             <SelectPositioner>
               <SelectContent>
-                {availableIcons.map((icon) => (
+                {iconItems.map((item) => (
                   <SelectItem
-                    key={icon.name}
-                    value={icon.name}
+                    key={item.value}
+                    value={item.value}
                   >
-                    <div className="flex items-center gap-2">
-                      <icon.component className="h-4 w-4" />
-                      <span>{icon.label}</span>
-                    </div>
+                    {item.label}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -54,6 +54,7 @@ function DeleteRoleButton({ roleId, onDelete, t, variant = 'default' }: DeleteRo
       onOpenChange={setIsOpen}
     >
       <AlertDialogTrigger
+        nativeButton
         render={
           <Button
             variant="destructive"

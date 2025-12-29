@@ -15,12 +15,12 @@ import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/update
 import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { getCourseUpdatesSwrKey } from '@services/courses/keys';
 import { useCourse } from '@components/Contexts/CourseContext';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { getCourseUpdatesSwrKey } from '@services/courses/keys';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { format, formatDistanceToNow } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -158,8 +158,12 @@ const UpdatesSection = () => {
   const course = useCourse();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const UPDATES_KEY = course?.courseStructure?.course_uuid ? getCourseUpdatesSwrKey(course?.courseStructure?.course_uuid) : null;
-  const { data: updates } = useSWR(UPDATES_KEY && access_token ? [UPDATES_KEY, access_token] : null, ([url, token]) => swrFetcher(url, token));
+  const UPDATES_KEY = course?.courseStructure?.course_uuid
+    ? getCourseUpdatesSwrKey(course?.courseStructure?.course_uuid)
+    : null;
+  const { data: updates } = useSWR(UPDATES_KEY && access_token ? [UPDATES_KEY, access_token] : null, ([url, token]) =>
+    swrFetcher(url, token),
+  );
   const t = useTranslations('Courses.CourseAuthors');
 
   return (
@@ -386,7 +390,10 @@ const DeleteUpdateButton = ({ update }: any) => {
       if (res.status === 200) {
         toast.dismiss(toast_loading);
         toast.success(t('updateDeletedSuccess'));
-        mutate([getCourseUpdatesSwrKey(course?.courseStructure.course_uuid), session.data?.tokens?.access_token] as any);
+        mutate([
+          getCourseUpdatesSwrKey(course?.courseStructure.course_uuid),
+          session.data?.tokens?.access_token,
+        ] as any);
         setIsOpen(false);
       } else {
         toast.dismiss(toast_loading);

@@ -1,6 +1,13 @@
 'use client';
 
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectPositioner,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, Globe, Image as ImageIcon, Loader2, Lock, Search } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
@@ -117,6 +124,17 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
     setSelectedCourses([]);
   };
 
+  const visibilityItems = [
+    {
+      value: 'true',
+      label: t('visibilityPublic'),
+    },
+    {
+      value: 'false',
+      label: t('visibilityPrivate'),
+    },
+  ] as const;
+
   if (error) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
@@ -176,8 +194,9 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
                   {t('visibilityLabel')} <span className="text-red-500">*</span>
                 </Label>
                 <Select
-                  onValueChange={(value) => value !== null && handleVisibilityChange(value)}
                   value={String(isPublic)}
+                  onValueChange={(value) => value !== null && handleVisibilityChange(value)}
+                  items={visibilityItems}
                 >
                   <SelectTrigger
                     id="collection-visibility"
@@ -185,20 +204,20 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
                   >
                     <SelectValue />
                   </SelectTrigger>
+
                   <SelectPositioner>
                     <SelectContent>
-                      <SelectItem value="true">
-                        <div className="flex items-center gap-2">
-                          <Globe className="h-4 w-4" />
-                          <span>{t('visibilityPublic')}</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="false">
-                        <div className="flex items-center gap-2">
-                          <Lock className="h-4 w-4" />
-                          <span>{t('visibilityPrivate')}</span>
-                        </div>
-                      </SelectItem>
+                      {visibilityItems.map((item) => (
+                        <SelectItem
+                          key={item.value}
+                          value={item.value}
+                        >
+                          <div className="flex items-center gap-2">
+                            {item.value === 'true' ? <Globe className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                            <span>{item.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </SelectPositioner>
                 </Select>

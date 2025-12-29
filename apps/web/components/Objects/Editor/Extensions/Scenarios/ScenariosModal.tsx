@@ -1,5 +1,5 @@
+import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { ArrowRight, CheckCircle, GitBranch, Image, Play, Plus, RotateCcw, Save, Settings, Trash2 } from 'lucide-react';
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { Textarea } from '@components/ui/textarea';
@@ -42,11 +42,18 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
   const [title, setTitle] = useState(initialTitle);
   const [scenarios, setScenarios] = useState<Scenario[]>(initialScenarios);
   const [currentScenarioId, setCurrentScenarioId] = useState(initialCurrentScenarioId);
+
   const [showPreview, setShowPreview] = useState(false);
   const [previewCurrentId, setPreviewCurrentId] = useState('1');
   const [showImageInputs, setShowImageInputs] = useState<Record<string, boolean>>({});
 
   const t = useTranslations('DashPage.Editor.Scenarios');
+
+  const nextScenarioOptions = [
+    { value: '__end', label: t('endScenarioOption') },
+    ...scenarios.map((s) => ({ value: s.id, label: t('scenarioOptionLabel', { id: s.id }) })),
+  ];
+
   const [dialogAlertOpen, setDialogAlertOpen] = useState(false);
   const [dialogAlertMessage, setDialogAlertMessage] = useState('');
 
@@ -515,19 +522,19 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                                       nextScenarioId: val === '__end' ? null : val,
                                     })
                                   }
+                                  items={nextScenarioOptions}
                                 >
                                   <SelectTrigger className="flex-1 text-xs">
                                     <SelectValue placeholder={t('endScenarioOption') as string} />
                                   </SelectTrigger>
                                   <SelectPositioner>
                                     <SelectContent>
-                                      <SelectItem value="__end">{t('endScenarioOption')}</SelectItem>
-                                      {scenarios.map((s) => (
+                                      {nextScenarioOptions.map((item) => (
                                         <SelectItem
-                                          key={s.id}
-                                          value={s.id}
+                                          key={item.value}
+                                          value={item.value}
                                         >
-                                          {t('scenarioOptionLabel', { id: s.id })}
+                                          {item.label}
                                         </SelectItem>
                                       ))}
                                     </SelectContent>

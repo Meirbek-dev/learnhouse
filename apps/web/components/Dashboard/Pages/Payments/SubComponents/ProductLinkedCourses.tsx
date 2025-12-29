@@ -11,8 +11,8 @@ import { useEffect, useState } from 'react';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 
-import LinkCourseModal from './LinkCourseModal';
 import { getPaymentsProductsSwrKey, getProductLinkedCoursesSwrKey } from '@services/payments/keys';
+import LinkCourseModal from './LinkCourseModal';
 
 interface ProductLinkedCoursesProps {
   productId: string;
@@ -35,13 +35,10 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
     data: linkedCourses,
     mutate: mutateLinkedCourses,
     error,
-  } = useSWR(
-    LINKED_COURSES_KEY && accessToken ? [LINKED_COURSES_KEY, accessToken] : null,
-    async ([, token]) => {
-      const response = await getCoursesLinkedToProduct(orgId, productId, token);
-      return response.data || [];
-    },
-  );
+  } = useSWR(LINKED_COURSES_KEY && accessToken ? [LINKED_COURSES_KEY, accessToken] : null, async ([, token]) => {
+    const response = await getCoursesLinkedToProduct(orgId, productId, token);
+    return response.data || [];
+  });
 
   // Show error toast if fetch fails
   useEffect(() => {
@@ -55,7 +52,10 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
 
     const prev = linkedCourses;
     // Optimistically remove from local list
-    await mutateLinkedCourses(prev.filter((c: any) => c.id !== courseId), false);
+    await mutateLinkedCourses(
+      prev.filter((c: any) => c.id !== courseId),
+      false,
+    );
 
     try {
       const response = await unlinkCourseFromProduct(orgId, productId, courseId, accessToken);
@@ -73,7 +73,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
           }),
         );
       }
-    } catch (err) {
+    } catch {
       // rollback
       mutateLinkedCourses(prev, false);
       toast.error(tNotify('errors.unlinkCourseFailed', { error: '' }));

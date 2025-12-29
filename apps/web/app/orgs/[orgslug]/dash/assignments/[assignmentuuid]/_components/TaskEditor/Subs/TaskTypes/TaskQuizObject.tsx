@@ -1328,6 +1328,7 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                     />
                     <AlertDialog>
                       <AlertDialogTrigger
+                        nativeButton
                         render={
                           <Button
                             variant="ghost"

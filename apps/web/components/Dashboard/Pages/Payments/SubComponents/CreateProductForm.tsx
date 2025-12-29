@@ -1,8 +1,9 @@
 'use client';
 
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import { createProduct } from '@services/payments/products';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,7 +18,6 @@ import type { FC } from 'react';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
 import * as z from 'zod';
-import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   z.object({
@@ -70,6 +70,21 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
 
   const productType = form.watch('product_type');
   const priceType = form.watch('price_type');
+
+  const productTypeItems = [
+    { value: 'one_time', label: t('productTypes.one_time') },
+    { value: 'subscription', label: t('productTypes.subscription') },
+  ];
+
+  const priceTypeOptions =
+    productType !== 'subscription'
+      ? [
+          { value: 'fixed_price', label: t('priceTypes.fixed_price') },
+          { value: 'customer_choice', label: t('priceTypes.customer_choice') },
+        ]
+      : [{ value: 'fixed_price', label: t('priceTypes.fixed_price') }];
+
+  const currencyItems = currencies.map((currency) => ({ value: currency.code, label: currency.name }));
 
   const handleSubmit = async (values: ProductFormValues) => {
     const loadingToast = toast.loading(tNotify('creatingProduct'));
@@ -141,6 +156,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                 <Select
                   onValueChange={field.onChange}
                   value={field.value}
+                  items={productTypeItems}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -149,8 +165,14 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                   </FormControl>
                   <SelectPositioner>
                     <SelectContent>
-                      <SelectItem value="one_time">{t('productTypes.one_time')}</SelectItem>
-                      <SelectItem value="subscription">{t('productTypes.subscription')}</SelectItem>
+                      {productTypeItems.map((item) => (
+                        <SelectItem
+                          key={item.value}
+                          value={item.value}
+                        >
+                          {item.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </SelectPositioner>
                 </Select>
@@ -168,6 +190,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                 <Select
                   onValueChange={field.onChange}
                   value={field.value}
+                  items={priceTypeOptions}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -176,10 +199,14 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                   </FormControl>
                   <SelectPositioner>
                     <SelectContent>
-                      <SelectItem value="fixed_price">{t('priceTypes.fixed_price')}</SelectItem>
-                      {productType !== 'subscription' && (
-                        <SelectItem value="customer_choice">{t('priceTypes.customer_choice')}</SelectItem>
-                      )}
+                      {priceTypeOptions.map((item) => (
+                        <SelectItem
+                          key={item.value}
+                          value={item.value}
+                        >
+                          {item.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </SelectPositioner>
                 </Select>
@@ -221,6 +248,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
+                      items={currencyItems}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -229,12 +257,12 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                       </FormControl>
                       <SelectPositioner>
                         <SelectContent>
-                          {currencies.map((currency) => (
+                          {currencyItems.map((currency) => (
                             <SelectItem
-                              key={currency.code}
-                              value={currency.code}
+                              key={currency.value}
+                              value={currency.value}
                             >
-                              {currency.name}
+                              {currency.label}
                             </SelectItem>
                           ))}
                         </SelectContent>

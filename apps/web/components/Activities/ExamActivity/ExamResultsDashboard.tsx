@@ -9,7 +9,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectPositioner,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock, Download, Eye, TrendingDown, TrendingUp, Users } from 'lucide-react';
@@ -52,10 +59,40 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
   const [sortBy, setSortBy] = useState<string>('started_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
+  const statusItems = [
+    { value: 'all', label: t('allStatuses') },
+    { value: 'SUBMITTED', label: t('submitted') },
+    { value: 'AUTO_SUBMITTED', label: t('autoSubmitted') },
+    { value: 'IN_PROGRESS', label: t('inProgress') },
+  ];
+
+  const sortItems = [
+    { value: 'started_at', label: t('startedAt') },
+    { value: 'user_name', label: t('studentName') },
+    { value: 'percentage', label: t('score') },
+    { value: 'duration_minutes', label: t('duration') },
+  ];
+
+  // Helper to safely get duration in seconds (null if unavailable)
+  const getDurationSeconds = (
+    a: { duration_seconds?: number | null; duration_minutes?: number | null } | null | undefined,
+  ) => {
+    if (!a) return null;
+    // use typeof checks to correctly narrow `undefined` and `null` cases
+    if (typeof a.duration_seconds === 'number') return a.duration_seconds;
+    if (typeof a.duration_minutes === 'number') return Math.round(a.duration_minutes * 60);
+    return null;
+  };
+
   // Calculate statistics
   const stats = useMemo(() => {
     const submitted = attempts.filter((a) => a.status === 'SUBMITTED' || a.status === 'AUTO_SUBMITTED');
     const scores = submitted.map((a) => a.percentage);
+
+    const totalTime = submitted
+      .map((a) => getDurationSeconds(a))
+      .filter((s): s is number => s !== null)
+      .reduce((acc, s) => acc + s, 0);
 
     return {
       totalStudents: new Set(attempts.map((a) => a.user_id)).size,
@@ -65,23 +102,7 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
       avgScore: scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
       highestScore: scores.length > 0 ? Math.max(...scores) : 0,
       lowestScore: scores.length > 0 ? Math.min(...scores) : 0,
-      avgTimeSeconds:
-        submitted.length > 0
-          ? Math.round(
-              submitted
-                .filter((a) => a.duration_seconds != null || a.duration_minutes != null)
-                .reduce(
-                  (acc, b) =>
-                    acc +
-                    (b.duration_seconds != null
-                      ? b.duration_seconds
-                      : b.duration_minutes != null
-                        ? Math.round(b.duration_minutes * 60)
-                        : 0),
-                  0,
-                ) / submitted.length,
-            )
-          : 0,
+      avgTimeSeconds: submitted.length > 0 && totalTime > 0 ? Math.round(totalTime / submitted.length) : 0,
     };
   }, [attempts]);
 
@@ -108,8 +129,8 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
       let aVal: any = a[sortBy as keyof AttemptData] ?? null;
       let bVal: any = b[sortBy as keyof AttemptData] ?? null;
 
-      if (aVal == null) aVal = sortOrder === 'asc' ? Infinity : -Infinity;
-      if (bVal == null) bVal = sortOrder === 'asc' ? Infinity : -Infinity;
+      if (aVal === null) aVal = sortOrder === 'asc' ? Infinity : -Infinity;
+      if (bVal === null) bVal = sortOrder === 'asc' ? Infinity : -Infinity;
 
       if (typeof aVal === 'string') {
         // ensure we have string operands
@@ -155,12 +176,7 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
     ];
 
     const rows = filteredAttempts.map((a) => {
-      const durationSeconds =
-        a.duration_seconds !== null
-          ? a.duration_seconds
-          : a.duration_minutes !== null
-            ? Math.round(a.duration_minutes * 60)
-            : null;
+      const durationSeconds = getDurationSeconds(a);
       return [
         escapeCsv(a.user_name),
         escapeCsv(a.user_email),
@@ -326,32 +342,42 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
             <Select
               value={statusFilter}
               onValueChange={(value) => value !== null && setStatusFilter(value)}
+              items={statusItems}
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t('filterByStatus')} />
               </SelectTrigger>
               <SelectPositioner>
                 <SelectContent>
-                  <SelectItem value="all">{t('allStatuses')}</SelectItem>
-                  <SelectItem value="SUBMITTED">{t('submitted')}</SelectItem>
-                  <SelectItem value="AUTO_SUBMITTED">{t('autoSubmitted')}</SelectItem>
-                  <SelectItem value="IN_PROGRESS">{t('inProgress')}</SelectItem>
+                  {statusItems.map((item) => (
+                    <SelectItem
+                      key={item.value}
+                      value={item.value}
+                    >
+                      {item.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </SelectPositioner>
             </Select>
             <Select
               value={sortBy}
               onValueChange={(value) => value !== null && setSortBy(value)}
+              items={sortItems}
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t('sortBy')} />
               </SelectTrigger>
               <SelectPositioner>
                 <SelectContent>
-                  <SelectItem value="started_at">{t('startedAt')}</SelectItem>
-                  <SelectItem value="user_name">{t('studentName')}</SelectItem>
-                  <SelectItem value="percentage">{t('score')}</SelectItem>
-                  <SelectItem value="duration_minutes">{t('duration')}</SelectItem>
+                  {sortItems.map((item) => (
+                    <SelectItem
+                      key={item.value}
+                      value={item.value}
+                    >
+                      {item.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </SelectPositioner>
             </Select>
@@ -488,12 +514,7 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
                           <TableCell>{new Date(attempt.started_at).toLocaleString()}</TableCell>
                           <TableCell>
                             {(() => {
-                              const durationSeconds =
-                                attempt.duration_seconds !== null
-                                  ? attempt.duration_seconds
-                                  : attempt.duration_minutes !== null
-                                    ? Math.round(attempt.duration_minutes * 60)
-                                    : null;
+                              const durationSeconds = getDurationSeconds(attempt);
                               return durationSeconds !== null ? formatDuration(durationSeconds) : '-';
                             })()}
                           </TableCell>
@@ -566,13 +587,8 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
                 <div className="text-sm text-gray-600">{t('duration')}</div>
                 <div className="font-semibold">
                   {(() => {
-                    const durationSeconds =
-                      selectedAttempt.duration_seconds != null
-                        ? selectedAttempt.duration_seconds
-                        : selectedAttempt.duration_minutes != null
-                          ? Math.round(selectedAttempt.duration_minutes * 60)
-                          : null;
-                    return durationSeconds != null ? formatDuration(durationSeconds) : '-';
+                    const durationSeconds = getDurationSeconds(selectedAttempt);
+                    return durationSeconds !== null ? formatDuration(durationSeconds) : '-';
                   })()}
                 </div>
               </div>

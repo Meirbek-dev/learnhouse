@@ -234,7 +234,7 @@ export function useTestGuard({
             // contentEditable check
             active.getAttribute?.('contenteditable') === 'true');
 
-        if (isEditable) return; 
+        if (isEditable) return;
 
         if ((e.ctrlKey || e.metaKey) && ['c', 'a', 'u', 's', 'p', 'x'].includes(e.key.toLowerCase())) {
           e.preventDefault();

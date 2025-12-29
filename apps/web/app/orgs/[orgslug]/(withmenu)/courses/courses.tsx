@@ -81,7 +81,9 @@ const Courses = (props: CourseProps) => {
 
   // Fetch trail data to show progress on course thumbnails
   const TRAIL_KEY = org?.id ? getTrailSwrKey(org.id) : null;
-  const { data: trailData } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) => swrFetcher(url, token));
+  const { data: trailData } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) =>
+    swrFetcher(url, token),
+  );
 
   async function closeNewCourseModal() {
     setNewCourseModal(false);

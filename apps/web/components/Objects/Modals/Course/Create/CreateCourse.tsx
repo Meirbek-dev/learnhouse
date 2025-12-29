@@ -1,6 +1,13 @@
 'use client';
 
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectPositioner,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
@@ -208,6 +215,11 @@ const CreateCourseModal = ({ closeModal, orgslug }: CreateCourseModalProps) => {
 
   const thumbnailValue = form.watch('thumbnail');
 
+  const visibilityItems = [
+    { value: 'true', label: t('visibilityItemPublic') },
+    { value: 'false', label: t('visibilityItemPrivate') },
+  ] as const;
+
   return (
     <Form {...form}>
       <form
@@ -355,6 +367,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: CreateCourseModalProps) => {
               <Select
                 value={String(field.value ?? true)}
                 onValueChange={(value) => field.onChange(value === 'true')}
+                items={visibilityItems}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -363,11 +376,18 @@ const CreateCourseModal = ({ closeModal, orgslug }: CreateCourseModalProps) => {
                 </FormControl>
                 <SelectPositioner>
                   <SelectContent>
-                    <SelectItem value="true">{t('visibilityItemPublic')}</SelectItem>
-                    <SelectItem value="false">{t('visibilityItemPrivate')}</SelectItem>
+                    {visibilityItems.map((item) => (
+                      <SelectItem
+                        key={item.value}
+                        value={item.value}
+                      >
+                        {item.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </SelectPositioner>
               </Select>
+
               <FormMessage />
             </FormItem>
           )}

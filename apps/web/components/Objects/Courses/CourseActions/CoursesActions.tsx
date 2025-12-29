@@ -11,8 +11,8 @@ import {
   Trophy,
   UserPen,
 } from 'lucide-react';
-import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getProductsByCourse } from '@services/payments/products';
@@ -24,6 +24,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { startCourse } from '@services/courses/activity';
 import { Card, CardContent } from '@/components/ui/card';
 import UserAvatar from '@components/Objects/UserAvatar';
+import { getTrailSwrKey } from '@services/courses/keys';
 import CoursePaidOptions from './CoursePaidOptions';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -33,7 +34,6 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
-import { getTrailSwrKey } from '@services/courses/keys';
 
 interface CourseRun {
   status: string;

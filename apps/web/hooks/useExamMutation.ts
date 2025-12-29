@@ -1,7 +1,7 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import { useCallback, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 export interface MutationOptions<TData, TVariables> {
@@ -219,7 +219,6 @@ export function useExamSubmission(accessToken: string, onSuccess?: () => void) {
   const t = useTranslations('Activities.ExamActivity');
 
   const mutation = useExamMutation({
-
     mutationFn: async ({
       examUuid,
       attemptUuid,

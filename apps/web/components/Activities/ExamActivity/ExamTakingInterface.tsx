@@ -19,7 +19,7 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@components/ui/radio-group';
 import { Alert, AlertDescription } from '@components/ui/alert';
@@ -358,42 +358,46 @@ export default function ExamTakingInterface({
         const matchAnswers = answers[questionId] || {};
         return (
           <div className="space-y-3">
-            {question.answer_options.map((option, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-4 rounded-lg border border-gray-200 p-4"
-              >
-                <span className="min-w-[200px] text-base font-medium">{option.left}</span>
-                <span className="text-gray-400">→</span>
-                <div className="flex-1">
-                  <Select
-                    value={matchAnswers[option.left || ''] || ''}
-                    onValueChange={(val) =>
-                      handleAnswerChange(questionId, {
-                        ...matchAnswers,
-                        [option.left || '']: val,
-                      })
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t('selectMatch')} />
-                    </SelectTrigger>
-                    <SelectPositioner>
-                      <SelectContent>
-                        {question.answer_options.map((opt, idx) => (
-                          <SelectItem
-                            key={idx}
-                            value={opt.right ?? ''}
-                          >
-                            {opt.right}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </SelectPositioner>
-                  </Select>
+            {question.answer_options.map((option, index) => {
+              const matchOptions = question.answer_options.map((opt) => ({ value: opt.right ?? '', label: opt.right }));
+              return (
+                <div
+                  key={index}
+                  className="flex items-center gap-4 rounded-lg border border-gray-200 p-4"
+                >
+                  <span className="min-w-[200px] text-base font-medium">{option.left}</span>
+                  <span className="text-gray-400">→</span>
+                  <div className="flex-1">
+                    <Select
+                      value={matchAnswers[option.left || ''] || ''}
+                      onValueChange={(val) =>
+                        handleAnswerChange(questionId, {
+                          ...matchAnswers,
+                          [option.left || '']: val,
+                        })
+                      }
+                      items={matchOptions}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={t('selectMatch')} />
+                      </SelectTrigger>
+                      <SelectPositioner>
+                        <SelectContent>
+                          {matchOptions.map((opt) => (
+                            <SelectItem
+                              key={opt.value}
+                              value={opt.value}
+                            >
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </SelectPositioner>
+                    </Select>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         );
       }

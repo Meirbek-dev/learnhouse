@@ -24,12 +24,13 @@ import {
   RefreshCcw,
   SquareCheck,
 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { archiveProduct, getProducts, updateProduct } from '@services/payments/products';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
+import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import CreateProductForm from './SubComponents/CreateProductForm';
 import { getPaymentConfigs } from '@services/payments/payments';
@@ -45,7 +46,6 @@ import { useTranslations } from 'next-intl';
 import currencyCodes from 'currency-codes';
 import { useForm } from 'react-hook-form';
 import useSWR, { mutate } from 'swr';
-import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
@@ -358,6 +358,7 @@ const EditProductForm = ({
     code: currency.code,
     name: `${currency.code} - ${currency.currency}`,
   }));
+  const currencyItems = currencies.map((currency) => ({ value: currency.code, label: currency.name }));
   const t = useTranslations('DashPage.Payments.ProductPage.editForm');
   const validationSchema = createValidationSchema(t);
 
@@ -458,6 +459,7 @@ const EditProductForm = ({
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
+                      items={currencyItems}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -466,12 +468,12 @@ const EditProductForm = ({
                       </FormControl>
                       <SelectPositioner>
                         <SelectContent>
-                          {currencies.map((currency) => (
+                          {currencyItems.map((currency) => (
                             <SelectItem
-                              key={currency.code}
-                              value={currency.code}
+                              key={currency.value}
+                              value={currency.value}
                             >
-                              {currency.name}
+                              {currency.label}
                             </SelectItem>
                           ))}
                         </SelectContent>

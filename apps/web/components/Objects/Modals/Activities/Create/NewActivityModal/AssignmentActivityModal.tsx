@@ -1,5 +1,12 @@
 'use client';
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectPositioner,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { createAssignmentWithActivity } from '@services/courses/assignments';
@@ -48,6 +55,11 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug 
   const session = usePlatformSession() as any;
   const validationSchema = createValidationSchema(validationT);
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
+
+  const gradingTypeItems = [
+    { value: 'NUMERIC', label: t('numeric') },
+    { value: 'PERCENTAGE', label: t('percentage') },
+  ];
 
   // Get the appropriate date-fns locale
   const getDateFnsLocale = (locale: string) => {
@@ -237,6 +249,7 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug 
               <Select
                 onValueChange={field.onChange}
                 value={field.value}
+                items={gradingTypeItems}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -245,8 +258,14 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug 
                 </FormControl>
                 <SelectPositioner>
                   <SelectContent>
-                    <SelectItem value="NUMERIC">{t('numeric')}</SelectItem>
-                    <SelectItem value="PERCENTAGE">{t('percentage')}</SelectItem>
+                    {gradingTypeItems.map((item) => (
+                      <SelectItem
+                        key={item.value}
+                        value={item.value}
+                      >
+                        {item.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </SelectPositioner>
               </Select>

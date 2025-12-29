@@ -1,5 +1,12 @@
 'use client';
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectPositioner,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
@@ -122,6 +129,11 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
     });
   };
 
+  const gradingTypes = [
+    { value: 'NUMERIC', label: t('numeric') },
+    { value: 'PERCENTAGE', label: t('percentage') },
+  ];
+
   return (
     <Form {...form}>
       <form
@@ -222,6 +234,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
               <Select
                 onValueChange={field.onChange}
                 value={field.value}
+                items={gradingTypes}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -230,8 +243,14 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
                 </FormControl>
                 <SelectPositioner>
                   <SelectContent>
-                    <SelectItem value="NUMERIC">{t('numeric')}</SelectItem>
-                    <SelectItem value="PERCENTAGE">{t('percentage')}</SelectItem>
+                    {gradingTypes.map((item) => (
+                      <SelectItem
+                        key={item.value}
+                        value={item.value}
+                      >
+                        {item.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </SelectPositioner>
               </Select>

@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { getAPIUrl } from '@/services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { Checkbox } from '@components/ui/checkbox';
@@ -179,10 +179,19 @@ export default function QuestionEditor({
               </SelectTrigger>
               <SelectPositioner>
                 <SelectContent>
-                  <SelectItem value="SINGLE_CHOICE">{t('single_choice')}</SelectItem>
-                  <SelectItem value="MULTIPLE_CHOICE">{t('multiple_choice')}</SelectItem>
-                  <SelectItem value="TRUE_FALSE">{t('true_false')}</SelectItem>
-                  <SelectItem value="MATCHING">{t('matching')}</SelectItem>
+                  {[
+                    { value: 'SINGLE_CHOICE', label: t('single_choice') },
+                    { value: 'MULTIPLE_CHOICE', label: t('multiple_choice') },
+                    { value: 'TRUE_FALSE', label: t('true_false') },
+                    { value: 'MATCHING', label: t('matching') },
+                  ].map((item) => (
+                    <SelectItem
+                      key={item.value}
+                      value={item.value}
+                    >
+                      {item.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </SelectPositioner>
             </Select>

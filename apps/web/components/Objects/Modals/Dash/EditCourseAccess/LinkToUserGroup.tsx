@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { linkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
@@ -40,6 +40,8 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
   // Use first usergroup as default if not explicitly set
   const effectiveUserGroup = selectedUserGroup ?? usergroups?.[0]?.id ?? null;
 
+  const usergroupItems = (usergroups || []).map((group: UserGroup) => ({ value: String(group.id), label: group.name }));
+
   const handleLink = async () => {
     if (!effectiveUserGroup) {
       toast.error(t('selectUserGroupFirst'));
@@ -76,18 +78,19 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
             <Select
               onValueChange={(value) => value && setSelectedUserGroup(Number(value))}
               value={effectiveUserGroup?.toString()}
+              items={usergroupItems}
             >
               <SelectTrigger className="mx-5 mt-2 w-fit min-w-32">
                 <SelectValue placeholder={t('selectUserGroup')} />
               </SelectTrigger>
               <SelectPositioner>
                 <SelectContent>
-                  {usergroups?.map((group: UserGroup) => (
+                  {usergroupItems.map((group) => (
                     <SelectItem
-                      key={group.id}
-                      value={group.id.toString()}
+                      key={group.value}
+                      value={group.value}
                     >
-                      {group.name}
+                      {group.label}
                     </SelectItem>
                   ))}
                 </SelectContent>

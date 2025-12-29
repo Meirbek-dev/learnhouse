@@ -16,7 +16,7 @@ import {
   Upload,
   Users,
 } from 'lucide-react';
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { updateOrgLanding, uploadLandingContent } from '@services/organizations/orgs';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
@@ -224,6 +224,73 @@ const getSectionDisplayName = (t: Function, section: LandingSection) => {
   return t(`SectionTypes.${sectionTypeKey}.label`);
 };
 
+// Helper factories that produce item lists (use t at call site)
+const makeBackgroundTypeItems = (t: Function) => [
+  { value: 'solid', label: t('HeroEditor.Background.solid') },
+  { value: 'gradient', label: t('HeroEditor.Background.gradient') },
+  { value: 'image', label: t('HeroEditor.Background.image') },
+];
+
+const makeGradientTypeItems = (t: Function) => [
+  { value: 'preset', label: t('HeroEditor.Background.presetGradients') },
+  { value: 'custom', label: t('HeroEditor.Background.customGradient') },
+];
+
+const makeIllustrationPositionItems = (t: Function) => [
+  { value: 'left', label: t('HeroEditor.Illustration.positionLeft') },
+  { value: 'right', label: t('HeroEditor.Illustration.positionRight') },
+];
+
+const makeIllustrationSizeItems = (t: Function) => [
+  { value: 'small', label: t('HeroEditor.Illustration.sizeSmall') },
+  { value: 'medium', label: t('HeroEditor.Illustration.sizeMedium') },
+  { value: 'large', label: t('HeroEditor.Illustration.sizeLarge') },
+];
+
+const makeFlowItems = (t: Function) => [
+  { value: 'left', label: t('TextAndImageEditor.positionLeft') },
+  { value: 'right', label: t('TextAndImageEditor.positionRight') },
+];
+
+const makeSectionTypeItems = (t: Function) =>
+  Object.entries(getSectionTypes(t)).map(([type, conf]) => ({
+    value: type,
+    label: createElement(
+      'div',
+      { className: 'flex items-center space-x-3 py-1' },
+      createElement(
+        'div',
+        { className: 'rounded-md bg-gray-50 p-1.5' },
+        createElement(conf.icon as any, { size: 16, className: 'text-gray-600' }),
+      ),
+      createElement(
+        'div',
+        { className: 'flex-1' },
+        createElement('div', { className: 'text-sm font-medium text-gray-700' }, conf.label),
+        createElement('div', { className: 'text-xs text-gray-500' }, conf.description),
+      ),
+    ) as any,
+  }));
+
+const makeGradientPresetItems = (t: Function) =>
+  Object.entries(PREDEFINED_GRADIENTS).map(([name]) => ({
+    value: name,
+    label: (
+      <div className="flex items-center space-x-1">
+        <div
+          className="h-8 w-8 rounded-md"
+          style={{
+            background: `linear-gradient(${PREDEFINED_GRADIENTS[name as keyof typeof PREDEFINED_GRADIENTS].direction}, ${PREDEFINED_GRADIENTS[name as keyof typeof PREDEFINED_GRADIENTS].colors.join(', ')})`,
+          }}
+        />
+        <span className="capitalize">{getGradientPresetName(t, name)}</span>
+      </div>
+    ) as any,
+  }));
+
+const makeGradientDirectionItems = (t: Function) =>
+  Object.entries(getGradientDirections(t)).map(([value, label]) => ({ value, label }));
+
 const OrgEditLanding = () => {
   const org = useOrg() as any;
   const session = usePlatformSession() as any;
@@ -231,6 +298,10 @@ const OrgEditLanding = () => {
   const [isLandingEnabled, setIsLandingEnabled] = useState(false);
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.OrgSettings.Landing');
+
+  // Precompute section type items for `Select` usage
+  const sectionTypeItems = makeSectionTypeItems(t);
+
   const [landingData, setLandingData] = useState<LandingObject>({
     sections: [],
     enabled: false,
@@ -526,6 +597,7 @@ const OrgEditLanding = () => {
                         addSection(value);
                       }
                     }}
+                    items={sectionTypeItems}
                   >
                     <SelectTrigger
                       className="bg-primary hover:bg-primary/90 w-full border-0 p-0"
@@ -541,27 +613,16 @@ const OrgEditLanding = () => {
                     </SelectTrigger>
                     <SelectPositioner>
                       <SelectContent>
-                        {Object.entries(getSectionTypes(t)).map(([type, { icon: Icon, label, description }]) => (
+                        {sectionTypeItems.map((item) => (
                           <SelectItem
-                            key={type}
-                            value={type}
+                            key={item.value}
+                            value={item.value}
                           >
-                            <div className="flex items-center space-x-3 py-1">
-                            <div className="rounded-md bg-gray-50 p-1.5">
-                              <Icon
-                                size={16}
-                                className="text-gray-600"
-                              />
-                            </div>
-                            <div className="flex-1">
-                              <div className="text-sm font-medium text-gray-700">{label}</div>
-                              <div className="text-xs text-gray-500">{description}</div>
-                            </div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </SelectPositioner>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </SelectPositioner>
                   </Select>
                 </div>
               </div>
@@ -854,15 +915,21 @@ const HeroSectionEditor: FC<{
                     },
                   });
                 }}
+                items={makeBackgroundTypeItems(t)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={t('HeroEditor.Background.typePlaceholder')} />
                 </SelectTrigger>
                 <SelectPositioner>
                   <SelectContent>
-                    <SelectItem value="solid">{t('HeroEditor.Background.solid')}</SelectItem>
-                    <SelectItem value="gradient">{t('HeroEditor.Background.gradient')}</SelectItem>
-                    <SelectItem value="image">{t('HeroEditor.Background.image')}</SelectItem>
+                    {makeBackgroundTypeItems(t).map((item) => (
+                      <SelectItem
+                        key={item.value}
+                        value={item.value}
+                      >
+                        {item.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </SelectPositioner>
               </Select>
@@ -909,6 +976,7 @@ const HeroSectionEditor: FC<{
               <div className="space-y-4">
                 <div>
                   <Label>{t('HeroEditor.Background.gradientTypeLabel')}</Label>
+                  {/* use factory for consistency */}
                   <Select
                     value={
                       Object.values(PREDEFINED_GRADIENTS).some(
@@ -940,14 +1008,23 @@ const HeroSectionEditor: FC<{
                         });
                       }
                     }}
+                    items={makeGradientTypeItems(t)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={t('HeroEditor.Background.gradientTypePlaceholder')} />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="preset">{t('HeroEditor.Background.presetGradients')}</SelectItem>
-                      <SelectItem value="custom">{t('HeroEditor.Background.customGradient')}</SelectItem>
-                    </SelectContent>
+                    <SelectPositioner>
+                      <SelectContent>
+                        {makeGradientTypeItems(t).map((item) => (
+                          <SelectItem
+                            key={item.value}
+                            value={item.value}
+                          >
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </SelectPositioner>
                   </Select>
                 </div>
 
@@ -1045,28 +1122,23 @@ const HeroSectionEditor: FC<{
                           },
                         });
                       }}
+                      items={makeGradientPresetItems(t)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder={t('HeroEditor.Background.gradientPresetPlaceholder')} />
                       </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(PREDEFINED_GRADIENTS).map(([name]) => (
-                          <SelectItem
-                            key={name}
-                            value={name}
-                          >
-                            <div className="flex items-center space-x-1">
-                              <div
-                                className="h-8 w-8 rounded-md"
-                                style={{
-                                  background: `linear-gradient(${PREDEFINED_GRADIENTS[name as keyof typeof PREDEFINED_GRADIENTS].direction}, ${PREDEFINED_GRADIENTS[name as keyof typeof PREDEFINED_GRADIENTS].colors.join(', ')})`,
-                                }}
-                              />
-                              <span className="capitalize">{getGradientPresetName(t, name)}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
+                      <SelectPositioner>
+                        <SelectContent>
+                          {makeGradientPresetItems(t).map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </SelectPositioner>
                     </Select>
                   </div>
                 )}
@@ -1083,20 +1155,23 @@ const HeroSectionEditor: FC<{
                         });
                       }
                     }}
+                    items={makeGradientDirectionItems(t)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={t('HeroEditor.Background.gradientDirectionPlaceholder')} />
                     </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(getGradientDirections(t)).map(([value, label]) => (
-                        <SelectItem
-                          key={value}
-                          value={value}
-                        >
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
+                    <SelectPositioner>
+                      <SelectContent>
+                        {makeGradientDirectionItems(t).map((item) => (
+                          <SelectItem
+                            key={item.value}
+                            value={item.value}
+                          >
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </SelectPositioner>
                   </Select>
                 </div>
 
@@ -1354,14 +1429,21 @@ const HeroSectionEditor: FC<{
                         },
                       });
                     }}
+                    items={makeIllustrationPositionItems(t)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={t('HeroEditor.Illustration.positionPlaceholder')} />
                     </SelectTrigger>
                     <SelectPositioner>
                       <SelectContent>
-                        <SelectItem value="left">{t('HeroEditor.Illustration.positionLeft')}</SelectItem>
-                        <SelectItem value="right">{t('HeroEditor.Illustration.positionRight')}</SelectItem>
+                        {makeIllustrationPositionItems(t).map((item) => (
+                          <SelectItem
+                            key={item.value}
+                            value={item.value}
+                          >
+                            {item.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </SelectPositioner>
                   </Select>
@@ -1387,15 +1469,21 @@ const HeroSectionEditor: FC<{
                         },
                       });
                     }}
+                    items={makeIllustrationSizeItems(t)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={t('HeroEditor.Illustration.sizePlaceholder')} />
                     </SelectTrigger>
                     <SelectPositioner>
                       <SelectContent>
-                        <SelectItem value="small">{t('HeroEditor.Illustration.sizeSmall')}</SelectItem>
-                        <SelectItem value="medium">{t('HeroEditor.Illustration.sizeMedium')}</SelectItem>
-                        <SelectItem value="large">{t('HeroEditor.Illustration.sizeLarge')}</SelectItem>
+                        {makeIllustrationSizeItems(t).map((item) => (
+                          <SelectItem
+                            key={item.value}
+                            value={item.value}
+                          >
+                            {item.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </SelectPositioner>
                   </Select>
@@ -1547,14 +1635,21 @@ const TextAndImageSectionEditor: FC<{
             onValueChange={(value) => {
               onChange({ ...section, flow: value as 'left' | 'right' });
             }}
+            items={makeFlowItems(t)}
           >
             <SelectTrigger>
               <SelectValue placeholder={t('TextAndImageEditor.imagePositionPlaceholder')} />
             </SelectTrigger>
             <SelectPositioner>
               <SelectContent>
-                <SelectItem value="left">{t('TextAndImageEditor.positionLeft')}</SelectItem>
-                <SelectItem value="right">{t('TextAndImageEditor.positionRight')}</SelectItem>
+                {makeFlowItems(t).map((item) => (
+                  <SelectItem
+                    key={item.value}
+                    value={item.value}
+                  >
+                    {item.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </SelectPositioner>
           </Select>

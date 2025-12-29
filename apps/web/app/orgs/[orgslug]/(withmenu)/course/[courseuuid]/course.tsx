@@ -27,15 +27,15 @@ import { getDiscussionsSwrKey } from '@services/courses/discussions-keys';
 // Import existing components and utilities
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { CourseProvider } from '@components/Contexts/CourseContext';
-import { getUriWithOrg } from '@services/config/config';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { getTrailSwrKey } from '@services/courses/keys';
 // Import the new discussions component
 import CourseDiscussions from '@/components/discussions';
 // Import UI components
 import { Card, CardContent } from '@/components/ui/card';
+import { getUriWithOrg } from '@services/config/config';
+import { getTrailSwrKey } from '@services/courses/keys';
 import { Separator } from '@/components/ui/separator';
 import { useEffect, useMemo, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -71,7 +71,9 @@ const CourseClient = (props: any) => {
 
   // Add SWR for trail data
   const TRAIL_KEY = org?.id ? getTrailSwrKey(org?.id) : null;
-  const { data: trailData } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) => swrFetcher(url, token));
+  const { data: trailData } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) =>
+    swrFetcher(url, token),
+  );
 
   // Normalizes various formats of `course.learnings` into an array that the UI can render
   const normalizedLearnings = useMemo(() => {

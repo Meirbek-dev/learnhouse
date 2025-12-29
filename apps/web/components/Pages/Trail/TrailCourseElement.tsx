@@ -2,12 +2,12 @@
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
-import { getUriWithOrg } from '@services/config/config';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { getTrailSwrKey } from '@services/courses/keys';
 import { Award, ExternalLink, Loader2 } from 'lucide-react';
 import { removeCourse } from '@services/courses/activity';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { getUriWithOrg } from '@services/config/config';
+import { getTrailSwrKey } from '@services/courses/keys';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';

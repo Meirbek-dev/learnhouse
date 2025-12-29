@@ -1,5 +1,5 @@
 'use client';
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
@@ -100,6 +100,11 @@ const RolesUpdate: FC<Props> = (props) => {
                   onValueChange={field.onChange}
                   value={field.value}
                   disabled={!roles || rolesError}
+                  items={
+                    !roles || rolesError
+                      ? undefined
+                      : roles.map((role: any) => ({ value: role.role_uuid || role.id.toString(), label: role.name }))
+                  }
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -109,16 +114,11 @@ const RolesUpdate: FC<Props> = (props) => {
                   <SelectPositioner>
                     <SelectContent>
                       {!roles || rolesError ? (
-                        <SelectItem
-                          value="loading"
-                          disabled
-                        >
-                          {t('loadingRoles')}
-                        </SelectItem>
+                        <div className="text-muted-foreground px-3 py-2">{t('loadingRoles')}</div>
                       ) : (
                         roles.map((role: any) => (
                           <SelectItem
-                            key={role.id}
+                            key={role.role_uuid || role.id}
                             value={role.role_uuid || role.id.toString()}
                           >
                             {role.name}

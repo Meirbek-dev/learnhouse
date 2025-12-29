@@ -17,6 +17,7 @@ import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/update
 import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
 import { useEffectEvent, useLayoutEffect, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { getCourseUpdatesSwrKey } from '@services/courses/keys';
 import { useCourse } from '@components/Contexts/CourseContext';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
@@ -24,7 +25,6 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { format, formatDistanceToNow } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { getCourseUpdatesSwrKey } from '@services/courses/keys';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -39,10 +39,11 @@ const CourseUpdates = () => {
   const course = useCourse();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const UPDATES_KEY = course?.courseStructure?.course_uuid ? getCourseUpdatesSwrKey(course?.courseStructure?.course_uuid) : null;
-  const { data: updates } = useSWR(
-    UPDATES_KEY && access_token ? [UPDATES_KEY, access_token] : null,
-    ([url, token]) => swrFetcher(url, token),
+  const UPDATES_KEY = course?.courseStructure?.course_uuid
+    ? getCourseUpdatesSwrKey(course?.courseStructure?.course_uuid)
+    : null;
+  const { data: updates } = useSWR(UPDATES_KEY && access_token ? [UPDATES_KEY, access_token] : null, ([url, token]) =>
+    swrFetcher(url, token),
   );
   const [isModelOpen, setIsModelOpen] = useState(false);
   const t = useTranslations('Courses.CourseUpdates');
@@ -171,7 +172,11 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
     };
 
     // Optimistically add the update to the list
-    await mutate([UPDATES_KEY, session.data?.tokens?.access_token] as any, (prev: any) => [optimistic, ...(prev || [])], false);
+    await mutate(
+      [UPDATES_KEY, session.data?.tokens?.access_token] as any,
+      (prev: any) => [optimistic, ...(prev || [])],
+      false,
+    );
 
     const res = await createCourseUpdate(body, session.data?.tokens?.access_token);
     if (res.status === 200) {
@@ -260,8 +265,12 @@ const UpdatesListView = () => {
   const adminStatus = useAdminStatus();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const UPDATES_KEY = course?.courseStructure?.course_uuid ? getCourseUpdatesSwrKey(course?.courseStructure?.course_uuid) : null;
-  const { data: updates } = useSWR(UPDATES_KEY && access_token ? [UPDATES_KEY, access_token] : null, ([url, token]) => swrFetcher(url, token));
+  const UPDATES_KEY = course?.courseStructure?.course_uuid
+    ? getCourseUpdatesSwrKey(course?.courseStructure?.course_uuid)
+    : null;
+  const { data: updates } = useSWR(UPDATES_KEY && access_token ? [UPDATES_KEY, access_token] : null, ([url, token]) =>
+    swrFetcher(url, token),
+  );
   const t = useTranslations('Courses.CourseUpdates');
   const locale = useDateFnsLocale();
 

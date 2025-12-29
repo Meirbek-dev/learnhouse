@@ -71,6 +71,7 @@ function ConfirmDeleteStripeConfig({ onDelete, t }: ConfirmDeleteStripeConfigPro
       onOpenChange={setIsOpen}
     >
       <AlertDialogTrigger
+        nativeButton
         render={
           <Button className="flex items-center space-x-2 rounded-full bg-red-500 text-sm text-white transition duration-300 hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50">
             <Trash2 size={16} />

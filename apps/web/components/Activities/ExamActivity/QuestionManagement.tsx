@@ -277,7 +277,6 @@ export default function QuestionManagement({
                 onCancel={() => {
                   dispatch({ type: 'CANCEL_EDIT' });
                 }}
-                
               />
             </DialogContent>
           </Dialog>
@@ -302,7 +301,6 @@ export default function QuestionManagement({
                     onCancel={() => {
                       dispatch({ type: 'CANCEL_EDIT' });
                     }}
-                    
                   />
                 </CardContent>
               </Card>
@@ -396,7 +394,6 @@ export default function QuestionManagement({
                           onCancel={() => {
                             dispatch({ type: 'CANCEL_EDIT' });
                           }}
-                          
                         />
                       </CardContent>
                     </Card>

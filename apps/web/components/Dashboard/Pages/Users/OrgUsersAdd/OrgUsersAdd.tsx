@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
@@ -37,6 +37,11 @@ const OrgUsersAdd = () => {
 
   // Use first invite code as default if not explicitly set
   const effectiveInviteCode = selectedInviteCode ?? invites?.[0]?.invite_code_uuid;
+
+  const inviteItems = (invites || []).map((invite: any) => ({
+    value: invite.invite_code_uuid,
+    label: invite.invite_code,
+  }));
 
   async function sendInvites() {
     if (!effectiveInviteCode) {
@@ -100,6 +105,7 @@ const OrgUsersAdd = () => {
                 <Select
                   value={effectiveInviteCode || ''}
                   onValueChange={(value) => setSelectedInviteCode(value)}
+                  items={inviteItems}
                 >
                   <SelectTrigger
                     id="inviteCodeSelect"
@@ -114,12 +120,12 @@ const OrgUsersAdd = () => {
                   </SelectTrigger>
                   <SelectPositioner>
                     <SelectContent>
-                      {invites?.map((invite: any) => (
+                      {inviteItems.map((invite: any) => (
                         <SelectItem
-                          key={invite.invite_code_uuid}
-                          value={invite.invite_code_uuid}
+                          key={invite.value}
+                          value={invite.value}
                         >
-                          {invite.invite_code}
+                          {invite.label}
                         </SelectItem>
                       ))}
                     </SelectContent>

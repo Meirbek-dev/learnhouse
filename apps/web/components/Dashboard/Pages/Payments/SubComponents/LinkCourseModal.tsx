@@ -3,6 +3,7 @@
 import { getCoursesLinkedToProduct, linkCourseToProduct } from '@services/payments/products';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import { getOrgCourses } from '@services/courses/courses';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Button } from '@components/ui/button';
@@ -10,7 +11,6 @@ import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { Search } from 'lucide-react';
 import useSWR, { mutate } from 'swr';
-import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -95,7 +95,6 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
     () => (org?.slug && accessToken ? [org.slug, accessToken] : null),
     ([orgSlug, token]) => getOrgCourses(orgSlug, null, token),
   );
-
 
   const { data: linkedCoursesData, error: linkedCoursesError } = useSWR(
     () => (orgId && accessToken ? [`/payments/${orgId}/products/${productId}/courses`, accessToken] : null),

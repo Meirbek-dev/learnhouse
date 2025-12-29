@@ -1,4 +1,11 @@
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectPositioner,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { createCertification, deleteCertification } from '@services/courses/certifications';
@@ -139,6 +146,23 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
       certificate_instructor: '',
     },
   });
+
+  const certificationTypes = [
+    'completion',
+    'achievement',
+    'assessment',
+    'participation',
+    'mastery',
+    'professional',
+    'continuing',
+    'workshop',
+    'specialization',
+  ] as const;
+
+  const certificationTypeItems = certificationTypes.map((type) => ({
+    value: type,
+    label: t(`certificationTypes.${type}`),
+  }));
 
   // Handle toggle
   const handleCertificationToggle = useCallback(
@@ -417,6 +441,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
                                 <Select
                                   value={field.value}
                                   onValueChange={field.onChange}
+                                  items={certificationTypeItems}
                                 >
                                   <FormControl>
                                     <SelectTrigger>
@@ -425,22 +450,12 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
                                   </FormControl>
                                   <SelectPositioner>
                                     <SelectContent>
-                                      {[
-                                        'completion',
-                                        'achievement',
-                                        'assessment',
-                                        'participation',
-                                        'mastery',
-                                        'professional',
-                                        'continuing',
-                                        'workshop',
-                                        'specialization',
-                                      ].map((type) => (
+                                      {certificationTypeItems.map((item) => (
                                         <SelectItem
-                                          key={type}
-                                          value={type}
+                                          key={item.value}
+                                          value={item.value}
                                         >
-                                          {t(`certificationTypes.${type}`)}
+                                          {item.label}
                                         </SelectItem>
                                       ))}
                                     </SelectContent>

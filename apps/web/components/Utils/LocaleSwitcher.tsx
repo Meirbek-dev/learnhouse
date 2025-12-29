@@ -1,6 +1,13 @@
 'use client';
 
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectPositioner,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { updateUserLocale } from '@services/users/users';
 import { useLocale, useTranslations } from 'next-intl';
@@ -24,6 +31,8 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
   const t = useTranslations('Components.LocaleSwitcher');
   const session = usePlatformSession() as any;
 
+  const localeItems = locales.map((locale) => ({ value: locale, label: t(locale) }));
+
   const handleLocaleChange = (newLocale: Locale) => {
     startTransition(async () => {
       await setUserLocale(newLocale);
@@ -46,7 +55,24 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
       value={currentLocale}
       onValueChange={(value) => value && handleLocaleChange(value as Locale)}
       disabled={isPending}
+      items={localeItems}
     >
+      <SelectPositioner
+        className={cn(isMobile && 'z-80')}
+        side="bottom"
+        sideOffset={4}
+      >
+        <SelectContent>
+          {localeItems.map((locale) => (
+            <SelectItem
+              key={locale.value}
+              value={locale.value}
+            >
+              {locale.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </SelectPositioner>
       {isMobile ? (
         <SelectTrigger
           className={cn('w-auto touch-manipulation', isMobile && 'w-full', className)}

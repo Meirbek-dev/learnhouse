@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { createInviteCode, createInviteCodeWithUserGroup } from '@services/organizations/invites';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getOrgInvitesSwrKey } from '@services/organizations/keys';
@@ -30,6 +30,11 @@ const OrgInviteCodeGenerate = (props: OrgInviteCodeGenerateProps) => {
 
   // Use controlled state with default fallback to first usergroup
   const [usergroup_id, setUsergroup_id] = useState<number | null>(null);
+
+  const usergroupItems = (usergroups || []).map((usergroup: any) => ({
+    value: String(usergroup.id),
+    label: usergroup.name,
+  }));
 
   // Use first usergroup as default if not explicitly set
   const effectiveUsergroupId = usergroup_id ?? usergroups?.[0]?.id ?? 0;
@@ -76,18 +81,19 @@ const OrgInviteCodeGenerate = (props: OrgInviteCodeGenerateProps) => {
                   onValueChange={(value) => {
                     setUsergroup_id(Number(value));
                   }}
+                  items={usergroupItems}
                 >
                   <SelectTrigger className="w-fit min-w-32">
                     <SelectValue placeholder={t('selectUserGroup')} />
                   </SelectTrigger>
                   <SelectPositioner>
                     <SelectContent>
-                      {usergroups?.map((usergroup: any) => (
+                      {usergroupItems.map((usergroup) => (
                         <SelectItem
-                          key={usergroup.id}
-                          value={String(usergroup.id)}
+                          key={usergroup.value}
+                          value={usergroup.value}
                         >
-                          {usergroup.name}
+                          {usergroup.label}
                         </SelectItem>
                       ))}
                     </SelectContent>

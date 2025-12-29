@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { AlertTriangle, BookOpen, Image as ImageIcon, Loader2, Tag, Video } from 'lucide-react';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
@@ -72,6 +72,49 @@ const validateValues = (values: FormValues, t: any) => {
 function EditCourseGeneral(_props: EditCourseStructureProps) {
   const t = useTranslations('CourseEdit.General');
   const [error, setError] = useState('');
+
+  const thumbnailTypeItems = [
+    {
+      value: 'image',
+      label: (
+        <div className="flex items-center gap-2">
+          <ImageIcon
+            className="h-4 w-4"
+            aria-hidden="true"
+          />
+          {t('image')}
+        </div>
+      ),
+    },
+    {
+      value: 'video',
+      label: (
+        <div className="flex items-center gap-2">
+          <Video
+            className="h-4 w-4"
+            aria-hidden="true"
+          />
+          {t('video')}
+        </div>
+      ),
+    },
+    {
+      value: 'both',
+      label: (
+        <div className="flex items-center gap-2">
+          <ImageIcon
+            className="h-4 w-4"
+            aria-hidden="true"
+          />
+          <Video
+            className="h-4 w-4"
+            aria-hidden="true"
+          />
+          {t('both')}
+        </div>
+      ),
+    },
+  ];
   const course = useCourse();
   const dispatchCourse = useCourseDispatch();
   const { isLoading, courseStructure } = course;
@@ -392,43 +435,21 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
+                          items={thumbnailTypeItems}
                         >
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectPositioner>
                             <SelectContent>
-                              <SelectItem value="image">
-                                <div className="flex items-center gap-2">
-                                  <ImageIcon
-                                    className="h-4 w-4"
-                                    aria-hidden="true"
-                                  />
-                                  {t('image')}
-                                </div>
-                              </SelectItem>
-                              <SelectItem value="video">
-                                <div className="flex items-center gap-2">
-                                  <Video
-                                    className="h-4 w-4"
-                                    aria-hidden="true"
-                                  />
-                                  {t('video')}
-                                </div>
-                              </SelectItem>
-                              <SelectItem value="both">
-                                <div className="flex items-center gap-2">
-                                  <ImageIcon
-                                    className="h-4 w-4"
-                                    aria-hidden="true"
-                                  />
-                                  <Video
-                                    className="h-4 w-4"
-                                    aria-hidden="true"
-                                  />
-                                  {t('both')}
-                                </div>
-                              </SelectItem>
+                              {thumbnailTypeItems.map((item) => (
+                                <SelectItem
+                                  key={String(item.value)}
+                                  value={item.value}
+                                >
+                                  {item.label}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </SelectPositioner>
                         </Select>

@@ -1,7 +1,14 @@
 'use client';
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectPositioner,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
-import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -186,6 +193,11 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
 
   const initialAccessMode = settings.access_mode || 'NO_ACCESS';
 
+  const accessModes = [
+    { value: 'NO_ACCESS', label: t('accessModeNoAccess') },
+    { value: 'WHITELIST', label: t('accessModeWhitelist') },
+    { value: 'ALL_ENROLLED', label: t('accessModeAllEnrolled') },
+  ];
   return (
     <Card>
       <CardHeader>
@@ -375,6 +387,7 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      items={accessModes}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -383,9 +396,14 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
                       </FormControl>
                       <SelectPositioner>
                         <SelectContent>
-                          <SelectItem value="NO_ACCESS">{t('accessModeNoAccess')}</SelectItem>
-                          <SelectItem value="WHITELIST">{t('accessModeWhitelist')}</SelectItem>
-                          <SelectItem value="ALL_ENROLLED">{t('accessModeAllEnrolled')}</SelectItem>
+                          {accessModes.map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </SelectPositioner>
                     </Select>
