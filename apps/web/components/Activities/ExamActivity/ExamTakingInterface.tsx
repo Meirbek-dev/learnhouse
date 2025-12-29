@@ -19,7 +19,7 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@components/ui/radio-group';
 import { Alert, AlertDescription } from '@components/ui/alert';
@@ -378,16 +378,18 @@ export default function ExamTakingInterface({
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder={t('selectMatch')} />
                     </SelectTrigger>
-                    <SelectContent>
-                      {question.answer_options.map((opt, idx) => (
-                        <SelectItem
-                          key={idx}
-                          value={opt.right ?? ''}
-                        >
-                          {opt.right}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
+                    <SelectPositioner>
+                      <SelectContent>
+                        {question.answer_options.map((opt, idx) => (
+                          <SelectItem
+                            key={idx}
+                            value={opt.right ?? ''}
+                          >
+                            {opt.right}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </SelectPositioner>
                   </Select>
                 </div>
               </div>

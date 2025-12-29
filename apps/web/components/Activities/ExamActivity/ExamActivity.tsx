@@ -218,7 +218,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
 
           <Tabs
             value={activeTab}
-            onValueChange={setActiveTab}
+            onValueChange={(value) => value && setActiveTab(value)}
           >
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="questions">{t('questions')}</TabsTrigger>

@@ -1,5 +1,5 @@
 'use client';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -205,16 +205,18 @@ const OrgEditGeneral: FC = () => {
                               <SelectValue placeholder={t('Form.labelPlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
-                            {getOrgLabels(t).map((type) => (
-                              <SelectItem
-                                key={type.value}
-                                value={type.value}
-                              >
-                                {type.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
+                          <SelectPositioner>
+                            <SelectContent>
+                              {getOrgLabels(t).map((type) => (
+                                <SelectItem
+                                  key={type.value}
+                                  value={type.value}
+                                >
+                                  {type.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </SelectPositioner>
                         </Select>
                         <FormMessage />
                       </FormItem>

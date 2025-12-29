@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
@@ -361,10 +361,12 @@ const CreateCourseModal = ({ closeModal, orgslug }: CreateCourseModalProps) => {
                     <SelectValue placeholder={t('placeholderVisibility')} />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="true">{t('visibilityItemPublic')}</SelectItem>
-                  <SelectItem value="false">{t('visibilityItemPrivate')}</SelectItem>
-                </SelectContent>
+                <SelectPositioner>
+                  <SelectContent>
+                    <SelectItem value="true">{t('visibilityItemPublic')}</SelectItem>
+                    <SelectItem value="false">{t('visibilityItemPrivate')}</SelectItem>
+                  </SelectContent>
+                </SelectPositioner>
               </Select>
               <FormMessage />
             </FormItem>

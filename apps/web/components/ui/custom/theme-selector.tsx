@@ -1,6 +1,13 @@
 'use client';
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectPositioner,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useTheme } from '@/components/providers/theme-provider';
 import { getThemePreviewColors } from '@/lib/theme-color-utils';
 import { Label } from '@/components/ui/label';
@@ -68,40 +75,42 @@ export function ThemeSelector({ className }: ThemeSelectorProps) {
               </div>
             </SelectValue>
           </SelectTrigger>
-          <SelectContent>
-            {themeList.map((theme) => {
-              const colors = getThemePreviewColors(theme);
-              return (
-                <SelectItem
-                  key={theme.name}
-                  value={theme.name}
-                >
-                  <div className="flex items-center gap-3">
-                    {/* Theme color preview - using OKLCH colors */}
-                    <div className="flex gap-1">
-                      <div
-                        className="border-border h-4 w-4 shrink-0 rounded border"
-                        style={{ backgroundColor: colors.primary }}
-                      />
-                      <div
-                        className="border-border h-4 w-4 shrink-0 rounded border"
-                        style={{ backgroundColor: colors.secondary }}
-                      />
-                      <div
-                        className="border-border h-4 w-4 shrink-0 rounded border"
-                        style={{ backgroundColor: colors.accent }}
-                        title="Accent"
-                      />
+          <SelectPositioner>
+            <SelectContent>
+              {themeList.map((theme) => {
+                const colors = getThemePreviewColors(theme);
+                return (
+                  <SelectItem
+                    key={theme.name}
+                    value={theme.name}
+                  >
+                    <div className="flex items-center gap-3">
+                      {/* Theme color preview - using OKLCH colors */}
+                      <div className="flex gap-1">
+                        <div
+                          className="border-border h-4 w-4 shrink-0 rounded border"
+                          style={{ backgroundColor: colors.primary }}
+                        />
+                        <div
+                          className="border-border h-4 w-4 shrink-0 rounded border"
+                          style={{ backgroundColor: colors.secondary }}
+                        />
+                        <div
+                          className="border-border h-4 w-4 shrink-0 rounded border"
+                          style={{ backgroundColor: colors.accent }}
+                          title="Accent"
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{tThemes(`${theme.name}.name`)}</span>
+                        <span className="text-muted-foreground text-xs">{tThemes(`${theme.name}.description`)}</span>
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{tThemes(`${theme.name}.name`)}</span>
-                      <span className="text-muted-foreground text-xs">{tThemes(`${theme.name}.description`)}</span>
-                    </div>
-                  </div>
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </SelectPositioner>
         </Select>
 
         {/* Optional: Show current theme description */}

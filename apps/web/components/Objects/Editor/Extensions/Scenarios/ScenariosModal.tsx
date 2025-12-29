@@ -1,5 +1,5 @@
 import { ArrowRight, CheckCircle, GitBranch, Image, Play, Plus, RotateCcw, Save, Settings, Trash2 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { Textarea } from '@components/ui/textarea';
@@ -519,17 +519,19 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                                   <SelectTrigger className="flex-1 text-xs">
                                     <SelectValue placeholder={t('endScenarioOption') as string} />
                                   </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="__end">{t('endScenarioOption')}</SelectItem>
-                                    {scenarios.map((s) => (
-                                      <SelectItem
-                                        key={s.id}
-                                        value={s.id}
-                                      >
-                                        {t('scenarioOptionLabel', { id: s.id })}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
+                                  <SelectPositioner>
+                                    <SelectContent>
+                                      <SelectItem value="__end">{t('endScenarioOption')}</SelectItem>
+                                      {scenarios.map((s) => (
+                                        <SelectItem
+                                          key={s.id}
+                                          value={s.id}
+                                        >
+                                          {t('scenarioOptionLabel', { id: s.id })}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </SelectPositioner>
                                 </Select>
                               </div>
                             </div>

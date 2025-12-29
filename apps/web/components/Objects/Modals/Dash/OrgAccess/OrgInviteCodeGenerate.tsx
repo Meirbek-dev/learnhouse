@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { createInviteCode, createInviteCodeWithUserGroup } from '@services/organizations/invites';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getOrgInvitesSwrKey } from '@services/organizations/keys';
@@ -80,16 +80,18 @@ const OrgInviteCodeGenerate = (props: OrgInviteCodeGenerateProps) => {
                   <SelectTrigger className="w-fit min-w-32">
                     <SelectValue placeholder={t('selectUserGroup')} />
                   </SelectTrigger>
-                  <SelectContent>
-                    {usergroups?.map((usergroup: any) => (
-                      <SelectItem
-                        key={usergroup.id}
-                        value={String(usergroup.id)}
-                      >
-                        {usergroup.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+                  <SelectPositioner>
+                    <SelectContent>
+                      {usergroups?.map((usergroup: any) => (
+                        <SelectItem
+                          key={usergroup.id}
+                          value={String(usergroup.id)}
+                        >
+                          {usergroup.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </SelectPositioner>
                 </Select>
 
                 <div className="">

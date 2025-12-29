@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
@@ -99,7 +99,7 @@ const OrgUsersAdd = () => {
                 </Label>
                 <Select
                   value={effectiveInviteCode || ''}
-                  onValueChange={setSelectedInviteCode}
+                  onValueChange={(value) => setSelectedInviteCode(value)}
                 >
                   <SelectTrigger
                     id="inviteCodeSelect"
@@ -112,16 +112,18 @@ const OrgUsersAdd = () => {
                       }
                     />
                   </SelectTrigger>
-                  <SelectContent>
-                    {invites?.map((invite: any) => (
-                      <SelectItem
-                        key={invite.invite_code_uuid}
-                        value={invite.invite_code_uuid}
-                      >
-                        {invite.invite_code}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+                  <SelectPositioner>
+                    <SelectContent>
+                      {invites?.map((invite: any) => (
+                        <SelectItem
+                          key={invite.invite_code_uuid}
+                          value={invite.invite_code_uuid}
+                        >
+                          {invite.invite_code}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </SelectPositioner>
                 </Select>
                 <ToolTip
                   content={t('inviteCodeTooltip')}

@@ -91,7 +91,8 @@
       "dueDate": "Тапсыру мерзімі",
       "hint": "Кеңес",
       "referenceDocument": "Анықтамалық құжат",
-      "task": "Тапсырма {index}"
+      "task": "Тапсырма {index}",
+      "noTasks": "Қол жетімді тапсырмалар жоқ"
     },
     "DocumentPdf": {
       "viewerTitle": "PDF құжаттарды қарау құралы"

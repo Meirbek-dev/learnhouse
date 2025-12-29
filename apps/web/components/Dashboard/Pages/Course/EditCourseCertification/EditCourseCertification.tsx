@@ -1,4 +1,4 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { createCertification, deleteCertification } from '@services/courses/certifications';
@@ -423,26 +423,28 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
                                       <SelectValue>{t(`certificationTypes.${field.value}`)}</SelectValue>
                                     </SelectTrigger>
                                   </FormControl>
-                                  <SelectContent>
-                                    {[
-                                      'completion',
-                                      'achievement',
-                                      'assessment',
-                                      'participation',
-                                      'mastery',
-                                      'professional',
-                                      'continuing',
-                                      'workshop',
-                                      'specialization',
-                                    ].map((type) => (
-                                      <SelectItem
-                                        key={type}
-                                        value={type}
-                                      >
-                                        {t(`certificationTypes.${type}`)}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
+                                  <SelectPositioner>
+                                    <SelectContent>
+                                      {[
+                                        'completion',
+                                        'achievement',
+                                        'assessment',
+                                        'participation',
+                                        'mastery',
+                                        'professional',
+                                        'continuing',
+                                        'workshop',
+                                        'specialization',
+                                      ].map((type) => (
+                                        <SelectItem
+                                          key={type}
+                                          value={type}
+                                        >
+                                          {t(`certificationTypes.${type}`)}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </SelectPositioner>
                                 </Select>
                                 <FormMessage />
                               </FormItem>

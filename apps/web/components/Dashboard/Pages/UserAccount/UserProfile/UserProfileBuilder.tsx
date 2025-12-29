@@ -17,7 +17,7 @@ import {
   Trash2,
   Trophy,
 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { createElement, useEffect, useEffectEvent, useState } from 'react';
@@ -547,9 +547,9 @@ const UserProfileBuilder = () => {
 
             <div className="pt-4">
               <Select
-                onValueChange={(value: keyof typeof SECTION_TYPE_KEYS) => {
+                onValueChange={(value) => {
                   if (value) {
-                    addSection(value);
+                    addSection(value as keyof typeof SECTION_TYPE_KEYS);
                   }
                 }}
               >
@@ -562,27 +562,29 @@ const UserProfileBuilder = () => {
                     {t('SectionsPanel.addSectionButton')}
                   </div>
                 </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(getSectionTypesConfig(t)).map(([type, { icon: Icon, label, description }]) => (
-                    <SelectItem
-                      key={type}
-                      value={type}
-                    >
-                      <div className="flex items-center space-x-3 py-1">
-                        <div className="rounded-md bg-gray-50 p-1.5">
-                          <Icon
-                            size={16}
-                            className="text-gray-600"
-                          />
+                <SelectPositioner>
+                  <SelectContent>
+                    {Object.entries(getSectionTypesConfig(t)).map(([type, { icon: Icon, label, description }]) => (
+                      <SelectItem
+                        key={type}
+                        value={type}
+                      >
+                        <div className="flex items-center space-x-3 py-1">
+                          <div className="rounded-md bg-gray-50 p-1.5">
+                            <Icon
+                              size={16}
+                              className="text-gray-600"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-gray-700">{label}</div>
+                            <div className="text-xs text-gray-500">{description}</div>
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <div className="text-sm font-medium text-gray-700">{label}</div>
-                          <div className="text-xs text-gray-500">{description}</div>
-                        </div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </SelectPositioner>
               </Select>
             </div>
           </div>
@@ -1039,12 +1041,14 @@ const SkillsEditor: FC<{
                   <SelectTrigger>
                     <SelectValue placeholder={t('SkillsEditor.selectLevelPlaceholder')} />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="beginner">{t('SkillsEditor.levelBeginner')}</SelectItem>
-                    <SelectItem value="intermediate">{t('SkillsEditor.levelIntermediate')}</SelectItem>
-                    <SelectItem value="advanced">{t('SkillsEditor.levelAdvanced')}</SelectItem>
-                    <SelectItem value="expert">{t('SkillsEditor.levelExpert')}</SelectItem>
-                  </SelectContent>
+                  <SelectPositioner>
+                    <SelectContent>
+                      <SelectItem value="beginner">{t('SkillsEditor.levelBeginner')}</SelectItem>
+                      <SelectItem value="intermediate">{t('SkillsEditor.levelIntermediate')}</SelectItem>
+                      <SelectItem value="advanced">{t('SkillsEditor.levelAdvanced')}</SelectItem>
+                      <SelectItem value="expert">{t('SkillsEditor.levelExpert')}</SelectItem>
+                    </SelectContent>
+                  </SelectPositioner>
                 </Select>
                 <Input
                   value={skill.category || ''}

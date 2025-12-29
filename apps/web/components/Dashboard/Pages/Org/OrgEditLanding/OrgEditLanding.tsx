@@ -16,7 +16,7 @@ import {
   Upload,
   Users,
 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { updateOrgLanding, uploadLandingContent } from '@services/organizations/orgs';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
@@ -539,13 +539,14 @@ const OrgEditLanding = () => {
                         {t('SectionsPanel.addSectionButton')}
                       </div>
                     </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(getSectionTypes(t)).map(([type, { icon: Icon, label, description }]) => (
-                        <SelectItem
-                          key={type}
-                          value={type}
-                        >
-                          <div className="flex items-center space-x-3 py-1">
+                    <SelectPositioner>
+                      <SelectContent>
+                        {Object.entries(getSectionTypes(t)).map(([type, { icon: Icon, label, description }]) => (
+                          <SelectItem
+                            key={type}
+                            value={type}
+                          >
+                            <div className="flex items-center space-x-3 py-1">
                             <div className="rounded-md bg-gray-50 p-1.5">
                               <Icon
                                 size={16}
@@ -560,6 +561,7 @@ const OrgEditLanding = () => {
                         </SelectItem>
                       ))}
                     </SelectContent>
+                  </SelectPositioner>
                   </Select>
                 </div>
               </div>
@@ -856,11 +858,13 @@ const HeroSectionEditor: FC<{
                 <SelectTrigger>
                   <SelectValue placeholder={t('HeroEditor.Background.typePlaceholder')} />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="solid">{t('HeroEditor.Background.solid')}</SelectItem>
-                  <SelectItem value="gradient">{t('HeroEditor.Background.gradient')}</SelectItem>
-                  <SelectItem value="image">{t('HeroEditor.Background.image')}</SelectItem>
-                </SelectContent>
+                <SelectPositioner>
+                  <SelectContent>
+                    <SelectItem value="solid">{t('HeroEditor.Background.solid')}</SelectItem>
+                    <SelectItem value="gradient">{t('HeroEditor.Background.gradient')}</SelectItem>
+                    <SelectItem value="image">{t('HeroEditor.Background.image')}</SelectItem>
+                  </SelectContent>
+                </SelectPositioner>
               </Select>
             </div>
 
@@ -1334,7 +1338,7 @@ const HeroSectionEditor: FC<{
                   <Label>{t('HeroEditor.Illustration.positionLabel')}</Label>
                   <Select
                     value={section.illustration?.position || 'left'}
-                    onValueChange={(value: 'left' | 'right') => {
+                    onValueChange={(value: 'left' | 'right' | null) => {
                       if (!value) return;
                       onChange({
                         ...section,
@@ -1354,10 +1358,12 @@ const HeroSectionEditor: FC<{
                     <SelectTrigger>
                       <SelectValue placeholder={t('HeroEditor.Illustration.positionPlaceholder')} />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="left">{t('HeroEditor.Illustration.positionLeft')}</SelectItem>
-                      <SelectItem value="right">{t('HeroEditor.Illustration.positionRight')}</SelectItem>
-                    </SelectContent>
+                    <SelectPositioner>
+                      <SelectContent>
+                        <SelectItem value="left">{t('HeroEditor.Illustration.positionLeft')}</SelectItem>
+                        <SelectItem value="right">{t('HeroEditor.Illustration.positionRight')}</SelectItem>
+                      </SelectContent>
+                    </SelectPositioner>
                   </Select>
                 </div>
 
@@ -1365,7 +1371,7 @@ const HeroSectionEditor: FC<{
                   <Label>{t('HeroEditor.Illustration.sizeLabel')}</Label>
                   <Select
                     value={section.illustration?.size || 'medium'}
-                    onValueChange={(value: 'small' | 'medium' | 'large') => {
+                    onValueChange={(value: 'small' | 'medium' | 'large' | null) => {
                       if (!value) return;
                       onChange({
                         ...section,
@@ -1385,11 +1391,13 @@ const HeroSectionEditor: FC<{
                     <SelectTrigger>
                       <SelectValue placeholder={t('HeroEditor.Illustration.sizePlaceholder')} />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="small">{t('HeroEditor.Illustration.sizeSmall')}</SelectItem>
-                      <SelectItem value="medium">{t('HeroEditor.Illustration.sizeMedium')}</SelectItem>
-                      <SelectItem value="large">{t('HeroEditor.Illustration.sizeLarge')}</SelectItem>
-                    </SelectContent>
+                    <SelectPositioner>
+                      <SelectContent>
+                        <SelectItem value="small">{t('HeroEditor.Illustration.sizeSmall')}</SelectItem>
+                        <SelectItem value="medium">{t('HeroEditor.Illustration.sizeMedium')}</SelectItem>
+                        <SelectItem value="large">{t('HeroEditor.Illustration.sizeLarge')}</SelectItem>
+                      </SelectContent>
+                    </SelectPositioner>
                   </Select>
                 </div>
               </div>
@@ -1543,10 +1551,12 @@ const TextAndImageSectionEditor: FC<{
             <SelectTrigger>
               <SelectValue placeholder={t('TextAndImageEditor.imagePositionPlaceholder')} />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="left">{t('TextAndImageEditor.positionLeft')}</SelectItem>
-              <SelectItem value="right">{t('TextAndImageEditor.positionRight')}</SelectItem>
-            </SelectContent>
+            <SelectPositioner>
+              <SelectContent>
+                <SelectItem value="left">{t('TextAndImageEditor.positionLeft')}</SelectItem>
+                <SelectItem value="right">{t('TextAndImageEditor.positionRight')}</SelectItem>
+              </SelectContent>
+            </SelectPositioner>
           </Select>
         </div>
 

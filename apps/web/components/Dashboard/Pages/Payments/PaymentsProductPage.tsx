@@ -25,7 +25,7 @@ import {
   SquareCheck,
 } from 'lucide-react';
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { archiveProduct, getProducts, updateProduct } from '@services/payments/products';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
@@ -464,16 +464,18 @@ const EditProductForm = ({
                           <SelectValue placeholder={t('currencyPlaceholder')} />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        {currencies.map((currency) => (
-                          <SelectItem
-                            key={currency.code}
-                            value={currency.code}
-                          >
-                            {currency.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
+                      <SelectPositioner>
+                        <SelectContent>
+                          {currencies.map((currency) => (
+                            <SelectItem
+                              key={currency.code}
+                              value={currency.code}
+                            >
+                              {currency.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </SelectPositioner>
                     </Select>
                     <FormMessage />
                   </FormItem>

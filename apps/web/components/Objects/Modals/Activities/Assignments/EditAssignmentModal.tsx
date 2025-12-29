@@ -1,5 +1,5 @@
 'use client';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
@@ -228,10 +228,12 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
                     <SelectValue placeholder={validationT('selectGradingType')} />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="NUMERIC">{t('numeric')}</SelectItem>
-                  <SelectItem value="PERCENTAGE">{t('percentage')}</SelectItem>
-                </SelectContent>
+                <SelectPositioner>
+                  <SelectContent>
+                    <SelectItem value="NUMERIC">{t('numeric')}</SelectItem>
+                    <SelectItem value="PERCENTAGE">{t('percentage')}</SelectItem>
+                  </SelectContent>
+                </SelectPositioner>
               </Select>
               <FormMessage />
             </FormItem>

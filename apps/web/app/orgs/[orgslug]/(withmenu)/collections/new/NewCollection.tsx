@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, Globe, Image as ImageIcon, Loader2, Lock, Search } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
@@ -176,7 +176,7 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
                   {t('visibilityLabel')} <span className="text-red-500">*</span>
                 </Label>
                 <Select
-                  onValueChange={handleVisibilityChange}
+                  onValueChange={(value) => value !== null && handleVisibilityChange(value)}
                   value={String(isPublic)}
                 >
                   <SelectTrigger
@@ -185,20 +185,22 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
                   >
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="true">
-                      <div className="flex items-center gap-2">
-                        <Globe className="h-4 w-4" />
-                        <span>{t('visibilityPublic')}</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="false">
-                      <div className="flex items-center gap-2">
-                        <Lock className="h-4 w-4" />
-                        <span>{t('visibilityPrivate')}</span>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
+                  <SelectPositioner>
+                    <SelectContent>
+                      <SelectItem value="true">
+                        <div className="flex items-center gap-2">
+                          <Globe className="h-4 w-4" />
+                          <span>{t('visibilityPublic')}</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="false">
+                        <div className="flex items-center gap-2">
+                          <Lock className="h-4 w-4" />
+                          <span>{t('visibilityPrivate')}</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </SelectPositioner>
                 </Select>
               </div>
             </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { updateUserLocale } from '@services/users/users';
 import { useLocale, useTranslations } from 'next-intl';
@@ -65,21 +65,22 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
           {isMobile ? <SelectValue placeholder={t('selectLanguage')}>{t(currentLocale)}</SelectValue> : null}
         </SelectTrigger>
       )}
-      <SelectContent
+      <SelectPositioner
         className={cn(isMobile && 'z-80')}
-        position="popper"
-        sideOffset={4}
         side="bottom"
+        sideOffset={4}
       >
-        {locales.map((locale) => (
-          <SelectItem
-            key={locale}
-            value={locale}
-          >
-            {t(locale)}
-          </SelectItem>
-        ))}
-      </SelectContent>
+        <SelectContent>
+          {locales.map((locale) => (
+            <SelectItem
+              key={locale}
+              value={locale}
+            >
+              {t(locale)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </SelectPositioner>
     </Select>
   );
 };

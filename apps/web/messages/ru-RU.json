@@ -91,7 +91,8 @@
       "dueDate": "Срок сдачи",
       "hint": "Подсказка",
       "referenceDocument": "Справочный документ",
-      "task": "Задание {index}"
+      "task": "Задание {index}",
+      "noTasks": "Нет доступных заданий"
     },
     "DocumentPdf": {
       "viewerTitle": "PDF Document Viewer"

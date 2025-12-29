@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { AlertTriangle, BookOpen, Image as ImageIcon, Loader2, Tag, Video } from 'lucide-react';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
@@ -396,39 +396,41 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="image">
-                              <div className="flex items-center gap-2">
-                                <ImageIcon
-                                  className="h-4 w-4"
-                                  aria-hidden="true"
-                                />
-                                {t('image')}
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="video">
-                              <div className="flex items-center gap-2">
-                                <Video
-                                  className="h-4 w-4"
-                                  aria-hidden="true"
-                                />
-                                {t('video')}
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="both">
-                              <div className="flex items-center gap-2">
-                                <ImageIcon
-                                  className="h-4 w-4"
-                                  aria-hidden="true"
-                                />
-                                <Video
-                                  className="h-4 w-4"
-                                  aria-hidden="true"
-                                />
-                                {t('both')}
-                              </div>
-                            </SelectItem>
-                          </SelectContent>
+                          <SelectPositioner>
+                            <SelectContent>
+                              <SelectItem value="image">
+                                <div className="flex items-center gap-2">
+                                  <ImageIcon
+                                    className="h-4 w-4"
+                                    aria-hidden="true"
+                                  />
+                                  {t('image')}
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="video">
+                                <div className="flex items-center gap-2">
+                                  <Video
+                                    className="h-4 w-4"
+                                    aria-hidden="true"
+                                  />
+                                  {t('video')}
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="both">
+                                <div className="flex items-center gap-2">
+                                  <ImageIcon
+                                    className="h-4 w-4"
+                                    aria-hidden="true"
+                                  />
+                                  <Video
+                                    className="h-4 w-4"
+                                    aria-hidden="true"
+                                  />
+                                  {t('both')}
+                                </div>
+                              </SelectItem>
+                            </SelectContent>
+                          </SelectPositioner>
                         </Select>
                       </FormControl>
                       <FormMessage />

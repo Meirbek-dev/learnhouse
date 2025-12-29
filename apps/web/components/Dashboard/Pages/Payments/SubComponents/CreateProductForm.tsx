@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { createProduct } from '@services/payments/products';
@@ -147,10 +147,12 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                       <SelectValue placeholder={t('productTypePlaceholder')} />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="one_time">{t('productTypes.one_time')}</SelectItem>
-                    <SelectItem value="subscription">{t('productTypes.subscription')}</SelectItem>
-                  </SelectContent>
+                  <SelectPositioner>
+                    <SelectContent>
+                      <SelectItem value="one_time">{t('productTypes.one_time')}</SelectItem>
+                      <SelectItem value="subscription">{t('productTypes.subscription')}</SelectItem>
+                    </SelectContent>
+                  </SelectPositioner>
                 </Select>
                 <FormMessage />
               </FormItem>
@@ -172,12 +174,14 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                       <SelectValue placeholder={t('priceTypePlaceholder')} />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="fixed_price">{t('priceTypes.fixed_price')}</SelectItem>
-                    {productType !== 'subscription' && (
-                      <SelectItem value="customer_choice">{t('priceTypes.customer_choice')}</SelectItem>
-                    )}
-                  </SelectContent>
+                  <SelectPositioner>
+                    <SelectContent>
+                      <SelectItem value="fixed_price">{t('priceTypes.fixed_price')}</SelectItem>
+                      {productType !== 'subscription' && (
+                        <SelectItem value="customer_choice">{t('priceTypes.customer_choice')}</SelectItem>
+                      )}
+                    </SelectContent>
+                  </SelectPositioner>
                 </Select>
                 <FormMessage />
               </FormItem>
@@ -223,16 +227,18 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                           <SelectValue placeholder={t('currencyPlaceholder')} />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        {currencies.map((currency) => (
-                          <SelectItem
-                            key={currency.code}
-                            value={currency.code}
-                          >
-                            {currency.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
+                      <SelectPositioner>
+                        <SelectContent>
+                          {currencies.map((currency) => (
+                            <SelectItem
+                              key={currency.code}
+                              value={currency.code}
+                            >
+                              {currency.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </SelectPositioner>
                     </Select>
                     <FormMessage />
                   </FormItem>

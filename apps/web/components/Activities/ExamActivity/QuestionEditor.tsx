@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { getAPIUrl } from '@/services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { Checkbox } from '@components/ui/checkbox';
@@ -177,12 +177,14 @@ export default function QuestionEditor({
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="SINGLE_CHOICE">{t('single_choice')}</SelectItem>
-                <SelectItem value="MULTIPLE_CHOICE">{t('multiple_choice')}</SelectItem>
-                <SelectItem value="TRUE_FALSE">{t('true_false')}</SelectItem>
-                <SelectItem value="MATCHING">{t('matching')}</SelectItem>
-              </SelectContent>
+              <SelectPositioner>
+                <SelectContent>
+                  <SelectItem value="SINGLE_CHOICE">{t('single_choice')}</SelectItem>
+                  <SelectItem value="MULTIPLE_CHOICE">{t('multiple_choice')}</SelectItem>
+                  <SelectItem value="TRUE_FALSE">{t('true_false')}</SelectItem>
+                  <SelectItem value="MATCHING">{t('matching')}</SelectItem>
+                </SelectContent>
+              </SelectPositioner>
             </Select>
           </div>
 

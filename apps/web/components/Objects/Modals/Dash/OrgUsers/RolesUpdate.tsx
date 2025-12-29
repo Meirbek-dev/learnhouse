@@ -1,5 +1,5 @@
 'use client';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
@@ -106,25 +106,27 @@ const RolesUpdate: FC<Props> = (props) => {
                       <SelectValue placeholder={t('selectRolePlaceholder')} />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
-                    {!roles || rolesError ? (
-                      <SelectItem
-                        value="loading"
-                        disabled
-                      >
-                        {t('loadingRoles')}
-                      </SelectItem>
-                    ) : (
-                      roles.map((role: any) => (
+                  <SelectPositioner>
+                    <SelectContent>
+                      {!roles || rolesError ? (
                         <SelectItem
-                          key={role.id}
-                          value={role.role_uuid || role.id.toString()}
+                          value="loading"
+                          disabled
                         >
-                          {role.name}
+                          {t('loadingRoles')}
                         </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
+                      ) : (
+                        roles.map((role: any) => (
+                          <SelectItem
+                            key={role.id}
+                            value={role.role_uuid || role.id.toString()}
+                          >
+                            {role.name}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </SelectPositioner>
                 </Select>
                 <FormMessage />
               </FormItem>

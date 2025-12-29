@@ -1,7 +1,7 @@
 'use client';
 
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -381,11 +381,13 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
                           <SelectValue placeholder={t('selectAccessMode')} />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="NO_ACCESS">{t('accessModeNoAccess')}</SelectItem>
-                        <SelectItem value="WHITELIST">{t('accessModeWhitelist')}</SelectItem>
-                        <SelectItem value="ALL_ENROLLED">{t('accessModeAllEnrolled')}</SelectItem>
-                      </SelectContent>
+                      <SelectPositioner>
+                        <SelectContent>
+                          <SelectItem value="NO_ACCESS">{t('accessModeNoAccess')}</SelectItem>
+                          <SelectItem value="WHITELIST">{t('accessModeWhitelist')}</SelectItem>
+                          <SelectItem value="ALL_ENROLLED">{t('accessModeAllEnrolled')}</SelectItem>
+                        </SelectContent>
+                      </SelectPositioner>
                     </Select>
                     <FormDescription>{t('accessModeDescription')}</FormDescription>
                   </FormItem>

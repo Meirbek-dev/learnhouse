@@ -9,7 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectPositioner, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock, Download, Eye, TrendingDown, TrendingUp, Users } from 'lucide-react';
@@ -325,31 +325,35 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
             />
             <Select
               value={statusFilter}
-              onValueChange={setStatusFilter}
+              onValueChange={(value) => value !== null && setStatusFilter(value)}
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t('filterByStatus')} />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('allStatuses')}</SelectItem>
-                <SelectItem value="SUBMITTED">{t('submitted')}</SelectItem>
-                <SelectItem value="AUTO_SUBMITTED">{t('autoSubmitted')}</SelectItem>
-                <SelectItem value="IN_PROGRESS">{t('inProgress')}</SelectItem>
-              </SelectContent>
+              <SelectPositioner>
+                <SelectContent>
+                  <SelectItem value="all">{t('allStatuses')}</SelectItem>
+                  <SelectItem value="SUBMITTED">{t('submitted')}</SelectItem>
+                  <SelectItem value="AUTO_SUBMITTED">{t('autoSubmitted')}</SelectItem>
+                  <SelectItem value="IN_PROGRESS">{t('inProgress')}</SelectItem>
+                </SelectContent>
+              </SelectPositioner>
             </Select>
             <Select
               value={sortBy}
-              onValueChange={setSortBy}
+              onValueChange={(value) => value !== null && setSortBy(value)}
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t('sortBy')} />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="started_at">{t('startedAt')}</SelectItem>
-                <SelectItem value="user_name">{t('studentName')}</SelectItem>
-                <SelectItem value="percentage">{t('score')}</SelectItem>
-                <SelectItem value="duration_minutes">{t('duration')}</SelectItem>
-              </SelectContent>
+              <SelectPositioner>
+                <SelectContent>
+                  <SelectItem value="started_at">{t('startedAt')}</SelectItem>
+                  <SelectItem value="user_name">{t('studentName')}</SelectItem>
+                  <SelectItem value="percentage">{t('score')}</SelectItem>
+                  <SelectItem value="duration_minutes">{t('duration')}</SelectItem>
+                </SelectContent>
+              </SelectPositioner>
             </Select>
             <Button
               variant="outline"
