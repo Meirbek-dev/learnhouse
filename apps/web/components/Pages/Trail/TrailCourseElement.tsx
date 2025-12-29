@@ -2,8 +2,9 @@
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { getUriWithOrg } from '@services/config/config';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { getTrailSwrKey } from '@services/courses/keys';
 import { Award, ExternalLink, Loader2 } from 'lucide-react';
 import { removeCourse } from '@services/courses/activity';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -42,7 +43,7 @@ const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) =
     router.refresh();
 
     // Mutate
-    mutate(`${getAPIUrl()}trail/org/${orgID}/trail`);
+    mutate([getTrailSwrKey(orgID), access_token]);
   }
 
   // Fetch certificate for this course

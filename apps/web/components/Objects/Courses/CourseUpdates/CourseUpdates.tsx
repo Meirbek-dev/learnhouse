@@ -24,7 +24,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { format, formatDistanceToNow } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { getAPIUrl } from '@services/config/config';
+import { getCourseUpdatesSwrKey } from '@services/courses/keys';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -39,8 +39,10 @@ const CourseUpdates = () => {
   const course = useCourse();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const { data: updates } = useSWR(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`, (url) =>
-    swrFetcher(url, access_token),
+  const UPDATES_KEY = course?.courseStructure?.course_uuid ? getCourseUpdatesSwrKey(course?.courseStructure?.course_uuid) : null;
+  const { data: updates } = useSWR(
+    UPDATES_KEY && access_token ? [UPDATES_KEY, access_token] : null,
+    ([url, token]) => swrFetcher(url, token),
   );
   const [isModelOpen, setIsModelOpen] = useState(false);
   const t = useTranslations('Courses.CourseUpdates');
@@ -159,13 +161,28 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
       course_uuid: course.courseStructure.course_uuid,
       org_id: org.id,
     };
+    const UPDATES_KEY = getCourseUpdatesSwrKey(course.courseStructure.course_uuid);
+
+    const optimistic = {
+      id: `temp-${Date.now()}`,
+      title: values.title,
+      content: values.content,
+      creation_date: new Date().toISOString(),
+    };
+
+    // Optimistically add the update to the list
+    await mutate([UPDATES_KEY, session.data?.tokens?.access_token] as any, (prev: any) => [optimistic, ...(prev || [])], false);
+
     const res = await createCourseUpdate(body, session.data?.tokens?.access_token);
     if (res.status === 200) {
       toast.success(t('updateAddedSuccess'));
       setSelectedView('list');
       form.reset();
-      mutate(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`);
+      // Revalidate to get the actual server-side object and remove optimistic placeholder
+      mutate([UPDATES_KEY, session.data?.tokens?.access_token] as any);
     } else {
+      // Rollback by revalidating
+      mutate([UPDATES_KEY, session.data?.tokens?.access_token] as any);
       toast.error(t('updateAddFailed'));
     }
   };
@@ -243,9 +260,8 @@ const UpdatesListView = () => {
   const adminStatus = useAdminStatus();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const { data: updates } = useSWR(`${getAPIUrl()}courses/${course?.courseStructure?.course_uuid}/updates`, (url) =>
-    swrFetcher(url, access_token),
-  );
+  const UPDATES_KEY = course?.courseStructure?.course_uuid ? getCourseUpdatesSwrKey(course?.courseStructure?.course_uuid) : null;
+  const { data: updates } = useSWR(UPDATES_KEY && access_token ? [UPDATES_KEY, access_token] : null, ([url, token]) => swrFetcher(url, token));
   const t = useTranslations('Courses.CourseUpdates');
   const locale = useDateFnsLocale();
 
@@ -306,7 +322,7 @@ const DeleteUpdateButton = ({ update }: any) => {
       if (res.status === 200) {
         toast.dismiss(toast_loading);
         toast.success(t('successfullDelete'));
-        mutate(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`);
+        mutate([getCourseUpdatesSwrKey(course?.courseStructure.course_uuid), session.data?.tokens?.access_token]);
         setIsOpen(false);
       } else {
         toast.dismiss(toast_loading);

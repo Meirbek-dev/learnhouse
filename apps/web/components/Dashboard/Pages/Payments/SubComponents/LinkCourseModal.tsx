@@ -10,6 +10,7 @@ import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { Search } from 'lucide-react';
 import useSWR, { mutate } from 'swr';
+import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -88,10 +89,13 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.Payments.LinkCourseModal');
 
+  const PRODUCTS_KEY = getPaymentsProductsSwrKey(orgId);
+
   const { data: coursesData, error: coursesError } = useSWR(
     () => (org?.slug && accessToken ? [org.slug, accessToken] : null),
     ([orgSlug, token]) => getOrgCourses(orgSlug, null, token),
   );
+
 
   const { data: linkedCoursesData, error: linkedCoursesError } = useSWR(
     () => (orgId && accessToken ? [`/payments/${orgId}/products/${productId}/courses`, accessToken] : null),
@@ -102,7 +106,7 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
     try {
       const response = await linkCourseToProduct(orgId, productId, courseId, accessToken);
       if (response.success) {
-        mutate([`/payments/${orgId}/products`, accessToken]);
+        mutate([getPaymentsProductsSwrKey(orgId), accessToken]);
         toast.success(tNotify('courseLinkedSuccess'));
         onSuccess();
       } else {

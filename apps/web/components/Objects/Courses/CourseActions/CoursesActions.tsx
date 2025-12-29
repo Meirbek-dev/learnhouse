@@ -11,7 +11,7 @@ import {
   Trophy,
   UserPen,
 } from 'lucide-react';
-import { getAPIUrl, getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
@@ -33,6 +33,7 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
+import { getTrailSwrKey } from '@services/courses/keys';
 
 interface CourseRun {
   status: string;
@@ -189,7 +190,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
 
     try {
       await startCourse(`course_${courseuuid}`, orgslug, session.data?.tokens?.access_token);
-      mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`);
+      mutate([getTrailSwrKey(org?.id), session.data?.tokens?.access_token]);
       toast.success(t('startedCourseSuccess'), { id: loadingToast });
 
       // Get the first activity from the first chapter
@@ -202,7 +203,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
           `${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
         );
       } else {
-        mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`);
+        mutate([getTrailSwrKey(org?.id), session.data?.tokens?.access_token]);
         router.refresh();
       }
     } catch (error) {

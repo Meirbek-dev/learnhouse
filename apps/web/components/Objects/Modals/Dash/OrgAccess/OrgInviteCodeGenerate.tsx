@@ -3,6 +3,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { createInviteCode, createInviteCodeWithUserGroup } from '@services/organizations/invites';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { getOrgInvitesSwrKey } from '@services/organizations/keys';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -36,7 +37,7 @@ const OrgInviteCodeGenerate = (props: OrgInviteCodeGenerateProps) => {
   async function createInviteWithUserGroup() {
     const res = await createInviteCodeWithUserGroup(org.id, effectiveUsergroupId, session.data?.tokens?.access_token);
     if (res.status === 200) {
-      mutate(`${getAPIUrl()}orgs/${org.id}/invites`);
+      mutate([getOrgInvitesSwrKey(org.id), access_token] as any);
       props.setInvitesModal(false);
     } else {
       toast.error(
@@ -50,7 +51,7 @@ const OrgInviteCodeGenerate = (props: OrgInviteCodeGenerateProps) => {
   async function createInvite() {
     const res = await createInviteCode(org.id, session.data?.tokens?.access_token);
     if (res.status === 200) {
-      mutate(`${getAPIUrl()}orgs/${org.id}/invites`);
+      mutate([getOrgInvitesSwrKey(org.id), access_token] as any);
       props.setInvitesModal(false);
     } else {
       toast.error(

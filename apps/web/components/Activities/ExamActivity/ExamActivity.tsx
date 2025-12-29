@@ -16,6 +16,7 @@ import ExamResultsDashboard from './ExamResultsDashboard';
 import ExamTakingInterface from './ExamTakingInterface';
 import QuestionManagement from './QuestionManagement';
 import { getAPIUrl } from '@/services/config/config';
+import { getTrailSwrKey } from '@services/courses/keys';
 import { examActions } from './state/examActions';
 import { Button } from '@/components/ui/button';
 import ExamPreScreen from './ExamPreScreen';
@@ -126,7 +127,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
 
     // Revalidate trail data
     try {
-      await mutate(`${getAPIUrl()}trail/org/${exam?.org_id}/trail`);
+      await mutate([getTrailSwrKey(exam?.org_id), accessToken]);
     } catch (error) {
       console.warn('Failed to revalidate trail after exam completion', error);
     }

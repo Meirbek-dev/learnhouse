@@ -149,8 +149,6 @@ export const swrFetcher = async (url: string, token?: string) => {
     redirect: 'follow',
     credentials: 'include',
   };
-  // The fetch call will throw on network error, and errorHandling throws on non-ok status.
-  // The redundant try/catch block has been removed.
   const response = await fetch(url, options);
   return errorHandling(response);
 };

@@ -11,7 +11,8 @@ import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
+import { getTrailSwrKey } from '@services/courses/keys';
+
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -79,10 +80,8 @@ const Courses = (props: CourseProps) => {
   const access_token = session?.data?.tokens?.access_token;
 
   // Fetch trail data to show progress on course thumbnails
-  const { data: trailData } = useSWR(
-    org?.id && access_token ? `${getAPIUrl()}trail/org/${org.id}/trail` : null,
-    (url) => swrFetcher(url, access_token),
-  );
+  const TRAIL_KEY = org?.id ? getTrailSwrKey(org.id) : null;
+  const { data: trailData } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) => swrFetcher(url, token));
 
   async function closeNewCourseModal() {
     setNewCourseModal(false);

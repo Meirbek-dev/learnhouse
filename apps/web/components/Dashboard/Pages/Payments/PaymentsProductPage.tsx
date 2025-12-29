@@ -45,6 +45,7 @@ import { useTranslations } from 'next-intl';
 import currencyCodes from 'currency-codes';
 import { useForm } from 'react-hook-form';
 import useSWR, { mutate } from 'swr';
+import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
@@ -145,7 +146,7 @@ const PaymentsProductPage = () => {
   const t = useTranslations('DashPage.Payments.ProductPage');
 
   const { data: products, error } = useSWR(
-    () => (orgId && accessToken ? [`/payments/${orgId}/products`, accessToken] : null),
+    () => (orgId && accessToken ? [getPaymentsProductsSwrKey(orgId), accessToken] : null),
     ([_url, token]) => getProducts(orgId, token),
   );
 

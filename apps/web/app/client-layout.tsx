@@ -9,6 +9,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { SWRConfig } from 'swr';
+import { swrFetcher } from '@services/utils/ts/requests';
 
 interface ClientLayoutProps {
   children: ReactNode;
@@ -62,12 +63,14 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
         {/* Global SWR defaults to reduce frequent revalidation and dedupe identical requests. */}
         <SWRConfig
           value={{
+            // Use the central swrFetcher which accepts (url, token)
+            fetcher: (url: string, token?: string) => swrFetcher(url, token),
             dedupingInterval: 60_000, // dedupe identical requests for 60s
             focusThrottleInterval: 60_000, // throttle refetches on focus
             revalidateOnFocus: false,
             revalidateOnReconnect: false,
-            shouldRetryOnError: false,
-            errorRetryCount: 1,
+            shouldRetryOnError: true,
+            errorRetryCount: 3,
           }}
         >
           <ThemeProviderWrapper>{children}</ThemeProviderWrapper>

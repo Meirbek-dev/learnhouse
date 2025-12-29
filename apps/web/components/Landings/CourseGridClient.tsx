@@ -4,7 +4,7 @@ import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
+import { getTrailSwrKey } from '@services/courses/keys';
 import useSWR from 'swr';
 
 interface CourseGridClientProps {
@@ -20,9 +20,10 @@ export default function CourseGridClient({ courses, orgslug }: CourseGridClientP
 
   // Fetch trail data to show progress on course thumbnails
   // Dedupe and revalidate less frequently to reduce requests
+  const TRAIL_KEY = orgId ? getTrailSwrKey(orgId) : null;
   const { data: trailData } = useSWR(
-    orgId && accessToken ? `${getAPIUrl()}trail/org/${orgId}/trail` : null,
-    (url) => swrFetcher(url, accessToken),
+    orgId && accessToken && TRAIL_KEY ? [TRAIL_KEY, accessToken] : null,
+    ([url, token]) => swrFetcher(url, token),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,

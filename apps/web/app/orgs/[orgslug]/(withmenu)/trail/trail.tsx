@@ -19,6 +19,7 @@ import { Leaderboard } from '@/components/Dashboard/Gamification/leaderboard';
 import TrailCourseElement from '@components/Pages/Trail/TrailCourseElement';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
+import { getTrailSwrKey } from '@services/courses/keys';
 import UserCertificates from '@components/Pages/Trail/UserCertificates';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { AlertTriangle, BookOpen, Loader2 } from 'lucide-react';
@@ -43,11 +44,12 @@ const Trail = (params: any) => {
   const [quittingProgress, setQuittingProgress] = useState(0);
   const [isQuitDialogOpen, setIsQuitDialogOpen] = useState(false);
 
+  const TRAIL_KEY = orgID ? getTrailSwrKey(orgID) : null;
   const {
     data: trail,
     error,
     mutate,
-  } = useSWR(`${getAPIUrl()}trail/org/${orgID}/trail`, (url) => swrFetcher(url, access_token));
+  } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) => swrFetcher(url, token));
 
   // Use gamification context (already available from parent layout)
   const gamificationContext = useOptionalGamificationContext();

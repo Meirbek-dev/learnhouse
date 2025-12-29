@@ -17,6 +17,7 @@ import type { FC } from 'react';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
 import * as z from 'zod';
+import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   z.object({
@@ -76,7 +77,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
       const res = await createProduct(orgId, values, accessToken);
       if (res.success) {
         toast.success(tNotify('productCreatedSuccess'), { id: loadingToast });
-        mutate([`/payments/${orgId}/products`, accessToken]);
+        mutate([getPaymentsProductsSwrKey(orgId), accessToken]);
         form.reset();
         onSuccess();
       } else {

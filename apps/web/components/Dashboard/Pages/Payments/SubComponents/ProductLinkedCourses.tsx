@@ -12,6 +12,7 @@ import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 
 import LinkCourseModal from './LinkCourseModal';
+import { getPaymentsProductsSwrKey, getProductLinkedCoursesSwrKey } from '@services/payments/keys';
 
 interface ProductLinkedCoursesProps {
   productId: string;
@@ -27,12 +28,15 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
   const t = useTranslations('DashPage.Payments.LinkedCourses');
 
   // Use SWR to fetch linked courses
+  const LINKED_COURSES_KEY = orgId && productId ? getProductLinkedCoursesSwrKey(orgId, productId) : null;
+  const PRODUCTS_KEY = getPaymentsProductsSwrKey(orgId);
+
   const {
     data: linkedCourses,
     mutate: mutateLinkedCourses,
     error,
   } = useSWR(
-    orgId && accessToken && productId ? [`/payments/${orgId}/products/${productId}/courses`, accessToken] : null,
+    LINKED_COURSES_KEY && accessToken ? [LINKED_COURSES_KEY, accessToken] : null,
     async ([, token]) => {
       const response = await getCoursesLinkedToProduct(orgId, productId, token);
       return response.data || [];
@@ -47,20 +51,31 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
   }, [error, tNotify]);
 
   const handleUnlinkCourse = async (courseId: string) => {
+    if (!linkedCourses) return;
+
+    const prev = linkedCourses;
+    // Optimistically remove from local list
+    await mutateLinkedCourses(prev.filter((c: any) => c.id !== courseId), false);
+
     try {
       const response = await unlinkCourseFromProduct(orgId, productId, courseId, accessToken);
       if (response.success) {
-        await mutateLinkedCourses();
-        mutate([`/payments/${orgId}/products`, accessToken]);
+        // Revalidate products list and linked courses list from server
+        mutate([PRODUCTS_KEY, accessToken]);
+        mutateLinkedCourses();
         toast.success(tNotify('courseUnlinkedSuccess'));
       } else {
+        // rollback
+        mutateLinkedCourses(prev, false);
         toast.error(
           tNotify('errors.unlinkCourseFailed', {
             error: response.data?.detail || '',
           }),
         );
       }
-    } catch {
+    } catch (err) {
+      // rollback
+      mutateLinkedCourses(prev, false);
       toast.error(tNotify('errors.unlinkCourseFailed', { error: '' }));
     }
   };

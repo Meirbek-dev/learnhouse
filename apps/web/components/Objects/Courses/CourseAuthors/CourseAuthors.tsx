@@ -20,6 +20,7 @@ import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { getCourseUpdatesSwrKey } from '@services/courses/keys';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { format, formatDistanceToNow } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -157,9 +158,8 @@ const UpdatesSection = () => {
   const course = useCourse();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const { data: updates } = useSWR(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`, (url) =>
-    swrFetcher(url, access_token),
-  );
+  const UPDATES_KEY = course?.courseStructure?.course_uuid ? getCourseUpdatesSwrKey(course?.courseStructure?.course_uuid) : null;
+  const { data: updates } = useSWR(UPDATES_KEY && access_token ? [UPDATES_KEY, access_token] : null, ([url, token]) => swrFetcher(url, token));
   const t = useTranslations('Courses.CourseAuthors');
 
   return (
@@ -245,7 +245,7 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
       toast.success(t('updateAddedSuccess'));
       setSelectedView('list');
       form.reset();
-      mutate(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`);
+      mutate([getCourseUpdatesSwrKey(course?.courseStructure.course_uuid), session.data?.tokens?.access_token] as any);
     } else {
       toast.error(t('updateAddFailed'));
     }
@@ -386,7 +386,7 @@ const DeleteUpdateButton = ({ update }: any) => {
       if (res.status === 200) {
         toast.dismiss(toast_loading);
         toast.success(t('updateDeletedSuccess'));
-        mutate(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`);
+        mutate([getCourseUpdatesSwrKey(course?.courseStructure.course_uuid), session.data?.tokens?.access_token] as any);
         setIsOpen(false);
       } else {
         toast.dismiss(toast_loading);

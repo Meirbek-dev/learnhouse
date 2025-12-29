@@ -27,10 +27,11 @@ import { getDiscussionsSwrKey } from '@services/courses/discussions-keys';
 // Import existing components and utilities
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { CourseProvider } from '@components/Contexts/CourseContext';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { getUriWithOrg } from '@services/config/config';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { getTrailSwrKey } from '@services/courses/keys';
 // Import the new discussions component
 import CourseDiscussions from '@/components/discussions';
 // Import UI components
@@ -69,9 +70,8 @@ const CourseClient = (props: any) => {
   );
 
   // Add SWR for trail data
-  const { data: trailData } = useSWR(`${getAPIUrl()}trail/org/${org?.id}/trail`, (url) =>
-    swrFetcher(url, access_token),
-  );
+  const TRAIL_KEY = org?.id ? getTrailSwrKey(org?.id) : null;
+  const { data: trailData } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) => swrFetcher(url, token));
 
   // Normalizes various formats of `course.learnings` into an array that the UI can render
   const normalizedLearnings = useMemo(() => {
