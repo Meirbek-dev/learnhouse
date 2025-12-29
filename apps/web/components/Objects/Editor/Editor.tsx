@@ -126,10 +126,23 @@ const Editor = (props: EditorProps) => {
     Scenarios.configure({ editable: true, activity: props.activity }),
   ];
 
+  const EMPTY_DOC = { type: 'doc', content: [{ type: 'paragraph' }] };
+
+  function isValidEditorContent(content: any) {
+    if (!content) return false;
+    if (typeof content === 'string') return true;
+    if (typeof content !== 'object') return false;
+    if (content.type === 'doc') return true;
+    if (Array.isArray(content.content)) return true;
+    return false;
+  }
+
+  const initialContent = isValidEditorContent(props.content) ? props.content : EMPTY_DOC;
+
   const editor: any = useEditor({
     editable: true,
     extensions,
-    content: props.content,
+    content: initialContent,
     immediatelyRender: false,
   });
 
@@ -231,6 +244,7 @@ const Editor = (props: EditorProps) => {
                       <Image
                         className=""
                         width={16}
+                        height={16}
                         src={platformLogoLight}
                         alt="AI Editor Icon"
                       />
