@@ -2,6 +2,7 @@ import { getLocale, getMessages, setRequestLocale } from 'next-intl/server';
 import { IntlProvider } from '@/components/providers/IntlProvider';
 import { inter, jetBrainsMono } from '@/lib/fonts';
 import ClientLayout from './client-layout';
+import DevScriptLoader from '@/components/DevScriptLoader';
 import { isDevEnv } from '@/auth';
 import { Suspense } from 'react';
 
@@ -28,14 +29,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${inter.variable} ${jetBrainsMono.variable}`}
       lang="en"
     >
-      <head>
-        {isDevEnv && (
-          <script
-            crossOrigin="anonymous"
-            src="//unpkg.com/react-scan/dist/auto.global.js"
-          />
-        )}
-      </head>
+      <head />
+      
+      {/* Dev-only non-blocking script loader (client-side) */}
+      {isDevEnv && <DevScriptLoader />}
       <body className="bg-background/20">
         <Suspense fallback={null}>
           <LocalizedLayout>{children}</LocalizedLayout>
