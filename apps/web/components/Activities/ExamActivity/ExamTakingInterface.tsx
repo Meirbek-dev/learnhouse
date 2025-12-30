@@ -289,9 +289,23 @@ export default function ExamTakingInterface({
     switch (question.question_type) {
       case 'SINGLE_CHOICE':
       case 'TRUE_FALSE': {
+        // Ensure we only treat explicit numeric or boolean answers as selected for radios.
+        // This prevents accidental pre-selection when stored value is malformed or empty.
+        const rawAnswer = answers[questionId];
+        const radioValue = (() => {
+          if (rawAnswer === undefined || rawAnswer === null || rawAnswer === '') return '';
+          if (typeof rawAnswer === 'boolean') return rawAnswer ? '1' : '0';
+          if (typeof rawAnswer === 'number') return String(rawAnswer);
+          if (typeof rawAnswer === 'string') {
+            const parsed = Number.parseInt(rawAnswer, 10);
+            return Number.isNaN(parsed) ? '' : String(parsed);
+          }
+          return '';
+        })();
+
         return (
           <RadioGroup
-            value={answers[questionId] !== undefined && answers[questionId] !== null ? String(answers[questionId]) : ''}
+            value={radioValue}
             onValueChange={(value) =>
               handleAnswerChange(questionId, typeof value === 'string' ? Number.parseInt(value, 10) : Number(value))
             }
