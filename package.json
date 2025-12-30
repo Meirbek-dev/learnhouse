@@ -18,6 +18,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:all": "mprocs",
     "format": "prettier --write \"**/*.{js,ts,tsx,md,css,json}\"",
     "lint": "turbo run lint",
     "oxlint": "oxlint --type-aware --fix --fix-suggestions --fix-dangerously",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "eslint": "^9.39.2",
+    "mprocs": "^0.8.2",
     "oxlint": "^1.36.0",
     "oxlint-tsgolint": "^0.10.0",
     "prettier": "^3.7.4",

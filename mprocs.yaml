@@ -1,0 +1,18 @@
+procs:
+  services:
+    shell: "docker compose up -d db chromadb redis"
+    cwd: .
+    autostart: true
+    autorestart: false
+
+  frontend:
+    shell: "pnpm dev"
+    cwd: .
+    autostart: true
+    autorestart: true
+
+  api:
+    shell: "uv run app.py"
+    cwd: apps/api
+    autostart: true
+    autorestart: true
