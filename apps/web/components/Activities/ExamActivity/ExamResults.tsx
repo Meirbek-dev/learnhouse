@@ -238,12 +238,24 @@ export default function ExamResults({
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       {/* Score Card */}
       <Card>
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-blue-100">
-            <Trophy className="h-12 w-12 text-blue-600" />
+        <CardHeader className="space-y-3 text-center">
+          <div
+            className="mx-auto mb-2 inline-flex items-center justify-center rounded-full bg-gradient-to-br from-blue-50 to-blue-100 p-6 shadow ring-1 ring-blue-200"
+            aria-hidden="true"
+          >
+            <Trophy className="h-14 w-14 text-blue-600" />
           </div>
-          <CardTitle className="text-3xl">{t('examCompleted')}</CardTitle>
-          <CardDescription className="text-base">{exam.title}</CardDescription>
+
+          <CardTitle className="inline-flex items-center justify-center gap-3 pt-2 text-3xl font-semibold">
+            {t('examCompleted')}
+          </CardTitle>
+
+          <div className="mt-2 flex items-center justify-center gap-3">
+            <div className="rounded-full bg-blue-50 px-3 py-1 text-xl font-semibold text-blue-600 ring-1 ring-blue-100">
+              {percentage}%
+            </div>
+            <div className={`${performanceSummary.color} text-xl font-medium`}>{performanceSummary.message}</div>
+          </div>
         </CardHeader>
 
         <CardContent className="space-y-6">
@@ -253,10 +265,6 @@ export default function ExamResults({
             role="status"
             aria-live="polite"
           >
-            <div className="mb-3 flex items-center justify-center space-x-3">
-              <div className="text-5xl font-bold text-blue-500">{percentage}%</div>
-            </div>
-
             <div className="text-lg text-gray-600">
               {t('scoreDetails', { score: attempt.score, max: attempt.max_score })}
             </div>
