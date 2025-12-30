@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@components/ui/radio-group';
 import { getAPIUrl } from '@/services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { Checkbox } from '@components/ui/checkbox';
@@ -123,6 +124,9 @@ export default function QuestionEditor({
   };
 
   const addOption = () => {
+    // Prevent adding options for TRUE_FALSE — it's a fixed two-option question
+    if (formData.question_type === 'TRUE_FALSE') return;
+
     setFormData({
       ...formData,
       answer_options: [
@@ -133,6 +137,9 @@ export default function QuestionEditor({
   };
 
   const removeOption = (index: number) => {
+    // Prevent removing options for TRUE_FALSE — options are fixed
+    if (formData.question_type === 'TRUE_FALSE') return;
+
     setFormData({
       ...formData,
       answer_options: formData.answer_options.filter((_, i) => i !== index),
@@ -147,6 +154,48 @@ export default function QuestionEditor({
     newOptions[index] = { ...newOptions[index], ...updates };
     setFormData({ ...formData, answer_options: newOptions });
   };
+
+  // When switching question types, normalize options:
+  // - TRUE_FALSE: ensure two options, labeled True/False, and at most one marked correct
+  // - SINGLE_CHOICE: ensure at most one marked correct
+  useEffect(() => {
+    setFormData((prev) => {
+      if (prev.question_type === 'TRUE_FALSE') {
+        const opts = [...prev.answer_options];
+        // ensure at least two options
+        if (opts.length < 2) {
+          return {
+            ...prev,
+            answer_options: [
+              { text: t('true'), is_correct: opts[0]?.is_correct ?? false },
+              { text: t('false'), is_correct: opts[1]?.is_correct ?? false },
+            ],
+          };
+        }
+
+        // ensure texts are present
+        const normalized = opts
+          .slice(0, 2)
+          .map((o, i) => ({ ...o, text: o.text || (i === 0 ? t('true') : t('false')) }));
+        const firstCorrect = normalized.findIndex((o) => o.is_correct);
+        if (firstCorrect === -1) {
+          return { ...prev, answer_options: normalized };
+        }
+        return { ...prev, answer_options: normalized.map((o, i) => ({ ...o, is_correct: i === firstCorrect })) };
+      }
+
+      if (prev.question_type === 'SINGLE_CHOICE') {
+        const firstCorrect = prev.answer_options.findIndex((o) => o.is_correct);
+        if (firstCorrect === -1) return prev;
+        return {
+          ...prev,
+          answer_options: prev.answer_options.map((o, i) => ({ ...o, is_correct: i === firstCorrect })),
+        };
+      }
+
+      return prev;
+    });
+  }, [formData.question_type, t]);
 
   const questionTypes = [
     { value: 'SINGLE_CHOICE', label: t('single_choice') },
@@ -206,8 +255,10 @@ export default function QuestionEditor({
               id="points"
               type="number"
               min="1"
+              max="100"
               value={formData.points}
               onChange={(e) => setFormData({ ...formData, points: Number.parseInt(e.target.value) })}
+              className='w-18'
             />
           </div>
         </div>
@@ -215,32 +266,125 @@ export default function QuestionEditor({
         <div>
           <Label>{t('answerOptions')}</Label>
           <div className="mt-2 space-y-2">
-            {formData.answer_options.map((option, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-2"
+            {formData.question_type === 'MATCHING' ? (
+              formData.answer_options.map((option, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2"
+                >
+                  <Input
+                    placeholder={t('leftSide')}
+                    value={option.left || ''}
+                    onChange={(e) => updateOption(index, { left: e.target.value })}
+                    className="flex-1"
+                  />
+                  <span className="pt-2">→</span>
+                  <Input
+                    placeholder={t('rightSide')}
+                    value={option.right || ''}
+                    onChange={(e) => updateOption(index, { right: e.target.value })}
+                    className="flex-1"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeOption(index)}
+                    disabled={formData.answer_options.length === 1}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))
+            ) : formData.question_type === 'MULTIPLE_CHOICE' ? (
+              formData.answer_options.map((option, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2"
+                >
+                  <Checkbox
+                    checked={option.is_correct}
+                    onCheckedChange={(checked) => updateOption(index, { is_correct: checked })}
+                  />
+                  <Input
+                    placeholder={t('optionText', { number: index + 1 })}
+                    value={option.text}
+                    onChange={(e) => updateOption(index, { text: e.target.value })}
+                    className="flex-1"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeOption(index)}
+                    disabled={formData.answer_options.length === 1}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))
+            ) : formData.question_type === 'TRUE_FALSE' ? (
+              // TRUE_FALSE: fixed two-option UI (True / False) — no add/remove, no editable labels
+              <RadioGroup
+                value={(() => {
+                  const idx = formData.answer_options.findIndex((o) => o.is_correct);
+                  return idx === -1 ? undefined : idx.toString();
+                })()}
+                onValueChange={(value: any) => {
+                  const i = Number.parseInt(String(value), 10);
+                  const newOptions = [
+                    { text: t('true'), is_correct: i === 0 },
+                    { text: t('false'), is_correct: i === 1 },
+                  ];
+                  setFormData({ ...formData, answer_options: newOptions });
+                }}
+                className="flex flex-col gap-3"
               >
-                {formData.question_type === 'MATCHING' ? (
-                  <>
-                    <Input
-                      placeholder={t('leftSide')}
-                      value={option.left || ''}
-                      onChange={(e) => updateOption(index, { left: e.target.value })}
-                      className="flex-1"
-                    />
-                    <span className="pt-2">→</span>
-                    <Input
-                      placeholder={t('rightSide')}
-                      value={option.right || ''}
-                      onChange={(e) => updateOption(index, { right: e.target.value })}
-                      className="flex-1"
-                    />
-                  </>
-                ) : (
-                  <>
-                    <Checkbox
-                      checked={option.is_correct}
-                      onCheckedChange={(checked) => updateOption(index, { is_correct: checked })}
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem
+                    value="0"
+                    id={`option-0`}
+                  />
+                  <Label
+                    htmlFor={`option-0`}
+                    className="flex-1 cursor-default select-none"
+                  >
+                    {t('true')}
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem
+                    value="1"
+                    id={`option-1`}
+                  />
+                  <Label
+                    htmlFor={`option-1`}
+                    className="flex-1 cursor-default select-none"
+                  >
+                    {t('false')}
+                  </Label>
+                </div>
+              </RadioGroup>
+            ) : (
+              // SINGLE_CHOICE — radio with editable labels and add/remove allowed
+              <RadioGroup
+                value={(() => {
+                  const idx = formData.answer_options.findIndex((o) => o.is_correct);
+                  return idx === -1 ? undefined : idx.toString();
+                })()}
+                onValueChange={(value: any) => {
+                  const i = Number.parseInt(String(value), 10);
+                  const newOptions = formData.answer_options.map((opt, idx) => ({ ...opt, is_correct: idx === i }));
+                  setFormData({ ...formData, answer_options: newOptions });
+                }}
+                className="flex flex-col gap-2"
+              >
+                {formData.answer_options.map((option, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2"
+                  >
+                    <RadioGroupItem
+                      value={index.toString()}
+                      id={`option-${index}`}
                     />
                     <Input
                       placeholder={t('optionText', { number: index + 1 })}
@@ -248,26 +392,29 @@ export default function QuestionEditor({
                       onChange={(e) => updateOption(index, { text: e.target.value })}
                       className="flex-1"
                     />
-                  </>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeOption(index)}
-                  disabled={formData.answer_options.length === 1}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={addOption}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              {t('addOption')}
-            </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeOption(index)}
+                      disabled={formData.answer_options.length === 1}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </RadioGroup>
+            )}
+
+            {formData.question_type !== 'TRUE_FALSE' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addOption}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                {t('addOption')}
+              </Button>
+            )}
           </div>
         </div>
 

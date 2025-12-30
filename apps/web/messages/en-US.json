@@ -948,6 +948,8 @@
       "single_choice": "Single Choice",
       "multiple_choice": "Multiple Choice",
       "true_false": "True/False",
+      "true": "True",
+      "false": "False",
       "matching": "Matching",
       "confirmDelete": "Are you sure you want to delete this question?",
       "delete": "Delete",

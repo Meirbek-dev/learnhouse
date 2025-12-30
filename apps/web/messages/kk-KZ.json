@@ -937,6 +937,8 @@
       "single_choice": "Бір таңдау",
       "multiple_choice": "Көп таңдау",
       "true_false": "Ақиқат/Жалған",
+      "true": "Ақиқат",
+      "false": "Жалған",
       "matching": "Сәйкестендіру",
       "confirmDelete": "Бұл сұрақты жоюға сенімдісіз бе?",
       "delete": "Жою",
