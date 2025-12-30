@@ -74,3 +74,26 @@ async def test_update_user_invalidates_cache(monkeypatch):
     keys = delete_calls[0]
     assert f"user:id:{user.id}" in keys
     assert f"user:username:{user.username.lower()}" in keys
+
+
+async def test_update_user_bypasses_cache(monkeypatch):
+    """Ensure update_user calls _get_user_by_field with use_cache=False so mutations fetch ORM instances."""
+    from src.services.users.users import update_user
+
+    called = {}
+
+    async def fake_get_user(db, field, value, use_cache=True):
+        called['use_cache'] = use_cache
+        return SimpleNamespace(id=value, username='u', user_uuid='user_1')
+
+    monkeypatch.setattr("src.services.users.users._get_user_by_field", fake_get_user)
+
+    current_user = SimpleNamespace(id=1, user_uuid='user_1')
+    db_session = Mock()
+    user_update = Mock()
+    user_update.model_dump.return_value = {'first_name': 'X'}
+
+    await update_user(Mock(), db_session, 1, current_user, user_update)
+
+    assert called.get('use_cache') is False
+

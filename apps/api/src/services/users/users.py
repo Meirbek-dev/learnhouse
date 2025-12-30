@@ -151,8 +151,8 @@ async def update_user(
     current_user: PublicUser | AnonymousUser,
     user_object: UserUpdate,
 ):
-    # Get user
-    user = await _get_user_by_field(db_session, "id", user_id)
+    # Get user (bypass cache for mutations to ensure ORM-attached instance)
+    user = await _get_user_by_field(db_session, "id", user_id, use_cache=False)
 
     # Validate unique constraints if fields are being updated
     user_data = user_object.model_dump(exclude_unset=True)
@@ -215,8 +215,8 @@ async def update_user_avatar(
     current_user: PublicUser | AnonymousUser,
     avatar_file: UploadFile | None = None,
 ):
-    # Get user
-    user = await _get_user_by_field(db_session, "id", current_user.id)
+    # Get user (bypass cache for mutations to ensure ORM-attached instance)
+    user = await _get_user_by_field(db_session, "id", current_user.id, use_cache=False)
 
     # RBAC check
     await rbac_check(request, current_user, "update", user.user_uuid, db_session)
@@ -256,8 +256,8 @@ async def update_user_password(
     user_id: int,
     form: UserUpdatePassword,
 ):
-    # Get user
-    user = await _get_user_by_field(db_session, "id", user_id)
+    # Get user (bypass cache for mutations to ensure ORM-attached instance)
+    user = await _get_user_by_field(db_session, "id", user_id, use_cache=False)
 
     # RBAC check
     await rbac_check(request, current_user, "update", user.user_uuid, db_session)
@@ -385,8 +385,8 @@ async def delete_user_by_id(
     current_user: PublicUser | AnonymousUser,
     user_id: int,
 ) -> str:
-    # Get user
-    user = await _get_user_by_field(db_session, "id", user_id)
+    # Get user (bypass cache for mutations to ensure ORM-attached instance)
+    user = await _get_user_by_field(db_session, "id", user_id, use_cache=False)
 
     # RBAC check
     await rbac_check(request, current_user, "delete", user.user_uuid, db_session)
@@ -639,13 +639,19 @@ async def _link_user_to_organization(
     db_session.refresh(user_organization)
 
 
-async def _get_user_by_field(db_session: Session, field: str, value: str | int) -> User:
+async def _get_user_by_field(db_session: Session, field: str, value: str | int, use_cache: bool = True) -> User:
     """Generic function to get user by any field.
 
     Optimizations:
     - Use Redis cache when configured to avoid repeated DB hits for frequent reads.
     - Cache keys: `user:id:{id}` and `user:username:{username_lower}`
     - Invalidation is done on updates (see `update_user` and `update_user_avatar`).
+
+    IMPORTANT: callers that intend to mutate or delete the returned user should pass
+    `use_cache=False` to ensure an ORM-attached instance is returned from the DB session
+    rather than a cached (detached) Pydantic/namespace object. Returning a detached
+    object and then calling `db_session.add()`/`db_session.delete()` may trigger an
+    INSERT/DELETE on a non-attached object leading to integrity errors.
     """
     # Try cache lookup first (best-effort, helper handles missing Redis)
     def _try_cache_get(key: str) -> User | None:
@@ -673,13 +679,13 @@ async def _get_user_by_field(db_session: Session, field: str, value: str | int) 
         except Exception:
             pass
 
-    # Try cache lookup first
-    if field == "id" and isinstance(value, int):
+    # Try cache lookup first (only when allowed)
+    if use_cache and field == "id" and isinstance(value, int):
         key = f"user:id:{value}"
         cached = _try_cache_get(key)
         if cached:
             return cached
-    if field == "username" and isinstance(value, str):
+    if use_cache and field == "username" and isinstance(value, str):
         key = f"user:username:{value.lower()}"
         cached = _try_cache_get(key)
         if cached:
