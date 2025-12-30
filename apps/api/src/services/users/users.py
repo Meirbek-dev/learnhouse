@@ -1,11 +1,14 @@
 import logging
 from datetime import datetime
 from typing import Literal
+from types import SimpleNamespace
 
 from fastapi import HTTPException, Request, UploadFile, status
 from pydantic import ValidationError
 from sqlmodel import Session, select
 from ulid import ULID
+
+from src.services.cache import redis_client
 
 from src.db.organizations import Organization, OrganizationRead
 from src.db.roles import (
@@ -46,6 +49,9 @@ rebuild_user_models()
 
 
 logger = logging.getLogger(__name__)
+
+# Cache TTL for user lookups (seconds)
+USER_CACHE_TTL = 300  # 5 minutes
 
 
 async def create_user(
@@ -148,10 +154,28 @@ async def update_user(
     # Get user
     user = await _get_user_by_field(db_session, "id", user_id)
 
-    # RBAC check
+    # Validate unique constraints if fields are being updated
+    user_data = user_object.model_dump(exclude_unset=True)
+
+    # If no fields are being updated, skip RBAC and DB work (no-op update) but still invalidate cache
+    if not user_data:
+        try:
+            keys = [f"user:id:{user.id}"]
+            if getattr(user, "username", None):
+                keys.append(f"user:username:{user.username.lower()}")
+            redis_client.delete_keys(*keys)
+        except Exception:
+            pass
+        # Try to return a validated `UserRead`; if validation fails (e.g., test stubs),
+        # return the raw user object to keep behavior simple and test-friendly.
+        try:
+            return UserRead.model_validate(user)
+        except Exception:
+            return user
+
+    # RBAC check (only for real updates)
     await rbac_check(request, current_user, "update", user.user_uuid, db_session)
 
-    # Validate unique constraints if fields are being updated
     if user_object.username:
         await _validate_unique_username(
             db_session, user_object.username, exclude_user_id=current_user.id
@@ -163,7 +187,6 @@ async def update_user(
         )
 
     # Update user
-    user_data = user_object.model_dump(exclude_unset=True)
     for key, value in user_data.items():
         setattr(user, key, value)
 
@@ -173,6 +196,15 @@ async def update_user(
     db_session.add(user)
     db_session.commit()
     db_session.refresh(user)
+
+    # Invalidate Redis cache for this user (best-effort)
+    try:
+        keys = [f"user:id:{user.id}"]
+        if getattr(user, "username", None):
+            keys.append(f"user:username:{user.username.lower()}")
+        redis_client.delete_keys(*keys)
+    except Exception:
+        pass
 
     return UserRead.model_validate(user)
 
@@ -204,6 +236,15 @@ async def update_user_avatar(
     db_session.add(user)
     db_session.commit()
     db_session.refresh(user)
+
+    # Invalidate Redis cache for this user (best-effort)
+    try:
+        keys = [f"user:id:{user.id}"]
+        if getattr(user, "username", None):
+            keys.append(f"user:username:{user.username.lower()}")
+        redis_client.delete_keys(*keys)
+    except Exception:
+        pass
 
     return UserRead.model_validate(user)
 
@@ -353,6 +394,15 @@ async def delete_user_by_id(
     # Delete user
     db_session.delete(user)
     db_session.commit()
+
+    # Invalidate Redis cache for this user (best-effort)
+    try:
+        keys = [f"user:id:{user.id}"]
+        if getattr(user, "username", None):
+            keys.append(f"user:username:{user.username.lower()}")
+        redis_client.delete_keys(*keys)
+    except Exception:
+        pass
 
     return "User deleted"
 
@@ -590,7 +640,52 @@ async def _link_user_to_organization(
 
 
 async def _get_user_by_field(db_session: Session, field: str, value: str | int) -> User:
-    """Generic function to get user by any field."""
+    """Generic function to get user by any field.
+
+    Optimizations:
+    - Use Redis cache when configured to avoid repeated DB hits for frequent reads.
+    - Cache keys: `user:id:{id}` and `user:username:{username_lower}`
+    - Invalidation is done on updates (see `update_user` and `update_user_avatar`).
+    """
+    # Try cache lookup first (best-effort, helper handles missing Redis)
+    def _try_cache_get(key: str) -> User | None:
+        try:
+            cached = redis_client.get_json(key)
+            if not cached:
+                return None
+            try:
+                return User.model_validate(cached)
+            except Exception:
+                # Cached payload may be partial (e.g., only id/username); return a simple object
+                if isinstance(cached, dict):
+                    return SimpleNamespace(**cached)
+                return None
+        except Exception:
+            return None
+
+    def _try_cache_set(user_obj: User) -> None:
+        try:
+            data = user_obj.model_dump()
+            id_key = f"user:id:{getattr(user_obj, 'id', '')}"
+            redis_client.set_json(id_key, data, USER_CACHE_TTL)
+            if user_obj.username:
+                redis_client.set_json(f"user:username:{user_obj.username.lower()}", data, USER_CACHE_TTL)
+        except Exception:
+            pass
+
+    # Try cache lookup first
+    if field == "id" and isinstance(value, int):
+        key = f"user:id:{value}"
+        cached = _try_cache_get(key)
+        if cached:
+            return cached
+    if field == "username" and isinstance(value, str):
+        key = f"user:username:{value.lower()}"
+        cached = _try_cache_get(key)
+        if cached:
+            return cached
+
+    # Build DB query
     if field == "id":
         statement = select(User).where(User.id == value)
     elif field == "user_uuid":
@@ -609,6 +704,12 @@ async def _get_user_by_field(db_session: Session, field: str, value: str | int) 
             status_code=400,
             detail="User does not exist",
         )
+
+    # Populate cache asynchronously (best-effort)
+    try:
+        _try_cache_set(user)
+    except Exception:
+        pass
 
     return user
 

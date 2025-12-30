@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import orjson
-import redis
+from src.services.cache.redis_client import get_redis_client, get_json, delete_keys
 from fastapi import HTTPException, Request
 from pydantic import EmailStr
 from sqlmodel import Session, select
@@ -51,8 +51,8 @@ async def send_reset_password_code(
             detail="Redis connection string not found",
         )
 
-    # Connect to Redis
-    r = redis.Redis.from_url(redis_conn_string)
+    # Connect to Redis (use cached client)
+    r = get_redis_client()
 
     if not r:
         raise HTTPException(
@@ -141,8 +141,8 @@ async def change_password_with_reset_code(
             detail="Redis connection string not found",
         )
 
-    # Connect to Redis
-    r = redis.Redis.from_url(redis_conn_string)
+    # Connect to Redis (use cached client)
+    r = get_redis_client()
 
     if not r:
         raise HTTPException(
@@ -161,14 +161,14 @@ async def change_password_with_reset_code(
         )
 
     # Get reset code object
-    reset_code_value = r.get(keys[0])
+    key = keys[0].decode("utf-8") if isinstance(keys[0], (bytes, bytearray)) else keys[0]
+    reset_code_object = get_json(key)
 
-    if reset_code_value is None:
+    if reset_code_object is None:
         raise HTTPException(
             status_code=400,
             detail="Reset code value not found",
         )
-    reset_code_object = orjson.loads(reset_code_value)
 
     # Check if reset code is expired
     if reset_code_object["reset_code_expires"] < int(datetime.now().timestamp()):
@@ -185,6 +185,7 @@ async def change_password_with_reset_code(
     db_session.refresh(user)
 
     # Delete reset code
-    r.delete(keys[0])
+    key = keys[0].decode("utf-8") if isinstance(keys[0], (bytes, bytearray)) else keys[0]
+    delete_keys(key)
 
     return "Password changed"

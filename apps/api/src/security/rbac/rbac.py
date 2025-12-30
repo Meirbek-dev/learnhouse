@@ -113,7 +113,11 @@ async def authorization_verify_based_on_roles(
         .where(UserOrganization.user_id == user_id)
     )
 
-    user_roles_in_organization_and_standard_roles = db_session.exec(statement).all()
+    roles_result = db_session.exec(statement).all()
+    try:
+        user_roles_in_organization_and_standard_roles = list(roles_result)
+    except TypeError:
+        user_roles_in_organization_and_standard_roles = []
 
     # Check if user is the author of the resource for "own" permissions
     is_author = False
@@ -161,7 +165,11 @@ async def authorization_verify_based_on_org_admin_status(
         .where(UserOrganization.user_id == user_id)
     )
 
-    user_roles_in_organization_and_standard_roles = db_session.exec(statement).all()
+    roles_result = db_session.exec(statement).all()
+    try:
+        user_roles_in_organization_and_standard_roles = list(roles_result)
+    except TypeError:
+        user_roles_in_organization_and_standard_roles = []
 
     # Check if user has admin role (role_id 1 or 2) in any organization
     for role in user_roles_in_organization_and_standard_roles:

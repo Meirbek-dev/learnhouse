@@ -42,7 +42,14 @@ def grade_quiz(
     answer_lookup = {ans.get("question_id"): ans for ans in user_answers}
 
     # Calculate points per question
-    points_per_question = max_score / len(questions)
+    # If questions provide explicit `points` values, use them proportionally
+    total_defined_points = sum(float(q.get("points", 0)) for q in questions)
+
+    if total_defined_points > 0:
+        # We'll compute each question's points individually inside the loop below
+        points_per_question = None
+    else:
+        points_per_question = max_score / len(questions)
 
     total_score = 0.0
     per_question_results = []
@@ -54,11 +61,19 @@ def grade_quiz(
 
         user_answer = answer_lookup.get(question_id, {})
 
+        # Decide points for this question (respect explicit question.points if present)
+        q_points_raw = float(question.get("points")) if question.get("points") is not None else None
+        if q_points_raw is not None and total_defined_points > 0:
+            # Scale question raw points to the overall max_score
+            points = (q_points_raw / total_defined_points) * max_score
+        else:
+            points = points_per_question
+
         # Grade based on question type
         if question_type == "multiple_choice":
-            result = _grade_multiple_choice(question, user_answer, points_per_question)
+            result = _grade_multiple_choice(question, user_answer, points)
         elif question_type == "custom_answer":
-            result = _grade_custom_answer(question, user_answer, points_per_question)
+            result = _grade_custom_answer(question, user_answer, points)
         else:
             # Unknown question type - give 0 points
             result = {
@@ -66,7 +81,7 @@ def grade_quiz(
                 "question_text": question_text,
                 "correct": False,
                 "score": 0.0,
-                "max_score": points_per_question,
+                "max_score": points,
                 "feedback": "Unknown question type",
             }
 
@@ -93,17 +108,27 @@ def _grade_multiple_choice(
     question_text = question.get("question") or question.get("questionText", "")
     options = question.get("answers") or question.get("options", [])
 
-    # Find all correct answers
+    # Find all correct answers (support multiple option key names)
     correct_option_ids = set()
     for opt in options:
-        opt_id = opt.get("answer_id") or opt.get("optionUUID")
+        opt_id = (
+            opt.get("answer_id")
+            or opt.get("optionUUID")
+            or opt.get("option_id")
+            or opt.get("id")
+        )
         is_correct = opt.get("correct") or opt.get("assigned_right_answer", False)
         if is_correct:
             correct_option_ids.add(opt_id)
 
-    # Get user's selected answer(s)
-    user_selected = user_answer.get("answer_id") or user_answer.get(
-        "selected_option_id"
+    # Get user's selected answer(s) (support common variant keys)
+    user_selected = (
+        user_answer.get("answer_id")
+        or user_answer.get("selected_option_id")
+        or user_answer.get("selected_options")
+        or user_answer.get("selected_options_id")
+        or user_answer.get("selected_option_ids")
+        or user_answer.get("selected_option")
     )
 
     if not user_selected:

@@ -1,6 +1,6 @@
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, Request, UploadFile
+from fastapi import APIRouter, Depends, Request, UploadFile, Response
 from pydantic import EmailStr
 from sqlmodel import Session
 
@@ -133,10 +133,13 @@ async def api_get_user_by_id(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     user_id: int,
+    response: Response,
 ) -> UserRead:
     """
     Get User by ID
     """
+    # Short client-side cache; data is user-scoped and should be private
+    response.headers["Cache-Control"] = "private, max-age=60"
     return await read_user_by_id(request, db_session, current_user, user_id)
 
 
@@ -161,10 +164,13 @@ async def api_get_user_by_username(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     username: str,
+    response: Response,
 ) -> UserRead:
     """
     Get User by Username
     """
+    # Short client-side cache; data is user-scoped and should be private
+    response.headers["Cache-Control"] = "private, max-age=60"
     return await read_user_by_username(request, db_session, current_user, username)
 
 

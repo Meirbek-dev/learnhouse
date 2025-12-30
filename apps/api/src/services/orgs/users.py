@@ -2,7 +2,8 @@ import logging
 from datetime import datetime, timedelta
 
 import orjson
-import redis
+from src.services.cache import redis_client
+from src.services.cache.redis_client import get_json, set_json, delete_keys
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
 
@@ -280,8 +281,8 @@ async def invite_batch_users(
     # RBAC check
     await rbac_check(request, org.org_uuid, current_user, "create", db_session)
 
-    # Connect to Redis
-    r = redis.Redis.from_url(redis_conn_string)
+    # Connect to Redis (use cached client)
+    r = redis_client.get_redis_client()
 
     if not r:
         raise HTTPException(
@@ -298,7 +299,7 @@ async def invite_batch_users(
         email = email.strip()
 
         # Check if user is already invited
-        invited_user = r.get(f"invited_user:{email}:org:{org.org_uuid}")
+        invited_user = get_json(f"invited_user:{email}:org:{org.org_uuid}")
 
         if invited_user:
             logging.error(f"User {email} already invited")
@@ -326,10 +327,10 @@ async def invite_batch_users(
             "created_by": current_user.user_uuid,
         }
 
-        invited_user = r.set(
+        invited_user = set_json(
             f"invited_user:{email}:org:{org.org_uuid}",
-            orjson.dumps(invited_user_object),
-            ex=ttl,
+            invited_user_object,
+            ttl,
         )
 
     return {"detail": "Users invited"}
@@ -365,8 +366,8 @@ async def get_list_of_invited_users(
     # RBAC check
     await rbac_check(request, org.org_uuid, current_user, "read", db_session)
 
-    # Connect to Redis
-    r = redis.Redis.from_url(redis_conn_string)
+    # Connect to Redis (use cached client)
+    r = redis_client.get_redis_client()
 
     if not r:
         raise HTTPException(
@@ -379,9 +380,9 @@ async def get_list_of_invited_users(
     invited_users_list = []
 
     for user in invited_users:
-        invited_user = r.get(user)
+        key = user.decode("utf-8") if isinstance(user, (bytes, bytearray)) else user
+        invited_user = get_json(key)
         if invited_user:
-            invited_user = orjson.loads(invited_user.decode("utf-8"))
             invited_users_list.append(invited_user)
 
     return invited_users_list
@@ -418,8 +419,8 @@ async def remove_invited_user(
     # RBAC check
     await rbac_check(request, org.org_uuid, current_user, "delete", db_session)
 
-    # Connect to Redis
-    r = redis.Redis.from_url(redis_conn_string)
+    # Connect to Redis (use cached client)
+    r = redis_client.get_redis_client()
 
     if not r:
         raise HTTPException(
@@ -427,7 +428,7 @@ async def remove_invited_user(
             detail="Could not connect to Redis",
         )
 
-    invited_user = r.get(f"invited_user:{email}:org:{org.org_uuid}")
+    invited_user = get_json(f"invited_user:{email}:org:{org.org_uuid}")
 
     if not invited_user:
         raise HTTPException(
@@ -435,6 +436,6 @@ async def remove_invited_user(
             detail="User not found",
         )
 
-    r.delete(f"invited_user:{email}:org:{org.org_uuid}")
+    delete_keys(f"invited_user:{email}:org:{org.org_uuid}")
 
     return {"detail": "User removed"}

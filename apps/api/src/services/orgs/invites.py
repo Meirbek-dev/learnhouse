@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 import orjson
-import redis
+from src.services.cache.redis_client import get_redis_client, get_json, set_json, delete_keys
 from fastapi import HTTPException, Request
 from pydantic import EmailStr
 from sqlmodel import Session, select
@@ -48,8 +48,8 @@ async def create_invite_code(
     # RBAC check
     await rbac_check(request, org.org_uuid, current_user, "update", db_session)
 
-    # Connect to Redis
-    r = redis.Redis.from_url(redis_conn_string)
+    # Connect to Redis (use cached client)
+    r = get_redis_client()
 
     if not r:
         raise HTTPException(
@@ -81,10 +81,10 @@ async def create_invite_code(
         "created_by": current_user.user_uuid,
     }
 
-    r.set(
+    set_json(
         f"{invite_code_uuid}:org:{org.org_uuid}:code:{generated_invite_code}",
-        orjson.dumps(inviteCodeObject),
-        ex=ttl,
+        inviteCodeObject,
+        ttl,
     )
 
     return inviteCodeObject
@@ -121,8 +121,8 @@ async def create_invite_code_with_usergroup(
     # RBAC check
     await rbac_check(request, org.org_uuid, current_user, "update", db_session)
 
-    # Connect to Redis
-    r = redis.Redis.from_url(redis_conn_string)
+    # Connect to Redis (use cached client)
+    r = get_redis_client()
 
     if not r:
         raise HTTPException(
@@ -155,10 +155,10 @@ async def create_invite_code_with_usergroup(
         "created_by": current_user.user_uuid,
     }
 
-    r.set(
+    set_json(
         f"{invite_code_uuid}:org:{org.org_uuid}:code:{generated_invite_code}",
-        orjson.dumps(inviteCodeObject),
-        ex=ttl,
+        inviteCodeObject,
+        ttl,
     )
 
     return inviteCodeObject
@@ -194,8 +194,8 @@ async def get_invite_codes(
     # RBAC check
     await rbac_check(request, org.org_uuid, current_user, "update", db_session)
 
-    # Connect to Redis
-    r = redis.Redis.from_url(redis_conn_string)
+    # Connect to Redis (use cached client)
+    r = get_redis_client()
 
     if not r:
         raise HTTPException(
@@ -208,10 +208,11 @@ async def get_invite_codes(
 
     invite_codes_list = []
 
-    for invite_code in invite_codes:
-        invite_code = r.get(invite_code)
-        invite_code = orjson.loads(invite_code)
-        invite_codes_list.append(invite_code)
+    for inv in invite_codes:
+        key = inv.decode("utf-8") if isinstance(inv, (bytes, bytearray)) else inv
+        invite_code = get_json(key)
+        if invite_code:
+            invite_codes_list.append(invite_code)
 
     return invite_codes_list
 
@@ -247,8 +248,8 @@ async def get_invite_code(
     # RBAC check
     # await rbac_check(request, org.org_uuid, current_user, "update", db_session)
 
-    # Connect to Redis
-    r = redis.Redis.from_url(redis_conn_string)
+    # Connect to Redis (use cached client)
+    r = get_redis_client()
 
     if not r:
         raise HTTPException(
@@ -257,16 +258,16 @@ async def get_invite_code(
         )
 
     # Get invite code
-    invite_code = r.keys(f"org_invite_code_*:org:{org.org_uuid}:code:{invite_code}")
+    keys = r.keys(f"org_invite_code_*:org:{org.org_uuid}:code:{invite_code}")
 
-    if not invite_code:
+    if not keys:
         raise HTTPException(
             status_code=404,
             detail="Invite code not found",
         )
 
-    invite_code = r.get(invite_code[0])
-    return orjson.loads(invite_code)
+    key = keys[0].decode("utf-8") if isinstance(keys[0], (bytes, bytearray)) else keys[0]
+    return get_json(key)
 
 
 async def delete_invite_code(
@@ -300,8 +301,8 @@ async def delete_invite_code(
     # RBAC check
     await rbac_check(request, org.org_uuid, current_user, "update", db_session)
 
-    # Connect to Redis
-    r = redis.Redis.from_url(redis_conn_string)
+    # Connect to Redis (use cached client)
+    r = get_redis_client()
 
     if not r:
         raise HTTPException(
@@ -312,7 +313,7 @@ async def delete_invite_code(
     # Delete invite code
     keys = r.keys(f"{invite_code_uuid}:org:{org.org_uuid}:code:*")
     if keys:
-        r.delete(*keys)
+        delete_keys(*[k.decode("utf-8") if isinstance(k, (bytes, bytearray)) else k for k in keys])
 
     if not keys:
         raise HTTPException(
@@ -338,8 +339,8 @@ def send_invite_email(
             detail="Redis connection string not found",
         )
 
-    # Connect to Redis
-    r = redis.Redis.from_url(redis_conn_string)
+    # Connect to Redis (use cached client)
+    r = get_redis_client()
 
     if not r:
         raise HTTPException(
@@ -348,12 +349,12 @@ def send_invite_email(
         )
 
     # Get invite code
-    invite = r.keys(f"{invite_code_uuid}:org:{org.org_uuid}:code:*")
+    keys = r.keys(f"{invite_code_uuid}:org:{org.org_uuid}:code:*")
 
     # Send email
-    if invite:
-        invite = r.get(invite[0])
-        invite = orjson.loads(invite)
+    if keys:
+        key = keys[0].decode("utf-8") if isinstance(keys[0], (bytes, bytearray)) else keys[0]
+        invite = get_json(key)
 
         # send email
         send_email(

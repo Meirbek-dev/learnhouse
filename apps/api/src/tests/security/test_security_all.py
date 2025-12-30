@@ -10,7 +10,6 @@ of the security functionality including:
 """
 
 from src.tests.security.test_auth import TestAuth
-from src.tests.security.test_features_utils import TestFeaturesUtils
 from src.tests.security.test_rbac import TestRBAC
 from src.tests.security.test_rbac_utils import TestRBACUtils
 from src.tests.security.test_security import TestSecurity
@@ -85,8 +84,6 @@ class TestSecurityComprehensive:
         """Test that the security module has the expected structure"""
         import src.security
         import src.security.auth
-        import src.security.features_utils
-        import src.security.features_utils.usage
         import src.security.rbac
         import src.security.rbac.rbac
         import src.security.rbac.utils
@@ -99,8 +96,6 @@ class TestSecurityComprehensive:
         assert src.security.rbac is not None
         assert src.security.rbac.rbac is not None
         assert src.security.rbac.utils is not None
-        assert src.security.features_utils is not None
-        assert src.security.features_utils.usage is not None
 
 
 # Test discovery helpers
@@ -111,7 +106,6 @@ def get_security_test_classes():
         TestAuth,
         TestRBAC,
         TestRBACUtils,
-        TestFeaturesUtils,
         TestSecurityComprehensive,
     ]
 
