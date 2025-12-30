@@ -16,7 +16,8 @@ import ExamResultsDashboard from './ExamResultsDashboard';
 import { getTrailSwrKey } from '@services/courses/keys';
 import ExamTakingInterface from './ExamTakingInterface';
 import QuestionManagement from './QuestionManagement';
-import { getAPIUrl } from '@/services/config/config';
+import { getAPIUrl, getUriWithOrg } from '@/services/config/config';
+import { useRouter } from 'next/navigation';
 import { examActions } from './state/examActions';
 import { Button } from '@/components/ui/button';
 import ExamPreScreen from './ExamPreScreen';
@@ -151,10 +152,40 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
     dispatch(examActions.submitExam(lastAttempt));
   }, [mutateAttempts, exam, course, examUuid, accessToken]);
 
+  const router = useRouter();
+
   const handleReturnToCourse = useCallback(() => {
     const courseuuid = course.course_uuid?.replace('course_', '');
     window.location.href = `/course/${courseuuid}`;
   }, [course]);
+
+  const handleProceedToNextActivity = useCallback(() => {
+    try {
+      const cleanCurrent = activity.activity_uuid?.replace('activity_', '');
+      const allActivities: any[] = [];
+      (course?.chapters || []).forEach((chapter: any) =>
+        (chapter.activities || []).forEach((a: any) =>
+          allActivities.push({ ...a, cleanUuid: a.activity_uuid?.replace('activity_', '') }),
+        ),
+      );
+
+      const currentIndex = allActivities.findIndex((a) => a.cleanUuid === cleanCurrent);
+      const nextActivity =
+        currentIndex >= 0 && currentIndex < allActivities.length - 1 ? allActivities[currentIndex + 1] : null;
+
+      if (!nextActivity) {
+        // Prefer a translation if available, otherwise fallback
+        toast.info(t('noNextActivity') || 'No next activity');
+        return;
+      }
+
+      const cleanCourseUuid = course.course_uuid?.replace('course_', '');
+      router.push(`${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}/activity/${nextActivity.cleanUuid}`);
+    } catch (err) {
+      console.error('Failed to navigate to next activity', err);
+      toast.error(t('navigationError') || 'Navigation failed');
+    }
+  }, [activity, course, orgslug, router, t]);
 
   const handleBackToPreExam = useCallback(() => {
     if (state.phase === 'results' || state.phase === 'manage') {
@@ -345,14 +376,16 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
     return (
       <ExamLayout
         title={state.exam.title}
-        startedAt={state.attempt?.started_at ?? undefined}
-        timeLimitMinutes={state.exam.settings?.time_limit ?? null}
+        /* Timer disabled on results screen */
+        startedAt={undefined}
+        timeLimitMinutes={null}
       >
         <ExamResults
           exam={state.exam}
           attempt={state.attempt}
           questions={state.questions}
           onReturnToCourse={handleReturnToCourse}
+          onProceedToNextActivity={handleProceedToNextActivity}
           onRetry={handleRetry}
           remainingAttempts={remainingAttempts}
           isTeacher={isTeacher}

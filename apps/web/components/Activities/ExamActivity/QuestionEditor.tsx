@@ -148,6 +148,13 @@ export default function QuestionEditor({
     setFormData({ ...formData, answer_options: newOptions });
   };
 
+  const questionTypes = [
+    { value: 'SINGLE_CHOICE', label: t('single_choice') },
+    { value: 'MULTIPLE_CHOICE', label: t('multiple_choice') },
+    { value: 'TRUE_FALSE', label: t('true_false') },
+    { value: 'MATCHING', label: t('matching') },
+  ];
+
   return (
     <div>
       <div className="mb-4">
@@ -173,18 +180,14 @@ export default function QuestionEditor({
             <Select
               value={formData.question_type}
               onValueChange={(value: any) => setFormData({ ...formData, question_type: value })}
+              items={questionTypes}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectPositioner>
                 <SelectContent>
-                  {[
-                    { value: 'SINGLE_CHOICE', label: t('single_choice') },
-                    { value: 'MULTIPLE_CHOICE', label: t('multiple_choice') },
-                    { value: 'TRUE_FALSE', label: t('true_false') },
-                    { value: 'MATCHING', label: t('matching') },
-                  ].map((item) => (
+                  {questionTypes.map((item) => (
                     <SelectItem
                       key={item.value}
                       value={item.value}

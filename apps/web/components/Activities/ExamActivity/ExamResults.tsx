@@ -22,6 +22,7 @@ interface ExamResultsProps {
   attempt: any;
   questions: Question[];
   onReturnToCourse: () => void;
+  onProceedToNextActivity?: () => void;
   onRetry?: () => void;
   remainingAttempts?: number | null;
   isTeacher?: boolean;
@@ -32,6 +33,7 @@ export default function ExamResults({
   attempt,
   questions,
   onReturnToCourse,
+  onProceedToNextActivity,
   onRetry,
   remainingAttempts = null,
   isTeacher = false,
@@ -249,9 +251,6 @@ export default function ExamResults({
                     <CardTitle className="text-lg">{t('questionNumber', { number: index + 1 })}</CardTitle>
                     <Badge
                       variant={status === 'correct' ? 'default' : status === 'incorrect' ? 'destructive' : 'secondary'}
-                      className={
-                        status === 'correct' ? 'bg-green-600' : status === 'incorrect' ? 'bg-red-600' : 'bg-gray-400'
-                      }
                     >
                       {status === 'correct' && <CheckCircle2 className="mr-1 h-3 w-3" />}
                       {status === 'incorrect' && <XCircle className="mr-1 h-3 w-3" />}
@@ -311,9 +310,9 @@ export default function ExamResults({
 
         <Button
           size="lg"
-          onClick={onReturnToCourse}
+          onClick={onProceedToNextActivity ?? onReturnToCourse}
         >
-          {t('returnToCourse')}
+          {onProceedToNextActivity ? t('proceedToNextActivity') || 'Next activity' : t('returnToCourse')}
         </Button>
       </div>
     </div>
