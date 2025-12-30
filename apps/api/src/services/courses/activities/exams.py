@@ -225,7 +225,9 @@ async def update_exam(
         from src.db.courses.exams import ExamSettingsBase
 
         try:
-            validated_settings = ExamSettingsBase.model_validate(update_data.get("settings") or {})
+            validated_settings = ExamSettingsBase.model_validate(
+                update_data.get("settings") or {}
+            )
             update_data["settings"] = validated_settings.model_dump()
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid settings: {e}")
@@ -317,10 +319,17 @@ async def create_exam_with_activity(
 
     # Link activity to chapter
     # Determine next "order" value for the chapter
-    statement = select(ChapterActivity).where(ChapterActivity.chapter_id == chapter.id).order_by(ChapterActivity.order.desc())
+    statement = (
+        select(ChapterActivity)
+        .where(ChapterActivity.chapter_id == chapter.id)
+        .order_by(ChapterActivity.order.desc())
+    )
     last_chapter_activity = db_session.exec(statement).first()
     next_order = 1
-    if last_chapter_activity and getattr(last_chapter_activity, "order", None) is not None:
+    if (
+        last_chapter_activity
+        and getattr(last_chapter_activity, "order", None) is not None
+    ):
         next_order = last_chapter_activity.order + 1
 
     chapter_activity = ChapterActivity(
@@ -567,10 +576,16 @@ async def start_exam_attempt(
         attempt_limit = settings.get("attempt_limit")
         if attempt_limit is not None:
             # validate configured value against allowed bounds
-            from src.db.courses.exams import ATTEMPT_LIMIT_MIN, ATTEMPT_LIMIT_MAX, QUESTION_LIMIT_MIN
+            from src.db.courses.exams import (
+                ATTEMPT_LIMIT_MIN,
+                ATTEMPT_LIMIT_MAX,
+                QUESTION_LIMIT_MIN,
+            )
 
             if not (ATTEMPT_LIMIT_MIN <= attempt_limit <= ATTEMPT_LIMIT_MAX):
-                raise HTTPException(status_code=400, detail="Invalid attempt_limit configured for exam")
+                raise HTTPException(
+                    status_code=400, detail="Invalid attempt_limit configured for exam"
+                )
 
             statement = select(ExamAttempt).where(
                 ExamAttempt.exam_id == exam.id,
@@ -584,7 +599,9 @@ async def start_exam_attempt(
     question_limit = settings.get("question_limit")
     if question_limit is not None:
         if question_limit < QUESTION_LIMIT_MIN:
-            raise HTTPException(status_code=400, detail="Invalid question_limit configured for exam")
+            raise HTTPException(
+                status_code=400, detail="Invalid question_limit configured for exam"
+            )
 
     # Get all questions for this exam
     statement = (
@@ -693,11 +710,16 @@ async def submit_exam_attempt(
 
     # Award gamification XP (skip preview attempts to avoid gaming the system)
     if not attempt.is_preview:
-        percentage = (attempt.score / attempt.max_score * 100) if attempt.max_score and attempt.max_score > 0 else 0
+        percentage = (
+            (attempt.score / attempt.max_score * 100)
+            if attempt.max_score and attempt.max_score > 0
+            else 0
+        )
 
         # Award base XP for exam completion (50 XP as defined in XP_REWARDS)
         try:
             from src.services.gamification.service import award_xp
+
             award_xp(
                 db=db_session,
                 user_id=current_user.id,
@@ -720,11 +742,16 @@ async def submit_exam_attempt(
         except Exception as e:
             # Log error but don't fail the submission
             import logging
+
             logger = logging.getLogger(__name__)
             logger.error(f"Failed to award XP for exam {attempt_uuid}: {e}")
 
     # Mark activity as complete only if score percentage exceeds 50%
-    percentage = (attempt.score / attempt.max_score * 100) if attempt.max_score and attempt.max_score > 0 else 0
+    percentage = (
+        (attempt.score / attempt.max_score * 100)
+        if attempt.max_score and attempt.max_score > 0
+        else 0
+    )
     exam = db_session.get(Exam, attempt.exam_id)
     if exam and percentage > 50:
         await mark_exam_complete(request, exam.activity_id, current_user.id, db_session)
@@ -765,6 +792,7 @@ async def record_violation(
 
     # Structured logging for violation events
     import logging
+
     logger = logging.getLogger(__name__)
     logger.warning(
         "Exam violation recorded",
@@ -776,7 +804,7 @@ async def record_violation(
             "violation_type": violation_type,
             "violation_count": len(violations),
             "timestamp": violation["timestamp"],
-        }
+        },
     )
 
     # Check violation threshold
@@ -800,7 +828,7 @@ async def record_violation(
                     "violation_count": len(violations),
                     "threshold": threshold,
                     "timestamp": datetime.now().isoformat(),
-                }
+                },
             )
 
     db_session.add(attempt)
@@ -848,51 +876,77 @@ async def get_attempt_by_uuid(
     """
     Get a specific exam attempt by UUID.
 
-    - Students can only view their own attempts
-    - Teachers/admins can view any attempt for exams they manage
+    Optimized: fetch attempt and related records in a single joined query and
+    short-circuit the owner path to avoid extra DB roundtrips. Preserves original
+    404 semantics for missing related records.
     """
     if isinstance(current_user, AnonymousUser):
         raise HTTPException(status_code=401, detail="Authentication required")
 
-    # Fetch the attempt
-    statement = select(ExamAttempt).where(ExamAttempt.attempt_uuid == attempt_uuid)
-    attempt = db_session.exec(statement).first()
+    # Fetch attempt + related records in one query (use outer joins so we can
+    # detect missing relations and raise appropriate 404s while keeping a
+    # single roundtrip).
+    statement = (
+        select(
+            ExamAttempt,
+            Exam,
+            Activity,
+            ChapterActivity,
+            Course,
+            ResourceAuthor,
+        )
+        .join(Exam, Exam.id == ExamAttempt.exam_id, isouter=True)
+        .join(Activity, Activity.id == Exam.activity_id, isouter=True)
+        .join(ChapterActivity, ChapterActivity.activity_id == Activity.id, isouter=True)
+        .join(Course, Course.id == ChapterActivity.course_id, isouter=True)
+        .join(
+            ResourceAuthor,
+            (ResourceAuthor.resource_uuid == Course.course_uuid)
+            & (ResourceAuthor.user_id == current_user.id),
+            isouter=True,
+        )
+        .where(ExamAttempt.attempt_uuid == attempt_uuid)
+    )
 
-    if not attempt:
+    row = db_session.exec(statement).first()
+
+    if not row:
+        # No attempt at all
         raise HTTPException(status_code=404, detail="Attempt not found")
 
-    # Fetch the exam
-    exam = db_session.get(Exam, attempt.exam_id)
+    # row is a tuple: (attempt, exam, activity, chapter_activity, course, resource_author)
+    attempt, exam, activity, chapter_activity, course, resource_author = row
+
+    # Preserve original 404 behavior for missing linked records
     if not exam:
         raise HTTPException(status_code=404, detail="Exam not found")
-
-    # Fetch the activity
-    activity = db_session.get(Activity, exam.activity_id)
     if not activity:
         raise HTTPException(status_code=404, detail="Activity not found")
-
-    # Fetch the chapter activity to get course
-    statement = select(ChapterActivity).where(ChapterActivity.activity_id == activity.id)
-    chapter_activity = db_session.exec(statement).first()
     if not chapter_activity:
         raise HTTPException(status_code=404, detail="Chapter activity not found")
-
-    # Fetch the course
-    course = db_session.get(Course, chapter_activity.course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    # Authorization check
+    # Authorization check: owner can always view their attempt
     is_owner = attempt.user_id == current_user.id
-    is_teacher = await is_course_contributor_or_admin(current_user.id, course, db_session)
+    if is_owner:
+        return ExamAttemptRead.model_validate(attempt)
 
-    if not is_owner and not is_teacher:
-        raise HTTPException(
-            status_code=403,
-            detail="Not authorized to view this attempt"
+    # Otherwise check if user is a course contributor/admin using the joined
+    # ResourceAuthor row (if present)
+    if (
+        resource_author
+        and resource_author.authorship
+        in (
+            ResourceAuthorshipEnum.CREATOR,
+            ResourceAuthorshipEnum.MAINTAINER,
+            ResourceAuthorshipEnum.CONTRIBUTOR,
         )
+        and resource_author.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE
+    ):
+        return ExamAttemptRead.model_validate(attempt)
 
-    return ExamAttemptRead.model_validate(attempt)
+    raise HTTPException(status_code=403, detail="Not authorized to view this attempt")
 
 
 ## > Helper Functions
@@ -1025,7 +1079,12 @@ async def get_all_exam_attempts(
             {
                 "attempt_uuid": attempt.attempt_uuid,
                 "user_id": user.id,
-                "user_name": (f"{getattr(user, 'first_name', '')} {getattr(user, 'middle_name', '')} {getattr(user, 'last_name', '')}".replace("  ", " ").strip()) or user.username,
+                "user_name": (
+                    f"{getattr(user, 'first_name', '')} {getattr(user, 'middle_name', '')} {getattr(user, 'last_name', '')}".replace(
+                        "  ", " "
+                    ).strip()
+                )
+                or user.username,
                 "user_email": user.email,
                 "started_at": attempt.started_at,
                 "finished_at": attempt.submitted_at,  # Map submitted_at to finished_at for frontend compatibility
@@ -1262,7 +1321,9 @@ async def reorder_questions(
         if not question_uuid or new_order is None:
             continue
 
-        question_statement = select(Question).where(Question.question_uuid == question_uuid)
+        question_statement = select(Question).where(
+            Question.question_uuid == question_uuid
+        )
         question = db_session.exec(question_statement).first()
 
         if question and question.exam_id == exam.id:
@@ -1273,4 +1334,3 @@ async def reorder_questions(
     db_session.commit()
 
     return {"updated": updated_count, "total": len(question_order)}
-
