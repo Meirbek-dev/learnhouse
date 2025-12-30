@@ -326,7 +326,7 @@ export default function QuestionEditor({
               <RadioGroup
                 value={(() => {
                   const idx = formData.answer_options.findIndex((o) => o.is_correct);
-                  return idx === -1 ? undefined : idx.toString();
+                  return idx === -1 ? '' : idx.toString();
                 })()}
                 onValueChange={(value: any) => {
                   const i = Number.parseInt(String(value), 10);
@@ -368,7 +368,7 @@ export default function QuestionEditor({
               <RadioGroup
                 value={(() => {
                   const idx = formData.answer_options.findIndex((o) => o.is_correct);
-                  return idx === -1 ? undefined : idx.toString();
+                  return idx === -1 ? '' : idx.toString();
                 })()}
                 onValueChange={(value: any) => {
                   const i = Number.parseInt(String(value), 10);

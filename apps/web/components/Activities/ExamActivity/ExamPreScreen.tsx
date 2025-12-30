@@ -133,13 +133,13 @@ export default function ExamPreScreen({
               {/* Instructions */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">{t('instructions')}</h3>
-                <ul className="space-y-2 text-sm text-gray-700">
+                <ul className="space-y-2 text-base text-gray-700">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-600" />
                     <span>{t('instruction1')}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-600" />
+                    <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
                     <span>{t('instruction2')}</span>
                   </li>
                   {timeLimit && (
@@ -176,34 +176,6 @@ export default function ExamPreScreen({
                 </Alert>
               )}
 
-              {/* Previous Attempts */}
-              {userAttempts.length > 0 && (
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold">{t('previousAttempts')}</h3>
-                  <div className="space-y-2">
-                    {userAttempts.map((attempt, index) => (
-                      <div
-                        key={attempt.id}
-                        className="flex items-center justify-between rounded-lg border p-3"
-                      >
-                        <div>
-                          <p className="font-medium">{t('attemptNumber', { number: index + 1 })}</p>
-                          <p className="text-sm text-gray-600">{new Date(attempt.submitted_at).toLocaleString()}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold">
-                            {attempt.score}/{attempt.max_score}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {Math.round((attempt.score / attempt.max_score) * 100)}%
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               <div className="mt-6 lg:hidden">
                 {/* Mobile CTA: Start button stays inside main content on small screens */}
                 {isTeacher && onBackToManage && (
@@ -234,6 +206,34 @@ export default function ExamPreScreen({
                   </Alert>
                 )}
               </div>
+
+              {/* Previous Attempts (mobile-only) */}
+              {userAttempts.length > 0 && (
+                <div className="mt-6 space-y-2 lg:hidden">
+                  <h3 className="text-lg font-semibold">{t('previousAttempts')}</h3>
+                  <div className="space-y-2">
+                    {userAttempts.map((attempt, index) => (
+                      <div
+                        key={attempt.id}
+                        className="flex items-center justify-between rounded-lg border p-3"
+                      >
+                        <div>
+                          <p className="font-medium">{t('attemptNumber', { number: index + 1 })}</p>
+                          <p className="text-sm text-gray-600">{new Date(attempt.submitted_at).toLocaleString()}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-bold">
+                            {attempt.score}/{attempt.max_score}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {Math.round((attempt.score / attempt.max_score) * 100)}%
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -288,6 +288,34 @@ export default function ExamPreScreen({
               </div>
             </CardContent>
           </Card>
+
+          {/* Previous Attempts (desktop) */}
+          {userAttempts.length > 0 && (
+            <Card className="mt-4 hidden lg:block">
+              <CardHeader>
+                <CardTitle>{t('previousAttempts')}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {userAttempts.map((attempt, index) => (
+                  <div
+                    key={attempt.id}
+                    className="flex items-center justify-between rounded-lg border p-3"
+                  >
+                    <div>
+                      <p className="font-medium">{t('attemptNumber', { number: index + 1 })}</p>
+                      <p className="text-sm text-gray-600">{new Date(attempt.submitted_at).toLocaleString()}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold">
+                        {attempt.score}/{attempt.max_score}
+                      </p>
+                      <p className="text-sm text-gray-600">{Math.round((attempt.score / attempt.max_score) * 100)}%</p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
         </aside>
       </div>
     </div>

@@ -291,7 +291,7 @@ export default function ExamTakingInterface({
       case 'TRUE_FALSE': {
         return (
           <RadioGroup
-            value={answers[questionId]?.toString()}
+            value={answers[questionId] !== undefined && answers[questionId] !== null ? String(answers[questionId]) : ''}
             onValueChange={(value) =>
               handleAnswerChange(questionId, typeof value === 'string' ? Number.parseInt(value, 10) : Number(value))
             }
@@ -369,7 +369,7 @@ export default function ExamTakingInterface({
                   <span className="text-gray-400">→</span>
                   <div className="flex-1">
                     <Select
-                      value={matchAnswers[option.left || ''] || ''}
+                      value={matchAnswers[option.left || ''] ?? ''}
                       onValueChange={(val) =>
                         handleAnswerChange(questionId, {
                           ...matchAnswers,

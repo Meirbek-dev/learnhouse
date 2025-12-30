@@ -135,6 +135,7 @@
       "noAttemptsRemaining": "Бұл емтиханға қалған әрекеттеріңіз жоқ",
       "notAnswered": "Жауап берілмеді",
       "notSet": "Орнатылмаған",
+      "backToExam": "Емтиханға оралу",
       "pleaseRefresh": "Бетті жаңартып, қайталап көріңіз",
       "points": "{count, plural, =0 {# ұпай} one {# ұпай} other {# ұпай}}",
       "pointsLabel": "Ұпайлар",

@@ -138,6 +138,7 @@
       "noAttemptsRemaining": "You have no attempts remaining for this exam",
       "notAnswered": "Not answered",
       "notSet": "Not set",
+      "backToExam": "Back to exam",
       "pleaseRefresh": "Please refresh the page and try again",
       "points": "{count, plural, =0 {# points} one {# point} other {# points}}",
       "pointsLabel": "Points",

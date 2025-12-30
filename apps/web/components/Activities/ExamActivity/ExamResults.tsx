@@ -24,6 +24,7 @@ interface ExamResultsProps {
   onReturnToCourse: () => void;
   onProceedToNextActivity?: () => void;
   onRetry?: () => void;
+  onBackToPreScreen?: () => void;
   remainingAttempts?: number | null;
   isTeacher?: boolean;
 }
@@ -35,6 +36,7 @@ export default function ExamResults({
   onReturnToCourse,
   onProceedToNextActivity,
   onRetry,
+  onBackToPreScreen,
   remainingAttempts = null,
   isTeacher = false,
 }: ExamResultsProps) {
@@ -291,6 +293,16 @@ export default function ExamResults({
 
       {/* Actions */}
       <div className="flex items-center justify-center space-x-4">
+        {onBackToPreScreen && (
+          <Button
+            size="lg"
+            variant="ghost"
+            onClick={onBackToPreScreen}
+          >
+            {t('backToExam')}
+          </Button>
+        )}
+
         {onRetry && (
           <Button
             size="lg"

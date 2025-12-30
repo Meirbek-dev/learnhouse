@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
+import { getAPIUrl, getUriWithOrg } from '@/services/config/config';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import type { AttemptData } from './state/examFlowReducer';
 import { swrFetcher } from '@/services/utils/ts/requests';
@@ -16,10 +17,9 @@ import ExamResultsDashboard from './ExamResultsDashboard';
 import { getTrailSwrKey } from '@services/courses/keys';
 import ExamTakingInterface from './ExamTakingInterface';
 import QuestionManagement from './QuestionManagement';
-import { getAPIUrl, getUriWithOrg } from '@/services/config/config';
-import { useRouter } from 'next/navigation';
 import { examActions } from './state/examActions';
 import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 import ExamPreScreen from './ExamPreScreen';
 import ExamSettings from './ExamSettings';
 import ExamResults from './ExamResults';
@@ -231,20 +231,11 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
               <h1 className="text-3xl font-bold">{activity.name}</h1>
               <p className="text-muted-foreground">{t('manageExam')}</p>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={() => setActiveTab('questions')}
-                variant="outline"
-              >
-                {t('manageQuestions')}
-              </Button>
-              <Button
-                onClick={() => dispatch(examActions.exitManagementMode(userAttempts || []))}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                {t('previewExam')}
-              </Button>
-            </div>
+            <Button
+              onClick={() => dispatch(examActions.exitManagementMode(userAttempts || []))}
+            >
+              {t('previewExam')}
+            </Button>
           </div>
 
           <Tabs
@@ -387,6 +378,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
           onReturnToCourse={handleReturnToCourse}
           onProceedToNextActivity={handleProceedToNextActivity}
           onRetry={handleRetry}
+          onBackToPreScreen={handleBackToPreExam}
           remainingAttempts={remainingAttempts}
           isTeacher={isTeacher}
         />
