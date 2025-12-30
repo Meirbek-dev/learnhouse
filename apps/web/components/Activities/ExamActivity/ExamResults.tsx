@@ -170,31 +170,6 @@ export default function ExamResults({
     }
   };
 
-  const handleExportCSV = () => {
-    const headers = [t('question'), t('yourAnswer'), t('correctAnswer'), t('status'), t('pointsLabel')];
-    const rows = orderedQuestions.map((q) => {
-      const status = getAnswerStatus(q);
-      const your = renderUserAnswer(q);
-      const correct = showCorrectAnswers ? (Array.isArray(renderCorrectAnswer(q)) ? renderCorrectAnswer(q) : '') : '';
-      const yourText =
-        typeof your === 'string' ? your : your === null ? '' : typeof your === 'object' ? JSON.stringify(your) : '';
-      const correctText =
-        typeof correct === 'string' ? correct : typeof correct === 'object' ? JSON.stringify(correct) : '';
-      return [q.question_text.replace(/\n/g, ' '), yourText, correctText, status, String(q.points)];
-    });
-
-    const csv = [headers, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${exam.title}-results.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       {/* Score Card */}
@@ -317,14 +292,6 @@ export default function ExamResults({
 
       {/* Actions */}
       <div className="flex items-center justify-center space-x-4">
-        <Button
-          size="lg"
-          variant="outline"
-          onClick={handleExportCSV}
-        >
-          {t('downloadCsv')}
-        </Button>
-
         {onRetry && (
           <Button
             size="lg"
