@@ -199,6 +199,7 @@
     "activityTypes": {
       "assignment": "Тапсырма",
       "document": "Құжат",
+      "exam": "Емтихан",
       "interactive": "Интерактивті",
       "learningMaterial": "Оқу материалы",
       "page": "Бет",
@@ -221,6 +222,7 @@
       "assignment": "Тапсырма",
       "document": "Құжат",
       "dynamic": "Бет",
+      "exam": "Емтихан",
       "learningMaterial": "Оқу материалы",
       "video": "Бейне"
     },
@@ -1656,6 +1658,7 @@
         "assignment": "Тапсырма",
         "document": "Құжат",
         "dynamic": "Динамикалық",
+        "exam": "Емтихан",
         "video": "Бейне"
       },
       "activityDeletedSuccess": "Белсенділік сәтті жойылды",

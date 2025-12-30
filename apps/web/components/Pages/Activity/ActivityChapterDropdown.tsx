@@ -1,5 +1,5 @@
 'use client';
-import { ArrowRight, Backpack, Check, FileText, ListTree, StickyNote, Video, X } from 'lucide-react';
+import { ArrowRight, Backpack, Check, ClipboardList, FileText, ListTree, StickyNote, Video, X } from 'lucide-react';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { getUriWithOrg } from '@services/config/config';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -56,6 +56,9 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
       case 'TYPE_ASSIGNMENT': {
         return <Backpack size={10} />;
       }
+      case 'TYPE_EXAM': {
+        return <ClipboardList size={10} />;
+      }
       default: {
         return <FileText size={10} />;
       }
@@ -75,6 +78,9 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
       }
       case 'TYPE_ASSIGNMENT': {
         return t('activityTypes.assignment');
+      }
+      case 'TYPE_EXAM': {
+        return t('activityTypes.exam');
       }
       default: {
         return t('activityTypes.learningMaterial');

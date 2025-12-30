@@ -13,6 +13,7 @@ import {
 import {
   AlertTriangle,
   Backpack,
+  ClipboardList,
   Eye,
   File,
   FilePenLine,
@@ -48,7 +49,7 @@ import { mutate } from 'swr';
 import useSWR from 'swr';
 
 // Types
-type ActivityType = 'TYPE_VIDEO' | 'TYPE_DOCUMENT' | 'TYPE_ASSIGNMENT' | 'TYPE_DYNAMIC';
+type ActivityType = 'TYPE_VIDEO' | 'TYPE_DOCUMENT' | 'TYPE_ASSIGNMENT' | 'TYPE_DYNAMIC' | 'TYPE_EXAM';
 
 interface Activity {
   id: string;
@@ -105,6 +106,11 @@ const ACTIVITY_CONFIG = {
     Icon: Sparkles,
     translationKey: 'dynamic',
     colorClass: 'bg-pink-50 text-pink-700 border-pink-200',
+  },
+  TYPE_EXAM: {
+    Icon: ClipboardList,
+    translationKey: 'exam',
+    colorClass: 'bg-amber-50 text-amber-700 border-amber-200',
   },
 } as const;
 

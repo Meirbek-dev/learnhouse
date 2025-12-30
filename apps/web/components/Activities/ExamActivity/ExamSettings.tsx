@@ -386,7 +386,7 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
                     <FormLabel>{t('accessMode')}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value ?? 'NO_ACCESS'}
                       items={accessModes}
                     >
                       <FormControl>

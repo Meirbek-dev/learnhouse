@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpenCheck, Check, ChevronLeft, ChevronRight, FileText, Layers, Trophy, Video } from 'lucide-react';
+import { BookOpenCheck, Check, ChevronLeft, ChevronRight, ClipboardList, FileText, Layers, Trophy, Video } from 'lucide-react';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { getUriWithOrg } from '@services/config/config';
 import { useRouter } from 'next/navigation';
@@ -32,6 +32,9 @@ function getActivityTypeLabel(activityType: string, t: (key: string) => string):
     case 'TYPE_ASSIGNMENT': {
       return t('activityTypes.assignment');
     }
+    case 'TYPE_EXAM': {
+      return t('activityTypes.exam');
+    }
     default: {
       return t('unknownActivity');
     }
@@ -52,6 +55,9 @@ function getActivityTypeIconColor(activityType: string): string {
     case 'TYPE_ASSIGNMENT': {
       return 'text-orange-500';
     }
+    case 'TYPE_EXAM': {
+      return 'text-amber-500';
+    }
     default: {
       return 'text-gray-500';
     }
@@ -71,6 +77,9 @@ function getActivityTypeBadgeColor(activityType: string): string {
     }
     case 'TYPE_ASSIGNMENT': {
       return 'bg-orange-50 text-orange-600 ring-1 ring-orange-200';
+    }
+    case 'TYPE_EXAM': {
+      return 'bg-amber-50 text-amber-600 ring-1 ring-amber-200';
     }
     default: {
       return 'bg-gray-50 text-gray-600 ring-1 ring-gray-200';
@@ -108,6 +117,14 @@ const ActivityTypeIcon = ({ activityType, size = 14 }: { activityType: string; s
     case 'TYPE_ASSIGNMENT': {
       return (
         <BookOpenCheck
+          size={size}
+          className={colorClass}
+        />
+      );
+    }
+    case 'TYPE_EXAM': {
+      return (
+        <ClipboardList
           size={size}
           className={colorClass}
         />

@@ -209,6 +209,7 @@
     "activityTypes": {
       "assignment": "Assignment",
       "document": "Document",
+      "exam": "Exam",
       "interactive": "Interactive",
       "learningMaterial": "Learning Material",
       "page": "Page",
@@ -231,6 +232,7 @@
       "assignment": "Assignment",
       "document": "Document",
       "dynamic": "Page",
+      "exam": "Exam",
       "learningMaterial": "Learning Material",
       "video": "Video"
     },
@@ -1672,6 +1674,7 @@
         "assignment": "Assignment",
         "document": "Document",
         "dynamic": "Dynamic",
+        "exam": "Exam",
         "video": "Video"
       },
       "activityDeletedSuccess": "Activity deleted successfully",

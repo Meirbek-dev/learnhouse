@@ -212,6 +212,7 @@
     "activityTypes": {
       "assignment": "Задание",
       "document": "Документ",
+      "exam": "Экзамен",
       "interactive": "Интерактив",
       "learningMaterial": "Учебный материал",
       "page": "Страница",
@@ -234,6 +235,7 @@
       "assignment": "Задание",
       "document": "Документ",
       "dynamic": "Страница",
+      "exam": "Экзамен",
       "learningMaterial": "Учебный материал",
       "video": "Видео"
     },
@@ -1675,6 +1677,7 @@
         "assignment": "Задание",
         "document": "Документ",
         "dynamic": "Динамический",
+        "exam": "Экзамен",
         "video": "Видео"
       },
       "activityDeletedSuccess": "Активность успешно удалена",
