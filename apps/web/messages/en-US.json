@@ -179,6 +179,26 @@
       "retryExamRemaining": "Retry Exam ({remaining} left)",
       "violationsRecorded": "{count} violations recorded during this exam",
       "violationWarning": "Violations: {count}/{max}. You have {remaining} remaining before auto-submit. If you believe this is a mistake, {appealLink}.",
+
+      "performance": {
+        "excellent": "Excellent!",
+        "good": "Good result!",
+        "satisfactory": "Satisfactory",
+        "unsatisfactory": "Needs improvement",
+        "emojiAlt": "Performance emoji for grade {grade}"
+      },
+
+      "grade": "Grade {grade}",
+      "scoreDetails": "{score} of {max} points",
+      "scoreProgress": "Score progress: {percentage}%",
+
+      "questionType": {
+        "SINGLE_CHOICE": "Single choice",
+        "MULTIPLE_CHOICE": "Multiple choice",
+        "TRUE_FALSE": "True / False",
+        "MATCHING": "Matching"
+      },
+
       "yourAnswer": "Your Answer",
       "fullscreenNotSupported": "Fullscreen mode not supported by your browser",
       "fullscreenRecommended": "Fullscreen mode is recommended for this exam",

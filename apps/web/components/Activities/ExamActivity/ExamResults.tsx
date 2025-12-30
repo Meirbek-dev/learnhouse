@@ -1,6 +1,7 @@
 'use client';
 
-import { AlertCircle, CheckCircle2, Trophy, XCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Trophy, XCircle, ArrowLeft, Repeat, ArrowRight } from 'lucide-react';
+import { useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
@@ -46,49 +47,104 @@ export default function ExamResults({
   const showCorrectAnswers = settings.allow_result_review && settings.show_correct_answers;
   const allowReview = settings.allow_result_review;
 
-  const percentage = attempt.max_score > 0 ? Math.round((attempt.score / attempt.max_score) * 100) : 0;
+  const percentage = useMemo(() => {
+    return attempt.max_score > 0 ? Math.round((attempt.score / attempt.max_score) * 100) : 0;
+  }, [attempt.score, attempt.max_score]);
 
-  const orderedQuestions = attempt.question_order
-    .map((id: number) => questions.find((q) => q.id === id))
-    .filter(Boolean) as Question[];
+  const orderedQuestions = useMemo(() => {
+    return (attempt.question_order || [])
+      .map((id: number) => questions.find((q) => q.id === id))
+      .filter(Boolean) as Question[];
+  }, [attempt.question_order, questions]);
 
-  const getAnswerStatus = (question: Question) => {
-    const userAnswer = attempt.answers[question.id];
-    if (userAnswer === undefined || userAnswer === null) return 'unanswered';
-
-    switch (question.question_type) {
-      case 'SINGLE_CHOICE':
-      case 'TRUE_FALSE': {
-        const correctIndices = question.answer_options
-          .map((opt, idx) => (opt.is_correct ? idx : -1))
-          .filter((idx) => idx !== -1);
-        return correctIndices.includes(userAnswer) ? 'correct' : 'incorrect';
-      }
-
-      case 'MULTIPLE_CHOICE': {
-        const correctIndices = new Set(
-          question.answer_options.map((opt, idx) => (opt.is_correct ? idx : -1)).filter((idx) => idx !== -1),
-        );
-        const userIndices = new Set(userAnswer);
-        const isCorrect =
-          correctIndices.size === userIndices.size && [...correctIndices].every((idx) => userIndices.has(idx));
-        return isCorrect ? 'correct' : 'incorrect';
-      }
-
-      case 'MATCHING': {
-        const allCorrect = question.answer_options.every((opt) => userAnswer[opt.left || ''] === opt.right);
-        return allCorrect ? 'correct' : 'incorrect';
-      }
-
-      default: {
-        return 'unanswered';
-      }
+  const getPerformance = (percentage: number) => {
+    if (percentage < 50) {
+      return { grade: 2, labelKey: 'unsatisfactory' };
     }
+
+    if (percentage <= 70) {
+      return { grade: 3, labelKey: 'satisfactory' };
+    }
+
+    if (percentage <= 89) {
+      return { grade: 4, labelKey: 'good' };
+    }
+
+    return { grade: 5, labelKey: 'excellent' };
   };
 
-  const correctCount = orderedQuestions.filter((q) => getAnswerStatus(q) === 'correct').length;
-  const incorrectCount = orderedQuestions.filter((q) => getAnswerStatus(q) === 'incorrect').length;
-  const unansweredCount = orderedQuestions.filter((q) => getAnswerStatus(q) === 'unanswered').length;
+  const performanceSummary = useMemo(() => {
+    const perf = getPerformance(percentage);
+    const message = t(`performance.${perf.labelKey}`) || '';
+    const color =
+      perf.grade === 5
+        ? 'text-green-600'
+        : perf.grade === 4
+          ? 'text-indigo-600'
+          : perf.grade === 3
+            ? 'text-purple-600'
+            : 'text-orange-600';
+    const emoji = perf.grade === 5 ? '🏆' : perf.grade === 4 ? '✨' : perf.grade === 3 ? '💪' : '📚';
+    return {
+      ...perf,
+      message,
+      color,
+      emoji,
+      grade: perf.grade,
+    };
+  }, [percentage, t]);
+
+  const getAnswerStatus = useCallback(
+    (question: Question) => {
+      const userAnswer = attempt.answers ? attempt.answers[question.id] : undefined;
+      if (userAnswer === undefined || userAnswer === null) return 'unanswered';
+
+      switch (question.question_type) {
+        case 'SINGLE_CHOICE':
+        case 'TRUE_FALSE': {
+          const correctIndices = question.answer_options
+            .map((opt, idx) => (opt.is_correct ? idx : -1))
+            .filter((idx) => idx !== -1);
+          return correctIndices.includes(userAnswer) ? 'correct' : 'incorrect';
+        }
+
+        case 'MULTIPLE_CHOICE': {
+          const correctIndices = new Set(
+            question.answer_options.map((opt, idx) => (opt.is_correct ? idx : -1)).filter((idx) => idx !== -1),
+          );
+          const userIndices = new Set(Array.isArray(userAnswer) ? userAnswer : []);
+          const isCorrect =
+            correctIndices.size === userIndices.size && [...correctIndices].every((idx) => userIndices.has(idx));
+          return isCorrect ? 'correct' : 'incorrect';
+        }
+
+        case 'MATCHING': {
+          const allCorrect = question.answer_options.every(
+            (opt) => (userAnswer && userAnswer[opt.left || '']) === opt.right,
+          );
+          return allCorrect ? 'correct' : 'incorrect';
+        }
+
+        default: {
+          return 'unanswered';
+        }
+      }
+    },
+    [attempt.answers],
+  );
+
+  const correctCount = useMemo(
+    () => orderedQuestions.filter((q) => getAnswerStatus(q) === 'correct').length,
+    [orderedQuestions, getAnswerStatus],
+  );
+  const incorrectCount = useMemo(
+    () => orderedQuestions.filter((q) => getAnswerStatus(q) === 'incorrect').length,
+    [orderedQuestions, getAnswerStatus],
+  );
+  const unansweredCount = useMemo(
+    () => orderedQuestions.filter((q) => getAnswerStatus(q) === 'unanswered').length,
+    [orderedQuestions, getAnswerStatus],
+  );
 
   const renderUserAnswer = (question: Question) => {
     const userAnswer = attempt.answers[question.id];
@@ -106,9 +162,13 @@ export default function ExamResults({
       case 'MULTIPLE_CHOICE': {
         return (
           <div className="space-y-1">
-            {userAnswer.map((idx: number) => (
-              <div key={idx}>{question.answer_options[idx]?.text}</div>
-            ))}
+            {Array.isArray(userAnswer) && userAnswer.length > 0 ? (
+              userAnswer.map((idx: number) => (
+                <div key={idx}>{question.answer_options[idx]?.text ?? t('invalidAnswer')}</div>
+              ))
+            ) : (
+              <span className="text-gray-500">{t('notAnswered')}</span>
+            )}
           </div>
         );
       }
@@ -188,17 +248,27 @@ export default function ExamResults({
 
         <CardContent className="space-y-6">
           {/* Score Display */}
-          <div className="text-center">
-            <div className="mb-2 text-6xl font-bold text-blue-600">{percentage}%</div>
-            <div className="text-xl text-gray-600">
-              {attempt.score} / {t('points', { count: attempt.max_score })}
+          <div
+            className="text-center"
+            role="status"
+            aria-live="polite"
+          >
+            <div className="mb-3 flex items-center justify-center space-x-3">
+              <div className="text-5xl font-bold text-blue-500">{percentage}%</div>
+            </div>
+
+            <div className="text-lg text-gray-600">
+              {t('scoreDetails', { score: attempt.score, max: attempt.max_score })}
+            </div>
+
+            <div className="mt-3">
+              <Progress
+                value={percentage}
+                className="h-3"
+                aria-label={t('scoreProgress', { percentage })}
+              />
             </div>
           </div>
-
-          <Progress
-            value={percentage}
-            className="h-3"
-          />
 
           {/* Statistics */}
           <div className="grid gap-4 md:grid-cols-3">
@@ -250,9 +320,15 @@ export default function ExamResults({
               <Card key={question.id}>
                 <CardHeader>
                   <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg">{t('questionNumber', { number: index + 1 })}</CardTitle>
+                    <div>
+                      <CardTitle className="text-lg">{t('questionNumber', { number: index + 1 })}</CardTitle>
+                      <div className="mt-1 text-sm text-gray-500">
+                        {t('questionType.' + question.question_type)} · {t('pointsValue', { points: question.points })}
+                      </div>
+                    </div>
                     <Badge
                       variant={status === 'correct' ? 'default' : status === 'incorrect' ? 'destructive' : 'secondary'}
+                      aria-label={t(status)}
                     >
                       {status === 'correct' && <CheckCircle2 className="mr-1 h-3 w-3" />}
                       {status === 'incorrect' && <XCircle className="mr-1 h-3 w-3" />}
@@ -260,7 +336,7 @@ export default function ExamResults({
                       {t(status)}
                     </Badge>
                   </div>
-                  <CardDescription className="text-base text-gray-900">{question.question_text}</CardDescription>
+                  <CardDescription className="mt-3 text-base text-gray-900">{question.question_text}</CardDescription>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
@@ -298,7 +374,9 @@ export default function ExamResults({
             size="lg"
             variant="ghost"
             onClick={onBackToPreScreen}
+            aria-label={t('backToExam')}
           >
+            <ArrowLeft className="mr-1 h-4 w-4" />
             {t('backToExam')}
           </Button>
         )}
@@ -313,7 +391,9 @@ export default function ExamResults({
             title={
               !isTeacher && remainingAttempts !== null && remainingAttempts <= 0 ? t('noAttemptsRemaining') : undefined
             }
+            aria-label={t('retryExam')}
           >
+            <Repeat className="mr-1 h-4 w-4" />
             {remainingAttempts !== null && remainingAttempts !== undefined
               ? t('retryExamRemaining', { remaining: remainingAttempts })
               : t('retryExam')}
@@ -323,8 +403,16 @@ export default function ExamResults({
         <Button
           size="lg"
           onClick={onProceedToNextActivity ?? onReturnToCourse}
+          aria-label={onProceedToNextActivity ? t('proceedToNextActivity') : t('returnToCourse')}
         >
-          {onProceedToNextActivity ? t('proceedToNextActivity') || 'Next activity' : t('returnToCourse')}
+          {onProceedToNextActivity ? (
+            <>
+              {t('proceedToNextActivity') || 'Next activity'}
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </>
+          ) : (
+            t('returnToCourse')
+          )}
         </Button>
       </div>
     </div>

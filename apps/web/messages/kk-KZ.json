@@ -178,6 +178,26 @@
       "retryExamRemaining": "Емтиханды қайталау ({remaining} қалды)",
       "violationsRecorded": "Осы емтихан кезінде {count} бұзушылық тіркелді",
       "violationWarning": "Бұзушылықтар: {count}/{max}. Автоматты тапсырмаға дейін {remaining} қалды. Егер бұл қате деп ойласаңыз, {appealLink}.",
+
+      "performance": {
+        "excellent": "Тамаша!",
+        "good": "Жақсы нәтиже!",
+        "satisfactory": "Қанағаттанарлық",
+        "unsatisfactory": "Жақсартуды қажет етеді",
+        "emojiAlt": "Өнімділік эмодзиі: {grade}"
+      },
+
+      "grade": "Баға {grade}",
+      "scoreDetails": "{score} / {max} ұпай",
+      "scoreProgress": "Прогресс: {percentage}%",
+
+      "questionType": {
+        "SINGLE_CHOICE": "Бір таңдау",
+        "MULTIPLE_CHOICE": "Көп таңдау",
+        "TRUE_FALSE": "Дұрыс / Қате",
+        "MATCHING": "Сәйкестендіру"
+      },
+
       "yourAnswer": "Сіздің жауабыңыз",
       "fullscreenNotSupported": "Толық экран режимі браузеріңізде қолдау көрсетілмейді",
       "fullscreenRecommended": "Бұл емтихан үшін толық экран режимі ұсынылады",

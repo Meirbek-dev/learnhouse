@@ -182,6 +182,21 @@
       "retryExamRemaining": "Повторить экзамен ({remaining} осталось)",
       "violationsRecorded": "Зафиксировано {count} нарушений во время этого экзамена",
       "violationWarning": "Нарушения: {count}/{max}. Осталось {remaining} до автоматической отправки. Если вы считаете, что это ошибка, {appealLink}.",
+      "performance": {
+        "excellent": "Отлично!",
+        "good": "Хороший результат!",
+        "satisfactory": "Удовлетворительно",
+        "unsatisfactory": "Требуется улучшение",
+        "emojiAlt": "Эмодзи результата: {grade}"
+      },
+      "scoreDetails": "{score} из {max} баллов",
+      "scoreProgress": "Прогресс: {percentage}%",
+      "questionType": {
+        "SINGLE_CHOICE": "Выбор одного ответа",
+        "MULTIPLE_CHOICE": "Выбор нескольких ответов",
+        "TRUE_FALSE": "Верно / Неверно",
+        "MATCHING": "Сопоставление"
+      },
       "yourAnswer": "Ваш ответ",
       "fullscreenNotSupported": "Полноэкранный режим не поддерживается вашим браузером",
       "fullscreenRecommended": "Для этого экзамена рекомендуется полноэкранный режим",
