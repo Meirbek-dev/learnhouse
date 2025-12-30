@@ -227,6 +227,23 @@ async def api_get_my_attempts(
     return await get_user_attempts(request, exam_uuid, current_user, db_session)
 
 
+@router.get("/attempts/{attempt_uuid}")
+async def api_get_attempt_by_uuid(
+    request: Request,
+    attempt_uuid: str,
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+) -> ExamAttemptRead:
+    """
+    Get a specific exam attempt by UUID.
+    
+    - Students can only access their own attempts
+    - Teachers/admins can access any attempt for exams they manage
+    """
+    from src.services.courses.activities.exams import get_attempt_by_uuid
+    return await get_attempt_by_uuid(request, attempt_uuid, current_user, db_session)
+
+
 @router.get("/{exam_uuid}/attempts/all")
 async def api_get_all_attempts(
     request: Request,

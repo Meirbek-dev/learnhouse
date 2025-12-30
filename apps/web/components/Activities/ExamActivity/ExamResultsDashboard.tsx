@@ -50,9 +50,10 @@ interface ExamResultsDashboardProps {
   attempts: AttemptData[];
   // optional callback for parent-level navigation; dashboard also provides internal modal
   onViewAttempt?: (attemptUuid: string) => void;
+  onReviewAttempt?: (attempt: any) => void;
 }
 
-export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt }: ExamResultsDashboardProps) {
+export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt, onReviewAttempt }: ExamResultsDashboardProps) {
   const t = useTranslations('Components.ExamResultsDashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -439,15 +440,31 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
                         )}
                       </div>
 
-                      <div>
+                      <div className="flex items-center gap-2">
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => handleOpenAttempt(attempt.attempt_uuid)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenAttempt(attempt.attempt_uuid);
+                          }}
                           aria-label={t('viewAttemptAria', { name: attempt.user_name })}
                         >
                           {t('view')}
                         </Button>
+                        {onReviewAttempt && (attempt.status === 'SUBMITTED' || attempt.status === 'AUTO_SUBMITTED') && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onReviewAttempt(attempt);
+                            }}
+                            aria-label={t('reviewAttemptAria', { name: attempt.user_name })}
+                          >
+                            {t('review')}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -533,15 +550,27 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
                             )}
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleOpenAttempt(attempt.attempt_uuid)}
-                              aria-label={t('viewAttemptAria', { name: attempt.user_name })}
-                            >
-                              <Eye className="mr-2 h-4 w-4" />
-                              {t('view')}
-                            </Button>
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleOpenAttempt(attempt.attempt_uuid)}
+                                aria-label={t('viewAttemptAria', { name: attempt.user_name })}
+                              >
+                                <Eye className="mr-2 h-4 w-4" />
+                                {t('view')}
+                              </Button>
+                              {onReviewAttempt && (attempt.status === 'SUBMITTED' || attempt.status === 'AUTO_SUBMITTED') && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => onReviewAttempt(attempt)}
+                                  aria-label={t('reviewAttemptAria', { name: attempt.user_name })}
+                                >
+                                  {t('review')}
+                                </Button>
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))
@@ -628,21 +657,33 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => handleCloseAttempt()}>{t('close')}</AlertDialogCancel>
             {selectedAttempt && (
-              <AlertDialogAction
-                onClick={() => {
-                  const payload = JSON.stringify(selectedAttempt, null, 2);
-                  const blob = new Blob([payload], { type: 'application/json' });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `attempt-${selectedAttempt.attempt_uuid}.json`;
-                  a.click();
-                  URL.revokeObjectURL(url);
-                  toast.success(t('downloadStarted'));
-                }}
-              >
-                {t('downloadJson')}
-              </AlertDialogAction>
+              <>
+                {onReviewAttempt && (selectedAttempt.status === 'SUBMITTED' || selectedAttempt.status === 'AUTO_SUBMITTED') && (
+                  <AlertDialogAction
+                    onClick={() => {
+                      onReviewAttempt(selectedAttempt);
+                      handleCloseAttempt();
+                    }}
+                  >
+                    {t('reviewAnswers')}
+                  </AlertDialogAction>
+                )}
+                <AlertDialogAction
+                  onClick={() => {
+                    const payload = JSON.stringify(selectedAttempt, null, 2);
+                    const blob = new Blob([payload], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `attempt-${selectedAttempt.attempt_uuid}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    toast.success(t('downloadStarted'));
+                  }}
+                >
+                  {t('downloadJson')}
+                </AlertDialogAction>
+              </>
             )}
           </AlertDialogFooter>
         </AlertDialogContent>

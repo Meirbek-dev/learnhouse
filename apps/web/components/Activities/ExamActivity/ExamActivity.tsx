@@ -188,10 +188,21 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
   }, [activity, course, orgslug, router, t]);
 
   const handleBackToPreExam = useCallback(() => {
-    if (state.phase === 'results' || state.phase === 'manage') {
+    if (state.phase === 'results' || state.phase === 'manage' || state.phase === 'reviewing') {
       dispatch(examActions.backToPreExam(userAttempts || []));
     }
   }, [state.phase, userAttempts]);
+
+  const handleReviewAttempt = useCallback((attempt: AttemptData) => {
+    const returnPhase = state.phase === 'manage' ? 'manage' : 'pre-exam';
+    dispatch(examActions.reviewAttempt(attempt, returnPhase));
+  }, [state.phase]);
+
+  const handleExitReview = useCallback(() => {
+    dispatch(examActions.exitReview());
+    // Refresh attempts data
+    mutateAttempts();
+  }, [mutateAttempts]);
 
   if (state.phase === 'loading' || !exam || !questions) {
     return <PageLoading />;
@@ -283,6 +294,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
                   onViewAttempt={(attemptUuid) => {
                     toast.info(t('viewAttempt', { attempt: attemptUuid }));
                   }}
+                  onReviewAttempt={handleReviewAttempt}
                 />
               )}
             </TabsContent>
@@ -306,6 +318,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
           userAttempts={state.userAttempts}
           accessToken={accessToken!}
           onStartExam={handleStartExam}
+          onReviewAttempt={handleReviewAttempt}
           isTeacher={isTeacher}
           onBackToManage={isTeacher ? () => dispatch(examActions.enterManagementMode()) : undefined}
         />
@@ -357,7 +370,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
     }
   };
 
-  if (state.phase === 'results') {
+  if (state.phase === 'results' || state.phase === 'reviewing') {
     const attempts = userAttempts || [];
     const remainingAttempts =
       isTeacher || !state.exam?.settings?.attempt_limit || state.exam.settings.attempt_limit === 0
@@ -376,9 +389,9 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
           attempt={state.attempt}
           questions={state.questions}
           onReturnToCourse={handleReturnToCourse}
-          onProceedToNextActivity={handleProceedToNextActivity}
-          onRetry={handleRetry}
-          onBackToPreScreen={handleBackToPreExam}
+          onProceedToNextActivity={state.phase === 'results' ? handleProceedToNextActivity : undefined}
+          onRetry={state.phase === 'results' ? handleRetry : undefined}
+          onBackToPreScreen={state.phase === 'reviewing' ? handleExitReview : handleBackToPreExam}
           remainingAttempts={remainingAttempts}
           isTeacher={isTeacher}
         />

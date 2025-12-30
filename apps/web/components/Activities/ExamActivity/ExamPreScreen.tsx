@@ -16,6 +16,7 @@ interface ExamPreScreenProps {
   userAttempts: any[];
   accessToken: string;
   onStartExam: (attempt: any) => void;
+  onReviewAttempt?: (attempt: any) => void;
   isTeacher?: boolean;
   onBackToManage?: () => void;
 }
@@ -26,6 +27,7 @@ export default function ExamPreScreen({
   userAttempts,
   accessToken,
   onStartExam,
+  onReviewAttempt,
   isTeacher = false,
   onBackToManage,
 }: ExamPreScreenProps) {
@@ -215,19 +217,30 @@ export default function ExamPreScreen({
                     {userAttempts.map((attempt, index) => (
                       <div
                         key={attempt.id}
-                        className="flex items-center justify-between rounded-lg border p-3"
+                        className="flex items-center justify-between gap-3 rounded-lg border p-3"
                       >
-                        <div>
+                        <div className="flex-1">
                           <p className="font-medium">{t('attemptNumber', { number: index + 1 })}</p>
                           <p className="text-sm text-gray-600">{new Date(attempt.submitted_at).toLocaleString()}</p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold">
-                            {attempt.score}/{attempt.max_score}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {Math.round((attempt.score / attempt.max_score) * 100)}%
-                          </p>
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <p className="text-lg font-bold">
+                              {attempt.score}/{attempt.max_score}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {Math.round((attempt.score / attempt.max_score) * 100)}%
+                            </p>
+                          </div>
+                          {onReviewAttempt && exam.settings?.allow_result_review && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => onReviewAttempt(attempt)}
+                            >
+                              {t('review')}
+                            </Button>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -299,18 +312,30 @@ export default function ExamPreScreen({
                 {userAttempts.map((attempt, index) => (
                   <div
                     key={attempt.id}
-                    className="flex items-center justify-between rounded-lg border p-3"
+                    className="flex flex-col gap-3 rounded-lg border p-3"
                   >
-                    <div>
-                      <p className="font-medium">{t('attemptNumber', { number: index + 1 })}</p>
-                      <p className="text-sm text-gray-600">{new Date(attempt.submitted_at).toLocaleString()}</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">{t('attemptNumber', { number: userAttempts.length - index })}</p>
+                        <p className="text-sm text-gray-600">{new Date(attempt.submitted_at).toLocaleString()}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold">
+                          {attempt.score}/{attempt.max_score}
+                        </p>
+                        <p className="text-sm text-gray-600">{Math.round((attempt.score / attempt.max_score) * 100)}%</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold">
-                        {attempt.score}/{attempt.max_score}
-                      </p>
-                      <p className="text-sm text-gray-600">{Math.round((attempt.score / attempt.max_score) * 100)}%</p>
-                    </div>
+                    {onReviewAttempt && exam.settings?.allow_result_review && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => onReviewAttempt(attempt)}
+                        className="w-full"
+                      >
+                        {t('review')}
+                      </Button>
+                    )}
                   </div>
                 ))}
               </CardContent>

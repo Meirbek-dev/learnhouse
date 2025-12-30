@@ -25,6 +25,15 @@ export const examActions = {
     payload: { attempt },
   }),
 
+  reviewAttempt: (attempt: AttemptData, returnPhase: 'pre-exam' | 'manage'): ExamFlowAction => ({
+    type: 'REVIEW_ATTEMPT',
+    payload: { attempt, returnPhase },
+  }),
+
+  exitReview: (): ExamFlowAction => ({
+    type: 'EXIT_REVIEW',
+  }),
+
   backToPreExam: (userAttempts: AttemptData[]): ExamFlowAction => ({
     type: 'BACK_TO_PRE_EXAM',
     payload: { userAttempts },

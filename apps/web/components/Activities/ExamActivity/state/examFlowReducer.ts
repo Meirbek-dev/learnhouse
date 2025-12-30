@@ -59,6 +59,7 @@ export type ExamFlowState =
   | { phase: 'pre-exam'; exam: ExamData; questions: QuestionData[]; userAttempts: AttemptData[] }
   | { phase: 'taking'; exam: ExamData; questions: QuestionData[]; attempt: AttemptData }
   | { phase: 'results'; exam: ExamData; questions: QuestionData[]; attempt: AttemptData }
+  | { phase: 'reviewing'; exam: ExamData; questions: QuestionData[]; attempt: AttemptData; returnPhase: 'pre-exam' | 'manage' }
   | { phase: 'manage'; exam: ExamData; questions: QuestionData[]; userAttempts: AttemptData[] }
   | { phase: 'error'; error: ErrorInfo };
 
@@ -68,6 +69,8 @@ export type ExamFlowAction =
   | { type: 'START_EXAM'; payload: { attempt: AttemptData } }
   | { type: 'SUBMIT_EXAM'; payload: { attempt: AttemptData } }
   | { type: 'VIEW_RESULTS'; payload: { attempt: AttemptData } }
+  | { type: 'REVIEW_ATTEMPT'; payload: { attempt: AttemptData; returnPhase: 'pre-exam' | 'manage' } }
+  | { type: 'EXIT_REVIEW' }
   | { type: 'BACK_TO_PRE_EXAM'; payload: { userAttempts: AttemptData[] } }
   | { type: 'ENTER_MANAGEMENT_MODE' }
   | { type: 'EXIT_MANAGEMENT_MODE'; payload: { userAttempts: AttemptData[] } }
@@ -127,6 +130,42 @@ export function examFlowReducer(state: ExamFlowState, action: ExamFlowAction): E
         questions: state.questions,
         attempt: action.payload.attempt,
       };
+    }
+
+    case 'REVIEW_ATTEMPT': {
+      if (state.phase !== 'pre-exam' && state.phase !== 'manage') {
+        console.warn('Cannot review attempt from phase:', state.phase);
+        return state;
+      }
+      return {
+        phase: 'reviewing',
+        exam: state.exam,
+        questions: state.questions,
+        attempt: action.payload.attempt,
+        returnPhase: action.payload.returnPhase,
+      };
+    }
+
+    case 'EXIT_REVIEW': {
+      if (state.phase !== 'reviewing') {
+        console.warn('Cannot exit review from phase:', state.phase);
+        return state;
+      }
+      if (state.returnPhase === 'pre-exam') {
+        return {
+          phase: 'pre-exam',
+          exam: state.exam,
+          questions: state.questions,
+          userAttempts: [],
+        };
+      } else {
+        return {
+          phase: 'manage',
+          exam: state.exam,
+          questions: state.questions,
+          userAttempts: [],
+        };
+      }
     }
 
     case 'BACK_TO_PRE_EXAM': {

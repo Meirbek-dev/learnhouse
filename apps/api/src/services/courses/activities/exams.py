@@ -839,6 +839,62 @@ async def get_user_attempts(
     return [ExamAttemptRead.model_validate(a) for a in attempts]
 
 
+async def get_attempt_by_uuid(
+    request: Request,
+    attempt_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> ExamAttemptRead:
+    """
+    Get a specific exam attempt by UUID.
+
+    - Students can only view their own attempts
+    - Teachers/admins can view any attempt for exams they manage
+    """
+    if isinstance(current_user, AnonymousUser):
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    # Fetch the attempt
+    statement = select(ExamAttempt).where(ExamAttempt.attempt_uuid == attempt_uuid)
+    attempt = db_session.exec(statement).first()
+
+    if not attempt:
+        raise HTTPException(status_code=404, detail="Attempt not found")
+
+    # Fetch the exam
+    exam = db_session.get(Exam, attempt.exam_id)
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    # Fetch the activity
+    activity = db_session.get(Activity, exam.activity_id)
+    if not activity:
+        raise HTTPException(status_code=404, detail="Activity not found")
+
+    # Fetch the chapter activity to get course
+    statement = select(ChapterActivity).where(ChapterActivity.activity_id == activity.id)
+    chapter_activity = db_session.exec(statement).first()
+    if not chapter_activity:
+        raise HTTPException(status_code=404, detail="Chapter activity not found")
+
+    # Fetch the course
+    course = db_session.get(Course, chapter_activity.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    # Authorization check
+    is_owner = attempt.user_id == current_user.id
+    is_teacher = await is_course_contributor_or_admin(current_user.id, course, db_session)
+
+    if not is_owner and not is_teacher:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to view this attempt"
+        )
+
+    return ExamAttemptRead.model_validate(attempt)
+
+
 ## > Helper Functions
 
 
@@ -938,7 +994,7 @@ async def get_all_exam_attempts(
     # Get all attempts with user info (exclude preview attempts from analytics)
     attempts_statement = (
         select(ExamAttempt)
-        .where(ExamAttempt.exam_id == exam.id, ExamAttempt.is_preview == False)
+        .where(ExamAttempt.exam_id == exam.id, not ExamAttempt.is_preview)
         .order_by(ExamAttempt.started_at.desc())
     )
     attempts = db_session.exec(attempts_statement).all()

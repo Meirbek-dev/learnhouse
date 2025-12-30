@@ -239,14 +239,7 @@ export default function ExamResults({
       {/* Score Card */}
       <Card>
         <CardHeader className="space-y-3 text-center">
-          <div
-            className="mx-auto mb-2 inline-flex items-center justify-center rounded-full bg-gradient-to-br from-blue-50 to-blue-100 p-6 shadow ring-1 ring-blue-200"
-            aria-hidden="true"
-          >
-            <Trophy className="h-14 w-14 text-blue-600" />
-          </div>
-
-          <CardTitle className="inline-flex items-center justify-center gap-3 pt-2 text-3xl font-semibold">
+          <CardTitle className="inline-flex items-center justify-center gap-3 pt-4 text-4xl font-semibold">
             {t('examCompleted')}
           </CardTitle>
 
