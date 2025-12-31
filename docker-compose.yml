@@ -58,6 +58,49 @@ services:
     labels:
       - docker-volume-backup.stop-during-backup=true
 
+  # Judge0 - code runner for coding activities
+  judge0_server:
+    image: judge0/judge0:latest
+    command: ["bash", "-c", "sudo mkdir -p /box && sudo chmod 1777 /box && exec ./scripts/server"]
+    volumes:
+      - ./judge0.conf:/judge0.conf:ro
+      - judge0_box:/box
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    ports:
+      - "2358:2358"
+    privileged: true
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    labels:
+      - docker-volume-backup.stop-during-backup=true
+    environment:
+      - REDIS_HOST=redis
+      - POSTGRES_HOST=db
+
+  judge0_workers:
+    image: judge0/judge0:latest
+    command: ["bash", "-c", "sudo mkdir -p /box && sudo chmod 1777 /box && exec ./scripts/workers"]
+    volumes:
+      - ./judge0.conf:/judge0.conf:ro
+      - judge0_box:/box
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    labels:
+      - docker-volume-backup.stop-during-backup=true
+    environment:
+      - REDIS_HOST=redis
+      - POSTGRES_HOST=db
+
   backup:
     image: offen/docker-volume-backup:v2.44.0
     restart: unless-stopped
@@ -71,6 +114,7 @@ services:
       # Application data volumes
       - app_content:/backup/app_content:ro
       - app_logs:/backup/app_logs:ro
+      - judge0_box:/backup/judge0_box:ro
       # Docker socket for container management
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # Local backup storage
@@ -82,3 +126,4 @@ volumes:
   chromadb_data:
   app_content:
   app_logs:
+  judge0_box:
