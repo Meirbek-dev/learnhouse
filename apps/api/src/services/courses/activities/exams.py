@@ -88,20 +88,20 @@ async def create_exam(
     # Verify org, course, chapter, activity exist
     org = db_session.get(Organization, exam_object.org_id)
     if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
+        raise HTTPException(status_code=404, detail="Организация не найдена")
 
     course = db_session.get(Course, exam_object.course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=404, detail="Курс не найден")
 
     activity = db_session.get(Activity, exam_object.activity_id)
     if not activity:
-        raise HTTPException(status_code=404, detail="Activity not found")
+        raise HTTPException(status_code=404, detail="Активность не найдена")
 
     # RBAC check: ensure user can create content in this course
     course = db_session.get(Course, exam_object.course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=404, detail="Курс не найден")
     await courses_rbac_check_for_assignments(
         request, course.course_uuid, current_user, "create", db_session
     )
@@ -113,7 +113,7 @@ async def create_exam(
         validated_settings = ExamSettingsBase.model_validate(exam_object.settings or {})
         settings_dict = validated_settings.model_dump()
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Invalid settings: {e}")
+        raise HTTPException(status_code=400, detail=f"Неверные настройки: {e}")
 
     # Create exam
     exam_uuid = f"exam_{ULID()}"
@@ -151,12 +151,12 @@ async def read_exam(
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="Экзамен не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=404, detail="Курс не найден")
     await courses_rbac_check_for_assignments(
         request, course.course_uuid, current_user, "read", db_session
     )
@@ -175,18 +175,18 @@ async def read_exam_from_activity_uuid(
     activity = db_session.exec(statement).first()
 
     if not activity:
-        raise HTTPException(status_code=404, detail="Activity not found")
+        raise HTTPException(status_code=404, detail="Активность не найдена")
 
     statement = select(Exam).where(Exam.activity_id == activity.id)
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="Экзамен не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=404, detail="Курс не найден")
     await courses_rbac_check_for_assignments(
         request, course.course_uuid, current_user, "read", db_session
     )
@@ -207,12 +207,12 @@ async def update_exam(
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="Экзамен не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=404, detail="Курс не найден")
     await courses_rbac_check_for_assignments(
         request, course.course_uuid, current_user, "update", db_session
     )
@@ -230,7 +230,7 @@ async def update_exam(
             )
             update_data["settings"] = validated_settings.model_dump()
         except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Invalid settings: {e}")
+            raise HTTPException(status_code=400, detail=f"Неверные настройки: {e}")
 
     for key, value in update_data.items():
         setattr(exam, key, value)
@@ -256,20 +256,13 @@ async def delete_exam(
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="Экзамен не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "delete", db_session
-    )
-
-    db_session.delete(exam)
-    db_session.commit()
-
-    return {"message": "Exam deleted successfully"}
+        raise HTTPException(status_code=404, detail="Курс не найден")
+    return {"message": "Экзамен успешно удалён"}
 
 
 async def create_exam_with_activity(
@@ -285,11 +278,11 @@ async def create_exam_with_activity(
 
     chapter = db_session.get(Chapter, exam_object.chapter_id)
     if not chapter:
-        raise HTTPException(status_code=404, detail="Chapter not found")
+        raise HTTPException(status_code=404, detail="Глава не найдена")
 
     course = db_session.get(Course, chapter.course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=404, detail="Курс не найден")
 
     # RBAC check: ensure user can create content in this course
     await courses_rbac_check_for_assignments(
@@ -388,39 +381,39 @@ async def create_question(
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="Экзамен не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=404, detail="Курс не найден")
     await courses_rbac_check_for_assignments(
         request, course.course_uuid, current_user, "create", db_session
     )
 
     # Input validation and sanitization
     if not question_object.question_text or not question_object.question_text.strip():
-        raise HTTPException(status_code=400, detail="Question text cannot be empty")
+        raise HTTPException(status_code=400, detail="Текст вопроса не может быть пустым")
 
     if len(question_object.question_text) > 5000:
-        raise HTTPException(status_code=400, detail="Question text too long (max 5000 characters)")
+        raise HTTPException(status_code=400, detail="Текст вопроса слишком длинный (макс. 5000 символов)")
 
     if question_object.explanation and len(question_object.explanation) > 2000:
-        raise HTTPException(status_code=400, detail="Explanation too long (max 2000 characters)")
+        raise HTTPException(status_code=400, detail="Пояснение слишком длинное (макс. 2000 символов)")
 
     # Validate answer_options based on question type
     if not question_object.answer_options or len(question_object.answer_options) == 0:
-        raise HTTPException(status_code=400, detail="At least one answer option is required")
+        raise HTTPException(status_code=400, detail="Требуется как минимум один вариант ответа")
 
     if len(question_object.answer_options) > 10:
-        raise HTTPException(status_code=400, detail="Too many answer options (max 10)")
+        raise HTTPException(status_code=400, detail="Слишком много вариантов ответа (макс. 10)")
 
     # Validate that at least one correct answer exists (except for essay/custom)
     from src.db.courses.exams import QuestionTypeEnum
     if question_object.question_type in [QuestionTypeEnum.SINGLE_CHOICE, QuestionTypeEnum.MULTIPLE_CHOICE, QuestionTypeEnum.TRUE_FALSE]:
         has_correct = any(opt.get("is_correct") for opt in question_object.answer_options)
         if not has_correct:
-            raise HTTPException(status_code=400, detail="At least one answer must be marked as correct")
+            raise HTTPException(status_code=400, detail="Необходим хотя бы один вариант, отмеченный как правильный")
 
     # Create question
     question_uuid = f"question_{ULID()}"
@@ -458,12 +451,12 @@ async def read_questions(
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="Экзамен не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=404, detail="Курс не найден")
     await courses_rbac_check_for_assignments(
         request, course.course_uuid, current_user, "read", db_session
     )
@@ -491,16 +484,16 @@ async def update_question(
     question = db_session.exec(statement).first()
 
     if not question:
-        raise HTTPException(status_code=404, detail="Question not found")
+        raise HTTPException(status_code=404, detail="Вопрос не найден")
 
     exam = db_session.get(Exam, question.exam_id)
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="Экзамен не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=404, detail="Курс не найден")
     await courses_rbac_check_for_assignments(
         request, course.course_uuid, current_user, "update", db_session
     )
@@ -531,16 +524,16 @@ async def delete_question(
     question = db_session.exec(statement).first()
 
     if not question:
-        raise HTTPException(status_code=404, detail="Question not found")
+        raise HTTPException(status_code=404, detail="Вопрос не найден")
 
     exam = db_session.get(Exam, question.exam_id)
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="Экзамен не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=404, detail="Курс не найден")
     await courses_rbac_check_for_assignments(
         request, course.course_uuid, current_user, "delete", db_session
     )
@@ -548,7 +541,7 @@ async def delete_question(
     db_session.delete(question)
     db_session.commit()
 
-    return {"message": "Question deleted successfully"}
+    return {"message": "Вопрос успешно удалён"}
 
 
 ## > Exam Attempts
@@ -562,18 +555,18 @@ async def start_exam_attempt(
 ) -> ExamAttemptRead:
     """Start a new exam attempt for the current user"""
     if isinstance(current_user, AnonymousUser):
-        raise HTTPException(status_code=401, detail="Authentication required")
+        raise HTTPException(status_code=401, detail="Требуется аутентификация")
 
     statement = select(Exam).where(Exam.exam_uuid == exam_uuid)
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="Экзамен не найден")
 
     # Get course to check contributor status
     course = db_session.get(Course, exam.course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=404, detail="Курс не найден")
 
     # Check if user is a teacher/contributor (teachers have unlimited attempts)
     is_teacher = await is_course_contributor_or_admin(
@@ -586,13 +579,13 @@ async def start_exam_attempt(
 
     if not is_teacher:
         if access_mode == "NO_ACCESS":
-            raise HTTPException(status_code=403, detail="Exam is not accessible")
+            raise HTTPException(status_code=403, detail="Экзамен недоступен")
 
         if access_mode == "WHITELIST":
             whitelist = settings.get("whitelist_user_ids", [])
             if current_user.id not in whitelist:
                 raise HTTPException(
-                    status_code=403, detail="You are not authorized to access this exam"
+                    status_code=403, detail="У вас нет доступа к этому экзамену"
                 )
 
     # Check attempt limit (teachers have unlimited attempts)
@@ -608,7 +601,7 @@ async def start_exam_attempt(
 
             if not (ATTEMPT_LIMIT_MIN <= attempt_limit <= ATTEMPT_LIMIT_MAX):
                 raise HTTPException(
-                    status_code=400, detail="Invalid attempt_limit configured for exam"
+                    status_code=400, detail="Неверно указано ограничение попыток для экзамена"
                 )
 
             # ATOMIC CHECK: Use FOR UPDATE to prevent race condition
@@ -623,14 +616,14 @@ async def start_exam_attempt(
             )
             attempt_count = db_session.exec(statement).one()
             if attempt_count >= attempt_limit:
-                raise HTTPException(status_code=403, detail="Attempt limit reached")
+                raise HTTPException(status_code=403, detail="Достигнут лимит попыток")
 
     # Validate question_limit if present
     question_limit = settings.get("question_limit")
     if question_limit is not None:
         if question_limit < QUESTION_LIMIT_MIN:
             raise HTTPException(
-                status_code=400, detail="Invalid question_limit configured for exam"
+                status_code=400, detail="Неверно указано ограничение по количеству вопросов для экзамена"
             )
 
     # Get all questions for this exam
@@ -642,7 +635,7 @@ async def start_exam_attempt(
     all_questions = list(db_session.exec(statement).all())
 
     if not all_questions:
-        raise HTTPException(status_code=400, detail="Exam has no questions")
+        raise HTTPException(status_code=400, detail="В экзамене нет вопросов")
 
     # Apply question limit if configured
     question_limit = settings.get("question_limit")
@@ -692,24 +685,24 @@ async def submit_exam_attempt(
 ) -> ExamAttemptRead:
     """Submit an exam attempt"""
     if isinstance(current_user, AnonymousUser):
-        raise HTTPException(status_code=401, detail="Authentication required")
+        raise HTTPException(status_code=401, detail="Требуется аутентификация")
 
     statement = select(ExamAttempt).where(ExamAttempt.attempt_uuid == attempt_uuid)
     attempt = db_session.exec(statement).first()
 
     if not attempt:
-        raise HTTPException(status_code=404, detail="Attempt not found")
+        raise HTTPException(status_code=404, detail="Попытка не найдена")
 
     if attempt.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized")
+        raise HTTPException(status_code=403, detail="Доступ запрещён")
 
     if attempt.status != AttemptStatusEnum.IN_PROGRESS:
-        raise HTTPException(status_code=400, detail="Attempt already submitted")
+        raise HTTPException(status_code=400, detail="Попытка уже отправлена")
 
     # Get exam to validate time limit server-side
     exam = db_session.get(Exam, attempt.exam_id)
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="Экзамен не найден")
 
     # SERVER-SIDE TIME LIMIT VALIDATION (Security: prevent client bypass)
     settings = exam.settings or {}
@@ -746,7 +739,7 @@ async def submit_exam_attempt(
         if str(answer_key) not in valid_question_ids:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid question ID in answers: {answer_key}"
+                detail=f"Недопустимый идентификатор вопроса в ответах: {answer_key}"
             )
 
     # Calculate score
@@ -858,7 +851,7 @@ async def submit_exam_attempt(
         logger.error(f"Failed to submit exam attempt {attempt_uuid}: {e}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail="Failed to submit exam. Please try again."
+            detail="Не удалось отправить экзамен. Пожалуйста, попробуйте ещё раз."
         )
 
 
@@ -871,16 +864,16 @@ async def record_violation(
 ) -> ExamAttemptRead:
     """Record a violation during an exam attempt"""
     if isinstance(current_user, AnonymousUser):
-        raise HTTPException(status_code=401, detail="Authentication required")
+        raise HTTPException(status_code=401, detail="Требуется аутентификация")
 
     statement = select(ExamAttempt).where(ExamAttempt.attempt_uuid == attempt_uuid)
     attempt = db_session.exec(statement).first()
 
     if not attempt:
-        raise HTTPException(status_code=404, detail="Attempt not found")
+        raise HTTPException(status_code=404, detail="Попытка не найдена")
 
     if attempt.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized")
+        raise HTTPException(status_code=403, detail="Доступ запрещён")
 
     # Add violation
     violation = {
@@ -949,13 +942,13 @@ async def get_user_attempts(
 ) -> list[ExamAttemptRead]:
     """Get all attempts for current user"""
     if isinstance(current_user, AnonymousUser):
-        raise HTTPException(status_code=401, detail="Authentication required")
+        raise HTTPException(status_code=401, detail="Требуется аутентификация")
 
     statement = select(Exam).where(Exam.exam_uuid == exam_uuid)
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="Экзамен не найден")
 
     statement = (
         select(ExamAttempt)
@@ -984,7 +977,7 @@ async def get_attempt_by_uuid(
     404 semantics for missing related records.
     """
     if isinstance(current_user, AnonymousUser):
-        raise HTTPException(status_code=401, detail="Authentication required")
+        raise HTTPException(status_code=401, detail="Требуется аутентификация")
 
     # Fetch attempt + related records in one query (use outer joins so we can
     # detect missing relations and raise appropriate 404s while keeping a
@@ -1015,20 +1008,20 @@ async def get_attempt_by_uuid(
 
     if not row:
         # No attempt at all
-        raise HTTPException(status_code=404, detail="Attempt not found")
+        raise HTTPException(status_code=404, detail="Попытка не найдена")
 
     # row is a tuple: (attempt, exam, activity, chapter_activity, course, resource_author)
     attempt, exam, activity, chapter_activity, course, resource_author = row
 
     # Preserve original 404 behavior for missing linked records
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="Экзамен не найден")
     if not activity:
-        raise HTTPException(status_code=404, detail="Activity not found")
+        raise HTTPException(status_code=404, detail="Активность не найдена")
     if not chapter_activity:
-        raise HTTPException(status_code=404, detail="Chapter activity not found")
+        raise HTTPException(status_code=404, detail="Активность главы не найдена")
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=404, detail="Курс не найден")
 
     # Authorization check: owner can always view their attempt
     is_owner = attempt.user_id == current_user.id
@@ -1049,7 +1042,7 @@ async def get_attempt_by_uuid(
     ):
         return ExamAttemptRead.model_validate(attempt)
 
-    raise HTTPException(status_code=403, detail="Not authorized to view this attempt")
+    raise HTTPException(status_code=403, detail="Доступ к просмотру этой попытки запрещён")
 
 
 ## > Helper Functions
@@ -1148,19 +1141,19 @@ async def get_all_exam_attempts(
     exam = db_session.exec(exam_statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="Экзамен не найден")
 
     # Get activity to check permissions
     activity_statement = select(Activity).where(Activity.id == exam.activity_id)
     activity = db_session.exec(activity_statement).first()
 
     if not activity:
-        raise HTTPException(status_code=404, detail="Activity not found")
+        raise HTTPException(status_code=404, detail="Активность не найдена")
 
     # Verify user is course contributor/teacher
     course = db_session.get(Course, activity.course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=404, detail="Курс не найден")
     await courses_rbac_check_for_assignments(
         request, course.course_uuid, current_user, "read", db_session
     )
@@ -1239,19 +1232,19 @@ async def export_questions_csv(
     exam = db_session.exec(exam_statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="Экзамен не найден")
 
     # Get activity to check permissions
     activity_statement = select(Activity).where(Activity.id == exam.activity_id)
     activity = db_session.exec(activity_statement).first()
 
     if not activity:
-        raise HTTPException(status_code=404, detail="Activity not found")
+        raise HTTPException(status_code=404, detail="Активность не найдена")
 
     # Verify user is course contributor/teacher
     course = db_session.get(Course, activity.course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=404, detail="Курс не найден")
     await courses_rbac_check_for_assignments(
         request, course.course_uuid, current_user, "read", db_session
     )
@@ -1274,12 +1267,12 @@ async def export_questions_csv(
     # Header
     writer.writerow(
         [
-            "Question Text",
-            "Type",
-            "Points",
-            "Answer Options (JSON)",
-            "Explanation",
-            "Order Index",
+            "Текст вопроса",
+            "Тип",
+            "Баллы",
+            "Варианты ответов (JSON)",
+            "Пояснение",
+            "Порядок",
         ]
     )
 
@@ -1314,19 +1307,19 @@ async def import_questions_csv(
     exam = db_session.exec(exam_statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="Экзамен не найден")
 
     # Get activity to check permissions
     activity_statement = select(Activity).where(Activity.id == exam.activity_id)
     activity = db_session.exec(activity_statement).first()
 
     if not activity:
-        raise HTTPException(status_code=404, detail="Activity not found")
+        raise HTTPException(status_code=404, detail="Активность не найдена")
 
     # Verify user is course contributor/teacher
     course = db_session.get(Course, activity.course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=404, detail="Курс не найден")
     await courses_rbac_check_for_assignments(
         request, course.course_uuid, current_user, "create", db_session
     )
@@ -1353,15 +1346,16 @@ async def import_questions_csv(
 
     for row_num, row in enumerate(reader, start=2):  # Start at 2 to account for header
         try:
-            question_text = row.get("Question Text", "").strip()
-            question_type = row.get("Type", "").strip()
-            points = int(row.get("Points", 1))
-            answer_options_json = row.get("Answer Options (JSON)", "[]")
-            explanation = row.get("Explanation", "").strip() or None
+            # Support both English and Russian CSV headers
+            question_text = (row.get("Question Text", "") or row.get("Текст вопроса", "")).strip()
+            question_type = (row.get("Type", "") or row.get("Тип", "")).strip()
+            points = int(row.get("Points", 1) or row.get("Баллы", 1))
+            answer_options_json = (row.get("Answer Options (JSON)", "[]") or row.get("Варианты ответов (JSON)", "[]"))
+            explanation = (row.get("Explanation", "") or row.get("Пояснение", "")).strip() or None
 
             # Validate
             if not question_text:
-                errors.append(f"Row {row_num}: Question text is required")
+                errors.append(f"Строка {row_num}: Требуется текст вопроса")
                 continue
 
             if question_type not in [
@@ -1370,14 +1364,14 @@ async def import_questions_csv(
                 "TRUE_FALSE",
                 "MATCHING",
             ]:
-                errors.append(f"Row {row_num}: Invalid question type '{question_type}'")
+                errors.append(f"Строка {row_num}: Неверный тип вопроса '{question_type}'")
                 continue
 
             # Parse answer options
             try:
                 answer_options = json.loads(answer_options_json)
             except json.JSONDecodeError:
-                errors.append(f"Row {row_num}: Invalid JSON in answer options")
+                errors.append(f"Строка {row_num}: Неверный JSON в вариантах ответов")
                 continue
 
             # Create question
@@ -1399,7 +1393,7 @@ async def import_questions_csv(
             next_order_index += 1
 
         except Exception as e:
-            errors.append(f"Row {row_num}: {e!s}")
+            errors.append(f"Строка {row_num}: {e!s}")
 
     db_session.commit()
 
@@ -1422,12 +1416,12 @@ async def reorder_questions(
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="Экзамен не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=404, detail="Курс не найден")
     await courses_rbac_check_for_assignments(
         request, course.course_uuid, current_user, "update", db_session
     )

@@ -198,12 +198,6 @@ export default function ExamPreScreen({
                     </div>
                     <span className="flex-1 text-sm leading-relaxed text-gray-700">{t('instruction1')}</span>
                   </li>
-                  <li className="flex items-start gap-3 rounded-lg bg-white p-3 shadow-sm">
-                    <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-amber-100">
-                      <AlertCircle className="h-4 w-4 text-amber-600" />
-                    </div>
-                    <span className="flex-1 text-sm leading-relaxed text-gray-700">{t('instruction2')}</span>
-                  </li>
                   {timeLimit && (
                     <li className="flex items-start gap-3 rounded-lg bg-white p-3 shadow-sm">
                       <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
@@ -214,6 +208,12 @@ export default function ExamPreScreen({
                       </span>
                     </li>
                   )}
+                  <li className="flex items-start gap-3 rounded-lg bg-white p-3 shadow-sm">
+                    <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-amber-100">
+                      <AlertCircle className="h-4 w-4 text-amber-600" />
+                    </div>
+                    <span className="flex-1 text-sm leading-relaxed text-gray-700">{t('instruction2')}</span>
+                  </li>
                   {settings.tab_switch_detection && (
                     <li className="flex items-start gap-3 rounded-lg bg-white p-3 shadow-sm">
                       <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-amber-100">
