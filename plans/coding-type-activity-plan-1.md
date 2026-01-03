@@ -2,7 +2,8 @@
 
 ## Overview
 
-A comprehensive coding assessment system integrated with Judge0, enabling instructors to create coding challenges and students to submit, test, and receive automated feedback on their solutions.
+A comprehensive coding assessment system integrated with Judge0, enabling instructors to create
+coding challenges and students to submit, test, and receive automated feedback on their solutions.
 
 ## Core Components
 
