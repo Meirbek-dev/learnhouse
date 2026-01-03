@@ -652,7 +652,9 @@ async def start_exam_attempt(
 
     # Create attempt
     attempt_uuid = f"attempt_{ULID()}"
-    now = datetime.now().isoformat()
+    from datetime import timezone
+    now = datetime.now(timezone.utc)
+    now_iso = now.isoformat()
 
     attempt = ExamAttempt(
         attempt_uuid=attempt_uuid,
@@ -664,9 +666,9 @@ async def start_exam_attempt(
         answers={},
         violations=[],
         is_preview=is_teacher,  # Mark teacher attempts as preview (exclude from analytics)
-        started_at=now,
-        creation_date=now,
-        update_date=now,
+        started_at=now_iso,
+        creation_date=now_iso,
+        update_date=now_iso,
     )
 
     db_session.add(attempt)

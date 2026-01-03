@@ -193,10 +193,12 @@ async def api_submit_exam_attempt(
     request: Request,
     exam_uuid: str,
     attempt_uuid: str,
-    answers: dict,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> ExamAttemptRead:
+    # Parse answers from request body
+    body = await request.json()
+    answers = body if isinstance(body, dict) else {}
     return await submit_exam_attempt(
         request, attempt_uuid, answers, current_user, db_session
     )
@@ -236,7 +238,7 @@ async def api_get_attempt_by_uuid(
 ) -> ExamAttemptRead:
     """
     Get a specific exam attempt by UUID.
-    
+
     - Students can only access their own attempts
     - Teachers/admins can access any attempt for exams they manage
     """
