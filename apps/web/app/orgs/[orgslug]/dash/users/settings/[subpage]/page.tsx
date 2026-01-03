@@ -1,164 +1,110 @@
 'use client';
+
 import OrgUserGroups from '@components/Dashboard/Pages/Users/OrgUserGroups/OrgUserGroups';
-import { Monitor, ScanEye, Shield, SquareUserRound, UserPlus, Users } from 'lucide-react';
 import OrgUsersAdd from '@components/Dashboard/Pages/Users/OrgUsersAdd/OrgUsersAdd';
+import { ScanEye, Shield, SquareUserRound, UserPlus, Users } from 'lucide-react';
 import OrgAccess from '@components/Dashboard/Pages/Users/OrgAccess/OrgAccess';
 import OrgUsers from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers';
 import OrgRoles from '@components/Dashboard/Pages/Users/OrgRoles/OrgRoles';
-import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
-import { Card, CardContent } from '@/components/ui/card';
+import DesktopOnlyGuard from '@components/Dashboard/Misc/DesktopOnlyGuard';
+import SettingsHeader from '@components/Dashboard/Misc/SettingsHeader';
+import SettingsTabs from '@components/Dashboard/Misc/SettingsTabs';
 import { getUriWithOrg } from '@services/config/config';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { use, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import Link from '@components/ui/AppLink';
-import { motion } from 'motion/react';
+import { use, useMemo } from 'react';
 
 export interface SettingsParams {
   subpage: string;
   orgslug: string;
 }
 
+type SubpageType = 'users' | 'signups' | 'add' | 'usergroups' | 'roles';
+
+interface TabConfig {
+  id: SubpageType;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  labelKey: string;
+  titleKey: string;
+  descriptionKey: string;
+  component: React.ComponentType;
+}
+
 const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
   const params = use(props.params);
   const t = useTranslations('DashPage.UserSettings');
-  const [H1Label, setH1Label] = useState('');
-  const [H2Label, setH2Label] = useState('');
-  const isMobile = useIsMobile();
 
-  useEffect(() => {
-    const handleLabels = () => {
-      if (params.subpage === 'users') {
-        setH1Label(t('usersTitle'));
-        setH2Label(t('usersDescription'));
-      }
-      if (params.subpage === 'signups') {
-        setH1Label(t('signupsTitle'));
-        setH2Label(t('signupsDescription'));
-      }
-      if (params.subpage === 'add') {
-        setH1Label(t('addTitle'));
-        setH2Label(t('addDescription'));
-      }
-      if (params.subpage === 'usergroups') {
-        setH1Label(t('usergroupsTitle'));
-        setH2Label(t('usergroupsDescription'));
-      }
-      if (params.subpage === 'roles') {
-        setH1Label(t('rolesTitle'));
-        setH2Label(t('rolesDescription'));
-      }
-    };
+  const tabs: TabConfig[] = useMemo(
+    () => [
+      {
+        id: 'users',
+        icon: Users,
+        labelKey: 'users',
+        titleKey: 'usersTitle',
+        descriptionKey: 'usersDescription',
+        component: OrgUsers,
+      },
+      {
+        id: 'usergroups',
+        icon: SquareUserRound,
+        labelKey: 'usergroups',
+        titleKey: 'usergroupsTitle',
+        descriptionKey: 'usergroupsDescription',
+        component: OrgUserGroups,
+      },
+      {
+        id: 'roles',
+        icon: Shield,
+        labelKey: 'roles',
+        titleKey: 'rolesTitle',
+        descriptionKey: 'rolesDescription',
+        component: OrgRoles,
+      },
+      {
+        id: 'signups',
+        icon: ScanEye,
+        labelKey: 'signups',
+        titleKey: 'signupsTitle',
+        descriptionKey: 'signupsDescription',
+        component: OrgAccess,
+      },
+      {
+        id: 'add',
+        icon: UserPlus,
+        labelKey: 'add',
+        titleKey: 'addTitle',
+        descriptionKey: 'addDescription',
+        component: OrgUsersAdd,
+      },
+    ],
+    [],
+  );
 
-    handleLabels();
-  }, [params.subpage, t]);
+  const currentTab: TabConfig = useMemo(
+    () => tabs.find((tab) => tab.id === params.subpage) ?? tabs[0]!,
+    [tabs, params.subpage],
+  );
 
-  if (isMobile) {
-    // TODO: Work on a better mobile experience
-    return (
-      <div className="bg-muted/40 flex h-screen w-full items-center justify-center p-4">
-        <Card className="max-w-sm text-center">
-          <CardContent className="flex flex-col items-center space-y-4 px-6 py-2">
-            <h2 className="text-xl font-bold tracking-tight">{t('desktopOnlyTitle')}</h2>
-            <Monitor
-              className="text-muted-foreground"
-              size={56}
-            />
-            <p className="text-muted-foreground text-sm leading-snug">{t('desktopOnlyMessage1')}</p>
-            <p className="text-muted-foreground/80 text-xs">{t('desktopOnlyMessage2')}</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const ActiveComponent = currentTab.component;
 
   return (
-    <div className="grid h-screen w-full grid-rows-[auto_1fr] bg-[#f8f8f8]">
-      <div className="z-10 bg-[#fcfbfc] pr-10 pl-10 tracking-tight shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
-        <BreadCrumbs type="orgusers" />
-        <div className="my-2 py-3">
-          <div className="flex max-w-7xl flex-col space-y-1">
-            <div className="flex pt-3 text-4xl font-bold tracking-tighter">{H1Label}</div>
-            <div className="flex text-base font-medium text-gray-400">{H2Label} </div>
-          </div>
-        </div>
-        <div className="flex space-x-5 text-sm font-bold">
-          <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/users`}>
-            <div
-              className={`border-primary w-fit py-2 text-center transition-all ease-linear ${
-                params.subpage === 'users' ? 'border-b-4' : 'opacity-50'
-              } cursor-pointer`}
-            >
-              <div className="mx-2 flex items-center space-x-2.5">
-                <Users size={16} />
-                <div>{t('users')}</div>
-              </div>
-            </div>
-          </Link>
-          <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/usergroups`}>
-            <div
-              className={`border-primary w-fit py-2 text-center transition-all ease-linear ${
-                params.subpage === 'usergroups' ? 'border-b-4' : 'opacity-50'
-              } cursor-pointer`}
-            >
-              <div className="mx-2 flex items-center space-x-2.5">
-                <SquareUserRound size={16} />
-                <div>{t('usergroups')}</div>
-              </div>
-            </div>
-          </Link>
-          <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/roles`}>
-            <div
-              className={`border-primary w-fit py-2 text-center transition-all ease-linear ${
-                params.subpage.toString() === 'roles' ? 'border-b-4' : 'opacity-50'
-              } cursor-pointer`}
-            >
-              <div className="mx-2 flex items-center space-x-2.5">
-                <Shield size={16} />
-                <div>{t('roles')}</div>
-              </div>
-            </div>
-          </Link>
-          <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/signups`}>
-            <div
-              className={`border-primary w-fit py-2 text-center transition-all ease-linear ${
-                params.subpage === 'signups' ? 'border-b-4' : 'opacity-50'
-              } cursor-pointer`}
-            >
-              <div className="mx-2 flex items-center space-x-2.5">
-                <ScanEye size={16} />
-                <div>{t('signups')}</div>
-              </div>
-            </div>
-          </Link>
-          <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/add`}>
-            <div
-              className={`border-primary w-fit py-2 text-center transition-all ease-linear ${
-                params.subpage === 'add' ? 'border-b-4' : 'opacity-50'
-              } cursor-pointer`}
-            >
-              <div className="mx-2 flex items-center space-x-2.5">
-                <UserPlus size={16} />
-                <div>{t('add')}</div>
-              </div>
-            </div>
-          </Link>
-        </div>
+    <DesktopOnlyGuard>
+      <div className="bg-background flex h-screen w-full flex-col">
+        <SettingsHeader
+          breadcrumbType="orgusers"
+          title={t(currentTab.titleKey)}
+          description={t(currentTab.descriptionKey)}
+        >
+          <SettingsTabs
+            value={params.subpage}
+            tabs={tabs}
+            getHref={(tab) => `${getUriWithOrg(params.orgslug, '')}/dash/users/settings/${tab.id}`}
+            translationNamespace="DashPage.UserSettings"
+          />
+        </SettingsHeader>
+
+        <ActiveComponent />
       </div>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.1, type: 'spring', stiffness: 80 }}
-        className="flex-1 overflow-y-auto"
-      >
-        {params.subpage === 'users' ? <OrgUsers /> : ''}
-        {params.subpage === 'signups' ? <OrgAccess /> : ''}
-        {params.subpage === 'add' ? <OrgUsersAdd /> : ''}
-        {params.subpage === 'usergroups' ? <OrgUserGroups /> : ''}
-        {params.subpage === 'roles' ? <OrgRoles /> : ''}
-      </motion.div>
-    </div>
+    </DesktopOnlyGuard>
   );
 };
 

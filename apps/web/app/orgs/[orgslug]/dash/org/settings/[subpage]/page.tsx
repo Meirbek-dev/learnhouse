@@ -6,13 +6,14 @@ import OrgEditLanding from '@components/Dashboard/Pages/Org/OrgEditLanding/OrgEd
 import OrgEditGeneral from '@components/Dashboard/Pages/Org/OrgEditGeneral/OrgEditGeneral';
 import OrgEditImages from '@components/Dashboard/Pages/Org/OrgEditImages/OrgEditImages';
 import OrgEditOther from '@components/Dashboard/Pages/Org/OrgEditOther/OrgEditOther';
-import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
+import SettingsHeader from '@components/Dashboard/Misc/SettingsHeader';
+import SettingsTabs from '@components/Dashboard/Misc/SettingsTabs';
 import { getUriWithOrg } from '@services/config/config';
-import { use, useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Separator } from '@/components/ui/separator';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import Link from '@components/ui/AppLink';
-import { motion } from 'motion/react';
+import { use, useMemo } from 'react';
 
 export interface OrgParams {
   subpage: string;
@@ -23,98 +24,120 @@ interface TabItem {
   id: string;
   label: string;
   icon: LucideIcon;
+  titleKey: string;
+  descriptionKey: string;
 }
 
 const SETTING_TABS: TabItem[] = [
-  { id: 'general', label: 'general', icon: TextIcon },
-  { id: 'landing', label: 'landing', icon: LayoutDashboardIcon },
-  { id: 'previews', label: 'previews', icon: ImageIcon },
-  { id: 'socials', label: 'socials', icon: Share2Icon },
-  { id: 'other', label: 'other', icon: CodeIcon },
+  {
+    id: 'general',
+    label: 'general',
+    icon: TextIcon,
+    titleKey: 'generalTitle',
+    descriptionKey: 'generalDescription',
+  },
+  {
+    id: 'landing',
+    label: 'landing',
+    icon: LayoutDashboardIcon,
+    titleKey: 'landingTitle',
+    descriptionKey: 'landingDescription',
+  },
+  {
+    id: 'previews',
+    label: 'previews',
+    icon: ImageIcon,
+    titleKey: 'previewsTitle',
+    descriptionKey: 'previewsDescription',
+  },
+  {
+    id: 'socials',
+    label: 'socials',
+    icon: Share2Icon,
+    titleKey: 'socialsTitle',
+    descriptionKey: 'socialsDescription',
+  },
+  {
+    id: 'other',
+    label: 'other',
+    icon: CodeIcon,
+    titleKey: 'other',
+    descriptionKey: 'Manage additional organization settings',
+  },
 ];
 
-const TabLink = ({ tab, isActive, orgslug }: { tab: TabItem; isActive: boolean; orgslug: string }) => {
-  const t = useTranslations('DashPage.OrgSettings');
+const ContentRenderer = ({ subpage }: { subpage: string }) => {
+  const content = useMemo(() => {
+    switch (subpage) {
+      case 'general':
+        return <OrgEditGeneral />;
+      case 'previews':
+        return <OrgEditImages />;
+      case 'socials':
+        return <OrgEditSocials />;
+      case 'landing':
+        return <OrgEditLanding />;
+      case 'other':
+        return <OrgEditOther />;
+      default:
+        return null;
+    }
+  }, [subpage]);
+
   return (
-    <Link href={`${getUriWithOrg(orgslug, '')}/dash/org/settings/${tab.id}`}>
-      <div
-        className={`border-primary w-fit py-2 text-center transition-all ease-linear ${
-          isActive ? 'border-b-4' : 'opacity-50'
-        } cursor-pointer`}
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={subpage}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
+        className="flex-1 overflow-y-auto"
       >
-        <div className="mx-2.5 flex items-center space-x-2.5">
-          <tab.icon size={16} />
-          <div>{t(tab.label)}</div>
-        </div>
-      </div>
-    </Link>
+        {content}
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
 const OrgPage = (props: { params: Promise<OrgParams> }) => {
   const t = useTranslations('DashPage.OrgSettings');
   const params = use(props.params);
-  const [H1Label, setH1Label] = useState('');
-  const [H2Label, setH2Label] = useState('');
 
-  useEffect(() => {
-    const handleLabels = () => {
-      if (params.subpage === 'general') {
-        setH1Label(t('generalTitle'));
-        setH2Label(t('generalDescription'));
-      } else if (params.subpage === 'previews') {
-        setH1Label(t('previewsTitle'));
-        setH2Label(t('previewsDescription'));
-      } else if (params.subpage === 'socials') {
-        setH1Label(t('socialsTitle'));
-        setH2Label(t('socialsDescription'));
-      } else if (params.subpage === 'landing') {
-        setH1Label(t('landingTitle'));
-        setH2Label(t('landingDescription'));
-      } else if (params.subpage === 'other') {
-        setH1Label(t('other'));
-        setH2Label(t('Manage additional organization settings'));
-      }
-    };
+  const currentTab = useMemo(
+    () => SETTING_TABS.find((tab) => tab.id === params.subpage) || SETTING_TABS[0],
+    [params.subpage],
+  );
 
-    handleLabels();
-  }, [params.subpage, t]);
+  const titleKey = currentTab!.titleKey;
+  const descKey = currentTab!.descriptionKey;
+
+  const pageTitle = useMemo(() => t(titleKey), [t, titleKey]);
+  const pageDescription = useMemo(() => t(descKey), [t, descKey]);
 
   return (
-    <div className="flex h-full w-full flex-col bg-[#f8f8f8]">
-      <div className="soft-shadow shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
-        <BreadCrumbs type="org" />
-        <div className="my-2 py-2">
-          <div className="flex max-w-7xl flex-col space-y-1">
-            <div className="flex pt-3 text-4xl font-bold tracking-tighter">{H1Label}</div>
-            <div className="flex text-base font-medium text-gray-400">{H2Label}</div>
-          </div>
-        </div>
-        <div className="flex space-x-0.5 text-sm font-bold">
-          {SETTING_TABS.map((tab) => (
-            <TabLink
-              key={tab.id}
-              tab={tab}
-              isActive={params.subpage === tab.id}
-              orgslug={params.orgslug}
-            />
-          ))}
-        </div>
-      </div>
-      <div className="h-6 shrink-0" />
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.1, type: 'spring', stiffness: 80 }}
-        className="flex-1 overflow-y-auto"
+    <div className="bg-background flex h-full w-full flex-col">
+      <SettingsHeader
+        breadcrumbType="org"
+        title={pageTitle}
+        description={pageDescription}
       >
-        {params.subpage === 'general' ? <OrgEditGeneral /> : ''}
-        {params.subpage === 'previews' ? <OrgEditImages /> : ''}
-        {params.subpage === 'socials' ? <OrgEditSocials /> : ''}
-        {params.subpage === 'landing' ? <OrgEditLanding /> : ''}
-        {params.subpage === 'other' ? <OrgEditOther /> : ''}
-      </motion.div>
+        <SettingsTabs
+          value={params.subpage}
+          tabs={SETTING_TABS.map((t) => ({ id: t.id, labelKey: t.label, icon: t.icon }))}
+          getHref={(tab) => `${getUriWithOrg(params.orgslug, '')}/dash/org/settings/${tab.id}`}
+          translationNamespace="DashPage.OrgSettings"
+        />
+      </SettingsHeader>
+
+      <Separator />
+
+      {/* Content Section */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="container max-w-screen py-6 lg:py-8">
+          <ContentRenderer subpage={params.subpage} />
+        </div>
+      </main>
     </div>
   );
 };

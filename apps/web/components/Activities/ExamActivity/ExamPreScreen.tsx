@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle, CheckCircle, Clock, FileText, Users } from 'lucide-react';
+import { AlertCircle, CheckCircle, CircleAlertIcon, Clock, FileText, InfinityIcon, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -81,13 +81,6 @@ export default function ExamPreScreen({
   return (
     <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
       {/* Page header with better visual hierarchy */}
-      <div className="mb-8 space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">{exam.title}</h1>
-        {exam.description && (
-          <p className="text-muted-foreground max-w-3xl text-lg leading-relaxed">{exam.description}</p>
-        )}
-      </div>
-
       <div className="grid gap-8 lg:grid-cols-[1fr,380px]">
         <div className="space-y-6">
           <Card>
@@ -149,16 +142,7 @@ export default function ExamPreScreen({
                   <div className="group relative overflow-hidden rounded-xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 via-blue-100/80 to-indigo-100/50 p-5 transition-all duration-200 hover:shadow-lg hover:shadow-blue-200">
                     <div className="flex items-start gap-4">
                       <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-lg">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-6 w-6"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                        </svg>
+                        <InfinityIcon />
                       </div>
                       <div className="flex-1">
                         <p className="font-semibold text-blue-900">{t('teacherPreview')}</p>
@@ -173,21 +157,7 @@ export default function ExamPreScreen({
               <div className="space-y-5 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 p-6">
                 <div className="flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900 text-white">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="10"
-                      />
-                      <path d="M12 16v-4M12 8h.01" />
-                    </svg>
+                    <CircleAlertIcon className="m-1.5" />
                   </div>
                   <h3 className="text-lg font-bold text-gray-900">{t('instructions')}</h3>
                 </div>
@@ -237,7 +207,7 @@ export default function ExamPreScreen({
               {(settings.tab_switch_detection || settings.copy_paste_protection || settings.devtools_detection) && (
                 <Alert className="border-l-4 border-l-red-500 bg-gradient-to-r from-red-50 to-red-100/50">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-600 text-white">
-                    <AlertCircle className="h-5 w-5" />
+                    <AlertCircle className="size-6" />
                   </div>
                   <div className="space-y-2">
                     <AlertTitle className="text-lg font-bold text-red-900">{t('antiCheatingEnabled')}</AlertTitle>
@@ -268,7 +238,7 @@ export default function ExamPreScreen({
                       size="lg"
                       onClick={handleStartExam}
                       disabled={isStarting}
-                      className="w-full bg-green-600 hover:bg-green-700"
+                      className="w-full"
                     >
                       {isStarting ? t('starting') : t('startExam')}
                     </Button>
@@ -347,7 +317,7 @@ export default function ExamPreScreen({
                 {canTakeExam ? (
                   <Button
                     size="lg"
-                    className="w-full bg-green-600 hover:bg-green-700"
+                    className="w-full "
                     onClick={handleStartExam}
                     disabled={isStarting}
                   >
