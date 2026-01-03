@@ -87,6 +87,15 @@ export default function QuestionEditor({
       return;
     }
 
+    // Validate that at least one answer is marked as correct
+    if (formData.question_type !== 'MATCHING') {
+      const hasCorrectAnswer = formData.answer_options.some((opt) => opt.is_correct);
+      if (!hasCorrectAnswer) {
+        toast.error(t('atLeastOneCorrectAnswer'));
+        return;
+      }
+    }
+
     setIsSaving(true);
 
     try {
@@ -258,7 +267,7 @@ export default function QuestionEditor({
               max="100"
               value={formData.points}
               onChange={(e) => setFormData({ ...formData, points: Number.parseInt(e.target.value) })}
-              className='w-18'
+              className="w-18"
             />
           </div>
         </div>
@@ -341,10 +350,10 @@ export default function QuestionEditor({
                 <div className="flex items-center gap-2">
                   <RadioGroupItem
                     value="0"
-                    id={`option-0`}
+                    id="option-0"
                   />
                   <Label
-                    htmlFor={`option-0`}
+                    htmlFor="option-0"
                     className="flex-1 cursor-default select-none"
                   >
                     {t('true')}
@@ -353,10 +362,10 @@ export default function QuestionEditor({
                 <div className="flex items-center gap-2">
                   <RadioGroupItem
                     value="1"
-                    id={`option-1`}
+                    id="option-1"
                   />
                   <Label
-                    htmlFor={`option-1`}
+                    htmlFor="option-1"
                     className="flex-1 cursor-default select-none"
                   >
                     {t('false')}

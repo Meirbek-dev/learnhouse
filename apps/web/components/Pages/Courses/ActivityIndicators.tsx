@@ -1,6 +1,16 @@
 'use client';
 
-import { BookOpenCheck, Check, ChevronLeft, ChevronRight, ClipboardList, FileText, Layers, Trophy, Video } from 'lucide-react';
+import {
+  BookOpenCheck,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  FileText,
+  Layers,
+  Trophy,
+  Video,
+} from 'lucide-react';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { getUriWithOrg } from '@services/config/config';
 import { useRouter } from 'next/navigation';

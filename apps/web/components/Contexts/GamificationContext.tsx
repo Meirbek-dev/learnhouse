@@ -101,7 +101,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
   // XP notification system with automatic batching - MUST be stable reference
   const xpToastSystem = useXPToast();
   const showEnhancedXPToast = xpToastSystem.showXPToast;
-  const ToastContainer = xpToastSystem.ToastContainer;
+  const { ToastContainer } = xpToastSystem;
   const [levelUpQueue, setLevelUpQueue] = useState<{ newLevel: number }[]>([]);
 
   // Update state when initialData changes (from server-side refetch)

@@ -81,10 +81,19 @@ export function LoginBonusHandler({ orgId }: LoginBonusHandlerProps) {
   if (!showBadge) return null;
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-5 pointer-events-none fixed right-4 bottom-20 z-50 duration-300">
-      <div className="flex items-center gap-2 rounded-full bg-linear-to-r from-green-500 to-emerald-500 px-4 py-2 text-sm font-medium text-white shadow-lg backdrop-blur-sm">
-        <span className="text-lg">✨</span>
-        <span>{t('loginBonus.dailyBonus', { xp: 10 })}</span>
+    <div
+      className="animate-in fade-in slide-in-from-bottom-5 pointer-events-none fixed right-4 bottom-20 z-50 duration-300"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="pointer-events-auto flex items-center gap-3 rounded-lg bg-gradient-to-r from-emerald-500/95 to-green-600/95 px-4 py-3 text-sm font-semibold text-white shadow-xl ring-1 ring-white/20 backdrop-blur-md">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-xl">
+          <span aria-hidden>✨</span>
+        </div>
+
+        <div className="min-w-0">
+          <div className="truncate">{t('loginBonus.dailyBonus', { xp: 10 })}</div>
+        </div>
       </div>
     </div>
   );

@@ -173,6 +173,7 @@
       "submitting": "Submitting...",
       "teacherPreview": "Teacher Preview",
       "timeLimit": "Time Limit",
+      "timeRemaining": "Time remaining",
       "totalQuestions": "Total Questions",
       "unanswered": "Unanswered",
       "unlimited": "Unlimited",
@@ -1007,6 +1008,7 @@
       "saving": "Saving...",
       "questionTextRequired": "Question text is required",
       "atLeastOneOption": "At least one answer option is required",
+      "atLeastOneCorrectAnswer": "At least one answer must be marked as correct",
       "questionUpdated": "Question updated successfully",
       "questionCreated": "Question created successfully",
       "errorSavingQuestion": "Failed to save question"
@@ -1064,6 +1066,8 @@
       "violationThresholdDescription": "Automatically submit the exam after too many violations",
       "violationThreshold": "Violation Threshold",
       "violationThresholdInputDescription": "Maximum number of violations before auto-submit",
+      "whitelistWillBeIgnored": "Whitelist will be ignored when access mode is changed",
+      "whitelistWillBeIgnoredDescription": "The stored whitelist will remain but it will be ignored until you switch back to Whitelist mode",
       "saveSettings": "Save Settings",
       "saving": "Saving...",
       "savingSettings": "Saving settings...",
@@ -1137,6 +1141,7 @@
       "saveWhitelist": "Save Whitelist",
       "saving": "Saving...",
       "whitelistUpdated": "Whitelist updated successfully",
+      "accessModeSetToWhitelist": "Access mode set to WHITELIST so the whitelist will be enforced",
       "errorUpdatingWhitelist": "Failed to update whitelist",
       "loadingStudents": "Loading students...",
       "errorFetchingStudents": "Failed to fetch students"
@@ -4548,6 +4553,8 @@
         },
         "loginBonus": {
           "dailyBonus": "+{xp} XP Daily Bonus",
+          "xpShort": "+{xp} XP",
+          "frequencyDaily": "Daily",
           "welcomeBack": "Welcome back!"
         },
         "notifications": {

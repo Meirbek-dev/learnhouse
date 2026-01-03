@@ -171,7 +171,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
 
       const currentIndex = allActivities.findIndex((a) => a.cleanUuid === cleanCurrent);
       const nextActivity =
-        currentIndex >= 0 && currentIndex < allActivities.length - 1 ? allActivities[currentIndex + 1] : null;
+        currentIndex !== -1 && currentIndex < allActivities.length - 1 ? allActivities[currentIndex + 1] : null;
 
       if (!nextActivity) {
         // Prefer a translation if available, otherwise fallback
@@ -181,8 +181,8 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
 
       const cleanCourseUuid = course.course_uuid?.replace('course_', '');
       router.push(`${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}/activity/${nextActivity.cleanUuid}`);
-    } catch (err) {
-      console.error('Failed to navigate to next activity', err);
+    } catch (error) {
+      console.error('Failed to navigate to next activity', error);
       toast.error(t('navigationError') || 'Navigation failed');
     }
   }, [activity, course, orgslug, router, t]);
@@ -193,10 +193,13 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
     }
   }, [state.phase, userAttempts]);
 
-  const handleReviewAttempt = useCallback((attempt: AttemptData) => {
-    const returnPhase = state.phase === 'manage' ? 'manage' : 'pre-exam';
-    dispatch(examActions.reviewAttempt(attempt, returnPhase));
-  }, [state.phase]);
+  const handleReviewAttempt = useCallback(
+    (attempt: AttemptData) => {
+      const returnPhase = state.phase === 'manage' ? 'manage' : 'pre-exam';
+      dispatch(examActions.reviewAttempt(attempt, returnPhase));
+    },
+    [state.phase],
+  );
 
   const handleExitReview = useCallback(() => {
     dispatch(examActions.exitReview());
@@ -242,9 +245,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
               <h1 className="text-3xl font-bold">{activity.name}</h1>
               <p className="text-muted-foreground">{t('manageExam')}</p>
             </div>
-            <Button
-              onClick={() => dispatch(examActions.exitManagementMode(userAttempts || []))}
-            >
+            <Button onClick={() => dispatch(examActions.exitManagementMode(userAttempts || []))}>
               {t('previewExam')}
             </Button>
           </div>
@@ -307,11 +308,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
   // Student views
   if (state.phase === 'pre-exam') {
     return (
-      <ExamLayout
-        title={state.exam.title}
-        startedAt={undefined}
-        timeLimitMinutes={state.exam.settings?.time_limit ?? null}
-      >
+      <ExamLayout title={state.exam.title}>
         <ExamPreScreen
           exam={state.exam}
           questionCount={state.questions.length}
@@ -328,11 +325,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
 
   if (state.phase === 'taking') {
     return (
-      <ExamLayout
-        title={state.exam.title}
-        startedAt={state.attempt?.started_at}
-        timeLimitMinutes={state.exam.settings?.time_limit ?? null}
-      >
+      <ExamLayout title={state.exam.title}>
         <ExamTakingInterface
           exam={state.exam}
           questions={state.questions}
@@ -378,12 +371,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
         : state.exam.settings.attempt_limit - attempts.length;
 
     return (
-      <ExamLayout
-        title={state.exam.title}
-        /* Timer disabled on results screen */
-        startedAt={undefined}
-        timeLimitMinutes={null}
-      >
+      <ExamLayout title={state.exam.title}>
         <ExamResults
           exam={state.exam}
           attempt={state.attempt}

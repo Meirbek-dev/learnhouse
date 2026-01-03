@@ -77,35 +77,41 @@ export default function ExamSubmissionReview({
           <AlertDialogTitle>{t('confirmSubmission')}</AlertDialogTitle>
           <AlertDialogDescription>{t('confirmSubmissionMessage')}</AlertDialogDescription>
 
-          <div className="space-y-4 text-left">
+          <div className="space-y-5 text-left">
             {/* Summary Stats */}
-            <div className="rounded-lg border bg-gray-50 p-4">
-              <div className="grid gap-3 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">{t('totalQuestions')}:</span>
-                  <span className="font-semibold">{totalQuestions}</span>
+            <div className="overflow-hidden rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white shadow-sm">
+              <div className="grid gap-0 divide-y divide-gray-100">
+                <div className="flex items-center justify-between p-4">
+                  <span className="font-medium text-gray-700">{t('totalQuestions')}:</span>
+                  <span className="text-xl font-bold text-blue-600">{totalQuestions}</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between bg-gradient-to-r from-green-50 to-white p-4">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <span className="text-green-600">{t('answered')}:</span>
+                    <div className="rounded-lg bg-green-600 p-1.5">
+                      <CheckCircle2 className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="font-medium text-green-700">{t('answered')}:</span>
                   </div>
-                  <span className="font-semibold text-green-600">{answeredCount}</span>
+                  <span className="text-xl font-bold text-green-600">{answeredCount}</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between bg-gradient-to-r from-orange-50 to-white p-4">
                   <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-gray-500" />
-                    <span className="text-gray-600">{t('unanswered')}:</span>
+                    <div className="rounded-lg bg-orange-600 p-1.5">
+                      <AlertTriangle className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="font-medium text-orange-700">{t('unanswered')}:</span>
                   </div>
-                  <span className="font-semibold text-gray-600">{unansweredQuestions.length}</span>
+                  <span className="text-xl font-bold text-orange-600">{unansweredQuestions.length}</span>
                 </div>
                 {hasFlagged && (
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-white p-4">
                     <div className="flex items-center gap-2">
-                      <Flag className="h-4 w-4 text-orange-500" />
-                      <span className="text-orange-600">{t('flagged')}:</span>
+                      <div className="rounded-lg bg-blue-600 p-1.5">
+                        <Flag className="h-4 w-4 text-white" />
+                      </div>
+                      <span className="font-medium text-blue-700">{t('flagged')}:</span>
                     </div>
-                    <span className="font-semibold text-orange-600">{flaggedQuestions.length}</span>
+                    <span className="text-xl font-bold text-blue-600">{flaggedQuestions.length}</span>
                   </div>
                 )}
               </div>
@@ -170,17 +176,17 @@ export default function ExamSubmissionReview({
             )}
 
             {/* Confirmation Checkbox */}
-            <div className="rounded-lg border-2 border-gray-300 bg-white p-4">
-              <div className="flex items-start gap-3">
+            <div className="overflow-hidden rounded-xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white p-5 shadow-sm">
+              <div className="flex items-start gap-4">
                 <Checkbox
                   id="confirm-submission"
                   checked={confirmChecked}
                   onCheckedChange={(checked) => setConfirmChecked(checked === true)}
-                  className="mt-0.5"
+                  className="mt-1"
                 />
                 <Label
                   htmlFor="confirm-submission"
-                  className="cursor-pointer text-sm leading-relaxed font-medium"
+                  className="cursor-pointer text-base leading-relaxed font-semibold text-blue-900"
                 >
                   {t('confirmSubmissionCheckbox')}
                 </Label>

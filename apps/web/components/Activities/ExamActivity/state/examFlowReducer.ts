@@ -59,7 +59,13 @@ export type ExamFlowState =
   | { phase: 'pre-exam'; exam: ExamData; questions: QuestionData[]; userAttempts: AttemptData[] }
   | { phase: 'taking'; exam: ExamData; questions: QuestionData[]; attempt: AttemptData }
   | { phase: 'results'; exam: ExamData; questions: QuestionData[]; attempt: AttemptData }
-  | { phase: 'reviewing'; exam: ExamData; questions: QuestionData[]; attempt: AttemptData; returnPhase: 'pre-exam' | 'manage' }
+  | {
+      phase: 'reviewing';
+      exam: ExamData;
+      questions: QuestionData[];
+      attempt: AttemptData;
+      returnPhase: 'pre-exam' | 'manage';
+    }
   | { phase: 'manage'; exam: ExamData; questions: QuestionData[]; userAttempts: AttemptData[] }
   | { phase: 'error'; error: ErrorInfo };
 

@@ -68,7 +68,7 @@ export default async function proxy(req: NextRequest) {
   // Auth Redirects
   if (pathname === '/redirect_from_auth') {
     if (cookie_orgslug) {
-      const searchParams = req.nextUrl.searchParams;
+      const { searchParams } = req.nextUrl;
       const queryString = searchParams.toString();
       const redirectPathname = '/';
       const redirectUrl = new URL(getUriWithOrg(cookie_orgslug, redirectPathname), req.url);

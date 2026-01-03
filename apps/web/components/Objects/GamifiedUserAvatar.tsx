@@ -203,7 +203,7 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
   const getAvatarFrame = (): string | null => {
     if (!(showAvatarFrame && gamificationProfile)) return null;
 
-    const level = gamificationProfile.level;
+    const { level } = gamificationProfile;
     const availableFrames = AVATAR_UNLOCKS.frames.filter((frame) => level >= frame.level);
 
     // Return the highest unlocked frame
@@ -214,7 +214,7 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
   const getAvatarAccessory = (): string | null => {
     if (!(showAvatarAccessories && gamificationProfile)) return null;
 
-    const level = gamificationProfile.level;
+    const { level } = gamificationProfile;
     const availableAccessories = AVATAR_UNLOCKS.accessories.filter((accessory) => level >= accessory.level);
 
     // Return the highest unlocked accessory

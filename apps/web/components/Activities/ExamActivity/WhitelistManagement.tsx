@@ -44,25 +44,40 @@ export default function WhitelistManagement({
   const fetchEnrolledStudents = useEffectEvent(async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${getAPIUrl()}courses/${courseId}/enrollments`, {
+
+      // First, get course_uuid from course_id
+      const courseResponse = await fetch(`${getAPIUrl()}courses/id/${courseId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
 
-      if (!response.ok) throw new Error('Failed to fetch enrollments');
+      if (!courseResponse.ok) throw new Error('Failed to fetch course');
+
+      const courseData = await courseResponse.json();
+
+      // Then get contributors (enrolled users) using course_uuid
+      const response = await fetch(`${getAPIUrl()}courses/${courseData.course_uuid}/contributors`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch contributors');
 
       const data = await response.json();
 
-      // Transform enrollment data to student format
-      const studentsData = data.map((enrollment: any) => ({
-        id: enrollment.id,
-        user_id: enrollment.user_id,
+      // Transform contributor data to student format
+      const studentsData = data.map((contributor: any) => ({
+        id: contributor.user_id,
+        user_id: contributor.user_id,
         user_name:
-          (enrollment.user && ((enrollment.user.first_name || '') + ' ' + (enrollment.user.last_name || '')).trim()) ||
-          enrollment.user?.username ||
-          enrollment.user_email,
-        user_email: enrollment.user?.email || enrollment.user_email,
+          (contributor.user &&
+            ((contributor.user.first_name || '') + ' ' + (contributor.user.last_name || '')).trim()) ||
+          contributor.user?.username ||
+          contributor.user?.email ||
+          'Unknown',
+        user_email: contributor.user?.email || '',
       }));
 
       setStudents(studentsData);
@@ -103,6 +118,23 @@ export default function WhitelistManagement({
   const handleSaveWhitelist = async () => {
     try {
       setIsSaving(true);
+
+      // Fetch current exam settings so we merge user-provided whitelist into existing settings
+      const examResp = await fetch(`${getAPIUrl()}exams/${examUuid}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (!examResp.ok) throw new Error('Failed to fetch exam settings');
+      const examData = await examResp.json();
+      const existingSettings = examData.settings || {};
+
+      // Merge and ensure access mode is WHITELIST so changes persist and the whitelist is effective
+      const mergedSettings = {
+        ...existingSettings,
+        whitelist_user_ids: [...selectedUserIds],
+        access_mode: existingSettings.access_mode === 'WHITELIST' ? 'WHITELIST' : 'WHITELIST',
+      };
+
       const response = await fetch(`${getAPIUrl()}exams/${examUuid}`, {
         method: 'PUT',
         headers: {
@@ -110,15 +142,19 @@ export default function WhitelistManagement({
           'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
-          settings: {
-            whitelist_user_ids: [...selectedUserIds],
-          },
+          settings: mergedSettings,
         }),
       });
 
       if (!response.ok) throw new Error('Failed to update whitelist');
 
-      toast.success(t('whitelistUpdated'));
+      // If access_mode was not WHITELIST before, inform the user that it has been set
+      if (existingSettings.access_mode !== 'WHITELIST') {
+        toast.success(t('whitelistUpdated') + '. ' + t('accessModeSetToWhitelist'));
+      } else {
+        toast.success(t('whitelistUpdated'));
+      }
+
       onWhitelistUpdated();
     } catch (error) {
       console.error('Error updating whitelist:', error);

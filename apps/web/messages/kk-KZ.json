@@ -171,6 +171,7 @@
       "submitting": "Тапсырылуда...",
       "teacherPreview": "Оқытушы алдын ала қарауы",
       "timeLimit": "Уақыт шегі",
+      "timeRemaining": "Қалған уақыт",
       "totalQuestions": "Барлық сұрақтар",
       "unanswered": "Жауап берілмеген",
       "unlimited": "Шексіз",
@@ -995,6 +996,7 @@
       "saving": "Сақталуда...",
       "questionTextRequired": "Сұрақ мәтіні міндетті",
       "atLeastOneOption": "Кемінде бір жауап опциясы міндетті",
+      "atLeastOneCorrectAnswer": "Кемінде бір жауап дұрыс деп белгіленуі керек",
       "questionUpdated": "Сұрақ сәтті жаңартылды",
       "questionCreated": "Сұрақ сәтті жасалды",
       "errorSavingQuestion": "Сұрақты сақтау сәтсіз аяқталды"
@@ -1052,6 +1054,8 @@
       "violationThresholdDescription": "Тым көп бұзушылықтардан кейін емтиханды автоматты түрде тапсыру",
       "violationThreshold": "Бұзушылық шегі",
       "violationThresholdInputDescription": "Автоматты тапсыруға дейінгі максималды бұзушылықтар саны",
+      "whitelistWillBeIgnored": "Қол жеткізу режимін өзгертсеңіз, ақ тізім еленбейді",
+      "whitelistWillBeIgnoredDescription": "Сақталған ақ тізім қалпында қалады, бірақ сіз қайтадан \"Ақ тізім\" режимін таңдағанға дейін еленбейді",
       "saveSettings": "Параметрлерді сақтау",
       "saving": "Сақталуда...",
       "savingSettings": "Параметрлер сақталуда...",
@@ -1121,6 +1125,7 @@
       "saveWhitelist": "Ақ тізімді сақтау",
       "saving": "Сақталуда...",
       "whitelistUpdated": "Ақ тізім сәтті жаңартылды",
+      "accessModeSetToWhitelist": "Қол жетімділік режимі WHITELIST ретінде орнатылды, ақ тізім қолданылатын болады",
       "errorUpdatingWhitelist": "Ақ тізімді жаңарту сәтсіз аяқталды",
       "loadingStudents": "Студенттер жүктелуде...",
       "errorFetchingStudents": "Студенттерді алу сәтсіз аяқталды"
@@ -4504,6 +4509,8 @@
         },
         "loginBonus": {
           "dailyBonus": "+{xp} XP Күнделікті бонус",
+          "xpShort": "+{xp} ТӨ",
+          "frequencyDaily": "Күнделікті",
           "welcomeBack": "Қайта келуіңізбен!"
         },
         "notifications": {

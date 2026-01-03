@@ -398,6 +398,30 @@ async def create_question(
         request, course.course_uuid, current_user, "create", db_session
     )
 
+    # Input validation and sanitization
+    if not question_object.question_text or not question_object.question_text.strip():
+        raise HTTPException(status_code=400, detail="Question text cannot be empty")
+
+    if len(question_object.question_text) > 5000:
+        raise HTTPException(status_code=400, detail="Question text too long (max 5000 characters)")
+
+    if question_object.explanation and len(question_object.explanation) > 2000:
+        raise HTTPException(status_code=400, detail="Explanation too long (max 2000 characters)")
+
+    # Validate answer_options based on question type
+    if not question_object.answer_options or len(question_object.answer_options) == 0:
+        raise HTTPException(status_code=400, detail="At least one answer option is required")
+
+    if len(question_object.answer_options) > 10:
+        raise HTTPException(status_code=400, detail="Too many answer options (max 10)")
+
+    # Validate that at least one correct answer exists (except for essay/custom)
+    from src.db.courses.exams import QuestionTypeEnum
+    if question_object.question_type in [QuestionTypeEnum.SINGLE_CHOICE, QuestionTypeEnum.MULTIPLE_CHOICE, QuestionTypeEnum.TRUE_FALSE]:
+        has_correct = any(opt.get("is_correct") for opt in question_object.answer_options)
+        if not has_correct:
+            raise HTTPException(status_code=400, detail="At least one answer must be marked as correct")
+
     # Create question
     question_uuid = f"question_{ULID()}"
     now = datetime.now().isoformat()
@@ -587,12 +611,18 @@ async def start_exam_attempt(
                     status_code=400, detail="Invalid attempt_limit configured for exam"
                 )
 
-            statement = select(ExamAttempt).where(
-                ExamAttempt.exam_id == exam.id,
-                ExamAttempt.user_id == current_user.id,
+            # ATOMIC CHECK: Use FOR UPDATE to prevent race condition
+            from sqlalchemy import func
+            statement = (
+                select(func.count(ExamAttempt.id))
+                .where(
+                    ExamAttempt.exam_id == exam.id,
+                    ExamAttempt.user_id == current_user.id,
+                )
+                .with_for_update()
             )
-            existing_attempts = db_session.exec(statement).all()
-            if len(existing_attempts) >= attempt_limit:
+            attempt_count = db_session.exec(statement).one()
+            if attempt_count >= attempt_limit:
                 raise HTTPException(status_code=403, detail="Attempt limit reached")
 
     # Validate question_limit if present
@@ -676,87 +706,160 @@ async def submit_exam_attempt(
     if attempt.status != AttemptStatusEnum.IN_PROGRESS:
         raise HTTPException(status_code=400, detail="Attempt already submitted")
 
+    # Get exam to validate time limit server-side
+    exam = db_session.get(Exam, attempt.exam_id)
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    # SERVER-SIDE TIME LIMIT VALIDATION (Security: prevent client bypass)
+    settings = exam.settings or {}
+    time_limit_minutes = settings.get("time_limit")
+    if time_limit_minutes:
+        from datetime import timezone
+        try:
+            # Use timezone-aware datetime for accurate comparison
+            started_at = datetime.fromisoformat(attempt.started_at.replace('Z', '+00:00'))
+            if started_at.tzinfo is None:
+                started_at = started_at.replace(tzinfo=timezone.utc)
+            now = datetime.now(timezone.utc)
+            elapsed_minutes = (now - started_at).total_seconds() / 60
+
+            # Add 30-second grace period for network latency
+            if elapsed_minutes > (time_limit_minutes + 0.5):
+                # Auto-submit with time violation flag
+                attempt.status = AttemptStatusEnum.AUTO_SUBMITTED
+                attempt.violations = attempt.violations or []
+                attempt.violations.append({
+                    "type": "TIME_EXCEEDED",
+                    "timestamp": now.isoformat(),
+                    "elapsed_minutes": round(elapsed_minutes, 2),
+                })
+        except (ValueError, AttributeError) as e:
+            # Log but don't fail - allow submission
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Failed to validate time limit for attempt {attempt_uuid}: {e}")
+
+    # VALIDATION: Ensure answers only reference questions in this attempt
+    valid_question_ids = set(str(qid) for qid in attempt.question_order)
+    for answer_key in answers.keys():
+        if str(answer_key) not in valid_question_ids:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid question ID in answers: {answer_key}"
+            )
+
     # Calculate score
     total_score = 0
     max_score = 0
 
-    for question_id in attempt.question_order:
-        question = db_session.get(Question, question_id)
-        if not question:
-            continue
+    try:
+        for question_id in attempt.question_order:
+            question = db_session.get(Question, question_id)
+            if not question:
+                continue
 
-        max_score += question.points
+            max_score += question.points
 
-        user_answer = answers.get(str(question_id))
-        if user_answer is None:
-            continue
+            user_answer = answers.get(str(question_id))
+            if user_answer is None:
+                continue
 
-        # Check answer correctness based on question type
-        is_correct = check_answer_correctness(question, user_answer)
-        if is_correct:
-            total_score += question.points
+            # Check answer correctness based on question type
+            try:
+                is_correct = check_answer_correctness(question, user_answer)
+                if is_correct:
+                    total_score += question.points
+            except Exception as e:
+                # Log validation error but continue grading
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Error validating answer for question {question_id}: {e}")
+                continue
 
-    # Update attempt
-    attempt.answers = answers
-    attempt.score = total_score
-    attempt.max_score = max_score
-    attempt.status = AttemptStatusEnum.SUBMITTED
-    attempt.submitted_at = datetime.now().isoformat()
-    attempt.update_date = datetime.now().isoformat()
+        # Update attempt (will auto-rollback if any subsequent operation fails)
+        now = datetime.now().isoformat()
+        attempt.answers = answers
+        attempt.score = total_score
+        attempt.max_score = max_score
+        if attempt.status == AttemptStatusEnum.IN_PROGRESS:
+            attempt.status = AttemptStatusEnum.SUBMITTED
+        attempt.submitted_at = now
+        attempt.update_date = now
 
-    db_session.add(attempt)
-    db_session.commit()
-    db_session.refresh(attempt)
+        db_session.add(attempt)
+        db_session.flush()  # Flush to catch DB errors before committing
 
-    # Award gamification XP (skip preview attempts to avoid gaming the system)
-    if not attempt.is_preview:
+        # Award gamification XP (skip preview attempts to avoid gaming the system)
+        if not attempt.is_preview:
+            percentage = (
+                (attempt.score / attempt.max_score * 100)
+                if attempt.max_score and attempt.max_score > 0
+                else 0
+            )
+
+            # Award base XP for exam completion (50 XP as defined in XP_REWARDS)
+            try:
+                from src.services.gamification.service import award_xp
+
+                award_xp(
+                    db=db_session,
+                    user_id=current_user.id,
+                    org_id=attempt.org_id,
+                    source="exam_completion",
+                    source_id=f"exam_{attempt_uuid}",
+                    idempotency_key=f"exam_completion_{attempt_uuid}",
+                )
+
+                # Award streak bonus for perfect score (50 bonus XP)
+                if percentage == 100:
+                    award_xp(
+                        db=db_session,
+                        user_id=current_user.id,
+                        org_id=attempt.org_id,
+                        source="streak_bonus",
+                        source_id=f"exam_perfect_{attempt_uuid}",
+                        idempotency_key=f"exam_perfect_{attempt_uuid}",
+                    )
+            except Exception as e:
+                # Log error but don't fail the submission
+                import logging
+
+                logger = logging.getLogger(__name__)
+                logger.error(f"Failed to award XP for exam {attempt_uuid}: {e}")
+
+        # Mark activity as complete only if score percentage exceeds 50%
         percentage = (
             (attempt.score / attempt.max_score * 100)
             if attempt.max_score and attempt.max_score > 0
             else 0
         )
+        exam = db_session.get(Exam, attempt.exam_id)
+        if exam and percentage > 50:
+            try:
+                await mark_exam_complete(request, exam.activity_id, current_user.id, db_session)
+            except Exception as e:
+                # Log but don't fail submission
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Failed to mark exam complete for attempt {attempt_uuid}: {e}")
 
-        # Award base XP for exam completion (50 XP as defined in XP_REWARDS)
-        try:
-            from src.services.gamification.service import award_xp
+        # Commit all changes atomically
+        db_session.commit()
+        db_session.refresh(attempt)
 
-            award_xp(
-                db=db_session,
-                user_id=current_user.id,
-                org_id=attempt.org_id,
-                source="exam_completion",
-                source_id=f"exam_{attempt_uuid}",
-                idempotency_key=f"exam_completion_{attempt_uuid}",
-            )
+        return ExamAttemptRead.model_validate(attempt)
 
-            # Award streak bonus for perfect score (50 bonus XP)
-            if percentage == 100:
-                award_xp(
-                    db=db_session,
-                    user_id=current_user.id,
-                    org_id=attempt.org_id,
-                    source="streak_bonus",
-                    source_id=f"exam_perfect_{attempt_uuid}",
-                    idempotency_key=f"exam_perfect_{attempt_uuid}",
-                )
-        except Exception as e:
-            # Log error but don't fail the submission
-            import logging
-
-            logger = logging.getLogger(__name__)
-            logger.error(f"Failed to award XP for exam {attempt_uuid}: {e}")
-
-    # Mark activity as complete only if score percentage exceeds 50%
-    percentage = (
-        (attempt.score / attempt.max_score * 100)
-        if attempt.max_score and attempt.max_score > 0
-        else 0
-    )
-    exam = db_session.get(Exam, attempt.exam_id)
-    if exam and percentage > 50:
-        await mark_exam_complete(request, exam.activity_id, current_user.id, db_session)
-
-    return ExamAttemptRead.model_validate(attempt)
+    except Exception as e:
+        # Rollback all changes on any error
+        db_session.rollback()
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Failed to submit exam attempt {attempt_uuid}: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to submit exam. Please try again."
+        )
 
 
 async def record_violation(
@@ -953,11 +1056,16 @@ async def get_attempt_by_uuid(
 
 
 def check_answer_correctness(question: Question, user_answer: any) -> bool:
-    """Check if a user's answer is correct"""
+    """Check if a user's answer is correct with strict validation"""
     from src.db.courses.exams import QuestionTypeEnum
 
     if question.question_type == QuestionTypeEnum.SINGLE_CHOICE:
-        # user_answer is an index
+        # user_answer must be a valid integer index
+        if not isinstance(user_answer, int):
+            return False
+        # Bounds check to prevent index out of range
+        if user_answer < 0 or user_answer >= len(question.answer_options):
+            return False
         correct_indices = [
             i for i, opt in enumerate(question.answer_options) if opt.get("is_correct")
         ]
@@ -967,6 +1075,10 @@ def check_answer_correctness(question: Question, user_answer: any) -> bool:
         # user_answer is a list of indices
         if not isinstance(user_answer, list):
             return False
+        # Validate each index
+        for idx in user_answer:
+            if not isinstance(idx, int) or idx < 0 or idx >= len(question.answer_options):
+                return False
         correct_indices = {
             i for i, opt in enumerate(question.answer_options) if opt.get("is_correct")
         }
@@ -975,6 +1087,10 @@ def check_answer_correctness(question: Question, user_answer: any) -> bool:
 
     if question.question_type == QuestionTypeEnum.TRUE_FALSE:
         # user_answer is 0 or 1 (True/False index)
+        if not isinstance(user_answer, int):
+            return False
+        if user_answer < 0 or user_answer >= len(question.answer_options):
+            return False
         correct_indices = [
             i for i, opt in enumerate(question.answer_options) if opt.get("is_correct")
         ]
@@ -984,11 +1100,15 @@ def check_answer_correctness(question: Question, user_answer: any) -> bool:
         # user_answer is a dict mapping left to right
         if not isinstance(user_answer, dict):
             return False
+        # Validate all expected pairs are present
+        expected_lefts = {opt.get("left") for opt in question.answer_options if opt.get("left")}
+        if set(user_answer.keys()) != expected_lefts:
+            return False
         # Check if all pairs match
         for option in question.answer_options:
             left = option.get("left")
             right = option.get("right")
-            if user_answer.get(left) != right:
+            if not left or user_answer.get(left) != right:
                 return False
         return True
 

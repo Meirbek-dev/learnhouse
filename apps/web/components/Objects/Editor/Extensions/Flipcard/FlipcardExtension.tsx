@@ -31,7 +31,7 @@ const FlipcardExtension: React.FC = (props: any) => {
   const questionInputRef = useRef<HTMLTextAreaElement>(null);
   const answerInputRef = useRef<HTMLTextAreaElement>(null);
   const editorState = useEditorProvider() as any;
-  const isEditable = editorState.isEditable;
+  const { isEditable } = editorState;
 
   const handleClickOutside = useEffectEvent((event: MouseEvent) => {
     if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node)) {

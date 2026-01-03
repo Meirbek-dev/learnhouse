@@ -95,8 +95,8 @@ const OrgUsers = () => {
     if (!roleObj) return 0;
     // roleObj may be the role itself or wrapped under `role`
     const role = roleObj.role || roleObj;
-    const role_uuid = role.role_uuid;
-    const id = role.id;
+    const { role_uuid } = role;
+    const { id } = role;
     const name = role.name || '';
 
     if (

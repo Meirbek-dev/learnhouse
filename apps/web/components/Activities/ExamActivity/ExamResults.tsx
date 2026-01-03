@@ -1,7 +1,7 @@
 'use client';
 
-import { AlertCircle, CheckCircle2, Trophy, XCircle, ArrowLeft, Repeat, ArrowRight } from 'lucide-react';
-import { useMemo, useCallback } from 'react';
+import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, Repeat, XCircle } from 'lucide-react';
+import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
@@ -76,6 +76,7 @@ export default function ExamResults({
   const performanceSummary = useMemo(() => {
     const perf = getPerformance(percentage);
     const message = t(`performance.${perf.labelKey}`) || '';
+
     const color =
       perf.grade === 5
         ? 'text-green-600'
@@ -84,12 +85,31 @@ export default function ExamResults({
           : perf.grade === 3
             ? 'text-purple-600'
             : 'text-orange-600';
-    const emoji = perf.grade === 5 ? '🏆' : perf.grade === 4 ? '✨' : perf.grade === 3 ? '💪' : '📚';
+
+    const ring =
+      perf.grade === 5
+        ? 'ring-green-200'
+        : perf.grade === 4
+          ? 'ring-indigo-200'
+          : perf.grade === 3
+            ? 'ring-purple-200'
+            : 'ring-orange-200';
+
+    const pillBg =
+      perf.grade === 5
+        ? 'bg-green-100 text-green-800'
+        : perf.grade === 4
+          ? 'bg-indigo-100 text-indigo-800'
+          : perf.grade === 3
+            ? 'bg-purple-100 text-purple-800'
+            : 'bg-orange-100 text-orange-800';
+
     return {
       ...perf,
       message,
       color,
-      emoji,
+      ring,
+      pillBg,
       grade: perf.grade,
     };
   }, [percentage, t]);
@@ -235,21 +255,30 @@ export default function ExamResults({
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6">
+    <div className="mx-auto max-w-7xl space-y-8 p-6">
       {/* Score Card */}
-      <Card>
-        <CardHeader className="space-y-3 text-center">
-          <CardTitle className="inline-flex items-center justify-center gap-3 pt-4 text-4xl font-semibold">
+      <Card className="overflow-hidden">
+        <div className="bg-gradient-to-br px-6 py-8 text-center">
+          <div className="inline-flex items-center justify-center gap-3 text-4xl font-bold text-blue-900">
             {t('examCompleted')}
-          </CardTitle>
-
-          <div className="mt-2 flex items-center justify-center gap-3">
-            <div className="rounded-full bg-blue-50 px-3 py-1 text-xl font-semibold text-blue-600 ring-1 ring-blue-100">
-              {percentage}%
-            </div>
-            <div className={`${performanceSummary.color} text-xl font-medium`}>{performanceSummary.message}</div>
           </div>
-        </CardHeader>
+
+          <div className="mt-6 flex items-center justify-center gap-6">
+            <div
+              className={`flex h-28 w-28 items-center justify-center rounded-full bg-white shadow-md ring-4 ${performanceSummary.ring}`}
+              role="img"
+              aria-label={`${percentage}%`}
+            >
+              <div className={`text-4xl font-extrabold ${performanceSummary.color}`}>{percentage}%</div>
+            </div>
+
+            <div className="flex flex-col items-start">
+              <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold ${performanceSummary.pillBg}`}>
+                {performanceSummary.message}
+              </div>
+            </div>
+          </div>
+        </div>
 
         <CardContent className="space-y-6">
           {/* Score Display */}
@@ -272,29 +301,44 @@ export default function ExamResults({
           </div>
 
           {/* Statistics */}
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4">
-              <CheckCircle2 className="h-8 w-8 text-green-600" />
-              <div>
-                <p className="text-sm text-gray-600">{t('correct')}</p>
-                <p className="text-2xl font-bold text-green-600">{correctCount}</p>
+          <div className="grid gap-5 md:grid-cols-3">
+            <div className="group relative overflow-hidden rounded-xl border border-green-200 bg-gradient-to-br from-green-50 to-green-100/50 p-6 shadow-sm transition-all hover:shadow-md hover:shadow-green-100">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-green-600 shadow-lg">
+                  <CheckCircle2 className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-green-700">{t('correct')}</p>
+                  <p className="text-3xl font-bold text-green-600">{correctCount}</p>
+                </div>
               </div>
+              <div className="absolute right-0 bottom-0 h-20 w-20 translate-x-8 translate-y-8 rounded-full bg-green-600/10" />
             </div>
 
-            <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
-              <XCircle className="h-8 w-8 text-red-600" />
-              <div>
-                <p className="text-sm text-gray-600">{t('incorrect')}</p>
-                <p className="text-2xl font-bold text-red-600">{incorrectCount}</p>
+            <div className="group relative overflow-hidden rounded-xl border border-red-200 bg-gradient-to-br from-red-50 to-red-100/50 p-6 shadow-sm transition-all hover:shadow-md hover:shadow-red-100">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-red-600 shadow-lg">
+                  <XCircle className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-red-700">{t('incorrect')}</p>
+                  <p className="text-3xl font-bold text-red-600">{incorrectCount}</p>
+                </div>
               </div>
+              <div className="absolute right-0 bottom-0 h-20 w-20 translate-x-8 translate-y-8 rounded-full bg-red-600/10" />
             </div>
 
-            <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
-              <AlertCircle className="h-8 w-8 text-gray-600" />
-              <div>
-                <p className="text-sm text-gray-600">{t('unanswered')}</p>
-                <p className="text-2xl font-bold text-gray-600">{unansweredCount}</p>
+            <div className="group relative overflow-hidden rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100/50 p-6 shadow-sm transition-all hover:shadow-md hover:shadow-gray-100">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gray-600 shadow-lg">
+                  <AlertCircle className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">{t('unanswered')}</p>
+                  <p className="text-3xl font-bold text-gray-600">{unansweredCount}</p>
+                </div>
               </div>
+              <div className="absolute right-0 bottom-0 h-20 w-20 translate-x-8 translate-y-8 rounded-full bg-gray-600/10" />
             </div>
           </div>
 

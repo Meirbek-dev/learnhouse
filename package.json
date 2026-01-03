@@ -1,6 +1,6 @@
 {
   "name": "ashyq-bilim",
-  "packageManager": "pnpm@10.26.2",
+  "packageManager": "pnpm@10.27.0",
   "private": true,
   "pnpm": {
     "overrides": {
@@ -28,7 +28,7 @@
     "eslint": "^9.39.2",
     "mprocs": "^0.8.2",
     "oxlint": "^1.36.0",
-    "oxlint-tsgolint": "^0.10.0",
+    "oxlint-tsgolint": "^0.10.1",
     "prettier": "^3.7.4",
     "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-sort-imports": "^1.8.9",

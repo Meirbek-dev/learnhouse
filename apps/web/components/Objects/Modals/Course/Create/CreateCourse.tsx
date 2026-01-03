@@ -48,7 +48,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: CreateCourseModalProps) => {
 
   const validationSchema = z.object({
     name: z.string().min(1, t('schemaNameRequired')).max(100, t('schemaNameMax')),
-    description: z.string().min(10, t('schemaDescriptionMin')).max(1000, t('schemaDescriptionMax')),
+    description: z.string().min(5, t('schemaDescriptionMin')).max(1000, t('schemaDescriptionMax')),
     learnings: z.array(z.string()).optional(),
     tags: z.array(z.string()).optional(),
     visibility: z.boolean(),
@@ -151,7 +151,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: CreateCourseModalProps) => {
                 router.refresh();
               }
             } else {
-              const detail = res.data.detail;
+              const { detail } = res.data;
               const errorMessage =
                 typeof detail === 'string'
                   ? detail

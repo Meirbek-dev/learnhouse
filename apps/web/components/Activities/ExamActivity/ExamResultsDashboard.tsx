@@ -53,7 +53,12 @@ interface ExamResultsDashboardProps {
   onReviewAttempt?: (attempt: any) => void;
 }
 
-export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt, onReviewAttempt }: ExamResultsDashboardProps) {
+export default function ExamResultsDashboard({
+  examUuid,
+  attempts,
+  onViewAttempt,
+  onReviewAttempt,
+}: ExamResultsDashboardProps) {
   const t = useTranslations('Components.ExamResultsDashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -560,16 +565,17 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
                                 <Eye className="mr-2 h-4 w-4" />
                                 {t('view')}
                               </Button>
-                              {onReviewAttempt && (attempt.status === 'SUBMITTED' || attempt.status === 'AUTO_SUBMITTED') && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => onReviewAttempt(attempt)}
-                                  aria-label={t('reviewAttemptAria', { name: attempt.user_name })}
-                                >
-                                  {t('review')}
-                                </Button>
-                              )}
+                              {onReviewAttempt &&
+                                (attempt.status === 'SUBMITTED' || attempt.status === 'AUTO_SUBMITTED') && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => onReviewAttempt(attempt)}
+                                    aria-label={t('reviewAttemptAria', { name: attempt.user_name })}
+                                  >
+                                    {t('review')}
+                                  </Button>
+                                )}
                             </div>
                           </TableCell>
                         </TableRow>
@@ -658,16 +664,17 @@ export default function ExamResultsDashboard({ examUuid, attempts, onViewAttempt
             <AlertDialogCancel onClick={() => handleCloseAttempt()}>{t('close')}</AlertDialogCancel>
             {selectedAttempt && (
               <>
-                {onReviewAttempt && (selectedAttempt.status === 'SUBMITTED' || selectedAttempt.status === 'AUTO_SUBMITTED') && (
-                  <AlertDialogAction
-                    onClick={() => {
-                      onReviewAttempt(selectedAttempt);
-                      handleCloseAttempt();
-                    }}
-                  >
-                    {t('reviewAnswers')}
-                  </AlertDialogAction>
-                )}
+                {onReviewAttempt &&
+                  (selectedAttempt.status === 'SUBMITTED' || selectedAttempt.status === 'AUTO_SUBMITTED') && (
+                    <AlertDialogAction
+                      onClick={() => {
+                        onReviewAttempt(selectedAttempt);
+                        handleCloseAttempt();
+                      }}
+                    >
+                      {t('reviewAnswers')}
+                    </AlertDialogAction>
+                  )}
                 <AlertDialogAction
                   onClick={() => {
                     const payload = JSON.stringify(selectedAttempt, null, 2);

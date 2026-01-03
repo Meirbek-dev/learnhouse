@@ -478,7 +478,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
 
   const getTipTapEditorSelectedTextGlobal = () => {
     // Get the entire block (paragraph / node) the user is in using resolved positions
-    const $from = props.editor.state.selection.$from;
+    const { $from } = props.editor.state.selection;
     const start = $from.start($from.depth);
     const end = $from.end($from.depth);
     return props.editor.state.doc.textBetween(start, end, '\n', '\n');

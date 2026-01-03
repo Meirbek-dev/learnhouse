@@ -127,6 +127,12 @@ export function useExamPersistence({
       if (typeof window === 'undefined') return;
 
       try {
+        // Validate answers object to prevent saving corrupted data
+        if (!answers || typeof answers !== 'object') {
+          console.warn('[useExamPersistence] Invalid answers object, skipping save');
+          return;
+        }
+
         const data: PersistedExamData = {
           attemptUuid,
           answers,
@@ -137,10 +143,29 @@ export function useExamPersistence({
         localStorage.setItem(storageKey, JSON.stringify(data));
         lastSaveTimeRef.current = data.lastSaved;
       } catch (error) {
-        console.error('[useExamPersistence] Failed to save answers:', error);
+        // Handle QuotaExceededError gracefully
+        if (error instanceof Error && error.name === 'QuotaExceededError') {
+          console.warn('[useExamPersistence] LocalStorage quota exceeded, attempting cleanup');
+          cleanupExpiredData();
+          // Try one more time after cleanup
+          try {
+            const data: PersistedExamData = {
+              attemptUuid,
+              answers,
+              lastSaved: Date.now(),
+              version: VERSION,
+            };
+            localStorage.setItem(storageKey, JSON.stringify(data));
+            lastSaveTimeRef.current = data.lastSaved;
+          } catch (error) {
+            console.error('[useExamPersistence] Failed to save exam answers after cleanup:', error);
+          }
+        } else {
+          console.error('[useExamPersistence] Failed to save answers:', error);
+        }
       }
     },
-    [attemptUuid, storageKey],
+    [attemptUuid, storageKey, cleanupExpiredData],
   );
 
   // Clear saved answers

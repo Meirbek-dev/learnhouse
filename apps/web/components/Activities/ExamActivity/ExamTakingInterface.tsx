@@ -107,7 +107,7 @@ export default function ExamTakingInterface({
   const answers = state.mode === 'submitting' ? state.answers : state.mode === 'recovery-prompt' ? {} : state.answers;
   const isSubmitting = state.mode === 'submitting';
   const showConfirmation = state.mode === 'confirming-submit';
-  const violationCount = state.violationCount;
+  const { violationCount } = state;
   const violationDialogOpen = state.mode === 'violation-warning';
   const currentViolation = state.mode === 'violation-warning' ? state.violation : null;
   const showRecoveryDialog = state.mode === 'recovery-prompt';
@@ -508,7 +508,6 @@ export default function ExamTakingInterface({
               count: violationCount,
               max: settings.violation_threshold || t('unlimited'),
               remaining: remainingViolations ?? '',
-              appealLink: t('appealLinkText'),
             })}
           </AlertDescription>
         </Alert>
