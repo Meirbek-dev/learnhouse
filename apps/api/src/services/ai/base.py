@@ -490,7 +490,7 @@ async def ask_ai(
                     agent.invoke,
                     {"messages": messages},
                 ),
-                timeout=60.0,  # Increased timeout for complex operations
+                timeout=120.0,  # Increased timeout for complex operations
             )
 
             # Extract response from result
@@ -518,7 +518,7 @@ async def ask_ai(
         except TimeoutError as e:
             error_msg = "AI processing timed out after 60 seconds"
             logger.warning(error_msg)
-            raise AITimeoutError(60, details={"question_length": len(question)}) from e
+            raise AITimeoutError(120, details={"question_length": len(question)}) from e
 
     except (AIProcessingError, VectorStoreError, AITimeoutError):
         raise

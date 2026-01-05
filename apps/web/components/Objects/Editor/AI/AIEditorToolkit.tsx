@@ -9,8 +9,8 @@ import {
   Lightbulb,
   X,
 } from 'lucide-react';
-import { useCallback, useMemo, useRef, type ChangeEvent, type KeyboardEvent, type ReactNode } from 'react';
 import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
+import { useCallback, useMemo, useRef, type ChangeEvent, type KeyboardEvent, type ReactNode } from 'react';
 import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
 import type { CritisizeScope } from '@components/Contexts/AI/AIEditorContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
@@ -20,6 +20,7 @@ import platformLogoLight from 'public/platform_logo_light.svg';
 import { ScrollArea } from '@components/ui/scroll-area';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
+import { marked } from 'marked';
 import Image from 'next/image';
 import { toast } from 'sonner';
 
@@ -271,19 +272,12 @@ function useEditorOperations(editor: Editor) {
         editor.chain().focus().deleteSelection().run();
       }
 
-      const words = text.split(' ');
+      // Parse markdown to HTML and insert it properly
+      const html = await marked.parse(text);
 
-      for (let i = 0; i < words.length; i++) {
-        if (signal.aborted) break;
-
-        editor.chain().focus().insertContent({ type: 'text', text: words[i] }).run();
-
-        if (i < words.length - 1) {
-          editor.chain().focus().insertContent({ type: 'text', text: ' ' }).run();
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, TYPING_DELAY_MS));
-      }
+      // For typing effect with proper formatting, insert chunks of parsed content
+      // Option A: Insert all at once (no typing effect, but proper formatting)
+      editor.chain().focus().insertContent(html).run();
     },
     [editor],
   );
