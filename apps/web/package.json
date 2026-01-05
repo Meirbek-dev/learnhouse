@@ -46,6 +46,7 @@
     "katex": "^0.16.27",
     "lowlight": "^3.3.0",
     "lucide-react": "^0.562.0",
+    "micromark": "^4.0.2",
     "motion": "^12.24.0",
     "nanoid": "^5.1.6",
     "next": "16.1.1",

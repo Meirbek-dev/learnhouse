@@ -41,7 +41,7 @@ interface BlockObject {
 interface ImageBlockProps {
   node: {
     attrs: {
-      blockObject: BlockObject | null;
+      blockObject?: BlockObject | null;
       size?: { width: number };
       alignment?: Alignment;
     };
