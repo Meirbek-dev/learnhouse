@@ -3276,6 +3276,9 @@
         "changeColor": "Change Color",
         "clickToFlip": "Click to flip",
         "clickToFlipBack": "Click to flip back",
+        "showQuestion": "Show question",
+        "showAnswer": "Show answer",
+        "doubleClickToEdit": "Double-click to edit",
         "colors": {
           "amber": "Amber",
           "blue": "Blue",

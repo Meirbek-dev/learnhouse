@@ -3258,6 +3258,9 @@
         "changeColor": "Түсін өзгерту",
         "clickToFlip": "Аудару үшін басыңыз",
         "clickToFlipBack": "Кері аудару үшін басыңыз",
+        "showQuestion": "Сұрақты көрсету",
+        "showAnswer": "Жауабын көрсету",
+        "doubleClickToEdit": "Өңдеу үшін екі рет басыңыз",
         "colors": {
           "amber": "Кәріптас",
           "blue": "Көк",

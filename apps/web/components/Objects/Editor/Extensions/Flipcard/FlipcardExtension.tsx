@@ -2,463 +2,639 @@ import {
   AlignCenter,
   AlignLeft,
   AlignRight,
-  Edit,
+  Check,
   Maximize2,
   Minimize2,
   Palette,
-  RotateCw,
+  RotateCcw,
   Square,
 } from 'lucide-react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { useEffect, useEffectEvent, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ReactNodeViewProps } from '@tiptap/react';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import { twMerge } from 'tailwind-merge';
-import type React from 'react';
 
-const FlipcardExtension: React.FC = (props: any) => {
-  const [isFlipped, setIsFlipped] = useState(false);
-  const t = useTranslations('DashPage.Editor.Flipcard');
-  const [question, setQuestion] = useState(props.node.attrs.question);
-  const [answer, setAnswer] = useState(props.node.attrs.answer);
-  const [color, setColor] = useState(props.node.attrs.color || 'blue');
-  const [alignment, setAlignment] = useState(props.node.attrs.alignment || 'center');
-  const [size, setSize] = useState(props.node.attrs.size || 'medium');
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const [isEditingQuestion, setIsEditingQuestion] = useState(false);
-  const [isEditingAnswer, setIsEditingAnswer] = useState(false);
-  const colorPickerRef = useRef<HTMLDivElement>(null);
-  const questionInputRef = useRef<HTMLTextAreaElement>(null);
-  const answerInputRef = useRef<HTMLTextAreaElement>(null);
-  const editorState = useEditorProvider() as any;
-  const { isEditable } = editorState;
+// ============================================================================
+// Types
+// ============================================================================
 
-  const handleClickOutside = useEffectEvent((event: MouseEvent) => {
-    if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node)) {
-      setShowColorPicker(false);
-    }
-  });
+type Alignment = 'left' | 'center' | 'right';
+type Size = 'small' | 'medium' | 'large';
+type CardColor = 'sky' | 'green' | 'yellow' | 'red' | 'purple' | 'teal' | 'amber' | 'indigo' | 'neutral' | 'blue';
+
+interface FlipcardAttrs {
+  question: string;
+  answer: string;
+  color: CardColor;
+  alignment: Alignment;
+  size: Size;
+}
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+const CARD_COLORS: CardColor[] = [
+  'blue',
+  'sky',
+  'teal',
+  'green',
+  'yellow',
+  'amber',
+  'red',
+  'purple',
+  'indigo',
+  'neutral',
+];
+
+const SIZE_CONFIG = {
+  small: { container: 'w-64 h-40', font: 'text-sm', icon: 16 },
+  medium: { container: 'w-80 h-52', font: 'text-base', icon: 18 },
+  large: { container: 'w-96 h-64', font: 'text-lg', icon: 20 },
+} as const;
+
+const COLOR_CONFIG: Record<CardColor, { front: string; back: string; swatch: string }> = {
+  sky: {
+    front: 'bg-sky-500 border-sky-400/50',
+    back: 'bg-sky-600 border-sky-500/50',
+    swatch: 'bg-sky-500',
+  },
+  green: {
+    front: 'bg-emerald-500 border-emerald-400/50',
+    back: 'bg-emerald-600 border-emerald-500/50',
+    swatch: 'bg-emerald-500',
+  },
+  yellow: {
+    front: 'bg-yellow-500 border-yellow-400/50',
+    back: 'bg-yellow-600 border-yellow-500/50',
+    swatch: 'bg-yellow-500',
+  },
+  red: {
+    front: 'bg-rose-500 border-rose-400/50',
+    back: 'bg-rose-600 border-rose-500/50',
+    swatch: 'bg-rose-500',
+  },
+  purple: {
+    front: 'bg-purple-500 border-purple-400/50',
+    back: 'bg-purple-600 border-purple-500/50',
+    swatch: 'bg-purple-500',
+  },
+  teal: {
+    front: 'bg-teal-500 border-teal-400/50',
+    back: 'bg-teal-600 border-teal-500/50',
+    swatch: 'bg-teal-500',
+  },
+  amber: {
+    front: 'bg-amber-500 border-amber-400/50',
+    back: 'bg-amber-600 border-amber-500/50',
+    swatch: 'bg-amber-500',
+  },
+  indigo: {
+    front: 'bg-indigo-500 border-indigo-400/50',
+    back: 'bg-indigo-600 border-indigo-500/50',
+    swatch: 'bg-indigo-500',
+  },
+  neutral: {
+    front: 'bg-neutral-500 border-neutral-400/50',
+    back: 'bg-neutral-600 border-neutral-500/50',
+    swatch: 'bg-neutral-500',
+  },
+  blue: {
+    front: 'bg-blue-500 border-blue-400/50',
+    back: 'bg-blue-600 border-blue-500/50',
+    swatch: 'bg-blue-500',
+  },
+};
+
+const ALIGNMENT_CONFIG = {
+  left: 'justify-start',
+  center: 'justify-center',
+  right: 'justify-end',
+} as const;
+
+// ============================================================================
+// Hooks
+// ============================================================================
+
+function useClickOutside<T extends HTMLElement>(ref: React.RefObject<T | null>, handler: () => void, enabled = true) {
+  const handlerRef = useRef(handler);
+  handlerRef.current = handler;
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+    if (!enabled) return;
+
+    const listener = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (!ref.current || ref.current.contains(target)) return;
+      // Ignore clicks on flipcard UI elements
+      if ((target as HTMLElement).closest?.('[data-flipcard-ui]')) return;
+      handlerRef.current();
     };
-  }, []);
 
-  const handleFlip = () => {
-    // Allow flipping in both edit and view modes, but prevent when editing text
-    if (!(isEditingQuestion || isEditingAnswer)) {
-      setIsFlipped(!isFlipped);
-    }
-  };
+    document.addEventListener('mousedown', listener);
+    return () => document.removeEventListener('mousedown', listener);
+  }, [ref, enabled]);
+}
 
-  const handleQuestionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setQuestion(e.target.value);
-    props.updateAttributes({
-      question: e.target.value,
-    });
-  };
+// ============================================================================
+// Sub-components
+// ============================================================================
 
-  const handleAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setAnswer(e.target.value);
-    props.updateAttributes({
-      answer: e.target.value,
-    });
-  };
+interface ToolbarButtonProps {
+  active?: boolean;
+  onClick: () => void;
+  title: string;
+  children: React.ReactNode;
+  variant?: 'default' | 'primary' | 'success';
+}
 
-  const handleAlignmentChange = (newAlignment: 'left' | 'center' | 'right') => {
-    setAlignment(newAlignment);
-    props.updateAttributes({
-      alignment: newAlignment,
-    });
-  };
+const ToolbarButton: React.FC<ToolbarButtonProps> = ({ active, onClick, title, children, variant = 'default' }) => {
+  const baseClasses =
+    'rounded-md p-1.5 transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400';
 
-  const handleColorSelect = (selectedColor: string) => {
-    setColor(selectedColor);
-    setShowColorPicker(false);
-    props.updateAttributes({
-      color: selectedColor,
-    });
-  };
-
-  const handleSizeChange = (newSize: 'small' | 'medium' | 'large') => {
-    setSize(newSize);
-    props.updateAttributes({
-      size: newSize,
-    });
-  };
-
-  const getAlignmentClass = () => {
-    switch (alignment) {
-      case 'left': {
-        return 'text-left justify-start';
-      }
-      case 'center': {
-        return 'text-center justify-center';
-      }
-      case 'right': {
-        return 'text-right justify-end';
-      }
-      default: {
-        return 'text-center justify-center';
-      }
-    }
-  };
-
-  const getSizeClass = () => {
-    switch (size) {
-      case 'small': {
-        return 'w-64 h-36';
-      }
-      case 'medium': {
-        return 'w-80 h-48';
-      }
-      case 'large': {
-        return 'w-96 h-60';
-      }
-      default: {
-        return 'w-80 h-48';
-      }
-    }
-  };
-
-  const getFontSizeClass = () => {
-    switch (size) {
-      case 'small': {
-        return 'text-sm';
-      }
-      case 'medium': {
-        return 'text-lg';
-      }
-      case 'large': {
-        return 'text-xl';
-      }
-      default: {
-        return 'text-lg';
-      }
-    }
-  };
-
-  const getIconSizeClass = () => {
-    switch (size) {
-      case 'small': {
-        return 16;
-      }
-      case 'medium': {
-        return 20;
-      }
-      case 'large': {
-        return 24;
-      }
-      default: {
-        return 20;
-      }
-    }
-  };
-
-  const getCardColor = (color: string, isBack = false) => {
-    const baseColors = {
-      sky: isBack ? 'bg-sky-600 border-sky-700' : 'bg-sky-500 border-sky-600',
-      green: isBack ? 'bg-green-600 border-green-700' : 'bg-green-500 border-green-600',
-      yellow: isBack ? 'bg-yellow-600 border-yellow-700' : 'bg-yellow-500 border-yellow-600',
-      red: isBack ? 'bg-red-600 border-red-700' : 'bg-red-500 border-red-600',
-      purple: isBack ? 'bg-purple-600 border-purple-700' : 'bg-purple-500 border-purple-600',
-      teal: isBack ? 'bg-teal-600 border-teal-700' : 'bg-teal-500 border-teal-600',
-      amber: isBack ? 'bg-amber-600 border-amber-700' : 'bg-amber-500 border-amber-600',
-      indigo: isBack ? 'bg-indigo-600 border-indigo-700' : 'bg-indigo-500 border-indigo-600',
-      neutral: isBack ? 'bg-neutral-700 border-neutral-800' : 'bg-neutral-600 border-neutral-700',
-      blue: isBack ? 'bg-blue-600 border-blue-700' : 'bg-blue-500 border-blue-600',
-    };
-    return baseColors[color as keyof typeof baseColors] || baseColors.blue;
-  };
-
-  const colors = ['sky', 'green', 'yellow', 'red', 'purple', 'teal', 'amber', 'indigo', 'neutral', 'blue'];
-
-  const handleQuestionEdit = () => {
-    setIsEditingQuestion(true);
-    // Use rAF to focus on next frame instead of setTimeout(,0)
-    if (typeof window !== 'undefined') requestAnimationFrame(() => questionInputRef.current?.focus());
-  };
-
-  const handleAnswerEdit = () => {
-    setIsEditingAnswer(true);
-    if (typeof window !== 'undefined') requestAnimationFrame(() => answerInputRef.current?.focus());
-  };
-
-  const handleQuestionBlur = () => {
-    setIsEditingQuestion(false);
-  };
-
-  const handleAnswerBlur = () => {
-    setIsEditingAnswer(false);
+  const variantClasses = {
+    default: active
+      ? 'bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-100'
+      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600',
+    primary: active
+      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+      : 'bg-gray-100 text-gray-600 hover:bg-blue-50 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-blue-900/50',
+    success: active
+      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300'
+      : 'bg-gray-100 text-gray-600 hover:bg-emerald-50 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-emerald-900/50',
   };
 
   return (
-    <NodeViewWrapper className={`flipcard-wrapper flex ${getAlignmentClass()} my-4`}>
-      <div className={`flipcard-container ${getSizeClass()} relative`}>
-        <div
-          className={`flipcard-inner cursor-pointer ${isFlipped ? 'flipped' : ''}`}
-          onClick={handleFlip}
-        >
-          {/* Front Side (Question) */}
-          <div
-            className={twMerge(
-              'flipcard-front soft-shadow flex flex-col items-center justify-center border-2 p-6 text-center text-white',
-              getCardColor(color, false),
-            )}
-          >
-            <div className="pointer-events-none mb-3 flex items-center justify-center select-none">
-              <RotateCw
-                size={getIconSizeClass()}
-                className="opacity-70"
-              />
-            </div>
-            <div className="flex flex-1 items-center justify-center">
-              {isEditable && isEditingQuestion ? (
-                <textarea
-                  ref={questionInputRef}
-                  value={question}
-                  onChange={handleQuestionChange}
-                  onBlur={handleQuestionBlur}
-                  className="h-20 w-full resize-none rounded-lg border-none bg-white/20 p-2 text-center text-white placeholder-white/70 backdrop-blur-sm outline-none"
-                  placeholder={t('enterQuestionPlaceholder')}
-                />
-              ) : (
-                <div
-                  className={`text-center font-medium ${getFontSizeClass()} flex items-center justify-center leading-relaxed select-none`}
-                >
-                  <span className="pointer-events-none select-none">{question}</span>
-                  {isEditable && (
-                    <button
-                      data-flipcard-ui
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleQuestionEdit();
-                      }}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }}
-                      className="pointer-events-auto ml-2 shrink-0 opacity-60 hover:opacity-100"
-                    >
-                      <Edit size={14} />
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-            {!isEditingQuestion && (
-              <div className="pointer-events-none mt-3 text-xs opacity-70 select-none">{t('clickToFlip')}</div>
-            )}
-          </div>
+    <button
+      type="button"
+      data-flipcard-ui
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        onClick();
+      }}
+      onMouseDown={(e) => e.preventDefault()}
+      className={twMerge(baseClasses, variantClasses[variant])}
+      title={title}
+    >
+      {children}
+    </button>
+  );
+};
 
-          {/* Back Side (Answer) */}
+const ToolbarDivider: React.FC = () => <div className="mx-1 h-5 w-px self-center bg-gray-300 dark:bg-gray-600" />;
+
+interface ColorPickerProps {
+  currentColor: CardColor;
+  onSelect: (color: CardColor) => void;
+  onClose: () => void;
+}
+
+const ColorPicker: React.FC<ColorPickerProps> = ({ currentColor, onSelect, onClose }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useClickOutside(ref, onClose);
+
+  return (
+    <div
+      ref={ref}
+      data-flipcard-ui
+      className="absolute top-full left-1/2 z-20 mt-2 -translate-x-1/2 rounded-xl border border-gray-200 bg-white p-3 shadow-xl dark:border-gray-700 dark:bg-gray-800"
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+      <div className="grid grid-cols-5 gap-2">
+        {CARD_COLORS.map((c) => (
+          <button
+            key={c}
+            type="button"
+            data-flipcard-ui
+            className={twMerge(
+              'flex h-8 w-8 items-center justify-center rounded-full transition-transform hover:scale-110',
+              COLOR_CONFIG[c].swatch,
+              currentColor === c && 'ring-2 ring-gray-400 ring-offset-2 dark:ring-offset-gray-800',
+            )}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect(c);
+            }}
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            {currentColor === c && (
+              <Check
+                size={14}
+                className="text-white"
+              />
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+interface CardFaceProps {
+  content: string;
+  placeholder: string;
+  isEditing: boolean;
+  isEditable: boolean;
+  onStartEdit: () => void;
+  onChange: (value: string) => void;
+  onBlur: () => void;
+  inputRef: React.RefObject<HTMLTextAreaElement | null>;
+  fontClass: string;
+  hint: string;
+  iconSize: number;
+  isBack?: boolean;
+}
+
+const CardFace: React.FC<CardFaceProps> = ({
+  content,
+  placeholder,
+  isEditing,
+  isEditable,
+  onStartEdit,
+  onChange,
+  onBlur,
+  inputRef,
+  fontClass,
+  hint,
+  iconSize,
+  isBack,
+}) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      onBlur();
+    }
+    // Prevent flip on Enter when editing
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.stopPropagation();
+    }
+  };
+
+  return (
+    <div className="flex h-full flex-col p-5">
+      {/* Flip indicator */}
+      <div className="pointer-events-none flex justify-center opacity-60 select-none">
+        <RotateCcw
+          size={iconSize}
+          className={isBack ? 'rotate-180' : ''}
+        />
+      </div>
+
+      {/* Content area */}
+      <div className="flex flex-1 items-center justify-center overflow-hidden py-3">
+        {isEditing ? (
+          <textarea
+            ref={inputRef}
+            value={content}
+            onChange={(e) => onChange(e.target.value)}
+            onBlur={onBlur}
+            onKeyDown={handleKeyDown}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            className={twMerge(
+              'h-full w-full resize-none rounded-lg border-none bg-white/20 p-3 text-center text-white placeholder-white/60 backdrop-blur-sm outline-none',
+              fontClass,
+            )}
+            placeholder={placeholder}
+          />
+        ) : (
+          <p
+            className={twMerge(
+              'line-clamp-4 overflow-hidden text-center leading-relaxed text-white select-none',
+              fontClass,
+              isEditable && 'cursor-text',
+            )}
+            onMouseDown={(e) => {
+              // Prevent placing the editor caret inside the flipcard when in read-only mode
+              if (!isEditable) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }}
+            onClick={(e) => {
+              // Prevent click-based focus/selection in read-only mode
+              if (!isEditable) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }}
+            onDoubleClick={(e) => {
+              if (isEditable) {
+                e.stopPropagation();
+                e.preventDefault();
+                onStartEdit();
+              } else {
+                // Prevent text selection when double-clicking in read-only mode
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }}
+          >
+            {content || <span className="italic opacity-60">{placeholder}</span>}
+          </p>
+        )}
+      </div>
+
+      {/* Hint text */}
+      <div className="pointer-events-none text-center text-xs text-white/60 select-none">
+        {isEditing ? '' : isEditable ? hint : hint.split('•')[0]}
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
+const FlipcardExtension: React.FC<ReactNodeViewProps> = ({ node, updateAttributes }) => {
+  const attrs = node.attrs as FlipcardAttrs;
+  const { question, answer, color, alignment, size } = attrs;
+
+  const t = useTranslations('DashPage.Editor.Flipcard');
+  const editorState = useEditorProvider() as { isEditable: boolean };
+  const { isEditable } = editorState;
+
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [editingFace, setEditingFace] = useState<'question' | 'answer' | null>(null);
+
+  const cardRef = useRef<HTMLDivElement>(null);
+  const questionInputRef = useRef<HTMLTextAreaElement>(null);
+  const answerInputRef = useRef<HTMLTextAreaElement>(null);
+  const isMountedRef = useRef(true);
+
+  // Track mounted state
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // Derived values
+  const sizeConfig = SIZE_CONFIG[size];
+  const colorConfig = COLOR_CONFIG[color];
+  const alignmentClass = ALIGNMENT_CONFIG[alignment];
+
+  // Handlers
+  const handleFlip = useCallback(() => {
+    if (editingFace) return;
+    setIsFlipped((prev) => !prev);
+  }, [editingFace]);
+
+  const updateAttr = useCallback(
+    <K extends keyof FlipcardAttrs>(key: K, value: FlipcardAttrs[K]) => {
+      updateAttributes({ [key]: value });
+    },
+    [updateAttributes],
+  );
+
+  const handleStartEdit = useCallback(
+    (face: 'question' | 'answer') => {
+      if (!isEditable) return;
+      setEditingFace(face);
+
+      // Use setTimeout to ensure state update is processed
+      setTimeout(() => {
+        if (!isMountedRef.current) return;
+        const ref = face === 'question' ? questionInputRef : answerInputRef;
+        ref.current?.focus();
+        ref.current?.select();
+      }, 0);
+    },
+    [isEditable],
+  );
+
+  const handleStopEdit = useCallback(() => {
+    setEditingFace(null);
+  }, []);
+
+  // Handle card keyboard navigation (only when card is focused)
+  const handleCardKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      // Don't flip via keyboard while editing a face or when in editor (teacher) mode
+      if (editingFace || isEditable) return;
+
+      // Allow Space/Enter to flip the card
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsFlipped((prev) => !prev);
+        return;
+      }
+
+      // Prevent navigation keys from moving the editor caret into the node
+      const navKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'];
+      if (navKeys.includes(e.key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      // Prevent printable characters from being inserted into the editor while the card is focused.
+      // This stops users from typing when `isEditable` is false (read-only), which previously
+      // produced transient input that wasn't saved in the flipcard attributes.
+      const isPrintable = e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && e.key !== ' ';
+      if (isPrintable) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+    },
+    [editingFace, isEditable],
+  );
+
+  // Handle card click
+  const handleCardClick = useCallback(
+    (e: React.MouseEvent) => {
+      // Don't flip if clicking on UI elements or while editing / in editor (teacher) mode
+      if (editingFace || isEditable || (e.target as HTMLElement).closest('[data-flipcard-ui]')) {
+        return;
+      }
+
+      // Prevent the editor from taking focus and ensure the card itself receives focus
+      e.preventDefault();
+      e.stopPropagation();
+      cardRef.current?.focus();
+
+      handleFlip();
+    },
+    [editingFace, isEditable, handleFlip],
+  );
+
+  return (
+    <NodeViewWrapper className={twMerge('flipcard-wrapper my-4 flex', alignmentClass)}>
+      <div className="group relative inline-flex flex-col items-center">
+        {/* Card */}
+        <div
+          ref={cardRef}
+          className={twMerge('flipcard-container [perspective:1000px]', sizeConfig.container)}
+          tabIndex={isEditable ? -1 : 0}
+          role="button"
+          aria-disabled={isEditable}
+          aria-label={isFlipped ? t('showQuestion') : t('showAnswer')}
+          onMouseDown={(e) => {
+            // Prevent the editor from taking focus when the card is clicked, but allow clicks on flipcard UI controls.
+            if ((e.target as HTMLElement).closest?.('[data-flipcard-ui]')) return;
+            e.preventDefault();
+          }}
+          onClick={handleCardClick}
+          onKeyDown={handleCardKeyDown}
+        >
           <div
             className={twMerge(
-              'flipcard-back soft-shadow flex flex-col items-center justify-center border-2 p-6 text-center text-white',
-              getCardColor(color, true),
+              'flipcard-inner relative h-full w-full transition-transform duration-500',
+              '[transform-style:preserve-3d]',
+              isFlipped && '[transform:rotateY(180deg)]',
             )}
           >
-            <div className="pointer-events-none mb-3 flex items-center justify-center select-none">
-              <RotateCw
-                size={getIconSizeClass()}
-                className="rotate-180 opacity-70"
+            {/* Front (Question) */}
+            <div
+              className={twMerge(
+                'flipcard-front absolute inset-0 rounded-2xl border-2 shadow-lg [backface-visibility:hidden]',
+                colorConfig.front,
+              )}
+            >
+              <CardFace
+                content={question}
+                placeholder={t('enterQuestionPlaceholder')}
+                isEditing={editingFace === 'question'}
+                isEditable={isEditable}
+                onStartEdit={() => handleStartEdit('question')}
+                onChange={(v) => updateAttr('question', v)}
+                onBlur={handleStopEdit}
+                inputRef={questionInputRef}
+                fontClass={sizeConfig.font}
+                hint={isEditable ? `${t('clickToFlip')} • ${t('doubleClickToEdit')}` : t('clickToFlip')}
+                iconSize={sizeConfig.icon}
               />
             </div>
-            <div className="flex flex-1 items-center justify-center">
-              {isEditable && isEditingAnswer ? (
-                <textarea
-                  ref={answerInputRef}
-                  value={answer}
-                  onChange={handleAnswerChange}
-                  onBlur={handleAnswerBlur}
-                  className="h-20 w-full resize-none rounded-lg border-none bg-white/20 p-2 text-center text-white placeholder-white/70 backdrop-blur-sm outline-none"
-                  placeholder={t('enterAnswerPlaceholder')}
-                />
-              ) : (
-                <div
-                  className={`text-center font-medium ${getFontSizeClass()} flex items-center justify-center leading-relaxed select-none`}
-                >
-                  <span className="pointer-events-none select-none">{answer}</span>
-                  {isEditable && (
-                    <button
-                      data-flipcard-ui
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAnswerEdit();
-                      }}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }}
-                      className="pointer-events-auto ml-2 shrink-0 opacity-60 hover:opacity-100"
-                    >
-                      <Edit size={14} />
-                    </button>
-                  )}
-                </div>
+
+            {/* Back (Answer) */}
+            <div
+              className={twMerge(
+                'flipcard-back absolute inset-0 rounded-2xl border-2 shadow-lg [backface-visibility:hidden] [transform:rotateY(180deg)]',
+                colorConfig.back,
               )}
+            >
+              <CardFace
+                content={answer}
+                placeholder={t('enterAnswerPlaceholder')}
+                isEditing={editingFace === 'answer'}
+                isEditable={isEditable}
+                onStartEdit={() => handleStartEdit('answer')}
+                onChange={(v) => updateAttr('answer', v)}
+                onBlur={handleStopEdit}
+                inputRef={answerInputRef}
+                fontClass={sizeConfig.font}
+                hint={isEditable ? `${t('clickToFlipBack')} • ${t('doubleClickToEdit')}` : t('clickToFlipBack')}
+                iconSize={sizeConfig.icon}
+                isBack
+              />
             </div>
-            {!isEditingAnswer && <div className="mt-3 text-xs opacity-70">{t('clickToFlipBack')}</div>}
           </div>
         </div>
 
-        {/* Editor Controls */}
+        {/* Toolbar */}
         {isEditable && (
           <div
-            className="mt-3 flex justify-center space-x-1 opacity-60 transition-opacity hover:opacity-100"
+            data-flipcard-ui
+            className={twMerge(
+              'mt-3 flex items-center gap-0.5 rounded-lg border border-gray-200 bg-white/90 p-1 shadow-sm backdrop-blur-sm transition-opacity dark:border-gray-700 dark:bg-gray-800/90',
+              'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100',
+            )}
             contentEditable={false}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
           >
-            <button
-              data-flipcard-ui
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAlignmentChange('left');
-              }}
-              onMouseDown={(e) => e.preventDefault()}
-              className={`rounded-md p-1.5 text-xs transition-colors ${alignment === 'left' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            {/* Alignment */}
+            <ToolbarButton
+              active={alignment === 'left'}
+              onClick={() => updateAttr('alignment', 'left')}
               title={t('alignLeft')}
+              variant="primary"
             >
-              <AlignLeft size={12} />
-            </button>
-            <button
-              data-flipcard-ui
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAlignmentChange('center');
-              }}
-              onMouseDown={(e) => e.preventDefault()}
-              className={`rounded-md p-1.5 text-xs transition-colors ${alignment === 'center' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+              <AlignLeft size={14} />
+            </ToolbarButton>
+            <ToolbarButton
+              active={alignment === 'center'}
+              onClick={() => updateAttr('alignment', 'center')}
               title={t('alignCenter')}
+              variant="primary"
             >
-              <AlignCenter size={12} />
-            </button>
-            <button
-              data-flipcard-ui
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAlignmentChange('right');
-              }}
-              onMouseDown={(e) => e.preventDefault()}
-              className={`rounded-md p-1.5 text-xs transition-colors ${alignment === 'right' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+              <AlignCenter size={14} />
+            </ToolbarButton>
+            <ToolbarButton
+              active={alignment === 'right'}
+              onClick={() => updateAttr('alignment', 'right')}
               title={t('alignRight')}
+              variant="primary"
             >
-              <AlignRight size={12} />
-            </button>
+              <AlignRight size={14} />
+            </ToolbarButton>
 
-            {/* Size Controls */}
-            <div className="mx-1 h-4 w-px self-center bg-gray-300" />
+            <ToolbarDivider />
 
-            <button
-              data-flipcard-ui
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSizeChange('small');
-              }}
-              onMouseDown={(e) => e.preventDefault()}
-              className={`rounded-md p-1.5 text-xs transition-colors ${size === 'small' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            {/* Size */}
+            <ToolbarButton
+              active={size === 'small'}
+              onClick={() => updateAttr('size', 'small')}
               title={t('smallSize')}
+              variant="success"
             >
-              <Minimize2 size={12} />
-            </button>
-            <button
-              data-flipcard-ui
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSizeChange('medium');
-              }}
-              onMouseDown={(e) => e.preventDefault()}
-              className={`rounded-md p-1.5 text-xs transition-colors ${size === 'medium' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+              <Minimize2 size={14} />
+            </ToolbarButton>
+            <ToolbarButton
+              active={size === 'medium'}
+              onClick={() => updateAttr('size', 'medium')}
               title={t('mediumSize')}
+              variant="success"
             >
-              <Square size={12} />
-            </button>
-            <button
-              data-flipcard-ui
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSizeChange('large');
-              }}
-              onMouseDown={(e) => e.preventDefault()}
-              className={`rounded-md p-1.5 text-xs transition-colors ${size === 'large' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+              <Square size={14} />
+            </ToolbarButton>
+            <ToolbarButton
+              active={size === 'large'}
+              onClick={() => updateAttr('size', 'large')}
               title={t('largeSize')}
+              variant="success"
             >
-              <Maximize2 size={12} />
-            </button>
+              <Maximize2 size={14} />
+            </ToolbarButton>
 
-            <div className="mx-1 h-4 w-px self-center bg-gray-300" />
+            <ToolbarDivider />
 
-            <button
-              data-flipcard-ui
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowColorPicker(!showColorPicker);
-              }}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              className="rounded-md bg-gray-100 p-1.5 text-xs text-gray-600 transition-colors hover:bg-gray-200"
-              title={t('changeColor')}
-            >
-              <Palette size={12} />
-            </button>
-            <button
-              data-flipcard-ui
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsFlipped(!isFlipped);
-              }}
-              onMouseDown={(e) => e.preventDefault()}
-              className="rounded-md bg-gray-100 p-1.5 text-xs text-gray-600 transition-colors hover:bg-gray-200"
+            {/* Color & Flip */}
+            <div className="relative">
+              <ToolbarButton
+                active={showColorPicker}
+                onClick={() => setShowColorPicker((prev) => !prev)}
+                title={t('changeColor')}
+              >
+                <Palette size={14} />
+              </ToolbarButton>
+              {showColorPicker && (
+                <ColorPicker
+                  currentColor={color}
+                  onSelect={(c) => {
+                    updateAttr('color', c);
+                    setShowColorPicker(false);
+                  }}
+                  onClose={() => setShowColorPicker(false)}
+                />
+              )}
+            </div>
+            <ToolbarButton
+              onClick={() => setIsFlipped((prev) => !prev)}
               title={t('previewFlip')}
             >
-              <RotateCw size={12} />
-            </button>
-          </div>
-        )}
-
-        {/* Color Picker */}
-        {isEditable && showColorPicker && (
-          <div
-            data-flipcard-ui
-            ref={colorPickerRef}
-            className="soft-shadow absolute top-full left-1/2 z-10 mt-2 -translate-x-1/2 transform rounded-lg bg-white p-3"
-            contentEditable={false}
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex max-w-xs flex-wrap gap-2">
-              {colors.map((c) => (
-                <button
-                  data-flipcard-ui
-                  type="button"
-                  key={c}
-                  className={`h-8 w-8 transform rounded-full border-2 border-white transition-transform hover:scale-110 ${getCardColor(c)} ${color === c ? 'ring-2 ring-gray-400 ring-offset-2' : ''}`}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleColorSelect(c);
-                  }}
-                  title={t(`colors.${c}` as any)}
-                />
-              ))}
-            </div>
+              <RotateCcw size={14} />
+            </ToolbarButton>
           </div>
         )}
       </div>
