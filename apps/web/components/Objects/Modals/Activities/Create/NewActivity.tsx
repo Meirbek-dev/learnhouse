@@ -2,6 +2,7 @@
 import DocumentPdfPageActivityImage from './images/documentpdf-page-activity.webp';
 import AssignmentActivityImage from './images/assignment-page-activity.webp';
 import DynamicPageActivityImage from './images/dynamic-page-activity.webp';
+import CodeChallenge from './NewActivityModal/CodeChallengeActivityModal';
 import DocumentPdfModal from './NewActivityModal/DocumentActivityModal';
 import DynamicCanvaModal from './NewActivityModal/DynamicActivityModal';
 import VideoPageActivityImage from './images/video-page-activity.webp';
@@ -9,6 +10,7 @@ import Assignment from './NewActivityModal/AssignmentActivityModal';
 import VideoModal from './NewActivityModal/VideoActivityModal';
 import Exam from './NewActivityModal/ExamActivityModal';
 import { useTranslations } from 'next-intl';
+import { Code2 } from 'lucide-react';
 import { useState } from 'react';
 import Image from 'next/image';
 
@@ -27,7 +29,7 @@ const NewActivityModal = ({
   return (
     <>
       {selectedView === 'home' && (
-        <div className="mt-2 grid w-full grid-cols-5 gap-4">
+        <div className="mt-2 grid w-full grid-cols-6 gap-4">
           <ActivityOption
             onClick={() => {
               setSelectedView('dynamic');
@@ -108,6 +110,18 @@ const NewActivityModal = ({
               {t('exams')}
             </div>
           </ActivityOption>
+          <ActivityOption
+            onClick={() => {
+              setSelectedView('codechallenge');
+            }}
+          >
+            <div className="m-0.5 flex h-20 flex-col items-center justify-center rounded-lg bg-white text-center hover:cursor-pointer">
+              <Code2 className="text-primary h-10 w-10" />
+            </div>
+            <div className="flex h-5 items-center justify-center text-center text-sm font-medium text-gray-500">
+              {t('codeChallenge')}
+            </div>
+          </ActivityOption>
         </div>
       )}
 
@@ -148,6 +162,16 @@ const NewActivityModal = ({
 
       {selectedView === 'exams' && (
         <Exam
+          submitActivity={submitActivity}
+          chapterId={chapterId}
+          course={course}
+          closeModal={closeModal}
+          orgslug={orgslug}
+        />
+      )}
+
+      {selectedView === 'codechallenge' && (
+        <CodeChallenge
           submitActivity={submitActivity}
           chapterId={chapterId}
           course={course}

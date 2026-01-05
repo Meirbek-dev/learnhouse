@@ -1,9 +1,9 @@
 'use client';
 
-import { Monitor } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslations } from 'next-intl';
+import { Monitor } from 'lucide-react';
 import React from 'react';
 
 interface Props {

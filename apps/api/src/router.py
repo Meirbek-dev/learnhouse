@@ -26,6 +26,7 @@ from src.routers.courses import (
     assignments,
     certifications,
     chapters,
+    code_challenges,
     collections,
     courses,
     discussions,
@@ -60,6 +61,9 @@ v1_router.include_router(
     assignments.router, prefix="/assignments", tags=["assignments"]
 )
 v1_router.include_router(exams.router, prefix="/exams", tags=["exams"])
+v1_router.include_router(
+    code_challenges.router, prefix="/code-challenges", tags=["code-challenges"]
+)
 v1_router.include_router(
     certifications.router, prefix="/certifications", tags=["certifications"]
 )

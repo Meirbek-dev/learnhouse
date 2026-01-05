@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   Backpack,
   ClipboardList,
+  Code2,
   Eye,
   File,
   FilePenLine,
@@ -49,7 +50,13 @@ import { mutate } from 'swr';
 import useSWR from 'swr';
 
 // Types
-type ActivityType = 'TYPE_VIDEO' | 'TYPE_DOCUMENT' | 'TYPE_ASSIGNMENT' | 'TYPE_DYNAMIC' | 'TYPE_EXAM';
+type ActivityType =
+  | 'TYPE_VIDEO'
+  | 'TYPE_DOCUMENT'
+  | 'TYPE_ASSIGNMENT'
+  | 'TYPE_DYNAMIC'
+  | 'TYPE_EXAM'
+  | 'TYPE_CODE_CHALLENGE';
 
 interface Activity {
   id: string;
@@ -111,6 +118,11 @@ const ACTIVITY_CONFIG = {
     Icon: ClipboardList,
     translationKey: 'exam',
     colorClass: 'bg-amber-50 text-amber-700 border-amber-200',
+  },
+  TYPE_CODE_CHALLENGE: {
+    Icon: Code2,
+    translationKey: 'codeChallenge',
+    colorClass: 'bg-cyan-50 text-cyan-700 border-cyan-200',
   },
 } as const;
 

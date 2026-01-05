@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardList,
+  Code2,
   FileText,
   Layers,
   Trophy,
@@ -45,6 +46,9 @@ function getActivityTypeLabel(activityType: string, t: (key: string) => string):
     case 'TYPE_EXAM': {
       return t('activityTypes.exam');
     }
+    case 'TYPE_CODE_CHALLENGE': {
+      return t('activityTypes.codeChallenge');
+    }
     default: {
       return t('unknownActivity');
     }
@@ -68,6 +72,9 @@ function getActivityTypeIconColor(activityType: string): string {
     case 'TYPE_EXAM': {
       return 'text-amber-500';
     }
+    case 'TYPE_CODE_CHALLENGE': {
+      return 'text-cyan-500';
+    }
     default: {
       return 'text-gray-500';
     }
@@ -90,6 +97,9 @@ function getActivityTypeBadgeColor(activityType: string): string {
     }
     case 'TYPE_EXAM': {
       return 'bg-amber-50 text-amber-600 ring-1 ring-amber-200';
+    }
+    case 'TYPE_CODE_CHALLENGE': {
+      return 'bg-cyan-50 text-cyan-600 ring-1 ring-cyan-200';
     }
     default: {
       return 'bg-gray-50 text-gray-600 ring-1 ring-gray-200';
@@ -135,6 +145,14 @@ const ActivityTypeIcon = ({ activityType, size = 14 }: { activityType: string; s
     case 'TYPE_EXAM': {
       return (
         <ClipboardList
+          size={size}
+          className={colorClass}
+        />
+      );
+    }
+    case 'TYPE_CODE_CHALLENGE': {
+      return (
+        <Code2
           size={size}
           className={colorClass}
         />

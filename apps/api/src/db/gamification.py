@@ -21,6 +21,10 @@ XP_REWARDS = {
     "exam_completion": 50,
     "streak_bonus": 50,
     "admin_award": 0,  # Custom amount required
+    # Code challenge rewards
+    "code_challenge_completion": 50,  # Base completion XP
+    "code_challenge_perfect": 100,  # All tests passed
+    "code_challenge_first_solve": 25,  # First time solving
 }
 
 DAILY_XP_LIMIT = 500
@@ -38,6 +42,10 @@ class XPSource(str, Enum):
     EXAM_COMPLETION = "exam_completion"
     STREAK_BONUS = "streak_bonus"
     ADMIN_AWARD = "admin_award"
+    # Code challenge sources
+    CODE_CHALLENGE_COMPLETION = "code_challenge_completion"
+    CODE_CHALLENGE_PERFECT = "code_challenge_perfect"
+    CODE_CHALLENGE_FIRST_SOLVE = "code_challenge_first_solve"
 
 
 class StreakType(str, Enum):

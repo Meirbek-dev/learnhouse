@@ -9,7 +9,7 @@ import OrgEditOther from '@components/Dashboard/Pages/Org/OrgEditOther/OrgEditOt
 import SettingsHeader from '@components/Dashboard/Misc/SettingsHeader';
 import SettingsTabs from '@components/Dashboard/Misc/SettingsTabs';
 import { getUriWithOrg } from '@services/config/config';
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { Separator } from '@/components/ui/separator';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -69,18 +69,24 @@ const SETTING_TABS: TabItem[] = [
 const ContentRenderer = ({ subpage }: { subpage: string }) => {
   const content = useMemo(() => {
     switch (subpage) {
-      case 'general':
+      case 'general': {
         return <OrgEditGeneral />;
-      case 'previews':
+      }
+      case 'previews': {
         return <OrgEditImages />;
-      case 'socials':
+      }
+      case 'socials': {
         return <OrgEditSocials />;
-      case 'landing':
+      }
+      case 'landing': {
         return <OrgEditLanding />;
-      case 'other':
+      }
+      case 'other': {
         return <OrgEditOther />;
-      default:
+      }
+      default: {
         return null;
+      }
     }
   }, [subpage]);
 
@@ -109,7 +115,7 @@ const OrgPage = (props: { params: Promise<OrgParams> }) => {
     [params.subpage],
   );
 
-  const titleKey = currentTab!.titleKey;
+  const {titleKey} = currentTab!;
   const descKey = currentTab!.descriptionKey;
 
   const pageTitle = useMemo(() => t(titleKey), [t, titleKey]);

@@ -71,6 +71,7 @@ const AssignmentStudentActivity = lazy(
   () => import('@components/Objects/Activities/Assignment/AssignmentStudentActivity'),
 );
 const ExamActivity = lazy(() => import('@components/Activities/ExamActivity/ExamActivity'));
+const CodeChallengeActivity = lazy(() => import('@components/Objects/Activities/CodeChallenge/CodeChallengeActivity'));
 const AIActivityAsk = lazy(() => import('@components/Objects/Activities/AI/AIActivityAsk'));
 const AIChatBotProvider = lazy(() => import('@components/Contexts/AI/AIChatBotContext'));
 
@@ -439,6 +440,17 @@ const ActivityClient = (props: ActivityClientProps) => {
         return (
           <Suspense fallback={<LoadingFallback />}>
             <ExamActivity
+              activity={activity}
+              course={course}
+              orgslug={orgslug}
+            />
+          </Suspense>
+        );
+      }
+      case 'TYPE_CODE_CHALLENGE': {
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <CodeChallengeActivity
               activity={activity}
               course={course}
               orgslug={orgslug}

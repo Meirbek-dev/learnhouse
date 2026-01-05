@@ -273,7 +273,9 @@ export default function ExamResults({
             </div>
 
             <div className="flex flex-col items-start">
-              <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold ${performanceSummary.pillBg}`}>
+              <div
+                className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold ${performanceSummary.pillBg}`}
+              >
                 {performanceSummary.message}
               </div>
             </div>
