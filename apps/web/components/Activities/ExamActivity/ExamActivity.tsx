@@ -97,6 +97,10 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
     // Check for in-progress attempt
     const inProgressAttempt = userAttemptsList.find((a: AttemptData) => a.status === 'IN_PROGRESS');
     if (inProgressAttempt && state.phase !== 'taking') {
+      // Ensure we have pre-exam state set before starting
+      if (state.phase === 'loading') {
+        dispatch(examActions.setPreExam(exam, questions, userAttemptsList));
+      }
       dispatch(examActions.startExam(inProgressAttempt));
       return;
     }
