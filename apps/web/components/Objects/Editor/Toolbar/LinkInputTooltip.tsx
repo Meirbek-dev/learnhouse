@@ -11,7 +11,7 @@ interface LinkInputTooltipProps {
 
 const LinkInputTooltip: React.FC<LinkInputTooltipProps> = ({ onSave, onCancel, currentUrl = '' }) => {
   const [url, setUrl] = useState(currentUrl);
-  const t = useTranslations('Components.Editor.LinkInputTooltip');
+  const t = useTranslations('DashPage.Editor.LinkInputTooltip');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

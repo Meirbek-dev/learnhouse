@@ -3301,7 +3301,12 @@
         "alignRight": "Align right",
         "download": "Download",
         "expand": "Expand",
-        "imageViewer": "Image Viewer"
+        "imageViewer": "Image Viewer",
+        "dropOrClick": "Drop an image here or click to select",
+        "supportedFormats": "Supported formats: JPG, PNG, WebP, GIF",
+        "cancel": "Cancel",
+        "upload": "Upload",
+        "uploading": "Uploading..."
       },
       "LinkInputTooltip": {
         "cancel": "Cancel",

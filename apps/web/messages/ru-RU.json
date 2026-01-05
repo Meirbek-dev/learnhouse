@@ -3293,10 +3293,15 @@
       "ImageBlock": {
         "alignCenter": "Выровнять по центру",
         "alignLeft": "Выровнять по левому краю",
-        "alignRight": "выровнять по правому краю",
+        "alignRight": "Выровнять по правому краю",
         "download": "Скачать",
-        "expand": "Расширять",
-        "imageViewer": "Просмотр изображения"
+        "expand": "Развернуть",
+        "imageViewer": "Просмотр изображения",
+        "dropOrClick": "Перетащите изображение сюда или кликните, чтобы выбрать",
+        "supportedFormats": "Поддерживаемые форматы: JPG, PNG, WebP, GIF",
+        "cancel": "Отмена",
+        "upload": "Загрузить",
+        "uploading": "Загрузка..."
       },
       "LinkInputTooltip": {
         "cancel": "Отменить",
