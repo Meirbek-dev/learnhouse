@@ -291,7 +291,7 @@ export function TestResultsList({ results, visibleTestIds, testCases = [] }: Tes
 
           return (
             <TestCaseCard
-              key={result.test_case_id}
+              key={`${result.test_case_id}-${index}`}
               result={result}
               index={index}
               isVisible={isVisible}

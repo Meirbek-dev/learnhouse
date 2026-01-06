@@ -8,19 +8,19 @@ import useSWR from 'swr';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
+import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getAPIUrl } from '@services/config/config';
 
-import { LanguageSelector } from './LanguageSelector';
-import { TestResultsList } from './TestCaseCard';
-import type { TestCaseResult } from './TestCaseCard';
 import { SubmissionStatusBadge } from './SubmissionStatusBadge';
+import { LanguageSelector } from './LanguageSelector';
+import type { TestCaseResult } from './TestCaseCard';
+import { TestResultsList } from './TestCaseCard';
 import { CodeEditor } from './CodeEditor';
 import { JUDGE0_LANGUAGES } from '.';
 
@@ -181,7 +181,7 @@ export function CodeChallengeEditor({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           source_code: btoa(code),
@@ -225,7 +225,7 @@ export function CodeChallengeEditor({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           source_code: btoa(code),
@@ -266,7 +266,7 @@ export function CodeChallengeEditor({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           source_code: btoa(code),
@@ -430,7 +430,7 @@ export function CodeChallengeEditor({
                     <p className="text-muted-foreground text-center">{t('noVisibleTestCases')}</p>
                   ) : (
                     visibleTestCases.map((tc, index) => (
-                      <Card key={tc.id}>
+                      <Card key={`${tc.id ?? 'tc'}-${index}`}>
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm">
                             {t('testCase')} #{index + 1}
@@ -511,9 +511,9 @@ export function CodeChallengeEditor({
                   {!submissions?.length ? (
                     <p className="text-muted-foreground text-center">{t('noSubmissionsYet')}</p>
                   ) : (
-                    submissions.map((submission) => (
+                    submissions.map((submission, index) => (
                       <Card
-                        key={submission.uuid}
+                        key={`${submission.uuid ?? 'submission'}-${index}`}
                         className="p-3"
                       >
                         <div className="flex items-center justify-between">

@@ -90,17 +90,20 @@ export function LanguageSelector({
 
   return (
     <Popover>
-      <PopoverTrigger>
-        <Button
-          variant="outline"
-          role="combobox"
-          disabled={disabled}
-          className={cn('w-[200px] justify-between', className)}
-        >
-          {selectedLanguage?.name || t('selectLanguage')}
-          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={(triggerProps) => (
+          <Button
+            {...triggerProps}
+            variant="outline"
+            role="combobox"
+            disabled={disabled}
+            className={cn('w-[200px] justify-between', className)}
+          >
+            {selectedLanguage?.name || t('selectLanguage')}
+            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        )}
+      />
       <PopoverContent className="w-[250px] p-0">
         <Command>
           <CommandInput placeholder={t('searchLanguage')} />

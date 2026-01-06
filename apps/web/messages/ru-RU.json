@@ -1906,6 +1906,7 @@
       "activityNamePlaceholder": "Название активности",
       "activityNameUpdatedSuccess": "Название активности успешно обновлено",
       "activityUpdateSuccess": "Активность успешно обновлена",
+      "configureButton": "Настроить",
       "deleteButton": "Удалить активность",
       "deleteConfirmation": "Вы уверены, что хотите удалить эту активность?",
       "deleteTitle": "Удалить {name}?",
