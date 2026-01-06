@@ -191,7 +191,12 @@ async def get_challenge_settings_endpoint(
         settings.hidden_tests = []
         settings.reference_solution = None
 
-    return settings.model_dump()
+    # Convert to dict and add frontend-expected field names
+    result = settings.model_dump()
+    result["time_limit_ms"] = settings.time_limit * 1000  # seconds -> ms
+    result["memory_limit_kb"] = settings.memory_limit * 1024  # MB -> KB
+
+    return result
 
 
 @router.post("/{activity_uuid}/submit", response_model=SubmissionResponse)

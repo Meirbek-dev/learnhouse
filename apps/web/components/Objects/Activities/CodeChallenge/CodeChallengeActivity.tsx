@@ -42,6 +42,9 @@ export default function CodeChallengeActivity({ activity, course, orgslug }: Cod
     { revalidateOnFocus: false },
   );
 
+  // Check if challenge is properly configured (has at least one allowed language)
+  const isConfigured = settings?.allowed_languages && settings.allowed_languages.length > 0;
+
   // Get initial code from activity content or settings
   const initialCode =
     settings?.starter_code?.[settings?.allowed_languages?.[0]?.toString()] || activity?.content?.starter_code || '';
@@ -58,7 +61,7 @@ export default function CodeChallengeActivity({ activity, course, orgslug }: Cod
     );
   }
 
-  if (!settings) {
+  if (!settings || !isConfigured) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="mb-4 text-4xl">🛠️</div>
