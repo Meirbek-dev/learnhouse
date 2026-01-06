@@ -4,7 +4,7 @@ import { Check, ChevronDown } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -14,18 +14,6 @@ export interface Language {
   name: string;
 }
 
-// Popular languages for quick access
-const POPULAR_LANGUAGE_IDS = new Set([
-  71, // Python (3.8.1)
-  63, // JavaScript (Node.js)
-  74, // TypeScript
-  62, // Java
-  54, // C++
-  50, // C
-  73, // Rust
-  60, // Go
-]);
-
 interface LanguageSelectorProps {
   languages: Language[];
   selectedId: number | null;
@@ -34,6 +22,23 @@ interface LanguageSelectorProps {
   disabled?: boolean;
   className?: string;
 }
+
+// Export a canonical list of Judge0 languages for consumers that expect it
+export const JUDGE0_LANGUAGES: Language[] = [
+  { id: 50, name: 'C (GCC 9.2.0)' },
+  { id: 54, name: 'C++ (GCC 9.2.0)' },
+  { id: 51, name: 'C# (Mono 6.6.0.161)' },
+  { id: 60, name: 'Go (1.13.5)' },
+  { id: 62, name: 'Java (OpenJDK 13.0.1)' },
+  { id: 63, name: 'JavaScript (Node.js 12.14.0)' },
+  { id: 78, name: 'Kotlin (1.3.70)' },
+  { id: 68, name: 'PHP (7.4.1)' },
+  { id: 71, name: 'Python (3.8.1)' },
+  { id: 73, name: 'Rust (1.40.0)' },
+  { id: 82, name: 'SQL (SQLite 3.27.2)' },
+  { id: 83, name: 'Swift (5.2.3)' },
+  { id: 74, name: 'TypeScript (3.7.4)' },
+];
 
 export function LanguageSelector({
   languages,
@@ -53,24 +58,9 @@ export function LanguageSelector({
     return languages.filter((lang) => allowedLanguages.includes(lang.id));
   }, [languages, allowedLanguages]);
 
-  // Group languages: popular first, then rest alphabetically
-  const { popular, other } = useMemo(() => {
-    const pop: Language[] = [];
-    const oth: Language[] = [];
-
-    for (const lang of availableLanguages) {
-      if (POPULAR_LANGUAGE_IDS.has(lang.id)) {
-        pop.push(lang);
-      } else {
-        oth.push(lang);
-      }
-    }
-
-    // Sort each group by name
-    pop.sort((a, b) => a.name.localeCompare(b.name));
-    oth.sort((a, b) => a.name.localeCompare(b.name));
-
-    return { popular: pop, other: oth };
+  // Sort languages alphabetically
+  const sortedLanguages = useMemo(() => {
+    return [...availableLanguages].sort((a, b) => a.name.localeCompare(b.name));
   }, [availableLanguages]);
 
   const selectedLanguage = useMemo(
@@ -109,51 +99,21 @@ export function LanguageSelector({
           <CommandInput placeholder={t('searchLanguage')} />
           <CommandList>
             <CommandEmpty>{t('noLanguageFound')}</CommandEmpty>
-            {popular.length > 0 && (
-              <CommandGroup heading={t('popularLanguages')}>
-                {popular.map((lang) => (
-                  <CommandItem
-                    key={lang.id}
-                    value={lang.id.toString()}
-                    onSelect={handleSelect}
-                  >
-                    <Check className={cn('mr-2 h-4 w-4', selectedId === lang.id ? 'opacity-100' : 'opacity-0')} />
-                    {lang.name}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
-            {other.length > 0 && (
-              <CommandGroup heading={t('otherLanguages')}>
-                {other.map((lang) => (
-                  <CommandItem
-                    key={lang.id}
-                    value={lang.id.toString()}
-                    onSelect={handleSelect}
-                  >
-                    <Check className={cn('mr-2 h-4 w-4', selectedId === lang.id ? 'opacity-100' : 'opacity-0')} />
-                    {lang.name}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
+            {sortedLanguages.map((lang) => (
+              <CommandItem
+                key={lang.id}
+                value={lang.id.toString()}
+                onSelect={handleSelect}
+              >
+                <Check className={cn('mr-2 h-4 w-4', selectedId === lang.id ? 'opacity-100' : 'opacity-0')} />
+                {lang.name}
+              </CommandItem>
+            ))}
           </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
   );
 }
-
-// Export a canonical list of Judge0 languages for consumers that expect it
-export const JUDGE0_LANGUAGES: Language[] = [
-  { id: 71, name: 'Python (3.8.1)' },
-  { id: 63, name: 'JavaScript (Node.js)' },
-  { id: 74, name: 'TypeScript' },
-  { id: 62, name: 'Java' },
-  { id: 54, name: 'C++' },
-  { id: 50, name: 'C' },
-  { id: 73, name: 'Rust' },
-  { id: 60, name: 'Go' },
-];
 
 export default LanguageSelector;

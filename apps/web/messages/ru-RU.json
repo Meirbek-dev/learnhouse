@@ -1910,6 +1910,7 @@
       "deleteButton": "Удалить активность",
       "deleteConfirmation": "Вы уверены, что хотите удалить эту активность?",
       "deleteTitle": "Удалить {name}?",
+      "deleting": "Удаление...",
       "deletingActivity": "Удаление активности...",
       "editAssignmentButton": "Редактировать задание",
       "editPageButton": "Редактировать страницу",
