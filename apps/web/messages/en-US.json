@@ -184,7 +184,6 @@
       "retryExamRemaining": "Retry Exam ({remaining} left)",
       "violationsRecorded": "{count} violations recorded during this exam",
       "violationWarning": "Violations: {count}/{max}. You have {remaining} remaining before auto-submit. If you believe this is a mistake, {appealLink}.",
-
       "performance": {
         "excellent": "Excellent!",
         "good": "Good result!",
@@ -192,18 +191,15 @@
         "unsatisfactory": "Needs improvement",
         "emojiAlt": "Performance emoji for grade {grade}"
       },
-
       "grade": "Grade {grade}",
       "scoreDetails": "{score} of {max} points",
       "scoreProgress": "Score progress: {percentage}%",
-
       "questionType": {
         "SINGLE_CHOICE": "Single choice",
         "MULTIPLE_CHOICE": "Multiple choice",
         "TRUE_FALSE": "True / False",
         "MATCHING": "Matching"
       },
-
       "yourAnswer": "Your Answer",
       "fullscreenNotSupported": "Fullscreen mode not supported by your browser",
       "fullscreenRecommended": "Fullscreen mode is recommended for this exam",
@@ -272,7 +268,6 @@
       "noCodeToRun": "Please write some code first",
       "noCodeToSubmit": "Please write some code to submit",
       "testResults": "Test Results",
-
       "status": {
         "inQueue": "In Queue",
         "processing": "Processing",
@@ -284,7 +279,6 @@
         "internalError": "Internal Error",
         "unknown": "Unknown"
       },
-
       "submission": {
         "pending": "Pending",
         "processing": "Processing",
@@ -294,13 +288,11 @@
         "completed": "Completed",
         "unknown": "Unknown"
       },
-
       "difficulty": {
         "easy": "Easy",
         "medium": "Medium",
         "hard": "Hard"
       },
-
       "gradingStrategy": {
         "allOrNothing": "All or Nothing",
         "allOrNothingHint": "Student must pass all test cases to receive points",
@@ -309,7 +301,6 @@
         "weighted": "Weighted",
         "weightedHint": "Each test case has its own point value"
       },
-
       "form": {
         "basicInfo": "Basic Info",
         "testCases": "Test Cases",
@@ -354,14 +345,51 @@
         "save": "Save Challenge",
         "saving": "Saving..."
       },
-
       "challengeSaved": "Challenge saved successfully",
       "saveFailed": "Failed to save challenge",
       "notConfigured": "Challenge Not Configured",
       "notConfiguredDescription": "This code challenge hasn't been set up yet. Please contact your instructor.",
       "competitive": "Competitive",
       "timeLimit": "Time Limit",
-      "memoryLimit": "Memory Limit"
+      "memoryLimit": "Memory Limit",
+      "configureChallenge": "Configure Code Challenge",
+      "configureDescription": "Set up test cases, time limits, and allowed programming languages",
+      "generalSettings": "General Settings",
+      "generalSettingsDescription": "Configure basic challenge parameters",
+      "allowedLanguages": "Allowed Languages",
+      "allowedLanguagesDescription": "Select which programming languages students can use",
+      "timeLimitDescription": "Maximum execution time per test case in seconds",
+      "memoryLimitDescription": "Maximum memory usage in MB",
+      "points": "Points",
+      "pointsDescription": "Maximum points for this challenge",
+      "gradingStrategy": "Grading Strategy",
+      "gradingStrategyDescription": "How to calculate the final score",
+      "selectGradingStrategy": "Select grading strategy",
+      "allOrNothing": "All or Nothing",
+      "partialCredit": "Partial Credit",
+      "bestSubmission": "Best Submission",
+      "latestSubmission": "Latest Submission",
+      "allowCustomInput": "Allow Custom Input",
+      "allowCustomInputDescription": "Let students test their code with custom input",
+      "visibleTestCases": "Visible Test Cases",
+      "visibleTestCasesDescription": "Test cases students can see and run against",
+      "hiddenTestCases": "Hidden Test Cases",
+      "hiddenTestCasesDescription": "Test cases only used during final submission",
+      "noHiddenTestCases": "No hidden test cases. Add some for validation.",
+      "addTestCase": "Add Test Case",
+      "removeTestCase": "Remove",
+      "testDescription": "Description",
+      "testDescriptionPlaceholder": "e.g., Edge case with empty input",
+      "inputPlaceholder": "Enter test input...",
+      "expectedOutputPlaceholder": "Enter expected output...",
+      "testWeight": "Weight",
+      "testWeightDescription": "Points allocated for this test case",
+      "cancel": "Cancel",
+      "saveConfig": "Save Configuration",
+      "savingConfig": "Saving configuration...",
+      "configSaved": "Configuration saved successfully",
+      "configSaveFailed": "Failed to save configuration",
+      "authRequired": "Authentication required"
     }
   },
   "ActivityIndicators": {
@@ -1878,6 +1906,7 @@
       "activityNamePlaceholder": "Activity name",
       "activityNameUpdatedSuccess": "Activity name updated successfully",
       "activityUpdateSuccess": "Activity updated successfully",
+      "configureButton": "Configure",
       "deleteButton": "Delete Activity",
       "deleteConfirmation": "Are you sure you want to delete this activity?",
       "deleteTitle": "Delete {name}?",

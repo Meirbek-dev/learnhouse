@@ -60,6 +60,11 @@ export default async function proxy(req: NextRequest) {
     return NextResponse.rewrite(new URL(`/editor${pathname}`, req.url));
   }
 
+  // Code Challenge Config Editor
+  if (pathname.match(/^\/course\/[^/]+\/activity\/[^/]+\/editor$/)) {
+    return NextResponse.rewrite(new URL(`/editor${pathname}`, req.url));
+  }
+
   // Health Check
   if (pathname.startsWith('/health')) {
     return NextResponse.rewrite(new URL('/api/health', req.url));

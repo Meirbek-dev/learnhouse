@@ -743,7 +743,7 @@ async def submit_code(...):
   - Worker scaling: docker-compose scale judge0_workers=4 (adjust per load)
   - Configuration (judge0.conf):
 
-    ```
+    ```python
     ENABLE_COMPILER_OPTIONS=true
     ENABLE_WAIT_RESULT=true  # Synchronous for custom tests
     MAX_QUEUE_SIZE=200

@@ -1,0 +1,667 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useFieldArray, useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { toast } from 'sonner';
+import useSWR from 'swr';
+import { ArrowLeft, Loader2, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { getAPIUrl } from '@services/config/config';
+import { JUDGE0_LANGUAGES } from './LanguageSelector';
+
+interface CodeChallengeConfigEditorProps {
+  activityUuid: string;
+  courseId: string;
+}
+
+const testCaseSchema = z.object({
+  id: z.string().optional(),
+  input: z.string(),
+  expected_output: z.string(),
+  is_visible: z.boolean(),
+  description: z.string().optional(),
+  weight: z.number(),
+});
+
+const formSchema = z.object({
+  allowed_languages: z.array(z.number()).min(1, 'At least one language must be selected'),
+  time_limit: z.number().min(1).max(60),
+  memory_limit: z.number().min(16).max(2048),
+  grading_strategy: z.enum(['ALL_OR_NOTHING', 'PARTIAL_CREDIT', 'BEST_SUBMISSION', 'LATEST_SUBMISSION']),
+  execution_mode: z.enum(['FAST_FEEDBACK', 'COMPLETE_FEEDBACK']),
+  allow_custom_input: z.boolean(),
+  points: z.number().min(0),
+  visible_tests: z.array(testCaseSchema),
+  hidden_tests: z.array(testCaseSchema),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+const fetcher = async ([url, token]: [string, string]) => {
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    if (res.status === 404) return null;
+    throw new Error('Failed to fetch');
+  }
+  return res.json();
+};
+
+export default function CodeChallengeConfigEditor({ activityUuid, courseId }: CodeChallengeConfigEditorProps) {
+  const t = useTranslations('Activities.CodeChallenges');
+  const router = useRouter();
+  const session = usePlatformSession();
+  const accessToken = session?.data?.tokens?.access_token;
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Fetch existing settings
+  const { data: existingSettings, isLoading } = useSWR(
+    accessToken ? [`${getAPIUrl()}code-challenges/${activityUuid}/settings`, accessToken] : null,
+    fetcher,
+    { revalidateOnFocus: false },
+  );
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      allowed_languages: [71],
+      time_limit: 2,
+      memory_limit: 256,
+      grading_strategy: 'PARTIAL_CREDIT',
+      execution_mode: 'COMPLETE_FEEDBACK',
+      allow_custom_input: true,
+      points: 100,
+      visible_tests: [{ input: '', expected_output: '', is_visible: true, description: '', weight: 1 }],
+      hidden_tests: [],
+    },
+  });
+
+  const {
+    fields: visibleTestFields,
+    append: appendVisibleTest,
+    remove: removeVisibleTest,
+  } = useFieldArray({
+    control: form.control,
+    name: 'visible_tests',
+  });
+
+  const {
+    fields: hiddenTestFields,
+    append: appendHiddenTest,
+    remove: removeHiddenTest,
+  } = useFieldArray({
+    control: form.control,
+    name: 'hidden_tests',
+  });
+
+  // Populate form when existing settings are loaded
+  useEffect(() => {
+    if (existingSettings) {
+      const visibleTests =
+        existingSettings.visible_tests?.map((tc: any) => ({
+          ...tc,
+          is_visible: true,
+        })) || [];
+      const hiddenTests =
+        existingSettings.hidden_tests?.map((tc: any) => ({
+          ...tc,
+          is_visible: false,
+        })) || [];
+
+      form.reset({
+        allowed_languages: existingSettings.allowed_languages || [71],
+        time_limit: existingSettings.time_limit || 2,
+        memory_limit: existingSettings.memory_limit || 256,
+        grading_strategy: existingSettings.grading_strategy || 'PARTIAL_CREDIT',
+        execution_mode: existingSettings.execution_mode || 'COMPLETE_FEEDBACK',
+        allow_custom_input: existingSettings.allow_custom_input ?? true,
+        points: existingSettings.points || 100,
+        visible_tests:
+          visibleTests.length > 0
+            ? visibleTests
+            : [{ input: '', expected_output: '', is_visible: true, description: '', weight: 1 }],
+        hidden_tests: hiddenTests,
+      });
+    }
+  }, [existingSettings, form]);
+
+  const onSubmit = async (values: FormValues) => {
+    if (!accessToken) {
+      toast.error(t('authRequired'));
+      return;
+    }
+
+    setIsSaving(true);
+    const loadingToast = toast.loading(t('savingConfig'));
+
+    try {
+      const response = await fetch(`${getAPIUrl()}code-challenges/${activityUuid}/settings`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          allowed_languages: values.allowed_languages,
+          time_limit: values.time_limit,
+          memory_limit: values.memory_limit,
+          grading_strategy: values.grading_strategy,
+          execution_mode: values.execution_mode,
+          allow_custom_input: values.allow_custom_input,
+          points: values.points,
+          visible_tests: values.visible_tests.map((tc) => ({
+            ...tc,
+            is_visible: true,
+          })),
+          hidden_tests: values.hidden_tests.map((tc) => ({
+            ...tc,
+            is_visible: false,
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to save configuration');
+      }
+
+      toast.success(t('configSaved'), { id: loadingToast });
+      router.back();
+    } catch (error) {
+      console.error('Error saving configuration:', error);
+      toast.error(error instanceof Error ? error.message : t('configSaveFailed'), { id: loadingToast });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const toggleLanguage = (languageId: number) => {
+    const current = form.getValues('allowed_languages');
+    if (current.includes(languageId)) {
+      if (current.length > 1) {
+        form.setValue('allowed_languages', current.filter((id) => id !== languageId));
+      }
+    } else {
+      form.setValue('allowed_languages', [...current, languageId]);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-4xl space-y-6">
+        <Skeleton className="h-10 w-1/3" />
+        <Skeleton className="h-[600px] w-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-4xl">
+      <div className="mb-6 flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.back()}
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold">{t('configureChallenge')}</h1>
+          <p className="text-muted-foreground text-sm">{t('configureDescription')}</p>
+        </div>
+      </div>
+
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-6"
+        >
+          {/* General Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('generalSettings')}</CardTitle>
+              <CardDescription>{t('generalSettingsDescription')}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Allowed Languages */}
+              <FormField
+                control={form.control}
+                name="allowed_languages"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('allowedLanguages')}</FormLabel>
+                    <FormControl>
+                      <div className="flex flex-wrap gap-2">
+                        {JUDGE0_LANGUAGES.map((lang) => {
+                          const isSelected = field.value.includes(lang.id);
+                          return (
+                            <Badge
+                              key={lang.id}
+                              variant={isSelected ? 'default' : 'outline'}
+                              className="cursor-pointer"
+                              onClick={() => toggleLanguage(lang.id)}
+                            >
+                              {lang.name}
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    </FormControl>
+                    <FormDescription>{t('allowedLanguagesDescription')}</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Time Limit */}
+                <FormField
+                  control={form.control}
+                  name="time_limit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('timeLimit')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={60}
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormDescription>{t('timeLimitDescription')}</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Memory Limit */}
+                <FormField
+                  control={form.control}
+                  name="memory_limit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('memoryLimit')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={16}
+                          max={2048}
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormDescription>{t('memoryLimitDescription')}</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Points */}
+                <FormField
+                  control={form.control}
+                  name="points"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('points')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormDescription>{t('pointsDescription')}</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Grading Strategy */}
+                <FormField
+                  control={form.control}
+                  name="grading_strategy"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('gradingStrategy')}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('selectGradingStrategy')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectPositioner>
+                          <SelectContent>
+                            <SelectItem value="ALL_OR_NOTHING">{t('allOrNothing')}</SelectItem>
+                            <SelectItem value="PARTIAL_CREDIT">{t('partialCredit')}</SelectItem>
+                            <SelectItem value="BEST_SUBMISSION">{t('bestSubmission')}</SelectItem>
+                            <SelectItem value="LATEST_SUBMISSION">{t('latestSubmission')}</SelectItem>
+                          </SelectContent>
+                        </SelectPositioner>
+                      </Select>
+                      <FormDescription>{t('gradingStrategyDescription')}</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Allow Custom Input */}
+              <FormField
+                control={form.control}
+                name="allow_custom_input"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">{t('allowCustomInput')}</FormLabel>
+                      <FormDescription>{t('allowCustomInputDescription')}</FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Visible Test Cases */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Eye className="h-5 w-5" />
+                    {t('visibleTestCases')}
+                  </CardTitle>
+                  <CardDescription>{t('visibleTestCasesDescription')}</CardDescription>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    appendVisibleTest({ input: '', expected_output: '', is_visible: true, description: '', weight: 1 })
+                  }
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  {t('addTestCase')}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Accordion className="w-full">
+                {visibleTestFields.map((field, index) => (
+                  <AccordionItem
+                    key={field.id}
+                    value={`visible-${index}`}
+                  >
+                    <AccordionTrigger className="hover:no-underline">
+                      <div className="flex items-center gap-2">
+                        <span>
+                          {t('testCase')} #{index + 1}
+                        </span>
+                        {form.watch(`visible_tests.${index}.description`) && (
+                          <span className="text-muted-foreground text-sm">
+                            - {form.watch(`visible_tests.${index}.description`)}
+                          </span>
+                        )}
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-4 pt-4">
+                      <FormField
+                        control={form.control}
+                        name={`visible_tests.${index}.description`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t('testDescription')}</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder={t('testDescriptionPlaceholder')}
+                                {...field}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name={`visible_tests.${index}.input`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('input')}</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  placeholder={t('inputPlaceholder')}
+                                  className="font-mono"
+                                  rows={4}
+                                  {...field}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`visible_tests.${index}.expected_output`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('expectedOutput')}</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  placeholder={t('expectedOutputPlaceholder')}
+                                  className="font-mono"
+                                  rows={4}
+                                  {...field}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="flex justify-end">
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => removeVisibleTest(index)}
+                          disabled={visibleTestFields.length === 1}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          {t('removeTestCase')}
+                        </Button>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </CardContent>
+          </Card>
+
+          {/* Hidden Test Cases */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <EyeOff className="h-5 w-5" />
+                    {t('hiddenTestCases')}
+                  </CardTitle>
+                  <CardDescription>{t('hiddenTestCasesDescription')}</CardDescription>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    appendHiddenTest({ input: '', expected_output: '', is_visible: false, description: '', weight: 1 })
+                  }
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  {t('addTestCase')}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {hiddenTestFields.length === 0 ? (
+                <p className="text-muted-foreground py-8 text-center text-sm">{t('noHiddenTestCases')}</p>
+              ) : (
+                <Accordion className="w-full">
+                  {hiddenTestFields.map((field, index) => (
+                    <AccordionItem
+                      key={field.id}
+                      value={`hidden-${index}`}
+                    >
+                      <AccordionTrigger className="hover:no-underline">
+                        <div className="flex items-center gap-2">
+                          <span>
+                            {t('hiddenTest')} #{index + 1}
+                          </span>
+                          {form.watch(`hidden_tests.${index}.description`) && (
+                            <span className="text-muted-foreground text-sm">
+                              - {form.watch(`hidden_tests.${index}.description`)}
+                            </span>
+                          )}
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="space-y-4 pt-4">
+                        <FormField
+                          control={form.control}
+                          name={`hidden_tests.${index}.description`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('testDescription')}</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder={t('testDescriptionPlaceholder')}
+                                  {...field}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name={`hidden_tests.${index}.input`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>{t('input')}</FormLabel>
+                                <FormControl>
+                                  <Textarea
+                                    placeholder={t('inputPlaceholder')}
+                                    className="font-mono"
+                                    rows={4}
+                                    {...field}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`hidden_tests.${index}.expected_output`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>{t('expectedOutput')}</FormLabel>
+                                <FormControl>
+                                  <Textarea
+                                    placeholder={t('expectedOutputPlaceholder')}
+                                    className="font-mono"
+                                    rows={4}
+                                    {...field}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <FormField
+                          control={form.control}
+                          name={`hidden_tests.${index}.weight`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('testWeight')}</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={100}
+                                  className="w-24"
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number(e.target.value))}
+                                />
+                              </FormControl>
+                              <FormDescription>{t('testWeightDescription')}</FormDescription>
+                            </FormItem>
+                          )}
+                        />
+                        <div className="flex justify-end">
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => removeHiddenTest(index)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            {t('removeTestCase')}
+                          </Button>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
+              disabled={isSaving}
+            >
+              {t('cancel')}
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSaving}
+            >
+              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t('saveConfig')}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
+  );
+}

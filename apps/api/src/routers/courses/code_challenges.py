@@ -43,6 +43,7 @@ from src.db.courses.code_challenges import (
     TestCaseResult,
     TestRunResponse,
 )
+from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
 from src.db.users import AnonymousUser, PublicUser, User
@@ -197,6 +198,81 @@ async def get_challenge_settings_endpoint(
     result["memory_limit_kb"] = settings.memory_limit * 1024  # MB -> KB
 
     return result
+
+
+class SettingsUpdateRequest(PydanticStrictBaseModel):
+    """Request model for updating challenge settings"""
+
+    allowed_languages: list[int] | None = None
+    time_limit: int | None = None  # seconds
+    memory_limit: int | None = None  # MB
+    grading_strategy: GradingStrategy | None = None
+    execution_mode: ExecutionMode | None = None
+    allow_custom_input: bool | None = None
+    points: int | None = None
+    due_date: str | None = None
+    starter_code: dict[str, str] | None = None
+    visible_tests: list[dict] | None = None
+    hidden_tests: list[dict] | None = None
+
+
+@router.put("/{activity_uuid}/settings")
+async def update_challenge_settings(
+    activity_uuid: str,
+    settings_update: SettingsUpdateRequest,
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+):
+    """Update code challenge settings (instructor only)"""
+    activity = await get_activity_or_404(activity_uuid, db_session)
+    await verify_code_challenge_activity(activity)
+    await check_challenge_access(activity, current_user, db_session, require_instructor=True)
+
+    # Get current settings
+    current_settings = get_challenge_settings(activity)
+    current_dict = current_settings.model_dump()
+
+    # Update with new values (only non-None fields)
+    update_dict = settings_update.model_dump(exclude_none=True)
+
+    # Process test cases - convert dicts to TestCase objects
+    if "visible_tests" in update_dict and update_dict["visible_tests"]:
+        visible_tests = []
+        for tc in update_dict["visible_tests"]:
+            if not tc.get("id"):
+                tc["id"] = f"test_{ULID()}"
+            tc["is_visible"] = True
+            visible_tests.append(tc)
+        update_dict["visible_tests"] = visible_tests
+
+    if "hidden_tests" in update_dict and update_dict["hidden_tests"]:
+        hidden_tests = []
+        for tc in update_dict["hidden_tests"]:
+            if not tc.get("id"):
+                tc["id"] = f"test_{ULID()}"
+            tc["is_visible"] = False
+            hidden_tests.append(tc)
+        update_dict["hidden_tests"] = hidden_tests
+
+    # Merge settings
+    for key, value in update_dict.items():
+        current_dict[key] = value
+
+    # Validate the merged settings
+    try:
+        updated_settings = CodeChallengeSettings.model_validate(current_dict)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid settings: {str(e)}")
+
+    # Update activity.details
+    activity.details = updated_settings.model_dump()
+    db_session.add(activity)
+    db_session.commit()
+    db_session.refresh(activity)
+
+    logger.info(f"Updated challenge settings for activity {activity_uuid}")
+
+    return {"message": "Settings updated successfully", "settings": activity.details}
 
 
 @router.post("/{activity_uuid}/submit", response_model=SubmissionResponse)
@@ -456,14 +532,20 @@ async def run_visible_tests(
     )
 
 
+class CustomTestRequest(PydanticStrictBaseModel):
+    """Request model for custom test execution"""
+
+    language_id: int
+    source_code: str  # Base64 encoded
+    stdin: str = ""  # Base64 encoded
+
+
 @router.post("/{activity_uuid}/custom-test", response_model=CustomTestResponse)
 async def run_custom_test(
     activity_uuid: str,
-    language_id: int,
-    source_code: str,  # Base64 encoded
-    stdin: str = "",  # Base64 encoded
-    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
-    db_session: Annotated[Session, Depends(get_db_session)] = None,
+    request_body: CustomTestRequest,
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """Run code with custom input (no expected output comparison)"""
     activity = await get_activity_or_404(activity_uuid, db_session)
@@ -477,9 +559,9 @@ async def run_custom_test(
 
     # Decode inputs
     try:
-        decoded_code = base64.b64decode(source_code).decode("utf-8")
+        decoded_code = base64.b64decode(request_body.source_code).decode("utf-8")
         decoded_code = sanitize_code(decoded_code)
-        decoded_stdin = base64.b64decode(stdin).decode("utf-8") if stdin else ""
+        decoded_stdin = base64.b64decode(request_body.stdin).decode("utf-8") if request_body.stdin else ""
     except CodeValidationError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
@@ -488,7 +570,7 @@ async def run_custom_test(
     try:
         result = await judge0_service.run_custom_test(
             source_code=decoded_code,
-            language_id=language_id,
+            language_id=request_body.language_id,
             stdin=decoded_stdin,
             time_limit=settings.time_limit,
             memory_limit=settings.memory_limit,

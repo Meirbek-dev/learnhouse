@@ -14,6 +14,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { getAPIUrl } from '@services/config/config';
 
 import { LanguageSelector } from './LanguageSelector';
 import { TestResultsList } from './TestCaseCard';
@@ -28,17 +30,20 @@ interface TestCase {
   expected_output: string;
   description?: string;
   is_visible: boolean;
-  points?: number;
+  weight?: number;
 }
 
 interface CodeChallengeSettings {
-  uuid: string;
+  uuid?: string;
   time_limit_ms: number;
   memory_limit_kb: number;
+  time_limit: number;
+  memory_limit: number;
   max_submissions?: number;
-  grading_strategy: 'all_or_nothing' | 'partial' | 'weighted';
+  grading_strategy: string;
   allowed_languages: number[];
-  test_cases: TestCase[];
+  visible_tests: TestCase[];
+  hidden_tests?: TestCase[];
   starter_code?: Record<string, string>;
   solution_code?: Record<string, string>;
 }
@@ -63,8 +68,10 @@ interface CodeChallengeEditorProps {
   onSubmissionComplete?: (submission: Submission) => void;
 }
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
+const fetcher = async ([url, token]: [string, string]) => {
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   if (!res.ok) throw new Error('Failed to fetch');
   return res.json();
 };
@@ -79,6 +86,8 @@ export function CodeChallengeEditor({
   onSubmissionComplete,
 }: CodeChallengeEditorProps) {
   const t = useTranslations('Activities.CodeChallenges');
+  const session = usePlatformSession();
+  const accessToken = session?.data?.tokens?.access_token;
 
   // State
   const [code, setCode] = useState(initialCode);
@@ -96,14 +105,16 @@ export function CodeChallengeEditor({
 
   // Fetch submissions history
   const { data: submissions, mutate: refreshSubmissions } = useSWR<Submission[]>(
-    `/api/proxy/code-challenges/${activityUuid}/submissions`,
+    accessToken ? [`${getAPIUrl()}code-challenges/${activityUuid}/submissions`, accessToken] : null,
     fetcher,
     { revalidateOnFocus: false },
   );
 
   // Poll for active submission status
   const { data: activeSubmission } = useSWR<Submission>(
-    activeSubmissionId ? `/api/proxy/code-challenges/submissions/${activeSubmissionId}` : null,
+    activeSubmissionId && accessToken
+      ? [`${getAPIUrl()}code-challenges/submissions/${activeSubmissionId}`, accessToken]
+      : null,
     fetcher,
     {
       refreshInterval: activeSubmissionId ? 1000 : 0,
@@ -156,19 +167,26 @@ export function CodeChallengeEditor({
       toast.error(t('noCodeToRun'));
       return;
     }
+    if (!accessToken) {
+      toast.error(t('authRequired'));
+      return;
+    }
 
     setIsRunning(true);
     setCustomOutput('');
     setActiveTab('custom');
 
     try {
-      const res = await fetch(`/api/proxy/code-challenges/${activityUuid}/custom-test`, {
+      const res = await fetch(`${getAPIUrl()}code-challenges/${activityUuid}/custom-test`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify({
-          source_code: code,
+          source_code: btoa(code),
           language_id: selectedLanguageId,
-          stdin: customInput,
+          stdin: btoa(customInput),
         }),
       });
 
@@ -185,12 +203,16 @@ export function CodeChallengeEditor({
     } finally {
       setIsRunning(false);
     }
-  }, [code, selectedLanguageId, customInput, activityUuid, t]);
+  }, [code, selectedLanguageId, customInput, activityUuid, t, accessToken]);
 
   // Run against sample test cases
   const handleTestAgainstSamples = useCallback(async () => {
     if (!code.trim()) {
       toast.error(t('noCodeToRun'));
+      return;
+    }
+    if (!accessToken) {
+      toast.error(t('authRequired'));
       return;
     }
 
@@ -199,11 +221,14 @@ export function CodeChallengeEditor({
     setActiveTab('results');
 
     try {
-      const res = await fetch(`/api/proxy/code-challenges/${activityUuid}/test`, {
+      const res = await fetch(`${getAPIUrl()}code-challenges/${activityUuid}/test`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify({
-          source_code: code,
+          source_code: btoa(code),
           language_id: selectedLanguageId,
         }),
       });
@@ -220,7 +245,7 @@ export function CodeChallengeEditor({
     } finally {
       setIsRunning(false);
     }
-  }, [code, selectedLanguageId, activityUuid, t]);
+  }, [code, selectedLanguageId, activityUuid, t, accessToken]);
 
   // Submit solution
   const handleSubmit = useCallback(async () => {
@@ -228,16 +253,23 @@ export function CodeChallengeEditor({
       toast.error(t('noCodeToSubmit'));
       return;
     }
+    if (!accessToken) {
+      toast.error(t('authRequired'));
+      return;
+    }
 
     setIsSubmitting(true);
     setTestResults(null);
 
     try {
-      const res = await fetch(`/api/proxy/code-challenges/${activityUuid}/submit`, {
+      const res = await fetch(`${getAPIUrl()}code-challenges/${activityUuid}/submit`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify({
-          source_code: code,
+          source_code: btoa(code),
           language_id: selectedLanguageId,
         }),
       });
@@ -248,13 +280,13 @@ export function CodeChallengeEditor({
       }
 
       const submission = await res.json();
-      setActiveSubmissionId(submission.uuid);
+      setActiveSubmissionId(submission.submission_uuid);
       toast.info(t('submissionQueued'));
     } catch (error) {
       setIsSubmitting(false);
       toast.error(error instanceof Error ? error.message : t('submissionFailed'));
     }
-  }, [code, selectedLanguageId, activityUuid, t]);
+  }, [code, selectedLanguageId, activityUuid, t, accessToken]);
 
   // Get language name from ID
   const getLanguageName = (languageId: number): string => {
@@ -262,9 +294,9 @@ export function CodeChallengeEditor({
     return lang?.name ?? `Language ${languageId}`;
   };
 
-  // Get visible test cases
-  const visibleTestCases = settings?.test_cases?.filter((tc) => tc.is_visible) ?? [];
-  const visibleTestIds = new Set(visibleTestCases.map((tc) => tc.id));
+  // Get visible test cases - use visible_tests from settings
+  const visibleTestCases = settings?.visible_tests ?? [];
+  const visibleTestIds = new Set(visibleTestCases.map((tc: TestCase) => tc.id));
 
   return (
     <div className="flex h-full flex-col">

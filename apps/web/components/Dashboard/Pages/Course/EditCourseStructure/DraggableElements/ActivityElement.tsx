@@ -550,6 +550,32 @@ const ActivityEditButton = ({
     );
   }
 
+  // Code challenge edit button
+  if (activity.activity_type === 'TYPE_CODE_CHALLENGE') {
+    const editUrl = `${getUriWithOrg(orgslug, '')}/course/${course?.courseStructure?.course_uuid?.replace(
+      'course_',
+      '',
+    )}/activity/${activity.activity_uuid.replace('activity_', '')}/editor`;
+
+    return (
+      <Button
+        size="sm"
+        variant="outline"
+        className="border-cyan-300 bg-cyan-50 text-cyan-700 hover:bg-cyan-100"
+      >
+        <Link
+          href={editUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center"
+        >
+          <FilePenLine className="h-3.5 w-3.5" />
+          {!isMobile && <span className="ml-1.5 text-xs">{t('configureButton')}</span>}
+        </Link>
+      </Button>
+    );
+  }
+
   return null;
 };
 

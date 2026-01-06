@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { useCallback } from 'react';
 import { z } from 'zod';
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Field, FieldLabel, FieldDescription, FieldContent, FieldError } from '@/components/ui/field';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -236,23 +236,25 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                           <SelectValue placeholder={t('form.selectDifficulty')} />
                         </SelectTrigger>
                       </FieldContent>
-                      <SelectContent>
-                        <SelectItem value="easy">
-                          <span className="flex items-center gap-2">
-                            <Badge variant="success">{t('difficulty.easy')}</Badge>
-                          </span>
-                        </SelectItem>
-                        <SelectItem value="medium">
-                          <span className="flex items-center gap-2">
-                            <Badge variant="warning">{t('difficulty.medium')}</Badge>
-                          </span>
-                        </SelectItem>
-                        <SelectItem value="hard">
-                          <span className="flex items-center gap-2">
-                            <Badge variant="destructive">{t('difficulty.hard')}</Badge>
-                          </span>
-                        </SelectItem>
-                      </SelectContent>
+                      <SelectPositioner>
+                        <SelectContent>
+                          <SelectItem value="easy">
+                            <span className="flex items-center gap-2">
+                              <Badge variant="success">{t('difficulty.easy')}</Badge>
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="medium">
+                            <span className="flex items-center gap-2">
+                              <Badge variant="warning">{t('difficulty.medium')}</Badge>
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="hard">
+                            <span className="flex items-center gap-2">
+                              <Badge variant="destructive">{t('difficulty.hard')}</Badge>
+                            </span>
+                          </SelectItem>
+                        </SelectContent>
+                      </SelectPositioner>
                     </Select>
                     <FieldError errors={[fieldState.error]} />
                   </Field>
@@ -274,11 +276,13 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                           <SelectValue placeholder={t('form.selectGradingStrategy')} />
                         </SelectTrigger>
                       </FieldContent>
-                      <SelectContent>
-                        <SelectItem value="all_or_nothing">{t('gradingStrategy.allOrNothing')}</SelectItem>
-                        <SelectItem value="partial">{t('gradingStrategy.partial')}</SelectItem>
-                        <SelectItem value="weighted">{t('gradingStrategy.weighted')}</SelectItem>
-                      </SelectContent>
+                      <SelectPositioner>
+                        <SelectContent>
+                          <SelectItem value="all_or_nothing">{t('gradingStrategy.allOrNothing')}</SelectItem>
+                          <SelectItem value="partial">{t('gradingStrategy.partial')}</SelectItem>
+                          <SelectItem value="weighted">{t('gradingStrategy.weighted')}</SelectItem>
+                        </SelectContent>
+                      </SelectPositioner>
                     </Select>
                     <FieldDescription>{t(`gradingStrategy.${field.value}Hint`)}</FieldDescription>
                     <FieldError errors={[fieldState.error]} />
