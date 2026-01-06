@@ -31,7 +31,7 @@ def upgrade() -> None:
         "FAILED",
         "PENDING_JUDGE0",
         name="submissionstatus",
-    ).create(op.get_bind())
+    ).create(op.get_bind(), checkfirst=True)
     op.create_table(
         "code_submission",
         sa.Column("language_id", sa.Integer(), nullable=False),

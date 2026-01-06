@@ -60,8 +60,8 @@ export default function CodeChallengeActivityModal({
   const handleSubmit = async (values: FormValues) => {
     const activityData = {
       name: values.name,
-      type: 'TYPE_CODE_CHALLENGE',
-      subtype: values.subtype === 'competitive' ? 'SUBTYPE_CODE_COMPETITIVE' : 'SUBTYPE_CODE_GENERAL',
+      activity_type: 'TYPE_CODE_CHALLENGE',
+      activity_sub_type: values.subtype === 'competitive' ? 'SUBTYPE_CODE_COMPETITIVE' : 'SUBTYPE_CODE_GENERAL',
       chapter_id: chapterId,
       course_id: course.id,
       published: false,

@@ -28,7 +28,13 @@ import NewActivityButton from '../Buttons/NewActivityButton';
 import ActivityElement from './ActivityElement';
 
 // Types
-type ActivityType = 'TYPE_VIDEO' | 'TYPE_DOCUMENT' | 'TYPE_ASSIGNMENT' | 'TYPE_DYNAMIC';
+type ActivityType =
+  | 'TYPE_VIDEO'
+  | 'TYPE_DOCUMENT'
+  | 'TYPE_ASSIGNMENT'
+  | 'TYPE_DYNAMIC'
+  | 'TYPE_EXAM'
+  | 'TYPE_CODE_CHALLENGE';
 
 interface Activity {
   id: string;

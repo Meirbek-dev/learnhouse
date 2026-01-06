@@ -13,7 +13,10 @@ interface UploadProgress {
 }
 
 export async function createActivity(data: any, chapter_id: number, org_id: number, access_token: string) {
-  data.content = {};
+  // Only set empty content if not already provided
+  if (!data.content) {
+    data.content = {};
+  }
   // ensure the server receives the target chapter and org so the activity is created under that chapter
   data.chapter_id = chapter_id;
   data.org_id = org_id;
@@ -280,11 +283,11 @@ export async function createExternalVideoActivity(data: any, activity: any, chap
   };
   const videoDetails = data.details
     ? {
-        startTime: data.details.startTime ?? defaultDetails.startTime,
-        endTime: data.details.endTime ?? defaultDetails.endTime,
-        autoplay: data.details.autoplay ?? defaultDetails.autoplay,
-        muted: data.details.muted ?? defaultDetails.muted,
-      }
+      startTime: data.details.startTime ?? defaultDetails.startTime,
+      endTime: data.details.endTime ?? defaultDetails.endTime,
+      autoplay: data.details.autoplay ?? defaultDetails.autoplay,
+      muted: data.details.muted ?? defaultDetails.muted,
+    }
     : defaultDetails;
   data.details = JSON.stringify(videoDetails);
   const result = await fetch(
