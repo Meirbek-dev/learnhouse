@@ -342,36 +342,31 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
             />
 
             {/* Publish/Unpublish Toggle */}
-            <ToolTip
-              content={activity.published ? t('unpublishButton') : t('publishButton')}
-              sideOffset={8}
+            <Button
+              size="sm"
+              variant={activity.published ? 'outline' : 'default'}
+              onClick={handleTogglePublish}
+              disabled={isUpdatingPublish}
+              className={
+                activity.published
+                  ? 'border-neutral-300 bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                  : 'bg-green-600 text-white hover:bg-green-700'
+              }
             >
-              <Button
-                size="sm"
-                variant={activity.published ? 'outline' : 'default'}
-                onClick={handleTogglePublish}
-                disabled={isUpdatingPublish}
-                className={
-                  activity.published
-                    ? 'border-neutral-300 bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                    : 'bg-green-600 text-white hover:bg-green-700'
-                }
-              >
-                {isUpdatingPublish ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : activity.published ? (
-                  <>
-                    <Lock className="h-3.5 w-3.5" />
-                    {!isMobile && <span className="ml-1.5 text-xs">{t('unpublish')}</span>}
-                  </>
-                ) : (
-                  <>
-                    <Globe className="h-3.5 w-3.5" />
-                    {!isMobile && <span className="ml-1.5 text-xs">{t('publish')}</span>}
-                  </>
-                )}
-              </Button>
-            </ToolTip>
+              {isUpdatingPublish ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : activity.published ? (
+                <>
+                  <Lock className="h-3.5 w-3.5" />
+                  {!isMobile && <span className="ml-1.5 text-xs">{t('unpublish')}</span>}
+                </>
+              ) : (
+                <>
+                  <Globe className="h-3.5 w-3.5" />
+                  {!isMobile && <span className="ml-1.5 text-xs">{t('publish')}</span>}
+                </>
+              )}
+            </Button>
 
             {/* Preview Button */}
             <ToolTip
@@ -498,26 +493,21 @@ const ActivityEditButton = ({
     )}/activity/${activity.activity_uuid.replace('activity_', '')}/edit`;
 
     return (
-      <ToolTip
-        content={t('editPageButton')}
-        sideOffset={8}
+      <Button
+        size="sm"
+        variant="outline"
+        className="border-sky-300 bg-sky-50 text-sky-700 hover:bg-sky-100"
       >
-        <Button
-          size="sm"
-          variant="outline"
-          className="border-sky-300 bg-sky-50 text-sky-700 hover:bg-sky-100"
+        <Link
+          href={editUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center"
         >
-          <Link
-            href={editUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center"
-          >
-            <FilePenLine className="h-3.5 w-3.5" />
-            {!isMobile && <span className="ml-1.5 text-xs">{t('editPageButton')}</span>}
-          </Link>
-        </Button>
-      </ToolTip>
+          <FilePenLine className="h-3.5 w-3.5" />
+          {!isMobile && <span className="ml-1.5 text-xs">{t('editPageButton')}</span>}
+        </Link>
+      </Button>
     );
   }
 
@@ -542,26 +532,21 @@ const ActivityEditButton = ({
     const editUrl = `${getUriWithOrg(org?.slug ?? '', '')}/dash/assignments/${assignmentUUID}`;
 
     return (
-      <ToolTip
-        content={t('editAssignmentButton')}
-        sideOffset={8}
+      <Button
+        size="sm"
+        variant="outline"
+        className="border-teal-300 bg-teal-50 text-teal-700 hover:bg-teal-100"
       >
-        <Button
-          size="sm"
-          variant="outline"
-          className="border-teal-300 bg-teal-50 text-teal-700 hover:bg-teal-100"
+        <Link
+          href={editUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center"
         >
-          <Link
-            href={editUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center"
-          >
-            <FilePenLine className="h-3.5 w-3.5" />
-            {!isMobile && <span className="ml-1.5 text-xs">{t('editAssignmentButton')}</span>}
-          </Link>
-        </Button>
-      </ToolTip>
+          <FilePenLine className="h-3.5 w-3.5" />
+          {!isMobile && <span className="ml-1.5 text-xs">{t('editAssignmentButton')}</span>}
+        </Link>
+      </Button>
     );
   }
 

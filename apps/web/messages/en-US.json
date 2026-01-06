@@ -1049,6 +1049,7 @@
       "dynamicPage": "Dynamic Page",
       "video": "Video",
       "codeChallenge": "Code Challenge",
+      "backToActivities": "Back to Activities",
       "CodeChallenge": {
         "title": "Create Code Challenge",
         "subtitle": "Create a programming exercise with automated testing",

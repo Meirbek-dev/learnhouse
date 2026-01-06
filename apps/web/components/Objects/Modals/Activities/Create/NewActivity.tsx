@@ -1,20 +1,91 @@
 'use client';
-import DocumentPdfPageActivityImage from './images/documentpdf-page-activity.webp';
-import AssignmentActivityImage from './images/assignment-page-activity.webp';
-import DynamicPageActivityImage from './images/dynamic-page-activity.webp';
+
+import {
+  Code2,
+  FileText,
+  ClipboardList,
+  GraduationCap,
+  Video,
+  Sparkles,
+  ArrowLeft,
+  type LucideIcon,
+} from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
+
 import CodeChallenge from './NewActivityModal/CodeChallengeActivityModal';
 import DocumentPdfModal from './NewActivityModal/DocumentActivityModal';
 import DynamicCanvaModal from './NewActivityModal/DynamicActivityModal';
-import VideoPageActivityImage from './images/video-page-activity.webp';
 import Assignment from './NewActivityModal/AssignmentActivityModal';
 import VideoModal from './NewActivityModal/VideoActivityModal';
 import Exam from './NewActivityModal/ExamActivityModal';
-import { useTranslations } from 'next-intl';
-import { Code2 } from 'lucide-react';
-import { useState } from 'react';
-import Image from 'next/image';
 
-const NewActivityModal = ({
+type ViewType = 'home' | 'dynamic' | 'video' | 'documentpdf' | 'assignments' | 'exams' | 'codechallenge';
+
+interface ActivityType {
+  id: ViewType;
+  labelKey: string;
+  icon: LucideIcon;
+  color: string;
+  bgColor: string;
+}
+
+interface NewActivityModalProps {
+  closeModal: () => void;
+  submitActivity: (data?: any) => Promise<void>;
+  submitFileActivity: (file: any, type: any, activity: any, chapterId: number) => Promise<void>;
+  submitExternalVideo: (external_video_data: any, activity: any, chapterId: number) => Promise<void>;
+  chapterId: number;
+  course: unknown;
+  orgslug: string;
+}
+
+const ACTIVITY_TYPES: ActivityType[] = [
+  {
+    id: 'dynamic',
+    labelKey: 'dynamicPage',
+    icon: Sparkles,
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-50 group-hover:bg-purple-100',
+  },
+  {
+    id: 'video',
+    labelKey: 'video',
+    icon: Video,
+    color: 'text-red-600',
+    bgColor: 'bg-red-50 group-hover:bg-red-100',
+  },
+  {
+    id: 'documentpdf',
+    labelKey: 'document',
+    icon: FileText,
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50 group-hover:bg-blue-100',
+  },
+  {
+    id: 'assignments',
+    labelKey: 'assignments',
+    icon: ClipboardList,
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-50 group-hover:bg-amber-100',
+  },
+  {
+    id: 'exams',
+    labelKey: 'exams',
+    icon: GraduationCap,
+    color: 'text-green-600',
+    bgColor: 'bg-green-50 group-hover:bg-green-100',
+  },
+  {
+    id: 'codechallenge',
+    labelKey: 'codeChallenge',
+    icon: Code2,
+    color: 'text-cyan-600',
+    bgColor: 'bg-cyan-50 group-hover:bg-cyan-100',
+  },
+];
+
+export default function NewActivityModal({
   closeModal,
   submitActivity,
   submitFileActivity,
@@ -22,114 +93,48 @@ const NewActivityModal = ({
   chapterId,
   course,
   orgslug,
-}: any) => {
+}: NewActivityModalProps) {
   const t = useTranslations('Components.NewActivity');
-  const [selectedView, setSelectedView] = useState('home');
+  const [selectedView, setSelectedView] = useState<ViewType>('home');
+
+  const handleBack = useCallback(() => setSelectedView('home'), []);
+
+  const sharedProps = {
+    chapterId,
+    course,
+    closeModal,
+    orgslug,
+  };
+
+  if (selectedView === 'home') {
+    return (
+      <div className="grid w-full grid-cols-2 gap-3 p-2 sm:grid-cols-3 lg:grid-cols-6">
+        {ACTIVITY_TYPES.map((activity) => (
+          <ActivityCard
+            key={activity.id}
+            activity={activity}
+            label={t(activity.labelKey)}
+            onClick={() => setSelectedView(activity.id)}
+          />
+        ))}
+      </div>
+    );
+  }
 
   return (
-    <>
-      {selectedView === 'home' && (
-        <div className="mt-2 grid w-full grid-cols-6 gap-4">
-          <ActivityOption
-            onClick={() => {
-              setSelectedView('dynamic');
-            }}
-          >
-            <div className="m-0.5 flex h-20 flex-col items-center justify-end rounded-lg bg-white text-center hover:cursor-pointer">
-              <Image
-                quality={100}
-                alt={t('dynamicPage')}
-                src={DynamicPageActivityImage}
-              />
-            </div>
-            <div className="flex h-5 items-center justify-center text-center text-sm font-medium text-gray-500">
-              {t('dynamicPage')}
-            </div>
-          </ActivityOption>
-          <ActivityOption
-            onClick={() => {
-              setSelectedView('video');
-            }}
-          >
-            <div className="m-0.5 flex h-20 flex-col items-center justify-end rounded-lg bg-white text-center hover:cursor-pointer">
-              <Image
-                quality={100}
-                alt={t('video')}
-                src={VideoPageActivityImage}
-              />
-            </div>
-            <div className="flex h-5 items-center justify-center text-center text-sm font-medium text-gray-500">
-              {t('video')}
-            </div>
-          </ActivityOption>
-          <ActivityOption
-            onClick={() => {
-              setSelectedView('documentpdf');
-            }}
-          >
-            <div className="m-0.5 flex h-20 flex-col items-center justify-end rounded-lg bg-white text-center hover:cursor-pointer">
-              <Image
-                quality={100}
-                alt={t('document')}
-                src={DocumentPdfPageActivityImage}
-              />
-            </div>
-            <div className="flex h-5 items-center justify-center text-center text-sm font-medium text-gray-500">
-              {t('document')}
-            </div>
-          </ActivityOption>
-          <ActivityOption
-            onClick={() => {
-              setSelectedView('assignments');
-            }}
-          >
-            <div className="m-0.5 flex h-20 flex-col items-center justify-end rounded-lg bg-white text-center hover:cursor-pointer">
-              <Image
-                quality={100}
-                alt={t('assignments')}
-                src={AssignmentActivityImage}
-              />
-            </div>
-            <div className="flex h-5 items-center justify-center text-center text-sm font-medium text-gray-500">
-              {t('assignments')}
-            </div>
-          </ActivityOption>
-          <ActivityOption
-            onClick={() => {
-              setSelectedView('exams');
-            }}
-          >
-            <div className="m-0.5 flex h-20 flex-col items-center justify-end rounded-lg bg-white text-center hover:cursor-pointer">
-              <Image
-                quality={100}
-                alt={t('exams')}
-                src={AssignmentActivityImage}
-              />
-            </div>
-            <div className="flex h-5 items-center justify-center text-center text-sm font-medium text-gray-500">
-              {t('exams')}
-            </div>
-          </ActivityOption>
-          <ActivityOption
-            onClick={() => {
-              setSelectedView('codechallenge');
-            }}
-          >
-            <div className="m-0.5 flex h-20 flex-col items-center justify-center rounded-lg bg-white text-center hover:cursor-pointer">
-              <Code2 className="text-primary h-10 w-10" />
-            </div>
-            <div className="flex h-5 items-center justify-center text-center text-sm font-medium text-gray-500">
-              {t('codeChallenge')}
-            </div>
-          </ActivityOption>
-        </div>
-      )}
+    <div className="w-full">
+      <button
+        onClick={handleBack}
+        className="mb-4 flex items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-700"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        {t('backToActivities')}
+      </button>
 
       {selectedView === 'dynamic' && (
         <DynamicCanvaModal
           submitActivity={submitActivity}
-          chapterId={chapterId}
-          course={course}
+          {...sharedProps}
         />
       )}
 
@@ -153,43 +158,46 @@ const NewActivityModal = ({
       {selectedView === 'assignments' && (
         <Assignment
           submitActivity={submitActivity}
-          chapterId={chapterId}
-          course={course}
-          closeModal={closeModal}
-          orgslug={orgslug}
+          {...sharedProps}
         />
       )}
 
       {selectedView === 'exams' && (
         <Exam
           submitActivity={submitActivity}
-          chapterId={chapterId}
-          course={course}
-          closeModal={closeModal}
-          orgslug={orgslug}
+          {...sharedProps}
         />
       )}
 
       {selectedView === 'codechallenge' && (
         <CodeChallenge
           submitActivity={submitActivity}
-          chapterId={chapterId}
-          course={course}
-          closeModal={closeModal}
-          orgslug={orgslug}
+          {...sharedProps}
         />
       )}
-    </>
+    </div>
   );
-};
+}
 
-const ActivityOption = ({ onClick, children }: any) => (
-  <div
-    onClick={onClick}
-    className="mx-auto w-full cursor-pointer rounded-xl border-4 border-gray-100 bg-gray-100 text-center transition duration-200 ease-in-out hover:border-gray-200 hover:bg-gray-200"
-  >
-    {children}
-  </div>
-);
+interface ActivityCardProps {
+  activity: ActivityType;
+  label: string;
+  onClick: () => void;
+}
 
-export default NewActivityModal;
+function ActivityCard({ activity, label, onClick }: ActivityCardProps) {
+  const Icon = activity.icon;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group focus:ring-primary/50 flex w-full flex-col items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all duration-200 hover:border-gray-300 hover:shadow-md focus:ring-2 focus:outline-none"
+    >
+      <div className={`flex h-14 w-14 items-center justify-center rounded-xl transition-colors ${activity.bgColor}`}>
+        <Icon className={`h-7 w-7 ${activity.color}`} />
+      </div>
+      <span className="text-center text-base font-medium text-gray-700 group-hover:text-gray-900">{label}</span>
+    </button>
+  );
+}

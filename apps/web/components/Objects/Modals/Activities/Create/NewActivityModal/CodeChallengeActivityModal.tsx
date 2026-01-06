@@ -136,8 +136,8 @@ export default function CodeChallengeActivityModal({
                 <FormItem>
                   <FormLabel>{t('difficulty')}</FormLabel>
                   <Select
+                    value={field.value}
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -164,8 +164,8 @@ export default function CodeChallengeActivityModal({
                 <FormItem>
                   <FormLabel>{t('type')}</FormLabel>
                   <Select
+                    value={field.value}
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>

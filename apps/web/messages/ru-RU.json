@@ -1041,10 +1041,11 @@
     "NewActivity": {
       "assignments": "Задания",
       "document": "Документ",
-      "dynamicPage": "Динамическая страница",
+      "dynamicPage": "Редактор",
       "video": "Видео",
       "exams": "Тест",
       "codeChallenge": "Код задача",
+      "backToActivities": "Вернуться к активностям",
       "CodeChallenge": {
         "title": "Создать код задачу",
         "subtitle": "Создайте программное упражнение с автоматической проверкой",
