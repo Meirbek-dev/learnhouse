@@ -10,6 +10,7 @@ from datetime import datetime
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
+from pydantic import field_validator
 from sqlmodel import Session, func, select
 from ulid import ULID
 
@@ -82,10 +83,21 @@ async def get_activity_or_404(
     db_session: Session,
 ) -> Activity:
     """Get activity by UUID or raise 404"""
+    logger.info(f"Looking for activity with UUID: {activity_uuid}")
+
+    # Handle both cases: with and without 'activity_' prefix
+    # Frontend strips the prefix, but DB stores it with prefix
+    if not activity_uuid.startswith('activity_'):
+        activity_uuid = f'activity_{activity_uuid}'
+
     statement = select(Activity).where(Activity.activity_uuid == activity_uuid)
     activity = db_session.exec(statement).first()
+
     if not activity:
+        logger.warning(f"Activity not found: {activity_uuid}")
         raise HTTPException(status_code=404, detail="Activity not found")
+
+    logger.info(f"Found activity: ID={activity.id}, UUID={activity.activity_uuid}, Type={activity.activity_type}")
     return activity
 
 
@@ -214,6 +226,24 @@ class SettingsUpdateRequest(PydanticStrictBaseModel):
     starter_code: dict[str, str] | None = None
     visible_tests: list[dict] | None = None
     hidden_tests: list[dict] | None = None
+
+    @field_validator("grading_strategy", mode="before")
+    @classmethod
+    def validate_grading_strategy(cls, v):
+        if v is None:
+            return v
+        if isinstance(v, str):
+            return GradingStrategy(v)
+        return v
+
+    @field_validator("execution_mode", mode="before")
+    @classmethod
+    def validate_execution_mode(cls, v):
+        if v is None:
+            return v
+        if isinstance(v, str):
+            return ExecutionMode(v)
+        return v
 
 
 @router.put("/{activity_uuid}/settings")
@@ -737,8 +767,6 @@ async def get_challenge_analytics(
     activity = await get_activity_or_404(activity_uuid, db_session)
     await verify_code_challenge_activity(activity)
     await check_challenge_access(activity, current_user, db_session, require_instructor=True)
-
-    settings = get_challenge_settings(activity)
 
     # Get all submissions
     statement = select(CodeSubmission).where(
