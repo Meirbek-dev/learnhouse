@@ -262,7 +262,7 @@
       "noSubmissionsYet": "Пока нет отправок",
       "runningTests": "Выполнение тестов...",
       "enterCustomInput": "Введите тестовые данные здесь...",
-      "points": "балл(ов)",
+      "pointsShort": "балл(ов)",
       "allTestsPassed": "Все тесты пройдены! 🎉",
       "submissionQueued": "Решение добавлено в очередь на проверку",
       "submissionFailed": "Ошибка отправки",
@@ -296,7 +296,7 @@
         "medium": "Средне",
         "hard": "Сложно"
       },
-      "gradingStrategy": {
+      "gradingStrategyOptions": {
         "allOrNothing": "Всё или ничего",
         "allOrNothingHint": "Студент должен пройти все тесты для получения баллов",
         "partial": "Частичный зачёт",
@@ -368,7 +368,7 @@
       "memoryLimitDescription": "Максимальное использование памяти в МБ",
       "points": "Баллы",
       "pointsDescription": "Максимум баллов за эту задачу",
-      "gradingStrategy": "Стратегия оценивания",
+      "gradingStrategyLabel": "Стратегия оценивания",
       "gradingStrategyDescription": "Как рассчитывать итоговый балл",
       "selectGradingStrategy": "Выберите стратегию оценивания",
       "allOrNothing": "Всё или ничего",

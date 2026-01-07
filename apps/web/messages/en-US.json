@@ -262,7 +262,7 @@
       "noSubmissionsYet": "No submissions yet",
       "runningTests": "Running tests...",
       "enterCustomInput": "Enter your test input here...",
-      "points": "pts",
+      "pointsShort": "pts",
       "allTestsPassed": "All tests passed! 🎉",
       "submissionQueued": "Submission queued for evaluation",
       "submissionFailed": "Submission failed",
@@ -296,7 +296,7 @@
         "medium": "Medium",
         "hard": "Hard"
       },
-      "gradingStrategy": {
+      "gradingStrategyOptions": {
         "allOrNothing": "All or Nothing",
         "allOrNothingHint": "Student must pass all test cases to receive points",
         "partial": "Partial Credit",
@@ -368,7 +368,7 @@
       "memoryLimitDescription": "Maximum memory usage in MB",
       "points": "Points",
       "pointsDescription": "Maximum points for this challenge",
-      "gradingStrategy": "Grading Strategy",
+      "gradingStrategyLabel": "Grading Strategy",
       "gradingStrategyDescription": "How to calculate the final score",
       "selectGradingStrategy": "Select grading strategy",
       "allOrNothing": "All or Nothing",

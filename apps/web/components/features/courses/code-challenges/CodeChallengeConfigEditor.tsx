@@ -335,7 +335,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                   name="grading_strategy"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('gradingStrategy')}</FormLabel>
+                      <FormLabel>{t('gradingStrategyLabel')}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}

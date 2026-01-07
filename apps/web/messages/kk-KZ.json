@@ -255,7 +255,7 @@
       "noSubmissionsYet": "Әзірге жіберулер жоқ",
       "runningTests": "Тесттер орындалуда...",
       "enterCustomInput": "Тест деректерін енгізіңіз...",
-      "points": "ұпай",
+      "pointsShort": "ұпай",
       "allTestsPassed": "Барлық тесттер өтті! 🎉",
       "submissionQueued": "Шешім тексеруге қойылды",
       "submissionFailed": "Жіберу қатесі",
@@ -293,7 +293,7 @@
         "hard": "Қиын"
       },
 
-      "gradingStrategy": {
+      "gradingStrategyOptions": {
         "allOrNothing": "Бәрі немесе ештеңе",
         "allOrNothingHint": "Студент ұпай алу үшін барлық тесттерден өтуі керек",
         "partial": "Ішінара есеп",

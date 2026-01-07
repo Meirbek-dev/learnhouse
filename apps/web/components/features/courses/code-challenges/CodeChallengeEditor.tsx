@@ -535,7 +535,7 @@ export function CodeChallengeEditor({
                               <div className="text-lg font-semibold">
                                 {submission.score}/{submission.max_score}
                               </div>
-                              <div className="text-muted-foreground text-xs">{t('points')}</div>
+                              <div className="text-muted-foreground text-xs">{t('pointsShort')}</div>
                             </div>
                           )}
                         </div>

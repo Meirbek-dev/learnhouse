@@ -286,13 +286,13 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                       </FieldContent>
                       <SelectPositioner>
                         <SelectContent>
-                          <SelectItem value="all_or_nothing">{t('gradingStrategy.allOrNothing')}</SelectItem>
-                          <SelectItem value="partial">{t('gradingStrategy.partial')}</SelectItem>
-                          <SelectItem value="weighted">{t('gradingStrategy.weighted')}</SelectItem>
+                          <SelectItem value="all_or_nothing">{t('gradingStrategyOptions.allOrNothing')}</SelectItem>
+                          <SelectItem value="partial">{t('gradingStrategyOptions.partial')}</SelectItem>
+                          <SelectItem value="weighted">{t('gradingStrategyOptions.weighted')}</SelectItem>
                         </SelectContent>
                       </SelectPositioner>
                     </Select>
-                    <FieldDescription>{t(`gradingStrategy.${field.value}Hint`)}</FieldDescription>
+                    <FieldDescription>{t(`gradingStrategyOptions.${field.value}Hint`)}</FieldDescription>
                     <FieldError errors={[fieldState.error]} />
                   </Field>
                 )}
