@@ -40,7 +40,8 @@ const codeChallengeFormSchema = z.object({
   description: z.string().optional(),
   difficulty: z.enum(['easy', 'medium', 'hard']),
   time_limit_ms: z.number().min(100).max(30_000).default(2000),
-  memory_limit_kb: z.number().min(1024).max(512_000).default(128_000),
+  // memory_limit_kb is in KB. Increase default to 256MB and allow up to 2GB.
+  memory_limit_kb: z.number().min(1024).max(2_097_152).default(262_144),
   max_submissions: z.number().min(0).optional(),
   grading_strategy: z.enum(['all_or_nothing', 'partial', 'weighted']),
   allowed_languages: z.array(z.number()).min(1, 'At least one language is required'),
@@ -81,7 +82,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
       description: '',
       difficulty: 'medium',
       time_limit_ms: 2000,
-      memory_limit_kb: 128_000,
+      memory_limit_kb: 262_144,
       grading_strategy: 'partial',
       allowed_languages: [71], // Python by default
       test_cases: [
