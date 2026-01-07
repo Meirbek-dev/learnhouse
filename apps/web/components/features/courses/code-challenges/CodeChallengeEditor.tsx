@@ -425,7 +425,7 @@ export function CodeChallengeEditor({
               className="flex-1 overflow-hidden p-4"
             >
               <ScrollArea className="h-full">
-                <div className="space-y-4">
+                <div className="space-y-4 p-1">
                   {visibleTestCases.length === 0 ? (
                     <p className="text-muted-foreground text-center">{t('noVisibleTestCases')}</p>
                   ) : (

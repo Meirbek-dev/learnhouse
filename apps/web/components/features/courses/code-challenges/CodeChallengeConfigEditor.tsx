@@ -3,9 +3,9 @@
 import { ArrowLeft, Loader2, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import useSWR from 'swr';
 import { z } from 'zod';
@@ -65,23 +65,27 @@ export function createConfigFormSchema(t: (key: string, params?: any) => string)
     expected_output: z.string(),
     is_visible: z.boolean(),
     description: z.string().optional(),
-    weight: z.number()
+    weight: z
+      .number()
       .min(1, t('validation.testWeightRange', { min: 1, max: 100 }))
       .max(100, t('validation.testWeightRange', { min: 1, max: 100 })),
   });
 
   return z.object({
     allowed_languages: z.array(z.number()).min(1, t('validation.atLeastOneLanguage')),
-    time_limit: z.number()
+    time_limit: z
+      .number()
       .min(1, t('validation.timeLimitRange', { min: 1, max: 60 }))
       .max(60, t('validation.timeLimitRange', { min: 1, max: 60 })),
-    memory_limit: z.number()
+    memory_limit: z
+      .number()
       .min(16, t('validation.memoryLimitRange', { min: 16, max: 2048 }))
       .max(2048, t('validation.memoryLimitRange', { min: 16, max: 2048 })),
     grading_strategy: z.enum(['ALL_OR_NOTHING', 'PARTIAL_CREDIT', 'BEST_SUBMISSION', 'LATEST_SUBMISSION']),
     execution_mode: z.enum(['FAST_FEEDBACK', 'COMPLETE_FEEDBACK']),
     allow_custom_input: z.boolean(),
-    points: z.number()
+    points: z
+      .number()
       .min(0, t('validation.pointsRange', { min: 0, max: 10000 }))
       .max(10000, t('validation.pointsRange', { min: 0, max: 10000 })),
     visible_tests: z.array(tc),
@@ -150,6 +154,22 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
     control: form.control,
     name: 'hidden_tests',
   });
+
+  // Controlled accordion state to avoid changing defaultValue after initialization
+  const [visibleAccordionValue, setVisibleAccordionValue] = useState<string[]>(
+    visibleTestFields.map((_, i) => `visible-${i}`),
+  );
+  useEffect(() => {
+    // Keep panels in sync when fields are added/removed; open all by default
+    setVisibleAccordionValue(visibleTestFields.map((_, i) => `visible-${i}`));
+  }, [visibleTestFields, visibleTestFields.length]);
+
+  const [hiddenAccordionValue, setHiddenAccordionValue] = useState<string[]>(
+    hiddenTestFields.map((_, i) => `hidden-${i}`),
+  );
+  useEffect(() => {
+    setHiddenAccordionValue(hiddenTestFields.map((_, i) => `hidden-${i}`));
+  }, [hiddenTestFields, hiddenTestFields.length]);
 
   // Populate form when existing settings are loaded
   useEffect(() => {
@@ -462,7 +482,12 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
               </div>
             </CardHeader>
             <CardContent>
-              <Accordion className="w-full" multiple defaultValue={visibleTestFields.map((_, i) => `visible-${i}`)}>
+              <Accordion
+                className="w-full"
+                multiple
+                value={visibleAccordionValue}
+                onValueChange={(v) => setVisibleAccordionValue(Array.isArray(v) ? v : [v])}
+              >
                 {visibleTestFields.map((field, index) => (
                   <AccordionItem
                     key={field.id}
@@ -579,7 +604,12 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
               {hiddenTestFields.length === 0 ? (
                 <p className="text-muted-foreground py-8 text-center text-sm">{t('noHiddenTestCases')}</p>
               ) : (
-                <Accordion className="w-full" multiple defaultValue={hiddenTestFields.map((_, i) => `hidden-${i}`)}>
+                <Accordion
+                  className="w-full"
+                  multiple
+                  value={hiddenAccordionValue}
+                  onValueChange={(v) => setHiddenAccordionValue(Array.isArray(v) ? v : [v])}
+                >
                   {hiddenTestFields.map((field, index) => (
                     <AccordionItem
                       key={field.id}

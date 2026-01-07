@@ -86,6 +86,7 @@ export default function MultiSelectCombobox<T>({
                             variant="ghost"
                             size="icon"
                             className="size-4"
+                            nativeButton={false}
                             onClick={(e) => {
                               e.stopPropagation();
                               removeSelection(val);

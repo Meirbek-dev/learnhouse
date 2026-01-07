@@ -3,6 +3,22 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import CodeChallengeConfigEditor from '@components/features/courses/code-challenges/CodeChallengeConfigEditor';
 
+import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
+
+interface MetadataProps {
+  params: Promise<{ courseid: string; activityuuid: string }>;
+}
+
+export async function generateMetadata(_props: MetadataProps): Promise<Metadata> {
+  const t = await getTranslations('Activities.CodeChallenges');
+
+  return {
+    title: `${t('configureChallenge')} — Ashyq Bilim`,
+    description: t('configureDescription'),
+  };
+}
+
 interface PageProps {
   params: Promise<{
     courseid: string;
