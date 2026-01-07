@@ -6148,5 +6148,12 @@
   "seconds": "Seconds",
   "selectDeadline": "Select a deadline for completing the task",
   "touUniversity": "Toraighyrov University",
-  "webPreview": "Web Preview"
+  "webPreview": "Web Preview",
+  "MultiSelectCombobox": {
+    "placeholder": "Select items...",
+    "searchPlaceholder": "Search...",
+    "emptyMessage": "No results found.",
+    "showLess": "Show Less",
+    "moreItems": "+{count} more"
+  }
 }

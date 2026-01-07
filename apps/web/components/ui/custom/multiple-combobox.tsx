@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useId, useState } from 'react';
 
 import { CheckIcon, ChevronsUpDownIcon, XIcon } from 'lucide-react';
@@ -30,14 +31,20 @@ export default function MultiSelectCombobox<T>({
   getOptionValue,
   getOptionLabel,
   label,
-  placeholder = 'Select items...',
-  searchPlaceholder = 'Search...',
-  emptyMessage = 'No results found.',
+  placeholder,
+  searchPlaceholder,
+  emptyMessage,
   maxShownItems = 4,
 }: MultiSelectComboboxProps<T>) {
   const id = useId();
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
+
+  const t = useTranslations('MultiSelectCombobox');
+
+  const placeholderText = placeholder ?? t('placeholder');
+  const searchPlaceholderText = searchPlaceholder ?? t('searchPlaceholder');
+  const emptyMessageText = emptyMessage ?? t('emptyMessage');
 
   const toggleSelection = (optionValue: string | number) => {
     onChange(value.includes(optionValue) ? value.filter((v) => v !== optionValue) : [...value, optionValue]);
@@ -109,12 +116,12 @@ export default function MultiSelectCombobox<T>({
                         }}
                         className="cursor-pointer rounded-sm"
                       >
-                        {expanded ? 'Show Less' : `+${hiddenCount} more`}
+                        {expanded ? t('showLess') : t('moreItems', { count: hiddenCount })}
                       </Badge>
                     ) : null}
                   </>
                 ) : (
-                  <span className="text-muted-foreground">{placeholder}</span>
+                  <span className="text-muted-foreground">{placeholderText}</span>
                 )}
               </div>
               <ChevronsUpDownIcon
@@ -126,9 +133,9 @@ export default function MultiSelectCombobox<T>({
         />
         <PopoverContent className="w-(--radix-popper-anchor-width) p-0">
           <Command>
-            <CommandInput placeholder={searchPlaceholder} />
+            <CommandInput placeholder={searchPlaceholderText} />
             <CommandList>
-              <CommandEmpty>{emptyMessage}</CommandEmpty>
+              <CommandEmpty>{emptyMessageText}</CommandEmpty>
               <CommandGroup>
                 {options.map((option) => {
                   const optionValue = getOptionValue(option);

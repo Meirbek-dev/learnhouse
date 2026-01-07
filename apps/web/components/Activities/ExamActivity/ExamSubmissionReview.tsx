@@ -137,7 +137,7 @@ export default function ExamSubmissionReview({
                       ))}
                       {unansweredQuestions.length > 20 && (
                         <span className="inline-flex items-center px-2 text-xs text-orange-700">
-                          +{unansweredQuestions.length - 20} more
+                          ещё +{unansweredQuestions.length - 20}
                         </span>
                       )}
                     </div>

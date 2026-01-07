@@ -6118,5 +6118,12 @@
   "seconds": "Секунды",
   "selectDeadline": "Выберите дедлайн для выполнения задачи",
   "touUniversity": "Торайгыров Университет",
-  "webPreview": "Веб-предпросмотр"
-}
+  "webPreview": "Веб-предпросмотр",
+  "MultiSelectCombobox": {
+    "placeholder": "Выберите элементы...",
+    "searchPlaceholder": "Поиск...",
+    "emptyMessage": "Результатов не найдено.",
+    "showLess": "Показать меньше",
+    "moreItems": "+{count} ещё"
+  }
+} 
