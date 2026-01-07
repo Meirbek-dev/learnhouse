@@ -10,65 +10,50 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 
-interface ComboboxMultipleProps<T> {
-  items: T[];
-  valueKey: keyof T;
-  labelKey: keyof T;
-  value?: T[keyof T][];
-  defaultValue?: T[keyof T][];
-  onChange?: (values: T[keyof T][]) => void;
+interface MultiSelectComboboxProps<T> {
+  options: T[];
+  value: (string | number)[];
+  onChange: (value: (string | number)[]) => void;
+  getOptionValue: (option: T) => string | number;
+  getOptionLabel: (option: T) => string;
   label?: string;
   placeholder?: string;
   searchPlaceholder?: string;
   emptyMessage?: string;
-  className?: string;
+  maxShownItems?: number;
 }
 
-function ComboboxMultiple<T extends Record<string, unknown>>({
-  items,
-  valueKey,
-  labelKey,
+export default function MultiSelectCombobox<T>({
+  options,
   value,
-  defaultValue = [],
   onChange,
+  getOptionValue,
+  getOptionLabel,
   label,
-  placeholder,
-  searchPlaceholder,
-  emptyMessage,
-  className,
-}: ComboboxMultipleProps<T>) {
+  placeholder = 'Select items...',
+  searchPlaceholder = 'Search...',
+  emptyMessage = 'No results found.',
+  maxShownItems = 4,
+}: MultiSelectComboboxProps<T>) {
   const id = useId();
   const [open, setOpen] = useState(false);
-  const [internalValue, setInternalValue] = useState<T[keyof T][]>(defaultValue);
+  const [expanded, setExpanded] = useState(false);
 
-  const selectedValues = value ?? internalValue;
-
-  const toggleSelection = (itemValue: T[keyof T]) => {
-    const newValues = selectedValues.includes(itemValue)
-      ? selectedValues.filter((v) => v !== itemValue)
-      : [...selectedValues, itemValue];
-
-    if (value === undefined) {
-      setInternalValue(newValues);
-    }
-    onChange?.(newValues);
+  const toggleSelection = (optionValue: string | number) => {
+    onChange(value.includes(optionValue) ? value.filter((v) => v !== optionValue) : [...value, optionValue]);
   };
 
-  const removeSelection = (itemValue: T[keyof T]) => {
-    const newValues = selectedValues.filter((v) => v !== itemValue);
-
-    if (value === undefined) {
-      setInternalValue(newValues);
-    }
-    onChange?.(newValues);
+  const removeSelection = (optionValue: string | number) => {
+    onChange(value.filter((v) => v !== optionValue));
   };
 
-  const getItemByValue = (val: T[keyof T]) => {
-    return items.find((item) => item[valueKey] === val);
-  };
+  const visibleItems = expanded ? value : value.slice(0, maxShownItems);
+  const hiddenCount = value.length - visibleItems.length;
+
+  const getOptionByValue = (val: string | number) => options.find((opt) => getOptionValue(opt) === val);
 
   return (
-    <div className={className ?? 'w-full max-w-xs space-y-2'}>
+    <div className="w-full space-y-2">
       {label && <Label htmlFor={id}>{label}</Label>}
       <Popover
         open={open}
@@ -81,37 +66,52 @@ function ComboboxMultiple<T extends Record<string, unknown>>({
               variant="outline"
               role="combobox"
               aria-expanded={open}
-              className="h-auto min-h-24 w-full justify-between hover:bg-transparent"
+              className="h-auto min-h-8 w-full justify-between hover:bg-transparent"
             >
-              <div className="flex flex-wrap items-center gap-1 pr-2">
-                {selectedValues.length > 0 ? (
-                  selectedValues.map((val) => {
-                    const item = getItemByValue(val);
+              <div className="flex flex-wrap items-center gap-1 pr-2.5">
+                {value.length > 0 ? (
+                  <>
+                    {visibleItems.map((val) => {
+                      const option = getOptionByValue(val);
+                      if (!option) return null;
 
-                    return item ? (
+                      return (
+                        <Badge
+                          key={val}
+                          variant="outline"
+                          className="rounded-sm"
+                        >
+                          {getOptionLabel(option)}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-4"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeSelection(val);
+                            }}
+                            render={
+                              <span>
+                                <XIcon className="size-3" />
+                              </span>
+                            }
+                          />
+                        </Badge>
+                      );
+                    })}
+                    {hiddenCount > 0 || expanded ? (
                       <Badge
-                        key={String(val)}
-                        variant="default"
-                        className="h-fit w-fit rounded-sm "
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpanded((prev) => !prev);
+                        }}
+                        className="cursor-pointer rounded-sm"
                       >
-                        {String(item[labelKey])}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-5"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeSelection(val);
-                          }}
-                          render={
-                            <span>
-                              <XIcon className="size-4" />
-                            </span>
-                          }
-                        />
+                        {expanded ? 'Show Less' : `+${hiddenCount} more`}
                       </Badge>
-                    ) : null;
-                  })
+                    ) : null}
+                  </>
                 ) : (
                   <span className="text-muted-foreground">{placeholder}</span>
                 )}
@@ -129,21 +129,24 @@ function ComboboxMultiple<T extends Record<string, unknown>>({
             <CommandList>
               <CommandEmpty>{emptyMessage}</CommandEmpty>
               <CommandGroup>
-                {items.map((item) => (
-                  <CommandItem
-                    key={String(item[valueKey])}
-                    value={String(item[labelKey])}
-                    onSelect={() => toggleSelection(item[valueKey])}
-                  >
-                    <span className="truncate">{String(item[labelKey])}</span>
-                    {selectedValues.includes(item[valueKey]) && (
-                      <CheckIcon
-                        size={16}
-                        className="ml-auto"
-                      />
-                    )}
-                  </CommandItem>
-                ))}
+                {options.map((option) => {
+                  const optionValue = getOptionValue(option);
+                  return (
+                    <CommandItem
+                      key={optionValue}
+                      value={String(optionValue)}
+                      onSelect={() => toggleSelection(optionValue)}
+                    >
+                      <span className="truncate">{getOptionLabel(option)}</span>
+                      {value.includes(optionValue) && (
+                        <CheckIcon
+                          size={16}
+                          className="ml-auto"
+                        />
+                      )}
+                    </CommandItem>
+                  );
+                })}
               </CommandGroup>
             </CommandList>
           </Command>
@@ -152,5 +155,3 @@ function ComboboxMultiple<T extends Record<string, unknown>>({
     </div>
   );
 }
-
-export default ComboboxMultiple;

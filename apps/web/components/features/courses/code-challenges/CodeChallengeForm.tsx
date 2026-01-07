@@ -531,15 +531,14 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
 
                   <div className="mt-4">
                     <ComboboxMultiple<{ id: number; name: string }>
-                      items={JUDGE0_LANGUAGES}
-                      valueKey="id"
-                      labelKey="name"
+                      options={JUDGE0_LANGUAGES}
                       value={field.value}
                       onChange={(vals) => field.onChange(vals as number[])}
+                      getOptionValue={(o) => o.id}
+                      getOptionLabel={(o) => o.name}
                       placeholder={t('form.selectLanguages')}
                       searchPlaceholder={t('form.searchLanguages')}
                       emptyMessage={t('form.noLanguagesFound')}
-                      className="w-full"
                     />
                     <div className="mt-2 flex gap-2">
                       <Button

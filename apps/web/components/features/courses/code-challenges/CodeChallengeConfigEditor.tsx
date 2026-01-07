@@ -245,15 +245,14 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                     <div className="space-y-2">
                       <FormControl>
                         <ComboboxMultiple<{ id: number; name: string }>
-                          items={JUDGE0_LANGUAGES}
-                          valueKey="id"
-                          labelKey="name"
+                          options={JUDGE0_LANGUAGES}
                           value={field.value}
                           onChange={(vals) => field.onChange(vals as number[])}
+                          getOptionValue={(o) => o.id}
+                          getOptionLabel={(o) => o.name}
                           placeholder={t('selectLanguages')}
                           searchPlaceholder={t('searchLanguages')}
                           emptyMessage={t('noLanguagesFound')}
-                          className="w-full"
                         />
                       </FormControl>
                       <div className="mt-2 flex gap-2">
