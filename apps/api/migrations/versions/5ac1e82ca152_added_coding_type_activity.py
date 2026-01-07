@@ -33,87 +33,84 @@ def upgrade() -> None:
         "PENDING_JUDGE0",
         name="submissionstatus",
     ).create(op.get_bind(), checkfirst=True)
-    op.create_table(
-        "code_submission",
-        sa.Column("language_id", sa.Integer(), nullable=False),
-        sa.Column("language_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("source_code", sa.Text(), nullable=True),
-        sa.Column(
-            "status",
-            postgresql.ENUM(
-                "PENDING",
-                "PROCESSING",
-                "COMPLETED",
-                "FAILED",
-                "PENDING_JUDGE0",
-                name="submissionstatus",
-                create_type=False,
+
+    # Guard table/index creation to make this migration idempotent for local/dev databases
+    bind = op.get_bind()
+    insp = sa.inspect(bind)
+
+    if not insp.has_table("code_submission"):
+        op.create_table(
+            "code_submission",
+            sa.Column("language_id", sa.Integer(), nullable=False),
+            sa.Column("language_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column("source_code", sa.Text(), nullable=True),
+            sa.Column(
+                "status",
+                postgresql.ENUM(
+                    "PENDING",
+                    "PROCESSING",
+                    "COMPLETED",
+                    "FAILED",
+                    "PENDING_JUDGE0",
+                    name="submissionstatus",
+                    create_type=False,
+                ),
+                nullable=False,
             ),
-            nullable=False,
-        ),
-        sa.Column("score", sa.Float(), nullable=False),
-        sa.Column("passed_tests", sa.Integer(), nullable=False),
-        sa.Column("total_tests", sa.Integer(), nullable=False),
-        sa.Column("execution_time_ms", sa.Float(), nullable=True),
-        sa.Column("memory_kb", sa.Float(), nullable=True),
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column(
-            "submission_uuid", sqlmodel.sql.sqltypes.AutoString(), nullable=False
-        ),
-        sa.Column("activity_id", sa.BigInteger(), nullable=True),
-        sa.Column("user_id", sa.BigInteger(), nullable=True),
-        sa.Column("org_id", sa.BigInteger(), nullable=True),
-        sa.Column("test_results", sa.JSON(), nullable=True),
-        sa.Column("created_at", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("updated_at", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("plagiarism_score", sa.Float(), nullable=True),
-        sa.Column("judge0_tokens", sa.JSON(), nullable=True),
-        sa.ForeignKeyConstraint(["activity_id"], ["activity.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["org_id"], ["organization.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["user_id"], ["user.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_index(
-        "idx_code_submission_created", "code_submission", ["created_at"], unique=False
-    )
-    op.create_index(
-        "idx_code_submission_score",
-        "code_submission",
-        ["activity_id", "score"],
-        unique=False,
-    )
-    op.create_index(
-        "idx_code_submission_user_activity",
-        "code_submission",
-        ["user_id", "activity_id"],
-        unique=False,
-    )
-    op.create_index(
-        op.f("ix_code_submission_submission_uuid"),
-        "code_submission",
-        ["submission_uuid"],
-        unique=False,
-    )
-    op.create_table(
-        "hint_usage",
-        sa.Column("hint_id", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("xp_deducted", sa.Integer(), nullable=False),
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("activity_id", sa.BigInteger(), nullable=True),
-        sa.Column("user_id", sa.BigInteger(), nullable=True),
-        sa.Column("org_id", sa.BigInteger(), nullable=True),
-        sa.Column("unlocked_at", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.ForeignKeyConstraint(["activity_id"], ["activity.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["org_id"], ["organization.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["user_id"], ["user.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_index(
-        "idx_hint_usage_user_activity",
-        "hint_usage",
-        ["user_id", "activity_id"],
-        unique=False,
-    )
+            sa.Column("score", sa.Float(), nullable=False),
+            sa.Column("passed_tests", sa.Integer(), nullable=False),
+            sa.Column("total_tests", sa.Integer(), nullable=False),
+            sa.Column("execution_time_ms", sa.Float(), nullable=True),
+            sa.Column("memory_kb", sa.Float(), nullable=True),
+            sa.Column("id", sa.Integer(), nullable=False),
+            sa.Column(
+                "submission_uuid", sqlmodel.sql.sqltypes.AutoString(), nullable=False
+            ),
+            sa.Column("activity_id", sa.BigInteger(), nullable=True),
+            sa.Column("user_id", sa.BigInteger(), nullable=True),
+            sa.Column("org_id", sa.BigInteger(), nullable=True),
+            sa.Column("test_results", sa.JSON(), nullable=True),
+            sa.Column("created_at", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column("updated_at", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column("plagiarism_score", sa.Float(), nullable=True),
+            sa.Column("judge0_tokens", sa.JSON(), nullable=True),
+            sa.ForeignKeyConstraint(["activity_id"], ["activity.id"], ondelete="CASCADE"),
+            sa.ForeignKeyConstraint(["org_id"], ["organization.id"], ondelete="CASCADE"),
+            sa.ForeignKeyConstraint(["user_id"], ["user.id"], ondelete="CASCADE"),
+            sa.PrimaryKeyConstraint("id"),
+        )
+        # Use IF NOT EXISTS to make index creation safe if the table already existed
+        op.execute(
+            "CREATE INDEX IF NOT EXISTS idx_code_submission_created ON code_submission (created_at)"
+        )
+        op.execute(
+            "CREATE INDEX IF NOT EXISTS idx_code_submission_score ON code_submission (activity_id, score)"
+        )
+        op.execute(
+            "CREATE INDEX IF NOT EXISTS idx_code_submission_user_activity ON code_submission (user_id, activity_id)"
+        )
+        op.execute(
+            "CREATE INDEX IF NOT EXISTS ix_code_submission_submission_uuid ON code_submission (submission_uuid)"
+        )
+
+    if not insp.has_table("hint_usage"):
+        op.create_table(
+            "hint_usage",
+            sa.Column("hint_id", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column("xp_deducted", sa.Integer(), nullable=False),
+            sa.Column("id", sa.Integer(), nullable=False),
+            sa.Column("activity_id", sa.BigInteger(), nullable=True),
+            sa.Column("user_id", sa.BigInteger(), nullable=True),
+            sa.Column("org_id", sa.BigInteger(), nullable=True),
+            sa.Column("unlocked_at", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.ForeignKeyConstraint(["activity_id"], ["activity.id"], ondelete="CASCADE"),
+            sa.ForeignKeyConstraint(["org_id"], ["organization.id"], ondelete="CASCADE"),
+            sa.ForeignKeyConstraint(["user_id"], ["user.id"], ondelete="CASCADE"),
+            sa.PrimaryKeyConstraint("id"),
+        )
+        op.execute(
+            "CREATE INDEX IF NOT EXISTS idx_hint_usage_user_activity ON hint_usage (user_id, activity_id)"
+        )
     op.drop_table("ar_internal_metadata")
     op.drop_table("languages")
     op.drop_index(op.f("index_submissions_on_token"), table_name="submissions")
