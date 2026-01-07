@@ -427,7 +427,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
               </div>
             </CardHeader>
             <CardContent>
-              <Accordion className="w-full">
+              <Accordion className="w-full" multiple defaultValue={visibleTestFields.map((_, i) => `visible-${i}`)}>
                 {visibleTestFields.map((field, index) => (
                   <AccordionItem
                     key={field.id}
@@ -445,7 +445,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                         )}
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent className="space-y-4 pt-4">
+                    <AccordionContent className="space-y-4 px-1 pt-4">
                       <FormField
                         control={form.control}
                         name={`visible_tests.${index}.description`}
@@ -544,7 +544,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
               {hiddenTestFields.length === 0 ? (
                 <p className="text-muted-foreground py-8 text-center text-sm">{t('noHiddenTestCases')}</p>
               ) : (
-                <Accordion className="w-full">
+                <Accordion className="w-full" multiple defaultValue={hiddenTestFields.map((_, i) => `hidden-${i}`)}>
                   {hiddenTestFields.map((field, index) => (
                     <AccordionItem
                       key={field.id}
@@ -562,7 +562,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                           )}
                         </div>
                       </AccordionTrigger>
-                      <AccordionContent className="space-y-4 pt-4">
+                      <AccordionContent className="space-y-4 px-1 pt-4">
                         <FormField
                           control={form.control}
                           name={`hidden_tests.${index}.description`}
