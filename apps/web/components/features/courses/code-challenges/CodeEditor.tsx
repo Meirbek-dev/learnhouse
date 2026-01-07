@@ -31,7 +31,8 @@ const JUDGE0_TO_MONACO: Record<number, string> = {
   73: 'rust', // Rust (1.40.0)
   82: 'sql', // SQL (SQLite 3.27.2)
   74: 'typescript', // TypeScript (3.7.4)
-  78: 'kotlin', // Kotlin (1.3.70)
+  // 60: 'go', // Go (1.13.5)
+  // 78: 'kotlin', // Kotlin (1.3.70)
   68: 'php', // PHP (7.4.1)
   83: 'swift', // Swift (5.2.3)
 };
