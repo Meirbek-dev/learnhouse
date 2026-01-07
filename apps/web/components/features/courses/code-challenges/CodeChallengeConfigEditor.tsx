@@ -1,28 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { ArrowLeft, Loader2, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
+import { useFieldArray, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useFieldArray, useForm } from 'react-hook-form';
-import { z } from 'zod';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import useSWR from 'swr';
-import { ArrowLeft, Loader2, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
+import { z } from 'zod';
 
-import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectPositioner,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getAPIUrl } from '@services/config/config';
+import ComboboxMultiple from '@/components/ui/custom/multiple-combobox';
 import { JUDGE0_LANGUAGES } from './LanguageSelector';
+import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
+import { getAPIUrl } from '@services/config/config';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface CodeChallengeConfigEditorProps {
   activityUuid: string;
@@ -155,7 +162,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           allowed_languages: values.allowed_languages,
@@ -188,17 +195,6 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
       toast.error(error instanceof Error ? error.message : t('configSaveFailed'), { id: loadingToast });
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const toggleLanguage = (languageId: number) => {
-    const current = form.getValues('allowed_languages');
-    if (current.includes(languageId)) {
-      if (current.length > 1) {
-        form.setValue('allowed_languages', current.filter((id) => id !== languageId));
-      }
-    } else {
-      form.setValue('allowed_languages', [...current, languageId]);
     }
   };
 
@@ -247,21 +243,17 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                   <FormItem>
                     <FormLabel>{t('allowedLanguages')}</FormLabel>
                     <FormControl>
-                      <div className="flex flex-wrap gap-2">
-                        {JUDGE0_LANGUAGES.map((lang) => {
-                          const isSelected = field.value.includes(lang.id);
-                          return (
-                            <Badge
-                              key={lang.id}
-                              variant={isSelected ? 'default' : 'outline'}
-                              className="cursor-pointer"
-                              onClick={() => toggleLanguage(lang.id)}
-                            >
-                              {lang.name}
-                            </Badge>
-                          );
-                        })}
-                      </div>
+                      <ComboboxMultiple<{ id: number; name: string }>
+                        items={JUDGE0_LANGUAGES}
+                        valueKey="id"
+                        labelKey="name"
+                        value={field.value}
+                        onChange={(vals) => field.onChange(vals as number[])}
+                        placeholder={t('selectLanguages')}
+                        searchPlaceholder={t('searchLanguages')}
+                        emptyMessage={t('noLanguagesFound')}
+                        className="w-full"
+                      />
                     </FormControl>
                     <FormDescription>{t('allowedLanguagesDescription')}</FormDescription>
                     <FormMessage />

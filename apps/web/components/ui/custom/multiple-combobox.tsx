@@ -32,9 +32,9 @@ function ComboboxMultiple<T extends Record<string, unknown>>({
   defaultValue = [],
   onChange,
   label,
-  placeholder = 'Select items...',
-  searchPlaceholder = 'Search...',
-  emptyMessage = 'No items found.',
+  placeholder,
+  searchPlaceholder,
+  emptyMessage,
   className,
 }: ComboboxMultipleProps<T>) {
   const id = useId();
@@ -81,9 +81,9 @@ function ComboboxMultiple<T extends Record<string, unknown>>({
               variant="outline"
               role="combobox"
               aria-expanded={open}
-              className="h-auto min-h-8 w-full justify-between hover:bg-transparent"
+              className="h-auto min-h-18 w-full justify-between hover:bg-transparent"
             >
-              <div className="flex flex-wrap items-center gap-1 pr-2.5">
+              <div className="flex flex-wrap items-center gap-1 pr-2">
                 {selectedValues.length > 0 ? (
                   selectedValues.map((val) => {
                     const item = getItemByValue(val);
@@ -91,21 +91,21 @@ function ComboboxMultiple<T extends Record<string, unknown>>({
                     return item ? (
                       <Badge
                         key={String(val)}
-                        variant="outline"
-                        className="rounded-sm"
+                        variant="default"
+                        className="h-fit w-fit rounded-sm "
                       >
                         {String(item[labelKey])}
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="size-4"
+                          className="size-5"
                           onClick={(e) => {
                             e.stopPropagation();
                             removeSelection(val);
                           }}
                           render={
                             <span>
-                              <XIcon className="size-3" />
+                              <XIcon className="size-4" />
                             </span>
                           }
                         />

@@ -7,14 +7,21 @@ import { useTranslations } from 'next-intl';
 import { useCallback } from 'react';
 import { z } from 'zod';
 
-import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectPositioner,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Field, FieldLabel, FieldDescription, FieldContent, FieldError } from '@/components/ui/field';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import ComboboxMultiple from '@/components/ui/custom/multiple-combobox';
 import { Controller, FormProvider } from 'react-hook-form';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -522,37 +529,18 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
 
                   <Separator />
 
-                  {/* All languages */}
-                  <div className="mt-4 max-h-64 overflow-y-auto">
-                    <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
-                      {JUDGE0_LANGUAGES.map((lang) => {
-                        const isSelected = field.value.includes(lang.id);
-                        return (
-                          <div
-                            key={lang.id}
-                            className="flex items-center space-x-2"
-                          >
-                            <Checkbox
-                              id={`lang-${lang.id}`}
-                              checked={isSelected}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  field.onChange([...field.value, lang.id]);
-                                } else {
-                                  field.onChange(field.value.filter((id) => id !== lang.id));
-                                }
-                              }}
-                            />
-                            <label
-                              htmlFor={`lang-${lang.id}`}
-                              className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                              {lang.name}
-                            </label>
-                          </div>
-                        );
-                      })}
-                    </div>
+                  <div className="mt-4">
+                    <ComboboxMultiple<{ id: number; name: string }>
+                      items={JUDGE0_LANGUAGES}
+                      valueKey="id"
+                      labelKey="name"
+                      value={field.value}
+                      onChange={(vals) => field.onChange(vals as number[])}
+                      placeholder={t('form.selectLanguages')}
+                      searchPlaceholder={t('form.searchLanguages')}
+                      emptyMessage={t('form.noLanguagesFound')}
+                      className="w-full"
+                    />
                   </div>
                   <FieldError errors={[fieldState.error]} />
                 </Field>
