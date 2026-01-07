@@ -1,14 +1,13 @@
+import contextlib
 import logging
 from datetime import datetime
-from typing import Literal
 from types import SimpleNamespace
+from typing import Literal
 
 from fastapi import HTTPException, Request, UploadFile, status
 from pydantic import ValidationError
 from sqlmodel import Session, select
 from ulid import ULID
-
-from src.services.cache import redis_client
 
 from src.db.organizations import Organization, OrganizationRead
 from src.db.roles import (
@@ -38,6 +37,7 @@ from src.security.rbac.rbac import (
     authorization_verify_if_user_is_anon,
 )
 from src.security.security import security_hash_password, security_verify_password
+from src.services.cache import redis_client
 from src.services.orgs.invites import get_invite_code
 from src.services.orgs.orgs import get_org_join_mechanism
 from src.services.users.avatars import upload_avatar
@@ -639,7 +639,9 @@ async def _link_user_to_organization(
     db_session.refresh(user_organization)
 
 
-async def _get_user_by_field(db_session: Session, field: str, value: str | int, use_cache: bool = True) -> User:
+async def _get_user_by_field(
+    db_session: Session, field: str, value: str | int, use_cache: bool = True
+) -> User:
     """Generic function to get user by any field.
 
     Optimizations:
@@ -653,6 +655,7 @@ async def _get_user_by_field(db_session: Session, field: str, value: str | int, 
     object and then calling `db_session.add()`/`db_session.delete()` may trigger an
     INSERT/DELETE on a non-attached object leading to integrity errors.
     """
+
     # Try cache lookup first (best-effort, helper handles missing Redis)
     def _try_cache_get(key: str) -> User | None:
         try:
@@ -675,7 +678,9 @@ async def _get_user_by_field(db_session: Session, field: str, value: str | int, 
             id_key = f"user:id:{getattr(user_obj, 'id', '')}"
             redis_client.set_json(id_key, data, USER_CACHE_TTL)
             if user_obj.username:
-                redis_client.set_json(f"user:username:{user_obj.username.lower()}", data, USER_CACHE_TTL)
+                redis_client.set_json(
+                    f"user:username:{user_obj.username.lower()}", data, USER_CACHE_TTL
+                )
         except Exception:
             pass
 
@@ -712,10 +717,8 @@ async def _get_user_by_field(db_session: Session, field: str, value: str | int, 
         )
 
     # Populate cache asynchronously (best-effort)
-    try:
+    with contextlib.suppress(Exception):
         _try_cache_set(user)
-    except Exception:
-        pass
 
     return user
 

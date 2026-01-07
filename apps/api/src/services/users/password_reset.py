@@ -1,7 +1,6 @@
 from datetime import datetime
 
 import orjson
-from src.services.cache.redis_client import get_redis_client, get_json, delete_keys
 from fastapi import HTTPException, Request
 from pydantic import EmailStr
 from sqlmodel import Session, select
@@ -11,6 +10,7 @@ from config.config import get_platform_config
 from src.db.organizations import Organization, OrganizationRead
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.security import generate_secure_code, security_hash_password
+from src.services.cache.redis_client import delete_keys, get_json, get_redis_client
 from src.services.users.emails import send_password_reset_email
 
 
@@ -161,7 +161,9 @@ async def change_password_with_reset_code(
         )
 
     # Get reset code object
-    key = keys[0].decode("utf-8") if isinstance(keys[0], (bytes, bytearray)) else keys[0]
+    key = (
+        keys[0].decode("utf-8") if isinstance(keys[0], (bytes, bytearray)) else keys[0]
+    )
     reset_code_object = get_json(key)
 
     if reset_code_object is None:
@@ -185,7 +187,9 @@ async def change_password_with_reset_code(
     db_session.refresh(user)
 
     # Delete reset code
-    key = keys[0].decode("utf-8") if isinstance(keys[0], (bytes, bytearray)) else keys[0]
+    key = (
+        keys[0].decode("utf-8") if isinstance(keys[0], (bytes, bytearray)) else keys[0]
+    )
     delete_keys(key)
 
     return "Password changed"

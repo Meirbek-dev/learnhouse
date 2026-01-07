@@ -1,5 +1,5 @@
 import random
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
@@ -30,16 +30,15 @@ from src.db.courses.exams import (
     QuestionUpdate,
 )
 from src.db.organizations import Organization
-from src.db.trail_runs import TrailRun
-from src.db.trail_steps import TrailStep
-from src.db.users import AnonymousUser, PublicUser, User
-from src.security.courses_security import courses_rbac_check_for_assignments
 from src.db.resource_authors import (
     ResourceAuthor,
     ResourceAuthorshipEnum,
     ResourceAuthorshipStatusEnum,
 )
-
+from src.db.trail_runs import TrailRun
+from src.db.trail_steps import TrailStep
+from src.db.users import AnonymousUser, PublicUser, User
+from src.security.courses_security import courses_rbac_check_for_assignments
 
 ## > Helper Functions
 
@@ -60,18 +59,18 @@ async def is_course_contributor_or_admin(
     )
     resource_author = db_session.exec(statement).first()
 
-    if resource_author and (
-        resource_author.authorship
-        in (
-            ResourceAuthorshipEnum.CREATOR,
-            ResourceAuthorshipEnum.MAINTAINER,
-            ResourceAuthorshipEnum.CONTRIBUTOR,
+    return bool(
+        resource_author
+        and (
+            resource_author.authorship
+            in (
+                ResourceAuthorshipEnum.CREATOR,
+                ResourceAuthorshipEnum.MAINTAINER,
+                ResourceAuthorshipEnum.CONTRIBUTOR,
+            )
+            and resource_author.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE
         )
-        and resource_author.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE
-    ):
-        return True
-
-    return False
+    )
 
 
 ## > Exams CRUD
@@ -393,27 +392,48 @@ async def create_question(
 
     # Input validation and sanitization
     if not question_object.question_text or not question_object.question_text.strip():
-        raise HTTPException(status_code=400, detail="Текст вопроса не может быть пустым")
+        raise HTTPException(
+            status_code=400, detail="Текст вопроса не может быть пустым"
+        )
 
     if len(question_object.question_text) > 5000:
-        raise HTTPException(status_code=400, detail="Текст вопроса слишком длинный (макс. 5000 символов)")
+        raise HTTPException(
+            status_code=400,
+            detail="Текст вопроса слишком длинный (макс. 5000 символов)",
+        )
 
     if question_object.explanation and len(question_object.explanation) > 2000:
-        raise HTTPException(status_code=400, detail="Пояснение слишком длинное (макс. 2000 символов)")
+        raise HTTPException(
+            status_code=400, detail="Пояснение слишком длинное (макс. 2000 символов)"
+        )
 
     # Validate answer_options based on question type
     if not question_object.answer_options or len(question_object.answer_options) == 0:
-        raise HTTPException(status_code=400, detail="Требуется как минимум один вариант ответа")
+        raise HTTPException(
+            status_code=400, detail="Требуется как минимум один вариант ответа"
+        )
 
     if len(question_object.answer_options) > 10:
-        raise HTTPException(status_code=400, detail="Слишком много вариантов ответа (макс. 10)")
+        raise HTTPException(
+            status_code=400, detail="Слишком много вариантов ответа (макс. 10)"
+        )
 
     # Validate that at least one correct answer exists (except for essay/custom)
     from src.db.courses.exams import QuestionTypeEnum
-    if question_object.question_type in [QuestionTypeEnum.SINGLE_CHOICE, QuestionTypeEnum.MULTIPLE_CHOICE, QuestionTypeEnum.TRUE_FALSE]:
-        has_correct = any(opt.get("is_correct") for opt in question_object.answer_options)
+
+    if question_object.question_type in [
+        QuestionTypeEnum.SINGLE_CHOICE,
+        QuestionTypeEnum.MULTIPLE_CHOICE,
+        QuestionTypeEnum.TRUE_FALSE,
+    ]:
+        has_correct = any(
+            opt.get("is_correct") for opt in question_object.answer_options
+        )
         if not has_correct:
-            raise HTTPException(status_code=400, detail="Необходим хотя бы один вариант, отмеченный как правильный")
+            raise HTTPException(
+                status_code=400,
+                detail="Необходим хотя бы один вариант, отмеченный как правильный",
+            )
 
     # Create question
     question_uuid = f"question_{ULID()}"
@@ -594,18 +614,20 @@ async def start_exam_attempt(
         if attempt_limit is not None:
             # validate configured value against allowed bounds
             from src.db.courses.exams import (
-                ATTEMPT_LIMIT_MIN,
                 ATTEMPT_LIMIT_MAX,
+                ATTEMPT_LIMIT_MIN,
                 QUESTION_LIMIT_MIN,
             )
 
             if not (ATTEMPT_LIMIT_MIN <= attempt_limit <= ATTEMPT_LIMIT_MAX):
                 raise HTTPException(
-                    status_code=400, detail="Неверно указано ограничение попыток для экзамена"
+                    status_code=400,
+                    detail="Неверно указано ограничение попыток для экзамена",
                 )
 
             # ATOMIC CHECK: Use FOR UPDATE to prevent race condition
             from sqlalchemy import func
+
             statement = (
                 select(func.count(ExamAttempt.id))
                 .where(
@@ -620,11 +642,11 @@ async def start_exam_attempt(
 
     # Validate question_limit if present
     question_limit = settings.get("question_limit")
-    if question_limit is not None:
-        if question_limit < QUESTION_LIMIT_MIN:
-            raise HTTPException(
-                status_code=400, detail="Неверно указано ограничение по количеству вопросов для экзамена"
-            )
+    if question_limit is not None and question_limit < QUESTION_LIMIT_MIN:
+        raise HTTPException(
+            status_code=400,
+            detail="Неверно указано ограничение по количеству вопросов для экзамена",
+        )
 
     # Get all questions for this exam
     statement = (
@@ -653,7 +675,8 @@ async def start_exam_attempt(
     # Create attempt
     attempt_uuid = f"attempt_{ULID()}"
     from datetime import timezone
-    now = datetime.now(timezone.utc)
+
+    now = datetime.now(UTC)
     now_iso = now.isoformat()
 
     attempt = ExamAttempt(
@@ -711,12 +734,13 @@ async def submit_exam_attempt(
     time_limit_minutes = settings.get("time_limit")
     if time_limit_minutes:
         from datetime import timezone
+
         try:
             # Use timezone-aware datetime for accurate comparison
-            started_at = datetime.fromisoformat(attempt.started_at.replace('Z', '+00:00'))
+            started_at = datetime.fromisoformat(attempt.started_at)
             if started_at.tzinfo is None:
-                started_at = started_at.replace(tzinfo=timezone.utc)
-            now = datetime.now(timezone.utc)
+                started_at = started_at.replace(tzinfo=UTC)
+            now = datetime.now(UTC)
             elapsed_minutes = (now - started_at).total_seconds() / 60
 
             # Add 30-second grace period for network latency
@@ -724,24 +748,29 @@ async def submit_exam_attempt(
                 # Auto-submit with time violation flag
                 attempt.status = AttemptStatusEnum.AUTO_SUBMITTED
                 attempt.violations = attempt.violations or []
-                attempt.violations.append({
-                    "type": "TIME_EXCEEDED",
-                    "timestamp": now.isoformat(),
-                    "elapsed_minutes": round(elapsed_minutes, 2),
-                })
+                attempt.violations.append(
+                    {
+                        "type": "TIME_EXCEEDED",
+                        "timestamp": now.isoformat(),
+                        "elapsed_minutes": round(elapsed_minutes, 2),
+                    }
+                )
         except (ValueError, AttributeError) as e:
             # Log but don't fail - allow submission
             import logging
+
             logger = logging.getLogger(__name__)
-            logger.warning(f"Failed to validate time limit for attempt {attempt_uuid}: {e}")
+            logger.warning(
+                f"Failed to validate time limit for attempt {attempt_uuid}: {e}"
+            )
 
     # VALIDATION: Ensure answers only reference questions in this attempt
-    valid_question_ids = set(str(qid) for qid in attempt.question_order)
-    for answer_key in answers.keys():
+    valid_question_ids = {str(qid) for qid in attempt.question_order}
+    for answer_key in answers:
         if str(answer_key) not in valid_question_ids:
             raise HTTPException(
                 status_code=400,
-                detail=f"Недопустимый идентификатор вопроса в ответах: {answer_key}"
+                detail=f"Недопустимый идентификатор вопроса в ответах: {answer_key}",
             )
 
     # Calculate score
@@ -768,8 +797,11 @@ async def submit_exam_attempt(
             except Exception as e:
                 # Log validation error but continue grading
                 import logging
+
                 logger = logging.getLogger(__name__)
-                logger.error(f"Error validating answer for question {question_id}: {e}")
+                logger.exception(
+                    f"Error validating answer for question {question_id}: {e}"
+                )
                 continue
 
         # Update attempt (will auto-rollback if any subsequent operation fails)
@@ -821,7 +853,7 @@ async def submit_exam_attempt(
                 import logging
 
                 logger = logging.getLogger(__name__)
-                logger.error(f"Failed to award XP for exam {attempt_uuid}: {e}")
+                logger.exception(f"Failed to award XP for exam {attempt_uuid}: {e}")
 
         # Mark activity as complete only if score percentage exceeds 50%
         percentage = (
@@ -832,12 +864,17 @@ async def submit_exam_attempt(
         exam = db_session.get(Exam, attempt.exam_id)
         if exam and percentage > 50:
             try:
-                await mark_exam_complete(request, exam.activity_id, current_user.id, db_session)
+                await mark_exam_complete(
+                    request, exam.activity_id, current_user.id, db_session
+                )
             except Exception as e:
                 # Log but don't fail submission
                 import logging
+
                 logger = logging.getLogger(__name__)
-                logger.error(f"Failed to mark exam complete for attempt {attempt_uuid}: {e}")
+                logger.exception(
+                    f"Failed to mark exam complete for attempt {attempt_uuid}: {e}"
+                )
 
         # Commit all changes atomically
         db_session.commit()
@@ -849,11 +886,14 @@ async def submit_exam_attempt(
         # Rollback all changes on any error
         db_session.rollback()
         import logging
+
         logger = logging.getLogger(__name__)
-        logger.error(f"Failed to submit exam attempt {attempt_uuid}: {e}", exc_info=True)
+        logger.error(
+            f"Failed to submit exam attempt {attempt_uuid}: {e}", exc_info=True
+        )
         raise HTTPException(
             status_code=500,
-            detail="Не удалось отправить экзамен. Пожалуйста, попробуйте ещё раз."
+            detail="Не удалось отправить экзамен. Пожалуйста, попробуйте ещё раз.",
         )
 
 
@@ -1044,7 +1084,9 @@ async def get_attempt_by_uuid(
     ):
         return ExamAttemptRead.model_validate(attempt)
 
-    raise HTTPException(status_code=403, detail="Доступ к просмотру этой попытки запрещён")
+    raise HTTPException(
+        status_code=403, detail="Доступ к просмотру этой попытки запрещён"
+    )
 
 
 ## > Helper Functions
@@ -1072,7 +1114,11 @@ def check_answer_correctness(question: Question, user_answer: any) -> bool:
             return False
         # Validate each index
         for idx in user_answer:
-            if not isinstance(idx, int) or idx < 0 or idx >= len(question.answer_options):
+            if (
+                not isinstance(idx, int)
+                or idx < 0
+                or idx >= len(question.answer_options)
+            ):
                 return False
         correct_indices = {
             i for i, opt in enumerate(question.answer_options) if opt.get("is_correct")
@@ -1096,7 +1142,9 @@ def check_answer_correctness(question: Question, user_answer: any) -> bool:
         if not isinstance(user_answer, dict):
             return False
         # Validate all expected pairs are present
-        expected_lefts = {opt.get("left") for opt in question.answer_options if opt.get("left")}
+        expected_lefts = {
+            opt.get("left") for opt in question.answer_options if opt.get("left")
+        }
         if set(user_answer.keys()) != expected_lefts:
             return False
         # Check if all pairs match
@@ -1349,11 +1397,17 @@ async def import_questions_csv(
     for row_num, row in enumerate(reader, start=2):  # Start at 2 to account for header
         try:
             # Support both English and Russian CSV headers
-            question_text = (row.get("Question Text", "") or row.get("Текст вопроса", "")).strip()
+            question_text = (
+                row.get("Question Text", "") or row.get("Текст вопроса", "")
+            ).strip()
             question_type = (row.get("Type", "") or row.get("Тип", "")).strip()
             points = int(row.get("Points", 1) or row.get("Баллы", 1))
-            answer_options_json = (row.get("Answer Options (JSON)", "[]") or row.get("Варианты ответов (JSON)", "[]"))
-            explanation = (row.get("Explanation", "") or row.get("Пояснение", "")).strip() or None
+            answer_options_json = row.get("Answer Options (JSON)", "[]") or row.get(
+                "Варианты ответов (JSON)", "[]"
+            )
+            explanation = (
+                row.get("Explanation", "") or row.get("Пояснение", "")
+            ).strip() or None
 
             # Validate
             if not question_text:
@@ -1366,7 +1420,9 @@ async def import_questions_csv(
                 "TRUE_FALSE",
                 "MATCHING",
             ]:
-                errors.append(f"Строка {row_num}: Неверный тип вопроса '{question_type}'")
+                errors.append(
+                    f"Строка {row_num}: Неверный тип вопроса '{question_type}'"
+                )
                 continue
 
             # Parse answer options

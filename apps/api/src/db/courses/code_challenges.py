@@ -7,12 +7,12 @@ Database models for the coding activity system with Judge0 integration.
 from datetime import datetime
 from enum import Enum
 
-from pydantic import ConfigDict, Field as PydanticField, field_validator
+from pydantic import ConfigDict, field_validator
+from pydantic import Field as PydanticField
 from sqlalchemy import JSON, BigInteger, Column, ForeignKey, Index, Text
 from sqlmodel import Field
 
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
-
 
 # Enums
 
@@ -137,7 +137,9 @@ class CodeChallengeSettings(PydanticStrictBaseModel):
     """Settings stored in activity.details JSON field"""
 
     difficulty: DifficultyLevel = DifficultyLevel.EASY
-    allowed_languages: list[int] = PydanticField(default_factory=list)  # Judge0 language IDs
+    allowed_languages: list[int] = PydanticField(
+        default_factory=list
+    )  # Judge0 language IDs
     time_limit: int = 5  # seconds per test case
     memory_limit: int = 256  # MB
     grading_strategy: GradingStrategy = GradingStrategy.PARTIAL_CREDIT
@@ -145,7 +147,9 @@ class CodeChallengeSettings(PydanticStrictBaseModel):
     allow_custom_input: bool = True
     points: int = 100
     due_date: str | None = None
-    starter_code: dict[str, str] = PydanticField(default_factory=dict)  # {language_id: code}
+    starter_code: dict[str, str] = PydanticField(
+        default_factory=dict
+    )  # {language_id: code}
     visible_tests: list[TestCase] = PydanticField(default_factory=list)
     hidden_tests: list[TestCase] = PydanticField(default_factory=list)
     hints: list[Hint] = PydanticField(default_factory=list)
@@ -293,9 +297,7 @@ class HintUsage(HintUsageBase, table=True):
     )
     unlocked_at: str = ""
 
-    __table_args__ = (
-        Index("idx_hint_usage_user_activity", "user_id", "activity_id"),
-    )
+    __table_args__ = (Index("idx_hint_usage_user_activity", "user_id", "activity_id"),)
 
 
 # Response Models

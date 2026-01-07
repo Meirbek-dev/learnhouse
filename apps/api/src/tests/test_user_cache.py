@@ -1,9 +1,10 @@
-import pytest
-from unittest.mock import Mock, patch
 from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
-from src.services.users.users import _get_user_by_field
+import pytest
+
 from src.db.users import User
+from src.services.users.users import _get_user_by_field
 
 
 @pytest.mark.asyncio
@@ -21,13 +22,19 @@ async def test_get_user_by_field_returns_from_cache():
 @pytest.mark.asyncio
 async def test_get_user_by_field_sets_cache_after_db_fetch(monkeypatch):
     # Mock DB to return a User-like object
-    mock_user = SimpleNamespace(id=2, username="bob", email="b@x.com", user_uuid="user_2", model_dump=lambda: {"id":2, "username":"bob"})
+    mock_user = SimpleNamespace(
+        id=2,
+        username="bob",
+        email="b@x.com",
+        user_uuid="user_2",
+        model_dump=lambda: {"id": 2, "username": "bob"},
+    )
     mock_db = Mock()
     mock_db.exec.return_value.first.return_value = mock_user
 
     set_calls = []
 
-    def fake_set_json(k, v, ttl):
+    def fake_set_json(k, v, ttl) -> None:
         set_calls.append((k, v, ttl))
 
     monkeypatch.setattr("src.services.cache.redis_client.set_json", fake_set_json)
@@ -57,7 +64,7 @@ async def test_update_user_invalidates_cache(monkeypatch):
     # Patch delete_keys
     delete_calls = []
 
-    def fake_delete_keys(*keys):
+    def fake_delete_keys(*keys) -> None:
         delete_calls.append(keys)
 
     monkeypatch.setattr("src.services.cache.redis_client.delete_keys", fake_delete_keys)
@@ -83,17 +90,16 @@ async def test_update_user_bypasses_cache(monkeypatch):
     called = {}
 
     async def fake_get_user(db, field, value, use_cache=True):
-        called['use_cache'] = use_cache
-        return SimpleNamespace(id=value, username='u', user_uuid='user_1')
+        called["use_cache"] = use_cache
+        return SimpleNamespace(id=value, username="u", user_uuid="user_1")
 
     monkeypatch.setattr("src.services.users.users._get_user_by_field", fake_get_user)
 
-    current_user = SimpleNamespace(id=1, user_uuid='user_1')
+    current_user = SimpleNamespace(id=1, user_uuid="user_1")
     db_session = Mock()
     user_update = Mock()
-    user_update.model_dump.return_value = {'first_name': 'X'}
+    user_update.model_dump.return_value = {"first_name": "X"}
 
     await update_user(Mock(), db_session, 1, current_user, user_update)
 
-    assert called.get('use_cache') is False
-
+    assert called.get("use_cache") is False

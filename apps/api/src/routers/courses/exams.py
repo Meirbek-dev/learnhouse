@@ -38,25 +38,30 @@ from src.services.courses.activities.exams import (
 
 router = APIRouter()
 
+
 # Public endpoint to expose exam input limits to frontends
 @router.get("/config")
 async def api_get_exam_config():
     from src.db.courses.exams import (
-        TIME_LIMIT_MIN,
-        TIME_LIMIT_MAX,
-        ATTEMPT_LIMIT_MIN,
         ATTEMPT_LIMIT_MAX,
-        VIOLATION_THRESHOLD_MIN,
-        VIOLATION_THRESHOLD_MAX,
+        ATTEMPT_LIMIT_MIN,
         QUESTION_LIMIT_MIN,
+        TIME_LIMIT_MAX,
+        TIME_LIMIT_MIN,
+        VIOLATION_THRESHOLD_MAX,
+        VIOLATION_THRESHOLD_MIN,
     )
 
     return {
         "time_limit": {"min": TIME_LIMIT_MIN, "max": TIME_LIMIT_MAX},
         "attempt_limit": {"min": ATTEMPT_LIMIT_MIN, "max": ATTEMPT_LIMIT_MAX},
-        "violation_threshold": {"min": VIOLATION_THRESHOLD_MIN, "max": VIOLATION_THRESHOLD_MAX},
+        "violation_threshold": {
+            "min": VIOLATION_THRESHOLD_MIN,
+            "max": VIOLATION_THRESHOLD_MAX,
+        },
         "question_limit": {"min": QUESTION_LIMIT_MIN},
     }
+
 
 ## EXAMS ##
 
@@ -243,6 +248,7 @@ async def api_get_attempt_by_uuid(
     - Teachers/admins can access any attempt for exams they manage
     """
     from src.services.courses.activities.exams import get_attempt_by_uuid
+
     return await get_attempt_by_uuid(request, attempt_uuid, current_user, db_session)
 
 
@@ -305,5 +311,7 @@ async def api_reorder_questions(
 ) -> dict:
     """Bulk update question order"""
     from src.services.courses.activities.exams import reorder_questions
-    return await reorder_questions(request, exam_uuid, question_order, current_user, db_session)
 
+    return await reorder_questions(
+        request, exam_uuid, question_order, current_user, db_session
+    )

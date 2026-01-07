@@ -5,17 +5,18 @@ Revises: 5ac1e82ca152
 Create Date: 2026-01-06 12:30:52.103818
 
 """
-from typing import Sequence, Union
 
-from alembic import op
+from collections.abc import Sequence
+from typing import Union
+
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = '103e657f0164'
-down_revision: Union[str, None] = '5ac1e82ca152'
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+revision: str = "103e657f0164"
+down_revision: str | None = "5ac1e82ca152"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -67,4 +68,3 @@ def downgrade() -> None:
     """Downgrade schema."""
     # Note: PostgreSQL does not support removing enum values
     # This would require creating a new enum type and migrating data
-    pass

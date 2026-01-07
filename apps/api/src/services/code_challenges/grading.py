@@ -34,11 +34,7 @@ def calculate_score(
         return 0.0
 
     # Calculate weighted score
-    earned_weight = sum(
-        weight_map.get(r.test_case_id, 1)
-        for r in results
-        if r.passed
-    )
+    earned_weight = sum(weight_map.get(r.test_case_id, 1) for r in results if r.passed)
 
     return (earned_weight / total_weight) * 100
 
@@ -63,20 +59,25 @@ def apply_grading_strategy(
     if strategy == GradingStrategy.ALL_OR_NOTHING:
         # Score is 100 if any submission has all tests passed, else 0
         for sub in submissions:
-            if sub.get("passed_tests", 0) == sub.get("total_tests", 0) and sub.get("total_tests", 0) > 0:
+            if (
+                sub.get("passed_tests", 0) == sub.get("total_tests", 0)
+                and sub.get("total_tests", 0) > 0
+            ):
                 return 100.0
         return 0.0
 
-    elif strategy == GradingStrategy.BEST_SUBMISSION:
+    if strategy == GradingStrategy.BEST_SUBMISSION:
         # Return highest score
         return max(sub.get("score", 0.0) for sub in submissions)
 
-    elif strategy == GradingStrategy.LATEST_SUBMISSION:
+    if strategy == GradingStrategy.LATEST_SUBMISSION:
         # Return score of most recent submission
-        sorted_subs = sorted(submissions, key=lambda x: x.get("created_at", ""), reverse=True)
+        sorted_subs = sorted(
+            submissions, key=lambda x: x.get("created_at", ""), reverse=True
+        )
         return sorted_subs[0].get("score", 0.0) if sorted_subs else 0.0
 
-    elif strategy == GradingStrategy.PARTIAL_CREDIT:
+    if strategy == GradingStrategy.PARTIAL_CREDIT:
         # Return highest score (same as BEST_SUBMISSION for partial credit)
         return max(sub.get("score", 0.0) for sub in submissions)
 

@@ -12,11 +12,11 @@ Design:
 - Swallows exceptions and logs, so callers can be simple and robust
 - Easy to patch in tests (patch get_redis_client or this module functions)
 """
+
 from __future__ import annotations
 
 import logging
 from typing import Optional
-
 
 try:
     import redis
@@ -41,11 +41,12 @@ except Exception:  # pragma: no cover - orjson optional
     def _loads(b: bytes) -> object:  # type: ignore
         return _json.loads(b.decode())
 
+
 _logger = logging.getLogger(__name__)
-_client: Optional["redis.Redis"] = None
+_client: redis.Redis | None = None
 
 
-def get_redis_client() -> Optional["redis.Redis"]:
+def get_redis_client() -> redis.Redis | None:
     """Return a cached redis client or None if not configured/available."""
     global _client
     if _client is not None:

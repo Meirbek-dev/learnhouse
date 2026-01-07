@@ -4,7 +4,6 @@ Code sanitization utilities for security
 
 import re
 
-
 # Maximum allowed source code size (10 MB)
 MAX_CODE_SIZE = 10 * 1024 * 1024
 
@@ -14,8 +13,6 @@ MAX_CODE_LINES = 10000
 
 class CodeValidationError(Exception):
     """Raised when code validation fails"""
-
-    pass
 
 
 def sanitize_code(source_code: str) -> str:
@@ -32,24 +29,24 @@ def sanitize_code(source_code: str) -> str:
         CodeValidationError: If code fails validation
     """
     if not source_code:
-        raise CodeValidationError("Source code cannot be empty")
+        msg = "Source code cannot be empty"
+        raise CodeValidationError(msg)
 
     # Check size
     if len(source_code) > MAX_CODE_SIZE:
-        raise CodeValidationError(
-            f"Source code exceeds maximum size of {MAX_CODE_SIZE // (1024 * 1024)} MB"
-        )
+        msg = f"Source code exceeds maximum size of {MAX_CODE_SIZE // (1024 * 1024)} MB"
+        raise CodeValidationError(msg)
 
     # Check for null bytes
     if "\x00" in source_code:
-        raise CodeValidationError("Source code contains invalid characters")
+        msg = "Source code contains invalid characters"
+        raise CodeValidationError(msg)
 
     # Check line count
     line_count = source_code.count("\n") + 1
     if line_count > MAX_CODE_LINES:
-        raise CodeValidationError(
-            f"Source code exceeds maximum of {MAX_CODE_LINES} lines"
-        )
+        msg = f"Source code exceeds maximum of {MAX_CODE_LINES} lines"
+        raise CodeValidationError(msg)
 
     return source_code
 

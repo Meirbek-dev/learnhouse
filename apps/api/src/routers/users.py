@@ -1,6 +1,6 @@
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, Request, UploadFile, Response
+from fastapi import APIRouter, Depends, Request, Response, UploadFile
 from pydantic import EmailStr
 from sqlmodel import Session
 

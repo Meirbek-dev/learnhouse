@@ -65,7 +65,8 @@ class ExamSettingsBase(SQLModelStrictBaseModel):
         if v is None:
             return v
         if not (TIME_LIMIT_MIN <= v <= TIME_LIMIT_MAX):
-            raise ValueError(f"time_limit must be between {TIME_LIMIT_MIN} and {TIME_LIMIT_MAX}")
+            msg = f"time_limit must be between {TIME_LIMIT_MIN} and {TIME_LIMIT_MAX}"
+            raise ValueError(msg)
         return v
 
     @field_validator("attempt_limit", mode="before")
@@ -74,7 +75,8 @@ class ExamSettingsBase(SQLModelStrictBaseModel):
         if v is None:
             return v
         if not (ATTEMPT_LIMIT_MIN <= v <= ATTEMPT_LIMIT_MAX):
-            raise ValueError(f"attempt_limit must be between {ATTEMPT_LIMIT_MIN} and {ATTEMPT_LIMIT_MAX}")
+            msg = f"attempt_limit must be between {ATTEMPT_LIMIT_MIN} and {ATTEMPT_LIMIT_MAX}"
+            raise ValueError(msg)
         return v
 
     @field_validator("question_limit", mode="before")
@@ -83,7 +85,8 @@ class ExamSettingsBase(SQLModelStrictBaseModel):
         if v is None:
             return v
         if v < QUESTION_LIMIT_MIN:
-            raise ValueError(f"question_limit must be >= {QUESTION_LIMIT_MIN}")
+            msg = f"question_limit must be >= {QUESTION_LIMIT_MIN}"
+            raise ValueError(msg)
         return v
 
     @field_validator("violation_threshold", mode="before")
@@ -92,7 +95,8 @@ class ExamSettingsBase(SQLModelStrictBaseModel):
         if v is None:
             return v
         if not (VIOLATION_THRESHOLD_MIN <= v <= VIOLATION_THRESHOLD_MAX):
-            raise ValueError(f"violation_threshold must be between {VIOLATION_THRESHOLD_MIN} and {VIOLATION_THRESHOLD_MAX}")
+            msg = f"violation_threshold must be between {VIOLATION_THRESHOLD_MIN} and {VIOLATION_THRESHOLD_MAX}"
+            raise ValueError(msg)
         return v
 
     @field_validator("access_mode", mode="before")
@@ -104,7 +108,7 @@ class ExamSettingsBase(SQLModelStrictBaseModel):
 
     @field_validator("shuffle_answers", mode="before")
     @classmethod
-    def validate_shuffle_answers(cls, v):
+    def validate_shuffle_answers(cls, v) -> bool:
         # Always enforce shuffle_answers=True for security
         return True
 

@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 
 import orjson
-from src.services.cache.redis_client import get_redis_client, get_json, set_json, delete_keys
 from fastapi import HTTPException, Request
 from pydantic import EmailStr
 from sqlmodel import Session, select
@@ -14,6 +13,12 @@ from src.db.organizations import (
 )
 from src.db.users import AnonymousUser, PublicUser, UserRead
 from src.security.security import generate_secure_code
+from src.services.cache.redis_client import (
+    delete_keys,
+    get_json,
+    get_redis_client,
+    set_json,
+)
 from src.services.email.utils import send_email
 from src.services.orgs.orgs import rbac_check
 
@@ -266,7 +271,9 @@ async def get_invite_code(
             detail="Invite code not found",
         )
 
-    key = keys[0].decode("utf-8") if isinstance(keys[0], (bytes, bytearray)) else keys[0]
+    key = (
+        keys[0].decode("utf-8") if isinstance(keys[0], (bytes, bytearray)) else keys[0]
+    )
     return get_json(key)
 
 
@@ -313,7 +320,12 @@ async def delete_invite_code(
     # Delete invite code
     keys = r.keys(f"{invite_code_uuid}:org:{org.org_uuid}:code:*")
     if keys:
-        delete_keys(*[k.decode("utf-8") if isinstance(k, (bytes, bytearray)) else k for k in keys])
+        delete_keys(
+            *[
+                k.decode("utf-8") if isinstance(k, (bytes, bytearray)) else k
+                for k in keys
+            ]
+        )
 
     if not keys:
         raise HTTPException(
@@ -353,7 +365,11 @@ def send_invite_email(
 
     # Send email
     if keys:
-        key = keys[0].decode("utf-8") if isinstance(keys[0], (bytes, bytearray)) else keys[0]
+        key = (
+            keys[0].decode("utf-8")
+            if isinstance(keys[0], (bytes, bytearray))
+            else keys[0]
+        )
         invite = get_json(key)
 
         # send email

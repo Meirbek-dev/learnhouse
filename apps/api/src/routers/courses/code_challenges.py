@@ -44,9 +44,9 @@ from src.db.courses.code_challenges import (
     TestCaseResult,
     TestRunResponse,
 )
-from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
+from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User
 from src.security.auth import get_current_user
 from src.security.courses_security import courses_rbac_check_for_assignments
@@ -87,8 +87,8 @@ async def get_activity_or_404(
 
     # Handle both cases: with and without 'activity_' prefix
     # Frontend strips the prefix, but DB stores it with prefix
-    if not activity_uuid.startswith('activity_'):
-        activity_uuid = f'activity_{activity_uuid}'
+    if not activity_uuid.startswith("activity_"):
+        activity_uuid = f"activity_{activity_uuid}"
 
     statement = select(Activity).where(Activity.activity_uuid == activity_uuid)
     activity = db_session.exec(statement).first()
@@ -97,7 +97,9 @@ async def get_activity_or_404(
         logger.warning(f"Activity not found: {activity_uuid}")
         raise HTTPException(status_code=404, detail="Activity not found")
 
-    logger.info(f"Found activity: ID={activity.id}, UUID={activity.activity_uuid}, Type={activity.activity_type}")
+    logger.info(
+        f"Found activity: ID={activity.id}, UUID={activity.activity_uuid}, Type={activity.activity_type}"
+    )
     return activity
 
 
@@ -130,10 +132,10 @@ async def check_challenge_access(
             "create" if require_instructor else "read",
             db_session,
         )
-    except HTTPException as e:
+    except HTTPException:
         if require_instructor:
             raise HTTPException(status_code=403, detail="Instructor access required")
-        raise e
+        raise
 
     return course
 
@@ -256,7 +258,9 @@ async def update_challenge_settings(
     """Update code challenge settings (instructor only)"""
     activity = await get_activity_or_404(activity_uuid, db_session)
     await verify_code_challenge_activity(activity)
-    await check_challenge_access(activity, current_user, db_session, require_instructor=True)
+    await check_challenge_access(
+        activity, current_user, db_session, require_instructor=True
+    )
 
     # Get current settings
     current_settings = get_challenge_settings(activity)
@@ -266,7 +270,7 @@ async def update_challenge_settings(
     update_dict = settings_update.model_dump(exclude_none=True)
 
     # Process test cases - convert dicts to TestCase objects
-    if "visible_tests" in update_dict and update_dict["visible_tests"]:
+    if update_dict.get("visible_tests"):
         visible_tests = []
         for tc in update_dict["visible_tests"]:
             if not tc.get("id"):
@@ -275,7 +279,7 @@ async def update_challenge_settings(
             visible_tests.append(tc)
         update_dict["visible_tests"] = visible_tests
 
-    if "hidden_tests" in update_dict and update_dict["hidden_tests"]:
+    if update_dict.get("hidden_tests"):
         hidden_tests = []
         for tc in update_dict["hidden_tests"]:
             if not tc.get("id"):
@@ -292,7 +296,7 @@ async def update_challenge_settings(
     try:
         updated_settings = CodeChallengeSettings.model_validate(current_dict)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Invalid settings: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Invalid settings: {e!s}")
 
     # Update activity.details
     activity.details = updated_settings.model_dump()
@@ -321,8 +325,13 @@ async def submit_code_challenge(
     settings = get_challenge_settings(activity)
 
     # Validate language is allowed
-    if settings.allowed_languages and submission.language_id not in settings.allowed_languages:
-        raise HTTPException(status_code=400, detail="Language not allowed for this challenge")
+    if (
+        settings.allowed_languages
+        and submission.language_id not in settings.allowed_languages
+    ):
+        raise HTTPException(
+            status_code=400, detail="Language not allowed for this challenge"
+        )
 
     # Validate and decode source code
     try:
@@ -413,7 +422,9 @@ async def process_submission(
             submission.status = SubmissionStatus.PENDING_JUDGE0
             submission.updated_at = datetime.now().isoformat()
             db_session.commit()
-            logger.warning(f"Judge0 unavailable, submission {submission_id} marked as pending")
+            logger.warning(
+                f"Judge0 unavailable, submission {submission_id} marked as pending"
+            )
             return
 
         # Run test cases
@@ -460,10 +471,12 @@ async def process_submission(
             submission.status = SubmissionStatus.PENDING_JUDGE0
             submission.updated_at = datetime.now().isoformat()
             db_session.commit()
-        logger.warning(f"Judge0 unavailable during processing of submission {submission_id}")
+        logger.warning(
+            f"Judge0 unavailable during processing of submission {submission_id}"
+        )
 
     except Exception as e:
-        logger.error(f"Error processing submission {submission_id}: {e}")
+        logger.exception(f"Error processing submission {submission_id}: {e}")
         submission = db_session.get(CodeSubmission, submission_id)
         if submission:
             submission.status = SubmissionStatus.FAILED
@@ -506,7 +519,7 @@ async def award_challenge_xp(submission: CodeSubmission, db_session: Session):
         )
 
     except Exception as e:
-        logger.error(f"Error awarding XP: {e}")
+        logger.exception(f"Error awarding XP: {e}")
 
 
 @router.post("/{activity_uuid}/test", response_model=TestRunResponse)
@@ -543,7 +556,9 @@ async def run_visible_tests(
             stop_on_failure=False,
         )
     except Judge0UnavailableError:
-        raise HTTPException(status_code=503, detail="Code execution service unavailable")
+        raise HTTPException(
+            status_code=503, detail="Code execution service unavailable"
+        )
     except Judge0Error as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -591,7 +606,11 @@ async def run_custom_test(
     try:
         decoded_code = base64.b64decode(request_body.source_code).decode("utf-8")
         decoded_code = sanitize_code(decoded_code)
-        decoded_stdin = base64.b64decode(request_body.stdin).decode("utf-8") if request_body.stdin else ""
+        decoded_stdin = (
+            base64.b64decode(request_body.stdin).decode("utf-8")
+            if request_body.stdin
+            else ""
+        )
     except CodeValidationError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
@@ -606,7 +625,9 @@ async def run_custom_test(
             memory_limit=settings.memory_limit,
         )
     except Judge0UnavailableError:
-        raise HTTPException(status_code=503, detail="Code execution service unavailable")
+        raise HTTPException(
+            status_code=503, detail="Code execution service unavailable"
+        )
     except Judge0Error as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -622,8 +643,8 @@ async def get_submission_history(
     activity_uuid: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
-    limit: int = Query(20, le=100),
-    offset: int = Query(0, ge=0),
+    limit: Annotated[int, Query(le=100)] = 20,
+    offset: Annotated[int, Query(ge=0)] = 0,
 ):
     """Get user's submission history for a challenge"""
     activity = await get_activity_or_404(activity_uuid, db_session)
@@ -726,7 +747,7 @@ async def get_student_analytics(
     # Calculate analytics
     best_submission = max(submissions, key=lambda s: s.score)
     scores = [s.score for s in submissions]
-    languages = list(set(s.language_name for s in submissions))
+    languages = list({s.language_name for s in submissions})
     total_time = sum(s.execution_time_ms or 0 for s in submissions)
 
     # Find first AC
@@ -737,12 +758,15 @@ async def get_student_analytics(
             break
 
     # Count hints used
-    hint_count = db_session.exec(
-        select(func.count(HintUsage.id)).where(
-            HintUsage.activity_id == activity.id,
-            HintUsage.user_id == user_id,
-        )
-    ).first() or 0
+    hint_count = (
+        db_session.exec(
+            select(func.count(HintUsage.id)).where(
+                HintUsage.activity_id == activity.id,
+                HintUsage.user_id == user_id,
+            )
+        ).first()
+        or 0
+    )
 
     return StudentAnalytics(
         total_submissions=len(submissions),
@@ -753,7 +777,11 @@ async def get_student_analytics(
         total_time_spent_ms=total_time,
         first_ac_time_ms=first_ac,
         hints_used=hint_count,
-        xp_earned=100 if best_submission.score >= 100 else 50 if best_submission.passed_tests == best_submission.total_tests else 0,
+        xp_earned=100
+        if best_submission.score >= 100
+        else 50
+        if best_submission.passed_tests == best_submission.total_tests
+        else 0,
     )
 
 
@@ -766,7 +794,9 @@ async def get_challenge_analytics(
     """Get analytics for a code challenge (instructor only)"""
     activity = await get_activity_or_404(activity_uuid, db_session)
     await verify_code_challenge_activity(activity)
-    await check_challenge_access(activity, current_user, db_session, require_instructor=True)
+    await check_challenge_access(
+        activity, current_user, db_session, require_instructor=True
+    )
 
     # Get all submissions
     statement = select(CodeSubmission).where(
@@ -788,7 +818,7 @@ async def get_challenge_analytics(
         )
 
     # Calculate analytics
-    unique_users = set(s.user_id for s in submissions)
+    unique_users = {s.user_id for s in submissions}
     scores = [s.score for s in submissions]
 
     # Score distribution
@@ -811,11 +841,14 @@ async def get_challenge_analytics(
         lang_dist[s.language_name] = lang_dist.get(s.language_name, 0) + 1
 
     # Completion rate (users who got 100%)
-    completed_users = set(
-        s.user_id for s in submissions
+    completed_users = {
+        s.user_id
+        for s in submissions
         if s.passed_tests == s.total_tests and s.total_tests > 0
+    }
+    completion_rate = (
+        (len(completed_users) / len(unique_users)) * 100 if unique_users else 0
     )
-    completion_rate = (len(completed_users) / len(unique_users)) * 100 if unique_users else 0
 
     # Common errors and failing tests (simplified)
     failing_tests: dict[str, int] = {}
@@ -844,9 +877,11 @@ async def get_challenge_analytics(
 async def get_leaderboard(
     activity_uuid: str,
     timeframe: Literal["all", "week", "month"] = "all",
-    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)] = None,
+    current_user: Annotated[
+        PublicUser | AnonymousUser, Depends(get_current_user)
+    ] = None,
     db_session: Annotated[Session, Depends(get_db_session)] = None,
-    limit: int = Query(100, le=100),
+    limit: Annotated[int, Query(le=100)] = 100,
 ):
     """Get leaderboard for a code challenge"""
     activity = await get_activity_or_404(activity_uuid, db_session)
@@ -886,12 +921,15 @@ async def get_leaderboard(
             continue
 
         # Count attempts for this user
-        attempt_count = db_session.exec(
-            select(func.count(CodeSubmission.id)).where(
-                CodeSubmission.activity_id == activity.id,
-                CodeSubmission.user_id == s.user_id,
-            )
-        ).first() or 1
+        attempt_count = (
+            db_session.exec(
+                select(func.count(CodeSubmission.id)).where(
+                    CodeSubmission.activity_id == activity.id,
+                    CodeSubmission.user_id == s.user_id,
+                )
+            ).first()
+            or 1
+        )
 
         composite = calculate_composite_score(
             s.score,

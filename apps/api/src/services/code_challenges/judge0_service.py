@@ -34,19 +34,15 @@ JUDGE0_MAX_BATCH_SIZE = 20
 class Judge0Error(Exception):
     """Base exception for Judge0 errors"""
 
-    pass
-
 
 class Judge0UnavailableError(Judge0Error):
     """Judge0 service is unavailable"""
-
-    pass
 
 
 class Judge0Service:
     """Service for interacting with Judge0 API"""
 
-    def __init__(self, base_url: str | None = None):
+    def __init__(self, base_url: str | None = None) -> None:
         self.base_url = base_url or JUDGE0_BASE_URL
 
     async def health_check(self) -> bool:
@@ -56,7 +52,7 @@ class Judge0Service:
                 response = await client.get(f"{self.base_url}/config_info")
                 return response.status_code == 200
         except Exception as e:
-            logger.error(f"Judge0 health check failed: {e}")
+            logger.exception(f"Judge0 health check failed: {e}")
             return False
 
     async def get_languages(self) -> list[Judge0Language]:
@@ -67,8 +63,9 @@ class Judge0Service:
                 response.raise_for_status()
                 return [Judge0Language(**lang) for lang in response.json()]
         except Exception as e:
-            logger.error(f"Failed to fetch languages: {e}")
-            raise Judge0Error(f"Failed to fetch languages: {e}")
+            logger.exception(f"Failed to fetch languages: {e}")
+            msg = f"Failed to fetch languages: {e}"
+            raise Judge0Error(msg)
 
     async def get_statuses(self) -> dict[int, str]:
         """Fetch status descriptions from Judge0"""
@@ -78,8 +75,9 @@ class Judge0Service:
                 response.raise_for_status()
                 return {s["id"]: s["description"] for s in response.json()}
         except Exception as e:
-            logger.error(f"Failed to fetch statuses: {e}")
-            raise Judge0Error(f"Failed to fetch statuses: {e}")
+            logger.exception(f"Failed to fetch statuses: {e}")
+            msg = f"Failed to fetch statuses: {e}"
+            raise Judge0Error(msg)
 
     def _encode_base64(self, text: str) -> str:
         """Encode text to base64"""
@@ -170,14 +168,17 @@ class Judge0Service:
                 return result["token"]
 
         except httpx.TimeoutException:
-            logger.error("Judge0 submission timed out")
-            raise Judge0UnavailableError("Judge0 request timed out")
+            logger.exception("Judge0 submission timed out")
+            msg = "Judge0 request timed out"
+            raise Judge0UnavailableError(msg)
         except httpx.HTTPStatusError as e:
-            logger.error(f"Judge0 HTTP error: {e.response.status_code}")
-            raise Judge0Error(f"Judge0 HTTP error: {e.response.status_code}")
+            logger.exception(f"Judge0 HTTP error: {e.response.status_code}")
+            msg = f"Judge0 HTTP error: {e.response.status_code}"
+            raise Judge0Error(msg)
         except Exception as e:
-            logger.error(f"Judge0 submission failed: {e}")
-            raise Judge0Error(f"Judge0 submission failed: {e}")
+            logger.exception(f"Judge0 submission failed: {e}")
+            msg = f"Judge0 submission failed: {e}"
+            raise Judge0Error(msg)
 
     async def create_batch_submission(
         self,
@@ -193,7 +194,8 @@ class Judge0Service:
             List of submission tokens
         """
         if len(submissions) > JUDGE0_MAX_BATCH_SIZE:
-            raise ValueError(f"Batch size exceeds maximum of {JUDGE0_MAX_BATCH_SIZE}")
+            msg = f"Batch size exceeds maximum of {JUDGE0_MAX_BATCH_SIZE}"
+            raise ValueError(msg)
 
         try:
             async with httpx.AsyncClient(timeout=JUDGE0_TIMEOUT) as client:
@@ -206,11 +208,13 @@ class Judge0Service:
                 return [s["token"] for s in response.json()]
 
         except httpx.TimeoutException:
-            logger.error("Judge0 batch submission timed out")
-            raise Judge0UnavailableError("Judge0 request timed out")
+            logger.exception("Judge0 batch submission timed out")
+            msg = "Judge0 request timed out"
+            raise Judge0UnavailableError(msg)
         except Exception as e:
-            logger.error(f"Judge0 batch submission failed: {e}")
-            raise Judge0Error(f"Judge0 batch submission failed: {e}")
+            logger.exception(f"Judge0 batch submission failed: {e}")
+            msg = f"Judge0 batch submission failed: {e}"
+            raise Judge0Error(msg)
 
     async def get_submission(self, token: str) -> dict[str, Any]:
         """Get submission result by token"""
@@ -224,8 +228,9 @@ class Judge0Service:
                 return self._process_result(response.json())
 
         except Exception as e:
-            logger.error(f"Failed to get submission {token}: {e}")
-            raise Judge0Error(f"Failed to get submission: {e}")
+            logger.exception(f"Failed to get submission {token}: {e}")
+            msg = f"Failed to get submission: {e}"
+            raise Judge0Error(msg)
 
     async def get_batch_submissions(self, tokens: list[str]) -> list[dict[str, Any]]:
         """Get multiple submission results"""
@@ -243,12 +248,13 @@ class Judge0Service:
                 return [self._process_result(s) for s in data.get("submissions", [])]
 
         except Exception as e:
-            logger.error(f"Failed to get batch submissions: {e}")
-            raise Judge0Error(f"Failed to get batch submissions: {e}")
+            logger.exception(f"Failed to get batch submissions: {e}")
+            msg = f"Failed to get batch submissions: {e}"
+            raise Judge0Error(msg)
 
     def _process_result(self, result: dict[str, Any]) -> dict[str, Any]:
         """Process and decode a submission result"""
-        processed = {
+        return {
             "token": result.get("token"),
             "status": result.get("status", {}),
             "time": result.get("time"),
@@ -258,7 +264,6 @@ class Judge0Service:
             "compile_output": self._decode_base64(result.get("compile_output")),
             "message": self._decode_base64(result.get("message")),
         }
-        return processed
 
     async def poll_submission(
         self,
@@ -390,7 +395,7 @@ class Judge0Service:
             )
 
             # Convert to TestCaseResult
-            for tc, raw in zip(batch_test_cases, raw_results):
+            for tc, raw in zip(batch_test_cases, raw_results, strict=False):
                 status = raw.get("status", {})
                 status_id = status.get("id", 0)
 
@@ -399,8 +404,12 @@ class Judge0Service:
                     status=status_id,
                     status_description=status.get("description", "Unknown"),
                     passed=status_id == Judge0Status.ACCEPTED.value,
-                    time_ms=float(raw.get("time") or 0) * 1000 if raw.get("time") else None,
-                    memory_kb=float(raw.get("memory") or 0) if raw.get("memory") else None,
+                    time_ms=float(raw.get("time") or 0) * 1000
+                    if raw.get("time")
+                    else None,
+                    memory_kb=float(raw.get("memory") or 0)
+                    if raw.get("memory")
+                    else None,
                     stdout=raw.get("stdout"),
                     stderr=raw.get("stderr"),
                     compile_output=raw.get("compile_output"),
@@ -453,8 +462,12 @@ class Judge0Service:
             stdout=result.get("stdout"),
             stderr=result.get("stderr"),
             compile_output=result.get("compile_output"),
-            time_ms=float(result.get("time") or 0) * 1000 if result.get("time") else None,
-            memory_kb=float(result.get("memory") or 0) if result.get("memory") else None,
+            time_ms=float(result.get("time") or 0) * 1000
+            if result.get("time")
+            else None,
+            memory_kb=float(result.get("memory") or 0)
+            if result.get("memory")
+            else None,
         )
 
 

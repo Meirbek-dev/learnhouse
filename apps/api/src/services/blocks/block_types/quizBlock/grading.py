@@ -62,7 +62,11 @@ def grade_quiz(
         user_answer = answer_lookup.get(question_id, {})
 
         # Decide points for this question (respect explicit question.points if present)
-        q_points_raw = float(question.get("points")) if question.get("points") is not None else None
+        q_points_raw = (
+            float(question.get("points"))
+            if question.get("points") is not None
+            else None
+        )
         if q_points_raw is not None and total_defined_points > 0:
             # Scale question raw points to the overall max_score
             points = (q_points_raw / total_defined_points) * max_score
