@@ -60,7 +60,7 @@ services:
 
   # Judge0 - code runner for coding activities
   judge0_server:
-    image: judge0/judge0:latest
+    image: judge0/judge0:1.13.1
     command: ["bash", "-c", "sudo mkdir -p /box && sudo chmod 1777 /box && exec ./scripts/server"]
     volumes:
       - ./judge0.conf:/judge0.conf:ro
@@ -82,7 +82,7 @@ services:
       - POSTGRES_HOST=db
 
   judge0_workers:
-    image: judge0/judge0:latest
+    image: judge0/judge0:1.13.1
     command: ["bash", "-c", "sudo mkdir -p /box && sudo chmod 1777 /box && exec ./scripts/workers"]
     volumes:
       - ./judge0.conf:/judge0.conf:ro
