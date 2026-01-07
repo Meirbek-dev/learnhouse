@@ -22,12 +22,12 @@ export interface Language {
 
 // Map Judge0 language IDs to Monaco language identifiers
 const JUDGE0_TO_MONACO: Record<number, string> = {
+  71: 'python', // Python (3.8.1)
   50: 'c', // C (GCC 9.2.0)
   54: 'cpp', // C++ (GCC 9.2.0)
   51: 'csharp', // C# (Mono 6.6.0.161)
   62: 'java', // Java (OpenJDK 13.0.1)
   63: 'javascript', // JavaScript (Node.js 12.14.0)
-  71: 'python', // Python (3.8.1)
   73: 'rust', // Rust (1.40.0)
   82: 'sql', // SQL (SQLite 3.27.2)
   74: 'typescript', // TypeScript (3.7.4)
@@ -38,7 +38,8 @@ const JUDGE0_TO_MONACO: Record<number, string> = {
 };
 
 function getMonacoLanguage(languageId: number): string {
-  return JUDGE0_TO_MONACO[languageId] || 'plaintext';
+  // Default to Python if the language ID is unknown to provide a sensible default
+  return JUDGE0_TO_MONACO[languageId] || 'python';
 }
 
 interface CodeEditorProps {
