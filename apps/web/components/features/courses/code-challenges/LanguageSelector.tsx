@@ -61,7 +61,7 @@ export function LanguageSelector({
 
   // Sort languages alphabetically
   const sortedLanguages = useMemo(() => {
-    return [...availableLanguages].sort((a, b) => a.name.localeCompare(b.name));
+    return [...availableLanguages].toSorted((a, b) => a.name.localeCompare(b.name));
   }, [availableLanguages]);
 
   const selectedLanguage = useMemo(

@@ -1,4 +1,12 @@
-import { Select, SelectContent, SelectGroup, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectPositioner,
+  SelectTrigger,
+  SelectValue,
+} from '@components/ui/select';
 import { ArrowRight, CheckCircle, GitBranch, Image, Play, Plus, RotateCcw, Save, Settings, Trash2 } from 'lucide-react';
 import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';

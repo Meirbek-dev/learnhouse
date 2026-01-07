@@ -17,7 +17,15 @@ import {
   Trash2,
   Trophy,
 } from 'lucide-react';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectPositioner,
+  SelectTrigger,
+  SelectValue,
+} from '@components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { createElement, useEffect, useEffectEvent, useState } from 'react';

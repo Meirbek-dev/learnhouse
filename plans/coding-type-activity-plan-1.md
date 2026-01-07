@@ -5,8 +5,9 @@
 A comprehensive coding assessment system integrated with Judge0, enabling instructors to create
 coding challenges and students to submit, test, and receive automated feedback on their solutions.
 
-**Architecture**: Extends existing Activity/Block system with new `TYPE_CODE_CHALLENGE` activity type,
-leveraging the deployed Judge0 instance (judge0_server:2358 + judge0_workers) in docker-compose.
+**Architecture**: Extends existing Activity/Block system with new `TYPE_CODE_CHALLENGE` activity
+type, leveraging the deployed Judge0 instance (judge0_server:2358 + judge0_workers) in
+docker-compose.
 
 ## Core Components
 
@@ -132,10 +133,10 @@ class CodeChallengeSettings(SQLModelStrictBaseModel):
 **New Frontend Component** (`apps/web/components/features/courses/CodeChallengeEditor.tsx`):
 
 ```tsx
-import { Editor } from '@monaco-editor/react';  // Add to package.json
-import { useTranslations } from 'next-intl';
 import { Button } from '@components/ui/button';
 import { Select } from '@base-ui/react/Select';
+import { Editor } from '@monaco-editor/react'; // Add to package.json
+import { useTranslations } from 'next-intl';
 
 interface CodeChallengeEditorProps {
   activityUuid: string;
@@ -167,10 +168,9 @@ interface CodeChallengeEditorProps {
    - Real-time output display using SWR polling:
 
      ```tsx
-     const { data } = useSWR(
-       submissionToken ? `/api/judge0/submission/${submissionToken}` : null,
-       { refreshInterval: 1000 }
-     );
+     const { data } = useSWR(submissionToken ? `/api/judge0/submission/${submissionToken}` : null, {
+       refreshInterval: 1000,
+     });
      ```
 
    - Judge0 Status Mapping:
@@ -356,7 +356,8 @@ class Judge0Service:
 
 #### Student View
 
-**Component** (`apps/web/app/orgs/[orgslug]/courses/[courseuuid]/activities/[activityuuid]/analytics/page.tsx`):
+**Component**
+(`apps/web/app/orgs/[orgslug]/courses/[courseuuid]/activities/[activityuuid]/analytics/page.tsx`):
 
 - **Performance Dashboard** (reuse existing dashboard components from `components/Dashboard`):
   - Completion rate: Recharts Pie Chart
@@ -372,13 +373,14 @@ class Judge0Service:
   // Server Component
   const analytics = await fetch(
     `${getAPIUrl()}code-challenges/${activityUuid}/analytics/${userId}`,
-    { cache: 'no-store', headers: { Authorization: `Bearer ${token}` } }
+    { cache: 'no-store', headers: { Authorization: `Bearer ${token}` } },
   );
   ```
 
 #### Instructor View
 
-**Component** (`apps/web/app/orgs/[orgslug]/dash/code-challenges/[activityuuid]/analytics/page.tsx`):
+**Component**
+(`apps/web/app/orgs/[orgslug]/dash/code-challenges/[activityuuid]/analytics/page.tsx`):
 
 - **Challenge Analytics Dashboard**:
   - Submission rate: Total submissions / enrolled students
@@ -393,7 +395,7 @@ class Judge0Service:
   - Data Table component (shadcn Table) with sorting/filtering
   - Columns: Name, Attempts, Best Score, Time Spent, Last Attempt, Status
   - Red flag indicators:
-    - >10 attempts without passing
+    - > 10 attempts without passing
     - Plagiarism score >0.8 (MOSS integration)
     - Suspicious timing patterns (e.g., identical submission times)
 
@@ -413,14 +415,19 @@ class Judge0Service:
   - Inline comments: Monaco decorations API for line-level comments
 
     ```tsx
-    editor.deltaDecorations([], [{
-      range: new monaco.Range(lineNumber, 1, lineNumber, 1),
-      options: {
-        isWholeLine: true,
-        glyphMarginClassName: 'comment-glyph',
-        hoverMessage: { value: commentText }
-      }
-    }]);
+    editor.deltaDecorations(
+      [],
+      [
+        {
+          range: new monaco.Range(lineNumber, 1, lineNumber, 1),
+          options: {
+            isWholeLine: true,
+            glyphMarginClassName: 'comment-glyph',
+            hoverMessage: { value: commentText },
+          },
+        },
+      ],
+    );
     ```
 
   - Grade override: Modal form with justification field (required)
@@ -593,16 +600,16 @@ export default async function CodeChallengePage({ params }) {
 }
 
 // Client Component - handles interactive state
-'use client';
+('use client');
 export function CodeChallengeEditor({ activity }) {
-  const [code, setCode] = useState(activity.starterCode);  // Auto-save to localStorage
+  const [code, setCode] = useState(activity.starterCode); // Auto-save to localStorage
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(activity.allowedLanguages[0]); // C by default
 
   // SWR for real-time submission status
   const { data: submission, error } = useSWR(
     submissionUuid ? `/api/submissions/${submissionUuid}` : null,
-    { refreshInterval: 1000 }  // Poll every 1s while processing
+    { refreshInterval: 1000 }, // Poll every 1s while processing
   );
 }
 ```
@@ -652,9 +659,9 @@ interface ErrorDisplayProps {
   message="Compilation failed"
   details={{
     line: 15,
-    stderr: sanitizedStderr
+    stderr: sanitizedStderr,
   }}
-/>
+/>;
 ```
 
 - **Error Types**:
@@ -893,7 +900,7 @@ async def test_judge0_submission_flow():
   }
 
   // Client Component (mark explicitly)
-  'use client';
+  ('use client');
   export function ClientCodeEditor({ activity }) {
     const [code, setCode] = useState(activity.starterCode);
     // ...

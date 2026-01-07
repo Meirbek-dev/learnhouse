@@ -1,8 +1,8 @@
 'use client';
 
 import { AlertCircle, CheckCircle2, Clock, Loader2, XCircle } from 'lucide-react';
-import { cva } from 'class-variance-authority';
 import type { VariantProps } from 'class-variance-authority';
+import { cva } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';

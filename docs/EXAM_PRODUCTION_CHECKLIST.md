@@ -260,8 +260,8 @@ artillery quick --count 100 --num 10 http://localhost:8000/api/exams/start
 
 ## ✅ Sign-Off
 
-**Completed By**: ********\_******** **Date**: ********\_******** **Production Ready**: ☐ Yes ☐ No
-(explain): ********\_********
+**Completed By**: **\*\*\*\***\_**\*\*\*\*** **Date**: **\*\*\*\***\_**\*\*\*\*** **Production
+Ready**: ☐ Yes ☐ No (explain): **\*\*\*\***\_**\*\*\*\***
 
 ---
 

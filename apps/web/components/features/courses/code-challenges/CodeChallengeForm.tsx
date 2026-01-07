@@ -1,10 +1,11 @@
 'use client';
 
-import { useFieldArray, useForm, type SubmitHandler } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
+import type { SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Grip, Plus, Trash2 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 import { useCallback, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { z } from 'zod';
 
 import {
@@ -16,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Field, FieldLabel, FieldDescription, FieldContent, FieldError } from '@/components/ui/field';
+import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ComboboxMultiple from '@/components/ui/custom/multiple-combobox';
@@ -40,7 +41,7 @@ const testCaseSchema = z.object({
   expected_output: z.string().min(1),
   description: z.string().optional(),
   is_visible: z.boolean().default(true),
-  points: z.number().min(0).max(10000).default(10),
+  points: z.number().min(0).max(10_000).default(10),
 });
 
 const codeChallengeFormSchema = z.object({
@@ -50,7 +51,7 @@ const codeChallengeFormSchema = z.object({
   time_limit_ms: z.number().min(100).max(30_000).default(2000),
   // memory_limit_kb is in KB. Increase default to 256MB and allow up to 2GB.
   memory_limit_kb: z.number().min(1024).max(2_097_152).default(262_144),
-  max_submissions: z.number().min(0).max(10000).optional(),
+  max_submissions: z.number().min(0).max(10_000).optional(),
   grading_strategy: z.enum(['all_or_nothing', 'partial', 'weighted']),
   allowed_languages: z.array(z.number()).min(1, 'At least one language is required'),
   test_cases: z.array(testCaseSchema).min(1, 'At least one test case is required'),
@@ -75,9 +76,10 @@ export function createCodeChallengeFormSchema(t: (key: string, params?: any) => 
     expected_output: z.string().min(1, t('validation.expectedOutputRequired')),
     description: z.string().optional(),
     is_visible: z.boolean().default(true),
-    points: z.number()
-      .min(0, t('validation.pointsRange', { min: 0, max: 10000 }))
-      .max(10000, t('validation.pointsRange', { min: 0, max: 10000 }))
+    points: z
+      .number()
+      .min(0, t('validation.pointsRange', { min: 0, max: 10_000 }))
+      .max(10_000, t('validation.pointsRange', { min: 0, max: 10_000 }))
       .default(10),
   });
 
@@ -85,17 +87,20 @@ export function createCodeChallengeFormSchema(t: (key: string, params?: any) => 
     title: z.string().min(1, t('validation.titleRequired')),
     description: z.string().optional(),
     difficulty: z.enum(['easy', 'medium', 'hard']),
-    time_limit_ms: z.number()
-      .min(100, t('validation.timeLimitRange', { min: 100, max: 30000 }))
-      .max(30_000, t('validation.timeLimitRange', { min: 100, max: 30000 }))
+    time_limit_ms: z
+      .number()
+      .min(100, t('validation.timeLimitRange', { min: 100, max: 30_000 }))
+      .max(30_000, t('validation.timeLimitRange', { min: 100, max: 30_000 }))
       .default(2000),
-    memory_limit_kb: z.number()
+    memory_limit_kb: z
+      .number()
       .min(1024, t('validation.memoryLimitRange', { min: 1024, max: 2_097_152 }))
       .max(2_097_152, t('validation.memoryLimitRange', { min: 1024, max: 2_097_152 }))
       .default(262_144),
-    max_submissions: z.number()
-      .min(0, t('validation.maxSubmissionsRange', { min: 0, max: 10000 }))
-      .max(10000, t('validation.maxSubmissionsRange', { min: 0, max: 10000 }))
+    max_submissions: z
+      .number()
+      .min(0, t('validation.maxSubmissionsRange', { min: 0, max: 10_000 }))
+      .max(10_000, t('validation.maxSubmissionsRange', { min: 0, max: 10_000 }))
       .optional(),
     grading_strategy: z.enum(['all_or_nothing', 'partial', 'weighted']),
     allowed_languages: z.array(z.number()).min(1, t('validation.atLeastOneLanguage')),
@@ -105,7 +110,8 @@ export function createCodeChallengeFormSchema(t: (key: string, params?: any) => 
       .array(
         z.object({
           text: z.string(),
-          penalty_percent: z.number()
+          penalty_percent: z
+            .number()
             .min(0, t('validation.penaltyRange', { min: 0, max: 100 }))
             .max(100, t('validation.penaltyRange', { min: 0, max: 100 }))
             .default(10),
@@ -188,9 +194,30 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
 
   // Use item arrays for Select components so we follow the shared pattern and keep labels localized.
   const difficultyItems = [
-    { value: 'easy', label: <span className="flex items-center gap-2"><Badge variant="success">{t('difficulty.easy')}</Badge></span> },
-    { value: 'medium', label: <span className="flex items-center gap-2"><Badge variant="warning">{t('difficulty.medium')}</Badge></span> },
-    { value: 'hard', label: <span className="flex items-center gap-2"><Badge variant="destructive">{t('difficulty.hard')}</Badge></span> },
+    {
+      value: 'easy',
+      label: (
+        <span className="flex items-center gap-2">
+          <Badge variant="success">{t('difficulty.easy')}</Badge>
+        </span>
+      ),
+    },
+    {
+      value: 'medium',
+      label: (
+        <span className="flex items-center gap-2">
+          <Badge variant="warning">{t('difficulty.medium')}</Badge>
+        </span>
+      ),
+    },
+    {
+      value: 'hard',
+      label: (
+        <span className="flex items-center gap-2">
+          <Badge variant="destructive">{t('difficulty.hard')}</Badge>
+        </span>
+      ),
+    },
   ];
 
   const gradingStrategyItems = [
@@ -208,10 +235,10 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
       const parsed: CodeChallengeFormData = schema.parse(data);
       await onSubmit(parsed);
       toast.success(t('challengeSaved'));
-    } catch (err) {
+    } catch (error) {
       // If something unexpected fails, show an error.
       toast.error(t('saveFailed'));
-      throw err;
+      throw error;
     }
   };
 
@@ -315,7 +342,10 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                         <SelectContent>
                           <SelectGroup>
                             {difficultyItems.map((item) => (
-                              <SelectItem key={item.value} value={item.value}>
+                              <SelectItem
+                                key={item.value}
+                                value={item.value}
+                              >
                                 {item.label}
                               </SelectItem>
                             ))}
@@ -348,7 +378,10 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                         <SelectContent>
                           <SelectGroup>
                             {gradingStrategyItems.map((item) => (
-                              <SelectItem key={item.value} value={item.value}>
+                              <SelectItem
+                                key={item.value}
+                                value={item.value}
+                              >
                                 {item.label}
                               </SelectItem>
                             ))}
@@ -535,7 +568,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                               <Input
                                 type="number"
                                 min={0}
-                                max={10000}
+                                max={10_000}
                                 {...field}
                                 onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 0)}
                               />
@@ -699,7 +732,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                     <Input
                       type="number"
                       min={0}
-                      max={10000}
+                      max={10_000}
                       placeholder={t('form.unlimitedSubmissions')}
                       {...field}
                       value={field.value ?? ''}

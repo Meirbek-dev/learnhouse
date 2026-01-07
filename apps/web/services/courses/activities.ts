@@ -283,11 +283,11 @@ export async function createExternalVideoActivity(data: any, activity: any, chap
   };
   const videoDetails = data.details
     ? {
-      startTime: data.details.startTime ?? defaultDetails.startTime,
-      endTime: data.details.endTime ?? defaultDetails.endTime,
-      autoplay: data.details.autoplay ?? defaultDetails.autoplay,
-      muted: data.details.muted ?? defaultDetails.muted,
-    }
+        startTime: data.details.startTime ?? defaultDetails.startTime,
+        endTime: data.details.endTime ?? defaultDetails.endTime,
+        autoplay: data.details.autoplay ?? defaultDetails.autoplay,
+        muted: data.details.muted ?? defaultDetails.muted,
+      }
     : defaultDetails;
   data.details = JSON.stringify(videoDetails);
   const result = await fetch(

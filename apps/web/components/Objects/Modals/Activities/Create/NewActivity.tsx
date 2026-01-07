@@ -1,16 +1,8 @@
 'use client';
 
-import {
-  Code2,
-  FileText,
-  ClipboardList,
-  GraduationCap,
-  Video,
-  Sparkles,
-  ArrowLeft,
-  type LucideIcon,
-} from 'lucide-react';
-import { useState, useCallback } from 'react';
+import { Code2, FileText, ClipboardList, GraduationCap, Video, Sparkles, ArrowLeft } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import CodeChallenge from './NewActivityModal/CodeChallengeActivityModal';

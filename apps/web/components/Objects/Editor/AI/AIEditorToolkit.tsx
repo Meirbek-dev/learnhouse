@@ -10,11 +10,13 @@ import {
   X,
 } from 'lucide-react';
 import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
-import { useCallback, useMemo, useRef, type ChangeEvent, type KeyboardEvent, type ReactNode } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
+import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react';
 import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
 import type { CritisizeScope } from '@components/Contexts/AI/AIEditorContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { AnimatePresence, motion, type Variants } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
+import type { Variants } from 'motion/react';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import platformLogoLight from 'public/platform_logo_light.svg';
 import { ScrollArea } from '@components/ui/scroll-area';
@@ -468,7 +470,7 @@ function AiEditorActionScreen({ onExecute }: ActionScreenProps) {
   }, [dispatchAIEditor]);
 
   const lastAiMessage = useMemo(
-    () => [...aiEditorState.messages].reverse().find((msg) => msg.sender === 'ai'),
+    () => [...aiEditorState.messages].toReversed().find((msg) => msg.sender === 'ai'),
     [aiEditorState.messages],
   );
 
@@ -698,20 +700,26 @@ function UserFeedbackModal({ editor, activity }: AIEditorToolkitProps) {
       if (!selection) return '';
 
       switch (label) {
-        case 'Writer':
+        case 'Writer': {
           return t('prompt_writer', { selection });
-        case 'ContinueWriting':
+        }
+        case 'ContinueWriting': {
           return t('prompt_continueWriting', { selection });
-        case 'MakeLonger':
+        }
+        case 'MakeLonger': {
           return t('prompt_makeLonger', { selection });
-        case 'Critisize':
+        }
+        case 'Critisize': {
           return scope === 'lecture'
             ? t('prompt_critisizeLecture', { selection })
             : t('prompt_critisize', { selection });
-        case 'Translate':
+        }
+        case 'Translate': {
           return targetLanguage ? t('prompt_translateTo', { language: targetLanguage, selection }) : '';
-        default:
+        }
+        default: {
           return '';
+        }
       }
     },
     [t],

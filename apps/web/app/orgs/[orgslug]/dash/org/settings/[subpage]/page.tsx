@@ -115,7 +115,7 @@ const OrgPage = (props: { params: Promise<OrgParams> }) => {
     [params.subpage],
   );
 
-  const {titleKey} = currentTab!;
+  const { titleKey } = currentTab!;
   const descKey = currentTab!.descriptionKey;
 
   const pageTitle = useMemo(() => t(titleKey), [t, titleKey]);

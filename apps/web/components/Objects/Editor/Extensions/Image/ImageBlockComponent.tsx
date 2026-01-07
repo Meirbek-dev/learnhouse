@@ -10,7 +10,7 @@ import {
   Loader2,
   Upload,
 } from 'lucide-react';
-import { useState, useRef, useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 
@@ -115,8 +115,8 @@ function useImageUpload({ activityUuid, accessToken, onSuccess }: UseImageUpload
       onSuccess(result);
       setFile(null);
       setPreview(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Upload failed');
     } finally {
       setIsUploading(false);
     }
@@ -153,7 +153,8 @@ function useImageResize(initialWidth: number, onResize: (width: number) => void)
       const startWidth = width;
 
       const handleMove = (moveEvent: MouseEvent | TouchEvent) => {
-        const currentX = 'touches' in moveEvent ? (moveEvent.touches?.[0]?.clientX ?? startX) : (moveEvent as MouseEvent).clientX;
+        const currentX =
+          'touches' in moveEvent ? (moveEvent.touches?.[0]?.clientX ?? startX) : (moveEvent as MouseEvent).clientX;
         const delta = currentX - startX;
         const newWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, startWidth + delta * 2)); // *2 because handle is centered
         setWidth(newWidth);

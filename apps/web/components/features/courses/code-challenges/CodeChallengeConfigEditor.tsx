@@ -1,9 +1,9 @@
 'use client';
 
-import { ArrowLeft, Loader2, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Loader2, Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -53,7 +53,7 @@ const formSchema = z.object({
   grading_strategy: z.enum(['ALL_OR_NOTHING', 'PARTIAL_CREDIT', 'BEST_SUBMISSION', 'LATEST_SUBMISSION']),
   execution_mode: z.enum(['FAST_FEEDBACK', 'COMPLETE_FEEDBACK']),
   allow_custom_input: z.boolean(),
-  points: z.number().min(0).max(10000),
+  points: z.number().min(0).max(10_000),
   visible_tests: z.array(testCaseSchema),
   hidden_tests: z.array(testCaseSchema),
 });
@@ -87,8 +87,8 @@ export function createConfigFormSchema(t: (key: string, params?: any) => string)
     allow_custom_input: z.boolean(),
     points: z
       .number()
-      .min(0, t('validation.pointsRange', { min: 0, max: 10000 }))
-      .max(10000, t('validation.pointsRange', { min: 0, max: 10000 })),
+      .min(0, t('validation.pointsRange', { min: 0, max: 10_000 }))
+      .max(10_000, t('validation.pointsRange', { min: 0, max: 10_000 })),
     visible_tests: z.array(tc),
     hidden_tests: z.array(tc),
   });
@@ -401,7 +401,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                         <Input
                           type="number"
                           min={0}
-                          max={10000}
+                          max={10_000}
                           {...field}
                           onChange={(e) => field.onChange(Number(e.target.value))}
                         />
@@ -433,7 +433,10 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                           <SelectContent>
                             <SelectGroup>
                               {gradingStrategyItems.map((item) => (
-                                <SelectItem key={item.value} value={item.value}>
+                                <SelectItem
+                                  key={item.value}
+                                  value={item.value}
+                                >
                                   {item.label}
                                 </SelectItem>
                               ))}

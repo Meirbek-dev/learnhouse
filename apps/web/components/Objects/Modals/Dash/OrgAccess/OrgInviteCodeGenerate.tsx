@@ -1,6 +1,14 @@
 'use client';
 
-import { Select, SelectContent, SelectGroup, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectPositioner,
+  SelectTrigger,
+  SelectValue,
+} from '@components/ui/select';
 import { createInviteCode, createInviteCodeWithUserGroup } from '@services/organizations/invites';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getOrgInvitesSwrKey } from '@services/organizations/keys';
