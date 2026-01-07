@@ -238,6 +238,8 @@
       "noLanguagesFound": "Языки не найдены",
       "popularLanguages": "Популярные",
       "otherLanguages": "Другие языки",
+      "selectAll": "Выбрать всё",
+      "deselectAll": "Снять всё выделение",
       "runCode": "Запустить",
       "runTests": "Запустить тесты",
       "submit": "Отправить",

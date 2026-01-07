@@ -242,19 +242,39 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t('allowedLanguages')}</FormLabel>
-                    <FormControl>
-                      <ComboboxMultiple<{ id: number; name: string }>
-                        items={JUDGE0_LANGUAGES}
-                        valueKey="id"
-                        labelKey="name"
-                        value={field.value}
-                        onChange={(vals) => field.onChange(vals as number[])}
-                        placeholder={t('selectLanguages')}
-                        searchPlaceholder={t('searchLanguages')}
-                        emptyMessage={t('noLanguagesFound')}
-                        className="w-full"
-                      />
-                    </FormControl>
+                    <div className="space-y-2">
+                      <FormControl>
+                        <ComboboxMultiple<{ id: number; name: string }>
+                          items={JUDGE0_LANGUAGES}
+                          valueKey="id"
+                          labelKey="name"
+                          value={field.value}
+                          onChange={(vals) => field.onChange(vals as number[])}
+                          placeholder={t('selectLanguages')}
+                          searchPlaceholder={t('searchLanguages')}
+                          emptyMessage={t('noLanguagesFound')}
+                          className="w-full"
+                        />
+                      </FormControl>
+                      <div className="mt-2 flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => field.onChange(JUDGE0_LANGUAGES.map((l) => l.id))}
+                          disabled={(field.value ?? []).length >= JUDGE0_LANGUAGES.length}
+                        >
+                          {t('selectAll')}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => field.onChange([])}
+                          disabled={(field.value ?? []).length === 0}
+                        >
+                          {t('deselectAll')}
+                        </Button>
+                      </div>
+                    </div>
                     <FormDescription>{t('allowedLanguagesDescription')}</FormDescription>
                     <FormMessage />
                   </FormItem>

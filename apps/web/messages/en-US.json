@@ -238,6 +238,8 @@
       "noLanguagesFound": "No languages found",
       "popularLanguages": "Popular",
       "otherLanguages": "Other Languages",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
       "runCode": "Run",
       "runTests": "Run Tests",
       "submit": "Submit",

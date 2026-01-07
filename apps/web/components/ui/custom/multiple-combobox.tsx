@@ -81,7 +81,7 @@ function ComboboxMultiple<T extends Record<string, unknown>>({
               variant="outline"
               role="combobox"
               aria-expanded={open}
-              className="h-auto min-h-18 w-full justify-between hover:bg-transparent"
+              className="h-auto min-h-24 w-full justify-between hover:bg-transparent"
             >
               <div className="flex flex-wrap items-center gap-1 pr-2">
                 {selectedValues.length > 0 ? (

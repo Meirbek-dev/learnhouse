@@ -231,6 +231,8 @@
       "noLanguagesFound": "Тілдер табылмады",
       "popularLanguages": "Танымал",
       "otherLanguages": "Басқа тілдер",
+      "selectAll": "Барлығын таңдау",
+      "deselectAll": "Барлығын алып тастау",
       "runCode": "Іске қосу",
       "runTests": "Тесттерді орындау",
       "submit": "Жіберу",

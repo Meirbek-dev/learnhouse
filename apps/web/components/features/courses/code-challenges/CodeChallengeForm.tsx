@@ -502,11 +502,11 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                   {/* Quick selection for popular languages */}
                   <div className="mb-4">
                     <h4 className="mb-2 text-sm font-medium">{t('popularLanguages')}</h4>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="mt-2 flex flex-wrap gap-2">
                       {popularLanguageIds.map((langId) => {
                         const lang = JUDGE0_LANGUAGES.find((l) => l.id === langId);
                         if (!lang) return null;
-                        const isSelected = field.value.includes(langId);
+                        const isSelected = (field.value ?? []).includes(langId);
                         return (
                           <Badge
                             key={langId}
@@ -514,9 +514,9 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                             className="cursor-pointer"
                             onClick={() => {
                               if (isSelected) {
-                                field.onChange(field.value.filter((id) => id !== langId));
+                                field.onChange((field.value ?? []).filter((id) => id !== langId));
                               } else {
-                                field.onChange([...field.value, langId]);
+                                field.onChange([...(field.value ?? []), langId]);
                               }
                             }}
                           >
@@ -541,6 +541,27 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                       emptyMessage={t('form.noLanguagesFound')}
                       className="w-full"
                     />
+                    <div className="mt-2 flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const allIds = JUDGE0_LANGUAGES.map((l) => l.id);
+                          field.onChange(allIds);
+                        }}
+                        disabled={(field.value ?? []).length >= JUDGE0_LANGUAGES.length}
+                      >
+                        {t('selectAll')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => field.onChange([])}
+                        disabled={(field.value ?? []).length === 0}
+                      >
+                        {t('deselectAll')}
+                      </Button>
+                    </div>
                   </div>
                   <FieldError errors={[fieldState.error]} />
                 </Field>
