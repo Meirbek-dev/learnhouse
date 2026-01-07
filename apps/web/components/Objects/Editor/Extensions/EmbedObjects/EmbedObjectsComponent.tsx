@@ -4,30 +4,55 @@ import {
   SiCanva,
   SiCodepen,
   SiFigma,
-  SiGiphy,
   SiGithub,
   SiGoogledocs,
+  SiGoogleforms,
   SiGooglemaps,
-  SiLoom,
   SiNotion,
-  SiReplit,
-  SiSpotify,
-  SiX,
   SiYoutube,
 } from '@icons-pack/react-simple-icons';
+import {
+  AlignCenter,
+  Code,
+  GripHorizontal,
+  GripVertical,
+  Link,
+  Edit2,
+  Trash2,
+  X,
+  HelpCircle,
+  LinkIcon,
+} from 'lucide-react';
 import type { CSSProperties, ChangeEvent, FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
-import { AlignCenter, Code, GripHorizontal, GripVertical, Link as LinkIcon } from 'lucide-react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { Textarea } from '@components/ui/textarea';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import DOMPurify from 'dompurify';
 
-// Add new type for script-based embeds
-// MANUAL REVIEW: Script-based embeds may load remote scripts. Ensure CSP and sanitization are sufficient; consider lazy-loading and cleanup of injected scripts.
-const SCRIPT_BASED_EMBEDS = {
+// ============================================================================
+// TYPES & CONSTANTS
+// ============================================================================
+
+type EmbedType = 'url' | 'code';
+type Alignment = 'left' | 'center';
+type ActiveInput = 'none' | 'url' | 'code';
+
+interface ScriptEmbedConfig {
+  src: string;
+  identifier: string;
+}
+
+interface SupportedProduct {
+  name: string;
+  icon: any;
+  color: string;
+  guide: string;
+}
+
+const SCRIPT_BASED_EMBEDS: Record<string, ScriptEmbedConfig> = {
   twitter: {
     src: 'https://platform.twitter.com/widgets.js',
     identifier: 'twitter-tweet',
@@ -40,48 +65,127 @@ const SCRIPT_BASED_EMBEDS = {
     src: 'https://www.tiktok.com/embed.js',
     identifier: 'tiktok-embed',
   },
-  // TODO: Add more platforms
 };
 
-// Helper function to convert YouTube URLs to embed format
-const getYouTubeEmbedUrl = (url: string): string => {
+const SUPPORTED_PRODUCTS: SupportedProduct[] = [
+  { name: 'G Docs', icon: SiGoogledocs, color: '#4285F4', guide: 'https://support.google.com/docs/answer/183965' },
+  {
+    name: 'YouTube',
+    icon: SiYoutube,
+    color: '#FF0000',
+    guide: 'https://support.google.com/youtube/answer/171780?hl=en',
+  },
+  { name: 'GitHub', icon: SiGithub, color: '#181717', guide: 'https://emgithub.com/' },
+
+  { name: 'CodePen', icon: SiCodepen, color: '#000000', guide: 'https://blog.codepen.io/documentation/embedded-pens/' },
+  { name: 'Figma', icon: SiFigma, color: '#F24E1E', guide: 'https://help.figma.com/hc/en-us/articles/360041057214' },
+  {
+    name: 'GMaps',
+    icon: SiGooglemaps,
+    color: '#4285F4',
+    guide: 'https://developers.google.com/maps/documentation/embed/get-started',
+  },
+  { name: 'Canva', icon: SiCanva, color: '#00C4CC', guide: 'https://www.canva.com/help/article/embed-designs' },
+  {
+    name: 'Notion',
+    icon: SiNotion,
+    color: '#878787',
+    guide: 'https://www.notion.so/help/embed-and-connect-other-apps',
+  },
+  {
+    name: 'SlideShare',
+    icon: LinkIcon,
+    color: '#0077B5',
+    guide: 'https://www.slideshare.net/help/embedding-slideshows',
+  },
+  {
+    name: 'Google Slides',
+    icon: SiGoogledocs,
+    color: '#F9AB00',
+    guide: 'https://support.google.com/docs/answer/183965',
+  },
+  {
+    name: 'PowerPoint',
+    icon: LinkIcon,
+    color: '#D24726',
+    guide:
+      'https://support.microsoft.com/en-us/office/embed-powerpoint-presentations-on-your-website-6ac2f112-3b21-4a62-920b-3a83a7c2f0c0',
+  },
+  {
+    name: 'CodeSandbox',
+    icon: SiCodepen,
+    color: '#000000',
+    guide: 'https://codesandbox.io/docs/embedding',
+  },
+  {
+    name: 'JSFiddle',
+    icon: LinkIcon,
+    color: '#39B0FF',
+    guide: 'https://jsfiddle.net/about/embed/',
+  },
+  {
+    name: 'Google Forms',
+    icon: SiGoogleforms,
+    color: '#34A853',
+    guide: 'https://support.google.com/docs/answer/2839588',
+  },
+];
+
+const YOUTUBE_HOSTNAMES = ['youtube.com', 'www.youtube.com', 'youtu.be', 'www.youtu.be'];
+const YOUTUBE_VIDEO_ID_LENGTH = 11;
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+const isYouTubeUrl = (url: string): boolean => {
   try {
-    // First validate that this is a proper URL
-    const parsedUrl = new URL(url);
-
-    // Ensure the hostname is actually YouTube
-    const isYoutubeHostname =
-      parsedUrl.hostname === 'youtube.com' ||
-      parsedUrl.hostname === 'www.youtube.com' ||
-      parsedUrl.hostname === 'youtu.be' ||
-      parsedUrl.hostname === 'www.youtu.be';
-
-    if (!isYoutubeHostname) {
-      return url; // Not a YouTube URL, return as is
-    }
-
-    // Handle different YouTube URL formats with a more precise regex
-    const youtubeRegex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[&?]v=)|youtu\.be\/)([^\s"&/?]{11})/i;
-    const match = url.match(youtubeRegex);
-
-    if (match?.[1]) {
-      // Validate the video ID format (should be exactly 11 characters)
-      const videoId = match[1];
-      if (videoId.length === 11) {
-        // Return the embed URL with the video ID and secure protocol
-        return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0`;
-      }
-    }
-
-    // If no valid match found, return the original URL
-    return url;
+    const parsed = new URL(url);
+    return YOUTUBE_HOSTNAMES.includes(parsed.hostname);
   } catch {
-    // If URL parsing fails, return the original URL
-    return url;
+    return false;
   }
 };
 
-// Embed content component
+const getYouTubeEmbedUrl = (url: string): string => {
+  if (!isYouTubeUrl(url)) return url;
+
+  const youtubeRegex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[&?]v=)|youtu\.be\/)([^\s"&/?]{11})/i;
+  const match = url.match(youtubeRegex);
+
+  if (match?.[1]?.length === YOUTUBE_VIDEO_ID_LENGTH) {
+    return `https://www.youtube.com/embed/${match[1]}?autoplay=0&rel=0`;
+  }
+
+  return url;
+};
+
+const sanitizeUrl = (url: string): string => {
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+
+  const sanitized = DOMPurify.sanitize(trimmed);
+  if (!sanitized) return '';
+
+  try {
+    const parsed = new URL(sanitized);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      parsed.protocol = 'https:';
+      return parsed.toString();
+    }
+    return sanitized;
+  } catch {
+    if (!/^[A-Za-z]+:\/\//.test(sanitized)) {
+      return `https://${sanitized}`;
+    }
+    return sanitized;
+  }
+};
+
+// ============================================================================
+// SUB-COMPONENTS
+// ============================================================================
+
 const EmbedContent = ({
   embedUrl,
   sanitizedEmbedCode,
@@ -90,59 +194,39 @@ const EmbedContent = ({
 }: {
   embedUrl: string;
   sanitizedEmbedCode: string;
-  embedType: 'url' | 'code';
+  embedType: EmbedType;
   embeddedTitle?: string;
 }) => {
   useEffect(() => {
-    if (embedType === 'code' && sanitizedEmbedCode) {
-      // Check for any matching script-based embeds
-      const matchingPlatform = Object.entries(SCRIPT_BASED_EMBEDS).find(([_, config]) =>
-        sanitizedEmbedCode.includes(config.identifier),
-      );
+    if (embedType !== 'code' || !sanitizedEmbedCode) return;
 
-      if (matchingPlatform) {
-        const [_, config] = matchingPlatform;
-        const script = document.createElement('script');
-        script.src = config.src;
-        script.async = true;
-        document.body.append(script);
+    const matchingPlatform = Object.entries(SCRIPT_BASED_EMBEDS).find(([_, config]) =>
+      sanitizedEmbedCode.includes(config.identifier),
+    );
 
-        return () => {
-          if (document.body.contains(script)) {
-            document.body.removeChild(script);
-          }
-        };
+    if (!matchingPlatform) return;
+
+    const [_, config] = matchingPlatform;
+    const script = document.createElement('script');
+    script.src = config.src;
+    script.async = true;
+    document.body.append(script);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
       }
-    }
-
-    return () => {};
+    };
   }, [embedType, sanitizedEmbedCode]);
 
   if (embedType === 'url' && embedUrl) {
-    // Process the URL if it's a YouTube URL - using proper URL validation
-    let isYoutubeUrl = false;
-
-    try {
-      const url = new URL(embedUrl);
-      // Check if the hostname is exactly youtube.com or youtu.be (or www variants)
-      isYoutubeUrl =
-        url.hostname === 'youtube.com' ||
-        url.hostname === 'www.youtube.com' ||
-        url.hostname === 'youtu.be' ||
-        url.hostname === 'www.youtu.be';
-    } catch {
-      // Invalid URL format, not a YouTube URL
-      isYoutubeUrl = false;
-    }
-
-    const processedUrl = isYoutubeUrl ? getYouTubeEmbedUrl(embedUrl) : embedUrl;
-
+    const processedUrl = isYouTubeUrl(embedUrl) ? getYouTubeEmbedUrl(embedUrl) : embedUrl;
     return (
       <iframe
         src={processedUrl}
         className="h-full w-full border-0"
         allowFullScreen
-        title={embeddedTitle ?? ''}
+        title={embeddedTitle ?? 'Embedded content'}
       />
     );
   }
@@ -159,379 +243,470 @@ const EmbedContent = ({
   return null;
 };
 
+const ProductIcon = ({ product, onClick }: { product: SupportedProduct; onClick: () => void }) => {
+  const isMobile = useIsMobile();
+  const t = useTranslations('DashPage.Editor.EmbedObjects');
+
+  return (
+    <button
+      onClick={onClick}
+      className="group flex flex-col items-center gap-1.5 transition-transform hover:scale-105 active:scale-95"
+      title={t('addProductEmbedTitle', { productName: product.name })}
+    >
+      <div
+        className="flex h-10 w-10 items-center justify-center rounded-xl shadow-sm transition-shadow group-hover:shadow-md sm:h-12 sm:w-12"
+        style={{ backgroundColor: product.color }}
+      >
+        <product.icon
+          size={isMobile ? 20 : 26}
+          color="#FFFFFF"
+        />
+      </div>
+      <span className="text-xs font-medium text-gray-700 group-hover:text-gray-900">{product.name}</span>
+    </button>
+  );
+};
+
+const EmbedToolbar = ({
+  onEdit,
+  onCenter,
+  onRemove,
+  alignment,
+  t,
+}: {
+  onEdit: () => void;
+  onCenter: () => void;
+  onRemove: () => void;
+  alignment: Alignment;
+  t: any;
+}) => (
+  <div className="absolute top-2 right-2 flex items-center gap-1 rounded-lg bg-white/90 p-1 opacity-0 shadow-md backdrop-blur-sm transition-opacity group-hover:opacity-100">
+    <button
+      onClick={onEdit}
+      className="rounded-md p-1.5 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+      title={t('editEmbedTitle')}
+    >
+      <Edit2 size={16} />
+    </button>
+    <button
+      onClick={onCenter}
+      className="rounded-md p-1.5 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+      title={alignment === 'center' ? t('alignLeftTitle') : t('centerAlignTitle')}
+    >
+      <AlignCenter size={16} />
+    </button>
+    <button
+      onClick={onRemove}
+      className="rounded-md p-1.5 text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
+      title={t('removeEmbedTitle')}
+    >
+      <Trash2 size={16} />
+    </button>
+  </div>
+);
+
+const InputModal = ({
+  activeInput,
+  embedUrl,
+  embedCode,
+  selectedProduct,
+  onClose,
+  onUrlChange,
+  onCodeChange,
+  onSubmit,
+  onOpenDocs,
+  t,
+}: {
+  activeInput: ActiveInput;
+  embedUrl: string;
+  embedCode: string;
+  selectedProduct: SupportedProduct | null;
+  onClose: () => void;
+  onUrlChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onCodeChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
+  onSubmit: (e: FormEvent) => void;
+  onOpenDocs: () => void;
+  t: any;
+}) => {
+  const urlInputRef = useRef<HTMLInputElement>(null);
+  const codeInputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      requestAnimationFrame(() => {
+        if (activeInput === 'url') urlInputRef.current?.focus();
+        else if (activeInput === 'code') codeInputRef.current?.focus();
+      });
+    }, 50);
+    return () => clearTimeout(timeout);
+  }, [activeInput]);
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    },
+    [onClose],
+  );
+
+  const isValid = (activeInput === 'url' && embedUrl) || (activeInput === 'code' && embedCode);
+
+  return (
+    <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900/20 p-4 backdrop-blur-sm">
+      <form
+        onSubmit={onSubmit}
+        onKeyDown={handleKeyDown}
+        className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl"
+      >
+        {/* Header */}
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {selectedProduct && activeInput === 'url' && (
+              <div
+                className="flex h-9 w-9 items-center justify-center rounded-lg"
+                style={{ backgroundColor: selectedProduct.color }}
+              >
+                <selectedProduct.icon
+                  size={20}
+                  color="#FFFFFF"
+                />
+              </div>
+            )}
+            <h3 className="text-lg font-semibold text-gray-900">
+              {activeInput === 'url'
+                ? selectedProduct
+                  ? t('addProductEmbedTitle', { productName: selectedProduct.name })
+                  : t('addEmbedUrlTitle')
+                : t('addEmbedCodeTitle')}
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Input */}
+        {activeInput === 'url' ? (
+          <div className="mb-3">
+            <div className="relative">
+              <Link
+                className="absolute top-1/2 left-3 -translate-y-1/2 text-blue-500"
+                size={18}
+              />
+              <input
+                ref={urlInputRef}
+                type="text"
+                value={embedUrl}
+                onChange={onUrlChange}
+                className="w-full rounded-xl border-2 border-gray-200 bg-gray-50 py-3 pr-4 pl-11 transition-all focus:border-blue-500 focus:bg-white focus:outline-hidden"
+                placeholder={
+                  selectedProduct
+                    ? t('productUrlPlaceholder', { productName: selectedProduct.name })
+                    : t('urlPlaceholder')
+                }
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="mb-3">
+            <Textarea
+              ref={codeInputRef}
+              value={embedCode}
+              onChange={onCodeChange}
+              className="min-h-[140px] w-full rounded-xl border-2 border-gray-200 bg-gray-50 font-mono text-sm transition-all focus:border-blue-500 focus:bg-white"
+              placeholder={t('codePlaceholder')}
+            />
+          </div>
+        )}
+
+        {/* Help Text */}
+        <div className="mb-4 flex justify-end">
+          {selectedProduct && (
+            <button
+              type="button"
+              onClick={onOpenDocs}
+              className="flex shrink-0 items-center gap-1 text-xs font-medium text-blue-600 transition-colors hover:text-blue-700"
+            >
+              <HelpCircle size={14} />
+              {t('guide')}
+            </button>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
+          >
+            {t('cancel')}
+          </button>
+          <button
+            type="submit"
+            disabled={!isValid}
+            className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {t('apply')}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+const EmptyState = ({
+  onProductSelect,
+  onUrlClick,
+  onCodeClick,
+  isEditable,
+  t,
+}: {
+  onProductSelect: (product: SupportedProduct) => void;
+  onUrlClick: () => void;
+  onCodeClick: () => void;
+  isEditable: boolean;
+  t: any;
+}) => (
+  <div className="flex h-full w-full flex-col items-center justify-center p-6">
+    <p className="mb-5 text-center text-lg font-medium text-gray-700">{t('addEmbedFrom')}</p>
+
+    <div className="mb-6 grid grid-cols-4 gap-4 sm:grid-cols-6 lg:grid-cols-7">
+      {SUPPORTED_PRODUCTS.map((product) => (
+        <ProductIcon
+          key={product.name}
+          product={product}
+          onClick={() => onProductSelect(product)}
+        />
+      ))}
+    </div>
+
+    <p className="mb-4 max-w-md text-center text-sm text-gray-500">{t('clickServiceToAdd')}</p>
+
+    {isEditable && (
+      <div className="flex gap-3">
+        <button
+          onClick={onUrlClick}
+          className="flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-gray-200 transition-all hover:bg-gray-50 hover:shadow"
+        >
+          <LinkIcon size={16} />
+          {t('urlButton')}
+        </button>
+        <button
+          onClick={onCodeClick}
+          className="flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-gray-200 transition-all hover:bg-gray-50 hover:shadow"
+        >
+          <Code size={16} />
+          {t('codeButton')}
+        </button>
+      </div>
+    )}
+  </div>
+);
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
 const EmbedObjectsComponent = (props: any) => {
   const t = useTranslations('DashPage.Editor.EmbedObjects');
   const { updateAttributes } = props;
-  const [embedType, setEmbedType] = useState<'url' | 'code'>(props.node.attrs.embedType || 'url');
+  const isMobile = useIsMobile();
+  const { isEditable } = useEditorProvider();
+
+  // State
+  const [embedType, setEmbedType] = useState<EmbedType>(props.node.attrs.embedType || 'url');
   const [embedUrl, setEmbedUrl] = useState(props.node.attrs.embedUrl || '');
   const [embedCode, setEmbedCode] = useState(props.node.attrs.embedCode || '');
   const [embedHeight, setEmbedHeight] = useState(props.node.attrs.embedHeight || 300);
   const [embedWidth, setEmbedWidth] = useState(props.node.attrs.embedWidth || '100%');
-  const [alignment, setAlignment] = useState(props.node.attrs.alignment || 'left');
+  const [alignment, setAlignment] = useState<Alignment>(props.node.attrs.alignment || 'left');
   const [isResizing, setIsResizing] = useState(false);
   const [parentWidth, setParentWidth] = useState<number | null>(null);
+  const [activeInput, setActiveInput] = useState<ActiveInput>('none');
+  const [selectedProduct, setSelectedProduct] = useState<SupportedProduct | null>(null);
 
-  const isMobile = useIsMobile();
+  // Refs
   const resizeRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const editorState = useEditorProvider();
-  const { isEditable } = editorState;
-
-  // Refs to hold active mouse handlers for safe cleanup
+  const dimensionsRef = useRef({ width: embedWidth, height: embedHeight });
   const mouseMoveHandlerRef = useRef<((e: MouseEvent) => void) | null>(null);
   const mouseUpHandlerRef = useRef<(() => void) | null>(null);
-  const urlInputFocusTimeoutRef = useRef<number | null>(null);
 
-  // Add ResizeObserver to track parent container size changes
-  useEffect(() => {
-    const updateDimensions = () => {
-      if (containerRef.current?.parentElement) {
-        const { parentElement } = containerRef.current;
-        const newParentWidth = parentElement.offsetWidth;
-        setParentWidth(newParentWidth);
+  // Sanitized embed code
+  const sanitizedEmbedCode = useMemo(
+    () =>
+      embedType === 'code' && embedCode ? DOMPurify.sanitize(embedCode, { ADD_TAGS: ['iframe'], ADD_ATTR: ['*'] }) : '',
+    [embedType, embedCode],
+  );
 
-        // If embedWidth is set to a percentage, maintain that percentage
-        // Otherwise, adjust to fit parent width
-        if (typeof embedWidth === 'string' && embedWidth.endsWith('%')) {
-          const percentage = Number.parseInt(embedWidth, 10);
-          const newWidth = `${Math.min(100, percentage)}%`;
-          setEmbedWidth(newWidth);
-          updateAttributes({ embedWidth: newWidth });
-        } else if (newParentWidth < Number.parseInt(String(embedWidth), 10)) {
-          // If parent is smaller than current width, adjust to fit
-          setEmbedWidth('100%');
-          updateAttributes({ embedWidth: '100%' });
-        }
+  // Handlers
+  const handleUrlChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const sanitized = sanitizeUrl(e.target.value);
+      setEmbedUrl(sanitized);
+      updateAttributes({ embedUrl: sanitized, embedType: 'url' });
+    },
+    [updateAttributes],
+  );
+
+  const handleCodeChange = useCallback(
+    (e: ChangeEvent<HTMLTextAreaElement>) => {
+      const value = e.target.value;
+      if (value === '' || value.trim()) {
+        setEmbedCode(value);
+        updateAttributes({ embedCode: value, embedType: 'code' });
       }
-    };
+    },
+    [updateAttributes],
+  );
 
-    // Initialize dimensions
-    updateDimensions();
+  const handleProductSelection = useCallback((product: SupportedProduct) => {
+    setEmbedType('url');
+    setActiveInput('url');
+    setSelectedProduct(product);
+  }, []);
 
-    // Set up ResizeObserver
-    const resizeObserver = new ResizeObserver(() => {
-      updateDimensions();
-    });
+  const handleCenterBlock = useCallback(() => {
+    const newAlignment: Alignment = alignment === 'center' ? 'left' : 'center';
+    setAlignment(newAlignment);
+    updateAttributes({ alignment: newAlignment });
+  }, [alignment, updateAttributes]);
 
-    if (containerRef.current?.parentElement) {
-      resizeObserver.observe(containerRef.current.parentElement);
+  const handleRemove = useCallback(() => {
+    setEmbedUrl('');
+    setEmbedCode('');
+    updateAttributes({ embedUrl: '', embedCode: '' });
+  }, [updateAttributes]);
+
+  const handleInputSubmit = useCallback((e: FormEvent) => {
+    e.preventDefault();
+    setActiveInput('none');
+  }, []);
+
+  const handleOpenDocs = useCallback(() => {
+    if (selectedProduct) {
+      window.open(selectedProduct.guide, '_blank', 'noopener,noreferrer');
     }
+  }, [selectedProduct]);
 
-    // Clean up
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [embedWidth, updateAttributes]);
+  const handleResizeStart = useCallback(
+    (e: ReactMouseEvent<HTMLDivElement>, direction: 'horizontal' | 'vertical') => {
+      e.preventDefault();
+      setIsResizing(true);
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const startWidth = resizeRef.current?.offsetWidth || 0;
+      const startHeight = resizeRef.current?.offsetHeight || 0;
 
-  const supportedProducts = [
-    {
-      name: 'YouTube',
-      icon: SiYoutube,
-      color: '#FF0000',
-      guide: 'https://support.google.com/youtube/answer/171780?hl=en',
-    },
-    {
-      name: 'GitHub',
-      icon: SiGithub,
-      color: '#181717',
-      guide: 'https://emgithub.com/',
-    },
-    {
-      name: 'Replit',
-      icon: SiReplit,
-      color: '#F26207',
-      guide: 'https://docs.replit.com/hosting/embedding-repls',
-    },
-    {
-      name: 'Spotify',
-      icon: SiSpotify,
-      color: '#1DB954',
-      guide: 'https://developer.spotify.com/documentation/embeds',
-    },
-    {
-      name: 'Loom',
-      icon: SiLoom,
-      color: '#625DF5',
-      guide: 'https://support.loom.com/hc/en-us/articles/360002208317-How-to-embed-your-video-into-a-webpage',
-    },
-    {
-      name: 'GMaps',
-      icon: SiGooglemaps,
-      color: '#4285F4',
-      guide: 'https://developers.google.com/maps/documentation/embed/get-started',
-    },
-    {
-      name: 'CodePen',
-      icon: SiCodepen,
-      color: '#000000',
-      guide: 'https://blog.codepen.io/documentation/embedded-pens/',
-    },
-    {
-      name: 'Canva',
-      icon: SiCanva,
-      color: '#00C4CC',
-      guide: 'https://www.canva.com/help/article/embed-designs',
-    },
-    {
-      name: 'Notion',
-      icon: SiNotion,
-      color: '#878787',
-      guide: 'https://www.notion.so/help/embed-and-connect-other-apps#7a70ac4b5c5f4ec889e69d262e0de9e7',
-    },
-    {
-      name: 'G Docs',
-      icon: SiGoogledocs,
-      color: '#4285F4',
-      guide: 'https://support.google.com/docs/answer/183965?hl=en&co=GENIE.Platform%3DDesktop',
-    },
-    {
-      name: 'X',
-      icon: SiX,
-      color: '#000000',
-      guide: 'https://help.twitter.com/en/using-twitter/how-to-embed-a-tweet',
-    },
-    {
-      name: 'Figma',
-      icon: SiFigma,
-      color: '#F24E1E',
-      guide: 'https://help.figma.com/hc/en-us/articles/360041057214-Embed-files-and-prototypes',
-    },
-    {
-      name: 'Giphy',
-      icon: SiGiphy,
-      color: '#FF6666',
-      guide: 'https://developers.giphy.com/docs/embed/',
-    },
-  ];
+      const handleMouseMove = (e: MouseEvent) => {
+        if (!resizeRef.current) return;
 
-  const sanitizedEmbedCode =
-    embedType === 'code' && embedCode ? DOMPurify.sanitize(embedCode, { ADD_TAGS: ['iframe'], ADD_ATTR: ['*'] }) : '';
-
-  const handleUrlChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const newUrl = event.target.value;
-    const trimmedUrl = newUrl.trim();
-
-    // Only update if URL is not just whitespace
-    if (newUrl === '' || trimmedUrl) {
-      // First sanitize with DOMPurify
-      const sanitizedUrl = DOMPurify.sanitize(newUrl);
-
-      // Additional URL validation for security
-      let validatedUrl = sanitizedUrl;
-
-      if (sanitizedUrl) {
-        try {
-          // Ensure it's a valid URL by parsing it
-          const url = new URL(sanitizedUrl);
-
-          // Only allow http and https protocols
-          if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-            // If invalid protocol, default to https
-            url.protocol = 'https:';
-            validatedUrl = url.toString();
-          }
-        } catch {
-          // If it's not a valid URL, prepend https:// to make it valid
-          // Only do this if it's not empty and doesn't already start with a protocol
-          if (sanitizedUrl && !/^[A-Za-z]+:\/\//.test(sanitizedUrl)) {
-            validatedUrl = `https://${sanitizedUrl}`;
-          }
-        }
-      }
-
-      setEmbedUrl(validatedUrl);
-      props.updateAttributes({
-        embedUrl: validatedUrl,
-        embedType: 'url',
-      });
-    }
-  };
-
-  const handleCodeChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    const newCode = event.target.value;
-    const trimmedCode = newCode.trim();
-    // Only update if code is not just whitespace
-    if (newCode === '' || trimmedCode) {
-      setEmbedCode(newCode);
-      props.updateAttributes({
-        embedCode: newCode,
-        embedType: 'code',
-      });
-    }
-  };
-
-  // Add refs for storing dimensions during resize
-  const dimensionsRef = useRef({
-    width: props.node.attrs.embedWidth || '100%',
-    height: props.node.attrs.embedHeight || 300,
-  });
-
-  const handleResizeStart = (event: ReactMouseEvent<HTMLDivElement>, direction: 'horizontal' | 'vertical') => {
-    event.preventDefault();
-    setIsResizing(true);
-    const startX = event.clientX;
-    const startY = event.clientY;
-    const startWidth = resizeRef.current?.offsetWidth || 0;
-    const startHeight = resizeRef.current?.offsetHeight || 0;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (resizeRef.current) {
         if (direction === 'horizontal') {
           const newWidth = startWidth + e.clientX - startX;
           const parentWidth = resizeRef.current.parentElement?.offsetWidth || 1;
           const widthPercentage = Math.min(100, Math.max(10, (newWidth / parentWidth) * 100));
           const newWidthValue = `${widthPercentage}%`;
-
-          // Update ref and DOM directly during resize
           dimensionsRef.current.width = newWidthValue;
           resizeRef.current.style.width = newWidthValue;
         } else {
           const newHeight = Math.max(100, startHeight + e.clientY - startY);
-
-          // Update ref and DOM directly during resize
           dimensionsRef.current.height = newHeight;
           resizeRef.current.style.height = `${newHeight}px`;
         }
-      }
-    };
+      };
 
-    const handleMouseUp = () => {
-      setIsResizing(false);
-      // Only update state and attributes after resize is complete
-      setEmbedWidth(dimensionsRef.current.width);
-      setEmbedHeight(dimensionsRef.current.height);
-      props.updateAttributes({
-        embedWidth: dimensionsRef.current.width,
-        embedHeight: dimensionsRef.current.height,
-      });
+      const handleMouseUp = () => {
+        setIsResizing(false);
+        setEmbedWidth(dimensionsRef.current.width);
+        setEmbedHeight(dimensionsRef.current.height);
+        updateAttributes({
+          embedWidth: dimensionsRef.current.width,
+          embedHeight: dimensionsRef.current.height,
+        });
 
-      // Remove handlers and clear refs
-      if (mouseMoveHandlerRef.current) {
-        document.removeEventListener('mousemove', mouseMoveHandlerRef.current);
-        mouseMoveHandlerRef.current = null;
-      }
-      if (mouseUpHandlerRef.current) {
-        document.removeEventListener('mouseup', mouseUpHandlerRef.current);
-        mouseUpHandlerRef.current = null;
-      }
-    };
+        if (mouseMoveHandlerRef.current) {
+          document.removeEventListener('mousemove', mouseMoveHandlerRef.current);
+          mouseMoveHandlerRef.current = null;
+        }
+        if (mouseUpHandlerRef.current) {
+          document.removeEventListener('mouseup', mouseUpHandlerRef.current);
+          mouseUpHandlerRef.current = null;
+        }
+      };
 
-    // Register handlers and keep references so we can clean up on unmount
-    mouseMoveHandlerRef.current = handleMouseMove;
-    mouseUpHandlerRef.current = handleMouseUp;
+      mouseMoveHandlerRef.current = handleMouseMove;
+      mouseUpHandlerRef.current = handleMouseUp;
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    },
+    [updateAttributes],
+  );
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
-
-  const handleCenterBlock = () => {
-    const newAlignment = alignment === 'center' ? 'left' : 'center';
-    setAlignment(newAlignment);
-    props.updateAttributes({ alignment: newAlignment });
-  };
-
-  // Calculate responsive styles based on parent width
-  const getResponsiveStyles = () => {
-    // Default styles
+  // Responsive styles
+  const getResponsiveStyles = useCallback((): CSSProperties => {
     const styles: CSSProperties = {
       height: `${embedHeight}px`,
       width: embedWidth,
     };
 
-    // If parent width is available, ensure we don't exceed it
     if (parentWidth) {
-      // For mobile viewports, always use 100% width
       if (isMobile) {
         styles.width = '100%';
         styles.minWidth = 'unset';
       } else {
-        // For desktop, use the set width but ensure it's not wider than parent
         styles.minWidth = `${Math.min(parentWidth, 400)}px`;
         styles.maxWidth = '100%';
       }
     }
 
     return styles;
-  };
+  }, [embedHeight, embedWidth, parentWidth, isMobile]);
 
-  const embedContent =
-    !isResizing && (embedUrl || sanitizedEmbedCode) ? (
-      <EmbedContent
-        embedUrl={embedUrl}
-        sanitizedEmbedCode={sanitizedEmbedCode}
-        embedType={embedType}
-        embeddedTitle={t('embeddedContent')}
-      />
-    ) : (
-      <div className="h-full w-full bg-gray-200" />
-    );
+  // Effects
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (!containerRef.current?.parentElement) return;
 
-  // Input states
-  const [activeInput, setActiveInput] = useState<'none' | 'url' | 'code'>('none');
-  const [selectedProduct, setSelectedProduct] = useState<(typeof supportedProducts)[0] | null>(null);
-  const urlInputRef = useRef<HTMLInputElement>(null);
-  const codeInputRef = useRef<HTMLTextAreaElement>(null);
-  const [isPending, startTransition] = useTransition();
+      const newParentWidth = containerRef.current.parentElement.offsetWidth;
+      setParentWidth(newParentWidth);
 
-  // Handle direct input from product selection
-  const handleProductSelection = (product: (typeof supportedProducts)[0]) => {
-    // Set the input type to URL by default
-    setEmbedType('url');
-    setActiveInput('url');
+      if (typeof embedWidth === 'string' && embedWidth.endsWith('%')) {
+        const percentage = Number.parseInt(embedWidth, 10);
+        const newWidth = `${Math.min(100, percentage)}%`;
+        setEmbedWidth(newWidth);
+        updateAttributes({ embedWidth: newWidth });
+      } else if (newParentWidth < Number.parseInt(String(embedWidth), 10)) {
+        setEmbedWidth('100%');
+        updateAttributes({ embedWidth: '100%' });
+      }
+    };
 
-    // Store the selected product for the popup
-    setSelectedProduct(product);
-
-    // Focus the URL input after a short delay to allow rendering
-    // MANUAL REVIEW: We use a short timeout here to wait for rendering; consider switching to requestAnimationFrame or a more explicit signal if race conditions appear.
-    if (urlInputFocusTimeoutRef.current) clearTimeout(urlInputFocusTimeoutRef.current);
-    urlInputFocusTimeoutRef.current = window.setTimeout(() => {
-      // Schedule focus on next paint to be robust against layout changes
-      window.requestAnimationFrame(() => {
-        if (urlInputRef.current) {
-          urlInputRef.current.focus();
-        }
-      });
-    }, 50);
-  };
-
-  // Handle input submission
-  const handleInputSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    startTransition(() => {
-      setActiveInput('none');
-    });
-  };
-
-  // Handle escape key to cancel input
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      setActiveInput('none');
+    updateDimensions();
+    const resizeObserver = new ResizeObserver(updateDimensions);
+    if (containerRef.current?.parentElement) {
+      resizeObserver.observe(containerRef.current.parentElement);
     }
-  };
 
-  // Ensure we clean up any active document handlers if component unmounts
+    return () => resizeObserver.disconnect();
+  }, [embedWidth, updateAttributes]);
+
   useEffect(() => {
     return () => {
       if (mouseMoveHandlerRef.current) {
         document.removeEventListener('mousemove', mouseMoveHandlerRef.current);
-        mouseMoveHandlerRef.current = null;
       }
       if (mouseUpHandlerRef.current) {
         document.removeEventListener('mouseup', mouseUpHandlerRef.current);
-        mouseUpHandlerRef.current = null;
-      }
-      if (urlInputFocusTimeoutRef.current) {
-        clearTimeout(urlInputFocusTimeoutRef.current);
-        urlInputFocusTimeoutRef.current = null;
       }
     };
   }, []);
 
-  // Handle opening documentation
-  const handleOpenDocs = (guide: string) => {
-    window.open(guide, '_blank', 'noopener,noreferrer');
-  };
+  // Render
+  const hasContent = embedUrl || sanitizedEmbedCode;
 
   return (
     <NodeViewWrapper
@@ -540,347 +715,67 @@ const EmbedObjectsComponent = (props: any) => {
     >
       <div
         ref={resizeRef}
-        className={`relative flex items-center justify-center overflow-hidden rounded-lg bg-gray-100 ${alignment === 'center' ? 'mx-auto' : ''}`}
+        className={`group relative flex items-center justify-center overflow-hidden rounded-xl bg-gray-100 transition-shadow hover:shadow-sm ${
+          alignment === 'center' ? 'mx-auto' : ''
+        }`}
         style={getResponsiveStyles()}
       >
-        {embedUrl || sanitizedEmbedCode ? (
-          // Show the embed content if we have a URL or code
+        {hasContent ? (
           <>
-            {embedContent}
-            {/* Minimal toolbar for existing embeds */}
-            {isEditable ? (
-              <div className="bg-opacity-90 absolute top-2 right-2 flex items-center gap-1.5 rounded-lg bg-white p-1 opacity-70 shadow-xs backdrop-blur-xs transition-opacity hover:opacity-100">
-                <button
-                  onClick={() => {
-                    setActiveInput(embedType);
-                  }}
-                  className="rounded-md p-1.5 text-gray-600 hover:bg-gray-100"
-                  title={t('editEmbedTitle')}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3Z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={handleCenterBlock}
-                  className="rounded-md p-1.5 text-gray-600 hover:bg-gray-100"
-                  title={alignment === 'center' ? t('alignLeftTitle') : t('centerAlignTitle')}
-                >
-                  <AlignCenter size={16} />
-                </button>
-                <button
-                  onClick={() => {
-                    setEmbedUrl('');
-                    setEmbedCode('');
-                    props.updateAttributes({
-                      embedUrl: '',
-                      embedCode: '',
-                    });
-                  }}
-                  className="rounded-md p-1.5 text-gray-600 hover:bg-gray-100"
-                  title={t('removeEmbedTitle')}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M3 6h18" />
-                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                  </svg>
-                </button>
-              </div>
-            ) : null}
+            {!isResizing && (
+              <EmbedContent
+                embedUrl={embedUrl}
+                sanitizedEmbedCode={sanitizedEmbedCode}
+                embedType={embedType}
+                embeddedTitle={t('embeddedContent')}
+              />
+            )}
+            {isEditable && (
+              <EmbedToolbar
+                onEdit={() => setActiveInput(embedType)}
+                onCenter={handleCenterBlock}
+                onRemove={handleRemove}
+                alignment={alignment}
+                t={t}
+              />
+            )}
           </>
         ) : (
-          // Show the embed selection UI if we don't have content yet
-          <div className="flex h-full w-full flex-col items-center justify-center p-2 sm:p-6">
-            <p className="mb-2 text-center text-base font-medium tracking-tighter text-gray-500 sm:mb-4 sm:text-lg">
-              {t('addEmbedFrom')}
-            </p>
-            <div className="flex flex-wrap justify-center gap-2 sm:gap-5">
-              {supportedProducts.map((product) => (
-                <button
-                  key={product.name}
-                  className="group flex flex-col items-center transition-transform hover:scale-110"
-                  onClick={() => {
-                    handleProductSelection(product);
-                  }}
-                  title={t('addProductEmbedTitle', {
-                    productName: product.name,
-                  })}
-                >
-                  <div
-                    className="flex h-8 w-8 items-center justify-center rounded-lg shadow-md transition-shadow group-hover:shadow-lg sm:h-12 sm:w-12"
-                    style={{ backgroundColor: product.color }}
-                  >
-                    <product.icon
-                      size={isMobile ? 16 : 24}
-                      color="#FFFFFF"
-                    />
-                  </div>
-                  <span className="mt-1 text-xs font-medium text-gray-700 group-hover:text-gray-900 sm:mt-2">
-                    {product.name}
-                  </span>
-                </button>
-              ))}
-            </div>
-            <p className="mt-3 mb-2 max-w-md text-center text-xs text-gray-500">{t('clickServiceToAdd')}</p>
-            {/* Direct input options */}
-            {isEditable ? (
-              <div className="mt-4 flex justify-center gap-3">
-                <button
-                  onClick={() => {
-                    setEmbedType('url');
-                    setActiveInput('url');
-                  }}
-                  className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm text-gray-700 shadow-xs transition-all hover:shadow-md"
-                >
-                  <LinkIcon size={14} />
-                  <span>{t('urlButton')}</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setEmbedType('code');
-                    setActiveInput('code');
-                  }}
-                  className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm text-gray-700 shadow-xs transition-all hover:shadow-md"
-                >
-                  <Code size={14} />
-                  <span>{t('codeButton')}</span>
-                </button>
-              </div>
-            ) : null}
-          </div>
+          <EmptyState
+            onProductSelect={handleProductSelection}
+            onUrlClick={() => {
+              setEmbedType('url');
+              setActiveInput('url');
+            }}
+            onCodeClick={() => {
+              setEmbedType('code');
+              setActiveInput('code');
+            }}
+            isEditable={isEditable}
+            t={t}
+          />
         )}
 
-        {/* Inline input UI - appears in place without covering content */}
-        {isEditable && activeInput !== 'none' ? (
-          <div className="bg-opacity-95 absolute inset-0 z-10 flex items-center justify-center bg-gray-100 p-4 backdrop-blur-xs">
-            <form
-              onSubmit={handleInputSubmit}
-              className="w-full max-w-lg rounded-xl bg-white p-4 shadow-lg"
-              onKeyDown={handleKeyDown}
-            >
-              <div className="mb-3 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {selectedProduct && activeInput === 'url' ? (
-                    <div
-                      className="flex h-8 w-8 items-center justify-center rounded-lg"
-                      style={{ backgroundColor: selectedProduct.color }}
-                    >
-                      <selectedProduct.icon
-                        size={18}
-                        color="#FFFFFF"
-                      />
-                    </div>
-                  ) : null}
-                  <h3 className="text-lg font-medium text-gray-800">
-                    {activeInput === 'url'
-                      ? selectedProduct
-                        ? t('addProductEmbedTitle', {
-                            productName: selectedProduct.name,
-                          })
-                        : t('addEmbedUrlTitle')
-                      : t('addEmbedCodeTitle')}
-                  </h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveInput('none');
-                  }}
-                  className="rounded-full p-1 text-gray-500 hover:bg-gray-100"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <line
-                      x1="18"
-                      y1="6"
-                      x2="6"
-                      y2="18"
-                    />
-                    <line
-                      x1="6"
-                      y1="6"
-                      x2="18"
-                      y2="18"
-                    />
-                  </svg>
-                </button>
-              </div>
+        {isEditable && activeInput !== 'none' && (
+          <InputModal
+            activeInput={activeInput}
+            embedUrl={embedUrl}
+            embedCode={embedCode}
+            selectedProduct={selectedProduct}
+            onClose={() => setActiveInput('none')}
+            onUrlChange={handleUrlChange}
+            onCodeChange={handleCodeChange}
+            onSubmit={handleInputSubmit}
+            onOpenDocs={handleOpenDocs}
+            t={t}
+          />
+        )}
 
-              {activeInput === 'url' ? (
-                <>
-                  <div className="relative mb-2">
-                    <div className="absolute top-1/2 left-3 -translate-y-1/2 text-blue-500">
-                      <LinkIcon size={16} />
-                    </div>
-                    <input
-                      ref={urlInputRef}
-                      type="text"
-                      value={embedUrl}
-                      onChange={handleUrlChange}
-                      className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pr-4 pl-10 transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
-                      placeholder={
-                        selectedProduct
-                          ? t('productUrlPlaceholder', {
-                              productName: selectedProduct.name,
-                            })
-                          : t('urlPlaceholder')
-                      }
-                    />
-                  </div>
-                  <div className="mb-4 flex items-center justify-between">
-                    <p className="text-xs text-gray-500">
-                      {selectedProduct ? t('urlTip', { productName: selectedProduct.name }) : t('defaultUrlTip')}
-                    </p>
-                    {selectedProduct ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          handleOpenDocs(selectedProduct.guide);
-                        }}
-                        className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <circle
-                            cx="12"
-                            cy="12"
-                            r="10"
-                          />
-                          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                          <line
-                            x1="12"
-                            y1="17"
-                            x2="12.01"
-                            y2="17"
-                          />
-                        </svg>
-                        {t('howToEmbed', { productName: selectedProduct.name })}
-                      </button>
-                    ) : null}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="relative mb-2">
-                    <Textarea
-                      ref={codeInputRef}
-                      value={embedCode}
-                      onChange={handleCodeChange}
-                      className="h-32 w-full font-mono text-sm"
-                      placeholder={t('codePlaceholder')}
-                    />
-                  </div>
-                  <div className="mb-4 flex items-center justify-between">
-                    <p className="text-xs text-gray-500">{t('codeTip')}</p>
-                    {selectedProduct ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          handleOpenDocs(selectedProduct.guide);
-                        }}
-                        className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <circle
-                            cx="12"
-                            cy="12"
-                            r="10"
-                          />
-                          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                          <line
-                            x1="12"
-                            y1="17"
-                            x2="12.01"
-                            y2="17"
-                          />
-                        </svg>
-                        {t('howToEmbed', { productName: selectedProduct.name })}
-                      </button>
-                    ) : null}
-                  </div>
-                </>
-              )}
-
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveInput('none');
-                  }}
-                  className="rounded-lg px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
-                >
-                  {t('cancel')}
-                </button>
-                <button
-                  type="submit"
-                  className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600 disabled:opacity-60"
-                  disabled={isPending || (activeInput === 'url' && !embedUrl) || (activeInput === 'code' && !embedCode)}
-                  aria-busy={isPending}
-                >
-                  {t('apply')}
-                </button>
-              </div>
-            </form>
-          </div>
-        ) : null}
-
-        {/* Resize handles */}
-        {isEditable ? (
+        {isEditable && hasContent && (
           <>
             <div
-              className="bg-opacity-70 hover:bg-opacity-100 absolute top-0 right-0 bottom-0 flex w-4 cursor-ew-resize items-center justify-center bg-white transition-opacity"
-              onMouseDown={(e) => {
-                handleResizeStart(e, 'horizontal');
-              }}
+              className="absolute top-0 right-0 bottom-0 flex w-4 cursor-ew-resize items-center justify-center bg-white/70 opacity-0 transition-opacity hover:bg-white/90 hover:opacity-100"
+              onMouseDown={(e) => handleResizeStart(e, 'horizontal')}
             >
               <GripVertical
                 size={16}
@@ -888,10 +783,8 @@ const EmbedObjectsComponent = (props: any) => {
               />
             </div>
             <div
-              className="bg-opacity-70 hover:bg-opacity-100 absolute right-0 bottom-0 left-0 flex h-4 cursor-ns-resize items-center justify-center bg-white transition-opacity"
-              onMouseDown={(e) => {
-                handleResizeStart(e, 'vertical');
-              }}
+              className="absolute right-0 bottom-0 left-0 flex h-4 cursor-ns-resize items-center justify-center bg-white/70 opacity-0 transition-opacity hover:bg-white/90 hover:opacity-100"
+              onMouseDown={(e) => handleResizeStart(e, 'vertical')}
             >
               <GripHorizontal
                 size={16}
@@ -899,7 +792,7 @@ const EmbedObjectsComponent = (props: any) => {
               />
             </div>
           </>
-        ) : null}
+        )}
       </div>
     </NodeViewWrapper>
   );

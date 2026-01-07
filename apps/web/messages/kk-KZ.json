@@ -182,7 +182,6 @@
       "retryExamRemaining": "Емтиханды қайталау ({remaining} қалды)",
       "violationsRecorded": "Осы емтихан кезінде {count} бұзушылық тіркелді",
       "violationWarning": "Бұзушылықтар: {count}/{max}. Автоматты тапсырмаға дейін {remaining} қалды. Егер бұл қате деп ойласаңыз, {appealLink}.",
-
       "performance": {
         "excellent": "Тамаша!",
         "good": "Жақсы нәтиже!",
@@ -190,18 +189,15 @@
         "unsatisfactory": "Жақсартуды қажет етеді",
         "emojiAlt": "Өнімділік эмодзиі: {grade}"
       },
-
       "grade": "Баға {grade}",
       "scoreDetails": "{score} / {max} ұпай",
       "scoreProgress": "Прогресс: {percentage}%",
-
       "questionType": {
         "SINGLE_CHOICE": "Бір таңдау",
         "MULTIPLE_CHOICE": "Көп таңдау",
         "TRUE_FALSE": "Дұрыс / Қате",
         "MATCHING": "Сәйкестендіру"
       },
-
       "yourAnswer": "Сіздің жауабыңыз",
       "fullscreenNotSupported": "Толық экран режимі браузеріңізде қолдау көрсетілмейді",
       "fullscreenRecommended": "Бұл емтихан үшін толық экран режимі ұсынылады",
@@ -266,7 +262,6 @@
       "noCodeToRun": "Алдымен код жазыңыз",
       "noCodeToSubmit": "Жіберу үшін код жазыңыз",
       "testResults": "Тест нәтижелері",
-
       "status": {
         "inQueue": "Кезекте",
         "processing": "Өңделуде",
@@ -278,7 +273,6 @@
         "internalError": "Ішкі қате",
         "unknown": "Белгісіз"
       },
-
       "submission": {
         "pending": "Күту",
         "processing": "Өңделуде",
@@ -288,13 +282,11 @@
         "completed": "Аяқталды",
         "unknown": "Белгісіз"
       },
-
       "difficulty": {
         "easy": "Оңай",
         "medium": "Орташа",
         "hard": "Қиын"
       },
-
       "gradingStrategyOptions": {
         "allOrNothing": "Бәрі немесе ештеңе",
         "allOrNothingHint": "Студент ұпай алу үшін барлық тесттерден өтуі керек",
@@ -303,7 +295,6 @@
         "weighted": "Салмақталған",
         "weightedHint": "Әр тесттің өз ұпай мәні бар"
       },
-
       "form": {
         "basicInfo": "Негізгі ақпарат",
         "testCases": "Тест-кейстер",
@@ -363,7 +354,6 @@
         "titleRequired": "Тақырып міндетті",
         "atLeastOneTestCase": "Ең болмағанда бір тест-кейс болуы керек"
       },
-
       "challengeSaved": "Тапсырма сәтті сақталды",
       "saveFailed": "Тапсырманы сақтау сәтсіз аяқталды",
       "notConfigured": "Тапсырма бапталмаған",
@@ -3259,6 +3249,8 @@
         "editEmbedTitle": "Кірістіруді өңдеу",
         "howToEmbed": "{productName} қалай кірістіру керек",
         "loading": "Жүктелуде...",
+        "embeddedContent": "Енгізілген мазмұн",
+        "guide": "Нұсқаулық",
         "productUrlPlaceholder": "{productName} кірістіру үшін URL мекенжайын қойыңыз",
         "removeEmbedTitle": "Кірістіруді жою",
         "urlButton": "URL",

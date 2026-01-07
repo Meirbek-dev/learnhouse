@@ -3303,6 +3303,8 @@
         "editEmbedTitle": "Редактировать встраивание",
         "howToEmbed": "Как встроить {productName}",
         "loading": "Загрузка...",
+        "embeddedContent": "Встроенное содержимое",
+        "guide": "Руководство",
         "productUrlPlaceholder": "Вставьте URL для встраивания {productName}",
         "removeEmbedTitle": "Удалить встраивание",
         "urlButton": "URL",

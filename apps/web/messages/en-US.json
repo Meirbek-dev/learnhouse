@@ -3304,6 +3304,8 @@
         "editEmbedTitle": "Edit embed",
         "howToEmbed": "How to embed {productName}",
         "loading": "Loading...",
+        "embeddedContent": "Embedded content",
+        "guide": "Guide",
         "productUrlPlaceholder": "Paste {productName} embed URL",
         "removeEmbedTitle": "Remove embed",
         "urlButton": "URL",
