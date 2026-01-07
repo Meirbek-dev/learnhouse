@@ -353,6 +353,18 @@
         "save": "Save Challenge",
         "saving": "Saving..."
       },
+      "validation": {
+        "atLeastOneLanguage": "At least one language must be selected",
+        "timeLimitRange": "Time limit must be between {min} and {max} ms",
+        "memoryLimitRange": "Memory limit must be between {min} and {max} KB",
+        "pointsRange": "Points must be between {min} and {max}",
+        "testWeightRange": "Weight must be between {min} and {max}",
+        "maxSubmissionsRange": "Max submissions must be between {min} and {max}",
+        "expectedOutputRequired": "Expected output is required",
+        "penaltyRange": "Penalty must be between {min}% and {max}%",
+        "titleRequired": "Title is required",
+        "atLeastOneTestCase": "At least one test case is required"
+      },
       "challengeSaved": "Challenge saved successfully",
       "saveFailed": "Failed to save challenge",
       "notConfigured": "Challenge Not Configured",

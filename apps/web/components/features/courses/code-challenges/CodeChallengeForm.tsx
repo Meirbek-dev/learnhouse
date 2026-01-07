@@ -4,7 +4,7 @@ import { useFieldArray, useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Grip, Plus, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { z } from 'zod';
 
 import {
@@ -36,20 +36,20 @@ import { CodeEditor } from './CodeEditor';
 const testCaseSchema = z.object({
   id: z.string(),
   input: z.string(),
-  expected_output: z.string().min(1, 'Expected output is required'),
+  expected_output: z.string().min(1),
   description: z.string().optional(),
   is_visible: z.boolean().default(true),
-  points: z.number().min(0).default(10),
+  points: z.number().min(0).max(10000).default(10),
 });
 
 const codeChallengeFormSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
+  title: z.string().min(1),
   description: z.string().optional(),
   difficulty: z.enum(['easy', 'medium', 'hard']),
   time_limit_ms: z.number().min(100).max(30_000).default(2000),
   // memory_limit_kb is in KB. Increase default to 256MB and allow up to 2GB.
   memory_limit_kb: z.number().min(1024).max(2_097_152).default(262_144),
-  max_submissions: z.number().min(0).optional(),
+  max_submissions: z.number().min(0).max(10000).optional(),
   grading_strategy: z.enum(['all_or_nothing', 'partial', 'weighted']),
   allowed_languages: z.array(z.number()).min(1, 'At least one language is required'),
   test_cases: z.array(testCaseSchema).min(1, 'At least one test case is required'),
@@ -65,6 +65,56 @@ const codeChallengeFormSchema = z.object({
   starter_code: z.record(z.string(), z.string()).optional(),
   solution_code: z.record(z.string(), z.string()).optional(),
 });
+
+// Create a localized schema factory to supply messages from next-intl
+export function createCodeChallengeFormSchema(t: (key: string, params?: any) => string) {
+  const tc = z.object({
+    id: z.string(),
+    input: z.string(),
+    expected_output: z.string().min(1, t('validation.expectedOutputRequired')),
+    description: z.string().optional(),
+    is_visible: z.boolean().default(true),
+    points: z.number()
+      .min(0, t('validation.pointsRange', { min: 0, max: 10000 }))
+      .max(10000, t('validation.pointsRange', { min: 0, max: 10000 }))
+      .default(10),
+  });
+
+  return z.object({
+    title: z.string().min(1, t('validation.titleRequired')),
+    description: z.string().optional(),
+    difficulty: z.enum(['easy', 'medium', 'hard']),
+    time_limit_ms: z.number()
+      .min(100, t('validation.timeLimitRange', { min: 100, max: 30000 }))
+      .max(30_000, t('validation.timeLimitRange', { min: 100, max: 30000 }))
+      .default(2000),
+    memory_limit_kb: z.number()
+      .min(1024, t('validation.memoryLimitRange', { min: 1024, max: 2_097_152 }))
+      .max(2_097_152, t('validation.memoryLimitRange', { min: 1024, max: 2_097_152 }))
+      .default(262_144),
+    max_submissions: z.number()
+      .min(0, t('validation.maxSubmissionsRange', { min: 0, max: 10000 }))
+      .max(10000, t('validation.maxSubmissionsRange', { min: 0, max: 10000 }))
+      .optional(),
+    grading_strategy: z.enum(['all_or_nothing', 'partial', 'weighted']),
+    allowed_languages: z.array(z.number()).min(1, t('validation.atLeastOneLanguage')),
+    test_cases: z.array(tc).min(1, t('validation.atLeastOneTestCase')),
+    enable_hints: z.boolean().default(false),
+    hints: z
+      .array(
+        z.object({
+          text: z.string(),
+          penalty_percent: z.number()
+            .min(0, t('validation.penaltyRange', { min: 0, max: 100 }))
+            .max(100, t('validation.penaltyRange', { min: 0, max: 100 }))
+            .default(10),
+        }),
+      )
+      .optional(),
+    starter_code: z.record(z.string(), z.string()).optional(),
+    solution_code: z.record(z.string(), z.string()).optional(),
+  });
+}
 
 // Use Zod's input (pre-parse) type for form interactions and the inferred output type for the
 // canonical, parsed form data we pass to the parent on submit.
@@ -82,8 +132,10 @@ interface CodeChallengeFormProps {
 export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCancel }: CodeChallengeFormProps) {
   const t = useTranslations('Activities.CodeChallenges');
 
+  const schema = useMemo(() => createCodeChallengeFormSchema(t), [t]);
+
   const form = useForm<CodeChallengeFormInput>({
-    resolver: zodResolver(codeChallengeFormSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       title: '',
       description: '',
@@ -139,7 +191,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
   const handleFormSubmit: SubmitHandler<CodeChallengeFormInput> = async (data) => {
     try {
       // Parse the raw input into the canonical, fully-populated output type
-      const parsed: CodeChallengeFormData = codeChallengeFormSchema.parse(data);
+      const parsed: CodeChallengeFormData = schema.parse(data);
       await onSubmit(parsed);
       toast.success(t('challengeSaved'));
     } catch (err) {
@@ -331,9 +383,9 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                       <Input
                         type="number"
                         min={1024}
-                        max={512_000}
+                        max={2_097_152}
                         {...field}
-                        onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 128_000)}
+                        onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 262_144)}
                       />
                     </FieldContent>
                     <FieldDescription>{t('form.memoryLimitHint')}</FieldDescription>
@@ -471,6 +523,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                               <Input
                                 type="number"
                                 min={0}
+                                max={10000}
                                 {...field}
                                 onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 0)}
                               />
@@ -634,6 +687,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                     <Input
                       type="number"
                       min={0}
+                      max={10000}
                       placeholder={t('form.unlimitedSubmissions')}
                       {...field}
                       value={field.value ?? ''}

@@ -351,6 +351,18 @@
         "save": "Тапсырманы сақтау",
         "saving": "Сақталуда..."
       },
+      "validation": {
+        "atLeastOneLanguage": "Ең болмағанда бір тіл таңдалуы қажет",
+        "timeLimitRange": "Уақыт шегі {min} мен {max} мс арасында болуы керек",
+        "memoryLimitRange": "Жад шегі {min} мен {max} КБ арасында болуы керек",
+        "pointsRange": "Ұпайлар {min} мен {max} арасында болуы керек",
+        "testWeightRange": "Тесттің салмағы {min} мен {max} арасында болуы керек",
+        "maxSubmissionsRange": "Максималды жіберулер саны {min} мен {max} арасында болуы керек",
+        "expectedOutputRequired": "Күтілетін шығару талап етіледі",
+        "penaltyRange": "Штраф {min}% пен {max}% арасында болуы керек",
+        "titleRequired": "Тақырып міндетті",
+        "atLeastOneTestCase": "Ең болмағанда бір тест-кейс болуы керек"
+      },
 
       "challengeSaved": "Тапсырма сәтті сақталды",
       "saveFailed": "Тапсырманы сақтау сәтсіз аяқталды",

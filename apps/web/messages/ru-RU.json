@@ -353,6 +353,18 @@
         "save": "Сохранить задачу",
         "saving": "Сохранение..."
       },
+      "validation": {
+        "atLeastOneLanguage": "Должен быть выбран как минимум один язык",
+        "timeLimitRange": "Лимит времени должен быть между {min} и {max} мс",
+        "memoryLimitRange": "Лимит памяти должен быть между {min} и {max} КБ",
+        "pointsRange": "Баллы должны быть в пределах от {min} до {max}",
+        "testWeightRange": "Вес теста должен быть между {min} и {max}",
+        "maxSubmissionsRange": "Максимум отправок должен быть между {min} и {max}",
+        "expectedOutputRequired": "Требуется ожидаемый вывод",
+        "penaltyRange": "Штраф должен быть между {min}% и {max}%",
+        "titleRequired": "Требуется название",
+        "atLeastOneTestCase": "Требуется как минимум один тестовый случай"
+      },
       "challengeSaved": "Задача успешно сохранена",
       "saveFailed": "Не удалось сохранить задачу",
       "notConfigured": "Задача не настроена",

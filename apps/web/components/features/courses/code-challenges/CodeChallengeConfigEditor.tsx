@@ -5,7 +5,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import useSWR from 'swr';
 import { z } from 'zod';
@@ -42,20 +42,52 @@ const testCaseSchema = z.object({
   expected_output: z.string(),
   is_visible: z.boolean(),
   description: z.string().optional(),
-  weight: z.number(),
+  weight: z.number().min(1).max(100),
 });
 
 const formSchema = z.object({
-  allowed_languages: z.array(z.number()).min(1, 'At least one language must be selected'),
+  allowed_languages: z.array(z.number()).min(1),
   time_limit: z.number().min(1).max(60),
   memory_limit: z.number().min(16).max(2048),
   grading_strategy: z.enum(['ALL_OR_NOTHING', 'PARTIAL_CREDIT', 'BEST_SUBMISSION', 'LATEST_SUBMISSION']),
   execution_mode: z.enum(['FAST_FEEDBACK', 'COMPLETE_FEEDBACK']),
   allow_custom_input: z.boolean(),
-  points: z.number().min(0),
+  points: z.number().min(0).max(10000),
   visible_tests: z.array(testCaseSchema),
   hidden_tests: z.array(testCaseSchema),
 });
+
+// Create a schema factory that accepts the translation function so validation messages are localized
+export function createConfigFormSchema(t: (key: string, params?: any) => string) {
+  const tc = z.object({
+    id: z.string().optional(),
+    input: z.string(),
+    expected_output: z.string(),
+    is_visible: z.boolean(),
+    description: z.string().optional(),
+    weight: z.number()
+      .min(1, t('validation.testWeightRange', { min: 1, max: 100 }))
+      .max(100, t('validation.testWeightRange', { min: 1, max: 100 })),
+  });
+
+  return z.object({
+    allowed_languages: z.array(z.number()).min(1, t('validation.atLeastOneLanguage')),
+    time_limit: z.number()
+      .min(1, t('validation.timeLimitRange', { min: 1, max: 60 }))
+      .max(60, t('validation.timeLimitRange', { min: 1, max: 60 })),
+    memory_limit: z.number()
+      .min(16, t('validation.memoryLimitRange', { min: 16, max: 2048 }))
+      .max(2048, t('validation.memoryLimitRange', { min: 16, max: 2048 })),
+    grading_strategy: z.enum(['ALL_OR_NOTHING', 'PARTIAL_CREDIT', 'BEST_SUBMISSION', 'LATEST_SUBMISSION']),
+    execution_mode: z.enum(['FAST_FEEDBACK', 'COMPLETE_FEEDBACK']),
+    allow_custom_input: z.boolean(),
+    points: z.number()
+      .min(0, t('validation.pointsRange', { min: 0, max: 10000 }))
+      .max(10000, t('validation.pointsRange', { min: 0, max: 10000 })),
+    visible_tests: z.array(tc),
+    hidden_tests: z.array(tc),
+  });
+}
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -84,8 +116,10 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
     { revalidateOnFocus: false },
   );
 
+  const schema = useMemo(() => createConfigFormSchema(t), [t]);
+
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       allowed_languages: [71],
       time_limit: 2,
@@ -338,6 +372,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                         <Input
                           type="number"
                           min={0}
+                          max={10000}
                           {...field}
                           onChange={(e) => field.onChange(Number(e.target.value))}
                         />
