@@ -1,5 +1,5 @@
 'use client';
-import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
@@ -116,14 +116,16 @@ const RolesUpdate: FC<Props> = (props) => {
                       {!roles || rolesError ? (
                         <div className="text-muted-foreground px-3 py-2">{t('loadingRoles')}</div>
                       ) : (
-                        roles.map((role: any) => (
-                          <SelectItem
-                            key={role.role_uuid || role.id}
-                            value={role.role_uuid || role.id.toString()}
-                          >
-                            {role.name}
-                          </SelectItem>
-                        ))
+                        <SelectGroup>
+                          {roles.map((role: any) => (
+                            <SelectItem
+                              key={role.role_uuid || role.id}
+                              value={role.role_uuid || role.id.toString()}
+                            >
+                              {role.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
                       )}
                     </SelectContent>
                   </SelectPositioner>

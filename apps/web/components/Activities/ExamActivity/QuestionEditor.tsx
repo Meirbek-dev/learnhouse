@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@components/ui/radio-group';
 import { getAPIUrl } from '@/services/config/config';
 import { Textarea } from '@components/ui/textarea';
@@ -245,14 +245,16 @@ export default function QuestionEditor({
               </SelectTrigger>
               <SelectPositioner>
                 <SelectContent>
-                  {questionTypes.map((item) => (
-                    <SelectItem
-                      key={item.value}
-                      value={item.value}
-                    >
-                      {item.label}
-                    </SelectItem>
-                  ))}
+                  <SelectGroup>
+                    {questionTypes.map((item) => (
+                      <SelectItem
+                        key={item.value}
+                        value={item.value}
+                      >
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </SelectPositioner>
             </Select>

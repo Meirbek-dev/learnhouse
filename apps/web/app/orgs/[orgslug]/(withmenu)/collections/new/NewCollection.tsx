@@ -3,6 +3,7 @@
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectPositioner,
   SelectTrigger,
@@ -207,17 +208,19 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
 
                   <SelectPositioner>
                     <SelectContent>
-                      {visibilityItems.map((item) => (
-                        <SelectItem
-                          key={item.value}
-                          value={item.value}
-                        >
-                          <div className="flex items-center gap-2">
-                            {item.value === 'true' ? <Globe className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-                            <span>{item.label}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                      <SelectGroup>
+                        {visibilityItems.map((item) => (
+                          <SelectItem
+                            key={item.value}
+                            value={item.value}
+                          >
+                            <div className="flex items-center gap-2">
+                              {item.value === 'true' ? <Globe className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                              <span>{item.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
                     </SelectContent>
                   </SelectPositioner>
                 </Select>

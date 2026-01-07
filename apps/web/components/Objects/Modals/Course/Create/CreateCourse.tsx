@@ -3,6 +3,7 @@
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectPositioner,
   SelectTrigger,
@@ -376,14 +377,16 @@ const CreateCourseModal = ({ closeModal, orgslug }: CreateCourseModalProps) => {
                 </FormControl>
                 <SelectPositioner>
                   <SelectContent>
-                    {visibilityItems.map((item) => (
-                      <SelectItem
-                        key={item.value}
-                        value={item.value}
-                      >
-                        {item.label}
-                      </SelectItem>
-                    ))}
+                    <SelectGroup>
+                      {visibilityItems.map((item) => (
+                        <SelectItem
+                          key={item.value}
+                          value={item.value}
+                        >
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
                   </SelectContent>
                 </SelectPositioner>
               </Select>

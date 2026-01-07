@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
@@ -165,14 +165,16 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                   </FormControl>
                   <SelectPositioner>
                     <SelectContent>
-                      {productTypeItems.map((item) => (
-                        <SelectItem
-                          key={item.value}
-                          value={item.value}
-                        >
-                          {item.label}
-                        </SelectItem>
-                      ))}
+                      <SelectGroup>
+                        {productTypeItems.map((item) => (
+                          <SelectItem
+                            key={item.value}
+                            value={item.value}
+                          >
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
                     </SelectContent>
                   </SelectPositioner>
                 </Select>
@@ -199,14 +201,16 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                   </FormControl>
                   <SelectPositioner>
                     <SelectContent>
-                      {priceTypeOptions.map((item) => (
-                        <SelectItem
-                          key={item.value}
-                          value={item.value}
-                        >
-                          {item.label}
-                        </SelectItem>
-                      ))}
+                      <SelectGroup>
+                        {priceTypeOptions.map((item) => (
+                          <SelectItem
+                            key={item.value}
+                            value={item.value}
+                          >
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
                     </SelectContent>
                   </SelectPositioner>
                 </Select>
@@ -257,14 +261,16 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                       </FormControl>
                       <SelectPositioner>
                         <SelectContent>
-                          {currencyItems.map((currency) => (
-                            <SelectItem
-                              key={currency.value}
-                              value={currency.value}
-                            >
-                              {currency.label}
-                            </SelectItem>
-                          ))}
+                          <SelectGroup>
+                            {currencyItems.map((currency) => (
+                              <SelectItem
+                                key={currency.value}
+                                value={currency.value}
+                              >
+                                {currency.label}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
                         </SelectContent>
                       </SelectPositioner>
                     </Select>

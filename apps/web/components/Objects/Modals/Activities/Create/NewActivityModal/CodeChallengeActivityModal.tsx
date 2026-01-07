@@ -6,8 +6,16 @@ import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectPositioner,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -132,59 +140,91 @@ export default function CodeChallengeActivityModal({
             <FormField
               control={form.control}
               name="difficulty"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('difficulty')}</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('selectDifficulty')} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectPositioner>
-                      <SelectContent>
-                        <SelectItem value="easy">{t('difficultyEasy')}</SelectItem>
-                        <SelectItem value="medium">{t('difficultyMedium')}</SelectItem>
-                        <SelectItem value="hard">{t('difficultyHard')}</SelectItem>
-                      </SelectContent>
-                    </SelectPositioner>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                const difficultyItems = [
+                  { value: 'easy', label: t('difficultyEasy') },
+                  { value: 'medium', label: t('difficultyMedium') },
+                  { value: 'hard', label: t('difficultyHard') },
+                ];
+
+                return (
+                  <FormItem>
+                    <FormLabel>{t('difficulty')}</FormLabel>
+                    <Select
+                      items={difficultyItems}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('selectDifficulty')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectPositioner>
+                        <SelectContent>
+                          <SelectGroup>
+                            {difficultyItems.map((item) => (
+                              <SelectItem
+                                key={item.value}
+                                value={item.value}
+                              >
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </SelectPositioner>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
 
             <FormField
               control={form.control}
               name="subtype"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('type')}</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('selectType')} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectPositioner>
-                      <SelectContent>
-                        <SelectItem value="general">{t('typeGeneral')}</SelectItem>
-                        <SelectItem value="competitive">{t('typeCompetitive')}</SelectItem>
-                      </SelectContent>
-                    </SelectPositioner>
-                  </Select>
-                  <FormDescription>
-                    {field.value === 'competitive' ? t('typeCompetitiveHint') : t('typeGeneralHint')}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                const subtypeItems = [
+                  { value: 'general', label: t('typeGeneral') },
+                  { value: 'competitive', label: t('typeCompetitive') },
+                ];
+
+                return (
+                  <FormItem>
+                    <FormLabel>{t('type')}</FormLabel>
+                    <Select
+                      items={subtypeItems}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('selectType')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectPositioner>
+                        <SelectContent>
+                          <SelectGroup>
+                            {subtypeItems.map((item) => (
+                              <SelectItem
+                                key={item.value}
+                                value={item.value}
+                              >
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </SelectPositioner>
+                    </Select>
+                    <FormDescription>
+                      {field.value === 'competitive' ? t('typeCompetitiveHint') : t('typeGeneralHint')}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
           </div>
 

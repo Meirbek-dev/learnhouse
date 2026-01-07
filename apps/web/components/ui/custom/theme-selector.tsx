@@ -3,6 +3,7 @@
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectPositioner,
   SelectTrigger,
@@ -107,14 +108,16 @@ export function ThemeSelector({ className }: ThemeSelectorProps) {
           </SelectTrigger>
           <SelectPositioner>
             <SelectContent>
-              {themeItems.map((theme) => (
-                <SelectItem
-                  key={theme.value}
-                  value={theme.value}
-                >
-                  {theme.label}
-                </SelectItem>
-              ))}
+              <SelectGroup>
+                {themeItems.map((theme) => (
+                  <SelectItem
+                    key={theme.value}
+                    value={theme.value}
+                  >
+                    {theme.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             </SelectContent>
           </SelectPositioner>
         </Select>

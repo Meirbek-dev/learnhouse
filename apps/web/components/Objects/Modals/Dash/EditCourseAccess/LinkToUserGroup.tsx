@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { linkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
@@ -85,14 +85,16 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
               </SelectTrigger>
               <SelectPositioner>
                 <SelectContent>
-                  {usergroupItems.map((group) => (
-                    <SelectItem
-                      key={group.value}
-                      value={group.value}
-                    >
-                      {group.label}
-                    </SelectItem>
-                  ))}
+                  <SelectGroup>
+                    {usergroupItems.map((group) => (
+                      <SelectItem
+                        key={group.value}
+                        value={group.value}
+                      >
+                        {group.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </SelectPositioner>
             </Select>

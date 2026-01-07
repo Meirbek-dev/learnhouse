@@ -13,6 +13,7 @@ import { z } from 'zod';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectPositioner,
   SelectTrigger,
@@ -136,6 +137,14 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
       hidden_tests: [],
     },
   });
+
+  // Items for selects
+  const gradingStrategyItems = [
+    { value: 'ALL_OR_NOTHING', label: t('allOrNothing') },
+    { value: 'PARTIAL_CREDIT', label: t('partialCredit') },
+    { value: 'BEST_SUBMISSION', label: t('bestSubmission') },
+    { value: 'LATEST_SUBMISSION', label: t('latestSubmission') },
+  ];
 
   const {
     fields: visibleTestFields,
@@ -411,6 +420,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                     <FormItem>
                       <FormLabel>{t('gradingStrategyLabel')}</FormLabel>
                       <Select
+                        items={gradingStrategyItems}
                         onValueChange={field.onChange}
                         value={field.value}
                       >
@@ -421,10 +431,13 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                         </FormControl>
                         <SelectPositioner>
                           <SelectContent>
-                            <SelectItem value="ALL_OR_NOTHING">{t('allOrNothing')}</SelectItem>
-                            <SelectItem value="PARTIAL_CREDIT">{t('partialCredit')}</SelectItem>
-                            <SelectItem value="BEST_SUBMISSION">{t('bestSubmission')}</SelectItem>
-                            <SelectItem value="LATEST_SUBMISSION">{t('latestSubmission')}</SelectItem>
+                            <SelectGroup>
+                              {gradingStrategyItems.map((item) => (
+                                <SelectItem key={item.value} value={item.value}>
+                                  {item.label}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
                           </SelectContent>
                         </SelectPositioner>
                       </Select>

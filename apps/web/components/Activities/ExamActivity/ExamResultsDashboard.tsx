@@ -12,6 +12,7 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectPositioner,
   SelectTrigger,
@@ -355,14 +356,16 @@ export default function ExamResultsDashboard({
               </SelectTrigger>
               <SelectPositioner>
                 <SelectContent>
-                  {statusItems.map((item) => (
-                    <SelectItem
-                      key={item.value}
-                      value={item.value}
-                    >
-                      {item.label}
-                    </SelectItem>
-                  ))}
+                  <SelectGroup>
+                    {statusItems.map((item) => (
+                      <SelectItem
+                        key={item.value}
+                        value={item.value}
+                      >
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </SelectPositioner>
             </Select>
@@ -376,14 +379,16 @@ export default function ExamResultsDashboard({
               </SelectTrigger>
               <SelectPositioner>
                 <SelectContent>
-                  {sortItems.map((item) => (
-                    <SelectItem
-                      key={item.value}
-                      value={item.value}
-                    >
-                      {item.label}
-                    </SelectItem>
-                  ))}
+                  <SelectGroup>
+                    {sortItems.map((item) => (
+                      <SelectItem
+                        key={item.value}
+                        value={item.value}
+                      >
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </SelectPositioner>
             </Select>

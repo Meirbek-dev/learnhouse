@@ -1,5 +1,5 @@
 'use client';
-import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -209,14 +209,16 @@ const OrgEditGeneral: FC = () => {
 
                           <SelectPositioner>
                             <SelectContent>
-                              {getOrgLabels(t).map((item) => (
-                                <SelectItem
-                                  key={item.value}
-                                  value={item.value}
-                                >
-                                  {item.label}
-                                </SelectItem>
-                              ))}
+                                <SelectGroup>
+                                  {getOrgLabels(t).map((item) => (
+                                    <SelectItem
+                                      key={item.value}
+                                      value={item.value}
+                                    >
+                                      {item.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectGroup>
                             </SelectContent>
                           </SelectPositioner>
                         </Select>

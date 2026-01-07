@@ -2,6 +2,7 @@
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectPositioner,
   SelectTrigger,
@@ -243,14 +244,16 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
                 </FormControl>
                 <SelectPositioner>
                   <SelectContent>
-                    {gradingTypes.map((item) => (
-                      <SelectItem
-                        key={item.value}
-                        value={item.value}
-                      >
-                        {item.label}
-                      </SelectItem>
-                    ))}
+                    <SelectGroup>
+                      {gradingTypes.map((item) => (
+                        <SelectItem
+                          key={item.value}
+                          value={item.value}
+                        >
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
                   </SelectContent>
                 </SelectPositioner>
               </Select>

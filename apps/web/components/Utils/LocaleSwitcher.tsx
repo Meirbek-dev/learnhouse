@@ -3,6 +3,7 @@
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectPositioner,
   SelectTrigger,
@@ -63,14 +64,16 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
         sideOffset={4}
       >
         <SelectContent>
-          {localeItems.map((locale) => (
-            <SelectItem
-              key={locale.value}
-              value={locale.value}
-            >
-              {locale.label}
-            </SelectItem>
-          ))}
+          <SelectGroup>
+            {localeItems.map((locale) => (
+              <SelectItem
+                key={locale.value}
+                value={locale.value}
+              >
+                {locale.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
         </SelectContent>
       </SelectPositioner>
       {isMobile ? (
@@ -97,14 +100,16 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
         sideOffset={4}
       >
         <SelectContent>
-          {locales.map((locale) => (
-            <SelectItem
-              key={locale}
-              value={locale}
-            >
-              {t(locale)}
-            </SelectItem>
-          ))}
+          <SelectGroup>
+            {locales.map((locale) => (
+              <SelectItem
+                key={locale}
+                value={locale}
+              >
+                {t(locale)}
+              </SelectItem>
+            ))}
+          </SelectGroup>
         </SelectContent>
       </SelectPositioner>
     </Select>

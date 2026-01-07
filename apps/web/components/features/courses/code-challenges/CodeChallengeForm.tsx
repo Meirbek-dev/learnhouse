@@ -10,6 +10,7 @@ import { z } from 'zod';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectPositioner,
   SelectTrigger,
@@ -185,6 +186,19 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
   const watchEnableHints = form.watch('enable_hints');
   const watchGradingStrategy = form.watch('grading_strategy');
 
+  // Use item arrays for Select components so we follow the shared pattern and keep labels localized.
+  const difficultyItems = [
+    { value: 'easy', label: <span className="flex items-center gap-2"><Badge variant="success">{t('difficulty.easy')}</Badge></span> },
+    { value: 'medium', label: <span className="flex items-center gap-2"><Badge variant="warning">{t('difficulty.medium')}</Badge></span> },
+    { value: 'hard', label: <span className="flex items-center gap-2"><Badge variant="destructive">{t('difficulty.hard')}</Badge></span> },
+  ];
+
+  const gradingStrategyItems = [
+    { value: 'all_or_nothing', label: t('gradingStrategyOptions.allOrNothing') },
+    { value: 'partial', label: t('gradingStrategyOptions.partial') },
+    { value: 'weighted', label: t('gradingStrategyOptions.weighted') },
+  ];
+
   // Compute a safe default language id for the language Tabs (avoid undefined access)
   const defaultLanguageId = Number(watchAllowedLanguages?.[0] ?? JUDGE0_LANGUAGES?.[0]?.id ?? 71);
 
@@ -288,8 +302,9 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                   <Field>
                     <FieldLabel>{t('form.difficulty')}</FieldLabel>
                     <Select
+                      items={difficultyItems}
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                     >
                       <FieldContent>
                         <SelectTrigger>
@@ -298,21 +313,13 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                       </FieldContent>
                       <SelectPositioner>
                         <SelectContent>
-                          <SelectItem value="easy">
-                            <span className="flex items-center gap-2">
-                              <Badge variant="success">{t('difficulty.easy')}</Badge>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="medium">
-                            <span className="flex items-center gap-2">
-                              <Badge variant="warning">{t('difficulty.medium')}</Badge>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="hard">
-                            <span className="flex items-center gap-2">
-                              <Badge variant="destructive">{t('difficulty.hard')}</Badge>
-                            </span>
-                          </SelectItem>
+                          <SelectGroup>
+                            {difficultyItems.map((item) => (
+                              <SelectItem key={item.value} value={item.value}>
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
                         </SelectContent>
                       </SelectPositioner>
                     </Select>
@@ -328,8 +335,9 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                   <Field>
                     <FieldLabel>{t('form.gradingStrategy')}</FieldLabel>
                     <Select
+                      items={gradingStrategyItems}
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                     >
                       <FieldContent>
                         <SelectTrigger>
@@ -338,9 +346,13 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                       </FieldContent>
                       <SelectPositioner>
                         <SelectContent>
-                          <SelectItem value="all_or_nothing">{t('gradingStrategyOptions.allOrNothing')}</SelectItem>
-                          <SelectItem value="partial">{t('gradingStrategyOptions.partial')}</SelectItem>
-                          <SelectItem value="weighted">{t('gradingStrategyOptions.weighted')}</SelectItem>
+                          <SelectGroup>
+                            {gradingStrategyItems.map((item) => (
+                              <SelectItem key={item.value} value={item.value}>
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
                         </SelectContent>
                       </SelectPositioner>
                     </Select>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
@@ -120,14 +120,16 @@ const OrgUsersAdd = () => {
                   </SelectTrigger>
                   <SelectPositioner>
                     <SelectContent>
-                      {inviteItems.map((invite: any) => (
-                        <SelectItem
-                          key={invite.value}
-                          value={invite.value}
-                        >
-                          {invite.label}
-                        </SelectItem>
-                      ))}
+                      <SelectGroup>
+                        {inviteItems.map((invite: any) => (
+                          <SelectItem
+                            key={invite.value}
+                            value={invite.value}
+                          >
+                            {invite.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
                     </SelectContent>
                   </SelectPositioner>
                 </Select>

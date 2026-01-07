@@ -20,7 +20,7 @@ import {
   UploadCloud,
   Users,
 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUser, updateUserAvatar } from '@services/users/users';
@@ -214,14 +214,16 @@ const DetailCard = ({
             </SelectTrigger>
             <SelectPositioner>
               <SelectContent>
-                {iconItems.map((item) => (
-                  <SelectItem
-                    key={item.value}
-                    value={item.value}
-                  >
-                    {item.label}
-                  </SelectItem>
-                ))}
+                <SelectGroup>
+                  {iconItems.map((item) => (
+                    <SelectItem
+                      key={item.value}
+                      value={item.value}
+                    >
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               </SelectContent>
             </SelectPositioner>
           </Select>

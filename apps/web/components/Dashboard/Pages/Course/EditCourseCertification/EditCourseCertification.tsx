@@ -1,6 +1,7 @@
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectPositioner,
   SelectTrigger,
@@ -450,14 +451,16 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
                                   </FormControl>
                                   <SelectPositioner>
                                     <SelectContent>
-                                      {certificationTypeItems.map((item) => (
-                                        <SelectItem
-                                          key={item.value}
-                                          value={item.value}
-                                        >
-                                          {item.label}
-                                        </SelectItem>
-                                      ))}
+                                      <SelectGroup>
+                                        {certificationTypeItems.map((item) => (
+                                          <SelectItem
+                                            key={item.value}
+                                            value={item.value}
+                                          >
+                                            {item.label}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectGroup>
                                     </SelectContent>
                                   </SelectPositioner>
                                 </Select>

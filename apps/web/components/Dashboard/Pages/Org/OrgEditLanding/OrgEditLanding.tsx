@@ -16,7 +16,7 @@ import {
   Upload,
   Users,
 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectPositioner, SelectTrigger, SelectValue } from '@components/ui/select';
 import { updateOrgLanding, uploadLandingContent } from '@services/organizations/orgs';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
@@ -613,14 +613,16 @@ const OrgEditLanding = () => {
                     </SelectTrigger>
                     <SelectPositioner>
                       <SelectContent>
-                        {sectionTypeItems.map((item) => (
-                          <SelectItem
-                            key={item.value}
-                            value={item.value}
-                          >
-                            {item.label}
-                          </SelectItem>
-                        ))}
+                        <SelectGroup>
+                          {sectionTypeItems.map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
                       </SelectContent>
                     </SelectPositioner>
                   </Select>
@@ -922,14 +924,16 @@ const HeroSectionEditor: FC<{
                 </SelectTrigger>
                 <SelectPositioner>
                   <SelectContent>
-                    {makeBackgroundTypeItems(t).map((item) => (
-                      <SelectItem
-                        key={item.value}
-                        value={item.value}
-                      >
-                        {item.label}
-                      </SelectItem>
-                    ))}
+                    <SelectGroup>
+                      {makeBackgroundTypeItems(t).map((item) => (
+                        <SelectItem
+                          key={item.value}
+                          value={item.value}
+                        >
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
                   </SelectContent>
                 </SelectPositioner>
               </Select>
@@ -1015,14 +1019,16 @@ const HeroSectionEditor: FC<{
                     </SelectTrigger>
                     <SelectPositioner>
                       <SelectContent>
-                        {makeGradientTypeItems(t).map((item) => (
-                          <SelectItem
-                            key={item.value}
-                            value={item.value}
-                          >
-                            {item.label}
-                          </SelectItem>
-                        ))}
+                        <SelectGroup>
+                          {makeGradientTypeItems(t).map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
                       </SelectContent>
                     </SelectPositioner>
                   </Select>
@@ -1129,14 +1135,16 @@ const HeroSectionEditor: FC<{
                       </SelectTrigger>
                       <SelectPositioner>
                         <SelectContent>
-                          {makeGradientPresetItems(t).map((item) => (
-                            <SelectItem
-                              key={item.value}
-                              value={item.value}
-                            >
-                              {item.label}
-                            </SelectItem>
-                          ))}
+                          <SelectGroup>
+                            {makeGradientPresetItems(t).map((item) => (
+                              <SelectItem
+                                key={item.value}
+                                value={item.value}
+                              >
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
                         </SelectContent>
                       </SelectPositioner>
                     </Select>
@@ -1162,14 +1170,16 @@ const HeroSectionEditor: FC<{
                     </SelectTrigger>
                     <SelectPositioner>
                       <SelectContent>
-                        {makeGradientDirectionItems(t).map((item) => (
-                          <SelectItem
-                            key={item.value}
-                            value={item.value}
-                          >
-                            {item.label}
-                          </SelectItem>
-                        ))}
+                        <SelectGroup>
+                          {makeGradientDirectionItems(t).map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
                       </SelectContent>
                     </SelectPositioner>
                   </Select>
@@ -1436,14 +1446,16 @@ const HeroSectionEditor: FC<{
                     </SelectTrigger>
                     <SelectPositioner>
                       <SelectContent>
-                        {makeIllustrationPositionItems(t).map((item) => (
-                          <SelectItem
-                            key={item.value}
-                            value={item.value}
-                          >
-                            {item.label}
-                          </SelectItem>
-                        ))}
+                        <SelectGroup>
+                          {makeIllustrationPositionItems(t).map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
                       </SelectContent>
                     </SelectPositioner>
                   </Select>
@@ -1476,14 +1488,16 @@ const HeroSectionEditor: FC<{
                     </SelectTrigger>
                     <SelectPositioner>
                       <SelectContent>
-                        {makeIllustrationSizeItems(t).map((item) => (
-                          <SelectItem
-                            key={item.value}
-                            value={item.value}
-                          >
-                            {item.label}
-                          </SelectItem>
-                        ))}
+                        <SelectGroup>
+                          {makeIllustrationSizeItems(t).map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
                       </SelectContent>
                     </SelectPositioner>
                   </Select>
@@ -1642,14 +1656,16 @@ const TextAndImageSectionEditor: FC<{
             </SelectTrigger>
             <SelectPositioner>
               <SelectContent>
-                {makeFlowItems(t).map((item) => (
-                  <SelectItem
-                    key={item.value}
-                    value={item.value}
-                  >
-                    {item.label}
-                  </SelectItem>
-                ))}
+                <SelectGroup>
+                  {makeFlowItems(t).map((item) => (
+                    <SelectItem
+                      key={item.value}
+                      value={item.value}
+                    >
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               </SelectContent>
             </SelectPositioner>
           </Select>

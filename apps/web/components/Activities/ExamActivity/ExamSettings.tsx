@@ -3,6 +3,7 @@
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectPositioner,
   SelectTrigger,
@@ -396,14 +397,16 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
                       </FormControl>
                       <SelectPositioner>
                         <SelectContent>
-                          {accessModes.map((item) => (
-                            <SelectItem
-                              key={item.value}
-                              value={item.value}
-                            >
-                              {item.label}
-                            </SelectItem>
-                          ))}
+                          <SelectGroup>
+                            {accessModes.map((item) => (
+                              <SelectItem
+                                key={item.value}
+                                value={item.value}
+                              >
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
                         </SelectContent>
                       </SelectPositioner>
                     </Select>

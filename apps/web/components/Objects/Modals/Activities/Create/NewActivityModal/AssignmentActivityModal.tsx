@@ -2,6 +2,7 @@
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectPositioner,
   SelectTrigger,
@@ -258,14 +259,16 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug 
                 </FormControl>
                 <SelectPositioner>
                   <SelectContent>
-                    {gradingTypeItems.map((item) => (
-                      <SelectItem
-                        key={item.value}
-                        value={item.value}
-                      >
-                        {item.label}
-                      </SelectItem>
-                    ))}
+                    <SelectGroup>
+                      {gradingTypeItems.map((item) => (
+                        <SelectItem
+                          key={item.value}
+                          value={item.value}
+                        >
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
                   </SelectContent>
                 </SelectPositioner>
               </Select>
