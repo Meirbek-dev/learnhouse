@@ -7,7 +7,7 @@ import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 
 interface MetadataProps {
-  params: Promise<{ courseid: string; activityuuid: string }>;
+  params: Promise<{ courseuuid: string; activityid: string }>;
 }
 
 export async function generateMetadata(_props: MetadataProps): Promise<Metadata> {
@@ -21,14 +21,14 @@ export async function generateMetadata(_props: MetadataProps): Promise<Metadata>
 
 interface PageProps {
   params: Promise<{
-    courseid: string;
-    activityuuid: string;
+    courseuuid: string;
+    activityid: string;
   }>;
 }
 
 export default async function CodeChallengeEditorPage({ params }: PageProps) {
   const session = await auth();
-  const { courseid, activityuuid } = await params;
+  const { courseuuid, activityid } = await params;
 
   if (!session) {
     redirect('/auth/signin');
@@ -37,8 +37,8 @@ export default async function CodeChallengeEditorPage({ params }: PageProps) {
   return (
     <div className="container mx-auto py-8">
       <CodeChallengeConfigEditor
-        activityUuid={activityuuid}
-        courseId={courseid}
+        activityUuid={activityid}
+        courseId={courseuuid}
       />
     </div>
   );
