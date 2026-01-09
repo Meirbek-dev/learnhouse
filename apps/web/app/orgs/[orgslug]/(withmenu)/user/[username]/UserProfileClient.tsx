@@ -366,9 +366,7 @@ const UserProfileClient = ({ userData, profile }: UserProfileClientProps) => {
                   ))}
                 </div>
               ) : null}
-              {isLoadingCourses ? (
-                <div className="py-8 text-center text-gray-500">{t('courseSection.loadingCourses')}</div>
-              ) : null}
+
               {error ? <div className="text-red-500">{t('courseSection.errorLoadingCourses')}</div> : null}
             </div>
           </div>
