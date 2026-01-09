@@ -348,6 +348,14 @@ export async function getAssignmentsFromACourse(courseUUID: string, access_token
   return await getResponseMetadata(result);
 }
 
+export async function getAssignmentsFromCourses(courseUUIDs: string[], access_token: string) {
+  const result: any = await fetch(
+    `${getAPIUrl()}assignments/courses`,
+    RequestBodyWithAuthHeader('POST', { course_uuids: courseUUIDs }, null, access_token),
+  );
+  return await getResponseMetadata(result);
+}
+
 export async function createAssignmentWithActivity(
   body: any,
   chapterId: number,

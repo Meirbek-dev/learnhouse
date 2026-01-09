@@ -1957,3 +1957,54 @@ async def get_assignments_from_course(
 
     # return assignments read
     return [AssignmentRead.model_validate(assignment) for assignment in assignments]
+
+
+async def get_assignments_from_courses(
+    request: Request,
+    course_uuids: list[str],
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> dict[str, list[AssignmentRead]]:
+    """
+    Get assignments for multiple courses in a single request. Returns a mapping
+    of course_uuid -> list[AssignmentRead]. An entry is present for each input
+    course_uuid (empty list if no assignments or course not found).
+    """
+    # Fetch courses that exist
+    statement = select(Course).where(Course.course_uuid.in_(course_uuids))
+    courses = db_session.exec(statement).all()
+
+    # Build helper maps
+    course_id_to_uuid = {c.id: c.course_uuid for c in courses}
+
+    # Check RBAC for each found course
+    for c in courses:
+        await courses_rbac_check_for_assignments(
+            request, c.course_uuid, current_user, "read", db_session
+        )
+
+    course_ids = list(course_id_to_uuid.keys())
+
+    # Load activities for those courses
+    activities = []
+    if course_ids:
+        statement = select(Activity).where(Activity.course_id.in_(course_ids))
+        activities = db_session.exec(statement).all()
+
+    activity_id_to_course_uuid = {a.id: course_id_to_uuid.get(a.course_id) for a in activities}
+    activity_ids = list(activity_id_to_course_uuid.keys())
+
+    # Load assignments for those activities
+    assignments = []
+    if activity_ids:
+        statement = select(Assignment).where(Assignment.activity_id.in_(activity_ids))
+        assignments = db_session.exec(statement).all()
+
+    # Build result mapping (preserve input course order/keys)
+    result: dict[str, list[AssignmentRead]] = {uuid: [] for uuid in course_uuids}
+    for assignment in assignments:
+        course_uuid = activity_id_to_course_uuid.get(assignment.activity_id)
+        if course_uuid:
+            result.setdefault(course_uuid, []).append(AssignmentRead.model_validate(assignment))
+
+    return result

@@ -26,6 +26,7 @@ from src.services.courses.activities.assignments import (
     delete_assignment_task,
     delete_assignment_task_submission,
     get_assignments_from_course,
+    get_assignments_from_courses,
     get_grade_assignment_submission,
     grade_assignment_submission,
     handle_assignment_task_submission,
@@ -514,6 +515,23 @@ async def api_get_assignments(
     """
     return await get_assignments_from_course(
         request, course_uuid, current_user, db_session
+    )
+
+
+@router.post("/courses")
+async def api_get_assignments_for_courses(
+    request: Request,
+    course_uuids: list[str],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session=Depends(get_db_session),
+):
+    """
+    Get assignments for multiple courses in a single request.
+    Body: { "course_uuids": ["course_xxx", ...] }
+    Returns a mapping course_uuid -> list of assignments.
+    """
+    return await get_assignments_from_courses(
+        request, course_uuids, current_user, db_session
     )
 
 

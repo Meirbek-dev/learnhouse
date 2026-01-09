@@ -1,6 +1,6 @@
 import { FileText } from 'lucide-react';
 
-import { getAssignmentsFromACourse } from '@services/courses/assignments';
+import { getAssignmentsFromCourses } from '@services/courses/assignments';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { getOrgCourses } from '@services/courses/courses';
@@ -36,13 +36,13 @@ const AssignmentsHome = async (params: any) => {
 
   const courses = (await getOrgCourses(orgslug, undefined, access_token)) || [];
 
-  // fetch assignments for each course in parallel
-  const courseAssignments: Assignment[][] = await Promise.all(
-    courses.map(async (course: Course) => {
-      const res = await getAssignmentsFromACourse(course.course_uuid, access_token);
-      return res?.data || [];
-    }),
-  );
+  // Fetch assignments in one batched request
+  let courseAssignments: Assignment[][] = [];
+  if (courses.length > 0) {
+    const res = await getAssignmentsFromCourses(courses.map((c: Course) => c.course_uuid), access_token);
+    const assignmentsMap = res?.data || {};
+    courseAssignments = courses.map((course: Course) => assignmentsMap[course.course_uuid] || []);
+  }
 
   return (
     <div className="flex min-h-screen w-full">
