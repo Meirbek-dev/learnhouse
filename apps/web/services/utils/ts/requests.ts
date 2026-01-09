@@ -157,6 +157,11 @@ export const errorHandling = (res: Response) => {
   if (!res.ok) {
     const error: any = new Error(res.statusText || 'Request failed');
     error.status = res.status;
+    // Attach Retry-After when present (useful for 429 handling and logging)
+    const retryAfter = res.headers.get('Retry-After');
+    if (retryAfter) {
+      error.retryAfter = retryAfter;
+    }
     throw error;
   }
   return res.json();

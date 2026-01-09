@@ -19,8 +19,8 @@ export const CacheProfiles = {
   static: { stale: 60 * 30, revalidate: 60 * 60, expire: 60 * 60 * 24 },
   // Organization metadata - updated occasionally
   organization: { stale: 60 * 5, revalidate: 60 * 10, expire: 60 * 60 },
-  // Course metadata and structure - short stale for faster updates
-  courses: { stale: 15, revalidate: 60, expire: 60 * 60 },
+  // Course metadata and structure - increased stale to reduce frequent upstream calls
+  courses: { stale: 60 * 5, revalidate: 60 * 10, expire: 60 * 60 * 24 },
   // Per-user dynamic data
   user: { stale: 30, revalidate: 60, expire: 60 * 5 },
   // Realtime-ish data (gamification, metrics)
