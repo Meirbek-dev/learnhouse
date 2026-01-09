@@ -8,7 +8,6 @@ import {
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { getAPIUrl } from '@services/config/config';
 import { tags } from '@/lib/cacheTags';
-import { fetchWithRetry } from '@services/utils/ts/fetchWithRetry';
 
 /*
  This file includes POST, PUT, DELETE requests and cached GET requests
@@ -29,10 +28,10 @@ async function fetchOrgCourses(org_slug: string, access_token?: string) {
     headers['Authorization'] = `Bearer ${access_token}`;
   }
 
-  const result = await fetchWithRetry(`${getAPIUrl()}courses/org_slug/${org_slug}/page/1/limit/128`, {
+  const result = await fetch(`${getAPIUrl()}courses/org_slug/${org_slug}/page/1/limit/128`, {
     method: 'GET',
     headers,
-  }, { retries: 3 });
+  });
   return await errorHandling(result);
 }
 
