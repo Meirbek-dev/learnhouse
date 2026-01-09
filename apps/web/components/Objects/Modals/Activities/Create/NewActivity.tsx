@@ -1,6 +1,6 @@
 'use client';
 
-import { Code2, FileText, ClipboardList, GraduationCap, Video, Sparkles, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ClipboardList, Code2, FileText, GraduationCap, Sparkles, Video } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';

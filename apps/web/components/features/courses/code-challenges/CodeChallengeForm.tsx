@@ -1,8 +1,8 @@
 'use client';
 
 import { useFieldArray, useForm } from 'react-hook-form';
-import type { SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { SubmitHandler } from 'react-hook-form';
 import { Grip, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';

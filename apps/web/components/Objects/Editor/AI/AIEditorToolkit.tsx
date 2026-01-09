@@ -10,16 +10,16 @@ import {
   X,
 } from 'lucide-react';
 import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
-import { useCallback, useMemo, useRef } from 'react';
-import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react';
 import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
 import type { CritisizeScope } from '@components/Contexts/AI/AIEditorContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { AnimatePresence, motion } from 'motion/react';
-import type { Variants } from 'motion/react';
+import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import platformLogoLight from 'public/platform_logo_light.svg';
 import { ScrollArea } from '@components/ui/scroll-area';
+import { AnimatePresence, motion } from 'motion/react';
+import { useCallback, useMemo, useRef } from 'react';
+import type { Variants } from 'motion/react';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import { marked } from 'marked';

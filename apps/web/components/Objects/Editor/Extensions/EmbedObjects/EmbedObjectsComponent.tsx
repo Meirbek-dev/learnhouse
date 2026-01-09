@@ -14,18 +14,18 @@ import {
 import {
   AlignCenter,
   Code,
+  Edit2,
   GripHorizontal,
   GripVertical,
+  HelpCircle,
   Link,
-  Edit2,
+  LinkIcon,
   Trash2,
   X,
-  HelpCircle,
-  LinkIcon,
 } from 'lucide-react';
 import type { CSSProperties, ChangeEvent, FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Textarea } from '@components/ui/textarea';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { NodeViewWrapper } from '@tiptap/react';
@@ -131,7 +131,7 @@ const SUPPORTED_PRODUCTS: SupportedProduct[] = [
   },
 ];
 
-const YOUTUBE_HOSTNAMES = ['youtube.com', 'www.youtube.com', 'youtu.be', 'www.youtu.be'];
+const YOUTUBE_HOSTNAMES = new Set(['youtube.com', 'www.youtube.com', 'youtu.be', 'www.youtu.be']);
 const YOUTUBE_VIDEO_ID_LENGTH = 11;
 
 // ============================================================================
@@ -141,7 +141,7 @@ const YOUTUBE_VIDEO_ID_LENGTH = 11;
 const isYouTubeUrl = (url: string): boolean => {
   try {
     const parsed = new URL(url);
-    return YOUTUBE_HOSTNAMES.includes(parsed.hostname);
+    return YOUTUBE_HOSTNAMES.has(parsed.hostname);
   } catch {
     return false;
   }
@@ -555,7 +555,7 @@ const EmbedObjectsComponent = (props: any) => {
 
   const handleCodeChange = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>) => {
-      const value = e.target.value;
+      const { value } = e.target;
       if (value === '' || value.trim()) {
         setEmbedCode(value);
         updateAttributes({ embedCode: value, embedType: 'code' });

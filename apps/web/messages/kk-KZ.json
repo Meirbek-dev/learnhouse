@@ -5592,6 +5592,13 @@
     "noFeaturedCourses": "Ұсынылған курстар таңдалмаған",
     "noImage": "Сурет жоқ"
   },
+  "MultiSelectCombobox": {
+    "placeholder": "Элементтерді таңдаңыз...",
+    "searchPlaceholder": "Іздеу...",
+    "emptyMessage": "Нәтижелер табылмады.",
+    "showLess": "Аз көрсету",
+    "moreItems": "+{count} тағы"
+  },
   "NewCollectionPage": {
     "cancelButton": "Бас тарту",
     "createButton": "Жинақ жасау",
@@ -6055,12 +6062,5 @@
   "seconds": "Секунд",
   "selectDeadline": "Тапсырманы аяқтау үшін мерзімді таңдаңыз",
   "touUniversity": "Торайғыров университеті",
-  "webPreview": "Веб алдын ала қарау",
-  "MultiSelectCombobox": {
-    "placeholder": "Элементтерді таңдаңыз...",
-    "searchPlaceholder": "Іздеу...",
-    "emptyMessage": "Нәтижелер табылмады.",
-    "showLess": "Аз көрсету",
-    "moreItems": "+{count} тағы"
-  }
+  "webPreview": "Веб алдын ала қарау"
 }

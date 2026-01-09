@@ -964,7 +964,7 @@
       "placeholderTags": "Press Enter to add...",
       "placeholderVisibility": "Select Visibility",
       "schemaDescriptionMax": "Must be 1000 characters or less",
-      "schemaDescriptionMin": "Description must be at least 10 characters",
+      "schemaDescriptionMin": "Description must be at least 5 characters",
       "schemaNameMax": "Must be 100 characters or less",
       "schemaNameRequired": "Course name is required",
       "selectFile": "Select Thumbnail Image",
@@ -5685,6 +5685,13 @@
     "noFeaturedCourses": "No featured courses selected",
     "noImage": "No Image"
   },
+  "MultiSelectCombobox": {
+    "placeholder": "Select items...",
+    "searchPlaceholder": "Search...",
+    "emptyMessage": "No results found.",
+    "showLess": "Show Less",
+    "moreItems": "+{count} more"
+  },
   "NewCollectionPage": {
     "cancelButton": "Cancel",
     "createButton": "Create Collection",
@@ -6150,12 +6157,5 @@
   "seconds": "Seconds",
   "selectDeadline": "Select a deadline for completing the task",
   "touUniversity": "Toraighyrov University",
-  "webPreview": "Web Preview",
-  "MultiSelectCombobox": {
-    "placeholder": "Select items...",
-    "searchPlaceholder": "Search...",
-    "emptyMessage": "No results found.",
-    "showLess": "Show Less",
-    "moreItems": "+{count} more"
-  }
+  "webPreview": "Web Preview"
 }

@@ -964,7 +964,7 @@
       "placeholderTags": "Нажмите Enter, чтобы добавить...",
       "placeholderVisibility": "Выберите видимость",
       "schemaDescriptionMax": "Должно быть 1000 символов или меньше",
-      "schemaDescriptionMin": "Описание должно содержать не менее 10 символов",
+      "schemaDescriptionMin": "Описание должно содержать не менее 5 символов",
       "schemaNameMax": "Должно быть 100 символов или меньше",
       "schemaNameRequired": "Требуется название курса",
       "selectFile": "Выберите изображение миниатюры",
@@ -5655,6 +5655,13 @@
     "noFeaturedCourses": "Нет выбранных рекомендуемых курсов",
     "noImage": "Нет изображения"
   },
+  "MultiSelectCombobox": {
+    "placeholder": "Выберите элементы...",
+    "searchPlaceholder": "Поиск...",
+    "emptyMessage": "Результатов не найдено.",
+    "showLess": "Показать меньше",
+    "moreItems": "+{count} ещё"
+  },
   "NewCollectionPage": {
     "cancelButton": "Отмена",
     "createButton": "Создать коллекцию",
@@ -6120,12 +6127,5 @@
   "seconds": "Секунды",
   "selectDeadline": "Выберите дедлайн для выполнения задачи",
   "touUniversity": "Торайгыров Университет",
-  "webPreview": "Веб-предпросмотр",
-  "MultiSelectCombobox": {
-    "placeholder": "Выберите элементы...",
-    "searchPlaceholder": "Поиск...",
-    "emptyMessage": "Результатов не найдено.",
-    "showLess": "Показать меньше",
-    "moreItems": "+{count} ещё"
-  }
-} 
+  "webPreview": "Веб-предпросмотр"
+}
