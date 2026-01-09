@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, Body
 
 from src.core.events.database import get_db_session
 from src.db.courses.assignments import (
@@ -521,15 +521,16 @@ async def api_get_assignments(
 @router.post("/courses")
 async def api_get_assignments_for_courses(
     request: Request,
-    course_uuids: list[str],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
+    payload: dict = Body(...),
 ):
     """
     Get assignments for multiple courses in a single request.
     Body: { "course_uuids": ["course_xxx", ...] }
     Returns a mapping course_uuid -> list of assignments.
     """
+    course_uuids: list[str] = payload.get("course_uuids", [])
     return await get_assignments_from_courses(
         request, course_uuids, current_user, db_session
     )

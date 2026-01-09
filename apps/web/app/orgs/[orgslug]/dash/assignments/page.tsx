@@ -39,8 +39,13 @@ const AssignmentsHome = async (params: any) => {
   // Fetch assignments in one batched request
   let courseAssignments: Assignment[][] = [];
   if (courses.length > 0) {
-    const res = await getAssignmentsFromCourses(courses.map((c: Course) => c.course_uuid), access_token);
-    const assignmentsMap = res?.data || {};
+    const res = await getAssignmentsFromCourses(
+      courses.map((c: Course) => c.course_uuid),
+      access_token,
+    );
+    // If the batched endpoint succeeded and returned a mapping, use it.
+
+    const assignmentsMap = res.data as Record<string, Assignment[]>;
     courseAssignments = courses.map((course: Course) => assignmentsMap[course.course_uuid] || []);
   }
 
