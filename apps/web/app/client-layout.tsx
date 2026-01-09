@@ -71,6 +71,32 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
             revalidateOnReconnect: false,
             shouldRetryOnError: true,
             errorRetryCount: 3,
+            // Respect upstream Retry-After when available (e.g., 429 from nginx)
+            onErrorRetry: (error: any, key, config, revalidate, { retryCount }: any) => {
+              // Do not retry more than configured
+              if (retryCount >= (config.errorRetryCount ?? 3)) return;
+
+              // If server provided Retry-After header, respect it
+              const retryAfter = error?.retryAfter;
+              if (retryAfter) {
+                // Retry-After may be seconds (numeric) or HTTP-date
+                const parsed = Number(retryAfter);
+                if (Number.isFinite(parsed) && parsed >= 0) {
+                  setTimeout(() => revalidate({ retryCount }), parsed * 1000 + Math.floor(Math.random() * 300));
+                  return;
+                }
+                const parsedDate = Date.parse(retryAfter);
+                if (!isNaN(parsedDate)) {
+                  const wait = Math.max(parsedDate - Date.now(), 0);
+                  setTimeout(() => revalidate({ retryCount }), Math.min(wait, 60_000) + Math.floor(Math.random() * 300));
+                  return;
+                }
+              }
+
+              // Fallback exponential backoff with jitter
+              const backoff = Math.min(1000 * 2 ** retryCount, 30_000);
+              setTimeout(() => revalidate({ retryCount }), backoff + Math.floor(Math.random() * Math.floor(backoff * 0.3)));
+            },
           }}
         >
           <ThemeProviderWrapper>{children}</ThemeProviderWrapper>

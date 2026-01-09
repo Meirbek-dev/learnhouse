@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, Request, UploadFile
+from fastapi import APIRouter, Depends, Form, Request, UploadFile, Response
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
@@ -155,6 +155,7 @@ async def api_get_course_meta(
 @router.get("/org_slug/{org_slug}/page/{page}/limit/{limit}")
 async def api_get_course_by_orgslug(
     request: Request,
+    response: Response,
     page: int,
     limit: int,
     org_slug: str,
@@ -163,10 +164,47 @@ async def api_get_course_by_orgslug(
 ) -> list[CourseRead]:
     """
     Get courses by org slug with pagination
+    Adds basic HTTP caching headers for public (anonymous) requests to allow
+    upstream caches (nginx/CDN) to reduce load and avoid 429s.
     """
-    return await get_courses_orgslug(
+    courses = await get_courses_orgslug(
         request, current_user, org_slug, db_session, page, limit
     )
+
+    # Set cache headers for public responses to help upstream caching
+    # and reduce the request rate to university nginx.
+    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=120"
+
+    # Set Last-Modified based on latest update_date among returned courses
+    try:
+        latest = None
+        for c in courses:
+            ud = getattr(c, "update_date", None)
+            if ud:
+                if latest is None or ud > latest:
+                    latest = ud
+        if latest:
+            # Format as HTTP-date
+            response.headers["Last-Modified"] = latest.strftime("%a, %d %b %Y %H:%M:%S GMT")
+
+            # Respect If-Modified-Since: return 304 when no changes
+            ims = request.headers.get("If-Modified-Since")
+            if ims:
+                try:
+                    from email.utils import parsedate_to_datetime
+
+                    ims_dt = parsedate_to_datetime(ims)
+                    # If upstream client has a timestamp >= latest, nothing changed
+                    if ims_dt >= latest:
+                        return Response(status_code=304)
+                except Exception:
+                    # If parsing fails, ignore and continue
+                    pass
+    except Exception:
+        # Don't fail the endpoint just for caching header computation
+        pass
+
+    return courses
 
 
 @router.get("/org_slug/{org_slug}/search")

@@ -188,6 +188,25 @@ async def get_courses_orgslug(
     page: int = 1,
     limit: int = 20,
 ) -> list[CourseRead]:
+    # Simple caching for anonymous (public) course listings to reduce
+    # load and avoid upstream rate limits. Uses Redis if available.
+    try:
+        from src.services.cache.redis_client import get_json, set_json
+    except Exception:
+        get_json = None  # type: ignore
+        set_json = None  # type: ignore
+
+    # Only cache results for anonymous users (public content)
+    cache_key = f"courses:org:{org_slug}:page:{page}:limit:{limit}"
+    if isinstance(current_user, AnonymousUser) and get_json is not None:
+        try:
+            cached = get_json(cache_key)
+            if cached:
+                # cached is a list of serialised course dicts
+                return [CourseRead.model_validate(c) for c in cached]
+        except Exception:
+            # Redis errors should not break the request
+            pass
     offset = (page - 1) * limit
 
     # Base query
@@ -287,6 +306,19 @@ async def get_courses_orgslug(
             }
         )
         course_reads.append(course_read)
+
+    # Cache anonymous/public responses if Redis is configured
+    try:
+        if isinstance(current_user, AnonymousUser) and get_json is not None and set_json is not None:
+            try:
+                serialised = [cr.model_dump() for cr in course_reads]
+                set_json(cache_key, serialised, ttl=60)
+            except Exception:
+                # Swallow redis set errors
+                pass
+    except Exception:
+        # Ignore caching errors
+        pass
 
     return course_reads
 
