@@ -637,7 +637,10 @@ async def start_exam_attempt(
                 )
                 .with_for_update()
             )
-            existing_attempt_ids = db_session.exec(statement).scalars().all()
+            # db_session.exec(...) may return a ScalarResult; calling .scalars() on it
+            # can raise AttributeError. Use .all() which works for both Result and
+            # ScalarResult and returns a list of ids.
+            existing_attempt_ids = db_session.exec(statement).all()
             attempt_count = len(existing_attempt_ids)
             if attempt_count >= attempt_limit:
                 raise HTTPException(status_code=403, detail="Достигнут лимит попыток")
