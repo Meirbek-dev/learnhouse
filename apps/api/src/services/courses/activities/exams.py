@@ -625,18 +625,20 @@ async def start_exam_attempt(
                     detail="Неверно указано ограничение попыток для экзамена",
                 )
 
-            # ATOMIC CHECK: Use FOR UPDATE to prevent race condition
-            from sqlalchemy import func
+            # ATOMIC CHECK: Use FOR UPDATE to prevent race condition.
+            # Postgres does not allow FOR UPDATE with aggregate functions, so lock the
+            # matching rows and count in Python instead to perform an atomic check.
 
             statement = (
-                select(func.count(ExamAttempt.id))
+                select(ExamAttempt.id)
                 .where(
                     ExamAttempt.exam_id == exam.id,
                     ExamAttempt.user_id == current_user.id,
                 )
                 .with_for_update()
             )
-            attempt_count = db_session.exec(statement).one()
+            existing_attempt_ids = db_session.exec(statement).scalars().all()
+            attempt_count = len(existing_attempt_ids)
             if attempt_count >= attempt_limit:
                 raise HTTPException(status_code=403, detail="Достигнут лимит попыток")
 
