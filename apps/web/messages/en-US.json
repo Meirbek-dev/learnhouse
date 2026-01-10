@@ -2173,7 +2173,7 @@
     },
     "CourseAuthors": {
       "and": " & ",
-      "andMoreAuthors": "& {authors.length - 2} more",
+      "andMoreAuthors": "& {count, plural, one {# more} other {# more}}",
       "authorsAndUpdates": "Authors & Updates ",
       "cancel": "Cancel",
       "contentRequired": "Content is required",

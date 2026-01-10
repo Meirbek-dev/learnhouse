@@ -126,7 +126,7 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
                   {author.user.first_name && author.user.last_name
                     ? [author.user.first_name, author.user.middle_name, author.user.last_name].filter(Boolean).join(' ')
                     : `@${author.user.username}`}
-                  {index === 0 && authors.length > 1 && index < displayedNames.length - 1 && ' & '}
+                  {index === 0 && authors.length > 1 && index < displayedNames.length - 1 && t('and')}
                 </span>
               ))}
               {authors.length > 2 && (

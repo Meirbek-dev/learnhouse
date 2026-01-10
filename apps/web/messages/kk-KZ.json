@@ -2120,7 +2120,7 @@
     },
     "CourseAuthors": {
       "and": " және ",
-      "andMoreAuthors": "& тағы {authors.length - 2} автор",
+      "andMoreAuthors": "& {count, plural, one {# автор} other {# автор}}",
       "authorsAndUpdates": "Авторлар мен жаңартулар",
       "cancel": "Бас тарту",
       "contentRequired": "Мазмұн міндетті",

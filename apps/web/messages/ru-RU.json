@@ -2173,7 +2173,7 @@
     },
     "CourseAuthors": {
       "and": " и ",
-      "andMoreAuthors": "& еще {authors.length - 2} автора",
+      "andMoreAuthors": "& {count, plural, one {# автор} few {# автора} many {# авторов} other {# авторов}}",
       "authorsAndUpdates": "Авторы и обновления",
       "cancel": "Отмена",
       "contentRequired": "Содержимое обязательно",
