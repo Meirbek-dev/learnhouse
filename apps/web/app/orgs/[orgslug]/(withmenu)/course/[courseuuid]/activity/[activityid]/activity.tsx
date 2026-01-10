@@ -384,6 +384,11 @@ const ActivityClient = (props: ActivityClientProps) => {
   const nextActivity = currentIndex < allActivities.length - 1 ? allActivities[currentIndex + 1] : null;
 
   const activityContent = (() => {
+    // If no activity is provided, nothing to render
+    if (!activity) {
+      return null;
+    }
+
     // Allow teachers (ACTIVE contributors) to view content even when unpublished or paid-locked
     if (!activity?.published && contributorStatus !== 'ACTIVE') {
       return null;
