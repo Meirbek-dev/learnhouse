@@ -236,7 +236,7 @@ const SubmissionReviewCard = ({ t }: SubmissionReviewCardProps) => (
       <p className="text-muted-foreground text-sm">{t('startTest.review.description')}</p>
       <Button
         variant="outline"
-        onClick={() => window.location.reload()}
+        onClick={() => globalThis.location.reload()}
       >
         {t('startTest.review.refresh')}
       </Button>
@@ -292,7 +292,7 @@ const SubmissionGradedCard = ({ grade, t }: SubmissionGradedCardProps) => {
           variant="outline"
           size="sm"
           className="w-full"
-          onClick={() => window.location.reload()}
+          onClick={() => globalThis.location.reload()}
         >
           <RefreshCcw className="mr-2 h-4 w-4" />
           {t('startTest.graded.refresh')}
@@ -996,13 +996,13 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
         localStorage.setItem('globalFocusMode', 'true');
         // Mark that focus mode was auto-initiated by a quiz so UI can hide toggles immediately
         localStorage.setItem('globalFocusModeInitiated', 'true');
-        window.dispatchEvent(new CustomEvent('focusModeChange'));
+        globalThis.dispatchEvent(new CustomEvent('focusModeChange'));
       } else if (prevFocusModeRef.current !== null) {
         // Restore previous state
         localStorage.setItem('globalFocusMode', prevFocusModeRef.current ?? 'false');
         // Clear the auto-initiated flag
         localStorage.removeItem('globalFocusModeInitiated');
-        window.dispatchEvent(new CustomEvent('focusModeChange'));
+        globalThis.dispatchEvent(new CustomEvent('focusModeChange'));
         prevFocusModeRef.current = null;
       }
     } catch (error) {
@@ -1016,7 +1016,7 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
         if (prevFocusModeRef.current !== null) {
           localStorage.setItem('globalFocusMode', prevFocusModeRef.current ?? 'false');
           localStorage.removeItem('globalFocusModeInitiated');
-          window.dispatchEvent(new CustomEvent('focusModeChange'));
+          globalThis.dispatchEvent(new CustomEvent('focusModeChange'));
           prevFocusModeRef.current = null;
         }
       } catch {

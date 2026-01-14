@@ -51,7 +51,7 @@ export function useExamPersistence({
 
   // Clean up expired data from localStorage
   const cleanupExpiredData = useCallback(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof globalThis.window === 'undefined') return;
 
     try {
       const now = Date.now();
@@ -87,7 +87,7 @@ export function useExamPersistence({
 
   // Check if there's recoverable data for this attempt
   const hasRecoverableData = useCallback((): boolean => {
-    if (typeof window === 'undefined') return false;
+    if (typeof globalThis.window === 'undefined') return false;
 
     try {
       const dataStr = localStorage.getItem(storageKey);
@@ -124,7 +124,7 @@ export function useExamPersistence({
   // Save answers to localStorage
   const saveAnswers = useCallback(
     (answers: Record<number, any>) => {
-      if (typeof window === 'undefined') return;
+      if (typeof globalThis.window === 'undefined') return;
 
       try {
         // Validate answers object to prevent saving corrupted data
@@ -170,7 +170,7 @@ export function useExamPersistence({
 
   // Clear saved answers
   const clearSavedAnswers = useCallback(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof globalThis.window === 'undefined') return;
 
     try {
       localStorage.removeItem(storageKey);

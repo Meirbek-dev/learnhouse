@@ -37,7 +37,7 @@ export const getTopLevelCookieDomain = () =>
  */
 export const getAPIUrl = () => {
   // Server-side: use internal Docker network URL when available
-  if (typeof window === 'undefined') {
+  if (typeof globalThis.window === 'undefined') {
     const internalUrl = process.env.PLATFORM_INTERNAL_API_URL;
     if (internalUrl) {
       return internalUrl.endsWith('/') ? internalUrl : `${internalUrl}/`;
@@ -54,8 +54,8 @@ export const getAPIUrl = () => {
   let base = PLATFORM_API_URL;
 
   // Browser fallback if env not provided at build time
-  if (!base && typeof window !== 'undefined') {
-    const { protocol, hostname, port } = window.location;
+  if (!base && typeof globalThis.window !== 'undefined') {
+    const { protocol, hostname, port } = globalThis.location;
     const portPart = port ? `:${port}` : '';
     base = `${protocol}//${hostname}${portPart}/api/v1/`;
   }
@@ -65,7 +65,7 @@ export const getAPIUrl = () => {
     base = 'http://localhost:1338/api/v1/';
 
     // Warn in server context when using fallback
-    if (typeof window === 'undefined') {
+    if (typeof globalThis.window === 'undefined') {
       console.warn(
         '[Config] Using fallback API URL in server context. ' +
           'Please set NEXT_PUBLIC_PLATFORM_API_URL or PLATFORM_INTERNAL_API_URL environment variable. ' +
@@ -104,8 +104,8 @@ export const getOrgFromUri = () => {
     const def = getDefaultOrg();
     if (def) return def;
     return undefined;
-  } else if (typeof window !== 'undefined') {
-    const { hostname } = window.location;
+  } else if (typeof globalThis.window !== 'undefined') {
+    const { hostname } = globalThis.location;
 
     return hostname.replace(`.${PLATFORM_DOMAIN}`, '');
   }

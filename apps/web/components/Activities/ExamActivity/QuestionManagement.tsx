@@ -76,13 +76,13 @@ export default function QuestionManagement({
       if (!response.ok) throw new Error('Failed to export questions');
 
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const url = globalThis.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `exam_${examUuid}_questions.csv`;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
+      globalThis.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
       toast.success(t('questionsExported'));

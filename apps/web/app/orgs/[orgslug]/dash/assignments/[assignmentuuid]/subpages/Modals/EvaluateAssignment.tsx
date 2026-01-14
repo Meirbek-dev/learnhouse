@@ -65,7 +65,7 @@ const EvaluateAssignment = ({ user_id }: any) => {
       session.data.tokens.access_token,
     );
     toast.success(t('rejectSuccess'));
-    window.location.reload();
+    globalThis.location.reload();
   }
 
   return (

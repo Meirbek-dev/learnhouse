@@ -62,7 +62,7 @@ const LoginClient = (props: LoginClientProps) => {
 
         if (res?.ok) {
           // Successful login, redirect
-          window.location.href = '/redirect_from_auth';
+          globalThis.location.href = '/redirect_from_auth';
         }
       } catch (error) {
         console.error('Login error:', error);

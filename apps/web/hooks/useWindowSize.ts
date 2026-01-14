@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react';
 
 export function useWindowSize() {
   const [windowSize, setWindowSize] = useState({
-    width: typeof window !== 'undefined' ? window.innerWidth : 0,
-    height: typeof window !== 'undefined' ? window.innerHeight : 0,
+    width: typeof globalThis.window !== 'undefined' ? window.innerWidth : 0,
+    height: typeof globalThis.window !== 'undefined' ? window.innerHeight : 0,
   });
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof globalThis.window === 'undefined') return;
     let rafId: number | null = null;
     function handleResize() {
       if (rafId) cancelAnimationFrame(rafId);

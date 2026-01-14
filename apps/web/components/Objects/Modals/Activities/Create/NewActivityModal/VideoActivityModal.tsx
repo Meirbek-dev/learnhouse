@@ -811,7 +811,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
     muted: false,
     subtitles: [],
   });
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Debug: Log org data when component mounts or org changes
   useEffect(() => {
@@ -828,7 +828,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
   const isYouTubeUrlValid = youtubeUrl ? /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/.test(youtubeUrl) : false;
 
   const validateForm = () => {
-    const newErrors: { [key: string]: string } = {};
+    const newErrors: Record<string, string> = {};
 
     if (!name.trim()) {
       newErrors.name = t('errorActivityNameRequired');

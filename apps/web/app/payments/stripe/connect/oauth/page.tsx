@@ -43,7 +43,7 @@ const StripeConnectCallback = () => {
       setStatus('success');
       setMessage(t('connectionSuccess'));
 
-      closeTimeoutRef.current = window.setTimeout(() => {
+      closeTimeoutRef.current = globalThis.setTimeout(() => {
         window.close();
       }, 2000) as unknown as number;
     } catch (error) {

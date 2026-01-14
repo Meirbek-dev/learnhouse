@@ -13,13 +13,13 @@ import { useEffect, useState } from 'react';
 
 export function useReducedData(): boolean {
   const [prefersReducedData, setPrefersReducedData] = useState(() => {
-    if (typeof window === 'undefined') return false;
+    if (typeof globalThis.window === 'undefined') return false;
 
     // Check multiple signals
     let reduced = false;
 
     // 1. Check prefers-reduced-data media query (new standard)
-    const mediaQuery = window.matchMedia('(prefers-reduced-data: reduce)');
+    const mediaQuery = globalThis.matchMedia('(prefers-reduced-data: reduce)');
     if (mediaQuery.matches) {
       reduced = true;
     }
@@ -42,9 +42,9 @@ export function useReducedData(): boolean {
   });
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof globalThis.window === 'undefined') return;
 
-    const mediaQuery = window.matchMedia('(prefers-reduced-data: reduce)');
+    const mediaQuery = globalThis.matchMedia('(prefers-reduced-data: reduce)');
     const connection =
       (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
 

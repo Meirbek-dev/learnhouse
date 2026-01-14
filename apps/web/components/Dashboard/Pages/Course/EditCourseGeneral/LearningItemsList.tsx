@@ -78,8 +78,8 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
   const [focusedItemId, setFocusedItemId] = useState<string | null>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
   const linkInputRef = useRef<HTMLDivElement>(null);
-  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
-  const linkInputFieldRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+  const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const linkInputFieldRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const initialSyncRafRef = useRef<number | null>(null);
   const focusRafRef = useRef<number | null>(null);
@@ -238,7 +238,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
 
   const handleInputBlur = () => {
     if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
-    blurTimeoutRef.current = window.setTimeout(() => {
+    blurTimeoutRef.current = globalThis.setTimeout(() => {
       const activeEl = document.activeElement;
       const isStillInComponent =
         activeEl?.classList.contains('learning-item-input') || activeEl?.closest('[data-emoji-picker="true"]');

@@ -309,7 +309,11 @@ async def get_courses_orgslug(
 
     # Cache anonymous/public responses if Redis is configured
     try:
-        if isinstance(current_user, AnonymousUser) and get_json is not None and set_json is not None:
+        if (
+            isinstance(current_user, AnonymousUser)
+            and get_json is not None
+            and set_json is not None
+        ):
             try:
                 serialised = [cr.model_dump() for cr in course_reads]
                 set_json(cache_key, serialised, ttl=60)

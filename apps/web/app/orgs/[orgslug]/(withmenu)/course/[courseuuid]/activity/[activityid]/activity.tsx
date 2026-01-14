@@ -333,7 +333,7 @@ const ActivityClient = (props: ActivityClientProps) => {
   const access_token = session?.data?.tokens?.access_token;
   const [assignment, setAssignment] = useState(null) as any;
   const [isFocusMode, setIsFocusMode] = useState(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof globalThis.window !== 'undefined') {
       const saved = localStorage.getItem('globalFocusMode');
       return saved === 'true';
     }
@@ -343,7 +343,7 @@ const ActivityClient = (props: ActivityClientProps) => {
   // Track whether focus mode was auto-initiated (e.g., by starting a quiz) so we can hide manual toggles
   const [isAutoFocusInitiated, setIsAutoFocusInitiated] = useState(() => {
     try {
-      return typeof window !== 'undefined' && localStorage.getItem('globalFocusModeInitiated') === 'true';
+      return typeof globalThis.window !== 'undefined' && localStorage.getItem('globalFocusModeInitiated') === 'true';
     } catch {
       return false;
     }
@@ -480,10 +480,10 @@ const ActivityClient = (props: ActivityClientProps) => {
   // Save focus mode to localStorage when it changes
   const initialRenderRafRef = useRef<number | null>(null);
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof globalThis.window !== 'undefined') {
       localStorage.setItem('globalFocusMode', isFocusMode.toString());
       // Dispatch custom event for focus mode change
-      window.dispatchEvent(
+      globalThis.dispatchEvent(
         new CustomEvent('focusModeChange', {
           detail: { isFocusMode },
         }),
@@ -509,15 +509,15 @@ const ActivityClient = (props: ActivityClientProps) => {
       }
     };
 
-    window.addEventListener('focusModeChange', handler as EventListener);
-    window.addEventListener('storage', handler);
+    globalThis.addEventListener('focusModeChange', handler as EventListener);
+    globalThis.addEventListener('storage', handler);
 
     // Run once to initialize
     handler();
 
     return () => {
-      window.removeEventListener('focusModeChange', handler as EventListener);
-      window.removeEventListener('storage', handler);
+      globalThis.removeEventListener('focusModeChange', handler as EventListener);
+      globalThis.removeEventListener('storage', handler);
     };
   }, []);
 

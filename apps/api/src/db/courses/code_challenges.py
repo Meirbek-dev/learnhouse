@@ -185,7 +185,8 @@ class CodeChallengeSettings(PydanticStrictBaseModel):
         try:
             val = int(v)
         except Exception:
-            raise ValueError("memory_limit must be an integer number of MB")
+            msg = "memory_limit must be an integer number of MB"
+            raise ValueError(msg)
         # Clamp to [64, 2048] MB to prevent too-low values that break V8 and too-high values
         if val < 64:
             return 64

@@ -26,7 +26,7 @@ function ThemeSync() {
   }, [session]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof globalThis.window === 'undefined') return;
 
     const handleThemeChange = (event: Event) => {
       const customEvent = event as CustomEvent<{ theme?: string }>;
@@ -41,9 +41,9 @@ function ThemeSync() {
       }
     };
 
-    window.addEventListener('themeChange', handleThemeChange);
+    globalThis.addEventListener('themeChange', handleThemeChange);
     return () => {
-      window.removeEventListener('themeChange', handleThemeChange);
+      globalThis.removeEventListener('themeChange', handleThemeChange);
     };
   }, []);
 

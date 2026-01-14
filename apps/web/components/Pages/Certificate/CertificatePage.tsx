@@ -1,7 +1,7 @@
 'use client';
 
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
-import { Document, Page, Text, View, Image, pdf, StyleSheet, Font } from '@react-pdf/renderer';
+import { Document, Font, Image, Page, StyleSheet, Text, View, pdf } from '@react-pdf/renderer';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserCertificates } from '@services/courses/certifications';
 import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';

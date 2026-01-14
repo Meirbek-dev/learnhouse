@@ -93,7 +93,7 @@ export default function UserGamificationSettings() {
 
       // Reset success indicator after 2 seconds
       if (saveSuccessTimeoutRef.current) clearTimeout(saveSuccessTimeoutRef.current);
-      saveSuccessTimeoutRef.current = window.setTimeout(() => {
+      saveSuccessTimeoutRef.current = globalThis.setTimeout(() => {
         setSaveSuccess(false);
       }, 2000);
     } catch (error) {

@@ -227,7 +227,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
       setUploadProgress(0);
 
       // Simulate upload progress — store interval id in a ref so we can clear it on unmount
-      progressIntervalRef.current = window.setInterval(() => {
+      progressIntervalRef.current = globalThis.setInterval(() => {
         setUploadProgress((prev) => Math.min(prev + 10, 90));
       }, 200);
 
@@ -267,7 +267,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
       setVideo(null);
 
       // Reset progress after a delay
-      uploadResetTimeoutRef.current = window.setTimeout(() => {
+      uploadResetTimeoutRef.current = globalThis.setTimeout(() => {
         setUploadProgress(0);
       }, 1000);
     } catch (error: any) {

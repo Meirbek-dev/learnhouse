@@ -11,7 +11,7 @@ interface RichContentRendererProps {
 export default function RichContentRenderer({ content, className = '' }: RichContentRendererProps) {
   // Sanitize the HTML content to prevent XSS attacks
   const sanitizedContent =
-    typeof window !== 'undefined'
+    typeof globalThis.window !== 'undefined'
       ? DOMPurify.sanitize(content, {
           ALLOWED_TAGS: [
             'p',

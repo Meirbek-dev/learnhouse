@@ -91,7 +91,7 @@ interface FormValues {
   last_name: string;
   email: string;
   bio?: string;
-  details: { [key: string]: DetailItem };
+  details: Record<string, DetailItem>;
 }
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>

@@ -42,7 +42,9 @@ def upgrade() -> None:
         op.create_table(
             "code_submission",
             sa.Column("language_id", sa.Integer(), nullable=False),
-            sa.Column("language_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column(
+                "language_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False
+            ),
             sa.Column("source_code", sa.Text(), nullable=True),
             sa.Column(
                 "status",
@@ -74,8 +76,12 @@ def upgrade() -> None:
             sa.Column("updated_at", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
             sa.Column("plagiarism_score", sa.Float(), nullable=True),
             sa.Column("judge0_tokens", sa.JSON(), nullable=True),
-            sa.ForeignKeyConstraint(["activity_id"], ["activity.id"], ondelete="CASCADE"),
-            sa.ForeignKeyConstraint(["org_id"], ["organization.id"], ondelete="CASCADE"),
+            sa.ForeignKeyConstraint(
+                ["activity_id"], ["activity.id"], ondelete="CASCADE"
+            ),
+            sa.ForeignKeyConstraint(
+                ["org_id"], ["organization.id"], ondelete="CASCADE"
+            ),
             sa.ForeignKeyConstraint(["user_id"], ["user.id"], ondelete="CASCADE"),
             sa.PrimaryKeyConstraint("id"),
         )
@@ -102,9 +108,15 @@ def upgrade() -> None:
             sa.Column("activity_id", sa.BigInteger(), nullable=True),
             sa.Column("user_id", sa.BigInteger(), nullable=True),
             sa.Column("org_id", sa.BigInteger(), nullable=True),
-            sa.Column("unlocked_at", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-            sa.ForeignKeyConstraint(["activity_id"], ["activity.id"], ondelete="CASCADE"),
-            sa.ForeignKeyConstraint(["org_id"], ["organization.id"], ondelete="CASCADE"),
+            sa.Column(
+                "unlocked_at", sqlmodel.sql.sqltypes.AutoString(), nullable=False
+            ),
+            sa.ForeignKeyConstraint(
+                ["activity_id"], ["activity.id"], ondelete="CASCADE"
+            ),
+            sa.ForeignKeyConstraint(
+                ["org_id"], ["organization.id"], ondelete="CASCADE"
+            ),
             sa.ForeignKeyConstraint(["user_id"], ["user.id"], ondelete="CASCADE"),
             sa.PrimaryKeyConstraint("id"),
         )

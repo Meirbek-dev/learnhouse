@@ -12,7 +12,7 @@ const ErrorUI = ({ message, submessage }: { message?: string; submessage?: strin
 
   function reloadPage() {
     router.refresh();
-    window.location.reload();
+    globalThis.location.reload();
   }
 
   return (

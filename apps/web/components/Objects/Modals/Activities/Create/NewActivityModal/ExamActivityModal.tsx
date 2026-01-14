@@ -129,7 +129,7 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal, orgslug }: any
             if (course?.course_uuid) {
               courseUuidClean = course.course_uuid.replace('course_', '');
             } else {
-              const parts = window.location.pathname.split('/').filter(Boolean);
+              const parts = globalThis.location.pathname.split('/').filter(Boolean);
               const courseIndex = parts.indexOf('course');
               if (courseIndex !== -1 && parts.length > courseIndex + 1) {
                 courseUuidClean = String(parts[courseIndex + 1]);
@@ -138,10 +138,10 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal, orgslug }: any
 
             if (courseUuidClean) {
               // Use canonical path without org prefix
-              window.location.href = `/course/${courseUuidClean}/activity/${activity_uuid_clean}${withUnpublishedActivities ? '?withUnpublishedActivities=true' : ''}`;
+              globalThis.location.href = `/course/${courseUuidClean}/activity/${activity_uuid_clean}${withUnpublishedActivities ? '?withUnpublishedActivities=true' : ''}`;
             } else {
               // Last-resort fallback: navigate to global courses listing
-              window.location.href = `/courses`;
+              globalThis.location.href = `/courses`;
             }
           }
 

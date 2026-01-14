@@ -422,7 +422,7 @@ export const SearchBar: FC<SearchBarProps> = ({
   // handler for Enter key press
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter' && searchQuery.trim().length > 0) {
-      window.location.href = getUriWithOrg(orgslug, `/search?q=${encodeURIComponent(searchQuery)}`);
+      globalThis.location.href = getUriWithOrg(orgslug, `/search?q=${encodeURIComponent(searchQuery)}`);
     }
   }
 

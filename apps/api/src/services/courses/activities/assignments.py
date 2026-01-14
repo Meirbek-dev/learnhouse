@@ -1991,7 +1991,9 @@ async def get_assignments_from_courses(
         statement = select(Activity).where(Activity.course_id.in_(course_ids))
         activities = db_session.exec(statement).all()
 
-    activity_id_to_course_uuid = {a.id: course_id_to_uuid.get(a.course_id) for a in activities}
+    activity_id_to_course_uuid = {
+        a.id: course_id_to_uuid.get(a.course_id) for a in activities
+    }
     activity_ids = list(activity_id_to_course_uuid.keys())
 
     # Load assignments for those activities
@@ -2005,6 +2007,8 @@ async def get_assignments_from_courses(
     for assignment in assignments:
         course_uuid = activity_id_to_course_uuid.get(assignment.activity_id)
         if course_uuid:
-            result.setdefault(course_uuid, []).append(AssignmentRead.model_validate(assignment))
+            result.setdefault(course_uuid, []).append(
+                AssignmentRead.model_validate(assignment)
+            )
 
     return result

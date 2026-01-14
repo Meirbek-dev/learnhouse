@@ -160,7 +160,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
 
   const handleReturnToCourse = useCallback(() => {
     const courseuuid = course.course_uuid?.replace('course_', '');
-    window.location.href = `/course/${courseuuid}`;
+    globalThis.location.href = `/course/${courseuuid}`;
   }, [course]);
 
   const handleProceedToNextActivity = useCallback(() => {

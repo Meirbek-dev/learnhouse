@@ -295,7 +295,7 @@ export async function logout(): Promise<Response> {
  * @returns Promise<AuthUser> - User information
  */
 export async function getUserInfo(token: string): Promise<AuthUser> {
-  if (typeof window === 'undefined') {
+  if (typeof globalThis.window === 'undefined') {
     throw createAuthError('getUserInfo can only be called on the client side', 400, 'CLIENT_SIDE_ONLY');
   }
 
@@ -304,7 +304,7 @@ export async function getUserInfo(token: string): Promise<AuthUser> {
   }
 
   try {
-    const { origin } = window.location;
+    const { origin } = globalThis.location;
     const headers = createHeaders('application/json', {
       Authorization: `Bearer ${token.trim()}`,
       Origin: origin,
@@ -649,7 +649,7 @@ export const getAuthErrorDetails = (error: unknown) => {
  * @returns Parsed payload or null if invalid
  */
 export const parseJWTPayload = (token: string): any | null => {
-  if (typeof window === 'undefined') {
+  if (typeof globalThis.window === 'undefined') {
     console.warn('parseJWTPayload should only be used client-side');
     return null;
   }

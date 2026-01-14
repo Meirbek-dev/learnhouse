@@ -51,6 +51,6 @@ export function applyTheme(theme: Readonly<Theme>): void {
  * Get stored theme preference
  */
 export function getStoredTheme(): string | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof globalThis.window === 'undefined') return null;
   return localStorage.getItem('theme');
 }

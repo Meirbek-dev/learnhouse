@@ -136,9 +136,9 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
 
   // Lock scroll on mobile when modal is open
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof globalThis.window === 'undefined') return;
 
-    const isSmallViewport = window.matchMedia('(max-width: 767px)').matches;
+    const isSmallViewport = globalThis.matchMedia('(max-width: 767px)').matches;
 
     if (aiChatBotState.isModalOpen && isSmallViewport) {
       scrollYRef.current = window.scrollY || window.pageYOffset || 0;

@@ -66,8 +66,8 @@ export async function getAvailableThemeNames(): Promise<string[]> {
  */
 export function preloadThemes(themeNames: string[]): void {
   // Use requestIdleCallback for non-blocking preloading
-  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-    window.requestIdleCallback(() => {
+  if (typeof globalThis.window !== 'undefined' && 'requestIdleCallback' in globalThis) {
+    globalThis.requestIdleCallback(() => {
       themeNames.forEach((name) => {
         loadTheme(name);
       });

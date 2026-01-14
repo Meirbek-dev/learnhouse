@@ -160,7 +160,7 @@ const _GRADIENT_DIRECTIONS = {
 } as const;
 
 // Map section type keys to translation keys
-const SECTION_TYPE_KEYS: { [key in LandingSection['type']]: string } = {
+const SECTION_TYPE_KEYS: Record<LandingSection['type'], string> = {
   'hero': 'hero',
   'text-and-image': 'textAndImage',
   'logos': 'logos',

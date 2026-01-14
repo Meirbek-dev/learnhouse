@@ -330,14 +330,14 @@ export function useContextualPosition(
   // listener references stable and avoid stale-closure issues; see useEffect below.
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof globalThis.window === 'undefined') return;
     if (!contextElement) return;
 
     mountedRef.current = true;
 
     // Define computePosition and scheduler here so listeners can add/remove reliably
     const computePosition = () => {
-      if (typeof window === 'undefined') return;
+      if (typeof globalThis.window === 'undefined') return;
       if (!contextElement || !mountedRef.current) return;
 
       const rect = contextElement.getBoundingClientRect();
@@ -377,7 +377,7 @@ export function useContextualPosition(
     // Listen to viewport changes
     window.addEventListener('resize', scheduleCompute, listenerOptions);
     window.addEventListener('scroll', scheduleCompute, listenerOptions);
-    window.addEventListener('orientationchange', scheduleCompute, listenerOptions);
+    globalThis.addEventListener('orientationchange', scheduleCompute, listenerOptions);
 
     return () => {
       mountedRef.current = false;
@@ -385,7 +385,7 @@ export function useContextualPosition(
       // Remove listeners using the same options reference to ensure handlers are removed reliably in all browsers
       window.removeEventListener('resize', scheduleCompute, listenerOptions);
       window.removeEventListener('scroll', scheduleCompute, listenerOptions);
-      window.removeEventListener('orientationchange', scheduleCompute, listenerOptions);
+      globalThis.removeEventListener('orientationchange', scheduleCompute, listenerOptions);
       // Note: if the element can be inside a scrollable container, consider listening on the nearest scroll container or using IntersectionObserver — manual review may be needed.
     };
   }, [contextElement]);

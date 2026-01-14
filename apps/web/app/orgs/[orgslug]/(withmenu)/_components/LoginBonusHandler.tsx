@@ -33,7 +33,7 @@ export function LoginBonusHandler({ orgId }: LoginBonusHandlerProps) {
 
     try {
       const todayKey = `gamification:lastLoginAward:${orgId}:${new Date().toISOString().slice(0, 10)}`;
-      const alreadyDone = typeof window !== 'undefined' ? localStorage.getItem(todayKey) : null;
+      const alreadyDone = typeof globalThis.window !== 'undefined' ? localStorage.getItem(todayKey) : null;
 
       if (alreadyDone) return;
 
@@ -57,7 +57,7 @@ export function LoginBonusHandler({ orgId }: LoginBonusHandlerProps) {
           // Show subtle badge indicator for 5 seconds (if still mounted)
           if (isMountedRef.current) {
             setShowBadge(true);
-            timeoutRef.current = window.setTimeout(() => {
+            timeoutRef.current = globalThis.setTimeout(() => {
               if (isMountedRef.current) setShowBadge(false);
             }, 5000) as unknown as number;
           }

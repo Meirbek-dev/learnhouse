@@ -9,13 +9,13 @@ import { useEffect, useState } from 'react';
 
 export function useReducedMotion(): boolean {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (typeof globalThis.window === 'undefined') return false;
+    return globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches;
   });
 
   useEffect(() => {
     // Check media query on mount
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const mediaQuery = globalThis.matchMedia('(prefers-reduced-motion: reduce)');
 
     // Listen for changes
     const handleChange = (event: MediaQueryListEvent) => {

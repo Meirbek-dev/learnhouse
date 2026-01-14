@@ -39,7 +39,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   // Check window availability - use lazy initialization
-  const [winReady, setwinReady] = useState(() => typeof window !== 'undefined');
+  const [winReady, setwinReady] = useState(() => typeof globalThis.window !== 'undefined');
   const t = useTranslations('CourseEdit.Structure');
 
   const dispatchCourse = useCourseDispatch();

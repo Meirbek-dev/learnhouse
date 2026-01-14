@@ -210,10 +210,9 @@ const OrgUsers = () => {
                               // Determine specific disabled reason for clearer messaging
                               if (user.role.name === 'Админ')
                                 return <div className="text-neutral-500">{t('noActionsForAdministrators')}</div>;
-                              if (currentUserPriority < targetPriority)
+                              if (currentUserPriority <= targetPriority)
                                 return <div className="text-neutral-500">{t('cannotManageHigherRole')}</div>;
-                              if (isSelf)
-                                return <div className="text-neutral-500">{t('cannotEditSelf')}</div>;
+                              if (isSelf) return <div className="text-neutral-500">{t('cannotEditSelf')}</div>;
                               return <div className="text-neutral-500">{t('noActionsForAdministrators')}</div>;
                             }
 

@@ -24,9 +24,7 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
   const t = useTranslations('Courses.CoursePaidOptions');
   const org = useOrg() as any;
   const session = usePlatformSession() as any;
-  const [expandedProducts, setExpandedProducts] = useState<{
-    [key: string]: boolean;
-  }>({});
+  const [expandedProducts, setExpandedProducts] = useState<Record<string, boolean>>({});
   const [isProcessing, setIsProcessing] = useState<Record<string, boolean>>({});
   const [isPending, startTransition] = useTransition();
   const router = useRouter();

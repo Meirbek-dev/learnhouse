@@ -147,9 +147,7 @@ const PaymentsProductPage = () => {
   const orgId = org?.id;
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
-  const [expandedProducts, setExpandedProducts] = useState<{
-    [key: string]: boolean;
-  }>({});
+  const [expandedProducts, setExpandedProducts] = useState<Record<string, boolean>>({});
   const { isEnabled, isLoading } = usePaymentsEnabled();
   const t = useTranslations('DashPage.Payments.ProductPage');
 

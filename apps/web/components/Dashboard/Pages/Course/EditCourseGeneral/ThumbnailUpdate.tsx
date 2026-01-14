@@ -132,7 +132,7 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
 
         // Wait for backend to stabilize
         await new Promise((resolve) => {
-          thumbnailDelayRef.current = window.setTimeout(resolve, 1500) as unknown as number;
+          thumbnailDelayRef.current = globalThis.setTimeout(resolve, 1500) as unknown as number;
         });
 
         if (thumbnailDelayRef.current) {

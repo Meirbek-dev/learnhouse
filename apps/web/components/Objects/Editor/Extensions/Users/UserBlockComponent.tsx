@@ -40,14 +40,15 @@ interface UserData {
   username: string;
   bio?: string;
   avatar_image?: string;
-  details?: {
-    [key: string]: {
+  details?: Record<
+    string,
+    {
       id: string;
       label: string;
       icon: string;
       text: string;
-    };
-  };
+    }
+  >;
 }
 
 const AVAILABLE_ICONS = {

@@ -152,7 +152,7 @@ export function ParticleEffect({
       setParticles(newParticles);
     });
 
-    endTimeoutRef.current = window.setTimeout(() => {
+    endTimeoutRef.current = globalThis.setTimeout(() => {
       setParticles([]);
       isAnimatingRef.current = false;
       onCompleteRef.current?.();
@@ -282,7 +282,7 @@ export function XPGainAnimation({ amount, trigger, position, onComplete }: XPGai
       if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
 
       showRafRef.current = requestAnimationFrame(() => setIsVisible(true));
-      hideTimeoutRef.current = window.setTimeout(() => {
+      hideTimeoutRef.current = globalThis.setTimeout(() => {
         setIsVisible(false);
         onCompleteRef.current?.();
       }, 1200);

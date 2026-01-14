@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, Request, UploadFile, Response
+from fastapi import APIRouter, Depends, Form, Request, Response, UploadFile
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
@@ -180,12 +180,13 @@ async def api_get_course_by_orgslug(
         latest = None
         for c in courses:
             ud = getattr(c, "update_date", None)
-            if ud:
-                if latest is None or ud > latest:
-                    latest = ud
+            if ud and (latest is None or ud > latest):
+                latest = ud
         if latest:
             # Format as HTTP-date
-            response.headers["Last-Modified"] = latest.strftime("%a, %d %b %Y %H:%M:%S GMT")
+            response.headers["Last-Modified"] = latest.strftime(
+                "%a, %d %b %Y %H:%M:%S GMT"
+            )
 
             # Respect If-Modified-Since: return 304 when no changes
             ims = request.headers.get("If-Modified-Since")

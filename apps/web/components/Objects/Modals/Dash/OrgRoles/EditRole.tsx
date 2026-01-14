@@ -591,7 +591,7 @@ function EditRole(props: EditRoleProps) {
   };
 
   const getPermissionLabel = (permission: string): string => {
-    const permissionMap: { [key: string]: string } = {
+    const permissionMap: Record<string, string> = {
       action_create: t('permissions.create'),
       action_read: t('permissions.read'),
       action_read_own: t('permissions.readOwn'),

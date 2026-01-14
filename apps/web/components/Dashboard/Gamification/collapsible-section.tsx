@@ -33,8 +33,8 @@ export function CollapsibleSection({
 
   // Use useSyncExternalStore for SSR-safe localStorage access
   function subscribe(callback: () => void) {
-    window.addEventListener('storage', callback);
-    return () => window.removeEventListener('storage', callback);
+    globalThis.addEventListener('storage', callback);
+    return () => globalThis.removeEventListener('storage', callback);
   }
 
   function getSnapshot() {
@@ -60,7 +60,7 @@ export function CollapsibleSection({
     try {
       localStorage.setItem(storageKey, String(newState));
       // Trigger storage event manually for same-window updates
-      window.dispatchEvent(new StorageEvent('storage', { key: storageKey }));
+      globalThis.dispatchEvent(new StorageEvent('storage', { key: storageKey }));
     } catch (error) {
       console.warn('Failed to save collapse state:', error);
     }

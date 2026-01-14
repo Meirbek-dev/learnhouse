@@ -25,9 +25,7 @@ interface OrganizationValues {
     youtube?: string;
     tiktok?: string;
   };
-  links: {
-    [key: string]: string;
-  };
+  links: Record<string, string>;
 }
 
 export default function OrgEditSocials() {

@@ -24,8 +24,8 @@ interface User {
   email: string;
   avatar_image: string;
   bio: string;
-  details: { [key: string]: any };
-  profile: { [key: string]: any };
+  details: Record<string, any>;
+  profile: Record<string, any>;
   id: number;
   user_uuid: string;
 }
@@ -191,7 +191,7 @@ const SearchPage = () => {
   // Filter state
   const [selectedType, setSelectedType] = useState<ContentType>(type);
 
-  const updateSearchParams = (updates: { [key: string]: string }) => {
+  const updateSearchParams = (updates: Record<string, string>) => {
     const current = new URLSearchParams([...searchParams.entries()]);
     Object.entries(updates).forEach(([key, value]) => {
       if (value) {

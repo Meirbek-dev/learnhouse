@@ -183,7 +183,7 @@ export function useTestGuard({
         try {
           // Only consider clipboard events if there is an actual selection or pasted text
           if (e.type === 'copy' || e.type === 'cut') {
-            const sel = typeof window.getSelection === 'function' ? window.getSelection()?.toString() : '';
+            const sel = typeof globalThis.getSelection === 'function' ? globalThis.getSelection()?.toString() : '';
             if (!sel) return;
           }
           if (e.type === 'paste') {

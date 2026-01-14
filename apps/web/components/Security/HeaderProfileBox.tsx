@@ -60,7 +60,7 @@ export const HeaderProfileBox = () => {
 
       if (highestRole) {
         // Define role configurations based on actual database roles
-        const roleConfigs: { [key: string]: RoleInfo } = {
+        const roleConfigs: Record<string, RoleInfo> = {
           role_global_admin: {
             name: t('profile.roles.admin.name'),
             icon: <Crown size={12} />,

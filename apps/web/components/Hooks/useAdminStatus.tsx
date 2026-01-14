@@ -7,11 +7,7 @@ interface Role {
   role: {
     id: number;
     role_uuid: string;
-    rights?: {
-      [key: string]: {
-        [key: string]: boolean;
-      };
-    };
+    rights?: Record<string, Record<string, boolean>>;
   };
 }
 

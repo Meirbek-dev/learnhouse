@@ -23,7 +23,7 @@ interface ThemeProviderProps {
 export function ThemeProvider({ children, defaultThemeName = 'default', userTheme }: ThemeProviderProps) {
   // Initialize theme name and apply theme immediately during initialization
   const [themeName, setThemeName] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof globalThis.window !== 'undefined') {
       const effectiveTheme = getStoredTheme() || userTheme || defaultThemeName;
       const initialTheme = getTheme(effectiveTheme);
       applyTheme(initialTheme);
@@ -52,8 +52,8 @@ export function ThemeProvider({ children, defaultThemeName = 'default', userThem
 
     // Set new timeout for server sync (1000ms debounce)
     serverSyncTimeoutRef.current = setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(
+      if (typeof globalThis.window !== 'undefined') {
+        globalThis.dispatchEvent(
           new CustomEvent('themeChange', {
             detail: { theme },
           }),

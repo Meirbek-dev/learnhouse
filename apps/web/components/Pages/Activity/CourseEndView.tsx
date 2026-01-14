@@ -1,5 +1,5 @@
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
-import { Document, Page, Text, View, Image, pdf, StyleSheet, Font } from '@react-pdf/renderer';
+import { Document, Font, Image, Page, StyleSheet, Text, View, pdf } from '@react-pdf/renderer';
 import { ArrowLeft, BookOpen, Download, Loader2, Shield, Target, Trophy } from 'lucide-react';
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';

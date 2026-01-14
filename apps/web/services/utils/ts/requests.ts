@@ -197,7 +197,7 @@ export const revalidateTags = async (tags: string[], orgslug: string) => {
     return;
   }
 
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const baseUrl = typeof globalThis.window !== 'undefined' ? globalThis.location.origin : '';
   const endpoint = `${baseUrl}/api/revalidate`;
 
   try {

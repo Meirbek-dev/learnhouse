@@ -45,7 +45,7 @@ const OrgScripts: React.FC = () => {
   useEffect(() => {
     // Local helpers to avoid stale-dep lint warnings
     function sanitizeScriptContent(content: string): string {
-      if (typeof window === 'undefined') return '';
+      if (typeof globalThis.window === 'undefined') return '';
 
       // Register a removable hook to ensure we don't leak hooks when effect re-runs
       const afterSanitizeAttributesHook = (node: any) => {

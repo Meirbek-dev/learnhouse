@@ -81,12 +81,12 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('focusModeChange', handleFocusModeChange as EventListener);
+    globalThis.addEventListener('storage', handleStorageChange);
+    globalThis.addEventListener('focusModeChange', handleFocusModeChange as EventListener);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('focusModeChange', handleFocusModeChange as EventListener);
+      globalThis.removeEventListener('storage', handleStorageChange);
+      globalThis.removeEventListener('focusModeChange', handleFocusModeChange as EventListener);
     };
   }
 
@@ -109,7 +109,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
   useEffect(() => {
     // Scroll detection for header background
     const handleScroll = () => {
-      const { scrollY } = window;
+      const { scrollY } = globalThis;
       setIsScrolled(scrollY > 20);
     };
 

@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, Body
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, UploadFile
 
 from src.core.events.database import get_db_session
 from src.db.courses.assignments import (

@@ -94,12 +94,10 @@ export function useAIEditorDispatch(): React.Dispatch<AIEditorAction> {
   return context;
 }
 
-type AIEditorActionHandlers = {
-  [Type in AIEditorAction['type']]: (
-    state: AIEditorStateTypes,
-    action: Extract<AIEditorAction, { type: Type }>,
-  ) => AIEditorStateTypes;
-};
+type AIEditorActionHandlers = Record<
+  AIEditorAction['type'],
+  (state: AIEditorStateTypes, action: Extract<AIEditorAction, { type: Type }>) => AIEditorStateTypes
+>;
 
 const AI_EDITOR_ACTION_HANDLERS: AIEditorActionHandlers = {
   setMessages: (state, action) => ({ ...state, messages: action.payload }),

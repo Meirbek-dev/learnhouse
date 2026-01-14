@@ -24,13 +24,13 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
   const isChunkError = error?.name === 'ChunkLoadError' || /Failed to load chunk/i.test(error?.message || '');
 
   const handleRetry = () => {
-    if (typeof window === 'undefined') {
+    if (typeof globalThis.window === 'undefined') {
       reset();
       return;
     }
 
     if (isChunkError) {
-      window.location.reload();
+      globalThis.location.reload();
     } else {
       reset();
     }

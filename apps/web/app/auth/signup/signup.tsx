@@ -120,7 +120,7 @@ const LoggedInJoinScreen = (props: any) => {
         void mutate(`${getAPIUrl()}orgs/user/page/1/limit/20`);
         void mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
 
-        redirectTimeoutRef.current = window.setTimeout(() => {
+        redirectTimeoutRef.current = globalThis.setTimeout(() => {
           router.push(getUriWithOrg(org.slug, '/'));
         }, 1500);
       } else {
@@ -192,7 +192,7 @@ const LoggedInJoinScreen = (props: any) => {
           void mutate(`${getAPIUrl()}orgs/user/page/1/limit/20`);
           void mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
 
-          redirectTimeoutRef.current = window.setTimeout(() => {
+          redirectTimeoutRef.current = globalThis.setTimeout(() => {
             router.push(getUriWithOrg(org.slug, '/'));
           }, 1500);
         } else {
@@ -278,7 +278,7 @@ const NoTokenScreen = (_props: any) => {
     if (res.success) {
       toast.success(toastT('inviteCodeValid'));
       if (validateRedirectTimeoutRef.current) clearTimeout(validateRedirectTimeoutRef.current);
-      validateRedirectTimeoutRef.current = window.setTimeout(() => {
+      validateRedirectTimeoutRef.current = globalThis.setTimeout(() => {
         router.push(getUriWithoutOrg(`/signup?inviteCode=${inviteCode}&orgslug=${org.slug}`));
       }, 1500);
     } else {
