@@ -213,7 +213,7 @@ const OrgUsers = () => {
                               if (currentUserPriority < targetPriority)
                                 return <div className="text-neutral-500">{t('cannotManageHigherRole')}</div>;
                               if (isSelf)
-                                return <div className="text-neutral-500">{t('cannMaintainerotEditSelf')}</div>;
+                                return <div className="text-neutral-500">{t('cannotEditSelf')}</div>;
                               return <div className="text-neutral-500">{t('noActionsForAdministrators')}</div>;
                             }
 
