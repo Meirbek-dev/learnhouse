@@ -1,13 +1,4 @@
 'use client';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectPositioner,
-  SelectTrigger,
-  SelectValue,
-} from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -167,6 +158,7 @@ const OrgEditGeneral: FC = () => {
                           <Input
                             placeholder={t('Form.namePlaceholder')}
                             maxLength={60}
+                            disabled
                             {...field}
                           />
                         </FormControl>
@@ -193,43 +185,6 @@ const OrgEditGeneral: FC = () => {
                             {...field}
                           />
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="label"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('Form.labelLabel')}</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                          items={getOrgLabels(t)}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder={t('Form.labelPlaceholder')} />
-                            </SelectTrigger>
-                          </FormControl>
-
-                          <SelectPositioner>
-                            <SelectContent>
-                              <SelectGroup>
-                                {getOrgLabels(t).map((item) => (
-                                  <SelectItem
-                                    key={item.value}
-                                    value={item.value}
-                                  >
-                                    {item.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectGroup>
-                            </SelectContent>
-                          </SelectPositioner>
-                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}

@@ -4,8 +4,8 @@ import PageLoading from '@components/Objects/Loaders/PageLoading';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { useEffect } from 'react';
 
 interface OrgLayoutProps {
   children: ReactNode;
