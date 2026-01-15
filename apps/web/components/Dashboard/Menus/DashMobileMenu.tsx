@@ -5,6 +5,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { usePaymentsEnabled } from '@components/Hooks/usePaymentsEnabled';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
+import useAdminStatus from '@components/Hooks/useAdminStatus';
 import AppLink from '@/components/ui/AppLink';
 import { useTranslations } from 'next-intl';
 
@@ -12,6 +13,11 @@ const DashMobileMenu = () => {
   const session = usePlatformSession() as any;
   const t = useTranslations('SidebarMenu');
   const { isEnabled: arePaymentsEnabled } = usePaymentsEnabled();
+  const { rights } = useAdminStatus();
+
+  // Check if user has organization management rights
+  const canManageOrganization =
+    rights?.organizations?.action_read === true || rights?.organizations?.action_update === true;
 
   return (
     <div
@@ -100,21 +106,23 @@ const DashMobileMenu = () => {
               <span className="mt-1 text-xs">{t('mobile.users')}</span>
             </AppLink>
           </ToolTip>
-          <ToolTip
-            content={t('tooltips.organization')}
-            slateBlack
-            sideOffset={8}
-            side="top"
-          >
-            <AppLink
-              href="/dash/org/settings/general"
-              className="flex flex-col items-center p-2"
-              aria-label={t('ariaLabels.organizationSettings')}
+          {canManageOrganization ? (
+            <ToolTip
+              content={t('tooltips.organization')}
+              slateBlack
+              sideOffset={8}
+              side="top"
             >
-              <School size={20} />
-              <span className="mt-1 text-xs">{t('mobile.org')}</span>
-            </AppLink>
-          </ToolTip>
+              <AppLink
+                href="/dash/org/settings/general"
+                className="flex flex-col items-center p-2"
+                aria-label={t('ariaLabels.organizationSettings')}
+              >
+                <School size={20} />
+                <span className="mt-1 text-xs">{t('mobile.org')}</span>
+              </AppLink>
+            </ToolTip>
+          ) : null}
         </AdminAuthorization>
         <ToolTip
           content={t('tooltips.userSettings', {

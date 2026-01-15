@@ -18,6 +18,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
 import platformLogoLight from '@public/platform_logo_light.svg';
 import useFeatureFlag from '@components/Hooks/useFeatureFlag';
+import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Separator } from '@/components/ui/separator';
@@ -92,6 +93,11 @@ const useNavigationItems = () => {
     path: ['features', 'payments', 'enabled'],
     defaultValue: false,
   });
+  const { rights } = useAdminStatus();
+
+  // Check if user has organization management rights
+  const canManageOrganization =
+    rights?.organizations?.action_read === true || rights?.organizations?.action_update === true;
 
   return [
     {
@@ -133,13 +139,17 @@ const useNavigationItems = () => {
           },
         ]
       : []),
-    {
-      title: t('tooltips.organization'),
-      href: '/dash/org/settings/general',
-      icon: School,
-      tooltip: t('tooltips.organization'),
-      isActive: pathname.startsWith('/dash/org'),
-    },
+    ...(canManageOrganization
+      ? [
+          {
+            title: t('tooltips.organization'),
+            href: '/dash/org/settings/general',
+            icon: School,
+            tooltip: t('tooltips.organization'),
+            isActive: pathname.startsWith('/dash/org'),
+          },
+        ]
+      : []),
   ];
 };
 
