@@ -90,7 +90,7 @@ const LoggedInJoinScreen = (props: any) => {
 
   const accessToken = session?.data?.tokens?.access_token;
   const userId = session?.data?.user?.id;
-  const redirectTimeoutRef = useRef<number | null>(null);
+  const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   async function join() {
     setIsSubmitting(true);
@@ -264,7 +264,7 @@ const NoTokenScreen = (_props: any) => {
     return !(session && org);
   });
   const initialLoadingRafRef = useRef<number | null>(null);
-  const validateRedirectTimeoutRef = useRef<number | null>(null);
+  const validateRedirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [inviteCode, setInviteCode] = useState('');
 
   const handleInviteCodeChange = (e: any) => {

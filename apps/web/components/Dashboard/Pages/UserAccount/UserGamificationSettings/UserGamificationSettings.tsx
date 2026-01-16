@@ -45,7 +45,7 @@ export default function UserGamificationSettings() {
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const saveSuccessTimeoutRef = useRef<number | null>(null);
+  const saveSuccessTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Load preferences from profile
   useEffect(() => {
     if (profile?.preferences) {

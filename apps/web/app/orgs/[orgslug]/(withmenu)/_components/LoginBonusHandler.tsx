@@ -23,7 +23,7 @@ export function LoginBonusHandler({ orgId }: LoginBonusHandlerProps) {
   const { profile, updateStreak, awardXP } = useGamificationContext();
   const [showBadge, setShowBadge] = useState(false);
 
-  const timeoutRef = useRef<number | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef<boolean>(false);
 
   useEffect(() => {
@@ -59,7 +59,7 @@ export function LoginBonusHandler({ orgId }: LoginBonusHandlerProps) {
             setShowBadge(true);
             timeoutRef.current = globalThis.setTimeout(() => {
               if (isMountedRef.current) setShowBadge(false);
-            }, 5000) as unknown as number;
+            }, 5000);
           }
         } catch (error) {
           // Non-fatal error, log and continue

@@ -112,7 +112,7 @@ export function ParticleEffect({
   const onCompleteRef = useRef(onComplete);
   const isAnimatingRef = useRef(false);
   const startRafRef = useRef<number | null>(null);
-  const endTimeoutRef = useRef<number | null>(null);
+  const endTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
   // Keep ref updated
@@ -262,7 +262,7 @@ export function XPGainAnimation({ amount, trigger, position, onComplete }: XPGai
   const [isVisible, setIsVisible] = useState(false);
   const onCompleteRef = useRef(onComplete);
   const showRafRef = useRef<number | null>(null);
-  const hideTimeoutRef = useRef<number | null>(null);
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {

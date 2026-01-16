@@ -234,11 +234,11 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
     setFocusedItemId(id);
   };
 
-  const blurTimeoutRef = useRef<number | null>(null);
+  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleInputBlur = () => {
     if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
-    blurTimeoutRef.current = globalThis.setTimeout(() => {
+    blurTimeoutRef.current = setTimeout(() => {
       const activeEl = document.activeElement;
       const isStillInComponent =
         activeEl?.classList.contains('learning-item-input') || activeEl?.closest('[data-emoji-picker="true"]');
@@ -246,7 +246,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
       if (!isStillInComponent) {
         setShowLinkInput(null);
       }
-    }, 100) as unknown as number;
+    }, 100);
   };
 
   // Ensure blur timeout cleared on unmount

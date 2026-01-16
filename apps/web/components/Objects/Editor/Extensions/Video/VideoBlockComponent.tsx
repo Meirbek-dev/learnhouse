@@ -154,7 +154,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const uploadResetTimeoutRef = useRef<number | null>(null);
+  const uploadResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [blockObject, setBlockObject] = useState<VideoBlockObject | null>(initialBlockObject || null);
   const [selectedSize, setSelectedSize] = useState<VideoSize>(initialBlockObject?.size || 'medium');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -216,7 +216,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
   };
 
   // MANUAL REVIEW: progressIntervalRef tracks simulated upload progress. If uploads can be aborted, ensure abort handling clears intervals and timeouts as well.
-  const progressIntervalRef = useRef<number | null>(null);
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const handleUpload = async (file: File) => {
     if (!access_token) return;

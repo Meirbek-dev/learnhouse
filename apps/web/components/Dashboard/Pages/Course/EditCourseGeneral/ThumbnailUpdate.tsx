@@ -37,7 +37,7 @@ interface LocalThumbnail {
 const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
-  const thumbnailDelayRef = useRef<number | null>(null);
+  const thumbnailDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const course = useCourse();
   const session = usePlatformSession() as any;
@@ -132,7 +132,7 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
 
         // Wait for backend to stabilize
         await new Promise((resolve) => {
-          thumbnailDelayRef.current = globalThis.setTimeout(resolve, 1500) as unknown as number;
+          thumbnailDelayRef.current = globalThis.setTimeout(resolve, 1500);
         });
 
         if (thumbnailDelayRef.current) {

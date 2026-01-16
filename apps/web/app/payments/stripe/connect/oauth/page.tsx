@@ -17,7 +17,7 @@ const StripeConnectCallback = () => {
   const session = usePlatformSession();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [message, setMessage] = useState('');
-  const closeTimeoutRef = useRef<number | null>(null);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const verifyConnectionEvent = useEffectEvent(async (signal?: AbortSignal) => {
     try {
@@ -45,7 +45,7 @@ const StripeConnectCallback = () => {
 
       closeTimeoutRef.current = globalThis.setTimeout(() => {
         window.close();
-      }, 2000) as unknown as number;
+      }, 2000);
     } catch (error) {
       console.error('Error verifying Stripe connection:', error);
       if (signal?.aborted) return;
