@@ -1617,7 +1617,9 @@
       "next": "Next",
       "nextAria": "Go to next page",
       "previous": "Previous",
-      "previousAria": "Go to previous page"
+      "previousAria": "Go to previous page",
+      "ellipsis": "More pages",
+      "ellipsisAria": "More pages"
     },
     "RolesUpdate": {
       "adminRole": "Admin",

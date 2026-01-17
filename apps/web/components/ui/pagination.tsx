@@ -1,13 +1,17 @@
+'use client';
+
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 function Pagination({ className, ...props }: React.ComponentProps<'nav'>) {
+  const t = useTranslations('Pagination');
   return (
     <nav
-      aria-label="pagination"
+      aria-label={t('label')}
       data-slot="pagination"
       className={cn('mx-auto flex w-full justify-center', className)}
       {...props}
@@ -59,34 +63,37 @@ function PaginationLink({ className, isActive, size = 'icon', ...props }: Pagina
 }
 
 function PaginationPrevious({ className, ...props }: React.ComponentProps<typeof PaginationLink>) {
+  const t = useTranslations('Pagination');
   return (
     <PaginationLink
-      aria-label="Go to previous page"
+      aria-label={t('previousAria')}
       size="default"
       className={cn('pl-2!', className)}
       {...props}
     >
       <ChevronLeftIcon data-icon="inline-start" />
-      <span className="hidden sm:block">Previous</span>
+      <span className="hidden sm:block">{t('previous')}</span>
     </PaginationLink>
   );
 }
 
 function PaginationNext({ className, ...props }: React.ComponentProps<typeof PaginationLink>) {
+  const t = useTranslations('Pagination');
   return (
     <PaginationLink
-      aria-label="Go to next page"
+      aria-label={t('nextAria')}
       size="default"
       className={cn('pr-2!', className)}
       {...props}
     >
-      <span className="hidden sm:block">Next</span>
+      <span className="hidden sm:block">{t('next')}</span>
       <ChevronRightIcon data-icon="inline-end" />
     </PaginationLink>
   );
 }
 
 function PaginationEllipsis({ className, ...props }: React.ComponentProps<'span'>) {
+  const t = useTranslations('Pagination');
   return (
     <span
       aria-hidden
@@ -95,7 +102,7 @@ function PaginationEllipsis({ className, ...props }: React.ComponentProps<'span'
       {...props}
     >
       <MoreHorizontalIcon />
-      <span className="sr-only">More pages</span>
+      <span className="sr-only">{t('ellipsisAria')}</span>
     </span>
   );
 }

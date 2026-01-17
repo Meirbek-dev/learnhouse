@@ -1566,7 +1566,9 @@
       "next": "Келесі",
       "nextAria": "Келесі бетке өту",
       "previous": "Алдыңғы",
-      "previousAria": "Алдыңғы бетке өту"
+      "previousAria": "Алдыңғы бетке өту",
+      "ellipsis": "Көбірек беттер",
+      "ellipsisAria": "Көбірек беттер"
     },
     "RolesUpdate": {
       "adminRole": "Әкімші",
