@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 function Pagination({ className, ...props }: React.ComponentProps<'nav'>) {
-  const t = useTranslations('Pagination');
+  const t = useTranslations('Components.Pagination');
   return (
     <nav
       aria-label={t('label')}
@@ -63,7 +63,7 @@ function PaginationLink({ className, isActive, size = 'icon', ...props }: Pagina
 }
 
 function PaginationPrevious({ className, ...props }: React.ComponentProps<typeof PaginationLink>) {
-  const t = useTranslations('Pagination');
+  const t = useTranslations('Components.Pagination');
   return (
     <PaginationLink
       aria-label={t('previousAria')}
@@ -78,7 +78,7 @@ function PaginationPrevious({ className, ...props }: React.ComponentProps<typeof
 }
 
 function PaginationNext({ className, ...props }: React.ComponentProps<typeof PaginationLink>) {
-  const t = useTranslations('Pagination');
+  const t = useTranslations('Components.Pagination');
   return (
     <PaginationLink
       aria-label={t('nextAria')}
@@ -93,7 +93,7 @@ function PaginationNext({ className, ...props }: React.ComponentProps<typeof Pag
 }
 
 function PaginationEllipsis({ className, ...props }: React.ComponentProps<'span'>) {
-  const t = useTranslations('Pagination');
+  const t = useTranslations('Components.Pagination');
   return (
     <span
       aria-hidden
