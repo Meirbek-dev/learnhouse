@@ -3,7 +3,6 @@ import { getActivityMediaDirectory } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
 import type ArtplayerType from 'artplayer';
 import { useLocale } from 'next-intl';
-import YouTube from 'react-youtube';
 
 // Function to extract YouTube video ID from various YouTube URL formats
 function getYouTubeID(url: string): string | null {
@@ -134,28 +133,21 @@ const VideoActivity = ({ activity, course }: VideoActivityProps) => {
                 onPlayerReady={(_art: ArtplayerType) => {}}
               />
             )}
-            {activity.activity_sub_type === 'SUBTYPE_VIDEO_YOUTUBE' && (
-              <YouTube
-                className="h-full w-full"
-                opts={{
-                  width: '100%',
-                  height: '100%',
-                  playerVars: {
-                    autoplay: activity.details?.autoplay ? 1 : 0,
-                    mute: activity.details?.muted ? 1 : 0,
-                    start: activity.details?.startTime || 0,
-                    end: activity.details?.endTime || undefined,
-                    controls: 1,
-                    modestbranding: 1,
-                    rel: 0,
-                  },
-                }}
-                videoId={videoId}
-                onReady={(event) => {
-                  if (activity.details?.startTime) {
-                    event.target.seekTo(activity.details.startTime, true);
-                  }
-                }}
+            {activity.activity_sub_type === 'SUBTYPE_VIDEO_YOUTUBE' && videoId && (
+              <iframe
+                className="size-full"
+                src={`https://www.youtube.com/embed/${videoId}?${new URLSearchParams({
+                  autoplay: activity.details?.autoplay ? '1' : '0',
+                  mute: activity.details?.muted ? '1' : '0',
+                  start: String(activity.details?.startTime || 0),
+                  ...(activity.details?.endTime && { end: String(activity.details.endTime) }),
+                  controls: '1',
+                  modestbranding: '1',
+                  rel: '0',
+                }).toString()}`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                title="YouTube видео-плеер"
               />
             )}
           </div>
