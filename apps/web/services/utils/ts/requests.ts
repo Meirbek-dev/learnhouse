@@ -153,6 +153,38 @@ export const swrFetcher = async (url: string, token?: string) => {
   return errorHandling(response);
 };
 
+/**
+ * SWR fetcher that returns both data and response headers.
+ * Useful for paginated endpoints that return total count in headers.
+ */
+export const swrFetcherWithHeaders = async (
+  url: string,
+  token?: string,
+): Promise<{ data: any; headers: Record<string, string> }> => {
+  const reqHeaders: Record<string, string> = {};
+  if (token) {
+    reqHeaders.Authorization = `Bearer ${token}`;
+  }
+  const options: RequestInit = {
+    method: 'GET',
+    headers: reqHeaders,
+    redirect: 'follow',
+    credentials: 'include',
+  };
+  const response = await fetch(url, options);
+  if (!response.ok) {
+    const error: any = new Error(response.statusText || 'Request failed');
+    error.status = response.status;
+    throw error;
+  }
+  const data = await response.json();
+  const resHeaders: Record<string, string> = {};
+  response.headers.forEach((value, key) => {
+    resHeaders[key.toLowerCase()] = value;
+  });
+  return { data, headers: resHeaders };
+};
+
 export const errorHandling = (res: Response) => {
   if (!res.ok) {
     const error: any = new Error(res.statusText || 'Request failed');

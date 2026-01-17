@@ -8,6 +8,11 @@ export function getTrailSwrKey(orgId: number | null | undefined) {
   return `${getAPIUrl()}trail/org/${orgId}/trail`;
 }
 
+export function getCoursesSwrKey(orgSlug: string, page: number = 1, limit: number = 12) {
+  if (!orgSlug) return '';
+  return `${getAPIUrl()}courses/org_slug/${orgSlug}/page/${page}/limit/${limit}`;
+}
+
 export function getCourseUpdatesSwrKey(course_uuid: string | null | undefined) {
   if (!course_uuid) return '';
   return `${getAPIUrl()}courses/${course_uuid}/updates`;

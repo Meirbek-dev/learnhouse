@@ -55,7 +55,7 @@ const CoursesPage = async (params: any) => {
   const session = await auth();
   const access_token = session?.tokens?.access_token;
 
-  const courses = await getOrgCourses(orgslug, undefined, access_token || null);
+  const { courses, total } = await getOrgCourses(orgslug, undefined, access_token || null);
 
   return (
     <div>
@@ -63,6 +63,7 @@ const CoursesPage = async (params: any) => {
         org_id={org.org_id}
         orgslug={orgslug}
         courses={courses}
+        totalCourses={total}
       />
     </div>
   );

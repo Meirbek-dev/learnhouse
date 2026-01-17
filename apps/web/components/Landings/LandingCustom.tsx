@@ -27,9 +27,10 @@ const LandingCustom = ({ landing, orgslug, org_id, gamificationData }: LandingCu
   const t = useTranslations('LandingCustom');
 
   // Fetch all courses for the organization
-  const { data: allCourses } = useSWR(orgslug ? [orgslug, access_token] : null, ([slug, token]) =>
+  const { data: coursesData } = useSWR(orgslug ? [orgslug, access_token] : null, ([slug, token]) =>
     getOrgCourses(slug, null, token),
   );
+  const allCourses = coursesData?.courses;
 
   const renderSection = (section: LandingSection) => {
     switch (section.type) {

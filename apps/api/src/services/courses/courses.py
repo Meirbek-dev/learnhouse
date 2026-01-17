@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from fastapi import HTTPException, Request, UploadFile, status
+from sqlalchemy import func
 from sqlmodel import Session, and_, or_, select, text
 from ulid import ULID
 
@@ -178,6 +179,58 @@ async def get_course_meta(
     return FullCourseRead.model_validate(
         {**course.model_dump(), "authors": authors, "chapters": chapters}
     )
+
+
+async def count_courses_orgslug(
+    current_user: PublicUser | AnonymousUser,
+    org_slug: str,
+    db_session: Session,
+) -> int:
+    """Count total courses for an organization with proper access filtering."""
+    # Base count query
+    query = (
+        select(func.count(Course.id.distinct()))
+        .join(Organization)
+        .where(Organization.slug == org_slug)
+    )
+
+    if isinstance(current_user, AnonymousUser):
+        # For anonymous users, only count public courses
+        query = query.where(Course.public)
+    else:
+        # For authenticated users, count:
+        # 1. Public courses
+        # 2. Courses not in any UserGroup
+        # 3. Courses in UserGroups where the user is a member
+        # 4. Courses where the user is a resource author
+        query = (
+            query.outerjoin(
+                UserGroupResource, UserGroupResource.resource_uuid == Course.course_uuid
+            )
+            .outerjoin(
+                UserGroupUser,
+                and_(
+                    UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
+                    UserGroupUser.user_id == current_user.id,
+                ),
+            )
+            .outerjoin(
+                ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid
+            )
+            .where(
+                or_(
+                    Course.public,
+                    UserGroupResource.resource_uuid
+                    is None,  # Courses not in any UserGroup
+                    UserGroupUser.user_id
+                    == current_user.id,  # Courses in UserGroups where user is a member
+                    ResourceAuthor.user_id
+                    == current_user.id,  # Courses where user is a resource author
+                )
+            )
+        )
+
+    return db_session.exec(query).one()
 
 
 async def get_courses_orgslug(

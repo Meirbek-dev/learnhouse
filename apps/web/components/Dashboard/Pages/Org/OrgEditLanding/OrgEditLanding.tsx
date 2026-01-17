@@ -2023,9 +2023,10 @@ const FeaturedCoursesEditor: FC<{
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 
-  const { data: courses } = useSWR(org?.slug ? [org.slug, access_token] : null, ([orgSlug, token]) =>
+  const { data: coursesData } = useSWR(org?.slug ? [org.slug, access_token] : null, ([orgSlug, token]) =>
     getOrgCourses(orgSlug, null, token),
   );
+  const courses = coursesData?.courses;
 
   return (
     <div className="soft-shadow space-y-6 rounded-lg bg-white p-6">

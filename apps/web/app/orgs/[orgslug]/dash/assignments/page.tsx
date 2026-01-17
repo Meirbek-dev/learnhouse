@@ -34,7 +34,8 @@ const AssignmentsHome = async (params: any) => {
   }
   const org = await getOrganizationContextInfo(orgslug, undefined, access_token);
 
-  const courses = (await getOrgCourses(orgslug, undefined, access_token)) || [];
+  const coursesData = await getOrgCourses(orgslug, undefined, access_token);
+  const courses = coursesData?.courses || [];
 
   // Fetch assignments in one batched request
   let courseAssignments: Assignment[][] = [];

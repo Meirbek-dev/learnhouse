@@ -96,6 +96,8 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
     ([orgSlug, token]) => getOrgCourses(orgSlug, null, token),
   );
 
+  const courses = coursesData?.courses;
+
   const { data: linkedCoursesData, error: linkedCoursesError } = useSWR(
     () => (orgId && accessToken ? [`/payments/${orgId}/products/${productId}/courses`, accessToken] : null),
     ([_, token]) => getCoursesLinkedToProduct(orgId, productId, token),
@@ -125,7 +127,7 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
   };
 
   const filteredCourses =
-    coursesData?.filter(
+    courses?.filter(
       (course: any) =>
         course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         course.description.toLowerCase().includes(searchTerm.toLowerCase()),

@@ -17,8 +17,14 @@ import { tags } from '@/lib/cacheTags';
 /**
  * Cached fetch for organization courses
  * Uses `use cache` directive for cacheComponents
+ * Returns both courses and total count for pagination
  */
-async function fetchOrgCourses(org_slug: string, access_token?: string) {
+async function fetchOrgCourses(
+  org_slug: string,
+  page: number = 1,
+  limit: number = 12,
+  access_token?: string,
+): Promise<{ courses: any[]; total: number }> {
   'use cache';
   cacheTag(tags.courses);
   cacheLife(CacheProfiles.courses);
@@ -28,15 +34,31 @@ async function fetchOrgCourses(org_slug: string, access_token?: string) {
     headers['Authorization'] = `Bearer ${access_token}`;
   }
 
-  const result = await fetch(`${getAPIUrl()}courses/org_slug/${org_slug}/page/1/limit/128`, {
+  const result = await fetch(`${getAPIUrl()}courses/org_slug/${org_slug}/page/${page}/limit/${limit}`, {
     method: 'GET',
     headers,
   });
-  return await errorHandling(result);
+
+  if (!result.ok) {
+    const error: any = new Error(result.statusText || 'Request failed');
+    error.status = result.status;
+    throw error;
+  }
+
+  const courses = await result.json();
+  const total = parseInt(result.headers.get('X-Total-Count') ?? '0', 10);
+
+  return { courses, total };
 }
 
-export async function getOrgCourses(org_slug: string, _next?: any, access_token?: any) {
-  return fetchOrgCourses(org_slug, access_token);
+export async function getOrgCourses(
+  org_slug: string,
+  _next?: any,
+  access_token?: any,
+  page: number = 1,
+  limit: number = 12,
+) {
+  return fetchOrgCourses(org_slug, page, limit, access_token);
 }
 
 export async function searchOrgCourses(

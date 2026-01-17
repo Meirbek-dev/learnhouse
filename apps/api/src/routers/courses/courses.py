@@ -27,6 +27,7 @@ from src.services.courses.contributors import (
     update_course_contributor,
 )
 from src.services.courses.courses import (
+    count_courses_orgslug,
     create_course,
     delete_course,
     get_course,
@@ -166,10 +167,16 @@ async def api_get_course_by_orgslug(
     Get courses by org slug with pagination
     Adds basic HTTP caching headers for public (anonymous) requests to allow
     upstream caches (nginx/CDN) to reduce load and avoid 429s.
+    Returns X-Total-Count header with total number of courses.
     """
     courses = await get_courses_orgslug(
         request, current_user, org_slug, db_session, page, limit
     )
+
+    # Get total count for pagination
+    total_count = await count_courses_orgslug(current_user, org_slug, db_session)
+    response.headers["X-Total-Count"] = str(total_count)
+    response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
 
     # Set cache headers for public responses to help upstream caching
     # and reduce the request rate to university nginx.

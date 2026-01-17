@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   }
 
   const orgInfo = await getOrganizationContextInfo(orgSlug, null);
-  const courses = await getOrgCourses(orgSlug, null);
+  const { courses } = await getOrgCourses(orgSlug, null);
   const collections = await getOrgCollections(orgInfo.id);
 
   const host = request.headers.get('host');

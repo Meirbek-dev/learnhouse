@@ -41,13 +41,13 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
         })
       : Promise.resolve(null);
 
-    const [courses, collections, gamificationData] = await Promise.all([
+    const [coursesData, collections, gamificationData] = await Promise.all([
       getOrgCourses(orgslug, undefined, access_token || null).catch((error) => {
         console.error('[LandingContent] Courses fetch failed:', {
           message: error instanceof Error ? error.message : 'Unknown error',
           orgslug,
         });
-        return [];
+        return { courses: [], total: 0 };
       }),
       getOrgCollections(org.id, access_token).catch((error) => {
         console.error('[LandingContent] Collections fetch failed:', {
@@ -58,6 +58,9 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
       }),
       gamificationPromise,
     ]);
+
+    const courses = coursesData.courses;
+    const totalCourses = coursesData.total;
 
     // Check if custom landing is enabled
     const hasCustomLanding = org.config?.config?.landing?.enabled;
@@ -72,6 +75,7 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
     ) : (
       <LandingClassic
         courses={courses}
+        totalCourses={totalCourses}
         collections={collections}
         orgslug={orgslug}
         org_id={org.id}

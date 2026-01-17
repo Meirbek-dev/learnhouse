@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 // Types
 interface LandingClassicProps {
   courses: any[];
+  totalCourses: number;
   collections: any[];
   orgslug: string;
   org_id: number;
@@ -106,12 +107,12 @@ const SectionHeader = ({ title, type, action }: { title: string; type: 'cou' | '
 );
 
 // Main Component
-const LandingClassic = async ({ courses, collections, orgslug, org_id, gamificationData }: LandingClassicProps) => {
+const LandingClassic = async ({ courses, totalCourses, collections, orgslug, org_id, gamificationData }: LandingClassicProps) => {
   const t = await getTranslations('HomePage');
   const gamificationProfile = gamificationData?.profile;
   const userRank = gamificationData?.user_rank;
 
-  const hasCourses = courses.length > 0;
+  const hasCourses = courses.length > 0 || totalCourses > 0;
   const hasCollections = collections.length > 0;
 
   return (
@@ -149,7 +150,8 @@ const LandingClassic = async ({ courses, collections, orgslug, org_id, gamificat
               <div className="min-h-[200px]">
                 {hasCourses ? (
                   <CourseGridClient
-                    courses={courses}
+                    initialCourses={courses}
+                    initialTotal={totalCourses}
                     orgslug={orgslug}
                   />
                 ) : (

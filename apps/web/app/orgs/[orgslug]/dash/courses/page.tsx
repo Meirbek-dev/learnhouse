@@ -44,7 +44,7 @@ async function CoursesPage(params: any) {
   const org = await getOrganizationContextInfo(orgslug);
   const session = await auth();
   const access_token = session?.tokens?.access_token;
-  const courses = await getOrgCourses(orgslug, undefined, access_token || null);
+  const { courses } = await getOrgCourses(orgslug, undefined, access_token || null);
 
   return (
     <CoursesHome

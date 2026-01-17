@@ -5,22 +5,18 @@ import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/Ge
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
-import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import CourseGridClient from '@components/Landings/CourseGridClient';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { swrFetcher } from '@services/utils/ts/requests';
-import { getTrailSwrKey } from '@services/courses/keys';
 
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import useSWR from 'swr';
 
 interface CourseProps {
   orgslug: string;
-  courses: any;
+  courses: any[];
+  totalCourses: number;
   org_id: number;
 }
 
@@ -51,39 +47,13 @@ const EmptyStateMessage = ({ isUserAdmin, t, newCourseButtonTrigger }: any) => (
   </div>
 );
 
-const CourseGrid = ({ courses, orgslug, trailData }: { courses: any[]; orgslug: string; trailData?: any }) => (
-  <div className="grid w-full grid-cols-1 gap-6 pb-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-    {courses.map((course: any) => (
-      <div
-        key={course.course_uuid}
-        className="mx-auto w-full max-w-[300px]"
-      >
-        <CourseThumbnail
-          course={course}
-          orgslug={orgslug}
-          trailData={trailData}
-        />
-      </div>
-    ))}
-  </div>
-);
-
 const Courses = (props: CourseProps) => {
   const t = useTranslations('CoursesPage');
-  const { orgslug, courses, org_id } = props;
+  const { orgslug, courses, totalCourses, org_id } = props;
   const searchParams = useSearchParams();
   const isCreatingCourse = Boolean(searchParams.get('new'));
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
   const isUserAdmin = useAdminStatus();
-  const session = usePlatformSession() as any;
-  const org = useOrg() as any;
-  const access_token = session?.data?.tokens?.access_token;
-
-  // Fetch trail data to show progress on course thumbnails
-  const TRAIL_KEY = org?.id ? getTrailSwrKey(org.id) : null;
-  const { data: trailData } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) =>
-    swrFetcher(url, token),
-  );
 
   async function closeNewCourseModal() {
     setNewCourseModal(false);
@@ -104,6 +74,8 @@ const Courses = (props: CourseProps) => {
       />
     </AuthenticatedClientElement>
   );
+
+  const hasCourses = courses.length > 0 || totalCourses > 0;
 
   return (
     <div className="w-full">
@@ -132,17 +104,17 @@ const Courses = (props: CourseProps) => {
             dialogDescription={t('createCourseDescription')}
           />
 
-          {courses.length === 0 ? (
+          {!hasCourses ? (
             <EmptyStateMessage
               isUserAdmin={isUserAdmin}
               t={t}
               newCourseButtonTrigger={newCourseButtonTrigger}
             />
           ) : (
-            <CourseGrid
-              courses={courses}
+            <CourseGridClient
+              initialCourses={courses}
+              initialTotal={totalCourses}
               orgslug={orgslug}
-              trailData={trailData}
             />
           )}
         </div>
