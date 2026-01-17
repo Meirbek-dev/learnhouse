@@ -92,6 +92,18 @@ class OrganizationUser(PydanticStrictBaseModel):
     role: RoleRead
 
 
+class PaginatedOrganizationUsers(PydanticStrictBaseModel):
+    """Paginated response for organization users."""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    users: list[OrganizationUser]
+    total: int
+    page: int
+    per_page: int
+    total_pages: int
+
+
 def rebuild_organization_models() -> None:
     """Rebuild organization models to resolve forward references."""
     from src.db.users import UserRead

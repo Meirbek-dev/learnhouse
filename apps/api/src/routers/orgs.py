@@ -10,6 +10,7 @@ from src.db.organizations import (
     OrganizationRead,
     OrganizationUpdate,
     OrganizationUser,
+    PaginatedOrganizationUsers,
 )
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
@@ -98,11 +99,15 @@ async def api_get_org_users(
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
-) -> list[OrganizationUser]:
+    page: int = 1,
+    per_page: int = 20,
+) -> PaginatedOrganizationUsers:
     """
-    Get single Org by ID
+    Get organization users with pagination
     """
-    return await get_organization_users(request, org_id, db_session, current_user)
+    return await get_organization_users(
+        request, org_id, db_session, current_user, page, per_page
+    )
 
 
 @router.post("/join")

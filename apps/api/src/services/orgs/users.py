@@ -10,6 +10,7 @@ from src.db.organizations import (
     Organization,
     OrganizationRead,
     OrganizationUser,
+    PaginatedOrganizationUsers,
     rebuild_organization_models,
 )
 from src.db.roles import Role, RoleRead
@@ -29,7 +30,9 @@ async def get_organization_users(
     org_id: int,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
-) -> list[OrganizationUser]:
+    page: int = 1,
+    per_page: int = 20,
+) -> PaginatedOrganizationUsers:
     # Convert org_id to int for proper type matching with database
     org_id_int = int(org_id)
 
@@ -47,14 +50,22 @@ async def get_organization_users(
     # RBAC check
     await rbac_check(request, org.org_uuid, current_user, "read", db_session)
 
-    statement = (
+    # Build base query
+    base_statement = (
         select(User)
         .join(UserOrganization)
         .join(Organization)
         .where(Organization.id == org_id_int)
     )
-    users = db_session.exec(statement)
-    users = users.all()
+
+    # Get total count
+    all_users = db_session.exec(base_statement).all()
+    total = len(all_users)
+
+    # Apply pagination
+    offset = (page - 1) * per_page
+    paginated_statement = base_statement.offset(offset).limit(per_page)
+    users = db_session.exec(paginated_statement).all()
 
     org_users_list = []
 
@@ -103,7 +114,15 @@ async def get_organization_users(
 
         org_users_list.append(org_user)
 
-    return org_users_list
+    total_pages = (total + per_page - 1) // per_page if total > 0 else 1
+
+    return PaginatedOrganizationUsers(
+        users=org_users_list,
+        total=total,
+        page=page,
+        per_page=per_page,
+        total_pages=total_pages,
+    )
 
 
 async def remove_user_from_org(
