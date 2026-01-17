@@ -18,7 +18,7 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import { useState, useMemo } from 'react';
 import useSWR from 'swr';
 
-const COURSES_PER_PAGE = 12;
+const COURSES_PER_PAGE = 20;
 
 interface CourseGridClientProps {
   initialCourses: any[];
