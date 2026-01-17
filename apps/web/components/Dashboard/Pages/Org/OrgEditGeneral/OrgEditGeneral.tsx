@@ -17,79 +17,15 @@ import { toast } from 'sonner';
 import { mutate } from 'swr';
 import * as z from 'zod';
 
-const ORG_LABELS = [
-  { value: 'languages', label: '🌐 Languages' },
-  { value: 'business', label: '💰 Business' },
-  { value: 'ecommerce', label: '🛍️ E-commerce' },
-  { value: 'gaming', label: '🎮 Gaming' },
-  { value: 'music', label: '🎸 Music' },
-  { value: 'sports', label: '⚽️ Sports' },
-  { value: 'cars', label: '🚗 Cars' },
-  { value: 'sales_marketing', label: '🚀 Sales & Marketing' },
-  { value: 'tech', label: '💻 Tech' },
-  { value: 'photo_video', label: '📸 Photo & Video' },
-  { value: 'pets', label: '🐾 Pets' },
-  { value: 'personal_development', label: '📚 Personal Development' },
-  { value: 'real_estate', label: '🏠 Real Estate' },
-  { value: 'beauty_fashion', label: '👠 Beauty & Fashion' },
-  { value: 'travel', label: '✈️ Travel' },
-  { value: 'productivity', label: '⏳ Productivity' },
-  { value: 'health_fitness', label: '🍎 Health & Fitness' },
-  { value: 'finance', label: '📈 Finance' },
-  { value: 'arts_crafts', label: '🎨 Arts & Crafts' },
-  { value: 'education', label: '📚 Education' },
-  { value: 'stem', label: '🔬 STEM' },
-  { value: 'humanities', label: '📖 Humanities' },
-  { value: 'professional_skills', label: '💼 Professional Skills' },
-  { value: 'digital_skills', label: '🖥️ Digital Skills' },
-  { value: 'creative_arts', label: '🎨 Creative Arts' },
-  { value: 'social_sciences', label: '🌍 Social Sciences' },
-  { value: 'test_prep', label: '✍️ Test Prep' },
-  { value: 'vocational', label: '🔧 Vocational Training' },
-  { value: 'early_education', label: '🎯 Early Education' },
-] as const;
-
-const getOrgLabels = (t: Function) =>
-  ORG_LABELS.map((item) => {
-    try {
-      // Try to get the translated version
-      const translatedLabel = t(`OrgLabels.${item.value}` as any);
-      // If translation exists and is not the key itself, use it
-      if (translatedLabel && !translatedLabel.startsWith('OrgLabels.')) {
-        return {
-          value: item.value,
-          label: translatedLabel,
-        };
-      }
-      // Fallback to hardcoded label
-      return {
-        value: item.value,
-        label: item.label,
-      };
-    } catch {
-      // If translation fails, use hardcoded label
-      return {
-        value: item.value,
-        label: item.label,
-      };
-    }
-  });
-
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   z.object({
-    name: z.string().min(1, t('Form.nameRequired')).max(60, t('Form.nameMax')),
     description: z.string().min(1, t('Form.descriptionRequired')).max(100, t('Form.descriptionMax')),
     about: z.string().max(400, t('Form.aboutMax')).optional().or(z.literal('')),
-    label: z.string().min(1, t('Form.labelRequired')),
-    explore: z.boolean(),
   });
 
 interface OrganizationValues {
-  name: string;
   description: string;
   about?: string;
-  label: string;
-  explore: boolean;
 }
 
 const OrgEditGeneral: FC = () => {
@@ -102,11 +38,8 @@ const OrgEditGeneral: FC = () => {
   const form = useForm<OrganizationValues>({
     resolver: zodResolver(validationSchema),
     defaultValues: {
-      name: org?.name || '',
       description: org?.description || '',
       about: org?.about || '',
-      label: org?.label || 'education',
-      explore: org?.explore ?? false,
     },
   });
   const [isPending, startTransition] = useTransition();
@@ -131,7 +64,7 @@ const OrgEditGeneral: FC = () => {
   };
 
   return (
-    <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
+    <div className="soft-shadow m-1 rounded-xl bg-white sm:mx-10">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(updateOrg)}>
           <div className="flex flex-col gap-0">
@@ -143,30 +76,6 @@ const OrgEditGeneral: FC = () => {
             <div className="mx-5 my-5 mt-0 flex flex-col lg:flex-row lg:space-x-8">
               <div className="w-full space-y-6">
                 <div className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          {t('Form.nameLabel')}
-                          <span className="text-sm text-gray-500">
-                            ({60 - (field.value?.length || 0)} {t('Form.charsLeft')})
-                          </span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={t('Form.namePlaceholder')}
-                            maxLength={60}
-                            disabled
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
                   <FormField
                     control={form.control}
                     name="description"
