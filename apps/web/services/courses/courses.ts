@@ -21,8 +21,8 @@ import { tags } from '@/lib/cacheTags';
  */
 async function fetchOrgCourses(
   org_slug: string,
-  page: number = 1,
-  limit: number = 12,
+  page = 1,
+  limit = 12,
   access_token?: string,
 ): Promise<{ courses: any[]; total: number }> {
   'use cache';
@@ -46,18 +46,12 @@ async function fetchOrgCourses(
   }
 
   const courses = await result.json();
-  const total = parseInt(result.headers.get('X-Total-Count') ?? '0', 10);
+  const total = Number.parseInt(result.headers.get('X-Total-Count') ?? '0', 10);
 
   return { courses, total };
 }
 
-export async function getOrgCourses(
-  org_slug: string,
-  _next?: any,
-  access_token?: any,
-  page: number = 1,
-  limit: number = 12,
-) {
+export async function getOrgCourses(org_slug: string, _next?: any, access_token?: any, page = 1, limit = 12) {
   return fetchOrgCourses(org_slug, page, limit, access_token);
 }
 

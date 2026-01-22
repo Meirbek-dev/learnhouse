@@ -59,7 +59,7 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
       gamificationPromise,
     ]);
 
-    const courses = coursesData.courses;
+    const { courses } = coursesData;
     const totalCourses = coursesData.total;
 
     // Check if custom landing is enabled

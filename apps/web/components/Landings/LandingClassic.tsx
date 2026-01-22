@@ -107,7 +107,14 @@ const SectionHeader = ({ title, type, action }: { title: string; type: 'cou' | '
 );
 
 // Main Component
-const LandingClassic = async ({ courses, totalCourses, collections, orgslug, org_id, gamificationData }: LandingClassicProps) => {
+const LandingClassic = async ({
+  courses,
+  totalCourses,
+  collections,
+  orgslug,
+  org_id,
+  gamificationData,
+}: LandingClassicProps) => {
   const t = await getTranslations('HomePage');
   const gamificationProfile = gamificationData?.profile;
   const userRank = gamificationData?.user_rank;

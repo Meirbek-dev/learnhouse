@@ -29,13 +29,13 @@ import { AlertTriangle, KeyRound, Loader2, LogOut, Search } from 'lucide-react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { removeUserFromOrg } from '@services/organizations/orgs';
+import React, { useMemo, useState, useTransition } from 'react';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import React, { useMemo, useState, useTransition } from 'react';
-import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
+import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 
@@ -143,9 +143,8 @@ const OrgUsers = () => {
     data: orgUsersData,
     error,
     isLoading,
-  } = useSWR(
-    org ? `${getAPIUrl()}orgs/${org?.id}/users?page=${currentPage}&per_page=${USERS_PER_PAGE}` : null,
-    (url) => swrFetcher(url, access_token)
+  } = useSWR(org ? `${getAPIUrl()}orgs/${org?.id}/users?page=${currentPage}&per_page=${USERS_PER_PAGE}` : null, (url) =>
+    swrFetcher(url, access_token),
   );
 
   const totalUsers = orgUsersData?.total ?? 0;
@@ -362,7 +361,7 @@ const OrgUsers = () => {
                       })
                       .map((page, idx, arr) => {
                         const prev = arr[idx - 1];
-                        const showEllipsisBefore = idx > 0 && prev != null && page - prev > 1;
+                        const showEllipsisBefore = idx > 0 && typeof prev !== 'undefined' && page - prev > 1;
                         return (
                           <React.Fragment key={page}>
                             {showEllipsisBefore && (

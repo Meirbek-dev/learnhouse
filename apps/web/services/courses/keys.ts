@@ -8,7 +8,7 @@ export function getTrailSwrKey(orgId: number | null | undefined) {
   return `${getAPIUrl()}trail/org/${orgId}/trail`;
 }
 
-export function getCoursesSwrKey(orgSlug: string, page: number = 1, limit: number = 12) {
+export function getCoursesSwrKey(orgSlug: string, page = 1, limit = 12) {
   if (!orgSlug) return '';
   return `${getAPIUrl()}courses/org_slug/${orgSlug}/page/${page}/limit/${limit}`;
 }

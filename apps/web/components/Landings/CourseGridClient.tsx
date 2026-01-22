@@ -11,11 +11,11 @@ import {
 } from '@/components/ui/pagination';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { swrFetcherWithHeaders } from '@services/utils/ts/requests';
 import { getCoursesSwrKey, getTrailSwrKey } from '@services/courses/keys';
+import { swrFetcherWithHeaders } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 
 const COURSES_PER_PAGE = 20;
@@ -42,12 +42,13 @@ export default function CourseGridClient({ initialCourses, initialTotal, orgslug
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       dedupingInterval: 60_000,
-      fallbackData: page === 1 ? { data: initialCourses, headers: { 'x-total-count': String(initialTotal) } } : undefined,
+      fallbackData:
+        page === 1 ? { data: initialCourses, headers: { 'x-total-count': String(initialTotal) } } : undefined,
     },
   );
 
   const courses = coursesResponse?.data ?? initialCourses;
-  const totalCount = parseInt(coursesResponse?.headers?.['x-total-count'] ?? String(initialTotal), 10);
+  const totalCount = Number.parseInt(coursesResponse?.headers?.['x-total-count'] ?? String(initialTotal), 10);
   const totalPages = Math.ceil(totalCount / COURSES_PER_PAGE);
 
   // Fetch trail data to show progress on course thumbnails
@@ -70,14 +71,14 @@ export default function CourseGridClient({ initialCourses, initialTotal, orgslug
     const range: (number | 'ellipsis')[] = [];
     const rangeWithDots: (number | 'ellipsis')[] = [];
 
-    for (let i = Math.max(2, page - delta); i <= Math.min(totalPages - 1, page + delta); i++) {
+    for (let i = Math.max(2, page - delta); i <= Math.min(totalPages - 1, page + delta); i += 1) {
       range.push(i);
     }
 
     if (page - delta > 2) {
       rangeWithDots.push(1, 'ellipsis');
     } else {
-      for (let i = 1; i < Math.max(2, page - delta); i++) {
+      for (let i = 1; i < Math.max(2, page - delta); i += 1) {
         rangeWithDots.push(i);
       }
     }
@@ -87,7 +88,7 @@ export default function CourseGridClient({ initialCourses, initialTotal, orgslug
     if (page + delta < totalPages - 1) {
       rangeWithDots.push('ellipsis', totalPages);
     } else {
-      for (let i = Math.min(totalPages - 1, page + delta) + 1; i <= totalPages; i++) {
+      for (let i = Math.min(totalPages - 1, page + delta) + 1; i <= totalPages; i += 1) {
         rangeWithDots.push(i);
       }
     }
