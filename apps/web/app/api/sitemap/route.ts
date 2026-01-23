@@ -13,7 +13,20 @@ export async function GET(request: NextRequest) {
   }
 
   const orgInfo = await getOrganizationContextInfo(orgSlug, null);
-  const { courses } = await getOrgCourses(orgSlug, null);
+
+  // Fetch all courses with pagination (20 per page)
+  const COURSES_PER_PAGE = 20;
+  const allCourses: { course_uuid: string }[] = [];
+  let page = 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { courses: pageCourses, total } = await getOrgCourses(orgSlug, null, null, page, COURSES_PER_PAGE);
+    allCourses.push(...pageCourses);
+    hasMore = page * COURSES_PER_PAGE < total;
+    page++;
+  }
+
   const collections = await getOrgCollections(orgInfo.id);
 
   const host = request.headers.get('host');
@@ -28,7 +41,7 @@ export async function GET(request: NextRequest) {
     { loc: `${baseUrl}collections`, priority: 0.9, changefreq: 'weekly' },
     { loc: `${baseUrl}courses`, priority: 0.9, changefreq: 'weekly' },
     // Courses
-    ...courses.map((course: { course_uuid: string }) => ({
+    ...allCourses.map((course) => ({
       loc: `${baseUrl}course/${course.course_uuid.replace('course_', '')}`,
       priority: 0.7,
       changefreq: 'weekly',
