@@ -56,7 +56,7 @@ async def test_update_user_invalidates_cache(monkeypatch):
     # Mock _get_user_by_field to return a user
     user = SimpleNamespace(id=3, username="charlie", user_uuid="user_3")
 
-    async def fake_get_user(db, field, value):
+    async def fake_get_user(db, field, value, use_cache=True):
         return user
 
     monkeypatch.setattr("src.services.users.users._get_user_by_field", fake_get_user)
@@ -91,9 +91,27 @@ async def test_update_user_bypasses_cache(monkeypatch):
 
     async def fake_get_user(db, field, value, use_cache=True):
         called["use_cache"] = use_cache
-        return SimpleNamespace(id=value, username="u", user_uuid="user_1")
+        return SimpleNamespace(
+            id=value,
+            username="u",
+            user_uuid="user_1",
+            email="test@example.com",
+            first_name="Test",
+            last_name="User",
+        )
 
     monkeypatch.setattr("src.services.users.users._get_user_by_field", fake_get_user)
+
+    # Mock validation functions to avoid DB interaction
+    async def fake_validate(*args, **kwargs):
+        pass
+
+    monkeypatch.setattr(
+        "src.services.users.users._validate_unique_username", fake_validate
+    )
+    monkeypatch.setattr(
+        "src.services.users.users._validate_unique_email", fake_validate
+    )
 
     current_user = SimpleNamespace(id=1, user_uuid="user_1")
     db_session = Mock()

@@ -120,7 +120,7 @@ def install_default_elements(db_session: Session) -> bool:
     )
 
     role_global_maintainer = Role(
-        name="Maintainer",
+        name="Модератор",
         description="Менеджер среднего звена, широкие полномочия, но нет контроля над платформой",
         id=2,
         role_type=RoleTypeEnum.TYPE_GLOBAL,
