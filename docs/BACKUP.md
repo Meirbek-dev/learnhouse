@@ -121,13 +121,15 @@ DROPBOX_REFRESH_TOKEN="your-refresh-token"
 
 ## Restoring from Backup
 
-### 1. Stop the Application
+### On Linux/macOS
+
+#### 1. Stop the Application
 
 ```bash
 docker compose down
 ```
 
-### 2. Extract the Backup
+#### 2. Extract the Backup
 
 ```bash
 # Extract to a temporary directory (use the actual backup filename or the symlink)
@@ -142,7 +144,7 @@ tar --zstd -xf ./backups/backup-openu-latest.tar.gz -C temp-restore
 # tar -xzf ./backups/backup-openu-YYYY-MM-DDTHH-MM-SS.tar.gz -C temp-restore
 ```
 
-### 3. Restore Specific Volumes
+#### 3. Restore Specific Volumes
 
 ```bash
 # Restore PostgreSQL data
@@ -161,17 +163,254 @@ docker run --rm -v openu-dev_app_content:/data -v ${PWD}/temp-restore/backup/app
 docker run --rm -v openu-dev_app_logs:/data -v ${PWD}/temp-restore/backup/app_logs:/backup alpine sh -c "cd /data && cp -a /backup/* ."
 ```
 
-### 4. Start the Application
+#### 4. Start the Application
 
 ```bash
 docker compose up -d
 ```
 
-### 5. Clean Up
+#### 5. Clean Up
 
 ```bash
-Remove-Item -Recurse -Force temp-restore
+rm -rf temp-restore
 ```
+
+---
+
+### On Windows (PowerShell)
+
+#### Prerequisites
+
+1. **Docker Desktop** installed and running
+2. **7-Zip** or **zstd** installed for extracting `.tar.zst` files
+   - Option A: Install 7-Zip from <https://www.7-zip.org/>
+   - Option B: Install zstd via `winget install -e --id Gyan.ZStd`
+
+#### 1. Transfer the Backup File
+
+Copy the backup file from the original machine to your new Windows machine:
+
+```powershell
+# Example: Copy to X:\ashyq-bilim\backups directory
+# Place your backup-2026-01-23T02-00-00.tar.zst file in the backups folder
+```
+
+#### 2. Stop the Application
+
+```powershell
+# Navigate to project directory
+cd X:\ashyq-bilim
+
+# Stop all containers
+docker compose down
+```
+
+#### 3. Extract the Backup Archive
+
+> **⚠️ Important Note About Symbolic Links**
+>
+> PostgreSQL backups contain symbolic links in the data directory. When extracting with 7-Zip,
+> you may see warnings like:
+>
+> `Skipping the potentially unsafe \backup\postgres\data -> . link`
+>
+> This is normal. You have two options:
+>
+> 1. **Enable symlink extraction in 7-Zip** (see Option A below) - Required for full restoration
+> 2. **Use tar from Git Bash or WSL** (see Option D below) - Recommended, handles symlinks automatically
+
+**Option A: Using 7-Zip (GUI) - With Symlink Support**
+
+1. Right-click on `backup-2026-01-23T02-00-00.tar.zst`
+2. Select "7-Zip" → "Extract Here" (this extracts the .zst to .tar)
+3. Right-click on the resulting `.tar` file
+4. Select "7-Zip" → "Extract files..."
+5. In the Extract dialog:
+   - Set "Extract to:" as `temp-restore`
+   - **Important:** Click the "..." button next to the path
+   - In the options dialog, check **"Allow absolute paths in symbolic links"**
+   - Click OK to extract
+
+**Option B: Using 7-Zip (Command Line) - With Symlink Support**
+
+```powershell
+# Extract in two steps: first decompress zstd, then extract tar
+& "C:\Program Files\7-Zip\7z.exe" x .\backups\backup-2026-01-23T02-00-00.tar.zst -o.\
+& "C:\Program Files\7-Zip\7z.exe" x .\backup-2026-01-23T02-00-00.tar -o.\temp-restore -snl
+# Note: -snl flag enables symbolic link support
+```
+
+**Option C: Using zstd CLI + PowerShell tar**
+
+```powershell
+# Install zstd if not already installed
+winget install -e --id Gyan.ZStd
+
+# Create extraction directory
+New-Item -ItemType Directory -Force -Path temp-restore
+
+# Extract the archive
+zstd -d .\backups\backup-2026-01-23T02-00-00.tar.zst
+tar -xf .\backups\backup-2026-01-23T02-00-00.tar -C temp-restore
+```
+
+**Option D: Using Git Bash or WSL (Recommended)**
+
+If you have Git Bash or WSL installed, this is the simplest and most reliable method:
+
+```bash
+# In Git Bash or WSL terminal
+mkdir -p temp-restore
+tar --zstd -xf ./backups/backup-2026-01-23T02-00-00.tar.zst -C temp-restore
+```
+
+After extraction, you should have the following structure:
+
+```
+temp-restore/
+  backup/
+    postgres/
+    redis/
+    chromadb/
+    app_content/
+    app_logs/
+    judge0_box/
+```
+
+#### 4. Identify Docker Volume Names
+
+Docker volumes are prefixed with the project directory name. Check your volume names:
+
+```powershell
+# List all Docker volumes
+docker volume ls
+
+# Look for volumes like:
+# ashyq-bilim_postgres_data
+# ashyq-bilim_redis_data
+# ashyq-bilim_chromadb_data
+# ashyq-bilim_app_content
+# ashyq-bilim_app_logs
+# ashyq-bilim_judge0_box
+```
+
+Note the prefix (e.g., `ashyq-bilim_`) - you'll need this for the next step.
+
+#### 5. Restore Each Volume
+
+Replace `ashyq-bilim` with your actual volume prefix if different:
+
+```powershell
+# Get the current directory path
+$backupPath = (Get-Location).Path + "\temp-restore\backup"
+
+# Restore PostgreSQL data
+docker run --rm `
+  -v ashyq-bilim_postgres_data:/data `
+  -v "${backupPath}\postgres:/backup" `
+  alpine sh -c "cd /data && cp -a /backup/* ."
+
+# Restore Redis data
+docker run --rm `
+  -v ashyq-bilim_redis_data:/data `
+  -v "${backupPath}\redis:/backup" `
+  alpine sh -c "cd /data && cp -a /backup/* ."
+
+# Restore ChromaDB data
+docker run --rm `
+  -v ashyq-bilim_chromadb_data:/data `
+  -v "${backupPath}\chromadb:/backup" `
+  alpine sh -c "cd /data && cp -a /backup/* ."
+
+# Restore app content (user uploads, org data)
+docker run --rm `
+  -v ashyq-bilim_app_content:/data `
+  -v "${backupPath}\app_content:/backup" `
+  alpine sh -c "cd /data && cp -a /backup/* ."
+
+# Restore app logs
+docker run --rm `
+  -v ashyq-bilim_app_logs:/data `
+  -v "${backupPath}\app_logs:/backup" `
+  alpine sh -c "cd /data && cp -a /backup/* ."
+
+# Restore Judge0 box (optional, if you have coding activities)
+docker run --rm `
+  -v ashyq-bilim_judge0_box:/data `
+  -v "${backupPath}\judge0_box:/backup" `
+  alpine sh -c "cd /data && cp -a /backup/* ."
+```
+
+#### 6. Start the Application
+
+```powershell
+docker compose up -d
+```
+
+#### 7. Verify the Restoration
+
+```powershell
+# Check container status
+docker compose ps
+
+# View logs to ensure everything started correctly
+docker compose logs -f
+
+# Test database connection
+docker compose exec db psql -U openu -d openu -c "SELECT COUNT(*) FROM pg_tables;"
+```
+
+#### 8. Clean Up
+
+```powershell
+# Remove the extracted backup directory
+Remove-Item -Recurse -Force temp-restore
+
+# Optionally remove the extracted .tar file if you used 7-Zip
+Remove-Item .\backups\backup-2026-01-23T02-00-00.tar -ErrorAction SilentlyContinue
+```
+
+### Troubleshooting Restoration on Windows
+
+#### Volume Path Issues
+
+If you get "invalid mount config" errors, ensure paths use forward slashes in Docker commands:
+
+```powershell
+# Convert Windows path to Docker-compatible format
+$backupPath = (Get-Location).Path.Replace('\', '/') + "/temp-restore/backup"
+```
+
+#### Permission Denied
+
+If restoration fails with permission errors, try running PowerShell as Administrator.
+
+#### Empty Volumes After Restoration
+
+Verify the backup structure:
+
+```powershell
+# List backup contents
+Get-ChildItem -Recurse .\temp-restore\backup
+```
+
+Ensure each subdirectory (postgres, redis, etc.) contains files before attempting restoration.
+
+#### Container Won't Start After Restoration
+
+Check logs for specific errors:
+
+```powershell
+# View logs for a specific service
+docker compose logs db
+docker compose logs redis
+```
+
+Common issues:
+
+- PostgreSQL version mismatch (backup from newer version than container)
+- Corrupted data files (try restoring from an older backup)
+- Insufficient disk space
 
 ## Manual Backup
 
