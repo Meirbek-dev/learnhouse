@@ -72,7 +72,9 @@ class OrganizationPolicy(BasePolicy):
 
         return False
 
-    def _resolve_org_id(self, resource_id: str | None, context: dict | None) -> int | None:
+    def _resolve_org_id(
+        self, resource_id: str | None, context: dict | None
+    ) -> int | None:
         """
         Resolve organization ID from resource_id or context.
 
@@ -92,9 +94,10 @@ class OrganizationPolicy(BasePolicy):
                 return int(resource_id)
 
             # Try as org_uuid
-            statement = select(Organization.id).where(Organization.org_uuid == resource_id)
-            result = self.db.exec(statement).first()
-            return result
+            statement = select(Organization.id).where(
+                Organization.org_uuid == resource_id
+            )
+            return self.db.exec(statement).first()
 
         return None
 
@@ -217,8 +220,7 @@ class OrganizationPolicy(BasePolicy):
             )
             .order_by(RoleNew.priority.desc())
         )
-        result = self.db.exec(statement).first()
-        return result
+        return self.db.exec(statement).first()
 
     def get_org_members_count(self, org_id: int) -> int:
         """
@@ -232,6 +234,8 @@ class OrganizationPolicy(BasePolicy):
         """
         from sqlalchemy import func
 
-        statement = select(func.count(UserRole.user_id.distinct())).where(UserRole.org_id == org_id)
+        statement = select(func.count(UserRole.user_id.distinct())).where(
+            UserRole.org_id == org_id
+        )
         result = self.db.exec(statement).first()
         return result or 0

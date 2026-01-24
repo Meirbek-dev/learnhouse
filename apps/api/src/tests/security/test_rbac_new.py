@@ -148,7 +148,9 @@ class TestPermissionChecker:
         """check() should pass resource_id to policy engine."""
         checker = PermissionChecker(mock_db)
 
-        with patch.object(checker.policy_engine, "evaluate", return_value=True) as mock_eval:
+        with patch.object(
+            checker.policy_engine, "evaluate", return_value=True
+        ) as mock_eval:
             result = checker.check(
                 mock_public_user,
                 Action.UPDATE,
@@ -164,7 +166,9 @@ class TestPermissionChecker:
         """check() should pass org_id to policy engine."""
         checker = PermissionChecker(mock_db)
 
-        with patch.object(checker.policy_engine, "evaluate", return_value=True) as mock_eval:
+        with patch.object(
+            checker.policy_engine, "evaluate", return_value=True
+        ) as mock_eval:
             result = checker.check(
                 mock_public_user,
                 Action.CREATE,
@@ -194,7 +198,9 @@ class TestPolicyEngine:
     def test_anonymous_access_read_collection(self, mock_db):
         """Anonymous users should be able to read collections."""
         engine = PolicyEngine(mock_db)
-        result = engine._check_anonymous_access(Action.READ, ResourceType.COLLECTION, None)
+        result = engine._check_anonymous_access(
+            Action.READ, ResourceType.COLLECTION, None
+        )
         assert result is True
 
     def test_anonymous_no_write_access(self, mock_db):
@@ -302,20 +308,20 @@ class TestPermissionService:
 
         service = PermissionService(mock_db)
         data = PermissionCreate(
-            name="test:create:all",
+            name="course:create:all",
             resource_type=ResourceType.COURSE,
             action=Action.CREATE,
             scope=Scope.ALL,
         )
 
         # Mock refresh to populate the ID
-        def mock_refresh(obj):
+        def mock_refresh(obj) -> None:
             obj.id = 1
 
         mock_db.refresh.side_effect = mock_refresh
 
         result = service.create(data)
-        assert result.name == "test:create:all"
+        assert result.name == "course:create:all"
         mock_db.add.assert_called_once()
         mock_db.commit.assert_called_once()
 
@@ -328,8 +334,7 @@ class TestPermissionService:
 
         service = PermissionService(mock_db)
         result = service.get_or_create(
-            name="course:create:org",
-            resource_type=ResourceType.COURSE,
+            resource=ResourceType.COURSE,
             action=Action.CREATE,
             scope=Scope.ORG,
         )
@@ -343,11 +348,19 @@ class TestPermissionIntegration:
 
     def test_permission_name_format(self):
         """Permission names should follow resource:action:scope format."""
-        from src.types import permission_name
+        # Use the PermissionService helper function
+        from src.services.permissions.permission_service import PermissionService
 
-        # This would be a helper function
-        name = f"{ResourceType.COURSE.value}:{Action.CREATE.value}:{Scope.ORG.value}"
+        name = PermissionService.build_permission_name(
+            ResourceType.COURSE, Action.CREATE, Scope.ORG
+        )
         assert name == "course:create:org"
+
+        # Also test manual format
+        manual_name = (
+            f"{ResourceType.COURSE.value}:{Action.CREATE.value}:{Scope.ORG.value}"
+        )
+        assert manual_name == "course:create:org"
 
     def test_role_hierarchy_concept(self):
         """Roles can have parent roles for permission inheritance."""

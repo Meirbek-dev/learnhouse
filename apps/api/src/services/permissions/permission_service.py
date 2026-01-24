@@ -14,14 +14,14 @@ from src.db.permissions.models import Permission, PermissionCreate, PermissionRe
 class PermissionService:
     """Service for managing permission definitions."""
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     @staticmethod
     def build_permission_name(
-        resource: ResourceType,
-        action: Action,
-        scope: Scope = Scope.ALL,
+        resource: ResourceType | str,
+        action: Action | str,
+        scope: Scope | str = Scope.ALL,
     ) -> str:
         """
         Build a permission name string from components.
@@ -29,7 +29,10 @@ class PermissionService:
         Format: resource:action:scope
         Example: course:create:org
         """
-        return f"{resource.value}:{action.value}:{scope.value}"
+        resource_val = resource.value if hasattr(resource, "value") else resource
+        action_val = action.value if hasattr(action, "value") else action
+        scope_val = scope.value if hasattr(scope, "value") else scope
+        return f"{resource_val}:{action_val}:{scope_val}"
 
     @staticmethod
     def parse_permission_name(name: str) -> tuple[ResourceType, Action, Scope]:
@@ -47,7 +50,8 @@ class PermissionService:
         """
         parts = name.split(":")
         if len(parts) != 3:
-            raise ValueError(f"Invalid permission name format: {name}")
+            msg = f"Invalid permission name format: {name}"
+            raise ValueError(msg)
 
         return (
             ResourceType(parts[0]),
@@ -101,7 +105,9 @@ class PermissionService:
         self.db.refresh(permission)
         return permission
 
-    def list_all(self, resource_type: ResourceType | None = None) -> list[PermissionRead]:
+    def list_all(
+        self, resource_type: ResourceType | None = None
+    ) -> list[PermissionRead]:
         """
         List all permissions, optionally filtered by resource type.
 
@@ -135,7 +141,8 @@ class PermissionService:
         name = self.build_permission_name(data.resource_type, data.action, data.scope)
 
         if self.get_by_name(name):
-            raise ValueError(f"Permission '{name}' already exists")
+            msg = f"Permission '{name}' already exists"
+            raise ValueError(msg)
 
         permission = Permission(
             name=name,
@@ -176,25 +183,65 @@ class PermissionService:
         """
         default_permissions = [
             # Organization permissions
-            (ResourceType.ORGANIZATION, Action.READ, Scope.OWN, "Read own organization"),
-            (ResourceType.ORGANIZATION, Action.UPDATE, Scope.OWN, "Update own organization"),
-            (ResourceType.ORGANIZATION, Action.MANAGE, Scope.OWN, "Manage own organization settings"),
-            (ResourceType.ORGANIZATION, Action.DELETE, Scope.OWN, "Delete own organization"),
+            (
+                ResourceType.ORGANIZATION,
+                Action.READ,
+                Scope.OWN,
+                "Read own organization",
+            ),
+            (
+                ResourceType.ORGANIZATION,
+                Action.UPDATE,
+                Scope.OWN,
+                "Update own organization",
+            ),
+            (
+                ResourceType.ORGANIZATION,
+                Action.MANAGE,
+                Scope.OWN,
+                "Manage own organization settings",
+            ),
+            (
+                ResourceType.ORGANIZATION,
+                Action.DELETE,
+                Scope.OWN,
+                "Delete own organization",
+            ),
             # Course permissions
-            (ResourceType.COURSE, Action.CREATE, Scope.ORG, "Create courses in organization"),
+            (
+                ResourceType.COURSE,
+                Action.CREATE,
+                Scope.ORG,
+                "Create courses in organization",
+            ),
             (ResourceType.COURSE, Action.READ, Scope.ALL, "Read all public courses"),
             (ResourceType.COURSE, Action.READ, Scope.OWN, "Read own courses"),
             (ResourceType.COURSE, Action.UPDATE, Scope.OWN, "Update own courses"),
             (ResourceType.COURSE, Action.DELETE, Scope.OWN, "Delete own courses"),
-            (ResourceType.COURSE, Action.MANAGE, Scope.OWN, "Manage own course settings"),
+            (
+                ResourceType.COURSE,
+                Action.MANAGE,
+                Scope.OWN,
+                "Manage own course settings",
+            ),
             (ResourceType.COURSE, Action.MANAGE, Scope.ALL, "Manage all courses"),
             # Chapter permissions
-            (ResourceType.CHAPTER, Action.CREATE, Scope.OWN, "Create chapters in own courses"),
+            (
+                ResourceType.CHAPTER,
+                Action.CREATE,
+                Scope.OWN,
+                "Create chapters in own courses",
+            ),
             (ResourceType.CHAPTER, Action.READ, Scope.ALL, "Read chapters"),
             (ResourceType.CHAPTER, Action.UPDATE, Scope.OWN, "Update own chapters"),
             (ResourceType.CHAPTER, Action.DELETE, Scope.OWN, "Delete own chapters"),
             # Activity permissions
-            (ResourceType.ACTIVITY, Action.CREATE, Scope.OWN, "Create activities in own courses"),
+            (
+                ResourceType.ACTIVITY,
+                Action.CREATE,
+                Scope.OWN,
+                "Create activities in own courses",
+            ),
             (ResourceType.ACTIVITY, Action.READ, Scope.ALL, "Read activities"),
             (ResourceType.ACTIVITY, Action.UPDATE, Scope.OWN, "Update own activities"),
             (ResourceType.ACTIVITY, Action.DELETE, Scope.OWN, "Delete own activities"),
@@ -202,42 +249,142 @@ class PermissionService:
             (ResourceType.USER, Action.READ, Scope.ORG, "Read users in organization"),
             (ResourceType.USER, Action.READ, Scope.ALL, "Read all users"),
             (ResourceType.USER, Action.UPDATE, Scope.OWN, "Update own profile"),
-            (ResourceType.USER, Action.UPDATE, Scope.ORG, "Update users in organization"),
-            (ResourceType.USER, Action.DELETE, Scope.ORG, "Delete users in organization"),
-            (ResourceType.USER, Action.INVITE, Scope.ORG, "Invite users to organization"),
+            (
+                ResourceType.USER,
+                Action.UPDATE,
+                Scope.ORG,
+                "Update users in organization",
+            ),
+            (
+                ResourceType.USER,
+                Action.DELETE,
+                Scope.ORG,
+                "Delete users in organization",
+            ),
+            (
+                ResourceType.USER,
+                Action.INVITE,
+                Scope.ORG,
+                "Invite users to organization",
+            ),
             # Usergroup permissions
-            (ResourceType.USERGROUP, Action.CREATE, Scope.ORG, "Create usergroups in organization"),
-            (ResourceType.USERGROUP, Action.READ, Scope.ORG, "Read usergroups in organization"),
-            (ResourceType.USERGROUP, Action.UPDATE, Scope.ORG, "Update usergroups in organization"),
-            (ResourceType.USERGROUP, Action.DELETE, Scope.ORG, "Delete usergroups in organization"),
+            (
+                ResourceType.USERGROUP,
+                Action.CREATE,
+                Scope.ORG,
+                "Create usergroups in organization",
+            ),
+            (
+                ResourceType.USERGROUP,
+                Action.READ,
+                Scope.ORG,
+                "Read usergroups in organization",
+            ),
+            (
+                ResourceType.USERGROUP,
+                Action.UPDATE,
+                Scope.ORG,
+                "Update usergroups in organization",
+            ),
+            (
+                ResourceType.USERGROUP,
+                Action.DELETE,
+                Scope.ORG,
+                "Delete usergroups in organization",
+            ),
             # Collection permissions
-            (ResourceType.COLLECTION, Action.CREATE, Scope.ORG, "Create collections in organization"),
-            (ResourceType.COLLECTION, Action.READ, Scope.ALL, "Read public collections"),
-            (ResourceType.COLLECTION, Action.UPDATE, Scope.OWN, "Update own collections"),
-            (ResourceType.COLLECTION, Action.DELETE, Scope.OWN, "Delete own collections"),
+            (
+                ResourceType.COLLECTION,
+                Action.CREATE,
+                Scope.ORG,
+                "Create collections in organization",
+            ),
+            (
+                ResourceType.COLLECTION,
+                Action.READ,
+                Scope.ALL,
+                "Read public collections",
+            ),
+            (
+                ResourceType.COLLECTION,
+                Action.UPDATE,
+                Scope.OWN,
+                "Update own collections",
+            ),
+            (
+                ResourceType.COLLECTION,
+                Action.DELETE,
+                Scope.OWN,
+                "Delete own collections",
+            ),
             # Role permissions
-            (ResourceType.ROLE, Action.CREATE, Scope.ORG, "Create roles in organization"),
+            (
+                ResourceType.ROLE,
+                Action.CREATE,
+                Scope.ORG,
+                "Create roles in organization",
+            ),
             (ResourceType.ROLE, Action.READ, Scope.ORG, "Read roles in organization"),
-            (ResourceType.ROLE, Action.UPDATE, Scope.ORG, "Update roles in organization"),
-            (ResourceType.ROLE, Action.DELETE, Scope.ORG, "Delete roles in organization"),
+            (
+                ResourceType.ROLE,
+                Action.UPDATE,
+                Scope.ORG,
+                "Update roles in organization",
+            ),
+            (
+                ResourceType.ROLE,
+                Action.DELETE,
+                Scope.ORG,
+                "Delete roles in organization",
+            ),
             # Certificate permissions
-            (ResourceType.CERTIFICATE, Action.CREATE, Scope.OWN, "Create certificates for own courses"),
+            (
+                ResourceType.CERTIFICATE,
+                Action.CREATE,
+                Scope.OWN,
+                "Create certificates for own courses",
+            ),
             (ResourceType.CERTIFICATE, Action.READ, Scope.ALL, "Read certificates"),
             # Analytics permissions
             (ResourceType.ANALYTICS, Action.READ, Scope.OWN, "Read own analytics"),
-            (ResourceType.ANALYTICS, Action.READ, Scope.ORG, "Read organization analytics"),
+            (
+                ResourceType.ANALYTICS,
+                Action.READ,
+                Scope.ORG,
+                "Read organization analytics",
+            ),
             # Assignment/Quiz permissions
-            (ResourceType.ASSIGNMENT, Action.GRADE, Scope.OWN, "Grade assignments in own courses"),
+            (
+                ResourceType.ASSIGNMENT,
+                Action.GRADE,
+                Scope.OWN,
+                "Grade assignments in own courses",
+            ),
             (ResourceType.ASSIGNMENT, Action.SUBMIT, Scope.ALL, "Submit assignments"),
-            (ResourceType.QUIZ, Action.GRADE, Scope.OWN, "Grade quizzes in own courses"),
+            (
+                ResourceType.QUIZ,
+                Action.GRADE,
+                Scope.OWN,
+                "Grade quizzes in own courses",
+            ),
             (ResourceType.QUIZ, Action.SUBMIT, Scope.ALL, "Submit quizzes"),
             # Exam permissions
-            (ResourceType.EXAM, Action.CREATE, Scope.ORG, "Create exams in organization"),
+            (
+                ResourceType.EXAM,
+                Action.CREATE,
+                Scope.ORG,
+                "Create exams in organization",
+            ),
             (ResourceType.EXAM, Action.READ, Scope.OWN, "Read own exams"),
             (ResourceType.EXAM, Action.UPDATE, Scope.OWN, "Update own exams"),
             (ResourceType.EXAM, Action.DELETE, Scope.OWN, "Delete own exams"),
             # File permissions
-            (ResourceType.FILE, Action.CREATE, Scope.ORG, "Upload files to organization"),
+            (
+                ResourceType.FILE,
+                Action.CREATE,
+                Scope.ORG,
+                "Upload files to organization",
+            ),
             (ResourceType.FILE, Action.READ, Scope.ORG, "Read files in organization"),
             (ResourceType.FILE, Action.DELETE, Scope.OWN, "Delete own files"),
             # API Token permissions

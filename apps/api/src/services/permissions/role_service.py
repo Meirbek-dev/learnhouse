@@ -29,7 +29,7 @@ from src.services.permissions.permission_service import PermissionService
 class RoleService:
     """Service for managing roles and their permissions."""
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
         self.permission_service = PermissionService(db)
 
@@ -59,7 +59,9 @@ class RoleService:
             statement = statement.where(RoleNew.org_id.is_(None))  # type: ignore[union-attr]
         return self.db.exec(statement).first()
 
-    def list_all(self, org_id: int | None = None, include_global: bool = True) -> list[RoleNewRead]:
+    def list_all(
+        self, org_id: int | None = None, include_global: bool = True
+    ) -> list[RoleNewRead]:
         """
         List all roles, optionally filtered by organization.
 
@@ -74,7 +76,9 @@ class RoleService:
 
         if org_id is not None:
             if include_global:
-                statement = statement.where((RoleNew.org_id == org_id) | (RoleNew.org_id.is_(None)))  # type: ignore[union-attr]
+                statement = statement.where(
+                    (RoleNew.org_id == org_id) | (RoleNew.org_id.is_(None))
+                )  # type: ignore[union-attr]
             else:
                 statement = statement.where(RoleNew.org_id == org_id)
         elif not include_global:
@@ -101,7 +105,8 @@ class RoleService:
         """
         existing = self.get_by_slug(data.slug, data.org_id)
         if existing:
-            raise ValueError(f"Role '{data.slug}' already exists in this organization")
+            msg = f"Role '{data.slug}' already exists in this organization"
+            raise ValueError(msg)
 
         role = RoleNew(
             name=data.name,
@@ -167,7 +172,8 @@ class RoleService:
             return False
 
         if role.is_system:
-            raise ValueError("Cannot delete system roles")
+            msg = "Cannot delete system roles"
+            raise ValueError(msg)
 
         self.db.delete(role)
         self.db.commit()
@@ -288,7 +294,8 @@ class RoleService:
         )
         existing = self.db.exec(statement).first()
         if existing:
-            raise ValueError("Permission already assigned to role")
+            msg = "Permission already assigned to role"
+            raise ValueError(msg)
 
         rp = RolePermission(
             role_id=role_id,
@@ -347,7 +354,8 @@ class RoleService:
         """
         parts = pattern.split(":")
         if len(parts) != 3:
-            raise ValueError(f"Invalid permission pattern: {pattern}")
+            msg = f"Invalid permission pattern: {pattern}"
+            raise ValueError(msg)
 
         resource_pat, action_pat, scope_pat = parts
         created = []
@@ -410,7 +418,8 @@ class RoleService:
         )
         existing = self.db.exec(statement).first()
         if existing:
-            raise ValueError("Role already assigned to user in this organization")
+            msg = "Role already assigned to user in this organization"
+            raise ValueError(msg)
 
         ur = UserRole(
             user_id=user_id,
@@ -448,7 +457,9 @@ class RoleService:
         self.db.commit()
         return True
 
-    def get_user_roles(self, user_id: int, org_id: int | None = None) -> list[UserRoleRead]:
+    def get_user_roles(
+        self, user_id: int, org_id: int | None = None
+    ) -> list[UserRoleRead]:
         """
         Get all roles assigned to a user.
 
@@ -482,7 +493,9 @@ class RoleService:
 
         return user_roles
 
-    def get_users_with_role(self, role_id: int, org_id: int | None = None) -> list[UserRole]:
+    def get_users_with_role(
+        self, role_id: int, org_id: int | None = None
+    ) -> list[UserRole]:
         """
         Get all users who have a specific role.
 

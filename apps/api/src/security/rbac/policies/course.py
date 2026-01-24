@@ -136,10 +136,12 @@ class CoursePolicy(BasePolicy):
         statement = select(ResourceAuthor).where(
             ResourceAuthor.resource_uuid == course_uuid,
             ResourceAuthor.user_id == user.id,
-            ResourceAuthor.authorship.in_([
-                ResourceAuthorshipEnum.CREATOR,
-                ResourceAuthorshipEnum.MAINTAINER,
-            ]),
+            ResourceAuthor.authorship.in_(
+                [
+                    ResourceAuthorshipEnum.CREATOR,
+                    ResourceAuthorshipEnum.MAINTAINER,
+                ]
+            ),
             ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
         )
         result = self.db.exec(statement).first()
@@ -175,5 +177,4 @@ class CoursePolicy(BasePolicy):
             Organization ID or None
         """
         statement = select(Course.org_id).where(Course.course_uuid == course_uuid)
-        result = self.db.exec(statement).first()
-        return result
+        return self.db.exec(statement).first()

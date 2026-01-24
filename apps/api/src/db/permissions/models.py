@@ -18,7 +18,6 @@ from sqlmodel import Field
 from src.db.permissions.enums import Action, ResourceType, Scope
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
-
 # ---------------------------------------------------------------------------
 # Permission Model
 # ---------------------------------------------------------------------------
@@ -29,11 +28,17 @@ class PermissionBase(SQLModelStrictBaseModel):
 
     model_config = ConfigDict(use_enum_values=True)
 
-    name: str = Field(max_length=100, description="Unique permission name, e.g., 'course:create:org'")
-    resource_type: ResourceType = Field(description="Type of resource this permission applies to")
+    name: str = Field(
+        max_length=100, description="Unique permission name, e.g., 'course:create:org'"
+    )
+    resource_type: ResourceType = Field(
+        description="Type of resource this permission applies to"
+    )
     action: Action = Field(description="Action this permission allows")
     scope: Scope = Field(default=Scope.ALL, description="Scope of the permission")
-    description: str | None = Field(default=None, description="Human-readable description")
+    description: str | None = Field(
+        default=None, description="Human-readable description"
+    )
 
 
 class Permission(PermissionBase, table=True):
@@ -88,10 +93,17 @@ class RoleNewBase(SQLModelStrictBaseModel):
     model_config = ConfigDict(use_enum_values=True)
 
     name: str = Field(max_length=100, description="Role display name")
-    slug: str = Field(max_length=100, description="Unique role slug, e.g., 'org-admin', 'instructor'")
+    slug: str = Field(
+        max_length=100, description="Unique role slug, e.g., 'org-admin', 'instructor'"
+    )
     description: str | None = Field(default=None, description="Role description")
-    is_system: bool = Field(default=False, description="Whether this is a built-in system role")
-    priority: int = Field(default=0, description="Role priority for conflict resolution (higher = more privileged)")
+    is_system: bool = Field(
+        default=False, description="Whether this is a built-in system role"
+    )
+    priority: int = Field(
+        default=0,
+        description="Role priority for conflict resolution (higher = more privileged)",
+    )
 
 
 class RoleNew(RoleNewBase, table=True):
@@ -169,10 +181,14 @@ class RolePermission(RolePermissionBase, table=True):
     __table_args__ = (Index("ix_role_permissions_role_id", "role_id"),)
 
     role_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("roles_new.id", ondelete="CASCADE"), primary_key=True),
+        sa_column=Column(
+            Integer, ForeignKey("roles_new.id", ondelete="CASCADE"), primary_key=True
+        ),
     )
     permission_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("permissions.id", ondelete="CASCADE"), primary_key=True),
+        sa_column=Column(
+            Integer, ForeignKey("permissions.id", ondelete="CASCADE"), primary_key=True
+        ),
     )
     granted_at: datetime = Field(default_factory=datetime.utcnow)
     granted_by: int | None = Field(
@@ -208,20 +224,28 @@ class UserRole(UserRoleBase, table=True):
     )
 
     user_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), primary_key=True),
+        sa_column=Column(
+            Integer, ForeignKey("user.id", ondelete="CASCADE"), primary_key=True
+        ),
     )
     role_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("roles_new.id", ondelete="CASCADE"), primary_key=True),
+        sa_column=Column(
+            Integer, ForeignKey("roles_new.id", ondelete="CASCADE"), primary_key=True
+        ),
     )
     org_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"), primary_key=True),
+        sa_column=Column(
+            Integer, ForeignKey("organization.id", ondelete="CASCADE"), primary_key=True
+        ),
     )
     granted_at: datetime = Field(default_factory=datetime.utcnow)
     granted_by: int | None = Field(
         default=None,
         sa_column=Column(Integer, ForeignKey("user.id", ondelete="SET NULL")),
     )
-    expires_at: datetime | None = Field(default=None, description="Optional role expiry")
+    expires_at: datetime | None = Field(
+        default=None, description="Optional role expiry"
+    )
 
 
 class UserRoleCreate(SQLModelStrictBaseModel):
@@ -264,7 +288,9 @@ class ResourcePermissionBase(SQLModelStrictBaseModel):
     model_config = ConfigDict(use_enum_values=True)
 
     resource_type: ResourceType = Field(description="Type of resource")
-    resource_id: str = Field(max_length=100, description="UUID of the specific resource")
+    resource_id: str = Field(
+        max_length=100, description="UUID of the specific resource"
+    )
 
 
 class ResourcePermission(ResourcePermissionBase, table=True):
@@ -272,8 +298,19 @@ class ResourcePermission(ResourcePermissionBase, table=True):
 
     __tablename__ = "resource_permissions"
     __table_args__ = (
-        UniqueConstraint("user_id", "resource_type", "resource_id", "permission_id", name="uq_resource_permission"),
-        Index("ix_resource_permissions_user_resource", "user_id", "resource_type", "resource_id"),
+        UniqueConstraint(
+            "user_id",
+            "resource_type",
+            "resource_id",
+            "permission_id",
+            name="uq_resource_permission",
+        ),
+        Index(
+            "ix_resource_permissions_user_resource",
+            "user_id",
+            "resource_type",
+            "resource_id",
+        ),
     )
 
     id: int | None = Field(default=None, primary_key=True)

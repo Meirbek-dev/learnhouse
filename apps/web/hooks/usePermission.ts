@@ -1,17 +1,20 @@
-'use client'
+'use client';
 
-import { useSession } from 'next-auth/react'
-import { useCallback, useMemo } from 'react'
+import { useSession } from 'next-auth/react';
+import { useCallback, useMemo } from 'react';
 
 import {
-  Action,
+  Actions,
+  ResourceTypes,
+  Scopes,
+  RoleSlugs,
   buildPermissionName,
   isAdminRole,
   isInstructorOrHigher,
-  ResourceType,
-  RoleSlugs,
-  Scope,
-} from '@/types/permissions'
+  type Action,
+  type ResourceType,
+  type Scope,
+} from '@/types/permissions';
 
 /**
  * Hook for checking user permissions.
@@ -24,7 +27,7 @@ import {
  * const { can, hasRole, isAdmin } = usePermission()
  *
  * // Check specific permission
- * if (can(Action.CREATE, ResourceType.COURSE)) {
+ * if (can(Actions.CREATE, ResourceTypes.COURSE)) {
  *   // Show create button
  * }
  *
@@ -35,20 +38,17 @@ import {
  * ```
  */
 export function usePermission() {
-  const { data: session, status } = useSession()
+  const { data: session, status } = useSession();
 
   /**
    * User's effective permissions map.
    */
-  const permissions = useMemo(
-    () => session?.permissions ?? {},
-    [session?.permissions]
-  )
+  const permissions = useMemo(() => session?.permissions ?? {}, [session?.permissions]);
 
   /**
    * User's role slugs.
    */
-  const roles = useMemo(() => session?.roles ?? [], [session?.roles])
+  const roles = useMemo(() => session?.roles ?? [], [session?.roles]);
 
   /**
    * Check if user has a specific permission.
@@ -59,130 +59,114 @@ export function usePermission() {
    * @returns True if user has the permission
    */
   const can = useCallback(
-    (
-      action: Action,
-      resource: ResourceType,
-      scope: Scope = Scope.ALL
-    ): boolean => {
+    (action: Action, resource: ResourceType, scope: Scope = Scopes.ALL): boolean => {
       // Not authenticated
       if (status !== 'authenticated' || !session) {
         // Anonymous users can only read public content
-        return action === Action.READ && scope === Scope.ALL
+        return action === Actions.READ && scope === Scopes.ALL;
       }
 
       // Super admin can do anything
       if (roles.includes(RoleSlugs.SUPER_ADMIN)) {
-        return true
+        return true;
       }
 
       // Check specific permission
-      const permName = buildPermissionName(resource, action, scope)
+      const permName = buildPermissionName(resource, action, scope);
       if (permissions[permName]) {
-        return true
+        return true;
       }
 
       // Check with ALL scope if specific scope was requested
-      if (scope !== Scope.ALL) {
-        const allScopePerm = buildPermissionName(resource, action, Scope.ALL)
+      if (scope !== Scopes.ALL) {
+        const allScopePerm = buildPermissionName(resource, action, Scopes.ALL);
         if (permissions[allScopePerm]) {
-          return true
+          return true;
         }
       }
 
       // Check with ORG scope for organization-wide permissions
-      if (scope === Scope.OWN) {
-        const orgScopePerm = buildPermissionName(resource, action, Scope.ORG)
+      if (scope === Scopes.OWN) {
+        const orgScopePerm = buildPermissionName(resource, action, Scopes.ORG);
         if (permissions[orgScopePerm]) {
-          return true
+          return true;
         }
       }
 
-      return false
+      return false;
     },
-    [status, session, roles, permissions]
-  )
+    [status, session, roles, permissions],
+  );
 
   /**
    * Check if user has any of the specified permissions.
    */
   const canAny = useCallback(
-    (checks: Array<{ action: Action; resource: ResourceType; scope?: Scope }>): boolean => {
-      return checks.some(({ action, resource, scope }) => can(action, resource, scope))
+    (checks: { action: Action; resource: ResourceType; scope?: Scope }[]): boolean => {
+      return checks.some(({ action, resource, scope }) => can(action, resource, scope));
     },
-    [can]
-  )
+    [can],
+  );
 
   /**
    * Check if user has all of the specified permissions.
    */
   const canAll = useCallback(
-    (checks: Array<{ action: Action; resource: ResourceType; scope?: Scope }>): boolean => {
-      return checks.every(({ action, resource, scope }) => can(action, resource, scope))
+    (checks: { action: Action; resource: ResourceType; scope?: Scope }[]): boolean => {
+      return checks.every(({ action, resource, scope }) => can(action, resource, scope));
     },
-    [can]
-  )
+    [can],
+  );
 
   /**
    * Check if user has a specific role.
    */
   const hasRole = useCallback(
     (roleSlug: string): boolean => {
-      return roles.includes(roleSlug)
+      return roles.includes(roleSlug);
     },
-    [roles]
-  )
+    [roles],
+  );
 
   /**
    * Check if user has any of the specified roles.
    */
   const hasAnyRole = useCallback(
     (roleSlugs: string[]): boolean => {
-      return roleSlugs.some((slug) => roles.includes(slug))
+      return roleSlugs.some((slug) => roles.includes(slug));
     },
-    [roles]
-  )
+    [roles],
+  );
 
   /**
    * Check if user is an admin (super-admin or org-admin).
    */
-  const isAdmin = useMemo(
-    () => roles.some((role) => isAdminRole(role)),
-    [roles]
-  )
+  const isAdmin = useMemo(() => roles.some((role) => isAdminRole(role)), [roles]);
 
   /**
    * Check if user is super admin.
    */
-  const isSuperAdmin = useMemo(
-    () => roles.includes(RoleSlugs.SUPER_ADMIN),
-    [roles]
-  )
+  const isSuperAdmin = useMemo(() => roles.includes(RoleSlugs.SUPER_ADMIN), [roles]);
 
   /**
    * Check if user is org admin.
    */
-  const isOrgAdmin = useMemo(
-    () => roles.includes(RoleSlugs.ORG_ADMIN),
-    [roles]
-  )
+  const isOrgAdmin = useMemo(() => roles.includes(RoleSlugs.ORG_ADMIN), [roles]);
 
   /**
    * Check if user is instructor or higher.
    */
-  const isInstructor = useMemo(
-    () => roles.some((role) => isInstructorOrHigher(role)),
-    [roles]
-  )
+  const isInstructor = useMemo(() => roles.some((role) => isInstructorOrHigher(role)), [roles]);
 
   /**
    * Check if user is authenticated.
    */
-  const isAuthenticated = status === 'authenticated'
+  const isAuthenticated = status === 'authenticated';
 
   /**
    * Check if session is loading.
    */
-  const isLoading = status === 'loading'
+  const isLoading = status === 'loading';
 
   return {
     // Permission checks
@@ -206,7 +190,7 @@ export function usePermission() {
     isAuthenticated,
     isLoading,
     session,
-  }
+  };
 }
 
 /**
@@ -216,30 +200,30 @@ export function usePermission() {
  * @param isOwner - Whether the current user owns the course
  */
 export function useCoursePermission(courseUuid?: string, isOwner = false) {
-  const { can, isInstructor, isAdmin } = usePermission()
+  const { can, isInstructor, isAdmin } = usePermission();
 
-  const canCreate = can(Action.CREATE, ResourceType.COURSE, Scope.ORG)
+  const canCreate = can(Actions.CREATE, ResourceTypes.COURSE, Scopes.ORG);
 
-  const canRead = can(Action.READ, ResourceType.COURSE, Scope.ALL)
+  const canRead = can(Actions.READ, ResourceTypes.COURSE, Scopes.ALL);
 
   const canUpdate =
     isAdmin ||
-    (isOwner && can(Action.UPDATE, ResourceType.COURSE, Scope.OWN)) ||
-    can(Action.UPDATE, ResourceType.COURSE, Scope.ORG)
+    (isOwner && can(Actions.UPDATE, ResourceTypes.COURSE, Scopes.OWN)) ||
+    can(Actions.UPDATE, ResourceTypes.COURSE, Scopes.ORG);
 
   const canDelete =
     isAdmin ||
-    (isOwner && can(Action.DELETE, ResourceType.COURSE, Scope.OWN)) ||
-    can(Action.DELETE, ResourceType.COURSE, Scope.ORG)
+    (isOwner && can(Actions.DELETE, ResourceTypes.COURSE, Scopes.OWN)) ||
+    can(Actions.DELETE, ResourceTypes.COURSE, Scopes.ORG);
 
   const canManage =
     isAdmin ||
-    (isOwner && can(Action.MANAGE, ResourceType.COURSE, Scope.OWN)) ||
-    can(Action.MANAGE, ResourceType.COURSE, Scope.ALL)
+    (isOwner && can(Actions.MANAGE, ResourceTypes.COURSE, Scopes.OWN)) ||
+    can(Actions.MANAGE, ResourceTypes.COURSE, Scopes.ALL);
 
-  const canCreateContent = isAdmin || isOwner
+  const canCreateContent = isAdmin || isOwner;
 
-  const canManageContributors = isAdmin || isOwner
+  const canManageContributors = isAdmin || isOwner;
 
   return {
     canCreate,
@@ -250,7 +234,7 @@ export function useCoursePermission(courseUuid?: string, isOwner = false) {
     canCreateContent,
     canManageContributors,
     isOwner,
-  }
+  };
 }
 
 /**
@@ -259,25 +243,19 @@ export function useCoursePermission(courseUuid?: string, isOwner = false) {
  * @param orgId - Organization ID to check permissions for
  */
 export function useOrgPermission(orgId?: number) {
-  const { can, isAdmin, isSuperAdmin, isOrgAdmin } = usePermission()
+  const { can, isAdmin, isSuperAdmin, isOrgAdmin } = usePermission();
 
-  const canRead = can(Action.READ, ResourceType.ORGANIZATION, Scope.OWN)
+  const canRead = can(Actions.READ, ResourceTypes.ORGANIZATION, Scopes.OWN);
 
-  const canUpdate =
-    isSuperAdmin ||
-    isOrgAdmin ||
-    can(Action.UPDATE, ResourceType.ORGANIZATION, Scope.OWN)
+  const canUpdate = isSuperAdmin || isOrgAdmin || can(Actions.UPDATE, ResourceTypes.ORGANIZATION, Scopes.OWN);
 
-  const canManage =
-    isSuperAdmin ||
-    isOrgAdmin ||
-    can(Action.MANAGE, ResourceType.ORGANIZATION, Scope.OWN)
+  const canManage = isSuperAdmin || isOrgAdmin || can(Actions.MANAGE, ResourceTypes.ORGANIZATION, Scopes.OWN);
 
-  const canDelete = isSuperAdmin
+  const canDelete = isSuperAdmin;
 
-  const canInvite = can(Action.INVITE, ResourceType.USER, Scope.ORG)
+  const canInvite = can(Actions.INVITE, ResourceTypes.USER, Scopes.ORG);
 
-  const canManageRoles = can(Action.UPDATE, ResourceType.ROLE, Scope.ORG)
+  const canManageRoles = can(Actions.UPDATE, ResourceTypes.ROLE, Scopes.ORG);
 
   return {
     canRead,
@@ -287,7 +265,7 @@ export function useOrgPermission(orgId?: number) {
     canInvite,
     canManageRoles,
     isAdmin,
-  }
+  };
 }
 
-export default usePermission
+export default usePermission;

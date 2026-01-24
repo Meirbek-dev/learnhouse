@@ -11,8 +11,8 @@ from src.services.permissions.policy_engine import PolicyEngine
 from src.services.permissions.role_service import RoleService
 
 __all__ = [
-    "PermissionService",
-    "RoleService",
-    "PolicyEngine",
     "AuditService",
+    "PermissionService",
+    "PolicyEngine",
+    "RoleService",
 ]

@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const { courses: pageCourses, total } = await getOrgCourses(orgSlug, null, null, page, COURSES_PER_PAGE);
     allCourses.push(...pageCourses);
     hasMore = page * COURSES_PER_PAGE < total;
-    page++;
+    page += 1;
   }
 
   const collections = await getOrgCollections(orgInfo.id);

@@ -1,44 +1,44 @@
-'use client'
+'use client';
 
-import type { ReactNode } from 'react'
+import type { ReactNode } from 'react';
 
-import { usePermission } from '@/hooks/usePermission'
-import type { Action, ResourceType, Scope } from '@/types/permissions'
+import type { Action, ResourceType, Scope } from '@/types/permissions';
+import { usePermission } from '@/hooks/usePermission';
 
 interface PermissionGuardProps {
   /**
    * Action to check permission for.
    */
-  action: Action
+  action: Action;
   /**
    * Resource type to check permission for.
    */
-  resource: ResourceType
+  resource: ResourceType;
   /**
    * Optional resource ID for resource-specific checks.
    */
-  resourceId?: string
+  resourceId?: string;
   /**
    * Permission scope (defaults to ALL).
    */
-  scope?: Scope
+  scope?: Scope;
   /**
    * Content to render if permission is granted.
    */
-  children: ReactNode
+  children: ReactNode;
   /**
    * Optional fallback content if permission is denied.
    * If not provided, nothing is rendered.
    */
-  fallback?: ReactNode
+  fallback?: ReactNode;
   /**
    * If true, shows loading state while checking permissions.
    */
-  showLoading?: boolean
+  showLoading?: boolean;
   /**
    * Custom loading component.
    */
-  loadingComponent?: ReactNode
+  loadingComponent?: ReactNode;
 }
 
 /**
@@ -74,45 +74,45 @@ export function PermissionGuard({
   showLoading = false,
   loadingComponent = null,
 }: PermissionGuardProps) {
-  const { can, isLoading } = usePermission()
+  const { can, isLoading } = usePermission();
 
   // Show loading state if requested
   if (isLoading && showLoading) {
-    return <>{loadingComponent}</>
+    return <>{loadingComponent}</>;
   }
 
   // Check permission
-  const hasPermission = can(action, resource, scope)
+  const hasPermission = can(action, resource, scope);
 
   if (!hasPermission) {
-    return <>{fallback}</>
+    return <>{fallback}</>;
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }
 
 interface MultiPermissionGuardProps {
   /**
    * Array of permission checks. All must pass for children to render.
    */
-  permissions: Array<{
-    action: Action
-    resource: ResourceType
-    scope?: Scope
-  }>
+  permissions: {
+    action: Action;
+    resource: ResourceType;
+    scope?: Scope;
+  }[];
   /**
    * If true, only one permission needs to pass (OR logic).
    * If false (default), all permissions must pass (AND logic).
    */
-  any?: boolean
+  any?: boolean;
   /**
    * Content to render if permissions are granted.
    */
-  children: ReactNode
+  children: ReactNode;
   /**
    * Optional fallback content if permissions are denied.
    */
-  fallback?: ReactNode
+  fallback?: ReactNode;
 }
 
 /**
@@ -149,35 +149,35 @@ export function MultiPermissionGuard({
   children,
   fallback = null,
 }: MultiPermissionGuardProps) {
-  const { canAny, canAll } = usePermission()
+  const { canAny, canAll } = usePermission();
 
-  const hasPermission = any ? canAny(permissions) : canAll(permissions)
+  const hasPermission = any ? canAny(permissions) : canAll(permissions);
 
   if (!hasPermission) {
-    return <>{fallback}</>
+    return <>{fallback}</>;
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }
 
 interface RoleGuardProps {
   /**
    * Role slug or array of role slugs to check.
    */
-  role: string | string[]
+  role: string | string[];
   /**
    * If true with array of roles, any role is sufficient.
    * If false, user must have all specified roles.
    */
-  any?: boolean
+  any?: boolean;
   /**
    * Content to render if role check passes.
    */
-  children: ReactNode
+  children: ReactNode;
   /**
    * Optional fallback content.
    */
-  fallback?: ReactNode
+  fallback?: ReactNode;
 }
 
 /**
@@ -197,42 +197,40 @@ interface RoleGuardProps {
  * ```
  */
 export function RoleGuard({ role, any = true, children, fallback = null }: RoleGuardProps) {
-  const { hasRole, hasAnyRole, roles } = usePermission()
+  const { hasRole, hasAnyRole, roles } = usePermission();
 
-  let hasRequiredRole: boolean
+  let hasRequiredRole: boolean;
 
   if (Array.isArray(role)) {
-    hasRequiredRole = any
-      ? hasAnyRole(role)
-      : role.every((r) => roles.includes(r))
+    hasRequiredRole = any ? hasAnyRole(role) : role.every((r) => roles.includes(r));
   } else {
-    hasRequiredRole = hasRole(role)
+    hasRequiredRole = hasRole(role);
   }
 
   if (!hasRequiredRole) {
-    return <>{fallback}</>
+    return <>{fallback}</>;
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }
 
 interface AuthGuardProps {
   /**
    * Content to render if user is authenticated.
    */
-  children: ReactNode
+  children: ReactNode;
   /**
    * Optional fallback content for unauthenticated users.
    */
-  fallback?: ReactNode
+  fallback?: ReactNode;
   /**
    * If true, shows loading state during authentication check.
    */
-  showLoading?: boolean
+  showLoading?: boolean;
   /**
    * Custom loading component.
    */
-  loadingComponent?: ReactNode
+  loadingComponent?: ReactNode;
 }
 
 /**
@@ -245,39 +243,34 @@ interface AuthGuardProps {
  * </AuthGuard>
  * ```
  */
-export function AuthGuard({
-  children,
-  fallback = null,
-  showLoading = true,
-  loadingComponent = null,
-}: AuthGuardProps) {
-  const { isAuthenticated, isLoading } = usePermission()
+export function AuthGuard({ children, fallback = null, showLoading = true, loadingComponent = null }: AuthGuardProps) {
+  const { isAuthenticated, isLoading } = usePermission();
 
   if (isLoading && showLoading) {
-    return <>{loadingComponent}</>
+    return <>{loadingComponent}</>;
   }
 
   if (!isAuthenticated) {
-    return <>{fallback}</>
+    return <>{fallback}</>;
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }
 
 interface AdminGuardProps {
   /**
    * Content to render if user is admin.
    */
-  children: ReactNode
+  children: ReactNode;
   /**
    * Optional fallback content.
    */
-  fallback?: ReactNode
+  fallback?: ReactNode;
   /**
    * If true, requires super-admin specifically.
    * If false (default), org-admin is sufficient.
    */
-  superAdminOnly?: boolean
+  superAdminOnly?: boolean;
 }
 
 /**
@@ -295,20 +288,16 @@ interface AdminGuardProps {
  * </AdminGuard>
  * ```
  */
-export function AdminGuard({
-  children,
-  fallback = null,
-  superAdminOnly = false,
-}: AdminGuardProps) {
-  const { isAdmin, isSuperAdmin } = usePermission()
+export function AdminGuard({ children, fallback = null, superAdminOnly = false }: AdminGuardProps) {
+  const { isAdmin, isSuperAdmin } = usePermission();
 
-  const hasAccess = superAdminOnly ? isSuperAdmin : isAdmin
+  const hasAccess = superAdminOnly ? isSuperAdmin : isAdmin;
 
   if (!hasAccess) {
-    return <>{fallback}</>
+    return <>{fallback}</>;
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }
 
-export default PermissionGuard
+export default PermissionGuard;

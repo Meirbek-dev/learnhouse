@@ -9,14 +9,18 @@ from datetime import datetime
 
 from sqlmodel import Session, select
 
-from src.db.permissions.audit import PermissionAuditLog, PermissionAuditLogCreate, PermissionAuditLogRead
+from src.db.permissions.audit import (
+    PermissionAuditLog,
+    PermissionAuditLogCreate,
+    PermissionAuditLogRead,
+)
 from src.db.permissions.enums import Action, AuditAction, ResourceType
 
 
 class AuditService:
     """Service for permission audit logging."""
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     def log(
@@ -48,7 +52,11 @@ class AuditService:
         Returns:
             The created audit log entry
         """
-        resource_type_str = resource_type.value if isinstance(resource_type, ResourceType) else resource_type
+        resource_type_str = (
+            resource_type.value
+            if isinstance(resource_type, ResourceType)
+            else resource_type
+        )
 
         log_entry = PermissionAuditLog(
             user_id=user_id,
@@ -293,7 +301,9 @@ class AuditService:
 
         cutoff = datetime.utcnow() - timedelta(days=days)
 
-        statement = select(PermissionAuditLog).where(PermissionAuditLog.created_at < cutoff)
+        statement = select(PermissionAuditLog).where(
+            PermissionAuditLog.created_at < cutoff
+        )
         old_logs = self.db.exec(statement).all()
 
         count = len(old_logs)

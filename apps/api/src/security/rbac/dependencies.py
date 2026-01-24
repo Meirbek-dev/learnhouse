@@ -83,7 +83,7 @@ class PermissionDeps:
         checker: PermissionCheckerDep,
         context: PermissionContextDep,
         user: CurrentUserDep,
-    ):
+    ) -> None:
         self.checker = checker
         self.context = context
         self.user = user

@@ -193,12 +193,15 @@ export default function QuestionEditor({
         // ensure texts are present
         const normalized = opts
           .slice(0, 2)
-          .map((o, i) => (Object.assign({}, o, { text: o.text || (i === 0 ? t('true') : t('false')) })));
+          .map((o, i) => Object.assign({}, o, { text: o.text || (i === 0 ? t('true') : t('false')) }));
         const firstCorrect = normalized.findIndex((o) => o.is_correct);
         if (firstCorrect === -1) {
           return { ...prev, answer_options: normalized };
         }
-        return { ...prev, answer_options: normalized.map((o, i) => (Object.assign({}, o, { is_correct: i === firstCorrect }))) };
+        return {
+          ...prev,
+          answer_options: normalized.map((o, i) => Object.assign({}, o, { is_correct: i === firstCorrect })),
+        };
       }
 
       if (prev.question_type === 'SINGLE_CHOICE') {

@@ -6,6 +6,7 @@ This module provides the core permission evaluation logic, including:
 - Resource ownership verification
 - Scope evaluation
 - ABAC condition evaluation
+- Redis caching for performance
 """
 
 from datetime import datetime
@@ -25,6 +26,12 @@ from src.db.resource_authors import (
     ResourceAuthorshipEnum,
     ResourceAuthorshipStatusEnum,
 )
+from src.services.permissions.permission_cache import (
+    get_cached_permission,
+    get_cached_user_roles,
+    set_cached_permission,
+    set_cached_user_roles,
+)
 
 
 class PolicyEngine:
@@ -38,8 +45,9 @@ class PolicyEngine:
     - Scope evaluation
     """
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, use_cache: bool = True) -> None:
         self.db = db
+        self.use_cache = use_cache
 
     def evaluate(
         self,
@@ -54,9 +62,11 @@ class PolicyEngine:
         Evaluate if a user has permission to perform an action on a resource.
 
         The evaluation order:
-        1. Check resource-level permissions (most specific)
-        2. Check role-based permissions with scope evaluation
-        3. Evaluate ABAC conditions if present
+        1. Check cache for previous result
+        2. Check resource-level permissions (most specific)
+        3. Check role-based permissions with scope evaluation
+        4. Evaluate ABAC conditions if present
+        5. Cache the result
 
         Args:
             user_id: User ID
@@ -73,14 +83,35 @@ class PolicyEngine:
         if user_id == 0:
             return self._check_anonymous_access(action, resource, resource_id)
 
+        # Check cache first (skip if context is provided - ABAC may vary)
+        action_str = action.value if hasattr(action, "value") else str(action)
+        resource_str = resource.value if hasattr(resource, "value") else str(resource)
+
+        if self.use_cache and context is None:
+            cached = get_cached_permission(
+                user_id, action_str, resource_str, resource_id, org_id
+            )
+            if cached is not None:
+                return cached["allowed"]
+
         # Check resource-level permissions first (most specific)
-        if resource_id and self._check_resource_permission(user_id, action, resource, resource_id):
+        if resource_id and self._check_resource_permission(
+            user_id, action, resource, resource_id
+        ):
+            if self.use_cache:
+                set_cached_permission(
+                    user_id, action_str, resource_str, True, resource_id, org_id
+                )
             return True
 
         # Get user's roles (filter expired)
         roles = self._get_user_active_roles(user_id, org_id)
 
         if not roles:
+            if self.use_cache:
+                set_cached_permission(
+                    user_id, action_str, resource_str, False, resource_id, org_id
+                )
             return False
 
         # Check ownership for "own" scope
@@ -91,8 +122,16 @@ class PolicyEngine:
         # Check each role's permissions (including inherited)
         for role in roles:
             if self._check_role_permission(role, action, resource, is_owner, context):
+                if self.use_cache and context is None:
+                    set_cached_permission(
+                        user_id, action_str, resource_str, True, resource_id, org_id
+                    )
                 return True
 
+        if self.use_cache and context is None:
+            set_cached_permission(
+                user_id, action_str, resource_str, False, resource_id, org_id
+            )
         return False
 
     def _check_anonymous_access(
@@ -141,13 +180,16 @@ class PolicyEngine:
 
         # Filter out expired permissions
         statement = statement.where(
-            (ResourcePermission.expires_at.is_(None)) | (ResourcePermission.expires_at > datetime.utcnow())  # type: ignore[union-attr]
+            (ResourcePermission.expires_at.is_(None))
+            | (ResourcePermission.expires_at > datetime.utcnow())  # type: ignore[union-attr]
         )
 
         result = self.db.exec(statement).first()
         return result is not None
 
-    def _get_user_active_roles(self, user_id: int, org_id: int | None = None) -> list[RoleNew]:
+    def _get_user_active_roles(
+        self, user_id: int, org_id: int | None = None
+    ) -> list[RoleNew]:
         """
         Get all active (non-expired) roles for a user.
 
@@ -162,7 +204,10 @@ class PolicyEngine:
             select(RoleNew)
             .join(UserRole, UserRole.role_id == RoleNew.id)
             .where(UserRole.user_id == user_id)
-            .where((UserRole.expires_at.is_(None)) | (UserRole.expires_at > datetime.utcnow()))  # type: ignore[union-attr]
+            .where(
+                (UserRole.expires_at.is_(None))
+                | (UserRole.expires_at > datetime.utcnow())
+            )  # type: ignore[union-attr]
         )
 
         if org_id is not None:
@@ -182,11 +227,13 @@ class PolicyEngine:
         statement = select(ResourceAuthor).where(
             ResourceAuthor.resource_uuid == resource_id,
             ResourceAuthor.user_id == user_id,
-            ResourceAuthor.authorship.in_([
-                ResourceAuthorshipEnum.CREATOR,
-                ResourceAuthorshipEnum.MAINTAINER,
-                ResourceAuthorshipEnum.CONTRIBUTOR,
-            ]),
+            ResourceAuthor.authorship.in_(
+                [
+                    ResourceAuthorshipEnum.CREATOR,
+                    ResourceAuthorshipEnum.MAINTAINER,
+                    ResourceAuthorshipEnum.CONTRIBUTOR,
+                ]
+            ),
             ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
         )
         result = self.db.exec(statement).first()

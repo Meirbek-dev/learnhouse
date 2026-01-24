@@ -103,7 +103,7 @@ async def test_update_user_bypasses_cache(monkeypatch):
     monkeypatch.setattr("src.services.users.users._get_user_by_field", fake_get_user)
 
     # Mock validation functions to avoid DB interaction
-    async def fake_validate(*args, **kwargs):
+    async def fake_validate(*args, **kwargs) -> None:
         pass
 
     monkeypatch.setattr(

@@ -98,8 +98,7 @@ class UserPolicy(BasePolicy):
 
         # Try as user_uuid
         statement = select(User.id).where(User.user_uuid == resource_id)
-        result = self.db.exec(statement).first()
-        return result
+        return self.db.exec(statement).first()
 
     def _can_manage_user(
         self,
@@ -131,11 +130,7 @@ class UserPolicy(BasePolicy):
             return False
 
         # Check if current user is admin in any shared org
-        for org_id in shared_orgs:
-            if self._is_org_admin_for_user(user, org_id):
-                return True
-
-        return False
+        return any(self._is_org_admin_for_user(user, org_id) for org_id in shared_orgs)
 
     def _get_shared_orgs(self, user_id_1: int, user_id_2: int) -> list[int]:
         """

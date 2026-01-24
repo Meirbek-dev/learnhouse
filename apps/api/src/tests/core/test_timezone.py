@@ -4,9 +4,9 @@ Tests for timezone utilities
 
 from datetime import UTC, datetime, timezone
 from unittest.mock import MagicMock, patch
-from zoneinfo import ZoneInfo
 
 import pytest
+from zoneinfo import ZoneInfo
 
 from src.core.timezone import (
     get_timezone,

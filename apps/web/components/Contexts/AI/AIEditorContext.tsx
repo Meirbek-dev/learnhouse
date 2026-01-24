@@ -97,7 +97,10 @@ export function useAIEditorDispatch(): React.Dispatch<AIEditorAction> {
 type AIEditorActionType = AIEditorAction['type'];
 
 type AIEditorActionHandlers = {
-  [T in AIEditorActionType]: (state: AIEditorStateTypes, action: Extract<AIEditorAction, { type: T }>) => AIEditorStateTypes;
+  [T in AIEditorActionType]: (
+    state: AIEditorStateTypes,
+    action: Extract<AIEditorAction, { type: T }>,
+  ) => AIEditorStateTypes;
 };
 
 const AI_EDITOR_ACTION_HANDLERS: AIEditorActionHandlers = {

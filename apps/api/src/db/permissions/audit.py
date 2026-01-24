@@ -20,11 +20,21 @@ class PermissionAuditLogBase(SQLModelStrictBaseModel):
 
     model_config = ConfigDict(use_enum_values=True)
 
-    action: AuditAction = Field(description="Type of action: check, grant, revoke, deny")
-    resource_type: str | None = Field(default=None, max_length=50, description="Type of resource")
-    resource_id: str | None = Field(default=None, max_length=100, description="UUID of resource")
-    permission_name: str | None = Field(default=None, max_length=100, description="Permission that was checked/modified")
-    result: bool = Field(description="Result of the action (True=allowed, False=denied)")
+    action: AuditAction = Field(
+        description="Type of action: check, grant, revoke, deny"
+    )
+    resource_type: str | None = Field(
+        default=None, max_length=50, description="Type of resource"
+    )
+    resource_id: str | None = Field(
+        default=None, max_length=100, description="UUID of resource"
+    )
+    permission_name: str | None = Field(
+        default=None, max_length=100, description="Permission that was checked/modified"
+    )
+    result: bool = Field(
+        description="Result of the action (True=allowed, False=denied)"
+    )
 
 
 class PermissionAuditLog(PermissionAuditLogBase, table=True):

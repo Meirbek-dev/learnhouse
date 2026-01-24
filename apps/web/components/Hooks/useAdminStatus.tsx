@@ -1,5 +1,7 @@
+import { Actions, ResourceTypes } from '@/types/permissions';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { usePermission } from '@/hooks/usePermission';
 import type { Session } from 'next-auth';
 
 interface Role {
@@ -87,106 +89,82 @@ function hasRoles(sessionData: Session | null): sessionData is Session & {
   );
 }
 
-// Type guard to check if org has id
-function hasOrgId(org: any): org is { id: number } {
-  return org !== null && typeof org === 'object' && 'id' in org && typeof org.id === 'number';
-}
-
+/**
+ * Hook that provides admin status and permission checks.
+ *
+ * This hook has been updated to use the new RBAC permission system
+ * while maintaining backward compatibility with the old rights structure.
+ */
 function useAdminStatus(): UseAdminStatusReturn {
   const session = usePlatformSession();
   const org = useOrg();
+  const { can, isAdmin: permissionIsAdmin, isLoading: permissionLoading } = usePermission();
 
   const userRoles: Role[] = hasRoles(session.data) ? session.data.roles : [];
 
-  let rights: Rights | null = null;
-  if (session.status === 'authenticated' && hasOrgId(org) && userRoles && userRoles.length > 0) {
-    // Find roles for the current organization
-    const orgRoles = userRoles.filter((role: Role) => role.org.id === org.id);
-    if (orgRoles.length > 0) {
-      // Initialize merged rights with default values
-      const mergedRights: Rights = {
-        courses: {
-          action_create: false,
-          action_read: false,
-          action_read_own: false,
-          action_update: false,
-          action_update_own: false,
-          action_delete: false,
-          action_delete_own: false,
-        },
-        users: {
-          action_create: false,
-          action_read: false,
-          action_update: false,
-          action_delete: false,
-        },
-        usergroups: {
-          action_create: false,
-          action_read: false,
-          action_update: false,
-          action_delete: false,
-        },
-        collections: {
-          action_create: false,
-          action_read: false,
-          action_update: false,
-          action_delete: false,
-        },
-        organizations: {
-          action_create: false,
-          action_read: false,
-          action_update: false,
-          action_delete: false,
-        },
-        coursechapters: {
-          action_create: false,
-          action_read: false,
-          action_update: false,
-          action_delete: false,
-        },
-        activities: {
-          action_create: false,
-          action_read: false,
-          action_update: false,
-          action_delete: false,
-        },
-        roles: {
-          action_create: false,
-          action_read: false,
-          action_update: false,
-          action_delete: false,
-        },
-        dashboard: {
-          action_access: false,
-        },
-      };
+  // Build rights from new permission system
+  const rights: Rights = {
+    courses: {
+      action_create: can(Actions.CREATE, ResourceTypes.COURSE),
+      action_read: can(Actions.READ, ResourceTypes.COURSE),
+      action_read_own: can(Actions.READ, ResourceTypes.COURSE),
+      action_update: can(Actions.UPDATE, ResourceTypes.COURSE),
+      action_update_own: can(Actions.UPDATE, ResourceTypes.COURSE),
+      action_delete: can(Actions.DELETE, ResourceTypes.COURSE),
+      action_delete_own: can(Actions.DELETE, ResourceTypes.COURSE),
+    },
+    users: {
+      action_create: can(Actions.CREATE, ResourceTypes.USER),
+      action_read: can(Actions.READ, ResourceTypes.USER),
+      action_update: can(Actions.UPDATE, ResourceTypes.USER),
+      action_delete: can(Actions.DELETE, ResourceTypes.USER),
+    },
+    usergroups: {
+      action_create: can(Actions.CREATE, ResourceTypes.USERGROUP),
+      action_read: can(Actions.READ, ResourceTypes.USERGROUP),
+      action_update: can(Actions.UPDATE, ResourceTypes.USERGROUP),
+      action_delete: can(Actions.DELETE, ResourceTypes.USERGROUP),
+    },
+    collections: {
+      action_create: can(Actions.CREATE, ResourceTypes.COLLECTION),
+      action_read: can(Actions.READ, ResourceTypes.COLLECTION),
+      action_update: can(Actions.UPDATE, ResourceTypes.COLLECTION),
+      action_delete: can(Actions.DELETE, ResourceTypes.COLLECTION),
+    },
+    organizations: {
+      action_create: can(Actions.CREATE, ResourceTypes.ORGANIZATION),
+      action_read: can(Actions.READ, ResourceTypes.ORGANIZATION),
+      action_update: can(Actions.UPDATE, ResourceTypes.ORGANIZATION),
+      action_delete: can(Actions.DELETE, ResourceTypes.ORGANIZATION),
+    },
+    coursechapters: {
+      action_create: can(Actions.CREATE, ResourceTypes.CHAPTER),
+      action_read: can(Actions.READ, ResourceTypes.CHAPTER),
+      action_update: can(Actions.UPDATE, ResourceTypes.CHAPTER),
+      action_delete: can(Actions.DELETE, ResourceTypes.CHAPTER),
+    },
+    activities: {
+      action_create: can(Actions.CREATE, ResourceTypes.ACTIVITY),
+      action_read: can(Actions.READ, ResourceTypes.ACTIVITY),
+      action_update: can(Actions.UPDATE, ResourceTypes.ACTIVITY),
+      action_delete: can(Actions.DELETE, ResourceTypes.ACTIVITY),
+    },
+    roles: {
+      action_create: can(Actions.CREATE, ResourceTypes.ROLE),
+      action_read: can(Actions.READ, ResourceTypes.ROLE),
+      action_update: can(Actions.UPDATE, ResourceTypes.ROLE),
+      action_delete: can(Actions.DELETE, ResourceTypes.ROLE),
+    },
+    dashboard: {
+      // Access if user has any of these permissions
+      action_access:
+        can(Actions.MANAGE, ResourceTypes.ORGANIZATION) || can(Actions.CREATE, ResourceTypes.COURSE) || permissionIsAdmin,
+    },
+  };
 
-      // Merge rights from all roles
-      orgRoles.forEach((role: Role) => {
-        if (role.role.rights) {
-          Object.keys(role.role.rights).forEach((resourceType) => {
-            const resourceKey = resourceType as keyof Rights;
-            if (mergedRights[resourceKey] && role.role.rights?.[resourceType]) {
-              Object.keys(role.role.rights[resourceType]).forEach((action) => {
-                if (role.role.rights?.[resourceType]?.[action] === true) {
-                  const actionKey = action as keyof Rights[typeof resourceKey];
-                  if (actionKey in mergedRights[resourceKey]) {
-                    (mergedRights[resourceKey] as any)[actionKey] = true;
-                  }
-                }
-              });
-            }
-          });
-        }
-      });
-
-      rights = mergedRights;
-    }
-  }
-
-  // Derive isAdmin and loading from rights
-  const isAdmin = rights?.dashboard?.action_access === true;
-  const loading = session.status === 'loading';
+  // Use permission-based admin check, with fallback to legacy role check
+  const isAdmin = permissionIsAdmin || rights.dashboard.action_access;
+  const loading = session.status === 'loading' || permissionLoading;
 
   return { isAdmin, loading, userRoles, rights };
 }

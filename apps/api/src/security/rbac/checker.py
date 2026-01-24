@@ -25,7 +25,7 @@ class PermissionChecker:
     - can(): Alias for check()
     """
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         """
         Initialize the permission checker.
 
@@ -135,7 +135,8 @@ class PermissionChecker:
         if not self.check(user, action, resource, resource_id, org_id, context):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=error_message or f"Permission denied: {action.value} on {resource.value}",
+                detail=error_message
+                or f"Permission denied: {action.value} on {resource.value}",
             )
 
     def can(

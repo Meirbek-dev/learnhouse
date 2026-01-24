@@ -7,8 +7,8 @@
  * - Managing roles (admin only)
  */
 
+import type { Permission, Role } from '@/types/permissions';
 import { getAPIUrl } from '@services/config/config';
-import type { Permission, Role, UserPermissions } from '@/types/permissions';
 
 interface PermissionCheckRequest {
   action: string;
@@ -17,20 +17,18 @@ interface PermissionCheckRequest {
   org_id?: number;
 }
 
-interface PermissionCheckResponse {
-  [key: string]: boolean;
-}
+type PermissionCheckResponse = Record<string, boolean>;
 
 interface UserPermissionsResponse {
   user_id: number;
   org_id: number | null;
   roles: Role[];
   permissions: Record<string, boolean>;
-  resource_permissions: Array<{
+  resource_permissions: {
     resource_type: string;
     resource_id: string;
     permission_id: number;
-  }>;
+  }[];
 }
 
 /**
@@ -40,10 +38,7 @@ interface UserPermissionsResponse {
  * @param orgId - Optional organization ID to filter permissions
  * @returns Promise<UserPermissionsResponse>
  */
-export async function fetchUserPermissions(
-  accessToken: string,
-  orgId?: number
-): Promise<UserPermissionsResponse> {
+export async function fetchUserPermissions(accessToken: string, orgId?: number): Promise<UserPermissionsResponse> {
   const url = new URL(`${getAPIUrl()}me/permissions`);
   if (orgId) {
     url.searchParams.set('org_id', orgId.toString());
@@ -52,7 +47,7 @@ export async function fetchUserPermissions(
   const response = await fetch(url.toString(), {
     method: 'GET',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',
@@ -77,12 +72,12 @@ export async function fetchUserPermissions(
  */
 export async function batchCheckPermissions(
   accessToken: string,
-  checks: PermissionCheckRequest[]
+  checks: PermissionCheckRequest[],
 ): Promise<PermissionCheckResponse> {
   const response = await fetch(`${getAPIUrl()}permissions/check`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',
@@ -103,10 +98,7 @@ export async function batchCheckPermissions(
  * @param resourceType - Optional filter by resource type
  * @returns Promise<Permission[]>
  */
-export async function listPermissions(
-  accessToken: string,
-  resourceType?: string
-): Promise<Permission[]> {
+export async function listPermissions(accessToken: string, resourceType?: string): Promise<Permission[]> {
   const url = new URL(`${getAPIUrl()}permissions`);
   if (resourceType) {
     url.searchParams.set('resource_type', resourceType);
@@ -115,7 +107,7 @@ export async function listPermissions(
   const response = await fetch(url.toString(), {
     method: 'GET',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',
@@ -136,11 +128,7 @@ export async function listPermissions(
  * @param includeGlobal - Whether to include global roles (default: true)
  * @returns Promise<Role[]>
  */
-export async function listRoles(
-  accessToken: string,
-  orgId?: number,
-  includeGlobal: boolean = true
-): Promise<Role[]> {
+export async function listRoles(accessToken: string, orgId?: number, includeGlobal = true): Promise<Role[]> {
   const url = new URL(`${getAPIUrl()}roles-new`);
   if (orgId !== undefined) {
     url.searchParams.set('org_id', orgId.toString());
@@ -150,7 +138,7 @@ export async function listRoles(
   const response = await fetch(url.toString(), {
     method: 'GET',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',
@@ -172,12 +160,12 @@ export async function listRoles(
  */
 export async function getRoleWithPermissions(
   accessToken: string,
-  roleId: number
+  roleId: number,
 ): Promise<Role & { permissions: Permission[] }> {
   const response = await fetch(`${getAPIUrl()}roles-new/${roleId}`, {
     method: 'GET',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',
@@ -205,12 +193,12 @@ export async function assignRoleToUser(
   userId: number,
   roleId: number,
   orgId: number,
-  expiresAt?: Date
+  expiresAt?: Date,
 ): Promise<void> {
   const response = await fetch(`${getAPIUrl()}users/${userId}/roles`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',
@@ -240,7 +228,7 @@ export async function removeRoleFromUser(
   accessToken: string,
   userId: number,
   roleId: number,
-  orgId: number
+  orgId: number,
 ): Promise<void> {
   const url = new URL(`${getAPIUrl()}users/${userId}/roles/${roleId}`);
   url.searchParams.set('org_id', orgId.toString());
@@ -248,7 +236,7 @@ export async function removeRoleFromUser(
   const response = await fetch(url.toString(), {
     method: 'DELETE',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',

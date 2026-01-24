@@ -1,6 +1,6 @@
 // next-auth.d.ts
-import 'next-auth';
 import type { Role, ResourcePermission } from './permissions';
+import 'next-auth';
 
 // Ambient global auth domain types (no import needed elsewhere)
 declare global {
@@ -66,4 +66,3 @@ declare module 'next-auth/jwt' {
     permissions?: Record<string, boolean>;
   }
 }
-

@@ -116,7 +116,9 @@ async def api_create_role_new(
 
     Requires role:create:org permission.
     """
-    checker.require(current_user, Action.CREATE, ResourceType.ROLE, org_id=role_data.org_id)
+    checker.require(
+        current_user, Action.CREATE, ResourceType.ROLE, org_id=role_data.org_id
+    )
 
     service = RoleService(db_session)
     try:
@@ -163,7 +165,9 @@ async def api_update_role_new(
     if not existing:
         raise HTTPException(status_code=404, detail="Role not found")
 
-    checker.require(current_user, Action.UPDATE, ResourceType.ROLE, org_id=existing.org_id)
+    checker.require(
+        current_user, Action.UPDATE, ResourceType.ROLE, org_id=existing.org_id
+    )
 
     try:
         role = service.update(role_id, role_data)
@@ -190,7 +194,9 @@ async def api_delete_role_new(
     if not existing:
         raise HTTPException(status_code=404, detail="Role not found")
 
-    checker.require(current_user, Action.DELETE, ResourceType.ROLE, org_id=existing.org_id)
+    checker.require(
+        current_user, Action.DELETE, ResourceType.ROLE, org_id=existing.org_id
+    )
 
     try:
         service.delete(role_id)
@@ -222,10 +228,14 @@ async def api_add_permission_to_role(
     if not existing:
         raise HTTPException(status_code=404, detail="Role not found")
 
-    checker.require(current_user, Action.UPDATE, ResourceType.ROLE, org_id=existing.org_id)
+    checker.require(
+        current_user, Action.UPDATE, ResourceType.ROLE, org_id=existing.org_id
+    )
 
     try:
-        service.add_permission_to_role(role_id, permission_id, granted_by=current_user.id)
+        service.add_permission_to_role(
+            role_id, permission_id, granted_by=current_user.id
+        )
         return {"message": "Permission added to role"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -249,7 +259,9 @@ async def api_remove_permission_from_role(
     if not existing:
         raise HTTPException(status_code=404, detail="Role not found")
 
-    checker.require(current_user, Action.UPDATE, ResourceType.ROLE, org_id=existing.org_id)
+    checker.require(
+        current_user, Action.UPDATE, ResourceType.ROLE, org_id=existing.org_id
+    )
 
     if not service.remove_permission_from_role(role_id, permission_id):
         raise HTTPException(status_code=404, detail="Permission not assigned to role")
@@ -301,7 +313,9 @@ async def api_assign_role_to_user(
 
     Requires role:update:org permission.
     """
-    checker.require(current_user, Action.UPDATE, ResourceType.ROLE, org_id=role_data.org_id)
+    checker.require(
+        current_user, Action.UPDATE, ResourceType.ROLE, org_id=role_data.org_id
+    )
 
     service = RoleService(db_session)
     try:
@@ -432,7 +446,9 @@ async def api_check_permissions(
         elif org_id:
             key += f":org_{org_id}"
 
-        results[key] = checker.check(current_user, action, resource, resource_id, org_id)
+        results[key] = checker.check(
+            current_user, action, resource, resource_id, org_id
+        )
 
     return results
 
@@ -465,6 +481,7 @@ async def api_seed_permissions(
     if not is_super_admin:
         # If no super-admin exists yet, allow first user to seed
         from sqlmodel import select
+
         from src.db.permissions.models import UserRole
 
         existing_admins = db_session.exec(select(UserRole)).first()

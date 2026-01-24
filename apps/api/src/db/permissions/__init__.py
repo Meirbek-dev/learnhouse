@@ -31,12 +31,17 @@ from src.db.permissions.models import (
 __all__ = [
     # Enums
     "Action",
-    "ResourceType",
-    "Scope",
     # Permission models
     "Permission",
+    # Audit
+    "PermissionAuditLog",
     "PermissionCreate",
     "PermissionRead",
+    # Resource-level permissions
+    "ResourcePermission",
+    "ResourcePermissionCreate",
+    "ResourcePermissionRead",
+    "ResourceType",
     # Role models
     "RoleNew",
     "RoleNewCreate",
@@ -45,18 +50,13 @@ __all__ = [
     # Role-Permission junction
     "RolePermission",
     "RolePermissionCreate",
+    # Composite models
+    "RoleWithPermissions",
+    "Scope",
+    "UserPermissionsResponse",
     # User-Role assignment
     "UserRole",
     "UserRoleAssign",
     "UserRoleCreate",
     "UserRoleRead",
-    # Resource-level permissions
-    "ResourcePermission",
-    "ResourcePermissionCreate",
-    "ResourcePermissionRead",
-    # Composite models
-    "RoleWithPermissions",
-    "UserPermissionsResponse",
-    # Audit
-    "PermissionAuditLog",
 ]

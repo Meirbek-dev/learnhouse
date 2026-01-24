@@ -22,7 +22,7 @@ class BasePolicy(ABC):
 
     resource_type: ResourceType
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         """
         Initialize the policy.
 
@@ -53,7 +53,6 @@ class BasePolicy(ABC):
         Returns:
             True if allowed, False otherwise
         """
-        pass
 
     def is_owner(self, user: PublicUser | AnonymousUser, resource_id: str) -> bool:
         """
@@ -80,11 +79,13 @@ class BasePolicy(ABC):
         statement = select(ResourceAuthor).where(
             ResourceAuthor.resource_uuid == resource_id,
             ResourceAuthor.user_id == user.id,
-            ResourceAuthor.authorship.in_([
-                ResourceAuthorshipEnum.CREATOR,
-                ResourceAuthorshipEnum.MAINTAINER,
-                ResourceAuthorshipEnum.CONTRIBUTOR,
-            ]),
+            ResourceAuthor.authorship.in_(
+                [
+                    ResourceAuthorshipEnum.CREATOR,
+                    ResourceAuthorshipEnum.MAINTAINER,
+                    ResourceAuthorshipEnum.CONTRIBUTOR,
+                ]
+            ),
             ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
         )
         result = self.db.exec(statement).first()
@@ -138,6 +139,8 @@ class BasePolicy(ABC):
         if isinstance(user, AnonymousUser) or user.id == 0:
             return []
 
-        statement = select(UserRole.org_id).where(UserRole.user_id == user.id).distinct()
+        statement = (
+            select(UserRole.org_id).where(UserRole.user_id == user.id).distinct()
+        )
         results = self.db.exec(statement).all()
         return list(results)
