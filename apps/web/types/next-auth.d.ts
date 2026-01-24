@@ -1,5 +1,6 @@
 // next-auth.d.ts
 import 'next-auth';
+import type { Role, ResourcePermission } from './permissions';
 
 // Ambient global auth domain types (no import needed elsewhere)
 declare global {
@@ -29,6 +30,12 @@ declare global {
     user: AuthUser;
     roles: string[];
     tokens: AuthTokens;
+    /** User's effective permissions as permission_name -> boolean */
+    permissions?: Record<string, boolean>;
+    /** User's roles with full details */
+    roleDetails?: Role[];
+    /** Resource-level permission overrides */
+    resourcePermissions?: ResourcePermission[];
   }
 
   interface TokenRefreshResult {
@@ -43,6 +50,10 @@ declare module 'next-auth' {
     roles?: string[];
     tokens?: AuthTokens;
     expires: string;
+    /** User's effective permissions as permission_name -> boolean */
+    permissions?: Record<string, boolean>;
+    /** User's roles with full details */
+    roleDetails?: Role[];
   }
 
   type User = UserWithTokens;
@@ -51,5 +62,8 @@ declare module 'next-auth' {
 declare module 'next-auth/jwt' {
   interface JWT {
     user?: UserWithTokens;
+    /** Cached permissions */
+    permissions?: Record<string, boolean>;
   }
 }
+

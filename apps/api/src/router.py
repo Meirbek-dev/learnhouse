@@ -15,6 +15,7 @@ from src.routers import (
     gamification,
     health,
     orgs,
+    permissions,
     roles,
     search,
     trail,
@@ -46,6 +47,7 @@ v1_router.include_router(usergroups.router, prefix="/usergroups", tags=["usergro
 v1_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 v1_router.include_router(orgs.router, prefix="/orgs", tags=["orgs"])
 v1_router.include_router(roles.router, prefix="/roles", tags=["roles"])
+v1_router.include_router(permissions.router, tags=["permissions"])
 v1_router.include_router(search.router, prefix="/search", tags=["search"])
 v1_router.include_router(health.router, prefix="/health", tags=["health"])
 v1_router.include_router(utils_router, prefix="/utils", tags=["utils"])

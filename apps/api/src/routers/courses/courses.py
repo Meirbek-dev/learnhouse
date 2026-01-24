@@ -16,9 +16,12 @@ from src.db.courses.courses import (
     FullCourseRead,
     ThumbnailType,
 )
+from src.db.permissions import Action, ResourceType
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
+from src.security.rbac.checker import PermissionChecker
+from src.security.rbac.dependencies import get_permission_checker
 from src.services.courses.contributors import (
     add_bulk_course_contributors,
     apply_course_contributor,
@@ -47,6 +50,22 @@ from src.services.courses.updates import (
 )
 
 router = APIRouter()
+
+
+# ---------------------------------------------------------------------------
+# Course CRUD Endpoints
+# ---------------------------------------------------------------------------
+# NOTE: The routes below use the legacy RBAC check inside services.
+# New routes should use the PermissionChecker dependency as shown:
+#
+# @router.post("/v2")
+# async def api_create_course_v2(
+#     ...,
+#     checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
+# ):
+#     checker.require(current_user, Action.CREATE, ResourceType.COURSE, org_id=org_id)
+#     ...
+# ---------------------------------------------------------------------------
 
 
 @router.post("/")

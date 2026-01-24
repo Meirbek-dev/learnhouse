@@ -32,6 +32,7 @@ from src.db.users import (
     UserUpdatePassword,
     rebuild_user_models,
 )
+from src.security.rbac.checker import PermissionChecker
 from src.security.rbac.rbac import (
     authorization_verify_based_on_roles_and_authorship,
     authorization_verify_if_user_is_anon,
@@ -350,9 +351,19 @@ async def get_user_session(
                 )
             )
 
+    # Get user's effective permissions from the new RBAC system
+    permissions: dict[str, bool] = {}
+    try:
+        checker = PermissionChecker(db_session)
+        permissions = checker.get_user_permissions(current_user)
+    except Exception:
+        # Fallback: if new RBAC system not yet migrated, return empty
+        pass
+
     return UserSession(
         user=user_read,
         roles=roles,
+        permissions=permissions,
     )
 
 

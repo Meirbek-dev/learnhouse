@@ -10,6 +10,7 @@ interface LoginResponse {
 interface UserSessionResponse {
   user: AuthUser;
   roles: string[];
+  permissions?: Record<string, boolean>;
 }
 
 interface AuthError extends Error {

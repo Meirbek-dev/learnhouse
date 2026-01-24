@@ -367,6 +367,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           user: cachedSession.data.user,
           roles: cachedSession.data.roles,
           tokens: cachedSession.data.tokens,
+          permissions: cachedSession.data.permissions,
         };
       }
 
@@ -382,6 +383,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           user: api_SESSION.user,
           roles: api_SESSION.roles || [],
           tokens: tokens,
+          permissions: api_SESSION.permissions || {},
         };
 
         const updatedSession = {
@@ -389,6 +391,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           user: sessionData.user,
           roles: sessionData.roles,
           tokens: sessionData.tokens,
+          permissions: sessionData.permissions,
         };
 
         // Cache the fresh session data

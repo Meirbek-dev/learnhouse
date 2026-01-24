@@ -69,6 +69,7 @@ class UserRoleWithOrg(PydanticStrictBaseModel):
 class UserSession(PydanticStrictBaseModel):
     user: UserRead
     roles: list[UserRoleWithOrg]
+    permissions: dict[str, bool] = {}  # Effective permissions: "course:create:org" -> True
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
