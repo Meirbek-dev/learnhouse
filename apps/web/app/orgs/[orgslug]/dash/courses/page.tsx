@@ -39,18 +39,25 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   };
 }
 
-async function CoursesPage(params: any) {
-  const { orgslug } = await params.params;
+const COURSES_PER_PAGE = 999;
+
+async function CoursesPage(props: {
+  params: Promise<{ orgslug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const { orgslug } = await props.params;
+
   const org = await getOrganizationContextInfo(orgslug);
   const session = await auth();
   const access_token = session?.tokens?.access_token;
-  const { courses } = await getOrgCourses(orgslug, undefined, access_token || null);
+  const { courses, total } = await getOrgCourses(orgslug, undefined, access_token || null, 1, COURSES_PER_PAGE);
 
   return (
     <CoursesHome
       org_id={org.org_id}
       orgslug={orgslug}
       courses={courses}
+      totalCourses={total}
     />
   );
 }

@@ -19,14 +19,14 @@ interface CourseProps {
   orgslug: string;
   courses: any;
   org_id: number;
+  totalCourses: number;
 }
 
 const CoursesHome = (params: CourseProps) => {
   const searchParams = useSearchParams();
   const isCreatingCourse = Boolean(searchParams.get('new'));
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
-  const { orgslug } = params;
-  const { courses } = params;
+  const { orgslug, courses, totalCourses } = params;
   const isUserAdmin = useAdminStatus();
   const t = useTranslations('DashPage.Courses.HomePageClient');
   const org = useOrg() as any;
