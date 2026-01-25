@@ -1033,6 +1033,39 @@ async def get_course_user_rights(
     is_maintainer_role = rights["roles"]["is_maintainer_role"]
     is_instructor = rights["roles"]["is_instructor"]
 
+    # Additional access checks: membership in UserGroups for this resource or authorship.
+    has_user_permissions = False
+
+    # If the user is an active resource author, grant access
+    statement = select(ResourceAuthor).where(
+        ResourceAuthor.resource_uuid == course_uuid,
+        ResourceAuthor.user_id == current_user.id,
+        ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
+    )
+    if db_session.exec(statement).first():
+        has_user_permissions = True
+    else:
+        # Check if the course is not protected by any UserGroupResource entry. If so,
+        # authenticated users are allowed to access it.
+        ugr_stmt = select(UserGroupResource).where(
+            UserGroupResource.resource_uuid == course_uuid
+        )
+        ugr = db_session.exec(ugr_stmt).all()
+        if not ugr:
+            has_user_permissions = True
+        else:
+            # Otherwise check if the user is a member of any usergroup that grants access
+            member_stmt = (
+                select(UserGroupUser)
+                .join(UserGroupResource, UserGroupUser.usergroup_id == UserGroupResource.usergroup_id)
+                .where(
+                    UserGroupResource.resource_uuid == course_uuid,
+                    UserGroupUser.user_id == current_user.id,
+                )
+            )
+            if db_session.exec(member_stmt).first():
+                has_user_permissions = True
+
     # READ permissions
     if (
         course.public
