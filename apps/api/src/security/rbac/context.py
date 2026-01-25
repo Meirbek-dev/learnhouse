@@ -6,7 +6,7 @@ user, organization, and resource during permission checks.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, UTC
 
 from src.db.permissions.enums import Action, ResourceType
 
@@ -39,7 +39,7 @@ class PermissionContext:
     extra: dict = field(default_factory=dict)
 
     # Timestamp
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     @property
     def is_anonymous(self) -> bool:

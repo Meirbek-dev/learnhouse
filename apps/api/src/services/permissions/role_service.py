@@ -5,7 +5,7 @@ This service handles CRUD operations for roles, role hierarchy,
 and permission assignments to roles.
 """
 
-from datetime import datetime
+from datetime import datetime, UTC
 
 from sqlmodel import Session, select
 
@@ -148,7 +148,7 @@ class RoleService:
         for field, value in update_data.items():
             setattr(role, field, value)
 
-        role.updated_at = datetime.utcnow()
+        role.updated_at = datetime.now(UTC)
         self.db.add(role)
         self.db.commit()
         self.db.refresh(role)

@@ -649,4 +649,3 @@ async def delete_role(
     db_session.commit()
 
     return "Role deleted"
-

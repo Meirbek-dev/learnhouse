@@ -450,5 +450,3 @@ async def remove_resources_from_usergroup(
             logging.error(f"resource with uuid {resource_uuid} not found in UserGroup")
 
     return "Resources removed from UserGroup successfully"
-
-

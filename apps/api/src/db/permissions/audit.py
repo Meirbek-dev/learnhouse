@@ -5,7 +5,7 @@ This module provides the database model for tracking permission checks,
 grants, and revocations for security auditing and compliance.
 """
 
-from datetime import datetime
+from datetime import datetime, UTC
 
 from pydantic import ConfigDict, field_validator
 from sqlalchemy import JSON, Column, ForeignKey, Index, Integer, String, Text
@@ -68,7 +68,7 @@ class PermissionAuditLog(PermissionAuditLogBase, table=True):
         sa_column=Column(Text),
         description="User agent string",
     )
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     @field_validator("action", mode="before")
     @classmethod

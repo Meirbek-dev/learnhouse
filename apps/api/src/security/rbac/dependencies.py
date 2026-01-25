@@ -18,7 +18,9 @@ from src.security.rbac.checker import PermissionChecker
 from src.security.rbac.context import PermissionContext
 
 
-async def _lazy_get_current_user(request: Request, Authorize=Depends(), db_session=Depends(get_db_session)):
+async def _lazy_get_current_user(
+    request: Request, Authorize=Depends(), db_session=Depends(get_db_session)
+):
     """Lazy wrapper to import get_current_user at runtime to avoid circular imports."""
     from src.security.auth import get_current_user as _get_current_user
 
@@ -45,7 +47,9 @@ def get_permission_checker(
 
 def get_permission_context(
     request: Request,
-    current_user: Annotated[PublicUser | AnonymousUser, Depends(_lazy_get_current_user)],
+    current_user: Annotated[
+        PublicUser | AnonymousUser, Depends(_lazy_get_current_user)
+    ],
 ) -> PermissionContext:
     """
     Get the current permission context from request.

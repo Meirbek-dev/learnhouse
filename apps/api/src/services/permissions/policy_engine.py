@@ -9,7 +9,7 @@ This module provides the core permission evaluation logic, including:
 - Redis caching for performance
 """
 
-from datetime import datetime
+from datetime import datetime, UTC
 
 from sqlmodel import Session, select
 
@@ -181,7 +181,7 @@ class PolicyEngine:
         # Filter out expired permissions
         statement = statement.where(
             (ResourcePermission.expires_at.is_(None))
-            | (ResourcePermission.expires_at > datetime.utcnow())  # type: ignore[union-attr]
+            | (ResourcePermission.expires_at > datetime.now(UTC))  # type: ignore[union-attr]
         )
 
         result = self.db.exec(statement).first()
@@ -206,7 +206,7 @@ class PolicyEngine:
             .where(UserRole.user_id == user_id)
             .where(
                 (UserRole.expires_at.is_(None))
-                | (UserRole.expires_at > datetime.utcnow())
+                | (UserRole.expires_at > datetime.now(UTC))
             )  # type: ignore[union-attr]
         )
 

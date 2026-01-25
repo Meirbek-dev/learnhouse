@@ -9,7 +9,7 @@ This module defines the SQLModel tables for:
 - resource_permissions: Resource-level permission overrides
 """
 
-from datetime import datetime
+from datetime import datetime, UTC
 
 from pydantic import ConfigDict, field_validator
 from sqlalchemy import JSON, Column, ForeignKey, Index, Integer, UniqueConstraint
@@ -47,7 +47,7 @@ class Permission(PermissionBase, table=True):
     __tablename__ = "permissions"
 
     id: int | None = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     @field_validator("resource_type", mode="before")
     @classmethod
@@ -127,8 +127,8 @@ class RoleNew(RoleNewBase, table=True):
         sa_column=Column(Integer, ForeignKey("roles_new.id", ondelete="SET NULL")),
         description="Parent role for hierarchy inheritance",
     )
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class RoleNewCreate(RoleNewBase):
@@ -190,7 +190,7 @@ class RolePermission(RolePermissionBase, table=True):
             Integer, ForeignKey("permissions.id", ondelete="CASCADE"), primary_key=True
         ),
     )
-    granted_at: datetime = Field(default_factory=datetime.utcnow)
+    granted_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     granted_by: int | None = Field(
         default=None,
         sa_column=Column(Integer, ForeignKey("user.id", ondelete="SET NULL")),
@@ -238,7 +238,7 @@ class UserRole(UserRoleBase, table=True):
             Integer, ForeignKey("organization.id", ondelete="CASCADE"), primary_key=True
         ),
     )
-    granted_at: datetime = Field(default_factory=datetime.utcnow)
+    granted_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     granted_by: int | None = Field(
         default=None,
         sa_column=Column(Integer, ForeignKey("user.id", ondelete="SET NULL")),
@@ -320,7 +320,7 @@ class ResourcePermission(ResourcePermissionBase, table=True):
     permission_id: int = Field(
         sa_column=Column(Integer, ForeignKey("permissions.id", ondelete="CASCADE")),
     )
-    granted_at: datetime = Field(default_factory=datetime.utcnow)
+    granted_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     granted_by: int | None = Field(
         default=None,
         sa_column=Column(Integer, ForeignKey("user.id", ondelete="SET NULL")),

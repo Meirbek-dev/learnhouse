@@ -92,7 +92,14 @@ def is_admin_or_maintainer(db_session: Session, user_id: int) -> bool:
     """Check if user has admin or maintainer role."""
     role_service = RoleService(db_session)
     user_roles = role_service.get_user_roles(user_id)
-    admin_roles = {"admin", "superadmin", "org_admin", "maintainer", "super-admin", "org-admin"}
+    admin_roles = {
+        "admin",
+        "superadmin",
+        "org_admin",
+        "maintainer",
+        "super-admin",
+        "org-admin",
+    }
     return any(
         role.slug.lower() in admin_roles or role.name.lower() in admin_roles
         for role in user_roles
@@ -329,7 +336,9 @@ async def rbac_check_usergroup(
     verify_not_anonymous(user_id)
 
     checker = PermissionChecker(db_session)
-    if checker.check(current_user, map_action(action), ResourceType.USERGROUP, usergroup_uuid):
+    if checker.check(
+        current_user, map_action(action), ResourceType.USERGROUP, usergroup_uuid
+    ):
         return True
 
     raise HTTPException(
@@ -357,7 +366,9 @@ def has_authenticated_user_role(db_session: Session, user_id: int) -> bool:
         return False
     role_service = RoleService(db_session)
     user_roles = role_service.get_user_roles(user_id)
-    return len(user_roles) > 0 or True  # All authenticated users are considered to have basic role
+    return (
+        len(user_roles) > 0 or True
+    )  # All authenticated users are considered to have basic role
 
 
 def check_user_permission(
@@ -404,6 +415,8 @@ def check_user_permission(
     user = db_session.exec(select(User).where(User.id == user_id)).first()
     if user:
         public_user = PublicUser.model_validate(user)
-        return checker.check(public_user, map_action(action), resource_type, resource_uuid)
+        return checker.check(
+            public_user, map_action(action), resource_type, resource_uuid
+        )
 
     return False

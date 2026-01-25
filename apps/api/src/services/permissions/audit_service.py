@@ -5,7 +5,7 @@ This service provides methods for logging permission checks, grants,
 and revocations for security auditing and compliance.
 """
 
-from datetime import datetime
+from datetime import datetime, UTC
 
 from sqlmodel import Session, select
 
@@ -299,7 +299,7 @@ class AuditService:
         """
         from datetime import timedelta
 
-        cutoff = datetime.utcnow() - timedelta(days=days)
+        cutoff = datetime.now(UTC) - timedelta(days=days)
 
         statement = select(PermissionAuditLog).where(
             PermissionAuditLog.created_at < cutoff

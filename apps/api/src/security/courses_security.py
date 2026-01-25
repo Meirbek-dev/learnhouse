@@ -72,8 +72,18 @@ def _is_admin_or_maintainer(db_session: Session, user_id: int) -> bool:
     """Check if user has admin or maintainer role."""
     role_service = RoleService(db_session)
     user_roles = role_service.get_user_roles(user_id)
-    admin_roles = {"admin", "superadmin", "org_admin", "maintainer", "super-admin", "org-admin"}
-    return any(role.slug.lower() in admin_roles or role.name.lower() in admin_roles for role in user_roles)
+    admin_roles = {
+        "admin",
+        "superadmin",
+        "org_admin",
+        "maintainer",
+        "super-admin",
+        "org-admin",
+    }
+    return any(
+        role.slug.lower() in admin_roles or role.name.lower() in admin_roles
+        for role in user_roles
+    )
 
 
 def _is_resource_public(
@@ -214,7 +224,12 @@ async def courses_rbac_check_for_activities(
 ) -> bool:
     """RBAC check for activities - requires course ownership for non-read actions."""
     return await courses_rbac_check(
-        request, course_uuid, current_user, action, db_session, require_course_ownership=True
+        request,
+        course_uuid,
+        current_user,
+        action,
+        db_session,
+        require_course_ownership=True,
     )
 
 
@@ -227,7 +242,12 @@ async def courses_rbac_check_for_assignments(
 ) -> bool:
     """RBAC check for assignments - requires course ownership for non-read actions."""
     return await courses_rbac_check(
-        request, course_uuid, current_user, action, db_session, require_course_ownership=True
+        request,
+        course_uuid,
+        current_user,
+        action,
+        db_session,
+        require_course_ownership=True,
     )
 
 
@@ -240,7 +260,12 @@ async def courses_rbac_check_for_chapters(
 ) -> bool:
     """RBAC check for chapters - requires course ownership for non-read actions."""
     return await courses_rbac_check(
-        request, course_uuid, current_user, action, db_session, require_course_ownership=True
+        request,
+        course_uuid,
+        current_user,
+        action,
+        db_session,
+        require_course_ownership=True,
     )
 
 
@@ -253,7 +278,12 @@ async def courses_rbac_check_for_certifications(
 ) -> bool:
     """RBAC check for certifications - requires course ownership for non-read actions."""
     return await courses_rbac_check(
-        request, course_uuid, current_user, action, db_session, require_course_ownership=True
+        request,
+        course_uuid,
+        current_user,
+        action,
+        db_session,
+        require_course_ownership=True,
     )
 
 
@@ -272,13 +302,17 @@ async def courses_rbac_check_for_collections(
 
     if action == "read":
         if is_anonymous:
-            if _is_resource_public(db_session, collection_uuid, ResourceType.COLLECTION):
+            if _is_resource_public(
+                db_session, collection_uuid, ResourceType.COLLECTION
+            ):
                 return True
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You must be logged in to access this collection",
             )
-        if checker.check(current_user, mapped_action, ResourceType.COLLECTION, collection_uuid):
+        if checker.check(
+            current_user, mapped_action, ResourceType.COLLECTION, collection_uuid
+        ):
             return True
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -293,7 +327,9 @@ async def courses_rbac_check_for_collections(
         )
 
     # Check permission
-    if checker.check(current_user, mapped_action, ResourceType.COLLECTION, collection_uuid):
+    if checker.check(
+        current_user, mapped_action, ResourceType.COLLECTION, collection_uuid
+    ):
         return True
 
     raise HTTPException(

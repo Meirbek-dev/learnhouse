@@ -5,7 +5,7 @@ This module tests the new permission checker, policy engine,
 and related components.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import Mock, patch
 
 import pytest
@@ -395,7 +395,7 @@ class TestPermissionIntegration:
 
     def test_user_role_expiry(self):
         """User roles can have expiry dates."""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         future = now + timedelta(days=30)
         past = now - timedelta(days=1)
 

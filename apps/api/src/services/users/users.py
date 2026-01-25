@@ -383,7 +383,9 @@ async def authorize_user_action(
     # RBAC check using new service_utils
     from src.security.rbac.service_utils import check_user_permission
 
-    authorized = check_user_permission(db_session, current_user.id, action, resource_uuid)
+    authorized = check_user_permission(
+        db_session, current_user.id, action, resource_uuid
+    )
 
     if authorized:
         return True
@@ -741,7 +743,6 @@ async def _get_user_by_field(
         _try_cache_set(user)
 
     return user
-
 
 
 ## 🔒 RBAC Utils ##

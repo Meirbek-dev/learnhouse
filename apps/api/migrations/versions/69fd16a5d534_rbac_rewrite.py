@@ -16,7 +16,7 @@ It also migrates existing roles and user_organizations data to the new schema.
 """
 
 from collections.abc import Sequence
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Union
 
 import sqlalchemy as sa
@@ -721,6 +721,6 @@ def _migrate_user_organizations() -> None:
                 "user_id": user_id,
                 "role_id": new_role_id,
                 "org_id": org_id,
-                "granted_at": creation_date or datetime.utcnow(),
+                "granted_at": creation_date or datetime.now(UTC),
             },
         )

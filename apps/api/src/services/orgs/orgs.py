@@ -783,4 +783,3 @@ async def upload_org_landing_content_service(
     name_in_disk = await upload_org_landing_content(content_file, org.org_uuid)
 
     return {"detail": "Landing content uploaded successfully", "filename": name_in_disk}
-
