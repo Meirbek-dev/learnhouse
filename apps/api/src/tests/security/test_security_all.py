@@ -10,9 +10,8 @@ of the security functionality including:
 """
 
 from src.tests.security.test_auth import TestAuth
-from src.tests.security.test_rbac import TestRBAC
-from src.tests.security.test_rbac_utils import TestRBACUtils
 from src.tests.security.test_security import TestSecurity
+from src.tests.security.test_rbac_new import TestPermissionEnums, TestPermissionModels
 
 
 class TestSecurityComprehensive:
@@ -85,8 +84,8 @@ class TestSecurityComprehensive:
         import src.security
         import src.security.auth
         import src.security.rbac
-        import src.security.rbac.rbac
-        import src.security.rbac.utils
+        import src.security.rbac.checker
+        import src.security.rbac.service_utils
         import src.security.security
 
         # Verify all modules can be imported
@@ -94,8 +93,8 @@ class TestSecurityComprehensive:
         assert src.security.auth is not None
         assert src.security.security is not None
         assert src.security.rbac is not None
-        assert src.security.rbac.rbac is not None
-        assert src.security.rbac.utils is not None
+        assert src.security.rbac.checker is not None
+        assert src.security.rbac.service_utils is not None
 
 
 # Test discovery helpers
@@ -104,8 +103,8 @@ def get_security_test_classes():
     return [
         TestSecurity,
         TestAuth,
-        TestRBAC,
-        TestRBACUtils,
+        TestPermissionEnums,
+        TestPermissionModels,
         TestSecurityComprehensive,
     ]
 

@@ -11,10 +11,7 @@ from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
 from src.db.usergroups import UserGroup, UserGroupCreate, UserGroupRead, UserGroupUpdate
 from src.db.users import AnonymousUser, InternalUser, PublicUser, User, UserRead
-from src.security.rbac.rbac import (
-    authorization_verify_based_on_roles_and_authorship,
-    authorization_verify_if_user_is_anon,
-)
+from src.security.rbac.service_utils import rbac_check_usergroup as rbac_check
 
 
 async def create_usergroup(
@@ -455,29 +452,3 @@ async def remove_resources_from_usergroup(
     return "Resources removed from UserGroup successfully"
 
 
-## 🔒 RBAC Utils ##
-
-
-async def rbac_check(
-    request: Request,
-    usergroup_uuid: str,
-    current_user: PublicUser | AnonymousUser | InternalUser,
-    action: Literal["create", "read", "update", "delete"],
-    db_session: Session,
-) -> bool | None:
-    if isinstance(current_user, InternalUser):
-        return True
-
-    await authorization_verify_if_user_is_anon(current_user.id)
-
-    await authorization_verify_based_on_roles_and_authorship(
-        request,
-        current_user.id,
-        action,
-        usergroup_uuid,
-        db_session,
-    )
-    return None
-
-
-## 🔒 RBAC Utils ##

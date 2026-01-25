@@ -33,10 +33,7 @@ from src.db.organizations import (
 )
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, InternalUser, PublicUser
-from src.security.rbac.rbac import (
-    authorization_verify_based_on_org_admin_status,
-    authorization_verify_if_user_is_anon,
-)
+from src.security.rbac.service_utils import rbac_check_org as rbac_check
 from src.services.orgs.uploads import (
     upload_org_landing_content,
     upload_org_logo,
@@ -787,30 +784,3 @@ async def upload_org_landing_content_service(
 
     return {"detail": "Landing content uploaded successfully", "filename": name_in_disk}
 
-
-## 🔒 RBAC Utils ##
-
-
-async def rbac_check(
-    request: Request,
-    org_uuid: str,
-    current_user: PublicUser | AnonymousUser | InternalUser,
-    action: Literal["create", "read", "update", "delete"],
-    db_session: Session,
-):
-    # Organizations are readable by anyone
-    if action == "read":
-        return True
-
-    # Internal users can do anything
-    if isinstance(current_user, InternalUser):
-        return True
-
-    # Use the authorization functions for other users
-    await authorization_verify_if_user_is_anon(current_user.id)
-    return await authorization_verify_based_on_org_admin_status(
-        request, current_user.id, action, org_uuid, db_session
-    )
-
-
-## 🔒 RBAC Utils ##

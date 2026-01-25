@@ -24,9 +24,11 @@ from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.courses_security import courses_rbac_check
-from src.security.rbac.rbac import (
-    authorization_verify_based_on_org_admin_status,
-    authorization_verify_if_user_is_anon,
+from src.security.rbac.service_utils import (
+    is_admin_or_maintainer,
+    verify_not_anonymous,
+    has_instructor_role,
+    has_authenticated_user_role,
 )
 from src.services.courses.thumbnails import upload_thumbnail
 
@@ -758,12 +760,10 @@ async def update_course(
             is_course_owner = True
 
         # Check if user has admin or maintainer role
-        is_admin_or_maintainer = await authorization_verify_based_on_org_admin_status(
-            request, current_user.id, "update", course_uuid, db_session
-        )
+        admin_or_maintainer = is_admin_or_maintainer(db_session, current_user.id)
 
         # SECURITY: Only course owners (CREATOR, MAINTAINER) or admins can change access settings
-        if not (is_course_owner or is_admin_or_maintainer):
+        if not (is_course_owner or admin_or_maintainer):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"You must be the course owner (CREATOR or MAINTAINER) or have admin role to change access settings: {', '.join(sensitive_fields_updated)}",
@@ -840,7 +840,7 @@ async def get_user_courses(
     limit: int = 20,
 ) -> list[CourseRead]:
     # Verify user is not anonymous
-    await authorization_verify_if_user_is_anon(current_user.id)
+    verify_not_anonymous(current_user.id)
 
     # Get all resource authors for the user
     statement = select(ResourceAuthor).where(
@@ -1007,34 +1007,24 @@ async def get_course_user_rights(
                 rights["ownership"]["is_owner"] = True
 
     # Check user roles
-    from src.security.rbac.rbac import (
-        authorization_verify_based_on_org_admin_status,
-        authorization_verify_based_on_roles,
-    )
 
     # Check admin/maintainer role
-    is_admin_or_maintainer = await authorization_verify_based_on_org_admin_status(
-        request, current_user.id, "update", course_uuid, db_session
-    )
+    user_is_admin_or_maintainer = is_admin_or_maintainer(db_session, current_user.id)
 
-    if is_admin_or_maintainer:
+    if user_is_admin_or_maintainer:
         rights["roles"]["is_admin"] = True
         rights["roles"]["is_maintainer_role"] = True
 
     # Check instructor role
-    has_instructor_permissions = await authorization_verify_based_on_roles(
-        request, current_user.id, "create", "course_x", db_session
-    )
+    user_has_instructor_role = has_instructor_role(db_session, current_user.id)
 
-    if has_instructor_permissions:
+    if user_has_instructor_role:
         rights["roles"]["is_instructor"] = True
 
     # Check user role (basic permissions)
-    has_user_permissions = await authorization_verify_based_on_roles(
-        request, current_user.id, "read", course_uuid, db_session
-    )
+    user_has_basic_role = has_authenticated_user_role(db_session, current_user.id)
 
-    if has_user_permissions:
+    if user_has_basic_role:
         rights["roles"]["is_user"] = True
 
     # Determine permissions based on ownership and roles

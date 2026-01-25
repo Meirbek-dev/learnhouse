@@ -32,11 +32,8 @@ from src.db.users import (
     UserUpdatePassword,
     rebuild_user_models,
 )
+from src.security.rbac.service_utils import rbac_check_user as rbac_check
 from src.security.rbac.checker import PermissionChecker
-from src.security.rbac.rbac import (
-    authorization_verify_based_on_roles_and_authorship,
-    authorization_verify_if_user_is_anon,
-)
 from src.security.security import security_hash_password, security_verify_password
 from src.services.cache import redis_client
 from src.services.orgs.invites import get_invite_code
@@ -175,7 +172,13 @@ async def update_user(
             return user
 
     # RBAC check (only for real updates)
-    await rbac_check(request, current_user, "update", user.user_uuid, db_session)
+    await rbac_check(
+        request,
+        user_uuid=user.user_uuid,
+        current_user=current_user,
+        action="update",
+        db_session=db_session,
+    )
 
     if user_object.username:
         await _validate_unique_username(
@@ -377,10 +380,10 @@ async def authorize_user_action(
     # Get user
     await _get_user_by_field(db_session, "user_uuid", current_user.user_uuid)
 
-    # RBAC check
-    authorized = await authorization_verify_based_on_roles_and_authorship(
-        request, current_user.id, action, resource_uuid, db_session
-    )
+    # RBAC check using new service_utils
+    from src.security.rbac.service_utils import check_user_permission
+
+    authorized = check_user_permission(db_session, current_user.id, action, resource_uuid)
 
     if authorized:
         return True
@@ -400,7 +403,13 @@ async def delete_user_by_id(
     user = await _get_user_by_field(db_session, "id", user_id, use_cache=False)
 
     # RBAC check
-    await rbac_check(request, current_user, "delete", user.user_uuid, db_session)
+    await rbac_check(
+        request,
+        user_uuid=user.user_uuid,
+        current_user=current_user,
+        action="delete",
+        db_session=db_session,
+    )
 
     # Delete user
     db_session.delete(user)
@@ -733,35 +742,6 @@ async def _get_user_by_field(
 
     return user
 
-
-## 🔒 RBAC Utils ##
-
-
-async def rbac_check(
-    request: Request,
-    current_user: PublicUser | AnonymousUser,
-    action: Literal["create", "read", "update", "delete"],
-    user_uuid: str,
-    db_session: Session,
-) -> bool | None:
-    if action in {"create", "read"}:
-        if current_user.id == 0:  # if user is anonymous
-            return True
-        await authorization_verify_based_on_roles_and_authorship(
-            request, current_user.id, "create", "user_x", db_session
-        )
-
-    else:
-        await authorization_verify_if_user_is_anon(current_user.id)
-
-        # if user is the same as the one being read
-        if current_user.user_uuid == user_uuid:
-            return True
-
-        await authorization_verify_based_on_roles_and_authorship(
-            request, current_user.id, action, user_uuid, db_session
-        )
-    return None
 
 
 ## 🔒 RBAC Utils ##

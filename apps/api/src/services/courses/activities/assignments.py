@@ -35,9 +35,7 @@ from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User
 from src.security.courses_security import courses_rbac_check_for_assignments
-from src.security.rbac.rbac import (
-    authorization_verify_based_on_roles,
-)
+from src.security.rbac.service_utils import check_user_permission
 from src.services.courses.activities.uploads.sub_file import upload_submission_file
 from src.services.courses.activities.uploads.tasks_ref_files import (
     upload_reference_file,
@@ -585,8 +583,8 @@ async def put_assignment_task_submission_file(
     )
 
     # Check if user is enrolled in the course
-    if not await authorization_verify_based_on_roles(
-        request, current_user.id, "read", course.course_uuid, db_session
+    if not check_user_permission(
+        db_session, current_user.id, "read", course.course_uuid
     ):
         raise HTTPException(
             status_code=403,
@@ -767,15 +765,15 @@ async def handle_assignment_task_submission(
         )
 
     # SECURITY: Check if user has instructor/admin permissions for grading
-    is_instructor = await authorization_verify_based_on_roles(
-        request, current_user.id, "update", course.course_uuid, db_session
+    is_instructor = check_user_permission(
+        db_session, current_user.id, "update", course.course_uuid
     )
 
     # For regular users, ensure they can only submit their own work
     if not is_instructor:
         # Check if user is enrolled in the course
-        if not await authorization_verify_based_on_roles(
-            request, current_user.id, "read", course.course_uuid, db_session
+        if not check_user_permission(
+            db_session, current_user.id, "read", course.course_uuid
         ):
             raise HTTPException(
                 status_code=403,

@@ -10,10 +10,7 @@ from src.db.organizations import Organization
 from src.db.roles import Role, RoleCreate, RoleRead, RoleTypeEnum, RoleUpdate
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, PublicUser
-from src.security.rbac.rbac import (
-    authorization_verify_based_on_roles_and_authorship,
-    authorization_verify_if_user_is_anon,
-)
+from src.security.rbac.service_utils import rbac_check_role as rbac_check
 
 
 async def create_role(
@@ -653,22 +650,3 @@ async def delete_role(
 
     return "Role deleted"
 
-
-## 🔒 RBAC Utils ##
-
-
-async def rbac_check(
-    request: Request,
-    current_user: PublicUser | AnonymousUser,
-    action: Literal["create", "read", "update", "delete"],
-    role_uuid: str,
-    db_session: Session,
-) -> None:
-    await authorization_verify_if_user_is_anon(current_user.id)
-
-    await authorization_verify_based_on_roles_and_authorship(
-        request, current_user.id, action, role_uuid, db_session
-    )
-
-
-## 🔒 RBAC Utils ##

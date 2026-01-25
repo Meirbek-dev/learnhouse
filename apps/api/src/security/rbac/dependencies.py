@@ -14,9 +14,16 @@ from sqlmodel import Session
 
 from src.core.events.database import get_db_session
 from src.db.users import AnonymousUser, PublicUser
-from src.security.auth import get_current_user
 from src.security.rbac.checker import PermissionChecker
 from src.security.rbac.context import PermissionContext
+
+
+async def _lazy_get_current_user(request: Request, Authorize=Depends(), db_session=Depends(get_db_session)):
+    """Lazy wrapper to import get_current_user at runtime to avoid circular imports."""
+    from src.security.auth import get_current_user as _get_current_user
+
+    # Delegate to the real dependency (Authorise and db_session are provided by FastAPI)
+    return await _get_current_user(request, Authorize, db_session)
 
 
 def get_permission_checker(
@@ -38,7 +45,7 @@ def get_permission_checker(
 
 def get_permission_context(
     request: Request,
-    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
+    current_user: Annotated[PublicUser | AnonymousUser, Depends(_lazy_get_current_user)],
 ) -> PermissionContext:
     """
     Get the current permission context from request.
@@ -65,7 +72,7 @@ def get_permission_context(
 # Type aliases for cleaner dependency injection
 PermissionCheckerDep = Annotated[PermissionChecker, Depends(get_permission_checker)]
 PermissionContextDep = Annotated[PermissionContext, Depends(get_permission_context)]
-CurrentUserDep = Annotated[PublicUser | AnonymousUser, Depends(get_current_user)]
+CurrentUserDep = Annotated[PublicUser | AnonymousUser, Depends(_lazy_get_current_user)]
 
 
 class PermissionDeps:

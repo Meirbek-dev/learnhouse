@@ -12,7 +12,6 @@ from fastapi import Depends, HTTPException, Request, status
 
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
-from src.security.auth import get_current_user
 from src.security.rbac.context import PermissionContext
 from src.security.rbac.dependencies import get_permission_checker
 

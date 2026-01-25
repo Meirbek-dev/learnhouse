@@ -11,7 +11,7 @@ from src.db.resource_authors import (
 )
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.courses_security import courses_rbac_check
-from src.security.rbac.rbac import authorization_verify_if_user_is_anon
+from src.security.rbac.service_utils import verify_not_anonymous
 
 
 async def apply_course_contributor(
@@ -29,7 +29,7 @@ async def apply_course_contributor(
     - Only course owners (CREATOR, MAINTAINER) or admins can approve applications
     """
     # Verify user is not anonymous
-    await authorization_verify_if_user_is_anon(current_user.id)
+    verify_not_anonymous(current_user.id)
 
     # Check if course exists
     statement = select(Course).where(Course.course_uuid == course_uuid)
@@ -95,7 +95,7 @@ async def update_course_contributor(
     - Requires strict course ownership checks
     """
     # Verify user is not anonymous
-    await authorization_verify_if_user_is_anon(current_user.id)
+    verify_not_anonymous(current_user.id)
 
     # SECURITY: Require course ownership or admin role for updating contributors
     await courses_rbac_check(request, course_uuid, current_user, "update", db_session)
@@ -208,7 +208,7 @@ async def add_bulk_course_contributors(
     - Cannot add contributors to courses the user doesn't own
     """
     # Verify user is not anonymous
-    await authorization_verify_if_user_is_anon(current_user.id)
+    verify_not_anonymous(current_user.id)
 
     # SECURITY: Require course ownership or admin role for adding contributors
     await courses_rbac_check(request, course_uuid, current_user, "update", db_session)
@@ -298,7 +298,7 @@ async def remove_bulk_course_contributors(
     - Cannot remove the course creator
     """
     # Verify user is not anonymous
-    await authorization_verify_if_user_is_anon(current_user.id)
+    verify_not_anonymous(current_user.id)
 
     # SECURITY: Require course ownership or admin role for removing contributors
     await courses_rbac_check(request, course_uuid, current_user, "update", db_session)

@@ -6,7 +6,7 @@ from src.db.courses.courses import Course
 from src.db.payments.payments_courses import PaymentsCourse
 from src.db.payments.payments_users import PaymentStatusEnum, PaymentsUser
 from src.db.users import AnonymousUser, PublicUser
-from src.security.rbac.rbac import authorization_verify_if_user_is_author
+from src.security.rbac.service_utils import check_is_resource_author
 
 
 async def check_activity_paid_access(
@@ -37,9 +37,7 @@ async def check_activity_paid_access(
         raise HTTPException(status_code=404, detail="Course not found")
 
     # Check if user is author of the course
-    is_course_author = await authorization_verify_if_user_is_author(
-        request, user.id, "update", course.course_uuid, db_session
-    )
+    is_course_author = check_is_resource_author(db_session, user.id, course.course_uuid)
 
     if is_course_author:
         return True
