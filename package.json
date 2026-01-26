@@ -28,12 +28,12 @@
     "eslint": "^9.39.2",
     "mprocs": "^0.8.3",
     "oxlint": "^1.41.0",
-    "oxlint-tsgolint": "^0.11.1",
+    "oxlint-tsgolint": "^0.11.2",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-sort-imports": "^1.8.9",
     "prettier-plugin-sort-json": "^4.2.0",
     "prettier-plugin-tailwindcss": "^0.7.2",
-    "turbo": "^2.7.5"
+    "turbo": "^2.7.6"
   }
 }

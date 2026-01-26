@@ -28,43 +28,7 @@ interface AIStreamChunk {
 }
 
 /**
- * Legacy function - kept for backward compatibility
- * Consider migrating to startActivityAIChatSessionStream for better UX
- */
-export async function startActivityAIChatSession(
-  message: string,
-  access_token: string,
-  activity_uuid?: string,
-): Promise<AIResponse> {
-  try {
-    const data = { message, activity_uuid };
-    const result = await fetch(
-      `${getAPIUrl()}ai/start/activity_chat_session`,
-      RequestBodyWithAuthHeader('POST', data, null, access_token),
-    );
-
-    const responseData = await result.json();
-
-    return {
-      success: result.status === 200,
-      data: responseData,
-      status: result.status,
-      HTTPmessage: result.statusText,
-    };
-  } catch (error) {
-    console.error('AI chat session failed:', error);
-
-    return {
-      success: false,
-      data: { error: 'Network error' },
-      status: 0,
-      HTTPmessage: 'Network Error',
-    };
-  }
-}
-
-/**
- * New streaming version - provides real-time AI responses
+ * Provides real-time AI responses
  *
  * @param message - User's message
  * @param activity_uuid - Activity UUID
@@ -190,44 +154,6 @@ export async function startActivityAIChatSessionStream(
   }
 }
 
-/**
- * Legacy function - kept for backward compatibility
- */
-export async function sendActivityAIChatMessage(
-  message: string,
-  aichat_uuid: string,
-  activity_uuid: string,
-  access_token: string,
-): Promise<AIResponse> {
-  try {
-    const data = { aichat_uuid, message, activity_uuid };
-    const result = await fetch(
-      `${getAPIUrl()}ai/send/activity_chat_message`,
-      RequestBodyWithAuthHeader('POST', data, null, access_token),
-    );
-
-    const responseData = await result.json();
-    return {
-      success: result.status === 200,
-      data: responseData,
-      status: result.status,
-      HTTPmessage: result.statusText,
-    };
-  } catch (error) {
-    console.error('AI message failed:', error);
-
-    return {
-      success: false,
-      data: { error: 'Network error' },
-      status: 0,
-      HTTPmessage: 'Network Error',
-    };
-  }
-}
-
-/**
- * New streaming version for sending messages
- */
 export async function sendActivityAIChatMessageStream(
   message: string,
   aichat_uuid: string,
