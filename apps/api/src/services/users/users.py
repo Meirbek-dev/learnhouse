@@ -355,8 +355,9 @@ async def get_user_session(
     try:
         checker = PermissionChecker(db_session)
         permissions = checker.get_user_permissions(current_user)
-    except Exception:
+    except Exception as e:
         # Fallback: if new RBAC system not yet migrated, return empty
+        print(f"Error loading permissions for user {current_user.id}: {e}")
         pass
 
     return UserSession(

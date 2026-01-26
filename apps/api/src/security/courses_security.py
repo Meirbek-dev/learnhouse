@@ -146,12 +146,52 @@ async def courses_rbac_check(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You must be logged in to access this course",
             )
-        # Authenticated user - check read permission
-        if checker.check(current_user, mapped_action, ResourceType.COURSE, course_uuid):
+
+        # Authenticated user - check various access paths
+        # 1. Check if course is public
+        if _is_resource_public(db_session, course_uuid, ResourceType.COURSE):
             return True
+
+        # 2. Check if user is course owner/contributor
+        if _is_course_owner(db_session, user_id, course_uuid):
+            return True
+
+        # 3. Check if user is admin/maintainer
+        if _is_admin_or_maintainer(db_session, user_id):
+            return True
+
+        # 4. Check if accessible via UserGroup membership
+        from src.db.usergroups.usergroups import UserGroupResource, UserGroupUser
+
+        # Check if course has UserGroup restrictions
+        ugr_stmt = select(UserGroupResource).where(
+            UserGroupResource.resource_uuid == course_uuid
+        )
+        ugr_result = db_session.exec(ugr_stmt).first()
+
+        # If course has no UserGroup restrictions, any authenticated user can access
+        if not ugr_result:
+            return True
+
+        # Check if user is member of a UserGroup that grants access
+        member_stmt = (
+            select(UserGroupUser)
+            .join(
+                UserGroupResource,
+                UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
+            )
+            .where(
+                UserGroupResource.resource_uuid == course_uuid,
+                UserGroupUser.user_id == user_id,
+            )
+        )
+        if db_session.exec(member_stmt).first():
+            return True
+
+        # No access path found
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You don't have permission to read this course",
+            detail="You don't have permission to access this course",
         )
 
     # Non-read actions require authentication

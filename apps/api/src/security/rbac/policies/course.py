@@ -60,6 +60,8 @@ class CoursePolicy(BasePolicy):
                 if self.is_owner(user, resource_id):
                     return True
                 # Check if enrolled (to be implemented)
+                # Course not public and user not owner - check if accessible via UserGroup
+                return self._can_access_via_usergroup(user.id, resource_id)
             return True  # List access allowed for authenticated users
 
         # Create access - handled by role permissions
@@ -82,6 +84,37 @@ class CoursePolicy(BasePolicy):
         )
         result = self.db.exec(statement).first()
         return result is not None
+
+    def _can_access_via_usergroup(self, user_id: int, course_uuid: str) -> bool:
+        """Check if user can access course via UserGroup membership or if course has no restrictions."""
+        from sqlmodel import and_, or_
+
+        from src.db.usergroups.usergroups import UserGroupResource, UserGroupUser
+
+        # Check if course has UserGroup restrictions
+        ugr_stmt = select(UserGroupResource).where(
+            UserGroupResource.resource_uuid == course_uuid
+        )
+        ugr_result = self.db.exec(ugr_stmt).first()
+
+        # If course has no UserGroup restrictions, anyone authenticated can access
+        if not ugr_result:
+            return True
+
+        # Check if user is member of a UserGroup that grants access to this course
+        member_stmt = (
+            select(UserGroupUser)
+            .join(
+                UserGroupResource,
+                UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
+            )
+            .where(
+                UserGroupResource.resource_uuid == course_uuid,
+                UserGroupUser.user_id == user_id,
+            )
+        )
+        member_result = self.db.exec(member_stmt).first()
+        return member_result is not None
 
     def can_create_content(
         self,
