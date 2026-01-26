@@ -119,17 +119,21 @@ const OrgRoles: FC = () => {
     setEditRoleModal(!editRoleModal);
   };
 
-  const getRightsSummary = (rights: any) => {
-    if (!rights) return t('noPermissions');
-
-    const totalPermissions = Object.keys(rights).reduce((acc, key) => {
-      if (typeof rights[key] === 'object') {
-        return acc + Object.keys(rights[key]).filter((k) => rights[key][k] === true).length;
-      }
-      return acc;
-    }, 0);
-
-    return t('permissionsCount', { count: totalPermissions });
+  const getRoleBadge = (role: any) => {
+    // Use role type or name to show role level
+    if (role.role_type === 'TYPE_GLOBAL') {
+      return t('globalRole');
+    }
+    if (role.name?.toLowerCase().includes('admin')) {
+      return t('fullAccess');
+    }
+    if (role.name?.toLowerCase().includes('maintainer')) {
+      return t('fullAccess');
+    }
+    if (role.name?.toLowerCase().includes('instructor')) {
+      return t('instructorAccess');
+    }
+    return t('basicAccess');
   };
 
   // Check if a role is system-wide (TYPE_GLOBAL or role_uuid starts with role_global_)
@@ -143,8 +147,6 @@ const OrgRoles: FC = () => {
     if (role.role_uuid?.startsWith('role_global_')) {
       return true;
     }
-
-
 
     // Check if the role name indicates it's a system role
     if (role.name && ['Admin', 'Maintainer', 'Instructor', 'User'].includes(role.name)) {
@@ -183,7 +185,7 @@ const OrgRoles: FC = () => {
                       variant="outline"
                       className="text-xs"
                     >
-                      {getRightsSummary(role.rights)}
+                      {getRoleBadge(role)}
                     </Badge>
                   </div>
                   <p className="text-muted-foreground text-sm">{role.description || t('noDescription')}</p>
@@ -263,7 +265,7 @@ const OrgRoles: FC = () => {
                         variant="outline"
                         className="text-xs"
                       >
-                        {getRightsSummary(role.rights)}
+                        {getRoleBadge(role)}
                       </Badge>
                     </TableCell>
                     <TableCell>

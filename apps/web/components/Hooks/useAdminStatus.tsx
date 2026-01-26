@@ -1,5 +1,5 @@
-import { Actions, ResourceTypes } from '@/types/permissions';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { Actions, ResourceTypes } from '@/types/permissions';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { usePermission } from '@/hooks/usePermission';
 import type { Session } from 'next-auth';
@@ -158,7 +158,9 @@ function useAdminStatus(): UseAdminStatusReturn {
     dashboard: {
       // Access if user has any of these permissions
       action_access:
-        can(Actions.MANAGE, ResourceTypes.ORGANIZATION) || can(Actions.CREATE, ResourceTypes.COURSE) || permissionIsAdmin,
+        can(Actions.MANAGE, ResourceTypes.ORGANIZATION) ||
+        can(Actions.CREATE, ResourceTypes.COURSE) ||
+        permissionIsAdmin,
     },
   };
 

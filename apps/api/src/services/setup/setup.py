@@ -27,10 +27,6 @@ from src.db.organization_config import (
 )
 from src.db.organizations import Organization, OrganizationCreate
 from src.db.roles import (
-    DashboardPermission,
-    Permission,
-    PermissionsWithOwn,
-    Rights,
     Role,
     RoleTypeEnum,
 )

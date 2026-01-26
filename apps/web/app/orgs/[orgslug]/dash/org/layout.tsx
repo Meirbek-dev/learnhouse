@@ -1,7 +1,7 @@
-import { redirect } from 'next/navigation';
-import { auth } from '@/auth';
 import { fetchUserPermissions } from '@/services/permissions/permissions';
+import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { auth } from '@/auth';
 
 interface OrgLayoutProps {
   children: ReactNode;

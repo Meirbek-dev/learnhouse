@@ -94,41 +94,39 @@ export function useAIEditorDispatch(): React.Dispatch<AIEditorAction> {
   return context;
 }
 
-type AIEditorActionType = AIEditorAction['type'];
-
-type AIEditorActionHandlers = {
-  [T in AIEditorActionType]: (
-    state: AIEditorStateTypes,
-    action: Extract<AIEditorAction, { type: T }>,
-  ) => AIEditorStateTypes;
-};
-
-const AI_EDITOR_ACTION_HANDLERS: AIEditorActionHandlers = {
-  setMessages: (state, action) => ({ ...state, messages: action.payload }),
-  addMessage: (state, action) => ({ ...state, messages: [...state.messages, action.payload] }),
-  setIsModalOpen: (state) => ({ ...state, isModalOpen: true }),
-  setIsModalClose: (state) => ({ ...state, isModalOpen: false }),
-  setAichat_uuid: (state, action) => ({ ...state, aichat_uuid: action.payload }),
-  setIsWaitingForResponse: (state) => ({ ...state, isWaitingForResponse: true }),
-  setIsNoLongerWaitingForResponse: (state) => ({ ...state, isWaitingForResponse: false }),
-  setChatInputValue: (state, action) => ({ ...state, chatInputValue: action.payload }),
-  setSelectedTool: (state, action) => ({ ...state, selectedTool: action.payload, messages: [] }),
-  setIsFeedbackModalOpen: (state) => ({ ...state, isFeedbackModalOpen: true }),
-  setIsFeedbackModalClose: (state) => ({ ...state, isFeedbackModalOpen: false }),
-  setIsUserInputEnabled: (state, action) => ({ ...state, isUserInputEnabled: action.payload }),
-  setError: (state, action) => ({ ...state, error: action.payload }),
-  setCritisizeScope: (state, action) => ({ ...state, critisizeScope: action.payload }),
-};
-
-function aIEditorReducer(state: AIEditorStateTypes, action: AIEditorAction): AIEditorStateTypes {
-  const handler = AI_EDITOR_ACTION_HANDLERS[action.type];
-
-  if (!handler) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.error(`Unhandled action type: ${String(action.type)}`);
-    }
-    return state;
+function aIEditorReducerImpl(state: AIEditorStateTypes, action: AIEditorAction): AIEditorStateTypes {
+  switch (action.type) {
+    case 'setMessages':
+      return { ...state, messages: action.payload };
+    case 'addMessage':
+      return { ...state, messages: [...state.messages, action.payload] };
+    case 'setIsModalOpen':
+      return { ...state, isModalOpen: true };
+    case 'setIsModalClose':
+      return { ...state, isModalOpen: false };
+    case 'setAichat_uuid':
+      return { ...state, aichat_uuid: action.payload };
+    case 'setIsWaitingForResponse':
+      return { ...state, isWaitingForResponse: true };
+    case 'setIsNoLongerWaitingForResponse':
+      return { ...state, isWaitingForResponse: false };
+    case 'setChatInputValue':
+      return { ...state, chatInputValue: action.payload };
+    case 'setSelectedTool':
+      return { ...state, selectedTool: action.payload, messages: [] };
+    case 'setIsFeedbackModalOpen':
+      return { ...state, isFeedbackModalOpen: true };
+    case 'setIsFeedbackModalClose':
+      return { ...state, isFeedbackModalOpen: false };
+    case 'setIsUserInputEnabled':
+      return { ...state, isUserInputEnabled: action.payload };
+    case 'setError':
+      return { ...state, error: action.payload };
+    case 'setCritisizeScope':
+      return { ...state, critisizeScope: action.payload };
+    default:
+      return state;
   }
-
-  return handler(state, action as never);
 }
+
+const aIEditorReducer = aIEditorReducerImpl;

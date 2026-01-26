@@ -20,9 +20,9 @@ export const Actions = {
   GRADE: 'grade',
   SUBMIT: 'submit',
   ENROLL: 'enroll',
-} as const
+} as const;
 
-export type Action = (typeof Actions)[keyof typeof Actions]
+export type Action = (typeof Actions)[keyof typeof Actions];
 
 /**
  * Types of resources in the system.
@@ -58,9 +58,9 @@ export const Scopes = {
   OWN: 'own',
   ASSIGNED: 'assigned',
   ORG: 'org',
-} as const
+} as const;
 
-export type Scope = (typeof Scopes)[keyof typeof Scopes]
+export type Scope = (typeof Scopes)[keyof typeof Scopes];
 
 /**
  * Permission definition.
@@ -215,7 +215,11 @@ export function isAdminRole(roleSlug: string): boolean {
  * Check if a role has instructor-level access.
  */
 export function isInstructorOrHigher(roleSlug: string): boolean {
-  const instructorOrHigher: string[] = [RoleSlugs.SUPER_ADMIN, RoleSlugs.ORG_ADMIN, RoleSlugs.MAINTAINER, RoleSlugs.INSTRUCTOR];
+  const instructorOrHigher: string[] = [
+    RoleSlugs.SUPER_ADMIN,
+    RoleSlugs.ORG_ADMIN,
+    RoleSlugs.MAINTAINER,
+    RoleSlugs.INSTRUCTOR,
+  ];
   return instructorOrHigher.includes(roleSlug);
 }
-

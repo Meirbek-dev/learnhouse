@@ -264,7 +264,7 @@ export default function UserRolesClient() {
                             <Avatar className="h-6 w-6">
                               <AvatarImage src={user.avatar_image} />
                               <AvatarFallback>
-                                {((user.first_name?.[0] || user.username?.[0]) || 'U').toUpperCase()}
+                                {(user.first_name?.[0] || user.username?.[0] || 'U').toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <span>

@@ -11,10 +11,6 @@ from ulid import ULID
 
 from src.db.organizations import Organization, OrganizationRead
 from src.db.roles import (
-    DashboardPermission,
-    Permission,
-    PermissionsWithOwn,
-    Rights,
     Role,
     RoleRead,
 )
@@ -510,124 +506,26 @@ async def _create_and_validate_user(
     return user
 
 
-def _normalize_permission_schema(data: Permission | dict | None) -> Permission:
-    """Ensure permission payload contains all required keys."""
-    if isinstance(data, Permission):
-        return data
-
-    normalized = {
-        "action_create": False,
-        "action_read": False,
-        "action_update": False,
-        "action_delete": False,
-    }
-
-    if isinstance(data, dict):
-        for key in normalized:
-            if key in data:
-                normalized[key] = bool(data[key])
-
-    return Permission(**normalized)
-
-
-def _normalize_permissions_with_own_schema(
-    data: PermissionsWithOwn | dict | None,
-) -> PermissionsWithOwn:
-    """Ensure permissions-with-own payload contains all required keys."""
-    if isinstance(data, PermissionsWithOwn):
-        return data
-
-    normalized = {
-        "action_create": False,
-        "action_read": False,
-        "action_read_own": False,
-        "action_update": False,
-        "action_update_own": False,
-        "action_delete": False,
-        "action_delete_own": False,
-    }
-
-    if isinstance(data, dict):
-        for key in normalized:
-            if key in data:
-                normalized[key] = bool(data[key])
-
-    return PermissionsWithOwn(**normalized)
-
-
-def _normalize_dashboard_permission_schema(
-    data: DashboardPermission | dict | None,
-) -> DashboardPermission:
-    """Ensure dashboard permission payload is well formed."""
-    if isinstance(data, DashboardPermission):
-        return data
-
-    normalized = {"action_access": False}
-
-    if isinstance(data, dict) and "action_access" in data:
-        normalized["action_access"] = bool(data["action_access"])
-
-    return DashboardPermission(**normalized)
-
-
-def _normalize_rights_schema(rights: Rights | dict | None) -> Rights:
-    """Normalize rights payload to satisfy RoleRead validation."""
-    if isinstance(rights, Rights):
-        return rights
-
-    rights_data: dict = {}
-    if isinstance(rights, dict):
-        rights_data = rights
-
-    return Rights(
-        courses=_normalize_permissions_with_own_schema(rights_data.get("courses")),
-        users=_normalize_permission_schema(rights_data.get("users")),
-        usergroups=_normalize_permission_schema(rights_data.get("usergroups")),
-        collections=_normalize_permission_schema(rights_data.get("collections")),
-        organizations=_normalize_permission_schema(rights_data.get("organizations")),
-        coursechapters=_normalize_permission_schema(rights_data.get("coursechapters")),
-        activities=_normalize_permission_schema(rights_data.get("activities")),
-        roles=_normalize_permission_schema(rights_data.get("roles")),
-        dashboard=_normalize_dashboard_permission_schema(rights_data.get("dashboard")),
-    )
-
-
 def _safe_role_read(role: Role) -> RoleRead:
-    """Convert Role to RoleRead with graceful degradation on legacy payloads."""
+    """Convert Role to RoleRead."""
     try:
         return RoleRead.model_validate(role)
     except ValidationError as exc:  # pragma: no cover - defensive path
         logger.warning(
-            "Role validation failed for role_id=%s. Attempting rights normalization. Error: %s",
+            "Role validation failed for role_id=%s. Using fallback. Error: %s",
             getattr(role, "id", None),
             exc,
         )
-
-        normalized_role = role.model_dump()
-        normalized_role["rights"] = _normalize_rights_schema(
-            normalized_role.get("rights")
+        return RoleRead.model_construct(
+            name=role.name,
+            description=role.description,
+            org_id=role.org_id,
+            role_type=role.role_type,
+            role_uuid=role.role_uuid,
+            creation_date=role.creation_date,
+            update_date=role.update_date,
+            id=role.id,
         )
-
-        try:
-            return RoleRead.model_validate(normalized_role)
-        except ValidationError as fallback_exc:  # pragma: no cover - defensive path
-            logger.exception(
-                "Role normalization failed for role_id=%s. Falling back to default rights. Error: %s",
-                getattr(role, "id", None),
-                fallback_exc,
-            )
-
-            return RoleRead.model_construct(
-                name=role.name,
-                description=role.description,
-                rights=_normalize_rights_schema(getattr(role, "rights", None)),
-                org_id=role.org_id,
-                role_type=role.role_type,
-                role_uuid=role.role_uuid,
-                creation_date=role.creation_date,
-                update_date=role.update_date,
-                id=role.id,
-            )
 
 
 def _safe_organization_read(org: Organization) -> OrganizationRead:

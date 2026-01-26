@@ -16,23 +16,37 @@ export const AuthenticatedClientElement = (props: AuthenticatedClientElementProp
   const session = usePlatformSession() as any;
   const org = useOrg() as any;
 
-  function isUserAllowed(roles: any[], action: string, resourceType: string, org_uuid: string): boolean {
-    // Iterate over the user's roles
+  function isUserAllowed(
+    permissions: Record<string, boolean> | undefined,
+    roles: any[],
+    action: string,
+    resourceType: string,
+    org_uuid: string,
+  ): boolean {
+    // First, check new RBAC permission system
+    if (permissions) {
+      // Check permission patterns: "resource:action" or "resource:action:org"
+      const permKey = `${resourceType}:${action}`;
+      if (permissions[permKey] === true) {
+        return true;
+      }
+      // Check org-specific permission
+      const permKeyOrg = `${resourceType}:${action}:org`;
+      if (permissions[permKeyOrg] === true) {
+        return true;
+      }
+    }
+
+    // Fallback: check if user has admin or maintainer role for the org
     for (const role of roles) {
-      // Check if the role is for the right organization
-      if (
-        role.org.org_uuid === org_uuid && // Check if the user has the role for the resource type
-        role.role.rights?.[resourceType]
-      ) {
-        // Check if the user is allowed to execute the action
-        const actionKey = `action_${action}`;
-        if (role.role.rights[resourceType][actionKey] === true) {
+      if (role.org?.org_uuid === org_uuid) {
+        const roleName = role.role?.name?.toLowerCase() || '';
+        if (roleName.includes('admin') || roleName.includes('maintainer')) {
           return true;
         }
       }
     }
 
-    // If no role matches the organization, resource type, and action, return false
     return false;
   }
 
@@ -48,7 +62,13 @@ export const AuthenticatedClientElement = (props: AuthenticatedClientElementProp
 
     if (props.checkMethod === 'roles') {
       if (props.action && props.ressourceType && session?.data?.roles) {
-        return isUserAllowed(session.data.roles, props.action, props.ressourceType, org?.org_uuid);
+        return isUserAllowed(
+          session?.data?.permissions,
+          session.data.roles,
+          props.action,
+          props.ressourceType,
+          org?.org_uuid,
+        );
       }
       return false;
     }

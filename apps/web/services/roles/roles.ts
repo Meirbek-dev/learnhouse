@@ -18,7 +18,6 @@ import { tags } from '@/lib/cacheTags';
 export interface CreateOrUpdateRoleBody {
   name: string;
   description?: string;
-  rights: any;
   org_id?: number;
 }
 

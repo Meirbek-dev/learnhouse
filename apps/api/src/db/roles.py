@@ -1,92 +1,10 @@
 from enum import Enum
 
-from pydantic import ConfigDict, field_validator
-from sqlalchemy import Column, ForeignKey, Integer, TypeDecorator
-from sqlalchemy.dialects.postgresql import JSON as PGJSON
+from pydantic import field_validator
+from sqlalchemy import Column, ForeignKey, Integer
 from sqlmodel import Field
 
-from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
-
-
-class RightsJSON(TypeDecorator):
-    """Custom JSON type that handles Rights object serialization for psycopg3"""
-
-    impl = PGJSON
-    cache_ok = True
-
-    def process_bind_param(self, value: object, dialect) -> dict | None:
-        """Convert Rights object to dict before storing in database"""
-        if value is None:
-            return None
-        if hasattr(value, "model_dump"):
-            return value.model_dump()
-        return value
-
-    def process_result_value(self, value: object, dialect) -> dict | None:
-        """Return the dict value as-is from database"""
-        return value
-
-
-# Rights
-class Permission(PydanticStrictBaseModel):
-    action_create: bool
-    action_read: bool
-    action_update: bool
-    action_delete: bool
-
-    def __getitem__(self, item) -> object:
-        return getattr(self, item)
-
-    def __json__(self) -> dict:
-        return self.model_dump()
-
-    @classmethod
-    def __get_pydantic_json_schema__(cls, core_schema, handler):
-        return handler(core_schema)
-
-
-class PermissionsWithOwn(PydanticStrictBaseModel):
-    action_create: bool
-    action_read: bool
-    action_read_own: bool
-    action_update: bool
-    action_update_own: bool
-    action_delete: bool
-    action_delete_own: bool
-
-    def __getitem__(self, item) -> object:
-        return getattr(self, item)
-
-
-class DashboardPermission(PydanticStrictBaseModel):
-    action_access: bool
-
-    def __getitem__(self, item) -> object:
-        return getattr(self, item)
-
-
-class Rights(PydanticStrictBaseModel):
-    courses: PermissionsWithOwn
-    users: Permission
-    usergroups: Permission
-    collections: Permission
-    organizations: Permission
-    coursechapters: Permission
-    activities: Permission
-    roles: Permission
-    dashboard: DashboardPermission
-
-    def __getitem__(self, item) -> object:
-        return getattr(self, item)
-
-    def __json__(self) -> dict:
-        return self.model_dump()
-
-    @classmethod
-    def __get_pydantic_json_schema__(cls, core_schema, handler):
-        return handler(core_schema)
-
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
 # Database Models

@@ -220,35 +220,16 @@ async def get_roles_by_organization(
     # ============================================================================
     # VERIFICATION 3: Check if the user has permission to read roles in this organization
     # ============================================================================
-    # Get the user's role in this organization
-    statement = select(Role).where(Role.id == user_org.role_id)
-    user_role = db_session.exec(statement).first()
-
-    if not user_role:
-        raise HTTPException(
-            status_code=403,
-            detail="Your role in this organization could not be determined",
+    # Use new RBAC system to check permissions
+    if not is_admin_or_maintainer(db_session, current_user.id):
+        has_perm = check_user_permission(
+            db_session, current_user.id, "read", f"org_{org_id}"
         )
-
-    # Check if the user has role reading permissions
-    if user_role.rights and isinstance(user_role.rights, dict):
-        roles_rights = user_role.rights.get("roles", {})
-        if not roles_rights.get("action_read", False):
+        if not has_perm:
             raise HTTPException(
                 status_code=403,
-                detail="You don't have permission to read roles in this organization",
+                detail="You don't have permission to read roles in this organization. Admin or Maintainer role required.",
             )
-    # If no rights are defined, require admin/maintainer role
-    else:
-        if not is_admin_or_maintainer(db_session, current_user.id):
-            has_perm = check_user_permission(
-                db_session, current_user.id, "read", f"org_{org_id}"
-            )
-            if not has_perm:
-                raise HTTPException(
-                    status_code=403,
-                    detail="You don't have permission to read roles in this organization. Admin or Maintainer role required.",
-                )
 
     # ============================================================================
     # GET ROLES: Fetch all roles for the organization AND global roles
@@ -344,120 +325,6 @@ async def update_role(
     for field, value in update_data.items():
         if value is not None:
             setattr(role, field, value)
-
-    # ============================================================================
-    # VALIDATE RIGHTS STRUCTURE if rights are being updated
-    # ============================================================================
-    if role.rights:
-        # Convert Rights model to dict if needed
-        if isinstance(role.rights, dict):
-            # It's already a dict
-            rights_dict = role.rights
-        else:
-            try:
-                # Try model_dump() method (for Pydantic v2)
-                rights_dict = role.rights.model_dump()
-            except AttributeError:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Rights must be provided as a JSON object",
-                )
-
-        # Validate rights structure - check for required top-level keys
-        required_rights = [
-            "courses",
-            "users",
-            "usergroups",
-            "collections",
-            "organizations",
-            "coursechapters",
-            "activities",
-            "roles",
-            "dashboard",
-        ]
-
-        for required_right in required_rights:
-            if required_right not in rights_dict:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Missing required right: {required_right}",
-                )
-
-            # Validate the structure of each right
-            right_data = rights_dict[required_right]
-            if not isinstance(right_data, dict):
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Right '{required_right}' must be a JSON object",
-                )
-
-            # Validate courses permissions (has additional 'own' permissions)
-            if required_right == "courses":
-                required_course_permissions = [
-                    "action_create",
-                    "action_read",
-                    "action_read_own",
-                    "action_update",
-                    "action_update_own",
-                    "action_delete",
-                    "action_delete_own",
-                ]
-                for perm in required_course_permissions:
-                    if perm not in right_data:
-                        raise HTTPException(
-                            status_code=400,
-                            detail=f"Missing required course permission: {perm}",
-                        )
-                    if not isinstance(right_data[perm], bool):
-                        raise HTTPException(
-                            status_code=400,
-                            detail=f"Course permission '{perm}' must be a boolean",
-                        )
-
-            # Validate other permissions (standard permissions)
-            elif required_right in [
-                "users",
-                "usergroups",
-                "collections",
-                "organizations",
-                "coursechapters",
-                "activities",
-                "roles",
-            ]:
-                required_permissions = [
-                    "action_create",
-                    "action_read",
-                    "action_update",
-                    "action_delete",
-                ]
-                for perm in required_permissions:
-                    if perm not in right_data:
-                        raise HTTPException(
-                            status_code=400,
-                            detail=f"Missing required permission '{perm}' for '{required_right}'",
-                        )
-                    if not isinstance(right_data[perm], bool):
-                        raise HTTPException(
-                            status_code=400,
-                            detail=f"Permission '{perm}' for '{required_right}' must be a boolean",
-                        )
-
-            # Validate dashboard permissions
-            elif required_right == "dashboard":
-                if "action_access" not in right_data:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Missing required dashboard permission: action_access",
-                    )
-                if not isinstance(right_data["action_access"], bool):
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Dashboard permission 'action_access' must be a boolean",
-                    )
-
-        # Convert back to dict if it was a model
-        if not isinstance(role.rights, dict):
-            role.rights = rights_dict
 
     db_session.add(role)
     db_session.commit()
