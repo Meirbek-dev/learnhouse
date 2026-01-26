@@ -52,69 +52,13 @@ def install_default_elements(db_session: Session) -> bool:
     if existing_roles and len(existing_roles) >= 4:
         return True
 
-    # Create default roles
+    # Create default roles (without rights field - using new RBAC permission system)
     role_global_admin = Role(
         name="Админ",
         description="Полный контроль над платформой",
         id=1,
         role_type=RoleTypeEnum.TYPE_GLOBAL,
         role_uuid="role_global_admin",
-        rights=Rights(
-            courses=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=True,
-                action_update_own=True,
-                action_delete=True,
-                action_delete_own=True,
-            ),
-            users=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            usergroups=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            collections=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            organizations=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            coursechapters=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            activities=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            roles=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            dashboard=DashboardPermission(
-                action_access=True,
-            ),
-        ),
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
     )
@@ -125,62 +69,6 @@ def install_default_elements(db_session: Session) -> bool:
         id=2,
         role_type=RoleTypeEnum.TYPE_GLOBAL,
         role_uuid="role_global_maintainer",
-        rights=Rights(
-            courses=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=True,
-                action_update_own=True,
-                action_delete=True,
-                action_delete_own=True,
-            ),
-            users=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=False,
-            ),
-            usergroups=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            collections=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            organizations=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            coursechapters=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            activities=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            roles=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            dashboard=DashboardPermission(
-                action_access=True,
-            ),
-        ),
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
     )
@@ -191,62 +79,6 @@ def install_default_elements(db_session: Session) -> bool:
         id=3,
         role_type=RoleTypeEnum.TYPE_GLOBAL,
         role_uuid="role_global_instructor",
-        rights=Rights(
-            courses=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=False,
-                action_update_own=True,
-                action_delete=False,
-                action_delete_own=True,
-            ),
-            users=Permission(
-                action_create=False,
-                action_read=False,
-                action_update=False,
-                action_delete=False,
-            ),
-            usergroups=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            collections=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            organizations=Permission(
-                action_create=False,
-                action_read=False,
-                action_update=False,
-                action_delete=False,
-            ),
-            coursechapters=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            activities=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            roles=Permission(
-                action_create=False,
-                action_read=False,
-                action_update=False,
-                action_delete=False,
-            ),
-            dashboard=DashboardPermission(
-                action_access=True,
-            ),
-        ),
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
     )
@@ -257,71 +89,9 @@ def install_default_elements(db_session: Session) -> bool:
         role_type=RoleTypeEnum.TYPE_GLOBAL,
         role_uuid="role_global_user",
         id=4,
-        rights=Rights(
-            courses=PermissionsWithOwn(
-                action_create=False,
-                action_read=True,
-                action_read_own=True,
-                action_update=False,
-                action_update_own=False,
-                action_delete=True,
-                action_delete_own=True,
-            ),
-            users=Permission(
-                action_create=False,
-                action_read=False,
-                action_update=False,
-                action_delete=False,
-            ),
-            usergroups=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            collections=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            organizations=Permission(
-                action_create=False,
-                action_read=False,
-                action_update=False,
-                action_delete=False,
-            ),
-            coursechapters=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            activities=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            roles=Permission(
-                action_create=False,
-                action_read=False,
-                action_update=False,
-                action_delete=False,
-            ),
-            dashboard=DashboardPermission(
-                action_access=False,
-            ),
-        ),
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
     )
-
-    # Serialize rights to JSON
-    role_global_admin.rights = role_global_admin.rights.dict()
-    role_global_maintainer.rights = role_global_maintainer.rights.dict()
-    role_global_instructor.rights = role_global_instructor.rights.dict()
-    role_global_user.rights = role_global_user.rights.dict()
 
     # Insert roles in DB
     # Add each default role only if it doesn't already exist (by role_uuid)

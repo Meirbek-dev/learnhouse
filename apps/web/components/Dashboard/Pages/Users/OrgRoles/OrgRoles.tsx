@@ -144,10 +144,7 @@ const OrgRoles: FC = () => {
       return true;
     }
 
-    // Check for common system role IDs (1-4 are typically system roles)
-    if (role.id && [1, 2, 3, 4].includes(role.id)) {
-      return true;
-    }
+
 
     // Check if the role name indicates it's a system role
     if (role.name && ['Admin', 'Maintainer', 'Instructor', 'User'].includes(role.name)) {

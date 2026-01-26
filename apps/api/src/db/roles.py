@@ -101,9 +101,6 @@ class RoleTypeEnum(str, Enum):
 class RoleBase(SQLModelStrictBaseModel):
     name: str
     description: str | None
-    rights: Rights | dict | None = Field(
-        default_factory=dict, sa_column=Column(RightsJSON)
-    )
 
 
 class Role(RoleBase, table=True):
@@ -148,4 +145,3 @@ class RoleCreate(RoleBase):
 class RoleUpdate(SQLModelStrictBaseModel):
     name: str | None = None
     description: str | None = None
-    rights: Rights | dict | None = Field(default=None, sa_column=Column(RightsJSON))

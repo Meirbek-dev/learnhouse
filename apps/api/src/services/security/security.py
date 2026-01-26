@@ -20,7 +20,7 @@ def is_user_admin_of_org(user_id: int, org_id: int, db: Session) -> bool:
             .where(
                 UserOrganization.user_id == user_id,
                 UserOrganization.org_id == org_id,
-                Role.id.in_([1, 2]),
+                Role.role_uuid.in_(["role_global_admin", "role_global_maintainer"]),
             )
         ).first()
         return bool(exists_admin)

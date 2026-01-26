@@ -150,7 +150,7 @@ async def read_exam(
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Экзамен не найден")
+        raise HTTPException(status_code=404, detail="Тест не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)
@@ -180,7 +180,7 @@ async def read_exam_from_activity_uuid(
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Экзамен не найден")
+        raise HTTPException(status_code=404, detail="Тест не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)
@@ -206,7 +206,7 @@ async def update_exam(
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Экзамен не найден")
+        raise HTTPException(status_code=404, detail="Тест не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)
@@ -255,7 +255,7 @@ async def delete_exam(
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Экзамен не найден")
+        raise HTTPException(status_code=404, detail="Тест не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)
@@ -380,7 +380,7 @@ async def create_question(
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Экзамен не найден")
+        raise HTTPException(status_code=404, detail="Тест не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)
@@ -471,7 +471,7 @@ async def read_questions(
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Экзамен не найден")
+        raise HTTPException(status_code=404, detail="Тест не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)
@@ -508,7 +508,7 @@ async def update_question(
 
     exam = db_session.get(Exam, question.exam_id)
     if not exam:
-        raise HTTPException(status_code=404, detail="Экзамен не найден")
+        raise HTTPException(status_code=404, detail="Тест не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)
@@ -548,7 +548,7 @@ async def delete_question(
 
     exam = db_session.get(Exam, question.exam_id)
     if not exam:
-        raise HTTPException(status_code=404, detail="Экзамен не найден")
+        raise HTTPException(status_code=404, detail="Тест не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)
@@ -581,7 +581,7 @@ async def start_exam_attempt(
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Экзамен не найден")
+        raise HTTPException(status_code=404, detail="Тест не найден")
 
     # Get course to check contributor status
     course = db_session.get(Course, exam.course_id)
@@ -599,13 +599,13 @@ async def start_exam_attempt(
 
     if not is_teacher:
         if access_mode == "NO_ACCESS":
-            raise HTTPException(status_code=403, detail="Экзамен недоступен")
+            raise HTTPException(status_code=403, detail="Тест недоступен")
 
         if access_mode == "WHITELIST":
             whitelist = settings.get("whitelist_user_ids", [])
             if current_user.id not in whitelist:
                 raise HTTPException(
-                    status_code=403, detail="У вас нет доступа к этому экзамену"
+                    status_code=403, detail="У вас нет доступа к этому тесту"
                 )
 
     # Check attempt limit (teachers have unlimited attempts)
@@ -732,7 +732,7 @@ async def submit_exam_attempt(
     # Get exam to validate time limit server-side
     exam = db_session.get(Exam, attempt.exam_id)
     if not exam:
-        raise HTTPException(status_code=404, detail="Экзамен не найден")
+        raise HTTPException(status_code=404, detail="Тест не найден")
 
     # SERVER-SIDE TIME LIMIT VALIDATION (Security: prevent client bypass)
     settings = exam.settings or {}
@@ -995,7 +995,7 @@ async def get_user_attempts(
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Экзамен не найден")
+        raise HTTPException(status_code=404, detail="Тест не найден")
 
     statement = (
         select(ExamAttempt)
@@ -1062,7 +1062,7 @@ async def get_attempt_by_uuid(
 
     # Preserve original 404 behavior for missing linked records
     if not exam:
-        raise HTTPException(status_code=404, detail="Экзамен не найден")
+        raise HTTPException(status_code=404, detail="Тест не найден")
     if not activity:
         raise HTTPException(status_code=404, detail="Активность не найдена")
     if not chapter_activity:
@@ -1196,7 +1196,7 @@ async def get_all_exam_attempts(
     exam = db_session.exec(exam_statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Экзамен не найден")
+        raise HTTPException(status_code=404, detail="Тест не найден")
 
     # Get activity to check permissions
     activity_statement = select(Activity).where(Activity.id == exam.activity_id)
@@ -1287,7 +1287,7 @@ async def export_questions_csv(
     exam = db_session.exec(exam_statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Экзамен не найден")
+        raise HTTPException(status_code=404, detail="Тест не найден")
 
     # Get activity to check permissions
     activity_statement = select(Activity).where(Activity.id == exam.activity_id)
@@ -1362,7 +1362,7 @@ async def import_questions_csv(
     exam = db_session.exec(exam_statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Экзамен не найден")
+        raise HTTPException(status_code=404, detail="Тест не найден")
 
     # Get activity to check permissions
     activity_statement = select(Activity).where(Activity.id == exam.activity_id)
@@ -1479,7 +1479,7 @@ async def reorder_questions(
     exam = db_session.exec(statement).first()
 
     if not exam:
-        raise HTTPException(status_code=404, detail="Экзамен не найден")
+        raise HTTPException(status_code=404, detail="Тест не найден")
 
     # RBAC check
     course = db_session.get(Course, exam.course_id)

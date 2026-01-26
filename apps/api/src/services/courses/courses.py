@@ -1057,7 +1057,10 @@ async def get_course_user_rights(
             # Otherwise check if the user is a member of any usergroup that grants access
             member_stmt = (
                 select(UserGroupUser)
-                .join(UserGroupResource, UserGroupUser.usergroup_id == UserGroupResource.usergroup_id)
+                .join(
+                    UserGroupResource,
+                    UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
+                )
                 .where(
                     UserGroupResource.resource_uuid == course_uuid,
                     UserGroupUser.user_id == current_user.id,

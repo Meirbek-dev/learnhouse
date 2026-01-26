@@ -10,7 +10,11 @@ from src.db.organizations import Organization
 from src.db.roles import Role, RoleCreate, RoleRead, RoleTypeEnum, RoleUpdate
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, PublicUser
-from src.security.rbac.service_utils import rbac_check_role as rbac_check
+from src.security.rbac.service_utils import (
+    rbac_check_role as rbac_check,
+    is_admin_or_maintainer,
+    check_user_permission,
+)
 
 
 async def create_role(
@@ -66,30 +70,17 @@ async def create_role(
     # ============================================================================
     # VERIFICATION 4: Check if the user has permission to create roles in this organization
     # ============================================================================
-    # Get the user's role in this organization
-    statement = select(Role).where(Role.id == user_org.role_id)
-    user_role = db_session.exec(statement).first()
-
-    if not user_role:
-        raise HTTPException(
-            status_code=403,
-            detail="Your role in this organization could not be determined",
+    # Check if user has admin/maintainer role or explicit permission via new RBAC system
+    if not is_admin_or_maintainer(db_session, current_user.id):
+        # As a fallback, also check permission via permission checker (org-level create on roles)
+        has_perm = check_user_permission(
+            db_session, current_user.id, "create", f"org_{role.org_id}"
         )
-
-    # Check if the user has role creation permissions
-    if user_role.rights and isinstance(user_role.rights, dict):
-        roles_rights = user_role.rights.get("roles", {})
-        if not roles_rights.get("action_create", False):
+        if not has_perm:
             raise HTTPException(
                 status_code=403,
-                detail="You don't have permission to create roles in this organization",
+                detail="You don't have permission to create roles in this organization. Admin or Maintainer role required.",
             )
-    # If no rights are defined, check if user has admin role (role_id 1 or 2)
-    elif user_role.id not in [1, 2]:  # Admin and Maintainer roles
-        raise HTTPException(
-            status_code=403,
-            detail="You don't have permission to create roles in this organization. Admin or Maintainer role required.",
-        )
 
     # ============================================================================
     # VERIFICATION 5: Check if a role with the same name already exists in this organization
@@ -121,154 +112,6 @@ async def create_role(
             status_code=400,
             detail="Role name cannot exceed 100 characters",
         )
-
-    # ============================================================================
-    # VERIFICATION 7: Validate rights structure if provided
-    # ============================================================================
-    if role.rights:
-        # Convert Rights model to dict if needed
-        if isinstance(role.rights, dict):
-            # It's already a dict
-            rights_dict = role.rights
-        else:
-            try:
-                rights_dict = role.rights.model_dump()
-            except AttributeError:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Rights must be provided as a JSON object",
-                )
-
-        # Validate rights structure - check for required top-level keys
-        required_rights = [
-            "courses",
-            "users",
-            "usergroups",
-            "collections",
-            "organizations",
-            "coursechapters",
-            "activities",
-            "roles",
-            "dashboard",
-        ]
-
-        for required_right in required_rights:
-            if required_right not in rights_dict:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Missing required right: {required_right}",
-                )
-
-            # Validate the structure of each right
-            right_data = rights_dict[required_right]
-            if not isinstance(right_data, dict):
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Right '{required_right}' must be a JSON object",
-                )
-
-            # Validate courses permissions (has additional 'own' permissions)
-            if required_right == "courses":
-                required_course_permissions = [
-                    "action_create",
-                    "action_read",
-                    "action_read_own",
-                    "action_update",
-                    "action_update_own",
-                    "action_delete",
-                    "action_delete_own",
-                ]
-                for perm in required_course_permissions:
-                    if perm not in right_data:
-                        raise HTTPException(
-                            status_code=400,
-                            detail=f"Missing required course permission: {perm}",
-                        )
-                    if not isinstance(right_data[perm], bool):
-                        raise HTTPException(
-                            status_code=400,
-                            detail=f"Course permission '{perm}' must be a boolean",
-                        )
-
-            # Validate other permissions (standard permissions)
-            elif required_right in [
-                "users",
-                "usergroups",
-                "collections",
-                "organizations",
-                "coursechapters",
-                "activities",
-                "roles",
-            ]:
-                required_permissions = [
-                    "action_create",
-                    "action_read",
-                    "action_update",
-                    "action_delete",
-                ]
-                for perm in required_permissions:
-                    if perm not in right_data:
-                        raise HTTPException(
-                            status_code=400,
-                            detail=f"Missing required permission '{perm}' for '{required_right}'",
-                        )
-                    if not isinstance(right_data[perm], bool):
-                        raise HTTPException(
-                            status_code=400,
-                            detail=f"Permission '{perm}' for '{required_right}' must be a boolean",
-                        )
-
-            # Validate dashboard permissions
-            elif required_right == "dashboard":
-                if "action_access" not in right_data:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Missing required dashboard permission: action_access",
-                    )
-                if not isinstance(right_data["action_access"], bool):
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Dashboard permission 'action_access' must be a boolean",
-                    )
-
-        # Convert back to dict if it was a model
-        if not isinstance(role.rights, dict):
-            role.rights = rights_dict
-
-    # ============================================================================
-    # VERIFICATION 8: Ensure user cannot create a role with higher permissions than they have
-    # ============================================================================
-    if (
-        role.rights
-        and isinstance(role.rights, dict)
-        and user_role.rights
-        and isinstance(user_role.rights, dict)
-    ):
-        # Check if the new role has any permissions that the user doesn't have
-        for right_key, right_permissions in role.rights.items():
-            if right_key in user_role.rights:
-                user_right_permissions = user_role.rights[right_key]
-
-                # Check each permission in the right
-                for perm_key, perm_value in right_permissions.items():
-                    if (
-                        isinstance(perm_value, bool) and perm_value
-                    ):  # If the new role has this permission enabled
-                        if (
-                            isinstance(user_right_permissions, dict)
-                            and perm_key in user_right_permissions
-                        ):
-                            user_has_perm = user_right_permissions[perm_key]
-                            if not user_has_perm:
-                                raise HTTPException(
-                                    status_code=403,
-                                    detail=f"You cannot create a role with '{perm_key}' permission for '{right_key}' as you don't have this permission yourself",
-                                )
-                        else:
-                            raise HTTPException(
-                                status_code=403,
-                                detail=f"You cannot create a role with '{perm_key}' permission for '{right_key}' as you don't have this permission yourself",
-                            )
 
     # Complete the role object
     role.role_uuid = f"role_{ULID()}"
@@ -395,12 +238,17 @@ async def get_roles_by_organization(
                 status_code=403,
                 detail="You don't have permission to read roles in this organization",
             )
-    # If no rights are defined, check if user has admin role (role_id 1 or 2)
-    elif user_role.id not in [1, 2]:  # Admin and Maintainer roles
-        raise HTTPException(
-            status_code=403,
-            detail="You don't have permission to read roles in this organization. Admin or Maintainer role required.",
-        )
+    # If no rights are defined, require admin/maintainer role
+    else:
+        if not is_admin_or_maintainer(db_session, current_user.id):
+            has_perm = check_user_permission(
+                db_session, current_user.id, "read", f"org_{org_id}"
+            )
+            if not has_perm:
+                raise HTTPException(
+                    status_code=403,
+                    detail="You don't have permission to read roles in this organization. Admin or Maintainer role required.",
+                )
 
     # ============================================================================
     # GET ROLES: Fetch all roles for the organization AND global roles

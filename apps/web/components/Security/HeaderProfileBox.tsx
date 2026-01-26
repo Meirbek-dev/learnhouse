@@ -48,9 +48,9 @@ export const HeaderProfileBox = () => {
       // Sort by role priority (admin > maintainer > instructor > user)
       const sortedRoles = orgRoles.toSorted((a: any, b: any) => {
         const getRolePriority = (role: any) => {
-          if (role.role.role_uuid === 'role_global_admin' || role.role.id === 1) return 4;
-          if (role.role.role_uuid === 'role_global_maintainer' || role.role.id === 2) return 3;
-          if (role.role.role_uuid === 'role_global_instructor' || role.role.id === 3) return 2;
+          if (role.role.role_uuid === 'role_global_admin') return 4;
+          if (role.role.role_uuid === 'role_global_maintainer') return 3;
+          if (role.role.role_uuid === 'role_global_instructor') return 2;
           return 1;
         };
         return getRolePriority(b) - getRolePriority(a);
@@ -91,16 +91,14 @@ export const HeaderProfileBox = () => {
           },
         };
 
-        // Determine role based on role_uuid or id
+        // Determine role based on role_uuid (avoid using numeric IDs or missing fields)
         let roleKey = 'role_global_user'; // default
-        if (highestRole.role.role_uuid) {
-          roleKey = highestRole.role.role_uuid;
-        } else if (highestRole.role.id === 1) {
-          roleKey = 'role_global_admin';
-        } else if (highestRole.role.id === 2) {
-          roleKey = 'role_global_maintainer';
-        } else if (highestRole.role.id === 3) {
-          roleKey = 'role_global_instructor';
+        const highestRoleUuid = highestRole.role?.role_uuid ?? '';
+        if (highestRoleUuid.startsWith('role_global_')) {
+          roleKey = highestRoleUuid;
+        } else if (highestRoleUuid.startsWith('role_org_')) {
+          // leave as-is or map to org-level role if needed
+          roleKey = highestRoleUuid;
         }
 
         userRoleInfo = roleConfigs[roleKey] || roleConfigs.role_global_user || null;
@@ -112,16 +110,14 @@ export const HeaderProfileBox = () => {
     userRoles && userRoles.length > 0
       ? (userRoles.filter((role: any) => role.org.id === org?.id) ?? [])
           .filter((role: any) => {
-            const isSystemRole =
-              role.role.role_uuid?.startsWith('role_global_') ||
-              [1, 2, 3, 4].includes(role.role.id) ||
-              ['Admin', 'Maintainer', 'Instructor', 'User'].includes(role.role.name);
+            const roleUuid = role.role.role_uuid ?? '';
+            const isSystemRole = roleUuid.startsWith('role_global_') || roleUuid.startsWith('role_org_');
 
             return !isSystemRole;
           })
           .map((role: any) => ({
-            name: role.role.name || t('profile.customRole'),
-            description: role.role.description,
+            name: ((role.role as any).name as string) || t('profile.customRole'),
+            description: (role.role as any).description,
           }))
       : [];
 

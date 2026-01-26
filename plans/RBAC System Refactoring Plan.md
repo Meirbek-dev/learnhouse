@@ -498,10 +498,10 @@ export function PermissionGuard({
 #### 5.1 Remove Legacy Code
 
 - [x] Remove `authorization_verify_*` functions (completed — replaced by PermissionChecker and `src.security.rbac.service_utils`)
-- [ ] Remove hardcoded role IDs
-- [ ] Remove `courses_rbac_check` functions
-- [ ] Clean up `user_organizations.role_id` references
-- [ ] Remove old `Rights` model
+- [x] Remove hardcoded role IDs (replaced with checks via Role UUID / `is_admin_or_maintainer` / `check_user_permission`)
+- [x] Remove `courses_rbac_check` functions (legacy copies removed; routes/services use `src.security.courses_security`)
+- [x] Clean up `user_organizations.role_id` references (replaced hardcoded checks with role_uuid lookup / role-service lookups)
+- [ ] Remove old `Rights` model (blocked: requires data migration to `permissions` and `roles_new` tables; plan: write migration to convert `roles.rights` -> `role_permissions` and `role_new` seed)
 
 #### 5.2 Testing Strategy
 

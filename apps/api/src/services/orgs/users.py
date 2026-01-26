@@ -159,9 +159,14 @@ async def remove_user_from_org(
             detail="User not found",
         )
 
-    # Check if user is the last admin
+    # Check if user is the last admin (lookup admin role by role_uuid to avoid magic numbers)
+    admin_role = db_session.exec(
+        select(Role).where(Role.role_uuid == "role_global_admin")
+    ).first()
+    admin_role_id = admin_role.id if admin_role else 1
+
     statement = select(UserOrganization).where(
-        UserOrganization.org_id == org.id, UserOrganization.role_id == 1
+        UserOrganization.org_id == org.id, UserOrganization.role_id == admin_role_id
     )
     result = db_session.exec(statement)
     admins = result.all()
@@ -219,8 +224,13 @@ async def update_user_role(
     await rbac_check(request, org.org_uuid, current_user, "update", db_session)
 
     # Check if user is the last admin and if the new role is not admin
+    admin_role = db_session.exec(
+        select(Role).where(Role.role_uuid == "role_global_admin")
+    ).first()
+    admin_role_id = admin_role.id if admin_role else 1
+
     statement = select(UserOrganization).where(
-        UserOrganization.org_id == org.id, UserOrganization.role_id == 1
+        UserOrganization.org_id == org.id, UserOrganization.role_id == admin_role_id
     )
     result = db_session.exec(statement)
     admins = result.all()
