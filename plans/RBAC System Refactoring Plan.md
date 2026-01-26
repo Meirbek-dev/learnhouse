@@ -497,7 +497,7 @@ export function PermissionGuard({
 
 #### 5.1 Remove Legacy Code
 
-- [ ] Remove `authorization_verify_*` functions
+- [x] Remove `authorization_verify_*` functions (completed — replaced by PermissionChecker and `src.security.rbac.service_utils`)
 - [ ] Remove hardcoded role IDs
 - [ ] Remove `courses_rbac_check` functions
 - [ ] Clean up `user_organizations.role_id` references
