@@ -28,8 +28,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       className={`${inter.variable} ${jetBrainsMono.variable}`}
       lang="en"
+      suppressHydrationWarning
     >
-      <head />
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
 
       {/* Dev-only non-blocking script loader (client-side) */}
       {isDevEnv && <DevScriptLoader />}
