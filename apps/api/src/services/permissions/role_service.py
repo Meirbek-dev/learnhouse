@@ -5,7 +5,7 @@ This service handles CRUD operations for roles, role hierarchy,
 and permission assignments to roles.
 """
 
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 from sqlmodel import Session, select
 
@@ -15,10 +15,10 @@ from src.db.permissions.models import (
     Permission,
     Role,
     RoleCreate,
-    RoleRead,
-    RoleUpdate,
     RolePermission,
     RolePermissionCreate,
+    RoleRead,
+    RoleUpdate,
     RoleWithPermissions,
     UserRole,
     UserRoleCreate,

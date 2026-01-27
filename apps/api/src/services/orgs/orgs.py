@@ -31,9 +31,9 @@ from src.db.organizations import (
     OrganizationRead,
     OrganizationUpdate,
 )
+from src.db.permissions import Role, UserRole
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, InternalUser, PublicUser
-from src.db.permissions import Role, UserRole
 from src.security.rbac.service_utils import rbac_check_org as rbac_check
 from src.services.orgs.uploads import (
     upload_org_landing_content,

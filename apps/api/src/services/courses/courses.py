@@ -25,10 +25,10 @@ from src.db.usergroup_user import UserGroupUser
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.rbac import courses_rbac_check
 from src.security.rbac.service_utils import (
+    has_authenticated_user_role,
+    has_instructor_role,
     is_admin_or_maintainer,
     verify_not_anonymous,
-    has_instructor_role,
-    has_authenticated_user_role,
 )
 from src.services.courses.thumbnails import upload_thumbnail
 

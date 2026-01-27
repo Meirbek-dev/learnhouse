@@ -20,30 +20,38 @@ class RoleSlug(StrEnum):
 
 
 # Role groups for common permission checks
-ADMIN_ROLE_SLUGS = frozenset({
-    RoleSlug.SUPER_ADMIN,
-    RoleSlug.ORG_ADMIN,
-})
+ADMIN_ROLE_SLUGS = frozenset(
+    {
+        RoleSlug.SUPER_ADMIN,
+        RoleSlug.ORG_ADMIN,
+    }
+)
 
-ADMIN_OR_MAINTAINER_SLUGS = frozenset({
-    RoleSlug.SUPER_ADMIN,
-    RoleSlug.ORG_ADMIN,
-    RoleSlug.MAINTAINER,
-})
+ADMIN_OR_MAINTAINER_SLUGS = frozenset(
+    {
+        RoleSlug.SUPER_ADMIN,
+        RoleSlug.ORG_ADMIN,
+        RoleSlug.MAINTAINER,
+    }
+)
 
-INSTRUCTOR_OR_HIGHER_SLUGS = frozenset({
-    RoleSlug.SUPER_ADMIN,
-    RoleSlug.ORG_ADMIN,
-    RoleSlug.MAINTAINER,
-    RoleSlug.INSTRUCTOR,
-})
+INSTRUCTOR_OR_HIGHER_SLUGS = frozenset(
+    {
+        RoleSlug.SUPER_ADMIN,
+        RoleSlug.ORG_ADMIN,
+        RoleSlug.MAINTAINER,
+        RoleSlug.INSTRUCTOR,
+    }
+)
 
-CONTENT_CREATOR_SLUGS = frozenset({
-    RoleSlug.SUPER_ADMIN,
-    RoleSlug.ORG_ADMIN,
-    RoleSlug.MAINTAINER,
-    RoleSlug.INSTRUCTOR,
-})
+CONTENT_CREATOR_SLUGS = frozenset(
+    {
+        RoleSlug.SUPER_ADMIN,
+        RoleSlug.ORG_ADMIN,
+        RoleSlug.MAINTAINER,
+        RoleSlug.INSTRUCTOR,
+    }
+)
 
 
 def is_admin_role(role_slug: str) -> bool:

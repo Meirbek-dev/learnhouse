@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine, text
+
 from config.config import get_platform_config
 
 cfg = get_platform_config()
@@ -11,7 +12,7 @@ perms = conn.execute(
 ).fetchall()
 print("Distinct resource_type values in permissions table:")
 for p in perms:
-    print(f"  {repr(p[0])}")
+    print(f"  {p[0]!r}")
 
 # Check PostgreSQL enum type
 result = conn.execute(
@@ -25,4 +26,4 @@ result = conn.execute(
 ).fetchall()
 print("\nPostgreSQL resourcetype enum values:")
 for r in result:
-    print(f"  {repr(r[1])}")
+    print(f"  {r[1]!r}")

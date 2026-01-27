@@ -88,7 +88,6 @@ class CoursePolicy(BasePolicy):
     def _can_access_via_usergroup(self, user_id: int, course_uuid: str) -> bool:
         """Check if user can access course via UserGroup membership or if course has no restrictions."""
         from sqlmodel import and_, or_
-
         from src.db.usergroups.usergroups import UserGroupResource, UserGroupUser
 
         # Check if course has UserGroup restrictions

@@ -37,10 +37,10 @@ from src.db.permissions.models import (
     ResourcePermissionRead,
     Role,
     RoleCreate,
-    RoleRead,
-    RoleUpdate,
     RolePermission,
     RolePermissionCreate,
+    RoleRead,
+    RoleUpdate,
     RoleWithPermissions,
     UserPermissionsResponse,
     UserRole,
@@ -50,6 +50,10 @@ from src.db.permissions.models import (
 )
 
 __all__ = [
+    "ADMIN_OR_MAINTAINER_SLUGS",
+    "ADMIN_ROLE_SLUGS",
+    "CONTENT_CREATOR_SLUGS",
+    "INSTRUCTOR_OR_HIGHER_SLUGS",
     # Enums
     "Action",
     "AuditAction",
@@ -73,11 +77,13 @@ __all__ = [
     # Role models (new names)
     "Role",
     "RoleCreate",
-    "RoleRead",
-    "RoleUpdate",
     # Role-Permission junction
     "RolePermission",
     "RolePermissionCreate",
+    "RoleRead",
+    # Constants
+    "RoleSlug",
+    "RoleUpdate",
     # Composite models
     "RoleWithPermissions",
     "Scope",
@@ -87,14 +93,8 @@ __all__ = [
     "UserRoleAssign",
     "UserRoleCreate",
     "UserRoleRead",
-    # Constants
-    "RoleSlug",
-    "ADMIN_ROLE_SLUGS",
-    "ADMIN_OR_MAINTAINER_SLUGS",
-    "INSTRUCTOR_OR_HIGHER_SLUGS",
-    "CONTENT_CREATOR_SLUGS",
-    "is_admin_role",
     "is_admin_or_maintainer_role",
-    "is_instructor_or_higher_role",
+    "is_admin_role",
     "is_content_creator_role",
+    "is_instructor_or_higher_role",
 ]

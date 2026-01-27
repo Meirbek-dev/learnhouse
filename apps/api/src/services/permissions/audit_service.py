@@ -5,7 +5,7 @@ This service provides methods for logging permission checks, grants,
 and revocations for security auditing and compliance.
 """
 
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 from sqlmodel import Session, select
 

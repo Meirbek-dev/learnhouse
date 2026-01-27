@@ -16,7 +16,7 @@ It also migrates existing roles and user_organizations data to the new schema.
 """
 
 from collections.abc import Sequence
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from typing import Union
 
 import sqlalchemy as sa

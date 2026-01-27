@@ -1,6 +1,7 @@
 """Test if permissions are loading correctly after fixing enum case."""
 
 from sqlmodel import Session, create_engine
+
 from config.config import get_platform_config
 from src.services.permissions.policy_engine import PolicyEngine
 
@@ -18,7 +19,7 @@ try:
     print(f"  course:update:org: {perms.get('course:update:org', False)}")
     print(f"  role:create:org: {perms.get('role:create:org', False)}")
     print("\nSample permissions:")
-    for i, (key, value) in enumerate(list(perms.items())[:10]):
+    for _i, (key, value) in enumerate(list(perms.items())[:10]):
         print(f"  {key}: {value}")
 except Exception as e:
     print(f"✗ Error: {e}")

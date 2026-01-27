@@ -1,6 +1,7 @@
 """Fix enum case mismatch - convert UPPERCASE enum values to lowercase to match Python Enums."""
 
 from sqlalchemy import create_engine, text
+
 from config.config import get_platform_config
 
 cfg = get_platform_config()

@@ -488,13 +488,6 @@ def get_user_effective_permissions(
 - [ ] Add type hints where missing
 - [ ] Add docstrings to public methods
 
-### Testing
-
-- [ ] Add unit tests for PermissionChecker
-- [ ] Add unit tests for PolicyEngine
-- [ ] Add integration tests for permission API
-- [ ] Add performance benchmarks
-
 ### Documentation
 
 - [ ] Document permission naming convention

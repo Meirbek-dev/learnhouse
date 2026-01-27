@@ -5,7 +5,7 @@ This module tests the new permission checker, policy engine,
 and related components.
 """
 
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
 from unittest.mock import Mock, patch
 
 import pytest

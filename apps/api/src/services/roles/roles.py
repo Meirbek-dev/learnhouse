@@ -20,6 +20,8 @@ from src.db.users import PublicUser
 from src.security.rbac.service_utils import (
     check_user_permission,
     is_admin_or_maintainer,
+)
+from src.security.rbac.service_utils import (
     rbac_check_role as rbac_check,
 )
 
@@ -27,6 +29,7 @@ from src.security.rbac.service_utils import (
 def _generate_slug(name: str) -> str:
     """Generate a URL-safe slug from a role name."""
     import re
+
     from transliterate import translit
     from transliterate.exceptions import LanguageDetectionError
 
@@ -38,8 +41,7 @@ def _generate_slug(name: str) -> str:
 
     # Convert to lowercase and replace spaces/special chars with hyphens
     slug = re.sub(r"[^\w\s-]", "", slug.lower())
-    slug = re.sub(r"[-\s]+", "-", slug).strip("-")
-    return slug
+    return re.sub(r"[-\s]+", "-", slug).strip("-")
 
 
 async def create_role(

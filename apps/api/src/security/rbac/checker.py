@@ -11,6 +11,7 @@ from sqlmodel import Session
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac.context import PermissionContext
+from src.security.rbac.service_utils import get_user_id, is_anonymous
 from src.services.permissions.audit_service import AuditService
 from src.services.permissions.policy_engine import PolicyEngine
 
@@ -65,7 +66,7 @@ class PermissionChecker:
         Returns:
             True if permission is granted, False otherwise
         """
-        user_id = user.id if hasattr(user, "id") else 0
+        user_id = get_user_id(user)
 
         # Build context dict for ABAC
         abac_context = context.extra if context else None
@@ -122,9 +123,7 @@ class PermissionChecker:
             HTTPException: 403 if permission is denied
         """
         # Check if authentication is required
-        user_id = user.id if hasattr(user, "id") else 0
-
-        if user_id == 0 and action != Action.READ:
+        if is_anonymous(user) and action != Action.READ:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Authentication required",
@@ -225,9 +224,9 @@ class PermissionChecker:
         Returns:
             Dictionary mapping permission names to boolean
         """
-        user_id = user.id if hasattr(user, "id") else 0
+        user_id = get_user_id(user)
 
-        if user_id == 0:
+        if is_anonymous(user):
             # Anonymous users have very limited permissions
             return {
                 "course:read:all": True,

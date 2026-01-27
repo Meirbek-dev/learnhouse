@@ -10,8 +10,8 @@ of the security functionality including:
 """
 
 from src.tests.security.test_auth import TestAuth
-from src.tests.security.test_security import TestSecurity
 from src.tests.security.test_rbac_new import TestPermissionEnums, TestPermissionModels
+from src.tests.security.test_security import TestSecurity
 
 
 class TestSecurityComprehensive:

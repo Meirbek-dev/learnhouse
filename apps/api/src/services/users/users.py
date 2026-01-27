@@ -25,8 +25,8 @@ from src.db.users import (
     UserUpdatePassword,
     rebuild_user_models,
 )
-from src.security.rbac.service_utils import rbac_check_user as rbac_check
 from src.security.rbac.checker import PermissionChecker
+from src.security.rbac.service_utils import rbac_check_user as rbac_check
 from src.security.security import security_hash_password, security_verify_password
 from src.services.cache import redis_client
 from src.services.orgs.invites import get_invite_code
@@ -349,7 +349,6 @@ async def get_user_session(
     except Exception as e:
         # Fallback: if new RBAC system not yet migrated, return empty
         print(f"Error loading permissions for user {current_user.id}: {e}")
-        pass
 
     return UserSession(
         user=user_read,

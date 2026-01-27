@@ -9,7 +9,8 @@ This module provides the core permission evaluation logic, including:
 - Redis caching for performance
 """
 
-from datetime import datetime, UTC
+import logging
+from datetime import UTC, datetime
 
 from sqlmodel import Session, select
 
@@ -32,6 +33,11 @@ from src.services.permissions.permission_cache import (
     set_cached_permission,
     set_cached_user_roles,
 )
+
+_logger = logging.getLogger(__name__)
+
+# Maximum depth for role inheritance hierarchy to prevent performance issues
+MAX_ROLE_HIERARCHY_DEPTH = 10
 
 
 class PolicyEngine:
@@ -211,14 +217,13 @@ class PolicyEngine:
                 # Fetch full role objects by IDs
                 role_ids = cached.get("role_ids", [])
                 if role_ids:
-                    roles = list(
+                    return list(
                         self.db.exec(
                             select(Role)
                             .where(Role.id.in_(role_ids))
                             .order_by(Role.priority.desc())
                         ).all()
                     )
-                    return roles
                 return []
 
         # Query database
@@ -306,14 +311,27 @@ class PolicyEngine:
     def _get_role_hierarchy_ids(self, role_id: int) -> list[int]:
         """
         Get all role IDs in the hierarchy chain (role + all parents).
+
+        Limits traversal to MAX_ROLE_HIERARCHY_DEPTH to prevent
+        performance issues from deeply nested hierarchies.
         """
         ids = []
         current_id: int | None = role_id
         visited = set()
+        depth = 0
 
         while current_id is not None and current_id not in visited:
+            if depth >= MAX_ROLE_HIERARCHY_DEPTH:
+                _logger.warning(
+                    "Role hierarchy depth exceeded %d for role_id=%d",
+                    MAX_ROLE_HIERARCHY_DEPTH,
+                    role_id,
+                )
+                break
+
             visited.add(current_id)
             ids.append(current_id)
+            depth += 1
 
             role = self.db.get(Role, current_id)
             current_id = role.parent_role_id if role else None

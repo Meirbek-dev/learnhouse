@@ -9,7 +9,7 @@ This module defines the SQLModel tables for:
 - resource_permissions: Resource-level permission overrides
 """
 
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 from pydantic import ConfigDict, field_validator
 from sqlalchemy import JSON, Column, ForeignKey, Index, Integer, UniqueConstraint
@@ -221,7 +221,9 @@ class UserRole(UserRoleBase, table=True):
     __table_args__ = (
         Index("ix_user_roles_user_id", "user_id"),
         Index("ix_user_roles_org_id", "org_id"),
-        Index("ix_user_roles_user_org", "user_id", "org_id"),  # Composite index for common lookups
+        Index(
+            "ix_user_roles_user_org", "user_id", "org_id"
+        ),  # Composite index for common lookups
     )
 
     user_id: int = Field(

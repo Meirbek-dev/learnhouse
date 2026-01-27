@@ -8,10 +8,11 @@ This module provides REST API endpoints for:
 - Permission checks
 """
 
+from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from src.core.events.database import get_db_session
 from src.db.permissions import (
@@ -21,6 +22,7 @@ from src.db.permissions import (
     PermissionCheckRequest,
     PermissionCheckResult,
     PermissionRead,
+    ResourcePermission,
     ResourceType,
     RoleCreate,
     RoleRead,
@@ -399,12 +401,20 @@ async def api_get_my_permissions(
     user_roles = service.get_user_roles(user_id, org_id)
     roles = [ur.role for ur in user_roles if ur.role]
 
+    # Get user's resource-level permissions
+    resource_perms_stmt = select(ResourcePermission).where(
+        ResourcePermission.user_id == user_id,
+        (ResourcePermission.expires_at.is_(None))
+        | (ResourcePermission.expires_at > datetime.now(UTC)),
+    )
+    resource_perms = list(db_session.exec(resource_perms_stmt).all())
+
     return UserPermissionsResponse(
         user_id=user_id,
         org_id=org_id,
         roles=roles,
         permissions=permissions,
-        resource_permissions=[],  # TODO: Add resource permissions
+        resource_permissions=resource_perms,
     )
 
 

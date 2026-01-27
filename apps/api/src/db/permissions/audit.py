@@ -5,7 +5,7 @@ This module provides the database model for tracking permission checks,
 grants, and revocations for security auditing and compliance.
 """
 
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 from pydantic import ConfigDict, field_validator
 from sqlalchemy import JSON, Column, ForeignKey, Index, Integer, String, Text

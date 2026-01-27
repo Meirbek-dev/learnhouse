@@ -50,6 +50,7 @@ def get_user_id(user: PublicUser | AnonymousUser | InternalUser | None) -> int:
         return 0
     return user.id if hasattr(user, "id") else 0
 
+
 # Action mapping from string to enum
 ACTION_MAP: dict[str, Action] = {
     "create": Action.CREATE,
@@ -123,8 +124,7 @@ def is_admin_or_maintainer(db_session: Session, user_id: int) -> bool:
     role_service = RoleService(db_session)
     user_roles = role_service.get_user_roles(user_id)
     return any(
-        ur.role and ur.role.slug in ADMIN_OR_MAINTAINER_SLUGS
-        for ur in user_roles
+        ur.role and ur.role.slug in ADMIN_OR_MAINTAINER_SLUGS for ur in user_roles
     )
 
 
@@ -142,7 +142,7 @@ def is_resource_public(
             select(Course).where(Course.course_uuid == resource_uuid)
         ).first()
         return course.public if course else False
-    elif resource_type == ResourceType.COLLECTION:
+    if resource_type == ResourceType.COLLECTION:
         collection = db_session.exec(
             select(Collection).where(Collection.collection_uuid == resource_uuid)
         ).first()
@@ -388,8 +388,7 @@ def has_instructor_role(db_session: Session, user_id: int) -> bool:
     role_service = RoleService(db_session)
     user_roles = role_service.get_user_roles(user_id)
     return any(
-        ur.role and ur.role.slug in INSTRUCTOR_OR_HIGHER_SLUGS
-        for ur in user_roles
+        ur.role and ur.role.slug in INSTRUCTOR_OR_HIGHER_SLUGS for ur in user_roles
     )
 
 
@@ -568,7 +567,9 @@ async def courses_rbac_check(
     # Course creation (course_x placeholder)
     if action == "create" and course_uuid == "course_x":
         # Check if user has course create permission
-        if checker.check(current_user, Action.CREATE, ResourceType.COURSE, org_id=org_id):
+        if checker.check(
+            current_user, Action.CREATE, ResourceType.COURSE, org_id=org_id
+        ):
             return True
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -589,7 +590,9 @@ async def courses_rbac_check(
         )
 
     # Default: check general permission with org_id
-    if checker.check(current_user, mapped_action, ResourceType.COURSE, course_uuid, org_id):
+    if checker.check(
+        current_user, mapped_action, ResourceType.COURSE, course_uuid, org_id
+    ):
         return True
 
     raise HTTPException(
@@ -721,7 +724,11 @@ async def courses_rbac_check_for_collections(
                 detail="You must be logged in to access this collection",
             )
         if checker.check(
-            current_user, mapped_action, ResourceType.COLLECTION, collection_uuid, org_id
+            current_user,
+            mapped_action,
+            ResourceType.COLLECTION,
+            collection_uuid,
+            org_id,
         ):
             return True
         # Also allow if resource is public

@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine, text
+
 from config.config import get_platform_config
 
 cfg = get_platform_config()
