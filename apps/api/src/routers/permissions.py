@@ -12,6 +12,8 @@ from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlmodel import Session, select
 
 from src.core.events.database import get_db_session
@@ -38,6 +40,9 @@ from src.security.rbac.checker import PermissionChecker
 from src.security.rbac.dependencies import get_permission_checker
 from src.services.permissions.permission_service import PermissionService
 from src.services.permissions.role_service import RoleService
+
+# Rate limiter for permission check endpoints to prevent enumeration attacks
+_limiter = Limiter(key_func=get_remote_address)
 
 router = APIRouter()
 
@@ -419,6 +424,7 @@ async def api_get_my_permissions(
 
 
 @router.post("/permissions/check")
+@_limiter.limit("60/minute")  # 60 batch requests per minute
 async def api_check_permissions(
     request: Request,
     body: BatchPermissionCheckRequest,
@@ -428,6 +434,8 @@ async def api_check_permissions(
 ) -> BatchPermissionCheckResponse:
     """
     Batch check multiple permissions.
+
+    Rate limit: 60 requests per minute per IP address.
 
     Request body should contain a list of permission checks:
     ```json
@@ -476,7 +484,9 @@ async def api_check_permissions(
 
 
 @router.get("/permissions/check")
+@_limiter.limit("120/minute")  # 120 single check requests per minute
 async def api_check_single_permission(
+    request: Request,
     action: Action,
     resource: ResourceType,
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -487,6 +497,8 @@ async def api_check_single_permission(
 ) -> PermissionCheckResult:
     """
     Check a single permission.
+
+    Rate limit: 120 requests per minute per IP address.
 
     Query parameters:
     - action: The action to check (e.g., "create", "read", "update", "delete")

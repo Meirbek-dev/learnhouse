@@ -476,10 +476,22 @@ def get_user_effective_permissions(
 
 ### Critical Fixes
 
-- [ ] Fix BUG-004: Role table name mismatch
+- [x] Fix BUG-004: Role table name mismatch (already fixed in migration 91512ce105e5)
 - [x] Fix BUG-001: Add org_id to permission checks
 - [x] Fix BUG-003: Standardize anonymous user detection
+- [x] Fix BUG-005: Resource permissions in /me/permissions response
+- [x] Fix BUG-006: Implement ASSIGNED scope with UserGroupResource
 - [x] Fix PERF-003: Add composite indexes
+
+### Performance Improvements
+
+- [x] Fix N+1 queries: Batch role-permission lookups in PolicyEngine
+- [x] Add MAX_ROLE_HIERARCHY_DEPTH limit (10 levels)
+
+### Security Enhancements
+
+- [x] Add rate limiting to /permissions/check endpoints (60/min batch, 120/min single)
+- [x] Add configurable audit levels (AuditLevel enum)
 
 ### Code Quality
 
@@ -524,14 +536,18 @@ Examples:
 
 ### C. Files Modified Summary
 
-| File                                                     | Changes                                                   |
-| -------------------------------------------------------- | --------------------------------------------------------- |
-| `src/db/permissions/constants.py`                        | NEW - RoleSlug enum and helper functions                  |
-| `src/db/permissions/__init__.py`                         | Export constants                                          |
-| `src/db/permissions/models.py`                           | Add composite index to UserRole                           |
-| `src/security/rbac/service_utils.py`                     | Add is_anonymous, get_user_id, use constants, add org_id  |
-| `src/security/rbac/__init__.py`                          | Export new utilities                                      |
-| `src/services/permissions/role_service.py`               | Use RoleSlug constants in seed_default_roles              |
-| `migrations/versions/a54a941bd13e_rbac_3rd_rewrite.py`   | Add composite indexes migration                           |
+| File                                                     | Changes                                                        |
+| -------------------------------------------------------- | -------------------------------------------------------------- |
+| `src/db/permissions/constants.py`                        | NEW - RoleSlug enum and helper functions                       |
+| `src/db/permissions/__init__.py`                         | Export constants, AuditLevel                                   |
+| `src/db/permissions/enums.py`                            | Add AuditLevel enum                                            |
+| `src/db/permissions/models.py`                           | Add composite index to UserRole                                |
+| `src/security/rbac/service_utils.py`                     | Add is_anonymous, get_user_id, use constants, add org_id       |
+| `src/security/rbac/checker.py`                           | Configurable audit levels, use standardized utilities          |
+| `src/security/rbac/__init__.py`                          | Export new utilities                                           |
+| `src/services/permissions/policy_engine.py`              | Batch queries, ASSIGNED scope, MAX_ROLE_HIERARCHY_DEPTH        |
+| `src/services/permissions/role_service.py`               | Use RoleSlug constants in seed_default_roles                   |
+| `src/routers/permissions.py`                             | Rate limiting, resource_permissions in response                |
+| `migrations/versions/a54a941bd13e_rbac_3rd_rewrite.py`   | Add composite indexes migration                                |
 
 ---

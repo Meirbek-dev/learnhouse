@@ -27,6 +27,8 @@ from src.db.resource_authors import (
     ResourceAuthorshipEnum,
     ResourceAuthorshipStatusEnum,
 )
+from src.db.usergroup_resources import UserGroupResource
+from src.db.usergroup_user import UserGroupUser
 from src.services.permissions.permission_cache import (
     get_cached_permission,
     get_cached_user_roles,
@@ -128,7 +130,14 @@ class PolicyEngine:
         # Check each role's permissions (including inherited)
         for role in roles:
             if self._check_role_permission(
-                role, action, resource, is_owner, org_id, context
+                role,
+                action,
+                resource,
+                is_owner,
+                org_id,
+                context,
+                user_id,
+                resource_id,
             ):
                 if self.use_cache and context is None:
                     set_cached_permission(
@@ -274,6 +283,27 @@ class PolicyEngine:
         result = self.db.exec(statement).first()
         return result is not None
 
+    def _check_user_assigned(self, user_id: int, resource_id: str) -> bool:
+        """
+        Check if a user is assigned to a resource through user groups.
+
+        A user is assigned if:
+        1. They belong to a user group (UserGroupUser)
+        2. That user group is associated with the resource (UserGroupResource)
+        """
+        statement = (
+            select(UserGroupResource)
+            .join(
+                UserGroupUser, UserGroupUser.usergroup_id == UserGroupResource.usergroup_id
+            )
+            .where(
+                UserGroupUser.user_id == user_id,
+                UserGroupResource.resource_uuid == resource_id,
+            )
+        )
+        result = self.db.exec(statement).first()
+        return result is not None
+
     def _check_role_permission(
         self,
         role: Role,
@@ -282,29 +312,51 @@ class PolicyEngine:
         is_owner: bool,
         org_id: int | None = None,
         context: dict | None = None,
+        user_id: int | None = None,
+        resource_id: str | None = None,
     ) -> bool:
         """
         Check if a role grants a specific permission.
 
         This includes checking the role's own permissions and
         all inherited permissions from parent roles.
+
+        Uses batch query to avoid N+1 problem.
         """
         # Collect all role IDs in the hierarchy
         role_ids = self._get_role_hierarchy_ids(role.id)  # type: ignore[arg-type]
+
+        if not role_ids:
+            return False
 
         # Build scope context for evaluation
         scope_context = {
             "is_owner": is_owner,
             "request_org_id": org_id,
             "role_org_id": role.org_id,
+            "user_id": user_id,
+            "resource_id": resource_id,
         }
 
-        # Check if any role in the hierarchy has the permission
-        for role_id in role_ids:
-            if self._role_has_permission(
-                role_id, action, resource, scope_context, context
-            ):
-                return True
+        # Batch query: get all permissions for all role IDs in a single query
+        statement = (
+            select(Permission, RolePermission)
+            .join(RolePermission, RolePermission.permission_id == Permission.id)
+            .where(
+                RolePermission.role_id.in_(role_ids),
+                Permission.resource_type == resource,
+                Permission.action == action,
+            )
+        )
+
+        results = self.db.exec(statement).all()
+
+        for permission, role_permission in results:
+            # Check scope with full context
+            if self._scope_matches(permission.scope, scope_context):
+                # Check ABAC conditions
+                if self._conditions_match(role_permission.conditions, context):
+                    return True
 
         return False
 
@@ -337,46 +389,6 @@ class PolicyEngine:
             current_id = role.parent_role_id if role else None
 
         return ids
-
-    def _role_has_permission(
-        self,
-        role_id: int,
-        action: Action,
-        resource: ResourceType,
-        scope_context: dict,
-        abac_context: dict | None = None,
-    ) -> bool:
-        """
-        Check if a specific role (without inheritance) has a permission.
-
-        Args:
-            role_id: Role ID to check
-            action: Action to perform
-            resource: Resource type
-            scope_context: Context for scope evaluation (is_owner, org_ids)
-            abac_context: Additional ABAC conditions context
-        """
-        # Build the query for matching permissions
-        statement = (
-            select(Permission, RolePermission)
-            .join(RolePermission, RolePermission.permission_id == Permission.id)
-            .where(
-                RolePermission.role_id == role_id,
-                Permission.resource_type == resource,
-                Permission.action == action,
-            )
-        )
-
-        results = self.db.exec(statement).all()
-
-        for permission, role_permission in results:
-            # Check scope with full context
-            if self._scope_matches(permission.scope, scope_context):
-                # Check ABAC conditions
-                if self._conditions_match(role_permission.conditions, abac_context):
-                    return True
-
-        return False
 
     def _scope_matches(self, scope: Scope, scope_context: dict) -> bool:
         """
@@ -413,9 +425,14 @@ class PolicyEngine:
                 return True
             case Scope.ASSIGNED:
                 # ASSIGNED scope: for resources explicitly assigned to user
-                # Currently treated same as ALL within the caller's context
-                # TODO: Check assignment table when implemented
-                return True
+                # through user groups
+                user_id = scope_context.get("user_id")
+                resource_id = scope_context.get("resource_id")
+
+                if not user_id or not resource_id:
+                    return False
+
+                return self._check_user_assigned(user_id, resource_id)
             case _:
                 return False
 

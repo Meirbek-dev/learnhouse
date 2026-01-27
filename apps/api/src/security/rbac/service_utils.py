@@ -5,7 +5,7 @@ This module provides a consistent interface for permission checks across
 all services using the new PermissionChecker system.
 """
 
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
@@ -23,8 +23,10 @@ from src.db.resource_authors import (
     ResourceAuthorshipStatusEnum,
 )
 from src.db.users import AnonymousUser, InternalUser, PublicUser
-from src.security.rbac.checker import PermissionChecker
 from src.services.permissions.role_service import RoleService
+
+if TYPE_CHECKING:
+    from src.security.rbac.checker import PermissionChecker
 
 
 def is_anonymous(user: PublicUser | AnonymousUser | InternalUser | None) -> bool:
@@ -208,6 +210,8 @@ async def rbac_check(
     if isinstance(current_user, InternalUser):
         return True
 
+    from src.security.rbac.checker import PermissionChecker
+
     user_id = current_user.id if hasattr(current_user, "id") else 0
     is_anonymous = user_id == 0
     inferred_type = resource_type or infer_resource_type(resource_uuid)
@@ -324,6 +328,8 @@ async def rbac_check_user(
     if is_admin_or_maintainer(db_session, user_id):
         return True
 
+    from src.security.rbac.checker import PermissionChecker
+
     checker = PermissionChecker(db_session)
     if checker.check(current_user, map_action(action), ResourceType.USER, user_uuid):
         return True
@@ -344,7 +350,7 @@ async def rbac_check_role(
     """RBAC check for role resources. Requires authentication and appropriate permissions."""
     user_id = current_user.id if hasattr(current_user, "id") else 0
     verify_not_anonymous(user_id)
-
+    from src.security.rbac.checker import PermissionChecker
     checker = PermissionChecker(db_session)
     if checker.check(current_user, map_action(action), ResourceType.ROLE, role_uuid):
         return
@@ -368,7 +374,7 @@ async def rbac_check_usergroup(
 
     user_id = current_user.id if hasattr(current_user, "id") else 0
     verify_not_anonymous(user_id)
-
+    from src.security.rbac.checker import PermissionChecker
     checker = PermissionChecker(db_session)
     if checker.check(
         current_user, map_action(action), ResourceType.USERGROUP, usergroup_uuid
@@ -436,6 +442,8 @@ def check_user_permission(
         return True
 
     # Check through permission checker for more granular permissions
+    from src.security.rbac.checker import PermissionChecker
+
     resource_type = infer_resource_type(resource_uuid)
     checker = PermissionChecker(db_session)
 
@@ -485,6 +493,8 @@ async def courses_rbac_check(
         HTTPException: 403 Forbidden if user lacks required permissions
         HTTPException: 401 Unauthorized if user is anonymous for non-read actions
     """
+    from src.security.rbac.checker import PermissionChecker
+
     checker = PermissionChecker(db_session)
     mapped_action = map_action(action)
     user_id = get_user_id(current_user)
@@ -703,6 +713,8 @@ async def courses_rbac_check_for_collections(
     org_id: int | None = None,
 ) -> bool:
     """RBAC check for collections."""
+    from src.security.rbac.checker import PermissionChecker
+
     checker = PermissionChecker(db_session)
     mapped_action = map_action(action)
     user_is_anonymous = is_anonymous(current_user)

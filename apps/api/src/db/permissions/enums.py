@@ -67,6 +67,16 @@ class AuditAction(str, Enum):
     DENY = "deny"  # Permission check was denied
 
 
+class AuditLevel(str, Enum):
+    """Configurable audit logging levels."""
+
+    NONE = "none"  # No audit logging
+    FAILURES_ONLY = "failures_only"  # Log only denied checks
+    WRITES_ONLY = "writes_only"  # Log only write operations (create/update/delete) and failures
+    ALL_EXCEPT_READS = "all_except_reads"  # Log all except successful reads (default)
+    ALL = "all"  # Log everything including successful reads
+
+
 class PermissionErrorCode(str, Enum):
     """
     Error codes for permission-related errors.

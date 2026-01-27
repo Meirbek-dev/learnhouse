@@ -8,12 +8,15 @@ for all permission checks in the system.
 from fastapi import HTTPException, status
 from sqlmodel import Session
 
-from src.db.permissions.enums import Action, ResourceType
+from src.db.permissions.enums import Action, AuditLevel, ResourceType
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac.context import PermissionContext
 from src.security.rbac.service_utils import get_user_id, is_anonymous
 from src.services.permissions.audit_service import AuditService
 from src.services.permissions.policy_engine import PolicyEngine
+
+# Default audit level - can be overridden per-checker or globally
+DEFAULT_AUDIT_LEVEL = AuditLevel.ALL_EXCEPT_READS
 
 
 class PermissionChecker:
@@ -26,14 +29,18 @@ class PermissionChecker:
     - can(): Alias for check()
     """
 
-    def __init__(self, db: Session) -> None:
+    def __init__(
+        self, db: Session, audit_level: AuditLevel = DEFAULT_AUDIT_LEVEL
+    ) -> None:
         """
         Initialize the permission checker.
 
         Args:
             db: Database session
+            audit_level: Level of audit logging (default: ALL_EXCEPT_READS)
         """
         self.db = db
+        self.audit_level = audit_level
         self.policy_engine = PolicyEngine(db)
         self.audit_service = AuditService(db)
 
@@ -81,8 +88,9 @@ class PermissionChecker:
             context=abac_context,
         )
 
-        # Log to audit (only significant checks, not every read)
-        if action != Action.READ or not result:
+        # Log to audit based on configured level
+        should_log = self._should_log_audit(action, result)
+        if should_log:
             self.audit_service.log_check(
                 user_id=user_id if user_id != 0 else None,
                 action=action,
@@ -95,6 +103,26 @@ class PermissionChecker:
             )
 
         return result
+
+    def _should_log_audit(self, action: Action, result: bool) -> bool:
+        """Determine if this check should be logged based on audit level."""
+        match self.audit_level:
+            case AuditLevel.NONE:
+                return False
+            case AuditLevel.FAILURES_ONLY:
+                return not result
+            case AuditLevel.WRITES_ONLY:
+                if not result:
+                    return True
+                return action in (Action.CREATE, Action.UPDATE, Action.DELETE, Action.MANAGE)
+            case AuditLevel.ALL_EXCEPT_READS:
+                if not result:
+                    return True
+                return action != Action.READ
+            case AuditLevel.ALL:
+                return True
+            case _:
+                return True
 
     def require(
         self,
