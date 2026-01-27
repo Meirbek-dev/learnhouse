@@ -37,6 +37,7 @@ export default function CreateCourseTrigger({ orgslug, org_id }: CreateCourseTri
             <CreateCourseModal
               closeModal={closeNewCourseModal}
               orgslug={orgslug}
+              org_id={org_id}
             />
           }
           dialogTitle={t('createCourse')}

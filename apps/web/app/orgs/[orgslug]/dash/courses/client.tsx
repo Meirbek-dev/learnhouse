@@ -6,9 +6,9 @@ import AuthenticatedClientElement from '@components/Security/AuthenticatedClient
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
-import { usePermission } from '@/hooks/usePermission';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
+import { usePermission } from '@/hooks/usePermission';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -45,6 +45,7 @@ const CoursesHome = (params: CourseProps) => {
         <CreateCourseModal
           closeModal={closeNewCourseModal}
           orgslug={orgslug}
+          org_id={params.org_id}
         />
       }
       dialogTitle={t('createCourse')}

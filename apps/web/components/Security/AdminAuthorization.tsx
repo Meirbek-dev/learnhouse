@@ -2,10 +2,10 @@
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { usePermission } from '@/hooks/usePermission';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { usePathname, useRouter } from 'next/navigation';
+import { usePermission } from '@/hooks/usePermission';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import type { FC, ReactNode } from 'react';

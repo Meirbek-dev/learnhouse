@@ -5,13 +5,13 @@ import { useFormatter, useNow, useTranslations } from 'next-intl';
 import RichContentRenderer from './rich-content-renderer';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
+import usePermission from '@/hooks/usePermission';
 import { Button } from '@/components/ui/button';
 import RichTextEditor from './rich-text-editor';
 import { useState, useTransition } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type React from 'react';
-import usePermission from '@/hooks/usePermission';
 
 interface DiscussionReplyProps {
   reply: any;

@@ -25,6 +25,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
+import usePermission from '@/hooks/usePermission';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -35,7 +36,6 @@ import { motion } from 'motion/react';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 import * as z from 'zod';
-import usePermission from '@/hooks/usePermission';
 
 interface Author {
   user: {
@@ -153,7 +153,8 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
 };
 
 const UpdatesSection = () => {
-  const [selectedView, setSelectedView] = useState('list');  const { isAdmin } = usePermission();
+  const [selectedView, setSelectedView] = useState('list');
+  const { isAdmin } = usePermission();
   const course = useCourse();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;

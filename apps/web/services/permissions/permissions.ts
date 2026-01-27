@@ -88,7 +88,7 @@ export async function batchCheckPermissions(
   const response = await fetch(`${getAPIUrl()}permissions/check`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',
@@ -130,7 +130,7 @@ export async function checkPermission(
   const response = await fetch(url.toString(), {
     method: 'GET',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',

@@ -3,7 +3,15 @@
 import { useSession } from 'next-auth/react';
 import { useCallback, useMemo } from 'react';
 
-import { Actions, ResourceTypes, RoleSlugs, Scopes, buildPermissionName, isAdminRole, isInstructorOrHigher } from '@/types/permissions';
+import {
+  Actions,
+  ResourceTypes,
+  RoleSlugs,
+  Scopes,
+  buildPermissionName,
+  isAdminRole,
+  isInstructorOrHigher,
+} from '@/types/permissions';
 import type { Action, ResourceType, Scope } from '@/types/permissions';
 
 /**

@@ -98,6 +98,7 @@ const Courses = (props: CourseProps) => {
               <CreateCourseModal
                 closeModal={closeNewCourseModal}
                 orgslug={orgslug}
+                org_id={org_id}
               />
             }
             dialogTitle={t('createCourse')}

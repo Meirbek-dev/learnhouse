@@ -24,6 +24,7 @@ import OnBoardUGs from '@public/onboarding/OnBoardUGs.png';
 import OnBoardAI from '@public/onboarding/OnBoardAI.png';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
+import usePermission from '@/hooks/usePermission';
 import type { StaticImageData } from 'next/image';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useRouter } from 'next/navigation';
@@ -31,7 +32,6 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 import Image from 'next/image';
-import usePermission from '@/hooks/usePermission';
 
 interface OnboardingStep {
   imageSrc: StaticImageData;

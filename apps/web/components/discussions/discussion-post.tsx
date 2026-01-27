@@ -6,6 +6,7 @@ import RichContentRenderer from './rich-content-renderer';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { Separator } from '@/components/ui/separator';
+import usePermission from '@/hooks/usePermission';
 import DiscussionReply from './discussion-reply';
 import { Button } from '@/components/ui/button';
 import RichTextEditor from './rich-text-editor';
@@ -13,7 +14,6 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import type React from 'react';
-import usePermission from '@/hooks/usePermission';
 
 interface DiscussionPostProps {
   post: any;

@@ -35,15 +35,18 @@ const VALID_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp',
 interface CreateCourseModalProps {
   closeModal: () => void;
   orgslug: string;
+  org_id?: number;
 }
 
-const CreateCourseModal = ({ closeModal, orgslug }: CreateCourseModalProps) => {
+const CreateCourseModal = ({ closeModal, orgslug, org_id }: CreateCourseModalProps) => {
   const t = useTranslations('Components.CreateCourseModal');
+
+  // If parent already passed org_id, use it immediately instead of fetching by slug
+  const [orgId, setOrgId] = useState<number | null>(org_id ?? null);
   const router = useRouter();
   const session = usePlatformSession() as any;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [orgId, setOrgId] = useState<number | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
@@ -86,24 +89,31 @@ const CreateCourseModal = ({ closeModal, orgslug }: CreateCourseModalProps) => {
     },
   });
 
-  // Load organization ID
+  // Load organization ID when not already provided by props
   useEffect(() => {
+    if (org_id !== undefined && org_id !== null) return; // parent provided it
     if (!orgslug) return;
 
     const loadOrgId = async () => {
       try {
+        console.debug('Loading organization metadata for slug', orgslug);
         const org = await getOrganizationContextInfoWithoutCredentials(orgslug, {
           revalidate: 360,
           tags: ['organizations'],
         });
-        setOrgId(org.id);
+        console.debug('Organization metadata loaded', org);
+        if (org && org.id) {
+          setOrgId(org.id);
+        } else {
+          console.error('Organization metadata missing id', org);
+        }
       } catch (error) {
         console.error('Failed to load org metadata', error);
       }
     };
 
     void loadOrgId();
-  }, [orgslug]);
+  }, [orgslug, org_id]);
 
   // Cleanup on unmount
   useEffect(() => {

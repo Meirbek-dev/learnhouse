@@ -9,10 +9,10 @@ import {
 import { ChevronDown, Crown, LogOut, Shield, User, User as UserIcon, Users } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { usePermission } from '@/hooks/usePermission';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
+import { usePermission } from '@/hooks/usePermission';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';

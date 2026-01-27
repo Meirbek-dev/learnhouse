@@ -25,6 +25,7 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import { format, formatDistanceToNow } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '@components/ui/textarea';
+import usePermission from '@/hooks/usePermission';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
@@ -33,7 +34,6 @@ import { motion } from 'motion/react';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 import * as z from 'zod';
-import usePermission from '@/hooks/usePermission';
 
 const CourseUpdates = () => {
   const course = useCourse();
