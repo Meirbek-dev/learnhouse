@@ -7,7 +7,7 @@ import AuthenticatedClientElement from '@components/Security/AuthenticatedClient
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
 import CourseGridClient from '@components/Landings/CourseGridClient';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import useAdminStatus from '@components/Hooks/useAdminStatus';
+import { usePermission } from '@/hooks/usePermission';
 
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -53,7 +53,7 @@ const Courses = (props: CourseProps) => {
   const searchParams = useSearchParams();
   const isCreatingCourse = Boolean(searchParams.get('new'));
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
-  const isUserAdmin = useAdminStatus();
+  const { isAdmin: isUserAdmin } = usePermission();
 
   async function closeNewCourseModal() {
     setNewCourseModal(false);

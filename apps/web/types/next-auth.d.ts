@@ -1,6 +1,16 @@
 // next-auth.d.ts
-import type { Role, ResourcePermission } from './permissions';
+import type { Role } from './permissions';
 import 'next-auth';
+
+interface UserRoleWithOrg {
+  role: Role;
+  org: {
+    id: number;
+    org_uuid: string;
+    name: string;
+    slug: string;
+  };
+}
 
 // Ambient global auth domain types (no import needed elsewhere)
 declare global {
@@ -28,14 +38,10 @@ declare global {
 
   interface SessionData {
     user: AuthUser;
-    roles: string[];
+    roles: UserRoleWithOrg[];
     tokens: AuthTokens;
     /** User's effective permissions as permission_name -> boolean */
-    permissions?: Record<string, boolean>;
-    /** User's roles with full details */
-    roleDetails?: Role[];
-    /** Resource-level permission overrides */
-    resourcePermissions?: ResourcePermission[];
+    permissions: Record<string, boolean>;
   }
 
   interface TokenRefreshResult {
@@ -47,13 +53,11 @@ declare global {
 declare module 'next-auth' {
   interface Session {
     user: AuthUser;
-    roles?: string[];
+    roles?: UserRoleWithOrg[];
     tokens?: AuthTokens;
     expires: string;
     /** User's effective permissions as permission_name -> boolean */
     permissions?: Record<string, boolean>;
-    /** User's roles with full details */
-    roleDetails?: Role[];
   }
 
   type User = UserWithTokens;

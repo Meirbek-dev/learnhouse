@@ -2,7 +2,7 @@
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import useAdminStatus from '@components/Hooks/useAdminStatus';
+import { usePermission } from '@/hooks/usePermission';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { usePathname, useRouter } from 'next/navigation';
@@ -30,7 +30,7 @@ const AdminAuthorization: FC<AuthorizationProps> = ({ children, authorizationMod
   const org = useOrg() as any;
   const pathname = usePathname();
   const router = useRouter();
-  const { isAdmin, loading } = useAdminStatus();
+  const { isAdmin, isLoading } = usePermission();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const t = useTranslations('Security');
 
@@ -47,7 +47,7 @@ const AdminAuthorization: FC<AuthorizationProps> = ({ children, authorizationMod
   const isAdminPath = ADMIN_PATHS.some((path) => checkPathname(path, pathname));
 
   useEffect(() => {
-    if (loading) return;
+    if (isLoading) return;
     if (!isUserAuthenticated) {
       router.push(getUriWithoutOrg(`/login?orgslug=${org?.slug ?? ''}`));
       return;
@@ -67,9 +67,9 @@ const AdminAuthorization: FC<AuthorizationProps> = ({ children, authorizationMod
     } else if (authorizationMode === 'component') {
       setIsAuthorized(isAdmin);
     }
-  }, [loading, isUserAuthenticated, isAdmin, isAdminPath, authorizationMode, router, org?.slug]);
+  }, [isLoading, isUserAuthenticated, isAdmin, isAdminPath, authorizationMode, router, org?.slug]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <PageLoading />

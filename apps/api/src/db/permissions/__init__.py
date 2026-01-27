@@ -6,7 +6,13 @@ including permissions, roles, user-role assignments, and audit logging.
 """
 
 from src.db.permissions.audit import PermissionAuditLog
-from src.db.permissions.enums import Action, ResourceType, Scope
+from src.db.permissions.enums import (
+    Action,
+    AuditAction,
+    PermissionErrorCode,
+    ResourceType,
+    Scope,
+)
 from src.db.permissions.models import (
     BatchPermissionCheckRequest,
     BatchPermissionCheckResponse,
@@ -35,6 +41,7 @@ from src.db.permissions.models import (
 __all__ = [
     # Enums
     "Action",
+    "AuditAction",
     # Batch permission check models
     "BatchPermissionCheckRequest",
     "BatchPermissionCheckResponse",
@@ -45,6 +52,7 @@ __all__ = [
     "PermissionCheckRequest",
     "PermissionCheckResult",
     "PermissionCreate",
+    "PermissionErrorCode",
     "PermissionRead",
     # Resource-level permissions
     "ResourcePermission",

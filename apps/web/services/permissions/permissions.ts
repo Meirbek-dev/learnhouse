@@ -7,17 +7,28 @@
  * - Managing roles (admin only)
  */
 
-import type { Permission, Role } from '@/types/permissions';
+import type { Action, Permission, ResourceType, Role } from '@/types/permissions';
 import { getAPIUrl } from '@services/config/config';
 
 interface PermissionCheckRequest {
-  action: string;
-  resource: string;
+  action: Action;
+  resource: ResourceType;
   resource_id?: string;
   org_id?: number;
 }
 
-type PermissionCheckResponse = Record<string, boolean>;
+interface PermissionCheckResult {
+  action: Action;
+  resource: ResourceType;
+  resource_id?: string | null;
+  org_id?: number | null;
+  allowed: boolean;
+}
+
+interface BatchPermissionCheckResponse {
+  results: PermissionCheckResult[];
+  permissions: Record<string, boolean>;
+}
 
 interface UserPermissionsResponse {
   user_id: number;
@@ -68,20 +79,20 @@ export async function fetchUserPermissions(accessToken: string, orgId?: number):
  *
  * @param accessToken - JWT access token
  * @param checks - Array of permission checks to perform
- * @returns Promise<PermissionCheckResponse>
+ * @returns Promise<BatchPermissionCheckResponse>
  */
 export async function batchCheckPermissions(
   accessToken: string,
   checks: PermissionCheckRequest[],
-): Promise<PermissionCheckResponse> {
+): Promise<BatchPermissionCheckResponse> {
   const response = await fetch(`${getAPIUrl()}permissions/check`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-    body: JSON.stringify(checks),
+    body: JSON.stringify({ checks }),
   });
 
   if (!response.ok) {
@@ -89,6 +100,48 @@ export async function batchCheckPermissions(
   }
 
   return response.json();
+}
+
+/**
+ * Check a single permission.
+ *
+ * For checking multiple permissions, use batchCheckPermissions instead.
+ *
+ * @param accessToken - JWT access token
+ * @param action - Action to check
+ * @param resource - Resource type
+ * @param resourceId - Optional specific resource ID
+ * @param orgId - Optional organization context
+ * @returns Promise<boolean>
+ */
+export async function checkPermission(
+  accessToken: string,
+  action: Action,
+  resource: ResourceType,
+  resourceId?: string,
+  orgId?: number,
+): Promise<boolean> {
+  const url = new URL(`${getAPIUrl()}permissions/check`);
+  url.searchParams.set('action', action);
+  url.searchParams.set('resource', resource);
+  if (resourceId) url.searchParams.set('resource_id', resourceId);
+  if (orgId) url.searchParams.set('org_id', orgId.toString());
+
+  const response = await fetch(url.toString(), {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to check permission: ${response.status}`);
+  }
+
+  const result: PermissionCheckResult = await response.json();
+  return result.allowed;
 }
 
 /**

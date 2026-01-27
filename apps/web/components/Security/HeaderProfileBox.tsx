@@ -9,7 +9,7 @@ import {
 import { ChevronDown, Crown, LogOut, Shield, User, User as UserIcon, Users } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import useAdminStatus from '@components/Hooks/useAdminStatus';
+import { usePermission } from '@/hooks/usePermission';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -35,9 +35,12 @@ interface CustomRoleInfo {
 
 export const HeaderProfileBox = () => {
   const session = usePlatformSession() as any;
-  const { isAdmin, loading, userRoles, rights } = useAdminStatus();
+  const { isAdmin, isLoading } = usePermission();
   const org = useOrg() as any;
   const t = useTranslations('Header');
+
+  const userRoles = session?.data?.roles ?? [];
+  const permissions = session?.data?.permissions ?? {};
 
   let userRoleInfo: RoleInfo | null = null;
   if (userRoles && userRoles.length > 0) {
@@ -234,7 +237,7 @@ export const HeaderProfileBox = () => {
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                {rights?.dashboard?.action_access && (
+                {permissions['dashboard.action_access'] && (
                   <DropdownMenuItem
                     nativeButton={false}
                     render={

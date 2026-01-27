@@ -2,7 +2,6 @@
 
 import { ArrowBigDown, ArrowBigUp, Clock, Edit, Trash2 } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
-import useAdminStatus from '@components/Hooks/useAdminStatus';
 import RichContentRenderer from './rich-content-renderer';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -12,6 +11,7 @@ import { useState, useTransition } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type React from 'react';
+import usePermission from '@/hooks/usePermission';
 
 interface DiscussionReplyProps {
   reply: any;
@@ -37,7 +37,7 @@ export default function DiscussionReply({
   const format = useFormatter();
   const now = useNow();
   const org = useOrg() as any;
-  const { isAdmin } = useAdminStatus();
+  const { isAdmin } = usePermission();
 
   const isOwnReply = reply.username === currentUser?.username;
   const netScore = reply.upvotes - reply.downvotes;

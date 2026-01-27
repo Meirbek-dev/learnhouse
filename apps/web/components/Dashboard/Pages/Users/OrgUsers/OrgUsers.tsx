@@ -30,7 +30,6 @@ import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { removeUserFromOrg } from '@services/organizations/orgs';
 import React, { useMemo, useState, useTransition } from 'react';
-import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
@@ -101,7 +100,7 @@ const OrgUsers = () => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.UserSettings.usersSection');
-  const { userRoles } = useAdminStatus();
+  const userRoles = session?.data?.roles ?? [];
 
   const getRolePriority = (roleObj: any) => {
     if (!roleObj) return 0;

@@ -19,7 +19,6 @@ import { useEffectEvent, useLayoutEffect, useState, useTransition } from 'react'
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseUpdatesSwrKey } from '@services/courses/keys';
 import { useCourse } from '@components/Contexts/CourseContext';
-import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -34,6 +33,7 @@ import { motion } from 'motion/react';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 import * as z from 'zod';
+import usePermission from '@/hooks/usePermission';
 
 const CourseUpdates = () => {
   const course = useCourse();
@@ -103,7 +103,7 @@ const CourseUpdates = () => {
 
 const UpdatesSection = () => {
   const [selectedView, setSelectedView] = useState('list');
-  const adminStatus = useAdminStatus();
+  const { isAdmin } = usePermission();
   const t = useTranslations('Courses.CourseUpdates');
   return (
     <div className="soft-shadow w-[700px] overflow-hidden rounded-lg bg-white/95 backdrop-blur-md">
@@ -112,7 +112,7 @@ const UpdatesSection = () => {
           <Rss size={16} />
           <span>{t('updates')}</span>
         </div>
-        {adminStatus.isAdmin ? (
+        {isAdmin ? (
           <div
             onClick={() => {
               setSelectedView('new');
@@ -262,7 +262,7 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
 
 const UpdatesListView = () => {
   const course = useCourse();
-  const adminStatus = useAdminStatus();
+  const { isAdmin } = usePermission();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const UPDATES_KEY = course?.courseStructure?.course_uuid
@@ -276,7 +276,7 @@ const UpdatesListView = () => {
 
   return (
     <div className="max-h-[400px] overflow-y-auto bg-white px-5">
-      {updates && !adminStatus.loading
+      {updates
         ? updates.map((update: any) => (
             <div
               key={update.id}
@@ -294,7 +294,7 @@ const UpdatesListView = () => {
                     {formatDistanceToNow(new Date(update.creation_date), { addSuffix: true, locale })}
                   </span>
                 </div>
-                {adminStatus.isAdmin && !adminStatus.loading ? <DeleteUpdateButton update={update} /> : null}
+                {isAdmin ? <DeleteUpdateButton update={update} /> : null}
               </div>
               <div className="text-gray-600">{update.content}</div>
             </div>

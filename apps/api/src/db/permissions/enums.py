@@ -65,3 +65,20 @@ class AuditAction(str, Enum):
     GRANT = "grant"  # Permission was granted
     REVOKE = "revoke"  # Permission was revoked
     DENY = "deny"  # Permission check was denied
+
+
+class PermissionErrorCode(str, Enum):
+    """
+    Error codes for permission-related errors.
+
+    These codes provide more specific error information than HTTP status codes alone.
+    """
+
+    PERM_001 = "PERM_001"  # 401 - Authentication required
+    PERM_002 = "PERM_002"  # 403 - Permission denied
+    PERM_003 = "PERM_003"  # 403 - Insufficient role level
+    PERM_004 = "PERM_004"  # 404 - Permission not found
+    PERM_005 = "PERM_005"  # 404 - Role not found
+    PERM_006 = "PERM_006"  # 409 - Role already exists
+    PERM_007 = "PERM_007"  # 409 - Permission already assigned
+    PERM_008 = "PERM_008"  # 422 - Cannot modify system role

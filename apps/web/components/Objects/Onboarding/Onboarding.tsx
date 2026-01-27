@@ -19,7 +19,6 @@ import OnBoardWelcome from '@public/onboarding/OnBoardWelcome.png';
 import OnBoardCourses from '@public/onboarding/OnBoardCourses.png';
 import OnBoardEditor from '@public/onboarding/OnBoardEditor.png';
 import OnBoardAccess from '@public/onboarding/OnBoardAccess.png';
-import useAdminStatus from '@components/Hooks/useAdminStatus';
 import OnBoardMore from '@public/onboarding/OnBoardMore.png';
 import OnBoardUGs from '@public/onboarding/OnBoardUGs.png';
 import OnBoardAI from '@public/onboarding/OnBoardAI.png';
@@ -32,6 +31,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 import Image from 'next/image';
+import usePermission from '@/hooks/usePermission';
 
 interface OnboardingStep {
   imageSrc: StaticImageData;
@@ -96,7 +96,7 @@ const Onboarding: FC = () => {
   const isMobile = useIsMobile();
   const router = useRouter();
   const org = useOrg() as any;
-  const isUserAdmin = useAdminStatus();
+  const { isAdmin: isUserAdmin } = usePermission();
 
   const onboardingData: OnboardingStep[] = [
     {
@@ -259,7 +259,7 @@ const Onboarding: FC = () => {
 
   return (
     <div>
-      {isUserAdmin.isAdmin && !isUserAdmin.loading && !isOnboardingComplete && !isMobile ? (
+      {isUserAdmin && !isModalOpen && !isOnboardingComplete && !isMobile ? (
         <Modal
           isDialogOpen={isModalOpen}
           onOpenChange={setIsModalOpen}

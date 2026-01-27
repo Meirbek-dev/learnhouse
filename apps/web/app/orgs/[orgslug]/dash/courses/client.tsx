@@ -6,7 +6,7 @@ import AuthenticatedClientElement from '@components/Security/AuthenticatedClient
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
-import useAdminStatus from '@components/Hooks/useAdminStatus';
+import { usePermission } from '@/hooks/usePermission';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useSearchParams } from 'next/navigation';
@@ -27,7 +27,7 @@ const CoursesHome = (params: CourseProps) => {
   const isCreatingCourse = Boolean(searchParams.get('new'));
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
   const { orgslug, courses, totalCourses } = params;
-  const isUserAdmin = useAdminStatus();
+  const { isAdmin: isUserAdmin } = usePermission();
   const t = useTranslations('DashPage.Courses.HomePageClient');
   const org = useOrg() as any;
 

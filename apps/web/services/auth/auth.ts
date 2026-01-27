@@ -1,3 +1,4 @@
+import type { Role } from '@/types/permissions';
 import { RequestBody, getResponseMetadata } from '@services/utils/ts/requests';
 import { fetchWithRetry } from '@/lib/fetchWithRetry';
 import { getAPIUrl } from '@services/config/config';
@@ -7,10 +8,20 @@ interface LoginResponse {
   tokens: AuthTokens;
 }
 
+interface UserRoleWithOrg {
+  role: Role;
+  org: {
+    id: number;
+    org_uuid: string;
+    name: string;
+    slug: string;
+  };
+}
+
 interface UserSessionResponse {
   user: AuthUser;
-  roles: string[];
-  permissions?: Record<string, boolean>;
+  roles: UserRoleWithOrg[];
+  permissions: Record<string, boolean>;
 }
 
 interface AuthError extends Error {

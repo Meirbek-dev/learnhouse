@@ -8,12 +8,24 @@ This module provides the core RBAC functionality including:
 - Context: Permission context for tracking user, org, and resource
 - Service utilities: Helper functions for services (rbac_check, is_admin_or_maintainer, etc.)
 - Course-specific RBAC: Unified course permission checks
+- Exceptions: Permission-specific exceptions with error codes
 """
 
 from src.security.rbac.checker import PermissionChecker
 from src.security.rbac.context import PermissionContext
 from src.security.rbac.decorators import require_permission
 from src.security.rbac.dependencies import get_permission_checker
+from src.security.rbac.exceptions import (
+    AuthenticationRequiredError,
+    InsufficientRoleLevelError,
+    PermissionAlreadyAssignedError,
+    PermissionDeniedError,
+    PermissionError,
+    PermissionNotFoundError,
+    RoleAlreadyExistsError,
+    RoleNotFoundError,
+    SystemRoleModificationError,
+)
 from src.security.rbac.service_utils import (
     check_is_resource_author,
     check_user_permission,
@@ -45,6 +57,16 @@ __all__ = [
     "PermissionContext",
     "get_permission_checker",
     "require_permission",
+    # Exceptions
+    "PermissionError",
+    "AuthenticationRequiredError",
+    "PermissionDeniedError",
+    "InsufficientRoleLevelError",
+    "PermissionNotFoundError",
+    "RoleNotFoundError",
+    "RoleAlreadyExistsError",
+    "PermissionAlreadyAssignedError",
+    "SystemRoleModificationError",
     # Service utilities
     "rbac_check",
     "rbac_check_org",

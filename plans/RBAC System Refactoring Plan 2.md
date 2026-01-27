@@ -1354,7 +1354,7 @@ async def create_role(...):
 
 | Role       | Course Create | Course Read | Course Update | Course Delete | User Manage | Role Manage |
 | ---------- | ------------- | ----------- | ------------- | ------------- | ----------- | ----------- |
-| Admin      | ✅ all         | ✅ all       | ✅ all         | ✅ all         | ✅ org       | ✅ org       |
+| Admin      | ✅ all         | ✅ all       | ✅ all           ✅ all         | ✅ org       | ✅ org       |
 | Maintainer | ✅ org         | ✅ all       | ✅ all         | ✅ all         | ✅ org       | ❌           |
 | Instructor | ✅ org         | ✅ all       | ✅ own         | ✅ own         | ❌           | ❌           |
 | User       | ❌             | ✅ all       | ❌             | ❌             | ❌           | ❌           |

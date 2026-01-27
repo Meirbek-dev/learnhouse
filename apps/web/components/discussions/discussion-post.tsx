@@ -2,7 +2,6 @@
 
 import { ArrowBigDown, ArrowBigUp, Clock, Edit, Reply, Send, Trash2 } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
-import useAdminStatus from '@components/Hooks/useAdminStatus';
 import RichContentRenderer from './rich-content-renderer';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -14,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import type React from 'react';
+import usePermission from '@/hooks/usePermission';
 
 interface DiscussionPostProps {
   post: any;
@@ -46,7 +46,7 @@ export default function DiscussionPost({
   const format = useFormatter();
   const now = useNow();
   const org = useOrg() as any;
-  const { isAdmin } = useAdminStatus();
+  const { isAdmin } = usePermission();
 
   const isOwnPost = post.username === currentUser?.username;
   const netScore = post.upvotes - post.downvotes;

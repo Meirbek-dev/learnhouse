@@ -36,9 +36,13 @@ export function usePermission() {
   const permissions = useMemo(() => session?.permissions ?? {}, [session?.permissions]);
 
   /**
-   * User's role slugs.
+   * User's role slugs extracted from UserRoleWithOrg array.
    */
-  const roles = useMemo(() => session?.roles ?? [], [session?.roles]);
+  const roles = useMemo(() => {
+    const userRoles = session?.roles ?? [];
+    // Extract role slugs from UserRoleWithOrg objects
+    return userRoles.map((userRole: any) => userRole.role?.slug || userRole.role?.role_uuid || '').filter(Boolean);
+  }, [session?.roles]);
 
   /**
    * Check if user has a specific permission.
@@ -259,3 +263,64 @@ export function useOrgPermission(orgId?: number) {
 }
 
 export default usePermission;
+
+/**
+ * Hook for checking permissions on a specific resource.
+ *
+ * This hook provides common permission checks for a resource type
+ * with a specific resource ID, useful for resource detail pages.
+ *
+ * @param resourceType - Type of resource
+ * @param resourceId - Resource UUID
+ * @param isOwner - Whether current user owns this resource
+ *
+ * @example
+ * ```tsx
+ * const {
+ *   canRead,
+ *   canUpdate,
+ *   canDelete,
+ *   canManage,
+ *   loading
+ * } = useResourcePermissions(ResourceTypes.COURSE, courseUuid, isCreator)
+ *
+ * if (canUpdate) {
+ *   // Show edit button
+ * }
+ * ```
+ */
+export function useResourcePermissions(resourceType: ResourceType, resourceId?: string, isOwner = false) {
+  const { can, isAdmin, isLoading } = usePermission();
+
+  const canRead = can(Actions.READ, resourceType, Scopes.ALL);
+
+  const canCreate = can(Actions.CREATE, resourceType, Scopes.ORG);
+
+  const canUpdate =
+    isAdmin ||
+    (isOwner && can(Actions.UPDATE, resourceType, Scopes.OWN)) ||
+    can(Actions.UPDATE, resourceType, Scopes.ALL);
+
+  const canDelete =
+    isAdmin ||
+    (isOwner && can(Actions.DELETE, resourceType, Scopes.OWN)) ||
+    can(Actions.DELETE, resourceType, Scopes.ALL);
+
+  const canManage =
+    isAdmin ||
+    (isOwner && can(Actions.MANAGE, resourceType, Scopes.OWN)) ||
+    can(Actions.MANAGE, resourceType, Scopes.ALL);
+
+  const canModerate = can(Actions.MODERATE, resourceType, Scopes.ORG);
+
+  return {
+    canRead,
+    canCreate,
+    canUpdate,
+    canDelete,
+    canManage,
+    canModerate,
+    isOwner,
+    loading: isLoading,
+  };
+}
