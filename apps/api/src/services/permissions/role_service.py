@@ -550,7 +550,7 @@ class RoleService:
         default_roles = [
             {
                 "slug": RoleSlug.SUPER_ADMIN,
-                "name": "Super Admin",
+                "name": "Админ",
                 "description": "Platform-wide administrator with full access",
                 "is_system": True,
                 "priority": 100,
@@ -559,7 +559,7 @@ class RoleService:
             },
             {
                 "slug": RoleSlug.ORG_ADMIN,
-                "name": "Organization Admin",
+                "name": "Админ организации",
                 "description": "Full control over organization",
                 "is_system": True,
                 "priority": 90,
@@ -580,7 +580,7 @@ class RoleService:
             },
             {
                 "slug": RoleSlug.MAINTAINER,
-                "name": "Maintainer",
+                "name": "Мейнтейнер",
                 "description": "Content management and course administration",
                 "is_system": True,
                 "priority": 70,
@@ -600,7 +600,7 @@ class RoleService:
             },
             {
                 "slug": RoleSlug.INSTRUCTOR,
-                "name": "Instructor",
+                "name": "Преподаватель",
                 "description": "Course creation and management",
                 "is_system": True,
                 "priority": 50,
@@ -621,7 +621,7 @@ class RoleService:
             },
             {
                 "slug": RoleSlug.MODERATOR,
-                "name": "Moderator",
+                "name": "Модератор",
                 "description": "Community moderation",
                 "is_system": True,
                 "priority": 40,
@@ -634,7 +634,7 @@ class RoleService:
             },
             {
                 "slug": RoleSlug.USER,
-                "name": "User",
+                "name": "Пользователь",
                 "description": "Standard authenticated user",
                 "is_system": True,
                 "priority": 10,

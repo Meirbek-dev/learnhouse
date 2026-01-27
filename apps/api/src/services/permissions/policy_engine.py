@@ -294,7 +294,8 @@ class PolicyEngine:
         statement = (
             select(UserGroupResource)
             .join(
-                UserGroupUser, UserGroupUser.usergroup_id == UserGroupResource.usergroup_id
+                UserGroupUser,
+                UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
             )
             .where(
                 UserGroupUser.user_id == user_id,

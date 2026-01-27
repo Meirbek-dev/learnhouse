@@ -72,7 +72,9 @@ class AuditLevel(str, Enum):
 
     NONE = "none"  # No audit logging
     FAILURES_ONLY = "failures_only"  # Log only denied checks
-    WRITES_ONLY = "writes_only"  # Log only write operations (create/update/delete) and failures
+    WRITES_ONLY = (
+        "writes_only"  # Log only write operations (create/update/delete) and failures
+    )
     ALL_EXCEPT_READS = "all_except_reads"  # Log all except successful reads (default)
     ALL = "all"  # Log everything including successful reads
 

@@ -29,9 +29,26 @@ with engine.connect() as conn:
     for row in result:
         print(f"  {row}")
 
-    # Check if there are uppercase values
+    # Check if there are uppercase values (cast enum to text for comparison)
     result = conn.execute(
-        text("SELECT COUNT(*) as cnt FROM permissions WHERE action != LOWER(action)")
+        text(
+            "SELECT COUNT(*) as cnt FROM permissions WHERE action::text != LOWER(action::text)"
+        )
     )
     uppercase_count = result.fetchone()[0]
     print(f"\nPermissions with uppercase action: {uppercase_count}")
+
+    # Verify all enum values are lowercase
+    result = conn.execute(
+        text("""
+        SELECT COUNT(*) as cnt FROM permissions
+        WHERE resource_type::text != LOWER(resource_type::text)
+        OR action::text != LOWER(action::text)
+        OR scope::text != LOWER(scope::text)
+        """)
+    )
+    total_uppercase = result.fetchone()[0]
+    print(f"Total permissions with any uppercase enum values: {total_uppercase}")
+
+    if total_uppercase == 0:
+        print("✅ All enum values are lowercase!")

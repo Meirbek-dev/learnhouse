@@ -114,7 +114,12 @@ class PermissionChecker:
             case AuditLevel.WRITES_ONLY:
                 if not result:
                     return True
-                return action in (Action.CREATE, Action.UPDATE, Action.DELETE, Action.MANAGE)
+                return action in (
+                    Action.CREATE,
+                    Action.UPDATE,
+                    Action.DELETE,
+                    Action.MANAGE,
+                )
             case AuditLevel.ALL_EXCEPT_READS:
                 if not result:
                     return True

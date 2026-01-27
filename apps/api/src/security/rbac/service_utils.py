@@ -351,6 +351,7 @@ async def rbac_check_role(
     user_id = current_user.id if hasattr(current_user, "id") else 0
     verify_not_anonymous(user_id)
     from src.security.rbac.checker import PermissionChecker
+
     checker = PermissionChecker(db_session)
     if checker.check(current_user, map_action(action), ResourceType.ROLE, role_uuid):
         return
@@ -375,6 +376,7 @@ async def rbac_check_usergroup(
     user_id = current_user.id if hasattr(current_user, "id") else 0
     verify_not_anonymous(user_id)
     from src.security.rbac.checker import PermissionChecker
+
     checker = PermissionChecker(db_session)
     if checker.check(
         current_user, map_action(action), ResourceType.USERGROUP, usergroup_uuid
