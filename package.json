@@ -1,14 +1,14 @@
 {
   "name": "ashyq-bilim",
-  "packageManager": "pnpm@10.28.1",
+  "packageManager": "pnpm@10.28.2",
   "private": true,
   "pnpm": {
     "overrides": {
-      "@types/react": "19.2.9",
+      "@types/react": "19.2.10",
       "@types/react-dom": "19.2.3"
     },
     "onlyBuiltDependencies": [
-      "@swc/core",
+      "@parcel/watcher",
       "@tailwindcss/oxide",
       "core-js",
       "sharp",
@@ -27,7 +27,7 @@
   "devDependencies": {
     "eslint": "^9.39.2",
     "mprocs": "^0.8.3",
-    "oxlint": "^1.41.0",
+    "oxlint": "^1.42.0",
     "oxlint-tsgolint": "^0.11.2",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
