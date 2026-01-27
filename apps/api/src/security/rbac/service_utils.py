@@ -12,6 +12,10 @@ from sqlmodel import Session, select
 
 from src.db.collections import Collection
 from src.db.courses.courses import Course
+from src.db.permissions.constants import (
+    ADMIN_OR_MAINTAINER_SLUGS,
+    INSTRUCTOR_OR_HIGHER_SLUGS,
+)
 from src.db.permissions.enums import Action, ResourceType
 from src.db.resource_authors import (
     ResourceAuthor,
@@ -21,6 +25,30 @@ from src.db.resource_authors import (
 from src.db.users import AnonymousUser, InternalUser, PublicUser
 from src.security.rbac.checker import PermissionChecker
 from src.services.permissions.role_service import RoleService
+
+
+def is_anonymous(user: PublicUser | AnonymousUser | InternalUser | None) -> bool:
+    """
+    Check if the user is anonymous (not authenticated).
+
+    This is the standardized way to check for anonymous users.
+    Use this instead of checking user.id == 0 or isinstance checks.
+    """
+    if user is None:
+        return True
+    if isinstance(user, AnonymousUser):
+        return True
+    if isinstance(user, InternalUser):
+        return False
+    # PublicUser - check id
+    return not hasattr(user, "id") or user.id == 0
+
+
+def get_user_id(user: PublicUser | AnonymousUser | InternalUser | None) -> int:
+    """Get user ID, returns 0 for anonymous users."""
+    if user is None or isinstance(user, AnonymousUser):
+        return 0
+    return user.id if hasattr(user, "id") else 0
 
 # Action mapping from string to enum
 ACTION_MAP: dict[str, Action] = {
@@ -90,19 +118,13 @@ def is_resource_owner(
 
 def is_admin_or_maintainer(db_session: Session, user_id: int) -> bool:
     """Check if user has admin or maintainer role."""
+    if user_id == 0:
+        return False
     role_service = RoleService(db_session)
     user_roles = role_service.get_user_roles(user_id)
-    admin_roles = {
-        "admin",
-        "superadmin",
-        "org_admin",
-        "maintainer",
-        "super-admin",
-        "org-admin",
-    }
     return any(
-        role.slug.lower() in admin_roles or role.name.lower() in admin_roles
-        for role in user_roles
+        ur.role and ur.role.slug in ADMIN_OR_MAINTAINER_SLUGS
+        for ur in user_roles
     )
 
 
@@ -360,16 +382,15 @@ async def rbac_check_usergroup(
 
 
 def has_instructor_role(db_session: Session, user_id: int) -> bool:
-    """Check if user has instructor role."""
+    """Check if user has instructor role or higher."""
     if user_id == 0:
         return False
     role_service = RoleService(db_session)
     user_roles = role_service.get_user_roles(user_id)
-    instructor_roles = {"instructor", "teacher", "professor"}
     return any(
-        role.slug.lower() in instructor_roles or role.name.lower() in instructor_roles
-        for role in user_roles
-    ) or is_admin_or_maintainer(db_session, user_id)
+        ur.role and ur.role.slug in INSTRUCTOR_OR_HIGHER_SLUGS
+        for ur in user_roles
+    )
 
 
 def has_authenticated_user_role(db_session: Session, user_id: int) -> bool:
@@ -444,6 +465,7 @@ async def courses_rbac_check(
     action: Literal["create", "read", "update", "delete"],
     db_session: Session,
     require_course_ownership: bool = False,
+    org_id: int | None = None,
 ) -> bool:
     """
     Unified RBAC check for courses-related operations.
@@ -455,6 +477,7 @@ async def courses_rbac_check(
         action: Action to perform (create, read, update, delete)
         db_session: Database session
         require_course_ownership: If True, requires course ownership for non-read actions
+        org_id: Organization ID for org-scoped permissions (auto-detected from course if None)
 
     Returns:
         bool: True if authorized
@@ -465,12 +488,20 @@ async def courses_rbac_check(
     """
     checker = PermissionChecker(db_session)
     mapped_action = map_action(action)
-    user_id = current_user.id if hasattr(current_user, "id") else 0
-    is_anonymous = user_id == 0
+    user_id = get_user_id(current_user)
+    user_is_anonymous = is_anonymous(current_user)
+
+    # Auto-detect org_id from course if not provided and course exists
+    if org_id is None and course_uuid and course_uuid != "course_x":
+        course = db_session.exec(
+            select(Course).where(Course.course_uuid == course_uuid)
+        ).first()
+        if course:
+            org_id = course.org_id
 
     # READ operations
     if action == "read":
-        if is_anonymous:
+        if user_is_anonymous:
             # Anonymous users can only read public courses
             if is_resource_public(db_session, course_uuid, ResourceType.COURSE):
                 return True
@@ -528,7 +559,7 @@ async def courses_rbac_check(
         )
 
     # Non-read actions require authentication
-    if is_anonymous:
+    if user_is_anonymous:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="You must be logged in to perform this action",
@@ -537,7 +568,7 @@ async def courses_rbac_check(
     # Course creation (course_x placeholder)
     if action == "create" and course_uuid == "course_x":
         # Check if user has course create permission
-        if checker.check(current_user, Action.CREATE, ResourceType.COURSE):
+        if checker.check(current_user, Action.CREATE, ResourceType.COURSE, org_id=org_id):
             return True
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -557,8 +588,8 @@ async def courses_rbac_check(
             detail=f"You must be the course owner or have admin/maintainer role to {action} in this course",
         )
 
-    # Default: check general permission
-    if checker.check(current_user, mapped_action, ResourceType.COURSE, course_uuid):
+    # Default: check general permission with org_id
+    if checker.check(current_user, mapped_action, ResourceType.COURSE, course_uuid, org_id):
         return True
 
     raise HTTPException(
@@ -666,15 +697,23 @@ async def courses_rbac_check_for_collections(
     current_user: PublicUser | AnonymousUser,
     action: Literal["create", "read", "update", "delete"],
     db_session: Session,
+    org_id: int | None = None,
 ) -> bool:
     """RBAC check for collections."""
     checker = PermissionChecker(db_session)
     mapped_action = map_action(action)
-    user_id = current_user.id if hasattr(current_user, "id") else 0
-    is_anonymous = user_id == 0
+    user_is_anonymous = is_anonymous(current_user)
+
+    # Auto-detect org_id from collection if not provided
+    if org_id is None and collection_uuid:
+        collection = db_session.exec(
+            select(Collection).where(Collection.collection_uuid == collection_uuid)
+        ).first()
+        if collection:
+            org_id = collection.org_id
 
     if action == "read":
-        if is_anonymous:
+        if user_is_anonymous:
             if is_resource_public(db_session, collection_uuid, ResourceType.COLLECTION):
                 return True
             raise HTTPException(
@@ -682,7 +721,7 @@ async def courses_rbac_check_for_collections(
                 detail="You must be logged in to access this collection",
             )
         if checker.check(
-            current_user, mapped_action, ResourceType.COLLECTION, collection_uuid
+            current_user, mapped_action, ResourceType.COLLECTION, collection_uuid, org_id
         ):
             return True
         # Also allow if resource is public
@@ -694,15 +733,15 @@ async def courses_rbac_check_for_collections(
         )
 
     # Non-read requires authentication
-    if is_anonymous:
+    if user_is_anonymous:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="You must be logged in to perform this action",
         )
 
-    # Check permission
+    # Check permission with org_id
     if checker.check(
-        current_user, mapped_action, ResourceType.COLLECTION, collection_uuid
+        current_user, mapped_action, ResourceType.COLLECTION, collection_uuid, org_id
     ):
         return True
 

@@ -9,6 +9,7 @@ from datetime import datetime, UTC
 
 from sqlmodel import Session, select
 
+from src.db.permissions.constants import RoleSlug
 from src.db.permissions.enums import Action, ResourceType, Scope
 from src.db.permissions.models import (
     Permission,
@@ -548,7 +549,7 @@ class RoleService:
 
         default_roles = [
             {
-                "slug": "super-admin",
+                "slug": RoleSlug.SUPER_ADMIN,
                 "name": "Super Admin",
                 "description": "Platform-wide administrator with full access",
                 "is_system": True,
@@ -557,7 +558,7 @@ class RoleService:
                 "permissions": ["*:*:*"],  # All permissions
             },
             {
-                "slug": "org-admin",
+                "slug": RoleSlug.ORG_ADMIN,
                 "name": "Organization Admin",
                 "description": "Full control over organization",
                 "is_system": True,
@@ -578,12 +579,12 @@ class RoleService:
                 ],
             },
             {
-                "slug": "maintainer",
+                "slug": RoleSlug.MAINTAINER,
                 "name": "Maintainer",
                 "description": "Content management and course administration",
                 "is_system": True,
                 "priority": 70,
-                "parent_slug": "org-admin",
+                "parent_slug": RoleSlug.ORG_ADMIN,
                 "permissions": [
                     "course:create:org",
                     "course:read:all",
@@ -598,12 +599,12 @@ class RoleService:
                 ],
             },
             {
-                "slug": "instructor",
+                "slug": RoleSlug.INSTRUCTOR,
                 "name": "Instructor",
                 "description": "Course creation and management",
                 "is_system": True,
                 "priority": 50,
-                "parent_slug": "maintainer",
+                "parent_slug": RoleSlug.MAINTAINER,
                 "permissions": [
                     "course:create:org",
                     "course:read:all",
@@ -619,12 +620,12 @@ class RoleService:
                 ],
             },
             {
-                "slug": "moderator",
+                "slug": RoleSlug.MODERATOR,
                 "name": "Moderator",
                 "description": "Community moderation",
                 "is_system": True,
                 "priority": 40,
-                "parent_slug": "org-admin",
+                "parent_slug": RoleSlug.ORG_ADMIN,
                 "permissions": [
                     "course:read:all",
                     "user:read:org",
@@ -632,7 +633,7 @@ class RoleService:
                 ],
             },
             {
-                "slug": "user",
+                "slug": RoleSlug.USER,
                 "name": "User",
                 "description": "Standard authenticated user",
                 "is_system": True,

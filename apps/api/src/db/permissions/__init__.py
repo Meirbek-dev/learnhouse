@@ -6,6 +6,17 @@ including permissions, roles, user-role assignments, and audit logging.
 """
 
 from src.db.permissions.audit import PermissionAuditLog
+from src.db.permissions.constants import (
+    ADMIN_OR_MAINTAINER_SLUGS,
+    ADMIN_ROLE_SLUGS,
+    CONTENT_CREATOR_SLUGS,
+    INSTRUCTOR_OR_HIGHER_SLUGS,
+    RoleSlug,
+    is_admin_or_maintainer_role,
+    is_admin_role,
+    is_content_creator_role,
+    is_instructor_or_higher_role,
+)
 from src.db.permissions.enums import (
     Action,
     AuditAction,
@@ -76,4 +87,14 @@ __all__ = [
     "UserRoleAssign",
     "UserRoleCreate",
     "UserRoleRead",
+    # Constants
+    "RoleSlug",
+    "ADMIN_ROLE_SLUGS",
+    "ADMIN_OR_MAINTAINER_SLUGS",
+    "INSTRUCTOR_OR_HIGHER_SLUGS",
+    "CONTENT_CREATOR_SLUGS",
+    "is_admin_role",
+    "is_admin_or_maintainer_role",
+    "is_instructor_or_higher_role",
+    "is_content_creator_role",
 ]

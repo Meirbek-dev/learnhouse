@@ -221,6 +221,7 @@ class UserRole(UserRoleBase, table=True):
     __table_args__ = (
         Index("ix_user_roles_user_id", "user_id"),
         Index("ix_user_roles_org_id", "org_id"),
+        Index("ix_user_roles_user_org", "user_id", "org_id"),  # Composite index for common lookups
     )
 
     user_id: int = Field(
