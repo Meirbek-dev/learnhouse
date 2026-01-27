@@ -14,7 +14,7 @@ from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.chapters import Chapter
 from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
-from src.security.courses_security import courses_rbac_check_for_activities
+from src.security.rbac import courses_rbac_check_for_activities
 from src.services.payments.payments_access import check_activity_paid_access
 
 ####################################################

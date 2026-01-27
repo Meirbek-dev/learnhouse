@@ -34,7 +34,7 @@ from src.db.organizations import Organization
 from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User
-from src.security.courses_security import courses_rbac_check_for_assignments
+from src.security.rbac import courses_rbac_check_for_assignments
 from src.security.rbac.service_utils import check_user_permission
 from src.services.courses.activities.uploads.sub_file import upload_submission_file
 from src.services.courses.activities.uploads.tasks_ref_files import (

@@ -8,7 +8,7 @@ including self-management and admin user management.
 from sqlmodel import select
 
 from src.db.permissions.enums import Action, ResourceType
-from src.db.permissions.models import RoleNew, UserRole
+from src.db.permissions.models import Role, UserRole
 from src.db.users import AnonymousUser, PublicUser, User
 from src.security.rbac.policies.base import BasePolicy
 
@@ -166,11 +166,11 @@ class UserPolicy(BasePolicy):
         """
         statement = (
             select(UserRole)
-            .join(RoleNew, RoleNew.id == UserRole.role_id)
+            .join(Role, Role.id == UserRole.role_id)
             .where(
                 UserRole.user_id == user.id,
                 UserRole.org_id == org_id,
-                RoleNew.slug.in_(["org-admin", "super-admin"]),
+                Role.slug.in_(["org-admin", "super-admin"]),
             )
         )
         result = self.db.exec(statement).first()
@@ -189,11 +189,11 @@ class UserPolicy(BasePolicy):
         """
         statement = (
             select(UserRole)
-            .join(RoleNew, RoleNew.id == UserRole.role_id)
+            .join(Role, Role.id == UserRole.role_id)
             .where(
                 UserRole.user_id == user.id,
                 UserRole.org_id == org_id,
-                RoleNew.slug.in_(["org-admin", "maintainer", "super-admin"]),
+                Role.slug.in_(["org-admin", "maintainer", "super-admin"]),
             )
         )
         result = self.db.exec(statement).first()
@@ -214,10 +214,10 @@ class UserPolicy(BasePolicy):
 
         statement = (
             select(UserRole)
-            .join(RoleNew, RoleNew.id == UserRole.role_id)
+            .join(Role, Role.id == UserRole.role_id)
             .where(
                 UserRole.user_id == user.id,
-                RoleNew.slug == "super-admin",
+                Role.slug == "super-admin",
             )
         )
         result = self.db.exec(statement).first()

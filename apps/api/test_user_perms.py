@@ -1,4 +1,5 @@
 """Test if permissions are loading correctly after fixing enum case."""
+
 from sqlmodel import Session, create_engine
 from config.config import get_platform_config
 from src.services.permissions.policy_engine import PolicyEngine
@@ -22,6 +23,7 @@ try:
 except Exception as e:
     print(f"✗ Error: {e}")
     import traceback
+
     traceback.print_exc()
 
 print("\nTesting with org_id=1...")

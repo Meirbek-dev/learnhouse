@@ -26,96 +26,26 @@ from src.db.organization_config import (
     UserGroupOrgConfig,
 )
 from src.db.organizations import Organization, OrganizationCreate
-from src.db.roles import (
-    Role,
-    RoleTypeEnum,
-)
 from src.db.user_organizations import UserOrganization
 from src.db.users import User, UserCreate, UserRead
 from src.security.security import security_hash_password
+from src.services.permissions.role_service import RoleService
 
 
 # Install Default roles
 def install_default_elements(db_session: Session) -> bool:
-    """ """
-    # Ensure default global roles exist. Do not delete existing roles because
-    # they may be referenced by `UserOrganization` rows (foreign key).
-    # Create missing default roles idempotently by `role_uuid`.
-    statement = select(Role).where(Role.role_type == RoleTypeEnum.TYPE_GLOBAL)
-    existing_roles = db_session.exec(statement).all()
+    """
+    Install default elements including system roles and permissions.
 
-    # If all four default roles already exist, nothing to do
-    if existing_roles and len(existing_roles) >= 4:
-        return True
+    Uses the new RBAC permission system via RoleService.
+    """
+    role_service = RoleService(db_session)
 
-    # Create default roles (without rights field - using new RBAC permission system)
-    role_global_admin = Role(
-        name="Админ",
-        description="Полный контроль над платформой",
-        id=1,
-        role_type=RoleTypeEnum.TYPE_GLOBAL,
-        role_uuid="role_global_admin",
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
+    # Seed default roles and permissions using the new RBAC system
+    # This creates: super-admin, org-admin, maintainer, instructor, moderator, user
+    created_roles = role_service.seed_default_roles()
 
-    role_global_maintainer = Role(
-        name="Модератор",
-        description="Менеджер среднего звена, широкие полномочия, но нет контроля над платформой",
-        id=2,
-        role_type=RoleTypeEnum.TYPE_GLOBAL,
-        role_uuid="role_global_maintainer",
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-
-    role_global_instructor = Role(
-        name="Преподаватель",
-        description="Может управлять своим собственным контентом",
-        id=3,
-        role_type=RoleTypeEnum.TYPE_GLOBAL,
-        role_uuid="role_global_instructor",
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-
-    role_global_user = Role(
-        name="Пользователь",
-        description="Студент (только для чтения)",
-        role_type=RoleTypeEnum.TYPE_GLOBAL,
-        role_uuid="role_global_user",
-        id=4,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-
-    # Insert roles in DB
-    # Add each default role only if it doesn't already exist (by role_uuid)
-    for default_role in (
-        role_global_admin,
-        role_global_maintainer,
-        role_global_instructor,
-        role_global_user,
-    ):
-        stmt = select(Role).where(Role.role_uuid == default_role.role_uuid)
-        exists = db_session.exec(stmt).first()
-        if not exists:
-            # Avoid explicit id conflicts: let the DB assign the id if needed
-            with contextlib.suppress(Exception):
-                default_role.id = None
-            db_session.add(default_role)
-
-    # commit changes
-    db_session.commit()
-
-    # refresh roles
-    try:
-        db_session.refresh(role_global_admin)
-    except Exception:
-        # If the admin role wasn't created because it already existed, ignore
-        pass
-
-    return True
+    return len(created_roles) > 0
 
 
 # Organization creation

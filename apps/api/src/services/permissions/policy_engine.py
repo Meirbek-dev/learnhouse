@@ -17,7 +17,7 @@ from src.db.permissions.enums import Action, ResourceType, Scope
 from src.db.permissions.models import (
     Permission,
     ResourcePermission,
-    RoleNew,
+    Role,
     RolePermission,
     UserRole,
 )
@@ -121,7 +121,9 @@ class PolicyEngine:
 
         # Check each role's permissions (including inherited)
         for role in roles:
-            if self._check_role_permission(role, action, resource, is_owner, context):
+            if self._check_role_permission(
+                role, action, resource, is_owner, org_id, context
+            ):
                 if self.use_cache and context is None:
                     set_cached_permission(
                         user_id, action_str, resource_str, True, resource_id, org_id
@@ -189,9 +191,11 @@ class PolicyEngine:
 
     def _get_user_active_roles(
         self, user_id: int, org_id: int | None = None
-    ) -> list[RoleNew]:
+    ) -> list[Role]:
         """
         Get all active (non-expired) roles for a user.
+
+        Uses Redis cache for performance. Cache is invalidated when roles change.
 
         Args:
             user_id: User ID
@@ -200,9 +204,27 @@ class PolicyEngine:
         Returns:
             List of active roles, sorted by priority (highest first)
         """
+        # Try cache first
+        if self.use_cache:
+            cached = get_cached_user_roles(user_id, org_id)
+            if cached is not None:
+                # Fetch full role objects by IDs
+                role_ids = cached.get("role_ids", [])
+                if role_ids:
+                    roles = list(
+                        self.db.exec(
+                            select(Role)
+                            .where(Role.id.in_(role_ids))
+                            .order_by(Role.priority.desc())
+                        ).all()
+                    )
+                    return roles
+                return []
+
+        # Query database
         statement = (
-            select(RoleNew)
-            .join(UserRole, UserRole.role_id == RoleNew.id)
+            select(Role)
+            .join(UserRole, UserRole.role_id == Role.id)
             .where(UserRole.user_id == user_id)
             .where(
                 (UserRole.expires_at.is_(None))
@@ -213,8 +235,16 @@ class PolicyEngine:
         if org_id is not None:
             statement = statement.where(UserRole.org_id == org_id)
 
-        statement = statement.order_by(RoleNew.priority.desc())
-        return list(self.db.exec(statement).all())
+        statement = statement.order_by(Role.priority.desc())
+        roles = list(self.db.exec(statement).all())
+
+        # Cache the result
+        if self.use_cache and roles:
+            role_ids = [r.id for r in roles if r.id]
+            role_names = [r.name for r in roles]
+            set_cached_user_roles(user_id, role_ids, role_names, org_id)
+
+        return roles
 
     def _check_ownership(self, user_id: int, resource_id: str) -> bool:
         """
@@ -241,10 +271,11 @@ class PolicyEngine:
 
     def _check_role_permission(
         self,
-        role: RoleNew,
+        role: Role,
         action: Action,
         resource: ResourceType,
         is_owner: bool,
+        org_id: int | None = None,
         context: dict | None = None,
     ) -> bool:
         """
@@ -256,9 +287,18 @@ class PolicyEngine:
         # Collect all role IDs in the hierarchy
         role_ids = self._get_role_hierarchy_ids(role.id)  # type: ignore[arg-type]
 
+        # Build scope context for evaluation
+        scope_context = {
+            "is_owner": is_owner,
+            "request_org_id": org_id,
+            "role_org_id": role.org_id,
+        }
+
         # Check if any role in the hierarchy has the permission
         for role_id in role_ids:
-            if self._role_has_permission(role_id, action, resource, is_owner, context):
+            if self._role_has_permission(
+                role_id, action, resource, scope_context, context
+            ):
                 return True
 
         return False
@@ -275,7 +315,7 @@ class PolicyEngine:
             visited.add(current_id)
             ids.append(current_id)
 
-            role = self.db.get(RoleNew, current_id)
+            role = self.db.get(Role, current_id)
             current_id = role.parent_role_id if role else None
 
         return ids
@@ -285,11 +325,18 @@ class PolicyEngine:
         role_id: int,
         action: Action,
         resource: ResourceType,
-        is_owner: bool,
-        context: dict | None = None,
+        scope_context: dict,
+        abac_context: dict | None = None,
     ) -> bool:
         """
         Check if a specific role (without inheritance) has a permission.
+
+        Args:
+            role_id: Role ID to check
+            action: Action to perform
+            resource: Resource type
+            scope_context: Context for scope evaluation (is_owner, org_ids)
+            abac_context: Additional ABAC conditions context
         """
         # Build the query for matching permissions
         statement = (
@@ -305,39 +352,54 @@ class PolicyEngine:
         results = self.db.exec(statement).all()
 
         for permission, role_permission in results:
-            # Check scope
-            if self._scope_matches(permission.scope, is_owner):
+            # Check scope with full context
+            if self._scope_matches(permission.scope, scope_context):
                 # Check ABAC conditions
-                if self._conditions_match(role_permission.conditions, context):
+                if self._conditions_match(role_permission.conditions, abac_context):
                     return True
 
         return False
 
-    def _scope_matches(self, scope: Scope, is_owner: bool) -> bool:
+    def _scope_matches(self, scope: Scope, scope_context: dict) -> bool:
         """
         Check if a permission scope matches the current context.
 
         Args:
             scope: Permission scope
-            is_owner: Whether the user owns the resource
+            scope_context: Dict containing:
+                - is_owner: Whether the user owns the resource
+                - request_org_id: Org ID from the request
+                - role_org_id: Org ID from the user's role
 
         Returns:
             True if scope allows access
         """
-        if scope == Scope.ALL:
-            return True
-        if scope == Scope.OWN and is_owner:
-            return True
-        if scope == Scope.ORG:
-            # ORG scope allows access within the organization
-            # The caller should have already filtered by org_id
-            return True
-        if scope == Scope.ASSIGNED:
-            # ASSIGNED scope requires additional context checking
-            # For now, we treat it like ALL within the caller's context
-            return True
+        is_owner = scope_context.get("is_owner", False)
+        request_org_id = scope_context.get("request_org_id")
+        role_org_id = scope_context.get("role_org_id")
 
-        return False
+        match scope:
+            case Scope.ALL:
+                return True
+            case Scope.OWN:
+                return is_owner
+            case Scope.ORG:
+                # ORG scope: user's role org must match request org
+                # Global roles (role_org_id is None) can access any org
+                if role_org_id is None:
+                    return True
+                # If request_org_id is specified, it must match role_org_id
+                if request_org_id is not None:
+                    return role_org_id == request_org_id
+                # If no request org, allow (backward compat)
+                return True
+            case Scope.ASSIGNED:
+                # ASSIGNED scope: for resources explicitly assigned to user
+                # Currently treated same as ALL within the caller's context
+                # TODO: Check assignment table when implemented
+                return True
+            case _:
+                return False
 
     def _conditions_match(self, conditions: dict | None, context: dict | None) -> bool:
         """

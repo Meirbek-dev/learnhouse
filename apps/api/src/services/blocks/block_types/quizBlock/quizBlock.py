@@ -22,7 +22,7 @@ from src.db.courses.quiz import (
 )
 from src.db.gamification import XPSource
 from src.db.users import PublicUser
-from src.security.courses_security import courses_rbac_check
+from src.security.rbac import courses_rbac_check
 from src.services.blocks.block_types.quizBlock.grading import (
     apply_attempt_penalty,
     grade_quiz,

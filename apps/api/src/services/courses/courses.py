@@ -23,7 +23,7 @@ from src.db.resource_authors import (
 from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
-from src.security.courses_security import courses_rbac_check
+from src.security.rbac import courses_rbac_check
 from src.security.rbac.service_utils import (
     is_admin_or_maintainer,
     verify_not_anonymous,

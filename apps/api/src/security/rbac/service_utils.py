@@ -161,6 +161,7 @@ async def rbac_check(
     db_session: Session,
     resource_type: ResourceType | None = None,
     require_ownership: bool = False,
+    org_id: int | None = None,
 ) -> bool:
     """
     Generic RBAC check for any resource.
@@ -173,6 +174,7 @@ async def rbac_check(
         db_session: Database session
         resource_type: Optional explicit resource type (inferred from UUID if not provided)
         require_ownership: If True, requires resource ownership for non-read actions
+        org_id: Optional organization ID for org-scoped permissions
 
     Returns:
         True if authorized
@@ -200,8 +202,17 @@ async def rbac_check(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You must be logged in to access this resource",
             )
-        # Authenticated read - check permission
-        if checker.check(current_user, mapped_action, inferred_type, resource_uuid):
+        # Authenticated read - check permission or ownership
+        if is_resource_owner(db_session, user_id, resource_uuid):
+            return True
+        if is_admin_or_maintainer(db_session, user_id):
+            return True
+        if checker.check(
+            current_user, mapped_action, inferred_type, resource_uuid, org_id
+        ):
+            return True
+        # For courses, also check if public
+        if is_resource_public(db_session, resource_uuid, inferred_type):
             return True
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -211,19 +222,20 @@ async def rbac_check(
     # Non-read actions require authentication
     verify_not_anonymous(user_id)
 
-    # Check ownership if required
-    if require_ownership:
+    # Check ownership if required or for update/delete actions
+    if require_ownership or action in ("update", "delete"):
         is_owner = is_resource_owner(db_session, user_id, resource_uuid)
         is_admin = is_admin_or_maintainer(db_session, user_id)
         if is_owner or is_admin:
             return True
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"You must be the resource owner or have admin role to {action} this resource",
-        )
+        if require_ownership:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"You must be the resource owner or have admin role to {action} this resource",
+            )
 
     # Check general permission
-    if checker.check(current_user, mapped_action, inferred_type, resource_uuid):
+    if checker.check(current_user, mapped_action, inferred_type, resource_uuid, org_id):
         return True
 
     raise HTTPException(
@@ -408,8 +420,6 @@ def check_user_permission(
     checker = PermissionChecker(db_session)
 
     # Need to construct a minimal user object for the checker
-    from src.db.users import PublicUser
-    from sqlmodel import select
     from src.db.users import User
 
     user = db_session.exec(select(User).where(User.id == user_id)).first()
@@ -420,3 +430,283 @@ def check_user_permission(
         )
 
     return False
+
+
+# ---------------------------------------------------------------------------
+# Course-specific RBAC functions (consolidated from courses_security.py)
+# ---------------------------------------------------------------------------
+
+
+async def courses_rbac_check(
+    request: Request,
+    course_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    action: Literal["create", "read", "update", "delete"],
+    db_session: Session,
+    require_course_ownership: bool = False,
+) -> bool:
+    """
+    Unified RBAC check for courses-related operations.
+
+    Args:
+        request: FastAPI request object
+        course_uuid: UUID of the course (or "course_x" for course creation)
+        current_user: Current user (PublicUser or AnonymousUser)
+        action: Action to perform (create, read, update, delete)
+        db_session: Database session
+        require_course_ownership: If True, requires course ownership for non-read actions
+
+    Returns:
+        bool: True if authorized
+
+    Raises:
+        HTTPException: 403 Forbidden if user lacks required permissions
+        HTTPException: 401 Unauthorized if user is anonymous for non-read actions
+    """
+    checker = PermissionChecker(db_session)
+    mapped_action = map_action(action)
+    user_id = current_user.id if hasattr(current_user, "id") else 0
+    is_anonymous = user_id == 0
+
+    # READ operations
+    if action == "read":
+        if is_anonymous:
+            # Anonymous users can only read public courses
+            if is_resource_public(db_session, course_uuid, ResourceType.COURSE):
+                return True
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You must be logged in to access this course",
+            )
+
+        # Authenticated user - check various access paths
+        # 1. Check if course is public
+        if is_resource_public(db_session, course_uuid, ResourceType.COURSE):
+            return True
+
+        # 2. Check if user is course owner/contributor
+        if is_resource_owner(db_session, user_id, course_uuid):
+            return True
+
+        # 3. Check if user is admin/maintainer
+        if is_admin_or_maintainer(db_session, user_id):
+            return True
+
+        # 4. Check if accessible via UserGroup membership
+        from src.db.usergroup_resources import UserGroupResource
+        from src.db.usergroup_user import UserGroupUser
+
+        # Check if course has UserGroup restrictions
+        ugr_stmt = select(UserGroupResource).where(
+            UserGroupResource.resource_uuid == course_uuid
+        )
+        ugr_result = db_session.exec(ugr_stmt).first()
+
+        # If course has no UserGroup restrictions, any authenticated user can access
+        if not ugr_result:
+            return True
+
+        # Check if user is member of a UserGroup that grants access
+        member_stmt = (
+            select(UserGroupUser)
+            .join(
+                UserGroupResource,
+                UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
+            )
+            .where(
+                UserGroupResource.resource_uuid == course_uuid,
+                UserGroupUser.user_id == user_id,
+            )
+        )
+        if db_session.exec(member_stmt).first():
+            return True
+
+        # No access path found
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to access this course",
+        )
+
+    # Non-read actions require authentication
+    if is_anonymous:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You must be logged in to perform this action",
+        )
+
+    # Course creation (course_x placeholder)
+    if action == "create" and course_uuid == "course_x":
+        # Check if user has course create permission
+        if checker.check(current_user, Action.CREATE, ResourceType.COURSE):
+            return True
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You must have instructor role or higher to create courses",
+        )
+
+    # For course content operations (require_course_ownership=True) or update/delete
+    if require_course_ownership or action in ["update", "delete"]:
+        is_owner = is_resource_owner(db_session, user_id, course_uuid)
+        is_admin = is_admin_or_maintainer(db_session, user_id)
+
+        if is_owner or is_admin:
+            return True
+
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"You must be the course owner or have admin/maintainer role to {action} in this course",
+        )
+
+    # Default: check general permission
+    if checker.check(current_user, mapped_action, ResourceType.COURSE, course_uuid):
+        return True
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail=f"You don't have permission to {action} this course",
+    )
+
+
+async def courses_rbac_check_with_course_lookup(
+    request: Request,
+    course_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    action: Literal["create", "read", "update", "delete"],
+    db_session: Session,
+    require_course_ownership: bool = False,
+) -> Course:
+    """RBAC check with course lookup - returns course if authorized."""
+    statement = select(Course).where(Course.course_uuid == course_uuid)
+    course = db_session.exec(statement).first()
+
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    await courses_rbac_check(
+        request, course_uuid, current_user, action, db_session, require_course_ownership
+    )
+    return course
+
+
+async def courses_rbac_check_for_activities(
+    request: Request,
+    course_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    action: Literal["create", "read", "update", "delete"],
+    db_session: Session,
+) -> bool:
+    """RBAC check for activities - requires course ownership for non-read actions."""
+    return await courses_rbac_check(
+        request,
+        course_uuid,
+        current_user,
+        action,
+        db_session,
+        require_course_ownership=action != "read",
+    )
+
+
+async def courses_rbac_check_for_assignments(
+    request: Request,
+    course_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    action: Literal["create", "read", "update", "delete"],
+    db_session: Session,
+) -> bool:
+    """RBAC check for assignments - requires course ownership for non-read actions."""
+    return await courses_rbac_check(
+        request,
+        course_uuid,
+        current_user,
+        action,
+        db_session,
+        require_course_ownership=action != "read",
+    )
+
+
+async def courses_rbac_check_for_chapters(
+    request: Request,
+    course_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    action: Literal["create", "read", "update", "delete"],
+    db_session: Session,
+) -> bool:
+    """RBAC check for chapters - requires course ownership for non-read actions."""
+    return await courses_rbac_check(
+        request,
+        course_uuid,
+        current_user,
+        action,
+        db_session,
+        require_course_ownership=action != "read",
+    )
+
+
+async def courses_rbac_check_for_certifications(
+    request: Request,
+    course_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    action: Literal["create", "read", "update", "delete"],
+    db_session: Session,
+) -> bool:
+    """RBAC check for certifications - requires course ownership for non-read actions."""
+    return await courses_rbac_check(
+        request,
+        course_uuid,
+        current_user,
+        action,
+        db_session,
+        require_course_ownership=action != "read",
+    )
+
+
+async def courses_rbac_check_for_collections(
+    request: Request,
+    collection_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    action: Literal["create", "read", "update", "delete"],
+    db_session: Session,
+) -> bool:
+    """RBAC check for collections."""
+    checker = PermissionChecker(db_session)
+    mapped_action = map_action(action)
+    user_id = current_user.id if hasattr(current_user, "id") else 0
+    is_anonymous = user_id == 0
+
+    if action == "read":
+        if is_anonymous:
+            if is_resource_public(db_session, collection_uuid, ResourceType.COLLECTION):
+                return True
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You must be logged in to access this collection",
+            )
+        if checker.check(
+            current_user, mapped_action, ResourceType.COLLECTION, collection_uuid
+        ):
+            return True
+        # Also allow if resource is public
+        if is_resource_public(db_session, collection_uuid, ResourceType.COLLECTION):
+            return True
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to read this collection",
+        )
+
+    # Non-read requires authentication
+    if is_anonymous:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You must be logged in to perform this action",
+        )
+
+    # Check permission
+    if checker.check(
+        current_user, mapped_action, ResourceType.COLLECTION, collection_uuid
+    ):
+        return True
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail=f"You don't have permission to {action} this collection",
+    )

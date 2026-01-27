@@ -87,7 +87,7 @@ class PermissionRead(PermissionBase):
 # ---------------------------------------------------------------------------
 
 
-class RoleNewBase(SQLModelStrictBaseModel):
+class RoleBase(SQLModelStrictBaseModel):
     """Base model for the new Role system with hierarchy support."""
 
     model_config = ConfigDict(use_enum_values=True)
@@ -106,14 +106,14 @@ class RoleNewBase(SQLModelStrictBaseModel):
     )
 
 
-class RoleNew(RoleNewBase, table=True):
+class Role(RoleBase, table=True):
     """New Role table with hierarchy support."""
 
-    __tablename__ = "roles_new"
+    __tablename__ = "roles"
     __table_args__ = (
         UniqueConstraint("slug", "org_id", name="uq_role_slug_org"),
-        Index("ix_roles_new_org_id", "org_id"),
-        Index("ix_roles_new_slug", "slug"),
+        Index("ix_roles_org_id", "org_id"),
+        Index("ix_roles_slug", "slug"),
     )
 
     id: int | None = Field(default=None, primary_key=True)
@@ -124,21 +124,21 @@ class RoleNew(RoleNewBase, table=True):
     )
     parent_role_id: int | None = Field(
         default=None,
-        sa_column=Column(Integer, ForeignKey("roles_new.id", ondelete="SET NULL")),
+        sa_column=Column(Integer, ForeignKey("roles.id", ondelete="SET NULL")),
         description="Parent role for hierarchy inheritance",
     )
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
-class RoleNewCreate(RoleNewBase):
+class RoleCreate(RoleBase):
     """Model for creating a new role."""
 
     org_id: int | None = None
     parent_role_id: int | None = None
 
 
-class RoleNewRead(RoleNewBase):
+class RoleRead(RoleBase):
     """Model for reading a role with full details."""
 
     id: int
@@ -148,7 +148,7 @@ class RoleNewRead(RoleNewBase):
     updated_at: datetime
 
 
-class RoleNewUpdate(SQLModelStrictBaseModel):
+class RoleUpdate(SQLModelStrictBaseModel):
     """Model for updating a role."""
 
     name: str | None = None
@@ -182,7 +182,7 @@ class RolePermission(RolePermissionBase, table=True):
 
     role_id: int = Field(
         sa_column=Column(
-            Integer, ForeignKey("roles_new.id", ondelete="CASCADE"), primary_key=True
+            Integer, ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True
         ),
     )
     permission_id: int = Field(
@@ -230,7 +230,7 @@ class UserRole(UserRoleBase, table=True):
     )
     role_id: int = Field(
         sa_column=Column(
-            Integer, ForeignKey("roles_new.id", ondelete="CASCADE"), primary_key=True
+            Integer, ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True
         ),
     )
     org_id: int = Field(
@@ -274,7 +274,7 @@ class UserRoleRead(SQLModelStrictBaseModel):
     granted_at: datetime
     granted_by: int | None
     expires_at: datetime | None
-    role: RoleNewRead | None = None
+    role: RoleRead | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -359,11 +359,53 @@ class ResourcePermissionRead(ResourcePermissionBase):
 
 
 # ---------------------------------------------------------------------------
+# Permission Check Request/Response Models
+# ---------------------------------------------------------------------------
+
+
+class PermissionCheckRequest(PydanticStrictBaseModel):
+    """Request model for a single permission check."""
+
+    model_config = ConfigDict(use_enum_values=True)
+
+    action: Action
+    resource: ResourceType
+    resource_id: str | None = None
+    org_id: int | None = None
+
+
+class PermissionCheckResult(PydanticStrictBaseModel):
+    """Result of a single permission check."""
+
+    model_config = ConfigDict(use_enum_values=True)
+
+    action: Action
+    resource: ResourceType
+    resource_id: str | None = None
+    org_id: int | None = None
+    allowed: bool
+
+
+class BatchPermissionCheckRequest(PydanticStrictBaseModel):
+    """Request model for batch permission checks."""
+
+    checks: list[PermissionCheckRequest]
+
+
+class BatchPermissionCheckResponse(PydanticStrictBaseModel):
+    """Response model for batch permission checks."""
+
+    results: list[PermissionCheckResult]
+    # Convenience dict mapping "resource:action[:resource_id]" -> allowed
+    permissions: dict[str, bool]
+
+
+# ---------------------------------------------------------------------------
 # Composite Response Models
 # ---------------------------------------------------------------------------
 
 
-class RoleWithPermissions(RoleNewRead):
+class RoleWithPermissions(RoleRead):
     """Role with its assigned permissions."""
 
     permissions: list[PermissionRead] = []
@@ -376,6 +418,18 @@ class UserPermissionsResponse(PydanticStrictBaseModel):
 
     user_id: int
     org_id: int | None
-    roles: list[RoleNewRead]
+    roles: list[RoleRead]
     permissions: dict[str, bool]  # e.g., {"course:create:org": True, ...}
     resource_permissions: list[ResourcePermissionRead]
+
+
+# ---------------------------------------------------------------------------
+# Backward Compatibility Aliases (deprecated - use Role, RoleCreate, etc.)
+# ---------------------------------------------------------------------------
+
+# These aliases allow existing code to continue working while migrating
+RoleNew = Role
+RoleNewBase = RoleBase
+RoleNewCreate = RoleCreate
+RoleNewRead = RoleRead
+RoleNewUpdate = RoleUpdate

@@ -12,16 +12,20 @@ from sqlmodel import Session, select
 from src.db.permissions.enums import Action, ResourceType, Scope
 from src.db.permissions.models import (
     Permission,
-    RoleNew,
-    RoleNewCreate,
-    RoleNewRead,
-    RoleNewUpdate,
+    Role,
+    RoleCreate,
+    RoleRead,
+    RoleUpdate,
     RolePermission,
     RolePermissionCreate,
     RoleWithPermissions,
     UserRole,
     UserRoleCreate,
     UserRoleRead,
+)
+from src.services.permissions.permission_cache import (
+    invalidate_role_permissions,
+    invalidate_user_permissions,
 )
 from src.services.permissions.permission_service import PermissionService
 
@@ -37,11 +41,11 @@ class RoleService:
     # Role CRUD
     # -----------------------------------------------------------------------
 
-    def get_by_id(self, role_id: int) -> RoleNew | None:
+    def get_by_id(self, role_id: int) -> Role | None:
         """Get a role by ID."""
-        return self.db.get(RoleNew, role_id)
+        return self.db.get(Role, role_id)
 
-    def get_by_slug(self, slug: str, org_id: int | None = None) -> RoleNew | None:
+    def get_by_slug(self, slug: str, org_id: int | None = None) -> Role | None:
         """
         Get a role by slug and optional org_id.
 
@@ -52,16 +56,16 @@ class RoleService:
         Returns:
             Role if found, None otherwise
         """
-        statement = select(RoleNew).where(RoleNew.slug == slug)
+        statement = select(Role).where(Role.slug == slug)
         if org_id is not None:
-            statement = statement.where(RoleNew.org_id == org_id)
+            statement = statement.where(Role.org_id == org_id)
         else:
-            statement = statement.where(RoleNew.org_id.is_(None))  # type: ignore[union-attr]
+            statement = statement.where(Role.org_id.is_(None))  # type: ignore[union-attr]
         return self.db.exec(statement).first()
 
     def list_all(
         self, org_id: int | None = None, include_global: bool = True
-    ) -> list[RoleNewRead]:
+    ) -> list[RoleRead]:
         """
         List all roles, optionally filtered by organization.
 
@@ -72,24 +76,24 @@ class RoleService:
         Returns:
             List of roles
         """
-        statement = select(RoleNew)
+        statement = select(Role)
 
         if org_id is not None:
             if include_global:
                 statement = statement.where(
-                    (RoleNew.org_id == org_id) | (RoleNew.org_id.is_(None))
+                    (Role.org_id == org_id) | (Role.org_id.is_(None))
                 )  # type: ignore[union-attr]
             else:
-                statement = statement.where(RoleNew.org_id == org_id)
+                statement = statement.where(Role.org_id == org_id)
         elif not include_global:
             # Only global roles
-            statement = statement.where(RoleNew.org_id.is_(None))  # type: ignore[union-attr]
+            statement = statement.where(Role.org_id.is_(None))  # type: ignore[union-attr]
 
-        statement = statement.order_by(RoleNew.priority.desc(), RoleNew.name)
+        statement = statement.order_by(Role.priority.desc(), Role.name)
         results = self.db.exec(statement).all()
-        return [RoleNewRead.model_validate(r) for r in results]
+        return [RoleRead.model_validate(r) for r in results]
 
-    def create(self, data: RoleNewCreate, created_by: int | None = None) -> RoleNew:
+    def create(self, data: RoleCreate, created_by: int | None = None) -> Role:
         """
         Create a new role.
 
@@ -108,7 +112,7 @@ class RoleService:
             msg = f"Role '{data.slug}' already exists in this organization"
             raise ValueError(msg)
 
-        role = RoleNew(
+        role = Role(
             name=data.name,
             slug=data.slug,
             description=data.description,
@@ -122,7 +126,7 @@ class RoleService:
         self.db.refresh(role)
         return role
 
-    def update(self, role_id: int, data: RoleNewUpdate) -> RoleNew | None:
+    def update(self, role_id: int, data: RoleUpdate) -> Role | None:
         """
         Update a role.
 
@@ -183,7 +187,7 @@ class RoleService:
     # Role Hierarchy
     # -----------------------------------------------------------------------
 
-    def get_role_with_parents(self, role_id: int) -> list[RoleNew]:
+    def get_role_with_parents(self, role_id: int) -> list[Role]:
         """
         Get a role and all its parent roles (inheritance chain).
 
@@ -305,6 +309,10 @@ class RoleService:
         )
         self.db.add(rp)
         self.db.commit()
+
+        # Invalidate role's permission cache
+        invalidate_role_permissions(role_id)
+
         return rp
 
     def remove_permission_from_role(self, role_id: int, permission_id: int) -> bool:
@@ -328,6 +336,10 @@ class RoleService:
 
         self.db.delete(rp)
         self.db.commit()
+
+        # Invalidate role's permission cache
+        invalidate_role_permissions(role_id)
+
         return True
 
     def add_permissions_by_pattern(
@@ -430,6 +442,10 @@ class RoleService:
         )
         self.db.add(ur)
         self.db.commit()
+
+        # Invalidate user's permission cache
+        invalidate_user_permissions(user_id)
+
         return ur
 
     def remove_role_from_user(self, user_id: int, role_id: int, org_id: int) -> bool:
@@ -455,6 +471,10 @@ class RoleService:
 
         self.db.delete(ur)
         self.db.commit()
+
+        # Invalidate user's permission cache
+        invalidate_user_permissions(user_id)
+
         return True
 
     def get_user_roles(
@@ -487,7 +507,7 @@ class RoleService:
                     granted_at=ur.granted_at,
                     granted_by=ur.granted_by,
                     expires_at=ur.expires_at,
-                    role=RoleNewRead.model_validate(role) if role else None,
+                    role=RoleRead.model_validate(role) if role else None,
                 )
             )
 
@@ -516,7 +536,7 @@ class RoleService:
     # Seed Default Roles
     # -----------------------------------------------------------------------
 
-    def seed_default_roles(self) -> dict[str, RoleNew]:
+    def seed_default_roles(self) -> dict[str, Role]:
         """
         Seed the database with default system roles.
 
@@ -629,7 +649,7 @@ class RoleService:
             },
         ]
 
-        created_roles: dict[str, RoleNew] = {}
+        created_roles: dict[str, Role] = {}
 
         # First pass: create all roles without parent relationships
         for role_data in default_roles:
@@ -639,7 +659,7 @@ class RoleService:
             if existing:
                 created_roles[slug] = existing
             else:
-                role = RoleNew(
+                role = Role(
                     slug=slug,
                     name=role_data["name"],
                     description=role_data["description"],

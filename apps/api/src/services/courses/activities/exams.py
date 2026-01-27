@@ -38,7 +38,7 @@ from src.db.resource_authors import (
 from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User
-from src.security.courses_security import courses_rbac_check_for_assignments
+from src.security.rbac import courses_rbac_check_for_assignments
 
 ## > Helper Functions
 

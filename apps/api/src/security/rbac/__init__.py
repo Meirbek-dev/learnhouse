@@ -7,6 +7,7 @@ This module provides the core RBAC functionality including:
 - Dependencies: FastAPI dependency injection for permissions
 - Context: Permission context for tracking user, org, and resource
 - Service utilities: Helper functions for services (rbac_check, is_admin_or_maintainer, etc.)
+- Course-specific RBAC: Unified course permission checks
 """
 
 from src.security.rbac.checker import PermissionChecker
@@ -16,6 +17,13 @@ from src.security.rbac.dependencies import get_permission_checker
 from src.security.rbac.service_utils import (
     check_is_resource_author,
     check_user_permission,
+    courses_rbac_check,
+    courses_rbac_check_for_activities,
+    courses_rbac_check_for_assignments,
+    courses_rbac_check_for_certifications,
+    courses_rbac_check_for_chapters,
+    courses_rbac_check_for_collections,
+    courses_rbac_check_with_course_lookup,
     has_authenticated_user_role,
     has_instructor_role,
     infer_resource_type,
@@ -53,4 +61,12 @@ __all__ = [
     "is_resource_public",
     "infer_resource_type",
     "map_action",
+    # Course-specific RBAC
+    "courses_rbac_check",
+    "courses_rbac_check_with_course_lookup",
+    "courses_rbac_check_for_activities",
+    "courses_rbac_check_for_assignments",
+    "courses_rbac_check_for_chapters",
+    "courses_rbac_check_for_certifications",
+    "courses_rbac_check_for_collections",
 ]

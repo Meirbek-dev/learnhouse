@@ -33,7 +33,7 @@ from src.db.organizations import (
 )
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, InternalUser, PublicUser
-from src.db.roles import Role
+from src.db.permissions import Role, UserRole
 from src.security.rbac.service_utils import rbac_check_org as rbac_check
 from src.services.orgs.uploads import (
     upload_org_landing_content,
@@ -536,21 +536,20 @@ async def get_orgs_by_user_admin(
     # Convert user_id to int for proper type matching with database
     user_id_int = int(user_id)
 
-    # Join Organization, UserOrganization and OrganizationConfig in a single query
-    # Resolve the admin role id by slug to avoid magic numbers
+    # Join Organization, UserRole and OrganizationConfig in a single query
+    # Resolve the admin role id by slug (new RBAC system)
     admin_role = db_session.exec(
-        select(Role).where(Role.role_uuid == "role_global_admin")
+        select(Role).where(Role.slug.in_(["super-admin", "org-admin"]))
     ).first()
     admin_role_id = admin_role.id if admin_role else 1
 
     statement = (
         select(Organization, OrganizationConfig)
-        .join(UserOrganization)
+        .join(UserRole, UserRole.org_id == Organization.id)
         .outerjoin(OrganizationConfig)
         .where(
-            UserOrganization.user_id == user_id_int,
-            UserOrganization.role_id == admin_role_id,  # Only where the user is admin
-            UserOrganization.org_id == Organization.id,
+            UserRole.user_id == user_id_int,
+            UserRole.role_id == admin_role_id,  # Only where the user is admin
             OrganizationConfig.org_id == Organization.id,
         )
         .offset((page - 1) * limit)

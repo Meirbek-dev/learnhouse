@@ -19,7 +19,6 @@ This document outlines the comprehensive plan to complete, optimize, and finaliz
 7. [Migration Strategy](#7-migration-strategy)
 8. [Testing Strategy](#8-testing-strategy)
 9. [Security Considerations](#9-security-considerations)
-10. [Timeline & Milestones](#10-timeline--milestones)
 
 ---
 
@@ -230,7 +229,7 @@ class CoursePolicy(BasePolicy):
 
 ## 3. Implementation Phases
 
-### Phase 1: Consolidation & Cleanup (Week 1-2)
+### Phase 1: Consolidation & Cleanup
 
 #### 3.1.1 Unify RBAC Check Functions
 
@@ -239,14 +238,14 @@ class CoursePolicy(BasePolicy):
 **Tasks**:
 
 1. Merge `courses_security.py` into `service_utils.py`
-2. Deprecate duplicate functions with warnings
+2. Remove duplicate functions with warnings
 3. Update all service imports to use unified module
 4. Remove old `rights` field references
 
 **Files to Modify**:
 
 - `src/security/rbac/service_utils.py` - Primary location
-- `src/security/courses_security.py` - Mark as deprecated, import from service_utils
+- `src/security/courses_security.py` - Remove, import from service_utils
 - All services using RBAC checks
 
 **Unified API**:
@@ -1165,18 +1164,7 @@ export function usePermissions() {
 
 ### 7.1 Data Migration Steps
 
-1. **Backup existing data**
-
-   ```bash
-   pg_dump --table=roles --table=user_organizations > backup_rbac.sql
-   ```
-
-2. **Run migrations**
-   - `69fd16a5d534_rbac_rewrite.py` - Create new tables
-   - `afaf068e905d_rbac_rewrite_2.py` - Migrate rights JSON to role_permissions
-   - `seed_rbac_permissions.py` - Seed default permissions
-
-3. **Verify migration**
+1. **Verify migration**
 
    ```python
    # Check that all roles have permissions
@@ -1189,12 +1177,12 @@ export function usePermissions() {
            assert len(perms) > 0, f"Role {role.slug} has no permissions"
    ```
 
-4. **Switch to new system**
+2. **Switch to new system**
    - Update all service imports
    - Enable new permission checker
    - Monitor for errors
 
-5. **Cleanup**
+3. **Cleanup**
    - Remove old `roles` table
    - Remove `rights` column
    - Archive old migration files
@@ -1307,46 +1295,6 @@ async def test_role_assignment():
         assert response.json()["allowed"] is True
 ```
 
-### 8.3 E2E Tests
-
-```typescript
-// tests/e2e/rbac.spec.ts
-
-test.describe('RBAC', () => {
-  test('instructor can create course', async ({ page }) => {
-    await loginAs(page, 'instructor@test.com');
-    await page.goto('/dash/courses');
-
-    // Should see "New Course" button
-    await expect(page.getByRole('button', { name: /new course/i })).toBeVisible();
-
-    // Create course
-    await page.click('button:has-text("New Course")');
-    await page.fill('input[name="name"]', 'Test Course');
-    await page.click('button:has-text("Create")');
-
-    await expect(page.locator('text=Test Course')).toBeVisible();
-  });
-
-  test('regular user cannot create course', async ({ page }) => {
-    await loginAs(page, 'user@test.com');
-    await page.goto('/dash/courses');
-
-    // Should NOT see "New Course" button
-    await expect(page.getByRole('button', { name: /new course/i })).not.toBeVisible();
-  });
-
-  test('admin can access role management', async ({ page }) => {
-    await loginAs(page, 'admin@test.com');
-    await page.goto('/dash/admin/roles');
-
-    await expect(page.locator('h1:has-text("Access Control")')).toBeVisible();
-    await expect(page.locator('text=Admin')).toBeVisible();
-    await expect(page.locator('text=Instructor')).toBeVisible();
-  });
-});
-```
-
 ---
 
 ## 9. Security Considerations
@@ -1375,13 +1323,13 @@ test.describe('RBAC', () => {
 
 ### 9.2 Common Attack Vectors
 
-| Attack | Mitigation |
-|--------|------------|
-| IDOR (Insecure Direct Object Reference) | Always verify ownership/access before returning data |
-| Privilege Escalation | Prevent users from assigning roles higher than their own |
-| Cache Poisoning | Use secure cache keys, validate on cache miss |
-| Session Hijacking | Short TTLs, re-validate on sensitive operations |
-| Mass Assignment | Explicit allow-lists for updatable fields |
+| Attack                                  | Mitigation                                               |
+| --------------------------------------- | -------------------------------------------------------- |
+| IDOR (Insecure Direct Object Reference) | Always verify ownership/access before returning data     |
+| Privilege Escalation                    | Prevent users from assigning roles higher than their own |
+| Cache Poisoning                         | Use secure cache keys, validate on cache miss            |
+| Session Hijacking                       | Short TTLs, re-validate on sensitive operations          |
+| Mass Assignment                         | Explicit allow-lists for updatable fields                |
 
 ### 9.3 Rate Limiting
 
@@ -1402,76 +1350,30 @@ async def create_role(...):
 
 ---
 
-## 10. Timeline & Milestones
-
-### Week 1-2: Consolidation & Cleanup
-
-- [ ] Merge duplicate RBAC functions
-- [ ] Deprecate old code paths
-- [ ] Update service imports
-- [ ] Complete role migration
-
-### Week 3-4: Feature Completion
-
-- [ ] Implement role hierarchy
-- [ ] Add scope evaluation
-- [ ] Implement ABAC conditions
-- [ ] Add batch permission checking
-
-### Week 5-6: Frontend Integration
-
-- [ ] Create permission hooks
-- [ ] Add PermissionGate component
-- [ ] Update existing components
-- [ ] Add real-time updates
-
-### Week 7-8: Optimization & Polish
-
-- [ ] Optimize caching strategy
-- [ ] Enhance audit logging
-- [ ] Improve admin UI
-- [ ] Performance testing
-
-### Week 9: Testing & Documentation
-
-- [ ] Complete unit tests
-- [ ] Integration tests
-- [ ] E2E tests
-- [ ] Documentation
-
-### Week 10: Deployment
-
-- [ ] Staging deployment
-- [ ] Production migration
-- [ ] Monitor and fix issues
-- [ ] Remove deprecated code
-
----
-
 ## Appendix A: Permission Matrix
 
 | Role       | Course Create | Course Read | Course Update | Course Delete | User Manage | Role Manage |
-|------------|--------------|-------------|---------------|---------------|-------------|-------------|
-| Admin      | ✅ all        | ✅ all       | ✅ all         | ✅ all         | ✅ org       | ✅ org       |
-| Maintainer | ✅ org        | ✅ all       | ✅ all         | ✅ all         | ✅ org       | ❌           |
-| Instructor | ✅ org        | ✅ all       | ✅ own         | ✅ own         | ❌           | ❌           |
-| User       | ❌            | ✅ all       | ❌             | ❌             | ❌           | ❌           |
-| Anonymous  | ❌            | ✅ public    | ❌             | ❌             | ❌           | ❌           |
+| ---------- | ------------- | ----------- | ------------- | ------------- | ----------- | ----------- |
+| Admin      | ✅ all         | ✅ all       | ✅ all         | ✅ all         | ✅ org       | ✅ org       |
+| Maintainer | ✅ org         | ✅ all       | ✅ all         | ✅ all         | ✅ org       | ❌           |
+| Instructor | ✅ org         | ✅ all       | ✅ own         | ✅ own         | ❌           | ❌           |
+| User       | ❌             | ✅ all       | ❌             | ❌             | ❌           | ❌           |
+| Anonymous  | ❌             | ✅ public    | ❌             | ❌             | ❌           | ❌           |
 
 ---
 
 ## Appendix B: API Error Codes
 
-| Code | Status | Description |
-|------|--------|-------------|
-| `PERM_001` | 401 | Authentication required |
-| `PERM_002` | 403 | Permission denied |
-| `PERM_003` | 403 | Insufficient role level |
-| `PERM_004` | 404 | Permission not found |
-| `PERM_005` | 404 | Role not found |
-| `PERM_006` | 409 | Role already exists |
-| `PERM_007` | 409 | Permission already assigned |
-| `PERM_008` | 422 | Cannot modify system role |
+| Code       | Status | Description                 |
+| ---------- | ------ | --------------------------- |
+| `PERM_001` | 401    | Authentication required     |
+| `PERM_002` | 403    | Permission denied           |
+| `PERM_003` | 403    | Insufficient role level     |
+| `PERM_004` | 404    | Permission not found        |
+| `PERM_005` | 404    | Role not found              |
+| `PERM_006` | 409    | Role already exists         |
+| `PERM_007` | 409    | Permission already assigned |
+| `PERM_008` | 422    | Cannot modify system role   |
 
 ---
 

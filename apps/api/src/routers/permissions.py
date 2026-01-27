@@ -16,11 +16,15 @@ from sqlmodel import Session
 from src.core.events.database import get_db_session
 from src.db.permissions import (
     Action,
+    BatchPermissionCheckRequest,
+    BatchPermissionCheckResponse,
+    PermissionCheckRequest,
+    PermissionCheckResult,
     PermissionRead,
     ResourceType,
-    RoleNewCreate,
-    RoleNewRead,
-    RoleNewUpdate,
+    RoleCreate,
+    RoleRead,
+    RoleUpdate,
     RoleWithPermissions,
     UserPermissionsResponse,
     UserRoleCreate,
@@ -89,7 +93,7 @@ async def api_list_roles_new(
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     org_id: int | None = None,
     include_global: bool = True,
-) -> list[RoleNewRead]:
+) -> list[RoleRead]:
     """
     List all roles in the new system.
 
@@ -106,11 +110,11 @@ async def api_list_roles_new(
 
 @router.post("/roles-new")
 async def api_create_role_new(
-    role_data: RoleNewCreate,
+    role_data: RoleCreate,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
-) -> RoleNewRead:
+) -> RoleRead:
     """
     Create a new role.
 
@@ -123,7 +127,7 @@ async def api_create_role_new(
     service = RoleService(db_session)
     try:
         role = service.create(role_data, created_by=current_user.id)
-        return RoleNewRead.model_validate(role)
+        return RoleRead.model_validate(role)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -150,11 +154,11 @@ async def api_get_role_new(
 @router.put("/roles-new/{role_id}")
 async def api_update_role_new(
     role_id: int,
-    role_data: RoleNewUpdate,
+    role_data: RoleUpdate,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
-) -> RoleNewRead:
+) -> RoleRead:
     """
     Update a role.
 
@@ -171,7 +175,7 @@ async def api_update_role_new(
 
     try:
         role = service.update(role_id, role_data)
-        return RoleNewRead.model_validate(role)
+        return RoleRead.model_validate(role)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -404,53 +408,99 @@ async def api_get_my_permissions(
     )
 
 
-class PermissionCheckRequest:
-    """Request model for batch permission checks."""
-
-    action: Action
-    resource: ResourceType
-    resource_id: str | None = None
-    org_id: int | None = None
-
-
 @router.post("/permissions/check")
 async def api_check_permissions(
     request: Request,
-    checks: list[dict],
+    body: BatchPermissionCheckRequest,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
-) -> dict[str, bool]:
+) -> BatchPermissionCheckResponse:
     """
     Batch check multiple permissions.
 
-    Request body should be a list of permission checks:
-    [
-        {"action": "create", "resource": "course", "org_id": 1},
-        {"action": "update", "resource": "course", "resource_id": "course_abc123"},
-    ]
+    Request body should contain a list of permission checks:
+    ```json
+    {
+        "checks": [
+            {"action": "create", "resource": "course", "org_id": 1},
+            {"action": "update", "resource": "course", "resource_id": "course_abc123"}
+        ]
+    }
+    ```
 
-    Returns a dictionary mapping each check to its result.
+    Returns both a list of results and a convenience permissions dict.
     """
-    results = {}
+    results: list[PermissionCheckResult] = []
+    permissions: dict[str, bool] = {}
 
-    for check in checks:
-        action = Action(check.get("action", "read"))
-        resource = ResourceType(check.get("resource", "course"))
-        resource_id = check.get("resource_id")
-        org_id = check.get("org_id")
-
-        key = f"{resource}:{action}"
-        if resource_id:
-            key += f":{resource_id}"
-        elif org_id:
-            key += f":org_{org_id}"
-
-        results[key] = checker.check(
-            current_user, action, resource, resource_id, org_id
+    for check in body.checks:
+        allowed = checker.check(
+            current_user,
+            check.action,
+            check.resource,
+            check.resource_id,
+            check.org_id,
         )
 
-    return results
+        results.append(
+            PermissionCheckResult(
+                action=check.action,
+                resource=check.resource,
+                resource_id=check.resource_id,
+                org_id=check.org_id,
+                allowed=allowed,
+            )
+        )
+
+        # Build convenience key
+        key = f"{check.resource}:{check.action}"
+        if check.resource_id:
+            key += f":{check.resource_id}"
+        elif check.org_id:
+            key += f":org_{check.org_id}"
+
+        permissions[key] = allowed
+
+    return BatchPermissionCheckResponse(results=results, permissions=permissions)
+
+
+@router.get("/permissions/check")
+async def api_check_single_permission(
+    action: Action,
+    resource: ResourceType,
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
+    checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
+    resource_id: str | None = None,
+    org_id: int | None = None,
+) -> PermissionCheckResult:
+    """
+    Check a single permission.
+
+    Query parameters:
+    - action: The action to check (e.g., "create", "read", "update", "delete")
+    - resource: The resource type (e.g., "course", "activity")
+    - resource_id: Optional specific resource UUID
+    - org_id: Optional organization context
+
+    Returns whether the permission is allowed.
+    """
+    allowed = checker.check(
+        current_user,
+        action,
+        resource,
+        resource_id,
+        org_id,
+    )
+
+    return PermissionCheckResult(
+        action=action,
+        resource=resource,
+        resource_id=resource_id,
+        org_id=org_id,
+        allowed=allowed,
+    )
 
 
 # ---------------------------------------------------------------------------

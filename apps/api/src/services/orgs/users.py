@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 import orjson
 from fastapi import HTTPException, Request
@@ -13,7 +13,7 @@ from src.db.organizations import (
     PaginatedOrganizationUsers,
     rebuild_organization_models,
 )
-from src.db.roles import Role, RoleRead
+from src.db.permissions import Role, RoleRead, UserRole
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.services.cache import redis_client
@@ -70,46 +70,33 @@ async def get_organization_users(
     org_users_list = []
 
     for user in users:
-        statement = select(UserOrganization).where(
-            UserOrganization.user_id == user.id, UserOrganization.org_id == org_id_int
+        # Get user's role via new UserRole table
+        statement = select(UserRole).where(
+            UserRole.user_id == user.id, UserRole.org_id == org_id_int
         )
-        result = db_session.exec(statement)
-        user_org = result.first()
+        user_role_entry = db_session.exec(statement).first()
 
-        if not user_org:
-            logging.error(f"User {user.id} not found")
-
+        if not user_role_entry:
+            logging.warning(
+                f"UserRole not found for user {user.id} in org {org_id_int}"
+            )
             # skip this user
             continue
 
-        statement = select(Role).where(Role.id == user_org.role_id)
-        result = db_session.exec(statement)
-
-        role = result.first()
+        statement = select(Role).where(Role.id == user_role_entry.role_id)
+        role = db_session.exec(statement).first()
 
         if not role:
-            logging.error(f"Role {user_org.role_id} not found")
-
+            logging.error(f"Role {user_role_entry.role_id} not found")
             # skip this user
             continue
 
-        statement = select(User).where(User.id == user_org.user_id)
-        result = db_session.exec(statement)
-
-        user = result.first()
-
-        if not user:
-            logging.error(f"User {user_org.user_id} not found")
-
-            # skip this user
-            continue
-
-        user = UserRead.model_validate(user)
-        role = RoleRead.model_validate(role)
+        user_read = UserRead.model_validate(user)
+        role_read = RoleRead.model_validate(role)
 
         org_user = OrganizationUser(
-            user=user,
-            role=role,
+            user=user_read,
+            role=role_read,
         )
 
         org_users_list.append(org_user)

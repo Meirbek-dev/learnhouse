@@ -10,7 +10,7 @@ from src.db.resource_authors import (
     ResourceAuthorshipStatusEnum,
 )
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
-from src.security.courses_security import courses_rbac_check
+from src.security.rbac import courses_rbac_check
 from src.security.rbac.service_utils import verify_not_anonymous
 
 

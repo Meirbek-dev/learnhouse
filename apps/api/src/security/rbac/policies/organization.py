@@ -9,7 +9,7 @@ from sqlmodel import select
 
 from src.db.organizations import Organization
 from src.db.permissions.enums import Action, ResourceType
-from src.db.permissions.models import RoleNew, UserRole
+from src.db.permissions.models import Role, UserRole
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac.policies.base import BasePolicy
 
@@ -150,10 +150,10 @@ class OrganizationPolicy(BasePolicy):
 
         statement = (
             select(UserRole)
-            .join(RoleNew, RoleNew.id == UserRole.role_id)
+            .join(Role, Role.id == UserRole.role_id)
             .where(
                 UserRole.user_id == user.id,
-                RoleNew.slug == "super-admin",
+                Role.slug == "super-admin",
             )
         )
         result = self.db.exec(statement).first()
@@ -181,11 +181,11 @@ class OrganizationPolicy(BasePolicy):
 
         statement = (
             select(UserRole)
-            .join(RoleNew, RoleNew.id == UserRole.role_id)
+            .join(Role, Role.id == UserRole.role_id)
             .where(
                 UserRole.user_id == user.id,
                 UserRole.org_id == org_id,
-                RoleNew.slug.in_(role_slugs),
+                Role.slug.in_(role_slugs),
             )
         )
         result = self.db.exec(statement).first()
@@ -195,7 +195,7 @@ class OrganizationPolicy(BasePolicy):
         self,
         user: PublicUser | AnonymousUser,
         org_id: int,
-    ) -> RoleNew | None:
+    ) -> Role | None:
         """
         Get the user's role in an organization.
 
@@ -212,13 +212,13 @@ class OrganizationPolicy(BasePolicy):
             return None
 
         statement = (
-            select(RoleNew)
-            .join(UserRole, UserRole.role_id == RoleNew.id)
+            select(Role)
+            .join(UserRole, UserRole.role_id == Role.id)
             .where(
                 UserRole.user_id == user.id,
                 UserRole.org_id == org_id,
             )
-            .order_by(RoleNew.priority.desc())
+            .order_by(Role.priority.desc())
         )
         return self.db.exec(statement).first()
 

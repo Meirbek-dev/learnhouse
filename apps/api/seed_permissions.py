@@ -1,4 +1,5 @@
 """Seed default RBAC permissions for existing roles."""
+
 from sqlalchemy import create_engine, text
 
 from config.config import get_platform_config
@@ -32,15 +33,24 @@ def seed_permissions():
         # Insert permissions
         for resource_type, action, scope in permissions:
             result = conn.execute(
-                text("SELECT id FROM permissions WHERE resource_type = :rt AND action = :a AND scope = :s"),
+                text(
+                    "SELECT id FROM permissions WHERE resource_type = :rt AND action = :a AND scope = :s"
+                ),
                 {"rt": resource_type, "a": action, "s": scope},
             )
             existing = result.first()
 
             if not existing:
                 conn.execute(
-                    text("INSERT INTO permissions (name, resource_type, action, scope, created_at) VALUES (:name, :rt, :a, :s, NOW())"),
-                    {"name": f"{resource_type}:{action}:{scope}", "rt": resource_type, "a": action, "s": scope},
+                    text(
+                        "INSERT INTO permissions (name, resource_type, action, scope, created_at) VALUES (:name, :rt, :a, :s, NOW())"
+                    ),
+                    {
+                        "name": f"{resource_type}:{action}:{scope}",
+                        "rt": resource_type,
+                        "a": action,
+                        "s": scope,
+                    },
                 )
                 print(f"Created permission: {resource_type}:{action}:{scope}")
 
@@ -51,7 +61,9 @@ def seed_permissions():
             print(f"\nAssigning permissions to {role_name} (ID={role_id})...")
             for rt, a, s in permissions:
                 result = conn.execute(
-                    text("SELECT id FROM permissions WHERE resource_type = :rt AND action = :a AND scope = :s"),
+                    text(
+                        "SELECT id FROM permissions WHERE resource_type = :rt AND action = :a AND scope = :s"
+                    ),
                     {"rt": rt, "a": a, "s": s},
                 )
                 row = result.first()
@@ -60,18 +72,24 @@ def seed_permissions():
 
                 perm_id = row[0]
                 result = conn.execute(
-                    text("SELECT 1 FROM role_permissions WHERE role_id = :rid AND permission_id = :pid"),
+                    text(
+                        "SELECT 1 FROM role_permissions WHERE role_id = :rid AND permission_id = :pid"
+                    ),
                     {"rid": role_id, "pid": perm_id},
                 )
                 existing = result.first()
                 if not existing:
                     conn.execute(
-                        text("INSERT INTO role_permissions (role_id, permission_id, granted_at) VALUES (:rid, :pid, NOW())"),
+                        text(
+                            "INSERT INTO role_permissions (role_id, permission_id, granted_at) VALUES (:rid, :pid, NOW())"
+                        ),
                         {"rid": role_id, "pid": perm_id},
                     )
                     print(f"  Assigned {rt}:{a}:{s}")
 
         conn.commit()
         print("\n✅ Permissions seeded successfully!")
+
+
 if __name__ == "__main__":
     seed_permissions()

@@ -10,10 +10,7 @@ from sqlmodel import Session, select
 from ulid import ULID
 
 from src.db.organizations import Organization, OrganizationRead
-from src.db.roles import (
-    Role,
-    RoleRead,
-)
+from src.db.permissions import Role, RoleRead, UserRole
 from src.db.user_organizations import UserOrganization
 from src.db.users import (
     AnonymousUser,
@@ -323,23 +320,17 @@ async def get_user_session(
     user = await _get_user_by_field(db_session, "user_uuid", current_user.user_uuid)
     user_read = UserRead.model_validate(user)
 
-    # Get roles and orgs
-    statement = (
-        select(UserOrganization)
-        .where(UserOrganization.user_id == user.id)
-        .join(Organization)
-    )
-    user_organizations = db_session.exec(statement).all()
+    # Get roles and orgs using new UserRole table
+    statement = select(UserRole).where(UserRole.user_id == user.id)
+    user_roles = db_session.exec(statement).all()
 
     roles = []
 
-    for user_organization in user_organizations:
-        role_statement = select(Role).where(Role.id == user_organization.role_id)
+    for user_role in user_roles:
+        role_statement = select(Role).where(Role.id == user_role.role_id)
         role = db_session.exec(role_statement).first()
 
-        org_statement = select(Organization).where(
-            Organization.id == user_organization.org_id
-        )
+        org_statement = select(Organization).where(Organization.id == user_role.org_id)
         org = db_session.exec(org_statement).first()
 
         if role and org:
@@ -519,12 +510,14 @@ def _safe_role_read(role: Role) -> RoleRead:
         )
         return RoleRead.model_construct(
             name=role.name,
+            slug=role.slug,
             description=role.description,
             org_id=role.org_id,
-            role_type=role.role_type,
-            role_uuid=role.role_uuid,
-            creation_date=role.creation_date,
-            update_date=role.update_date,
+            is_system=role.is_system,
+            priority=role.priority,
+            parent_role_id=role.parent_role_id,
+            created_at=role.created_at,
+            updated_at=role.updated_at,
             id=role.id,
         )
 
@@ -546,18 +539,31 @@ def _safe_organization_read(org: Organization) -> OrganizationRead:
 async def _link_user_to_organization(
     db_session: Session, user_id: int | None, org_id: int
 ) -> None:
-    """Link user to organization with default role."""
-    user_organization = UserOrganization(
+    """Link user to organization with default 'user' role using new RBAC system."""
+    from datetime import UTC
+
+    # Find the default 'user' role
+    user_role_model = db_session.exec(
+        select(Role).where(Role.slug == "user", Role.org_id.is_(None))
+    ).first()
+
+    if not user_role_model:
+        # Fallback: create user_role anyway with role_id=None
+        logger.warning("Default 'user' role not found, creating UserRole without role")
+        role_id = None
+    else:
+        role_id = user_role_model.id
+
+    # Create UserRole entry (new RBAC system)
+    user_role = UserRole(
         user_id=user_id if user_id else 0,
+        role_id=role_id,
         org_id=org_id,
-        role_id=4,  # Default role ID
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
+        granted_at=datetime.now(UTC),
     )
 
-    db_session.add(user_organization)
+    db_session.add(user_role)
     db_session.commit()
-    db_session.refresh(user_organization)
 
 
 async def _get_user_by_field(

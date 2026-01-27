@@ -49,7 +49,7 @@ from src.db.organizations import Organization
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User
 from src.security.auth import get_current_user
-from src.security.courses_security import courses_rbac_check_for_assignments
+from src.security.rbac import courses_rbac_check_for_assignments
 from src.services.code_challenges.grading import (
     apply_grading_strategy,
     calculate_composite_score,

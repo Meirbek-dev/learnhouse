@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
-from src.db.roles import RoleCreate, RoleRead, RoleUpdate
+from src.db.permissions import RoleCreate, RoleRead, RoleUpdate
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
 from src.services.roles.roles import (

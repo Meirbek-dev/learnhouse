@@ -4,7 +4,7 @@ from pydantic import ConfigDict, EmailStr
 from sqlalchemy import JSON, Column
 from sqlmodel import Field
 
-from src.db.roles import RoleRead
+from src.db.permissions import RoleRead
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
 if TYPE_CHECKING:

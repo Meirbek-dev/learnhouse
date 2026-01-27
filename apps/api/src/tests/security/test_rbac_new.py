@@ -15,7 +15,7 @@ from sqlmodel.pool import StaticPool
 from src.db.permissions.enums import Action, ResourceType, Scope
 from src.db.permissions.models import (
     Permission,
-    RoleNew,
+    Role,
     RolePermission,
     UserRole,
 )
@@ -70,8 +70,8 @@ class TestPermissionModels:
         assert perm.scope == Scope.ORG
 
     def test_role_new_model_creation(self):
-        """Test creating a RoleNew model."""
-        role = RoleNew(
+        """Test creating a Role model."""
+        role = Role(
             name="Test Role",
             slug="test-role",
             description="A test role",
@@ -214,14 +214,34 @@ class TestPolicyEngine:
     def test_scope_all_matches(self, mock_db):
         """Scope.ALL should always match."""
         engine = PolicyEngine(mock_db)
-        assert engine._scope_matches(Scope.ALL, is_owner=False) is True
-        assert engine._scope_matches(Scope.ALL, is_owner=True) is True
+        scope_context = {"is_owner": False, "request_org_id": None, "role_org_id": None}
+        assert engine._scope_matches(Scope.ALL, scope_context) is True
+        scope_context["is_owner"] = True
+        assert engine._scope_matches(Scope.ALL, scope_context) is True
 
     def test_scope_own_requires_ownership(self, mock_db):
         """Scope.OWN should require ownership."""
         engine = PolicyEngine(mock_db)
-        assert engine._scope_matches(Scope.OWN, is_owner=True) is True
-        assert engine._scope_matches(Scope.OWN, is_owner=False) is False
+        scope_context = {"is_owner": True, "request_org_id": None, "role_org_id": None}
+        assert engine._scope_matches(Scope.OWN, scope_context) is True
+        scope_context["is_owner"] = False
+        assert engine._scope_matches(Scope.OWN, scope_context) is False
+
+    def test_scope_org_matches(self, mock_db):
+        """Scope.ORG should match when org IDs align."""
+        engine = PolicyEngine(mock_db)
+
+        # Global role (role_org_id is None) can access any org
+        scope_context = {"is_owner": False, "request_org_id": 1, "role_org_id": None}
+        assert engine._scope_matches(Scope.ORG, scope_context) is True
+
+        # Matching org IDs
+        scope_context = {"is_owner": False, "request_org_id": 1, "role_org_id": 1}
+        assert engine._scope_matches(Scope.ORG, scope_context) is True
+
+        # Mismatching org IDs
+        scope_context = {"is_owner": False, "request_org_id": 2, "role_org_id": 1}
+        assert engine._scope_matches(Scope.ORG, scope_context) is False
 
     def test_conditions_match_empty(self, mock_db):
         """Empty conditions should always match."""
@@ -261,14 +281,14 @@ class TestRoleService:
 
     def test_create_role_duplicate_raises(self, mock_db):
         """create() should raise if role with same slug exists."""
-        from src.db.permissions.models import RoleNewCreate
+        from src.db.permissions.models import RoleCreate
 
         # Mock existing role
-        existing = Mock(spec=RoleNew)
+        existing = Mock(spec=Role)
         mock_db.exec.return_value.first.return_value = existing
 
         service = RoleService(mock_db)
-        data = RoleNewCreate(
+        data = RoleCreate(
             name="Test Role",
             slug="test-role",
             description="A test role",
@@ -279,7 +299,7 @@ class TestRoleService:
 
     def test_delete_system_role_raises(self, mock_db):
         """delete() should raise if trying to delete system role."""
-        system_role = Mock(spec=RoleNew)
+        system_role = Mock(spec=Role)
         system_role.is_system = True
         mock_db.get.return_value = system_role
 
@@ -365,7 +385,7 @@ class TestPermissionIntegration:
     def test_role_hierarchy_concept(self):
         """Roles can have parent roles for permission inheritance."""
         # Create role hierarchy: super-admin -> org-admin -> instructor
-        super_admin = RoleNew(
+        super_admin = Role(
             id=1,
             name="Super Admin",
             slug="super-admin",
@@ -373,7 +393,7 @@ class TestPermissionIntegration:
             parent_role_id=None,
         )
 
-        org_admin = RoleNew(
+        org_admin = Role(
             id=2,
             name="Org Admin",
             slug="org-admin",
@@ -381,7 +401,7 @@ class TestPermissionIntegration:
             parent_role_id=1,  # Inherits from super-admin
         )
 
-        instructor = RoleNew(
+        instructor = Role(
             id=3,
             name="Instructor",
             slug="instructor",

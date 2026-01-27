@@ -19,7 +19,7 @@ from src.db.courses.courses import Course
 from src.db.organizations import Organization
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser
-from src.security.courses_security import courses_rbac_check_for_activities
+from src.security.rbac import courses_rbac_check_for_activities
 from src.services.courses.activities.uploads.videos import upload_subtitle, upload_video
 
 

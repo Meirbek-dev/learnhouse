@@ -8,16 +8,20 @@ including permissions, roles, user-role assignments, and audit logging.
 from src.db.permissions.audit import PermissionAuditLog
 from src.db.permissions.enums import Action, ResourceType, Scope
 from src.db.permissions.models import (
+    BatchPermissionCheckRequest,
+    BatchPermissionCheckResponse,
     Permission,
+    PermissionCheckRequest,
+    PermissionCheckResult,
     PermissionCreate,
     PermissionRead,
     ResourcePermission,
     ResourcePermissionCreate,
     ResourcePermissionRead,
-    RoleNew,
-    RoleNewCreate,
-    RoleNewRead,
-    RoleNewUpdate,
+    Role,
+    RoleCreate,
+    RoleRead,
+    RoleUpdate,
     RolePermission,
     RolePermissionCreate,
     RoleWithPermissions,
@@ -31,10 +35,15 @@ from src.db.permissions.models import (
 __all__ = [
     # Enums
     "Action",
+    # Batch permission check models
+    "BatchPermissionCheckRequest",
+    "BatchPermissionCheckResponse",
     # Permission models
     "Permission",
     # Audit
     "PermissionAuditLog",
+    "PermissionCheckRequest",
+    "PermissionCheckResult",
     "PermissionCreate",
     "PermissionRead",
     # Resource-level permissions
@@ -42,11 +51,11 @@ __all__ = [
     "ResourcePermissionCreate",
     "ResourcePermissionRead",
     "ResourceType",
-    # Role models
-    "RoleNew",
-    "RoleNewCreate",
-    "RoleNewRead",
-    "RoleNewUpdate",
+    # Role models (new names)
+    "Role",
+    "RoleCreate",
+    "RoleRead",
+    "RoleUpdate",
     # Role-Permission junction
     "RolePermission",
     "RolePermissionCreate",

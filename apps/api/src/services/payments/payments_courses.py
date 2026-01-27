@@ -5,7 +5,7 @@ from src.db.courses.courses import Course
 from src.db.payments.payments_courses import PaymentsCourse
 from src.db.payments.payments_products import PaymentsProduct
 from src.db.users import AnonymousUser, PublicUser
-from src.security.courses_security import courses_rbac_check
+from src.security.rbac import courses_rbac_check
 
 
 async def link_course_to_product(

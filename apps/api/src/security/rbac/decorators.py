@@ -189,7 +189,7 @@ def require_org_role(
         async def wrapper(*args, **kwargs) -> Any:
             from sqlmodel import select
 
-            from src.db.permissions.models import RoleNew, UserRole
+            from src.db.permissions.models import Role, UserRole
 
             current_user = kwargs.get("current_user")
             db_session = kwargs.get("db_session")
@@ -210,11 +210,11 @@ def require_org_role(
             # Check if user has the required role
             statement = (
                 select(UserRole)
-                .join(RoleNew, RoleNew.id == UserRole.role_id)
+                .join(Role, Role.id == UserRole.role_id)
                 .where(
                     UserRole.user_id == current_user.id,
                     UserRole.org_id == int(org_id),
-                    RoleNew.slug == role_slug,
+                    Role.slug == role_slug,
                 )
             )
             result = db_session.exec(statement).first()
