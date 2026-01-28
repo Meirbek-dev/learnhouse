@@ -526,6 +526,69 @@ async def api_check_single_permission(
 
 
 # ---------------------------------------------------------------------------
+# Permission Templates
+# ---------------------------------------------------------------------------
+
+
+@router.get("/templates")
+async def api_list_permission_templates(
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
+) -> dict[str, list[tuple[str, str, str]]]:
+    """
+    List all available permission templates.
+
+    Templates are predefined permission sets for common role types
+    like content_creator, moderator, analyst, grader, and student.
+    """
+    if isinstance(current_user, AnonymousUser) or current_user.id == 0:
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    service = RoleService(db_session)
+    return service.list_permission_templates()
+
+
+@router.post("/roles-new/{role_id}/apply-template/{template_name}")
+async def api_apply_permission_template(
+    role_id: int,
+    template_name: str,
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
+    checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
+):
+    """
+    Apply a permission template to a role.
+
+    This quickly assigns a predefined set of permissions based on
+    common role archetypes (e.g., content_creator, moderator, analyst).
+
+    Requires role:update:org permission.
+    """
+    service = RoleService(db_session)
+    existing = service.get_by_id(role_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Role not found")
+
+    checker.require(
+        current_user, Action.UPDATE, ResourceType.ROLE, org_id=existing.org_id
+    )
+
+    try:
+        service.apply_permission_template(
+            role_id=role_id,
+            template_name=template_name,
+            granted_by=current_user.id,
+        )
+        return {
+            "message": f"Template '{template_name}' applied successfully to role",
+            "role_id": role_id,
+            "template": template_name,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+# ---------------------------------------------------------------------------
 # Admin Endpoints
 # ---------------------------------------------------------------------------
 

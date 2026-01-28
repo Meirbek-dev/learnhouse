@@ -36,21 +36,18 @@ def upgrade() -> None:
     conn.execute(text("""
         CREATE INDEX IF NOT EXISTS ix_role_permissions_role_perm
         ON role_permissions (role_id, permission_id)
-        WHERE deleted_at IS NULL
     """))
 
     # Index for resource_permissions to speed up resource-level checks
     conn.execute(text("""
         CREATE INDEX IF NOT EXISTS ix_resource_permissions_lookup
-        ON resource_permissions (user_id, resource_type, resource_id)
-        WHERE expires_at IS NULL OR expires_at > NOW()
+        ON resource_permissions (user_id, resource_type, resource_id, expires_at)
     """))
 
     # Index for faster user role queries with org filtering
     conn.execute(text("""
         CREATE INDEX IF NOT EXISTS ix_user_roles_org_user
-        ON user_roles (org_id, user_id)
-        WHERE expires_at IS NULL OR expires_at > NOW()
+        ON user_roles (org_id, user_id, expires_at)
     """))
 
     # 2. Create recursive function to get role hierarchy efficiently
@@ -111,9 +108,8 @@ def upgrade() -> None:
                     AND (ur.expires_at IS NULL OR ur.expires_at > NOW())
                     AND (org_id_param IS NULL OR ur.org_id = org_id_param)
                     AND p.action = action_param
-                    AND p.resource = resource_param
+                    AND p.resource_type = resource_param
                     AND p.scope = scope_param
-                    AND (rp.deleted_at IS NULL)
             ) INTO has_perm;
 
             RETURN has_perm;
@@ -124,7 +120,7 @@ def upgrade() -> None:
     # 4. Add missing index on permissions for lookup efficiency
     conn.execute(text("""
         CREATE INDEX IF NOT EXISTS ix_permissions_action_resource_scope
-        ON permissions (action, resource, scope)
+        ON permissions (action, resource_type, scope)
     """))
 
     print("✅ RBAC v4 migration completed successfully")

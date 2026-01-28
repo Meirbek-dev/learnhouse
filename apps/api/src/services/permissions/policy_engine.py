@@ -385,31 +385,33 @@ class PolicyEngine:
         """
         Get all role IDs in the hierarchy chain (role + all parents).
 
+        Optimized to fetch all roles in hierarchy with a single recursive query.
         Limits traversal to MAX_ROLE_HIERARCHY_DEPTH to prevent
         performance issues from deeply nested hierarchies.
         """
-        ids = []
-        current_id: int | None = role_id
-        visited = set()
-        depth = 0
+        # Use recursive CTE for efficient hierarchy traversal in single query
+        from sqlalchemy import text
 
-        while current_id is not None and current_id not in visited:
-            if depth >= MAX_ROLE_HIERARCHY_DEPTH:
-                _logger.warning(
-                    "Role hierarchy depth exceeded %d for role_id=%d",
-                    MAX_ROLE_HIERARCHY_DEPTH,
-                    role_id,
+        result = self.db.exec(
+            text("""
+                WITH RECURSIVE role_hierarchy AS (
+                    SELECT id, parent_role_id, 0 as depth
+                    FROM roles
+                    WHERE id = :role_id
+
+                    UNION ALL
+
+                    SELECT r.id, r.parent_role_id, rh.depth + 1
+                    FROM roles r
+                    INNER JOIN role_hierarchy rh ON r.id = rh.parent_role_id
+                    WHERE rh.depth < :max_depth
                 )
-                break
+                SELECT id FROM role_hierarchy ORDER BY depth
+            """),
+            {"role_id": role_id, "max_depth": MAX_ROLE_HIERARCHY_DEPTH}
+        )
 
-            visited.add(current_id)
-            ids.append(current_id)
-            depth += 1
-
-            role = self.db.get(Role, current_id)
-            current_id = role.parent_role_id if role else None
-
-        return ids
+        return [row[0] for row in result.fetchall()]
 
     def _scope_matches(self, scope: Scope, scope_context: dict) -> bool:
         """
@@ -459,7 +461,17 @@ class PolicyEngine:
 
     def _conditions_match(self, conditions: dict | None, context: dict | None) -> bool:
         """
-        Evaluate ABAC conditions.
+        Evaluate ABAC conditions with advanced operators.
+
+        Supports condition types:
+        - Simple equality: {"field": "value"}
+        - Complex rules: {"type": "and|or|not", "rules": [...]}
+
+        Rule operators:
+        - ==, !=: Equality checks
+        - >, >=, <, <=: Numeric comparisons
+        - in, not_in: Membership checks
+        - contains: String/list containment
 
         Args:
             conditions: Conditions from the role-permission assignment
@@ -467,12 +479,27 @@ class PolicyEngine:
 
         Returns:
             True if all conditions match (or no conditions defined)
+
+        Example:
+            conditions = {
+                "type": "and",
+                "rules": [
+                    {"field": "time.hour", "operator": ">=", "value": 9},
+                    {"field": "time.hour", "operator": "<", "value": 17},
+                    {"field": "user.department", "operator": "==", "value": "engineering"}
+                ]
+            }
         """
         if not conditions:
             return True
 
         if not context:
+            # If conditions exist but no context provided, deny
             return False
+
+        # Check if this is a complex condition with rules
+        if "type" in conditions and "rules" in conditions:
+            return self._evaluate_complex_condition(conditions, context)
 
         # Simple ABAC: check if all condition keys match context values
         for key, expected in conditions.items():
@@ -482,6 +509,109 @@ class PolicyEngine:
                 return False
 
         return True
+
+    def _evaluate_complex_condition(self, condition: dict, context: dict) -> bool:
+        """
+        Evaluate complex ABAC condition with logical operators.
+
+        Args:
+            condition: Condition with type and rules
+            context: Request context
+
+        Returns:
+            True if condition matches
+        """
+        condition_type = condition.get("type", "and")
+        rules = condition.get("rules", [])
+
+        if not rules:
+            return True
+
+        if condition_type == "and":
+            return all(self._evaluate_rule(rule, context) for rule in rules)
+        elif condition_type == "or":
+            return any(self._evaluate_rule(rule, context) for rule in rules)
+        elif condition_type == "not":
+            return not any(self._evaluate_rule(rule, context) for rule in rules)
+
+        _logger.warning("Unknown condition type: %s", condition_type)
+        return False
+
+    def _evaluate_rule(self, rule: dict, context: dict) -> bool:
+        """
+        Evaluate a single ABAC rule.
+
+        Args:
+            rule: Rule with field, operator, and value
+            context: Request context
+
+        Returns:
+            True if rule matches
+        """
+        field = rule.get("field")
+        operator = rule.get("operator", "==")
+        expected = rule.get("value")
+
+        if not field:
+            return False
+
+        # Get actual value from context (supports nested fields with dot notation)
+        actual = self._get_context_value(field, context)
+
+        # Evaluate based on operator
+        try:
+            if operator == "==":
+                return actual == expected
+            elif operator == "!=":
+                return actual != expected
+            elif operator == ">":
+                return actual > expected
+            elif operator == ">=":
+                return actual >= expected
+            elif operator == "<":
+                return actual < expected
+            elif operator == "<=":
+                return actual <= expected
+            elif operator == "in":
+                return actual in expected if isinstance(expected, (list, tuple, set)) else False
+            elif operator == "not_in":
+                return actual not in expected if isinstance(expected, (list, tuple, set)) else True
+            elif operator == "contains":
+                if isinstance(actual, str):
+                    return expected in actual
+                elif isinstance(actual, (list, tuple)):
+                    return expected in actual
+                return False
+            else:
+                _logger.warning("Unknown operator: %s", operator)
+                return False
+        except (TypeError, AttributeError) as e:
+            _logger.warning("Error evaluating rule %s: %s", rule, e)
+            return False
+
+    def _get_context_value(self, field: str, context: dict) -> any:
+        """
+        Get value from context supporting dot notation for nested fields.
+
+        Args:
+            field: Field name (supports dot notation like "user.department")
+            context: Context dictionary
+
+        Returns:
+            Field value or None if not found
+        """
+        parts = field.split(".")
+        value = context
+
+        for part in parts:
+            if isinstance(value, dict):
+                value = value.get(part)
+                if value is None:
+                    return None
+            else:
+                return None
+
+        return value
 
     def get_user_permissions(
         self,

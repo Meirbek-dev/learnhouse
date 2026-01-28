@@ -30,6 +30,57 @@ from src.services.permissions.permission_cache import (
 )
 from src.services.permissions.permission_service import PermissionService
 
+# Permission templates for common role types
+PERMISSION_TEMPLATES = {
+    "content_creator": [
+        ("courses", "create", "org"),
+        ("courses", "read", "all"),
+        ("courses", "update", "own"),
+        ("courses", "delete", "own"),
+        ("activities", "create", "own"),
+        ("activities", "update", "own"),
+        ("activities", "delete", "own"),
+        ("chapters", "create", "own"),
+        ("chapters", "update", "own"),
+        ("chapters", "delete", "own"),
+        ("collections", "create", "org"),
+        ("collections", "read", "all"),
+        ("collections", "update", "own"),
+    ],
+    "moderator": [
+        ("discussions", "read", "all"),
+        ("discussions", "moderate", "org"),
+        ("discussions", "delete", "org"),
+        ("users", "read", "org"),
+        ("activities", "read", "all"),
+        ("courses", "read", "all"),
+    ],
+    "analyst": [
+        ("analytics", "read", "org"),
+        ("analytics", "export", "org"),
+        ("courses", "read", "org"),
+        ("users", "read", "org"),
+        ("activities", "read", "org"),
+    ],
+    "grader": [
+        ("assignments", "read", "org"),
+        ("assignments", "grade", "org"),
+        ("exams", "read", "org"),
+        ("exams", "grade", "org"),
+        ("courses", "read", "org"),
+    ],
+    "student": [
+        ("courses", "read", "all"),
+        ("courses", "enroll", "all"),
+        ("activities", "read", "assigned"),
+        ("activities", "submit", "assigned"),
+        ("assignments", "submit", "assigned"),
+        ("exams", "submit", "assigned"),
+        ("discussions", "read", "all"),
+        ("discussions", "create", "assigned"),
+    ],
+}
+
 
 class RoleService:
     """Service for managing roles and their permissions."""
@@ -48,21 +99,92 @@ class RoleService:
 
     def get_by_slug(self, slug: str, org_id: int | None = None) -> Role | None:
         """
-        Get a role by slug and optional org_id.
+        Get a role by slug.
 
         Args:
-            slug: Role slug (e.g., 'instructor')
-            org_id: Organization ID (None for global roles)
+            slug: Role slug
+            org_id: Optional organization ID filter
 
         Returns:
             Role if found, None otherwise
         """
-        statement = select(Role).where(Role.slug == slug)
+        query = select(Role).where(Role.slug == slug)
+
         if org_id is not None:
-            statement = statement.where(Role.org_id == org_id)
+            query = query.where(Role.org_id == org_id)
         else:
-            statement = statement.where(Role.org_id.is_(None))  # type: ignore[union-attr]
-        return self.db.exec(statement).first()
+            query = query.where(Role.org_id.is_(None))
+
+        return self.db.exec(query).first()
+
+    def apply_permission_template(
+        self,
+        role_id: int,
+        template_name: str,
+        granted_by: int | None = None,
+    ) -> None:
+        """
+        Apply a permission template to a role.
+
+        This is a convenience method to quickly assign a predefined set
+        of permissions to a role based on common role archetypes.
+
+        Args:
+            role_id: Role ID to apply template to
+            template_name: Name of the template (e.g., 'content_creator', 'moderator')
+            granted_by: User ID who granted these permissions
+
+        Raises:
+            ValueError: If template name is unknown or role doesn't exist
+
+        Example:
+            service.apply_permission_template(role_id, "content_creator", admin_user_id)
+        """
+        if template_name not in PERMISSION_TEMPLATES:
+            available = ", ".join(PERMISSION_TEMPLATES.keys())
+            raise ValueError(
+                f"Unknown template: {template_name}. "
+                f"Available templates: {available}"
+            )
+
+        role = self.get_by_id(role_id)
+        if not role:
+            raise ValueError(f"Role {role_id} not found")
+
+        template = PERMISSION_TEMPLATES[template_name]
+        permissions_added = 0
+
+        for resource_str, action_str, scope_str in template:
+            try:
+                # Get or create permission
+                permission = self.permission_service.get_or_create(
+                    action=Action(action_str),
+                    resource=ResourceType(resource_str),
+                    scope=Scope(scope_str),
+                )
+
+                # Add to role if not already assigned
+                self.add_permission_to_role(
+                    role_id=role_id,
+                    permission_id=permission.id,  # type: ignore[arg-type]
+                    granted_by=granted_by,
+                )
+                permissions_added += 1
+            except ValueError:
+                # Permission already assigned, skip
+                pass
+
+        # Invalidate cache
+        invalidate_role_permissions(role_id)
+
+    def list_permission_templates(self) -> dict[str, list[tuple[str, str, str]]]:
+        """
+        Get all available permission templates.
+
+        Returns:
+            Dictionary mapping template names to their permission lists
+        """
+        return PERMISSION_TEMPLATES.copy()
 
     def list_all(
         self, org_id: int | None = None, include_global: bool = True
