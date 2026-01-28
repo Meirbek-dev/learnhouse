@@ -98,34 +98,20 @@ export function usePermission() {
    * User's effective permissions map.
    */
   const permissions = useMemo(() => {
-    if (permissionsData?.permissions) {
-      return permissionsData.permissions;
-    }
-    // Fallback to session permissions (for backward compatibility)
-    return {};
+    // Only use API-fetched permissions
+    return permissionsData?.permissions ?? {};
   }, [permissionsData?.permissions]);
 
   /**
    * User's role slugs.
    */
   const roles = useMemo(() => {
+    // Only use API-fetched roles
     if (permissionsData?.roles) {
       return permissionsData.roles.map(r => r.slug).filter(Boolean);
     }
-
-    // Fallback to session roles (for backward compatibility)
-    const userRoles = session?.roles ?? [];
-    const now = new Date();
-
-    return userRoles
-      .filter((userRole: any) => {
-        if (!userRole.expires_at) return true;
-        const expiryDate = new Date(userRole.expires_at);
-        return expiryDate > now;
-      })
-      .map((userRole: any) => userRole.role?.slug || userRole.role?.role_uuid || '')
-      .filter(Boolean);
-  }, [permissionsData?.roles, session?.roles]);
+    return [];
+  }, [permissionsData?.roles]);
 
   /**
    * Check if user has a specific permission.

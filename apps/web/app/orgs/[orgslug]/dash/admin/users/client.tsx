@@ -94,7 +94,7 @@ export default function UserRolesClient() {
     if (!accessToken || !org?.id) return;
 
     try {
-      const res = await fetch(`${getAPIUrl()}/api/v1/roles-new?org_id=${org.id}`, {
+      const res = await fetch(`${getAPIUrl()}roles?org_id=${org.id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 

@@ -111,7 +111,7 @@ const RolesUpdate: FC<Props> = (props) => {
                   items={
                     !roles || rolesError
                       ? undefined
-                      : roles.map((role: any) => ({ value: role.role_uuid || role.id.toString(), label: role.name }))
+                      : roles.map((role: any) => ({ value: role.slug || role.id.toString(), label: role.name }))
                   }
                 >
                   <FormControl>
@@ -127,8 +127,8 @@ const RolesUpdate: FC<Props> = (props) => {
                         <SelectGroup>
                           {roles.map((role: any) => (
                             <SelectItem
-                              key={role.role_uuid || role.id}
-                              value={role.role_uuid || role.id.toString()}
+                              key={role.slug || role.id}
+                              value={role.slug || role.id.toString()}
                             >
                               {role.name}
                             </SelectItem>

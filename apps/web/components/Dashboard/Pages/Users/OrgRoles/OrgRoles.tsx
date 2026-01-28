@@ -136,20 +136,16 @@ const OrgRoles: FC = () => {
     return t('basicAccess');
   };
 
-  // Check if a role is system-wide (TYPE_GLOBAL or role_uuid starts with role_global_)
+  // Check if a role is system-wide (is_system flag or well-known system role slugs)
   const isSystemRole = (role: any) => {
-    // Check for role_type field first
-    if (role.role_type === 'TYPE_GLOBAL') {
+    // Check for is_system field (new RBAC system)
+    if (role.is_system === true) {
       return true;
     }
 
-    // Check for role_uuid starting with role_global_
-    if (role.role_uuid?.startsWith('role_global_')) {
-      return true;
-    }
-
-    // Check if the role name indicates it's a system role
-    if (role.name && ['Admin', 'Maintainer', 'Instructor', 'User'].includes(role.name)) {
+    // Check for well-known system role slugs
+    const systemSlugs = ['super-admin', 'org-admin', 'maintainer', 'instructor', 'user'];
+    if (role.slug && systemSlugs.includes(role.slug)) {
       return true;
     }
 

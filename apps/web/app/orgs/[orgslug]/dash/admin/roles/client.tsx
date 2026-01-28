@@ -78,10 +78,10 @@ export default function RBACAdminClient() {
       try {
         setLoading(true);
         const [rolesRes, permsRes] = await Promise.all([
-          fetch(`${getAPIUrl()}/api/v1/roles-new?org_id=${org.id}`, {
+          fetch(`${getAPIUrl()}roles?org_id=${org.id}`, {
             headers: { Authorization: `Bearer ${accessToken}` },
           }),
-          fetch(`${getAPIUrl()}/api/v1/permissions`, {
+          fetch(`${getAPIUrl()}permissions`, {
             headers: { Authorization: `Bearer ${accessToken}` },
           }),
         ]);
@@ -130,7 +130,7 @@ export default function RBACAdminClient() {
     if (!accessToken || !org?.id) return;
 
     try {
-      const res = await fetch(`${getAPIUrl()}/api/v1/roles-new`, {
+      const res = await fetch(`${getAPIUrl()}roles`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -194,7 +194,7 @@ export default function RBACAdminClient() {
     }
 
     try {
-      const res = await fetch(`${getAPIUrl()}/api/v1/roles-new/${roleId}`, {
+      const res = await fetch(`${getAPIUrl()}roles/${roleId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${accessToken}` },
       });
@@ -217,8 +217,8 @@ export default function RBACAdminClient() {
 
     try {
       const endpoint = hasPermission
-        ? `${getAPIUrl()}/api/v1/roles-new/${roleId}/permissions/${permissionId}`
-        : `${getAPIUrl()}/api/v1/roles-new/${roleId}/permissions`;
+        ? `${getAPIUrl()}roles/${roleId}/permissions/${permissionId}`
+        : `${getAPIUrl()}roles/${roleId}/permissions`;
 
       const res = await fetch(endpoint, {
         method: hasPermission ? 'DELETE' : 'POST',
@@ -231,7 +231,7 @@ export default function RBACAdminClient() {
 
       if (res.ok) {
         // Refresh the role's permissions
-        const roleRes = await fetch(`${getAPIUrl()}/api/v1/roles-new/${roleId}`, {
+        const roleRes = await fetch(`${getAPIUrl()}roles/${roleId}`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
 
