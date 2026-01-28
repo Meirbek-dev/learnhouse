@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       className={`${inter.variable} ${jetBrainsMono.variable}`}
-      lang="en"
+      lang="ru"
       suppressHydrationWarning
     >
       <head>

@@ -2,6 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useCallback, useMemo } from 'react';
+import useSWR from 'swr';
 
 import {
   Actions,
@@ -13,12 +14,51 @@ import {
   isInstructorOrHigher,
 } from '@/types/permissions';
 import type { Action, ResourceType, Scope } from '@/types/permissions';
+import { getAPIUrl } from '@/services/config/config';
+import { useOrg } from '@components/Contexts/OrgContext';
+
+/**
+ * User permissions response from backend.
+ */
+interface UserPermissionsResponse {
+  user_id: number;
+  org_id: number | null;
+  roles: Array<{
+    id: number;
+    name: string;
+    slug: string;
+    description: string | null;
+  }>;
+  permissions: Record<string, boolean>;
+  resource_permissions: any[];
+}
+
+/**
+ * SWR fetcher with access token.
+ */
+async function permissionFetcher(url: string, accessToken?: string): Promise<UserPermissionsResponse> {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`;
+  }
+
+  const response = await fetch(url, { headers });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch permissions: ${response.statusText}`);
+  }
+
+  return response.json();
+}
 
 /**
  * Hook for checking user permissions.
  *
- * This hook provides methods for checking if the current user has
- * specific permissions based on their roles and effective permissions.
+ * This hook fetches permissions from the backend API and provides methods
+ * for checking if the current user has specific permissions.
  *
  * @example
  * ```tsx
@@ -37,31 +77,55 @@ import type { Action, ResourceType, Scope } from '@/types/permissions';
  */
 export function usePermission() {
   const { data: session, status } = useSession();
+  const org = useOrg() as any;
+  const orgId = org?.id;
+
+  // Fetch permissions from backend API
+  const accessToken = session?.tokens?.access_token;
+  const shouldFetch = status === 'authenticated' && accessToken;
+
+  const { data: permissionsData, error, isLoading: isLoadingPermissions } = useSWR<UserPermissionsResponse>(
+    shouldFetch ? `${getAPIUrl()}permissions/me/permissions${orgId ? `?org_id=${orgId}` : ''}` : null,
+    (url: string) => permissionFetcher(url, accessToken),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 60000, // Cache for 1 minute
+    }
+  );
 
   /**
    * User's effective permissions map.
    */
-  const permissions = useMemo(() => session?.permissions ?? {}, [session?.permissions]);
+  const permissions = useMemo(() => {
+    if (permissionsData?.permissions) {
+      return permissionsData.permissions;
+    }
+    // Fallback to session permissions (for backward compatibility)
+    return session?.permissions ?? {};
+  }, [permissionsData?.permissions, session?.permissions]);
 
   /**
-   * User's role slugs extracted from UserRoleWithOrg array.
-   * Filters out expired roles.
+   * User's role slugs.
    */
   const roles = useMemo(() => {
+    if (permissionsData?.roles) {
+      return permissionsData.roles.map(r => r.slug).filter(Boolean);
+    }
+
+    // Fallback to session roles (for backward compatibility)
     const userRoles = session?.roles ?? [];
     const now = new Date();
 
-    // Filter out expired roles and extract slugs
     return userRoles
       .filter((userRole: any) => {
-        // Keep roles without expiry or with future expiry
         if (!userRole.expires_at) return true;
         const expiryDate = new Date(userRole.expires_at);
         return expiryDate > now;
       })
       .map((userRole: any) => userRole.role?.slug || userRole.role?.role_uuid || '')
       .filter(Boolean);
-  }, [session?.roles]);
+  }, [permissionsData?.roles, session?.roles]);
 
   /**
    * Check if user has a specific permission.
@@ -177,9 +241,9 @@ export function usePermission() {
   const isAuthenticated = status === 'authenticated';
 
   /**
-   * Check if session is loading.
+   * Check if session or permissions are loading.
    */
-  const isLoading = status === 'loading';
+  const isLoading = status === 'loading' || isLoadingPermissions;
 
   return {
     // Permission checks

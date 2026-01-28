@@ -9,6 +9,7 @@ from sqlmodel.pool import StaticPool
 
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, InternalUser, PublicUser
+from src.db.organizations import Organization
 from src.services.permissions.unified_permission_service import (
     UnifiedPermissionService,
     get_permission_service,
@@ -128,6 +129,71 @@ class TestUnifiedPermissionService:
             raise_on_deny=False,
         )
         assert result is False
+
+    @pytest.mark.asyncio
+    async def test_anonymous_user_can_read_public_org(self, db_session, anonymous_user):
+        """Anonymous users should be able to READ organizations marked as public/explore."""
+        service = get_permission_service(db_session)
+
+        # Create an organization marked as public (explore=True)
+        org = Organization(
+            name="Public Org",
+            slug="public-org",
+            email="admin@public.org",
+            explore=True,
+            org_uuid="org_public_123",
+        )
+        db_session.add(org)
+        db_session.commit()
+        db_session.refresh(org)
+
+        # Anonymous user should be allowed to read this organization
+        result = await service.check(
+            user=anonymous_user,
+            action=Action.READ,
+            resource=ResourceType.ORGANIZATION,
+            resource_id=org.org_uuid,
+            raise_on_deny=False,
+        )
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_anonymous_user_can_read_org_with_public_course(self, db_session, anonymous_user):
+        """If organization has a public course, anonymous users can READ the organization."""
+        service = get_permission_service(db_session)
+
+        # Create an organization without explore flag
+        org = Organization(
+            name="Public Course Org",
+            slug="public-course-org",
+            email="admin@public.org",
+            explore=False,
+            org_uuid="org_public_course",
+        )
+        db_session.add(org)
+        db_session.commit()
+        db_session.refresh(org)
+
+        # Create a public course for this org
+        course = Course(
+            name="Public Course",
+            org_id=org.id,
+            course_uuid="course_public_1",
+            public=True,
+        )
+        db_session.add(course)
+        db_session.commit()
+        db_session.refresh(course)
+
+        # Anonymous user should be allowed to read this organization due to public course
+        result = await service.check(
+            user=anonymous_user,
+            action=Action.READ,
+            resource=ResourceType.ORGANIZATION,
+            resource_id=org.org_uuid,
+            raise_on_deny=False,
+        )
+        assert result is True
 
     @pytest.mark.asyncio
     async def test_batch_check(self, db_session, public_user):

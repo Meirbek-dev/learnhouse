@@ -192,6 +192,31 @@ class UnifiedPermissionService:
                 select(Course).where(Course.course_uuid == resource_id)
             ).first()
             return course.public if course else False
+
+        if resource_type == ResourceType.ORGANIZATION:
+            # Organizations have an 'explore' flag that marks them as publicly discoverable
+            # Additionally, an organization is effectively public if it owns any public courses
+            from src.db.organizations import Organization
+            from src.db.courses.courses import Course
+
+            org = self.db.exec(
+                select(Organization).where(Organization.org_uuid == resource_id)
+            ).first()
+
+            if not org:
+                return False
+
+            if getattr(org, "explore", False):
+                return True
+
+            # Fallback: if organization has any public course, consider it public
+            public_course = (
+                self.db.exec(
+                    select(Course).where(Course.org_id == org.id, Course.public)
+                ).first()
+            )
+            return public_course is not None
+
         # Add more resource types as needed
         return False
 
@@ -490,14 +515,21 @@ class UnifiedPermissionService:
         resource_id: str,
     ) -> bool:
         """Check for resource-level permission overrides."""
+        # Ensure we pass the enum *value* (lowercase string) to SQL to match DB enum
+        # Normalize resource type to lowercase string for Postgres ENUM compatibility
+        if hasattr(resource, "value"):
+            resource_val = resource.value.lower()
+        else:
+            resource_val = str(resource).lower()
+
         statement = (
             select(ResourcePermission)
             .join(Permission, Permission.id == ResourcePermission.permission_id)
             .where(
                 ResourcePermission.user_id == user_id,
-                ResourcePermission.resource_type == resource,
+                ResourcePermission.resource_type == resource_val,
                 ResourcePermission.resource_id == resource_id,
-                Permission.action == action,
+                Permission.action == (action.value.lower() if hasattr(action, "value") else str(action).lower()),
             )
         )
 
@@ -605,7 +637,7 @@ class UnifiedPermissionService:
             .join(RolePermission, RolePermission.permission_id == Permission.id)
             .where(
                 RolePermission.role_id.in_(role_ids),
-                Permission.resource_type == resource,
+                Permission.resource_type == (resource.value.lower() if hasattr(resource, "value") else str(resource).lower()),
                 Permission.action == action,
             )
         )

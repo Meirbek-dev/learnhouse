@@ -63,14 +63,19 @@ async def get_organization(
             detail="Organization not found",
         )
 
-    # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    # Allow anonymous read if the organization is marked as discoverable (explore=True)
+    if isinstance(current_user, AnonymousUser) and getattr(org, "explore", False):
+        # Skip RBAC check for public orgs
+        pass
+    else:
+        # RBAC check
+        permission_service = get_permission_service(db_session)
+        await permission_service.check(
+            user=current_user,
+            action=Action.READ,
+            resource=ResourceType.ORGANIZATION,
+            resource_id=org.org_uuid,
+        )
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -103,15 +108,20 @@ async def get_organization_by_slug(
             detail="Organization not found",
         )
 
-    # RBAC check
-    permission_service = get_permission_service(db_session)
+    # Allow anonymous read if the organization is marked as discoverable (explore=True)
+    if isinstance(current_user, AnonymousUser) and getattr(org, "explore", False):
+        # Skip RBAC check for public orgs
+        pass
+    else:
+        # RBAC check
+        permission_service = get_permission_service(db_session)
 
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+        await permission_service.check(
+            user=current_user,
+            action=Action.READ,
+            resource=ResourceType.ORGANIZATION,
+            resource_id=org.org_uuid,
+        )
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)

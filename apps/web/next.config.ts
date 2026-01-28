@@ -2,18 +2,18 @@ import createNextIntlPlugin from 'next-intl/plugin';
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: '/umami/script.js',
-        destination: 'https://eu.umami.is/script.js',
-      },
-      {
-        source: '/umami/api/send',
-        destination: 'https://eu.umami.is/api/send',
-      },
-    ];
-  },
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: '/umami/script.js',
+  //       destination: 'https://eu.umami.is/script.js',
+  //     },
+  //     {
+  //       source: '/umami/api/send',
+  //       destination: 'https://eu.umami.is/api/send',
+  //     },
+  //   ];
+  // },
   experimental: {
     optimizePackageImports: [
       '@base-ui/react',
@@ -34,13 +34,7 @@ const nextConfig: NextConfig = {
       '@tiptap/extension-youtube',
       '@tiptap/extension-code-block-lowlight',
     ],
-    // Configure Server Actions body size limit (default is 1mb)
-    serverActions: {
-      bodySizeLimit: '5mb',
-      // allowedOrigins: ['https://example.com'], // add if you call Server Actions from other origins
-    },
   },
-
   compiler: {
     styledComponents: true,
   },
