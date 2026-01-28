@@ -15,7 +15,6 @@ from src.db.payments.payments_users import (
 from src.db.permissions.enums import Action, ResourceType
 from src.db.resource_authors import ResourceAuthor
 from src.db.users import AnonymousUser, InternalUser, PublicUser, User, UserRead
-from src.services.orgs.orgs import rbac_check
 from src.services.permissions import get_permission_service
 
 

@@ -46,10 +46,11 @@ from src.db.courses.code_challenges import (
 )
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
+from src.db.permissions.enums import Action, ResourceType
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User
 from src.security.auth import get_current_user
-from src.security.rbac import courses_rbac_check_for_assignments
+from src.services.permissions import get_permission_service
 from src.services.code_challenges.grading import (
     apply_grading_strategy,
     calculate_composite_score,
@@ -123,14 +124,16 @@ async def check_challenge_access(
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    # RBAC check
+    # RBAC check using standard permission service
+    permission_service = get_permission_service(db_session)
+    action = Action.UPDATE if require_instructor else Action.READ
+    
     try:
-        await courses_rbac_check_for_assignments(
-            None,  # Request not needed for basic check
-            course.course_uuid,
-            user,
-            "create" if require_instructor else "read",
-            db_session,
+        await permission_service.check(
+            user=user,
+            action=action,
+            resource=ResourceType.COURSE,
+            resource_id=course.course_uuid,
         )
     except HTTPException:
         if require_instructor:

@@ -5,7 +5,6 @@ from src.db.organizations import Organization
 from src.db.payments.payments_users import PaymentsUser
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
-from src.services.orgs.orgs import rbac_check
 from src.services.payments.payments_products import get_payments_product
 from src.services.permissions import get_permission_service
 from src.services.users.users import read_user_by_id
