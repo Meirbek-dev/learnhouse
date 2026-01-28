@@ -72,6 +72,9 @@ class UserSession(PydanticStrictBaseModel):
     permissions: dict[
         str, bool
     ] = {}  # Effective permissions: "course:create:org" -> True
+    permissions_timestamp: int | None = (
+        None  # Unix timestamp when permissions were loaded
+    )
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 

@@ -127,7 +127,7 @@ async def check_challenge_access(
     # RBAC check using standard permission service
     permission_service = get_permission_service(db_session)
     action = Action.UPDATE if require_instructor else Action.READ
-    
+
     try:
         await permission_service.check(
             user=user,

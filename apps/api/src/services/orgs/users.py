@@ -15,7 +15,6 @@ from src.db.organizations import (
 )
 from src.db.permissions import Role, RoleRead, UserRole
 from src.db.permissions.enums import Action, ResourceType
-from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.services.cache import redis_client
 from src.services.cache.redis_client import delete_keys, get_json, set_json
@@ -58,11 +57,11 @@ async def get_organization_users(
         resource_id=org.org_uuid,
     )
 
-    # Build base query
+    # Build base query joining via UserRole
     base_statement = (
         select(User)
-        .join(UserOrganization)
-        .join(Organization)
+        .join(UserRole, UserRole.user_id == User.id)
+        .join(Organization, UserRole.org_id == Organization.id)
         .where(Organization.id == org_id_int)
     )
 
@@ -148,8 +147,8 @@ async def remove_user_from_org(
         resource_id=org.org_uuid,
     )
 
-    statement = select(UserOrganization).where(
-        UserOrganization.user_id == user_id, UserOrganization.org_id == org.id
+    statement = select(UserRole).where(
+        UserRole.user_id == user_id, UserRole.org_id == org.id
     )
     result = db_session.exec(statement)
 
@@ -167,8 +166,8 @@ async def remove_user_from_org(
     ).first()
     admin_role_id = admin_role.id if admin_role else 1
 
-    statement = select(UserOrganization).where(
-        UserOrganization.org_id == org.id, UserOrganization.role_id == admin_role_id
+    statement = select(UserRole).where(
+        UserRole.org_id == org.id, UserRole.role_id == admin_role_id
     )
     result = db_session.exec(statement)
     admins = result.all()
@@ -238,8 +237,8 @@ async def update_user_role(
     ).first()
     admin_role_id = admin_role.id if admin_role else 1
 
-    statement = select(UserOrganization).where(
-        UserOrganization.org_id == org.id, UserOrganization.role_id == admin_role_id
+    statement = select(UserRole).where(
+        UserRole.org_id == org.id, UserRole.role_id == admin_role_id
     )
     result = db_session.exec(statement)
     admins = result.all()
@@ -260,8 +259,8 @@ async def update_user_role(
             detail="Organization must have at least one admin",
         )
 
-    statement = select(UserOrganization).where(
-        UserOrganization.user_id == user_id_int, UserOrganization.org_id == org.id
+    statement = select(UserRole).where(
+        UserRole.user_id == user_id_int, UserRole.org_id == org.id
     )
     result = db_session.exec(statement)
 

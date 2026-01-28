@@ -12,7 +12,7 @@ from ulid import ULID
 from src.db.organizations import Organization, OrganizationRead
 from src.db.permissions import Role, RoleRead, UserRole
 from src.db.permissions.enums import Action, ResourceType
-from src.db.user_organizations import UserOrganization
+from src.db.permissions.models import UserRole
 from src.db.users import (
     AnonymousUser,
     InternalUser,
@@ -367,13 +367,19 @@ async def get_user_session(
 
     # Get user's effective permissions from the new RBAC system
     permissions: dict[str, bool] = {}
+    permissions_timestamp: int | None = None
     try:
+        from datetime import UTC, datetime
         from src.services.permissions import get_permission_service
 
         permission_service = get_permission_service(db_session)
         # Get org_id from the current organization context if available
-        org_id = org.id if org and hasattr(org, 'id') else None
-        permissions = permission_service.get_user_permissions(current_user, org_id=org_id)
+        org_id = org.id if org and hasattr(org, "id") else None
+        permissions = permission_service.get_user_permissions(
+            current_user, org_id=org_id
+        )
+        # Add timestamp for cache validation (Unix timestamp in seconds)
+        permissions_timestamp = int(datetime.now(UTC).timestamp())
     except Exception as e:
         # Fallback: if error occurs, return empty permissions
         _logger.error(f"Error loading permissions for user {current_user.id}: {e}")
@@ -382,6 +388,7 @@ async def get_user_session(
         user=user_read,
         roles=roles,
         permissions=permissions,
+        permissions_timestamp=permissions_timestamp,
     )
 
 

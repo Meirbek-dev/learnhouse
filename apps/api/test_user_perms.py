@@ -20,6 +20,7 @@ try:
 except Exception as e:
     print(f"✗ Error: {e}")
     import traceback
+
     traceback.print_exc()
 
 print("\n✓ RBAC v6 migration complete - test file needs updating")

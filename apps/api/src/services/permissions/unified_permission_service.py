@@ -36,7 +36,13 @@ from src.db.permissions.constants import (
     ADMIN_OR_MAINTAINER_SLUGS,
     INSTRUCTOR_OR_HIGHER_SLUGS,
 )
-from src.db.permissions.enums import Action, AuditAction, AuditLevel, ResourceType, Scope
+from src.db.permissions.enums import (
+    Action,
+    AuditAction,
+    AuditLevel,
+    ResourceType,
+    Scope,
+)
 from src.db.permissions.models import (
     Permission,
     ResourcePermission,
@@ -250,9 +256,7 @@ class UnifiedPermissionService:
 
         # Check cache first
         action_str = action.value if hasattr(action, "value") else str(action)
-        resource_str = (
-            resource.value if hasattr(resource, "value") else str(resource)
-        )
+        resource_str = resource.value if hasattr(resource, "value") else str(resource)
         cache_key = f"{user_id}:{action_str}:{resource_str}:{resource_id}:{org_id}"
 
         if self.use_cache:
@@ -464,7 +468,11 @@ class UnifiedPermissionService:
 
         # Add request context if available
         if request:
-            context["ip_address"] = getattr(request.client, "host", None) if hasattr(request, "client") else None
+            context["ip_address"] = (
+                getattr(request.client, "host", None)
+                if hasattr(request, "client")
+                else None
+            )
             context["user_agent"] = request.headers.get("user-agent")
             context["method"] = request.method if hasattr(request, "method") else None
 
@@ -619,8 +627,7 @@ class UnifiedPermissionService:
         """Get all role IDs in the hierarchy chain using recursive CTE."""
         from sqlalchemy import text
 
-        result = self.db.exec(
-            text("""
+        stmt = text("""
                 WITH RECURSIVE role_hierarchy AS (
                     SELECT id, parent_role_id, 0 as depth
                     FROM roles
@@ -634,11 +641,10 @@ class UnifiedPermissionService:
                     WHERE rh.depth < :max_depth
                 )
                 SELECT id FROM role_hierarchy ORDER BY depth
-            """),
-            {"role_id": role_id, "max_depth": MAX_ROLE_HIERARCHY_DEPTH},
-        )
+            """).bindparams(role_id=role_id, max_depth=MAX_ROLE_HIERARCHY_DEPTH)
 
-        return [row[0] for row in result.fetchall()]
+        rows = self.db.exec(stmt).all()
+        return [r[0] for r in rows]
 
     def _scope_matches(self, scope: Scope, scope_context: dict) -> bool:
         """Check if a permission scope matches the current context."""
@@ -726,11 +732,23 @@ class UnifiedPermissionService:
             if operator == "<=":
                 return actual <= expected
             if operator == "in":
-                return actual in expected if isinstance(expected, (list, tuple, set)) else False
+                return (
+                    actual in expected
+                    if isinstance(expected, (list, tuple, set))
+                    else False
+                )
             if operator == "not_in":
-                return actual not in expected if isinstance(expected, (list, tuple, set)) else True
+                return (
+                    actual not in expected
+                    if isinstance(expected, (list, tuple, set))
+                    else True
+                )
             if operator == "contains":
-                return expected in actual if isinstance(actual, (str, list, tuple)) else False
+                return (
+                    expected in actual
+                    if isinstance(actual, (str, list, tuple))
+                    else False
+                )
             _logger.warning("Unknown operator: %s", operator)
             return False
         except (TypeError, AttributeError) as e:
@@ -922,14 +940,5 @@ def get_permission_service(
     """
     # Create a new instance (stateless)
     service = UnifiedPermissionService(db, use_cache=use_cache, audit_level=audit_level)
-
-    # Register resource-specific policies
-    from src.security.rbac.policies.course import CoursePolicy
-    from src.security.rbac.policies.organization import OrganizationPolicy
-    from src.security.rbac.policies.user import UserPolicy
-
-    service.register_policy(ResourceType.COURSE, CoursePolicy(db))
-    service.register_policy(ResourceType.ORGANIZATION, OrganizationPolicy(db))
-    service.register_policy(ResourceType.USER, UserPolicy(db))
 
     return service

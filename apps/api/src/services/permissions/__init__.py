@@ -6,6 +6,11 @@ roles, user-role assignments, and audit logging.
 """
 
 from src.services.permissions.audit_service import AuditService
+from src.services.permissions.permission_cache import (
+    invalidate_for_org,
+    invalidate_for_role,
+    invalidate_for_user,
+)
 from src.services.permissions.permission_service import PermissionService
 from src.services.permissions.role_service import RoleService
 from src.services.permissions.unified_permission_service import (
@@ -19,4 +24,7 @@ __all__ = [
     "RoleService",
     "UnifiedPermissionService",
     "get_permission_service",
+    "invalidate_for_org",
+    "invalidate_for_role",
+    "invalidate_for_user",
 ]

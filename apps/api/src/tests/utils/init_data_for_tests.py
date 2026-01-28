@@ -1,7 +1,7 @@
 from sqlmodel import Session, select
 
 from src.db.organizations import OrganizationCreate
-from src.db.user_organizations import UserOrganization
+from src.db.permissions.models import UserRole
 from src.db.users import User, UserCreate
 from src.services.setup.setup import (
     install_create_organization,
@@ -52,7 +52,7 @@ async def create_initial_data_for_tests(db_session: Session) -> bool:
         install_create_organization_user(user, "openu", db_session)
 
     # Make robin a normal user
-    statement = select(UserOrganization).join(User).where(User.username == "testo")
+    statement = select(UserRole).join(User).where(User.username == "testo")
     user_org = db_session.exec(statement).first()
 
     user_org.role_id = 3

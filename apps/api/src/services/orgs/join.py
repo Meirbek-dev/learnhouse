@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, Request
 from pydantic import Field
@@ -6,7 +6,7 @@ from sqlmodel import Session, select
 
 from src.db.organizations import Organization
 from src.db.strict_base_model import PydanticStrictBaseModel
-from src.db.user_organizations import UserOrganization
+from src.db.permissions.models import UserRole
 from src.db.users import AnonymousUser, PublicUser, User
 from src.services.orgs.invites import get_invite_code
 from src.services.orgs.orgs import get_org_join_mechanism
@@ -51,8 +51,8 @@ async def join_org(
         )
 
     # Check if user is already in the organization
-    statement = select(UserOrganization).where(
-        UserOrganization.user_id == args.user_id, UserOrganization.org_id == args.org_id
+    statement = select(UserRole).where(
+        UserRole.user_id == args.user_id, UserRole.org_id == args.org_id
     )
     result = db_session.exec(statement)
     userorg = result.first()
@@ -80,12 +80,12 @@ async def join_org(
             )
 
         # Link user and organization
-        user_organization = UserOrganization(
+        user_organization = UserRole(
             user_id=user.id,
             org_id=org.id,
             role_id=4,
-            creation_date=str(datetime.now()),
-            update_date=str(datetime.now()),
+            granted_at=datetime.now(UTC),
+            granted_by=None,
         )
         db_session.add(user_organization)
         db_session.commit()
@@ -94,12 +94,12 @@ async def join_org(
 
     if join_method == "open":
         # Link user and organization
-        user_organization = UserOrganization(
+        user_organization = UserRole(
             user_id=user.id,
             org_id=org.id,
             role_id=4,
-            creation_date=str(datetime.now()),
-            update_date=str(datetime.now()),
+            granted_at=datetime.now(UTC),
+            granted_by=None,
         )
         db_session.add(user_organization)
         db_session.commit()

@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Literal
 
 import orjson
@@ -33,7 +33,6 @@ from src.db.organizations import (
 )
 from src.db.permissions import Role, UserRole
 from src.db.permissions.enums import Action, ResourceType
-from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, InternalUser, PublicUser
 from src.services.orgs.uploads import (
     upload_org_landing_content,
@@ -163,12 +162,12 @@ async def create_org(
     db_session.refresh(org)
 
     # Link user to org
-    user_org = UserOrganization(
+    user_org = UserRole(
         user_id=int(current_user.id),
         org_id=int(org.id if org.id else 0),
         role_id=1,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
+        granted_at=datetime.now(UTC),
+        granted_by=None,
     )
     db_session.add(user_org)
     db_session.commit()
@@ -259,12 +258,12 @@ async def create_org_with_config(
     db_session.refresh(org)
 
     # Link user to org
-    user_org = UserOrganization(
+    user_org = UserRole(
         user_id=int(current_user.id),
         org_id=int(org.id if org.id else 0),
         role_id=1,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
+        granted_at=datetime.now(UTC),
+        granted_by=None,
     )
 
     db_session.add(user_org)
@@ -561,7 +560,7 @@ async def delete_org(
     db_session.commit()
 
     # Delete links to org
-    statement = select(UserOrganization).where(UserOrganization.org_id == org_id)
+    statement = select(UserRole).where(UserRole.org_id == org_id)
     result = db_session.exec(statement)
 
     user_orgs = result.all()
@@ -629,14 +628,14 @@ async def get_orgs_by_user(
     # Convert user_id to int for proper type matching with database
     user_id_int = int(user_id)
 
-    # Join Organization, UserOrganization and OrganizationConfig in a single query
+    # Join Organization, UserRole and OrganizationConfig in a single query
     statement = (
         select(Organization, OrganizationConfig)
-        .join(UserOrganization)
+        .join(UserRole)
         .outerjoin(OrganizationConfig)
         .where(
-            UserOrganization.user_id == user_id_int,
-            UserOrganization.org_id == Organization.id,
+            UserRole.user_id == user_id_int,
+            UserRole.org_id == Organization.id,
             OrganizationConfig.org_id == Organization.id,
         )
         .offset((page - 1) * limit)

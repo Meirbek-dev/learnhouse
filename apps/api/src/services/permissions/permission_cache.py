@@ -86,20 +86,22 @@ def _role_permissions_key(role_id: int) -> str:
 
 
 @contextmanager
-def cache_lock(lock_key: str, timeout: int = CACHE_LOCK_TTL) -> Generator[bool, None, None]:
+def cache_lock(
+    lock_key: str, timeout: int = CACHE_LOCK_TTL
+) -> Generator[bool, None, None]:
     """
     Context manager for distributed cache locking using Redis.
-    
+
     Prevents race conditions when multiple processes try to compute
     the same cache value simultaneously.
-    
+
     Args:
         lock_key: Unique key for this lock
         timeout: Lock timeout in seconds (default 10s)
-        
+
     Yields:
         True if lock was acquired, False otherwise
-        
+
     Example:
         with cache_lock("my_key:lock") as acquired:
             if acquired:
@@ -109,12 +111,12 @@ def cache_lock(lock_key: str, timeout: int = CACHE_LOCK_TTL) -> Generator[bool, 
     """
     r = get_redis_client()
     lock_acquired = False
-    
+
     if not r:
         # No Redis available, just proceed without locking
         yield False
         return
-    
+
     try:
         # Try to acquire lock (SET NX - set if not exists)
         lock_acquired = r.set(lock_key, "1", ex=timeout, nx=True)
@@ -242,7 +244,17 @@ def set_cached_user_permissions(
 
 
 def invalidate_user_permissions(user_id: int) -> None:
-    """Invalidate all cached permissions for a user."""
+    """
+    Invalidate all cached permissions for a user.
+
+    This should be called when:
+    - User's roles are changed (added/removed)
+    - User's resource permissions are changed
+    - User-specific permission overrides are modified
+
+    Args:
+        user_id: User ID whose permissions should be invalidated
+    """
     r = get_redis_client()
     if not r:
         return
@@ -258,12 +270,28 @@ def invalidate_user_permissions(user_id: int) -> None:
         perm_keys = list(r.scan_iter(match=perm_pattern, count=100))
         if perm_keys:
             r.delete(*perm_keys)
+
+        _logger.info(
+            "Invalidated permissions for user_id=%s (%d keys)",
+            user_id,
+            len(keys) + len(perm_keys),
+        )
     except Exception:
         _logger.exception("Failed to invalidate user permissions: user_id=%s", user_id)
 
 
 def invalidate_role_permissions(role_id: int) -> None:
-    """Invalidate all cached permissions for a role."""
+    """
+    Invalidate all cached permissions for a role.
+
+    This should be called when:
+    - Role's permissions are changed (added/removed)
+    - Role's parent hierarchy is changed
+    - Role's priority is modified
+
+    Args:
+        role_id: Role ID whose permissions should be invalidated
+    """
     r = get_redis_client()
     if not r:
         return
@@ -272,12 +300,26 @@ def invalidate_role_permissions(role_id: int) -> None:
         keys = list(r.scan_iter(match=pattern, count=100))
         if keys:
             r.delete(*keys)
+
+        _logger.info(
+            "Invalidated permissions for role_id=%s (%d keys)", role_id, len(keys)
+        )
     except Exception:
         _logger.exception("Failed to invalidate role permissions: role_id=%s", role_id)
 
 
 def invalidate_org_permissions(org_id: int) -> None:
-    """Invalidate all cached permissions for an organization."""
+    """
+    Invalidate all cached permissions for an organization.
+
+    This should be called when:
+    - Organization-wide role assignments change
+    - Organization settings that affect permissions change
+    - Organization-specific roles are modified
+
+    Args:
+        org_id: Organization ID whose permissions should be invalidated
+    """
     r = get_redis_client()
     if not r:
         return
@@ -286,8 +328,39 @@ def invalidate_org_permissions(org_id: int) -> None:
         keys = list(r.scan_iter(match=pattern, count=100))
         if keys:
             r.delete(*keys)
+
+        _logger.info(
+            "Invalidated permissions for org_id=%s (%d keys)", org_id, len(keys)
+        )
     except Exception:
         _logger.exception("Failed to invalidate org permissions: org_id=%s", org_id)
+
+
+def invalidate_for_user(user_id: int) -> None:
+    """
+    Wrapper for invalidate_user_permissions for consistency with naming convention.
+
+    Use this when user's roles or permissions change.
+    """
+    invalidate_user_permissions(user_id)
+
+
+def invalidate_for_role(role_id: int) -> None:
+    """
+    Wrapper for invalidate_role_permissions for consistency with naming convention.
+
+    Use this when a role's permissions or hierarchy changes.
+    """
+    invalidate_role_permissions(role_id)
+
+
+def invalidate_for_org(org_id: int) -> None:
+    """
+    Wrapper for invalidate_org_permissions for consistency with naming convention.
+
+    Use this when organization-wide permission settings change.
+    """
+    invalidate_org_permissions(org_id)
 
 
 def invalidate_all_permissions() -> None:

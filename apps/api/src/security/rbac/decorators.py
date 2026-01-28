@@ -56,7 +56,9 @@ def require_permission(
 
             # If service not in kwargs, we need to get it
             if checker is None and db_session is not None:
-                from src.services.permissions.unified_permission_service import UnifiedPermissionService
+                from src.services.permissions.unified_permission_service import (
+                    UnifiedPermissionService,
+                )
 
                 checker = UnifiedPermissionService(db_session)
 

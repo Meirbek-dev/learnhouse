@@ -1,5 +1,5 @@
 import contextlib
-from datetime import datetime
+from datetime import UTC, datetime
 
 import orjson
 from fastapi import HTTPException
@@ -26,7 +26,7 @@ from src.db.organization_config import (
     UserGroupOrgConfig,
 )
 from src.db.organizations import Organization, OrganizationCreate
-from src.db.user_organizations import UserOrganization
+from src.db.permissions.models import UserRole
 from src.db.users import User, UserCreate, UserRead
 from src.security.security import security_hash_password
 from src.services.permissions.role_service import RoleService
@@ -162,12 +162,12 @@ def install_create_organization_user(
     org_id = org.id if org else 0
 
     # Link user and organization
-    user_organization = UserOrganization(
+    user_organization = UserRole(
         user_id=user.id if user.id else 0,
         org_id=org_id or 0,
         role_id=1,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
+        granted_at=datetime.now(UTC),
+        granted_by=None,
     )
 
     db_session.add(user_organization)

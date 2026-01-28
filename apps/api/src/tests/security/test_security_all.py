@@ -10,27 +10,12 @@ of the security functionality including:
 """
 
 from src.tests.security.test_auth import TestAuth
-from src.tests.security.test_rbac_new import TestPermissionEnums, TestPermissionModels
+from src.tests.security.test_rbac import TestPermissionEnums, TestPermissionModels
 from src.tests.security.test_security import TestSecurity
 
 
 class TestSecurityComprehensive:
     """Comprehensive test suite for all security functionality"""
-
-    def test_security_module_imports(self) -> None:
-        """Test that all security modules can be imported successfully"""
-        # Test core security imports
-
-        # Test auth imports
-
-        # Test RBAC imports
-
-        # Test RBAC utils imports
-
-        # Test features utils imports
-
-        # Verify all imports succeeded
-        assert True
 
     def test_security_constants(self) -> None:
         """Test that security constants are properly defined"""
@@ -84,7 +69,6 @@ class TestSecurityComprehensive:
         import src.security
         import src.security.auth
         import src.security.rbac
-        import src.security.rbac.checker
         import src.security.rbac.service_utils
         import src.security.security
 
@@ -93,7 +77,6 @@ class TestSecurityComprehensive:
         assert src.security.auth is not None
         assert src.security.security is not None
         assert src.security.rbac is not None
-        assert src.security.rbac.checker is not None
         assert src.security.rbac.service_utils is not None
 
 

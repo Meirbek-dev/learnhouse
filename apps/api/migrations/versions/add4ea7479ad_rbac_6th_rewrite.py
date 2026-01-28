@@ -48,20 +48,25 @@ def upgrade() -> None:
     print("\n2. Adding permission_key column to permissions table...")
     try:
         # Check if column exists
-        result = conn.execute(text("""
+        result = conn.execute(
+            text("""
             SELECT column_name
             FROM information_schema.columns
             WHERE table_name='permissions' AND column_name='permission_key'
-        """))
+        """)
+        )
         if not result.fetchone():
-            conn.execute(text("""
+            conn.execute(
+                text("""
                 ALTER TABLE permissions
                 ADD COLUMN permission_key VARCHAR UNIQUE
-            """))
+            """)
+            )
             print("   ✅ Added permission_key column")
 
             # Populate permission_key from existing data (cast ENUMs to text)
-            conn.execute(text("""
+            conn.execute(
+                text("""
                 UPDATE permissions
                 SET permission_key = CONCAT(
                     LOWER(resource_type::text), ':',
@@ -69,7 +74,8 @@ def upgrade() -> None:
                     LOWER(scope::text)
                 )
                 WHERE permission_key IS NULL
-            """))
+            """)
+            )
             print("   ✅ Populated permission_key for existing permissions")
         else:
             print("   ℹ️  permission_key column already exists")
@@ -79,10 +85,12 @@ def upgrade() -> None:
     # 3. Add index on permission_key for fast lookups
     print("\n3. Adding index on permission_key...")
     try:
-        conn.execute(text("""
+        conn.execute(
+            text("""
             CREATE INDEX IF NOT EXISTS idx_permissions_key
             ON permissions(permission_key)
-        """))
+        """)
+        )
         print("   ✅ Created index on permission_key")
     except Exception as e:
         print(f"   ⚠️  Warning: {e}")
@@ -90,16 +98,20 @@ def upgrade() -> None:
     # 4. Add grant_type column for deny rules support
     print("\n4. Adding grant_type column to role_permissions...")
     try:
-        result = conn.execute(text("""
+        result = conn.execute(
+            text("""
             SELECT column_name
             FROM information_schema.columns
             WHERE table_name='role_permissions' AND column_name='grant_type'
-        """))
+        """)
+        )
         if not result.fetchone():
-            conn.execute(text("""
+            conn.execute(
+                text("""
                 ALTER TABLE role_permissions
                 ADD COLUMN grant_type VARCHAR DEFAULT 'allow'
-            """))
+            """)
+            )
             print("   ✅ Added grant_type column (values: 'allow' or 'deny')")
         else:
             print("   ℹ️  grant_type column already exists")
@@ -109,16 +121,20 @@ def upgrade() -> None:
     # 5. Add conditions column for conditional permissions
     print("\n5. Adding conditions column to role_permissions...")
     try:
-        result = conn.execute(text("""
+        result = conn.execute(
+            text("""
             SELECT column_name
             FROM information_schema.columns
             WHERE table_name='role_permissions' AND column_name='conditions'
-        """))
+        """)
+        )
         if not result.fetchone():
-            conn.execute(text("""
+            conn.execute(
+                text("""
                 ALTER TABLE role_permissions
                 ADD COLUMN conditions JSONB
-            """))
+            """)
+            )
             print("   ✅ Added conditions column for ABAC support")
         else:
             print("   ℹ️  conditions column already exists")
@@ -128,16 +144,20 @@ def upgrade() -> None:
     # 6. Add expires_at for permission expiration
     print("\n6. Adding expires_at column to role_permissions...")
     try:
-        result = conn.execute(text("""
+        result = conn.execute(
+            text("""
             SELECT column_name
             FROM information_schema.columns
             WHERE table_name='role_permissions' AND column_name='expires_at'
-        """))
+        """)
+        )
         if not result.fetchone():
-            conn.execute(text("""
+            conn.execute(
+                text("""
                 ALTER TABLE role_permissions
                 ADD COLUMN expires_at TIMESTAMP
-            """))
+            """)
+            )
             print("   ✅ Added expires_at column for time-based permissions")
         else:
             print("   ℹ️  expires_at column already exists")
@@ -148,25 +168,31 @@ def upgrade() -> None:
     print("\n7. Optimizing permission_audit_log indexes...")
     try:
         # Index for user queries (use created_at)
-        conn.execute(text("""
+        conn.execute(
+            text("""
             CREATE INDEX IF NOT EXISTS idx_audit_user_date
             ON permission_audit_log(user_id, created_at DESC)
-        """))
+        """)
+        )
         print("   ✅ Created index for user audit queries")
 
         # Index for denial queries
-        conn.execute(text("""
+        conn.execute(
+            text("""
             CREATE INDEX IF NOT EXISTS idx_audit_denials
             ON permission_audit_log(result, created_at DESC)
             WHERE result = false
-        """))
+        """)
+        )
         print("   ✅ Created partial index for denial queries")
 
         # Index for resource queries
-        conn.execute(text("""
+        conn.execute(
+            text("""
             CREATE INDEX IF NOT EXISTS idx_audit_resource
             ON permission_audit_log(resource_type, resource_id, created_at DESC)
-        """))
+        """)
+        )
         print("   ✅ Created index for resource audit queries")
     except Exception as e:
         print(f"   ⚠️  Warning: {e}")
@@ -175,10 +201,12 @@ def upgrade() -> None:
     print("\n8. Optimizing user_roles indexes...")
     try:
         # Composite index for user + org lookups (without WHERE clause)
-        conn.execute(text("""
+        conn.execute(
+            text("""
             CREATE INDEX IF NOT EXISTS idx_user_roles_user_org
             ON user_roles(user_id, org_id)
-        """))
+        """)
+        )
         print("   ✅ Created composite index for user roles")
     except Exception as e:
         print(f"   ⚠️  Warning: {e}")
@@ -186,10 +214,12 @@ def upgrade() -> None:
     # 9. Add index on role_permissions for faster permission resolution
     print("\n9. Optimizing role_permissions indexes...")
     try:
-        conn.execute(text("""
+        conn.execute(
+            text("""
             CREATE INDEX IF NOT EXISTS idx_role_permissions_role
             ON role_permissions(role_id, permission_id)
-        """))
+        """)
+        )
         print("   ✅ Created index for role permission lookups")
     except Exception as e:
         print(f"   ⚠️  Warning: {e}")
@@ -219,10 +249,18 @@ def downgrade() -> None:
 
     # Remove added columns
     try:
-        conn.execute(text("ALTER TABLE permissions DROP COLUMN IF EXISTS permission_key"))
-        conn.execute(text("ALTER TABLE role_permissions DROP COLUMN IF EXISTS grant_type"))
-        conn.execute(text("ALTER TABLE role_permissions DROP COLUMN IF EXISTS conditions"))
-        conn.execute(text("ALTER TABLE role_permissions DROP COLUMN IF EXISTS expires_at"))
+        conn.execute(
+            text("ALTER TABLE permissions DROP COLUMN IF EXISTS permission_key")
+        )
+        conn.execute(
+            text("ALTER TABLE role_permissions DROP COLUMN IF EXISTS grant_type")
+        )
+        conn.execute(
+            text("ALTER TABLE role_permissions DROP COLUMN IF EXISTS conditions")
+        )
+        conn.execute(
+            text("ALTER TABLE role_permissions DROP COLUMN IF EXISTS expires_at")
+        )
         print("✅ Removed v6 columns")
     except Exception as e:
         print(f"⚠️  Warning: {e}")

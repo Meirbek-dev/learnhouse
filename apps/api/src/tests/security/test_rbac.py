@@ -83,7 +83,6 @@ class TestPermissionModels:
         assert role.priority == 50
 
 
-
 class TestUnifiedPermissionService:
     """Test the UnifiedPermissionService class."""
 
@@ -105,7 +104,9 @@ class TestUnifiedPermissionService:
         """Create an anonymous user."""
         return AnonymousUser()
 
-    async def test_anonymous_user_can_read_public_courses(self, mock_db, anonymous_user):
+    async def test_anonymous_user_can_read_public_courses(
+        self, mock_db, anonymous_user
+    ):
         """Anonymous users should be able to read public courses."""
         service = UnifiedPermissionService(mock_db)
 
@@ -134,9 +135,7 @@ class TestUnifiedPermissionService:
         """check() should handle resource_id parameter."""
         service = UnifiedPermissionService(mock_db)
 
-        with patch.object(
-            service, "check", return_value=True
-        ) as mock_check:
+        with patch.object(service, "check", return_value=True) as mock_check:
             result = await service.check(
                 user=mock_public_user,
                 action=Action.UPDATE,
@@ -152,9 +151,7 @@ class TestUnifiedPermissionService:
         """check() should handle org_id parameter."""
         service = UnifiedPermissionService(mock_db)
 
-        with patch.object(
-            service, "check", return_value=True
-        ) as mock_check:
+        with patch.object(service, "check", return_value=True) as mock_check:
             result = await service.check(
                 user=mock_public_user,
                 action=Action.CREATE,

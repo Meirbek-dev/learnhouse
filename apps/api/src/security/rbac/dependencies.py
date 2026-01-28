@@ -74,7 +74,9 @@ def get_permission_context(
 
 
 # Type aliases for cleaner dependency injection
-PermissionServiceDep = Annotated[UnifiedPermissionService, Depends(get_permission_service)]
+PermissionServiceDep = Annotated[
+    UnifiedPermissionService, Depends(get_permission_service)
+]
 PermissionContextDep = Annotated[PermissionContext, Depends(get_permission_context)]
 CurrentUserDep = Annotated[PublicUser | AnonymousUser, Depends(_lazy_get_current_user)]
 
@@ -111,9 +113,9 @@ class PermissionDeps:
         )
         if not result:
             from fastapi import HTTPException, status
+
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Permission denied"
+                status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied"
             )
 
     async def can(self, action, resource, resource_id=None, org_id=None) -> bool:

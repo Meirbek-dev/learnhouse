@@ -42,6 +42,8 @@ declare global {
     tokens: AuthTokens;
     /** User's effective permissions as permission_name -> boolean */
     permissions: Record<string, boolean>;
+    /** Unix timestamp (seconds) when permissions were loaded - for cache validation */
+    permissions_timestamp?: number;
   }
 
   interface TokenRefreshResult {
@@ -58,6 +60,8 @@ declare module 'next-auth' {
     expires: string;
     /** User's effective permissions as permission_name -> boolean */
     permissions?: Record<string, boolean>;
+    /** Unix timestamp (seconds) when permissions were loaded - for cache validation */
+    permissions_timestamp?: number;
   }
 
   type User = UserWithTokens;
@@ -68,5 +72,7 @@ declare module 'next-auth/jwt' {
     user?: UserWithTokens;
     /** Cached permissions */
     permissions?: Record<string, boolean>;
+    /** Unix timestamp (seconds) when permissions were loaded */
+    permissions_timestamp?: number;
   }
 }
