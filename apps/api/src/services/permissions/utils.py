@@ -1,11 +1,6 @@
 """
 Permission helper utilities used by services.
 
-These helpers centralize small, commonly used checks that previously lived in
-`src.security.rbac.service_utils`. They're thin wrappers that either talk to
-`RoleService`/DB or provide small validations. They are intended to be used by
-service modules while the full `UnifiedPermissionService` is used for authoritative
-permission checks.
 """
 
 from fastapi import HTTPException, status

@@ -27,4 +27,4 @@ def auto_install() -> None:
         print("No default organization found. Starting auto-installation 🏗️")
         install(short=True)
     else:
-        print("Default organization found. Skipping auto-installation 🚀")
+        print("CS MOOC has been launched!")
