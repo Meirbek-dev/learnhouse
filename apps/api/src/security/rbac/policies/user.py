@@ -5,11 +5,13 @@ This module implements permission logic specific to user management,
 including self-management and admin user management.
 """
 
+from fastapi import HTTPException, status
 from sqlmodel import select
 
+from src.db.permissions.constants import ADMIN_OR_MAINTAINER_SLUGS
 from src.db.permissions.enums import Action, ResourceType
 from src.db.permissions.models import Role, UserRole
-from src.db.users import AnonymousUser, PublicUser, User
+from src.db.users import AnonymousUser, InternalUser, PublicUser, User
 from src.security.rbac.policies.base import BasePolicy
 
 
@@ -23,14 +25,14 @@ class UserPolicy(BasePolicy):
     - Only super admins can delete users
     """
 
-    resource_type = ResourceType.USER
+    resource_type: ResourceType = ResourceType.USER
 
-    def can(
+    def check(
         self,
-        user: PublicUser | AnonymousUser,
+        user: PublicUser | AnonymousUser | InternalUser,
         action: Action,
         resource_id: str | None = None,
-        context: dict | None = None,
+        org_id: int | None = None,
     ) -> bool:
         """
         Check if user can perform action on user resource.
@@ -39,20 +41,35 @@ class UserPolicy(BasePolicy):
             user: Current user (the one making the request)
             action: Action to perform
             resource_id: Target user UUID or ID
-            context: Optional context (org_id, etc.)
+            org_id: Optional organization context
 
         Returns:
             True if allowed
+
+        Raises:
+            HTTPException: If permission denied
         """
+        user_id = user.id if hasattr(user, "id") else 0
+        is_anonymous = user_id == 0
+
         # Anonymous users can only read public profiles
-        if isinstance(user, AnonymousUser) or user.id == 0:
-            return action == Action.READ
+        if is_anonymous:
+            if action == Action.READ:
+                return True
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="You must be logged in to perform this action",
+            )
+
+        # Anyone can create user accounts (registration)
+        if action == Action.CREATE:
+            return True
 
         # Get target user ID
         target_user_id = self._resolve_user_id(resource_id)
 
         # Self-actions are always allowed for read/update
-        if target_user_id and target_user_id == user.id:
+        if target_user_id and target_user_id == user_id:
             if action in (Action.READ, Action.UPDATE):
                 return True
 
@@ -60,24 +77,9 @@ class UserPolicy(BasePolicy):
         if action == Action.READ:
             return True
 
-        # Update other users - requires org admin in same org
-        if action == Action.UPDATE:
-            if target_user_id:
-                return self._can_manage_user(user, target_user_id, context)
-            return False
-
-        # Delete users - requires super admin
-        if action == Action.DELETE:
-            return self.is_super_admin(user)
-
-        # Invite users - requires maintainer or higher
-        if action == Action.INVITE:
-            org_id = context.get("org_id") if context else None
-            if org_id:
-                return self._has_invite_permission(user, int(org_id))
-            return False
-
-        return False
+        # Update other users - fall back to role check
+        # Delete users - fall back to role check
+        return super().check(user, action, resource_id, org_id)
 
     def _resolve_user_id(self, resource_id: str | None) -> int | None:
         """

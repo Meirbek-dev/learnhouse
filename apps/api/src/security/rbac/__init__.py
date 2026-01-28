@@ -12,6 +12,19 @@ This module provides the core RBAC functionality including:
 """
 
 from src.security.rbac.checker import PermissionChecker
+from src.security.rbac.compat import (
+    courses_rbac_check,
+    courses_rbac_check_for_activities,
+    courses_rbac_check_for_assignments,
+    courses_rbac_check_for_certifications,
+    courses_rbac_check_for_chapters,
+    courses_rbac_check_for_collections,
+    rbac_check,
+    rbac_check_org,
+    rbac_check_role,
+    rbac_check_user,
+    rbac_check_usergroup,
+)
 from src.security.rbac.context import PermissionContext
 from src.security.rbac.decorators import require_permission
 from src.security.rbac.dependencies import get_permission_checker
@@ -29,13 +42,6 @@ from src.security.rbac.exceptions import (
 from src.security.rbac.service_utils import (
     check_is_resource_author,
     check_user_permission,
-    courses_rbac_check,
-    courses_rbac_check_for_activities,
-    courses_rbac_check_for_assignments,
-    courses_rbac_check_for_certifications,
-    courses_rbac_check_for_chapters,
-    courses_rbac_check_for_collections,
-    courses_rbac_check_with_course_lookup,
     get_user_id,
     has_authenticated_user_role,
     has_instructor_role,
@@ -45,11 +51,6 @@ from src.security.rbac.service_utils import (
     is_resource_owner,
     is_resource_public,
     map_action,
-    rbac_check,
-    rbac_check_org,
-    rbac_check_role,
-    rbac_check_user,
-    rbac_check_usergroup,
     verify_not_anonymous,
 )
 
@@ -69,14 +70,13 @@ __all__ = [
     "SystemRoleModificationError",
     "check_is_resource_author",
     "check_user_permission",
-    # Course-specific RBAC
+    # Course-specific RBAC (DEPRECATED - use UnifiedPermissionService)
     "courses_rbac_check",
     "courses_rbac_check_for_activities",
     "courses_rbac_check_for_assignments",
     "courses_rbac_check_for_certifications",
     "courses_rbac_check_for_chapters",
     "courses_rbac_check_for_collections",
-    "courses_rbac_check_with_course_lookup",
     "get_permission_checker",
     "get_user_id",
     "has_authenticated_user_role",
@@ -87,7 +87,7 @@ __all__ = [
     "is_resource_owner",
     "is_resource_public",
     "map_action",
-    # Service utilities
+    # Service utilities (DEPRECATED - use UnifiedPermissionService)
     "rbac_check",
     "rbac_check_org",
     "rbac_check_role",

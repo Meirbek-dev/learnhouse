@@ -1189,6 +1189,8 @@ session = {
 
 ## Migration Strategy
 
+create alembic migrations in 831861f725e2_rbac_5th_rewrite.py file
+
 ### Step 1
 
 - Remove old system, all the legacy and compat code, migrate to the new systems

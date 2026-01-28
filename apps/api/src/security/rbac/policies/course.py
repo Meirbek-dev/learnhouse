@@ -5,11 +5,19 @@ This module implements permission logic specific to courses,
 including public course access and ownership checks.
 """
 
+from fastapi import HTTPException, status
 from sqlmodel import select
 
 from src.db.courses.courses import Course
 from src.db.permissions.enums import Action, ResourceType
-from src.db.users import AnonymousUser, PublicUser
+from src.db.resource_authors import (
+    ResourceAuthor,
+    ResourceAuthorshipEnum,
+    ResourceAuthorshipStatusEnum,
+)
+from src.db.usergroup_resources import UserGroupResource
+from src.db.usergroup_user import UserGroupUser
+from src.db.users import AnonymousUser, InternalUser, PublicUser
 from src.security.rbac.policies.base import BasePolicy
 
 
@@ -23,6 +31,145 @@ class CoursePolicy(BasePolicy):
     - Course updates require ownership or admin role
     - Chapter/activity creation requires course ownership
     """
+
+    resource_type: ResourceType = ResourceType.COURSE
+
+    def check(
+        self,
+        user: PublicUser | AnonymousUser | InternalUser,
+        action: Action,
+        resource_id: str | None = None,
+        org_id: int | None = None,
+    ) -> bool:
+        """
+        Check course-specific permissions.
+
+        Args:
+            user: User requesting access
+            action: Action to perform
+            resource_id: Course UUID
+            org_id: Optional organization context
+
+        Returns:
+            True if permission granted
+
+        Raises:
+            HTTPException: If permission denied
+        """
+        user_id = user.id if hasattr(user, "id") else 0
+        is_anonymous = user_id == 0
+
+        # Handle READ operations
+        if action == Action.READ:
+            # Anonymous users can only read public courses
+            if is_anonymous:
+                if resource_id and self._is_public_course(resource_id):
+                    return True
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You must be logged in to access this course",
+                )
+
+            # Authenticated users can read public courses
+            if resource_id and self._is_public_course(resource_id):
+                return True
+
+            # Check if user is course owner/contributor
+            if resource_id and self._is_course_contributor(user_id, resource_id):
+                return True
+
+            # Check UserGroup access (courses with no UserGroup restrictions are open)
+            if resource_id:
+                has_usergroup_restriction = self._has_usergroup_restriction(resource_id)
+                if not has_usergroup_restriction:
+                    # No restrictions = any authenticated user can access
+                    return True
+
+                # Check if user is in an authorized UserGroup
+                if self._is_in_authorized_usergroup(user_id, resource_id):
+                    return True
+
+            # Fall back to role-based check
+            return super().check(user, action, resource_id, org_id)
+
+        # CREATE operations (course creation)
+        if action == Action.CREATE:
+            if is_anonymous:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="You must be logged in to create courses",
+                )
+            # Fall back to role-based check (instructor or higher)
+            return super().check(user, action, resource_id, org_id)
+
+        # UPDATE/DELETE operations require ownership or admin
+        if action in (Action.UPDATE, Action.DELETE):
+            if is_anonymous:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="You must be logged in to modify courses",
+                )
+
+            if resource_id:
+                # Course owners can update/delete
+                if self._is_course_contributor(user_id, resource_id):
+                    return True
+
+            # Fall back to role-based check (admin/maintainer)
+            return super().check(user, action, resource_id, org_id)
+
+        # Default: fall back to parent
+        return super().check(user, action, resource_id, org_id)
+
+    def _is_public_course(self, course_uuid: str) -> bool:
+        """Check if course is public."""
+        course = self.db.exec(
+            select(Course).where(Course.course_uuid == course_uuid)
+        ).first()
+        return course.public if course else False
+
+    def _is_course_contributor(self, user_id: int, course_uuid: str) -> bool:
+        """Check if user is a contributor (owner, maintainer, or contributor) to the course."""
+        statement = select(ResourceAuthor).where(
+            ResourceAuthor.resource_uuid == course_uuid,
+            ResourceAuthor.user_id == user_id,
+        )
+        resource_author = self.db.exec(statement).first()
+
+        if not resource_author:
+            return False
+
+        return (
+            resource_author.authorship
+            in (
+                ResourceAuthorshipEnum.CREATOR,
+                ResourceAuthorshipEnum.MAINTAINER,
+                ResourceAuthorshipEnum.CONTRIBUTOR,
+            )
+            and resource_author.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE
+        )
+
+    def _has_usergroup_restriction(self, course_uuid: str) -> bool:
+        """Check if course has UserGroup access restrictions."""
+        ugr_stmt = select(UserGroupResource).where(
+            UserGroupResource.resource_uuid == course_uuid
+        )
+        return self.db.exec(ugr_stmt).first() is not None
+
+    def _is_in_authorized_usergroup(self, user_id: int, course_uuid: str) -> bool:
+        """Check if user is member of a UserGroup that grants access to this course."""
+        member_stmt = (
+            select(UserGroupUser)
+            .join(
+                UserGroupResource,
+                UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
+            )
+            .where(
+                UserGroupResource.resource_uuid == course_uuid,
+                UserGroupUser.user_id == user_id,
+            )
+        )
+        return self.db.exec(member_stmt).first() is not None
 
     resource_type = ResourceType.COURSE
 

@@ -5,12 +5,14 @@ This module implements permission logic specific to organizations,
 including membership checks and admin verification.
 """
 
+from fastapi import HTTPException, status
 from sqlmodel import select
 
 from src.db.organizations import Organization
+from src.db.permissions.constants import ADMIN_OR_MAINTAINER_SLUGS
 from src.db.permissions.enums import Action, ResourceType
 from src.db.permissions.models import Role, UserRole
-from src.db.users import AnonymousUser, PublicUser
+from src.db.users import AnonymousUser, InternalUser, PublicUser
 from src.security.rbac.policies.base import BasePolicy
 
 
@@ -24,14 +26,14 @@ class OrganizationPolicy(BasePolicy):
     - Only org admins can manage organization settings
     """
 
-    resource_type = ResourceType.ORGANIZATION
+    resource_type: ResourceType = ResourceType.ORGANIZATION
 
-    def can(
+    def check(
         self,
-        user: PublicUser | AnonymousUser,
+        user: PublicUser | AnonymousUser | InternalUser,
         action: Action,
         resource_id: str | None = None,
-        context: dict | None = None,
+        org_id: int | None = None,
     ) -> bool:
         """
         Check if user can perform action on organization.
@@ -39,67 +41,71 @@ class OrganizationPolicy(BasePolicy):
         Args:
             user: Current user
             action: Action to perform
-            resource_id: Organization UUID or ID
-            context: Optional context
+            resource_id: Organization UUID
+            org_id: Organization ID
 
         Returns:
             True if allowed
-        """
-        # Anonymous users can only read public org info
-        if isinstance(user, AnonymousUser) or user.id == 0:
-            return action == Action.READ
 
-        # Read access for authenticated users
+        Raises:
+            HTTPException: If permission denied
+        """
+        user_id = user.id if hasattr(user, "id") else 0
+        is_anonymous = user_id == 0
+
+        # Organizations are readable by anyone
         if action == Action.READ:
             return True
 
-        # Get org_id from resource_id or context
-        org_id = self._resolve_org_id(resource_id, context)
-        if org_id is None:
-            return False
+        # Write operations require authentication
+        if is_anonymous:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="You must be logged in to modify organizations",
+            )
 
-        # Update/Manage requires org admin role
-        if action in (Action.UPDATE, Action.MANAGE):
-            return self.is_org_admin(user, org_id)
+        # Get org_id from resource_id if needed
+        if org_id is None and resource_id:
+            org_id = self._resolve_org_id(resource_id)
 
-        # Delete requires super admin (platform-wide)
-        if action == Action.DELETE:
-            return self.is_super_admin(user)
+        # Check if user is admin/maintainer for this org
+        if org_id and self._is_org_admin(user_id, org_id):
+            return True
 
-        # Invite requires at least maintainer role
-        if action == Action.INVITE:
-            return self.has_org_role(user, org_id, ["org-admin", "maintainer"])
+        # Fall back to role-based check
+        return super().check(user, action, resource_id, org_id)
 
-        return False
-
-    def _resolve_org_id(
-        self, resource_id: str | None, context: dict | None
-    ) -> int | None:
+    def _resolve_org_id(self, resource_id: str) -> int | None:
         """
-        Resolve organization ID from resource_id or context.
+        Resolve organization ID from resource_id.
 
         Args:
             resource_id: Could be org UUID or org ID
-            context: May contain org_id
 
         Returns:
             Organization ID or None
         """
-        if context and "org_id" in context:
-            return int(context["org_id"])
+        if resource_id.isdigit():
+            return int(resource_id)
 
-        if resource_id:
-            # Try as org_id (integer)
-            if resource_id.isdigit():
-                return int(resource_id)
+        # Try as org_uuid
+        statement = select(Organization.id).where(
+            Organization.org_uuid == resource_id
+        )
+        return self.db.exec(statement).first()
 
-            # Try as org_uuid
-            statement = select(Organization.id).where(
-                Organization.org_uuid == resource_id
+    def _is_org_admin(self, user_id: int, org_id: int) -> bool:
+        """Check if user has admin or maintainer role in this organization."""
+        statement = (
+            select(UserRole)
+            .join(Role, UserRole.role_id == Role.id)
+            .where(
+                UserRole.user_id == user_id,
+                UserRole.org_id == org_id,
+                Role.slug.in_(ADMIN_OR_MAINTAINER_SLUGS),
             )
-            return self.db.exec(statement).first()
-
-        return None
+        )
+        return self.db.exec(statement).first() is not None
 
     def is_member(self, user: PublicUser | AnonymousUser, org_id: int) -> bool:
         """
