@@ -5,8 +5,35 @@ from src.db.courses.activities import Activity
 from src.db.courses.courses import Course
 from src.db.payments.payments_courses import PaymentsCourse
 from src.db.payments.payments_users import PaymentStatusEnum, PaymentsUser
+from src.db.resource_authors import (
+    ResourceAuthor,
+    ResourceAuthorshipEnum,
+    ResourceAuthorshipStatusEnum,
+)
 from src.db.users import AnonymousUser, PublicUser
-from src.security.rbac.service_utils import check_is_resource_author
+
+# Inline helper to check resource authorship for payments access
+
+
+def is_resource_author(db_session, user_id: int, resource_uuid: str) -> bool:
+    statement = select(ResourceAuthor).where(
+        ResourceAuthor.resource_uuid == resource_uuid,
+        ResourceAuthor.user_id == user_id,
+    )
+    resource_author = db_session.exec(statement).first()
+
+    if not resource_author:
+        return False
+
+    return (
+        resource_author.authorship
+        in (
+            ResourceAuthorshipEnum.CREATOR,
+            ResourceAuthorshipEnum.MAINTAINER,
+            ResourceAuthorshipEnum.CONTRIBUTOR,
+        )
+        and resource_author.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE
+    )
 
 
 async def check_activity_paid_access(
@@ -37,7 +64,7 @@ async def check_activity_paid_access(
         raise HTTPException(status_code=404, detail="Course not found")
 
     # Check if user is author of the course
-    is_course_author = check_is_resource_author(db_session, user.id, course.course_uuid)
+    is_course_author = is_resource_author(db_session, user.id, course.course_uuid)
 
     if is_course_author:
         return True

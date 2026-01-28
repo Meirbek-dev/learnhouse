@@ -14,8 +14,8 @@ from sqlmodel import Session
 
 from src.core.events.database import get_db_session
 from src.db.users import AnonymousUser, PublicUser
-from src.services.permissions.unified_permission_service import UnifiedPermissionService
 from src.security.rbac.context import PermissionContext
+from src.services.permissions.unified_permission_service import UnifiedPermissionService
 
 
 async def _lazy_get_current_user(

@@ -3,8 +3,8 @@
 from sqlmodel import Session, create_engine
 
 from config.config import get_platform_config
-from src.services.permissions import get_permission_service
 from src.db.permissions.enums import Action, ResourceType
+from src.services.permissions import get_permission_service
 
 cfg = get_platform_config()
 engine = create_engine(cfg.database_config.sql_connection_string)

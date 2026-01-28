@@ -50,7 +50,6 @@ from src.db.permissions.enums import Action, ResourceType
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User
 from src.security.auth import get_current_user
-from src.services.permissions import get_permission_service
 from src.services.code_challenges.grading import (
     apply_grading_strategy,
     calculate_composite_score,
@@ -67,6 +66,7 @@ from src.services.code_challenges.sanitize import (
     sanitize_stderr,
     sanitize_stdout,
 )
+from src.services.permissions import get_permission_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

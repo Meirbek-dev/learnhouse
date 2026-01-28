@@ -17,18 +17,18 @@ Create Date: 2026-01-28 20:25:54.022094
 
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
+from typing import Union
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy import text
-
 
 # revision identifiers, used by Alembic.
 revision: str = "5691309115ae"
-down_revision: Union[str, None] = "7ab52f84d98c"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "7ab52f84d98c"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -117,9 +117,8 @@ def upgrade() -> None:
     ).fetchall()
 
     if missing:
-        raise Exception(
-            f"[Migration] VALIDATION FAILED: {len(missing)} user-org relationships missing in user_roles!"
-        )
+        msg = f"[Migration] VALIDATION FAILED: {len(missing)} user-org relationships missing in user_roles!"
+        raise Exception(msg)
 
     # Step 6: Drop the old table
     op.drop_table("userorganization")

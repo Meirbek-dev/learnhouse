@@ -10,17 +10,17 @@ Add remaining indexes for optimal RBAC performance based on refactoring plan:
 3. Index on permissions(name) for permission name lookups
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
+from typing import Union
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "7ab52f84d98c"
-down_revision: Union[str, None] = "a4359f97a23d"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "a4359f97a23d"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:

@@ -113,9 +113,7 @@ class UnifiedPermissionService:
         self.role_service = RoleService(db)
         self._policies: dict[ResourceType, "BasePolicy"] = {}
 
-    def register_policy(
-        self, resource_type: ResourceType, policy: "BasePolicy"
-    ) -> None:
+    def register_policy(self, resource_type: ResourceType, policy: "BasePolicy") -> None:
         """Register a resource-specific policy."""
         self._policies[resource_type] = policy
 
@@ -207,9 +205,7 @@ class UnifiedPermissionService:
             return True
         if self.audit_level == AuditLevel.WRITES_ONLY and action != Action.READ:
             return True
-        if self.audit_level == AuditLevel.FAILURES_ONLY and not granted:
-            return True
-        return False
+        return bool(self.audit_level == AuditLevel.FAILURES_ONLY and not granted)
 
     async def check(
         self,
@@ -939,6 +935,4 @@ def get_permission_service(
     of a singleton, but this provides a simple factory for now.
     """
     # Create a new instance (stateless)
-    service = UnifiedPermissionService(db, use_cache=use_cache, audit_level=audit_level)
-
-    return service
+    return UnifiedPermissionService(db, use_cache=use_cache, audit_level=audit_level)

@@ -5,8 +5,8 @@ from pydantic import Field
 from sqlmodel import Session, select
 
 from src.db.organizations import Organization
-from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.permissions.models import UserRole
+from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User
 from src.services.orgs.invites import get_invite_code
 from src.services.orgs.orgs import get_org_join_mechanism

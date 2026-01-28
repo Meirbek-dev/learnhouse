@@ -17,9 +17,9 @@ from src.db.courses.discussions import (
     DiscussionType,
 )
 from src.db.organizations import Organization
+from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser, User
 from src.services.permissions import get_permission_service
-from src.db.permissions.enums import Action, ResourceType
 
 
 async def create_discussion(

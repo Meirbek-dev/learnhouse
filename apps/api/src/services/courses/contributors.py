@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, status
 from sqlmodel import Session, and_, select
 
 from src.db.courses.courses import Course
@@ -11,7 +11,6 @@ from src.db.resource_authors import (
     ResourceAuthorshipStatusEnum,
 )
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
-from src.security.rbac.service_utils import verify_not_anonymous
 from src.services.permissions import get_permission_service
 
 
@@ -30,7 +29,11 @@ async def apply_course_contributor(
     - Only course owners (CREATOR, MAINTAINER) or admins can approve applications
     """
     # Verify user is not anonymous
-    verify_not_anonymous(current_user.id)
+    if current_user.id == 0:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You must be logged in to perform this action",
+        )
 
     # Check if course exists
     statement = select(Course).where(Course.course_uuid == course_uuid)
@@ -96,7 +99,11 @@ async def update_course_contributor(
     - Requires strict course ownership checks
     """
     # Verify user is not anonymous
-    verify_not_anonymous(current_user.id)
+    if current_user.id == 0:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You must be logged in to perform this action",
+        )
 
     # SECURITY: Require course ownership or admin role for updating contributors
     permission_service = get_permission_service(db_session)
@@ -221,7 +228,11 @@ async def add_bulk_course_contributors(
     - Cannot add contributors to courses the user doesn't own
     """
     # Verify user is not anonymous
-    verify_not_anonymous(current_user.id)
+    if current_user.id == 0:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You must be logged in to perform this action",
+        )
 
     # SECURITY: Require course ownership or admin role for adding contributors
     permission_service = get_permission_service(db_session)
@@ -317,7 +328,11 @@ async def remove_bulk_course_contributors(
     - Cannot remove the course creator
     """
     # Verify user is not anonymous
-    verify_not_anonymous(current_user.id)
+    if current_user.id == 0:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You must be logged in to perform this action",
+        )
 
     # SECURITY: Require course ownership or admin role for removing contributors
     permission_service = get_permission_service(db_session)

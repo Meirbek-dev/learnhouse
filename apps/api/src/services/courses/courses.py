@@ -24,12 +24,6 @@ from src.db.resource_authors import (
 from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
-from src.security.rbac.service_utils import (
-    has_authenticated_user_role,
-    has_instructor_role,
-    is_admin_or_maintainer,
-    verify_not_anonymous,
-)
 from src.services.courses.thumbnails import upload_thumbnail
 from src.services.permissions import get_permission_service
 
@@ -786,8 +780,14 @@ async def update_course(
         ):
             is_course_owner = True
 
-        # Check if user has admin or maintainer role
-        admin_or_maintainer = is_admin_or_maintainer(db_session, current_user.id)
+        # Check if user has admin or maintainer role via permission service
+        permission_service = get_permission_service(db_session)
+        admin_or_maintainer = await permission_service.check(
+            user=current_user,
+            action=Action.UPDATE,
+            resource=ResourceType.ORGANIZATION,
+            org_id=course.org_id,
+        )
 
         # SECURITY: Only course owners (CREATOR, MAINTAINER) or admins can change access settings
         if not (is_course_owner or admin_or_maintainer):
@@ -871,7 +871,11 @@ async def get_user_courses(
     limit: int = 20,
 ) -> list[CourseRead]:
     # Verify user is not anonymous
-    verify_not_anonymous(current_user.id)
+    if current_user.id == 0:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You must be logged in to perform this action",
+        )
 
     # Get all resource authors for the user
     statement = select(ResourceAuthor).where(
@@ -1039,21 +1043,33 @@ async def get_course_user_rights(
 
     # Check user roles
 
-    # Check admin/maintainer role
-    user_is_admin_or_maintainer = is_admin_or_maintainer(db_session, current_user.id)
+    permission_service = get_permission_service(db_session)
+
+    # Check admin/maintainer role (organization-level update/management)
+    user_is_admin_or_maintainer = await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        org_id=course.org_id,
+    )
 
     if user_is_admin_or_maintainer:
         rights["roles"]["is_admin"] = True
         rights["roles"]["is_maintainer_role"] = True
 
-    # Check instructor role
-    user_has_instructor_role = has_instructor_role(db_session, current_user.id)
+    # Check instructor role (course-level update permission)
+    user_has_instructor_role = await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.COURSE,
+        resource_id=course.course_uuid,
+    )
 
     if user_has_instructor_role:
         rights["roles"]["is_instructor"] = True
 
     # Check user role (basic permissions)
-    user_has_basic_role = has_authenticated_user_role(db_session, current_user.id)
+    user_has_basic_role = current_user.id != 0
 
     if user_has_basic_role:
         rights["roles"]["is_user"] = True

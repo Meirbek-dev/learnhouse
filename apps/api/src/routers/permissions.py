@@ -94,7 +94,7 @@ async def api_get_permission(
 # ---------------------------------------------------------------------------
 
 
-@router.get("/roles-new")
+@router.get("/roles")
 async def api_list_roles_new(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
@@ -115,7 +115,7 @@ async def api_list_roles_new(
     return service.list_all(org_id, include_global)
 
 
-@router.post("/roles-new")
+@router.post("/roles")
 async def api_create_role_new(
     role_data: RoleCreate,
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -146,7 +146,7 @@ async def api_create_role_new(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/roles-new/{role_id}")
+@router.get("/roles/{role_id}")
 async def api_get_role_new(
     role_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -165,7 +165,7 @@ async def api_get_role_new(
     return role
 
 
-@router.put("/roles-new/{role_id}")
+@router.put("/roles/{role_id}")
 async def api_update_role_new(
     role_id: int,
     role_data: RoleUpdate,
@@ -201,7 +201,7 @@ async def api_update_role_new(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.delete("/roles-new/{role_id}")
+@router.delete("/roles/{role_id}")
 async def api_delete_role_new(
     role_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -242,7 +242,7 @@ async def api_delete_role_new(
 # ---------------------------------------------------------------------------
 
 
-@router.post("/roles-new/{role_id}/permissions/{permission_id}")
+@router.post("/roles/{role_id}/permissions/{permission_id}")
 async def api_add_permission_to_role(
     role_id: int,
     permission_id: int,
@@ -280,7 +280,7 @@ async def api_add_permission_to_role(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.delete("/roles-new/{role_id}/permissions/{permission_id}")
+@router.delete("/roles/{role_id}/permissions/{permission_id}")
 async def api_remove_permission_from_role(
     role_id: int,
     permission_id: int,
@@ -612,7 +612,7 @@ async def api_list_permission_templates(
     return service.list_permission_templates()
 
 
-@router.post("/roles-new/{role_id}/apply-template/{template_name}")
+@router.post("/roles/{role_id}/apply-template/{template_name}")
 async def api_apply_permission_template(
     role_id: int,
     template_name: str,

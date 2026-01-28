@@ -10,7 +10,7 @@ from sqlmodel import Session, select
 from ulid import ULID
 
 from src.db.organizations import Organization, OrganizationRead
-from src.db.permissions import Role, RoleRead, UserRole
+from src.db.permissions import Role, RoleRead
 from src.db.permissions.enums import Action, ResourceType
 from src.db.permissions.models import UserRole
 from src.db.users import (
@@ -39,7 +39,7 @@ from src.services.users.usergroups import add_users_to_usergroup
 rebuild_user_models()
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 # Cache TTL for user lookups (seconds)
 USER_CACHE_TTL = 300  # 5 minutes
@@ -370,6 +370,7 @@ async def get_user_session(
     permissions_timestamp: int | None = None
     try:
         from datetime import UTC, datetime
+
         from src.services.permissions import get_permission_service
 
         permission_service = get_permission_service(db_session)
@@ -382,7 +383,7 @@ async def get_user_session(
         permissions_timestamp = int(datetime.now(UTC).timestamp())
     except Exception as e:
         # Fallback: if error occurs, return empty permissions
-        _logger.error(f"Error loading permissions for user {current_user.id}: {e}")
+        _logger.exception(f"Error loading permissions for user {current_user.id}: {e}")
 
     return UserSession(
         user=user_read,
@@ -402,11 +403,21 @@ async def authorize_user_action(
     # Get user
     await _get_user_by_field(db_session, "user_uuid", current_user.user_uuid)
 
-    # RBAC check using new service_utils
-    from src.security.rbac.service_utils import check_user_permission
-
-    authorized = check_user_permission(
-        db_session, current_user.id, action, resource_uuid
+    permission_service = get_permission_service(db_session)
+    action_enum = (
+        Action.CREATE
+        if action == "create"
+        else Action.READ
+        if action == "read"
+        else Action.UPDATE
+        if action == "update"
+        else Action.DELETE
+    )
+    authorized = await permission_service.check(
+        user=current_user,
+        action=action_enum,
+        resource=ResourceType.USER,
+        resource_id=resource_uuid,
     )
 
     if authorized:
@@ -537,7 +548,7 @@ def _safe_role_read(role: Role) -> RoleRead:
     try:
         return RoleRead.model_validate(role)
     except ValidationError as exc:  # pragma: no cover - defensive path
-        logger.warning(
+        _logger.warning(
             "Role validation failed for role_id=%s. Using fallback. Error: %s",
             getattr(role, "id", None),
             exc,
@@ -561,7 +572,7 @@ def _safe_organization_read(org: Organization) -> OrganizationRead:
     try:
         return OrganizationRead.model_validate(org)
     except ValidationError as exc:  # pragma: no cover - defensive path
-        logger.warning(
+        _logger.warning(
             "Organization validation failed for org_id=%s. Using best-effort fallback. Error: %s",
             getattr(org, "id", None),
             exc,
@@ -583,7 +594,7 @@ async def _link_user_to_organization(
 
     if not user_role_model:
         # Fallback: create user_role anyway with role_id=None
-        logger.warning("Default 'user' role not found, creating UserRole without role")
+        _logger.warning("Default 'user' role not found, creating UserRole without role")
         role_id = None
     else:
         role_id = user_role_model.id

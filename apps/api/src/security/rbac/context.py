@@ -6,7 +6,7 @@ user, organization, and resource during permission checks.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 from src.db.permissions.enums import Action, ResourceType
 

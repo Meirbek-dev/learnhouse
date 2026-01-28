@@ -25,19 +25,6 @@ from src.security.rbac.exceptions import (
     RoleNotFoundError,
     SystemRoleModificationError,
 )
-from src.security.rbac.service_utils import (
-    check_is_resource_author,
-    get_user_id,
-    has_authenticated_user_role,
-    has_instructor_role,
-    infer_resource_type,
-    is_admin_or_maintainer,
-    is_anonymous,
-    is_resource_owner,
-    is_resource_public,
-    map_action,
-    verify_not_anonymous,
-)
 
 __all__ = [
     "AuthenticationRequiredError",
@@ -52,17 +39,6 @@ __all__ = [
     "RoleAlreadyExistsError",
     "RoleNotFoundError",
     "SystemRoleModificationError",
-    "check_is_resource_author",
     "get_permission_service",
-    "get_user_id",
-    "has_authenticated_user_role",
-    "has_instructor_role",
-    "infer_resource_type",
-    "is_admin_or_maintainer",
-    "is_anonymous",
-    "is_resource_owner",
-    "is_resource_public",
-    "map_action",
     "require_permission",
-    "verify_not_anonymous",
 ]

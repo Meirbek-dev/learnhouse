@@ -10,6 +10,8 @@ Tiered logging strategy:
 - ROUTINE (repeated successful checks): Redis counters only
 """
 
+from __future__ import annotations
+
 import hashlib
 import json
 from datetime import UTC, datetime
@@ -40,7 +42,7 @@ class AuditService:
     REDIS_COUNTER_KEY = "audit:counter"
     REDIS_TTL = 3600  # 1 hour
 
-    def __init__(self, db: Session, redis: "Redis | None" = None) -> None:
+    def __init__(self, db: Session, redis: Redis | None = None) -> None:
         self.db = db
         self.redis = redis
 

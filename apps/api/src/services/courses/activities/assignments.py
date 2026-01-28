@@ -35,7 +35,6 @@ from src.db.permissions.enums import Action, ResourceType
 from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User
-from src.security.rbac.service_utils import check_user_permission
 from src.services.courses.activities.uploads.sub_file import upload_submission_file
 from src.services.courses.activities.uploads.tasks_ref_files import (
     upload_reference_file,
@@ -628,9 +627,13 @@ async def put_assignment_task_submission_file(
     )
 
     # Check if user is enrolled in the course
-    if not check_user_permission(
-        db_session, current_user.id, "read", course.course_uuid
-    ):
+    can_view = await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.COURSE,
+        resource_id=course.course_uuid,
+    )
+    if not can_view:
         raise HTTPException(
             status_code=403,
             detail="You must be enrolled in this course to submit files",
@@ -818,16 +821,24 @@ async def handle_assignment_task_submission(
         )
 
     # SECURITY: Check if user has instructor/admin permissions for grading
-    is_instructor = check_user_permission(
-        db_session, current_user.id, "update", course.course_uuid
+    permission_service = get_permission_service(db_session)
+    is_instructor = await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.COURSE,
+        resource_id=course.course_uuid,
     )
 
     # For regular users, ensure they can only submit their own work
     if not is_instructor:
         # Check if user is enrolled in the course
-        if not check_user_permission(
-            db_session, current_user.id, "read", course.course_uuid
-        ):
+        can_view = await permission_service.check(
+            user=current_user,
+            action=Action.READ,
+            resource=ResourceType.COURSE,
+            resource_id=course.course_uuid,
+        )
+        if not can_view:
             raise HTTPException(
                 status_code=403,
                 detail="You must be enrolled in this course to submit assignments",

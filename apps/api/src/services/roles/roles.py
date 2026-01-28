@@ -16,13 +16,9 @@ from src.db.permissions import (
     RoleUpdate,
     UserRole,
 )
-from src.db.users import PublicUser
-from src.security.rbac.service_utils import (
-    check_user_permission,
-    is_admin_or_maintainer,
-)
-from src.services.permissions import get_permission_service
 from src.db.permissions.enums import Action, ResourceType
+from src.db.users import PublicUser
+from src.services.permissions import get_permission_service
 
 
 def _generate_slug(name: str) -> str:
@@ -102,17 +98,6 @@ async def create_role(
             status_code=403,
             detail="You are not a member of this organization",
         )
-
-    # Check permission to create roles
-    if not is_admin_or_maintainer(db_session, current_user.id):
-        has_perm = check_user_permission(
-            db_session, current_user.id, "create", f"org_{role_object.org_id}"
-        )
-        if not has_perm:
-            raise HTTPException(
-                status_code=403,
-                detail="You don't have permission to create roles in this organization.",
-            )
 
     # Validate role name
     if not role_object.name or role_object.name.strip() == "":
@@ -206,15 +191,18 @@ async def get_roles_by_organization(
         )
 
     # Check permission to read roles
-    if not is_admin_or_maintainer(db_session, current_user.id):
-        has_perm = check_user_permission(
-            db_session, current_user.id, "read", f"org_{org_id}"
+    permission_service = get_permission_service(db_session)
+    can_do = await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ORGANIZATION,
+        org_id=org_id,
+    )
+    if not can_do:
+        raise HTTPException(
+            status_code=403,
+            detail="You don't have permission to read roles in this organization.",
         )
-        if not has_perm:
-            raise HTTPException(
-                status_code=403,
-                detail="You don't have permission to read roles in this organization.",
-            )
 
     # Get global roles (org_id is NULL, is_system is True)
     global_roles_statement = (

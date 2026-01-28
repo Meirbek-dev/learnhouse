@@ -17,8 +17,9 @@ Includes cache locking to prevent race conditions.
 from __future__ import annotations
 
 import logging
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Generator, TypedDict
+from typing import TypedDict
 
 from src.services.cache.redis_client import (
     delete_keys,
@@ -86,9 +87,7 @@ def _role_permissions_key(role_id: int) -> str:
 
 
 @contextmanager
-def cache_lock(
-    lock_key: str, timeout: int = CACHE_LOCK_TTL
-) -> Generator[bool, None, None]:
+def cache_lock(lock_key: str, timeout: int = CACHE_LOCK_TTL) -> Generator[bool]:
     """
     Context manager for distributed cache locking using Redis.
 

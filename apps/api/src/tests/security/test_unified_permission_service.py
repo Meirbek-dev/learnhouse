@@ -1,8 +1,6 @@
 """
 Tests for the unified permission service.
 
-This module tests the new UnifiedPermissionService which replaces
-all the old rbac_check_* functions.
 """
 
 import pytest
@@ -26,14 +24,15 @@ def db_session():
         poolclass=StaticPool,
     )
     # Import all models so SQLModel.metadata is populated and create tables
-    from src.core.events.database import import_all_models
     from sqlmodel import SQLModel
+
+    from src.core.events.database import import_all_models
 
     import_all_models()
     # Some modules may fail to import during dynamic discovery; import critical models explicitly
-    import src.db.permissions.models as _permissions_models
     import src.db.courses.courses as _course_model
     import src.db.permissions.audit as _audit_model
+    import src.db.permissions.models as _permissions_models
 
     SQLModel.metadata.create_all(engine)
 
@@ -220,8 +219,8 @@ class TestRoleHierarchy:
     @pytest.mark.asyncio
     async def test_role_hierarchy_inheritance(self, db_session, public_user):
         """Test that child roles inherit parent role permissions."""
-        from src.db.permissions.models import Role, Permission, RolePermission
         from src.db.permissions.enums import Scope
+        from src.db.permissions.models import Permission, Role, RolePermission
         from src.services.permissions.permission_service import PermissionService
 
         # Create parent role
@@ -295,8 +294,8 @@ class TestResourceOverrides:
     @pytest.mark.asyncio
     async def test_resource_permission_overrides_role(self, db_session, public_user):
         """Test that resource-level permissions override role permissions."""
-        from src.db.permissions.models import ResourcePermission, Permission
         from src.db.permissions.enums import Scope
+        from src.db.permissions.models import Permission, ResourcePermission
         from src.services.permissions.permission_service import PermissionService
 
         # Create a permission
@@ -336,9 +335,9 @@ class TestCacheInvalidation:
     async def test_user_permission_invalidation(self, db_session, public_user):
         """Test that user permission cache is invalidated correctly."""
         from src.services.permissions.permission_cache import (
+            get_cached_permission,
             invalidate_for_user,
             set_cached_permission,
-            get_cached_permission,
         )
 
         # Set a cached permission
@@ -382,8 +381,8 @@ class TestScopeEvaluation:
     @pytest.mark.asyncio
     async def test_scope_all_allows_everything(self, db_session, public_user):
         """Test that Scope.ALL allows access to all resources."""
-        from src.db.permissions.models import Role, Permission, RolePermission, UserRole
         from src.db.permissions.enums import Scope
+        from src.db.permissions.models import Permission, Role, RolePermission, UserRole
 
         # Create role with ALL scope permission
         role = Role(name="Admin", slug="admin", priority=100, is_system=True)
