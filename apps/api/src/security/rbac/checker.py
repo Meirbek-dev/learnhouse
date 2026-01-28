@@ -11,6 +11,10 @@ from sqlmodel import Session
 from src.db.permissions.enums import Action, AuditLevel, ResourceType
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac.context import PermissionContext
+from src.security.rbac.exceptions import (
+    AuthenticationRequiredError,
+    PermissionDeniedError,
+)
 from src.security.rbac.service_utils import get_user_id, is_anonymous
 from src.services.permissions.audit_service import AuditService
 from src.services.permissions.policy_engine import PolicyEngine
@@ -152,23 +156,18 @@ class PermissionChecker:
             error_message: Optional custom error message
 
         Raises:
-            HTTPException: 401 if user is anonymous and auth required
-            HTTPException: 403 if permission is denied
+            AuthenticationRequiredError: If user is anonymous and auth required
+            PermissionDeniedError: If permission is denied
         """
         # Check if authentication is required
         if is_anonymous(user) and action != Action.READ:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Authentication required",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+            raise AuthenticationRequiredError()
 
         # Check permission
         if not self.check(user, action, resource, resource_id, org_id, context):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
+            raise PermissionDeniedError(
                 detail=error_message
-                or f"Permission denied: {action.value} on {resource.value}",
+                or f"Permission denied: {action.value} on {resource.value}"
             )
 
     def can(
@@ -205,14 +204,10 @@ class PermissionChecker:
             The user as PublicUser
 
         Raises:
-            HTTPException: 401 if user is anonymous
+            AuthenticationRequiredError: If user is anonymous
         """
         if isinstance(user, AnonymousUser) or (hasattr(user, "id") and user.id == 0):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Authentication required",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+            raise AuthenticationRequiredError()
         return user  # type: ignore[return-value]
 
     def require_org_membership(
@@ -228,17 +223,14 @@ class PermissionChecker:
             org_id: Organization ID
 
         Raises:
-            HTTPException: 403 if user is not a member
+            PermissionDeniedError: If user is not a member
         """
         # First require authentication
         self.require_authenticated(user)
 
         # Check if user has any role in the organization
         if not self.check(user, Action.READ, ResourceType.ORGANIZATION, org_id=org_id):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You are not a member of this organization",
-            )
+            raise PermissionDeniedError("You are not a member of this organization")
 
     def get_user_permissions(
         self,

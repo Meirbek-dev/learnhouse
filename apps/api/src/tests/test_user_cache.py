@@ -37,6 +37,8 @@ async def test_get_user_by_field_sets_cache_after_db_fetch(monkeypatch):
     def fake_set_json(k, v, ttl) -> None:
         set_calls.append((k, v, ttl))
 
+    # Mock get_json to return None (cache miss) so set_json gets called
+    monkeypatch.setattr("src.services.cache.redis_client.get_json", lambda k: None)
     monkeypatch.setattr("src.services.cache.redis_client.set_json", fake_set_json)
 
     user = await _get_user_by_field(mock_db, "id", 2)

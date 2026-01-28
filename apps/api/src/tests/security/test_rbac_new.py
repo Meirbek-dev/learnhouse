@@ -189,17 +189,64 @@ class TestPolicyEngine:
         """Create a mock database session."""
         return Mock(spec=Session)
 
-    def test_anonymous_access_read_course(self, mock_db):
-        """Anonymous users should be able to read courses."""
+    def test_anonymous_access_read_course_without_id(self, mock_db):
+        """Anonymous users cannot read courses without resource_id (security fix)."""
         engine = PolicyEngine(mock_db)
         result = engine._check_anonymous_access(Action.READ, ResourceType.COURSE, None)
+        # Should return False when no resource_id provided (can't verify if public)
+        assert result is False
+
+    def test_anonymous_access_read_public_course(self, mock_db):
+        """Anonymous users can read public courses."""
+        from src.db.courses.courses import Course
+
+        # Mock public course
+        mock_course = Mock(spec=Course)
+        mock_course.public = True
+        mock_db.exec.return_value.first.return_value = mock_course
+
+        engine = PolicyEngine(mock_db)
+        result = engine._check_anonymous_access(
+            Action.READ, ResourceType.COURSE, "course_public123"
+        )
         assert result is True
 
-    def test_anonymous_access_read_collection(self, mock_db):
-        """Anonymous users should be able to read collections."""
+    def test_anonymous_access_read_private_course(self, mock_db):
+        """Anonymous users cannot read private courses."""
+        from src.db.courses.courses import Course
+
+        # Mock private course
+        mock_course = Mock(spec=Course)
+        mock_course.public = False
+        mock_db.exec.return_value.first.return_value = mock_course
+
+        engine = PolicyEngine(mock_db)
+        result = engine._check_anonymous_access(
+            Action.READ, ResourceType.COURSE, "course_private123"
+        )
+        assert result is False
+
+    def test_anonymous_access_read_collection_without_id(self, mock_db):
+        """Anonymous users cannot read collections without resource_id (security fix)."""
         engine = PolicyEngine(mock_db)
         result = engine._check_anonymous_access(
             Action.READ, ResourceType.COLLECTION, None
+        )
+        # Should return False when no resource_id provided (can't verify if public)
+        assert result is False
+
+    def test_anonymous_access_read_public_collection(self, mock_db):
+        """Anonymous users can read public collections."""
+        from src.db.collections import Collection
+
+        # Mock public collection
+        mock_collection = Mock(spec=Collection)
+        mock_collection.public = True
+        mock_db.exec.return_value.first.return_value = mock_collection
+
+        engine = PolicyEngine(mock_db)
+        result = engine._check_anonymous_access(
+            Action.READ, ResourceType.COLLECTION, "collection_public123"
         )
         assert result is True
 
