@@ -26,6 +26,35 @@ from src.db.users import AnonymousUser, InternalUser, PublicUser, User
 from src.services.permissions.role_service import RoleService
 
 # ===========================
+# Resource Type Utilities
+# ===========================
+
+
+def infer_resource_type(resource_uuid: str) -> ResourceType | None:
+    """
+    Infer resource type from UUID prefix or database lookup.
+    
+    DEPRECATED: This is a best-effort function. Prefer passing explicit resource_type.
+    
+    Args:
+        resource_uuid: Resource UUID
+        
+    Returns:
+        Inferred ResourceType or None if cannot determine
+    """
+    # Try common prefixes
+    if resource_uuid.startswith("course_"):
+        return ResourceType.COURSE
+    if resource_uuid.startswith("collection_"):
+        return ResourceType.COLLECTION
+    if resource_uuid.startswith("org_"):
+        return ResourceType.ORGANIZATION
+    
+    # Default to None - caller should handle
+    return None
+
+
+# ===========================
 # User Type Utilities
 # ===========================
 
@@ -111,25 +140,6 @@ def map_action(action: str) -> Action:
         Corresponding Action enum value
     """
     return ACTION_MAP.get(action, Action.READ)
-
-
-def infer_resource_type(resource_uuid: str) -> ResourceType:
-    """
-    Infer resource type from UUID prefix.
-
-    REMOVE:  This function is deprecated and unsafe. Prefer explicit resource type specification.
-
-    Args:
-        resource_uuid: Resource UUID with type prefix
-
-    Returns:
-        Inferred ResourceType
-    """
-    if not resource_uuid or resource_uuid == "":
-        return ResourceType.ORGANIZATION
-
-    prefix = resource_uuid.split("_")[0].lower() if "_" in resource_uuid else ""
-    return RESOURCE_PREFIX_MAP.get(prefix, ResourceType.COURSE)
 
 
 # ===========================

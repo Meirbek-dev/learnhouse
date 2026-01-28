@@ -3,9 +3,17 @@ Audit service for permission-related logging.
 
 This service provides methods for logging permission checks, grants,
 and revocations for security auditing and compliance.
+
+Tiered logging strategy:
+- CRITICAL (grants, revokes, denials): Always log to DB
+- IMPORTANT (successful permission checks): 10% sampling + Redis aggregation
+- ROUTINE (repeated successful checks): Redis counters only
 """
 
+import hashlib
+import json
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from sqlmodel import Session, select
 
@@ -16,12 +24,89 @@ from src.db.permissions.audit import (
 )
 from src.db.permissions.enums import Action, AuditAction, ResourceType
 
+if TYPE_CHECKING:
+    from redis import Redis
+
 
 class AuditService:
-    """Service for permission audit logging."""
+    """Service for permission audit logging with tiered strategy."""
 
-    def __init__(self, db: Session) -> None:
+    # Sampling rates
+    IMPORTANT_SAMPLE_RATE = 0.1  # Log 10% of successful checks to DB
+    ROUTINE_SAMPLE_RATE = 0.0  # Never log routine checks to DB
+
+    # Redis key prefixes
+    REDIS_AGGREGATE_KEY = "audit:aggregate"
+    REDIS_COUNTER_KEY = "audit:counter"
+    REDIS_TTL = 3600  # 1 hour
+
+    def __init__(self, db: Session, redis: "Redis | None" = None) -> None:
         self.db = db
+        self.redis = redis
+
+    def _should_sample(self, audit_action: AuditAction, result: bool) -> bool:
+        """
+        Determine if this event should be logged to database.
+
+        CRITICAL events (always log):
+        - GRANT, REVOKE: Permission changes
+        - DENY: Security-relevant denials
+
+        IMPORTANT events (sample 10%):
+        - CHECK with result=True: Successful permission checks
+
+        ROUTINE events (never log to DB):
+        - Repeated successful checks (aggregated in Redis)
+        """
+        # Critical: Always log to DB
+        if audit_action in (AuditAction.GRANT, AuditAction.REVOKE, AuditAction.DENY):
+            return True
+
+        # Important: Sample successful checks
+        if audit_action == AuditAction.CHECK and result:
+            import random
+
+            return random.random() < self.IMPORTANT_SAMPLE_RATE
+
+        # Default: Don't log to DB
+        return False
+
+    def _aggregate_in_redis(
+        self,
+        user_id: int | None,
+        audit_action: AuditAction,
+        resource_type: str | None,
+        permission_name: str | None,
+    ) -> None:
+        """Increment Redis counter for this event."""
+        if not self.redis:
+            return
+
+        # Create aggregation key
+        key_parts = [
+            str(user_id or "anonymous"),
+            audit_action.value,
+            resource_type or "unknown",
+            permission_name or "unknown",
+        ]
+        key_hash = hashlib.md5(":".join(key_parts).encode()).hexdigest()[:8]
+        redis_key = f"{self.REDIS_COUNTER_KEY}:{key_hash}"
+
+        # Increment counter and set TTL
+        self.redis.incr(redis_key)
+        self.redis.expire(redis_key, self.REDIS_TTL)
+
+        # Store metadata for the aggregated events
+        metadata_key = f"{self.REDIS_AGGREGATE_KEY}:{key_hash}"
+        if not self.redis.exists(metadata_key):
+            metadata = {
+                "user_id": user_id,
+                "action": audit_action.value,
+                "resource_type": resource_type,
+                "permission_name": permission_name,
+                "first_seen": datetime.now(UTC).isoformat(),
+            }
+            self.redis.setex(metadata_key, self.REDIS_TTL, json.dumps(metadata))
 
     def log(
         self,
@@ -34,9 +119,9 @@ class AuditService:
         context: dict | None = None,
         ip_address: str | None = None,
         user_agent: str | None = None,
-    ) -> PermissionAuditLog:
+    ) -> PermissionAuditLog | None:
         """
-        Log a permission-related event.
+        Log a permission-related event with tiered strategy.
 
         Args:
             user_id: User who performed/requested the action
@@ -50,7 +135,7 @@ class AuditService:
             user_agent: User agent string
 
         Returns:
-            The created audit log entry
+            The created audit log entry if logged to DB, None if only aggregated
         """
         resource_type_str = (
             resource_type.value
@@ -58,6 +143,19 @@ class AuditService:
             else resource_type
         )
 
+        # Aggregate in Redis (always, for metrics)
+        self._aggregate_in_redis(
+            user_id=user_id,
+            audit_action=audit_action,
+            resource_type=resource_type_str,
+            permission_name=permission_name,
+        )
+
+        # Decide if we should log to DB based on tiering strategy
+        if not self._should_sample(audit_action, result):
+            return None
+
+        # Log to database (critical/sampled events only)
         log_entry = PermissionAuditLog(
             user_id=user_id,
             action=audit_action,
@@ -84,7 +182,7 @@ class AuditService:
         org_id: int | None = None,
         ip_address: str | None = None,
         user_agent: str | None = None,
-    ) -> PermissionAuditLog:
+    ) -> PermissionAuditLog | None:
         """
         Log a permission check event.
 
@@ -99,7 +197,7 @@ class AuditService:
             user_agent: User agent string
 
         Returns:
-            The created audit log entry
+            The created audit log entry if logged to DB, None if only aggregated
         """
         permission_name = f"{resource.value}:{action.value}"
         context = {}
@@ -312,3 +410,38 @@ class AuditService:
 
         self.db.commit()
         return count
+
+    def get_aggregated_stats(self, limit: int = 100) -> list[dict]:
+        """
+        Get aggregated statistics from Redis.
+
+        Returns recent aggregated permission check data that wasn't logged to DB.
+
+        Args:
+            limit: Maximum number of aggregated stats to return
+
+        Returns:
+            List of dicts with aggregated event data and counts
+        """
+        if not self.redis:
+            return []
+
+        stats = []
+        # Get all aggregate metadata keys
+        pattern = f"{self.REDIS_AGGREGATE_KEY}:*"
+        for key in self.redis.scan_iter(match=pattern, count=limit):
+            # Get metadata and counter
+            metadata_str = self.redis.get(key)
+            if not metadata_str:
+                continue
+
+            key_hash = key.decode().split(":")[-1]
+            counter_key = f"{self.REDIS_COUNTER_KEY}:{key_hash}"
+            count = self.redis.get(counter_key)
+
+            metadata = json.loads(metadata_str)
+            metadata["count"] = int(count) if count else 0
+            stats.append(metadata)
+
+        # Sort by count descending
+        return sorted(stats, key=lambda x: x["count"], reverse=True)[:limit]

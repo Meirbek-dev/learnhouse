@@ -1,8 +1,13 @@
 """
 Unified Permission Service - Single entry point for all RBAC checks.
 
-This module replaces all the scattered rbac_check_* functions with a single,
-consistent interface for permission checking across all resource types.
+This module provides a complete RBAC system with:
+- Role-based permission checks with hierarchy
+- Resource ownership verification
+- Scope evaluation (ALL, OWN, ORG, ASSIGNED)
+- ABAC condition evaluation
+- Redis caching for performance
+- Tiered audit logging
 
 Usage:
     from src.services.permissions.unified_permission_service import get_permission_service
@@ -19,6 +24,8 @@ Usage:
     )
 """
 
+import logging
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from fastapi import HTTPException, Request, status
@@ -29,23 +36,39 @@ from src.db.permissions.constants import (
     ADMIN_OR_MAINTAINER_SLUGS,
     INSTRUCTOR_OR_HIGHER_SLUGS,
 )
-from src.db.permissions.enums import Action, AuditAction, AuditLevel, ResourceType
+from src.db.permissions.enums import Action, AuditAction, AuditLevel, ResourceType, Scope
+from src.db.permissions.models import (
+    Permission,
+    ResourcePermission,
+    Role,
+    RolePermission,
+    UserRole,
+)
 from src.db.resource_authors import (
     ResourceAuthor,
     ResourceAuthorshipEnum,
     ResourceAuthorshipStatusEnum,
 )
+from src.db.usergroup_resources import UserGroupResource
+from src.db.usergroup_user import UserGroupUser
 from src.db.users import AnonymousUser, InternalUser, PublicUser
+from src.services.cache.redis_client import get_redis_client
 from src.services.permissions.audit_service import AuditService
 from src.services.permissions.permission_cache import (
     get_cached_permission,
+    get_cached_user_roles,
     set_cached_permission,
+    set_cached_user_roles,
 )
-from src.services.permissions.policy_engine import PolicyEngine
 from src.services.permissions.role_service import RoleService
 
 if TYPE_CHECKING:
     from src.security.rbac.policies.base import BasePolicy
+
+_logger = logging.getLogger(__name__)
+
+# Maximum depth for role inheritance hierarchy to prevent performance issues
+MAX_ROLE_HIERARCHY_DEPTH = 10
 
 
 class PermissionResult:
@@ -66,8 +89,8 @@ class UnifiedPermissionService:
     """
     Unified permission service for all RBAC checks.
 
-    This service replaces all the scattered rbac_check_* functions with
-    a single, consistent interface.
+    This service consolidates all permission checking logic, including
+    role-based permissions, ownership, scopes, and ABAC conditions.
     """
 
     def __init__(
@@ -79,8 +102,7 @@ class UnifiedPermissionService:
         self.db = db
         self.use_cache = use_cache
         self.audit_level = audit_level
-        self.policy_engine = PolicyEngine(db, use_cache=use_cache)
-        self.audit_service = AuditService(db)
+        self.audit_service = AuditService(db, redis=get_redis_client())
         self.role_service = RoleService(db)
         self._policies: dict[ResourceType, "BasePolicy"] = {}
 
@@ -337,11 +359,12 @@ class UnifiedPermissionService:
         """
         Default permission check logic when no policy is registered.
 
-        This implements the standard RBAC flow:
+        This implements the complete RBAC flow:
         1. Check if resource is public (for READ actions)
-        2. Check resource ownership
-        3. Check admin/maintainer role
-        4. Check via PolicyEngine
+        2. Check resource-level permissions (most specific)
+        3. Check resource ownership
+        4. Check admin/maintainer role
+        5. Check role-based permissions with scope/conditions
         """
         # Anonymous users can only read public resources
         if is_anonymous:
@@ -350,23 +373,326 @@ class UnifiedPermissionService:
                     return True
             return False
 
+        # Check resource-level permissions first (most specific)
+        if resource_id and self._check_resource_permission(
+            user_id, action, resource, resource_id
+        ):
+            return True
+
         # Check resource ownership (for specific resources)
+        is_owner = False
         if resource_id and action != Action.CREATE:
-            if self._is_resource_owner(user_id, resource_id):
+            is_owner = self._is_resource_owner(user_id, resource_id)
+            if is_owner:
                 return True
 
         # Check admin/maintainer role (full access)
         if self._is_admin_or_maintainer(user_id):
             return True
 
-        # Check via PolicyEngine (role-based permissions)
-        return self.policy_engine.evaluate(
-            user_id=user_id,
-            action=action,
-            resource=resource,
-            resource_id=resource_id,
-            org_id=org_id,
+        # Get user's active roles (filter expired)
+        roles = self._get_user_active_roles(user_id, org_id)
+
+        if not roles:
+            return False
+
+        # Build scope context for evaluation
+        scope_context = {
+            "is_owner": is_owner,
+            "request_org_id": org_id,
+            "user_id": user_id,
+            "resource_id": resource_id,
+        }
+
+        # Check each role's permissions (including inherited)
+        for role in roles:
+            scope_context["role_org_id"] = role.org_id
+            if self._check_role_permission(
+                role,
+                action,
+                resource,
+                scope_context,
+                context=None,  # ABAC context not implemented yet
+            ):
+                return True
+
+        return False
+
+    # ==================== Core RBAC Helper Methods ====================
+
+    def _check_resource_permission(
+        self,
+        user_id: int,
+        action: Action,
+        resource: ResourceType,
+        resource_id: str,
+    ) -> bool:
+        """Check for resource-level permission overrides."""
+        statement = (
+            select(ResourcePermission)
+            .join(Permission, Permission.id == ResourcePermission.permission_id)
+            .where(
+                ResourcePermission.user_id == user_id,
+                ResourcePermission.resource_type == resource,
+                ResourcePermission.resource_id == resource_id,
+                Permission.action == action,
+            )
         )
+
+        # Filter out expired permissions
+        statement = statement.where(
+            (ResourcePermission.expires_at.is_(None))
+            | (ResourcePermission.expires_at > datetime.now(UTC))  # type: ignore[union-attr]
+        )
+
+        return self.db.exec(statement).first() is not None
+
+    def _get_user_active_roles(
+        self, user_id: int, org_id: int | None = None
+    ) -> list[Role]:
+        """Get all active (non-expired) roles for a user with caching."""
+        # Try cache first
+        if self.use_cache:
+            cached = get_cached_user_roles(user_id, org_id)
+            if cached is not None:
+                role_ids = cached.get("role_ids", [])
+                if role_ids:
+                    return list(
+                        self.db.exec(
+                            select(Role)
+                            .where(Role.id.in_(role_ids))
+                            .order_by(Role.priority.desc())
+                        ).all()
+                    )
+                return []
+
+        # Query database
+        statement = (
+            select(Role)
+            .join(UserRole, UserRole.role_id == Role.id)
+            .where(UserRole.user_id == user_id)
+            .where(
+                (UserRole.expires_at.is_(None))
+                | (UserRole.expires_at > datetime.now(UTC))
+            )  # type: ignore[union-attr]
+        )
+
+        if org_id is not None:
+            statement = statement.where(UserRole.org_id == org_id)
+
+        statement = statement.order_by(Role.priority.desc())
+        roles = list(self.db.exec(statement).all())
+
+        # Cache the result
+        if self.use_cache and roles:
+            role_ids = [r.id for r in roles if r.id]
+            role_names = [r.name for r in roles]
+            set_cached_user_roles(user_id, role_ids, role_names, org_id)
+
+        return roles
+
+    def _check_ownership(self, user_id: int, resource_id: str) -> bool:
+        """Check if user owns a resource via ResourceAuthor table."""
+        statement = select(ResourceAuthor).where(
+            ResourceAuthor.resource_uuid == resource_id,
+            ResourceAuthor.user_id == user_id,
+            ResourceAuthor.authorship.in_(
+                [
+                    ResourceAuthorshipEnum.CREATOR,
+                    ResourceAuthorshipEnum.MAINTAINER,
+                    ResourceAuthorshipEnum.CONTRIBUTOR,
+                ]
+            ),
+            ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
+        )
+        return self.db.exec(statement).first() is not None
+
+    def _check_user_assigned(self, user_id: int, resource_id: str) -> bool:
+        """Check if user is assigned to a resource through user groups."""
+        statement = (
+            select(UserGroupResource)
+            .join(
+                UserGroupUser,
+                UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
+            )
+            .where(
+                UserGroupUser.user_id == user_id,
+                UserGroupResource.resource_uuid == resource_id,
+            )
+        )
+        return self.db.exec(statement).first() is not None
+
+    def _check_role_permission(
+        self,
+        role: Role,
+        action: Action,
+        resource: ResourceType,
+        scope_context: dict,
+        context: dict | None = None,
+    ) -> bool:
+        """Check if a role grants a specific permission with scope/condition evaluation."""
+        # Collect all role IDs in the hierarchy
+        role_ids = self._get_role_hierarchy_ids(role.id)  # type: ignore[arg-type]
+
+        if not role_ids:
+            return False
+
+        # Batch query: get all permissions for all role IDs
+        statement = (
+            select(Permission, RolePermission)
+            .join(RolePermission, RolePermission.permission_id == Permission.id)
+            .where(
+                RolePermission.role_id.in_(role_ids),
+                Permission.resource_type == resource,
+                Permission.action == action,
+            )
+        )
+
+        results = self.db.exec(statement).all()
+
+        for permission, role_permission in results:
+            if self._scope_matches(permission.scope, scope_context):
+                if self._conditions_match(role_permission.conditions, context):
+                    return True
+
+        return False
+
+    def _get_role_hierarchy_ids(self, role_id: int) -> list[int]:
+        """Get all role IDs in the hierarchy chain using recursive CTE."""
+        from sqlalchemy import text
+
+        result = self.db.exec(
+            text("""
+                WITH RECURSIVE role_hierarchy AS (
+                    SELECT id, parent_role_id, 0 as depth
+                    FROM roles
+                    WHERE id = :role_id
+
+                    UNION ALL
+
+                    SELECT r.id, r.parent_role_id, rh.depth + 1
+                    FROM roles r
+                    INNER JOIN role_hierarchy rh ON r.id = rh.parent_role_id
+                    WHERE rh.depth < :max_depth
+                )
+                SELECT id FROM role_hierarchy ORDER BY depth
+            """),
+            {"role_id": role_id, "max_depth": MAX_ROLE_HIERARCHY_DEPTH},
+        )
+
+        return [row[0] for row in result.fetchall()]
+
+    def _scope_matches(self, scope: Scope, scope_context: dict) -> bool:
+        """Check if a permission scope matches the current context."""
+        is_owner = scope_context.get("is_owner", False)
+        request_org_id = scope_context.get("request_org_id")
+        role_org_id = scope_context.get("role_org_id")
+
+        match scope:
+            case Scope.ALL:
+                return True
+            case Scope.OWN:
+                return is_owner
+            case Scope.ORG:
+                if role_org_id is None:
+                    return True  # Global role can access any org
+                if request_org_id is not None:
+                    return role_org_id == request_org_id
+                return True  # Backward compat
+            case Scope.ASSIGNED:
+                user_id = scope_context.get("user_id")
+                resource_id = scope_context.get("resource_id")
+                if not user_id or not resource_id:
+                    return False
+                return self._check_user_assigned(user_id, resource_id)
+            case _:
+                return False
+
+    def _conditions_match(self, conditions: dict | None, context: dict | None) -> bool:
+        """Evaluate ABAC conditions."""
+        if not conditions:
+            return True
+        if not context:
+            return False
+
+        if "type" in conditions and "rules" in conditions:
+            return self._evaluate_complex_condition(conditions, context)
+
+        # Simple equality check
+        for key, expected in conditions.items():
+            if key not in context or context[key] != expected:
+                return False
+
+        return True
+
+    def _evaluate_complex_condition(self, condition: dict, context: dict) -> bool:
+        """Evaluate complex ABAC condition with AND/OR/NOT logic."""
+        condition_type = condition.get("type", "and")
+        rules = condition.get("rules", [])
+
+        if not rules:
+            return True
+
+        if condition_type == "and":
+            return all(self._evaluate_rule(rule, context) for rule in rules)
+        if condition_type == "or":
+            return any(self._evaluate_rule(rule, context) for rule in rules)
+        if condition_type == "not":
+            return not any(self._evaluate_rule(rule, context) for rule in rules)
+
+        _logger.warning("Unknown condition type: %s", condition_type)
+        return False
+
+    def _evaluate_rule(self, rule: dict, context: dict) -> bool:
+        """Evaluate a single ABAC rule with operators like ==, >, in, contains."""
+        field = rule.get("field")
+        operator = rule.get("operator", "==")
+        expected = rule.get("value")
+
+        if not field:
+            return False
+
+        actual = self._get_context_value(field, context)
+
+        try:
+            if operator == "==":
+                return actual == expected
+            if operator == "!=":
+                return actual != expected
+            if operator == ">":
+                return actual > expected
+            if operator == ">=":
+                return actual >= expected
+            if operator == "<":
+                return actual < expected
+            if operator == "<=":
+                return actual <= expected
+            if operator == "in":
+                return actual in expected if isinstance(expected, (list, tuple, set)) else False
+            if operator == "not_in":
+                return actual not in expected if isinstance(expected, (list, tuple, set)) else True
+            if operator == "contains":
+                return expected in actual if isinstance(actual, (str, list, tuple)) else False
+            _logger.warning("Unknown operator: %s", operator)
+            return False
+        except (TypeError, AttributeError) as e:
+            _logger.warning("Error evaluating rule %s: %s", rule, e)
+            return False
+
+    def _get_context_value(self, field: str, context: dict) -> any:
+        """Get value from context with dot notation support (e.g., 'user.department')."""
+        parts = field.split(".")
+        value = context
+
+        for part in parts:
+            if isinstance(value, dict):
+                value = value.get(part)
+                if value is None:
+                    return None
+            else:
+                return None
+
+        return value
 
     async def require(
         self,

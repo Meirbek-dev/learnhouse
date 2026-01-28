@@ -60,13 +60,13 @@ def upgrade() -> None:
             """))
             print("   ✅ Added permission_key column")
 
-            # Populate permission_key from existing data
+            # Populate permission_key from existing data (cast ENUMs to text)
             conn.execute(text("""
                 UPDATE permissions
                 SET permission_key = CONCAT(
-                    LOWER(resource_type), ':',
-                    LOWER(action), ':',
-                    LOWER(scope)
+                    LOWER(resource_type::text), ':',
+                    LOWER(action::text), ':',
+                    LOWER(scope::text)
                 )
                 WHERE permission_key IS NULL
             """))
@@ -147,17 +147,17 @@ def upgrade() -> None:
     # 7. Optimize audit_log table with indexes
     print("\n7. Optimizing permission_audit_log indexes...")
     try:
-        # Index for user queries
+        # Index for user queries (use created_at)
         conn.execute(text("""
             CREATE INDEX IF NOT EXISTS idx_audit_user_date
-            ON permission_audit_log(user_id, timestamp DESC)
+            ON permission_audit_log(user_id, created_at DESC)
         """))
         print("   ✅ Created index for user audit queries")
 
         # Index for denial queries
         conn.execute(text("""
             CREATE INDEX IF NOT EXISTS idx_audit_denials
-            ON permission_audit_log(result, timestamp DESC)
+            ON permission_audit_log(result, created_at DESC)
             WHERE result = false
         """))
         print("   ✅ Created partial index for denial queries")
@@ -165,7 +165,7 @@ def upgrade() -> None:
         # Index for resource queries
         conn.execute(text("""
             CREATE INDEX IF NOT EXISTS idx_audit_resource
-            ON permission_audit_log(resource_type, resource_id, timestamp DESC)
+            ON permission_audit_log(resource_type, resource_id, created_at DESC)
         """))
         print("   ✅ Created index for resource audit queries")
     except Exception as e:
@@ -174,13 +174,12 @@ def upgrade() -> None:
     # 8. Add index on user_roles for faster permission lookups
     print("\n8. Optimizing user_roles indexes...")
     try:
-        # Composite index for user + org lookups
+        # Composite index for user + org lookups (without WHERE clause)
         conn.execute(text("""
             CREATE INDEX IF NOT EXISTS idx_user_roles_user_org
             ON user_roles(user_id, org_id)
-            WHERE expires_at IS NULL OR expires_at > NOW()
         """))
-        print("   ✅ Created composite index for active user roles")
+        print("   ✅ Created composite index for user roles")
     except Exception as e:
         print(f"   ⚠️  Warning: {e}")
 

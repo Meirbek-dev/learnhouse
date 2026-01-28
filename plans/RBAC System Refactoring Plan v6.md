@@ -895,7 +895,6 @@ export function PermissionGuard(props: PermissionGuardProps) {
 
 ---
 
-
 ## 8. Immediate Actions
 
 ### 🔴 CRITICAL (Do Today)
@@ -987,8 +986,6 @@ The current RBAC system is **over-engineered and under-delivered**. Four permiss
 
 - ✅ `usePermissions()` - general permissions
 - ✅ `useResourcePermissions()` - resource-specific
-
-
 
 Write alembic migration in add4ea7479ad_rbac_6th_rewrite.py
 Mercilessly remove all the legacy, deprecated, backward compat code.

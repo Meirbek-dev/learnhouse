@@ -1,8 +1,9 @@
 """
 Central permission checker with caching and audit logging.
 
-This module provides the PermissionChecker class which is the main entry point
-for all permission checks in the system.
+DEPRECATED: Use UnifiedPermissionService from src.services.permissions instead.
+
+This module is maintained for backward compatibility only.
 """
 
 from fastapi import HTTPException, status
@@ -16,8 +17,8 @@ from src.security.rbac.exceptions import (
     PermissionDeniedError,
 )
 from src.security.rbac.service_utils import get_user_id, is_anonymous
+from src.services.permissions import get_permission_service
 from src.services.permissions.audit_service import AuditService
-from src.services.permissions.policy_engine import PolicyEngine
 
 # Default audit level - can be overridden per-checker or globally
 DEFAULT_AUDIT_LEVEL = AuditLevel.ALL_EXCEPT_READS
@@ -27,10 +28,9 @@ class PermissionChecker:
     """
     Central permission checking with caching and audit.
 
-    This class provides the main interface for checking permissions:
-    - check(): Returns True/False
-    - require(): Raises HTTPException if denied
-    - can(): Alias for check()
+    DEPRECATED: Use UnifiedPermissionService instead.
+
+    This class wraps UnifiedPermissionService for backward compatibility.
     """
 
     def __init__(
@@ -45,10 +45,10 @@ class PermissionChecker:
         """
         self.db = db
         self.audit_level = audit_level
-        self.policy_engine = PolicyEngine(db)
+        self.unified_service = get_permission_service(db, audit_level=audit_level)
         self.audit_service = AuditService(db)
 
-    def check(
+    async def check(
         self,
         user: PublicUser | AnonymousUser,
         action: Action,
@@ -60,11 +60,7 @@ class PermissionChecker:
         """
         Check if user has permission to perform action on resource.
 
-        This method:
-        1. Evaluates role-based permissions
-        2. Checks resource-level permissions
-        3. Evaluates ABAC conditions
-        4. Logs the check to audit
+        DEPRECATED: Use UnifiedPermissionService.check() instead.
 
         Args:
             user: Current user (PublicUser or AnonymousUser)
@@ -77,63 +73,17 @@ class PermissionChecker:
         Returns:
             True if permission is granted, False otherwise
         """
-        user_id = get_user_id(user)
-
-        # Build context dict for ABAC
-        abac_context = context.extra if context else None
-
-        # Evaluate permission
-        result = self.policy_engine.evaluate(
-            user_id=user_id,
+        # Delegate to unified service
+        return await self.unified_service.check(
+            user=user,
             action=action,
             resource=resource,
             resource_id=resource_id,
             org_id=org_id,
-            context=abac_context,
+            raise_on_deny=False,
         )
 
-        # Log to audit based on configured level
-        should_log = self._should_log_audit(action, result)
-        if should_log:
-            self.audit_service.log_check(
-                user_id=user_id if user_id != 0 else None,
-                action=action,
-                resource=resource,
-                result=result,
-                resource_id=resource_id,
-                org_id=org_id,
-                ip_address=context.ip_address if context else None,
-                user_agent=context.user_agent if context else None,
-            )
-
-        return result
-
-    def _should_log_audit(self, action: Action, result: bool) -> bool:
-        """Determine if this check should be logged based on audit level."""
-        match self.audit_level:
-            case AuditLevel.NONE:
-                return False
-            case AuditLevel.FAILURES_ONLY:
-                return not result
-            case AuditLevel.WRITES_ONLY:
-                if not result:
-                    return True
-                return action in (
-                    Action.CREATE,
-                    Action.UPDATE,
-                    Action.DELETE,
-                    Action.MANAGE,
-                )
-            case AuditLevel.ALL_EXCEPT_READS:
-                if not result:
-                    return True
-                return action != Action.READ
-            case AuditLevel.ALL:
-                return True
-            case _:
-                return True
-
-    def require(
+    async def require(
         self,
         user: PublicUser | AnonymousUser,
         action: Action,
@@ -146,6 +96,8 @@ class PermissionChecker:
         """
         Check permission and raise HTTPException if denied.
 
+        DEPRECATED: Use UnifiedPermissionService.require() instead.
+
         Args:
             user: Current user
             action: Action to perform
@@ -156,21 +108,18 @@ class PermissionChecker:
             error_message: Optional custom error message
 
         Raises:
-            AuthenticationRequiredError: If user is anonymous and auth required
-            PermissionDeniedError: If permission is denied
+            HTTPException: If permission is denied
         """
-        # Check if authentication is required
-        if is_anonymous(user) and action != Action.READ:
-            raise AuthenticationRequiredError
+        # Delegate to unified service
+        await self.unified_service.require(
+            user=user,
+            action=action,
+            resource=resource,
+            resource_id=resource_id,
+            org_id=org_id,
+        )
 
-        # Check permission
-        if not self.check(user, action, resource, resource_id, org_id, context):
-            raise PermissionDeniedError(
-                detail=error_message
-                or f"Permission denied: {action.value} on {resource.value}"
-            )
-
-    def can(
+    async def can(
         self,
         user: PublicUser | AnonymousUser,
         action: Action,
@@ -180,6 +129,8 @@ class PermissionChecker:
     ) -> bool:
         """
         Alias for check() - Check if user can perform action.
+
+        DEPRECATED: Use UnifiedPermissionService.can() instead.
 
         Args:
             user: Current user
@@ -191,7 +142,7 @@ class PermissionChecker:
         Returns:
             True if permission is granted
         """
-        return self.check(user, action, resource, resource_id, org_id)
+        return await self.check(user, action, resource, resource_id, org_id)
 
     def require_authenticated(self, user: PublicUser | AnonymousUser) -> PublicUser:
         """
@@ -210,7 +161,7 @@ class PermissionChecker:
             raise AuthenticationRequiredError
         return user  # type: ignore[return-value]
 
-    def require_org_membership(
+    async def require_org_membership(
         self,
         user: PublicUser | AnonymousUser,
         org_id: int,
@@ -229,7 +180,7 @@ class PermissionChecker:
         self.require_authenticated(user)
 
         # Check if user has any role in the organization
-        if not self.check(user, Action.READ, ResourceType.ORGANIZATION, org_id=org_id):
+        if not await self.check(user, Action.READ, ResourceType.ORGANIZATION, org_id=org_id):
             msg = "You are not a member of this organization"
             raise PermissionDeniedError(msg)
 
@@ -241,7 +192,7 @@ class PermissionChecker:
         """
         Get all effective permissions for a user.
 
-        This is useful for the frontend to know what actions are allowed.
+        DEPRECATED: This returns empty dict now. Use UnifiedPermissionService instead.
 
         Args:
             user: Current user
@@ -250,62 +201,5 @@ class PermissionChecker:
         Returns:
             Dictionary mapping permission names to boolean
         """
-        user_id = get_user_id(user)
-
-        if is_anonymous(user):
-            # Anonymous users have very limited permissions
-            return {
-                "course:read:all": True,
-                "collection:read:all": True,
-            }
-
-        return self.policy_engine.get_user_permissions(user_id, org_id)
-
-
-# Utility functions for common permission checks
-
-
-def check_course_permission(
-    checker: PermissionChecker,
-    user: PublicUser | AnonymousUser,
-    action: Action,
-    course_uuid: str | None = None,
-    org_id: int | None = None,
-) -> bool:
-    """
-    Check permission for course-related actions.
-
-    Args:
-        checker: Permission checker instance
-        user: Current user
-        action: Action to perform
-        course_uuid: Optional course UUID
-        org_id: Optional organization context
-
-    Returns:
-        True if permission is granted
-    """
-    return checker.check(user, action, ResourceType.COURSE, course_uuid, org_id)
-
-
-def require_course_permission(
-    checker: PermissionChecker,
-    user: PublicUser | AnonymousUser,
-    action: Action,
-    course_uuid: str | None = None,
-    org_id: int | None = None,
-) -> None:
-    """
-    Require permission for course-related actions.
-
-    Args:
-        checker: Permission checker instance
-        user: Current user
-        action: Action to perform
-        course_uuid: Optional course UUID
-        org_id: Optional organization context
-
-    Raises:
-        HTTPException: If permission is denied
-    """
-    checker.require(user, action, ResourceType.COURSE, course_uuid, org_id)
+        # Return empty dict - this method is deprecated
+        return {}

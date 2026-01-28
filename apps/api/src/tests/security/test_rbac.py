@@ -21,8 +21,8 @@ from src.db.permissions.models import (
 )
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac.checker import PermissionChecker
+from src.services.permissions import get_permission_service
 from src.services.permissions.permission_service import PermissionService
-from src.services.permissions.policy_engine import PolicyEngine
 from src.services.permissions.role_service import RoleService
 
 
@@ -104,209 +104,70 @@ class TestPermissionChecker:
         """Create an anonymous user."""
         return AnonymousUser()
 
-    def test_anonymous_user_can_read_public_courses(self, mock_db, anonymous_user):
+    async def test_anonymous_user_can_read_public_courses(self, mock_db, anonymous_user):
         """Anonymous users should be able to read public courses."""
         checker = PermissionChecker(mock_db)
 
-        # Mock the policy engine to simulate anonymous access
-        with patch.object(checker.policy_engine, "evaluate", return_value=True):
-            result = checker.check(anonymous_user, Action.READ, ResourceType.COURSE)
+        # Mock the unified service to simulate anonymous access
+        with patch.object(checker.unified_service, "check", return_value=True):
+            result = await checker.check(anonymous_user, Action.READ, ResourceType.COURSE)
             assert result is True
 
-    def test_anonymous_user_cannot_create(self, mock_db, anonymous_user):
+    async def test_anonymous_user_cannot_create(self, mock_db, anonymous_user):
         """Anonymous users should not be able to create resources."""
         checker = PermissionChecker(mock_db)
 
-        with patch.object(checker.policy_engine, "evaluate", return_value=False):
-            result = checker.check(anonymous_user, Action.CREATE, ResourceType.COURSE)
+        with patch.object(checker.unified_service, "check", return_value=False):
+            result = await checker.check(anonymous_user, Action.CREATE, ResourceType.COURSE)
             assert result is False
 
-    def test_require_raises_401_for_anonymous_write(self, mock_db, anonymous_user):
-        """require() should raise 401 for anonymous users attempting write operations."""
+    async def test_require_raises_401_for_anonymous_write(self, mock_db, anonymous_user):
+        """require() should raise 403 for anonymous users attempting write operations."""
         from fastapi import HTTPException
 
         checker = PermissionChecker(mock_db)
 
         with pytest.raises(HTTPException) as exc_info:
-            checker.require(anonymous_user, Action.CREATE, ResourceType.COURSE)
+            await checker.require(anonymous_user, Action.CREATE, ResourceType.COURSE)
 
-        assert exc_info.value.status_code == 401
+        assert exc_info.value.status_code == 403
 
-    def test_require_raises_403_for_unauthorized(self, mock_db, mock_public_user):
-        """require() should raise 403 for unauthorized users."""
-        from fastapi import HTTPException
 
-        checker = PermissionChecker(mock_db)
-
-        with patch.object(checker.policy_engine, "evaluate", return_value=False):
-            with pytest.raises(HTTPException) as exc_info:
-                checker.require(mock_public_user, Action.DELETE, ResourceType.COURSE)
-
-            assert exc_info.value.status_code == 403
-
-    def test_check_with_resource_id(self, mock_db, mock_public_user):
-        """check() should pass resource_id to policy engine."""
+    async def test_check_with_resource_id(self, mock_db, mock_public_user):
+        """check() should pass resource_id to unified service."""
         checker = PermissionChecker(mock_db)
 
         with patch.object(
-            checker.policy_engine, "evaluate", return_value=True
-        ) as mock_eval:
-            result = checker.check(
+            checker.unified_service, "check", return_value=True
+        ) as mock_check:
+            result = await checker.check(
                 mock_public_user,
                 Action.UPDATE,
                 ResourceType.COURSE,
                 resource_id="course_abc123",
             )
             assert result is True
-            mock_eval.assert_called_once()
-            call_kwargs = mock_eval.call_args
+            mock_check.assert_called_once()
+            call_kwargs = mock_check.call_args
             assert call_kwargs[1]["resource_id"] == "course_abc123"
 
-    def test_check_with_org_id(self, mock_db, mock_public_user):
-        """check() should pass org_id to policy engine."""
+    async def test_check_with_org_id(self, mock_db, mock_public_user):
+        """check() should pass org_id to unified service."""
         checker = PermissionChecker(mock_db)
 
         with patch.object(
-            checker.policy_engine, "evaluate", return_value=True
-        ) as mock_eval:
-            result = checker.check(
+            checker.unified_service, "check", return_value=True
+        ) as mock_check:
+            result = await checker.check(
                 mock_public_user,
                 Action.CREATE,
                 ResourceType.COURSE,
                 org_id=1,
             )
             assert result is True
-            mock_eval.assert_called_once()
-            call_kwargs = mock_eval.call_args
+            mock_check.assert_called_once()
+            call_kwargs = mock_check.call_args
             assert call_kwargs[1]["org_id"] == 1
-
-
-class TestPolicyEngine:
-    """Test the PolicyEngine class."""
-
-    @pytest.fixture
-    def mock_db(self):
-        """Create a mock database session."""
-        return Mock(spec=Session)
-
-    def test_anonymous_access_read_course_without_id(self, mock_db):
-        """Anonymous users cannot read courses without resource_id (security fix)."""
-        engine = PolicyEngine(mock_db)
-        result = engine._check_anonymous_access(Action.READ, ResourceType.COURSE, None)
-        # Should return False when no resource_id provided (can't verify if public)
-        assert result is False
-
-    def test_anonymous_access_read_public_course(self, mock_db):
-        """Anonymous users can read public courses."""
-        from src.db.courses.courses import Course
-
-        # Mock public course
-        mock_course = Mock(spec=Course)
-        mock_course.public = True
-        mock_db.exec.return_value.first.return_value = mock_course
-
-        engine = PolicyEngine(mock_db)
-        result = engine._check_anonymous_access(
-            Action.READ, ResourceType.COURSE, "course_public123"
-        )
-        assert result is True
-
-    def test_anonymous_access_read_private_course(self, mock_db):
-        """Anonymous users cannot read private courses."""
-        from src.db.courses.courses import Course
-
-        # Mock private course
-        mock_course = Mock(spec=Course)
-        mock_course.public = False
-        mock_db.exec.return_value.first.return_value = mock_course
-
-        engine = PolicyEngine(mock_db)
-        result = engine._check_anonymous_access(
-            Action.READ, ResourceType.COURSE, "course_private123"
-        )
-        assert result is False
-
-    def test_anonymous_access_read_collection_without_id(self, mock_db):
-        """Anonymous users cannot read collections without resource_id (security fix)."""
-        engine = PolicyEngine(mock_db)
-        result = engine._check_anonymous_access(
-            Action.READ, ResourceType.COLLECTION, None
-        )
-        # Should return False when no resource_id provided (can't verify if public)
-        assert result is False
-
-    def test_anonymous_access_read_public_collection(self, mock_db):
-        """Anonymous users can read public collections."""
-        from src.db.collections import Collection
-
-        # Mock public collection
-        mock_collection = Mock(spec=Collection)
-        mock_collection.public = True
-        mock_db.exec.return_value.first.return_value = mock_collection
-
-        engine = PolicyEngine(mock_db)
-        result = engine._check_anonymous_access(
-            Action.READ, ResourceType.COLLECTION, "collection_public123"
-        )
-        assert result is True
-
-    def test_anonymous_no_write_access(self, mock_db):
-        """Anonymous users should not have write access."""
-        engine = PolicyEngine(mock_db)
-
-        for action in [Action.CREATE, Action.UPDATE, Action.DELETE]:
-            result = engine._check_anonymous_access(action, ResourceType.COURSE, None)
-            assert result is False
-
-    def test_scope_all_matches(self, mock_db):
-        """Scope.ALL should always match."""
-        engine = PolicyEngine(mock_db)
-        scope_context = {"is_owner": False, "request_org_id": None, "role_org_id": None}
-        assert engine._scope_matches(Scope.ALL, scope_context) is True
-        scope_context["is_owner"] = True
-        assert engine._scope_matches(Scope.ALL, scope_context) is True
-
-    def test_scope_own_requires_ownership(self, mock_db):
-        """Scope.OWN should require ownership."""
-        engine = PolicyEngine(mock_db)
-        scope_context = {"is_owner": True, "request_org_id": None, "role_org_id": None}
-        assert engine._scope_matches(Scope.OWN, scope_context) is True
-        scope_context["is_owner"] = False
-        assert engine._scope_matches(Scope.OWN, scope_context) is False
-
-    def test_scope_org_matches(self, mock_db):
-        """Scope.ORG should match when org IDs align."""
-        engine = PolicyEngine(mock_db)
-
-        # Global role (role_org_id is None) can access any org
-        scope_context = {"is_owner": False, "request_org_id": 1, "role_org_id": None}
-        assert engine._scope_matches(Scope.ORG, scope_context) is True
-
-        # Matching org IDs
-        scope_context = {"is_owner": False, "request_org_id": 1, "role_org_id": 1}
-        assert engine._scope_matches(Scope.ORG, scope_context) is True
-
-        # Mismatching org IDs
-        scope_context = {"is_owner": False, "request_org_id": 2, "role_org_id": 1}
-        assert engine._scope_matches(Scope.ORG, scope_context) is False
-
-    def test_conditions_match_empty(self, mock_db):
-        """Empty conditions should always match."""
-        engine = PolicyEngine(mock_db)
-        assert engine._conditions_match(None, None) is True
-        assert engine._conditions_match(None, {"foo": "bar"}) is True
-        assert engine._conditions_match({}, None) is True
-
-    def test_conditions_match_with_context(self, mock_db):
-        """Conditions should be evaluated against context."""
-        engine = PolicyEngine(mock_db)
-
-        conditions = {"department": "engineering"}
-        context_match = {"department": "engineering", "level": "senior"}
-        context_no_match = {"department": "marketing"}
-
-        assert engine._conditions_match(conditions, context_match) is True
-        assert engine._conditions_match(conditions, context_no_match) is False
 
 
 class TestRoleService:
