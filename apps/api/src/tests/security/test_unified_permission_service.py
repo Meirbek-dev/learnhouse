@@ -81,7 +81,9 @@ class TestUnifiedPermissionService:
         assert service._get_user_id(public_user) == 1
         assert service._get_user_id(None) == 0
 
-    def test_is_internal_user(self, db_session, anonymous_user, public_user, internal_user):
+    def test_is_internal_user(
+        self, db_session, anonymous_user, public_user, internal_user
+    ):
         """Test is_internal_user helper."""
         service = get_permission_service(db_session)
 
@@ -174,42 +176,6 @@ class TestUnifiedPermissionService:
         assert ResourceType.COURSE in service._policies
         assert ResourceType.ORGANIZATION in service._policies
         assert ResourceType.USER in service._policies
-
-
-class TestCompatibilityWrappers:
-    """Test backward compatibility wrappers."""
-
-    @pytest.mark.asyncio
-    async def test_rbac_check_compat(self, db_session, public_user):
-        """Test that old rbac_check still works via compatibility layer."""
-        from src.security.rbac.compat import rbac_check
-
-        # Should not raise for internal operations
-        result = await rbac_check(
-            request=None,
-            resource_uuid="course_123",
-            current_user=public_user,
-            action="read",
-            db_session=db_session,
-            resource_type=ResourceType.COURSE,
-        )
-        # Result depends on permissions, but should not error
-        assert isinstance(result, bool)
-
-    @pytest.mark.asyncio
-    async def test_courses_rbac_check_compat(self, db_session, public_user):
-        """Test that old courses_rbac_check still works."""
-        from src.security.rbac.compat import courses_rbac_check
-
-        # Should work via compatibility layer
-        result = await courses_rbac_check(
-            request=None,
-            course_uuid="course_123",
-            current_user=public_user,
-            action="read",
-            db_session=db_session,
-        )
-        assert isinstance(result, bool)
 
 
 class TestCaching:

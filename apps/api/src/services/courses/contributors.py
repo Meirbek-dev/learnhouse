@@ -4,14 +4,15 @@ from fastapi import HTTPException, Request
 from sqlmodel import Session, and_, select
 
 from src.db.courses.courses import Course
+from src.db.permissions.enums import Action, ResourceType
 from src.db.resource_authors import (
     ResourceAuthor,
     ResourceAuthorshipEnum,
     ResourceAuthorshipStatusEnum,
 )
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
-from src.security.rbac import courses_rbac_check
 from src.security.rbac.service_utils import verify_not_anonymous
+from src.services.permissions import get_permission_service
 
 
 async def apply_course_contributor(
@@ -98,7 +99,13 @@ async def update_course_contributor(
     verify_not_anonymous(current_user.id)
 
     # SECURITY: Require course ownership or admin role for updating contributors
-    await courses_rbac_check(request, course_uuid, current_user, "update", db_session)
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.COURSE,
+        resource_id=course_uuid,
+    )
 
     # Check if course exists
     statement = select(Course).where(Course.course_uuid == course_uuid)
@@ -169,7 +176,13 @@ async def get_course_contributors(
         )
 
     # SECURITY: Require read access to the course
-    await courses_rbac_check(request, course_uuid, current_user, "read", db_session)
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.COURSE,
+        resource_id=course_uuid,
+    )
 
     # Get all contributors for this course with user information
     statement = (
@@ -211,7 +224,13 @@ async def add_bulk_course_contributors(
     verify_not_anonymous(current_user.id)
 
     # SECURITY: Require course ownership or admin role for adding contributors
-    await courses_rbac_check(request, course_uuid, current_user, "update", db_session)
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.COURSE,
+        resource_id=course_uuid,
+    )
 
     # Check if course exists
     statement = select(Course).where(Course.course_uuid == course_uuid)
@@ -301,7 +320,13 @@ async def remove_bulk_course_contributors(
     verify_not_anonymous(current_user.id)
 
     # SECURITY: Require course ownership or admin role for removing contributors
-    await courses_rbac_check(request, course_uuid, current_user, "update", db_session)
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.COURSE,
+        resource_id=course_uuid,
+    )
 
     # Check if course exists
     statement = select(Course).where(Course.course_uuid == course_uuid)

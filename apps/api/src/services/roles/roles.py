@@ -21,9 +21,8 @@ from src.security.rbac.service_utils import (
     check_user_permission,
     is_admin_or_maintainer,
 )
-from src.security.rbac.service_utils import (
-    rbac_check_role as rbac_check,
-)
+from src.services.permissions import get_permission_service
+from src.db.permissions.enums import Action, ResourceType
 
 
 def _generate_slug(name: str) -> str:
@@ -73,11 +72,8 @@ async def create_role(
         )
 
     # RBAC check - verify user can create roles in this organization
-    from src.db.permissions import Action, ResourceType
-    from src.security.rbac import PermissionChecker
-
-    checker = PermissionChecker(db_session)
-    checker.require(
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
         user=current_user,
         action=Action.CREATE,
         resource=ResourceType.ROLE,
@@ -273,7 +269,13 @@ async def read_role(
         )
 
     # RBAC check using the role's slug
-    await rbac_check(request, current_user, "read", f"role_{role.slug}", db_session)
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user="read",
+        action=Action.READ,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=current_user,
+    )
 
     return RoleRead.model_validate(role)
 
@@ -318,7 +320,13 @@ async def update_role(
         )
 
     # RBAC check
-    await rbac_check(request, current_user, "update", f"role_{role.slug}", db_session)
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user="update",
+        action=Action.READ,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=current_user,
+    )
 
     # Update only the fields that were passed in
     update_data = role_object.model_dump(exclude_unset=True)
@@ -372,7 +380,13 @@ async def delete_role(
         )
 
     # RBAC check
-    await rbac_check(request, current_user, "delete", f"role_{role.slug}", db_session)
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user="delete",
+        action=Action.READ,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=current_user,
+    )
 
     db_session.delete(role)
     db_session.commit()

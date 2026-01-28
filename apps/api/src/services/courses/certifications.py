@@ -18,11 +18,12 @@ from src.db.courses.certifications import (
 )
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.courses import Course
+from src.db.permissions.enums import Action, ResourceType
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser
-from src.security.rbac import courses_rbac_check_for_certifications
 from src.services.gamification import StreakType, XPSource
 from src.services.gamification import service as gamification_service
+from src.services.permissions import get_permission_service
 
 logger = logging.getLogger(__name__)
 
@@ -50,8 +51,12 @@ async def create_certification(
         )
 
     # RBAC check
-    await courses_rbac_check_for_certifications(
-        request, course.course_uuid, current_user, "create", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.CERTIFICATE,
+        resource_id=course.course_uuid,
     )
 
     # Create certification
@@ -101,8 +106,12 @@ async def get_certification(
         )
 
     # RBAC check
-    await courses_rbac_check_for_certifications(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.CERTIFICATE,
+        resource_id=course.course_uuid,
     )
 
     return CertificationRead(**certification.model_dump())
@@ -127,8 +136,12 @@ async def get_certifications_by_course(
         )
 
     # RBAC check
-    await courses_rbac_check_for_certifications(
-        request, course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.CERTIFICATE,
+        resource_id=course_uuid,
     )
 
     # Get certifications for this course
@@ -172,8 +185,12 @@ async def update_certification(
         )
 
     # RBAC check
-    await courses_rbac_check_for_certifications(
-        request, course.course_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.CERTIFICATE,
+        resource_id=course.course_uuid,
     )
 
     # Update only the fields that were passed in
@@ -221,8 +238,12 @@ async def delete_certification(
         )
 
     # RBAC check
-    await courses_rbac_check_for_certifications(
-        request, course.course_uuid, current_user, "delete", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.CERTIFICATE,
+        resource_id=course.course_uuid,
     )
 
     db_session.delete(certification)
@@ -290,8 +311,12 @@ async def create_certificate_user(
             )
 
         # Require course ownership or instructor role for creating certificates
-        await courses_rbac_check_for_certifications(
-            request, course.course_uuid, current_user, "create", db_session
+        permission_service = get_permission_service(db_session)
+        await permission_service.check(
+            user=current_user,
+            action=Action.CREATE,
+            resource=ResourceType.CERTIFICATE,
+            resource_id=course.course_uuid,
         )
 
     now = tz_now()
@@ -428,8 +453,12 @@ async def get_user_certificates_for_course(
 
     # RBAC check with graceful fallback for learners retrieving their own certificates
     try:
-        await courses_rbac_check_for_certifications(
-            request, course_uuid, current_user, "read", db_session
+        permission_service = get_permission_service(db_session)
+        await permission_service.check(
+            user=current_user,
+            action=Action.READ,
+            resource=ResourceType.CERTIFICATE,
+            resource_id=course_uuid,
         )
     except HTTPException as exc:
         if exc.status_code != status.HTTP_403_FORBIDDEN:

@@ -15,6 +15,7 @@ from src.db.courses.courses import (
     ThumbnailType,
 )
 from src.db.organizations import Organization
+from src.db.permissions.enums import Action, ResourceType
 from src.db.resource_authors import (
     ResourceAuthor,
     ResourceAuthorshipEnum,
@@ -23,7 +24,6 @@ from src.db.resource_authors import (
 from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
-from src.security.rbac import courses_rbac_check
 from src.security.rbac.service_utils import (
     has_authenticated_user_role,
     has_instructor_role,
@@ -31,6 +31,7 @@ from src.security.rbac.service_utils import (
     verify_not_anonymous,
 )
 from src.services.courses.thumbnails import upload_thumbnail
+from src.services.permissions import get_permission_service
 
 
 async def get_course(
@@ -49,8 +50,12 @@ async def get_course(
         )
 
     # RBAC check
-    await courses_rbac_check(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.COURSE,
+        resource_id=course.course_uuid,
     )
 
     # Get course authors with their roles
@@ -93,8 +98,12 @@ async def get_course_by_id(
         )
 
     # RBAC check role-based access control
-    await courses_rbac_check(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.COURSE,
+        resource_id=course.course_uuid,
     )
 
     # Get course authors with their roles
@@ -154,8 +163,12 @@ async def get_course_meta(
     ]
 
     # RBAC check
-    await courses_rbac_check(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.COURSE,
+        resource_id=course.course_uuid,
     )
 
     # Get course chapters
@@ -523,7 +536,13 @@ async def create_course(
     # SECURITY: Check if user has permission to create courses in this organization
     # Since this is a new course, we need to check organization-level permissions
     # For now, we'll use the existing RBAC check but with proper organization context
-    await courses_rbac_check(request, "course_x", current_user, "create", db_session)
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.COURSE,
+        resource_id=None,
+    )
 
     # Get org uuid
     org_statement = select(Organization).where(Organization.id == org_id)
@@ -621,8 +640,12 @@ async def update_course_thumbnail(
         )
 
     # RBAC check
-    await courses_rbac_check(
-        request, course.course_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.COURSE,
+        resource_id=course.course_uuid,
     )
 
     # Get org uuid
@@ -726,8 +749,12 @@ async def update_course(
         )
 
     # SECURITY: Require course ownership or admin role for updating courses
-    await courses_rbac_check(
-        request, course.course_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.COURSE,
+        resource_id=course.course_uuid,
     )
 
     # SECURITY: Additional checks for sensitive access control fields
@@ -821,8 +848,12 @@ async def delete_course(
         )
 
     # RBAC check
-    await courses_rbac_check(
-        request, course.course_uuid, current_user, "delete", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.COURSE,
+        resource_id=course.course_uuid,
     )
 
     db_session.delete(course)

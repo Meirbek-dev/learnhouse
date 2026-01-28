@@ -31,10 +31,10 @@ from src.db.courses.assignments import (
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
+from src.db.permissions.enums import Action, ResourceType
 from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User
-from src.security.rbac import courses_rbac_check_for_assignments
 from src.security.rbac.service_utils import check_user_permission
 from src.services.courses.activities.uploads.sub_file import upload_submission_file
 from src.services.courses.activities.uploads.tasks_ref_files import (
@@ -43,6 +43,7 @@ from src.services.courses.activities.uploads.tasks_ref_files import (
 from src.services.courses.certifications import (
     check_course_completion_and_create_certificate,
 )
+from src.services.permissions import get_permission_service
 from src.services.trail.trail import check_trail_presence
 
 ## > Assignments CRUD
@@ -65,8 +66,12 @@ async def create_assignment(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "create", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Create Assignment
@@ -114,8 +119,12 @@ async def read_assignment(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # return assignment read
@@ -159,8 +168,12 @@ async def read_assignment_from_activity_uuid(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # return assignment read
@@ -195,8 +208,12 @@ async def update_assignment(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Update only the fields that were passed in using model_dump with exclude_unset
@@ -242,8 +259,12 @@ async def delete_assignment(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "delete", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Delete Assignment
@@ -291,8 +312,12 @@ async def delete_assignment_from_activity_uuid(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "delete", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Delete Assignment
@@ -334,8 +359,12 @@ async def create_assignment_task(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "create", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Create Assignment Task
@@ -392,8 +421,12 @@ async def read_assignment_tasks(
     )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # return assignment tasks read
@@ -442,8 +475,12 @@ async def read_assignment_task(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # return assignment task read
@@ -498,8 +535,12 @@ async def put_assignment_task_reference_file(
     org = db_session.exec(org_statement).first()
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Upload reference file
@@ -578,8 +619,12 @@ async def put_assignment_task_submission_file(
     org = db_session.exec(org_statement).first()
 
     # RBAC check - only need read permission to submit files
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Check if user is enrolled in the course
@@ -649,8 +694,12 @@ async def update_assignment_task(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Update only the fields that were passed in using model_dump with exclude_unset
@@ -708,8 +757,12 @@ async def delete_assignment_task(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "delete", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Delete Assignment Task
@@ -793,13 +846,21 @@ async def handle_assignment_task_submission(
             )
 
         # Only need read permission for submissions
-        await courses_rbac_check_for_assignments(
-            request, course.course_uuid, current_user, "read", db_session
+        permission_service = get_permission_service(db_session)
+        await permission_service.check(
+            user=current_user,
+            action=Action.READ,
+            resource=ResourceType.ASSIGNMENT,
+            resource_id=course.course_uuid,
         )
     else:
         # SECURITY: Instructors/admins need update permission to grade
-        await courses_rbac_check_for_assignments(
-            request, course.course_uuid, current_user, "update", db_session
+        permission_service = get_permission_service(db_session)
+        await permission_service.check(
+            user=current_user,
+            action=Action.UPDATE,
+            resource=ResourceType.ASSIGNMENT,
+            resource_id=course.course_uuid,
         )
 
     # Try to find existing submission by user_id and assignment_task_id first (for save progress functionality)
@@ -913,8 +974,12 @@ async def read_user_assignment_task_submissions(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Check if assignment task submission exists
@@ -970,8 +1035,12 @@ async def read_user_assignment_task_submissions_me(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Check if assignment task submission exists
@@ -1028,8 +1097,12 @@ async def read_assignment_task_submissions(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # return assignment task submissions list
@@ -1094,8 +1167,12 @@ async def update_assignment_task_submission(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Update only the fields that were passed in using model_dump with exclude_unset
@@ -1196,8 +1273,12 @@ async def delete_assignment_task_submission(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "delete", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Delete Assignment Task Submission
@@ -1264,8 +1345,12 @@ async def create_assignment_submission(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Create Assignment User Submission
@@ -1399,8 +1484,12 @@ async def read_assignment_submissions(
     )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # return assignment tasks read
@@ -1444,8 +1533,12 @@ async def read_user_assignment_submissions(
     )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # return assignment tasks read
@@ -1512,8 +1605,12 @@ async def update_assignment_submission(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Update only the fields that were passed in using model_dump with exclude_unset
@@ -1588,8 +1685,12 @@ async def delete_assignment_submission(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "delete", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Delete Assignment User Submission
@@ -1628,8 +1729,12 @@ async def grade_assignment_submission(
         )
 
     # SECURITY: Require course ownership or instructor role for grading
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Check if assignment user submission exists
@@ -1792,8 +1897,12 @@ async def mark_activity_as_done_for_user(
         )
 
     # SECURITY: Require course ownership or instructor role for marking activities as done
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     if not activity:
@@ -1866,8 +1975,12 @@ async def create_assignment_with_activity(
         )
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "create", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Create Activity first
@@ -1949,8 +2062,12 @@ async def get_assignments_from_course(
             assignments.append(assignment)
 
     # RBAC check
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # return assignments read
@@ -1977,8 +2094,12 @@ async def get_assignments_from_courses(
 
     # Check RBAC for each found course
     for c in courses:
-        await courses_rbac_check_for_assignments(
-            request, c.course_uuid, current_user, "read", db_session
+        permission_service = get_permission_service(db_session)
+        await permission_service.check(
+            user=current_user,
+            action=Action.READ,
+            resource=ResourceType.ASSIGNMENT,
+            resource_id=c.course_uuid,
         )
 
     course_ids = list(course_id_to_uuid.keys())

@@ -30,6 +30,7 @@ from src.db.courses.exams import (
     QuestionUpdate,
 )
 from src.db.organizations import Organization
+from src.db.permissions.enums import Action, ResourceType
 from src.db.resource_authors import (
     ResourceAuthor,
     ResourceAuthorshipEnum,
@@ -38,7 +39,7 @@ from src.db.resource_authors import (
 from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User
-from src.security.rbac import courses_rbac_check_for_assignments
+from src.services.permissions import get_permission_service
 
 ## > Helper Functions
 
@@ -101,8 +102,12 @@ async def create_exam(
     course = db_session.get(Course, exam_object.course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "create", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Validate settings against ExamSettingsBase so frontend limits are enforced server-side
@@ -156,8 +161,12 @@ async def read_exam(
     course = db_session.get(Course, exam.course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     return ExamRead.model_validate(exam)
@@ -186,8 +195,12 @@ async def read_exam_from_activity_uuid(
     course = db_session.get(Course, exam.course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     return ExamRead.model_validate(exam)
@@ -212,8 +225,12 @@ async def update_exam(
     course = db_session.get(Course, exam.course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Update fields
@@ -284,8 +301,12 @@ async def create_exam_with_activity(
         raise HTTPException(status_code=404, detail="Курс не найден")
 
     # RBAC check: ensure user can create content in this course
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "create", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Create activity
@@ -386,8 +407,12 @@ async def create_question(
     course = db_session.get(Course, exam.course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "create", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Input validation and sanitization
@@ -477,8 +502,12 @@ async def read_questions(
     course = db_session.get(Course, exam.course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     statement = (
@@ -514,8 +543,12 @@ async def update_question(
     course = db_session.get(Course, exam.course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Update fields
@@ -554,8 +587,12 @@ async def delete_question(
     course = db_session.get(Course, exam.course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "delete", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     db_session.delete(question)
@@ -1209,8 +1246,12 @@ async def get_all_exam_attempts(
     course = db_session.get(Course, activity.course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Get all attempts with user info (exclude preview attempts from analytics)
@@ -1300,8 +1341,12 @@ async def export_questions_csv(
     course = db_session.get(Course, activity.course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Get questions
@@ -1375,8 +1420,12 @@ async def import_questions_csv(
     course = db_session.get(Course, activity.course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "create", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Parse CSV
@@ -1485,8 +1534,12 @@ async def reorder_questions(
     course = db_session.get(Course, exam.course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
-    await courses_rbac_check_for_assignments(
-        request, course.course_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ASSIGNMENT,
+        resource_id=course.course_uuid,
     )
 
     # Update order_index for each question

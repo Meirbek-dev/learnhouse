@@ -4,8 +4,9 @@ from sqlmodel import Session, select
 from src.db.courses.courses import Course
 from src.db.payments.payments_courses import PaymentsCourse
 from src.db.payments.payments_products import PaymentsProduct
+from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
-from src.security.rbac import courses_rbac_check
+from src.services.permissions import get_permission_service
 
 
 async def link_course_to_product(
@@ -24,8 +25,12 @@ async def link_course_to_product(
         raise HTTPException(status_code=404, detail="Course not found")
 
     # RBAC check
-    await courses_rbac_check(
-        request, course.course_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.COURSE,
+        resource_id=course.course_uuid,
     )
 
     # Check if product exists
@@ -74,8 +79,12 @@ async def unlink_course_from_product(
         raise HTTPException(status_code=404, detail="Course not found")
 
     # RBAC check
-    await courses_rbac_check(
-        request, course.course_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.COURSE,
+        resource_id=course.course_uuid,
     )
 
     # Find and delete the payment course link

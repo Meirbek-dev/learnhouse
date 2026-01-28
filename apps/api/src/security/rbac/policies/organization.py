@@ -89,9 +89,7 @@ class OrganizationPolicy(BasePolicy):
             return int(resource_id)
 
         # Try as org_uuid
-        statement = select(Organization.id).where(
-            Organization.org_uuid == resource_id
-        )
+        statement = select(Organization.id).where(Organization.org_uuid == resource_id)
         return self.db.exec(statement).first()
 
     def _is_org_admin(self, user_id: int, org_id: int) -> bool:

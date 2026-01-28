@@ -56,7 +56,7 @@ class PermissionResult:
         granted: bool,
         reason: str | None = None,
         cached: bool = False,
-    ):
+    ) -> None:
         self.granted = granted
         self.reason = reason
         self.cached = cached
@@ -75,26 +75,30 @@ class UnifiedPermissionService:
         db: Session,
         use_cache: bool = True,
         audit_level: AuditLevel = AuditLevel.ALL_EXCEPT_READS,
-    ):
+    ) -> None:
         self.db = db
         self.use_cache = use_cache
         self.audit_level = audit_level
         self.policy_engine = PolicyEngine(db, use_cache=use_cache)
         self.audit_service = AuditService(db)
         self.role_service = RoleService(db)
-        self._policies: dict[ResourceType, "BasePolicy"] = {}
+        self._policies: dict[ResourceType, BasePolicy] = {}
 
-    def register_policy(self, resource_type: ResourceType, policy: "BasePolicy") -> None:
+    def register_policy(self, resource_type: ResourceType, policy: BasePolicy) -> None:
         """Register a resource-specific policy."""
         self._policies[resource_type] = policy
 
-    def _get_user_id(self, user: PublicUser | AnonymousUser | InternalUser | None) -> int:
+    def _get_user_id(
+        self, user: PublicUser | AnonymousUser | InternalUser | None
+    ) -> int:
         """Get user ID, returns 0 for anonymous users."""
         if user is None or isinstance(user, AnonymousUser):
             return 0
         return user.id if hasattr(user, "id") else 0
 
-    def _is_anonymous(self, user: PublicUser | AnonymousUser | InternalUser | None) -> bool:
+    def _is_anonymous(
+        self, user: PublicUser | AnonymousUser | InternalUser | None
+    ) -> bool:
         """Check if the user is anonymous (not authenticated)."""
         if user is None or isinstance(user, AnonymousUser):
             return True
@@ -102,7 +106,9 @@ class UnifiedPermissionService:
             return False
         return not hasattr(user, "id") or user.id == 0
 
-    def _is_internal_user(self, user: PublicUser | AnonymousUser | InternalUser | None) -> bool:
+    def _is_internal_user(
+        self, user: PublicUser | AnonymousUser | InternalUser | None
+    ) -> bool:
         """Check if the user is an internal system user."""
         return isinstance(user, InternalUser)
 
@@ -148,7 +154,9 @@ class UnifiedPermissionService:
             ur.role and ur.role.slug in INSTRUCTOR_OR_HIGHER_SLUGS for ur in user_roles
         )
 
-    def _is_resource_public(self, resource_id: str, resource_type: ResourceType) -> bool:
+    def _is_resource_public(
+        self, resource_id: str, resource_type: ResourceType
+    ) -> bool:
         """Check if a resource is publicly accessible."""
         if resource_type == ResourceType.COURSE:
             course = self.db.exec(
@@ -166,9 +174,7 @@ class UnifiedPermissionService:
             return True
         if self.audit_level == AuditLevel.ALL_EXCEPT_READS and action != Action.READ:
             return True
-        if self.audit_level == AuditLevel.DENIED_ONLY and not granted:
-            return True
-        return False
+        return bool(self.audit_level == AuditLevel.DENIED_ONLY and not granted)
 
     async def check(
         self,
@@ -216,7 +222,9 @@ class UnifiedPermissionService:
         # Check cache first
         if self.use_cache:
             action_str = action.value if hasattr(action, "value") else str(action)
-            resource_str = resource.value if hasattr(resource, "value") else str(resource)
+            resource_str = (
+                resource.value if hasattr(resource, "value") else str(resource)
+            )
             cached = get_cached_permission(
                 user_id, action_str, resource_str, resource_id, org_id
             )
@@ -228,7 +236,11 @@ class UnifiedPermissionService:
                         result=cached,
                         resource_type=resource,
                         resource_id=resource_id,
-                        context={"cached": True, "org_id": org_id, "action": action.value},
+                        context={
+                            "cached": True,
+                            "org_id": org_id,
+                            "action": action.value,
+                        },
                     )
                 if not cached and raise_on_deny:
                     raise HTTPException(
@@ -267,7 +279,9 @@ class UnifiedPermissionService:
         # Cache result
         if self.use_cache:
             action_str = action.value if hasattr(action, "value") else str(action)
-            resource_str = resource.value if hasattr(resource, "value") else str(resource)
+            resource_str = (
+                resource.value if hasattr(resource, "value") else str(resource)
+            )
             set_cached_permission(
                 user_id, action_str, resource_str, resource_id, org_id, granted
             )
@@ -328,15 +342,13 @@ class UnifiedPermissionService:
             return True
 
         # Check via PolicyEngine (role-based permissions)
-        granted = self.policy_engine.evaluate(
+        return self.policy_engine.evaluate(
             user_id=user_id,
             action=action,
             resource=resource,
             resource_id=resource_id,
             org_id=org_id,
         )
-
-        return granted
 
     async def require(
         self,

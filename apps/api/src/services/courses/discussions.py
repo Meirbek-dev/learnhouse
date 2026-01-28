@@ -18,7 +18,8 @@ from src.db.courses.discussions import (
 )
 from src.db.organizations import Organization
 from src.db.users import AnonymousUser, PublicUser, User
-from src.services.courses.courses import courses_rbac_check
+from src.services.permissions import get_permission_service
+from src.db.permissions.enums import Action, ResourceType
 
 
 async def create_discussion(
@@ -56,8 +57,13 @@ async def create_discussion(
         )
 
     # RBAC check - users need read access to participate in discussions
-    await courses_rbac_check(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.COURSE,
+        resource_id=course.course_uuid,
     )
 
     # If it's a reply, check if parent discussion exists
@@ -125,8 +131,13 @@ async def get_discussions_by_course_uuid(
         )
 
     # RBAC check
-    await courses_rbac_check(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.COURSE,
+        resource_id=course.course_uuid,
     )
 
     # Get main discussions (posts, not replies)
@@ -604,8 +615,13 @@ async def get_discussion_replies(
     course = db_session.exec(course_statement).first()
 
     if course:
-        await courses_rbac_check(
-            request, course.course_uuid, current_user, "read", db_session
+        permission_service = get_permission_service(db_session)
+
+        await permission_service.check(
+            user=current_user,
+            action=Action.READ,
+            resource=ResourceType.COURSE,
+            resource_id=course.course_uuid,
         )
 
     # Get replies

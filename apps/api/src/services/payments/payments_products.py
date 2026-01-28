@@ -14,6 +14,7 @@ from src.db.payments.payments_products import (
     PaymentsProductUpdate,
 )
 from src.db.payments.payments_users import PaymentStatusEnum, PaymentsUser
+from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
 from src.services.orgs.orgs import rbac_check
 from src.services.payments.payments_stripe import (
@@ -21,6 +22,7 @@ from src.services.payments.payments_stripe import (
     create_stripe_product,
     update_stripe_product,
 )
+from src.services.permissions import get_permission_service
 
 
 async def create_payments_product(
@@ -37,7 +39,14 @@ async def create_payments_product(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "create", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Check if payments config exists, has a valid id, and is active
     statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
@@ -83,7 +92,14 @@ async def get_payments_product(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "read", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Get payments product
     statement = select(PaymentsProduct).where(
@@ -111,7 +127,14 @@ async def update_payments_product(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "update", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Get existing payments product
     statement = select(PaymentsProduct).where(
@@ -154,7 +177,14 @@ async def delete_payments_product(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "delete", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Get existing payments product
     statement = select(PaymentsProduct).where(
@@ -201,7 +231,14 @@ async def list_payments_products(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "read", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Get payments products ordered by id
     statement = (
@@ -229,7 +266,14 @@ async def get_products_by_course(
         raise HTTPException(status_code=404, detail="Course not found")
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=course.course_uuid,
+    )
 
     # Get all products linked to this course with explicit join
     statement = (

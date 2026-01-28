@@ -11,7 +11,6 @@ This module provides the core RBAC functionality including:
 - Exceptions: Permission-specific exceptions with error codes
 """
 
-from src.security.rbac.checker import PermissionChecker
 from src.security.rbac.compat import (
     courses_rbac_check,
     courses_rbac_check_for_activities,
@@ -25,6 +24,8 @@ from src.security.rbac.compat import (
     rbac_check_user,
     rbac_check_usergroup,
 )
+
+from src.security.rbac.checker import PermissionChecker
 from src.security.rbac.context import PermissionContext
 from src.security.rbac.decorators import require_permission
 from src.security.rbac.dependencies import get_permission_checker

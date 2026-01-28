@@ -12,8 +12,9 @@ from src.db.collections import (
 )
 from src.db.collections_courses import CollectionCourse
 from src.db.courses.courses import Course
+from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
-from src.security.rbac import courses_rbac_check_for_collections
+from src.services.permissions import get_permission_service
 
 ####################################################
 # CRUD
@@ -35,8 +36,12 @@ async def get_collection(
         )
 
     # RBAC check
-    await courses_rbac_check_for_collections(
-        request, collection.collection_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.COLLECTION,
+        resource_id=collection.collection_uuid,
     )
 
     # get courses in collection
@@ -83,8 +88,12 @@ async def create_collection(
     # SECURITY: Check if user has permission to create collections in this organization
     # Since collections are organization-level resources, we need to check org permissions
     # For now, we'll use the existing RBAC check but with proper organization context
-    await courses_rbac_check_for_collections(
-        request, "collection_x", current_user, "create", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.COLLECTION,
+        resource_id=None,
     )
 
     # Complete the collection object
@@ -107,8 +116,12 @@ async def create_collection(
             if course:
                 # Verify user has read access to the course before adding it to collection
                 try:
-                    await courses_rbac_check_for_collections(
-                        request, course.course_uuid, current_user, "read", db_session
+                    permission_service = get_permission_service(db_session)
+                    await permission_service.check(
+                        user=current_user,
+                        action=Action.READ,
+                        resource=ResourceType.COLLECTION,
+                        resource_id=course.course_uuid,
                     )
                 except HTTPException:
                     raise HTTPException(
@@ -159,8 +172,12 @@ async def update_collection(
         )
 
     # RBAC check
-    await courses_rbac_check_for_collections(
-        request, collection.collection_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.COLLECTION,
+        resource_id=collection.collection_uuid,
     )
 
     courses = collection_object.courses
@@ -227,8 +244,12 @@ async def delete_collection(
         )
 
     # RBAC check
-    await courses_rbac_check_for_collections(
-        request, collection.collection_uuid, current_user, "delete", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.COLLECTION,
+        resource_id=collection.collection_uuid,
     )
 
     # delete collection from database

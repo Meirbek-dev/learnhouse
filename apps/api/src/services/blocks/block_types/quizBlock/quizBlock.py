@@ -21,13 +21,14 @@ from src.db.courses.quiz import (
     QuizSubmissionResponse,
 )
 from src.db.gamification import XPSource
+from src.db.permissions.enums import Action, ResourceType
 from src.db.users import PublicUser
-from src.security.rbac import courses_rbac_check
 from src.services.blocks.block_types.quizBlock.grading import (
     apply_attempt_penalty,
     grade_quiz,
 )
 from src.services.gamification.service import award_xp
+from src.services.permissions import get_permission_service
 
 
 async def submit_quiz(
@@ -59,12 +60,13 @@ async def submit_quiz(
         )
 
     # Check permissions (students can submit, teachers can view)
-    await courses_rbac_check(
-        request=request,
-        course_uuid=str(activity.course_id),
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
         user=current_user,
-        permission="mark_activities_done",
-        db_session=db_session,
+        action=Action.UPDATE,
+        resource=ResourceType.COURSE,
+        resource_id=str(activity.course_id),
     )
 
     # Get quiz block to access questions and settings
@@ -250,12 +252,13 @@ async def get_quiz_attempts(
         )
 
     # Check permissions
-    await courses_rbac_check(
-        request=request,
-        course_uuid=str(activity.course_id),
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
         user=current_user,
-        permission="read",
-        db_session=db_session,
+        action=Action.READ,
+        resource=ResourceType.COURSE,
+        resource_id=str(activity.course_id),
     )
 
     # Build query
@@ -307,12 +310,12 @@ async def get_quiz_stats(
         )
 
     # Check permissions (teacher/admin only)
-    await courses_rbac_check(
-        request=request,
-        course_uuid=str(activity.course_id),
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
         user=current_user,
-        permission="update",  # Requires teacher permissions
-        db_session=db_session,
+        action=Action.UPDATE,  # Requires teacher permissions
+        resource=ResourceType.COURSE,
+        resource_id=str(activity.course_id),
     )
 
     # Get stats

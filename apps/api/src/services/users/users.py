@@ -11,6 +11,7 @@ from ulid import ULID
 
 from src.db.organizations import Organization, OrganizationRead
 from src.db.permissions import Role, RoleRead, UserRole
+from src.db.permissions.enums import Action, ResourceType
 from src.db.user_organizations import UserOrganization
 from src.db.users import (
     AnonymousUser,
@@ -26,11 +27,11 @@ from src.db.users import (
     rebuild_user_models,
 )
 from src.security.rbac.checker import PermissionChecker
-from src.security.rbac.service_utils import rbac_check_user as rbac_check
 from src.security.security import security_hash_password, security_verify_password
 from src.services.cache import redis_client
 from src.services.orgs.invites import get_invite_code
 from src.services.orgs.orgs import get_org_join_mechanism
+from src.services.permissions import get_permission_service
 from src.services.users.avatars import upload_avatar
 from src.services.users.emails import send_account_creation_email
 from src.services.users.usergroups import add_users_to_usergroup
@@ -53,7 +54,13 @@ async def create_user(
     org_id: int,
 ):
     # RBAC check
-    await rbac_check(request, current_user, "create", "user_x", db_session)
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user="create",
+        action=Action.READ,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=current_user,
+    )
 
     # Validate organization exists
     await _validate_organization_exists(db_session, org_id)
@@ -119,7 +126,13 @@ async def create_user_without_org(
     user_object: UserCreate,
 ):
     # RBAC check
-    await rbac_check(request, current_user, "create", "user_x", db_session)
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user="create",
+        action=Action.READ,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=current_user,
+    )
 
     # Create and validate user
     user = await _create_and_validate_user(db_session, user_object)
@@ -165,12 +178,12 @@ async def update_user(
             return user
 
     # RBAC check (only for real updates)
-    await rbac_check(
-        request,
-        user_uuid=user.user_uuid,
-        current_user=current_user,
-        action="update",
-        db_session=db_session,
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.USER,
+        resource_id=user.user_uuid,
     )
 
     if user_object.username:
@@ -216,7 +229,13 @@ async def update_user_avatar(
     user = await _get_user_by_field(db_session, "id", current_user.id, use_cache=False)
 
     # RBAC check
-    await rbac_check(request, current_user, "update", user.user_uuid, db_session)
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user="update",
+        action=Action.READ,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=current_user,
+    )
 
     # Upload avatar with security validation
     if avatar_file and avatar_file.filename:
@@ -257,7 +276,13 @@ async def update_user_password(
     user = await _get_user_by_field(db_session, "id", user_id, use_cache=False)
 
     # RBAC check
-    await rbac_check(request, current_user, "update", user.user_uuid, db_session)
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user="update",
+        action=Action.READ,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=current_user,
+    )
 
     if not security_verify_password(form.old_password, user.password):
         raise HTTPException(
@@ -392,12 +417,12 @@ async def delete_user_by_id(
     user = await _get_user_by_field(db_session, "id", user_id, use_cache=False)
 
     # RBAC check
-    await rbac_check(
-        request,
-        user_uuid=user.user_uuid,
-        current_user=current_user,
-        action="delete",
-        db_session=db_session,
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.USER,
+        resource_id=user.user_uuid,
     )
 
     # Delete user

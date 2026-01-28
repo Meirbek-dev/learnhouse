@@ -14,12 +14,13 @@ from src.db.organizations import (
     rebuild_organization_models,
 )
 from src.db.permissions import Role, RoleRead, UserRole
+from src.db.permissions.enums import Action, ResourceType
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.services.cache import redis_client
 from src.services.cache.redis_client import delete_keys, get_json, set_json
 from src.services.orgs.invites import send_invite_email
-from src.services.orgs.orgs import rbac_check
+from src.services.permissions import get_permission_service
 
 # Rebuild organization models to resolve forward references
 rebuild_organization_models()
@@ -48,7 +49,14 @@ async def get_organization_users(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "read", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Build base query
     base_statement = (
@@ -131,7 +139,14 @@ async def remove_user_from_org(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "delete", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     statement = select(UserOrganization).where(
         UserOrganization.user_id == user_id, UserOrganization.org_id == org.id
@@ -208,7 +223,14 @@ async def update_user_role(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "update", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Check if user is the last admin and if the new role is not admin
     admin_role = db_session.exec(
@@ -295,7 +317,14 @@ async def invite_batch_users(
     user = db_session.exec(statement).first()
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "create", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Connect to Redis (use cached client)
     r = redis_client.get_redis_client()
@@ -380,7 +409,14 @@ async def get_list_of_invited_users(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "read", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Connect to Redis (use cached client)
     r = redis_client.get_redis_client()
@@ -433,7 +469,14 @@ async def remove_invited_user(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "delete", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Connect to Redis (use cached client)
     r = redis_client.get_redis_client()

@@ -32,15 +32,16 @@ from src.db.organizations import (
     OrganizationUpdate,
 )
 from src.db.permissions import Role, UserRole
+from src.db.permissions.enums import Action, ResourceType
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, InternalUser, PublicUser
-from src.security.rbac.service_utils import rbac_check_org as rbac_check
 from src.services.orgs.uploads import (
     upload_org_landing_content,
     upload_org_logo,
     upload_org_preview,
     upload_org_thumbnail,
 )
+from src.services.permissions import get_permission_service
 
 
 async def get_organization(
@@ -64,7 +65,13 @@ async def get_organization(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "read", db_session)
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -98,7 +105,14 @@ async def get_organization_by_slug(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "read", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -305,7 +319,14 @@ async def update_org(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "update", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Verify if the new slug is already in use
     statement = select(Organization).where(Organization.slug == org_object.slug)
@@ -400,7 +421,14 @@ async def update_org_logo(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "update", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Upload logo
     name_in_disk = await upload_org_logo(logo_file, org.org_uuid)
@@ -440,7 +468,14 @@ async def update_org_thumbnail(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "update", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Upload logo
     name_in_disk = await upload_org_thumbnail(thumbnail_file, org.org_uuid)
@@ -480,7 +515,14 @@ async def update_org_preview(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "update", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Upload logo
     name_in_disk = await upload_org_preview(preview_file, org.org_uuid)
@@ -506,7 +548,14 @@ async def delete_org(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "delete", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     db_session.delete(org)
     db_session.commit()
@@ -628,7 +677,14 @@ async def update_org_signup_mechanism(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "update", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -678,7 +734,14 @@ async def get_org_join_mechanism(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "read", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -731,7 +794,14 @@ async def update_org_landing(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "update", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -783,7 +853,14 @@ async def upload_org_landing_content_service(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "update", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Upload content
     name_in_disk = await upload_org_landing_content(content_file, org.org_uuid)

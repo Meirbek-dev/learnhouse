@@ -7,11 +7,12 @@ from sqlmodel import Session, select
 from ulid import ULID
 
 from src.db.organizations import Organization
+from src.db.permissions.enums import Action, ResourceType
 from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
 from src.db.usergroups import UserGroup, UserGroupCreate, UserGroupRead, UserGroupUpdate
 from src.db.users import AnonymousUser, InternalUser, PublicUser, User, UserRead
-from src.security.rbac.service_utils import rbac_check_usergroup as rbac_check
+from src.services.permissions import get_permission_service
 
 
 async def create_usergroup(
@@ -23,12 +24,13 @@ async def create_usergroup(
     usergroup = UserGroup.model_validate(usergroup_create)
 
     # RBAC check
-    await rbac_check(
-        request,
-        usergroup_uuid="usergroup_X",
-        current_user=current_user,
-        action="create",
-        db_session=db_session,
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.USERGROUP,
+        resource_id=None,
     )
 
     # Check if Organization exists
@@ -70,12 +72,13 @@ async def read_usergroup_by_id(
         )
 
     # RBAC check
-    await rbac_check(
-        request,
-        usergroup_uuid=usergroup.usergroup_uuid,
-        current_user=current_user,
-        action="read",
-        db_session=db_session,
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.USERGROUP,
+        resource_id=usergroup.usergroup_uuid,
     )
 
     return UserGroupRead.model_validate(usergroup)
@@ -97,12 +100,13 @@ async def get_users_linked_to_usergroup(
         )
 
     # RBAC check
-    await rbac_check(
-        request,
-        usergroup_uuid=usergroup.usergroup_uuid,
-        current_user=current_user,
-        action="read",
-        db_session=db_session,
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.USERGROUP,
+        resource_id=usergroup.usergroup_uuid,
     )
 
     statement = select(UserGroupUser).where(UserGroupUser.usergroup_id == usergroup_id)
@@ -130,12 +134,13 @@ async def read_usergroups_by_org_id(
     usergroups = db_session.exec(statement).all()
 
     # RBAC check
-    await rbac_check(
-        request,
-        usergroup_uuid="usergroup_X",
-        current_user=current_user,
-        action="read",
-        db_session=db_session,
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.USERGROUP,
+        resource_id=None,
     )
 
     return [UserGroupRead.model_validate(usergroup) for usergroup in usergroups]
@@ -153,12 +158,13 @@ async def get_usergroups_by_resource(
     usergroup_resources = db_session.exec(statement).all()
 
     # RBAC check
-    await rbac_check(
-        request,
-        usergroup_uuid="usergroup_X",
-        current_user=current_user,
-        action="read",
-        db_session=db_session,
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.USERGROUP,
+        resource_id=None,
     )
 
     usergroup_ids = [usergroup.usergroup_id for usergroup in usergroup_resources]
@@ -190,12 +196,13 @@ async def update_usergroup_by_id(
         )
 
     # RBAC check
-    await rbac_check(
-        request,
-        usergroup_uuid=usergroup.usergroup_uuid,
-        current_user=current_user,
-        action="update",
-        db_session=db_session,
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.USERGROUP,
+        resource_id=usergroup.usergroup_uuid,
     )
 
     usergroup.name = usergroup_update.name
@@ -225,12 +232,13 @@ async def delete_usergroup_by_id(
         )
 
     # RBAC check
-    await rbac_check(
-        request,
-        usergroup_uuid=usergroup.usergroup_uuid,
-        current_user=current_user,
-        action="delete",
-        db_session=db_session,
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.USERGROUP,
+        resource_id=usergroup.usergroup_uuid,
     )
 
     db_session.delete(usergroup)
@@ -256,12 +264,13 @@ async def add_users_to_usergroup(
         )
 
     # RBAC check
-    await rbac_check(
-        request,
-        usergroup_uuid=usergroup.usergroup_uuid,
-        current_user=current_user,
-        action="create",
-        db_session=db_session,
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.USERGROUP,
+        resource_id=usergroup.usergroup_uuid,
     )
 
     user_ids_array = user_ids.split(",")
@@ -324,12 +333,13 @@ async def remove_users_from_usergroup(
         )
 
     # RBAC check
-    await rbac_check(
-        request,
-        usergroup_uuid=usergroup.usergroup_uuid,
-        current_user=current_user,
-        action="delete",
-        db_session=db_session,
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.USERGROUP,
+        resource_id=usergroup.usergroup_uuid,
     )
 
     user_ids_array = user_ids.split(",")
@@ -372,12 +382,13 @@ async def add_resources_to_usergroup(
         )
 
     # RBAC check
-    await rbac_check(
-        request,
-        usergroup_uuid=usergroup.usergroup_uuid,
-        current_user=current_user,
-        action="create",
-        db_session=db_session,
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.USERGROUP,
+        resource_id=usergroup.usergroup_uuid,
     )
 
     resources_uuids_array = resources_uuids.split(",")
@@ -427,12 +438,13 @@ async def remove_resources_from_usergroup(
         )
 
     # RBAC check
-    await rbac_check(
-        request,
-        usergroup_uuid=usergroup.usergroup_uuid,
-        current_user=current_user,
-        action="delete",
-        db_session=db_session,
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.USERGROUP,
+        resource_id=usergroup.usergroup_uuid,
     )
 
     resources_uuids_array = resources_uuids.split(",")

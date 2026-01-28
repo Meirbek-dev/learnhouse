@@ -15,8 +15,9 @@ from src.db.courses.chapters import (
 )
 from src.db.courses.course_chapters import CourseChapter
 from src.db.courses.courses import Course
+from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
-from src.security.rbac import courses_rbac_check_for_chapters
+from src.services.permissions import get_permission_service
 
 ####################################################
 # CRUD
@@ -36,8 +37,12 @@ async def create_chapter(
     course = db_session.exec(statement).one()
 
     # RBAC check
-    await courses_rbac_check_for_chapters(
-        request, course.course_uuid, current_user, "create", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.CHAPTER,
+        resource_id=course.course_uuid,
     )
 
     # Complete chapter object
@@ -117,8 +122,12 @@ async def get_chapter(
         )
 
     # RBAC check
-    await courses_rbac_check_for_chapters(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.CHAPTER,
+        resource_id=course.course_uuid,
     )
 
     # Get activities for this chapter
@@ -157,8 +166,12 @@ async def update_chapter(
         )
 
     # RBAC check
-    await courses_rbac_check_for_chapters(
-        request, chapter.chapter_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.CHAPTER,
+        resource_id=chapter.chapter_uuid,
     )
 
     # Update only the fields that were passed in
@@ -189,8 +202,12 @@ async def delete_chapter(
         )
 
     # RBAC check
-    await courses_rbac_check_for_chapters(
-        request, chapter.chapter_uuid, current_user, "delete", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.CHAPTER,
+        resource_id=chapter.chapter_uuid,
     )
 
     # Remove all linked chapter activities
@@ -225,8 +242,12 @@ async def get_course_chapters(
         )
 
     # RBAC check
-    await courses_rbac_check_for_chapters(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.CHAPTER,
+        resource_id=course.course_uuid,
     )
 
     statement = (
@@ -281,8 +302,12 @@ async def reorder_chapters_and_activities(
         )
 
     # RBAC check
-    await courses_rbac_check_for_chapters(
-        request, course.course_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.CHAPTER,
+        resource_id=course.course_uuid,
     )
 
     ###########

@@ -171,8 +171,6 @@ class CoursePolicy(BasePolicy):
         )
         return self.db.exec(member_stmt).first() is not None
 
-    resource_type = ResourceType.COURSE
-
     def can(
         self,
         user: PublicUser | AnonymousUser,

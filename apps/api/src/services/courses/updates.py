@@ -12,8 +12,9 @@ from src.db.courses.course_updates import (
 )
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
+from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
-from src.security.rbac import courses_rbac_check
+from src.services.permissions import get_permission_service
 
 
 async def create_update(
@@ -41,8 +42,12 @@ async def create_update(
         )
 
     # RBAC check
-    await courses_rbac_check(
-        request, course.course_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.COURSE,
+        resource_id=course.course_uuid,
     )
     # Generate UUID
     courseupdate_uuid = f"courseupdate_{ULID()}"
@@ -81,8 +86,12 @@ async def update_update(
             status_code=status.HTTP_409_CONFLICT, detail="Update does not exist"
         )
     # RBAC check
-    await courses_rbac_check(
-        request, update.courseupdate_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.COURSE,
+        resource_id=update.courseupdate_uuid,
     )
 
     for key, value in update_object.model_dump(exclude_unset=True).items():
@@ -115,8 +124,12 @@ async def delete_update(
         )
 
     # RBAC check
-    await courses_rbac_check(
-        request, update.courseupdate_uuid, current_user, "delete", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.COURSE,
+        resource_id=update.courseupdate_uuid,
     )
 
     db_session.delete(update)

@@ -13,9 +13,10 @@ from src.db.courses.activities import (
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.chapters import Chapter
 from src.db.courses.courses import Course
+from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
-from src.security.rbac import courses_rbac_check_for_activities
 from src.services.payments.payments_access import check_activity_paid_access
+from src.services.permissions import get_permission_service
 
 ####################################################
 # CRUD
@@ -48,8 +49,12 @@ async def create_activity(
             detail="Course not found",
         )
 
-    await courses_rbac_check_for_activities(
-        request, course.course_uuid, current_user, "create", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.ACTIVITY,
+        resource_id=course.course_uuid,
     )
 
     # Create Activity
@@ -119,8 +124,12 @@ async def get_activity(
     activity, course = result
 
     # RBAC check
-    await courses_rbac_check_for_activities(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ACTIVITY,
+        resource_id=course.course_uuid,
     )
 
     # Paid access check
@@ -158,8 +167,12 @@ async def get_activityby_id(
     activity, course = result
 
     # RBAC check
-    await courses_rbac_check_for_activities(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ACTIVITY,
+        resource_id=course.course_uuid,
     )
 
     return ActivityRead.model_validate(activity)
@@ -191,8 +204,12 @@ async def update_activity(
             detail="Course not found",
         )
 
-    await courses_rbac_check_for_activities(
-        request, course.course_uuid, current_user, "update", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ACTIVITY,
+        resource_id=course.course_uuid,
     )
 
     # Update only the fields that were passed in
@@ -235,8 +252,12 @@ async def delete_activity(
             detail="Course not found",
         )
 
-    await courses_rbac_check_for_activities(
-        request, course.course_uuid, current_user, "delete", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.ACTIVITY,
+        resource_id=course.course_uuid,
     )
 
     # Delete activity from chapter
@@ -302,8 +323,12 @@ async def get_activities(
             detail="Course not found",
         )
 
-    await courses_rbac_check_for_activities(
-        request, course.course_uuid, current_user, "read", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.READ,
+        resource=ResourceType.ACTIVITY,
+        resource_id=course.course_uuid,
     )
 
     return [ActivityRead.model_validate(activity) for activity in activities]

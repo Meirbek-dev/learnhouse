@@ -12,6 +12,8 @@ from src.db.organizations import (
     OrganizationRead,
 )
 from src.db.users import AnonymousUser, PublicUser, UserRead
+from src.services.permissions import get_permission_service
+from src.db.permissions.enums import Action, ResourceType
 from src.security.security import generate_secure_code
 from src.services.cache.redis_client import (
     delete_keys,
@@ -20,7 +22,6 @@ from src.services.cache.redis_client import (
     set_json,
 )
 from src.services.email.utils import send_email
-from src.services.orgs.orgs import rbac_check
 
 
 async def create_invite_code(
@@ -51,7 +52,14 @@ async def create_invite_code(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "update", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Connect to Redis (use cached client)
     r = get_redis_client()
@@ -124,7 +132,14 @@ async def create_invite_code_with_usergroup(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "update", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Connect to Redis (use cached client)
     r = get_redis_client()
@@ -197,7 +212,14 @@ async def get_invite_codes(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "update", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Connect to Redis (use cached client)
     r = get_redis_client()
@@ -251,7 +273,13 @@ async def get_invite_code(
         )
 
     # RBAC check
-    # await rbac_check(request, org.org_uuid, current_user, "update", db_session)
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Connect to Redis (use cached client)
     r = get_redis_client()
@@ -306,7 +334,14 @@ async def delete_invite_code(
         )
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "update", db_session)
+    permission_service = get_permission_service(db_session)
+
+    await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        resource_id=org.org_uuid,
+    )
 
     # Connect to Redis (use cached client)
     r = get_redis_client()

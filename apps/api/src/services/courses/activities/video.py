@@ -17,10 +17,11 @@ from src.db.courses.chapters import Chapter
 from src.db.courses.course_chapters import CourseChapter
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
+from src.db.permissions.enums import Action, ResourceType
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser
-from src.security.rbac import courses_rbac_check_for_activities
 from src.services.courses.activities.uploads.videos import upload_subtitle, upload_video
+from src.services.permissions import get_permission_service
 
 
 def _get_language_label(language_code: str) -> str:
@@ -298,8 +299,12 @@ async def create_external_video_activity(
         )
 
     # RBAC check
-    await courses_rbac_check_for_activities(
-        request, course.course_uuid, current_user, "create", db_session
+    permission_service = get_permission_service(db_session)
+    await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.ACTIVITY,
+        resource_id=course.course_uuid,
     )
 
     # generate activity_uuid
