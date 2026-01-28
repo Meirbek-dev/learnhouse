@@ -10,6 +10,7 @@ from sqlmodel.pool import StaticPool
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, InternalUser, PublicUser
 from src.db.organizations import Organization
+from src.db.courses.courses import Course
 from src.services.permissions.unified_permission_service import (
     UnifiedPermissionService,
     get_permission_service,

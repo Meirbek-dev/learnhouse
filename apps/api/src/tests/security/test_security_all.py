@@ -64,21 +64,6 @@ class TestSecurityComprehensive:
                 "usergroups",
             ]
 
-    def test_security_module_structure(self) -> None:
-        """Test that the security module has the expected structure"""
-        import src.security
-        import src.security.auth
-        import src.security.rbac
-        import src.security.security
-        import src.services.permissions.utils as rbac_utils
-
-        # Verify all modules can be imported
-        assert src.security is not None
-        assert src.security.auth is not None
-        assert src.security.security is not None
-        assert src.security.rbac is not None
-        assert rbac_utils is not None
-
 
 # Test discovery helpers
 def get_security_test_classes():

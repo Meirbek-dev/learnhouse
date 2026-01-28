@@ -30,6 +30,7 @@ from typing import TYPE_CHECKING
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
+import sqlalchemy as sa
 
 from src.db.courses.courses import Course
 from src.db.permissions.constants import (
@@ -113,7 +114,9 @@ class UnifiedPermissionService:
         self.role_service = RoleService(db)
         self._policies: dict[ResourceType, "BasePolicy"] = {}
 
-    def register_policy(self, resource_type: ResourceType, policy: "BasePolicy") -> None:
+    def register_policy(
+        self, resource_type: ResourceType, policy: "BasePolicy"
+    ) -> None:
         """Register a resource-specific policy."""
         self._policies[resource_type] = policy
 
@@ -210,11 +213,9 @@ class UnifiedPermissionService:
                 return True
 
             # Fallback: if organization has any public course, consider it public
-            public_course = (
-                self.db.exec(
-                    select(Course).where(Course.org_id == org.id, Course.public)
-                ).first()
-            )
+            public_course = self.db.exec(
+                select(Course).where(Course.org_id == org.id, Course.public)
+            ).first()
             return public_course is not None
 
         # Add more resource types as needed
@@ -522,14 +523,29 @@ class UnifiedPermissionService:
         else:
             resource_val = str(resource).lower()
 
+        # Prepare action string for comparison
+        action_str = (
+            action.value.lower() if hasattr(action, "value") else str(action).lower()
+        )
+
         statement = (
             select(ResourcePermission)
             .join(Permission, Permission.id == ResourcePermission.permission_id)
             .where(
                 ResourcePermission.user_id == user_id,
-                ResourcePermission.resource_type == resource_val,
+                # Accept either Enum-based equality (used in SQLite tests) or string-based equality (used with Postgres enums)
+                (
+                    (ResourcePermission.resource_type == resource)
+                    | (
+                        sa.cast(ResourcePermission.resource_type, sa.String)
+                        == resource_val
+                    )
+                ),
                 ResourcePermission.resource_id == resource_id,
-                Permission.action == (action.value.lower() if hasattr(action, "value") else str(action).lower()),
+                (
+                    (Permission.action == action)
+                    | (sa.cast(Permission.action, sa.String) == action_str)
+                ),
             )
         )
 
@@ -637,8 +653,18 @@ class UnifiedPermissionService:
             .join(RolePermission, RolePermission.permission_id == Permission.id)
             .where(
                 RolePermission.role_id.in_(role_ids),
-                Permission.resource_type == (resource.value.lower() if hasattr(resource, "value") else str(resource).lower()),
-                Permission.action == action,
+                sa.cast(Permission.resource_type, sa.String)
+                == (
+                    resource.value.lower()
+                    if hasattr(resource, "value")
+                    else str(resource).lower()
+                ),
+                sa.cast(Permission.action, sa.String)
+                == (
+                    action.value.lower()
+                    if hasattr(action, "value")
+                    else str(action).lower()
+                ),
             )
         )
 

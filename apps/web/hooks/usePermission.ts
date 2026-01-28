@@ -102,8 +102,8 @@ export function usePermission() {
       return permissionsData.permissions;
     }
     // Fallback to session permissions (for backward compatibility)
-    return session?.permissions ?? {};
-  }, [permissionsData?.permissions, session?.permissions]);
+    return {};
+  }, [permissionsData?.permissions]);
 
   /**
    * User's role slugs.
