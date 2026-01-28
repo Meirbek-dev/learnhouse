@@ -11,18 +11,18 @@ This migration adds performance optimizations and helper functions:
 4. Optimizes permission lookups
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
+from typing import Union
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy import text
-
 
 # revision identifiers, used by Alembic.
 revision: str = "94253463a6f4"
-down_revision: Union[str, None] = "c525ba58794c"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "c525ba58794c"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -33,26 +33,33 @@ def upgrade() -> None:
     print("Adding performance indexes...")
 
     # Index for role_permissions to speed up role-based permission checks
-    conn.execute(text("""
+    conn.execute(
+        text("""
         CREATE INDEX IF NOT EXISTS ix_role_permissions_role_perm
         ON role_permissions (role_id, permission_id)
-    """))
+    """)
+    )
 
     # Index for resource_permissions to speed up resource-level checks
-    conn.execute(text("""
+    conn.execute(
+        text("""
         CREATE INDEX IF NOT EXISTS ix_resource_permissions_lookup
         ON resource_permissions (user_id, resource_type, resource_id, expires_at)
-    """))
+    """)
+    )
 
     # Index for faster user role queries with org filtering
-    conn.execute(text("""
+    conn.execute(
+        text("""
         CREATE INDEX IF NOT EXISTS ix_user_roles_org_user
         ON user_roles (org_id, user_id, expires_at)
-    """))
+    """)
+    )
 
     # 2. Create recursive function to get role hierarchy efficiently
     print("Creating role hierarchy helper function...")
-    conn.execute(text("""
+    conn.execute(
+        text("""
         CREATE OR REPLACE FUNCTION get_role_hierarchy(role_id_param INTEGER, max_depth INTEGER DEFAULT 10)
         RETURNS TABLE(role_id INTEGER, role_name VARCHAR, depth INTEGER) AS $$
         WITH RECURSIVE role_tree AS (
@@ -81,11 +88,13 @@ def upgrade() -> None:
         FROM role_tree
         ORDER BY depth;
         $$ LANGUAGE SQL STABLE;
-    """))
+    """)
+    )
 
     # 3. Create function to efficiently check if user has permission
     print("Creating permission check helper function...")
-    conn.execute(text("""
+    conn.execute(
+        text("""
         CREATE OR REPLACE FUNCTION user_has_permission(
             user_id_param INTEGER,
             action_param VARCHAR,
@@ -115,13 +124,16 @@ def upgrade() -> None:
             RETURN has_perm;
         END;
         $$ LANGUAGE plpgsql STABLE;
-    """))
+    """)
+    )
 
     # 4. Add missing index on permissions for lookup efficiency
-    conn.execute(text("""
+    conn.execute(
+        text("""
         CREATE INDEX IF NOT EXISTS ix_permissions_action_resource_scope
         ON permissions (action, resource_type, scope)
-    """))
+    """)
+    )
 
     print("✅ RBAC v4 migration completed successfully")
 
@@ -132,7 +144,11 @@ def downgrade() -> None:
 
     # Drop functions
     conn.execute(text("DROP FUNCTION IF EXISTS get_role_hierarchy(INTEGER, INTEGER)"))
-    conn.execute(text("DROP FUNCTION IF EXISTS user_has_permission(INTEGER, VARCHAR, VARCHAR, VARCHAR, INTEGER)"))
+    conn.execute(
+        text(
+            "DROP FUNCTION IF EXISTS user_has_permission(INTEGER, VARCHAR, VARCHAR, VARCHAR, INTEGER)"
+        )
+    )
 
     # Drop indexes
     conn.execute(text("DROP INDEX IF EXISTS ix_role_permissions_role_perm"))

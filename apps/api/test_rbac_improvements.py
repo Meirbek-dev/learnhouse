@@ -7,7 +7,7 @@ from src.db.permissions import Action, ResourceType
 from src.db.users import PublicUser
 from src.security.rbac.checker import PermissionChecker
 from src.services.permissions.policy_engine import PolicyEngine
-from src.services.permissions.role_service import RoleService, PERMISSION_TEMPLATES
+from src.services.permissions.role_service import PERMISSION_TEMPLATES, RoleService
 
 cfg = get_platform_config()
 engine = create_engine(cfg.database_config.sql_connection_string)
@@ -41,8 +41,8 @@ try:
         "type": "and",
         "rules": [
             {"field": "time.hour", "operator": ">=", "value": 9},
-            {"field": "time.hour", "operator": "<", "value": 17}
-        ]
+            {"field": "time.hour", "operator": "<", "value": 17},
+        ],
     }
     context2 = {"time": {"hour": 14}}
     result2 = policy_engine._conditions_match(conditions2, context2)
@@ -74,7 +74,7 @@ try:
         user_id=0,  # Anonymous
         action=Action.READ,
         resource=ResourceType.COURSE,
-        resource_id="course_nonexistent123"
+        resource_id="course_nonexistent123",
     )
     print(f"✅ Anonymous access to non-existent course: {result} (expected: False)")
 except Exception as e:
@@ -95,7 +95,7 @@ except Exception as e:
 
 # Test 6: Permission templates available
 print("\n6. Available permission templates:")
-for template_name in PERMISSION_TEMPLATES.keys():
+for template_name in PERMISSION_TEMPLATES:
     print(f"  - {template_name}")
 
 print("\n" + "=" * 80)

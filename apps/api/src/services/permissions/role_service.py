@@ -142,14 +142,13 @@ class RoleService:
         """
         if template_name not in PERMISSION_TEMPLATES:
             available = ", ".join(PERMISSION_TEMPLATES.keys())
-            raise ValueError(
-                f"Unknown template: {template_name}. "
-                f"Available templates: {available}"
-            )
+            msg = f"Unknown template: {template_name}. Available templates: {available}"
+            raise ValueError(msg)
 
         role = self.get_by_id(role_id)
         if not role:
-            raise ValueError(f"Role {role_id} not found")
+            msg = f"Role {role_id} not found"
+            raise ValueError(msg)
 
         template = PERMISSION_TEMPLATES[template_name]
         permissions_added = 0

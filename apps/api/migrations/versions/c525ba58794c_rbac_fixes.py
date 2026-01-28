@@ -11,17 +11,17 @@ This migration:
 4. Promotes all Organization Admins to Super Admins
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
+from typing import Union
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "c525ba58794c"
-down_revision: Union[str, None] = "a54a941bd13e"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "a54a941bd13e"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -142,8 +142,8 @@ def upgrade() -> None:
     # Delete rows with invalid action values - the audit log is just a log
     op.execute(
         """
-        DELETE FROM permission_audit_log 
-        WHERE action IS NOT NULL 
+        DELETE FROM permission_audit_log
+        WHERE action IS NOT NULL
         AND action NOT IN ('create', 'read', 'update', 'delete', 'manage', 'moderate', 'export', 'invite', 'grade', 'submit', 'enroll')
         """
     )

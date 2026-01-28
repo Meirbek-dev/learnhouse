@@ -183,7 +183,7 @@ class PolicyEngine:
                 select(Course).where(Course.course_uuid == resource_id)
             ).first()
             return course.public if course else False
-        elif resource == ResourceType.COLLECTION:
+        if resource == ResourceType.COLLECTION:
             from src.db.collections import Collection
 
             collection = self.db.exec(
@@ -408,7 +408,7 @@ class PolicyEngine:
                 )
                 SELECT id FROM role_hierarchy ORDER BY depth
             """),
-            {"role_id": role_id, "max_depth": MAX_ROLE_HIERARCHY_DEPTH}
+            {"role_id": role_id, "max_depth": MAX_ROLE_HIERARCHY_DEPTH},
         )
 
         return [row[0] for row in result.fetchall()]
@@ -529,9 +529,9 @@ class PolicyEngine:
 
         if condition_type == "and":
             return all(self._evaluate_rule(rule, context) for rule in rules)
-        elif condition_type == "or":
+        if condition_type == "or":
             return any(self._evaluate_rule(rule, context) for rule in rules)
-        elif condition_type == "not":
+        if condition_type == "not":
             return not any(self._evaluate_rule(rule, context) for rule in rules)
 
         _logger.warning("Unknown condition type: %s", condition_type)
@@ -562,29 +562,34 @@ class PolicyEngine:
         try:
             if operator == "==":
                 return actual == expected
-            elif operator == "!=":
+            if operator == "!=":
                 return actual != expected
-            elif operator == ">":
+            if operator == ">":
                 return actual > expected
-            elif operator == ">=":
+            if operator == ">=":
                 return actual >= expected
-            elif operator == "<":
+            if operator == "<":
                 return actual < expected
-            elif operator == "<=":
+            if operator == "<=":
                 return actual <= expected
-            elif operator == "in":
-                return actual in expected if isinstance(expected, (list, tuple, set)) else False
-            elif operator == "not_in":
-                return actual not in expected if isinstance(expected, (list, tuple, set)) else True
-            elif operator == "contains":
-                if isinstance(actual, str):
-                    return expected in actual
-                elif isinstance(actual, (list, tuple)):
+            if operator == "in":
+                return (
+                    actual in expected
+                    if isinstance(expected, (list, tuple, set))
+                    else False
+                )
+            if operator == "not_in":
+                return (
+                    actual not in expected
+                    if isinstance(expected, (list, tuple, set))
+                    else True
+                )
+            if operator == "contains":
+                if isinstance(actual, (str, list, tuple)):
                     return expected in actual
                 return False
-            else:
-                _logger.warning("Unknown operator: %s", operator)
-                return False
+            _logger.warning("Unknown operator: %s", operator)
+            return False
         except (TypeError, AttributeError) as e:
             _logger.warning("Error evaluating rule %s: %s", rule, e)
             return False

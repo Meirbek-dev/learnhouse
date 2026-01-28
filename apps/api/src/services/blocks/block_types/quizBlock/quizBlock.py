@@ -262,13 +262,17 @@ async def get_quiz_attempts(
     statement = select(QuizAttempt).where(QuizAttempt.activity_id == activity_id)
 
     # Check if user can view all attempts (instructor/admin) or just their own
-    from src.security.rbac.service_utils import has_instructor_role, is_admin_or_maintainer
-    
-    can_view_all = (
-        is_admin_or_maintainer(db_session, current_user.id if hasattr(current_user, 'id') else 0)
-        or has_instructor_role(db_session, current_user.id if hasattr(current_user, 'id') else 0)
+    from src.security.rbac.service_utils import (
+        has_instructor_role,
+        is_admin_or_maintainer,
     )
-    
+
+    can_view_all = is_admin_or_maintainer(
+        db_session, current_user.id if hasattr(current_user, "id") else 0
+    ) or has_instructor_role(
+        db_session, current_user.id if hasattr(current_user, "id") else 0
+    )
+
     # If not instructor/admin, only show own attempts
     if not can_view_all:
         if user_id:

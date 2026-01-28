@@ -161,7 +161,7 @@ class PermissionChecker:
         """
         # Check if authentication is required
         if is_anonymous(user) and action != Action.READ:
-            raise AuthenticationRequiredError()
+            raise AuthenticationRequiredError
 
         # Check permission
         if not self.check(user, action, resource, resource_id, org_id, context):
@@ -207,7 +207,7 @@ class PermissionChecker:
             AuthenticationRequiredError: If user is anonymous
         """
         if isinstance(user, AnonymousUser) or (hasattr(user, "id") and user.id == 0):
-            raise AuthenticationRequiredError()
+            raise AuthenticationRequiredError
         return user  # type: ignore[return-value]
 
     def require_org_membership(
@@ -230,7 +230,8 @@ class PermissionChecker:
 
         # Check if user has any role in the organization
         if not self.check(user, Action.READ, ResourceType.ORGANIZATION, org_id=org_id):
-            raise PermissionDeniedError("You are not a member of this organization")
+            msg = "You are not a member of this organization"
+            raise PermissionDeniedError(msg)
 
     def get_user_permissions(
         self,
