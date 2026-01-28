@@ -2,7 +2,7 @@
 FastAPI dependencies for the permission system.
 
 This module provides FastAPI dependency injection functions for:
-- Getting the permission checker
+- Getting the permission service
 - Getting the current permission context
 - Combining user and permission data
 """
@@ -14,7 +14,7 @@ from sqlmodel import Session
 
 from src.core.events.database import get_db_session
 from src.db.users import AnonymousUser, PublicUser
-from src.security.rbac.checker import PermissionChecker
+from src.services.permissions.unified_permission_service import UnifiedPermissionService
 from src.security.rbac.context import PermissionContext
 
 
@@ -28,11 +28,11 @@ async def _lazy_get_current_user(
     return await _get_current_user(request, Authorize, db_session)
 
 
-def get_permission_checker(
+def get_permission_service(
     db_session: Annotated[Session, Depends(get_db_session)],
-) -> PermissionChecker:
+) -> UnifiedPermissionService:
     """
-    Get a PermissionChecker instance.
+    Get a UnifiedPermissionService instance.
 
     This is the main dependency for permission checking in routes.
 
@@ -40,9 +40,9 @@ def get_permission_checker(
         db_session: Database session
 
     Returns:
-        PermissionChecker instance
+        UnifiedPermissionService instance
     """
-    return PermissionChecker(db_session)
+    return UnifiedPermissionService(db_session)
 
 
 def get_permission_context(
@@ -74,7 +74,7 @@ def get_permission_context(
 
 
 # Type aliases for cleaner dependency injection
-PermissionCheckerDep = Annotated[PermissionChecker, Depends(get_permission_checker)]
+PermissionServiceDep = Annotated[UnifiedPermissionService, Depends(get_permission_service)]
 PermissionContextDep = Annotated[PermissionContext, Depends(get_permission_context)]
 CurrentUserDep = Annotated[PublicUser | AnonymousUser, Depends(_lazy_get_current_user)]
 
@@ -86,39 +86,45 @@ class PermissionDeps:
     This class holds all permission-related dependencies for easy injection.
     Usage:
         async def my_route(deps: Annotated[PermissionDeps, Depends()]):
-            deps.checker.require(deps.user, Action.READ, ResourceType.COURSE)
+            await deps.service.check(deps.user, Action.READ, ResourceType.COURSE)
     """
 
     def __init__(
         self,
-        checker: PermissionCheckerDep,
+        service: PermissionServiceDep,
         context: PermissionContextDep,
         user: CurrentUserDep,
     ) -> None:
-        self.checker = checker
+        self.service = service
         self.context = context
         self.user = user
 
-    def require(self, action, resource, resource_id=None, org_id=None):
-        """Shorthand for checker.require with current user and context."""
-        self.checker.require(
-            self.user,
-            action,
-            resource,
-            resource_id,
-            org_id,
-            self.context,
+    async def require(self, action, resource, resource_id=None, org_id=None):
+        """Shorthand for service.check with current user and context."""
+        result = await self.service.check(
+            user=self.user,
+            action=action,
+            resource=resource,
+            resource_id=resource_id,
+            org_id=org_id,
+            context=self.context,
         )
+        if not result:
+            from fastapi import HTTPException, status
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Permission denied"
+            )
 
-    def can(self, action, resource, resource_id=None, org_id=None) -> bool:
-        """Shorthand for checker.check with current user."""
-        return self.checker.check(
-            self.user,
-            action,
-            resource,
-            resource_id,
-            org_id,
-            self.context,
+    async def can(self, action, resource, resource_id=None, org_id=None) -> bool:
+        """Shorthand for service.check with current user."""
+        return await self.service.check(
+            user=self.user,
+            action=action,
+            resource=resource,
+            resource_id=resource_id,
+            org_id=org_id,
+            context=self.context,
         )
 
 

@@ -20,8 +20,6 @@ from src.db.permissions import Action, ResourceType
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.security.rbac.checker import PermissionChecker
-from src.security.rbac.dependencies import get_permission_checker
 from src.services.courses.contributors import (
     add_bulk_course_contributors,
     apply_course_contributor,

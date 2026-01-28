@@ -13,7 +13,6 @@ from fastapi import Depends, HTTPException, Request, status
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac.context import PermissionContext
-from src.security.rbac.dependencies import get_permission_checker
 
 
 def require_permission(
@@ -55,16 +54,16 @@ def require_permission(
             db_session = kwargs.get("db_session")
             checker = kwargs.get("checker")
 
-            # If checker not in kwargs, we need to get it
+            # If service not in kwargs, we need to get it
             if checker is None and db_session is not None:
-                from src.security.rbac.checker import PermissionChecker
+                from src.services.permissions.unified_permission_service import UnifiedPermissionService
 
-                checker = PermissionChecker(db_session)
+                checker = UnifiedPermissionService(db_session)
 
             if checker is None:
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Permission checker not available",
+                    detail="Permission service not available",
                 )
 
             if current_user is None:

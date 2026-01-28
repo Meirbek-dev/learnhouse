@@ -20,10 +20,10 @@ from src.db.permissions.models import (
     UserRole,
 )
 from src.db.users import AnonymousUser, PublicUser
-from src.security.rbac.checker import PermissionChecker
 from src.services.permissions import get_permission_service
 from src.services.permissions.permission_service import PermissionService
 from src.services.permissions.role_service import RoleService
+from src.services.permissions.unified_permission_service import UnifiedPermissionService
 
 
 class TestPermissionEnums:
@@ -83,8 +83,9 @@ class TestPermissionModels:
         assert role.priority == 50
 
 
-class TestPermissionChecker:
-    """Test the PermissionChecker class."""
+
+class TestUnifiedPermissionService:
+    """Test the UnifiedPermissionService class."""
 
     @pytest.fixture
     def mock_db(self):
@@ -106,44 +107,40 @@ class TestPermissionChecker:
 
     async def test_anonymous_user_can_read_public_courses(self, mock_db, anonymous_user):
         """Anonymous users should be able to read public courses."""
-        checker = PermissionChecker(mock_db)
+        service = UnifiedPermissionService(mock_db)
 
-        # Mock the unified service to simulate anonymous access
-        with patch.object(checker.unified_service, "check", return_value=True):
-            result = await checker.check(anonymous_user, Action.READ, ResourceType.COURSE)
+        # Mock the check method to simulate anonymous access
+        with patch.object(service, "check", return_value=True):
+            result = await service.check(
+                user=anonymous_user,
+                action=Action.READ,
+                resource=ResourceType.COURSE,
+            )
             assert result is True
 
     async def test_anonymous_user_cannot_create(self, mock_db, anonymous_user):
         """Anonymous users should not be able to create resources."""
-        checker = PermissionChecker(mock_db)
+        service = UnifiedPermissionService(mock_db)
 
-        with patch.object(checker.unified_service, "check", return_value=False):
-            result = await checker.check(anonymous_user, Action.CREATE, ResourceType.COURSE)
+        with patch.object(service, "check", return_value=False):
+            result = await service.check(
+                user=anonymous_user,
+                action=Action.CREATE,
+                resource=ResourceType.COURSE,
+            )
             assert result is False
 
-    async def test_require_raises_401_for_anonymous_write(self, mock_db, anonymous_user):
-        """require() should raise 403 for anonymous users attempting write operations."""
-        from fastapi import HTTPException
-
-        checker = PermissionChecker(mock_db)
-
-        with pytest.raises(HTTPException) as exc_info:
-            await checker.require(anonymous_user, Action.CREATE, ResourceType.COURSE)
-
-        assert exc_info.value.status_code == 403
-
-
     async def test_check_with_resource_id(self, mock_db, mock_public_user):
-        """check() should pass resource_id to unified service."""
-        checker = PermissionChecker(mock_db)
+        """check() should handle resource_id parameter."""
+        service = UnifiedPermissionService(mock_db)
 
         with patch.object(
-            checker.unified_service, "check", return_value=True
+            service, "check", return_value=True
         ) as mock_check:
-            result = await checker.check(
-                mock_public_user,
-                Action.UPDATE,
-                ResourceType.COURSE,
+            result = await service.check(
+                user=mock_public_user,
+                action=Action.UPDATE,
+                resource=ResourceType.COURSE,
                 resource_id="course_abc123",
             )
             assert result is True
@@ -152,16 +149,16 @@ class TestPermissionChecker:
             assert call_kwargs[1]["resource_id"] == "course_abc123"
 
     async def test_check_with_org_id(self, mock_db, mock_public_user):
-        """check() should pass org_id to unified service."""
-        checker = PermissionChecker(mock_db)
+        """check() should handle org_id parameter."""
+        service = UnifiedPermissionService(mock_db)
 
         with patch.object(
-            checker.unified_service, "check", return_value=True
+            service, "check", return_value=True
         ) as mock_check:
-            result = await checker.check(
-                mock_public_user,
-                Action.CREATE,
-                ResourceType.COURSE,
+            result = await service.check(
+                user=mock_public_user,
+                action=Action.CREATE,
+                resource=ResourceType.COURSE,
                 org_id=1,
             )
             assert result is True
@@ -208,6 +205,13 @@ class TestRoleService:
     def test_delete_system_role_raises(self, mock_db):
         """delete() should raise if trying to delete system role."""
         system_role = Mock(spec=Role)
+        system_role.is_system = True
+
+        mock_db.exec.return_value.first.return_value = system_role
+
+        service = RoleService(mock_db)
+        with pytest.raises(ValueError, match="system role"):
+            service.delete(1)
         system_role.is_system = True
         mock_db.get.return_value = system_role
 

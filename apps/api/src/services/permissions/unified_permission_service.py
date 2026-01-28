@@ -55,6 +55,7 @@ from src.db.users import AnonymousUser, InternalUser, PublicUser
 from src.services.cache.redis_client import get_redis_client
 from src.services.permissions.audit_service import AuditService
 from src.services.permissions.permission_cache import (
+    cache_lock,
     get_cached_permission,
     get_cached_user_roles,
     set_cached_permission,
@@ -248,11 +249,13 @@ class UnifiedPermissionService:
             return True
 
         # Check cache first
+        action_str = action.value if hasattr(action, "value") else str(action)
+        resource_str = (
+            resource.value if hasattr(resource, "value") else str(resource)
+        )
+        cache_key = f"{user_id}:{action_str}:{resource_str}:{resource_id}:{org_id}"
+
         if self.use_cache:
-            action_str = action.value if hasattr(action, "value") else str(action)
-            resource_str = (
-                resource.value if hasattr(resource, "value") else str(resource)
-            )
             cached = get_cached_permission(
                 user_id, action_str, resource_str, resource_id, org_id
             )
@@ -284,39 +287,63 @@ class UnifiedPermissionService:
                     )
                 return bool(cached_allowed)
 
-        # Check if resource-specific policy exists
-        policy = self._policies.get(resource)
-        if policy:
-            try:
-                result = policy.check(
+        # Use cache lock to prevent race conditions
+        granted = False
+        with cache_lock(f"rbac:lock:{cache_key}") as lock_acquired:
+            # If we acquired the lock, check cache again and compute if needed
+            if lock_acquired and self.use_cache:
+                # Double-check cache (may have been set while waiting for lock)
+                cached = get_cached_permission(
+                    user_id, action_str, resource_str, resource_id, org_id
+                )
+                if cached is not None:
+                    cached_allowed = (
+                        cached["allowed"] if isinstance(cached, dict) else bool(cached)
+                    )
+                    return bool(cached_allowed) if cached_allowed is not None else False
+
+            # Perform the actual permission check
+            # Check if resource-specific policy exists
+            policy = self._policies.get(resource)
+            # Check if resource-specific policy exists
+            policy = self._policies.get(resource)
+            if policy:
+                try:
+                    result = policy.check(
+                        user=user,
+                        action=action,
+                        resource_id=resource_id,
+                        org_id=org_id,
+                    )
+                    granted = result
+                except HTTPException:
+                    granted = False
+                    if raise_on_deny:
+                        raise
+            else:
+                # Use default permission logic
+                # Build ABAC context from request
+                abac_context = self._build_abac_context(
                     user=user,
+                    user_id=user_id,
+                    org_id=org_id,
+                    resource_id=resource_id,
+                    request=request,
+                )
+
+                granted = await self._default_check(
+                    user=user,
+                    user_id=user_id,
+                    is_anonymous=is_anonymous,
                     action=action,
+                    resource=resource,
                     resource_id=resource_id,
                     org_id=org_id,
+                    abac_context=abac_context,
                 )
-                granted = result
-            except HTTPException:
-                granted = False
-                if raise_on_deny:
-                    raise
-        else:
-            # Use default permission logic
-            granted = await self._default_check(
-                user=user,
-                user_id=user_id,
-                is_anonymous=is_anonymous,
-                action=action,
-                resource=resource,
-                resource_id=resource_id,
-                org_id=org_id,
-            )
 
         # Cache result
         if self.use_cache:
-            action_str = action.value if hasattr(action, "value") else str(action)
-            resource_str = (
-                resource.value if hasattr(resource, "value") else str(resource)
-            )
             set_cached_permission(
                 user_id,
                 action_str,
@@ -355,6 +382,7 @@ class UnifiedPermissionService:
         resource: ResourceType,
         resource_id: str | None,
         org_id: int | None,
+        abac_context: dict | None = None,
     ) -> bool:
         """
         Default permission check logic when no policy is registered.
@@ -412,11 +440,41 @@ class UnifiedPermissionService:
                 action,
                 resource,
                 scope_context,
-                context=None,  # ABAC context not implemented yet
+                context=abac_context,  # Pass ABAC context
             ):
                 return True
 
         return False
+
+    def _build_abac_context(
+        self,
+        user: PublicUser | AnonymousUser | InternalUser,
+        user_id: int,
+        org_id: int | None,
+        resource_id: str | None,
+        request: Request | None,
+    ) -> dict:
+        """Build ABAC context from request and user data."""
+        context = {
+            "user_id": user_id,
+            "org_id": org_id,
+            "resource_id": resource_id,
+            "timestamp": datetime.now(UTC),
+        }
+
+        # Add request context if available
+        if request:
+            context["ip_address"] = getattr(request.client, "host", None) if hasattr(request, "client") else None
+            context["user_agent"] = request.headers.get("user-agent")
+            context["method"] = request.method if hasattr(request, "method") else None
+
+        # Add user attributes if available
+        if hasattr(user, "email"):
+            context["user_email"] = user.email
+        if hasattr(user, "username"):
+            context["user_username"] = user.username
+
+        return context
 
     # ==================== Core RBAC Helper Methods ====================
 
@@ -793,6 +851,58 @@ class UnifiedPermissionService:
                 results[check_tuple] = False
 
         return results
+
+    def get_user_permissions(
+        self,
+        user: PublicUser | AnonymousUser | InternalUser,
+        org_id: int | None = None,
+    ) -> dict[str, bool]:
+        """
+        Get all effective permissions for a user as a dictionary.
+
+        Returns a dictionary mapping permission strings to boolean values.
+        Format: 'resource:action:scope' -> bool
+
+        Args:
+            user: User to get permissions for
+            org_id: Optional organization context
+
+        Returns:
+            Dictionary like {'course:create:org': True, 'course:update:own': True}
+        """
+        user_id = self._get_user_id(user)
+        is_anonymous = self._is_anonymous(user)
+
+        permissions: dict[str, bool] = {}
+
+        # Anonymous users have no permissions
+        if is_anonymous:
+            return permissions
+
+        # Get user's active roles
+        roles = self._get_user_active_roles(user_id, org_id)
+
+        # Collect all permissions from all roles
+        for role in roles:
+            role_ids = self._get_role_hierarchy_ids(role.id)  # type: ignore[arg-type]
+            if not role_ids:
+                continue
+
+            # Get all permissions for this role hierarchy
+            statement = (
+                select(Permission, RolePermission)
+                .join(RolePermission, RolePermission.permission_id == Permission.id)
+                .where(RolePermission.role_id.in_(role_ids))
+            )
+
+            results = self.db.exec(statement).all()
+
+            for permission, _ in results:
+                # Build permission key: resource:action:scope
+                perm_key = f"{permission.resource_type.value}:{permission.action.value}:{permission.scope.value}"
+                permissions[perm_key] = True
+
+        return permissions
 
 
 # Singleton instance factory

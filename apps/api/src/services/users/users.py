@@ -26,7 +26,6 @@ from src.db.users import (
     UserUpdatePassword,
     rebuild_user_models,
 )
-from src.security.rbac.checker import PermissionChecker
 from src.security.security import security_hash_password, security_verify_password
 from src.services.cache import redis_client
 from src.services.orgs.invites import get_invite_code
@@ -369,11 +368,15 @@ async def get_user_session(
     # Get user's effective permissions from the new RBAC system
     permissions: dict[str, bool] = {}
     try:
-        checker = PermissionChecker(db_session)
-        permissions = checker.get_user_permissions(current_user)
+        from src.services.permissions import get_permission_service
+
+        permission_service = get_permission_service(db_session)
+        # Get org_id from the current organization context if available
+        org_id = org.id if org and hasattr(org, 'id') else None
+        permissions = permission_service.get_user_permissions(current_user, org_id=org_id)
     except Exception as e:
-        # Fallback: if new RBAC system not yet migrated, return empty
-        print(f"Error loading permissions for user {current_user.id}: {e}")
+        # Fallback: if error occurs, return empty permissions
+        _logger.error(f"Error loading permissions for user {current_user.id}: {e}")
 
     return UserSession(
         user=user_read,

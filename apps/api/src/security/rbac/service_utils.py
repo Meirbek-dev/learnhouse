@@ -33,12 +33,12 @@ from src.services.permissions.role_service import RoleService
 def infer_resource_type(resource_uuid: str) -> ResourceType | None:
     """
     Infer resource type from UUID prefix or database lookup.
-    
+    REMOVE IT
     DEPRECATED: This is a best-effort function. Prefer passing explicit resource_type.
-    
+
     Args:
         resource_uuid: Resource UUID
-        
+
     Returns:
         Inferred ResourceType or None if cannot determine
     """
@@ -49,7 +49,7 @@ def infer_resource_type(resource_uuid: str) -> ResourceType | None:
         return ResourceType.COLLECTION
     if resource_uuid.startswith("org_"):
         return ResourceType.ORGANIZATION
-    
+
     # Default to None - caller should handle
     return None
 

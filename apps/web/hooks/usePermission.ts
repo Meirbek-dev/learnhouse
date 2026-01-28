@@ -45,11 +45,22 @@ export function usePermission() {
 
   /**
    * User's role slugs extracted from UserRoleWithOrg array.
+   * Filters out expired roles.
    */
   const roles = useMemo(() => {
     const userRoles = session?.roles ?? [];
-    // Extract role slugs from UserRoleWithOrg objects
-    return userRoles.map((userRole: any) => userRole.role?.slug || userRole.role?.role_uuid || '').filter(Boolean);
+    const now = new Date();
+
+    // Filter out expired roles and extract slugs
+    return userRoles
+      .filter((userRole: any) => {
+        // Keep roles without expiry or with future expiry
+        if (!userRole.expires_at) return true;
+        const expiryDate = new Date(userRole.expires_at);
+        return expiryDate > now;
+      })
+      .map((userRole: any) => userRole.role?.slug || userRole.role?.role_uuid || '')
+      .filter(Boolean);
   }, [session?.roles]);
 
   /**

@@ -2,7 +2,7 @@
 New RBAC module for the permission system.
 
 This module provides the core RBAC functionality including:
-- PermissionChecker: Central permission checking with caching and audit
+- UnifiedPermissionService: Central permission checking with caching and audit
 - Decorators: @require_permission for route protection
 - Dependencies: FastAPI dependency injection for permissions
 - Context: Permission context for tracking user, org, and resource
@@ -11,10 +11,9 @@ This module provides the core RBAC functionality including:
 - Exceptions: Permission-specific exceptions with error codes
 """
 
-from src.security.rbac.checker import PermissionChecker
 from src.security.rbac.context import PermissionContext
 from src.security.rbac.decorators import require_permission
-from src.security.rbac.dependencies import get_permission_checker
+from src.security.rbac.dependencies import get_permission_service
 from src.security.rbac.exceptions import (
     AuthenticationRequiredError,
     InsufficientRoleLevelError,
@@ -45,7 +44,6 @@ __all__ = [
     "InsufficientRoleLevelError",
     "PermissionAlreadyAssignedError",
     # Core RBAC
-    "PermissionChecker",
     "PermissionContext",
     "PermissionDeniedError",
     # Exceptions
@@ -55,7 +53,7 @@ __all__ = [
     "RoleNotFoundError",
     "SystemRoleModificationError",
     "check_is_resource_author",
-    "get_permission_checker",
+    "get_permission_service",
     "get_user_id",
     "has_authenticated_user_role",
     "has_instructor_role",

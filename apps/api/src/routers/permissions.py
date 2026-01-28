@@ -36,10 +36,10 @@ from src.db.permissions import (
 )
 from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user
-from src.security.rbac.checker import PermissionChecker
-from src.security.rbac.dependencies import get_permission_checker
+from src.security.rbac.dependencies import get_permission_service
 from src.services.permissions.permission_service import PermissionService
 from src.services.permissions.role_service import RoleService
+from src.services.permissions.unified_permission_service import UnifiedPermissionService
 
 # Rate limiter for permission check endpoints to prevent enumeration attacks
 _limiter = Limiter(key_func=get_remote_address)
@@ -120,16 +120,21 @@ async def api_create_role_new(
     role_data: RoleCreate,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
 ) -> RoleRead:
     """
     Create a new role.
 
     Requires role:create:org permission.
     """
-    checker.require(
-        current_user, Action.CREATE, ResourceType.ROLE, org_id=role_data.org_id
+    can_do = await permission_service.check(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.ROLE,
+        org_id=role_data.org_id,
     )
+    if not can_do:
+        raise HTTPException(status_code=403, detail="Permission denied")
 
     service = RoleService(db_session)
     try:
@@ -164,7 +169,7 @@ async def api_update_role_new(
     role_data: RoleUpdate,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
 ) -> RoleRead:
     """
     Update a role.
@@ -176,9 +181,14 @@ async def api_update_role_new(
     if not existing:
         raise HTTPException(status_code=404, detail="Role not found")
 
-    checker.require(
-        current_user, Action.UPDATE, ResourceType.ROLE, org_id=existing.org_id
+    can_do = await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ROLE,
+        org_id=existing.org_id,
     )
+    if not can_do:
+        raise HTTPException(status_code=403, detail="Permission denied")
 
     try:
         role = service.update(role_id, role_data)
@@ -192,7 +202,7 @@ async def api_delete_role_new(
     role_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
 ):
     """
     Delete a role.
@@ -205,9 +215,14 @@ async def api_delete_role_new(
     if not existing:
         raise HTTPException(status_code=404, detail="Role not found")
 
-    checker.require(
-        current_user, Action.DELETE, ResourceType.ROLE, org_id=existing.org_id
+    can_do = await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.ROLE,
+        org_id=existing.org_id,
     )
+    if not can_do:
+        raise HTTPException(status_code=403, detail="Permission denied")
 
     try:
         service.delete(role_id)
@@ -227,7 +242,7 @@ async def api_add_permission_to_role(
     permission_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
 ):
     """
     Add a permission to a role.
@@ -239,9 +254,14 @@ async def api_add_permission_to_role(
     if not existing:
         raise HTTPException(status_code=404, detail="Role not found")
 
-    checker.require(
-        current_user, Action.UPDATE, ResourceType.ROLE, org_id=existing.org_id
+    can_do = await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ROLE,
+        org_id=existing.org_id,
     )
+    if not can_do:
+        raise HTTPException(status_code=403, detail="Permission denied")
 
     try:
         service.add_permission_to_role(
@@ -258,7 +278,7 @@ async def api_remove_permission_from_role(
     permission_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
 ):
     """
     Remove a permission from a role.
@@ -270,9 +290,14 @@ async def api_remove_permission_from_role(
     if not existing:
         raise HTTPException(status_code=404, detail="Role not found")
 
-    checker.require(
-        current_user, Action.UPDATE, ResourceType.ROLE, org_id=existing.org_id
+    can_do = await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ROLE,
+        org_id=existing.org_id,
     )
+    if not can_do:
+        raise HTTPException(status_code=403, detail="Permission denied")
 
     if not service.remove_permission_from_role(role_id, permission_id):
         raise HTTPException(status_code=404, detail="Permission not assigned to role")
@@ -304,8 +329,15 @@ async def api_get_user_roles(
     # Users can always view their own roles
     if current_user.id != user_id:
         # For viewing other users' roles, need read permission on users
-        checker = PermissionChecker(db_session)
-        checker.require(current_user, Action.READ, ResourceType.USER, org_id=org_id)
+        permission_service = UnifiedPermissionService(db_session)
+        can_do = await permission_service.check(
+            user=current_user,
+            action=Action.READ,
+            resource=ResourceType.USER,
+            org_id=org_id,
+        )
+        if not can_do:
+            raise HTTPException(status_code=403, detail="Permission denied")
 
     service = RoleService(db_session)
     return service.get_user_roles(user_id, org_id)
@@ -317,16 +349,21 @@ async def api_assign_role_to_user(
     role_data: UserRoleCreate,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
 ):
     """
     Assign a role to a user in an organization.
 
     Requires role:update:org permission.
     """
-    checker.require(
-        current_user, Action.UPDATE, ResourceType.ROLE, org_id=role_data.org_id
+    can_do = await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ROLE,
+        org_id=role_data.org_id,
     )
+    if not can_do:
+        raise HTTPException(status_code=403, detail="Permission denied")
 
     service = RoleService(db_session)
     try:
@@ -349,14 +386,21 @@ async def api_remove_role_from_user(
     org_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
 ):
     """
     Remove a role from a user in an organization.
 
     Requires role:update:org permission.
     """
-    checker.require(current_user, Action.UPDATE, ResourceType.ROLE, org_id=org_id)
+    can_do = await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ROLE,
+        org_id=org_id,
+    )
+    if not can_do:
+        raise HTTPException(status_code=403, detail="Permission denied")
 
     service = RoleService(db_session)
     if not service.remove_role_from_user(user_id, role_id, org_id):
@@ -374,7 +418,7 @@ async def api_remove_role_from_user(
 async def api_get_my_permissions(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
     org_id: int | None = None,
 ) -> UserPermissionsResponse:
     """
@@ -399,7 +443,7 @@ async def api_get_my_permissions(
         )
 
     # Get user's permissions
-    permissions = checker.get_user_permissions(current_user, org_id)
+    permissions = await permission_service.get_user_permissions(current_user, org_id)
 
     # Get user's roles
     service = RoleService(db_session)
@@ -430,7 +474,7 @@ async def api_check_permissions(
     body: BatchPermissionCheckRequest,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
 ) -> BatchPermissionCheckResponse:
     """
     Batch check multiple permissions.
@@ -453,12 +497,12 @@ async def api_check_permissions(
     permissions: dict[str, bool] = {}
 
     for check in body.checks:
-        allowed = checker.check(
-            current_user,
-            check.action,
-            check.resource,
-            check.resource_id,
-            check.org_id,
+        allowed = await permission_service.check(
+            user=current_user,
+            action=check.action,
+            resource=check.resource,
+            resource_id=check.resource_id,
+            org_id=check.org_id,
         )
 
         results.append(
@@ -491,7 +535,7 @@ async def api_check_single_permission(
     resource: ResourceType,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
     resource_id: str | None = None,
     org_id: int | None = None,
 ) -> PermissionCheckResult:
@@ -508,12 +552,12 @@ async def api_check_single_permission(
 
     Returns whether the permission is allowed.
     """
-    allowed = checker.check(
-        current_user,
-        action,
-        resource,
-        resource_id,
-        org_id,
+    allowed = await permission_service.check(
+        user=current_user,
+        action=action,
+        resource=resource,
+        resource_id=resource_id,
+        org_id=org_id,
     )
 
     return PermissionCheckResult(
@@ -554,7 +598,7 @@ async def api_apply_permission_template(
     template_name: str,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
 ):
     """
     Apply a permission template to a role.
@@ -569,9 +613,14 @@ async def api_apply_permission_template(
     if not existing:
         raise HTTPException(status_code=404, detail="Role not found")
 
-    checker.require(
-        current_user, Action.UPDATE, ResourceType.ROLE, org_id=existing.org_id
+    can_do = await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ROLE,
+        org_id=existing.org_id,
     )
+    if not can_do:
+        raise HTTPException(status_code=403, detail="Permission denied")
 
     try:
         service.apply_permission_template(
@@ -597,7 +646,7 @@ async def api_apply_permission_template(
 async def api_seed_permissions(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
 ):
     """
     Seed default permissions and roles.
