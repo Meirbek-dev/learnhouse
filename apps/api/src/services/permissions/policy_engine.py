@@ -168,9 +168,29 @@ class PolicyEngine:
         if resource not in (ResourceType.COURSE, ResourceType.COLLECTION):
             return False
 
-        # For public access, we need to check if the resource is actually public
-        # This will be handled by the caller checking the resource's public flag
-        return True
+        # Actually check if the resource is public
+        if not resource_id:
+            return False
+
+        return self._is_resource_public(resource, resource_id)
+
+    def _is_resource_public(self, resource: ResourceType, resource_id: str) -> bool:
+        """Check if a specific resource is marked as public."""
+        if resource == ResourceType.COURSE:
+            from src.db.courses.courses import Course
+
+            course = self.db.exec(
+                select(Course).where(Course.course_uuid == resource_id)
+            ).first()
+            return course.public if course else False
+        elif resource == ResourceType.COLLECTION:
+            from src.db.collections import Collection
+
+            collection = self.db.exec(
+                select(Collection).where(Collection.collection_uuid == resource_id)
+            ).first()
+            return collection.public if collection else False
+        return False
 
     def _check_resource_permission(
         self,

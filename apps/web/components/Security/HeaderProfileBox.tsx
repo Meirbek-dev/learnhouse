@@ -237,7 +237,7 @@ export const HeaderProfileBox = () => {
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                {permissions['dashboard.action_access'] && (
+                {permissions['dashboard:access:all'] && (
                   <DropdownMenuItem
                     nativeButton={false}
                     render={

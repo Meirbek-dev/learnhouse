@@ -25,8 +25,8 @@ async function OrgLayout({ children, params }: OrgLayoutProps) {
 
     // Check if user has organization management rights
     const canManageOrganization =
-      permissions?.permissions?.['organizations:read'] === true ||
-      permissions?.permissions?.['organizations:update'] === true;
+      permissions?.permissions?.['organizations:read:org'] === true ||
+      permissions?.permissions?.['organizations:update:org'] === true;
 
     if (!canManageOrganization) {
       redirect(`/orgs/${orgslug}/dash`);

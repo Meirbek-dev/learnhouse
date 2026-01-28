@@ -261,12 +261,20 @@ async def get_quiz_attempts(
     # Build query
     statement = select(QuizAttempt).where(QuizAttempt.activity_id == activity_id)
 
-    # If not a teacher, only show own attempts
-    # TODO: Add proper role check
-    if user_id:
-        statement = statement.where(QuizAttempt.user_id == user_id)
-    elif not current_user.is_anonymous:
-        statement = statement.where(QuizAttempt.user_id == current_user.id)
+    # Check if user can view all attempts (instructor/admin) or just their own
+    from src.security.rbac.service_utils import has_instructor_role, is_admin_or_maintainer
+    
+    can_view_all = (
+        is_admin_or_maintainer(db_session, current_user.id if hasattr(current_user, 'id') else 0)
+        or has_instructor_role(db_session, current_user.id if hasattr(current_user, 'id') else 0)
+    )
+    
+    # If not instructor/admin, only show own attempts
+    if not can_view_all:
+        if user_id:
+            statement = statement.where(QuizAttempt.user_id == user_id)
+        elif not current_user.is_anonymous:
+            statement = statement.where(QuizAttempt.user_id == current_user.id)
 
     attempts = db_session.exec(statement).all()
 

@@ -65,15 +65,24 @@ async def create_role(
     Raises:
         HTTPException: If validation fails or user lacks permissions
     """
-    # RBAC check
-    await rbac_check(request, current_user, "create", "role_xxx", db_session)
-
     # Validate org_id is provided
     if not role_object.org_id:
         raise HTTPException(
             status_code=400,
             detail="Organization ID is required for role creation",
         )
+
+    # RBAC check - verify user can create roles in this organization
+    from src.db.permissions import Action, ResourceType
+    from src.security.rbac import PermissionChecker
+
+    checker = PermissionChecker(db_session)
+    checker.require(
+        user=current_user,
+        action=Action.CREATE,
+        resource=ResourceType.ROLE,
+        org_id=role_object.org_id,
+    )
 
     # Check if the organization exists
     statement = select(Organization).where(Organization.id == role_object.org_id)

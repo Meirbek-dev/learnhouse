@@ -17,7 +17,7 @@ const DashMobileMenu = () => {
 
   // Check if user has organization management rights
   const canManageOrganization =
-    permissions['organizations.action_read'] === true || permissions['organizations.action_update'] === true;
+    permissions['organizations:read:org'] === true || permissions['organizations:update:org'] === true;
 
   return (
     <div
