@@ -11,20 +11,6 @@ This module provides the core RBAC functionality including:
 - Exceptions: Permission-specific exceptions with error codes
 """
 
-from src.security.rbac.compat import (
-    courses_rbac_check,
-    courses_rbac_check_for_activities,
-    courses_rbac_check_for_assignments,
-    courses_rbac_check_for_certifications,
-    courses_rbac_check_for_chapters,
-    courses_rbac_check_for_collections,
-    rbac_check,
-    rbac_check_org,
-    rbac_check_role,
-    rbac_check_user,
-    rbac_check_usergroup,
-)
-
 from src.security.rbac.checker import PermissionChecker
 from src.security.rbac.context import PermissionContext
 from src.security.rbac.decorators import require_permission
@@ -42,7 +28,6 @@ from src.security.rbac.exceptions import (
 )
 from src.security.rbac.service_utils import (
     check_is_resource_author,
-    check_user_permission,
     get_user_id,
     has_authenticated_user_role,
     has_instructor_role,
@@ -70,14 +55,6 @@ __all__ = [
     "RoleNotFoundError",
     "SystemRoleModificationError",
     "check_is_resource_author",
-    "check_user_permission",
-    # Course-specific RBAC (DEPRECATED - use UnifiedPermissionService)
-    "courses_rbac_check",
-    "courses_rbac_check_for_activities",
-    "courses_rbac_check_for_assignments",
-    "courses_rbac_check_for_certifications",
-    "courses_rbac_check_for_chapters",
-    "courses_rbac_check_for_collections",
     "get_permission_checker",
     "get_user_id",
     "has_authenticated_user_role",
@@ -88,12 +65,6 @@ __all__ = [
     "is_resource_owner",
     "is_resource_public",
     "map_action",
-    # Service utilities (DEPRECATED - use UnifiedPermissionService)
-    "rbac_check",
-    "rbac_check_org",
-    "rbac_check_role",
-    "rbac_check_user",
-    "rbac_check_usergroup",
     "require_permission",
     "verify_not_anonymous",
 ]

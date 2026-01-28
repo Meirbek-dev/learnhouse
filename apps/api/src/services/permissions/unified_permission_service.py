@@ -82,9 +82,11 @@ class UnifiedPermissionService:
         self.policy_engine = PolicyEngine(db, use_cache=use_cache)
         self.audit_service = AuditService(db)
         self.role_service = RoleService(db)
-        self._policies: dict[ResourceType, BasePolicy] = {}
+        self._policies: dict[ResourceType, "BasePolicy"] = {}
 
-    def register_policy(self, resource_type: ResourceType, policy: BasePolicy) -> None:
+    def register_policy(
+        self, resource_type: ResourceType, policy: "BasePolicy"
+    ) -> None:
         """Register a resource-specific policy."""
         self._policies[resource_type] = policy
 
@@ -174,7 +176,11 @@ class UnifiedPermissionService:
             return True
         if self.audit_level == AuditLevel.ALL_EXCEPT_READS and action != Action.READ:
             return True
-        return bool(self.audit_level == AuditLevel.DENIED_ONLY and not granted)
+        if self.audit_level == AuditLevel.WRITES_ONLY and action != Action.READ:
+            return True
+        if self.audit_level == AuditLevel.FAILURES_ONLY and not granted:
+            return True
+        return False
 
     async def check(
         self,
@@ -229,11 +235,18 @@ class UnifiedPermissionService:
                 user_id, action_str, resource_str, resource_id, org_id
             )
             if cached is not None:
-                if self._should_audit(action, cached):
+                # Cached is a dict-like object with 'allowed', 'scope', 'conditions'
+                cached_allowed = (
+                    cached["allowed"] if isinstance(cached, dict) else bool(cached)
+                )
+                # Coerce None to False for safety
+                if cached_allowed is None:
+                    cached_allowed = False
+                if self._should_audit(action, cached_allowed):
                     self.audit_service.log(
                         user_id=user_id if user_id != 0 else None,
                         audit_action=AuditAction.CHECK,
-                        result=cached,
+                        result=bool(cached_allowed),
                         resource_type=resource,
                         resource_id=resource_id,
                         context={
@@ -242,12 +255,12 @@ class UnifiedPermissionService:
                             "action": action.value,
                         },
                     )
-                if not cached and raise_on_deny:
+                if not cached_allowed and raise_on_deny:
                     raise HTTPException(
                         status_code=status.HTTP_403_FORBIDDEN,
                         detail=f"Permission denied: Cannot {action.value} {resource.value}",
                     )
-                return cached
+                return bool(cached_allowed)
 
         # Check if resource-specific policy exists
         policy = self._policies.get(resource)
@@ -283,7 +296,12 @@ class UnifiedPermissionService:
                 resource.value if hasattr(resource, "value") else str(resource)
             )
             set_cached_permission(
-                user_id, action_str, resource_str, resource_id, org_id, granted
+                user_id,
+                action_str,
+                resource_str,
+                granted,
+                resource_id=resource_id,
+                org_id=org_id,
             )
 
         # Audit

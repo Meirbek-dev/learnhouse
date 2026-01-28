@@ -25,9 +25,18 @@ def db_session():
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    # Create tables (would normally be done by migrations)
-    # from src.db.base import SQLModel
-    # SQLModel.metadata.create_all(engine)
+    # Import all models so SQLModel.metadata is populated and create tables
+    from src.core.events.database import import_all_models
+    from sqlmodel import SQLModel
+
+    import_all_models()
+    # Some modules may fail to import during dynamic discovery; import critical models explicitly
+    import src.db.permissions.models as _permissions_models
+    import src.db.user_organizations as _user_org_model
+    import src.db.courses.courses as _course_model
+    import src.db.permissions.audit as _audit_model
+
+    SQLModel.metadata.create_all(engine)
 
     with Session(engine) as session:
         yield session

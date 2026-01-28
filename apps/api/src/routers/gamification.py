@@ -1,7 +1,6 @@
 """
 Gamification Router
 
-Clean API (no legacy):
 - GET /{org_id} → Dashboard
 - POST /{org_id}/xp → Award XP (typed only)
 - POST /{org_id}/streaks/{streak_type} → Update streak

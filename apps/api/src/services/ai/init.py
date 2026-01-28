@@ -10,48 +10,6 @@ from config.config import get_platform_config
 logger = logging.getLogger(__name__)
 
 
-@lru_cache(maxsize=1)
-def get_chromadb_client() -> chromadb.Client:
-    """
-    Get cached ChromaDB client instance with optimized configuration.
-
-    Note: This function is deprecated. Use get_chromadb_pool() from chromadb_pool.py instead.
-    """
-    try:
-        config = get_platform_config()
-        chromadb_config = getattr(config.ai_config, "chromadb_config", None)
-
-        if (
-            chromadb_config
-            and isinstance(chromadb_config.db_host, str)
-            and chromadb_config.db_host
-            and getattr(chromadb_config, "isSeparateDatabaseEnabled", False)
-        ):
-            logger.info(f"Using remote ChromaDB at {chromadb_config.db_host}")
-            try:
-                client = chromadb.HttpClient(
-                    host=chromadb_config.db_host,
-                    port=getattr(chromadb_config, "db_port", 8001),
-                )
-                # Test the connection
-                client.heartbeat()
-                return client
-            except Exception as remote_error:
-                logger.warning(f"Remote ChromaDB connection failed: {remote_error}")
-                logger.info("Falling back to ephemeral in-memory client")
-                return chromadb.EphemeralClient()
-
-        logger.info("Using ephemeral in-memory ChromaDB client")
-        return chromadb.EphemeralClient()
-
-    except Exception as e:
-        error_msg = f"Failed to create ChromaDB client: {e!s}"
-        logger.exception(error_msg)
-        # Fallback to ephemeral client as last resort
-        logger.warning("Falling back to ephemeral ChromaDB client")
-        return chromadb.EphemeralClient()
-
-
 @lru_cache(maxsize=10)
 def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
     """
@@ -148,7 +106,6 @@ def clear_ai_cache() -> None:
     """
     Clear all AI-related caches. Useful for configuration changes.
     """
-    get_chromadb_client.cache_clear()
     get_embedding_function.cache_clear()
     get_llm.cache_clear()
     logger.info("AI caches cleared")

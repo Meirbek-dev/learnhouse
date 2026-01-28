@@ -54,6 +54,31 @@ class BasePolicy(ABC):
             True if allowed, False otherwise
         """
 
+    def check(
+        self,
+        user: PublicUser | AnonymousUser,
+        action: Action,
+        resource_id: str | None = None,
+        org_id: int | None = None,
+        context: dict | None = None,
+    ) -> bool:
+        """
+        Default policy check that raises on denial.
+
+        This method calls `can()` and raises an HTTPException with
+        status 403 when access is denied. Policies can override this
+        behavior by implementing their own `check()` method.
+        """
+        from fastapi import HTTPException, status
+
+        allowed = self.can(user, action, resource_id=resource_id, context=context)
+        if allowed:
+            return True
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Permission denied: Cannot {action.value} on resource",
+        )
+
     def is_owner(self, user: PublicUser | AnonymousUser, resource_id: str) -> bool:
         """
         Check if user owns the resource.

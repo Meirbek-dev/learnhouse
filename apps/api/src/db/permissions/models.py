@@ -424,15 +424,3 @@ class UserPermissionsResponse(PydanticStrictBaseModel):
     roles: list[RoleRead]
     permissions: dict[str, bool]  # e.g., {"course:create:org": True, ...}
     resource_permissions: list[ResourcePermissionRead]
-
-
-# ---------------------------------------------------------------------------
-# Backward Compatibility Aliases (deprecated - use Role, RoleCreate, etc.)
-# ---------------------------------------------------------------------------
-
-# These aliases allow existing code to continue working while migrating
-RoleNew = Role
-RoleNewBase = RoleBase
-RoleNewCreate = RoleCreate
-RoleNewRead = RoleRead
-RoleNewUpdate = RoleUpdate

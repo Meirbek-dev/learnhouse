@@ -75,6 +75,20 @@ class OrganizationPolicy(BasePolicy):
         # Fall back to role-based check
         return super().check(user, action, resource_id, org_id)
 
+    def can(
+        self,
+        user: PublicUser | AnonymousUser,
+        action: Action,
+        resource_id: str | None = None,
+        context: dict | None = None,
+    ) -> bool:
+        """Non-raising variant of check(). Returns True/False."""
+        try:
+            org_id = context.get("org_id") if context else None
+            return self.check(user, action, resource_id, org_id)
+        except HTTPException:
+            return False
+
     def _resolve_org_id(self, resource_id: str) -> int | None:
         """
         Resolve organization ID from resource_id.

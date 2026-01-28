@@ -77,9 +77,37 @@ class UserPolicy(BasePolicy):
         if action == Action.READ:
             return True
 
-        # Update other users - fall back to role check
-        # Delete users - fall back to role check
-        return super().check(user, action, resource_id, org_id)
+        # Update/Delete other users - fall back to role-based checks
+        if action in (Action.UPDATE, Action.DELETE):
+            # Super admin can manage/delete anyone
+            if self.is_super_admin(user):
+                return True
+
+            if target_user_id:
+                # Check if current user can manage target via org admin roles
+                if self._can_manage_user(user, target_user_id, {"org_id": org_id}):
+                    return True
+
+        # Default deny
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to perform this action",
+        )
+
+    def can(
+        self,
+        user: PublicUser | AnonymousUser | InternalUser,
+        action: Action,
+        resource_id: str | None = None,
+        context: dict | None = None,
+    ) -> bool:
+        """Non-raising variant of check(). Returns True/False."""
+        try:
+            # Map context to org_id if provided
+            org_id = context.get("org_id") if context else None
+            return self.check(user, action, resource_id, org_id)
+        except HTTPException:
+            return False
 
     def _resolve_user_id(self, resource_id: str | None) -> int | None:
         """

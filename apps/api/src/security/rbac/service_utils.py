@@ -117,7 +117,7 @@ def infer_resource_type(resource_uuid: str) -> ResourceType:
     """
     Infer resource type from UUID prefix.
 
-    WARNING: This function is deprecated and unsafe. Prefer explicit resource type specification.
+    REMOVE:  This function is deprecated and unsafe. Prefer explicit resource type specification.
 
     Args:
         resource_uuid: Resource UUID with type prefix
@@ -319,78 +319,3 @@ def verify_not_anonymous(user_id: int) -> None:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="You must be logged in to perform this action",
         )
-
-
-# ===========================
-# Legacy Permission Check Utility
-# ===========================
-
-
-def check_user_permission(
-    db_session: Session,
-    user_id: int,
-    action: str,
-    resource_uuid: str,
-) -> bool:
-    """
-    Check if a user has permission for an action on a resource.
-
-    DEPRECATED: Use UnifiedPermissionService instead.
-    This function is kept for backward compatibility with existing code.
-
-    Args:
-        db_session: Database session
-        user_id: User ID
-        action: Action string ("create", "read", "update", "delete")
-        resource_uuid: Resource UUID
-
-    Returns:
-        True if user has permission, False otherwise
-    """
-    if user_id == 0:
-        return False
-
-    # First check if user is resource owner/author
-    if action in ("update", "delete", "read"):
-        if is_resource_owner(db_session, user_id, resource_uuid):
-            return True
-
-    # Check if user has admin/maintainer role
-    if is_admin_or_maintainer(db_session, user_id):
-        return True
-
-    # For read actions, also check instructor role
-    if action == "read" and has_instructor_role(db_session, user_id):
-        return True
-
-    # For update actions (grading, etc), require instructor role
-    if action == "update" and has_instructor_role(db_session, user_id):
-        return True
-
-    # For proper permission checking, use UnifiedPermissionService
-    from src.services.permissions import get_permission_service
-
-    resource_type = infer_resource_type(resource_uuid)
-    mapped_action = map_action(action)
-
-    # Need to construct a minimal user object for the permission service
-    user = db_session.exec(select(User).where(User.id == user_id)).first()
-    if user:
-        public_user = PublicUser.model_validate(user)
-        permission_service = get_permission_service(db_session)
-        try:
-            # Use can() method which returns bool instead of raising
-            import asyncio
-
-            return asyncio.run(
-                permission_service.can(
-                    user=public_user,
-                    action=mapped_action,
-                    resource=resource_type,
-                    resource_id=resource_uuid,
-                )
-            )
-        except Exception:
-            return False
-
-    return False

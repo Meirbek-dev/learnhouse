@@ -55,17 +55,6 @@ router = APIRouter()
 # ---------------------------------------------------------------------------
 # Course CRUD Endpoints
 # ---------------------------------------------------------------------------
-# NOTE: The routes below use the legacy RBAC check inside services.
-# New routes should use the PermissionChecker dependency as shown:
-#
-# @router.post("/v2")
-# async def api_create_course_v2(
-#     ...,
-#     checker: Annotated[PermissionChecker, Depends(get_permission_checker)],
-# ):
-#     checker.require(current_user, Action.CREATE, ResourceType.COURSE, org_id=org_id)
-#     ...
-# ---------------------------------------------------------------------------
 
 
 @router.post("/")
