@@ -24,6 +24,15 @@ from src.db.permissions.enums import (
     ResourceType,
     Scope,
 )
+from src.db.permissions.errors import (
+    AuthenticationRequiredError,
+    PermissionDeniedError,
+    PermissionErrorDetail,
+    ResourceNotFoundError,
+    raise_authentication_required,
+    raise_permission_denied,
+    raise_resource_not_found,
+)
 from src.db.permissions.models import (
     BatchPermissionCheckRequest,
     BatchPermissionCheckResponse,
@@ -58,6 +67,8 @@ __all__ = [
     "Action",
     "AuditAction",
     "AuditLevel",
+    # Error classes
+    "AuthenticationRequiredError",
     # Batch permission check models
     "BatchPermissionCheckRequest",
     "BatchPermissionCheckResponse",
@@ -68,9 +79,12 @@ __all__ = [
     "PermissionCheckRequest",
     "PermissionCheckResult",
     "PermissionCreate",
+    "PermissionDeniedError",
     "PermissionErrorCode",
+    "PermissionErrorDetail",
     "PermissionRead",
     # Resource-level permissions
+    "ResourceNotFoundError",
     "ResourcePermission",
     "ResourcePermissionCreate",
     "ResourcePermissionRead",
@@ -98,4 +112,7 @@ __all__ = [
     "is_admin_role",
     "is_content_creator_role",
     "is_instructor_or_higher_role",
+    "raise_authentication_required",
+    "raise_permission_denied",
+    "raise_resource_not_found",
 ]

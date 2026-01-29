@@ -15,7 +15,10 @@ from src.db.users import (
     UserUpdate,
     UserUpdatePassword,
 )
+from src.db.permissions import Action, ResourceType, raise_permission_denied
 from src.security.auth import get_current_user
+from src.security.rbac.dependencies import get_permission_service
+from src.services.permissions.unified_permission_service import UnifiedPermissionService
 from src.services.courses.courses import get_user_courses
 from src.services.users.password_reset import (
     change_password_with_reset_code,
@@ -83,12 +86,30 @@ async def api_create_user_with_orgid(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
     user_object: UserCreate,
     org_id: int,
 ) -> UserRead:
     """
     Create User with Org ID
+
+    **Required Permission**: `user:create:org`
     """
+    # Check permission to create users in this organization
+    has_permission = await permission_service.check_permission(
+        user_id=current_user.id,
+        action=Action.CREATE,
+        resource_type=ResourceType.USER,
+        org_id=org_id,
+    )
+
+    if not has_permission:
+        raise_permission_denied(
+            action="create",
+            resource_type="user",
+            message="You don't have permission to create users in this organization"
+        )
+
     return await create_user_with_org_validation(
         request, db_session, current_user, user_object, org_id
     )
@@ -180,12 +201,34 @@ async def api_update_user(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
     user_id: int,
     user_object: UserUpdate,
 ) -> UserRead:
     """
     Update User
+
+    **Required Permission**: `user:update:own` (for own profile) or `user:update:org` (for others)
     """
+    # Check if updating own profile or another user's profile
+    is_own_profile = user_id == current_user.id
+
+    if not is_own_profile:
+        # Check permission to update other users
+        has_permission = await permission_service.check_permission(
+            user_id=current_user.id,
+            action=Action.UPDATE,
+            resource_type=ResourceType.USER,
+        )
+
+        if not has_permission:
+            raise_permission_denied(
+                action="update",
+                resource_type="user",
+                resource_id=user_id,
+                message="You don't have permission to update other users"
+            )
+
     return await update_user(request, db_session, user_id, current_user, user_object)
 
 
@@ -214,7 +257,18 @@ async def api_update_user_password(
 ) -> UserRead:
     """
     Update User Password
+
+    **Required Permission**: Own account only (for security)
     """
+    # Password changes restricted to own account only
+    if user_id != current_user.id:
+        raise_permission_denied(
+            action="change password for",
+            resource_type="user",
+            resource_id=user_id,
+            message="You can only change your own password"
+        )
+
     return await update_user_password(request, db_session, current_user, user_id, form)
 
 
@@ -292,11 +346,37 @@ async def api_delete_user(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
     user_id: int,
 ):
     """
     Delete User
+
+    **Required Permission**: `user:delete:org`
     """
+    # Check permission to delete users
+    has_permission = await permission_service.check_permission(
+        user_id=current_user.id,
+        action=Action.DELETE,
+        resource_type=ResourceType.USER,
+    )
+
+    if not has_permission:
+        raise_permission_denied(
+            action="delete",
+            resource_type="user",
+            resource_id=user_id,
+        )
+
+    # Prevent self-deletion
+    if user_id == current_user.id:
+        raise_permission_denied(
+            action="delete",
+            resource_type="user",
+            resource_id=user_id,
+            message="You cannot delete your own account through this endpoint"
+        )
+
     return await delete_user_by_id(request, db_session, current_user, user_id)
 
 

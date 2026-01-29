@@ -16,10 +16,12 @@ from src.db.courses.courses import (
     FullCourseRead,
     ThumbnailType,
 )
-from src.db.permissions import Action, ResourceType
+from src.db.permissions import Action, ResourceType, raise_permission_denied
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
-from src.db.users import PublicUser
+from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user
+from src.security.rbac.dependencies import get_permission_service
+from src.services.permissions.unified_permission_service import UnifiedPermissionService
 from src.services.courses.contributors import (
     add_bulk_course_contributors,
     apply_course_contributor,
@@ -68,11 +70,29 @@ async def api_create_course(
     thumbnail_type: Annotated[ThumbnailType, Form()] = ThumbnailType.IMAGE,
     thumbnail: UploadFile | None = None,
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)] = None,
     db_session=Depends(get_db_session),
 ) -> CourseRead:
     """
     Create new Course
+
+    **Required Permission**: `course:create:org`
     """
+    # Check permission to create courses in this organization
+    has_permission = await permission_service.check_permission(
+        user_id=current_user.id,
+        action=Action.CREATE,
+        resource_type=ResourceType.COURSE,
+        org_id=org_id,
+    )
+
+    if not has_permission:
+        raise_permission_denied(
+            action="create",
+            resource_type="course",
+            message="You don't have permission to create courses in this organization"
+        )
+
     course = CourseCreate(
         name=name,
         description=description,
@@ -246,10 +266,28 @@ async def api_update_course(
     course_uuid: str,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)] = None,
 ) -> CourseRead:
     """
     Update Course by course_uuid
+
+    **Required Permission**: `course:update:own` or `course:update:org`
     """
+    # Check permission to update this course
+    has_permission = await permission_service.check_resource_permission(
+        user_id=current_user.id,
+        action=Action.UPDATE,
+        resource_type=ResourceType.COURSE,
+        resource_id=course_uuid,
+    )
+
+    if not has_permission:
+        raise_permission_denied(
+            action="update",
+            resource_type="course",
+            resource_id=course_uuid,
+        )
+
     return await update_course(
         request, course_object, course_uuid, current_user, db_session
     )
@@ -261,10 +299,28 @@ async def api_delete_course(
     course_uuid: str,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)] = None,
 ):
     """
     Delete Course by ID
+
+    **Required Permission**: `course:delete:own` or `course:delete:org`
     """
+    # Check permission to delete this course
+    has_permission = await permission_service.check_resource_permission(
+        user_id=current_user.id,
+        action=Action.DELETE,
+        resource_type=ResourceType.COURSE,
+        resource_id=course_uuid,
+    )
+
+    if not has_permission:
+        raise_permission_denied(
+            action="delete",
+            resource_type="course",
+            resource_id=course_uuid,
+        )
+
     return await delete_course(request, course_uuid, current_user, db_session)
 
 
@@ -367,11 +423,27 @@ async def api_update_course_contributor(
     authorship_status: ResourceAuthorshipStatusEnum,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)] = None,
 ):
     """
     Update a course contributor's role and status
-    Only administrators can perform this action
+
+    **Required Permission**: `course:manage:own` or `course:manage:org`
     """
+    # Check permission to manage course contributors
+    has_permission = await permission_service.check_resource_permission(
+        user_id=current_user.id,
+        action=Action.MANAGE,
+        resource_type=ResourceType.COURSE,
+        resource_id=course_uuid,
+    )
+
+    if not has_permission:
+        raise_permission_denied(
+            action="manage contributors for",
+            resource_type="course",
+            resource_id=course_uuid,
+        )
     return await update_course_contributor(
         request,
         course_uuid,
@@ -390,11 +462,27 @@ async def api_add_bulk_course_contributors(
     usernames: list[str],
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)] = None,
 ):
     """
     Add multiple contributors to a course by their usernames
-    Only administrators can perform this action
+
+    **Required Permission**: `course:manage:own` or `course:manage:org`
     """
+    # Check permission to manage course contributors
+    has_permission = await permission_service.check_resource_permission(
+        user_id=current_user.id,
+        action=Action.MANAGE,
+        resource_type=ResourceType.COURSE,
+        resource_id=course_uuid,
+    )
+
+    if not has_permission:
+        raise_permission_denied(
+            action="manage contributors for",
+            resource_type="course",
+            resource_id=course_uuid,
+        )
     return await add_bulk_course_contributors(
         request, course_uuid, usernames, current_user, db_session
     )

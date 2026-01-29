@@ -37,7 +37,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
     },
     openGraph: {
       title: `${course_meta.name} — Ashyq Bilim`,
-      description: course_meta.description ? course_meta.description : '',
+      description: course_meta.description || '',
       images: [
         {
           url: getCourseThumbnailMediaDirectory(org?.org_uuid, course_meta?.course_uuid, course_meta?.thumbnail_image),
@@ -47,8 +47,8 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
         },
       ],
       type: 'article',
-      publishedTime: course_meta.creation_date ? course_meta.creation_date : '',
-      tags: course_meta.learnings ? course_meta.learnings : [],
+      publishedTime: course_meta.creation_date || '',
+      tags: course_meta.learnings || [],
     },
   };
 }

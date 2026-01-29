@@ -14,8 +14,8 @@ import {
   isInstructorOrHigher,
 } from '@/types/permissions';
 import type { Action, ResourceType, Scope } from '@/types/permissions';
-import { getAPIUrl } from '@/services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { getAPIUrl } from '@/services/config/config';
 
 /**
  * User permissions response from backend.
@@ -23,12 +23,12 @@ import { useOrg } from '@components/Contexts/OrgContext';
 interface UserPermissionsResponse {
   user_id: number;
   org_id: number | null;
-  roles: Array<{
+  roles: {
     id: number;
     name: string;
     slug: string;
     description: string | null;
-  }>;
+  }[];
   permissions: Record<string, boolean>;
   resource_permissions: any[];
 }
@@ -84,14 +84,18 @@ export function usePermission() {
   const accessToken = session?.tokens?.access_token;
   const shouldFetch = status === 'authenticated' && accessToken;
 
-  const { data: permissionsData, error, isLoading: isLoadingPermissions } = useSWR<UserPermissionsResponse>(
+  const {
+    data: permissionsData,
+    error,
+    isLoading: isLoadingPermissions,
+  } = useSWR<UserPermissionsResponse>(
     shouldFetch ? `${getAPIUrl()}permissions/me/permissions${orgId ? `?org_id=${orgId}` : ''}` : null,
     (url: string) => permissionFetcher(url, accessToken),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
-      dedupingInterval: 60000, // Cache for 1 minute
-    }
+      dedupingInterval: 60_000, // Cache for 1 minute
+    },
   );
 
   /**
@@ -108,7 +112,7 @@ export function usePermission() {
   const roles = useMemo(() => {
     // Only use API-fetched roles
     if (permissionsData?.roles) {
-      return permissionsData.roles.map(r => r.slug).filter(Boolean);
+      return permissionsData.roles.map((r) => r.slug).filter(Boolean);
     }
     return [];
   }, [permissionsData?.roles]);

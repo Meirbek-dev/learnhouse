@@ -113,7 +113,7 @@ export default function ExamPreScreen({
                     <div className="flex-1">
                       <p className="text-sm font-medium text-gray-600">{t('timeLimit')}</p>
                       <p className="mt-1 text-3xl font-bold text-gray-900">
-                        {timeLimit ? timeLimit : <span className="text-2xl">{t('unlimited')}</span>}
+                        {timeLimit || <span className="text-2xl">{t('unlimited')}</span>}
                       </p>
                       {timeLimit && <p className="text-xs text-gray-500">{t('minutes', { count: timeLimit })}</p>}
                     </div>

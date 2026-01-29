@@ -209,15 +209,16 @@ docker compose down
 
 > **⚠️ Important Note About Symbolic Links**
 >
-> PostgreSQL backups contain symbolic links in the data directory. When extracting with 7-Zip,
-> you may see warnings like:
+> PostgreSQL backups contain symbolic links in the data directory. When extracting with 7-Zip, you
+> may see warnings like:
 >
 > `Skipping the potentially unsafe \backup\postgres\data -> . link`
 >
 > This is normal. You have two options:
 >
 > 1. **Enable symlink extraction in 7-Zip** (see Option A below) - Required for full restoration
-> 2. **Use tar from Git Bash or WSL** (see Option D below) - Recommended, handles symlinks automatically
+> 2. **Use tar from Git Bash or WSL** (see Option D below) - Recommended, handles symlinks
+>    automatically
 
 **Option A: Using 7-Zip (GUI) - With Symlink Support**
 

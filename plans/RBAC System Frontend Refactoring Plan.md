@@ -2,11 +2,16 @@
 
 ## Executive Summary
 
-This document outlines a comprehensive plan to resolve frontend-backend misalignments in the RBAC (Role-Based Access Control) system. The system has undergone a major backend refactoring from a legacy "rights-based" model to a modern permission-based RBAC system, but the frontend has not been fully updated to align with these changes. Remove all legacy, backward compat, duplicated code
+This document outlines a comprehensive plan to resolve frontend-backend misalignments in the RBAC
+(Role-Based Access Control) system. The system has undergone a major backend refactoring from a
+legacy "rights-based" model to a modern permission-based RBAC system, but the frontend has not been
+fully updated to align with these changes. Remove all legacy, backward compat, duplicated code
 
-**Status**: The backend has migrated to a new permission system, but the frontend still expects and uses legacy patterns in many places.
+**Status**: The backend has migrated to a new permission system, but the frontend still expects and
+uses legacy patterns in many places.
 
-**Impact**: Medium to High - Affects authorization, role management, and user experience across the platform.
+**Impact**: Medium to High - Affects authorization, role management, and user experience across the
+platform.
 
 ---
 
@@ -53,7 +58,8 @@ This document outlines a comprehensive plan to resolve frontend-backend misalign
 
 ### 1.2 Frontend (Web) - Partial Update ⚠️
 
-**Location**: `apps/web/types/permissions.ts`, `apps/web/hooks/usePermission.ts`, `apps/web/services/permissions/`
+**Location**: `apps/web/types/permissions.ts`, `apps/web/hooks/usePermission.ts`,
+`apps/web/services/permissions/`
 
 **Current Implementation**:
 
@@ -102,7 +108,8 @@ This document outlines a comprehensive plan to resolve frontend-backend misalign
 
 #### Issue 1: Dual Permission Systems
 
-**Problem**: Backend has both old RBAC functions (`rbac.py`) and new `UnifiedPermissionService`, causing inconsistency.
+**Problem**: Backend has both old RBAC functions (`rbac.py`) and new `UnifiedPermissionService`,
+causing inconsistency.
 
 **Location**:
 
@@ -189,7 +196,8 @@ if role.slug in ['super-admin', 'org-admin']:
 
 #### Issue 5: Missing Resource-Level Permissions
 
-**Problem**: Backend supports `resource_permissions` table for resource-specific overrides, but frontend doesn't use them.
+**Problem**: Backend supports `resource_permissions` table for resource-specific overrides, but
+frontend doesn't use them.
 
 **Impact**: Cannot implement fine-grained per-resource permissions in UI
 
@@ -206,25 +214,29 @@ if role.slug in ['super-admin', 'org-admin']:
 
 #### Issue 7: Permission Cache Not Used by Frontend
 
-**Problem**: Backend has Redis caching for permissions, but frontend doesn't leverage it effectively.
+**Problem**: Backend has Redis caching for permissions, but frontend doesn't leverage it
+effectively.
 
 **Impact**: Unnecessary API calls, slower performance
 
 #### Issue 8: Audit Logging Not Integrated
 
-**Problem**: Backend has comprehensive audit logging, but frontend doesn't trigger or display audit events.
+**Problem**: Backend has comprehensive audit logging, but frontend doesn't trigger or display audit
+events.
 
 **Impact**: No visibility into permission denials for users/admins
 
 #### Issue 9: Role Hierarchy Not Exposed to Frontend
 
-**Problem**: Backend supports role inheritance (`parent_role_id`), but frontend doesn't understand or display it.
+**Problem**: Backend supports role inheritance (`parent_role_id`), but frontend doesn't understand
+or display it.
 
 **Impact**: Cannot show role relationships in UI
 
 #### Issue 10: Batch Permission Checks Underutilized
 
-**Problem**: Frontend has `batchCheckPermissions()` but still makes individual permission checks in many places.
+**Problem**: Frontend has `batchCheckPermissions()` but still makes individual permission checks in
+many places.
 
 **Impact**: More API calls than necessary, slower page loads
 
@@ -485,21 +497,22 @@ const permissions = useMemo(() => {
 **File**: `apps/web/hooks/useResourcePermission.ts` (NEW)
 
 ```typescript
-import useSWR from 'swr';
 import { getAPIUrl } from '@/services/config/config';
+import useSWR from 'swr';
 
 export function useResourcePermission(
   resourceType: ResourceType,
   resourceId: string,
-  accessToken?: string
+  accessToken?: string,
 ) {
   const { data, error, isLoading } = useSWR(
     accessToken && resourceId
       ? `${getAPIUrl()}permissions/resource/${resourceType}/${resourceId}`
       : null,
-    (url: string) => fetch(url, {
-      headers: { Authorization: `Bearer ${accessToken}` }
-    }).then(r => r.json())
+    (url: string) =>
+      fetch(url, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }).then((r) => r.json()),
   );
 
   return {
@@ -608,7 +621,6 @@ WHERE name NOT LIKE '%:%:%';
 
 ---
 
-
 ## 7. Testing Plan
 
 ### 7.1 Unit Tests
@@ -621,7 +633,6 @@ WHERE name NOT LIKE '%:%:%';
 - [ ] Test resource permission overrides
 - [ ] Test permission caching
 - [ ] Test audit logging
-
 
 ## 9. Documentation Updates
 
@@ -640,7 +651,6 @@ WHERE name NOT LIKE '%:%:%';
 - [ ] Document all permission-related endpoints
 - [ ] Add examples for batch permission checks
 - [ ] Document error codes and responses
-
 
 ---
 
@@ -753,7 +763,10 @@ WHERE name NOT LIKE '%:%:%';
 
 ## 15. Conclusion
 
-This plan provides a comprehensive roadmap for aligning the frontend and backend RBAC systems. The migration will be executed in phases to minimize risk and allow for rollback if issues arise. Success depends on thorough testing, careful data migration, and clear communication with all stakeholders.
+This plan provides a comprehensive roadmap for aligning the frontend and backend RBAC systems. The
+migration will be executed in phases to minimize risk and allow for rollback if issues arise.
+Success depends on thorough testing, careful data migration, and clear communication with all
+stakeholders.
 
 **Key Takeaways**:
 
