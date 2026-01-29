@@ -14,7 +14,10 @@ from src.db.courses.assignments import (
     AssignmentUserSubmissionCreate,
 )
 from src.db.users import PublicUser
+from src.db.permissions import Action, ResourceType, raise_permission_denied
 from src.security.auth import get_current_user
+from src.security.rbac.dependencies import get_permission_service
+from src.services.permissions.unified_permission_service import UnifiedPermissionService
 from src.services.courses.activities.assignments import (
     create_assignment,
     create_assignment_submission,
@@ -477,11 +480,28 @@ async def api_final_grade_submission(
     assignment_uuid: str,
     user_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
     db_session=Depends(get_db_session),
 ):
     """
     Grade submissions for an assignment from a user
+
+    **Required Permission**: `submission:grade:assigned` (instructors/graders only)
     """
+    # Check permission to grade submissions
+    has_permission = await permission_service.check_permission(
+        user_id=current_user.id,
+        action=Action.GRADE,
+        resource_type=ResourceType.SUBMISSION,
+    )
+
+    if not has_permission:
+        raise_permission_denied(
+            action="grade",
+            resource_type="submission",
+            message="You don't have permission to grade assignments"
+        )
+
     return await grade_assignment_submission(
         request, user_id, assignment_uuid, current_user, db_session
     )

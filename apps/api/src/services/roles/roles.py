@@ -256,13 +256,13 @@ async def read_role(
             detail="Role not found",
         )
 
-    # RBAC check using the role's slug
+    # RBAC check - verify user can read roles in this organization
     permission_service = get_permission_service(db_session)
     await permission_service.check(
-        user="read",
+        user=current_user,
         action=Action.READ,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=current_user,
+        resource=ResourceType.ROLE,
+        org_id=role.org_id,
     )
 
     return RoleRead.model_validate(role)
@@ -310,10 +310,10 @@ async def update_role(
     # RBAC check
     permission_service = get_permission_service(db_session)
     await permission_service.check(
-        user="update",
-        action=Action.READ,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=current_user,
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ROLE,
+        org_id=role.org_id,
     )
 
     # Update only the fields that were passed in
@@ -370,10 +370,10 @@ async def delete_role(
     # RBAC check
     permission_service = get_permission_service(db_session)
     await permission_service.check(
-        user="delete",
-        action=Action.READ,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=current_user,
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.ROLE,
+        org_id=role.org_id,
     )
 
     db_session.delete(role)

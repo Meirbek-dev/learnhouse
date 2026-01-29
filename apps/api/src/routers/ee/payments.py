@@ -11,7 +11,10 @@ from src.db.payments.payments_products import (
     PaymentsProductUpdate,
 )
 from src.db.users import PublicUser
+from src.db.permissions import Action, ResourceType, raise_permission_denied
 from src.security.auth import get_current_user
+from src.security.rbac.dependencies import get_permission_service
+from src.services.permissions.unified_permission_service import UnifiedPermissionService
 from src.services.payments.payments_access import check_course_paid_access
 from src.services.payments.payments_config import (
     delete_payments_config,
@@ -50,8 +53,29 @@ async def api_create_payments_config(
     org_id: int,
     provider: Literal["stripe"],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> PaymentsConfig:
+    """
+    Create payments configuration
+
+    **Required Permission**: `organization:manage:own` (admin only)
+    """
+    # Check permission to manage organization (payment config is critical)
+    has_permission = await permission_service.check_permission(
+        user_id=current_user.id,
+        action=Action.MANAGE,
+        resource_type=ResourceType.ORGANIZATION,
+        org_id=org_id,
+    )
+
+    if not has_permission:
+        raise_permission_denied(
+            action="manage payment configuration for",
+            resource_type="organization",
+            resource_id=org_id,
+        )
+
     return await init_payments_config(
         request, org_id, provider, current_user, db_session
     )
@@ -72,8 +96,29 @@ async def api_delete_payments_config(
     request: Request,
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
+    """
+    Delete payments configuration
+
+    **Required Permission**: `organization:manage:own` (admin only)
+    """
+    # Check permission to manage organization
+    has_permission = await permission_service.check_permission(
+        user_id=current_user.id,
+        action=Action.MANAGE,
+        resource_type=ResourceType.ORGANIZATION,
+        org_id=org_id,
+    )
+
+    if not has_permission:
+        raise_permission_denied(
+            action="manage payment configuration for",
+            resource_type="organization",
+            resource_id=org_id,
+        )
+
     await delete_payments_config(request, org_id, current_user, db_session)
     return {"message": "Payments config deleted successfully"}
 
@@ -84,8 +129,29 @@ async def api_create_payments_product(
     org_id: int,
     payments_product: PaymentsProductCreate,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> PaymentsProductRead:
+    """
+    Create payment product
+
+    **Required Permission**: `organization:manage:own`
+    """
+    # Check permission to manage products
+    has_permission = await permission_service.check_permission(
+        user_id=current_user.id,
+        action=Action.MANAGE,
+        resource_type=ResourceType.ORGANIZATION,
+        org_id=org_id,
+    )
+
+    if not has_permission:
+        raise_permission_denied(
+            action="create products in",
+            resource_type="organization",
+            resource_id=org_id,
+        )
+
     return await create_payments_product(
         request, org_id, payments_product, current_user, db_session
     )
@@ -121,8 +187,29 @@ async def api_update_payments_product(
     product_id: int,
     payments_product: PaymentsProductUpdate,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> PaymentsProductRead:
+    """
+    Update payment product
+
+    **Required Permission**: `organization:manage:own`
+    """
+    # Check permission to manage products
+    has_permission = await permission_service.check_permission(
+        user_id=current_user.id,
+        action=Action.MANAGE,
+        resource_type=ResourceType.ORGANIZATION,
+        org_id=org_id,
+    )
+
+    if not has_permission:
+        raise_permission_denied(
+            action="update products in",
+            resource_type="organization",
+            resource_id=org_id,
+        )
+
     return await update_payments_product(
         request, org_id, product_id, payments_product, current_user, db_session
     )
@@ -134,8 +221,29 @@ async def api_delete_payments_product(
     org_id: int,
     product_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
+    """
+    Delete payment product
+
+    **Required Permission**: `organization:manage:own`
+    """
+    # Check permission to manage products
+    has_permission = await permission_service.check_permission(
+        user_id=current_user.id,
+        action=Action.MANAGE,
+        resource_type=ResourceType.ORGANIZATION,
+        org_id=org_id,
+    )
+
+    if not has_permission:
+        raise_permission_denied(
+            action="delete products in",
+            resource_type="organization",
+            resource_id=org_id,
+        )
+
     await delete_payments_product(request, org_id, product_id, current_user, db_session)
     return {"message": "Payments product deleted successfully"}
 

@@ -6,7 +6,10 @@ from sqlmodel import Session
 from src.core.events.database import get_db_session
 from src.db.usergroups import UserGroupCreate, UserGroupRead, UserGroupUpdate
 from src.db.users import PublicUser, UserRead
+from src.db.permissions import Action, ResourceType, raise_permission_denied
 from src.security.auth import get_current_user
+from src.security.rbac.dependencies import get_permission_service
+from src.services.permissions.unified_permission_service import UnifiedPermissionService
 from src.services.users.usergroups import (
     add_resources_to_usergroup,
     add_users_to_usergroup,
@@ -30,11 +33,27 @@ async def api_create_usergroup(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
     usergroup_object: UserGroupCreate,
 ) -> UserGroupRead:
     """
-    Create User
+    Create UserGroup
+
+    **Required Permission**: `usergroup:create:org`
     """
+    # Check permission to create usergroups
+    has_permission = await permission_service.check_permission(
+        user_id=current_user.id,
+        action=Action.CREATE,
+        resource_type=ResourceType.USERGROUP,
+    )
+
+    if not has_permission:
+        raise_permission_denied(
+            action="create",
+            resource_type="usergroup",
+        )
+
     return await create_usergroup(request, db_session, current_user, usergroup_object)
 
 
@@ -104,12 +123,29 @@ async def api_update_usergroup(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
     usergroup_id: int,
     usergroup_object: UserGroupUpdate,
 ) -> UserGroupRead:
     """
     Update UserGroup
+
+    **Required Permission**: `usergroup:update:org`
     """
+    # Check permission to update usergroups
+    has_permission = await permission_service.check_permission(
+        user_id=current_user.id,
+        action=Action.UPDATE,
+        resource_type=ResourceType.USERGROUP,
+    )
+
+    if not has_permission:
+        raise_permission_denied(
+            action="update",
+            resource_type="usergroup",
+            resource_id=usergroup_id,
+        )
+
     return await update_usergroup_by_id(
         request, db_session, current_user, usergroup_id, usergroup_object
     )
@@ -121,11 +157,28 @@ async def api_delete_usergroup(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
     usergroup_id: int,
 ) -> str:
     """
     Delete UserGroup
+
+    **Required Permission**: `usergroup:delete:org`
     """
+    # Check permission to delete usergroups
+    has_permission = await permission_service.check_permission(
+        user_id=current_user.id,
+        action=Action.DELETE,
+        resource_type=ResourceType.USERGROUP,
+    )
+
+    if not has_permission:
+        raise_permission_denied(
+            action="delete",
+            resource_type="usergroup",
+            resource_id=usergroup_id,
+        )
+
     return await delete_usergroup_by_id(request, db_session, current_user, usergroup_id)
 
 
@@ -135,12 +188,29 @@ async def api_add_users_to_usergroup(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
     usergroup_id: int,
     user_ids: str,
 ) -> str:
     """
     Add Users to UserGroup
+
+    **Required Permission**: `usergroup:manage:org`
     """
+    # Check permission to manage usergroups
+    has_permission = await permission_service.check_permission(
+        user_id=current_user.id,
+        action=Action.MANAGE,
+        resource_type=ResourceType.USERGROUP,
+    )
+
+    if not has_permission:
+        raise_permission_denied(
+            action="manage members of",
+            resource_type="usergroup",
+            resource_id=usergroup_id,
+        )
+
     return await add_users_to_usergroup(
         request, db_session, current_user, usergroup_id, user_ids
     )
