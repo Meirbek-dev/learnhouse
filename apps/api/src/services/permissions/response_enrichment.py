@@ -493,14 +493,46 @@ async def enrich_activity_with_permissions(
     Returns:
         Activity with permission metadata
     """
-    return await enrich_generic_resource_with_permissions(
-        resource=activity,
-        resource_type=ResourceType.ACTIVITY,
-        resource_id=activity.get("id"),
-        current_user=current_user,
-        permission_service=permission_service,
-        actions_to_check=[Action.READ, Action.UPDATE, Action.DELETE, Action.GRADE],
+    activity_id = activity.get("id")
+
+    # Check permissions
+    can_update = await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ACTIVITY,
+        resource_id=str(activity_id),
+        raise_on_deny=False,
     )
+
+    can_delete = await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.ACTIVITY,
+        resource_id=str(activity_id),
+        raise_on_deny=False,
+    )
+
+    # Check ownership
+    creator_id = activity.get("creator_id")
+    is_creator = creator_id == current_user.id if creator_id else False
+    is_owner = is_creator  # For activities, creator is owner
+
+    # Build available actions
+    available_actions = ["read"]  # If they can see it, they can read it
+    if can_update:
+        available_actions.append("update")
+    if can_delete:
+        available_actions.append("delete")
+
+    return {
+        **activity,
+        "can_update": can_update,
+        "can_delete": can_delete,
+        "is_owner": is_owner,
+        "is_creator": is_creator,
+        "available_actions": available_actions,
+    }
+
 
 
 async def enrich_discussion_with_permissions(

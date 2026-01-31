@@ -62,7 +62,7 @@ const TableOfContents = ({ editor }: TableOfContentsProps) => {
         {headings.map((heading, index) => (
           <TOCItem
             key={index}
-            level={heading.level}
+            $level={heading.level}
           >
             <span className="toc-check">
               <Check
@@ -103,9 +103,9 @@ const TOCList = styled.ul`
   margin: 0;
 `;
 
-const TOCItem = styled.li<{ level: number }>`
+const TOCItem = styled.li<{ $level: number }>`
   margin: 0.5rem 0;
-  padding-left: ${({ level }) => `${(level - 1) * 1.2}rem`};
+  padding-left: ${({ $level }) => `${($level - 1) * 1.2}rem`};
   list-style: none !important;
   display: flex;
   align-items: flex-start;
@@ -125,8 +125,8 @@ const TOCItem = styled.li<{ level: number }>`
     min-width: 0;
     padding: 0;
     color: #23272f;
-    font-weight: ${({ level }) => (level === 1 ? 500 : 400)};
-    font-size: ${({ level }) => (level === 1 ? '1rem' : level === 2 ? '0.97rem' : '0.95rem')};
+    font-weight: ${({ $level }) => ($level === 1 ? 500 : 400)};
+    font-size: ${({ $level }) => ($level === 1 ? '1rem' : $level === 2 ? '0.97rem' : '0.95rem')};
     line-height: 1.4;
     text-decoration: none;
     word-break: break-word;

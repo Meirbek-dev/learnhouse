@@ -343,7 +343,7 @@ const OrgUsers = () => {
                 </div>
                 <Pagination>
                   <PaginationContent>
-                    <PaginationItem>
+                    <PaginationItem key="prev">
                       <PaginationPrevious
                         onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                         aria-disabled={currentPage === 1}
@@ -361,13 +361,13 @@ const OrgUsers = () => {
                         const prev = arr[idx - 1];
                         const showEllipsisBefore = idx > 0 && typeof prev !== 'undefined' && page - prev > 1;
                         return (
-                          <React.Fragment key={page}>
+                          <React.Fragment key={`fragment-${page}`}>
                             {showEllipsisBefore && (
-                              <PaginationItem>
+                              <PaginationItem key={`ellipsis-${page}`}>
                                 <PaginationEllipsis />
                               </PaginationItem>
                             )}
-                            <PaginationItem>
+                            <PaginationItem key={`page-${page}`}>
                               <PaginationLink
                                 onClick={() => setCurrentPage(page)}
                                 isActive={currentPage === page}
@@ -379,7 +379,7 @@ const OrgUsers = () => {
                           </React.Fragment>
                         );
                       })}
-                    <PaginationItem>
+                    <PaginationItem key="next">
                       <PaginationNext
                         onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                         aria-disabled={currentPage === totalPages}
