@@ -639,40 +639,62 @@ class UnifiedPermissionService:
         scope_context: dict,
         context: dict | None = None,
     ) -> bool:
-        """Check if a role grants a specific permission with scope/condition evaluation."""
+        """Check if a role grants a specific permission with scope/condition evaluation.
+
+        Supports wildcards:
+        - *:*:* (super admin - all permissions)
+        - resource:*:scope (all actions on specific resource)
+        - *:action:scope (specific action on all resources)
+        - resource:action:* (all scopes)
+        """
         # Collect all role IDs in the hierarchy
         role_ids = self._get_role_hierarchy_ids(role.id)  # type: ignore[arg-type]
 
         if not role_ids:
             return False
 
-        # Batch query: get all permissions for all role IDs
+        resource_str = resource.value.lower() if hasattr(resource, "value") else str(resource).lower()
+        action_str = action.value.lower() if hasattr(action, "value") else str(action).lower()
+
+        # Build conditions for wildcard matching
+        # We need to check: exact match OR wildcards
+        resource_conditions = [
+            sa.cast(Permission.resource_type, sa.String) == resource_str,
+            sa.cast(Permission.resource_type, sa.String) == "*",
+        ]
+        action_conditions = [
+            sa.cast(Permission.action, sa.String) == action_str,
+            sa.cast(Permission.action, sa.String) == "*",
+        ]
+
+        # Batch query: get all permissions for all role IDs with wildcard support
         statement = (
             select(Permission, RolePermission)
             .join(RolePermission, RolePermission.permission_id == Permission.id)
             .where(
                 RolePermission.role_id.in_(role_ids),
-                sa.cast(Permission.resource_type, sa.String)
-                == (
-                    resource.value.lower()
-                    if hasattr(resource, "value")
-                    else str(resource).lower()
-                ),
-                sa.cast(Permission.action, sa.String)
-                == (
-                    action.value.lower()
-                    if hasattr(action, "value")
-                    else str(action).lower()
-                ),
+                sa.or_(*resource_conditions),
+                sa.or_(*action_conditions),
             )
         )
 
         results = self.db.exec(statement).all()
 
         for permission, role_permission in results:
-            if self._scope_matches(permission.scope, scope_context):
-                if self._conditions_match(role_permission.conditions, context):
-                    return True
+            # Check if this permission matches the requested permission (including wildcards)
+            perm_resource = permission.resource_type.value.lower() if hasattr(permission.resource_type, "value") else str(permission.resource_type).lower()
+            perm_action = permission.action.value.lower() if hasattr(permission.action, "value") else str(permission.action).lower()
+
+            # Match logic: permission matches if:
+            # 1. Exact match on resource (or wildcard)
+            # 2. Exact match on action (or wildcard)
+            resource_matches = perm_resource == resource_str or perm_resource == "*"
+            action_matches = perm_action == action_str or perm_action == "*"
+
+            if resource_matches and action_matches:
+                if self._scope_matches(permission.scope, scope_context):
+                    if self._conditions_match(role_permission.conditions, context):
+                        return True
 
         return False
 
@@ -953,6 +975,19 @@ class UnifiedPermissionService:
         # Get user's active roles
         roles = self._get_user_active_roles(user_id, org_id)
 
+        # Check if user has super-admin role (wildcard permissions)
+        has_super_admin = any(role.slug == "super-admin" for role in roles)
+
+        # If super-admin, return all permissions as true
+        if has_super_admin:
+            # Expand all combinations for super-admin
+            for resource in ResourceType:
+                for action in Action:
+                    for scope in Scope:
+                        perm_key = f"{resource.value}:{action.value}:{scope.value}"
+                        permissions[perm_key] = True
+            return permissions
+
         # Collect all permissions from all roles
         for role in roles:
             role_ids = self._get_role_hierarchy_ids(role.id)  # type: ignore[arg-type]
@@ -969,8 +1004,43 @@ class UnifiedPermissionService:
             results = self.db.exec(statement).all()
 
             for permission, _ in results:
+                # Check for wildcard permissions
+                resource_val = permission.resource_type.value if hasattr(permission.resource_type, "value") else str(permission.resource_type)
+                action_val = permission.action.value if hasattr(permission.action, "value") else str(permission.action)
+                scope_val = permission.scope.value if hasattr(permission.scope, "value") else str(permission.scope)
+
+                # Handle *:*:* (all permissions)
+                if resource_val == "*" and action_val == "*" and scope_val == "*":
+                    for resource in ResourceType:
+                        for action in Action:
+                            for scope in Scope:
+                                perm_key = f"{resource.value}:{action.value}:{scope.value}"
+                                permissions[perm_key] = True
+                    continue
+
+                # Handle resource:*:scope (all actions on resource)
+                if action_val == "*":
+                    for action in Action:
+                        perm_key = f"{resource_val}:{action.value}:{scope_val}"
+                        permissions[perm_key] = True
+                    continue
+
+                # Handle *:action:scope (action on all resources)
+                if resource_val == "*":
+                    for resource in ResourceType:
+                        perm_key = f"{resource.value}:{action_val}:{scope_val}"
+                        permissions[perm_key] = True
+                    continue
+
+                # Handle resource:action:* (all scopes)
+                if scope_val == "*":
+                    for scope in Scope:
+                        perm_key = f"{resource_val}:{action_val}:{scope.value}"
+                        permissions[perm_key] = True
+                    continue
+
                 # Build permission key: resource:action:scope
-                perm_key = f"{permission.resource_type.value}:{permission.action.value}:{permission.scope.value}"
+                perm_key = f"{resource_val}:{action_val}:{scope_val}"
                 permissions[perm_key] = True
 
         return permissions
