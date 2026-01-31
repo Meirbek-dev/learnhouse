@@ -68,7 +68,7 @@ function PaginationPrevious({ className, ...props }: React.ComponentProps<typeof
     <PaginationLink
       aria-label={t('previousAria')}
       size="default"
-      className={cn('pl-2!', className)}
+      className={cn('ps-2!', className)}
       {...props}
     >
       <ChevronLeftIcon data-icon="inline-start" />
@@ -83,7 +83,7 @@ function PaginationNext({ className, ...props }: React.ComponentProps<typeof Pag
     <PaginationLink
       aria-label={t('nextAria')}
       size="default"
-      className={cn('pr-2!', className)}
+      className={cn('pe-2!', className)}
       {...props}
     >
       <span className="hidden sm:block">{t('next')}</span>

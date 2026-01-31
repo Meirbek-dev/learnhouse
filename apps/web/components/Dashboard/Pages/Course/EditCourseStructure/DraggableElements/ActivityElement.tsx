@@ -33,6 +33,7 @@ import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from
 import { deleteActivity, updateActivity } from '@services/courses/activities';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { PermissionTooltip } from '@/components/Utils/PermissionTooltip';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -48,7 +49,6 @@ import Link from '@components/ui/AppLink';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
 import useSWR from 'swr';
-import { PermissionTooltip } from '@/components/Utils/PermissionTooltip';
 
 // Types
 type ActivityType =

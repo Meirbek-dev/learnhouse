@@ -134,12 +134,12 @@ function SelectItem({ className, children, ...props }: SelectPrimitive.Item.Prop
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        "focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pe-8 ps-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
         className,
       )}
       {...props}
     >
-      <span className="absolute right-2 flex size-3.5 items-center justify-center">
+      <span className="absolute end-2 flex size-3.5 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
           <CheckIcon className="size-4" />
         </SelectPrimitive.ItemIndicator>
@@ -165,7 +165,7 @@ function SelectScrollUpButton({ className, ...props }: SelectPrimitive.ScrollUpA
       data-slot="select-scroll-up-button"
       className={cn(
         'w-full bg-popover z-51 text-center cursor-default h-6 flex items-center justify-center text-md border data-[direction=up]:border-b-0 data-[direction=down]:border-t-0 data-[direction=up]:rounded-t-md data-[direction=down]:rounded-b-md',
-        "before:content-[''] before:absolute before:w-full before:h-full before:left-0 data-[direction=up]:before:top-full data-[direction=down]:bottom-0 data-[direction=down]:before:-bottom-full",
+        "before:content-[''] before:absolute before:w-full before:h-full before:start-0 data-[direction=up]:before:top-full data-[direction=down]:bottom-0 data-[direction=down]:before:-bottom-full",
         className,
       )}
       {...props}
@@ -180,7 +180,7 @@ function SelectScrollDownButton({ className, ...props }: SelectPrimitive.ScrollD
       data-slot="select-scroll-down-button"
       className={cn(
         'w-full bg-popover z-51 text-center cursor-default h-6 flex items-center justify-center text-md border data-[direction=up]:border-b-0 data-[direction=down]:border-t-0 data-[direction=up]:rounded-t-md data-[direction=down]:rounded-b-md',
-        "before:content-[''] before:absolute before:w-full before:h-full before:left-0 data-[direction=up]:before:top-full data-[direction=down]:bottom-0 data-[direction=down]:before:-bottom-full",
+        "before:content-[''] before:absolute before:w-full before:h-full before:start-0 data-[direction=up]:before:top-full data-[direction=down]:bottom-0 data-[direction=down]:before:-bottom-full",
         className,
       )}
       {...props}

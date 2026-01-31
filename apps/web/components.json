@@ -20,5 +20,6 @@
     "cssVariables": true,
     "prefix": ""
   },
-  "tsx": true
+  "tsx": true,
+  "rtl": true
 }

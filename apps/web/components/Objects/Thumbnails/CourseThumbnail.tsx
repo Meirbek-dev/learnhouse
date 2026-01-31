@@ -28,12 +28,12 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { ResourceActionsMenu, type ResourceAction } from '@/components/Utils/ResourceActionsMenu';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Card, CardContent, CardFooter } from '@components/ui/card';
-import { usePermissions } from '@/hooks/usePermissions';
-import { ResourceActionsMenu, type ResourceAction } from '@/components/Utils/ResourceActionsMenu';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import Link from '@components/ui/AppLink';

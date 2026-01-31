@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowBigDown, ArrowBigUp, Clock, Edit, Reply, Send, Trash2 } from 'lucide-react';
+import { PermissionTooltip } from '@/components/Utils/PermissionTooltip';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import RichContentRenderer from './rich-content-renderer';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -10,7 +11,6 @@ import DiscussionReply from './discussion-reply';
 import { Button } from '@/components/ui/button';
 import RichTextEditor from './rich-text-editor';
 import { Badge } from '@/components/ui/badge';
-import { PermissionTooltip } from '@/components/Utils/PermissionTooltip';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import type React from 'react';

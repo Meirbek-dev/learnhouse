@@ -4,7 +4,6 @@ import { useSession } from 'next-auth/react';
 import { useCallback, useMemo } from 'react';
 import useSWR from 'swr';
 
-import type { Action, ResourceType, Scope } from '@/types/permissions';
 import {
   Actions,
   ResourceTypes,
@@ -13,6 +12,7 @@ import {
   isAdminRole,
   isInstructorOrHigher,
 } from '@/types/permissions';
+import type { Action, ResourceType, Scope } from '@/types/permissions';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getAPIUrl } from '@/services/config/config';
 
@@ -64,7 +64,10 @@ interface ResourcePermissionResponse {
 /**
  * SWR fetcher with access token.
  */
-async function permissionFetcher(url: string, accessToken?: string): Promise<UserPermissionsResponse | ResourcePermissionResponse> {
+async function permissionFetcher(
+  url: string,
+  accessToken?: string,
+): Promise<UserPermissionsResponse | ResourcePermissionResponse> {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
@@ -172,15 +175,11 @@ export function usePermissions(options?: UsePermissionsOptions) {
     data: apiData,
     error,
     isLoading: isLoadingApi,
-  } = useSWR(
-    shouldFetch ? endpoint : null,
-    (url: string) => permissionFetcher(url, accessToken),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: true,
-      dedupingInterval: 60_000, // Cache for 1 minute
-    },
-  );
+  } = useSWR(shouldFetch ? endpoint : null, (url: string) => permissionFetcher(url, accessToken), {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: true,
+    dedupingInterval: 60_000, // Cache for 1 minute
+  });
 
   // Extract permissions from either API response or embedded metadata
   const permissions = useMemo(() => {
@@ -515,8 +514,6 @@ export function usePermissions(options?: UsePermissionsOptions) {
  *
  * @deprecated Use `usePermissions({ resource })` instead
  */
-export function useResourcePermissions<T extends ResourceWithPermissions>(
-  resource: T | null | undefined,
-) {
+export function useResourcePermissions<T extends ResourceWithPermissions>(resource: T | null | undefined) {
   return usePermissions({ resource });
 }

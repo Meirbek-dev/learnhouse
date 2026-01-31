@@ -1,13 +1,6 @@
 'use client';
 
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
   Edit,
   Trash2,
   Share2,
@@ -23,10 +16,17 @@ import {
   Shield,
   type LucideIcon,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import type React from 'react';
+import { useTranslations } from 'next-intl';
 import { Fragment } from 'react';
+import type React from 'react';
 
 export interface ResourceAction {
   id: string;
@@ -79,12 +79,7 @@ interface ResourceActionsMenuProps {
  * />
  * ```
  */
-export function ResourceActionsMenu({
-  availableActions,
-  actions,
-  trigger,
-  align = 'end',
-}: ResourceActionsMenuProps) {
+export function ResourceActionsMenu({ availableActions, actions, trigger, align = 'end' }: ResourceActionsMenuProps) {
   const t = useTranslations('Components.ResourceActionsMenu');
 
   // Filter actions based on available_actions from backend

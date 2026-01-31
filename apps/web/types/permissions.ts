@@ -9,12 +9,7 @@
  * This file contains only the interfaces and helper functions.
  */
 
-import {
-  Actions,
-  ResourceTypes,
-  Scopes,
-  RoleSlugs,
-} from './generated_permissions';
+import { Actions, ResourceTypes, Scopes, RoleSlugs } from './generated_permissions';
 import type { Action, ResourceType, Scope, RoleSlug } from './generated_permissions';
 
 // Re-export the generated types for convenience

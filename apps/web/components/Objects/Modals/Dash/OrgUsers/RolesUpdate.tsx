@@ -74,7 +74,7 @@ const RolesUpdate: FC<Props> = (props) => {
         props.setRolesModal(false);
         toast.success(t('toastSuccess'), { id: toastId });
       } else {
-        const detail = res?.data?.detail ?? (res as any)?.statusText ?? (res?.data?.message ?? 'Unknown error');
+        const detail = res?.data?.detail ?? (res as any)?.statusText ?? res?.data?.message ?? 'Unknown error';
         setError(`Error ${res.status}: ${detail}`);
         toast.error(t('toastError'), { id: toastId });
       }

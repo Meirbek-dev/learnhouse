@@ -122,7 +122,7 @@ const OrgRoles: FC = () => {
 
   const getRoleBadge = (role: any) => {
     // Use slug-based checks instead of name matching
-    const {slug} = role;
+    const { slug } = role;
 
     if (!slug) {
       return t('basicAccess');

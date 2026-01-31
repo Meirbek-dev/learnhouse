@@ -75,7 +75,7 @@ export default function MultiSelectCombobox<T>({
               aria-expanded={open}
               className="h-auto min-h-8 w-full justify-between hover:bg-transparent"
             >
-              <div className="flex flex-wrap items-center gap-1 pr-2.5">
+              <div className="flex flex-wrap items-center gap-1 pe-2.5">
                 {value.length > 0 ? (
                   <>
                     {visibleItems.map((val) => {
@@ -149,7 +149,7 @@ export default function MultiSelectCombobox<T>({
                       {value.includes(optionValue) && (
                         <CheckIcon
                           size={16}
-                          className="ml-auto"
+                          className="ms-auto"
                         />
                       )}
                     </CommandItem>

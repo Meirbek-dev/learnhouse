@@ -74,11 +74,7 @@ export type RoleSlug = (typeof RoleSlugs)[keyof typeof RoleSlugs];
  * Format: {resource}:{action}:{scope}
  * Example: course:update:own
  */
-export function buildPermissionName(
-  resource: ResourceType,
-  action: Action,
-  scope: Scope = Scopes.ALL,
-): string {
+export function buildPermissionName(resource: ResourceType, action: Action, scope: Scope = Scopes.ALL): string {
   return `${resource.toLowerCase()}:${action.toLowerCase()}:${scope.toLowerCase()}`;
 }
 
@@ -105,10 +101,7 @@ export function parsePermissionName(name: string): {
  * Check if a role slug is an admin role.
  */
 export function isAdminRole(roleSlug: string): boolean {
-  return (
-    roleSlug === RoleSlugs.SUPER_ADMIN ||
-    roleSlug === RoleSlugs.ORG_ADMIN
-  );
+  return roleSlug === RoleSlugs.SUPER_ADMIN || roleSlug === RoleSlugs.ORG_ADMIN;
 }
 
 /**
