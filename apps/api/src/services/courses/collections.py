@@ -78,13 +78,9 @@ async def get_collection(
     courses = list(db_session.exec(statement).all())
 
     # Enrich with permission metadata (will include courses in the response)
-    enriched = await enrich_collection_with_permissions(
-        collection, current_user, db_session, permission_service
+    return await enrich_collection_with_permissions(
+        collection, current_user, db_session, permission_service, courses=courses
     )
-    # Add courses to enriched response
-    enriched_dict = enriched.model_dump()
-    enriched_dict["courses"] = courses
-    return CollectionReadWithPermissions(**enriched_dict)
 
 
 async def create_collection(
@@ -329,10 +325,8 @@ async def get_collections(
 
         # Enrich with permission metadata
         enriched = await enrich_collection_with_permissions(
-            collection, current_user, db_session, permission_service
+            collection, current_user, db_session, permission_service, courses=list(courses)
         )
-        enriched_dict = enriched.model_dump()
-        enriched_dict["courses"] = list(courses)
-        collections_with_courses.append(CollectionReadWithPermissions(**enriched_dict))
+        collections_with_courses.append(enriched)
 
     return collections_with_courses

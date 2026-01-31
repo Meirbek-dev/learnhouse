@@ -523,7 +523,7 @@ async def api_get_my_permissions(
         )
 
     # Get user's permissions
-    permissions = await permission_service.get_user_permissions(current_user, org_id)
+    permissions = permission_service.get_user_permissions(current_user, org_id)
 
     # Get user's roles
     service = RoleService(db_session)

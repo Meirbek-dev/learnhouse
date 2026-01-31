@@ -214,6 +214,7 @@ async def enrich_collection_with_permissions(
     current_user: PublicUser,
     db_session: Session,
     permission_service: UnifiedPermissionService,
+    courses: list | None = None,
 ) -> CollectionReadWithPermissions:
     """
     Enrich a collection response with permission metadata.
@@ -223,6 +224,7 @@ async def enrich_collection_with_permissions(
         current_user: Current authenticated user
         db_session: Database session
         permission_service: Permission service instance
+        courses: Optional list of courses in the collection
 
     Returns:
         Collection with permission metadata
@@ -271,6 +273,10 @@ async def enrich_collection_with_permissions(
         if hasattr(collection, "model_dump")
         else collection.dict()
     )
+
+    # Add courses if not already present
+    if "courses" not in collection_dict:
+        collection_dict["courses"] = courses if courses is not None else []
 
     return CollectionReadWithPermissions(
         **collection_dict,
