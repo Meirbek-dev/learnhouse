@@ -88,7 +88,7 @@ function ThemeProviderWrapper({ children }: { children: ReactNode }) {
     <ThemeProvider userTheme={userTheme}>
       <ThemeSync />
       <StyledComponentsRegistry>
-        <main className="animate-fade-in">{children}</main>
+        <main>{children}</main>
         <Toaster />
       </StyledComponentsRegistry>
     </ThemeProvider>
