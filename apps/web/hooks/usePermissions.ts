@@ -242,7 +242,7 @@ export function usePermissions(options?: UsePermissionsOptions) {
     (action: Action, resource: ResourceType, scope: Scope = Scopes.ALL): boolean => {
       if (!session) return false;
 
-      const permissionName = buildPermissionName(action, resource, scope);
+      const permissionName = buildPermissionName(resource, action, scope);
       return permissions[permissionName] === true;
     },
     [session, permissions],
@@ -392,7 +392,7 @@ export function usePermissions(options?: UsePermissionsOptions) {
       return permissions.can_publish;
     }
     if (options?.resourceType) {
-      return can(Actions.PUBLISH, options.resourceType, Scopes.ORG);
+      return can(Actions.MANAGE, options.resourceType, Scopes.ORG);
     }
     return false;
   }, [permissions, options, can]);

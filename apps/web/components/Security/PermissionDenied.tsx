@@ -3,7 +3,7 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { Action, ResourceType } from '@/types/permissions';
 import { Actions, ResourceTypes } from '@/types/permissions';
-import { usePermission } from '@/hooks/usePermission';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
@@ -36,7 +36,7 @@ interface PermissionDeniedProps {
  * ```
  */
 export function PermissionDenied({ action, resource, requiredPermission, reason, className }: PermissionDeniedProps) {
-  const { isAdmin } = usePermission();
+  const { isAdmin } = usePermissions();
 
   const actionLabels: Record<Action, string> = {
     [Actions.CREATE]: 'create',

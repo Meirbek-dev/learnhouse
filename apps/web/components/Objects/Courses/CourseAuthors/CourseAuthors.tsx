@@ -25,7 +25,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
-import usePermission from '@/hooks/usePermission';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -154,7 +154,7 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
 
 const UpdatesSection = () => {
   const [selectedView, setSelectedView] = useState('list');
-  const { isAdmin } = usePermission();
+  const { isAdmin } = usePermissions();
   const course = useCourse();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -314,7 +314,7 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
 
 const UpdatesListView = () => {
   const course = useCourse();
-  const { isAdmin } = usePermission();
+  const { isAdmin } = usePermissions();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const { data: updates } = useSWR(`${getAPIUrl()}courses/${course?.courseStructure?.course_uuid}/updates`, (url) =>

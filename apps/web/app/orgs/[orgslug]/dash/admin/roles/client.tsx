@@ -17,7 +17,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { PermissionGuard } from '@/components/Security/PermissionGuard';
 import { Actions, ResourceTypes } from '@/types/permissions';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { usePermission } from '@/hooks/usePermission';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { getAPIUrl } from '@services/config/config';
@@ -58,7 +58,7 @@ interface RoleWithPermissions extends Role {
 export default function RBACAdminClient() {
   const org = useOrg() as { id: number } | null;
   const session = usePlatformSession();
-  const { can } = usePermission();
+  const { can } = usePermissions();
 
   const [roles, setRoles] = useState<RoleWithPermissions[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);

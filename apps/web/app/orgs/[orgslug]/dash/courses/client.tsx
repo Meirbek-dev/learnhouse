@@ -9,7 +9,7 @@ import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { Actions, ResourceTypes } from '@/types/permissions';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
-import { usePermission } from '@/hooks/usePermission';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -28,7 +28,7 @@ const CoursesHome = (params: CourseProps) => {
   const isCreatingCourse = Boolean(searchParams.get('new'));
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
   const { orgslug, courses, totalCourses } = params;
-  const { isAdmin: isUserAdmin } = usePermission();
+  const { isAdmin: isUserAdmin } = usePermissions();
   const t = useTranslations('DashPage.Courses.HomePageClient');
   const org = useOrg() as any;
 

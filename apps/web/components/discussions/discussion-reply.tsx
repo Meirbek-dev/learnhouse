@@ -5,7 +5,7 @@ import { useFormatter, useNow, useTranslations } from 'next-intl';
 import RichContentRenderer from './rich-content-renderer';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
-import usePermission from '@/hooks/usePermission';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Button } from '@/components/ui/button';
 import RichTextEditor from './rich-text-editor';
 import { useState, useTransition } from 'react';
@@ -37,7 +37,7 @@ export default function DiscussionReply({
   const format = useFormatter();
   const now = useNow();
   const org = useOrg() as any;
-  const { isAdmin } = usePermission();
+  const { isAdmin } = usePermissions();
 
   const isOwnReply = reply.username === currentUser?.username;
   const netScore = reply.upvotes - reply.downvotes;

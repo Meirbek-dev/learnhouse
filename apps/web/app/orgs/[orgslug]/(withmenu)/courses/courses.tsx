@@ -8,7 +8,7 @@ import { PermissionGuard } from '@components/Security/PermissionGuard';
 import CourseGridClient from '@components/Landings/CourseGridClient';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { Actions, ResourceTypes } from '@/types/permissions';
-import { usePermission } from '@/hooks/usePermission';
+import { usePermissions } from '@/hooks/usePermissions';
 
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -54,7 +54,7 @@ const Courses = (props: CourseProps) => {
   const searchParams = useSearchParams();
   const isCreatingCourse = Boolean(searchParams.get('new'));
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
-  const { isAdmin: isUserAdmin } = usePermission();
+  const { isAdmin: isUserAdmin } = usePermissions();
 
   async function closeNewCourseModal() {
     setNewCourseModal(false);

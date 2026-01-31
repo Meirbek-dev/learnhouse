@@ -18,7 +18,7 @@ import { PermissionGuard } from '@/components/Security/PermissionGuard';
 import { Actions, ResourceTypes } from '@/types/permissions';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useCallback, useEffect, useState } from 'react';
-import { usePermission } from '@/hooks/usePermission';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';
@@ -58,7 +58,7 @@ interface UserRoleAssignment {
 export default function UserRolesClient() {
   const org = useOrg() as { id: number } | null;
   const session = usePlatformSession();
-  const { can } = usePermission();
+  const { can } = usePermissions();
 
   const [userRoles, setUserRoles] = useState<UserRoleAssignment[]>([]);
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);

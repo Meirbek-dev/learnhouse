@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 
 import type { Action, ResourceType, Scope } from '@/types/permissions';
-import { usePermission } from '@/hooks/usePermission';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface PermissionGuardProps {
   /**
@@ -74,7 +74,7 @@ export function PermissionGuard({
   showLoading = false,
   loadingComponent = null,
 }: PermissionGuardProps) {
-  const { can, isLoading } = usePermission();
+  const { can, loading: isLoading } = usePermissions();
 
   // Show loading state if requested
   if (isLoading && showLoading) {
@@ -149,7 +149,7 @@ export function MultiPermissionGuard({
   children,
   fallback = null,
 }: MultiPermissionGuardProps) {
-  const { canAny, canAll } = usePermission();
+  const { canAny, canAll } = usePermissions();
 
   const hasPermission = any ? canAny(permissions) : canAll(permissions);
 
@@ -197,12 +197,12 @@ interface RoleGuardProps {
  * ```
  */
 export function RoleGuard({ role, any = true, children, fallback = null }: RoleGuardProps) {
-  const { hasRole, hasAnyRole, roles } = usePermission();
+  const { hasRole, hasAnyRole } = usePermissions();
 
   let hasRequiredRole: boolean;
 
   if (Array.isArray(role)) {
-    hasRequiredRole = any ? hasAnyRole(role) : role.every((r) => roles.includes(r));
+    hasRequiredRole = any ? hasAnyRole(role) : role.every((r) => hasRole(r));
   } else {
     hasRequiredRole = hasRole(role);
   }
@@ -244,7 +244,8 @@ interface AuthGuardProps {
  * ```
  */
 export function AuthGuard({ children, fallback = null, showLoading = true, loadingComponent = null }: AuthGuardProps) {
-  const { isAuthenticated, isLoading } = usePermission();
+  const { loading: isLoading } = usePermissions();
+  const isAuthenticated = !isLoading;
 
   if (isLoading && showLoading) {
     return <>{loadingComponent}</>;
@@ -289,7 +290,7 @@ interface AdminGuardProps {
  * ```
  */
 export function AdminGuard({ children, fallback = null, superAdminOnly = false }: AdminGuardProps) {
-  const { isAdmin, isSuperAdmin } = usePermission();
+  const { isAdmin, isSuperAdmin } = usePermissions();
 
   const hasAccess = superAdminOnly ? isSuperAdmin : isAdmin;
 

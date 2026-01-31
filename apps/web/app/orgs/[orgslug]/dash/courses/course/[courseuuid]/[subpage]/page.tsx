@@ -9,7 +9,7 @@ import { Award, GalleryVerticalEnd, Globe, Info, Loader2, Lock, UserPen } from '
 import { CourseProvider } from '../../../../../../../../components/Contexts/CourseContext';
 import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
-import { usePermission } from '@/hooks/usePermission';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Actions, ResourceTypes } from '@/types/permissions';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -28,7 +28,7 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
   const params = use(props.params);
   const router = useRouter();
   const courseuuid = `course_${params.courseuuid}`;
-  const { can, isLoading: rightsLoading } = usePermission();
+  const { can, loading: rightsLoading } = usePermissions();
 
   // Define tab configurations with their required permissions
   const tabs = [

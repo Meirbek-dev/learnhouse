@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Card, CardContent, CardFooter } from '@components/ui/card';
-import { useResourcePermissions } from '@/hooks/useResourcePermissions';
+import { usePermissions } from '@/hooks/usePermissions';
 import { ResourceActionsMenu, type ResourceAction } from '@/components/Utils/ResourceActionsMenu';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -383,7 +383,7 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, orgSlug, onDelete }) => {
   const [isPending, startTransition] = useTransition();
 
   // Use backend permission metadata
-  const { canUpdate, canDelete, isOwner, availableActions } = useResourcePermissions(course);
+  const { canUpdate, canDelete, isOwner, availableActions } = usePermissions({ resource: course });
 
   const handleDelete = () => {
     startTransition(async () => {

@@ -6,7 +6,7 @@ import { usePaymentsEnabled } from '@components/Hooks/usePaymentsEnabled';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
 import { Actions, ResourceTypes } from '@/types/permissions';
-import { usePermission } from '@/hooks/usePermission';
+import { usePermissions } from '@/hooks/usePermissions';
 import AppLink from '@/components/ui/AppLink';
 import { useTranslations } from 'next-intl';
 
@@ -14,7 +14,7 @@ const DashMobileMenu = () => {
   const session = usePlatformSession() as any;
   const t = useTranslations('SidebarMenu');
   const { isEnabled: arePaymentsEnabled } = usePaymentsEnabled();
-  const { can } = usePermission();
+  const { can } = usePermissions();
 
   // Check if user has organization management rights using permission hook
   const canManageOrganization = can(Actions.MANAGE, ResourceTypes.ORGANIZATION);

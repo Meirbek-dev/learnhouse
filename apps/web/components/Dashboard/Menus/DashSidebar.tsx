@@ -22,7 +22,7 @@ import { Actions, ResourceTypes } from '@/types/permissions';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Separator } from '@/components/ui/separator';
-import { usePermission } from '@/hooks/usePermission';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import UserAvatar from '../../Objects/UserAvatar';
 import { useEffect, useEffectEvent } from 'react';
@@ -95,7 +95,7 @@ const useNavigationItems = () => {
     path: ['features', 'payments', 'enabled'],
     defaultValue: false,
   });
-  const { can } = usePermission();
+  const { can } = usePermissions();
 
   // Check if user has organization management rights using permission hook
   const canManageOrganization = can(Actions.MANAGE, ResourceTypes.ORGANIZATION);

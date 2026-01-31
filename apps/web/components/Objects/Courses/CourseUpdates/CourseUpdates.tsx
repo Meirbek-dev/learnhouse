@@ -25,7 +25,7 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import { format, formatDistanceToNow } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '@components/ui/textarea';
-import usePermission from '@/hooks/usePermission';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
@@ -103,7 +103,7 @@ const CourseUpdates = () => {
 
 const UpdatesSection = () => {
   const [selectedView, setSelectedView] = useState('list');
-  const { isAdmin } = usePermission();
+  const { isAdmin } = usePermissions();
   const t = useTranslations('Courses.CourseUpdates');
   return (
     <div className="soft-shadow w-[700px] overflow-hidden rounded-lg bg-white/95 backdrop-blur-md">
@@ -262,7 +262,7 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
 
 const UpdatesListView = () => {
   const course = useCourse();
-  const { isAdmin } = usePermission();
+  const { isAdmin } = usePermissions();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const UPDATES_KEY = course?.courseStructure?.course_uuid

@@ -5,7 +5,7 @@ import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { usePathname, useRouter } from 'next/navigation';
-import { usePermission } from '@/hooks/usePermission';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import type { FC, ReactNode } from 'react';
@@ -30,7 +30,7 @@ const AdminAuthorization: FC<AuthorizationProps> = ({ children, authorizationMod
   const org = useOrg() as any;
   const pathname = usePathname();
   const router = useRouter();
-  const { isAdmin, isLoading } = usePermission();
+  const { isAdmin, loading: isLoading } = usePermissions();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const t = useTranslations('Security');
 

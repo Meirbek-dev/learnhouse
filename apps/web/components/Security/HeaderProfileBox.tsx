@@ -12,7 +12,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
-import { usePermission } from '@/hooks/usePermission';
+import { usePermissions } from '@/hooks/usePermissions';
 import { RoleSlugs } from '@/types/permissions';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
@@ -36,7 +36,7 @@ interface CustomRoleInfo {
 
 export const HeaderProfileBox = () => {
   const session = usePlatformSession() as any;
-  const { isAdmin, isLoading } = usePermission();
+  const { isAdmin, loading: isLoading } = usePermissions();
   const org = useOrg() as any;
   const t = useTranslations('Header');
 
