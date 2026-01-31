@@ -75,31 +75,35 @@ async def enrich_course_with_permissions(
             is_contributor = not is_owner  # Contributor but not owner
 
     # Check permissions
-    can_update = await permission_service.check_resource_permission(
-        user_id=current_user.id,
+    can_update = await permission_service.check(
+        user=current_user,
         action=Action.UPDATE,
-        resource_type=ResourceType.COURSE,
+        resource=ResourceType.COURSE,
         resource_id=course_id,
+        raise_on_deny=False,
     )
 
-    can_delete = await permission_service.check_resource_permission(
-        user_id=current_user.id,
+    can_delete = await permission_service.check(
+        user=current_user,
         action=Action.DELETE,
-        resource_type=ResourceType.COURSE,
+        resource=ResourceType.COURSE,
         resource_id=course_id,
+        raise_on_deny=False,
     )
 
-    can_publish = await permission_service.check_permission(
-        user_id=current_user.id,
+    can_publish = await permission_service.check(
+        user=current_user,
         action=Action.PUBLISH,
-        resource_type=ResourceType.COURSE,
+        resource=ResourceType.COURSE,
+        raise_on_deny=False,
     )
 
-    can_manage_contributors = await permission_service.check_resource_permission(
-        user_id=current_user.id,
+    can_manage_contributors = await permission_service.check(
+        user=current_user,
         action=Action.MANAGE,
-        resource_type=ResourceType.COURSE,
+        resource=ResourceType.COURSE,
         resource_id=course_id,
+        raise_on_deny=False,
     )
 
     # Build available actions list
@@ -230,18 +234,20 @@ async def enrich_collection_with_permissions(
     )
 
     # Check permissions
-    can_update = await permission_service.check_resource_permission(
-        user_id=current_user.id,
+    can_update = await permission_service.check(
+        user=current_user,
         action=Action.UPDATE,
-        resource_type=ResourceType.COLLECTION,
+        resource=ResourceType.COLLECTION,
         resource_id=collection_id,
+        raise_on_deny=False,
     )
 
-    can_delete = await permission_service.check_resource_permission(
-        user_id=current_user.id,
+    can_delete = await permission_service.check(
+        user=current_user,
         action=Action.DELETE,
-        resource_type=ResourceType.COLLECTION,
+        resource=ResourceType.COLLECTION,
         resource_id=collection_id,
+        raise_on_deny=False,
     )
 
     # Check ownership
@@ -330,27 +336,30 @@ async def enrich_discussion_with_permissions_typed(
         discussion_dict = discussion.model_dump()
 
     # Check UPDATE permission
-    can_update = await permission_service.check_resource_permission(
-        user_id=current_user.id,
+    can_update = await permission_service.check(
+        user=current_user,
         action=Action.UPDATE,
-        resource_type=ResourceType.DISCUSSION,
-        resource_id=discussion.id,
+        resource=ResourceType.DISCUSSION,
+        resource_id=str(discussion.id),
+        raise_on_deny=False,
     )
 
     # Check DELETE permission
-    can_delete = await permission_service.check_resource_permission(
-        user_id=current_user.id,
+    can_delete = await permission_service.check(
+        user=current_user,
         action=Action.DELETE,
-        resource_type=ResourceType.DISCUSSION,
-        resource_id=discussion.id,
+        resource=ResourceType.DISCUSSION,
+        resource_id=str(discussion.id),
+        raise_on_deny=False,
     )
 
     # Check MODERATE permission
-    can_moderate = await permission_service.check_resource_permission(
-        user_id=current_user.id,
+    can_moderate = await permission_service.check(
+        user=current_user,
         action=Action.MODERATE,
-        resource_type=ResourceType.DISCUSSION,
-        resource_id=discussion.id,
+        resource=ResourceType.DISCUSSION,
+        resource_id=str(discussion.id),
+        raise_on_deny=False,
     )
 
     # Determine ownership (discussions use user_id as creator)
@@ -438,11 +447,12 @@ async def enrich_generic_resource_with_permissions(
     # Check each permission
     permission_checks = {}
     for action in actions_to_check:
-        can_perform = await permission_service.check_resource_permission(
-            user_id=current_user.id,
+        can_perform = await permission_service.check(
+            user=current_user,
             action=action,
-            resource_type=resource_type,
-            resource_id=resource_id,
+            resource=resource_type,
+            resource_id=str(resource_id),
+            raise_on_deny=False,
         )
         permission_checks[f"can_{action.value}"] = can_perform
 

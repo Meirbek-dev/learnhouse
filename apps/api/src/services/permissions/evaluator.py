@@ -122,9 +122,7 @@ class PermissionEvaluator:
 
         # 4. Check admin/maintainer bypass
         if self._is_admin_or_maintainer(context.user_id):
-            return PermissionResult(
-                allowed=True, reason="Admin/Maintainer role bypass"
-            )
+            return PermissionResult(allowed=True, reason="Admin/Maintainer role bypass")
 
         # 5. Get user's active roles
         roles = self._get_user_active_roles(context.user_id, context.org_id)
@@ -144,7 +142,9 @@ class PermissionEvaluator:
         )
 
         if not matched_perm:
-            required_perm = f"{context.resource.value}:{context.action.value}:{context.scope.value}"
+            required_perm = (
+                f"{context.resource.value}:{context.action.value}:{context.scope.value}"
+            )
             return PermissionResult(
                 allowed=False,
                 reason=f"Permission {required_perm} not found in user's roles",
@@ -306,7 +306,9 @@ class PermissionEvaluator:
             return False
 
         roles = self._get_user_active_roles(user_id)
-        return any(role.slug in ADMIN_OR_MAINTAINER_SLUGS for role in roles if role.slug)
+        return any(
+            role.slug in ADMIN_OR_MAINTAINER_SLUGS for role in roles if role.slug
+        )
 
     def _get_user_active_roles(
         self, user_id: int, org_id: Optional[int] = None

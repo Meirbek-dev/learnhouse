@@ -492,10 +492,11 @@ async def api_final_grade_submission(
     **Required Permission**: `submission:grade:assigned` (instructors/graders only)
     """
     # Check permission to grade submissions
-    has_permission = await permission_service.check_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.GRADE,
-        resource_type=ResourceType.SUBMISSION,
+        resource=ResourceType.SUBMISSION,
+        raise_on_deny=False,
     )
 
     if not has_permission:

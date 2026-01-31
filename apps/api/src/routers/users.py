@@ -99,11 +99,12 @@ async def api_create_user_with_orgid(
     **Required Permission**: `user:create:org`
     """
     # Check permission to create users in this organization
-    has_permission = await permission_service.check_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.CREATE,
-        resource_type=ResourceType.USER,
+        resource=ResourceType.USER,
         org_id=org_id,
+        raise_on_deny=False,
     )
 
     if not has_permission:
@@ -221,10 +222,11 @@ async def api_update_user(
 
     if not is_own_profile:
         # Check permission to update other users
-        has_permission = await permission_service.check_permission(
-            user_id=current_user.id,
+        has_permission = await permission_service.check(
+            user=current_user,
             action=Action.UPDATE,
-            resource_type=ResourceType.USER,
+            resource=ResourceType.USER,
+            raise_on_deny=False,
         )
 
         if not has_permission:
@@ -363,10 +365,11 @@ async def api_delete_user(
     **Required Permission**: `user:delete:org`
     """
     # Check permission to delete users
-    has_permission = await permission_service.check_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.DELETE,
-        resource_type=ResourceType.USER,
+        resource=ResourceType.USER,
+        raise_on_deny=False,
     )
 
     if not has_permission:

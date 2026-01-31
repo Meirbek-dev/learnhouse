@@ -45,10 +45,11 @@ async def api_create_usergroup(
     **Required Permission**: `usergroup:create:org`
     """
     # Check permission to create usergroups
-    has_permission = await permission_service.check_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.CREATE,
-        resource_type=ResourceType.USERGROUP,
+        resource=ResourceType.USERGROUP,
+        raise_on_deny=False,
     )
 
     if not has_permission:
@@ -137,10 +138,11 @@ async def api_update_usergroup(
     **Required Permission**: `usergroup:update:org`
     """
     # Check permission to update usergroups
-    has_permission = await permission_service.check_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.UPDATE,
-        resource_type=ResourceType.USERGROUP,
+        resource=ResourceType.USERGROUP,
+        raise_on_deny=False,
     )
 
     if not has_permission:
@@ -170,10 +172,11 @@ async def api_delete_usergroup(
     **Required Permission**: `usergroup:delete:org`
     """
     # Check permission to delete usergroups
-    has_permission = await permission_service.check_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.DELETE,
-        resource_type=ResourceType.USERGROUP,
+        resource=ResourceType.USERGROUP,
+        raise_on_deny=False,
     )
 
     if not has_permission:
@@ -202,10 +205,11 @@ async def api_add_users_to_usergroup(
     **Required Permission**: `usergroup:manage:org`
     """
     # Check permission to manage usergroups
-    has_permission = await permission_service.check_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.MANAGE,
-        resource_type=ResourceType.USERGROUP,
+        resource=ResourceType.USERGROUP,
+        raise_on_deny=False,
     )
 
     if not has_permission:

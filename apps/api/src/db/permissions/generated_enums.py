@@ -27,7 +27,7 @@ class Action(str, Enum):
 
 class ResourceType(str, Enum):
     """Types of resources in the system."""
-    
+
     ORGANIZATION = "organization"
     COURSE = "course"
     CHAPTER = "chapter"
@@ -50,7 +50,7 @@ class ResourceType(str, Enum):
 
 class Scope(str, Enum):
     """Scope of a permission - determines what resources it applies to."""
-    
+
     ALL = "all"
     OWN = "own"
     ASSIGNED = "assigned"

@@ -14,4 +14,6 @@ def isDevModeEnabledOrRaise() -> bool:
     config = get_platform_config()
     if config.general_config.development_mode:
         return True
-    raise PermissionDenied(Action.MANAGE, ResourceType.ORGANIZATION, reason="Development mode is disabled")
+    raise PermissionDenied(
+        Action.MANAGE, ResourceType.ORGANIZATION, reason="Development mode is disabled"
+    )

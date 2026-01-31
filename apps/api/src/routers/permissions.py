@@ -17,8 +17,15 @@ from slowapi.util import get_remote_address
 from sqlmodel import Session, select
 
 from src.core.events.database import get_db_session
-from src.db.permissions.generated_enums import Action as ActionEnum, ResourceType as ResourceTypeEnum
-from src.security.permissions.exceptions import AuthenticationRequired, PermissionDenied, InsufficientRole
+from src.db.permissions.generated_enums import (
+    Action as ActionEnum,
+    ResourceType as ResourceTypeEnum,
+)
+from src.security.permissions.exceptions import (
+    AuthenticationRequired,
+    PermissionDenied,
+    InsufficientRole,
+)
 from src.db.permissions import (
     Action,
     BatchPermissionCheckRequest,
@@ -68,8 +75,7 @@ async def api_list_permissions(
     """
     if isinstance(current_user, AnonymousUser) or current_user.id == 0:
         raise AuthenticationRequired(
-            resource_type=ResourceTypeEnum.PERMISSION,
-            action=ActionEnum.READ
+            resource_type=ResourceTypeEnum.PERMISSION, action=ActionEnum.READ
         )
 
     service = PermissionService(db_session)
@@ -87,8 +93,7 @@ async def api_get_permission(
     """
     if isinstance(current_user, AnonymousUser) or current_user.id == 0:
         raise AuthenticationRequired(
-            resource_type=ResourceTypeEnum.PERMISSION,
-            action=ActionEnum.READ
+            resource_type=ResourceTypeEnum.PERMISSION, action=ActionEnum.READ
         )
 
     service = PermissionService(db_session)
@@ -119,8 +124,7 @@ async def api_list_roles(
     """
     if isinstance(current_user, AnonymousUser) or current_user.id == 0:
         raise AuthenticationRequired(
-            resource_type=ResourceTypeEnum.ROLE,
-            action=ActionEnum.READ
+            resource_type=ResourceTypeEnum.ROLE, action=ActionEnum.READ
         )
 
     service = RoleService(db_session)
@@ -151,7 +155,7 @@ async def api_create_role(
         raise PermissionDenied(
             ActionEnum.CREATE,
             ResourceTypeEnum.ROLE,
-            reason="Insufficient permissions to create role"
+            reason="Insufficient permissions to create role",
         )
 
     service = RoleService(db_session)
@@ -173,8 +177,7 @@ async def api_get_role(
     """
     if isinstance(current_user, AnonymousUser) or current_user.id == 0:
         raise AuthenticationRequired(
-            resource_type=ResourceTypeEnum.ROLE,
-            action=ActionEnum.READ
+            resource_type=ResourceTypeEnum.ROLE, action=ActionEnum.READ
         )
 
     service = RoleService(db_session)
@@ -214,7 +217,7 @@ async def api_update_role(
         raise PermissionDenied(
             ActionEnum.UPDATE,
             ResourceTypeEnum.ROLE,
-            reason="Insufficient permissions to update role"
+            reason="Insufficient permissions to update role",
         )
 
     try:
@@ -254,7 +257,7 @@ async def api_delete_role(
         raise PermissionDenied(
             ActionEnum.DELETE,
             ResourceTypeEnum.ROLE,
-            reason="Insufficient permissions to delete role"
+            reason="Insufficient permissions to delete role",
         )
 
     try:
@@ -299,7 +302,7 @@ async def api_add_permission_to_role(
         raise PermissionDenied(
             ActionEnum.UPDATE,
             ResourceTypeEnum.ROLE,
-            reason="Insufficient permissions to modify role permissions"
+            reason="Insufficient permissions to modify role permissions",
         )
 
     try:
@@ -343,7 +346,7 @@ async def api_remove_permission_from_role(
         raise PermissionDenied(
             ActionEnum.UPDATE,
             ResourceTypeEnum.ROLE,
-            reason="Insufficient permissions to modify role permissions"
+            reason="Insufficient permissions to modify role permissions",
         )
 
     if not service.remove_permission_from_role(role_id, permission_id):
@@ -375,8 +378,7 @@ async def api_get_user_roles(
     """
     if isinstance(current_user, AnonymousUser) or current_user.id == 0:
         raise AuthenticationRequired(
-            resource_type=ResourceTypeEnum.USER,
-            action=ActionEnum.READ
+            resource_type=ResourceTypeEnum.USER, action=ActionEnum.READ
         )
 
     # Users can always view their own roles
@@ -393,7 +395,7 @@ async def api_get_user_roles(
             raise PermissionDenied(
                 ActionEnum.READ,
                 ResourceTypeEnum.USER,
-                reason="Insufficient permissions to view user roles"
+                reason="Insufficient permissions to view user roles",
             )
 
     service = RoleService(db_session)
@@ -425,7 +427,7 @@ async def api_assign_role_to_user(
         raise PermissionDenied(
             ActionEnum.UPDATE,
             ResourceTypeEnum.ROLE,
-            reason="Insufficient permissions to assign role to user"
+            reason="Insufficient permissions to assign role to user",
         )
 
     service = RoleService(db_session)
@@ -472,7 +474,7 @@ async def api_remove_role_from_user(
         raise PermissionDenied(
             ActionEnum.UPDATE,
             ResourceTypeEnum.ROLE,
-            reason="Insufficient permissions to remove role from user"
+            reason="Insufficient permissions to remove role from user",
         )
 
     service = RoleService(db_session)
@@ -669,8 +671,7 @@ async def api_list_permission_templates(
     """
     if isinstance(current_user, AnonymousUser) or current_user.id == 0:
         raise AuthenticationRequired(
-            resource_type=ResourceTypeEnum.PERMISSION,
-            action=ActionEnum.READ
+            resource_type=ResourceTypeEnum.PERMISSION, action=ActionEnum.READ
         )
 
     service = RoleService(db_session)
@@ -710,7 +711,7 @@ async def api_apply_permission_template(
         raise PermissionDenied(
             ActionEnum.UPDATE,
             ResourceTypeEnum.ROLE,
-            reason="Insufficient permissions to apply template to role"
+            reason="Insufficient permissions to apply template to role",
         )
 
     try:
@@ -751,8 +752,7 @@ async def api_seed_permissions(
     # Only super-admin can seed permissions
     if isinstance(current_user, AnonymousUser) or current_user.id == 0:
         raise AuthenticationRequired(
-            resource_type=ResourceTypeEnum.PERMISSION,
-            action=ActionEnum.CREATE
+            resource_type=ResourceTypeEnum.PERMISSION, action=ActionEnum.CREATE
         )
 
     # Check for super-admin (this is a bootstrapping endpoint)
@@ -768,10 +768,7 @@ async def api_seed_permissions(
 
         existing_admins = db_session.exec(select(UserRole)).first()
         if existing_admins:
-            raise InsufficientRole(
-                required_role="SUPER_ADMIN",
-                current_role="USER"
-            )
+            raise InsufficientRole(required_role="SUPER_ADMIN", current_role="USER")
 
     # Seed permissions and roles
     permission_service = PermissionService(db_session)

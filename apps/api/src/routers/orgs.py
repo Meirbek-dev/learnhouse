@@ -161,11 +161,12 @@ async def api_remove_user_from_org(
     **Required Permission**: `user:delete:org`
     """
     # Check permission to remove users from organization
-    has_permission = await permission_service.check_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.DELETE,
-        resource_type=ResourceType.USER,
+        resource=ResourceType.USER,
         org_id=org_id,
+        raise_on_deny=False,
     )
 
     if not has_permission:
@@ -197,11 +198,12 @@ async def api_get_org_signup_mechanism(
     **Required Permission**: `organization:update:own`
     """
     # Check permission to update organization settings
-    has_permission = await permission_service.check_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.UPDATE,
-        resource_type=ResourceType.ORGANIZATION,
+        resource=ResourceType.ORGANIZATION,
         org_id=org_id,
+        raise_on_deny=False,
     )
 
     if not has_permission:
@@ -232,11 +234,12 @@ async def api_create_invite_code(
     **Required Permission**: `user:invite:org`
     """
     # Check permission to invite users
-    has_permission = await permission_service.check_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.INVITE,
-        resource_type=ResourceType.USER,
+        resource=ResourceType.USER,
         org_id=org_id,
+        raise_on_deny=False,
     )
 
     if not has_permission:

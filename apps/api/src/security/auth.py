@@ -157,6 +157,5 @@ async def get_current_user(
 async def non_public_endpoint(current_user: UserRead | AnonymousUser) -> None:
     if isinstance(current_user, AnonymousUser):
         raise AuthenticationRequired(
-            resource_type=ResourceType.API,
-            action=Action.ACCESS
+            resource_type=ResourceType.API, action=Action.ACCESS
         )

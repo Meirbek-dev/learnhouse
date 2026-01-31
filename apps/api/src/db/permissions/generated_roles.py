@@ -8,6 +8,7 @@ Generated: 2026-01-31T16:47:53.868332
 
 from src.db.permissions.generated_enums import Action, ResourceType, Scope
 
+
 # Role slug constants
 class RoleSlug:
     """Standard role slugs used across the platform."""
@@ -121,30 +122,38 @@ ROLE_PERMISSIONS: dict[str, list[str]] = {
 }
 
 # Role groups for common permission checks
-ADMIN_ROLE_SLUGS = frozenset({
-    RoleSlug.SUPER_ADMIN,
-    RoleSlug.ORG_ADMIN,
-})
+ADMIN_ROLE_SLUGS = frozenset(
+    {
+        RoleSlug.SUPER_ADMIN,
+        RoleSlug.ORG_ADMIN,
+    }
+)
 
-ADMIN_OR_MAINTAINER_SLUGS = frozenset({
-    RoleSlug.SUPER_ADMIN,
-    RoleSlug.ORG_ADMIN,
-    RoleSlug.MAINTAINER,
-})
+ADMIN_OR_MAINTAINER_SLUGS = frozenset(
+    {
+        RoleSlug.SUPER_ADMIN,
+        RoleSlug.ORG_ADMIN,
+        RoleSlug.MAINTAINER,
+    }
+)
 
-INSTRUCTOR_OR_HIGHER_SLUGS = frozenset({
-    RoleSlug.SUPER_ADMIN,
-    RoleSlug.ORG_ADMIN,
-    RoleSlug.MAINTAINER,
-    RoleSlug.INSTRUCTOR,
-})
+INSTRUCTOR_OR_HIGHER_SLUGS = frozenset(
+    {
+        RoleSlug.SUPER_ADMIN,
+        RoleSlug.ORG_ADMIN,
+        RoleSlug.MAINTAINER,
+        RoleSlug.INSTRUCTOR,
+    }
+)
 
-CONTENT_CREATOR_SLUGS = frozenset({
-    RoleSlug.SUPER_ADMIN,
-    RoleSlug.ORG_ADMIN,
-    RoleSlug.MAINTAINER,
-    RoleSlug.INSTRUCTOR,
-})
+CONTENT_CREATOR_SLUGS = frozenset(
+    {
+        RoleSlug.SUPER_ADMIN,
+        RoleSlug.ORG_ADMIN,
+        RoleSlug.MAINTAINER,
+        RoleSlug.INSTRUCTOR,
+    }
+)
 
 
 def is_admin_role(role_slug: str) -> bool:

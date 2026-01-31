@@ -614,7 +614,9 @@ async def start_exam_attempt(
 ) -> ExamAttemptRead:
     """Start a new exam attempt for the current user"""
     if isinstance(current_user, AnonymousUser):
-        raise AuthenticationRequired(resource_type=ResourceType.EXAM, action=Action.SUBMIT)
+        raise AuthenticationRequired(
+            resource_type=ResourceType.EXAM, action=Action.SUBMIT
+        )
 
     statement = select(Exam).where(Exam.exam_uuid == exam_uuid)
     exam = db_session.exec(statement).first()
@@ -638,7 +640,9 @@ async def start_exam_attempt(
 
     if not is_teacher:
         if access_mode == "NO_ACCESS":
-            raise PermissionDenied(Action.READ, ResourceType.EXAM, reason="Exam not accessible")
+            raise PermissionDenied(
+                Action.READ, ResourceType.EXAM, reason="Exam not accessible"
+            )
 
         if access_mode == "WHITELIST":
             whitelist = settings.get("whitelist_user_ids", [])
@@ -682,7 +686,9 @@ async def start_exam_attempt(
             existing_attempt_ids = db_session.exec(statement).all()
             attempt_count = len(existing_attempt_ids)
             if attempt_count >= attempt_limit:
-                raise PermissionDenied(Action.SUBMIT, ResourceType.EXAM, reason="Attempt limit reached")
+                raise PermissionDenied(
+                    Action.SUBMIT, ResourceType.EXAM, reason="Attempt limit reached"
+                )
 
     # Validate question_limit if present
     question_limit = settings.get("question_limit")
@@ -754,7 +760,9 @@ async def submit_exam_attempt(
 ) -> ExamAttemptRead:
     """Submit an exam attempt"""
     if isinstance(current_user, AnonymousUser):
-        raise AuthenticationRequired(resource_type=ResourceType.EXAM, action=Action.SUBMIT)
+        raise AuthenticationRequired(
+            resource_type=ResourceType.EXAM, action=Action.SUBMIT
+        )
 
     statement = select(ExamAttempt).where(ExamAttempt.attempt_uuid == attempt_uuid)
     attempt = db_session.exec(statement).first()
@@ -763,7 +771,9 @@ async def submit_exam_attempt(
         raise HTTPException(status_code=404, detail="Попытка не найдена")
 
     if attempt.user_id != current_user.id:
-        raise PermissionDenied(Action.SUBMIT, ResourceType.EXAM, reason="Not your exam attempt")
+        raise PermissionDenied(
+            Action.SUBMIT, ResourceType.EXAM, reason="Not your exam attempt"
+        )
 
     if attempt.status != AttemptStatusEnum.IN_PROGRESS:
         raise HTTPException(status_code=400, detail="Попытка уже отправлена")
@@ -950,7 +960,9 @@ async def record_violation(
 ) -> ExamAttemptRead:
     """Record a violation during an exam attempt"""
     if isinstance(current_user, AnonymousUser):
-        raise AuthenticationRequired(resource_type=ResourceType.EXAM, action=Action.SUBMIT)
+        raise AuthenticationRequired(
+            resource_type=ResourceType.EXAM, action=Action.SUBMIT
+        )
 
     statement = select(ExamAttempt).where(ExamAttempt.attempt_uuid == attempt_uuid)
     attempt = db_session.exec(statement).first()
@@ -959,7 +971,9 @@ async def record_violation(
         raise HTTPException(status_code=404, detail="Попытка не найдена")
 
     if attempt.user_id != current_user.id:
-        raise PermissionDenied(Action.SUBMIT, ResourceType.EXAM, reason="Not your exam attempt")
+        raise PermissionDenied(
+            Action.SUBMIT, ResourceType.EXAM, reason="Not your exam attempt"
+        )
 
     # Add violation
     violation = {
@@ -1028,7 +1042,9 @@ async def get_user_attempts(
 ) -> list[ExamAttemptRead]:
     """Get all attempts for current user"""
     if isinstance(current_user, AnonymousUser):
-        raise AuthenticationRequired(resource_type=ResourceType.EXAM, action=Action.READ)
+        raise AuthenticationRequired(
+            resource_type=ResourceType.EXAM, action=Action.READ
+        )
 
     statement = select(Exam).where(Exam.exam_uuid == exam_uuid)
     exam = db_session.exec(statement).first()
@@ -1063,7 +1079,9 @@ async def get_attempt_by_uuid(
     404 semantics for missing related records.
     """
     if isinstance(current_user, AnonymousUser):
-        raise AuthenticationRequired(resource_type=ResourceType.EXAM, action=Action.READ)
+        raise AuthenticationRequired(
+            resource_type=ResourceType.EXAM, action=Action.READ
+        )
 
     # Fetch attempt + related records in one query (use outer joins so we can
     # detect missing relations and raise appropriate 404s while keeping a

@@ -220,9 +220,7 @@ async def ai_start_activity_chat_session(
     except AIFeatureDisabledError as e:
         logger.warning(f"AI feature disabled: {e.message}")
         raise PermissionDenied(
-            Action.USE,
-            ResourceType.AI_FEATURE,
-            reason=e.message
+            Action.USE, ResourceType.AI_FEATURE, reason=e.message
         ) from e
 
     except AITimeoutError as e:
@@ -344,9 +342,7 @@ async def ai_send_activity_chat_message(
     except AIFeatureDisabledError as e:
         logger.warning(f"AI feature disabled: {e.message}")
         raise PermissionDenied(
-            Action.USE,
-            ResourceType.AI_FEATURE,
-            reason=e.message
+            Action.USE, ResourceType.AI_FEATURE, reason=e.message
         ) from e
 
     except AITimeoutError as e:

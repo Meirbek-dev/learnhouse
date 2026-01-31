@@ -114,7 +114,9 @@ class UnifiedPermissionService:
         self.role_service = RoleService(db)
         self._policies: dict[ResourceType, "BasePolicy"] = {}
 
-    def register_policy(self, resource_type: ResourceType, policy: "BasePolicy") -> None:
+    def register_policy(
+        self, resource_type: ResourceType, policy: "BasePolicy"
+    ) -> None:
         """Register a resource-specific policy."""
         self._policies[resource_type] = policy
 
@@ -197,7 +199,6 @@ class UnifiedPermissionService:
         if resource_type == ResourceType.ORGANIZATION:
             # Organizations have an 'explore' flag that marks them as publicly discoverable
             # Additionally, an organization is effectively public if it owns any public courses
-            from src.db.courses.courses import Course
             from src.db.organizations import Organization
 
             org = self.db.exec(

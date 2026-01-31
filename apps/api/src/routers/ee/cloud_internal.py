@@ -24,9 +24,7 @@ router = APIRouter()
 def check_internal_cloud_key(request: Request) -> None:
     if request.headers.get("CloudInternalKey") != os.environ.get("CLOUD_INTERNAL_KEY"):
         raise PermissionDenied(
-            Action.ACCESS,
-            ResourceType.API,
-            reason="Invalid internal cloud key"
+            Action.ACCESS, ResourceType.API, reason="Invalid internal cloud key"
         )
 
 

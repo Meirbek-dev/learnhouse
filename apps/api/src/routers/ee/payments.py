@@ -65,11 +65,12 @@ async def api_create_payments_config(
     **Required Permission**: `organization:manage:own` (admin only)
     """
     # Check permission to manage organization (payment config is critical)
-    has_permission = await permission_service.check_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.MANAGE,
-        resource_type=ResourceType.ORGANIZATION,
+        resource=ResourceType.ORGANIZATION,
         org_id=org_id,
+        raise_on_deny=False,
     )
 
     if not has_permission:
@@ -112,11 +113,12 @@ async def api_delete_payments_config(
     **Required Permission**: `organization:manage:own` (admin only)
     """
     # Check permission to manage organization
-    has_permission = await permission_service.check_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.MANAGE,
-        resource_type=ResourceType.ORGANIZATION,
+        resource=ResourceType.ORGANIZATION,
         org_id=org_id,
+        raise_on_deny=False,
     )
 
     if not has_permission:
@@ -149,11 +151,12 @@ async def api_create_payments_product(
     **Required Permission**: `organization:manage:own`
     """
     # Check permission to manage products
-    has_permission = await permission_service.check_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.MANAGE,
-        resource_type=ResourceType.ORGANIZATION,
+        resource=ResourceType.ORGANIZATION,
         org_id=org_id,
+        raise_on_deny=False,
     )
 
     if not has_permission:
@@ -211,11 +214,12 @@ async def api_update_payments_product(
     **Required Permission**: `organization:manage:own`
     """
     # Check permission to manage products
-    has_permission = await permission_service.check_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.MANAGE,
-        resource_type=ResourceType.ORGANIZATION,
+        resource=ResourceType.ORGANIZATION,
         org_id=org_id,
+        raise_on_deny=False,
     )
 
     if not has_permission:
@@ -249,11 +253,12 @@ async def api_delete_payments_product(
     **Required Permission**: `organization:manage:own`
     """
     # Check permission to manage products
-    has_permission = await permission_service.check_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.MANAGE,
-        resource_type=ResourceType.ORGANIZATION,
+        resource=ResourceType.ORGANIZATION,
         org_id=org_id,
+        raise_on_deny=False,
     )
 
     if not has_permission:

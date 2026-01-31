@@ -160,7 +160,7 @@ async def award_xp(
                 raise PermissionDenied(
                     action=Action.MANAGE,
                     resource_type=ResourceType.ORGANIZATION,
-                    reason="Admin privileges required for custom XP awards"
+                    reason="Admin privileges required for custom XP awards",
                 )
 
         # Normalize source: allow raw string or enum from request

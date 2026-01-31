@@ -67,7 +67,7 @@ class Course(CourseBase, table=True):
     )
     creator_id: int | None = Field(
         default=None,
-        sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="SET NULL"))
+        sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="SET NULL")),
     )
     course_uuid: str = ""
     creation_date: str = ""

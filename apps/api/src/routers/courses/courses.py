@@ -82,11 +82,12 @@ async def api_create_course(
     **Required Permission**: `course:create:org`
     """
     # Check permission to create courses in this organization
-    has_permission = await permission_service.check_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.CREATE,
-        resource_type=ResourceType.COURSE,
+        resource=ResourceType.COURSE,
         org_id=org_id,
+        raise_on_deny=False,
     )
 
     if not has_permission:
@@ -277,11 +278,12 @@ async def api_update_course(
     **Required Permission**: `course:update:own` or `course:update:org`
     """
     # Check permission to update this course
-    has_permission = await permission_service.check_resource_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.UPDATE,
-        resource_type=ResourceType.COURSE,
+        resource=ResourceType.COURSE,
         resource_id=course_uuid,
+        raise_on_deny=False,
     )
 
     if not has_permission:
@@ -310,11 +312,12 @@ async def api_delete_course(
     **Required Permission**: `course:delete:own` or `course:delete:org`
     """
     # Check permission to delete this course
-    has_permission = await permission_service.check_resource_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.DELETE,
-        resource_type=ResourceType.COURSE,
+        resource=ResourceType.COURSE,
         resource_id=course_uuid,
+        raise_on_deny=False,
     )
 
     if not has_permission:
@@ -434,11 +437,12 @@ async def api_update_course_contributor(
     **Required Permission**: `course:manage:own` or `course:manage:org`
     """
     # Check permission to manage course contributors
-    has_permission = await permission_service.check_resource_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.MANAGE,
-        resource_type=ResourceType.COURSE,
+        resource=ResourceType.COURSE,
         resource_id=course_uuid,
+        raise_on_deny=False,
     )
 
     if not has_permission:
@@ -473,11 +477,12 @@ async def api_add_bulk_course_contributors(
     **Required Permission**: `course:manage:own` or `course:manage:org`
     """
     # Check permission to manage course contributors
-    has_permission = await permission_service.check_resource_permission(
-        user_id=current_user.id,
+    has_permission = await permission_service.check(
+        user=current_user,
         action=Action.MANAGE,
-        resource_type=ResourceType.COURSE,
+        resource=ResourceType.COURSE,
         resource_id=course_uuid,
+        raise_on_deny=False,
     )
 
     if not has_permission:
