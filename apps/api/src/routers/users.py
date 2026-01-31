@@ -6,6 +6,7 @@ from sqlmodel import Session
 
 from src.core.events.database import get_db_session
 from src.db.courses.courses import CourseRead
+from src.db.permissions import Action, ResourceType, raise_permission_denied
 from src.db.users import (
     PublicUser,
     User,
@@ -15,11 +16,10 @@ from src.db.users import (
     UserUpdate,
     UserUpdatePassword,
 )
-from src.db.permissions import Action, ResourceType, raise_permission_denied
 from src.security.auth import get_current_user
 from src.security.rbac.dependencies import get_permission_service
-from src.services.permissions.unified_permission_service import UnifiedPermissionService
 from src.services.courses.courses import get_user_courses
+from src.services.permissions.unified_permission_service import UnifiedPermissionService
 from src.services.users.password_reset import (
     change_password_with_reset_code,
     send_reset_password_code,
@@ -86,7 +86,9 @@ async def api_create_user_with_orgid(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     user_object: UserCreate,
     org_id: int,
 ) -> UserRead:
@@ -107,7 +109,7 @@ async def api_create_user_with_orgid(
         raise_permission_denied(
             action="create",
             resource_type="user",
-            message="You don't have permission to create users in this organization"
+            message="You don't have permission to create users in this organization",
         )
 
     return await create_user_with_org_validation(
@@ -201,7 +203,9 @@ async def api_update_user(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     user_id: int,
     user_object: UserUpdate,
 ) -> UserRead:
@@ -226,7 +230,7 @@ async def api_update_user(
                 action="update",
                 resource_type="user",
                 resource_id=user_id,
-                message="You don't have permission to update other users"
+                message="You don't have permission to update other users",
             )
 
     return await update_user(request, db_session, user_id, current_user, user_object)
@@ -266,7 +270,7 @@ async def api_update_user_password(
             action="change password for",
             resource_type="user",
             resource_id=user_id,
-            message="You can only change your own password"
+            message="You can only change your own password",
         )
 
     return await update_user_password(request, db_session, current_user, user_id, form)
@@ -346,7 +350,9 @@ async def api_delete_user(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     user_id: int,
 ):
     """
@@ -374,7 +380,7 @@ async def api_delete_user(
             action="delete",
             resource_type="user",
             resource_id=user_id,
-            message="You cannot delete your own account through this endpoint"
+            message="You cannot delete your own account through this endpoint",
         )
 
     return await delete_user_by_id(request, db_session, current_user, user_id)

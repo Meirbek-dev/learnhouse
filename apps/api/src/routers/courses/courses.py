@@ -21,7 +21,6 @@ from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipSt
 from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user
 from src.security.rbac.dependencies import get_permission_service
-from src.services.permissions.unified_permission_service import UnifiedPermissionService
 from src.services.courses.contributors import (
     add_bulk_course_contributors,
     apply_course_contributor,
@@ -48,6 +47,7 @@ from src.services.courses.updates import (
     get_updates_by_course_uuid,
     update_update,
 )
+from src.services.permissions.unified_permission_service import UnifiedPermissionService
 
 router = APIRouter()
 
@@ -70,7 +70,9 @@ async def api_create_course(
     thumbnail_type: Annotated[ThumbnailType, Form()] = ThumbnailType.IMAGE,
     thumbnail: UploadFile | None = None,
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
-    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)] = None,
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ] = None,
     db_session=Depends(get_db_session),
 ) -> CourseRead:
     """
@@ -90,7 +92,7 @@ async def api_create_course(
         raise_permission_denied(
             action="create",
             resource_type="course",
-            message="You don't have permission to create courses in this organization"
+            message="You don't have permission to create courses in this organization",
         )
 
     course = CourseCreate(
@@ -266,7 +268,9 @@ async def api_update_course(
     course_uuid: str,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)] = None,
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ] = None,
 ) -> CourseRead:
     """
     Update Course by course_uuid
@@ -299,7 +303,9 @@ async def api_delete_course(
     course_uuid: str,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)] = None,
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ] = None,
 ):
     """
     Delete Course by ID
@@ -423,7 +429,9 @@ async def api_update_course_contributor(
     authorship_status: ResourceAuthorshipStatusEnum,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)] = None,
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ] = None,
 ):
     """
     Update a course contributor's role and status
@@ -462,7 +470,9 @@ async def api_add_bulk_course_contributors(
     usernames: list[str],
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)] = None,
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ] = None,
 ):
     """
     Add multiple contributors to a course by their usernames

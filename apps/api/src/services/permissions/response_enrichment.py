@@ -10,8 +10,17 @@ from typing import Any, TypeVar
 from sqlmodel import Session
 
 from src.db.collections import Collection, CollectionRead, CollectionReadWithPermissions
-from src.db.courses.activities import Activity, ActivityRead, ActivityReadWithPermissions
+from src.db.courses.activities import (
+    Activity,
+    ActivityRead,
+    ActivityReadWithPermissions,
+)
 from src.db.courses.courses import Course, CourseRead, FullCourseRead
+from src.db.courses.discussions import (
+    CourseDiscussion,
+    CourseDiscussionRead,
+    CourseDiscussionReadWithPermissions,
+)
 from src.db.courses.enhanced_responses import (
     CourseReadWithPermissions,
     FullCourseReadWithPermissions,
@@ -58,10 +67,7 @@ async def enrich_course_with_permissions(
     # Check authors list if available
     authors = course_dict.get("authors", [])
     if authors:
-        user_author = next(
-            (a for a in authors if a.get("id") == current_user.id),
-            None
-        )
+        user_author = next((a for a in authors if a.get("id") == current_user.id), None)
         if user_author:
             # User is in authors list
             role = user_author.get("role", "")
@@ -125,8 +131,7 @@ async def enrich_course_with_permissions(
     # Return appropriate model type
     if isinstance(course, FullCourseRead) or "chapters" in course_dict:
         return FullCourseReadWithPermissions(**enriched_data)
-    else:
-        return CourseReadWithPermissions(**enriched_data)
+    return CourseReadWithPermissions(**enriched_data)
 
 
 async def enrich_courses_with_permissions(
@@ -218,7 +223,11 @@ async def enrich_collection_with_permissions(
     Returns:
         Collection with permission metadata
     """
-    collection_id = collection.collection_uuid if hasattr(collection, "collection_uuid") else str(collection.id)
+    collection_id = (
+        collection.collection_uuid
+        if hasattr(collection, "collection_uuid")
+        else str(collection.id)
+    )
 
     # Check permissions
     can_update = await permission_service.check_resource_permission(
@@ -251,7 +260,11 @@ async def enrich_collection_with_permissions(
         available_actions.append("delete")
 
     # Convert to dict and add metadata
-    collection_dict = collection.model_dump() if hasattr(collection, "model_dump") else collection.dict()
+    collection_dict = (
+        collection.model_dump()
+        if hasattr(collection, "model_dump")
+        else collection.dict()
+    )
 
     return CollectionReadWithPermissions(
         **collection_dict,
@@ -289,6 +302,109 @@ async def enrich_collections_with_permissions(
         enriched_collections.append(enriched)
 
     return enriched_collections
+
+
+async def enrich_discussion_with_permissions_typed(
+    discussion: CourseDiscussionRead | CourseDiscussion,
+    current_user: PublicUser,
+    db_session: Session,
+    permission_service: UnifiedPermissionService,
+) -> CourseDiscussionReadWithPermissions:
+    """
+    Enrich a discussion response with permission metadata.
+
+    Args:
+        discussion: The discussion to enrich (Read model or DB model)
+        current_user: The authenticated user
+        db_session: Database session
+        permission_service: Unified permission service instance
+
+    Returns:
+        Discussion response with permission metadata
+    """
+    # Convert to dict to work with both CourseDiscussionRead and CourseDiscussion models
+    if isinstance(discussion, CourseDiscussionRead):
+        discussion_dict = discussion.model_dump()
+    else:
+        # SQLModel instance
+        discussion_dict = discussion.model_dump()
+
+    # Check UPDATE permission
+    can_update = await permission_service.check_resource_permission(
+        user_id=current_user.id,
+        action=Action.UPDATE,
+        resource_type=ResourceType.DISCUSSION,
+        resource_id=discussion.id,
+    )
+
+    # Check DELETE permission
+    can_delete = await permission_service.check_resource_permission(
+        user_id=current_user.id,
+        action=Action.DELETE,
+        resource_type=ResourceType.DISCUSSION,
+        resource_id=discussion.id,
+    )
+
+    # Check MODERATE permission
+    can_moderate = await permission_service.check_resource_permission(
+        user_id=current_user.id,
+        action=Action.MODERATE,
+        resource_type=ResourceType.DISCUSSION,
+        resource_id=discussion.id,
+    )
+
+    # Determine ownership (discussions use user_id as creator)
+    user_id = getattr(discussion, "user_id", None)
+    is_creator = user_id == current_user.id if user_id else False
+    is_owner = is_creator  # For discussions, creator is the owner
+
+    # Build available actions list
+    available_actions = ["read"]  # All users can read if they have access
+    if can_update:
+        available_actions.append("update")
+    if can_delete:
+        available_actions.append("delete")
+    if can_moderate:
+        available_actions.append("moderate")
+
+    # Create enriched response
+    return CourseDiscussionReadWithPermissions(
+        **discussion_dict,
+        can_update=can_update,
+        can_delete=can_delete,
+        can_moderate=can_moderate,
+        is_owner=is_owner,
+        is_creator=is_creator,
+        available_actions=available_actions,
+    )
+
+
+async def enrich_discussions_with_permissions(
+    discussions: list[CourseDiscussionRead | CourseDiscussion],
+    current_user: PublicUser,
+    db_session: Session,
+    permission_service: UnifiedPermissionService,
+) -> list[CourseDiscussionReadWithPermissions]:
+    """
+    Enrich multiple discussions with permission metadata.
+
+    Args:
+        discussions: List of discussions to enrich
+        current_user: Current authenticated user
+        db_session: Database session
+        permission_service: Permission service instance
+
+    Returns:
+        List of discussions with permission metadata
+    """
+    enriched_discussions = []
+    for discussion in discussions:
+        enriched = await enrich_discussion_with_permissions_typed(
+            discussion, current_user, db_session, permission_service
+        )
+        enriched_discussions.append(enriched)
+
+    return enriched_discussions
 
 
 async def enrich_generic_resource_with_permissions(
@@ -338,13 +454,11 @@ async def enrich_generic_resource_with_permissions(
     ]
 
     # Add permission metadata to resource
-    enriched_resource = {
+    return {
         **resource,
         **permission_checks,
         "available_actions": available_actions,
     }
-
-    return enriched_resource
 
 
 async def enrich_activity_with_permissions(
@@ -456,4 +570,3 @@ async def enrich_user_with_permissions(
     enriched["is_self"] = is_self
 
     return enriched
-

@@ -151,14 +151,12 @@ async def get_activity(
     )
 
     # Enrich with permission metadata
-    enriched_activity = await enrich_activity_with_permissions(
+    return await enrich_activity_with_permissions(
         activity=activity_read,
         current_user=current_user,
         db_session=db_session,
         permission_service=permission_service,
     )
-
-    return enriched_activity
 
 
 async def get_activityby_id(

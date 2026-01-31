@@ -9,6 +9,7 @@ from src.db.courses.discussions import (
     CourseDiscussion,
     CourseDiscussionCreate,
     CourseDiscussionRead,
+    CourseDiscussionReadWithPermissions,
     CourseDiscussionUpdate,
     DiscussionDislike,
     DiscussionLike,
@@ -20,6 +21,10 @@ from src.db.organizations import Organization
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser, User
 from src.services.permissions import get_permission_service
+from src.services.permissions.response_enrichment import (
+    enrich_discussion_with_permissions_typed,
+    enrich_discussions_with_permissions,
+)
 
 
 async def create_discussion(
@@ -119,7 +124,7 @@ async def get_discussions_by_course_uuid(
     include_replies: bool = False,
     limit: int = 50,
     offset: int = 0,
-) -> list[CourseDiscussionRead]:
+) -> list[CourseDiscussionReadWithPermissions]:
     """Get discussions for a course"""
     # Check if course exists
     statement = select(Course).where(Course.course_uuid == course_uuid)
@@ -183,7 +188,11 @@ async def get_discussions_by_course_uuid(
 
             discussion_data.replies = reply_data
 
-        result.append(discussion_data)
+        # Enrich discussion with permissions
+        enriched = await enrich_discussion_with_permissions_typed(
+            discussion_data, current_user, db_session, permission_service
+        )
+        result.append(enriched)
 
     return result
 

@@ -17,7 +17,7 @@ class Collection(CollectionBase, table=True):
     )
     creator_id: int | None = Field(
         default=None,
-        sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="SET NULL"))
+        sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="SET NULL")),
     )
     collection_uuid: str = ""
     creation_date: str = ""
@@ -46,6 +46,7 @@ class CollectionRead(CollectionBase):
 
 class CollectionReadWithPermissions(CollectionRead):
     """Collection response with permission metadata for frontend."""
+
     can_update: bool
     can_delete: bool
     is_owner: bool

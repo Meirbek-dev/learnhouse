@@ -3,7 +3,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Form, Request, UploadFile
 
 from src.core.events.database import get_db_session
-from src.db.courses.activities import ActivityCreate, ActivityRead, ActivityReadWithPermissions, ActivityUpdate
+from src.db.courses.activities import (
+    ActivityCreate,
+    ActivityRead,
+    ActivityReadWithPermissions,
+    ActivityUpdate,
+)
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
 from src.services.courses.activities.activities import (

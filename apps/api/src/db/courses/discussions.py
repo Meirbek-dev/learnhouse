@@ -139,6 +139,17 @@ class CourseDiscussionRead(SQLModelStrictBaseModel):
         return v
 
 
+class CourseDiscussionReadWithPermissions(CourseDiscussionRead):
+    """Discussion response with permission metadata."""
+
+    can_update: bool
+    can_delete: bool
+    can_moderate: bool
+    is_owner: bool
+    is_creator: bool
+    available_actions: list[str]
+
+
 class CourseDiscussionUpdate(SQLModelStrictBaseModel):
     content: str | None = None
     status: DiscussionStatusEnum | None = None

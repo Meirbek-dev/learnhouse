@@ -73,7 +73,7 @@ class Activity(ActivityBase, table=True):
     )
     creator_id: int | None = Field(
         default=None,
-        sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="SET NULL"))
+        sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="SET NULL")),
     )
     activity_uuid: str = ""
     creation_date: str = ""
@@ -111,6 +111,7 @@ class ActivityRead(ActivityBase):
 
 class ActivityReadWithPermissions(ActivityRead):
     """Activity response with permission metadata."""
+
     can_update: bool
     can_delete: bool
     is_owner: bool

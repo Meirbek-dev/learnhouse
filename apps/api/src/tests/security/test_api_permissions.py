@@ -8,11 +8,11 @@ import pytest
 from httpx import AsyncClient
 from sqlmodel import Session
 
-from src.db.users import PublicUser
-from src.db.organizations import Organization
 from src.db.courses.courses import Course
-from src.db.permissions.models import Role, Permission
+from src.db.organizations import Organization
 from src.db.permissions.enums import Action, ResourceType, Scope
+from src.db.permissions.models import Permission, Role
+from src.db.users import PublicUser
 
 
 @pytest.fixture
@@ -391,11 +391,12 @@ class TestAssignmentGradingPermissions:
         self, client: AsyncClient, org_with_users, db_session: Session
     ):
         """Test that grading requires submission:grade:assigned permission."""
-        from src.db.courses.assignments import Assignment
         from src.db.submissions import Submission
 
+        from src.db.courses.assignments import Assignment
+
         student = org_with_users["users"]["student"]
-        instructor = org_with_users["users"]["instructor"]
+        org_with_users["users"]["instructor"]
         org = org_with_users["org"]
 
         # Create course and assignment

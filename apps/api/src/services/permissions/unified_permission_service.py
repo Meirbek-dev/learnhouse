@@ -28,9 +28,9 @@ import logging
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+import sqlalchemy as sa
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
-import sqlalchemy as sa
 
 from src.db.courses.courses import Course
 from src.db.permissions.constants import (
@@ -114,9 +114,7 @@ class UnifiedPermissionService:
         self.role_service = RoleService(db)
         self._policies: dict[ResourceType, "BasePolicy"] = {}
 
-    def register_policy(
-        self, resource_type: ResourceType, policy: "BasePolicy"
-    ) -> None:
+    def register_policy(self, resource_type: ResourceType, policy: "BasePolicy") -> None:
         """Register a resource-specific policy."""
         self._policies[resource_type] = policy
 
@@ -199,8 +197,8 @@ class UnifiedPermissionService:
         if resource_type == ResourceType.ORGANIZATION:
             # Organizations have an 'explore' flag that marks them as publicly discoverable
             # Additionally, an organization is effectively public if it owns any public courses
-            from src.db.organizations import Organization
             from src.db.courses.courses import Course
+            from src.db.organizations import Organization
 
             org = self.db.exec(
                 select(Organization).where(Organization.org_uuid == resource_id)

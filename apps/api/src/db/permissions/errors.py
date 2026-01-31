@@ -11,7 +11,7 @@ from fastapi import HTTPException, status
 from pydantic import Field as PydanticField
 
 from src.db.permissions.enums import PermissionErrorCode
-from src.db.utils import PydanticStrictBaseModel
+from src.db.strict_base_model import PydanticStrictBaseModel
 
 
 class PermissionErrorDetail(PydanticStrictBaseModel):
@@ -21,35 +21,27 @@ class PermissionErrorDetail(PydanticStrictBaseModel):
     This model provides comprehensive information about why a permission
     check failed, including the required permission and suggested actions.
     """
-    code: PermissionErrorCode = PydanticField(
-        description="Machine-readable error code"
-    )
-    message: str = PydanticField(
-        description="Human-readable error message"
-    )
+
+    code: PermissionErrorCode = PydanticField(description="Machine-readable error code")
+    message: str = PydanticField(description="Human-readable error message")
     required_permission: str | None = PydanticField(
         default=None,
-        description="The permission string that is required (e.g., 'course:update:own')"
+        description="The permission string that is required (e.g., 'course:update:own')",
     )
     resource_type: str | None = PydanticField(
-        default=None,
-        description="The type of resource being accessed"
+        default=None, description="The type of resource being accessed"
     )
     resource_id: int | str | None = PydanticField(
-        default=None,
-        description="The ID of the resource being accessed"
+        default=None, description="The ID of the resource being accessed"
     )
     action: str | None = PydanticField(
-        default=None,
-        description="The action being attempted"
+        default=None, description="The action being attempted"
     )
     user_permissions: list[str] | None = PydanticField(
-        default=None,
-        description="User's current permissions (for debugging, optional)"
+        default=None, description="User's current permissions (for debugging, optional)"
     )
     suggestion: str | None = PydanticField(
-        default=None,
-        description="Suggested action to resolve the error"
+        default=None, description="Suggested action to resolve the error"
     )
 
 
@@ -72,7 +64,7 @@ class PermissionDeniedError(HTTPException):
         suggestion: str | None = None,
         include_user_permissions: bool = False,
         user_permissions: list[str] | None = None,
-    ):
+    ) -> None:
         """
         Initialize PermissionDeniedError.
 
@@ -127,7 +119,7 @@ class ResourceNotFoundError(HTTPException):
         resource_type: str,
         resource_id: int | str,
         message: str | None = None,
-    ):
+    ) -> None:
         """
         Initialize ResourceNotFoundError.
 
@@ -159,7 +151,7 @@ class AuthenticationRequiredError(HTTPException):
         self,
         message: str = "Authentication required",
         resource_type: str | None = None,
-    ):
+    ) -> None:
         """
         Initialize AuthenticationRequiredError.
 
@@ -182,6 +174,7 @@ class AuthenticationRequiredError(HTTPException):
 
 
 # Helper functions for common error scenarios
+
 
 def raise_permission_denied(
     action: str,

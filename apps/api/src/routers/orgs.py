@@ -12,11 +12,10 @@ from src.db.organizations import (
     OrganizationUser,
     PaginatedOrganizationUsers,
 )
-from src.db.users import PublicUser
 from src.db.permissions import Action, ResourceType, raise_permission_denied
+from src.db.users import PublicUser
 from src.security.auth import get_current_user
 from src.security.rbac.dependencies import get_permission_service
-from src.services.permissions.unified_permission_service import UnifiedPermissionService
 from src.services.orgs.invites import (
     create_invite_code,
     create_invite_code_with_usergroup,
@@ -49,6 +48,7 @@ from src.services.orgs.users import (
     remove_user_from_org,
     update_user_role,
 )
+from src.services.permissions.unified_permission_service import UnifiedPermissionService
 
 router = APIRouter()
 
@@ -149,7 +149,9 @@ async def api_remove_user_from_org(
     org_id: int,
     user_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -183,7 +185,9 @@ async def api_get_org_signup_mechanism(
     org_id: int,
     signup_mechanism: Literal["open", "inviteOnly"],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -216,7 +220,9 @@ async def api_create_invite_code(
     request: Request,
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """

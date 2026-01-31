@@ -7,6 +7,7 @@ from src.core.events.database import get_db_session
 from src.db.courses.discussions import (
     CourseDiscussionCreate,
     CourseDiscussionRead,
+    CourseDiscussionReadWithPermissions,
     CourseDiscussionUpdate,
     DiscussionLikeRead,
 )
@@ -40,7 +41,7 @@ async def api_get_course_discussions(
         int, Query(le=100, description="Number of discussions to return")
     ] = 50,
     offset: Annotated[int, Query(description="Number of discussions to skip")] = 0,
-) -> list[CourseDiscussionRead]:
+) -> list[CourseDiscussionReadWithPermissions]:
     """
     Get Course Discussions by course_uuid
     """

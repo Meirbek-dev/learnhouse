@@ -7,10 +7,10 @@ import pytest
 from sqlmodel import Session, create_engine
 from sqlmodel.pool import StaticPool
 
+from src.db.courses.courses import Course
+from src.db.organizations import Organization
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, InternalUser, PublicUser
-from src.db.organizations import Organization
-from src.db.courses.courses import Course
 from src.services.permissions.unified_permission_service import (
     UnifiedPermissionService,
     get_permission_service,
@@ -159,7 +159,9 @@ class TestUnifiedPermissionService:
         assert result is True
 
     @pytest.mark.asyncio
-    async def test_anonymous_user_can_read_org_with_public_course(self, db_session, anonymous_user):
+    async def test_anonymous_user_can_read_org_with_public_course(
+        self, db_session, anonymous_user
+    ):
         """If organization has a public course, anonymous users can READ the organization."""
         service = get_permission_service(db_session)
 

@@ -6,7 +6,6 @@ import RichContentRenderer from './rich-content-renderer';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { Separator } from '@/components/ui/separator';
-import usePermission from '@/hooks/usePermission';
 import DiscussionReply from './discussion-reply';
 import { Button } from '@/components/ui/button';
 import RichTextEditor from './rich-text-editor';
@@ -15,8 +14,28 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import type React from 'react';
 
+interface DiscussionPostData {
+  id: string;
+  postMessage: string;
+  username: string;
+  firstName?: string;
+  lastName?: string;
+  createDate: string;
+  updateDate?: string;
+  upvotes: number;
+  downvotes: number;
+  userVote?: 'up' | 'down';
+  replies?: any[];
+  can_update?: boolean;
+  can_delete?: boolean;
+  can_moderate?: boolean;
+  is_owner?: boolean;
+  is_creator?: boolean;
+  available_actions?: string[];
+}
+
 interface DiscussionPostProps {
-  post: any;
+  post: DiscussionPostData;
   currentUser: any;
   onVotePost: (postId: string, voteType: 'up' | 'down') => void;
   onVoteReply: (postId: string, replyId: string, voteType: 'up' | 'down') => void;
@@ -46,9 +65,13 @@ export default function DiscussionPost({
   const format = useFormatter();
   const now = useNow();
   const org = useOrg() as any;
-  const { isAdmin } = usePermission();
 
-  const isOwnPost = post.username === currentUser?.username;
+  // Use backend permission metadata
+  const canUpdate = post.can_update ?? false;
+  const canDelete = post.can_delete ?? false;
+  const canModerate = post.can_moderate ?? false;
+  const isOwner = post.is_owner ?? false;
+
   const netScore = post.upvotes - post.downvotes;
 
   const getUserDisplayName = (firstName?: string, lastName?: string) => {
@@ -82,13 +105,6 @@ export default function DiscussionPost({
     setEditingPost(false);
   };
 
-  // Helper to check if a given user is admin for the org
-  const isAuthorAdmin = (username: string) => {
-    if (!(org?.id && post?.username)) return false;
-    // If current user is admin and is the author, show badge
-    return isAdmin && username === currentUser?.username;
-  };
-
   return (
     <div className="group bg-card text-card-foreground overflow-hidden rounded-lg border shadow-sm">
       <div className="p-5">
@@ -103,12 +119,20 @@ export default function DiscussionPost({
               <div className="flex flex-wrap items-center gap-2">
                 <h4 className="font-semibold text-slate-900">{getUserDisplayName(post.firstName, post.lastName)}</h4>
                 <span className="text-sm text-slate-500">@{post.username}</span>
-                {isAuthorAdmin(post.username) && (
+                {canModerate && (
                   <Badge
                     variant="destructive"
                     className="h-auto px-1.5 py-0.5 text-xs"
                   >
-                    {t('admin')}
+                    {t('moderator')}
+                  </Badge>
+                )}
+                {isOwner && (
+                  <Badge
+                    variant="secondary"
+                    className="h-auto px-1.5 py-0.5 text-xs"
+                  >
+                    {t('author')}
                   </Badge>
                 )}
                 <div className="flex items-center gap-1 text-xs text-slate-400">
@@ -121,9 +145,9 @@ export default function DiscussionPost({
                     )}
                 </div>
               </div>
-              {(isAdmin || isOwnPost) && !editingPost && (
+              {(canDelete || canUpdate) && !editingPost && (
                 <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                  {isOwnPost && (
+                  {canUpdate && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -136,14 +160,16 @@ export default function DiscussionPost({
                       <Edit size={12} />
                     </Button>
                   )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDeletePost(post.id)}
-                    className="h-7 w-7 p-0 text-slate-500 hover:bg-red-50 hover:text-red-600"
-                  >
-                    <Trash2 size={12} />
-                  </Button>
+                  {canDelete && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onDeletePost(post.id)}
+                      className="h-7 w-7 p-0 text-slate-500 hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 size={12} />
+                    </Button>
+                  )}
                 </div>
               )}
             </div>

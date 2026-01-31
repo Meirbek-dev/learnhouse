@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
+from src.db.permissions import Action, ResourceType, raise_permission_denied
 from src.db.usergroups import UserGroupCreate, UserGroupRead, UserGroupUpdate
 from src.db.users import PublicUser, UserRead
-from src.db.permissions import Action, ResourceType, raise_permission_denied
 from src.security.auth import get_current_user
 from src.security.rbac.dependencies import get_permission_service
 from src.services.permissions.unified_permission_service import UnifiedPermissionService
@@ -33,7 +33,9 @@ async def api_create_usergroup(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     usergroup_object: UserGroupCreate,
 ) -> UserGroupRead:
     """
@@ -123,7 +125,9 @@ async def api_update_usergroup(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     usergroup_id: int,
     usergroup_object: UserGroupUpdate,
 ) -> UserGroupRead:
@@ -157,7 +161,9 @@ async def api_delete_usergroup(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     usergroup_id: int,
 ) -> str:
     """
@@ -188,7 +194,9 @@ async def api_add_users_to_usergroup(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     usergroup_id: int,
     user_ids: str,
 ) -> str:
