@@ -89,7 +89,7 @@ export function usePermission() {
     error,
     isLoading: isLoadingPermissions,
   } = useSWR<UserPermissionsResponse>(
-    shouldFetch ? `${getAPIUrl()}permissions/me/permissions${orgId ? `?org_id=${orgId}` : ''}` : null,
+    shouldFetch ? `${getAPIUrl()}me/permissions${orgId ? `?org_id=${orgId}` : ''}` : null,
     (url: string) => permissionFetcher(url, accessToken),
     {
       revalidateOnFocus: false,

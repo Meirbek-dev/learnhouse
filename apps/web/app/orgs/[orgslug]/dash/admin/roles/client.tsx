@@ -170,7 +170,7 @@ export default function RBACAdminClient() {
     if (!accessToken) return;
 
     try {
-      const res = await fetch(`${getAPIUrl()}/api/v1/roles-new/${roleId}`, {
+      const res = await fetch(`${getAPIUrl()}roles/${roleId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${accessToken}`,

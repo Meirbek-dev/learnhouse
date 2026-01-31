@@ -3,7 +3,7 @@ Database models for the RBAC permission system.
 
 This module defines the SQLModel tables for:
 - permissions: Individual permission definitions
-- roles_new: Role definitions with hierarchy support
+- roles: Role definitions with hierarchy support
 - role_permissions: Junction table for role-permission assignments
 - user_roles: User-role assignments per organization
 - resource_permissions: Resource-level permission overrides

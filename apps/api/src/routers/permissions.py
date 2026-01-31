@@ -95,7 +95,7 @@ async def api_get_permission(
 
 
 @router.get("/roles")
-async def api_list_roles_new(
+async def api_list_roles(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     org_id: int | None = None,
@@ -106,7 +106,7 @@ async def api_list_roles_new(
 
     Args:
         org_id: Optional organization ID filter
-        include_global: Whether to include global/system roles
+        include_global: Whether to include global/s!stem roles
     """
     if isinstance(current_user, AnonymousUser) or current_user.id == 0:
         raise HTTPException(status_code=401, detail="Authentication required")
@@ -116,7 +116,7 @@ async def api_list_roles_new(
 
 
 @router.post("/roles")
-async def api_create_role_new(
+async def api_create_role(
     role_data: RoleCreate,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
@@ -147,7 +147,7 @@ async def api_create_role_new(
 
 
 @router.get("/roles/{role_id}")
-async def api_get_role_new(
+async def api_get_role(
     role_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
@@ -166,7 +166,7 @@ async def api_get_role_new(
 
 
 @router.put("/roles/{role_id}")
-async def api_update_role_new(
+async def api_update_role(
     role_id: int,
     role_data: RoleUpdate,
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -202,7 +202,7 @@ async def api_update_role_new(
 
 
 @router.delete("/roles/{role_id}")
-async def api_delete_role_new(
+async def api_delete_role(
     role_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],

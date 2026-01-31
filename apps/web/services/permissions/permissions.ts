@@ -182,7 +182,7 @@ export async function listPermissions(accessToken: string, resourceType?: string
  * @returns Promise<Role[]>
  */
 export async function listRoles(accessToken: string, orgId?: number, includeGlobal = true): Promise<Role[]> {
-  const url = new URL(`${getAPIUrl()}roles-new`);
+  const url = new URL(`${getAPIUrl()}roles`);
   if (orgId !== undefined) {
     url.searchParams.set('org_id', orgId.toString());
   }
@@ -215,7 +215,7 @@ export async function getRoleWithPermissions(
   accessToken: string,
   roleId: number,
 ): Promise<Role & { permissions: Permission[] }> {
-  const response = await fetch(`${getAPIUrl()}roles-new/${roleId}`, {
+  const response = await fetch(`${getAPIUrl()}roles/${roleId}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
