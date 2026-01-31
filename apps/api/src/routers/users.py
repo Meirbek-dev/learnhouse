@@ -6,7 +6,8 @@ from sqlmodel import Session
 
 from src.core.events.database import get_db_session
 from src.db.courses.courses import CourseRead
-from src.db.permissions import Action, ResourceType, raise_permission_denied
+from src.db.permissions import Action, ResourceType
+from src.security.permissions.exceptions import PermissionDenied
 from src.db.users import (
     PublicUser,
     User,
@@ -106,10 +107,11 @@ async def api_create_user_with_orgid(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="create",
-            resource_type="user",
-            message="You don't have permission to create users in this organization",
+        raise PermissionDenied(
+            reason="You don't have permission to create users in this organization",
+            action=Action.CREATE,
+            resource_type=ResourceType.USER,
+            org_id=org_id,
         )
 
     return await create_user_with_org_validation(
@@ -226,11 +228,11 @@ async def api_update_user(
         )
 
         if not has_permission:
-            raise_permission_denied(
-                action="update",
-                resource_type="user",
+            raise PermissionDenied(
+                reason="You don't have permission to update other users",
+                action=Action.UPDATE,
+                resource_type=ResourceType.USER,
                 resource_id=user_id,
-                message="You don't have permission to update other users",
             )
 
     return await update_user(request, db_session, user_id, current_user, user_object)
@@ -266,11 +268,11 @@ async def api_update_user_password(
     """
     # Password changes restricted to own account only
     if user_id != current_user.id:
-        raise_permission_denied(
-            action="change password for",
-            resource_type="user",
+        raise PermissionDenied(
+            reason="You can only change your own password",
+            action=Action.UPDATE,
+            resource_type=ResourceType.USER,
             resource_id=user_id,
-            message="You can only change your own password",
         )
 
     return await update_user_password(request, db_session, current_user, user_id, form)
@@ -368,19 +370,20 @@ async def api_delete_user(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="delete",
-            resource_type="user",
+        raise PermissionDenied(
+            reason="You don't have permission to delete users",
+            action=Action.DELETE,
+            resource_type=ResourceType.USER,
             resource_id=user_id,
         )
 
     # Prevent self-deletion
     if user_id == current_user.id:
-        raise_permission_denied(
-            action="delete",
-            resource_type="user",
+        raise PermissionDenied(
+            reason="You cannot delete your own account through this endpoint",
+            action=Action.DELETE,
+            resource_type=ResourceType.USER,
             resource_id=user_id,
-            message="You cannot delete your own account through this endpoint",
         )
 
     return await delete_user_by_id(request, db_session, current_user, user_id)

@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
-from src.db.permissions import Action, ResourceType, raise_permission_denied
+from src.db.permissions import Action, ResourceType
 from src.db.usergroups import UserGroupCreate, UserGroupRead, UserGroupUpdate
+from src.security.permissions.exceptions import PermissionDenied
 from src.db.users import PublicUser, UserRead
 from src.security.auth import get_current_user
 from src.security.rbac.dependencies import get_permission_service
@@ -51,9 +52,8 @@ async def api_create_usergroup(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="create",
-            resource_type="usergroup",
+        raise PermissionDenied(
+            reason="You do not have permission to create user groups in this organization"
         )
 
     return await create_usergroup(request, db_session, current_user, usergroup_object)
@@ -144,10 +144,8 @@ async def api_update_usergroup(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="update",
-            resource_type="usergroup",
-            resource_id=usergroup_id,
+        raise PermissionDenied(
+            reason=f"You do not have permission to update user group {usergroup_id}"
         )
 
     return await update_usergroup_by_id(
@@ -179,10 +177,8 @@ async def api_delete_usergroup(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="delete",
-            resource_type="usergroup",
-            resource_id=usergroup_id,
+        raise PermissionDenied(
+            reason=f"You do not have permission to delete user group {usergroup_id}"
         )
 
     return await delete_usergroup_by_id(request, db_session, current_user, usergroup_id)
@@ -213,10 +209,8 @@ async def api_add_users_to_usergroup(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="manage members of",
-            resource_type="usergroup",
-            resource_id=usergroup_id,
+        raise PermissionDenied(
+            reason=f"You do not have permission to manage members of user group {usergroup_id}"
         )
 
     return await add_users_to_usergroup(

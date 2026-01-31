@@ -9,7 +9,7 @@ import { Award, GalleryVerticalEnd, Globe, Info, Loader2, Lock, UserPen } from '
 import { CourseProvider } from '../../../../../../../../components/Contexts/CourseContext';
 import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
-import { useCourseRights } from '@hooks/useCourseRights';
+import { useCourseRights } from '@/hooks/useCourseRights';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';

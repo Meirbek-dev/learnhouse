@@ -16,8 +16,9 @@ from src.db.courses.courses import (
     FullCourseRead,
     ThumbnailType,
 )
-from src.db.permissions import Action, ResourceType, raise_permission_denied
+from src.db.permissions import Action, ResourceType
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
+from src.security.permissions.exceptions import PermissionDenied
 from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user
 from src.security.rbac.dependencies import get_permission_service
@@ -89,10 +90,8 @@ async def api_create_course(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="create",
-            resource_type="course",
-            message="You don't have permission to create courses in this organization",
+        raise PermissionDenied(
+            reason="You do not have permission to create courses in this organization"
         )
 
     course = CourseCreate(
@@ -286,10 +285,8 @@ async def api_update_course(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="update",
-            resource_type="course",
-            resource_id=course_uuid,
+        raise PermissionDenied(
+            reason=f"You do not have permission to update course {course_uuid}"
         )
 
     return await update_course(
@@ -321,10 +318,8 @@ async def api_delete_course(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="delete",
-            resource_type="course",
-            resource_id=course_uuid,
+        raise PermissionDenied(
+            reason=f"You do not have permission to delete course {course_uuid}"
         )
 
     return await delete_course(request, course_uuid, current_user, db_session)
@@ -447,10 +442,8 @@ async def api_update_course_contributor(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="manage contributors for",
-            resource_type="course",
-            resource_id=course_uuid,
+        raise PermissionDenied(
+            reason=f"You do not have permission to manage contributors for course {course_uuid}"
         )
     return await update_course_contributor(
         request,
@@ -488,10 +481,8 @@ async def api_add_bulk_course_contributors(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="manage contributors for",
-            resource_type="course",
-            resource_id=course_uuid,
+        raise PermissionDenied(
+            reason=f"You do not have permission to manage contributors for course {course_uuid}"
         )
     return await add_bulk_course_contributors(
         request, course_uuid, usernames, current_user, db_session

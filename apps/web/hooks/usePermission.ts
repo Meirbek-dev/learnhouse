@@ -304,37 +304,6 @@ export function useCoursePermission(courseUuid?: string, isOwner = false) {
   };
 }
 
-/**
- * Hook for organization-specific permissions.
- *
- * @param orgId - Organization ID to check permissions for
- */
-export function useOrgPermission(orgId?: number) {
-  const { can, isAdmin, isSuperAdmin, isOrgAdmin } = usePermission();
-
-  const canRead = can(Actions.READ, ResourceTypes.ORGANIZATION, Scopes.OWN);
-
-  const canUpdate = isSuperAdmin || isOrgAdmin || can(Actions.UPDATE, ResourceTypes.ORGANIZATION, Scopes.OWN);
-
-  const canManage = isSuperAdmin || isOrgAdmin || can(Actions.MANAGE, ResourceTypes.ORGANIZATION, Scopes.OWN);
-
-  const canDelete = isSuperAdmin;
-
-  const canInvite = can(Actions.INVITE, ResourceTypes.USER, Scopes.ORG);
-
-  const canManageRoles = can(Actions.UPDATE, ResourceTypes.ROLE, Scopes.ORG);
-
-  return {
-    canRead,
-    canUpdate,
-    canManage,
-    canDelete,
-    canInvite,
-    canManageRoles,
-    isAdmin,
-  };
-}
-
 export default usePermission;
 
 /**

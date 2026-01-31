@@ -10,8 +10,9 @@ from src.db.payments.payments_products import (
     PaymentsProductRead,
     PaymentsProductUpdate,
 )
-from src.db.permissions import Action, ResourceType, raise_permission_denied
+from src.db.permissions import Action, ResourceType
 from src.db.users import PublicUser
+from src.security.permissions.exceptions import PermissionDenied
 from src.security.auth import get_current_user
 from src.security.rbac.dependencies import get_permission_service
 from src.services.payments.payments_access import check_course_paid_access
@@ -72,10 +73,12 @@ async def api_create_payments_config(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="manage payment configuration for",
-            resource_type="organization",
-            resource_id=org_id,
+        raise PermissionDenied(
+            action=Action.MANAGE,
+            resource_type=ResourceType.ORGANIZATION,
+            resource_id=str(org_id),
+            reason="Cannot manage payment configuration for this organization",
+            org_id=org_id,
         )
 
     return await init_payments_config(
@@ -117,10 +120,12 @@ async def api_delete_payments_config(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="manage payment configuration for",
-            resource_type="organization",
-            resource_id=org_id,
+        raise PermissionDenied(
+            action=Action.MANAGE,
+            resource_type=ResourceType.ORGANIZATION,
+            resource_id=str(org_id),
+            reason="Cannot delete payment configuration for this organization",
+            org_id=org_id,
         )
 
     await delete_payments_config(request, org_id, current_user, db_session)
@@ -152,10 +157,12 @@ async def api_create_payments_product(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="create products in",
-            resource_type="organization",
-            resource_id=org_id,
+        raise PermissionDenied(
+            action=Action.MANAGE,
+            resource_type=ResourceType.ORGANIZATION,
+            resource_id=str(org_id),
+            reason="Cannot create products in this organization",
+            org_id=org_id,
         )
 
     return await create_payments_product(
@@ -212,10 +219,12 @@ async def api_update_payments_product(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="update products in",
-            resource_type="organization",
-            resource_id=org_id,
+        raise PermissionDenied(
+            action=Action.MANAGE,
+            resource_type=ResourceType.ORGANIZATION,
+            resource_id=str(org_id),
+            reason="Cannot update products in this organization",
+            org_id=org_id,
         )
 
     return await update_payments_product(
@@ -248,10 +257,12 @@ async def api_delete_payments_product(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="delete products in",
-            resource_type="organization",
-            resource_id=org_id,
+        raise PermissionDenied(
+            action=Action.MANAGE,
+            resource_type=ResourceType.ORGANIZATION,
+            resource_id=str(org_id),
+            reason="Cannot delete products in this organization",
+            org_id=org_id,
         )
 
     await delete_payments_product(request, org_id, product_id, current_user, db_session)

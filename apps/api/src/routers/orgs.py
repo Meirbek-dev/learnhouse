@@ -12,9 +12,10 @@ from src.db.organizations import (
     OrganizationUser,
     PaginatedOrganizationUsers,
 )
-from src.db.permissions import Action, ResourceType, raise_permission_denied
+from src.db.permissions import Action, ResourceType
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
+from src.security.permissions.exceptions import PermissionDenied
 from src.security.rbac.dependencies import get_permission_service
 from src.services.orgs.invites import (
     create_invite_code,
@@ -168,10 +169,10 @@ async def api_remove_user_from_org(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="remove users from",
-            resource_type="organization",
-            resource_id=org_id,
+        raise PermissionDenied(
+            action=Action.DELETE,
+            resource_type=ResourceType.USER,
+            reason="User lacks permission to remove users from this organization",
         )
     return await remove_user_from_org(
         request, org_id, user_id, db_session, current_user
@@ -204,10 +205,10 @@ async def api_get_org_signup_mechanism(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="update",
-            resource_type="organization",
-            resource_id=org_id,
+        raise PermissionDenied(
+            action=Action.UPDATE,
+            resource_type=ResourceType.ORGANIZATION,
+            reason="User lacks permission to update organization settings",
         )
     return await update_org_signup_mechanism(
         request, signup_mechanism, org_id, current_user, db_session
@@ -239,10 +240,10 @@ async def api_create_invite_code(
     )
 
     if not has_permission:
-        raise_permission_denied(
-            action="invite users to",
-            resource_type="organization",
-            resource_id=org_id,
+        raise PermissionDenied(
+            action=Action.INVITE,
+            resource_type=ResourceType.USER,
+            reason="User lacks permission to invite users to this organization",
         )
     return await create_invite_code(request, org_id, current_user, db_session)
 
