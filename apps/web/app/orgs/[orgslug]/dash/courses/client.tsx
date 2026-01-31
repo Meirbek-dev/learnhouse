@@ -2,10 +2,11 @@
 
 import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
+import { PermissionGuard } from '@components/Security/PermissionGuard';
+import { Actions, ResourceTypes } from '@/types/permissions';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { usePermission } from '@/hooks/usePermission';
@@ -68,18 +69,17 @@ const CoursesHome = (params: CourseProps) => {
               <span>{t('rightsGuide')}</span>
             </Link>
           </div>
-          <AuthenticatedClientElement
-            checkMethod="roles"
-            action="create"
-            ressourceType="courses"
-            orgId={params.org_id}
+          <PermissionGuard
+            action={Actions.CREATE}
+            resource={ResourceTypes.COURSE}
+            fallback={null}
           >
             <NewCourseButton
               onClick={() => {
                 setNewCourseModal(true);
               }}
             />
-          </AuthenticatedClientElement>
+          </PermissionGuard>
         </div>
       </div>
 
@@ -103,18 +103,17 @@ const CoursesHome = (params: CourseProps) => {
               <p className="text-lg text-gray-400">{isUserAdmin ? t('createACourse') : t('noCoursesAvailable')}</p>
               {isUserAdmin ? (
                 <div className="mt-6 flex justify-center">
-                  <AuthenticatedClientElement
-                    action="create"
-                    ressourceType="courses"
-                    checkMethod="roles"
-                    orgId={params.org_id}
+                  <PermissionGuard
+                    action={Actions.CREATE}
+                    resource={ResourceTypes.COURSE}
+                    fallback={null}
                   >
                     <NewCourseButton
                       onClick={() => {
                         setNewCourseModal(true);
                       }}
                     />
-                  </AuthenticatedClientElement>
+                  </PermissionGuard>
                 </div>
               ) : null}
             </div>

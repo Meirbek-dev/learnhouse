@@ -5,7 +5,7 @@ This service provides utilities to add permission information to response models
 allowing the frontend to determine what actions are available to the user.
 """
 
-from typing import Any
+from typing import Any, TypeVar
 
 from sqlmodel import Session
 
@@ -17,6 +17,9 @@ from src.db.courses.enhanced_responses import (
 from src.db.permissions import Action, ResourceType
 from src.db.users import PublicUser
 from src.services.permissions.unified_permission_service import UnifiedPermissionService
+
+# Generic type for response models
+T = TypeVar("T")
 
 
 async def enrich_course_with_permissions(
@@ -193,3 +196,171 @@ def get_available_actions(
         actions.append("manage")
 
     return actions
+
+
+async def enrich_generic_resource_with_permissions(
+    resource: dict[str, Any],
+    resource_type: ResourceType,
+    resource_id: int | str,
+    current_user: PublicUser,
+    permission_service: UnifiedPermissionService,
+    actions_to_check: list[Action] | None = None,
+) -> dict[str, Any]:
+    """
+    Generic helper to enrich any resource with permission metadata.
+
+    This function can be used to add permission information to any resource type
+    (activities, discussions, users, organizations, etc.).
+
+    Args:
+        resource: Resource data as dict
+        resource_type: Type of resource (ACTIVITY, DISCUSSION, etc.)
+        resource_id: Resource identifier
+        current_user: The authenticated user
+        permission_service: Unified permission service instance
+        actions_to_check: List of actions to check (default: READ, UPDATE, DELETE, MANAGE)
+
+    Returns:
+        Resource dict with added permission metadata fields
+    """
+    if actions_to_check is None:
+        actions_to_check = [Action.READ, Action.UPDATE, Action.DELETE, Action.MANAGE]
+
+    # Check each permission
+    permission_checks = {}
+    for action in actions_to_check:
+        can_perform = await permission_service.check_resource_permission(
+            user_id=current_user.id,
+            action=action,
+            resource_type=resource_type,
+            resource_id=resource_id,
+        )
+        permission_checks[f"can_{action.value}"] = can_perform
+
+    # Build available actions list
+    available_actions = [
+        action.value
+        for action in actions_to_check
+        if permission_checks.get(f"can_{action.value}", False)
+    ]
+
+    # Add permission metadata to resource
+    enriched_resource = {
+        **resource,
+        **permission_checks,
+        "available_actions": available_actions,
+    }
+
+    return enriched_resource
+
+
+async def enrich_activity_with_permissions(
+    activity: dict[str, Any],
+    current_user: PublicUser,
+    permission_service: UnifiedPermissionService,
+) -> dict[str, Any]:
+    """
+    Enrich an activity with permission metadata.
+
+    Args:
+        activity: Activity data
+        current_user: The authenticated user
+        permission_service: Unified permission service instance
+
+    Returns:
+        Activity with permission metadata
+    """
+    return await enrich_generic_resource_with_permissions(
+        resource=activity,
+        resource_type=ResourceType.ACTIVITY,
+        resource_id=activity.get("id"),
+        current_user=current_user,
+        permission_service=permission_service,
+        actions_to_check=[Action.READ, Action.UPDATE, Action.DELETE, Action.GRADE],
+    )
+
+
+async def enrich_discussion_with_permissions(
+    discussion: dict[str, Any],
+    current_user: PublicUser,
+    permission_service: UnifiedPermissionService,
+) -> dict[str, Any]:
+    """
+    Enrich a discussion with permission metadata.
+
+    Args:
+        discussion: Discussion data
+        current_user: The authenticated user
+        permission_service: Unified permission service instance
+
+    Returns:
+        Discussion with permission metadata
+    """
+    return await enrich_generic_resource_with_permissions(
+        resource=discussion,
+        resource_type=ResourceType.DISCUSSION,
+        resource_id=discussion.get("id"),
+        current_user=current_user,
+        permission_service=permission_service,
+        actions_to_check=[Action.READ, Action.UPDATE, Action.DELETE, Action.MODERATE],
+    )
+
+
+async def enrich_organization_with_permissions(
+    organization: dict[str, Any],
+    current_user: PublicUser,
+    permission_service: UnifiedPermissionService,
+) -> dict[str, Any]:
+    """
+    Enrich an organization with permission metadata.
+
+    Args:
+        organization: Organization data
+        current_user: The authenticated user
+        permission_service: Unified permission service instance
+
+    Returns:
+        Organization with permission metadata
+    """
+    return await enrich_generic_resource_with_permissions(
+        resource=organization,
+        resource_type=ResourceType.ORGANIZATION,
+        resource_id=organization.get("id"),
+        current_user=current_user,
+        permission_service=permission_service,
+        actions_to_check=[Action.READ, Action.UPDATE, Action.MANAGE, Action.INVITE],
+    )
+
+
+async def enrich_user_with_permissions(
+    user: dict[str, Any],
+    current_user: PublicUser,
+    permission_service: UnifiedPermissionService,
+) -> dict[str, Any]:
+    """
+    Enrich a user profile with permission metadata.
+
+    Args:
+        user: User data
+        current_user: The authenticated user
+        permission_service: Unified permission service instance
+
+    Returns:
+        User with permission metadata
+    """
+    is_self = user.get("id") == current_user.id
+
+    enriched = await enrich_generic_resource_with_permissions(
+        resource=user,
+        resource_type=ResourceType.USER,
+        resource_id=user.get("id"),
+        current_user=current_user,
+        permission_service=permission_service,
+        actions_to_check=[Action.READ, Action.UPDATE, Action.DELETE],
+    )
+
+    # Add is_self flag
+    enriched["is_self"] = is_self
+
+    return enriched
+

@@ -1,9 +1,10 @@
 import NewCollectionButton from '@components/Objects/StyledElements/Buttons/NewCollectionButton';
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
+import { PermissionGuard } from '@components/Security/PermissionGuard';
+import { Actions, ResourceTypes } from '@/types/permissions';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import { getOrgCollections } from '@services/courses/collections';
@@ -70,16 +71,15 @@ const CollectionsPage = async (params: any) => {
             title={t('title')}
             type="col"
           />
-          <AuthenticatedClientElement
-            ressourceType="collections"
-            action="create"
-            checkMethod="roles"
-            orgId={org_id}
+          <PermissionGuard
+            action={Actions.CREATE}
+            resource={ResourceTypes.COLLECTION}
+            fallback={null}
           >
             <Link href={getUriWithOrg(orgslug, '/collections/new')}>
               <NewCollectionButton />
             </Link>
-          </AuthenticatedClientElement>
+          </PermissionGuard>
         </div>
         <div className="grid w-full grid-cols-2 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4">
           {collections.map((collection: any) => (
@@ -102,16 +102,15 @@ const CollectionsPage = async (params: any) => {
                   <ContentPlaceHolderIfUserIsNotAdmin text={t('noContentUserAdmin')} />
                 </p>
                 <div className="mt-4 flex justify-center">
-                  <AuthenticatedClientElement
-                    checkMethod="roles"
-                    ressourceType="collections"
-                    action="create"
-                    orgId={org_id}
+                  <PermissionGuard
+                    action={Actions.CREATE}
+                    resource={ResourceTypes.COLLECTION}
+                    fallback={null}
                   >
                     <Link href={getUriWithOrg(orgslug, '/collections/new')}>
                       <NewCollectionButton />
                     </Link>
-                  </AuthenticatedClientElement>
+                  </PermissionGuard>
                 </div>
               </div>
             </div>

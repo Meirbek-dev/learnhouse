@@ -30,6 +30,8 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
 import Image from 'next/image';
+import { usePermission } from '@/hooks/usePermission';
+import { Actions, ResourceTypes } from '@/types/permissions';
 
 interface NavigationItem {
   title: string;
@@ -93,12 +95,10 @@ const useNavigationItems = () => {
     path: ['features', 'payments', 'enabled'],
     defaultValue: false,
   });
+  const { can } = usePermission();
 
-  const permissions = session?.data?.permissions ?? {};
-
-  // Check if user has organization management rights
-  const canManageOrganization =
-    permissions['organizations:read:org'] === true || permissions['organizations:update:org'] === true;
+  // Check if user has organization management rights using permission hook
+  const canManageOrganization = can(Actions.MANAGE, ResourceTypes.ORGANIZATION);
 
   return [
     {

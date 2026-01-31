@@ -52,7 +52,6 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
   const isLoading = session.status === 'loading' || isOrgLoading || (isAuthenticated && isUserOrgsLoading);
   const hasError = Boolean(orgError) || (isAuthenticated && Boolean(orgsError));
 
-  const isOrgActive = org?.config?.config?.general?.enabled !== false;
   const isUserPartOfTheOrg = (() => {
     if (!isAuthenticated || !org?.id || !Array.isArray(orgs)) {
       return false;
@@ -62,7 +61,6 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
 
   if (hasError) return <ErrorUI message={t('fetchError')} />;
   if (isLoading) return <PageLoading />;
-  if (!isOrgActive) return <ErrorUI message={t('orgInactiveError')} />;
   if (!isUserPartOfTheOrg && session.status === 'authenticated' && !isAllowedPathname) {
     return (
       <div className="mx-auto flex flex-col items-center space-y-6 bg-linear-to-b from-yellow-100 to-yellow-100/5 py-10 antialiased ">

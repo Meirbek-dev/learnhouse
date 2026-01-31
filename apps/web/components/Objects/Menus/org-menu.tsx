@@ -1,6 +1,6 @@
 'use client';
 
-import AuthenticatedClientElement from '@/components/Security/AuthenticatedClientElement';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { NavigationMenu, NavigationMenuList } from '@/components/ui/navigation-menu';
 import { HeaderProfileBox } from '@/components/Security/HeaderProfileBox';
 import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
@@ -64,6 +64,8 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const t = useTranslations('Components.OrgMenu');
+  const session = usePlatformSession();
+  const isAuthenticated = session.status === 'authenticated';
 
   // Use useSyncExternalStore for focus mode from localStorage
   const isOnActivityPage = pathname?.includes('/activity/') ?? false;
@@ -218,13 +220,13 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                     type="collections"
                     orgslug={orgslug}
                   />
-                  <AuthenticatedClientElement checkMethod="authentication">
+                  {isAuthenticated && (
                     <NavigationLinkItem
                       href="/trail"
                       type="trail"
                       orgslug={orgslug}
                     />
-                  </AuthenticatedClientElement>
+                  )}
                 </NavigationMenuList>
               </NavigationMenu>
             </nav>
@@ -358,7 +360,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                           orgslug={orgslug}
                         />
                       </div>
-                      <AuthenticatedClientElement checkMethod="authentication">
+                      {isAuthenticated && (
                         <div
                           onClick={() => {
                             setIsMenuOpen(false);
@@ -370,7 +372,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                             orgslug={orgslug}
                           />
                         </div>
-                      </AuthenticatedClientElement>
+                      )}
                     </div>
                   </nav>
                 </div>

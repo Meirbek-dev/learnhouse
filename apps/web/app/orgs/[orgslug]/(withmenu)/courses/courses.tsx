@@ -3,10 +3,11 @@
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
 import CourseGridClient from '@components/Landings/CourseGridClient';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { PermissionGuard } from '@components/Security/PermissionGuard';
+import { Actions, ResourceTypes } from '@/types/permissions';
 import { usePermission } from '@/hooks/usePermission';
 
 import { useSearchParams } from 'next/navigation';
@@ -61,18 +62,17 @@ const Courses = (props: CourseProps) => {
 
   // Single trigger for opening the modal
   const newCourseButtonTrigger = (
-    <AuthenticatedClientElement
-      checkMethod="roles"
-      action="create"
-      ressourceType="courses"
-      orgId={org_id}
+    <PermissionGuard
+      action={Actions.CREATE}
+      resource={ResourceTypes.COURSE}
+      fallback={null}
     >
       <NewCourseButton
         onClick={() => {
           setNewCourseModal(true);
         }}
       />
-    </AuthenticatedClientElement>
+    </PermissionGuard>
   );
 
   const hasCourses = courses.length > 0 || totalCourses > 0;

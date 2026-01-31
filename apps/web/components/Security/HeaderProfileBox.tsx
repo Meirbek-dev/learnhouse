@@ -15,6 +15,7 @@ import UserAvatar from '@components/Objects/UserAvatar';
 import { usePermission } from '@/hooks/usePermission';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
+import { RoleSlugs } from '@/types/permissions';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { signOut } from 'next-auth/react';
@@ -48,12 +49,13 @@ export const HeaderProfileBox = () => {
     const orgRoles = userRoles.filter((role: any) => role.org.id === org?.id);
 
     if (orgRoles.length > 0) {
-      // Sort by role priority (admin > maintainer > instructor > user)
+      // Sort by role priority using slug-based comparison
       const sortedRoles = orgRoles.toSorted((a: any, b: any) => {
         const getRolePriority = (role: any) => {
-          if (role.role.role_uuid === 'role_global_admin') return 4;
-          if (role.role.role_uuid === 'role_global_maintainer') return 3;
-          if (role.role.role_uuid === 'role_global_instructor') return 2;
+          const slug = role.role?.slug || '';
+          if (slug === RoleSlugs.SUPER_ADMIN || slug === RoleSlugs.ORG_ADMIN) return 4;
+          if (slug === RoleSlugs.MAINTAINER) return 3;
+          if (slug === RoleSlugs.INSTRUCTOR) return 2;
           return 1;
         };
         return getRolePriority(b) - getRolePriority(a);
@@ -62,30 +64,38 @@ export const HeaderProfileBox = () => {
       const highestRole = sortedRoles[0];
 
       if (highestRole) {
-        // Define role configurations based on actual database roles
+        // Define role configurations based on slug
+        const roleSlug = highestRole.role?.slug || '';
         const roleConfigs: Record<string, RoleInfo> = {
-          role_global_admin: {
+          [RoleSlugs.SUPER_ADMIN]: {
             name: t('profile.roles.admin.name'),
             icon: <Crown size={12} />,
             bgColor: 'bg-purple-600',
             textColor: 'text-white',
             description: t('profile.roles.admin.description'),
           },
-          role_global_maintainer: {
+          [RoleSlugs.ORG_ADMIN]: {
+            name: t('profile.roles.admin.name'),
+            icon: <Crown size={12} />,
+            bgColor: 'bg-purple-600',
+            textColor: 'text-white',
+            description: t('profile.roles.admin.description'),
+          },
+          [RoleSlugs.MAINTAINER]: {
             name: t('profile.roles.maintainer.name'),
             icon: <Shield size={12} />,
             bgColor: 'bg-blue-600',
             textColor: 'text-white',
             description: t('profile.roles.maintainer.description'),
           },
-          role_global_instructor: {
+          [RoleSlugs.INSTRUCTOR]: {
             name: t('profile.roles.instructor.name'),
             icon: <Users size={12} />,
             bgColor: 'bg-green-600',
             textColor: 'text-white',
             description: t('profile.roles.instructor.description'),
           },
-          role_global_user: {
+          [RoleSlugs.USER]: {
             name: t('profile.roles.user.name'),
             icon: <User size={12} />,
             bgColor: 'bg-gray-500',
@@ -94,17 +104,7 @@ export const HeaderProfileBox = () => {
           },
         };
 
-        // Determine role based on role_uuid (avoid using numeric IDs or missing fields)
-        let roleKey = 'role_global_user'; // default
-        const highestRoleUuid = highestRole.role?.role_uuid ?? '';
-        if (highestRoleUuid.startsWith('role_global_')) {
-          roleKey = highestRoleUuid;
-        } else if (highestRoleUuid.startsWith('role_org_')) {
-          // leave as-is or map to org-level role if needed
-          roleKey = highestRoleUuid;
-        }
-
-        userRoleInfo = roleConfigs[roleKey] || roleConfigs.role_global_user || null;
+        userRoleInfo = roleConfigs[roleSlug] || roleConfigs[RoleSlugs.USER] || null;
       }
     }
   }
@@ -113,10 +113,16 @@ export const HeaderProfileBox = () => {
     userRoles && userRoles.length > 0
       ? (userRoles.filter((role: any) => role.org.id === org?.id) ?? [])
           .filter((role: any) => {
-            const roleUuid = role.role.role_uuid ?? '';
-            const isSystemRole = roleUuid.startsWith('role_global_') || roleUuid.startsWith('role_org_');
-
-            return !isSystemRole;
+            const slug = role.role?.slug || '';
+            // Filter out system roles based on slug
+            const systemSlugs = [
+              RoleSlugs.SUPER_ADMIN,
+              RoleSlugs.ORG_ADMIN,
+              RoleSlugs.MAINTAINER,
+              RoleSlugs.INSTRUCTOR,
+              RoleSlugs.USER,
+            ];
+            return !systemSlugs.includes(slug);
           })
           .map((role: any) => ({
             name: ((role.role as any).name as string) || t('profile.customRole'),

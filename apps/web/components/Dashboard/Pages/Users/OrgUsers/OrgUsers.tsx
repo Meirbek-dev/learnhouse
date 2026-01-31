@@ -37,6 +37,7 @@ import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
+import { RoleSlugs } from '@/types/permissions';
 
 const USERS_PER_PAGE = 20;
 
@@ -106,21 +107,19 @@ const OrgUsers = () => {
     if (!roleObj) return 0;
     // roleObj may be the role itself or wrapped under `role`
     const role = roleObj.role || roleObj;
-    const { role_uuid } = role;
-    const { id } = role;
-    const name = role.name || '';
+    const slug = role.slug || '';
 
-    if (
-      role_uuid === 'role_global_admin' ||
-      id === 1 ||
-      name === 'Админ' ||
-      name === 'Администратор' ||
-      name === 'Admin'
-    )
-      return 4;
-    if (role_uuid === 'role_global_maintainer' || id === 2 || name === 'Maintainer' || name === 'Мейнтейнер') return 3;
-    if (role_uuid === 'role_global_instructor' || id === 3 || name === 'Instructor' || name === 'Инструктор') return 2;
-    return 1;
+    // Use slug-based priority instead of hardcoded names
+    const priorities: Record<string, number> = {
+      [RoleSlugs.SUPER_ADMIN]: 1000,
+      [RoleSlugs.ORG_ADMIN]: 900,
+      [RoleSlugs.MAINTAINER]: 800,
+      [RoleSlugs.INSTRUCTOR]: 700,
+      [RoleSlugs.MODERATOR]: 500,
+      [RoleSlugs.USER]: 100,
+    };
+
+    return priorities[slug] ?? 0;
   };
 
   const currentUserPriority = (() => {
@@ -256,12 +255,13 @@ const OrgUsers = () => {
                               session?.data?.user?.user_uuid === user.user.user_uuid ||
                               session?.data?.user?.id === user.user.id;
                             const targetPriority = getRolePriority(user.role);
+                            const isTargetSuperAdmin = user.role.slug === RoleSlugs.SUPER_ADMIN;
                             const canManage =
-                              !isSelf && currentUserPriority >= targetPriority && user.role.name !== 'Админ';
+                              !isSelf && currentUserPriority >= targetPriority && !isTargetSuperAdmin;
 
                             if (!canManage) {
                               // Determine specific disabled reason for clearer messaging
-                              if (user.role.name === 'Админ')
+                              if (isTargetSuperAdmin)
                                 return <div className="text-neutral-500">{t('noActionsForAdministrators')}</div>;
                               if (currentUserPriority <= targetPriority)
                                 return <div className="text-neutral-500">{t('cannotManageHigherRole')}</div>;

@@ -12,7 +12,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import PermissionGuard from '@components/Security/PermissionGuard';
+import { Actions, ResourceTypes } from '@/types/permissions';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { deleteCollection } from '@services/courses/collections';
@@ -103,11 +104,10 @@ const CollectionAdminEditsArea = (props: any) => {
   }
 
   return (
-    <AuthenticatedClientElement
-      action="delete"
-      ressourceType="collections"
-      orgId={props.org_id}
-      checkMethod="roles"
+    <PermissionGuard
+      action={Actions.DELETE}
+      resource={ResourceTypes.COLLECTION}
+      fallback={null}
     >
       <div className="z-20 px-2">
         <AlertDialog
@@ -151,7 +151,7 @@ const CollectionAdminEditsArea = (props: any) => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </AuthenticatedClientElement>
+    </PermissionGuard>
   );
 };
 

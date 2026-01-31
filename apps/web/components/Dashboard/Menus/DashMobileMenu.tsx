@@ -7,17 +7,17 @@ import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
 import AppLink from '@/components/ui/AppLink';
 import { useTranslations } from 'next-intl';
+import { usePermission } from '@/hooks/usePermission';
+import { Actions, ResourceTypes } from '@/types/permissions';
 
 const DashMobileMenu = () => {
   const session = usePlatformSession() as any;
   const t = useTranslations('SidebarMenu');
   const { isEnabled: arePaymentsEnabled } = usePaymentsEnabled();
+  const { can } = usePermission();
 
-  const permissions = session?.data?.permissions ?? {};
-
-  // Check if user has organization management rights
-  const canManageOrganization =
-    permissions['organizations:read:org'] === true || permissions['organizations:update:org'] === true;
+  // Check if user has organization management rights using permission hook
+  const canManageOrganization = can(Actions.MANAGE, ResourceTypes.ORGANIZATION);
 
   return (
     <div

@@ -19,7 +19,8 @@ declare global {
     refresh_token: string;
     /** Epoch ms when the access token expires */
     expiry?: number;
-    [key: string]: any;
+    /** Additional token metadata */
+    [key: string]: string | number | undefined;
   }
 
   interface AuthUser {
@@ -29,7 +30,10 @@ declare global {
     first_name?: string;
     middle_name?: string;
     last_name?: string;
-    [key: string]: any;
+    avatar_image?: string;
+    bio?: string;
+    /** Additional user properties */
+    [key: string]: string | number | boolean | undefined;
   }
 
   interface UserWithTokens extends AuthUser {

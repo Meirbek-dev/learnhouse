@@ -41,7 +41,6 @@ import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/cour
 import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar';
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
 import { Suspense, lazy, useEffect, useRef, useState, useTransition } from 'react';
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
@@ -266,6 +265,7 @@ const ActivityActions = ({
   const org = useOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
+  const isAuthenticated = session.status === 'authenticated';
 
   // Add SWR for trail data
   const TRAIL_KEY = org?.id ? getTrailSwrKey(org?.id) : null;
@@ -277,8 +277,9 @@ const ActivityActions = ({
     <div className="flex items-center space-x-2">
       {activity &&
       (activity.published === true || contributorStatus === 'ACTIVE') &&
-      (activity.content.paid_access !== false || contributorStatus === 'ACTIVE') ? (
-        <AuthenticatedClientElement checkMethod="authentication">
+      (activity.content.paid_access !== false || contributorStatus === 'ACTIVE') &&
+      isAuthenticated ? (
+        <>
           {activity.activity_type !== 'TYPE_ASSIGNMENT' && (
             <MarkStatus
               activity={activity}
@@ -308,7 +309,7 @@ const ActivityActions = ({
               orgslug={orgslug}
             />
           ) : null}
-        </AuthenticatedClientElement>
+        </>
       ) : null}
     </div>
   );
@@ -331,6 +332,7 @@ const ActivityClient = (props: ActivityClientProps) => {
   const org = useOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
+  const isAuthenticated = session.status === 'authenticated';
   const [assignment, setAssignment] = useState(null) as any;
   const [isFocusMode, setIsFocusMode] = useState(() => {
     if (typeof globalThis.window !== 'undefined') {
@@ -992,8 +994,9 @@ const ActivityClient = (props: ActivityClientProps) => {
                         <div className="flex items-center space-x-2">
                           {activity &&
                           (activity.published === true || contributorStatus === 'ACTIVE') &&
-                          (activity.content.paid_access !== false || contributorStatus === 'ACTIVE') ? (
-                            <AuthenticatedClientElement checkMethod="authentication">
+                          (activity.content.paid_access !== false || contributorStatus === 'ACTIVE') &&
+                          isAuthenticated ? (
+                            <>
                               {activity.activity_type !== 'TYPE_ASSIGNMENT' && (
                                 <>
                                   <AIActivityAsk activity={activity} />
@@ -1019,7 +1022,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                                   )}
                                 </>
                               )}
-                            </AuthenticatedClientElement>
+                            </>
                           ) : null}
                         </div>
                       </div>

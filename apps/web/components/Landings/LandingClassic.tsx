@@ -2,7 +2,8 @@ import { LoginBonusHandler } from '@/app/orgs/[orgslug]/(withmenu)/_components/L
 import NewCollectionButton from '@components/Objects/StyledElements/Buttons/NewCollectionButton';
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import PermissionGuard from '@components/Security/PermissionGuard';
+import { Actions, ResourceTypes } from '@/types/permissions';
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
@@ -173,12 +174,7 @@ const LandingClassic = async ({
                 title={t('Collections.title')}
                 type="col"
                 action={
-                  <AuthenticatedClientElement
-                    checkMethod="roles"
-                    ressourceType="collections"
-                    action="create"
-                    orgId={org_id}
-                  >
+                  <PermissionGuard action={Actions.CREATE} resource={ResourceTypes.COLLECTION}>
                     <Link
                       prefetch={false}
                       href={getUriWithOrg(orgslug, '/collections/new')}
@@ -186,7 +182,7 @@ const LandingClassic = async ({
                     >
                       <NewCollectionButton />
                     </Link>
-                  </AuthenticatedClientElement>
+                  </PermissionGuard>
                 }
               />
 

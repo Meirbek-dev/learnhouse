@@ -1,9 +1,10 @@
 'use client';
 
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { PermissionGuard } from '@components/Security/PermissionGuard';
+import { Actions, ResourceTypes } from '@/types/permissions';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
@@ -21,11 +22,10 @@ export default function CreateCourseTrigger({ orgslug, org_id }: CreateCourseTri
   }
 
   return (
-    <AuthenticatedClientElement
-      ressourceType="courses"
-      action="create"
-      checkMethod="roles"
-      orgId={org_id}
+    <PermissionGuard
+      action={Actions.CREATE}
+      resource={ResourceTypes.COURSE}
+      fallback={null}
     >
       <div>
         <NewCourseButton onClick={() => setNewCourseModal(true)} />
@@ -44,6 +44,6 @@ export default function CreateCourseTrigger({ orgslug, org_id }: CreateCourseTri
           dialogDescription={t('createCourseDescription')}
         />
       </div>
-    </AuthenticatedClientElement>
+    </PermissionGuard>
   );
 }

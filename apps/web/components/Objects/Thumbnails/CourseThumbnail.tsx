@@ -20,7 +20,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import PermissionGuard from '@components/Security/PermissionGuard';
+import { Actions, ResourceTypes } from '@/types/permissions';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Card, CardContent, CardFooter } from '@components/ui/card';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -355,12 +356,7 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, orgSlug, onDelete }) => {
   const courseIdClean = removeCoursePrefix(course.course_uuid);
 
   return (
-    <AuthenticatedClientElement
-      action="update"
-      ressourceType="courses"
-      checkMethod="roles"
-      orgId={course.org_id}
-    >
+    <PermissionGuard action={Actions.UPDATE} resource={ResourceTypes.COURSE}>
       <div className="absolute top-2 right-2 z-20 opacity-0 transition-all duration-200 group-hover:opacity-100">
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -454,7 +450,7 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, orgSlug, onDelete }) => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </AuthenticatedClientElement>
+    </PermissionGuard>
   );
 };
 

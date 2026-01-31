@@ -2,15 +2,13 @@
 
 import ErrorUI from '@components/Objects/StyledElements/Error/Error';
 import { OrgProvider } from '@components/Contexts/OrgContext';
-import { useSearchParams } from 'next/navigation';
 import { Spinner } from '@components/ui/spinner';
 import { useTranslations } from 'next-intl';
 import { Suspense } from 'react';
 
 function AuthContent({ children }: { children: React.ReactNode }) {
   const t = useTranslations('Auth.Layout');
-  const searchParams = useSearchParams();
-  const orgslug = searchParams.get('orgslug');
+  const orgslug = 'openu';
 
   if (orgslug) {
     return <OrgProvider orgslug={orgslug}>{children}</OrgProvider>;

@@ -1,10 +1,13 @@
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { BookCopy, Signpost, SquareLibrary } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
 import { getTranslations } from 'next-intl/server';
 import Link from '@components/ui/AppLink';
+import { auth } from '@/auth';
 
-const MenuLinks = (props: { orgslug: string }) => {
+const MenuLinks = async (props: { orgslug: string }) => {
+  const session = await auth();
+  const isAuthenticated = !!session?.user;
+
   return (
     <div className="pl-1">
       <ul className="flex space-x-5">
@@ -18,13 +21,13 @@ const MenuLinks = (props: { orgslug: string }) => {
           type="collections"
           orgslug={props.orgslug}
         />
-        <AuthenticatedClientElement checkMethod="authentication">
+        {isAuthenticated && (
           <LinkItem
             link="/trail"
             type="trail"
             orgslug={props.orgslug}
           />
-        </AuthenticatedClientElement>
+        )}
       </ul>
     </div>
   );
