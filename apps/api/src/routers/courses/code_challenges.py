@@ -46,8 +46,9 @@ from src.db.courses.code_challenges import (
 )
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
-from src.db.permissions.enums import Action, ResourceType
+from src.db.permissions.generated_enums import Action, ResourceType
 from src.db.strict_base_model import PydanticStrictBaseModel
+from src.security.permissions.exceptions import AuthenticationRequired, PermissionDenied
 from src.db.users import AnonymousUser, PublicUser, User
 from src.security.auth import get_current_user
 from src.services.code_challenges.grading import (
@@ -118,7 +119,7 @@ async def check_challenge_access(
 ) -> Course:
     """Check user access to the challenge"""
     if isinstance(user, AnonymousUser):
-        raise HTTPException(status_code=401, detail="Authentication required")
+        raise AuthenticationRequired()
 
     course = db_session.get(Course, activity.course_id)
     if not course:
@@ -137,7 +138,11 @@ async def check_challenge_access(
         )
     except HTTPException:
         if require_instructor:
-            raise HTTPException(status_code=403, detail="Instructor access required")
+            raise PermissionDenied(
+                action=Action.UPDATE,
+                resource_type=ResourceType.CODE_CHALLENGE,
+                resource_id=str(activity.activity_uuid),
+            )
         raise
 
     return course
@@ -603,7 +608,11 @@ async def run_custom_test(
     settings = get_challenge_settings(activity)
 
     if not settings.allow_custom_input:
-        raise HTTPException(status_code=403, detail="Custom input testing is disabled")
+        raise PermissionDenied(
+            action=Action.EXECUTE,
+            resource_type=ResourceType.CODE_CHALLENGE,
+            resource_id=str(activity.activity_uuid),
+        )
 
     # Decode inputs
     try:
@@ -700,7 +709,11 @@ async def get_submission_detail(
     )
 
     if submission.user_id != current_user.id and not is_instructor:
-        raise HTTPException(status_code=403, detail="Access denied")
+        raise PermissionDenied(
+            action=Action.READ,
+            resource_type=ResourceType.CODE_CHALLENGE,
+            resource_id=str(submission.submission_uuid),
+        )
 
     return CodeSubmissionDetail.model_validate(submission)
 
@@ -725,7 +738,11 @@ async def get_student_analytics(
     )
 
     if user_id != current_user.id and not is_instructor:
-        raise HTTPException(status_code=403, detail="Access denied")
+        raise PermissionDenied(
+            action=Action.READ,
+            resource_type=ResourceType.CODE_CHALLENGE,
+            resource_id=str(activity.activity_uuid),
+        )
 
     # Get submissions
     statement = select(CodeSubmission).where(

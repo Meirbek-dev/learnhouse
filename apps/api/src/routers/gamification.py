@@ -18,6 +18,9 @@ from sqlmodel import Session, and_, select
 
 from src.core.events.database import get_db_session
 from src.core.timezone import now as tz_now
+from src.db.permissions.generated_enums import Action, ResourceType
+from src.security.permissions.checker import PermissionChecker
+from src.security.permissions.exceptions import PermissionDenied
 from src.db.gamification import (
     DashboardRead,
     GamificationProfile,
@@ -42,7 +45,6 @@ from src.services.gamification.service import (
     DailyLimitExceededError,
     GamificationError,
 )
-from src.services.security.security import is_user_admin_of_org
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -142,11 +144,20 @@ async def award_xp(
                     status_code=400,
                     detail="custom_amount allowed only with ADMIN_AWARD source",
                 )
-            is_admin = is_user_admin_of_org(user.id, org_id, db)
-            if not is_admin:
-                raise HTTPException(
-                    status_code=403,
-                    detail="Admin privileges required for custom awards",
+            # Check if user has admin permission for the organization
+            permission_checker = PermissionChecker(db)
+            has_permission = await permission_checker.check(
+                user_id=user.id,
+                org_id=org_id,
+                action=Action.MANAGE,
+                resource_type=ResourceType.GAMIFICATION,
+                resource_id=None
+            )
+            if not has_permission:
+                raise PermissionDenied(
+                    Action.MANAGE,
+                    ResourceType.GAMIFICATION,
+                    reason="Admin privileges required for custom XP awards"
                 )
 
         # Normalize source: allow raw string or enum from request

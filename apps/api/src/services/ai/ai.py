@@ -6,6 +6,8 @@ from fastapi import Depends, HTTPException, Request
 from sqlmodel import Session, select
 
 from src.core.events.database import get_db_session
+from src.db.permissions.generated_enums import Action, ResourceType
+from src.security.permissions.exceptions import PermissionDenied
 from src.db.courses.activities import Activity, ActivityRead
 from src.db.courses.courses import Course, CourseRead
 from src.db.organization_config import OrganizationConfig
@@ -217,7 +219,11 @@ async def ai_start_activity_chat_session(
 
     except AIFeatureDisabledError as e:
         logger.warning(f"AI feature disabled: {e.message}")
-        raise HTTPException(status_code=403, detail=e.message) from e
+        raise PermissionDenied(
+            Action.USE,
+            ResourceType.AI_FEATURE,
+            reason=e.message
+        ) from e
 
     except AITimeoutError as e:
         logger.warning(f"AI timeout: {e.message}")
@@ -337,7 +343,11 @@ async def ai_send_activity_chat_message(
 
     except AIFeatureDisabledError as e:
         logger.warning(f"AI feature disabled: {e.message}")
-        raise HTTPException(status_code=403, detail=e.message) from e
+        raise PermissionDenied(
+            Action.USE,
+            ResourceType.AI_FEATURE,
+            reason=e.message
+        ) from e
 
     except AITimeoutError as e:
         logger.warning(f"AI timeout: {e.message}")

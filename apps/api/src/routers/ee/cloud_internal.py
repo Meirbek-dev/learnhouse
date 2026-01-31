@@ -5,6 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
+from src.db.permissions.generated_enums import Action, ResourceType
+from src.security.permissions.exceptions import PermissionDenied
 from src.db.organization_config import OrganizationConfigBase
 from src.services.explore.explore import (
     get_course_for_explore,
@@ -21,7 +23,11 @@ router = APIRouter()
 # Utils
 def check_internal_cloud_key(request: Request) -> None:
     if request.headers.get("CloudInternalKey") != os.environ.get("CLOUD_INTERNAL_KEY"):
-        raise HTTPException(status_code=403, detail="Unauthorized")
+        raise PermissionDenied(
+            Action.ACCESS,
+            ResourceType.API,
+            reason="Invalid internal cloud key"
+        )
 
 
 @router.get("/explore/orgs")

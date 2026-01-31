@@ -3,64 +3,23 @@
  *
  * This module provides TypeScript types that mirror the backend permission system,
  * enabling type-safe permission checks in the frontend.
+ *
+ * NOTE: Actions, ResourceTypes, Scopes, and RoleSlugs are now imported from
+ * generated_permissions.ts which is auto-generated from the YAML schema.
+ * This file contains only the interfaces and helper functions.
  */
 
-/**
- * Actions that can be performed on resources.
- */
-export const Actions = {
-  CREATE: 'create',
-  READ: 'read',
-  UPDATE: 'update',
-  DELETE: 'delete',
-  MANAGE: 'manage',
-  MODERATE: 'moderate',
-  EXPORT: 'export',
-  INVITE: 'invite',
-  GRADE: 'grade',
-  SUBMIT: 'submit',
-  ENROLL: 'enroll',
-} as const;
+import {
+  Actions,
+  ResourceTypes,
+  Scopes,
+  RoleSlugs,
+} from './generated_permissions';
+import type { Action, ResourceType, Scope, RoleSlug } from './generated_permissions';
 
-export type Action = (typeof Actions)[keyof typeof Actions];
-
-/**
- * Types of resources in the system.
- */
-export const ResourceTypes = {
-  ORGANIZATION: 'organization',
-  COURSE: 'course',
-  CHAPTER: 'chapter',
-  ACTIVITY: 'activity',
-  ASSIGNMENT: 'assignment',
-  QUIZ: 'quiz',
-  USER: 'user',
-  USERGROUP: 'usergroup',
-  COLLECTION: 'collection',
-  ROLE: 'role',
-  CERTIFICATE: 'certificate',
-  DISCUSSION: 'discussion',
-  FILE: 'file',
-  ANALYTICS: 'analytics',
-  TRAIL: 'trail',
-  EXAM: 'exam',
-  PAYMENT: 'payment',
-  API_TOKEN: 'api_token',
-} as const;
-
-export type ResourceType = (typeof ResourceTypes)[keyof typeof ResourceTypes];
-
-/**
- * Scope of a permission.
- */
-export const Scopes = {
-  ALL: 'all',
-  OWN: 'own',
-  ASSIGNED: 'assigned',
-  ORG: 'org',
-} as const;
-
-export type Scope = (typeof Scopes)[keyof typeof Scopes];
+// Re-export the generated types for convenience
+export { Actions, ResourceTypes, Scopes, RoleSlugs };
+export type { Action, ResourceType, Scope, RoleSlug };
 
 /**
  * Permission definition.
@@ -189,20 +148,6 @@ export const CommonPermissions = {
   ANALYTICS_READ_OWN: buildPermissionName(ResourceTypes.ANALYTICS, Actions.READ, Scopes.OWN),
   ANALYTICS_READ_ORG: buildPermissionName(ResourceTypes.ANALYTICS, Actions.READ, Scopes.ORG),
 } as const;
-
-/**
- * Role slugs for common roles.
- */
-export const RoleSlugs = {
-  SUPER_ADMIN: 'super-admin',
-  ORG_ADMIN: 'org-admin',
-  MAINTAINER: 'maintainer',
-  INSTRUCTOR: 'instructor',
-  MODERATOR: 'moderator',
-  USER: 'user',
-} as const;
-
-export type RoleSlug = (typeof RoleSlugs)[keyof typeof RoleSlugs];
 
 /**
  * Check if a role is an admin role.

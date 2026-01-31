@@ -10,6 +10,8 @@ from sqlmodel import Session
 
 from config.config import get_platform_config
 from src.core.events.database import get_db_session
+from src.db.permissions.generated_enums import Action, ResourceType
+from src.security.permissions.exceptions import AuthenticationRequired
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.security import ALGORITHM, SECRET_KEY
@@ -154,4 +156,7 @@ async def get_current_user(
 
 async def non_public_endpoint(current_user: UserRead | AnonymousUser) -> None:
     if isinstance(current_user, AnonymousUser):
-        raise HTTPException(status_code=401, detail="Not authenticated")
+        raise AuthenticationRequired(
+            resource_type=ResourceType.API,
+            action=Action.ACCESS
+        )

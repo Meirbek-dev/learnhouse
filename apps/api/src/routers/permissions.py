@@ -17,6 +17,8 @@ from slowapi.util import get_remote_address
 from sqlmodel import Session, select
 
 from src.core.events.database import get_db_session
+from src.db.permissions.generated_enums import Action as ActionEnum, ResourceType as ResourceTypeEnum
+from src.security.permissions.exceptions import AuthenticationRequired, PermissionDenied, InsufficientRole
 from src.db.permissions import (
     Action,
     BatchPermissionCheckRequest,
@@ -64,7 +66,10 @@ async def api_list_permissions(
     Optionally filter by resource type.
     """
     if isinstance(current_user, AnonymousUser) or current_user.id == 0:
-        raise HTTPException(status_code=401, detail="Authentication required")
+        raise AuthenticationRequired(
+            resource_type=ResourceTypeEnum.PERMISSION,
+            action=ActionEnum.READ
+        )
 
     service = PermissionService(db_session)
     return service.list_all(resource_type)
@@ -80,7 +85,10 @@ async def api_get_permission(
     Get a specific permission by ID.
     """
     if isinstance(current_user, AnonymousUser) or current_user.id == 0:
-        raise HTTPException(status_code=401, detail="Authentication required")
+        raise AuthenticationRequired(
+            resource_type=ResourceTypeEnum.PERMISSION,
+            action=ActionEnum.READ
+        )
 
     service = PermissionService(db_session)
     permission = service.get_by_id(permission_id)
@@ -109,7 +117,10 @@ async def api_list_roles(
         include_global: Whether to include global/s!stem roles
     """
     if isinstance(current_user, AnonymousUser) or current_user.id == 0:
-        raise HTTPException(status_code=401, detail="Authentication required")
+        raise AuthenticationRequired(
+            resource_type=ResourceTypeEnum.ROLE,
+            action=ActionEnum.READ
+        )
 
     service = RoleService(db_session)
     return service.list_all(org_id, include_global)
@@ -136,7 +147,11 @@ async def api_create_role(
         org_id=role_data.org_id,
     )
     if not can_do:
-        raise HTTPException(status_code=403, detail="Permission denied")
+        raise PermissionDenied(
+            ActionEnum.CREATE,
+            ResourceTypeEnum.ROLE,
+            reason="Insufficient permissions to create role"
+        )
 
     service = RoleService(db_session)
     try:
@@ -156,7 +171,10 @@ async def api_get_role(
     Get a role with all its permissions.
     """
     if isinstance(current_user, AnonymousUser) or current_user.id == 0:
-        raise HTTPException(status_code=401, detail="Authentication required")
+        raise AuthenticationRequired(
+            resource_type=ResourceTypeEnum.ROLE,
+            action=ActionEnum.READ
+        )
 
     service = RoleService(db_session)
     role = service.get_role_with_permissions(role_id)
@@ -192,7 +210,11 @@ async def api_update_role(
         org_id=existing.org_id,
     )
     if not can_do:
-        raise HTTPException(status_code=403, detail="Permission denied")
+        raise PermissionDenied(
+            ActionEnum.UPDATE,
+            ResourceTypeEnum.ROLE,
+            reason="Insufficient permissions to update role"
+        )
 
     try:
         role = service.update(role_id, role_data)
@@ -228,7 +250,11 @@ async def api_delete_role(
         org_id=existing.org_id,
     )
     if not can_do:
-        raise HTTPException(status_code=403, detail="Permission denied")
+        raise PermissionDenied(
+            ActionEnum.DELETE,
+            ResourceTypeEnum.ROLE,
+            reason="Insufficient permissions to delete role"
+        )
 
     try:
         service.delete(role_id)
@@ -269,7 +295,11 @@ async def api_add_permission_to_role(
         org_id=existing.org_id,
     )
     if not can_do:
-        raise HTTPException(status_code=403, detail="Permission denied")
+        raise PermissionDenied(
+            ActionEnum.UPDATE,
+            ResourceTypeEnum.ROLE,
+            reason="Insufficient permissions to modify role permissions"
+        )
 
     try:
         service.add_permission_to_role(
@@ -307,7 +337,11 @@ async def api_remove_permission_from_role(
         org_id=existing.org_id,
     )
     if not can_do:
-        raise HTTPException(status_code=403, detail="Permission denied")
+        raise PermissionDenied(
+            ActionEnum.UPDATE,
+            ResourceTypeEnum.ROLE,
+            reason="Insufficient permissions to modify role permissions"
+        )
 
     if not service.remove_permission_from_role(role_id, permission_id):
         raise HTTPException(status_code=404, detail="Permission not assigned to role")
@@ -334,7 +368,10 @@ async def api_get_user_roles(
     Org admins can view roles of users in their org.
     """
     if isinstance(current_user, AnonymousUser) or current_user.id == 0:
-        raise HTTPException(status_code=401, detail="Authentication required")
+        raise AuthenticationRequired(
+            resource_type=ResourceTypeEnum.USER,
+            action=ActionEnum.READ
+        )
 
     # Users can always view their own roles
     if current_user.id != user_id:
@@ -347,7 +384,11 @@ async def api_get_user_roles(
             org_id=org_id,
         )
         if not can_do:
-            raise HTTPException(status_code=403, detail="Permission denied")
+            raise PermissionDenied(
+                ActionEnum.READ,
+                ResourceTypeEnum.USER,
+                reason="Insufficient permissions to view user roles"
+            )
 
     service = RoleService(db_session)
     return service.get_user_roles(user_id, org_id)
@@ -375,7 +416,11 @@ async def api_assign_role_to_user(
         org_id=role_data.org_id,
     )
     if not can_do:
-        raise HTTPException(status_code=403, detail="Permission denied")
+        raise PermissionDenied(
+            ActionEnum.UPDATE,
+            ResourceTypeEnum.ROLE,
+            reason="Insufficient permissions to assign role to user"
+        )
 
     service = RoleService(db_session)
     try:
@@ -414,7 +459,11 @@ async def api_remove_role_from_user(
         org_id=org_id,
     )
     if not can_do:
-        raise HTTPException(status_code=403, detail="Permission denied")
+        raise PermissionDenied(
+            ActionEnum.UPDATE,
+            ResourceTypeEnum.ROLE,
+            reason="Insufficient permissions to remove role from user"
+        )
 
     service = RoleService(db_session)
     if not service.remove_role_from_user(user_id, role_id, org_id):
@@ -606,7 +655,10 @@ async def api_list_permission_templates(
     like content_creator, moderator, analyst, grader, and student.
     """
     if isinstance(current_user, AnonymousUser) or current_user.id == 0:
-        raise HTTPException(status_code=401, detail="Authentication required")
+        raise AuthenticationRequired(
+            resource_type=ResourceTypeEnum.PERMISSION,
+            action=ActionEnum.READ
+        )
 
     service = RoleService(db_session)
     return service.list_permission_templates()
@@ -642,7 +694,11 @@ async def api_apply_permission_template(
         org_id=existing.org_id,
     )
     if not can_do:
-        raise HTTPException(status_code=403, detail="Permission denied")
+        raise PermissionDenied(
+            ActionEnum.UPDATE,
+            ResourceTypeEnum.ROLE,
+            reason="Insufficient permissions to apply template to role"
+        )
 
     try:
         service.apply_permission_template(
@@ -679,7 +735,10 @@ async def api_seed_permissions(
     """
     # Only super-admin can seed permissions
     if isinstance(current_user, AnonymousUser) or current_user.id == 0:
-        raise HTTPException(status_code=401, detail="Authentication required")
+        raise AuthenticationRequired(
+            resource_type=ResourceTypeEnum.PERMISSION,
+            action=ActionEnum.CREATE
+        )
 
     # Check for super-admin (this is a bootstrapping endpoint)
     role_service = RoleService(db_session)
@@ -694,7 +753,10 @@ async def api_seed_permissions(
 
         existing_admins = db_session.exec(select(UserRole)).first()
         if existing_admins:
-            raise HTTPException(status_code=403, detail="Super-admin required")
+            raise InsufficientRole(
+                required_role="SUPER_ADMIN",
+                current_role="USER"
+            )
 
     # Seed permissions and roles
     permission_service = PermissionService(db_session)

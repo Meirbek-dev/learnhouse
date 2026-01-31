@@ -48,7 +48,6 @@ import Link from '@components/ui/AppLink';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
 import useSWR from 'swr';
-import { useResourcePermissions } from '@/hooks/useResourcePermissions';
 import { PermissionTooltip } from '@/components/Utils/PermissionTooltip';
 
 // Types

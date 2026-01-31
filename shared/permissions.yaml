@@ -1,0 +1,176 @@
+# Shared Permission Schema
+# Single source of truth for all permissions across frontend and backend
+# Version: 1.0.0
+# Last Updated: 2026-01-31
+
+# Actions that can be performed on resources
+actions:
+  - create
+  - read
+  - update
+  - delete
+  - manage      # Full control including settings
+  - moderate    # Approve/reject content
+  - export      # Export data
+  - invite      # Invite users
+  - grade       # Grade assignments/quizzes
+  - submit      # Submit work
+  - enroll      # Enroll in courses
+
+# Scopes define the extent of a permission
+scopes:
+  - all         # All resources of type
+  - own         # Only owned resources
+  - assigned    # Assigned to user
+  - org         # Within organization
+
+# Resource types in the system
+resources:
+  - organization
+  - course
+  - chapter
+  - activity
+  - assignment
+  - quiz
+  - user
+  - usergroup
+  - collection
+  - role
+  - certificate
+  - discussion
+  - file
+  - analytics
+  - trail
+  - exam
+  - payment
+  - api_token
+
+# Role definitions with hierarchy
+roles:
+  super-admin:
+    description: "Platform super administrator with full system access"
+    inherits: null
+    permissions:
+      - "*:*:*"  # Wildcard: all actions on all resources
+
+  org-admin:
+    description: "Organization administrator with full org control"
+    inherits: null
+    permissions:
+      - "organization:manage:own"
+      - "organization:update:own"
+      - "organization:read:own"
+      - "course:*:org"
+      - "chapter:*:org"
+      - "activity:*:org"
+      - "assignment:*:org"
+      - "quiz:*:org"
+      - "exam:*:org"
+      - "user:invite:org"
+      - "user:read:org"
+      - "user:update:org"
+      - "usergroup:*:org"
+      - "collection:*:org"
+      - "role:read:org"
+      - "role:create:org"
+      - "role:update:org"
+      - "certificate:*:org"
+      - "discussion:moderate:org"
+      - "analytics:read:org"
+      - "payment:manage:org"
+
+  maintainer:
+    description: "Course maintainer with broad content permissions"
+    inherits: null
+    permissions:
+      - "course:create:org"
+      - "course:read:all"
+      - "course:update:org"
+      - "course:delete:own"
+      - "course:manage:own"
+      - "chapter:*:org"
+      - "activity:*:org"
+      - "assignment:*:org"
+      - "quiz:*:org"
+      - "exam:*:org"
+      - "collection:create:org"
+      - "collection:read:all"
+      - "collection:update:own"
+      - "collection:delete:own"
+      - "discussion:moderate:org"
+      - "analytics:read:own"
+      - "certificate:create:own"
+
+  instructor:
+    description: "Course instructor with content creation abilities"
+    inherits: null
+    permissions:
+      - "course:create:org"
+      - "course:read:all"
+      - "course:update:own"
+      - "course:delete:own"
+      - "chapter:create:own"
+      - "chapter:read:all"
+      - "chapter:update:own"
+      - "chapter:delete:own"
+      - "activity:create:own"
+      - "activity:read:all"
+      - "activity:update:own"
+      - "activity:delete:own"
+      - "assignment:*:own"
+      - "quiz:*:own"
+      - "exam:*:own"
+      - "collection:create:org"
+      - "collection:read:all"
+      - "collection:update:own"
+      - "discussion:moderate:own"
+      - "analytics:read:own"
+      - "user:read:assigned"
+
+  moderator:
+    description: "Content moderator for discussions and user content"
+    inherits: null
+    permissions:
+      - "course:read:all"
+      - "discussion:moderate:org"
+      - "discussion:read:all"
+      - "discussion:update:org"
+      - "discussion:delete:org"
+      - "user:read:org"
+
+  user:
+    description: "Regular user with basic access"
+    inherits: null
+    permissions:
+      - "course:read:all"
+      - "course:enroll:all"
+      - "chapter:read:all"
+      - "activity:read:all"
+      - "assignment:submit:assigned"
+      - "assignment:read:assigned"
+      - "quiz:submit:assigned"
+      - "quiz:read:assigned"
+      - "exam:submit:assigned"
+      - "exam:read:assigned"
+      - "collection:read:all"
+      - "discussion:create:org"
+      - "discussion:read:all"
+      - "discussion:update:own"
+      - "discussion:delete:own"
+      - "user:read:own"
+      - "user:update:own"
+      - "certificate:read:own"
+
+# Permission name format: {resource}:{action}:{scope}
+# Example: course:update:own
+# This grants permission to update courses that the user owns
+
+# Scope fallback chain (evaluated in order):
+# 1. Exact scope match (e.g., course:update:own)
+# 2. Broader scope (e.g., course:update:org when checking :own)
+# 3. All scope (e.g., course:update:all when checking :org or :own)
+
+# Wildcard support:
+# - course:*:own = all actions on owned courses
+# - *:read:all = read all resource types
+# - *:*:* = super admin (all permissions)

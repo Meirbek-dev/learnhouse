@@ -1,6 +1,8 @@
 from fastapi import HTTPException
 
 from config.config import get_platform_config
+from src.security.permissions.exceptions import PermissionDenied
+from src.db.permissions.generated_enums import Action, ResourceType
 
 
 def isDevModeEnabled():
@@ -12,4 +14,4 @@ def isDevModeEnabledOrRaise() -> bool:
     config = get_platform_config()
     if config.general_config.development_mode:
         return True
-    raise HTTPException(status_code=403, detail="Development mode is disabled")
+    raise PermissionDenied(Action.MANAGE, ResourceType.ORGANIZATION, reason="Development mode is disabled")
