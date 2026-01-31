@@ -19,8 +19,9 @@ from sqlmodel import Session, and_, select
 from src.core.events.database import get_db_session
 from src.core.timezone import now as tz_now
 from src.db.permissions.generated_enums import Action, ResourceType
-from src.security.permissions.checker import PermissionChecker
 from src.security.permissions.exceptions import PermissionDenied
+from src.security.rbac.dependencies import get_permission_service
+from src.services.permissions.unified_permission_service import UnifiedPermissionService
 from src.db.gamification import (
     DashboardRead,
     GamificationProfile,
@@ -133,6 +134,9 @@ async def award_xp(
     payload: XPAwardRequest,
     user: Annotated[PublicUser, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db_session)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
 ):
     """Award XP with strong typing and idempotency."""
     logger.info(f"Award XP request: user={user.id} org={org_id} payload={payload}")
@@ -145,18 +149,17 @@ async def award_xp(
                     detail="custom_amount allowed only with ADMIN_AWARD source",
                 )
             # Check if user has admin permission for the organization
-            permission_checker = PermissionChecker(db)
-            has_permission = await permission_checker.check(
-                user_id=user.id,
-                org_id=org_id,
+            has_permission = await permission_service.check(
+                user=user,
                 action=Action.MANAGE,
-                resource_type=ResourceType.GAMIFICATION,
-                resource_id=None
+                resource=ResourceType.ORGANIZATION,
+                org_id=org_id,
+                raise_on_deny=False,
             )
             if not has_permission:
                 raise PermissionDenied(
-                    Action.MANAGE,
-                    ResourceType.GAMIFICATION,
+                    action=Action.MANAGE,
+                    resource_type=ResourceType.ORGANIZATION,
                     reason="Admin privileges required for custom XP awards"
                 )
 

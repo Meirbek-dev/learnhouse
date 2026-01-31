@@ -42,6 +42,7 @@ from src.security.rbac.dependencies import get_permission_service
 from src.services.permissions.permission_service import PermissionService
 from src.services.permissions.role_service import RoleService
 from src.services.permissions.unified_permission_service import UnifiedPermissionService
+from src.services.permissions import permission_cache
 
 # Rate limiter for permission check endpoints to prevent enumeration attacks
 _limiter = Limiter(key_func=get_remote_address)
@@ -305,6 +306,8 @@ async def api_add_permission_to_role(
         service.add_permission_to_role(
             role_id, permission_id, granted_by=current_user.id
         )
+        # ✅ INVALIDATE CACHE - role's permissions changed
+        permission_cache.invalidate_role_permissions(role_id)
         return {"message": "Permission added to role"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -345,6 +348,9 @@ async def api_remove_permission_from_role(
 
     if not service.remove_permission_from_role(role_id, permission_id):
         raise HTTPException(status_code=404, detail="Permission not assigned to role")
+
+    # ✅ INVALIDATE CACHE - role's permissions changed
+    permission_cache.invalidate_role_permissions(role_id)
 
     return {"message": "Permission removed from role"}
 
@@ -431,6 +437,10 @@ async def api_assign_role_to_user(
             granted_by=current_user.id,
             expires_at=role_data.expires_at,
         )
+
+        # ✅ INVALIDATE CACHE - user's permissions changed
+        permission_cache.invalidate_user_permissions(user_id)
+
         return {"message": "Role assigned to user"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -468,6 +478,9 @@ async def api_remove_role_from_user(
     service = RoleService(db_session)
     if not service.remove_role_from_user(user_id, role_id, org_id):
         raise HTTPException(status_code=404, detail="Role not assigned to user")
+
+    # ✅ INVALIDATE CACHE - user's permissions changed
+    permission_cache.invalidate_user_permissions(user_id)
 
     return {"message": "Role removed from user"}
 
@@ -706,6 +719,8 @@ async def api_apply_permission_template(
             template_name=template_name,
             granted_by=current_user.id,
         )
+        # ✅ INVALIDATE CACHE - role's permissions changed
+        permission_cache.invalidate_role_permissions(role_id)
         return {
             "message": f"Template '{template_name}' applied successfully to role",
             "role_id": role_id,

@@ -9,7 +9,8 @@ import { Award, GalleryVerticalEnd, Globe, Info, Loader2, Lock, UserPen } from '
 import { CourseProvider } from '../../../../../../../../components/Contexts/CourseContext';
 import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
-import { useCourseRights } from '@/hooks/useCourseRights';
+import { usePermission } from '@/hooks/usePermission';
+import { Actions, ResourceTypes } from '@/types/permissions';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -27,7 +28,7 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
   const params = use(props.params);
   const router = useRouter();
   const courseuuid = `course_${params.courseuuid}`;
-  const { hasPermission, isLoading: rightsLoading } = useCourseRights(courseuuid);
+  const { can, isLoading: rightsLoading } = usePermission();
 
   // Define tab configurations with their required permissions
   const tabs = [
@@ -36,44 +37,46 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
       label: t('general'),
       icon: Info,
       href: `/dash/courses/course/${params.courseuuid}/general`,
-      requiredPermission: 'update' as const,
+      requiredAction: Actions.UPDATE,
     },
     {
       key: 'content',
       label: t('content'),
       icon: GalleryVerticalEnd,
       href: `/dash/courses/course/${params.courseuuid}/content`,
-      requiredPermission: 'update_content' as const,
+      requiredAction: Actions.UPDATE,
     },
     {
       key: 'access',
       label: t('access'),
       icon: Globe,
       href: `/dash/courses/course/${params.courseuuid}/access`,
-      requiredPermission: 'manage_access' as const,
+      requiredAction: Actions.MANAGE,
     },
     {
       key: 'contributors',
       label: t('contributors'),
       icon: UserPen,
       href: `/dash/courses/course/${params.courseuuid}/contributors`,
-      requiredPermission: 'manage_contributors' as const,
+      requiredAction: Actions.MANAGE,
+      context: 'contributors' as const,
     },
     {
       key: 'certification',
       label: t('certification'),
       icon: Award,
       href: `/dash/courses/course/${params.courseuuid}/certification`,
-      requiredPermission: 'create_certifications' as const,
+      requiredAction: Actions.CREATE,
+      context: 'certifications' as const,
     },
   ];
 
   // Filter tabs based on permissions
-  const visibleTabs = tabs.filter((tab) => hasPermission(tab.requiredPermission));
+  const visibleTabs = tabs.filter((tab) => can(tab.requiredAction, ResourceTypes.COURSE));
 
   // Check if current subpage is accessible
   const currentTab = tabs.find((tab) => tab.key === params.subpage);
-  const hasAccessToCurrentPage = currentTab ? hasPermission(currentTab.requiredPermission) : false;
+  const hasAccessToCurrentPage = currentTab ? can(currentTab.requiredAction, ResourceTypes.COURSE) : false;
 
   // Redirect to first available tab if current page is not accessible
   useEffect(() => {
@@ -119,7 +122,7 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
             {tabs.map((tab) => {
               const IconComponent = tab.icon;
               const isActive = params.subpage.toString() === tab.key;
-              const hasAccess = hasPermission(tab.requiredPermission);
+              const hasAccess = can(tab.requiredAction, ResourceTypes.COURSE);
 
               if (!hasAccess) {
                 return (
@@ -178,19 +181,19 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
           className="relative h-full overflow-y-auto"
         >
           <div className="absolute inset-0">
-            {params.subpage === 'content' && hasPermission('update_content') ? (
+            {params.subpage === 'content' && can(Actions.UPDATE, ResourceTypes.COURSE) ? (
               <EditCourseStructure orgslug={params.orgslug} />
             ) : null}
-            {params.subpage === 'general' && hasPermission('update') ? (
+            {params.subpage === 'general' && can(Actions.UPDATE, ResourceTypes.COURSE) ? (
               <EditCourseGeneral orgslug={params.orgslug} />
             ) : null}
-            {params.subpage === 'access' && hasPermission('manage_access') ? (
+            {params.subpage === 'access' && can(Actions.MANAGE, ResourceTypes.COURSE) ? (
               <EditCourseAccess orgslug={params.orgslug} />
             ) : null}
-            {params.subpage === 'contributors' && hasPermission('manage_contributors') ? (
+            {params.subpage === 'contributors' && can(Actions.MANAGE, ResourceTypes.COURSE) ? (
               <EditCourseContributors orgslug={params.orgslug} />
             ) : null}
-            {params.subpage === 'certification' && hasPermission('create_certifications') ? (
+            {params.subpage === 'certification' && can(Actions.CREATE, ResourceTypes.CERTIFICATE) ? (
               <EditCourseCertification orgslug={params.orgslug} />
             ) : null}
           </div>
