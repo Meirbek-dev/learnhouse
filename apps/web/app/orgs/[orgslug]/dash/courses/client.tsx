@@ -3,9 +3,9 @@
 import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
+import { PermissionGuard } from '@components/Security/PermissionGuard';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
-import { PermissionGuard } from '@components/Security/PermissionGuard';
 import { Actions, ResourceTypes } from '@/types/permissions';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';

@@ -22,6 +22,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { deleteRole } from '@services/roles/roles';
+import { RoleSlugs } from '@/types/permissions';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
@@ -120,17 +121,21 @@ const OrgRoles: FC = () => {
   };
 
   const getRoleBadge = (role: any) => {
-    // Use role type or name to show role level
-    if (role.role_type === 'TYPE_GLOBAL') {
-      return t('globalRole');
+    // Use slug-based checks instead of name matching
+    const {slug} = role;
+
+    if (!slug) {
+      return t('basicAccess');
     }
-    if (role.name?.toLowerCase().includes('admin')) {
+
+    // Check by slug (locale-independent, type-safe)
+    if (slug === RoleSlugs.SUPER_ADMIN || slug === RoleSlugs.ORG_ADMIN) {
       return t('fullAccess');
     }
-    if (role.name?.toLowerCase().includes('maintainer')) {
+    if (slug === RoleSlugs.MAINTAINER) {
       return t('fullAccess');
     }
-    if (role.name?.toLowerCase().includes('instructor')) {
+    if (slug === RoleSlugs.INSTRUCTOR) {
       return t('instructorAccess');
     }
     return t('basicAccess');

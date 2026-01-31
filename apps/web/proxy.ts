@@ -41,7 +41,7 @@ export default async function proxy(req: NextRequest) {
   if (auth_paths.includes(pathname)) {
     const response = NextResponse.rewrite(new URL(`/auth${pathname}${search}`, req.url));
 
-    const orgslug = "openu"
+    const orgslug = 'openu';
 
     if (orgslug) {
       response.cookies.set({

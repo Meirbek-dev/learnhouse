@@ -132,8 +132,6 @@ export async function loginAndGetToken(username: any, password: any): Promise<Re
       credentials: 'include',
     };
 
-    // For backward compatibility, return raw response
-    // Calling code can use handleAuthResponse if needed
     return await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.login}`, requestOptions);
   } catch (error) {
     if (error instanceof Error) {

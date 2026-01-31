@@ -3,11 +3,11 @@ import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOf
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
-import { PermissionGuard } from '@components/Security/PermissionGuard';
-import { Actions, ResourceTypes } from '@/types/permissions';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { PermissionGuard } from '@components/Security/PermissionGuard';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import { getOrgCollections } from '@services/courses/collections';
+import { Actions, ResourceTypes } from '@/types/permissions';
 import { getUriWithOrg } from '@services/config/config';
 import { getTranslations } from 'next-intl/server';
 import Link from '@components/ui/AppLink';

@@ -1,9 +1,9 @@
 'use client';
 
 import type { Action, ResourceType, Scope } from '@/types/permissions';
-import { Scopes } from '@/types/permissions';
 import { getAPIUrl } from '@/services/config/config';
 import { useCallback, useState } from 'react';
+import { Scopes } from '@/types/permissions';
 import { useSession } from 'next-auth/react';
 
 interface PermissionCheck {

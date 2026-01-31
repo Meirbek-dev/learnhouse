@@ -18,9 +18,11 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
 import platformLogoLight from '@public/platform_logo_light.svg';
 import useFeatureFlag from '@components/Hooks/useFeatureFlag';
+import { Actions, ResourceTypes } from '@/types/permissions';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Separator } from '@/components/ui/separator';
+import { usePermission } from '@/hooks/usePermission';
 import { Skeleton } from '@/components/ui/skeleton';
 import UserAvatar from '../../Objects/UserAvatar';
 import { useEffect, useEffectEvent } from 'react';
@@ -30,8 +32,6 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
 import Image from 'next/image';
-import { usePermission } from '@/hooks/usePermission';
-import { Actions, ResourceTypes } from '@/types/permissions';
 
 interface NavigationItem {
   title: string;

@@ -6,7 +6,7 @@ import { auth } from '@/auth';
 
 const MenuLinks = async (props: { orgslug: string }) => {
   const session = await auth();
-  const isAuthenticated = !!session?.user;
+  const isAuthenticated = Boolean(session?.user);
 
   return (
     <div className="pl-1">

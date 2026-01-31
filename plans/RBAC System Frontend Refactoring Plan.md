@@ -1,775 +1,982 @@
-# RBAC System Frontend-Backend Alignment Plan
+# RBAC System Frontend-Backend Alignment & Legacy Code Removal Plan
 
 ## Executive Summary
 
-This document outlines a comprehensive plan to resolve frontend-backend misalignments in the RBAC
-(Role-Based Access Control) system. The system has undergone a major backend refactoring from a
-legacy "rights-based" model to a modern permission-based RBAC system, but the frontend has not been
-fully updated to align with these changes. Remove all legacy, backward compat, duplicated code
-
-**Status**: The backend has migrated to a new permission system, but the frontend still expects and
-uses legacy patterns in many places.
-
-**Impact**: Medium to High - Affects authorization, role management, and user experience across the
-platform.
+This plan addresses critical frontend-backend misalignments in the RBAC system and eliminates all
+legacy, backward compatibility, and fallback code. The refactoring ensures a unified, secure, and
+maintainable permission system across the entire application.
 
 ---
 
-## 1. Current State Analysis
+## Current State Analysis
 
-### 1.1 Backend (API) - New System ✅
+### ✅ What Works
 
-**Location**: `apps/api/src/db/permissions/`, `apps/api/src/services/permissions/`
+1. **Backend RBAC System**
+   - UnifiedPermissionService with caching and audit logging
+   - Role hierarchy and permission inheritance
+   - Scope-based permissions (ALL, ORG, OWN, ASSIGNED)
+   - Resource-level permission overrides
+   - `/api/v1/permissions/*` endpoints functional
 
-**Key Components**:
+2. **Frontend Hooks**
+   - `usePermission()` - Basic permission checks
+   - `useBatchPermissions()` - Batch permission API calls
+   - `useResourcePermission()` - Resource-specific permissions
+   - Permission Guards (PermissionGuard, MultiPermissionGuard, RoleGuard)
 
-- **Enums** (`enums.py`):
-  - `Action`: CREATE, READ, UPDATE, DELETE, MANAGE, MODERATE, EXPORT, INVITE, GRADE, SUBMIT, ENROLL
-  - `ResourceType`: 19 resource types (organization, course, chapter, activity, etc.)
-  - `Scope`: ALL, OWN, ASSIGNED, ORG
-  - `AuditAction`, `AuditLevel`, `PermissionErrorCode`
+### ❌ Critical Issues
 
-- **Models** (`models.py`):
-  - `Permission`: Individual permission definitions with name format `resource:action:scope`
-  - `Role`: New role model with hierarchy support, org_id, parent_role_id, slug, priority
-  - `RolePermission`: Junction table for role-permission assignments
-  - `UserRole`: User-role assignments per organization
-  - `ResourcePermission`: Resource-level permission overrides
+#### 1. **Legacy User Role Structure** (HIGH PRIORITY)
 
-- **Services**:
-  - `UnifiedPermissionService`: Main entry point for all RBAC checks
-  - `RoleService`: Role management and hierarchy
-  - `PermissionService`: Permission CRUD operations
-  - `AuditService`: Permission audit logging
-  - `PermissionCache`: Redis caching for performance
+**Problem:**
 
-- **API Endpoints** (`routers/permissions.py`):
-  - `GET /permissions/me/permissions` - Get user's effective permissions
-  - `POST /permissions/check` - Batch permission checks
-  - `GET /roles`, `POST /roles`, `PUT /roles/{id}`, `DELETE /roles/{id}` - Role management
-  - `GET /roles/{id}/permissions` - Get role permissions
-
-**Migration Status**:
-
-- ✅ Database migration completed
-- ✅ Old `rights` column removed from role table
-- ✅ New permission system seeded with base permissions
-- ✅ Role permissions migrated from JSON `rights` to `role_permissions` table
-
-### 1.2 Frontend (Web) - Partial Update ⚠️
-
-**Location**: `apps/web/types/permissions.ts`, `apps/web/hooks/usePermission.ts`,
-`apps/web/services/permissions/`
-
-**Current Implementation**:
-
-**Types** (`types/permissions.ts`):
-
-- ✅ Modern permission types (Action, ResourceType, Scope enums)
-- ✅ `Permission`, `Role`, `RoleWithPermissions` interfaces
-- ✅ `UserPermissionsResponse` interface
-- ✅ Helper functions: `buildPermissionName()`, `parsePermissionName()`
-- ✅ `CommonPermissions` constant with pre-built permission names
-
-**Hook** (`hooks/usePermission.ts`):
-
-- ✅ Uses SWR to fetch permissions from `GET /permissions/me/permissions`
-- ✅ Implements `can(action, resource, scope)` method
-- ✅ Role checking methods: `hasRole()`, `isAdmin()`, `isInstructor()`
-- ⚠️ Falls back to session permissions for backward compatibility
-- ⚠️ Still uses legacy session role structure in places
-
-**Service** (`services/permissions/permissions.ts`):
-
-- ✅ `fetchUserPermissions()` - Calls new API endpoint
-- ✅ `batchCheckPermissions()` - Batch permission checks
-- ⚠️ Not widely used across the codebase
-
-### 1.3 Legacy System Remnants ❌
-
-**Backend Legacy** (Being Phased Out):
-
-- `apps/api/src/services/roles/roles.py` - Still references old validation patterns
-- `apps/api/src/security/rbac/rbac.py` - Old RBAC functions still in use
-- Various service files still use `authorization_verify_based_on_roles_and_authorship()`
-
-**Issues**:
-
-1. **Old RBAC functions** still widely used instead of `UnifiedPermissionService`
-2. **Role model confusion**: Both old `role` table and new `roles` table references
-3. **Rights-based logic**: Some services still check `user_role.rights` dictionary
-4. **Hardcoded role IDs**: Checks like `role.id in [1, 2]` for admin detection
-
----
-
-## 2. Identified Misalignments
-
-### 2.1 Critical Issues 🔴
-
-#### Issue 1: Dual Permission Systems
-
-**Problem**: Backend has both old RBAC functions (`rbac.py`) and new `UnifiedPermissionService`,
-causing inconsistency.
-
-**Location**:
-
-- `apps/api/src/security/rbac/rbac.py` - Old system
-- `apps/api/src/services/permissions/unified_permission_service.py` - New system
-- Multiple services import from both
-
-**Impact**: Inconsistent permission checks, potential security gaps
-
-**Example**:
-
-```python
-# Old pattern (still used in many places)
-await authorization_verify_based_on_roles_and_authorship(
-    request, user_id, "update", course_uuid, db_session
-)
-
-# New pattern (should be used)
-await permission_service.check(
-    user=current_user,
-    action=Action.UPDATE,
-    resource=ResourceType.COURSE,
-    resource_id=course_uuid,
-    org_id=org_id,
-)
+```tsx
+// Old structure still used in OrgUsers.tsx
+user.role.name; // Single role object
+user.role.role_uuid; // UUID-based identification
+session?.user?.role; // Single role in session
 ```
 
-#### Issue 2: Session-Based vs API-Based Permissions in Frontend
+**Backend Reality:**
 
-**Problem**: Frontend relies on JWT session permissions instead of fetching from API consistently.
+```python
+# Users can have MULTIPLE roles
+user_roles: list[Role]   # Array of roles
+role.slug                # String-based identification
+role.is_system           # System role flag
+```
 
-**Location**:
+**Impact:**
 
-- `apps/web/hooks/usePermission.ts` - Lines 98-107 (fallback logic)
+- Frontend assumes single role per user
+- Role priority calculations broken
+- UI shows only one role when users may have multiple
+- Role editing/assignment flows incorrect
 
-**Impact**: Stale permissions, cache issues, inconsistent UX
+#### 2. **Session-Based Permission Fallbacks** (SECURITY CRITICAL)
 
-**Code**:
+**Problem:**
+
+```tsx
+// Found in multiple files - SECURITY ISSUE
+session?.permissions?.['course:create'];
+session?.user?.role?.rights?.courses?.action_create;
+permissions['organizations:read:org']; // Direct session access
+```
+
+**Why This is Dangerous:**
+
+- Session data can be stale
+- No real-time permission updates
+- Bypasses backend validation
+- Inconsistent with backend permission checks
+
+#### 3. **Missing Response Metadata** (CRITICAL)
+
+**Problem:** Backend endpoints don't return permission metadata in responses:
+
+```python
+# Current response
+{
+  "id": 123,
+  "name": "My Course",
+  "description": "..."
+}
+
+# Missing metadata
+{
+  "can_update": false,
+  "can_delete": false,
+  "is_owner": true,
+  "available_actions": ["read", "update"]
+}
+```
+
+**Impact:**
+
+- Frontend must make separate API calls to check permissions
+- Multiple round-trips for UI state
+- Performance degradation
+- Inconsistent UI state
+
+#### 4. **Incomplete Permission Checks on Backend** (SECURITY CRITICAL)
+
+From RBAC_API_AUDIT.md:
+
+- ❌ 28 endpoints (41%) missing permission checks
+- User CRUD operations unprotected
+- Course management unprotected
+- Payment/billing endpoints unprotected
+- User groups completely lack RBAC
+
+#### 5. **Type Misalignment**
+
+**Frontend:**
 
 ```typescript
-const permissions = useMemo(() => {
-  if (permissionsData?.permissions) {
-    return permissionsData.permissions;
-  }
-  // Fallback to session permissions (LEGACY - should be removed)
-  return session?.permissions ?? {};
-}, [permissionsData?.permissions, session?.permissions]);
+interface UserPermissionsResponse {
+  user_id: number;
+  org_id: number | null;
+  roles: {
+    id: number;
+    name: string;
+    slug: string;
+    description: string | null;
+  }[];
+  permissions: Record<string, boolean>;
+  resource_permissions: any[]; // ❌ 'any' type
+}
 ```
 
-#### Issue 3: Hardcoded Role IDs
-
-**Problem**: Services use hardcoded role IDs (1, 2) instead of role slugs.
-
-**Location**:
-
-- `apps/api/src/services/roles/roles.py` - Multiple locations
-- `apps/api/src/security/rbac/rbac.py` - Lines 186, etc.
-
-**Impact**: Breaks if role IDs change, not database-agnostic
-
-**Example**:
+**Backend:**
 
 ```python
-# Bad - Hardcoded IDs
-if role.id in [1, 2]:  # Assuming 1 and 2 are admin role IDs
-    return True
-
-# Good - Use slugs
-if role.slug in ['super-admin', 'org-admin']:
-    return True
+class ResourcePermission(SQLModel):
+    id: int
+    user_id: int
+    resource_type: ResourceType
+    resource_id: str
+    permission_id: int
+    granted_at: datetime
+    granted_by: int | None
+    expires_at: datetime | None
 ```
 
-### 2.2 High Priority Issues 🟠
+#### 6. **Hardcoded Role Names** (LOCALIZATION ISSUE)
 
-#### Issue 4: Inconsistent Permission Check Patterns
+```tsx
+// In OrgUsers.tsx
+if (user.role.name === 'Админ')  // ❌ Cyrillic hardcoded
+```
 
-**Problem**: Frontend permission checks don't always match backend logic.
+Should use role slugs:
 
-**Details**:
-
-- Backend uses scope-based evaluation (ALL > ORG > OWN > ASSIGNED)
-- Frontend checks scopes but doesn't properly cascade
-- Resource ownership not always factored in frontend checks
-
-#### Issue 5: Missing Resource-Level Permissions
-
-**Problem**: Backend supports `resource_permissions` table for resource-specific overrides, but
-frontend doesn't use them.
-
-**Impact**: Cannot implement fine-grained per-resource permissions in UI
-
-#### Issue 6: Incomplete Migration from "Rights" to "Permissions"
-
-**Problem**: Some backend services still expect `role.rights` JSON structure.
-
-**Location**:
-
-- `apps/api/src/services/roles/roles.py` - Lines 79-95 (permission validation)
-- `apps/api/src/tests/security/test_rbac.py` - Test fixtures use old Rights models
-
-### 2.3 Medium Priority Issues 🟡
-
-#### Issue 7: Permission Cache Not Used by Frontend
-
-**Problem**: Backend has Redis caching for permissions, but frontend doesn't leverage it
-effectively.
-
-**Impact**: Unnecessary API calls, slower performance
-
-#### Issue 8: Audit Logging Not Integrated
-
-**Problem**: Backend has comprehensive audit logging, but frontend doesn't trigger or display audit
-events.
-
-**Impact**: No visibility into permission denials for users/admins
-
-#### Issue 9: Role Hierarchy Not Exposed to Frontend
-
-**Problem**: Backend supports role inheritance (`parent_role_id`), but frontend doesn't understand
-or display it.
-
-**Impact**: Cannot show role relationships in UI
-
-#### Issue 10: Batch Permission Checks Underutilized
-
-**Problem**: Frontend has `batchCheckPermissions()` but still makes individual permission checks in
-many places.
-
-**Impact**: More API calls than necessary, slower page loads
+```tsx
+if (hasRole(RoleSlugs.ORG_ADMIN))  // ✅ Slug-based
+```
 
 ---
 
-## 3. Migration Strategy
+## Refactoring Plan
 
-### 3.1 Phase 1: Backend Consolidation (Week 1-2)
+### Phase 1: Backend API Response Enhancement (Week 1)
 
-**Goal**: Standardize all backend permission checks to use `UnifiedPermissionService`.
+**Goal:** Add permission metadata to all resource responses
 
-#### Tasks
+#### 1.1 Create Response Mixins
 
-**1.1 Deprecate Old RBAC Functions**
-
-- [ ] Create adapter layer in `rbac.py` that wraps `UnifiedPermissionService`
-- [ ] Add deprecation warnings to old functions
-- [ ] Update documentation
-
-**1.2 Migrate Service Files**
-
-- [ ] `apps/api/src/services/roles/roles.py` - Replace old permission checks
-- [ ] `apps/api/src/services/users/users.py` - Use new service
-- [ ] `apps/api/src/services/orgs/orgs.py` - Use new service
-- [ ] `apps/api/src/services/courses/courses.py` - Use new service
-- [ ] `apps/api/src/security/courses_security.py` - Consolidate with new service
-
-**1.3 Remove Hardcoded Role IDs**
-
-- [ ] Replace all `role.id in [1, 2]` with `role.slug in ADMIN_SLUGS`
-- [ ] Use constants from `apps/api/src/db/permissions/constants.py`
-
-**1.4 Update Tests**
-
-- [ ] Migrate test fixtures from old Rights models to new Permission models
-- [ ] Add tests for `UnifiedPermissionService`
-- [ ] Remove deprecated RBAC function tests
-
-### 3.2 Phase 2: Frontend Permission System Overhaul (Week 3-4)
-
-**Goal**: Update frontend to fully use new permission API and remove legacy code.
-
-#### Tasks
-
-**2.1 Remove Session Permission Fallback**
-
-- [ ] Update `usePermission.ts` to only use API-fetched permissions
-- [ ] Remove fallback to `session?.permissions`
-- [ ] Handle loading states properly
-
-**2.2 Implement Resource-Level Permissions**
-
-- [ ] Add `useResourcePermission(resourceType, resourceId)` hook
-- [ ] Fetch resource permissions from backend
-- [ ] Integrate with existing permission checks
-
-**2.3 Add Permission Denial Feedback**
-
-- [ ] Create `PermissionDenied` component
-- [ ] Show why permission was denied (role, scope, etc.)
-- [ ] Link to audit logs for admins
-
-**2.4 Optimize Batch Checks**
-
-- [ ] Identify pages that check multiple permissions
-- [ ] Replace individual checks with `batchCheckPermissions()`
-- [ ] Add caching layer in frontend
-
-**2.5 Add Role Hierarchy UI**
-
-- [ ] Create role tree visualization component
-- [ ] Show inherited permissions
-- [ ] Allow selecting parent roles when creating roles
-
-### 3.3 Phase 3: API Alignment (Week 5)
-
-**Goal**: Ensure all API endpoints consistently use new permission system.
-
-#### Tasks
-
-**3.1 Audit API Endpoints**
-
-- [ ] List all endpoints that perform permission checks
-- [ ] Verify they use `UnifiedPermissionService` or dependency injection
-- [ ] Document permission requirements in OpenAPI schema
-
-**3.2 Add Permission Metadata to Responses**
-
-- [ ] Include `can_update`, `can_delete` flags in resource responses
-- [ ] Add `available_actions` array to show what user can do
-- [ ] Frontend can hide/show buttons based on this
-
-**3.3 Standardize Error Responses**
-
-- [ ] Use `PermissionErrorCode` enum consistently
-- [ ] Return detailed error messages (which permission is missing)
-- [ ] Frontend can parse and display appropriately
-
-### 3.4 Phase 4: Testing & Validation (Week 6)
-
-**Goal**: Comprehensive testing of the unified RBAC system.
-
-#### Tasks
-
-**4.1 Integration Tests**
-
-- [ ] Test permission checks across all resource types
-- [ ] Test scope evaluation (ALL, ORG, OWN, ASSIGNED)
-- [ ] Test role hierarchy and inheritance
-- [ ] Test resource-level permission overrides
-
----
-
-## 4. Detailed Technical Changes
-
-### 4.1 Backend Changes
-
-#### Change 1: Create Permission Service Dependency
-
-**File**: `apps/api/src/security/rbac/dependencies.py`
-
-**Action**: Create centralized dependency for permission service
+**File:** `apps/api/src/db/permissions/mixins.py`
 
 ```python
-from fastapi import Depends
-from sqlmodel import Session
-from src.core.events.database import get_db_session
-from src.services.permissions.unified_permission_service import UnifiedPermissionService
+from pydantic import BaseModel
 
-def get_permission_service(
-    db_session: Session = Depends(get_db_session),
-) -> UnifiedPermissionService:
-    """Get permission service instance."""
-    return UnifiedPermissionService(db_session)
-```
+class PermissionMetadataMixin(BaseModel):
+    """Mixin for adding permission metadata to responses."""
 
-#### Change 2: Deprecate Old RBAC Functions
+    can_read: bool = True
+    can_update: bool = False
+    can_delete: bool = False
+    can_manage: bool = False
+    is_owner: bool = False
+    available_actions: list[str] = []
 
-**File**: `apps/api/src/security/rbac/rbac.py`
 
-**Action**: Wrap old functions with new service and add warnings
-
-```python
-import warnings
-from src.services.permissions import get_permission_service
-
-async def authorization_verify_based_on_roles_and_authorship(
-    request: Request,
+def add_permission_metadata(
+    resource: dict,
     user_id: int,
-    action: str,
-    element_uuid: str,
-    db_session: Session,
-) -> bool:
-    """
-    DEPRECATED: Use UnifiedPermissionService.check() instead.
-    This function is maintained for backward compatibility only.
-    """
-    warnings.warn(
-        "authorization_verify_based_on_roles_and_authorship is deprecated. "
-        "Use UnifiedPermissionService.check() instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
+    resource_type: ResourceType,
+    resource_id: str,
+    permission_service: UnifiedPermissionService,
+) -> dict:
+    """Add permission metadata to resource response."""
 
-    # Get user object
-    user = db_session.exec(select(User).where(User.id == user_id)).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    # Map old action strings to new Action enum
-    action_map = {
-        "create": Action.CREATE,
-        "read": Action.READ,
-        "update": Action.UPDATE,
-        "delete": Action.DELETE,
+    metadata = {
+        "can_read": await permission_service.check(...),
+        "can_update": await permission_service.check(...),
+        "can_delete": await permission_service.check(...),
+        "can_manage": await permission_service.check(...),
+        "is_owner": check_ownership(user_id, resource_id),
+        "available_actions": get_available_actions(user_id, resource_id),
     }
 
-    # Infer resource type from element_uuid
-    resource_type = await check_element_type(element_uuid)
-    resource_type_map = {
-        "courses": ResourceType.COURSE,
-        "users": ResourceType.USER,
-        # ... etc
-    }
-
-    service = get_permission_service(db_session)
-    return await service.check(
-        user=user,
-        action=action_map[action],
-        resource=resource_type_map[resource_type],
-        resource_id=element_uuid,
-    )
+    return {**resource, **metadata}
 ```
 
-#### Change 3: Update Role Service
+#### 1.2 Update Response Models
 
-**File**: `apps/api/src/services/roles/roles.py`
+**Files to Update:**
 
-**Action**: Remove `rights` checks, use permission service
+- `apps/api/src/db/courses/courses.py`
+- `apps/api/src/db/activities.py`
+- `apps/api/src/db/organizations.py`
+- `apps/api/src/db/users.py`
 
-**Before**:
+**Example:**
 
 ```python
-if user_role.rights and isinstance(user_role.rights, dict):
-    roles_rights = user_role.rights.get("roles", {})
-    if not roles_rights.get("action_create", False):
-        raise HTTPException(status_code=403, detail="...")
-elif user_role.id not in [1, 2]:  # Hardcoded!
-    raise HTTPException(status_code=403, detail="...")
+class CourseRead(CourseBase):
+    id: int
+    uuid: str
+    created_at: datetime
+    # ... other fields
+
+    # Add permission metadata
+    can_update: bool = False
+    can_delete: bool = False
+    can_publish: bool = False
+    is_owner: bool = False
+    available_actions: list[str] = []
 ```
 
-**After**:
+#### 1.3 Update Endpoints to Include Metadata
+
+**Pattern:**
 
 ```python
-permission_service = get_permission_service(db_session)
-can_create = await permission_service.check(
-    user=current_user,
-    action=Action.CREATE,
-    resource=ResourceType.ROLE,
-    org_id=org_id,
-)
-if not can_create:
-    raise HTTPException(
-        status_code=403,
-        detail="You don't have permission to create roles in this organization"
+@router.get("/courses/{course_id}")
+async def get_course(
+    course_id: int,
+    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
+):
+    course = get_course_from_db(course_id)
+
+    # Add permission metadata if authenticated
+    if not isinstance(current_user, AnonymousUser):
+        course_dict = course.dict()
+        course_dict.update({
+            "can_update": await permission_service.check(
+                user=current_user,
+                action=Action.UPDATE,
+                resource=ResourceType.COURSE,
+                resource_id=str(course_id),
+            ),
+            "can_delete": await permission_service.check(
+                user=current_user,
+                action=Action.DELETE,
+                resource=ResourceType.COURSE,
+                resource_id=str(course_id),
+            ),
+            "is_owner": course.owner_id == current_user.id,
+            "available_actions": await get_available_actions(
+                current_user, course_id, ResourceType.COURSE
+            ),
+        })
+        return course_dict
+
+    return course
+```
+
+**Endpoints to Update (68 total):**
+
+- ✅ Courses (7 endpoints)
+- ✅ Activities (5 endpoints)
+- ✅ Assignments (6 endpoints)
+- ✅ Discussions (7 endpoints)
+- ✅ Users (9 endpoints)
+- ✅ Organizations (6 endpoints)
+- ✅ User Groups (5 endpoints)
+- ✅ Exams/Quizzes (7 endpoints)
+- ✅ Payments (8 endpoints)
+
+#### 1.4 Add Missing Permission Checks
+
+**Priority Order:**
+
+1. **CRITICAL** (Week 1)
+   - [ ] User CRUD endpoints
+   - [ ] Course CRUD endpoints
+   - [ ] Payment/product endpoints
+   - [ ] User group endpoints
+
+2. **HIGH** (Week 2)
+   - [ ] Activity CRUD endpoints
+   - [ ] Assignment grading endpoints
+   - [ ] Exam management endpoints
+   - [ ] Discussion moderation endpoints
+
+**Implementation Pattern:**
+
+```python
+@router.put("/courses/{course_id}")
+async def update_course(
+    course_id: int,
+    course_data: CourseUpdate,
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[UnifiedPermissionService, Depends(get_permission_service)],
+):
+    # Permission check - REQUIRED
+    allowed = await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.COURSE,
+        resource_id=str(course_id),
     )
+
+    if not allowed:
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "code": "PERMISSION_DENIED",
+                "message": "You don't have permission to update this course",
+                "required_permission": "course:update:own",
+            }
+        )
+
+    # Proceed with update
+    return update_course_in_db(course_id, course_data)
 ```
 
-### 4.2 Frontend Changes
+---
 
-#### Change 4: Remove Session Permission Fallback
+### Phase 2: Frontend Type System Cleanup (Week 2)
 
-**File**: `apps/web/hooks/usePermission.ts`
+**Goal:** Fix type misalignments and remove legacy structures
 
-**Before**:
+#### 2.1 Update Permission Types
 
-```typescript
-const permissions = useMemo(() => {
-  if (permissionsData?.permissions) {
-    return permissionsData.permissions;
-  }
-  // Fallback to session permissions (for backward compatibility)
-  return session?.permissions ?? {};
-}, [permissionsData?.permissions, session?.permissions]);
-```
+**File:** `apps/web/types/permissions.ts`
 
-**After**:
+**Remove Legacy Types:**
 
 ```typescript
-const permissions = useMemo(() => {
-  // Only use API-fetched permissions
-  return permissionsData?.permissions ?? {};
-}, [permissionsData?.permissions]);
-```
+// ❌ REMOVE - Single role assumption
+interface User {
+  role: Role; // Single role
+}
 
-#### Change 5: Add Resource Permission Hook
-
-**File**: `apps/web/hooks/useResourcePermission.ts` (NEW)
-
-```typescript
-import { getAPIUrl } from '@/services/config/config';
-import useSWR from 'swr';
-
-export function useResourcePermission(
-  resourceType: ResourceType,
-  resourceId: string,
-  accessToken?: string,
-) {
-  const { data, error, isLoading } = useSWR(
-    accessToken && resourceId
-      ? `${getAPIUrl()}permissions/resource/${resourceType}/${resourceId}`
-      : null,
-    (url: string) =>
-      fetch(url, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }).then((r) => r.json()),
-  );
-
-  return {
-    permissions: data?.permissions ?? {},
-    isLoading,
-    error,
+// ❌ REMOVE - Nested rights structure
+interface Role {
+  rights: {
+    courses: {
+      action_create: boolean;
+      action_update: boolean;
+    };
   };
 }
 ```
 
-#### Change 6: Improve Permission Denied UX
-
-**File**: `apps/web/components/PermissionDenied.tsx` (NEW)
+**Add Correct Types:**
 
 ```typescript
-interface PermissionDeniedProps {
-  action: Action;
-  resource: ResourceType;
-  requiredPermission?: string;
-  reason?: string;
+// ✅ ADD - Multiple roles support
+interface User {
+  roles: Role[]; // Multiple roles
 }
 
-export function PermissionDenied({
-  action,
-  resource,
-  requiredPermission,
-  reason
-}: PermissionDeniedProps) {
-  const { isAdmin } = usePermission();
-
-  return (
-    <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-      <div className="flex items-center gap-2">
-        <AlertCircle className="h-5 w-5 text-red-600" />
-        <h3 className="font-semibold text-red-900">Permission Denied</h3>
-      </div>
-      <p className="mt-2 text-sm text-red-800">
-        You don't have permission to {action} {resource}.
-      </p>
-      {requiredPermission && (
-        <p className="mt-1 text-xs text-red-700">
-          Required permission: <code>{requiredPermission}</code>
-        </p>
-      )}
-      {reason && (
-        <p className="mt-1 text-xs text-red-700">
-          Reason: {reason}
-        </p>
-      )}
-      {isAdmin && (
-        <Link href="/settings/roles" className="mt-2 text-sm text-blue-600 underline">
-          Manage roles and permissions
-        </Link>
-      )}
-    </div>
-  );
+// ✅ ADD - Resource permission metadata
+interface ResourcePermissionMetadata {
+  can_read: boolean;
+  can_update: boolean;
+  can_delete: boolean;
+  can_manage: boolean;
+  is_owner: boolean;
+  available_actions: Action[];
 }
+
+// ✅ ADD - Properly typed resource permission
+export interface ResourcePermission {
+  id: number;
+  user_id: number;
+  resource_type: ResourceType;
+  resource_id: string;
+  permission_id: number;
+  granted_at: string;
+  granted_by?: number | null;
+  expires_at?: string | null;
+}
+
+// ✅ UPDATE - No more 'any' types
+export interface UserPermissionsResponse {
+  user_id: number;
+  org_id?: number | null;
+  roles: Role[];
+  permissions: Record<string, boolean>;
+  resource_permissions: ResourcePermission[]; // Properly typed
+}
+
+// ✅ ADD - Course with metadata
+export interface CourseWithMetadata extends Course {
+  can_update: boolean;
+  can_delete: boolean;
+  can_publish: boolean;
+  is_owner: boolean;
+  available_actions: Action[];
+}
+```
+
+#### 2.2 Remove Session Permission Fallbacks
+
+**Files to Update:**
+
+1. **`apps/web/components/Dashboard/Menus/DashMobileMenu.tsx`**
+
+   ```typescript
+   // ❌ REMOVE
+   const permissions = session?.data?.permissions ?? {};
+   const canManageOrganization =
+     permissions['organizations:read:org'] === true ||
+     permissions['organizations:update:org'] === true;
+
+   // ✅ REPLACE WITH
+   const { can } = usePermission();
+   const canManageOrganization = can(Actions.MANAGE, ResourceTypes.ORGANIZATION);
+   ```
+
+2. **Search and Replace All Occurrences:**
+
+   ```bash
+   # Find all session permission accesses
+   grep -r "session?.permissions" apps/web/
+   grep -r "session?.user?.role" apps/web/
+   grep -r "session.permissions" apps/web/
+   ```
+
+**Remove Patterns:**
+
+- `session?.permissions?.[...]`
+- `session?.user?.role?.rights`
+- `session?.data?.permissions`
+- Direct session permission access
+
+**Replace With:**
+
+- `usePermission()` hook
+- `useBatchPermissions()` for multiple checks
+- `useResourcePermission()` for resource-specific checks
+
+#### 2.3 Fix Multi-Role Support
+
+**File:** `apps/web/components/Dashboard/Pages/Users/OrgUsers/OrgUsers.tsx`
+
+**Current (WRONG):**
+
+```typescript
+// ❌ Assumes single role
+user.role.name;
+user.role.role_uuid;
+
+const getRolePriority = (roleObj: any) => {
+  const roleName = roleObj?.name || roleObj?.role?.name || '';
+  // ...
+};
+```
+
+**Fixed:**
+
+```typescript
+// ✅ Multiple roles support
+user.roles: Role[]  // Array of roles
+
+const getUserHighestRole = (roles: Role[]): Role | null => {
+  if (!roles || roles.length === 0) return null;
+
+  // Sort by role priority (admin > instructor > student)
+  const sorted = [...roles].sort((a, b) => {
+    const priorityA = getRolePriority(a.slug);
+    const priorityB = getRolePriority(b.slug);
+    return priorityB - priorityA;
+  });
+
+  return sorted[0];
+};
+
+const getRolePriority = (slug: string): number => {
+  const priorities: Record<string, number> = {
+    [RoleSlugs.SUPER_ADMIN]: 1000,
+    [RoleSlugs.ORG_ADMIN]: 900,
+    [RoleSlugs.MAINTAINER]: 800,
+    [RoleSlugs.INSTRUCTOR]: 700,
+    [RoleSlugs.STUDENT]: 100,
+  };
+  return priorities[slug] ?? 0;
+};
+
+// Display all roles, not just one
+const RoleBadges = ({ roles }: { roles: Role[] }) => (
+  <div className="flex gap-1 flex-wrap">
+    {roles.map(role => (
+      <Badge key={role.id} variant={getRoleBadgeVariant(role.slug)}>
+        {role.name}
+      </Badge>
+    ))}
+  </div>
+);
+```
+
+#### 2.4 Remove Hardcoded Role Names
+
+**Find and Replace:**
+
+```typescript
+// ❌ REMOVE
+if (user.role.name === 'Админ')
+if (role.name === 'Admin')
+if (roleName === 'Instructor')
+
+// ✅ REPLACE WITH
+if (hasRole(RoleSlugs.ORG_ADMIN))
+if (hasRole(RoleSlugs.INSTRUCTOR))
+if (roles.some(r => r.slug === RoleSlugs.MAINTAINER))
+```
+
+**Files to Update:**
+
+- `apps/web/components/Dashboard/Pages/Users/OrgUsers/OrgUsers.tsx`
+- `apps/web/components/Security/HeaderProfileBox.tsx`
+- Any component with role name comparisons
+
+---
+
+### Phase 3: Remove Backward Compatibility Code (Week 3)
+
+**Goal:** Eliminate all legacy/fallback/compatibility code
+
+#### 3.1 Remove Legacy API Endpoints
+
+**Backend - Delete These Files/Routes:**
+
+- [ ] Any `/roles-new` endpoints → Use `/roles`
+- [ ] Any `/permissions-new` endpoints → Use `/permissions`
+- [ ] Old rights-based endpoints
+- [ ] Legacy role UUID-based lookups
+
+**Verify No Usage:**
+
+```bash
+# Search frontend for old endpoints
+grep -r "roles-new" apps/web/
+grep -r "permissions-new" apps/web/
+grep -r "role_uuid" apps/web/
+```
+
+#### 3.2 Remove Session Permission Storage
+
+**File:** `apps/web/auth.ts`
+
+**Remove:**
+
+```typescript
+// ❌ REMOVE - Don't store permissions in session
+session.user.permissions = await fetchUserPermissions();
+session.user.role = await fetchUserRole();
+
+// Session should ONLY contain:
+// - user.id
+// - user.email
+// - user.name
+// - tokens (access_token, refresh_token)
+```
+
+**Why:**
+
+- Permissions should be fetched fresh from API
+- Prevents stale permission data
+- Reduces session payload size
+- Enables real-time permission updates
+
+#### 3.3 Remove Fallback Permission Checks
+
+**Pattern to Find:**
+
+```typescript
+// ❌ REMOVE all instances
+const permissions = data?.permissions ?? session?.permissions ?? {};
+const canDo = permissions[key] ?? fallbackCheck() ?? false;
+
+// ✅ REPLACE with single source of truth
+const { can } = usePermission();
+const canDo = can(action, resource);
+```
+
+#### 3.4 Clean Up Hook Implementations
+
+**File:** `apps/web/hooks/usePermission.ts`
+
+**Remove:**
+
+- [ ] Any session fallback logic
+- [ ] Local permission caching beyond SWR
+- [ ] Compatibility shims for old structures
+
+**Keep:**
+
+- ✅ SWR caching (60s deduplication)
+- ✅ Backend API as single source of truth
+- ✅ Anonymous user handling (read-only public content)
+
+#### 3.5 Remove Backward Compatibility Comments
+
+**Search and Remove:**
+
+```bash
+# Find all backward compatibility comments
+grep -r "backward compat" apps/
+grep -r "fallback" apps/
+grep -r "legacy" apps/
+grep -r "TODO.*remove" apps/
+grep -r "FIXME.*remove" apps/
+```
+
+**Review Each:**
+
+- Remove code marked as "legacy"
+- Remove code marked as "backward compatible"
+- Remove "fallback" logic that references old systems
+- Keep legitimate error fallbacks (network errors, etc.)
+
+---
+
+### Phase 4: UI/UX Improvements (Week 4)
+
+**Goal:** Use permission metadata for better UX
+
+#### 4.1 Disable Buttons Based on Metadata
+
+**Before:**
+
+```tsx
+<Button onClick={handleDelete}>Delete Course</Button>
+```
+
+**After:**
+
+```tsx
+const course = useCourseWithMetadata(courseId);
+
+<Button
+  onClick={handleDelete}
+  disabled={!course.can_delete}
+  title={!course.can_delete ? "You don't have permission to delete this course" : undefined}
+>
+  Delete Course
+</Button>;
+```
+
+#### 4.2 Conditional Rendering with Guards
+
+**Use PermissionGuard:**
+
+```tsx
+<PermissionGuard
+  action={Actions.DELETE}
+  resource={ResourceTypes.COURSE}
+  fallback={<DisabledDeleteButton />}
+>
+  <DeleteButton />
+</PermissionGuard>
+```
+
+#### 4.3 Show Owner Badges
+
+```tsx
+{
+  course.is_owner && <Badge variant="success">Owner</Badge>;
+}
+{
+  !course.is_owner && course.can_update && <Badge variant="secondary">Editor</Badge>;
+}
+```
+
+#### 4.4 Dynamic Action Menus
+
+```tsx
+const availableActions = course.available_actions;
+
+<DropdownMenu>
+  {availableActions.includes(Actions.UPDATE) && (
+    <DropdownMenuItem onClick={handleEdit}>Edit</DropdownMenuItem>
+  )}
+  {availableActions.includes(Actions.DELETE) && (
+    <DropdownMenuItem onClick={handleDelete}>Delete</DropdownMenuItem>
+  )}
+  {availableActions.includes(Actions.PUBLISH) && (
+    <DropdownMenuItem onClick={handlePublish}>Publish</DropdownMenuItem>
+  )}
+</DropdownMenu>;
 ```
 
 ---
 
-## 5. Data Migration Checklist
+### Phase 5: Testing & Validation (Week 5)
 
-### 5.1 Database Verification
+#### 5.2 Integration Tests
 
-- [ ] Verify all roles have been migrated to `roles` table
-- [ ] Verify all permissions exist in `permissions` table
-- [ ] Verify `role_permissions` junction table is populated
-- [ ] Verify `user_roles` table has all user-role assignments
-- [ ] Verify old `role` table `rights` column has been dropped
+**Test Permission Flow:**
 
-### 5.2 Data Integrity Checks
+```python
+# test_permissions_integration.py
+async def test_course_update_permission_flow():
+    # Create course as instructor
+    course = await create_course(instructor_token)
 
-**SQL Queries to Run**:
+    # Get course as student
+    response = await client.get(f"/courses/{course.id}", headers=student_auth)
+    course_data = response.json()
 
-```sql
--- Check for users without roles
-SELECT u.id, u.email, u.username
-FROM "user" u
-LEFT JOIN user_roles ur ON u.id = ur.user_id
-WHERE ur.user_id IS NULL;
+    # Verify permission metadata
+    assert course_data["can_update"] == False
+    assert course_data["can_delete"] == False
+    assert course_data["is_owner"] == False
+    assert Actions.READ in course_data["available_actions"]
+    assert Actions.UPDATE not in course_data["available_actions"]
 
--- Check for roles without permissions
-SELECT r.id, r.slug, r.name, COUNT(rp.permission_id) as perm_count
-FROM roles r
-LEFT JOIN role_permissions rp ON r.id = rp.role_id
-GROUP BY r.id
-HAVING COUNT(rp.permission_id) = 0;
-
--- Check for orphaned user_roles (role doesn't exist)
-SELECT ur.*
-FROM user_roles ur
-LEFT JOIN roles r ON ur.role_id = r.id
-WHERE r.id IS NULL;
-
--- Verify permission name format (should be resource:action:scope)
-SELECT name FROM permissions
-WHERE name NOT LIKE '%:%:%';
+    # Verify permission enforcement
+    update_response = await client.put(
+        f"/courses/{course.id}",
+        json={"name": "Hacked"},
+        headers=student_auth
+    )
+    assert update_response.status_code == 403
 ```
 
-### 5.3 Session Data Migration
+#### 5.3 Security Audit
 
-- [ ] Update JWT token generation to include new permission format
-- [ ] Clear old Redis cache entries with legacy permission structure
-- [ ] Force all users to re-authenticate to get new tokens
+**Verify No Permission Bypasses:**
 
----
+```bash
+# Run security scan
+python scripts/verify_rbac_refactoring.py
 
-## 7. Testing Plan
-
-### 7.1 Unit Tests
-
-**Backend**:
-
-- [ ] Test `UnifiedPermissionService.check()` for all resource types
-- [ ] Test scope evaluation (ALL, ORG, OWN, ASSIGNED)
-- [ ] Test role hierarchy and permission inheritance
-- [ ] Test resource permission overrides
-- [ ] Test permission caching
-- [ ] Test audit logging
-
-## 9. Documentation Updates
-
-### 9.1 Developer Documentation
-
-- [ ] Update RBAC architecture diagram
-- [ ] Document `UnifiedPermissionService` API
-- [ ] Document permission naming convention
-- [ ] Document role hierarchy system
-- [ ] Document scope evaluation rules
-- [ ] Add code examples for common permission checks
-
-### 9.2 API Documentation
-
-- [ ] Update OpenAPI schema with permission requirements
-- [ ] Document all permission-related endpoints
-- [ ] Add examples for batch permission checks
-- [ ] Document error codes and responses
+# Check for:
+# ✓ No session.permissions access
+# ✓ No session.user.role access
+# ✓ All endpoints have permission checks
+# ✓ No hardcoded role names
+# ✓ No legacy API endpoints accessible
+```
 
 ---
 
-## 10. Timeline & Resources
+### Phase 6: Documentation Updates (Week 6)
 
-### 10.1 Estimated Timeline
+#### 6.1 Update Developer Guide
 
-| Phase                          | Duration    | Dependencies                |
-| ------------------------------ | ----------- | --------------------------- |
-| Phase 1: Backend Consolidation | 2 weeks     | Database migration complete |
-| Phase 2: Frontend Overhaul     | 2 weeks     | Phase 1 complete            |
-| Phase 3: API Alignment         | 1 week      | Phase 2 complete            |
-| Phase 4: Testing & Validation  | 1 week      | Phase 3 complete            |
-| **Total**                      | **6 weeks** |                             |
+**File:** `apps/web/docs/RBAC_DEVELOPER_GUIDE.md`
 
-## 11. Success Criteria
+**Add Sections:**
 
-### 11.1 Completion Criteria
+- ✅ Using Response Metadata
+- ✅ Multi-Role Support
+- ✅ Permission Guard Best Practices
+- ❌ Remove Legacy System References
 
-- [ ] All backend services use `UnifiedPermissionService`
-- [ ] No hardcoded role IDs in codebase
-- [ ] Frontend fetches permissions from API only (no session fallback)
-- [ ] All permission checks use new format (`resource:action:scope`)
-- [ ] Resource-level permissions implemented
-- [ ] Role hierarchy visible in UI
-- [ ] Permission denied messages are user-friendly
-- [ ] All tests passing
-- [ ] Documentation updated
+**Example:**
 
-### 11.2 Acceptance Criteria
+````markdown
+## Using Response Metadata
 
-**Functional**:
+All resource responses now include permission metadata:
 
-- User can create/edit/delete resources according to their permissions
-- Admin can manage roles and assign permissions
-- Permission changes reflect immediately (within 1 minute)
-- Users see appropriate UI based on permissions
+```tsx
+const { data: course } = useCourse(courseId);
 
-**Non-Functional**:
+// Access permission metadata
+if (course.can_update) {
+  // Show edit UI
+}
 
-- Permission checks complete in <50ms (p95)
-- No security vulnerabilities in permission system
-- No permission bypass exploits
-- System handles 1000 permission checks/second
+if (course.is_owner) {
+  // Show owner badge
+}
 
----
+// Use available actions for dynamic menus
+course.available_actions.forEach((action) => {
+  // Render menu item
+});
+```
+````
 
-## 12. Risk Assessment
+````
 
-### 12.1 Risks
+#### 6.2 Update Migration Guide
 
-| Risk                            | Probability | Impact   | Mitigation                                      |
-| ------------------------------- | ----------- | -------- | ----------------------------------------------- |
-| Permission bypass vulnerability | Low         | Critical | Extensive security testing, code review         |
-| Data migration errors           | Medium      | High     | Comprehensive data validation, rollback plan    |
-| Performance degradation         | Medium      | Medium   | Load testing, Redis caching, query optimization |
-| Frontend breaking changes       | Medium      | Medium   | Backward compatibility layer, phased rollout    |
-| User confusion during migration | High        | Low      | Clear communication, user documentation         |
+**File:** `apps/web/docs/RBAC_MIGRATION_GUIDE.md`
 
-### 12.2 Contingency Plans
+**Mark as Complete:**
+- ✅ All migration steps completed
+- ✅ No backward compatibility needed
+- ✅ Legacy system fully deprecated
 
-**If performance degrades**:
+**Add Deprecation Notice:**
+```markdown
+## Deprecated APIs (DO NOT USE)
 
-- Increase Redis cache TTL
-- Add database indexes on permission tables
-- Implement request-level permission caching
+The following APIs have been removed:
 
-**If users are locked out**:
-
-- Emergency admin override endpoint
-- Fallback to previous permission system
-- Manual role assignment via SQL
-
-**If migration fails**:
-
-- Execute rollback plan (Section 6)
-- Investigate root cause
-- Fix and retry migration
+- ❌ `session.permissions` - Use `usePermission()` hook
+- ❌ `session.user.role` - Use `usePermission().roles`
+- ❌ `/api/v1/roles-new` - Use `/api/v1/roles`
+- ❌ `user.role` (single) - Use `user.roles` (array)
+- ❌ `role.role_uuid` - Use `role.slug`
+````
 
 ---
 
-## 14. Post-Migration Tasks
+## Migration Checklist
 
-### 14.1 Cleanup
+### Backend
 
-- [ ] Remove deprecated RBAC functions from `rbac.py`
-- [ ] Remove old test fixtures
-- [ ] Remove backward compatibility code from frontend
-- [ ] Clean up migration scripts
-- [ ] Remove unused permissions from database
+- [ ] Add `PermissionMetadataMixin` to response models
+- [ ] Update 68 endpoints to include permission metadata
+- [ ] Add missing permission checks (28 endpoints)
+- [ ] Remove legacy `/roles-new` and `/permissions-new` endpoints
+- [ ] Remove backward compatibility code
+- [ ] Update OpenAPI documentation
+- [ ] Add integration tests for metadata
 
-### 14.2 Optimization
+### Frontend
 
-- [ ] Analyze permission check patterns, optimize common paths
-- [ ] Tune Redis cache configuration based on usage
-- [ ] Add database indexes if needed
-- [ ] Optimize role hierarchy queries
+- [ ] Fix `ResourcePermission` type (remove `any`)
+- [ ] Update `User` type to support multiple roles
+- [ ] Remove `session.permissions` fallbacks (all files)
+- [ ] Remove `session.user.role` single role access
+- [ ] Fix `OrgUsers.tsx` multi-role support
+- [ ] Remove hardcoded role names (use slugs)
+- [ ] Update all components to use response metadata
+- [ ] Add `useResourceMetadata()` hook if needed
+- [ ] Remove legacy API endpoint calls
+- [ ] Update permission guards to use metadata
 
-### 14.3 Future Enhancements
+### Testing
 
-**Planned Features**:
+- [ ] Unit tests for hooks (no session fallbacks)
 
-- [ ] Time-based permissions (temporary access)
-- [ ] Conditional permissions (ABAC policies)
-- [ ] Permission delegation (user can grant subset of permissions)
-- [ ] Permission analytics dashboard
-- [ ] Permission templates for common roles
+### Documentation
+
+- [ ] Update RBAC Developer Guide
+- [ ] Mark Migration Guide as complete
+- [ ] Add deprecation notices
+- [ ] Update OpenAPI specs
+- [ ] Create troubleshooting guide
+- [ ] Document breaking changes
 
 ---
 
-## 15. Conclusion
+## Breaking Changes
 
-This plan provides a comprehensive roadmap for aligning the frontend and backend RBAC systems. The
-migration will be executed in phases to minimize risk and allow for rollback if issues arise.
-Success depends on thorough testing, careful data migration, and clear communication with all
-stakeholders.
+### For Frontend Developers
 
-**Key Takeaways**:
+1. **No More Session Permissions**
+   - `session.permissions` is removed
+   - Must use `usePermission()` hook
 
-1. Backend has already migrated to new permission system
-2. Frontend needs significant updates to align
-3. Old RBAC functions should be deprecated, not removed immediately
+2. **Multiple Roles Per User**
+   - `user.role` → `user.roles` (array)
+   - Update UI to handle multiple roles
+
+3. **Role Slugs Required**
+   - `role.role_uuid` → `role.slug`
+   - No more UUID-based role checks
+
+4. **Response Metadata Required**
+   - All resource responses now include permission metadata
+   - Update TypeScript types accordingly
+
+### For Backend Developers
+
+1. **Permission Checks Mandatory**
+   - All modification endpoints must check permissions
+   - Use `UnifiedPermissionService.check()`
+
+2. **Response Metadata Required**
+   - All GET endpoints must include permission metadata
+   - Use `add_permission_metadata()` helper
+
+3. **Legacy Endpoints Removed**
+
+---
+
+## Success Criteria
+
+### Functionality
+
+- ✅ All endpoints have permission checks
+- ✅ All responses include permission metadata
+- ✅ Frontend uses single source of truth (API)
+- ✅ Multi-role support works correctly
+- ✅ No session-based permission fallbacks
+
+### Security
+
+- ✅ No permission bypasses possible
+- ✅ All modifications require proper permissions
+- ✅ Resource ownership correctly validated
+- ✅ Role hierarchy properly enforced
+
+### Performance
+
+- ✅ <100ms permission check latency
+- ✅ 50% reduction in API calls
+- ✅ Effective caching (60s SWR)
+
+### Code Quality
+
+- ✅ No `any` types in permission system
+- ✅ No hardcoded role names
+- ✅ No backward compatibility code
+- ✅ TypeScript strict mode passes
+- ✅ All tests passing
+
+---
+
+## Rollout Strategy
+
+### Phase A: Backend
+
+1. Deploy permission metadata in responses
+2. Add missing permission checks
+3. Remove legacy endpoints
+4. Remove duplications and fully migrate to new system and approaches
+5. Monitor for errors
+
+### Phase B: Frontend
+
+1. Update types and hooks
+2. Remove session fallbacks
+3. Update components to use metadata
+4. Test thoroughly in staging
+
+### Phase C: Cleanup
+
+1. Remove legacy endpoints
+2. Remove backward compatibility code
+3. Remove legacy fallbacks
+4. Final security audit
+5. Performance validation
+
+### Phase D: Documentation
+
+1. Update all documentation
+2. Create migration examples
+3. Announce breaking changes
+4. Deploy to production
+
+---
+
+## Open Questions
+
+1. **Should we batch permission checks on page load?**: Yes
+   - Pro: Fewer API calls, better performance
+   - Con: More complex implementation
+   - Decision: Yes, implement in Phase 4
+
+2. **How to handle permission changes in real-time?**
+   - Options: WebSocket updates, polling, SWR revalidation
+   - Decision: SWR revalidation every 60s + manual refresh
+
+3. **Should anonymous users get metadata?**
+   - Decision: Yes, but all `can_*` flags false except `can_read`
+
+---
+
+## Conclusion
+
+This refactoring plan eliminates all frontend-backend misalignments in the RBAC system and removes
+legacy/compatibility code. The result will be:
+
+- **More Secure:** All endpoints properly protected
+- **More Performant:** Fewer API calls, better caching
+- **More Maintainable:** Single source of truth, clear patterns
+- **Better UX:** Real-time permission updates, disabled buttons, clear feedback

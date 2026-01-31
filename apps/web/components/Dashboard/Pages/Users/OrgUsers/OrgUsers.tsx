@@ -33,11 +33,11 @@ import React, { useMemo, useState, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { RoleSlugs } from '@/types/permissions';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
-import { RoleSlugs } from '@/types/permissions';
 
 const USERS_PER_PAGE = 20;
 
@@ -256,8 +256,7 @@ const OrgUsers = () => {
                               session?.data?.user?.id === user.user.id;
                             const targetPriority = getRolePriority(user.role);
                             const isTargetSuperAdmin = user.role.slug === RoleSlugs.SUPER_ADMIN;
-                            const canManage =
-                              !isSelf && currentUserPriority >= targetPriority && !isTargetSuperAdmin;
+                            const canManage = !isSelf && currentUserPriority >= targetPriority && !isTargetSuperAdmin;
 
                             if (!canManage) {
                               // Determine specific disabled reason for clearer messaging
@@ -282,7 +281,7 @@ const OrgUsers = () => {
                                   dialogContent={
                                     selectedUser ? (
                                       <RolesUpdate
-                                        alreadyAssignedRole={selectedUser.role.role_uuid}
+                                        alreadyAssignedRole={selectedUser.role.slug || selectedUser.role.role_uuid}
                                         setRolesModal={setRolesModal}
                                         user={selectedUser}
                                       />

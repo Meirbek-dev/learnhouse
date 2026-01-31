@@ -2,12 +2,12 @@ import { LoginBonusHandler } from '@/app/orgs/[orgslug]/(withmenu)/_components/L
 import NewCollectionButton from '@components/Objects/StyledElements/Buttons/NewCollectionButton';
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import PermissionGuard from '@components/Security/PermissionGuard';
-import { Actions, ResourceTypes } from '@/types/permissions';
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import { HeroSection } from '@/components/Dashboard/Gamification/hero-section';
+import PermissionGuard from '@components/Security/PermissionGuard';
+import { Actions, ResourceTypes } from '@/types/permissions';
 import type { DashboardData } from '@/types/gamification';
 import { getUriWithOrg } from '@services/config/config';
 import CreateCourseTrigger from './CreateCourseTrigger';
@@ -174,7 +174,10 @@ const LandingClassic = async ({
                 title={t('Collections.title')}
                 type="col"
                 action={
-                  <PermissionGuard action={Actions.CREATE} resource={ResourceTypes.COLLECTION}>
+                  <PermissionGuard
+                    action={Actions.CREATE}
+                    resource={ResourceTypes.COLLECTION}
+                  >
                     <Link
                       prefetch={false}
                       href={getUriWithOrg(orgslug, '/collections/new')}

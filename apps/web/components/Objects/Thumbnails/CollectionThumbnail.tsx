@@ -12,16 +12,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import PermissionGuard from '@components/Security/PermissionGuard';
-import { Actions, ResourceTypes } from '@/types/permissions';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { deleteCollection } from '@services/courses/collections';
+import { AlertTriangle, Crown, Loader2, X } from 'lucide-react';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { Actions, ResourceTypes } from '@/types/permissions';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { AlertTriangle, Loader2, X } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
+import { usePermission } from '@/hooks/usePermission';
 import { useState, useTransition } from 'react';
+import { Badge } from '@components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -39,9 +41,27 @@ const removeCollectionPrefix = (collectionid: string) => {
 const CollectionThumbnail = (props: PropsType) => {
   const t = useTranslations('Components.CollectionThumbnail');
   const org = useOrg() as any;
+  const session = usePlatformSession() as any;
+
+  // Check if current user is the collection owner (created by them)
+  // Note: We don't have owner info in collection data currently, but we can add this later
+  // For now, we'll just show the delete button if they have delete permission
+  const isOwner = false; // TODO: Add owner detection when collection metadata includes creator info
+
   return (
     <div className="group relative overflow-hidden rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
       <div className="bg-primary flex h-full w-full items-center justify-between p-4">
+        {/* Owner badge - shown at top left */}
+        {isOwner && (
+          <Badge
+            variant="default"
+            className="absolute top-2 left-2 z-10 gap-1 backdrop-blur-sm"
+          >
+            <Crown className="h-3 w-3" />
+            Owner
+          </Badge>
+        )}
+
         <div className="flex items-center space-x-2">
           <div className="flex -space-x-3">
             {props.collection.courses.slice(0, 3).map(
@@ -91,8 +111,11 @@ const CollectionAdminEditsArea = (props: any) => {
   const t = useTranslations('Components.CollectionThumbnail');
   const router = useRouter();
   const session = usePlatformSession() as any;
+  const { can } = usePermission();
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  const canDelete = can(Actions.DELETE, ResourceTypes.COLLECTION);
 
   async function deleteCollectionUI() {
     startTransition(async () => {
@@ -103,55 +126,71 @@ const CollectionAdminEditsArea = (props: any) => {
     });
   }
 
+  // Don't show anything if user doesn't have delete permission
+  if (!canDelete) {
+    return (
+      <Tooltip>
+        <TooltipTrigger>
+          <button
+            disabled
+            className="absolute top-2 right-2 cursor-not-allowed rounded-full bg-red-500/50 p-1 text-white opacity-50"
+            aria-label={t('noDeletePermission', {
+              defaultValue: "You don't have permission to delete this collection",
+            })}
+          >
+            <X size={14} />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="left">
+          <p className="text-sm">You don't have permission to delete this collection</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
   return (
-    <PermissionGuard
-      action={Actions.DELETE}
-      resource={ResourceTypes.COLLECTION}
-      fallback={null}
-    >
-      <div className="z-20 px-2">
-        <AlertDialog
-          open={isOpen}
-          onOpenChange={setIsOpen}
-        >
-          <AlertDialogTrigger
-            render={
-              <button className="absolute top-2 right-2 rounded-full bg-red-500 p-1 text-white transition-colors duration-300 hover:bg-red-600">
-                <X size={14} />
-              </button>
-            }
-          />
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
-                <AlertTriangle className="size-8" />
-              </AlertDialogMedia>
-              <AlertDialogTitle>
-                {t('deleteConfirmationTitle', { collectionName: props.collection.name })}
-              </AlertDialogTitle>
-              <AlertDialogDescription>{t('deleteConfirmationMessage')}</AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel />
-              <AlertDialogAction
-                variant="destructive"
-                onClick={deleteCollectionUI}
-                disabled={isPending}
-              >
-                {isPending ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="size-4 animate-spin" />
-                    {t('deleting')}
-                  </div>
-                ) : (
-                  t('deleteButtonText')
-                )}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-    </PermissionGuard>
+    <div className="z-20 px-2">
+      <AlertDialog
+        open={isOpen}
+        onOpenChange={setIsOpen}
+      >
+        <AlertDialogTrigger
+          render={
+            <button className="absolute top-2 right-2 rounded-full bg-red-500 p-1 text-white transition-colors duration-300 hover:bg-red-600">
+              <X size={14} />
+            </button>
+          }
+        />
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
+              <AlertTriangle className="size-8" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>
+              {t('deleteConfirmationTitle', { collectionName: props.collection.name })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>{t('deleteConfirmationMessage')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel />
+            <AlertDialogAction
+              variant="destructive"
+              onClick={deleteCollectionUI}
+              disabled={isPending}
+            >
+              {isPending ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="size-4 animate-spin" />
+                  {t('deleting')}
+                </div>
+              ) : (
+                t('deleteButtonText')
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 };
 
