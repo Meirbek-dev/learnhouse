@@ -64,6 +64,11 @@ interface Activity {
   activity_type: ActivityType;
   name: string;
   published: boolean;
+  can_update?: boolean;
+  can_delete?: boolean;
+  is_owner?: boolean;
+  is_creator?: boolean;
+  available_actions?: string[];
 }
 
 interface ActivityElementProps {
@@ -141,6 +146,12 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
   const [editedName, setEditedName] = useState(activity?.name ?? '');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUpdatingPublish, setIsUpdatingPublish] = useState(false);
+
+  // Permission checks from backend metadata
+  const canUpdate = activity.can_update ?? false;
+  const canDelete = activity.can_delete ?? false;
+  const isOwner = activity.is_owner ?? false;
+  const availableActions = activity.available_actions ?? [];
 
   // Derived values
   const withUnpublishedActivities = course?.withUnpublishedActivities ?? false;
@@ -320,14 +331,23 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
             ) : (
               <div className="group flex items-center gap-2">
                 <p className="truncate text-sm font-medium text-neutral-900">{activity.name}</p>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={handleStartEdit}
-                  className="h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-blue-50 hover:text-blue-700"
-                >
-                  <Pencil className="h-3 w-3" />
-                </Button>
+                {canUpdate && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleStartEdit}
+                    className="h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-blue-50 hover:text-blue-700"
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </Button>
+                )}
+                {isOwner && (
+                  <ToolTip content={t('ownerBadge', { default: 'You created this activity' })}>
+                    <span className="ml-1 rounded-md bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700">
+                      Owner
+                    </span>
+                  </ToolTip>
+                )}
               </div>
             )}
           </div>
@@ -342,31 +362,33 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
             />
 
             {/* Publish/Unpublish Toggle */}
-            <Button
-              size="sm"
-              variant={activity.published ? 'outline' : 'default'}
-              onClick={handleTogglePublish}
-              disabled={isUpdatingPublish}
-              className={
-                activity.published
-                  ? 'border-neutral-300 bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                  : 'bg-green-600 text-white hover:bg-green-700'
-              }
-            >
-              {isUpdatingPublish ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : activity.published ? (
-                <>
-                  <Lock className="h-3.5 w-3.5" />
-                  {!isMobile && <span className="ml-1.5 text-xs">{t('unpublish')}</span>}
-                </>
-              ) : (
-                <>
-                  <Globe className="h-3.5 w-3.5" />
-                  {!isMobile && <span className="ml-1.5 text-xs">{t('publish')}</span>}
-                </>
-              )}
-            </Button>
+            {canUpdate && (
+              <Button
+                size="sm"
+                variant={activity.published ? 'outline' : 'default'}
+                onClick={handleTogglePublish}
+                disabled={isUpdatingPublish}
+                className={
+                  activity.published
+                    ? 'border-neutral-300 bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                    : 'bg-green-600 text-white hover:bg-green-700'
+                }
+              >
+                {isUpdatingPublish ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : activity.published ? (
+                  <>
+                    <Lock className="h-3.5 w-3.5" />
+                    {!isMobile && <span className="ml-1.5 text-xs">{t('unpublish')}</span>}
+                  </>
+                ) : (
+                  <>
+                    <Globe className="h-3.5 w-3.5" />
+                    {!isMobile && <span className="ml-1.5 text-xs">{t('publish')}</span>}
+                  </>
+                )}
+              </Button>
+            )}
 
             {/* Preview Button */}
             <ToolTip
@@ -392,45 +414,47 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
             </ToolTip>
 
             {/* Delete Button */}
-            <AlertDialog
-              open={isDeleteDialogOpen}
-              onOpenChange={setIsDeleteDialogOpen}
-            >
-              <AlertDialogTrigger>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
-                    <AlertTriangle className="size-8" />
-                  </AlertDialogMedia>
-                  <AlertDialogTitle>{t('deleteTitle', { name: activity.name })}</AlertDialogTitle>
-                  <AlertDialogDescription>{t('deleteConfirmation')}</AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isPending} />
-                  <AlertDialogAction
+            {canDelete && (
+              <AlertDialog
+                open={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
+              >
+                <AlertDialogTrigger>
+                  <Button
+                    size="sm"
                     variant="destructive"
-                    onClick={handleDeleteActivity}
-                    disabled={isPending}
                   >
-                    {isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {t('deleting')}
-                      </>
-                    ) : (
-                      t('deleteButton')
-                    )}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
+                      <AlertTriangle className="size-8" />
+                    </AlertDialogMedia>
+                    <AlertDialogTitle>{t('deleteTitle', { name: activity.name })}</AlertDialogTitle>
+                    <AlertDialogDescription>{t('deleteConfirmation')}</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isPending} />
+                    <AlertDialogAction
+                      variant="destructive"
+                      onClick={handleDeleteActivity}
+                      disabled={isPending}
+                    >
+                      {isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          {t('deleting')}
+                        </>
+                      ) : (
+                        t('deleteButton')
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
         </div>
       )}

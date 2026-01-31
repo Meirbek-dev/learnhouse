@@ -15,6 +15,10 @@ class Collection(CollectionBase, table=True):
     org_id: int = Field(
         sa_column=Column(BigInteger, ForeignKey("organization.id", ondelete="CASCADE"))
     )
+    creator_id: int | None = Field(
+        default=None,
+        sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="SET NULL"))
+    )
     collection_uuid: str = ""
     creation_date: str = ""
     update_date: str = ""
@@ -38,3 +42,12 @@ class CollectionRead(CollectionBase):
     collection_uuid: str
     creation_date: str
     update_date: str
+
+
+class CollectionReadWithPermissions(CollectionRead):
+    """Collection response with permission metadata for frontend."""
+    can_update: bool
+    can_delete: bool
+    is_owner: bool
+    is_creator: bool
+    available_actions: list[str]

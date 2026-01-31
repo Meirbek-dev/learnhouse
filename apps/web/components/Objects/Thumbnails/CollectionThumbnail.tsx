@@ -18,10 +18,8 @@ import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { deleteCollection } from '@services/courses/collections';
 import { AlertTriangle, Crown, Loader2, X } from 'lucide-react';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { Actions, ResourceTypes } from '@/types/permissions';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
-import { usePermission } from '@/hooks/usePermission';
 import { useState, useTransition } from 'react';
 import { Badge } from '@components/ui/badge';
 import { useRouter } from 'next/navigation';
@@ -41,12 +39,11 @@ const removeCollectionPrefix = (collectionid: string) => {
 const CollectionThumbnail = (props: PropsType) => {
   const t = useTranslations('Components.CollectionThumbnail');
   const org = useOrg() as any;
-  const session = usePlatformSession() as any;
 
-  // Check if current user is the collection owner (created by them)
-  // Note: We don't have owner info in collection data currently, but we can add this later
-  // For now, we'll just show the delete button if they have delete permission
-  const isOwner = false; // TODO: Add owner detection when collection metadata includes creator info
+  // Use backend metadata for ownership and permissions
+  const isOwner = props.collection.is_owner ?? false;
+  const canDelete = props.collection.can_delete ?? false;
+  const availableActions = props.collection.available_actions ?? [];
 
   return (
     <div className="group relative overflow-hidden rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
@@ -101,6 +98,8 @@ const CollectionThumbnail = (props: PropsType) => {
           org_id={props.org_id}
           collection_uuid={props.collection.collection_uuid}
           collection={props.collection}
+          canDelete={canDelete}
+          availableActions={availableActions}
         />
       </div>
     </div>
@@ -111,11 +110,11 @@ const CollectionAdminEditsArea = (props: any) => {
   const t = useTranslations('Components.CollectionThumbnail');
   const router = useRouter();
   const session = usePlatformSession() as any;
-  const { can } = usePermission();
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const canDelete = can(Actions.DELETE, ResourceTypes.COLLECTION);
+  // Use backend metadata for permissions (passed as props)
+  const canDelete = props.canDelete ?? false;
 
   async function deleteCollectionUI() {
     startTransition(async () => {

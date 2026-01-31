@@ -8,6 +8,7 @@ from src.db.collections import (
     Collection,
     CollectionCreate,
     CollectionRead,
+    CollectionReadWithPermissions,
     CollectionUpdate,
 )
 from src.db.collections_courses import CollectionCourse
@@ -15,6 +16,10 @@ from src.db.courses.courses import Course
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
 from src.services.permissions import get_permission_service
+from src.services.permissions.response_enrichment import (
+    enrich_collection_with_permissions,
+    enrich_collections_with_permissions,
+)
 
 ####################################################
 # CRUD
@@ -26,7 +31,7 @@ async def get_collection(
     collection_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
-) -> CollectionRead:
+) -> CollectionReadWithPermissions:
     statement = select(Collection).where(Collection.collection_uuid == collection_uuid)
     collection = db_session.exec(statement).first()
 
@@ -72,9 +77,14 @@ async def get_collection(
 
     courses = list(db_session.exec(statement).all())
 
-    return CollectionRead.model_validate(
-        {**collection.model_dump(), "courses": courses}
+    # Enrich with permission metadata (will include courses in the response)
+    enriched = await enrich_collection_with_permissions(
+        collection, current_user, db_session, permission_service
     )
+    # Add courses to enriched response
+    enriched_dict = enriched.model_dump()
+    enriched_dict["courses"] = courses
+    return CollectionReadWithPermissions(**enriched_dict)
 
 
 async def create_collection(
@@ -98,6 +108,7 @@ async def create_collection(
 
     # Complete the collection object
     collection.collection_uuid = f"collection_{ULID()}"
+    collection.creator_id = current_user.id  # Set creator
     collection.creation_date = str(datetime.now())
     collection.update_date = str(datetime.now())
 
@@ -271,7 +282,7 @@ async def get_collections(
     db_session: Session,
     page: int = 1,
     limit: int = 10,
-) -> list[CollectionRead]:
+) -> list[CollectionReadWithPermissions]:
     # Convert org_id to int for proper type matching with database
 
     statement_public = select(Collection).where(
@@ -286,6 +297,7 @@ async def get_collections(
     collections = db_session.exec(statement).all()
 
     collections_with_courses = []
+    permission_service = get_permission_service(db_session)
 
     for collection in collections:
         statement_all = (
@@ -315,7 +327,12 @@ async def get_collections(
 
         courses = db_session.exec(statement).all()
 
-        collection = CollectionRead(**collection.model_dump(), courses=list(courses))
-        collections_with_courses.append(collection)
+        # Enrich with permission metadata
+        enriched = await enrich_collection_with_permissions(
+            collection, current_user, db_session, permission_service
+        )
+        enriched_dict = enriched.model_dump()
+        enriched_dict["courses"] = list(courses)
+        collections_with_courses.append(CollectionReadWithPermissions(**enriched_dict))
 
     return collections_with_courses

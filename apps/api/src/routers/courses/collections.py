@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request
 
 from src.core.events.database import get_db_session
-from src.db.collections import CollectionCreate, CollectionRead, CollectionUpdate
+from src.db.collections import CollectionCreate, CollectionRead, CollectionReadWithPermissions, CollectionUpdate
 from src.security.auth import get_current_user
 from src.services.courses.collections import (
     create_collection,
@@ -36,9 +36,9 @@ async def api_get_collection(
     collection_uuid: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
-) -> CollectionRead:
+) -> CollectionReadWithPermissions:
     """
-    Get single collection by ID
+    Get single collection by ID with permission metadata
     """
     return await get_collection(request, collection_uuid, current_user, db_session)
 
@@ -51,9 +51,9 @@ async def api_get_collections_by(
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
-) -> list[CollectionRead]:
+) -> list[CollectionReadWithPermissions]:
     """
-    Get collections by page and limit
+    Get collections by page and limit with permission metadata
     """
     return await get_collections(request, org_id, current_user, db_session, page, limit)
 

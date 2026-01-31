@@ -9,6 +9,8 @@ from typing import Any, TypeVar
 
 from sqlmodel import Session
 
+from src.db.collections import Collection, CollectionRead, CollectionReadWithPermissions
+from src.db.courses.activities import Activity, ActivityRead, ActivityReadWithPermissions
 from src.db.courses.courses import Course, CourseRead, FullCourseRead
 from src.db.courses.enhanced_responses import (
     CourseReadWithPermissions,
@@ -196,6 +198,97 @@ def get_available_actions(
         actions.append("manage")
 
     return actions
+
+
+async def enrich_collection_with_permissions(
+    collection: CollectionRead | Collection,
+    current_user: PublicUser,
+    db_session: Session,
+    permission_service: UnifiedPermissionService,
+) -> CollectionReadWithPermissions:
+    """
+    Enrich a collection response with permission metadata.
+
+    Args:
+        collection: Collection to enrich
+        current_user: Current authenticated user
+        db_session: Database session
+        permission_service: Permission service instance
+
+    Returns:
+        Collection with permission metadata
+    """
+    collection_id = collection.collection_uuid if hasattr(collection, "collection_uuid") else str(collection.id)
+
+    # Check permissions
+    can_update = await permission_service.check_resource_permission(
+        user_id=current_user.id,
+        action=Action.UPDATE,
+        resource_type=ResourceType.COLLECTION,
+        resource_id=collection_id,
+    )
+
+    can_delete = await permission_service.check_resource_permission(
+        user_id=current_user.id,
+        action=Action.DELETE,
+        resource_type=ResourceType.COLLECTION,
+        resource_id=collection_id,
+    )
+
+    # Check ownership
+    is_owner = False
+    is_creator = False
+    if isinstance(collection, Collection) and collection.creator_id:
+        is_creator = collection.creator_id == current_user.id
+        is_owner = is_creator  # For collections, creator is owner
+
+    # Build available actions list
+    available_actions = []
+    available_actions.append("read")  # If they can see it, they can read it
+    if can_update:
+        available_actions.append("update")
+    if can_delete:
+        available_actions.append("delete")
+
+    # Convert to dict and add metadata
+    collection_dict = collection.model_dump() if hasattr(collection, "model_dump") else collection.dict()
+
+    return CollectionReadWithPermissions(
+        **collection_dict,
+        can_update=can_update,
+        can_delete=can_delete,
+        is_owner=is_owner,
+        is_creator=is_creator,
+        available_actions=available_actions,
+    )
+
+
+async def enrich_collections_with_permissions(
+    collections: list[CollectionRead | Collection],
+    current_user: PublicUser,
+    db_session: Session,
+    permission_service: UnifiedPermissionService,
+) -> list[CollectionReadWithPermissions]:
+    """
+    Enrich multiple collections with permission metadata.
+
+    Args:
+        collections: List of collections to enrich
+        current_user: Current authenticated user
+        db_session: Database session
+        permission_service: Permission service instance
+
+    Returns:
+        List of collections with permission metadata
+    """
+    enriched_collections = []
+    for collection in collections:
+        enriched = await enrich_collection_with_permissions(
+            collection, current_user, db_session, permission_service
+        )
+        enriched_collections.append(enriched)
+
+    return enriched_collections
 
 
 async def enrich_generic_resource_with_permissions(

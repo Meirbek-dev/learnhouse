@@ -1,7 +1,7 @@
 from enum import Enum
 
 from pydantic import ConfigDict, field_validator
-from sqlalchemy import JSON, Column, ForeignKey, Integer
+from sqlalchemy import JSON, BigInteger, Column, ForeignKey, Integer
 from sqlmodel import Field
 
 from src.db.strict_base_model import SQLModelStrictBaseModel
@@ -71,6 +71,10 @@ class Activity(ActivityBase, table=True):
         default=None,
         sa_column=Column(Integer, ForeignKey("course.id", ondelete="CASCADE")),
     )
+    creator_id: int | None = Field(
+        default=None,
+        sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="SET NULL"))
+    )
     activity_uuid: str = ""
     creation_date: str = ""
     update_date: str = ""
@@ -103,3 +107,12 @@ class ActivityRead(ActivityBase):
     activity_uuid: str
     creation_date: str
     update_date: str
+
+
+class ActivityReadWithPermissions(ActivityRead):
+    """Activity response with permission metadata."""
+    can_update: bool
+    can_delete: bool
+    is_owner: bool
+    is_creator: bool
+    available_actions: list[str]

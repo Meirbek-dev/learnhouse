@@ -8,6 +8,7 @@ from src.db.courses.activities import (
     Activity,
     ActivityCreate,
     ActivityRead,
+    ActivityReadWithPermissions,
     ActivityUpdate,
 )
 from src.db.courses.chapter_activities import ChapterActivity
@@ -17,6 +18,9 @@ from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
 from src.services.payments.payments_access import check_activity_paid_access
 from src.services.permissions import get_permission_service
+from src.services.permissions.response_enrichment import (
+    enrich_activity_with_permissions,
+)
 
 ####################################################
 # CRUD
@@ -65,6 +69,7 @@ async def create_activity(
     activity.update_date = str(datetime.now())
     activity.org_id = chapter.org_id
     activity.course_id = chapter.course_id
+    activity.creator_id = current_user.id  # Track creator
 
     # Insert Activity in DB
     db_session.add(activity)
@@ -145,7 +150,15 @@ async def get_activity(
         activity_read.content if has_paid_access else {"paid_access": False}
     )
 
-    return activity_read
+    # Enrich with permission metadata
+    enriched_activity = await enrich_activity_with_permissions(
+        activity=activity_read,
+        current_user=current_user,
+        db_session=db_session,
+        permission_service=permission_service,
+    )
+
+    return enriched_activity
 
 
 async def get_activityby_id(
