@@ -281,7 +281,7 @@ const OrgUsers = () => {
                                   dialogContent={
                                     selectedUser ? (
                                       <RolesUpdate
-                                        alreadyAssignedRole={selectedUser.role.slug || selectedUser.role.role_uuid}
+                                        alreadyAssignedRole={selectedUser.role?.slug}
                                         setRolesModal={setRolesModal}
                                         user={selectedUser}
                                       />

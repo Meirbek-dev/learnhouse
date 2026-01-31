@@ -14,6 +14,7 @@ from src.db.organizations import (
     rebuild_organization_models,
 )
 from src.db.permissions import Role, RoleRead, UserRole
+from src.db.permissions.constants import ADMIN_ROLE_SLUGS
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.services.cache import redis_client
@@ -160,9 +161,9 @@ async def remove_user_from_org(
             detail="User not found",
         )
 
-    # Check if user is the last admin (lookup admin role by role_uuid to avoid magic numbers)
+    # Check if user is the last admin (lookup admin role by configured admin slugs)
     admin_role = db_session.exec(
-        select(Role).where(Role.role_uuid == "role_global_admin")
+        select(Role).where(Role.slug.in_(list(ADMIN_ROLE_SLUGS)))
     ).first()
     admin_role_id = admin_role.id if admin_role else 1
 
@@ -196,8 +197,11 @@ async def update_user_role(
     org_id_int = int(org_id)
     user_id_int = int(user_id)
 
-    # find role
-    statement = select(Role).where(Role.role_uuid == role_uuid)
+    # normalize incoming role identifier to slug (handle legacy 'role_*' names)
+    slug = role_uuid.split("_")[-1] if isinstance(role_uuid, str) and role_uuid.startswith("role_") else role_uuid
+
+    # find role by slug
+    statement = select(Role).where(Role.slug == slug)
     result = db_session.exec(statement)
 
     role = result.first()
@@ -232,8 +236,9 @@ async def update_user_role(
     )
 
     # Check if user is the last admin and if the new role is not admin
+    # find any admin role by configured admin slugs
     admin_role = db_session.exec(
-        select(Role).where(Role.role_uuid == "role_global_admin")
+        select(Role).where(Role.slug.in_(list(ADMIN_ROLE_SLUGS)))
     ).first()
     admin_role_id = admin_role.id if admin_role else 1
 
@@ -252,7 +257,7 @@ async def update_user_role(
     if (
         len(admins) == 1
         and int(admins[0].user_id) == user_id_int
-        and str(role_uuid) != "role_global_admin"
+        and slug not in ADMIN_ROLE_SLUGS
     ):
         raise HTTPException(
             status_code=400,
