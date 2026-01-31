@@ -46,21 +46,21 @@ class Action(str, Enum):
 
     for action in actions:
         action_upper = action.upper()
-        python_code += f'    {action_upper} = "{action}"\n'
+        python_code += f'    {action_upper} = "{action_upper}"\n'
 
     python_code += '\n\nclass ResourceType(str, Enum):\n'
     python_code += '    """Types of resources in the system."""\n    \n'
 
     for resource in resources:
         resource_upper = resource.upper()
-        python_code += f'    {resource_upper} = "{resource}"\n'
+        python_code += f'    {resource_upper} = "{resource_upper}"\n'
 
     python_code += '\n\nclass Scope(str, Enum):\n'
     python_code += '    """Scope of a permission - determines what resources it applies to."""\n    \n'
 
     for scope in scopes:
         scope_upper = scope.upper()
-        python_code += f'    {scope_upper} = "{scope}"\n'
+        python_code += f'    {scope_upper} = "{scope_upper}"\n'
 
     python_code += '\n\ndef build_permission_name(\n'
     python_code += '    resource: ResourceType,\n'
@@ -68,7 +68,7 @@ class Action(str, Enum):
     python_code += '    scope: Scope = Scope.ALL,\n'
     python_code += ') -> str:\n'
     python_code += '    """Build a permission name from components."""\n'
-    python_code += '    return f"{resource.value}:{action.value}:{scope.value}"\n'
+    python_code += '    return f"{resource.value.lower()}:{action.value.lower()}:{scope.value.lower()}"\n'
 
     python_code += '\n\ndef parse_permission_name(name: str) -> tuple[str, str, str]:\n'
     python_code += '    """Parse a permission name into components."""\n'
@@ -106,7 +106,7 @@ export const Actions = {{
 
     for action in actions:
         action_upper = action.upper()
-        ts_code += f"  {action_upper}: '{action}',\n"
+        ts_code += f"  {action_upper}: '{action_upper}',\n"
 
     ts_code += '} as const;\n\n'
     ts_code += 'export type Action = (typeof Actions)[keyof typeof Actions];\n\n'
@@ -116,7 +116,7 @@ export const Actions = {{
 
     for resource in resources:
         resource_upper = resource.upper()
-        ts_code += f"  {resource_upper}: '{resource}',\n"
+        ts_code += f"  {resource_upper}: '{resource_upper}',\n"
 
     ts_code += '} as const;\n\n'
     ts_code += 'export type ResourceType = (typeof ResourceTypes)[keyof typeof ResourceTypes];\n\n'
@@ -126,7 +126,7 @@ export const Actions = {{
 
     for scope in scopes:
         scope_upper = scope.upper()
-        ts_code += f"  {scope_upper}: '{scope}',\n"
+        ts_code += f"  {scope_upper}: '{scope_upper}',\n"
 
     ts_code += '} as const;\n\n'
     ts_code += 'export type Scope = (typeof Scopes)[keyof typeof Scopes];\n\n'
@@ -151,7 +151,7 @@ export function buildPermissionName(
   action: Action,
   scope: Scope = Scopes.ALL,
 ): string {
-  return `${resource}:${action}:${scope}`;
+  return `${resource.toLowerCase()}:${action.toLowerCase()}:${scope.toLowerCase()}`;
 }
 
 /**

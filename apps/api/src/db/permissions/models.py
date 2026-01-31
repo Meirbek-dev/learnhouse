@@ -15,7 +15,7 @@ from pydantic import ConfigDict, field_validator
 from sqlalchemy import JSON, Column, ForeignKey, Index, Integer, UniqueConstraint
 from sqlmodel import Field
 
-from src.db.permissions.enums import Action, ResourceType, Scope
+from src.db.permissions.generated_enums import Action, ResourceType, Scope
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
 # ---------------------------------------------------------------------------

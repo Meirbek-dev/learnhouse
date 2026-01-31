@@ -2,60 +2,25 @@
 Enums for the RBAC permission system.
 
 This module defines the core enums used throughout the permission system:
-- Action: What operations can be performed
-- ResourceType: What types of resources exist
-- Scope: The scope/context of a permission
+- Action: What operations can be performed (re-exported from generated_enums)
+- ResourceType: What types of resources exist (re-exported from generated_enums)
+- Scope: The scope/context of a permission (re-exported from generated_enums)
+- AuditAction, AuditLevel, PermissionErrorCode: Additional enums specific to this system
 """
 
 from enum import Enum
 
+# Re-export generated enums to ensure consistency
+from src.db.permissions.generated_enums import Action, ResourceType, Scope
 
-class Action(str, Enum):
-    """Actions that can be performed on resources."""
-
-    CREATE = "create"
-    READ = "read"
-    UPDATE = "update"
-    DELETE = "delete"
-    MANAGE = "manage"  # Full control including settings
-    MODERATE = "moderate"  # Approve/reject content
-    EXPORT = "export"  # Export data
-    INVITE = "invite"  # Invite users
-    GRADE = "grade"  # Grade assignments/quizzes
-    SUBMIT = "submit"  # Submit work
-    ENROLL = "enroll"  # Enroll in courses
-
-
-class ResourceType(str, Enum):
-    """Types of resources in the system."""
-
-    ORGANIZATION = "organization"
-    COURSE = "course"
-    CHAPTER = "chapter"
-    ACTIVITY = "activity"
-    ASSIGNMENT = "assignment"
-    QUIZ = "quiz"
-    USER = "user"
-    USERGROUP = "usergroup"
-    COLLECTION = "collection"
-    ROLE = "role"
-    CERTIFICATE = "certificate"
-    DISCUSSION = "discussion"
-    FILE = "file"
-    ANALYTICS = "analytics"
-    TRAIL = "trail"
-    EXAM = "exam"
-    PAYMENT = "payment"
-    API_TOKEN = "api_token"
-
-
-class Scope(str, Enum):
-    """Scope of a permission - determines what resources it applies to."""
-
-    ALL = "all"  # All resources of type
-    OWN = "own"  # Only owned resources
-    ASSIGNED = "assigned"  # Assigned to user
-    ORG = "org"  # Within organization
+__all__ = [
+    "Action",
+    "ResourceType",
+    "Scope",
+    "AuditAction",
+    "AuditLevel",
+    "PermissionErrorCode",
+]
 
 
 class AuditAction(str, Enum):
