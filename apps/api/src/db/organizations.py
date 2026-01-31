@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from pydantic import ConfigDict
-from sqlalchemy import JSON, Column
+from sqlalchemy import JSON, Column, BigInteger, ForeignKey
 from sqlmodel import Field
 
 from src.db.organization_config import OrganizationConfig
@@ -39,6 +39,10 @@ class Organization(OrganizationBase, table=True):
     org_uuid: str = ""
     creation_date: str = ""
     update_date: str = ""
+    creator_id: int | None = Field(
+        default=None,
+        sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="SET NULL"))
+    )
 
 
 class OrganizationWithConfig(PydanticStrictBaseModel):
@@ -81,6 +85,21 @@ class OrganizationRead(OrganizationBase):
     config: OrganizationConfig | None = None
     creation_date: str
     update_date: str
+
+
+class OrganizationReadWithPermissions(OrganizationRead):
+    """Organization response with permission metadata."""
+
+    # Permission flags
+    can_update: bool | None = False
+    can_delete: bool | None = False
+    can_manage: bool | None = False
+    can_invite: bool | None = False
+    is_owner: bool | None = False
+    is_member: bool | None = False
+
+    # Available actions array
+    available_actions: list[str] | None = Field(default_factory=list)
 
 
 class OrganizationUser(PydanticStrictBaseModel):

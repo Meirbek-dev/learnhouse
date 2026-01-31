@@ -551,6 +551,7 @@ async def create_course(
     course.course_uuid = f"course_{ULID()}"
     course.creation_date = str(datetime.now())
     course.update_date = str(datetime.now())
+    course.creator_id = current_user.id  # Track creator
 
     # Upload thumbnail
     if thumbnail_file and thumbnail_file.filename:

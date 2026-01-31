@@ -570,3 +570,29 @@ async def enrich_user_with_permissions(
     enriched["is_self"] = is_self
 
     return enriched
+
+
+async def enrich_usergroup_with_permissions(
+    usergroup: dict[str, Any],
+    current_user: PublicUser,
+    permission_service: UnifiedPermissionService,
+) -> dict[str, Any]:
+    """
+    Enrich a usergroup with permission metadata.
+
+    Args:
+        usergroup: UserGroup data
+        current_user: The authenticated user
+        permission_service: Unified permission service instance
+
+    Returns:
+        UserGroup with permission metadata
+    """
+    return await enrich_generic_resource_with_permissions(
+        resource=usergroup,
+        resource_type=ResourceType.USERGROUP,
+        resource_id=usergroup.get("id"),
+        current_user=current_user,
+        permission_service=permission_service,
+        actions_to_check=[Action.READ, Action.UPDATE, Action.DELETE, Action.MANAGE],
+    )

@@ -2,7 +2,7 @@ from enum import Enum
 
 from pydantic import ConfigDict, field_validator
 from pydantic import Field as PydanticField
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import BigInteger, Column, ForeignKey, Integer
 from sqlmodel import Field
 
 from src.db.courses.chapters import ChapterRead
@@ -64,6 +64,10 @@ class Course(CourseBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     org_id: int = Field(
         sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
+    )
+    creator_id: int | None = Field(
+        default=None,
+        sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="SET NULL"))
     )
     course_uuid: str = ""
     creation_date: str = ""

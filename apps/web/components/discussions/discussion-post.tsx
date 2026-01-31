@@ -10,6 +10,7 @@ import DiscussionReply from './discussion-reply';
 import { Button } from '@/components/ui/button';
 import RichTextEditor from './rich-text-editor';
 import { Badge } from '@/components/ui/badge';
+import { PermissionTooltip } from '@/components/Utils/PermissionTooltip';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import type React from 'react';
@@ -147,7 +148,10 @@ export default function DiscussionPost({
               </div>
               {(canDelete || canUpdate) && !editingPost && (
                 <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                  {canUpdate && (
+                  <PermissionTooltip
+                    enabled={canUpdate}
+                    action="update"
+                  >
                     <Button
                       variant="ghost"
                       size="sm"
@@ -155,21 +159,26 @@ export default function DiscussionPost({
                         setEditingPost(true);
                         setEditContent(post.postMessage);
                       }}
+                      disabled={!canUpdate}
                       className="h-7 w-7 p-0 text-slate-500 hover:bg-blue-50 hover:text-blue-600"
                     >
                       <Edit size={12} />
                     </Button>
-                  )}
-                  {canDelete && (
+                  </PermissionTooltip>
+                  <PermissionTooltip
+                    enabled={canDelete}
+                    action="delete"
+                  >
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => onDeletePost(post.id)}
+                      disabled={!canDelete}
                       className="h-7 w-7 p-0 text-slate-500 hover:bg-red-50 hover:text-red-600"
                     >
                       <Trash2 size={12} />
                     </Button>
-                  )}
+                  </PermissionTooltip>
                 </div>
               )}
             </div>

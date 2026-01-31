@@ -27,22 +27,13 @@ import {
   AlertDialogHeader,
   AlertDialogMedia,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@components/ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Card, CardContent, CardFooter } from '@components/ui/card';
-import { Actions, ResourceTypes } from '@/types/permissions';
+import { useResourcePermissions } from '@/hooks/useResourcePermissions';
+import { ResourceActionsMenu, type ResourceAction } from '@/components/Utils/ResourceActionsMenu';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
-import { usePermission } from '@/hooks/usePermission';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import Link from '@components/ui/AppLink';
@@ -81,6 +72,14 @@ export interface Course {
   chapters?: {
     activities: any[];
   }[];
+  // Backend permission metadata
+  can_update?: boolean;
+  can_delete?: boolean;
+  can_publish?: boolean;
+  can_manage_contributors?: boolean;
+  is_owner?: boolean;
+  is_contributor?: boolean;
+  available_actions?: string[];
 }
 
 export interface CourseThumbnailProps {
@@ -375,14 +374,16 @@ interface AdminMenuProps {
   course: Course;
   orgSlug: string;
   onDelete: () => Promise<void>;
-  isOwner?: boolean;
 }
 
-const AdminMenu: FC<AdminMenuProps> = ({ course, orgSlug, onDelete, isOwner = false }) => {
+const AdminMenu: FC<AdminMenuProps> = ({ course, orgSlug, onDelete }) => {
   const t = useTranslations('Components.CourseThumbnail');
-  const { can } = usePermission();
+  const router = useRouter();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  // Use backend permission metadata
+  const { canUpdate, canDelete, isOwner, availableActions } = useResourcePermissions(course);
 
   const handleDelete = () => {
     startTransition(async () => {
@@ -393,157 +394,88 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, orgSlug, onDelete, isOwner = fa
 
   const courseIdClean = removeCoursePrefix(course.course_uuid);
 
-  // Check permissions
-  const canUpdate = can(Actions.UPDATE, ResourceTypes.COURSE);
-  const canDelete = can(Actions.DELETE, ResourceTypes.COURSE);
+  // Define available actions using CommonActions helper
+  const actions: ResourceAction[] = [
+    {
+      id: 'edit-content',
+      label: t('editContent'),
+      icon: FilePenLine,
+      onClick: () => router.push(getUriWithOrg(orgSlug, `/dash/courses/course/${courseIdClean}/content`)),
+      requiresAction: 'update',
+    },
+    {
+      id: 'settings',
+      label: t('settings'),
+      icon: Settings2,
+      onClick: () => router.push(getUriWithOrg(orgSlug, `/dash/courses/course/${courseIdClean}/general`)),
+      requiresAction: 'update',
+    },
+    {
+      id: 'delete',
+      label: t('delete'),
+      icon: BookMinus,
+      onClick: () => setIsDeleteDialogOpen(true),
+      variant: 'destructive' as const,
+      requiresAction: 'delete',
+      separator: true,
+    },
+  ];
 
-  // Don't show menu if user has no permissions
-  if (!canUpdate && !canDelete) {
-    return null;
-  }
+  // Custom trigger with owner badge
+  const trigger = (
+    <Button
+      variant="secondary"
+      size="icon"
+      className="bg-background/90 hover:bg-background h-8 w-8 rounded-full border-0 shadow-lg backdrop-blur-md transition-all hover:scale-110"
+      aria-label={t('courseOptions', { defaultValue: 'Course options' })}
+    >
+      <MoreVertical className="h-4 w-4" />
+    </Button>
+  );
 
   return (
-    <div className="absolute top-2 right-2 z-20 opacity-0 transition-all duration-200 group-hover:opacity-100">
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          nativeButton
-          render={
-            <Button
-              variant="secondary"
-              size="icon"
-              className="bg-background/90 hover:bg-background h-8 w-8 rounded-full border-0 shadow-lg backdrop-blur-md transition-all hover:scale-110"
-              aria-label={t('courseOptions', { defaultValue: 'Course options' })}
-            />
-          }
-        >
-          <MoreVertical className="h-4 w-4" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="bg-background/95 w-56 border-0 shadow-xl backdrop-blur-md"
-          sideOffset={8}
-        >
-          {/* Show owner badge at top of menu if user is owner */}
-          {isOwner && (
-            <>
-              <div className="px-2 py-1.5 text-sm">
-                <Badge
-                  variant="default"
-                  className="gap-1"
-                >
-                  <Crown className="h-3 w-3" />
-                  Owner
-                </Badge>
-              </div>
-              <DropdownMenuSeparator />
-            </>
-          )}
+    <>
+      <div className="absolute top-2 right-2 z-20 opacity-0 transition-all duration-200 group-hover:opacity-100">
+        <ResourceActionsMenu
+          availableActions={availableActions}
+          actions={actions}
+          trigger={trigger}
+        />
+      </div>
 
-          {/* Edit Content - requires UPDATE permission */}
-          {canUpdate ? (
-            <DropdownMenuItem
-              nativeButton={false}
-              render={
-                <Link
-                  prefetch={false}
-                  href={getUriWithOrg(orgSlug, `/dash/courses/course/${courseIdClean}/content`)}
-                />
-              }
-              className="focus:bg-muted/50 flex items-center hover:cursor-pointer"
+      {/* Delete confirmation dialog */}
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
+              <AlertTriangle className="size-8" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>{t('deleteConfirmationTitle', { courseName: course.name })}</AlertDialogTitle>
+            <AlertDialogDescription>{t('deleteConfirmationMessage')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel />
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isPending}
             >
-              <FilePenLine className="mr-2 h-4 w-4" /> {t('editContent')}
-            </DropdownMenuItem>
-          ) : null}
-
-          {/* Settings - requires UPDATE permission */}
-          {canUpdate ? (
-            <DropdownMenuItem
-              nativeButton={false}
-              render={
-                <Link
-                  prefetch={false}
-                  href={getUriWithOrg(orgSlug, `/dash/courses/course/${courseIdClean}/general`)}
-                />
-              }
-              className="focus:bg-muted/50 flex items-center hover:cursor-pointer"
-            >
-              <Settings2 className="mr-2 h-4 w-4" /> {t('settings')}
-            </DropdownMenuItem>
-          ) : null}
-
-          {/* Delete - requires DELETE permission */}
-          {canDelete ? (
-            <>
-              {canUpdate && <DropdownMenuSeparator />}
-              <DropdownMenuItem
-                variant="destructive"
-                className="focus:bg-destructive/10 cursor-pointer"
-              >
-                <AlertDialog
-                  open={isDeleteDialogOpen}
-                  onOpenChange={setIsDeleteDialogOpen}
-                >
-                  <AlertDialogTrigger
-                    render={
-                      <button
-                        className="flex py-1.5"
-                        type="button"
-                      >
-                        <BookMinus className="mr-4 h-4 w-4" /> {t('delete')}
-                      </button>
-                    }
-                  />
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
-                        <AlertTriangle className="size-8" />
-                      </AlertDialogMedia>
-                      <AlertDialogTitle>{t('deleteConfirmationTitle', { courseName: course.name })}</AlertDialogTitle>
-                      <AlertDialogDescription>{t('deleteConfirmationMessage')}</AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel />
-                      <AlertDialogAction
-                        variant="destructive"
-                        onClick={handleDelete}
-                        disabled={isPending}
-                      >
-                        {isPending ? (
-                          <div className="flex items-center gap-2">
-                            <Loader2 className="size-4 animate-spin" />
-                            {t('deleting')}
-                          </div>
-                        ) : (
-                          t('deleteButtonText')
-                        )}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </DropdownMenuItem>
-            </>
-          ) : (
-            // Show disabled delete option with tooltip explaining why
-            <Tooltip>
-              <TooltipTrigger>
-                <div>
-                  <DropdownMenuItem
-                    variant="destructive"
-                    disabled
-                    className="cursor-not-allowed opacity-50"
-                  >
-                    <BookMinus className="mr-4 h-4 w-4" /> {t('delete')}
-                  </DropdownMenuItem>
+              {isPending ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="size-4 animate-spin" />
+                  {t('deleting')}
                 </div>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                <p className="text-sm">You don't have permission to delete this course</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+              ) : (
+                t('deleteButtonText')
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
@@ -641,7 +573,6 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
         course={course}
         orgSlug={orgslug}
         onDelete={handleDelete}
-        isOwner={isOwner}
       />
 
       <CourseImage

@@ -161,7 +161,7 @@ function RoleTreeNode({
         {/* Permission count */}
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger asChild>
+            <TooltipTrigger>
               <div className="flex items-center gap-1 text-xs">
                 <Lock className="text-muted-foreground h-3 w-3" />
                 <span className="text-muted-foreground">

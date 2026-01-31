@@ -12,8 +12,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { PermissionTooltip } from '@/components/Utils/PermissionTooltip';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { deleteCollection } from '@services/courses/collections';
 import { AlertTriangle, Crown, Loader2, X } from 'lucide-react';
@@ -125,70 +125,57 @@ const CollectionAdminEditsArea = (props: any) => {
     });
   }
 
-  // Don't show anything if user doesn't have delete permission
-  if (!canDelete) {
-    return (
-      <Tooltip>
-        <TooltipTrigger>
-          <button
-            disabled
-            className="absolute top-2 right-2 cursor-not-allowed rounded-full bg-red-500/50 p-1 text-white opacity-50"
-            aria-label={t('noDeletePermission', {
-              defaultValue: "You don't have permission to delete this collection",
-            })}
-          >
-            <X size={14} />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent side="left">
-          <p className="text-sm">You don't have permission to delete this collection</p>
-        </TooltipContent>
-      </Tooltip>
-    );
-  }
-
   return (
     <div className="z-20 px-2">
-      <AlertDialog
-        open={isOpen}
-        onOpenChange={setIsOpen}
+      <PermissionTooltip
+        enabled={canDelete}
+        action="delete"
       >
-        <AlertDialogTrigger
-          render={
-            <button className="absolute top-2 right-2 rounded-full bg-red-500 p-1 text-white transition-colors duration-300 hover:bg-red-600">
-              <X size={14} />
-            </button>
-          }
-        />
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
-              <AlertTriangle className="size-8" />
-            </AlertDialogMedia>
-            <AlertDialogTitle>
-              {t('deleteConfirmationTitle', { collectionName: props.collection.name })}
-            </AlertDialogTitle>
-            <AlertDialogDescription>{t('deleteConfirmationMessage')}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel />
-            <AlertDialogAction
-              variant="destructive"
-              onClick={deleteCollectionUI}
-              disabled={isPending}
-            >
-              {isPending ? (
-                <div className="flex items-center gap-2">
-                  <Loader2 className="size-4 animate-spin" />
-                  {t('deleting')}
-                </div>
-              ) : (
-                t('deleteButtonText')
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        <AlertDialog
+          open={isOpen}
+          onOpenChange={setIsOpen}
+        >
+          <AlertDialogTrigger
+            disabled={!canDelete}
+            render={
+              <button
+                className="absolute top-2 right-2 rounded-full bg-red-500 p-1 text-white transition-colors duration-300 hover:bg-red-600 disabled:cursor-not-allowed disabled:bg-red-500/50 disabled:opacity-50"
+                disabled={!canDelete}
+              >
+                <X size={14} />
+              </button>
+            }
+          />
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
+                <AlertTriangle className="size-8" />
+              </AlertDialogMedia>
+              <AlertDialogTitle>
+                {t('deleteConfirmationTitle', { collectionName: props.collection.name })}
+              </AlertDialogTitle>
+              <AlertDialogDescription>{t('deleteConfirmationMessage')}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel />
+              <AlertDialogAction
+                variant="destructive"
+                onClick={deleteCollectionUI}
+                disabled={isPending}
+              >
+                {isPending ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="size-4 animate-spin" />
+                    {t('deleting')}
+                  </div>
+                ) : (
+                  t('deleteButtonText')
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </PermissionTooltip>
     </div>
   );
 };

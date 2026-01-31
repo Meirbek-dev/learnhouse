@@ -48,6 +48,8 @@ import Link from '@components/ui/AppLink';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
 import useSWR from 'swr';
+import { useResourcePermissions } from '@/hooks/useResourcePermissions';
+import { PermissionTooltip } from '@/components/Utils/PermissionTooltip';
 
 // Types
 type ActivityType =
@@ -362,12 +364,15 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
             />
 
             {/* Publish/Unpublish Toggle */}
-            {canUpdate && (
+            <PermissionTooltip
+              enabled={canUpdate}
+              action="update"
+            >
               <Button
                 size="sm"
                 variant={activity.published ? 'outline' : 'default'}
                 onClick={handleTogglePublish}
-                disabled={isUpdatingPublish}
+                disabled={isUpdatingPublish || !canUpdate}
                 className={
                   activity.published
                     ? 'border-neutral-300 bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
@@ -388,7 +393,7 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
                   </>
                 )}
               </Button>
-            )}
+            </PermissionTooltip>
 
             {/* Preview Button */}
             <ToolTip
@@ -414,15 +419,19 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
             </ToolTip>
 
             {/* Delete Button */}
-            {canDelete && (
+            <PermissionTooltip
+              enabled={canDelete}
+              action="delete"
+            >
               <AlertDialog
                 open={isDeleteDialogOpen}
                 onOpenChange={setIsDeleteDialogOpen}
               >
-                <AlertDialogTrigger>
+                <AlertDialogTrigger disabled={!canDelete}>
                   <Button
                     size="sm"
                     variant="destructive"
+                    disabled={!canDelete}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -454,7 +463,7 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-            )}
+            </PermissionTooltip>
           </div>
         </div>
       )}

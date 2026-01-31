@@ -166,6 +166,7 @@ async def create_org(
     org.org_uuid = f"org_{ULID()}"
     org.creation_date = str(datetime.now())
     org.update_date = str(datetime.now())
+    org.creator_id = current_user.id
 
     db_session.add(org)
     db_session.commit()
@@ -262,6 +263,7 @@ async def create_org_with_config(
     org.org_uuid = f"org_{ULID()}"
     org.creation_date = str(datetime.now())
     org.update_date = str(datetime.now())
+    org.creator_id = current_user.id
 
     db_session.add(org)
     db_session.commit()

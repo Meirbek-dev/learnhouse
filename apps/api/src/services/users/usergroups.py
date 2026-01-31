@@ -47,6 +47,7 @@ async def create_usergroup(
     usergroup.usergroup_uuid = f"usergroup_{ULID()}"
     usergroup.creation_date = str(datetime.now())
     usergroup.update_date = str(datetime.now())
+    usergroup.creator_id = current_user.id
 
     # Save the object
     db_session.add(usergroup)
