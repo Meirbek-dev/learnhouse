@@ -3,14 +3,21 @@
  *
  * This module exports all permission and role-related components
  * for the new RBAC system.
+ *
+ * CANONICAL API - All permission-related imports should use this module.
  */
 
-export { PermissionDenied } from './PermissionDenied';
-export { RoleHierarchyTree } from './RoleHierarchyTree';
+// Core provider and hook
+export { PermissionProvider } from './PermissionProvider';
+export { usePermissions, useResourcePermissions } from '@/hooks/usePermissions';
+export type { UsePermissionsOptions, ResourceWithPermissions } from '@/hooks/usePermissions';
 
-// Re-export unified permission hook
-export { usePermissions } from '@/hooks/usePermissions';
+// UI Components
+export { PermissionDenied } from './PermissionDenied';
+export { PermissionGuard } from './PermissionGuard';
+export { RoleHierarchyTree } from './RoleHierarchyTree';
+export { AdminGuard } from './AdminGuard';
 
 // Re-export types
-export type { Action, ResourceType, Scope } from '@/types/permissions';
-export { Actions, ResourceTypes, Scopes } from '@/types/permissions';
+export type { Action, ResourceType, Scope, Role, Permission } from '@/types/permissions';
+export { Actions, ResourceTypes, Scopes, RoleSlugs } from '@/types/permissions';

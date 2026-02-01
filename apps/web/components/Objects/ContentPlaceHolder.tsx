@@ -1,5 +1,5 @@
 'use client';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions } from '@/components/Security';
 import { useTranslations } from 'next-intl';
 
 // Terrible name and terible implementation, need to be refactored asap

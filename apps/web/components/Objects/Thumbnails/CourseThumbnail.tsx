@@ -33,7 +33,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Card, CardContent, CardFooter } from '@components/ui/card';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions } from '@/components/Security';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import Link from '@components/ui/AppLink';

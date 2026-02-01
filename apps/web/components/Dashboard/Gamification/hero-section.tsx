@@ -174,7 +174,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
               <p className="text-muted-foreground text-sm">{t(`levels.${getLevelKey(profile.level)}`)}</p>
             </div>
 
-            {/* Level Progress - Enhanced */}
+            {/* Level Progress */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground font-medium">{t('progress.levelProgress')}</span>
@@ -220,7 +220,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
               </div>
             </div>
 
-            {/* Daily XP Progress - Enhanced */}
+            {/* Daily XP Progress */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground flex items-center gap-1.5 font-medium">

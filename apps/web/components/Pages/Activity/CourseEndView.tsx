@@ -345,7 +345,6 @@ const CourseEndView: FC<CourseEndViewProps> = ({
         type: 'image/png',
       });
 
-      // PDF styles - Enhanced Professional Layout
       const styles = StyleSheet.create({
         page: {
           flexDirection: 'column',
@@ -354,7 +353,6 @@ const CourseEndView: FC<CourseEndViewProps> = ({
           position: 'relative',
           fontFamily: 'Roboto',
         },
-        // Enhanced decorative corner accents
         cornerTopLeft: {
           position: 'absolute',
           top: 24,
@@ -460,7 +458,6 @@ const CourseEndView: FC<CourseEndViewProps> = ({
           fontFamily: 'Roboto',
           fontWeight: 600,
         },
-        // Header with enhanced decorative lines
         headerSection: {
           flexDirection: 'column',
           alignItems: 'center',
@@ -566,7 +563,6 @@ const CourseEndView: FC<CourseEndViewProps> = ({
           maxWidth: '75%',
           fontFamily: 'Roboto',
         },
-        // Enhanced decorative divider
         dividerSection: {
           flexDirection: 'row',
           alignItems: 'center',
@@ -587,7 +583,6 @@ const CourseEndView: FC<CourseEndViewProps> = ({
           opacity: 0.8,
           border: `1px solid ${theme.secondary}`,
         },
-        // Information box with enhanced design
         infoSection: {
           flexDirection: 'column',
           alignItems: 'center',
@@ -624,7 +619,6 @@ const CourseEndView: FC<CourseEndViewProps> = ({
           fontFamily: 'Roboto',
           fontWeight: 400,
         },
-        // Enhanced footer
         footerSection: {
           position: 'absolute',
           bottom: 24,

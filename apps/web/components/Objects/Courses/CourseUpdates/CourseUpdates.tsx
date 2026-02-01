@@ -22,7 +22,7 @@ import { useCourse } from '@components/Contexts/CourseContext';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions } from '@/components/Security';
 import { format, formatDistanceToNow } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '@components/ui/textarea';

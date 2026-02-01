@@ -1,21 +1,25 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
-import { useCallback, useMemo } from 'react';
-import useSWR from 'swr';
+/**
+ * usePermissions Hook
+ *
+ * This hook extends the base PermissionProvider with resource-specific features:
+ * - Resource-specific permission fetching
+ * - Metadata extraction from enriched API responses
+ * - Convenience flags for common permissions
+ */
 
-import {
-  Actions,
-  ResourceTypes,
-  Scopes,
-  RoleSlugs,
-  buildPermissionName,
-  isAdminRole,
-  isInstructorOrHigher,
-} from '@/types/permissions';
-import type { Action, ResourceType, Scope } from '@/types/permissions';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { useMemo, useCallback } from 'react';
+import useSWR from 'swr';
+import { useSession } from 'next-auth/react';
 import { getAPIUrl } from '@/services/config/config';
+import { usePermissions as useBasePermissions } from '@/components/Security/PermissionProvider';
+import { Actions, Scopes } from '@/types/permissions';
+import type { Action, ResourceType } from '@/types/permissions';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 /**
  * Resource with permission metadata from enriched API responses.
@@ -42,31 +46,12 @@ export interface ResourceWithPermissions {
   is_owner?: boolean;
   is_creator?: boolean;
   is_contributor?: boolean;
-  is_member?: boolean; // for groups
+  is_member?: boolean;
 
   // Available actions array
   available_actions?: string[];
 }
 
-/**
- * User permissions response from backend.
- */
-interface UserPermissionsResponse {
-  user_id: number;
-  org_id: number | null;
-  roles: {
-    id: number;
-    name: string;
-    slug: string;
-    description: string | null;
-  }[];
-  permissions: Record<string, boolean>;
-  resource_permissions?: any[];
-}
-
-/**
- * Resource-specific permission response from backend.
- */
 interface ResourcePermissionResponse {
   resource_id: string;
   resource_type: ResourceType;
@@ -75,33 +60,6 @@ interface ResourcePermissionResponse {
   available_actions: Action[];
 }
 
-/**
- * SWR fetcher with access token.
- */
-async function permissionFetcher(
-  url: string,
-  accessToken?: string,
-): Promise<UserPermissionsResponse | ResourcePermissionResponse> {
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
-
-  if (accessToken) {
-    headers['Authorization'] = `Bearer ${accessToken}`;
-  }
-
-  const response = await fetch(url, { headers });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch permissions: ${response.statusText}`);
-  }
-
-  return response.json();
-}
-
-/**
- * Options for usePermissions hook.
- */
 export interface UsePermissionsOptions {
   /**
    * Resource type for resource-specific permission checks.
@@ -126,23 +84,40 @@ export interface UsePermissionsOptions {
   resource?: ResourceWithPermissions | null | undefined;
 }
 
+// ============================================================================
+// Fetcher
+// ============================================================================
+
+async function resourcePermissionFetcher(
+  url: string,
+  accessToken?: string,
+): Promise<ResourcePermissionResponse> {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`;
+  }
+
+  const response = await fetch(url, { headers, credentials: 'include' });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch resource permissions: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
 /**
- * Unified permission hook combining global, resource-specific, and metadata-based permissions.
+ * Permission hook with resource-specific features.
  *
- * This hook consolidates three previous hooks into one unified interface:
- * - `usePermission` - Global permissions
- * - `useResourcePermission` - Resource-specific API fetch
- * - `useResourcePermissions` - Metadata extraction from enriched responses
- *
- * @param options - Configuration options for the hook
+ * @param options - Configuration options
  *
  * @example
  * ```tsx
  * // Global permission check
- * const { can, hasRole, isAdmin } = usePermissions();
- * if (can(Actions.CREATE, ResourceTypes.COURSE)) {
- *   // Show create button
- * }
+ * const { can, isAdmin } = usePermissions();
  *
  * // Resource-specific permission check (fetches from API)
  * const { canUpdate, canDelete, isOwner } = usePermissions({
@@ -156,48 +131,43 @@ export interface UsePermissionsOptions {
  * ```
  */
 export function usePermissions(options?: UsePermissionsOptions) {
-  const { data: session, status } = useSession();
-  const org = useOrg() as any;
-  const contextOrgId = org?.id;
-
-  // Determine effective org_id (explicit > context)
-  const effectiveOrgId = options?.orgId ?? contextOrgId;
-
-  // Determine API endpoint based on options
-  const endpoint = useMemo(() => {
-    if (options?.resource) {
-      // Using embedded metadata, no fetch needed
-      return null;
-    }
-
-    if (options?.resourceType && options?.resourceId) {
-      // Resource-specific permissions
-      const orgParam = effectiveOrgId ? `?org_id=${effectiveOrgId}` : '';
-      return `${getAPIUrl()}permissions/resource/${options.resourceType}/${options.resourceId}${orgParam}`;
-    }
-
-    // Global permissions
-    const orgParam = effectiveOrgId ? `?org_id=${effectiveOrgId}` : '';
-    return `${getAPIUrl()}me/permissions${orgParam}`;
-  }, [options?.resource, options?.resourceType, options?.resourceId, effectiveOrgId]);
-
-  // Fetch permissions from API
+  // Get base permissions from provider
+  const basePermissions = useBasePermissions();
+  const { data: session } = useSession();
   const accessToken = session?.tokens?.access_token;
-  const shouldFetch = status === 'authenticated' && accessToken && endpoint !== null;
 
+  // Determine if we need to fetch resource-specific permissions
+  const shouldFetchResource =
+    options?.resourceType && options?.resourceId && !options?.resource && accessToken;
+
+  // Build endpoint for resource-specific permissions
+  const resourceEndpoint = useMemo(() => {
+    if (!shouldFetchResource) return null;
+    const orgParam = options?.orgId ? `?org_id=${options.orgId}` : '';
+    return `${getAPIUrl()}permissions/resource/${options.resourceType}/${options.resourceId}${orgParam}`;
+  }, [shouldFetchResource, options?.resourceType, options?.resourceId, options?.orgId]);
+
+  // Fetch resource-specific permissions
   const {
-    data: apiData,
-    error,
-    isLoading: isLoadingApi,
-  } = useSWR(shouldFetch ? endpoint : null, (url: string) => permissionFetcher(url, accessToken), {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: true,
-    dedupingInterval: 60_000, // Cache for 1 minute
-  });
+    data: resourceData,
+    error: resourceError,
+    isLoading: isLoadingResource,
+  } = useSWR(
+    resourceEndpoint,
+    (url: string) => resourcePermissionFetcher(url, accessToken),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 60_000,
+    },
+  );
 
-  // Extract permissions from either API response or embedded metadata
-  const permissions = useMemo(() => {
-    // Priority 1: Embedded metadata from resource
+  // Extract permissions based on priority:
+  // 1. Embedded metadata from resource prop
+  // 2. Fetched resource-specific permissions
+  // 3. Global permissions from provider
+  const extractedPermissions = useMemo(() => {
+    // Priority 1: Embedded metadata
     if (options?.resource) {
       return {
         can_update: options.resource.can_update ?? false,
@@ -220,9 +190,8 @@ export function usePermissions(options?: UsePermissionsOptions) {
       };
     }
 
-    // Priority 2: API response (resource-specific)
-    if (apiData && 'resource_id' in apiData) {
-      const resourceData = apiData as ResourcePermissionResponse;
+    // Priority 2: Fetched resource permissions
+    if (resourceData) {
       return {
         ...resourceData.permissions,
         is_owner: resourceData.user_is_owner,
@@ -230,295 +199,81 @@ export function usePermissions(options?: UsePermissionsOptions) {
       };
     }
 
-    // Priority 3: API response (global permissions)
-    if (apiData && 'permissions' in apiData) {
-      const userData = apiData as UserPermissionsResponse;
-      return userData.permissions;
-    }
-
+    // Priority 3: Global permissions
     return {};
-  }, [apiData, options?.resource]);
+  }, [options?.resource, resourceData]);
 
-  // Extract roles from API response
-  const roles = useMemo(() => {
-    if (apiData && 'roles' in apiData) {
-      const userData = apiData as UserPermissionsResponse;
-      return userData.roles ?? [];
-    }
-    return [];
-  }, [apiData]);
-
-  /**
-   * Check if user has a specific permission.
-   *
-   * @param action - The action to check (e.g., Actions.CREATE)
-   * @param resource - The resource type (e.g., ResourceTypes.COURSE)
-   * @param scope - The permission scope (defaults to Scopes.ALL)
-   * @returns true if user has the permission
-   */
-  const can = useCallback(
-    (action: Action, resource: ResourceType, scope: Scope = Scopes.ALL): boolean => {
-      if (!session) return false;
-
-      const permissionName = buildPermissionName(resource, action, scope);
-      return permissions[permissionName] === true;
-    },
-    [session, permissions],
-  );
-
-  /**
-   * Check if user has ANY of the specified permissions.
-   *
-   * @param checks - Array of permission checks
-   * @returns true if user has at least one of the permissions
-   */
-  const canAny = useCallback(
-    (checks: Array<{ action: Action; resource: ResourceType; scope?: Scope }>): boolean => {
-      return checks.some((check) => can(check.action, check.resource, check.scope ?? Scopes.ALL));
-    },
-    [can],
-  );
-
-  /**
-   * Check if user has ALL of the specified permissions.
-   *
-   * @param checks - Array of permission checks
-   * @returns true if user has all of the permissions
-   */
-  const canAll = useCallback(
-    (checks: Array<{ action: Action; resource: ResourceType; scope?: Scope }>): boolean => {
-      return checks.every((check) => can(check.action, check.resource, check.scope ?? Scopes.ALL));
-    },
-    [can],
-  );
-
-  /**
-   * Check if user has a specific role by slug.
-   *
-   * @param roleSlug - Role slug to check (e.g., 'instructor', 'admin')
-   * @returns true if user has the role
-   */
-  const hasRole = useCallback(
-    (roleSlug: string): boolean => {
-      return roles.some((role) => role.slug === roleSlug);
-    },
-    [roles],
-  );
-
-  /**
-   * Check if user has ANY of the specified roles.
-   *
-   * @param roleSlugs - Array of role slugs to check
-   * @returns true if user has at least one of the roles
-   */
-  const hasAnyRole = useCallback(
-    (roleSlugs: string[]): boolean => {
-      return roles.some((role) => roleSlugs.includes(role.slug));
-    },
-    [roles],
-  );
-
-  // Computed role flags
-  const isAdmin = useMemo(() => roles.some((role) => isAdminRole(role.slug)), [roles]);
-  const isSuperAdmin = useMemo(() => hasRole(RoleSlugs.SUPER_ADMIN), [hasRole]);
-  const isInstructor = useMemo(() => roles.some((role) => isInstructorOrHigher(role.slug)), [roles]);
-
-  // Convenience flags for common permissions
+  // Convenience flags with fallback to global permissions
   const canUpdate = useMemo(() => {
-    if (options?.resource) {
-      return options.resource.can_update ?? false;
-    }
-    if (permissions.can_update !== undefined) {
-      return permissions.can_update;
+    if (extractedPermissions.can_update !== undefined) {
+      return extractedPermissions.can_update;
     }
     if (options?.resourceType) {
-      return can(Actions.UPDATE, options.resourceType, Scopes.OWN);
+      return basePermissions.can(Actions.UPDATE, options.resourceType, Scopes.OWN);
     }
     return false;
-  }, [permissions, options, can]);
+  }, [extractedPermissions, options?.resourceType, basePermissions]);
 
   const canDelete = useMemo(() => {
-    if (options?.resource) {
-      return options.resource.can_delete ?? false;
-    }
-    if (permissions.can_delete !== undefined) {
-      return permissions.can_delete;
+    if (extractedPermissions.can_delete !== undefined) {
+      return extractedPermissions.can_delete;
     }
     if (options?.resourceType) {
-      return can(Actions.DELETE, options.resourceType, Scopes.OWN);
+      return basePermissions.can(Actions.DELETE, options.resourceType, Scopes.OWN);
     }
     return false;
-  }, [permissions, options, can]);
+  }, [extractedPermissions, options?.resourceType, basePermissions]);
 
   const canCreate = useMemo(() => {
-    if (options?.resource) {
-      return options.resource.can_create ?? false;
-    }
-    if (permissions.can_create !== undefined) {
-      return permissions.can_create;
+    if (extractedPermissions.can_create !== undefined) {
+      return extractedPermissions.can_create;
     }
     if (options?.resourceType) {
-      return can(Actions.CREATE, options.resourceType, Scopes.ORG);
+      return basePermissions.can(Actions.CREATE, options.resourceType, Scopes.ORG);
     }
     return false;
-  }, [permissions, options, can]);
+  }, [extractedPermissions, options?.resourceType, basePermissions]);
 
   const canRead = useMemo(() => {
-    if (options?.resource) {
-      return options.resource.can_read ?? false;
-    }
-    if (permissions.can_read !== undefined) {
-      return permissions.can_read;
+    if (extractedPermissions.can_read !== undefined) {
+      return extractedPermissions.can_read;
     }
     if (options?.resourceType) {
-      return can(Actions.READ, options.resourceType, Scopes.ALL);
+      return basePermissions.can(Actions.READ, options.resourceType, Scopes.ALL);
     }
     return false;
-  }, [permissions, options, can]);
+  }, [extractedPermissions, options?.resourceType, basePermissions]);
 
   const canManage = useMemo(() => {
-    if (options?.resource) {
-      return options.resource.can_manage ?? false;
-    }
-    if (permissions.can_manage !== undefined) {
-      return permissions.can_manage;
+    if (extractedPermissions.can_manage !== undefined) {
+      return extractedPermissions.can_manage;
     }
     if (options?.resourceType) {
-      return can(Actions.MANAGE, options.resourceType, Scopes.ORG);
+      return basePermissions.can(Actions.MANAGE, options.resourceType, Scopes.ORG);
     }
     return false;
-  }, [permissions, options, can]);
+  }, [extractedPermissions, options?.resourceType, basePermissions]);
 
-  const canModerate = useMemo(() => {
-    if (options?.resource) {
-      return options.resource.can_moderate ?? false;
-    }
-    if (permissions.can_moderate !== undefined) {
-      return permissions.can_moderate;
-    }
-    if (options?.resourceType) {
-      return can(Actions.MODERATE, options.resourceType, Scopes.ORG);
-    }
-    return false;
-  }, [permissions, options, can]);
+  const canModerate = useMemo(() => extractedPermissions.can_moderate ?? false, [extractedPermissions]);
+  const canPublish = useMemo(() => extractedPermissions.can_publish ?? false, [extractedPermissions]);
+  const canGrade = useMemo(() => extractedPermissions.can_grade ?? false, [extractedPermissions]);
+  const canEnroll = useMemo(() => extractedPermissions.can_enroll ?? false, [extractedPermissions]);
+  const canExport = useMemo(() => extractedPermissions.can_export ?? false, [extractedPermissions]);
+  const canInvite = useMemo(() => extractedPermissions.can_invite ?? false, [extractedPermissions]);
+  const canSubmit = useMemo(() => extractedPermissions.can_submit ?? false, [extractedPermissions]);
 
-  const canPublish = useMemo(() => {
-    if (options?.resource) {
-      return options.resource.can_publish ?? false;
-    }
-    if (permissions.can_publish !== undefined) {
-      return permissions.can_publish;
-    }
-    if (options?.resourceType) {
-      return can(Actions.MANAGE, options.resourceType, Scopes.ORG);
-    }
-    return false;
-  }, [permissions, options, can]);
+  // Ownership flags
+  const isOwner = useMemo(() => extractedPermissions.is_owner ?? false, [extractedPermissions]);
+  const isCreator = useMemo(() => extractedPermissions.is_creator ?? false, [extractedPermissions]);
+  const isContributor = useMemo(() => extractedPermissions.is_contributor ?? false, [extractedPermissions]);
+  const isMember = useMemo(() => extractedPermissions.is_member ?? false, [extractedPermissions]);
 
-  const canGrade = useMemo(() => {
-    if (options?.resource) {
-      return options.resource.can_grade ?? false;
-    }
-    if (permissions.can_grade !== undefined) {
-      return permissions.can_grade;
-    }
-    if (options?.resourceType) {
-      return can(Actions.GRADE, options.resourceType, Scopes.ORG);
-    }
-    return false;
-  }, [permissions, options, can]);
-  const canEnroll = useMemo(() => {
-    if (options?.resource) {
-      return options.resource.can_enroll ?? false;
-    }
-    if (permissions.can_enroll !== undefined) {
-      return permissions.can_enroll;
-    }
-    if (options?.resourceType) {
-      return can(Actions.ENROLL, options.resourceType, Scopes.ALL);
-    }
-    return false;
-  }, [permissions, options, can]);
+  // Available actions
+  const availableActions = useMemo(
+    () => (extractedPermissions.available_actions as string[]) ?? [],
+    [extractedPermissions],
+  );
 
-  const canExport = useMemo(() => {
-    if (options?.resource) {
-      return options.resource.can_export ?? false;
-    }
-    if (permissions.can_export !== undefined) {
-      return permissions.can_export;
-    }
-    if (options?.resourceType) {
-      return can(Actions.EXPORT, options.resourceType, Scopes.ORG);
-    }
-    return false;
-  }, [permissions, options, can]);
-
-  const canInvite = useMemo(() => {
-    if (options?.resource) {
-      return options.resource.can_invite ?? false;
-    }
-    if (permissions.can_invite !== undefined) {
-      return permissions.can_invite;
-    }
-    if (options?.resourceType) {
-      return can(Actions.INVITE, options.resourceType, Scopes.ORG);
-    }
-    return false;
-  }, [permissions, options, can]);
-
-  const canSubmit = useMemo(() => {
-    if (options?.resource) {
-      return options.resource.can_submit ?? false;
-    }
-    if (permissions.can_submit !== undefined) {
-      return permissions.can_submit;
-    }
-    if (options?.resourceType) {
-      return can(Actions.SUBMIT, options.resourceType, Scopes.ASSIGNED);
-    }
-    return false;
-  }, [permissions, options, can]);
-
-  const isMember = useMemo(() => {
-    if (options?.resource) {
-      return options.resource.is_member ?? false;
-    }
-    return permissions.is_member ?? false;
-  }, [permissions, options]);
-  const isOwner = useMemo(() => {
-    if (options?.resource) {
-      return options.resource.is_owner ?? false;
-    }
-    return permissions.is_owner ?? false;
-  }, [permissions, options]);
-
-  const isCreator = useMemo(() => {
-    if (options?.resource) {
-      return options.resource.is_creator ?? false;
-    }
-    return permissions.is_creator ?? false;
-  }, [permissions, options]);
-
-  const isContributor = useMemo(() => {
-    if (options?.resource) {
-      return options.resource.is_contributor ?? false;
-    }
-    return permissions.is_contributor ?? false;
-  }, [permissions, options]);
-
-  const availableActions = useMemo(() => {
-    if (options?.resource) {
-      return options.resource.available_actions ?? [];
-    }
-    return (permissions.available_actions as string[]) ?? [];
-  }, [permissions, options]);
-
-  /**
-   * Check if a specific action is available.
-   *
-   * @param action - Action name to check
-   * @returns true if action is available
-   */
   const hasAction = useCallback(
     (action: string): boolean => {
       return availableActions.includes(action);
@@ -526,12 +281,6 @@ export function usePermissions(options?: UsePermissionsOptions) {
     [availableActions],
   );
 
-  /**
-   * Check if ANY of the specified actions are available.
-   *
-   * @param actions - Array of action names
-   * @returns true if at least one action is available
-   */
   const hasAnyAction = useCallback(
     (actions: string[]): boolean => {
       return actions.some((action) => availableActions.includes(action));
@@ -539,29 +288,19 @@ export function usePermissions(options?: UsePermissionsOptions) {
     [availableActions],
   );
 
-  const isLoading = options?.resource ? false : isLoadingApi;
+  // Determine loading state
+  const loading = options?.resource ? false : basePermissions.loading || isLoadingResource;
+  const error = basePermissions.error || resourceError;
 
   return {
-    // Core permission checking
-    can,
-    canAny,
-    canAll,
+    // From base provider
+    ...basePermissions,
 
-    // Role checking
-    hasRole,
-    hasAnyRole,
-    roles,
-    isAdmin,
-    isSuperAdmin,
-    isInstructor,
-
-    // Convenience flags - basic CRUD
+    // Convenience flags
     canUpdate,
     canDelete,
     canCreate,
     canRead,
-
-    // Convenience flags - extended permissions
     canManage,
     canModerate,
     canPublish,
@@ -571,7 +310,7 @@ export function usePermissions(options?: UsePermissionsOptions) {
     canInvite,
     canSubmit,
 
-    // Ownership/authorship
+    // Ownership
     isOwner,
     isCreator,
     isContributor,
@@ -583,20 +322,18 @@ export function usePermissions(options?: UsePermissionsOptions) {
     hasAnyAction,
 
     // State
-    loading: isLoading,
+    loading,
     error,
-    permissions,
   };
 }
 
 /**
  * Legacy compatibility: Extract permissions from resource metadata.
  *
- * This is a convenience wrapper for the unified hook when you only
- * need to extract metadata from an enriched API response.
- *
  * @deprecated Use `usePermissions({ resource })` instead
  */
-export function useResourcePermissions<T extends ResourceWithPermissions>(resource: T | null | undefined) {
+export function useResourcePermissions<T extends ResourceWithPermissions>(
+  resource: T | null | undefined,
+) {
   return usePermissions({ resource });
 }

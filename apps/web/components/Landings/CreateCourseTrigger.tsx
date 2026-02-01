@@ -2,9 +2,8 @@
 
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
-import { PermissionGuard } from '@components/Security/PermissionGuard';
+import { PermissionGuard, Actions, ResourceTypes } from '@/components/Security';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { Actions, ResourceTypes } from '@/types/permissions';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 

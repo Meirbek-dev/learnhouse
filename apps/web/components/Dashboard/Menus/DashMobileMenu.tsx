@@ -4,9 +4,7 @@ import { Backpack, BadgeDollarSign, BookCopy, Home, School, Settings, Users } fr
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { usePaymentsEnabled } from '@components/Hooks/usePaymentsEnabled';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import AdminAuthorization from '@components/Security/AdminAuthorization';
-import { Actions, ResourceTypes } from '@/types/permissions';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions, Actions, ResourceTypes } from '@/components/Security';
 import AppLink from '@/components/ui/AppLink';
 import { useTranslations } from 'next-intl';
 
@@ -28,102 +26,100 @@ const DashMobileMenu = () => {
       className="fixed right-0 bottom-0 left-0 z-50 text-white shadow-xl backdrop-blur-lg"
     >
       <div className="flex h-16 items-center justify-around px-2">
-        <AdminAuthorization authorizationMode="component">
+        <ToolTip
+          content={t('tooltips.home')}
+          slateBlack
+          sideOffset={8}
+          side="top"
+        >
+          <AppLink
+            href="/"
+            className="flex flex-col items-center p-2"
+            aria-label={t('ariaLabels.home')}
+          >
+            <Home size={20} />
+            <span className="mt-1 text-xs">{t('mobile.home')}</span>
+          </AppLink>
+        </ToolTip>
+        <ToolTip
+          content={t('tooltips.courses')}
+          slateBlack
+          sideOffset={8}
+          side="top"
+        >
+          <AppLink
+            href="/dash/courses"
+            className="flex flex-col items-center p-2"
+            aria-label={t('ariaLabels.manageCourses')}
+          >
+            <BookCopy size={20} />
+            <span className="mt-1 text-xs">{t('mobile.courses')}</span>
+          </AppLink>
+        </ToolTip>
+        <ToolTip
+          content={t('tooltips.assignments')}
+          slateBlack
+          sideOffset={8}
+          side="top"
+        >
+          <AppLink
+            href="/dash/assignments"
+            className="flex flex-col items-center p-2"
+            aria-label={t('ariaLabels.manageAssignments')}
+          >
+            <Backpack size={20} />
+            <span className="mt-1 text-xs">{t('mobile.assignments')}</span>
+          </AppLink>
+        </ToolTip>
+        {arePaymentsEnabled ? (
           <ToolTip
-            content={t('tooltips.home')}
+            content={t('tooltips.payments')}
             slateBlack
             sideOffset={8}
             side="top"
           >
             <AppLink
-              href="/"
+              href="/dash/payments/customers"
               className="flex flex-col items-center p-2"
-              aria-label={t('ariaLabels.home')}
+              aria-label={t('ariaLabels.managePayments')}
             >
-              <Home size={20} />
-              <span className="mt-1 text-xs">{t('mobile.home')}</span>
+              <BadgeDollarSign size={20} />
+              <span className="mt-1 text-xs">{t('mobile.payments')}</span>
             </AppLink>
           </ToolTip>
+        ) : null}
+        <ToolTip
+          content={t('tooltips.users')}
+          slateBlack
+          sideOffset={8}
+          side="top"
+        >
+          <AppLink
+            href="/dash/users/settings/users"
+            className="flex flex-col items-center p-2"
+            aria-label={t('ariaLabels.manageUsers')}
+          >
+            <Users size={20} />
+            <span className="mt-1 text-xs">{t('mobile.users')}</span>
+          </AppLink>
+        </ToolTip>
+        {canManageOrganization ? (
           <ToolTip
-            content={t('tooltips.courses')}
+            content={t('tooltips.organization')}
             slateBlack
             sideOffset={8}
             side="top"
           >
             <AppLink
-              href="/dash/courses"
+              href="/dash/org/settings/general"
               className="flex flex-col items-center p-2"
-              aria-label={t('ariaLabels.manageCourses')}
+              aria-label={t('ariaLabels.organizationSettings')}
             >
-              <BookCopy size={20} />
-              <span className="mt-1 text-xs">{t('mobile.courses')}</span>
+              <School size={20} />
+              <span className="mt-1 text-xs">{t('mobile.org')}</span>
             </AppLink>
           </ToolTip>
-          <ToolTip
-            content={t('tooltips.assignments')}
-            slateBlack
-            sideOffset={8}
-            side="top"
-          >
-            <AppLink
-              href="/dash/assignments"
-              className="flex flex-col items-center p-2"
-              aria-label={t('ariaLabels.manageAssignments')}
-            >
-              <Backpack size={20} />
-              <span className="mt-1 text-xs">{t('mobile.assignments')}</span>
-            </AppLink>
-          </ToolTip>
-          {arePaymentsEnabled ? (
-            <ToolTip
-              content={t('tooltips.payments')}
-              slateBlack
-              sideOffset={8}
-              side="top"
-            >
-              <AppLink
-                href="/dash/payments/customers"
-                className="flex flex-col items-center p-2"
-                aria-label={t('ariaLabels.managePayments')}
-              >
-                <BadgeDollarSign size={20} />
-                <span className="mt-1 text-xs">{t('mobile.payments')}</span>
-              </AppLink>
-            </ToolTip>
-          ) : null}
-          <ToolTip
-            content={t('tooltips.users')}
-            slateBlack
-            sideOffset={8}
-            side="top"
-          >
-            <AppLink
-              href="/dash/users/settings/users"
-              className="flex flex-col items-center p-2"
-              aria-label={t('ariaLabels.manageUsers')}
-            >
-              <Users size={20} />
-              <span className="mt-1 text-xs">{t('mobile.users')}</span>
-            </AppLink>
-          </ToolTip>
-          {canManageOrganization ? (
-            <ToolTip
-              content={t('tooltips.organization')}
-              slateBlack
-              sideOffset={8}
-              side="top"
-            >
-              <AppLink
-                href="/dash/org/settings/general"
-                className="flex flex-col items-center p-2"
-                aria-label={t('ariaLabels.organizationSettings')}
-              >
-                <School size={20} />
-                <span className="mt-1 text-xs">{t('mobile.org')}</span>
-              </AppLink>
-            </ToolTip>
-          ) : null}
-        </AdminAuthorization>
+        ) : null}
         <ToolTip
           content={t('tooltips.userSettings', {
             username: session.data.user.username,

@@ -1,7 +1,5 @@
 /**
  * AI Service with Streaming Support
- *
- * Enhanced version with Server-Sent Events (SSE) for real-time AI responses
  */
 
 import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests';

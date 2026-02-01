@@ -15,13 +15,11 @@ import {
 } from '@/components/ui/sidebar';
 import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, School, Settings, Users } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import AdminAuthorization from '@components/Security/AdminAuthorization';
 import platformLogoLight from '@public/platform_logo_light.svg';
 import useFeatureFlag from '@components/Hooks/useFeatureFlag';
-import { Actions, ResourceTypes } from '@/types/permissions';
+import { usePermissions, Actions, ResourceTypes } from '@/components/Security';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { usePermissions } from '@/hooks/usePermissions';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import UserAvatar from '../../Objects/UserAvatar';
@@ -288,21 +286,19 @@ const DashSidebar = ({ className }: SidebarProps) => {
       </SidebarHeader>
 
       <SidebarContent className="flex-1 overflow-hidden">
-        <AdminAuthorization authorizationMode="component">
-          <SidebarGroup>
-            <SidebarGroupContent className={isCollapsed ? 'px-2' : ''}>
-              <SidebarMenu className={`space-y-1 ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
-                {navigationItems.map((item) => (
-                  <NavItem
-                    key={item.href}
-                    item={item}
-                    isCollapsed={isCollapsed}
-                  />
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </AdminAuthorization>
+        <SidebarGroup>
+          <SidebarGroupContent className={isCollapsed ? 'px-2' : ''}>
+            <SidebarMenu className={`space-y-1 ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
+              {navigationItems.map((item) => (
+                <NavItem
+                  key={item.href}
+                  item={item}
+                  isCollapsed={isCollapsed}
+                />
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="border-sidebar-border border-t p-4">

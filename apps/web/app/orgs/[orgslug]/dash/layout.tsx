@@ -1,4 +1,4 @@
-import AdminAuthorization from '@components/Security/AdminAuthorization';
+import { AdminGuard } from '@/components/Security';
 import ClientAdminLayout from './ClientAdminLayout';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
@@ -17,9 +17,9 @@ async function DashboardLayout(props: { children: ReactNode; params: Promise<any
   const { children } = props;
 
   return (
-    <AdminAuthorization authorizationMode="page">
+    <AdminGuard fallback={null}>
       <ClientAdminLayout params={params}>{children}</ClientAdminLayout>
-    </AdminAuthorization>
+    </AdminGuard>
   );
 }
 

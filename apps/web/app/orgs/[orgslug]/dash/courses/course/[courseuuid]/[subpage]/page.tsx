@@ -10,7 +10,7 @@ import { CourseProvider } from '../../../../../../../../components/Contexts/Cour
 import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { Actions, ResourceTypes } from '@/types/permissions';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions } from '@/components/Security';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';

@@ -1,6 +1,7 @@
 'use client';
 
 import PlatformSessionProvider, { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { PermissionProvider } from '@/components/Security/PermissionProvider';
 import StyledComponentsRegistry from '../components/Utils/libs/styled-registry';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -60,21 +61,23 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
       refetchWhenOffline={false}
     >
       <PlatformSessionProvider>
-        {/* Global SWR defaults to reduce frequent revalidation and dedupe identical requests. */}
-        <SWRConfig
-          value={{
-            // Use the central swrFetcher which accepts (url, token)
-            fetcher: (url: string, token?: string) => swrFetcher(url, token),
-            dedupingInterval: 60_000, // dedupe identical requests for 60s
-            focusThrottleInterval: 60_000, // throttle refetches on focus
-            revalidateOnFocus: false,
-            revalidateOnReconnect: false,
-            shouldRetryOnError: true,
-            errorRetryCount: 3,
-          }}
-        >
-          <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
-        </SWRConfig>
+        <PermissionProvider>
+          {/* Global SWR defaults to reduce frequent revalidation and dedupe identical requests. */}
+          <SWRConfig
+            value={{
+              // Use the central swrFetcher which accepts (url, token)
+              fetcher: (url: string, token?: string) => swrFetcher(url, token),
+              dedupingInterval: 60_000, // dedupe identical requests for 60s
+              focusThrottleInterval: 60_000, // throttle refetches on focus
+              revalidateOnFocus: false,
+              revalidateOnReconnect: false,
+              shouldRetryOnError: true,
+              errorRetryCount: 3,
+            }}
+          >
+            <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
+          </SWRConfig>
+        </PermissionProvider>
       </PlatformSessionProvider>
     </SessionProvider>
   );

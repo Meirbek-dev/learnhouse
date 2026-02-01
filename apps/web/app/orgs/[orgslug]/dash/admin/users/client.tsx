@@ -14,11 +14,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar, Plus, Search, Shield, Trash2, User } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { PermissionGuard } from '@/components/Security/PermissionGuard';
-import { Actions, ResourceTypes } from '@/types/permissions';
+import { PermissionGuard, Actions, ResourceTypes, usePermissions } from '@/components/Security';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useCallback, useEffect, useState } from 'react';
-import { usePermissions } from '@/hooks/usePermissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';

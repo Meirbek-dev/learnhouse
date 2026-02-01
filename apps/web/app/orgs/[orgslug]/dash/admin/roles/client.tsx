@@ -14,10 +14,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ChevronRight, Edit, Lock, Plus, Search, Shield, Trash2, Users } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { PermissionGuard } from '@/components/Security/PermissionGuard';
-import { Actions, ResourceTypes } from '@/types/permissions';
+import { PermissionGuard, Actions, ResourceTypes, usePermissions } from '@/components/Security';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { usePermissions } from '@/hooks/usePermissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { getAPIUrl } from '@services/config/config';

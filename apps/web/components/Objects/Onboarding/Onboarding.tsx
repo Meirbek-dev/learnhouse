@@ -24,7 +24,7 @@ import OnBoardUGs from '@public/onboarding/OnBoardUGs.png';
 import OnBoardAI from '@public/onboarding/OnBoardAI.png';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions } from '@/components/Security';
 import type { StaticImageData } from 'next/image';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useRouter } from 'next/navigation';

@@ -4,11 +4,9 @@ import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOf
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
-import { PermissionGuard } from '@components/Security/PermissionGuard';
+import { PermissionGuard, Actions, ResourceTypes, usePermissions } from '@/components/Security';
 import CourseGridClient from '@components/Landings/CourseGridClient';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { Actions, ResourceTypes } from '@/types/permissions';
-import { usePermissions } from '@/hooks/usePermissions';
 
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
