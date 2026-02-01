@@ -196,6 +196,15 @@ class UnifiedPermissionService:
             ).first()
             return course.public if course else False
 
+        if resource_type == ResourceType.COLLECTION:
+            # Collections are marked public via the `public` flag on the collection record
+            from src.db.collections import Collection
+
+            collection = self.db.exec(
+                select(Collection).where(Collection.collection_uuid == resource_id)
+            ).first()
+            return collection.public if collection else False
+
         if resource_type == ResourceType.ORGANIZATION:
             # Organizations have an 'explore' flag that marks them as publicly discoverable
             # Additionally, an organization is effectively public if it owns any public courses

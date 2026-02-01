@@ -27,6 +27,14 @@ const ManageUsers = (props: ManageUsersProps) => {
     swrFetcher(url, access_token),
   );
 
+  // Normalize OrgUsers response which may be either an array or a paginated object { users: [], total, ... }
+  const orgUsersList = (data: any) => {
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data.users)) return data.users;
+    return [];
+  };
+
   const isUserPartOfGroup = (user_id: number) => {
     if (UGusers) {
       return UGusers.some((user: any) => user.id === user_id);
@@ -65,7 +73,7 @@ const ManageUsers = (props: ManageUsersProps) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {OrgUsers?.map((user: any) => (
+          {orgUsersList(OrgUsers).map((user: any) => (
             <TableRow key={user.user.id}>
               <TableCell>
                 <div className="flex items-center space-x-2">

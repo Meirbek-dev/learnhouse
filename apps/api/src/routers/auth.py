@@ -55,7 +55,7 @@ def refresh(
     request: Request,
     response: Response,
     Authorize: Annotated[AuthJWT, Depends()],
-) -> dict[str, int]:
+) -> dict[str, str | int]:
     """
     Token refresh with rotation.
 

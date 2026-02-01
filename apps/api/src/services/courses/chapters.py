@@ -121,12 +121,12 @@ async def get_chapter(
             status_code=status.HTTP_404_NOT_FOUND, detail="Course does not exist"
         )
 
-    # RBAC check
+    # RBAC check (use parent Course for read access so public courses allow anonymous reads)
     permission_service = get_permission_service(db_session)
     await permission_service.check(
         user=current_user,
         action=Action.READ,
-        resource=ResourceType.CHAPTER,
+        resource=ResourceType.COURSE,
         resource_id=course.course_uuid,
     )
 
@@ -241,12 +241,12 @@ async def get_course_chapters(
             status_code=status.HTTP_404_NOT_FOUND, detail="Course does not exist"
         )
 
-    # RBAC check
+    # RBAC check (rights are determined by parent Course for read access)
     permission_service = get_permission_service(db_session)
     await permission_service.check(
         user=current_user,
         action=Action.READ,
-        resource=ResourceType.CHAPTER,
+        resource=ResourceType.COURSE,
         resource_id=course.course_uuid,
     )
 
