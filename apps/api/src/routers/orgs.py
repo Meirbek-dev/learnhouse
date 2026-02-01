@@ -257,11 +257,33 @@ async def api_create_invite_code_with_ug(
     org_id: int,
     usergroup_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
-    Create invite code
+    Create invite code with usergroup
+
+    **Required Permission**: `user:invite:org`
     """
+    # Check permission to invite users
+    has_permission = await permission_service.check(
+        user=current_user,
+        action=Action.INVITE,
+        resource=ResourceType.USER,
+        org_id=org_id,
+        raise_on_deny=False,
+    )
+
+    if not has_permission:
+        raise PermissionDenied(
+            action=Action.INVITE,
+            resource_type=ResourceType.USER,
+            reason="You don't have permission to invite users to this organization",
+            org_id=org_id,
+        )
+
     return await create_invite_code_with_usergroup(
         request, org_id, usergroup_id, current_user, db_session
     )
@@ -301,11 +323,33 @@ async def api_delete_invite_code(
     org_id: int,
     org_invite_code_uuid: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Delete invite code
+
+    **Required Permission**: `user:invite:org`
     """
+    # Check permission to manage invites
+    has_permission = await permission_service.check(
+        user=current_user,
+        action=Action.INVITE,
+        resource=ResourceType.USER,
+        org_id=org_id,
+        raise_on_deny=False,
+    )
+
+    if not has_permission:
+        raise PermissionDenied(
+            action=Action.INVITE,
+            resource_type=ResourceType.USER,
+            reason="You don't have permission to manage invites for this organization",
+            org_id=org_id,
+        )
+
     return await delete_invite_code(
         request, org_id, org_invite_code_uuid, current_user, db_session
     )
@@ -318,11 +362,33 @@ async def api_invite_batch_users(
     emails: str,
     invite_code_uuid: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Invite batch users by emails
+
+    **Required Permission**: `user:invite:org`
     """
+    # Check permission to invite users
+    has_permission = await permission_service.check(
+        user=current_user,
+        action=Action.INVITE,
+        resource=ResourceType.USER,
+        org_id=org_id,
+        raise_on_deny=False,
+    )
+
+    if not has_permission:
+        raise PermissionDenied(
+            action=Action.INVITE,
+            resource_type=ResourceType.USER,
+            reason="You don't have permission to invite users to this organization",
+            org_id=org_id,
+        )
+
     return await invite_batch_users(
         request, org_id, emails, invite_code_uuid, db_session, current_user
     )
@@ -347,11 +413,33 @@ async def api_delete_org_users_invites(
     org_id: int,
     email: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Delete org users invites
+
+    **Required Permission**: `user:invite:org`
     """
+    # Check permission to manage invites
+    has_permission = await permission_service.check(
+        user=current_user,
+        action=Action.INVITE,
+        resource=ResourceType.USER,
+        org_id=org_id,
+        raise_on_deny=False,
+    )
+
+    if not has_permission:
+        raise PermissionDenied(
+            action=Action.INVITE,
+            resource_type=ResourceType.USER,
+            reason="You don't have permission to manage invites for this organization",
+            org_id=org_id,
+        )
+
     return await remove_invited_user(request, org_id, email, db_session, current_user)
 
 
