@@ -374,11 +374,33 @@ async def api_update_org_logo(
     org_id: int,
     logo_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Update org logo
+
+    **Required Permission**: `organization:update:own`
     """
+    # Check permission to update organization
+    has_permission = await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        org_id=org_id,
+        raise_on_deny=False,
+    )
+
+    if not has_permission:
+        raise PermissionDenied(
+            action=Action.UPDATE,
+            resource_type=ResourceType.ORGANIZATION,
+            reason="You don't have permission to update this organization's logo",
+            org_id=org_id,
+        )
+
     return await update_org_logo(
         request=request,
         logo_file=logo_file,
@@ -394,11 +416,33 @@ async def api_update_org_thumbnail(
     org_id: int,
     thumbnail_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Update org thumbnail
+
+    **Required Permission**: `organization:update:own`
     """
+    # Check permission to update organization
+    has_permission = await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        org_id=org_id,
+        raise_on_deny=False,
+    )
+
+    if not has_permission:
+        raise PermissionDenied(
+            action=Action.UPDATE,
+            resource_type=ResourceType.ORGANIZATION,
+            reason="You don't have permission to update this organization's thumbnail",
+            org_id=org_id,
+        )
+
     return await update_org_thumbnail(
         request=request,
         thumbnail_file=thumbnail_file,
@@ -414,11 +458,33 @@ async def api_update_org_preview(
     org_id: int,
     preview_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
-    Update org thumbnail
+    Update org preview
+
+    **Required Permission**: `organization:update:own`
     """
+    # Check permission to update organization
+    has_permission = await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        org_id=org_id,
+        raise_on_deny=False,
+    )
+
+    if not has_permission:
+        raise PermissionDenied(
+            action=Action.UPDATE,
+            resource_type=ResourceType.ORGANIZATION,
+            reason="You don't have permission to update this organization's preview",
+            org_id=org_id,
+        )
+
     return await update_org_preview(
         request=request,
         preview_file=preview_file,
@@ -466,11 +532,33 @@ async def api_update_org(
     org_object: OrganizationUpdate,
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> OrganizationRead:
     """
     Update Org by ID
+
+    **Required Permission**: `organization:update:own`
     """
+    # Check permission to update organization
+    has_permission = await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        org_id=org_id,
+        raise_on_deny=False,
+    )
+
+    if not has_permission:
+        raise PermissionDenied(
+            action=Action.UPDATE,
+            resource_type=ResourceType.ORGANIZATION,
+            reason="You don't have permission to update this organization",
+            org_id=org_id,
+        )
+
     return await update_org(request, org_object, org_id, current_user, db_session)
 
 
@@ -479,11 +567,33 @@ async def api_delete_org(
     request: Request,
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Delete Org by ID
+
+    **Required Permission**: `organization:delete:own`
     """
+    # Check permission to delete organization
+    has_permission = await permission_service.check(
+        user=current_user,
+        action=Action.DELETE,
+        resource=ResourceType.ORGANIZATION,
+        org_id=org_id,
+        raise_on_deny=False,
+    )
+
+    if not has_permission:
+        raise PermissionDenied(
+            action=Action.DELETE,
+            resource_type=ResourceType.ORGANIZATION,
+            reason="You don't have permission to delete this organization",
+            org_id=org_id,
+        )
+
     return await delete_org(request, org_id, current_user, db_session)
 
 
@@ -493,11 +603,33 @@ async def api_update_org_landing(
     org_id: int,
     landing_object: dict,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Update organization landing object
+
+    **Required Permission**: `organization:update:own`
     """
+    # Check permission to update organization
+    has_permission = await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        org_id=org_id,
+        raise_on_deny=False,
+    )
+
+    if not has_permission:
+        raise PermissionDenied(
+            action=Action.UPDATE,
+            resource_type=ResourceType.ORGANIZATION,
+            reason="You don't have permission to update this organization's landing page",
+            org_id=org_id,
+        )
+
     return await update_org_landing(
         request, landing_object, org_id, current_user, db_session
     )
@@ -509,11 +641,33 @@ async def api_upload_org_landing_content(
     org_id: int,
     content_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Upload content for organization landing page
+
+    **Required Permission**: `organization:update:own`
     """
+    # Check permission to update organization
+    has_permission = await permission_service.check(
+        user=current_user,
+        action=Action.UPDATE,
+        resource=ResourceType.ORGANIZATION,
+        org_id=org_id,
+        raise_on_deny=False,
+    )
+
+    if not has_permission:
+        raise PermissionDenied(
+            action=Action.UPDATE,
+            resource_type=ResourceType.ORGANIZATION,
+            reason="You don't have permission to update this organization's landing content",
+            org_id=org_id,
+        )
+
     return await upload_org_landing_content_service(
         request=request,
         content_file=content_file,

@@ -149,7 +149,13 @@ const OrgRoles: FC = () => {
     }
 
     // Check for well-known system role slugs
-    const systemSlugs = ['super-admin', 'org-admin', 'maintainer', 'instructor', 'user'];
+    const systemSlugs = [
+      RoleSlugs.SUPER_ADMIN,
+      RoleSlugs.ORG_ADMIN,
+      RoleSlugs.MAINTAINER,
+      RoleSlugs.INSTRUCTOR,
+      RoleSlugs.USER,
+    ];
     if (role.slug && systemSlugs.includes(role.slug)) {
       return true;
     }

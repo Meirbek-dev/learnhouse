@@ -8,6 +8,7 @@ import {
   Actions,
   ResourceTypes,
   Scopes,
+  RoleSlugs,
   buildPermissionName,
   isAdminRole,
   isInstructorOrHigher,
@@ -20,17 +21,30 @@ import { getAPIUrl } from '@/services/config/config';
  * Resource with permission metadata from enriched API responses.
  */
 export interface ResourceWithPermissions {
+  // Basic CRUD permissions
   can_update?: boolean;
   can_delete?: boolean;
   can_create?: boolean;
   can_read?: boolean;
+
+  // Extended permissions
   can_manage?: boolean;
   can_moderate?: boolean;
   can_publish?: boolean;
   can_grade?: boolean;
+  can_enroll?: boolean;
+  can_export?: boolean;
+  can_invite?: boolean;
+  can_submit?: boolean;
+  can_manage_contributors?: boolean;
+
+  // Ownership/authorship flags
   is_owner?: boolean;
   is_creator?: boolean;
   is_contributor?: boolean;
+  is_member?: boolean; // for groups
+
+  // Available actions array
   available_actions?: string[];
 }
 
@@ -194,9 +208,14 @@ export function usePermissions(options?: UsePermissionsOptions) {
         can_moderate: options.resource.can_moderate ?? false,
         can_publish: options.resource.can_publish ?? false,
         can_grade: options.resource.can_grade ?? false,
+        can_enroll: options.resource.can_enroll ?? false,
+        can_export: options.resource.can_export ?? false,
+        can_invite: options.resource.can_invite ?? false,
+        can_submit: options.resource.can_submit ?? false,
         is_owner: options.resource.is_owner ?? false,
         is_creator: options.resource.is_creator ?? false,
         is_contributor: options.resource.is_contributor ?? false,
+        is_member: options.resource.is_member ?? false,
         available_actions: options.resource.available_actions ?? [],
       };
     }
@@ -301,7 +320,7 @@ export function usePermissions(options?: UsePermissionsOptions) {
 
   // Computed role flags
   const isAdmin = useMemo(() => roles.some((role) => isAdminRole(role.slug)), [roles]);
-  const isSuperAdmin = useMemo(() => hasRole('super-admin'), [hasRole]);
+  const isSuperAdmin = useMemo(() => hasRole(RoleSlugs.SUPER_ADMIN), [hasRole]);
   const isInstructor = useMemo(() => roles.some((role) => isInstructorOrHigher(role.slug)), [roles]);
 
   // Convenience flags for common permissions
@@ -408,7 +427,64 @@ export function usePermissions(options?: UsePermissionsOptions) {
     }
     return false;
   }, [permissions, options, can]);
+  const canEnroll = useMemo(() => {
+    if (options?.resource) {
+      return options.resource.can_enroll ?? false;
+    }
+    if (permissions.can_enroll !== undefined) {
+      return permissions.can_enroll;
+    }
+    if (options?.resourceType) {
+      return can(Actions.ENROLL, options.resourceType, Scopes.ALL);
+    }
+    return false;
+  }, [permissions, options, can]);
 
+  const canExport = useMemo(() => {
+    if (options?.resource) {
+      return options.resource.can_export ?? false;
+    }
+    if (permissions.can_export !== undefined) {
+      return permissions.can_export;
+    }
+    if (options?.resourceType) {
+      return can(Actions.EXPORT, options.resourceType, Scopes.ORG);
+    }
+    return false;
+  }, [permissions, options, can]);
+
+  const canInvite = useMemo(() => {
+    if (options?.resource) {
+      return options.resource.can_invite ?? false;
+    }
+    if (permissions.can_invite !== undefined) {
+      return permissions.can_invite;
+    }
+    if (options?.resourceType) {
+      return can(Actions.INVITE, options.resourceType, Scopes.ORG);
+    }
+    return false;
+  }, [permissions, options, can]);
+
+  const canSubmit = useMemo(() => {
+    if (options?.resource) {
+      return options.resource.can_submit ?? false;
+    }
+    if (permissions.can_submit !== undefined) {
+      return permissions.can_submit;
+    }
+    if (options?.resourceType) {
+      return can(Actions.SUBMIT, options.resourceType, Scopes.ASSIGNED);
+    }
+    return false;
+  }, [permissions, options, can]);
+
+  const isMember = useMemo(() => {
+    if (options?.resource) {
+      return options.resource.is_member ?? false;
+    }
+    return permissions.is_member ?? false;
+  }, [permissions, options]);
   const isOwner = useMemo(() => {
     if (options?.resource) {
       return options.resource.is_owner ?? false;
@@ -479,20 +555,27 @@ export function usePermissions(options?: UsePermissionsOptions) {
     isSuperAdmin,
     isInstructor,
 
-    // Convenience flags
+    // Convenience flags - basic CRUD
     canUpdate,
     canDelete,
     canCreate,
     canRead,
+
+    // Convenience flags - extended permissions
     canManage,
     canModerate,
     canPublish,
     canGrade,
+    canEnroll,
+    canExport,
+    canInvite,
+    canSubmit,
 
     // Ownership/authorship
     isOwner,
     isCreator,
     isContributor,
+    isMember,
 
     // Available actions
     availableActions,

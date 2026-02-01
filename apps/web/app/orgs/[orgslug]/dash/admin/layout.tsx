@@ -1,3 +1,4 @@
+import { RoleSlugs, CommonPermissions } from '@/types/permissions';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { auth } from '@/auth';
@@ -32,15 +33,15 @@ async function AdminLayout({ children, params }: AdminLayoutProps) {
     }
 
     const roleSlug = userRole.role?.slug || '';
-    return ['super-admin', 'org-admin', 'maintainer'].includes(roleSlug);
+    return [RoleSlugs.SUPER_ADMIN, RoleSlugs.ORG_ADMIN, RoleSlugs.MAINTAINER].includes(roleSlug);
   });
 
   // Check permissions dictionary as fallback
   const permissions = session.permissions || {};
   const hasOrgPermission =
-    permissions['organization:manage:own'] === true ||
-    permissions['organization:update:own'] === true ||
-    permissions['role:update:org'] === true;
+    permissions[CommonPermissions.ORG_MANAGE] === true ||
+    permissions[CommonPermissions.ORG_UPDATE] === true ||
+    permissions[CommonPermissions.ROLE_UPDATE] === true;
 
   if (!hasAdminRole && !hasOrgPermission) {
     redirect(`/orgs/${orgslug}/unauthorized`);

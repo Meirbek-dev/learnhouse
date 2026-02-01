@@ -244,13 +244,39 @@ async def api_update_user(
 async def api_update_avatar_user(
     *,
     request: Request,
+    user_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    permission_service: Annotated[
+        UnifiedPermissionService, Depends(get_permission_service)
+    ],
     avatar_file: UploadFile | None = None,
 ) -> UserRead:
     """
     Update User Avatar
+
+    **Required Permission**: `user:update:own` (for own avatar) or `user:update:org` (for others)
     """
+    # Check if updating own avatar or another user's avatar
+    is_own_avatar = user_id == current_user.id
+
+    if not is_own_avatar:
+        # Check permission to update other users
+        has_permission = await permission_service.check(
+            user=current_user,
+            action=Action.UPDATE,
+            resource=ResourceType.USER,
+            raise_on_deny=False,
+        )
+
+        if not has_permission:
+            raise PermissionDenied(
+                reason="You don't have permission to update other users' avatars",
+                action=Action.UPDATE,
+                resource_type=ResourceType.USER,
+                resource_id=user_id,
+            )
+
     return await update_user_avatar(request, db_session, current_user, avatar_file)
 
 

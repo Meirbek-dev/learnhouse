@@ -9,7 +9,7 @@
  * This file contains only the interfaces and helper functions.
  */
 
-import { Actions, ResourceTypes, Scopes, RoleSlugs } from './generated_permissions';
+import { Actions, ResourceTypes, Scopes, RoleSlugs, buildPermissionName } from './generated_permissions';
 import type { Action, ResourceType, Scope, RoleSlug } from './generated_permissions';
 
 // Re-export the generated types for convenience
@@ -90,26 +90,8 @@ export interface UserPermissionsResponse {
   resource_permissions: ResourcePermission[];
 }
 
-/**
- * Build a permission name from components.
- */
-export function buildPermissionName(resource: ResourceType, action: Action, scope: Scope = Scopes.ALL): string {
-  return `${resource}:${action}:${scope}`;
-}
-
-/**
- * Parse a permission name into components.
- */
-export function parsePermissionName(name: string): { resource: ResourceType; action: Action; scope: Scope } | null {
-  const parts = name.split(':');
-  if (parts.length !== 3) return null;
-
-  return {
-    resource: parts[0] as ResourceType,
-    action: parts[1] as Action,
-    scope: parts[2] as Scope,
-  };
-}
+// Re-export canonical helpers from generated types (no local implementations)
+export { buildPermissionName, parsePermissionName } from './generated_permissions';
 
 /**
  * Common permission names for quick access.
