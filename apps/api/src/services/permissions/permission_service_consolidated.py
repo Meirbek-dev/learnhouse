@@ -167,14 +167,15 @@ class PermissionService:
 
         # Cache result
         if self.use_cache and resource_id:
+            # allowed must be the 4th positional param; include metadata in conditions
             set_cached_permission(
                 user_id,
                 action.value,
                 resource.value,
-                resource_id,
-                org_id,
                 granted,
-                reason="direct_permission" if granted else "no_permission",
+                resource_id=resource_id,
+                org_id=org_id,
+                conditions={"reason": "direct_permission" if granted else "no_permission"},
             )
 
         # Audit
@@ -460,16 +461,27 @@ class PermissionService:
 
         results = self.db.exec(query).all()
 
-        # Load role details
+        # Load role details safely (select only required columns)
         roles = []
         for role_id, perm_org_id in results:
             if role_id:
-                role = self.db.get(Role, role_id)
-                if role:
+                row = self.db.exec(
+                    select(Role.id, Role.name, Role.slug, Role.org_id).where(Role.id == role_id)
+                ).first()
+                if row:
+                    # row is a RowMapping or tuple depending on SQLModel; support both
+                    try:
+                        r_id, r_name, r_slug, _r_org = row
+                    except Exception:
+                        r_id = row[0]
+                        r_name = row[1]
+                        r_slug = row[2]
+                        r_org = row[3]
+
                     roles.append({
-                        "role_id": role.id,
-                        "role_name": role.name,
-                        "role_slug": role.slug,
+                        "role_id": r_id,
+                        "role_name": r_name,
+                        "role_slug": r_slug,
                         "org_id": perm_org_id,
                     })
 
@@ -653,7 +665,13 @@ class PermissionService:
         """Cache result and audit if needed."""
         if self.use_cache and resource_id:
             set_cached_permission(
-                user_id, action.value, resource.value, resource_id, org_id, granted, reason
+                user_id,
+                action.value,
+                resource.value,
+                granted,
+                resource_id=resource_id,
+                org_id=org_id,
+                conditions={"reason": reason},
             )
 
         if self.audit_level != AuditLevel.DISABLED:

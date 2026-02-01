@@ -596,30 +596,37 @@ async def get_orgs_by_user_admin(
     ).first()
     admin_role_id = admin_role.id if admin_role else 1
 
-    statement = (
-        select(Organization, OrganizationConfig)
-        .join(UserPermission, UserPermission.org_id == Organization.id)
-        .outerjoin(OrganizationConfig)
+    # First get distinct org IDs where the user has admin role
+    org_id_query = (
+        select(UserPermission.org_id)
         .where(
             UserPermission.user_id == user_id_int,
-            UserPermission.granted_via_role_id == admin_role_id,  # Only where the user is admin
-            OrganizationConfig.org_id == Organization.id,
+            UserPermission.granted_via_role_id == admin_role_id,
         )
         .distinct()
         .offset((page - 1) * limit)
         .limit(limit)
     )
 
-    # Execute single query to get all data
-    result = db_session.exec(statement)
-    org_data = result.all()
+    org_ids = [r[0] for r in db_session.exec(org_id_query).all()]
 
-    # Process results in memory
     orgsWithConfig = []
-    for org, org_config in org_data:
-        config = OrganizationConfig.model_validate(org_config) if org_config else {}
-        org_read = OrganizationRead(**org.model_dump(), config=config)
-        orgsWithConfig.append(org_read)
+    if org_ids:
+        statement = (
+            select(Organization, OrganizationConfig)
+            .outerjoin(OrganizationConfig)
+            .where(Organization.id.in_(org_ids), OrganizationConfig.org_id == Organization.id)
+        )
+        result = db_session.exec(statement).all()
+        # Map by org id to preserve the set
+        org_map: dict[int, tuple] = {org.id: (org, org_config) for org, org_config in result}
+        for oid in org_ids:
+            org, org_config = org_map.get(oid, (None, None))
+            if not org:
+                continue
+            config = OrganizationConfig.model_validate(org_config) if org_config else {}
+            org_read = OrganizationRead(**org.model_dump(), config=config)
+            orgsWithConfig.append(org_read)
 
     return orgsWithConfig
 
@@ -634,31 +641,33 @@ async def get_orgs_by_user(
     # Convert user_id to int for proper type matching with database
     user_id_int = int(user_id)
 
-    # Join Organization, UserPermission and OrganizationConfig in a single query
-    statement = (
-        select(Organization, OrganizationConfig)
-        .join(UserPermission)
-        .outerjoin(OrganizationConfig)
-        .where(
-            UserPermission.user_id == user_id_int,
-            UserPermission.org_id == Organization.id,
-            OrganizationConfig.org_id == Organization.id,
-        )
+    # First get distinct org IDs for this user
+    org_id_query = (
+        select(UserPermission.org_id)
+        .where(UserPermission.user_id == user_id_int)
         .distinct()
         .offset((page - 1) * limit)
         .limit(limit)
     )
 
-    # Execute single query to get all data
-    result = db_session.exec(statement)
-    org_data = result.all()
+    org_ids = [r[0] for r in db_session.exec(org_id_query).all()]
 
-    # Process results in memory
     orgsWithConfig = []
-    for org, org_config in org_data:
-        config = OrganizationConfig.model_validate(org_config) if org_config else {}
-        org_read = OrganizationRead(**org.model_dump(), config=config)
-        orgsWithConfig.append(org_read)
+    if org_ids:
+        statement = (
+            select(Organization, OrganizationConfig)
+            .outerjoin(OrganizationConfig)
+            .where(Organization.id.in_(org_ids), OrganizationConfig.org_id == Organization.id)
+        )
+        result = db_session.exec(statement).all()
+        org_map: dict[int, tuple] = {org.id: (org, org_config) for org, org_config in result}
+        for oid in org_ids:
+            org, org_config = org_map.get(oid, (None, None))
+            if not org:
+                continue
+            config = OrganizationConfig.model_validate(org_config) if org_config else {}
+            org_read = OrganizationRead(**org.model_dump(), config=config)
+            orgsWithConfig.append(org_read)
 
     return orgsWithConfig
 
