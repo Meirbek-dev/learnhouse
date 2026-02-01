@@ -48,7 +48,7 @@ from src.services.courses.updates import (
     get_updates_by_course_uuid,
     update_update,
 )
-from src.services.permissions.unified_permission_service import UnifiedPermissionService
+from src.services.permissions.permission_service_consolidated import PermissionService
 
 router = APIRouter()
 
@@ -72,7 +72,7 @@ async def api_create_course(
     thumbnail: UploadFile | None = None,
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ] = None,
     db_session=Depends(get_db_session),
 ) -> CourseRead:
@@ -269,7 +269,7 @@ async def api_update_course(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ] = None,
 ) -> CourseRead:
     """
@@ -303,7 +303,7 @@ async def api_delete_course(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ] = None,
 ):
     """
@@ -428,7 +428,7 @@ async def api_update_course_contributor(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ] = None,
 ):
     """
@@ -468,7 +468,7 @@ async def api_add_bulk_course_contributors(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ] = None,
 ):
     """

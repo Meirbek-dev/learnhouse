@@ -21,7 +21,7 @@ from src.core.timezone import now as tz_now
 from src.db.permissions.generated_enums import Action, ResourceType
 from src.security.permissions.exceptions import PermissionDenied
 from src.security.rbac.dependencies import get_permission_service
-from src.services.permissions.unified_permission_service import UnifiedPermissionService
+from src.services.permissions.permission_service_consolidated import PermissionService
 from src.db.gamification import (
     DashboardRead,
     GamificationProfile,
@@ -135,7 +135,7 @@ async def award_xp(
     user: Annotated[PublicUser, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db_session)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
 ):
     """Award XP with strong typing and idempotency."""

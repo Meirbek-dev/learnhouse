@@ -49,7 +49,7 @@ from src.services.orgs.users import (
     remove_user_from_org,
     update_user_role,
 )
-from src.services.permissions.unified_permission_service import UnifiedPermissionService
+from src.services.permissions.permission_service_consolidated import PermissionService
 
 router = APIRouter()
 
@@ -151,7 +151,7 @@ async def api_remove_user_from_org(
     user_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
@@ -188,7 +188,7 @@ async def api_get_org_signup_mechanism(
     signup_mechanism: Literal["open", "inviteOnly"],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
@@ -224,7 +224,7 @@ async def api_create_invite_code(
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
@@ -258,7 +258,7 @@ async def api_create_invite_code_with_ug(
     usergroup_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
@@ -324,7 +324,7 @@ async def api_delete_invite_code(
     org_invite_code_uuid: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
@@ -363,7 +363,7 @@ async def api_invite_batch_users(
     invite_code_uuid: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
@@ -414,7 +414,7 @@ async def api_delete_org_users_invites(
     email: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
@@ -463,7 +463,7 @@ async def api_update_org_logo(
     logo_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
@@ -505,7 +505,7 @@ async def api_update_org_thumbnail(
     thumbnail_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
@@ -547,7 +547,7 @@ async def api_update_org_preview(
     preview_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
@@ -621,7 +621,7 @@ async def api_update_org(
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> OrganizationRead:
@@ -656,7 +656,7 @@ async def api_delete_org(
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
@@ -692,7 +692,7 @@ async def api_update_org_landing(
     landing_object: dict,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
@@ -730,7 +730,7 @@ async def api_upload_org_landing_content(
     content_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):

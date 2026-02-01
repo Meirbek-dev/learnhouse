@@ -29,7 +29,7 @@ from src.db.organizations import Organization, OrganizationCreate
 from src.db.permissions.models import UserRole
 from src.db.users import User, UserCreate, UserRead
 from src.security.security import security_hash_password
-from src.services.permissions.role_service import RoleService
+from src.services.permissions.permission_service_consolidated import PermissionService
 
 
 # Install Default roles
@@ -37,13 +37,13 @@ def install_default_elements(db_session: Session) -> bool:
     """
     Install default elements including system roles and permissions.
 
-    Uses the new RBAC permission system via RoleService.
+    Uses the new RBAC permission system via PermissionService.
     """
-    role_service = RoleService(db_session)
+    permission_service = PermissionService(db_session)
 
     # Seed default roles and permissions using the new RBAC system
     # This creates: super-admin, org-admin, maintainer, instructor, moderator, user
-    created_roles = role_service.seed_default_roles()
+    created_roles = permission_service.seed_default_roles()
 
     return len(created_roles) > 0
 

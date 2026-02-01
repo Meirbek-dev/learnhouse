@@ -10,7 +10,7 @@ from src.security.permissions.exceptions import PermissionDenied
 from src.db.users import PublicUser, UserRead
 from src.security.auth import get_current_user
 from src.security.rbac.dependencies import get_permission_service
-from src.services.permissions.unified_permission_service import UnifiedPermissionService
+from src.services.permissions.permission_service_consolidated import PermissionService
 from src.services.users.usergroups import (
     add_resources_to_usergroup,
     add_users_to_usergroup,
@@ -35,7 +35,7 @@ async def api_create_usergroup(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     usergroup_object: UserGroupCreate,
 ) -> UserGroupRead:
@@ -127,7 +127,7 @@ async def api_update_usergroup(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     usergroup_id: int,
     usergroup_object: UserGroupUpdate,
@@ -162,7 +162,7 @@ async def api_delete_usergroup(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     usergroup_id: int,
 ) -> str:
@@ -194,7 +194,7 @@ async def api_add_users_to_usergroup(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     usergroup_id: int,
     user_ids: str,

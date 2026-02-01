@@ -20,7 +20,7 @@ from src.db.users import (
 from src.security.auth import get_current_user
 from src.security.rbac.dependencies import get_permission_service
 from src.services.courses.courses import get_user_courses
-from src.services.permissions.unified_permission_service import UnifiedPermissionService
+from src.services.permissions.permission_service_consolidated import PermissionService
 from src.services.users.password_reset import (
     change_password_with_reset_code,
     send_reset_password_code,
@@ -88,7 +88,7 @@ async def api_create_user_with_orgid(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     user_object: UserCreate,
     org_id: int,
@@ -207,7 +207,7 @@ async def api_update_user(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     user_id: int,
     user_object: UserUpdate,
@@ -248,7 +248,7 @@ async def api_update_avatar_user(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     avatar_file: UploadFile | None = None,
 ) -> UserRead:
@@ -381,7 +381,7 @@ async def api_delete_user(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     user_id: int,
 ):

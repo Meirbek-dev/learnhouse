@@ -27,7 +27,7 @@ from src.db.courses.enhanced_responses import (
 )
 from src.db.permissions import Action, ResourceType
 from src.db.users import PublicUser
-from src.services.permissions.unified_permission_service import UnifiedPermissionService
+from src.services.permissions.permission_service_consolidated import PermissionService
 
 # Generic type for response models
 T = TypeVar("T")
@@ -37,7 +37,7 @@ async def enrich_course_with_permissions(
     course: CourseRead | FullCourseRead | Course,
     current_user: PublicUser,
     db_session: Session,
-    permission_service: UnifiedPermissionService,
+    permission_service: PermissionService,
 ) -> CourseReadWithPermissions | FullCourseReadWithPermissions:
     """
     Enrich a course response with permission metadata.
@@ -142,7 +142,7 @@ async def enrich_courses_with_permissions(
     courses: list[CourseRead | Course],
     current_user: PublicUser,
     db_session: Session,
-    permission_service: UnifiedPermissionService,
+    permission_service: PermissionService,
 ) -> list[CourseReadWithPermissions]:
     """
     Enrich multiple courses with permission metadata.
@@ -213,7 +213,7 @@ async def enrich_collection_with_permissions(
     collection: CollectionRead | Collection,
     current_user: PublicUser,
     db_session: Session,
-    permission_service: UnifiedPermissionService,
+    permission_service: PermissionService,
     courses: list | None = None,
 ) -> CollectionReadWithPermissions:
     """
@@ -292,7 +292,7 @@ async def enrich_collections_with_permissions(
     collections: list[CollectionRead | Collection],
     current_user: PublicUser,
     db_session: Session,
-    permission_service: UnifiedPermissionService,
+    permission_service: PermissionService,
 ) -> list[CollectionReadWithPermissions]:
     """
     Enrich multiple collections with permission metadata.
@@ -320,7 +320,7 @@ async def enrich_discussion_with_permissions_typed(
     discussion: CourseDiscussionRead | CourseDiscussion,
     current_user: PublicUser,
     db_session: Session,
-    permission_service: UnifiedPermissionService,
+    permission_service: PermissionService,
 ) -> CourseDiscussionReadWithPermissions:
     """
     Enrich a discussion response with permission metadata.
@@ -398,7 +398,7 @@ async def enrich_discussions_with_permissions(
     discussions: list[CourseDiscussionRead | CourseDiscussion],
     current_user: PublicUser,
     db_session: Session,
-    permission_service: UnifiedPermissionService,
+    permission_service: PermissionService,
 ) -> list[CourseDiscussionReadWithPermissions]:
     """
     Enrich multiple discussions with permission metadata.
@@ -427,7 +427,7 @@ async def enrich_generic_resource_with_permissions(
     resource_type: ResourceType,
     resource_id: int | str,
     current_user: PublicUser,
-    permission_service: UnifiedPermissionService,
+    permission_service: PermissionService,
     actions_to_check: list[Action] | None = None,
 ) -> dict[str, Any]:
     """
@@ -480,7 +480,7 @@ async def enrich_generic_resource_with_permissions(
 async def enrich_activity_with_permissions(
     activity: dict[str, Any],
     current_user: PublicUser,
-    permission_service: UnifiedPermissionService,
+    permission_service: PermissionService,
 ) -> dict[str, Any]:
     """
     Enrich an activity with permission metadata.
@@ -538,7 +538,7 @@ async def enrich_activity_with_permissions(
 async def enrich_discussion_with_permissions(
     discussion: dict[str, Any],
     current_user: PublicUser,
-    permission_service: UnifiedPermissionService,
+    permission_service: PermissionService,
 ) -> dict[str, Any]:
     """
     Enrich a discussion with permission metadata.
@@ -564,7 +564,7 @@ async def enrich_discussion_with_permissions(
 async def enrich_organization_with_permissions(
     organization: dict[str, Any],
     current_user: PublicUser,
-    permission_service: UnifiedPermissionService,
+    permission_service: PermissionService,
 ) -> dict[str, Any]:
     """
     Enrich an organization with permission metadata.
@@ -590,7 +590,7 @@ async def enrich_organization_with_permissions(
 async def enrich_user_with_permissions(
     user: dict[str, Any],
     current_user: PublicUser,
-    permission_service: UnifiedPermissionService,
+    permission_service: PermissionService,
 ) -> dict[str, Any]:
     """
     Enrich a user profile with permission metadata.
@@ -623,7 +623,7 @@ async def enrich_user_with_permissions(
 async def enrich_usergroup_with_permissions(
     usergroup: dict[str, Any],
     current_user: PublicUser,
-    permission_service: UnifiedPermissionService,
+    permission_service: PermissionService,
 ) -> dict[str, Any]:
     """
     Enrich a usergroup with permission metadata.

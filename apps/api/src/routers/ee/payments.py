@@ -43,7 +43,7 @@ from src.services.payments.payments_stripe import (
 )
 from src.services.payments.payments_users import get_owned_courses
 from src.services.payments.webhooks.payments_webhooks import handle_stripe_webhook
-from src.services.permissions.unified_permission_service import UnifiedPermissionService
+from src.services.permissions.permission_service_consolidated import PermissionService
 
 router = APIRouter()
 
@@ -55,7 +55,7 @@ async def api_create_payments_config(
     provider: Literal["stripe"],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> PaymentsConfig:
@@ -103,7 +103,7 @@ async def api_delete_payments_config(
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
@@ -141,7 +141,7 @@ async def api_create_payments_product(
     payments_product: PaymentsProductCreate,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> PaymentsProductRead:
@@ -204,7 +204,7 @@ async def api_update_payments_product(
     payments_product: PaymentsProductUpdate,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> PaymentsProductRead:
@@ -243,7 +243,7 @@ async def api_delete_payments_product(
     product_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):

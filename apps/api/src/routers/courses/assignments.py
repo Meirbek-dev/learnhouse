@@ -50,7 +50,7 @@ from src.services.courses.activities.assignments import (
     update_assignment_submission,
     update_assignment_task,
 )
-from src.services.permissions.unified_permission_service import UnifiedPermissionService
+from src.services.permissions.permission_service_consolidated import PermissionService
 
 router = APIRouter()
 
@@ -482,7 +482,7 @@ async def api_final_grade_submission(
     user_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     db_session=Depends(get_db_session),
 ):

@@ -46,9 +46,7 @@ from src.db.permissions import (
 from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user
 from src.security.rbac.dependencies import get_permission_service
-from src.services.permissions.permission_service import PermissionService
-from src.services.permissions.role_service import RoleService
-from src.services.permissions.unified_permission_service import UnifiedPermissionService
+from src.services.permissions.permission_service_consolidated import PermissionService
 from src.services.permissions import permission_cache
 
 # Rate limiter for permission check endpoints to prevent enumeration attacks
@@ -127,7 +125,7 @@ async def api_list_roles(
             resource_type=ResourceTypeEnum.ROLE, action=ActionEnum.READ
         )
 
-    service = RoleService(db_session)
+    service = PermissionService(db_session)
     return service.list_all(org_id, include_global)
 
 
@@ -137,7 +135,7 @@ async def api_create_role(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
 ) -> RoleRead:
     """
@@ -158,7 +156,7 @@ async def api_create_role(
             reason="Insufficient permissions to create role",
         )
 
-    service = RoleService(db_session)
+    service = PermissionService(db_session)
     try:
         role = service.create(role_data, created_by=current_user.id)
         return RoleRead.model_validate(role)
@@ -180,7 +178,7 @@ async def api_get_role(
             resource_type=ResourceTypeEnum.ROLE, action=ActionEnum.READ
         )
 
-    service = RoleService(db_session)
+    service = PermissionService(db_session)
     role = service.get_role_with_permissions(role_id)
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
@@ -194,7 +192,7 @@ async def api_update_role(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
 ) -> RoleRead:
     """
@@ -202,7 +200,7 @@ async def api_update_role(
 
     Requires role:update:org permission.
     """
-    service = RoleService(db_session)
+    service = PermissionService(db_session)
     existing = service.get_by_id(role_id)
     if not existing:
         raise HTTPException(status_code=404, detail="Role not found")
@@ -233,7 +231,7 @@ async def api_delete_role(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
 ):
     """
@@ -242,7 +240,7 @@ async def api_delete_role(
     Requires role:delete:org permission.
     Cannot delete system roles.
     """
-    service = RoleService(db_session)
+    service = PermissionService(db_session)
     existing = service.get_by_id(role_id)
     if not existing:
         raise HTTPException(status_code=404, detail="Role not found")
@@ -279,7 +277,7 @@ async def api_add_permission_to_role(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
 ):
     """
@@ -287,7 +285,7 @@ async def api_add_permission_to_role(
 
     Requires role:update:org permission.
     """
-    service = RoleService(db_session)
+    service = PermissionService(db_session)
     existing = service.get_by_id(role_id)
     if not existing:
         raise HTTPException(status_code=404, detail="Role not found")
@@ -323,7 +321,7 @@ async def api_remove_permission_from_role(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
 ):
     """
@@ -331,7 +329,7 @@ async def api_remove_permission_from_role(
 
     Requires role:update:org permission.
     """
-    service = RoleService(db_session)
+    service = PermissionService(db_session)
     existing = service.get_by_id(role_id)
     if not existing:
         raise HTTPException(status_code=404, detail="Role not found")
@@ -384,7 +382,7 @@ async def api_get_user_roles(
     # Users can always view their own roles
     if current_user.id != user_id:
         # For viewing other users' roles, need read permission on users
-        permission_service = UnifiedPermissionService(db_session)
+        permission_service = PermissionService(db_session)
         can_do = await permission_service.check(
             user=current_user,
             action=Action.READ,
@@ -398,7 +396,7 @@ async def api_get_user_roles(
                 reason="Insufficient permissions to view user roles",
             )
 
-    service = RoleService(db_session)
+    service = PermissionService(db_session)
     return service.get_user_roles(user_id, org_id)
 
 
@@ -409,7 +407,7 @@ async def api_assign_role_to_user(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
 ):
     """
@@ -430,7 +428,7 @@ async def api_assign_role_to_user(
             reason="Insufficient permissions to assign role to user",
         )
 
-    service = RoleService(db_session)
+    service = PermissionService(db_session)
     try:
         service.assign_role_to_user(
             user_id=user_id,
@@ -456,7 +454,7 @@ async def api_remove_role_from_user(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
 ):
     """
@@ -477,7 +475,7 @@ async def api_remove_role_from_user(
             reason="Insufficient permissions to remove role from user",
         )
 
-    service = RoleService(db_session)
+    service = PermissionService(db_session)
     if not service.remove_role_from_user(user_id, role_id, org_id):
         raise HTTPException(status_code=404, detail="Role not assigned to user")
 
@@ -497,7 +495,7 @@ async def api_get_my_permissions(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     org_id: int | None = None,
 ) -> UserPermissionsResponse:
@@ -526,7 +524,7 @@ async def api_get_my_permissions(
     permissions = permission_service.get_user_permissions(current_user, org_id)
 
     # Get user's roles
-    service = RoleService(db_session)
+    service = PermissionService(db_session)
     user_roles = service.get_user_roles(user_id, org_id)
     roles = [ur.role for ur in user_roles if ur.role]
 
@@ -555,7 +553,7 @@ async def api_check_permissions(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
 ) -> BatchPermissionCheckResponse:
     """
@@ -618,7 +616,7 @@ async def api_check_single_permission(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
     resource_id: str | None = None,
     org_id: int | None = None,
@@ -674,7 +672,7 @@ async def api_list_permission_templates(
             resource_type=ResourceTypeEnum.PERMISSION, action=ActionEnum.READ
         )
 
-    service = RoleService(db_session)
+    service = PermissionService(db_session)
     return service.list_permission_templates()
 
 
@@ -685,7 +683,7 @@ async def api_apply_permission_template(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
 ):
     """
@@ -696,7 +694,7 @@ async def api_apply_permission_template(
 
     Requires role:update:org permission.
     """
-    service = RoleService(db_session)
+    service = PermissionService(db_session)
     existing = service.get_by_id(role_id)
     if not existing:
         raise HTTPException(status_code=404, detail="Role not found")
@@ -741,7 +739,7 @@ async def api_seed_permissions(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     permission_service: Annotated[
-        UnifiedPermissionService, Depends(get_permission_service)
+        PermissionService, Depends(get_permission_service)
     ],
 ):
     """
@@ -756,7 +754,7 @@ async def api_seed_permissions(
         )
 
     # Check for super-admin (this is a bootstrapping endpoint)
-    role_service = RoleService(db_session)
+    role_service = PermissionService(db_session)
     user_roles = role_service.get_user_roles(current_user.id)
     is_super_admin = any(ur.role and ur.role.slug == "super-admin" for ur in user_roles)
 

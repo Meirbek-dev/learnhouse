@@ -15,7 +15,7 @@ from sqlmodel import Session
 from src.core.events.database import get_db_session
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac.context import PermissionContext
-from src.services.permissions.unified_permission_service import UnifiedPermissionService
+from src.services.permissions.permission_service_consolidated import PermissionService
 
 
 async def _lazy_get_current_user(
@@ -30,9 +30,9 @@ async def _lazy_get_current_user(
 
 def get_permission_service(
     db_session: Annotated[Session, Depends(get_db_session)],
-) -> UnifiedPermissionService:
+) -> PermissionService:
     """
-    Get a UnifiedPermissionService instance.
+    Get a PermissionService instance.
 
     This is the main dependency for permission checking in routes.
 
@@ -40,9 +40,9 @@ def get_permission_service(
         db_session: Database session
 
     Returns:
-        UnifiedPermissionService instance
+        PermissionService instance
     """
-    return UnifiedPermissionService(db_session)
+    return PermissionService(db_session)
 
 
 def get_permission_context(
@@ -75,7 +75,7 @@ def get_permission_context(
 
 # Type aliases for cleaner dependency injection
 PermissionServiceDep = Annotated[
-    UnifiedPermissionService, Depends(get_permission_service)
+    PermissionService, Depends(get_permission_service)
 ]
 PermissionContextDep = Annotated[PermissionContext, Depends(get_permission_context)]
 CurrentUserDep = Annotated[PublicUser | AnonymousUser, Depends(_lazy_get_current_user)]

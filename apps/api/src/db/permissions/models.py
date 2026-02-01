@@ -158,12 +158,16 @@ class RoleUpdate(SQLModelStrictBaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Role-Permission Junction
+
+# Role-Permission Junction (DEPRECATED - Replaced by user_permissions)
 # ---------------------------------------------------------------------------
+# NOTE: These models are kept for backward compatibility during migration.
+# They will be removed once rbac_schema_flatten migration is applied.
+# New code should use UserPermission instead.
 
 
 class RolePermissionBase(SQLModelStrictBaseModel):
-    """Base model for role-permission assignment."""
+    """Base model for role-permission assignment. DEPRECATED."""
 
     model_config = ConfigDict(use_enum_values=True)
 
@@ -175,7 +179,7 @@ class RolePermissionBase(SQLModelStrictBaseModel):
 
 
 class RolePermission(RolePermissionBase, table=True):
-    """Junction table for role-permission assignments."""
+    """Junction table for role-permission assignments. DEPRECATED - Use UserPermission."""
 
     __tablename__ = "role_permissions"
     __table_args__ = (Index("ix_role_permissions_role_id", "role_id"),)
@@ -198,7 +202,7 @@ class RolePermission(RolePermissionBase, table=True):
 
 
 class RolePermissionCreate(SQLModelStrictBaseModel):
-    """Model for assigning a permission to a role."""
+    """Model for assigning a permission to a role. DEPRECATED."""
 
     role_id: int
     permission_id: int
@@ -206,16 +210,19 @@ class RolePermissionCreate(SQLModelStrictBaseModel):
 
 
 # ---------------------------------------------------------------------------
-# User-Role Assignment
+# User-Role Assignment (DEPRECATED - Replaced by user_permissions)
 # ---------------------------------------------------------------------------
+# NOTE: These models are kept for backward compatibility during migration.
+# They will be removed once rbac_schema_flatten migration is applied.
+# New code should use UserPermission instead.
 
 
 class UserRoleBase(SQLModelStrictBaseModel):
-    """Base model for user-role assignment."""
+    """Base model for user-role assignment. DEPRECATED."""
 
 
 class UserRole(UserRoleBase, table=True):
-    """User-role assignment per organization."""
+    """User-role assignment per organization. DEPRECATED - Use UserPermission."""
 
     __tablename__ = "user_roles"
     __table_args__ = (
@@ -252,7 +259,7 @@ class UserRole(UserRoleBase, table=True):
 
 
 class UserRoleCreate(SQLModelStrictBaseModel):
-    """Model for assigning a role to a user."""
+    """Model for assigning a role to a user. DEPRECATED."""
 
     role_id: int
     org_id: int
@@ -260,7 +267,7 @@ class UserRoleCreate(SQLModelStrictBaseModel):
 
 
 class UserRoleAssign(SQLModelStrictBaseModel):
-    """Model for assigning a role to a user (with user_id for batch operations)."""
+    """Model for assigning a role to a user (with user_id for batch operations). DEPRECATED."""
 
     user_id: int
     role_id: int
@@ -269,7 +276,7 @@ class UserRoleAssign(SQLModelStrictBaseModel):
 
 
 class UserRoleRead(SQLModelStrictBaseModel):
-    """Model for reading user-role assignment."""
+    """Model for reading user-role assignment. DEPRECATED."""
 
     user_id: int
     role_id: int
@@ -278,6 +285,102 @@ class UserRoleRead(SQLModelStrictBaseModel):
     granted_by: int | None
     expires_at: datetime | None
     role: RoleRead | None = None
+
+
+# ---------------------------------------------------------------------------
+# User Permissions (NEW - Replaces user_roles + role_permissions)
+# ---------------------------------------------------------------------------
+
+
+class UserPermissionBase(SQLModelStrictBaseModel):
+    """Base model for flattened user permissions."""
+
+    model_config = ConfigDict(use_enum_values=True)
+
+    scope: Scope = Field(description="Permission scope (all, org, own, assigned)")
+
+
+class UserPermission(UserPermissionBase, table=True):
+    """Flattened user permissions - replaces user_roles + role_permissions junction tables.
+
+    This table denormalizes the relationship between users, roles, and permissions
+    for better query performance (1 join instead of 3).
+
+    Migration: Created by rbac_schema_flatten migration which expands
+    user_roles + role_permissions into individual user-permission entries.
+    """
+
+    __tablename__ = "user_permissions"
+    __table_args__ = (
+        Index("idx_user_perms_lookup", "user_id", "org_id"),  # Primary lookup
+        Index("idx_user_perms_permission", "permission_id"),  # Permission queries
+        Index("idx_user_perms_role", "granted_via_role_id"),  # Audit queries
+    )
+
+    user_id: int = Field(
+        sa_column=Column(
+            Integer, ForeignKey("user.id", ondelete="CASCADE"), primary_key=True
+        ),
+        description="User ID",
+    )
+    permission_id: int = Field(
+        sa_column=Column(
+            Integer, ForeignKey("permissions.id", ondelete="CASCADE"), primary_key=True
+        ),
+        description="Permission ID",
+    )
+    org_id: int = Field(
+        sa_column=Column(
+            Integer,
+            ForeignKey("organization.id", ondelete="CASCADE"),
+            primary_key=True,
+        ),
+        description="Organization ID",
+    )
+    granted_via_role_id: int | None = Field(
+        default=None,
+        sa_column=Column(Integer, ForeignKey("roles.id", ondelete="SET NULL")),
+        description="Role that granted this permission (NULL for direct assignments) - preserves audit trail",
+    )
+    granted_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC),
+        description="When permission was granted",
+    )
+    expires_at: datetime | None = Field(
+        default=None, description="Optional permission expiry"
+    )
+
+    @field_validator("scope", mode="before")
+    @classmethod
+    def validate_scope(cls, v):
+        if isinstance(v, str):
+            return Scope(v)
+        return v
+
+
+class UserPermissionCreate(SQLModelStrictBaseModel):
+    """Model for creating a user permission."""
+
+    model_config = ConfigDict(use_enum_values=True)
+
+    user_id: int
+    permission_id: int
+    org_id: int
+    scope: Scope
+    granted_via_role_id: int | None = None
+    expires_at: datetime | None = None
+
+
+class UserPermissionRead(UserPermissionBase):
+    """Model for reading a user permission."""
+
+    user_id: int
+    permission_id: int
+    org_id: int
+    granted_via_role_id: int | None
+    granted_at: datetime
+    expires_at: datetime | None
+    permission: PermissionRead | None = None  # Can include permission details
 
 
 # ---------------------------------------------------------------------------
