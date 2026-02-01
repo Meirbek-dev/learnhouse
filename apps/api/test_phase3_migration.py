@@ -29,9 +29,7 @@ from src.core.events.database import get_db_session
 from src.db.permissions.models import (
     Permission,
     Role,
-    RolePermission,
     UserPermission,
-    UserRole,
 )
 
 
@@ -41,68 +39,16 @@ def export_user_permissions_before_migration(
     """
     Export all user permissions BEFORE migration.
 
-    This captures the current state for comparison after migration.
+    NOTE: This function is deprecated as the migration has already been applied
+    and the old tables (user_roles, role_permissions) have been dropped.
     """
     print("=" * 70)
-    print("EXPORTING USER PERMISSIONS (BEFORE MIGRATION)")
+    print("DEPRECATED: Old tables have been dropped")
     print("=" * 70)
-
-    # Get all users with roles
-    user_roles = session.exec(select(UserRole)).all()
-
-    print(f"\nFound {len(user_roles)} user-role assignments")
-
-    user_permissions = {}
-
-    for ur in user_roles:
-        # Get permissions for this role (OLD WAY: 3 joins)
-        role_perms = session.exec(
-            select(Permission)
-            .join(RolePermission, RolePermission.permission_id == Permission.id)
-            .where(RolePermission.role_id == ur.role_id)
-        ).all()
-
-        # Build key: user_id:org_id
-        key = f"{ur.user_id}:{ur.org_id}"
-
-        if key not in user_permissions:
-            user_permissions[key] = {
-                "user_id": ur.user_id,
-                "org_id": ur.org_id,
-                "permissions": [],
-                "roles": [],
-            }
-
-        user_permissions[key]["roles"].append(
-            {
-                "role_id": ur.role_id,
-                "granted_at": ur.granted_at.isoformat() if ur.granted_at else None,
-                "expires_at": ur.expires_at.isoformat() if ur.expires_at else None,
-            }
-        )
-
-        for perm in role_perms:
-            if perm.name not in user_permissions[key]["permissions"]:
-                user_permissions[key]["permissions"].append(perm.name)
-
-    # Write to file
-    output = {
-        "exported_at": datetime.now().isoformat(),
-        "total_users": len(user_permissions),
-        "total_user_roles": len(user_roles),
-        "user_permissions": list(user_permissions.values()),
-    }
-
-    with open(output_file, "w") as f:
-        json.dump(output, f, indent=2)
-
-    print(
-        f"\n✅ Exported {len(user_permissions)} user-permission sets to {output_file}"
-    )
-    print(f"   Total users: {len(user_permissions)}")
-    print(f"   Total user-role assignments: {len(user_roles)}")
-
-    return output
+    print("\n❌ Cannot export from old schema - migration already complete")
+    print("   Tables dropped: user_roles, role_permissions")
+    print("   Current schema uses: user_permissions (flattened)")
+    return None
 
 
 def validate_migration(session: Session, before_file: str = "permissions_before.json"):
@@ -198,7 +144,7 @@ def validate_migration(session: Session, before_file: str = "permissions_before.
     if all_valid:
         print("\n✅ ALL VALIDATIONS PASSED")
         print(f"   - All {len(before_data['user_permissions'])} users preserved")
-        print(f"   - All permissions migrated correctly")
+        print("   - All permissions migrated correctly")
         print(f"   - Total permissions in new table: {len(user_perms_after)}")
     else:
         print("\n❌ VALIDATION FAILED")
@@ -228,10 +174,12 @@ def validate_migration(session: Session, before_file: str = "permissions_before.
 
 def benchmark_performance(session: Session, iterations: int = 100):
     """
-    Benchmark query performance: OLD (3 joins) vs NEW (1 join).
+    Benchmark query performance: NEW (1 join) architecture.
+
+    NOTE: Old query benchmark removed as user_roles table has been dropped.
     """
     print("=" * 70)
-    print("PERFORMANCE BENCHMARK")
+    print("PERFORMANCE BENCHMARK (NEW ARCHITECTURE)")
     print("=" * 70)
 
     # Rollback any pending transactions to get a clean state
@@ -239,18 +187,6 @@ def benchmark_performance(session: Session, iterations: int = 100):
         session.rollback()
     except Exception:
         pass
-
-    # Get a sample user with roles
-    try:
-        user_role = session.exec(select(UserRole)).first()
-        if not user_role:
-            print("\n⚠️  No user_roles found - cannot benchmark OLD queries")
-            user_role = None
-    except Exception as e:
-        print(f"\n⚠️  Cannot query user_roles: {e}")
-        user_role = None
-        # Rollback after error to continue
-        session.rollback()
 
     # Get a sample user permission
     try:
@@ -260,7 +196,7 @@ def benchmark_performance(session: Session, iterations: int = 100):
         user_perm = None
 
     if not user_perm:
-        print("\n❌ No user_permissions found - migration not applied yet")
+        print("\n❌ No user_permissions found - database may be empty")
         return
 
     user_id = user_perm.user_id
@@ -269,41 +205,13 @@ def benchmark_performance(session: Session, iterations: int = 100):
     print(f"\nBenchmarking with user_id={user_id}, org_id={org_id}")
     print(f"Running {iterations} iterations...")
 
-    # Benchmark OLD query (if user_roles still exists)
-    if user_role:
-        print(
-            "\n1. OLD QUERY (3 joins: user_roles → roles → role_permissions → permissions)"
-        )
-        start = time.time()
-
-        for _ in range(iterations):
-            # Simulate old query
-            user_roles = session.exec(
-                select(UserRole).where(
-                    UserRole.user_id == user_id,
-                    UserRole.org_id == org_id,
-                )
-            ).all()
-
-            for ur in user_roles:
-                session.exec(
-                    select(Permission)
-                    .join(RolePermission, RolePermission.permission_id == Permission.id)
-                    .where(RolePermission.role_id == ur.role_id)
-                ).all()
-
-        old_time = time.time() - start
-        old_avg = (old_time / iterations) * 1000  # ms
-
-        print(f"   Total time: {old_time:.3f}s")
-        print(f"   Average: {old_avg:.2f}ms per query")
-    else:
-        old_time = None
-        old_avg = None
-        print("\n1. OLD QUERY - Skipped (user_roles table not available)")
+    # OLD QUERY: Deprecated (tables dropped)
+    print("\n❌ OLD QUERY: Deprecated (user_roles table dropped)")
+    old_time = None
+    old_avg = None
 
     # Benchmark NEW query
-    print("\n2. NEW QUERY (1 join: user_permissions → permissions)")
+    print("\n✅ NEW QUERY (1 join: user_permissions → permissions)")
     start = time.time()
 
     for _ in range(iterations):

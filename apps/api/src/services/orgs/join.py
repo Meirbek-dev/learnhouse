@@ -5,11 +5,12 @@ from pydantic import Field
 from sqlmodel import Session, select
 
 from src.db.organizations import Organization
-from src.db.permissions.models import UserRole
+from src.db.permissions.models import UserPermission
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User
 from src.services.orgs.invites import get_invite_code
 from src.services.orgs.orgs import get_org_join_mechanism
+from src.services.permissions import get_permission_service
 
 
 class JoinOrg(PydanticStrictBaseModel):
@@ -51,8 +52,8 @@ async def join_org(
         )
 
     # Check if user is already in the organization
-    statement = select(UserRole).where(
-        UserRole.user_id == args.user_id, UserRole.org_id == args.org_id
+    statement = select(UserPermission).where(
+        UserPermission.user_id == args.user_id, UserPermission.org_id == args.org_id
     )
     result = db_session.exec(statement)
     userorg = result.first()
@@ -79,30 +80,24 @@ async def join_org(
                 detail="Invite code is incorrect",
             )
 
-        # Link user and organization
-        user_organization = UserRole(
+        # Link user and organization by assigning default role
+        permission_service = get_permission_service(db_session)
+        permission_service.assign_role(
             user_id=user.id,
+            role_id=4,  # Default user role
             org_id=org.id,
-            role_id=4,
-            granted_at=datetime.now(UTC),
-            granted_by=None,
         )
-        db_session.add(user_organization)
-        db_session.commit()
 
         return "Добро пожаловать!"
 
     if join_method == "open":
-        # Link user and organization
-        user_organization = UserRole(
+        # Link user and organization by assigning default role
+        permission_service = get_permission_service(db_session)
+        permission_service.assign_role(
             user_id=user.id,
+            role_id=4,  # Default user role
             org_id=org.id,
-            role_id=4,
-            granted_at=datetime.now(UTC),
-            granted_by=None,
         )
-        db_session.add(user_organization)
-        db_session.commit()
 
         return "Добро пожаловать!"
 

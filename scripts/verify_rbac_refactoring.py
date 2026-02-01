@@ -3,16 +3,16 @@
 RBAC System Verification Script
 
 This script verifies that the RBAC system has been properly refactored
-according to the RBAC System Frontend Refactoring Plan.
+to use the new flattened schema (user_permissions only).
 
 Usage:
     uv run python scripts/verify_rbac_refactoring.py
 
 Run this script to ensure:
-1. No legacy RBAC code remains
+1. No deprecated RolePermission/UserRole model usage
 2. No hardcoded role IDs exist
-3. UnifiedPermissionService is used consistently
-4. No user_role.rights references exist
+3. PermissionService is used consistently
+4. All code uses the new user_permissions architecture
 """
 
 import re
@@ -66,13 +66,14 @@ def search_files(directory: Path, pattern: str, extensions: List[str]) -> List[T
     return matches
 
 def check_legacy_rbac_functions(backend_path: Path) -> bool:
-    """Check for old RBAC function usage."""
-    print_header("Checking for Legacy RBAC Functions")
+    """Check for deprecated model usage (RolePermission, UserRole)."""
+    print_header("Checking for Deprecated Model Usage")
 
     patterns = [
-        r'authorization_verify_based_on_roles_and_authorship',
-        r'from\s+src\.security\.rbac\.rbac\s+import',
-        r'check_element_type',
+        r'from.*RolePermission',
+        r'from.*UserRole',
+        r'RolePermission\(',
+        r'UserRole\(',
     ]
 
     all_clean = True
@@ -80,13 +81,13 @@ def check_legacy_rbac_functions(backend_path: Path) -> bool:
         matches = search_files(backend_path, pattern, ['py'])
         if matches:
             all_clean = False
-            print_error(f"Found legacy pattern '{pattern}':")
+            print_error(f"Found deprecated model usage '{pattern}':")
             for file_path, line_num, line in matches[:5]:  # Show first 5 matches
                 print(f"  {file_path}:{line_num} - {line[:100]}")
             if len(matches) > 5:
                 print(f"  ... and {len(matches) - 5} more matches")
         else:
-            print_success(f"No matches for '{pattern}'")
+            print_success(f"No deprecated model usage for '{pattern}'")
 
     return all_clean
 

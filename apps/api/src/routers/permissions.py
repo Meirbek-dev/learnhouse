@@ -40,14 +40,32 @@ from src.db.permissions import (
     RoleUpdate,
     RoleWithPermissions,
     UserPermissionsResponse,
-    UserRoleCreate,
-    UserRoleRead,
 )
+from pydantic import BaseModel
 from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user
 from src.security.rbac.dependencies import get_permission_service
 from src.services.permissions.permission_service_consolidated import PermissionService
 from src.services.permissions import permission_cache
+
+
+# --- Request/Response Models for User-Role Endpoints ---
+
+
+class UserRoleAssignRequest(BaseModel):
+    """Request model for assigning a role to a user."""
+    role_id: int
+    org_id: int
+    expires_at: datetime | None = None
+
+
+class UserRoleInfo(BaseModel):
+    """Response model for user role information."""
+    role_id: int
+    role_name: str
+    role_slug: str
+    org_id: int
+
 
 # Rate limiter for permission check endpoints to prevent enumeration attacks
 _limiter = Limiter(key_func=get_remote_address)
@@ -367,7 +385,7 @@ async def api_get_user_roles(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     org_id: int | None = None,
-) -> list[UserRoleRead]:
+) -> list[UserRoleInfo]:
     """
     Get all roles assigned to a user.
 
@@ -397,13 +415,14 @@ async def api_get_user_roles(
             )
 
     service = PermissionService(db_session)
-    return service.get_user_roles(user_id, org_id)
+    roles_dicts = service.get_user_roles(user_id, org_id)
+    return [UserRoleInfo(**role_dict) for role_dict in roles_dicts]
 
 
 @router.post("/users/{user_id}/roles")
 async def api_assign_role_to_user(
     user_id: int,
-    role_data: UserRoleCreate,
+    role_data: UserRoleAssignRequest,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     permission_service: Annotated[
@@ -430,7 +449,7 @@ async def api_assign_role_to_user(
 
     service = PermissionService(db_session)
     try:
-        service.assign_role_to_user(
+        result = service.assign_role(
             user_id=user_id,
             role_id=role_data.role_id,
             org_id=role_data.org_id,
@@ -441,7 +460,7 @@ async def api_assign_role_to_user(
         # ✅ INVALIDATE CACHE - user's permissions changed
         permission_cache.invalidate_user_permissions(user_id)
 
-        return {"message": "Role assigned to user"}
+        return {"message": "Role assigned to user", "permissions_added": result.get("permissions_added", 0)}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -476,7 +495,8 @@ async def api_remove_role_from_user(
         )
 
     service = PermissionService(db_session)
-    if not service.remove_role_from_user(user_id, role_id, org_id):
+    success = service.remove_role(user_id=user_id, role_id=role_id, org_id=org_id)
+    if not success:
         raise HTTPException(status_code=404, detail="Role not assigned to user")
 
     # ✅ INVALIDATE CACHE - user's permissions changed
@@ -762,9 +782,9 @@ async def api_seed_permissions(
         # If no super-admin exists yet, allow first user to seed
         from sqlmodel import select
 
-        from src.db.permissions.models import UserRole
+        from src.db.permissions.models import UserPermission
 
-        existing_admins = db_session.exec(select(UserRole)).first()
+        existing_admins = db_session.exec(select(UserPermission)).first()
         if existing_admins:
             raise InsufficientRole(required_role="SUPER_ADMIN", current_role="USER")
 

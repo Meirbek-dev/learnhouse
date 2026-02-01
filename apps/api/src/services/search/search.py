@@ -8,7 +8,7 @@ from src.db.collections import Collection, CollectionRead
 from src.db.collections_courses import CollectionCourse
 from src.db.courses.courses import Course, CourseRead
 from src.db.organizations import Organization
-from src.db.permissions.models import UserRole
+from src.db.permissions.models import UserPermission
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.services.courses.courses import search_courses
@@ -65,9 +65,10 @@ async def search_across_org(
     users_query = (
         select(User)
         .join(
-            UserRole,
-            and_(UserRole.user_id == User.id, UserRole.org_id == org.id),
+            UserPermission,
+            and_(UserPermission.user_id == User.id, UserPermission.org_id == org.id),
         )
+        .distinct()
         .where(
             or_(
                 text(

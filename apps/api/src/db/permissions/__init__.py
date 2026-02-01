@@ -46,16 +46,13 @@ from src.db.permissions.models import (
     ResourcePermissionRead,
     Role,
     RoleCreate,
-    RolePermission,
-    RolePermissionCreate,
     RoleRead,
     RoleUpdate,
     RoleWithPermissions,
+    UserPermission,
+    UserPermissionCreate,
+    UserPermissionRead,
     UserPermissionsResponse,
-    UserRole,
-    UserRoleAssign,
-    UserRoleCreate,
-    UserRoleRead,
 )
 
 __all__ = [
@@ -89,12 +86,9 @@ __all__ = [
     "ResourcePermissionCreate",
     "ResourcePermissionRead",
     "ResourceType",
-    # Role models (new names)
+    # Role models
     "Role",
     "RoleCreate",
-    # Role-Permission junction
-    "RolePermission",
-    "RolePermissionCreate",
     "RoleRead",
     # Constants
     "RoleSlug",
@@ -102,12 +96,11 @@ __all__ = [
     # Composite models
     "RoleWithPermissions",
     "Scope",
+    # User permissions (new flattened schema)
+    "UserPermission",
+    "UserPermissionCreate",
+    "UserPermissionRead",
     "UserPermissionsResponse",
-    # User-Role assignment
-    "UserRole",
-    "UserRoleAssign",
-    "UserRoleCreate",
-    "UserRoleRead",
     "is_admin_or_maintainer_role",
     "is_admin_role",
     "is_content_creator_role",

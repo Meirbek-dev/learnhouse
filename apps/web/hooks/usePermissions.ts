@@ -326,14 +326,3 @@ export function usePermissions(options?: UsePermissionsOptions) {
     error,
   };
 }
-
-/**
- * Legacy compatibility: Extract permissions from resource metadata.
- *
- * @deprecated Use `usePermissions({ resource })` instead
- */
-export function useResourcePermissions<T extends ResourceWithPermissions>(
-  resource: T | null | undefined,
-) {
-  return usePermissions({ resource });
-}

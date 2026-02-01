@@ -12,7 +12,7 @@ from ulid import ULID
 from src.db.organizations import Organization, OrganizationRead
 from src.db.permissions import Role, RoleRead
 from src.db.permissions.enums import Action, ResourceType
-from src.db.permissions.models import UserRole
+from src.db.permissions.models import UserPermission
 from src.db.users import (
     AnonymousUser,
     InternalUser,
@@ -344,26 +344,37 @@ async def get_user_session(
     user = await _get_user_by_field(db_session, "user_uuid", current_user.user_uuid)
     user_read = UserRead.model_validate(user)
 
-    # Get roles and orgs using new UserRole table
-    statement = select(UserRole).where(UserRole.user_id == user.id)
-    user_roles = db_session.exec(statement).all()
+    # Get roles and orgs using PermissionService
+    from src.services.permissions import get_permission_service
+    permission_service = get_permission_service(db_session)
+
+    # Get all orgs where user has permissions
+    statement = select(UserPermission).where(UserPermission.user_id == user.id).distinct()
+    user_perms = db_session.exec(statement).all()
+
+    # Get unique org IDs
+    org_ids = {perm.org_id for perm in user_perms}
 
     roles = []
 
-    for user_role in user_roles:
-        role_statement = select(Role).where(Role.id == user_role.role_id)
-        role = db_session.exec(role_statement).first()
-
-        org_statement = select(Organization).where(Organization.id == user_role.org_id)
+    for org_id in org_ids:
+        org_statement = select(Organization).where(Organization.id == org_id)
         org = db_session.exec(org_statement).first()
 
-        if role and org:
-            roles.append(
-                UserRoleWithOrg(
-                    role=_safe_role_read(role),
-                    org=_safe_organization_read(org),
-                )
+        if org:
+            # Get user's roles in this org
+            user_roles = permission_service.get_user_roles(
+                user_id=user.id, org_id=org_id
             )
+
+            # Use first role (primary role)
+            if user_roles:
+                roles.append(
+                    UserRoleWithOrg(
+                        role=_safe_role_read(user_roles[0]),
+                        org=_safe_organization_read(org),
+                    )
+                )
 
     # Get user's effective permissions from the new RBAC system
     permissions: dict[str, bool] = {}
@@ -593,22 +604,20 @@ async def _link_user_to_organization(
     ).first()
 
     if not user_role_model:
-        # Fallback: create user_role anyway with role_id=None
-        _logger.warning("Default 'user' role not found, creating UserRole without role")
-        role_id = None
-    else:
-        role_id = user_role_model.id
+        # Fallback: log warning, no role assigned
+        _logger.warning("Default 'user' role not found, cannot assign role")
+        return
 
-    # Create UserRole entry (new RBAC system)
-    user_role = UserRole(
+    role_id = user_role_model.id
+
+    # Assign role using PermissionService
+    from src.services.permissions import get_permission_service
+    permission_service = get_permission_service(db_session)
+    permission_service.assign_role(
         user_id=user_id if user_id else 0,
         role_id=role_id,
         org_id=org_id,
-        granted_at=datetime.now(UTC),
     )
-
-    db_session.add(user_role)
-    db_session.commit()
 
 
 async def _get_user_by_field(

@@ -14,7 +14,7 @@ from src.db.permissions import (
     RoleCreate,
     RoleRead,
     RoleUpdate,
-    UserRole,
+    UserPermission,
 )
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import PublicUser
@@ -86,14 +86,14 @@ async def create_role(
             detail="Organization not found",
         )
 
-    # Check if the current user is a member of the organization via UserRole
-    statement = select(UserRole).where(
-        UserRole.user_id == current_user.id,
-        UserRole.org_id == role_object.org_id,
+    # Check if the current user is a member of the organization via UserPermission
+    statement = select(UserPermission).where(
+        UserPermission.user_id == current_user.id,
+        UserPermission.org_id == role_object.org_id,
     )
-    user_role = db_session.exec(statement).first()
+    user_perm = db_session.exec(statement).first()
 
-    if not user_role:
+    if not user_perm:
         raise HTTPException(
             status_code=403,
             detail="You are not a member of this organization",
@@ -178,13 +178,13 @@ async def get_roles_by_organization(
         )
 
     # Check if the current user is a member of the organization
-    statement = select(UserRole).where(
-        UserRole.user_id == current_user.id,
-        UserRole.org_id == org_id,
+    statement = select(UserPermission).where(
+        UserPermission.user_id == current_user.id,
+        UserPermission.org_id == org_id,
     )
-    user_role = db_session.exec(statement).first()
+    user_perm = db_session.exec(statement).first()
 
-    if not user_role:
+    if not user_perm:
         raise HTTPException(
             status_code=403,
             detail="You are not a member of this organization",

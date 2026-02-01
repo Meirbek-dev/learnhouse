@@ -13,7 +13,7 @@ from src.db.organizations import (
     PaginatedOrganizationUsers,
     rebuild_organization_models,
 )
-from src.db.permissions import Role, RoleRead, UserRole
+from src.db.permissions import Role, RoleRead, UserPermission
 from src.db.permissions.constants import ADMIN_ROLE_SLUGS
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
@@ -58,12 +58,13 @@ async def get_organization_users(
         resource_id=org.org_uuid,
     )
 
-    # Build base query joining via UserRole
+    # Build base query joining via UserPermission (new schema)
+    # Get distinct users who have any permission in this org
     base_statement = (
         select(User)
-        .join(UserRole, UserRole.user_id == User.id)
-        .join(Organization, UserRole.org_id == Organization.id)
-        .where(Organization.id == org_id_int)
+        .join(UserPermission, UserPermission.user_id == User.id)
+        .where(UserPermission.org_id == org_id_int)
+        .distinct()
     )
 
     # Get total count
@@ -77,27 +78,21 @@ async def get_organization_users(
 
     org_users_list = []
 
+    permission_service = get_permission_service(db_session)
+
     for user in users:
-        # Get user's role via new UserRole table
-        statement = select(UserRole).where(
-            UserRole.user_id == user.id, UserRole.org_id == org_id_int
+        # Get user's roles via new PermissionService
+        user_roles = permission_service.get_user_roles(
+            user_id=user.id, org_id=org_id_int
         )
-        user_role_entry = db_session.exec(statement).first()
 
-        if not user_role_entry:
-            logging.warning(
-                f"UserRole not found for user {user.id} in org {org_id_int}"
-            )
+        if not user_roles:
+            logging.warning(f"No roles found for user {user.id} in org {org_id_int}")
             # skip this user
             continue
 
-        statement = select(Role).where(Role.id == user_role_entry.role_id)
-        role = db_session.exec(statement).first()
-
-        if not role:
-            logging.error(f"Role {user_role_entry.role_id} not found")
-            # skip this user
-            continue
+        # Use the first role (primary role)
+        role = user_roles[0]
 
         user_read = UserRead.model_validate(user)
         role_read = RoleRead.model_validate(role)
@@ -148,14 +143,15 @@ async def remove_user_from_org(
         resource_id=org.org_uuid,
     )
 
-    statement = select(UserRole).where(
-        UserRole.user_id == user_id, UserRole.org_id == org.id
+    # Check if user has any permissions in this org (i.e., is a member)
+    statement = select(UserPermission).where(
+        UserPermission.user_id == user_id, UserPermission.org_id == org.id
     )
     result = db_session.exec(statement)
 
-    user_org = result.first()
+    user_perms = result.all()
 
-    if not user_org:
+    if not user_perms:
         raise HTTPException(
             status_code=404,
             detail="User not found",
@@ -167,19 +163,26 @@ async def remove_user_from_org(
     ).first()
     admin_role_id = admin_role.id if admin_role else 1
 
-    statement = select(UserRole).where(
-        UserRole.org_id == org.id, UserRole.role_id == admin_role_id
-    )
+    # Count admins by checking UserPermissions with granted_via_role_id = admin_role_id
+    statement = select(UserPermission).where(
+        UserPermission.org_id == org.id,
+        UserPermission.granted_via_role_id == admin_role_id
+    ).distinct()
     result = db_session.exec(statement)
-    admins = result.all()
+    admin_perms = result.all()
 
-    if len(admins) == 1 and admins[0].user_id == user_id:
+    # Get unique admin user IDs
+    admin_user_ids = {perm.user_id for perm in admin_perms}
+
+    if len(admin_user_ids) == 1 and user_id in admin_user_ids:
         raise HTTPException(
             status_code=400,
             detail="You can't remove the last admin of the organization",
         )
 
-    db_session.delete(user_org)
+    # Delete all user's permissions in this org
+    for perm in user_perms:
+        db_session.delete(perm)
     db_session.commit()
 
     return {"detail": "User removed from org"}
@@ -242,21 +245,26 @@ async def update_user_role(
     ).first()
     admin_role_id = admin_role.id if admin_role else 1
 
-    statement = select(UserRole).where(
-        UserRole.org_id == org.id, UserRole.role_id == admin_role_id
-    )
+    # Count admins by checking UserPermissions with granted_via_role_id = admin_role_id
+    statement = select(UserPermission).where(
+        UserPermission.org_id == org.id,
+        UserPermission.granted_via_role_id == admin_role_id
+    ).distinct()
     result = db_session.exec(statement)
-    admins = result.all()
+    admin_perms = result.all()
 
-    if not admins:
+    # Get unique admin user IDs
+    admin_user_ids = {perm.user_id for perm in admin_perms}
+
+    if not admin_user_ids:
         raise HTTPException(
             status_code=400,
             detail="There is no admin in the organization",
         )
 
     if (
-        len(admins) == 1
-        and int(admins[0].user_id) == user_id_int
+        len(admin_user_ids) == 1
+        and user_id_int in admin_user_ids
         and slug not in ADMIN_ROLE_SLUGS
     ):
         raise HTTPException(
@@ -264,25 +272,38 @@ async def update_user_role(
             detail="Organization must have at least one admin",
         )
 
-    statement = select(UserRole).where(
-        UserRole.user_id == user_id_int, UserRole.org_id == org.id
+    # Check if user has any permissions in this org
+    statement = select(UserPermission).where(
+        UserPermission.user_id == user_id_int, UserPermission.org_id == org.id
     )
     result = db_session.exec(statement)
 
-    user_org = result.first()
+    user_perms = result.all()
 
-    if not user_org:
+    if not user_perms:
         raise HTTPException(
             status_code=404,
             detail="User not found",
         )
 
+    # Remove old role and assign new role using PermissionService
     if role_id is not None:
-        user_org.role_id = role_id
+        # Get current role to remove
+        current_role_ids = {perm.granted_via_role_id for perm in user_perms if perm.granted_via_role_id}
 
-    db_session.add(user_org)
+        # Remove all current role-based permissions
+        for role_id_to_remove in current_role_ids:
+            if role_id_to_remove:
+                permission_service.remove_role(
+                    user_id=user_id_int, role_id=role_id_to_remove, org_id=org.id
+                )
+
+        # Assign new role
+        permission_service.assign_role(
+            user_id=user_id_int, role_id=role_id, org_id=org.id
+        )
+
     db_session.commit()
-    db_session.refresh(user_org)
 
     return {"detail": "User role updated"}
 

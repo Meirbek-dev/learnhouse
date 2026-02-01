@@ -26,7 +26,6 @@ from src.db.organization_config import (
     UserGroupOrgConfig,
 )
 from src.db.organizations import Organization, OrganizationCreate
-from src.db.permissions.models import UserRole
 from src.db.users import User, UserCreate, UserRead
 from src.security.security import security_hash_password
 from src.services.permissions.permission_service_consolidated import PermissionService
@@ -101,7 +100,7 @@ def install_create_organization(org_object: OrganizationCreate, db_session: Sess
     return org
 
 
-def install_create_organization_user(
+async def install_create_organization_user(
     user_object: UserCreate, org_slug: str, db_session: Session
 ):
     user = User.model_validate(user_object)
@@ -161,17 +160,13 @@ def install_create_organization_user(
     org = org.first()
     org_id = org.id if org else 0
 
-    # Link user and organization
-    user_organization = UserRole(
+    # Link user and organization by assigning admin role
+    from src.services.permissions import get_permission_service
+    permission_service = get_permission_service(db_session)
+    permission_service.assign_role(
         user_id=user.id if user.id else 0,
+        role_id=1,  # Admin role
         org_id=org_id or 0,
-        role_id=1,
-        granted_at=datetime.now(UTC),
-        granted_by=None,
     )
-
-    db_session.add(user_organization)
-    db_session.commit()
-    db_session.refresh(user_organization)
 
     return UserRead.model_validate(user)

@@ -31,7 +31,7 @@ from src.db.organizations import (
     OrganizationRead,
     OrganizationUpdate,
 )
-from src.db.permissions import Role, UserRole
+from src.db.permissions import Role, UserPermission
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, InternalUser, PublicUser
 from src.services.orgs.uploads import (
@@ -172,17 +172,14 @@ async def create_org(
     db_session.commit()
     db_session.refresh(org)
 
-    # Link user to org
-    user_org = UserRole(
+    # Link user to org by assigning admin role
+    from src.services.permissions import get_permission_service
+    permission_service = get_permission_service(db_session)
+    permission_service.assign_role(
         user_id=int(current_user.id),
+        role_id=1,  # Admin role
         org_id=int(org.id if org.id else 0),
-        role_id=1,
-        granted_at=datetime.now(UTC),
-        granted_by=None,
     )
-    db_session.add(user_org)
-    db_session.commit()
-    db_session.refresh(user_org)
 
     org_config = OrganizationConfigBase(
         config_version="1.1",
@@ -269,18 +266,14 @@ async def create_org_with_config(
     db_session.commit()
     db_session.refresh(org)
 
-    # Link user to org
-    user_org = UserRole(
+    # Link user to org by assigning admin role
+    from src.services.permissions import get_permission_service
+    permission_service = get_permission_service(db_session)
+    permission_service.assign_role(
         user_id=int(current_user.id),
+        role_id=1,  # Admin role
         org_id=int(org.id if org.id else 0),
-        role_id=1,
-        granted_at=datetime.now(UTC),
-        granted_by=None,
     )
-
-    db_session.add(user_org)
-    db_session.commit()
-    db_session.refresh(user_org)
     org_config = submitted_config
 
     org_config_dict = orjson.loads(org_config.model_dump_json())
@@ -571,15 +564,15 @@ async def delete_org(
     db_session.delete(org)
     db_session.commit()
 
-    # Delete links to org
-    statement = select(UserRole).where(UserRole.org_id == org_id)
+    # Delete all user permissions linked to this org
+    statement = select(UserPermission).where(UserPermission.org_id == org_id)
     result = db_session.exec(statement)
 
-    user_orgs = result.all()
+    user_perms = result.all()
 
-    for user_org in user_orgs:
-        db_session.delete(user_org)
-        db_session.commit()
+    for perm in user_perms:
+        db_session.delete(perm)
+    db_session.commit()
 
     db_session.refresh(org)
 
@@ -596,7 +589,7 @@ async def get_orgs_by_user_admin(
     # Convert user_id to int for proper type matching with database
     user_id_int = int(user_id)
 
-    # Join Organization, UserRole and OrganizationConfig in a single query
+    # Join Organization, UserPermission and OrganizationConfig in a single query
     # Resolve the admin role id by slug (new RBAC system)
     admin_role = db_session.exec(
         select(Role).where(Role.slug.in_(["super-admin", "org-admin"]))
@@ -605,13 +598,14 @@ async def get_orgs_by_user_admin(
 
     statement = (
         select(Organization, OrganizationConfig)
-        .join(UserRole, UserRole.org_id == Organization.id)
+        .join(UserPermission, UserPermission.org_id == Organization.id)
         .outerjoin(OrganizationConfig)
         .where(
-            UserRole.user_id == user_id_int,
-            UserRole.role_id == admin_role_id,  # Only where the user is admin
+            UserPermission.user_id == user_id_int,
+            UserPermission.granted_via_role_id == admin_role_id,  # Only where the user is admin
             OrganizationConfig.org_id == Organization.id,
         )
+        .distinct()
         .offset((page - 1) * limit)
         .limit(limit)
     )
@@ -640,16 +634,17 @@ async def get_orgs_by_user(
     # Convert user_id to int for proper type matching with database
     user_id_int = int(user_id)
 
-    # Join Organization, UserRole and OrganizationConfig in a single query
+    # Join Organization, UserPermission and OrganizationConfig in a single query
     statement = (
         select(Organization, OrganizationConfig)
-        .join(UserRole)
+        .join(UserPermission)
         .outerjoin(OrganizationConfig)
         .where(
-            UserRole.user_id == user_id_int,
-            UserRole.org_id == Organization.id,
+            UserPermission.user_id == user_id_int,
+            UserPermission.org_id == Organization.id,
             OrganizationConfig.org_id == Organization.id,
         )
+        .distinct()
         .offset((page - 1) * limit)
         .limit(limit)
     )

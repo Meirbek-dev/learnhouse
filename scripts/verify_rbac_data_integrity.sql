@@ -5,7 +5,7 @@
 -- ============================================================================
 -- 1. CHECK FOR USERS WITHOUT ROLES
 -- ============================================================================
--- This identifies users who don't have any role assigned
+-- This identifies users who dont have any role assigned
 SELECT
     u.id,
     u.email,
@@ -16,13 +16,13 @@ LEFT JOIN user_roles ur ON u.id = ur.user_id
 WHERE ur.user_id IS NULL
 ORDER BY u.created_at DESC;
 
--- Expected: Ideally empty, or only very recent users who haven't been assigned roles yet
+-- Expected: Ideally empty, or only very recent users who havent been assigned roles yet
 
 
 -- ============================================================================
 -- 2. CHECK FOR ROLES WITHOUT PERMISSIONS
 -- ============================================================================
--- This finds roles that don't have any permissions assigned
+-- This finds roles that dont have any permissions assigned
 SELECT
     r.id,
     r.slug,
@@ -36,13 +36,13 @@ GROUP BY r.id, r.slug, r.name, r.org_id, r.is_system
 HAVING COUNT(rp.permission_id) = 0
 ORDER BY r.is_system DESC, r.org_id;
 
--- Expected: Empty or only custom roles that haven't been configured yet
+-- Expected: Empty or only custom roles that havent been configured yet
 
 
 -- ============================================================================
 -- 3. CHECK FOR ORPHANED USER_ROLES
 -- ============================================================================
--- This finds user_roles entries where the role doesn't exist
+-- This finds user_roles entries where the role doesnt exist
 SELECT
     ur.id,
     ur.user_id,

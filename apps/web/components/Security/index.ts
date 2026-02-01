@@ -9,7 +9,7 @@
 
 // Core provider and hook
 export { PermissionProvider } from './PermissionProvider';
-export { usePermissions, useResourcePermissions } from '@/hooks/usePermissions';
+export { usePermissions } from '@/hooks/usePermissions';
 export type { UsePermissionsOptions, ResourceWithPermissions } from '@/hooks/usePermissions';
 
 // UI Components

@@ -1,3 +1,4 @@
+import asyncio
 import os
 from typing import Annotated
 
@@ -78,7 +79,7 @@ def install(
                 f"Using email from PLATFORM_INITIAL_ADMIN_EMAIL environment variable: {email}"
             )
         user = UserCreate(username="Meirbek", email=email, password=password)
-        install_create_organization_user(user, "openu", db_session)
+        asyncio.run(install_create_organization_user(user, "openu", db_session))
         print("Ashyq Bilim user created ✅")
 
         # Show the user how to login
@@ -113,7 +114,7 @@ def install(
         email = typer.prompt("What's the email for the user?")
         password = typer.prompt("What's the password for the user?", hide_input=True)
         user = UserCreate(username=username, email=email, password=password)
-        install_create_organization_user(user, "openu", db_session)
+        asyncio.run(install_create_organization_user(user, "openu", db_session))
         print(username + " user created ✅")
 
         # Show the user how to login
