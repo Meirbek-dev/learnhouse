@@ -902,6 +902,10 @@
       "deleteConfirmationTitle": "Удалить {collectionName}?",
       "deleting": "Удаление..."
     },
+    "PermissionTooltip": {
+      "enabled": "Вы можете {action}",
+      "disabled": "У вас нет прав выполнить {action}"
+    },
     "ConfirmationModal": {
       "cancel": "Отмена",
       "close": "Закрыть",

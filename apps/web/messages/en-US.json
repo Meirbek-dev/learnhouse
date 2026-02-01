@@ -902,6 +902,10 @@
       "deleteConfirmationTitle": "Delete {collectionName}?",
       "deleting": "Deleting..."
     },
+    "PermissionTooltip": {
+      "enabled": "You can {action}",
+      "disabled": "You don't have permission to {action}"
+    },
     "ConfirmationModal": {
       "cancel": "Cancel",
       "close": "Close",

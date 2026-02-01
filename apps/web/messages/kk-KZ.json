@@ -855,6 +855,10 @@
       "deleteConfirmationTitle": "{collectionName} жою керек пе?",
       "deleting": "Жойылуда..."
     },
+    "PermissionTooltip": {
+      "enabled": "Сіз {action} жасай аласыз",
+      "disabled": "Сізде {action} жасауға рұқсат жоқ"
+    },
     "ConfirmationModal": {
       "cancel": "Күшін жою",
       "close": "Жабу",
