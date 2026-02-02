@@ -1,7 +1,7 @@
 """Dedupe user_roles and add unique constraint
 
 Revision ID: b3f9d2c4a7e8
-Revises: l8oaz1wgmyid
+Revises: 69fd16a5d534
 Create Date: 2026-01-31 00:00:00.000000
 
 """
@@ -13,7 +13,7 @@ from sqlalchemy import text
 
 # revision identifiers, used by Alembic.
 revision = "b3f9d2c4a7e8"
-down_revision = "l8oaz1wgmyid"
+down_revision = "69fd16a5d534"
 branch_labels = None
 depends_on = None
 
