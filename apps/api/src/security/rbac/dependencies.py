@@ -11,8 +11,8 @@ from sqlmodel import Session
 
 from src.core.events.database import get_db_session
 from src.db.users import AnonymousUser, PublicUser
+from src.services.rbac.dependencies import RBACServiceDep, get_rbac_service
 from src.services.rbac.service import RBACService
-from src.services.rbac.dependencies import get_rbac_service, RBACServiceDep
 
 
 async def _lazy_get_current_user(

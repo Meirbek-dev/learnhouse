@@ -18,10 +18,6 @@ from sqlmodel import Session, and_, select
 
 from src.core.events.database import get_db_session
 from src.core.timezone import now as tz_now
-from src.db.permissions.generated_enums import Action, ResourceType
-from src.security.permissions.exceptions import PermissionDenied
-from src.security.rbac.dependencies import get_permission_service
-from src.services.permissions import PermissionService
 from src.db.gamification import (
     DashboardRead,
     GamificationProfile,
@@ -38,14 +34,18 @@ from src.db.gamification import (
 from src.db.gamification import (
     StreakType as DBStreakType,
 )
+from src.db.permissions.generated_enums import Action, ResourceType
 from src.db.users import PublicUser
 from src.db.users import User as DBUser
 from src.security.auth import get_current_user
+from src.security.permissions.exceptions import PermissionDenied
+from src.security.rbac.dependencies import get_permission_service
 from src.services.gamification import service
 from src.services.gamification.service import (
     DailyLimitExceededError,
     GamificationError,
 )
+from src.services.permissions import PermissionService
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -134,9 +134,7 @@ async def award_xp(
     payload: XPAwardRequest,
     user: Annotated[PublicUser, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db_session)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
 ):
     """Award XP with strong typing and idempotency."""
     logger.info(f"Award XP request: user={user.id} org={org_id} payload={payload}")

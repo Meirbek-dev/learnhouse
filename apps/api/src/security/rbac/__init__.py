@@ -5,20 +5,20 @@ RBAC v2: This is the only RBAC system.
 """
 
 from src.security.rbac.dependencies import (
-    get_permission_service,
-    PermissionServiceDep,
     CurrentUserDep,
+    PermissionServiceDep,
+    get_permission_service,
 )
+from src.services.rbac.dependencies import RBACServiceDep, get_rbac_service
 from src.services.rbac.service import RBACService
-from src.services.rbac.dependencies import get_rbac_service, RBACServiceDep
 
 __all__ = [
+    "CurrentUserDep",
+    "PermissionServiceDep",
     # RBAC Service
     "RBACService",
-    "get_rbac_service",
     "RBACServiceDep",
     # Legacy aliases
     "get_permission_service",
-    "PermissionServiceDep",
-    "CurrentUserDep",
+    "get_rbac_service",
 ]

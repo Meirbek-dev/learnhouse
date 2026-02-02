@@ -157,16 +157,20 @@ def test_all_endpoints_have_rbac():
 
                 # Check for permission checks
                 if not has_permission_check(source):
-                    unprotected_endpoints.append({
-                        "method": method,
-                        "path": path,
-                        "handler": endpoint_func.__name__,
-                        "module": module_name,
-                    })
+                    unprotected_endpoints.append(
+                        {
+                            "method": method,
+                            "path": path,
+                            "handler": endpoint_func.__name__,
+                            "module": module_name,
+                        }
+                    )
 
     # Assert no unprotected endpoints found
     if unprotected_endpoints:
-        error_msg = "\\n\\n⚠️  SECURITY: Found endpoints without permission checks:\\n\\n"
+        error_msg = (
+            "\\n\\n⚠️  SECURITY: Found endpoints without permission checks:\\n\\n"
+        )
         for ep in unprotected_endpoints:
             error_msg += f"  {ep['method']} {ep['path']}\\n"
             error_msg += f"    Handler: {ep['handler']} in {ep['module']}\\n\\n"
@@ -233,12 +237,17 @@ def test_permission_service_usage():
             # Check for common permission check anti-patterns
             if "permission_service.check(" in source:
                 # Should use raise_on_deny or check the boolean
-                if "raise_on_deny=False" in source and "if not has_permission" not in source:
-                    issues.append({
-                        "endpoint": endpoint_func.__name__,
-                        "issue": "Uses raise_on_deny=False but doesn't check result",
-                        "module": module_name,
-                    })
+                if (
+                    "raise_on_deny=False" in source
+                    and "if not has_permission" not in source
+                ):
+                    issues.append(
+                        {
+                            "endpoint": endpoint_func.__name__,
+                            "issue": "Uses raise_on_deny=False but doesn't check result",
+                            "module": module_name,
+                        }
+                    )
 
     if issues:
         error_msg = "\\n\\n⚠️  Permission Check Issues:\\n\\n"

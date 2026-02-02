@@ -162,6 +162,7 @@ async def install_create_organization_user(
 
     # Link user and organization by assigning admin role
     from src.services.permissions import get_permission_service
+
     permission_service = get_permission_service(db_session)
     permission_service.assign_role(
         user_id=user.id if user.id else 0,

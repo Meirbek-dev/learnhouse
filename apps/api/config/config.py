@@ -25,6 +25,7 @@ class SecurityConfig(PydanticStrictBaseModel):
 
 class RBACConfig(PydanticStrictBaseModel):
     """RBAC configuration."""
+
     audit_logging_enabled: bool = True
     cache_enabled: bool = True
     cache_ttl_seconds: int = 300  # 5 minutes

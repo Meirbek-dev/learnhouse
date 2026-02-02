@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from pydantic import ConfigDict
-from sqlalchemy import JSON, Column, BigInteger, ForeignKey
+from sqlalchemy import JSON, BigInteger, Column, ForeignKey
 from sqlmodel import Field
 
 from src.db.organization_config import OrganizationConfig

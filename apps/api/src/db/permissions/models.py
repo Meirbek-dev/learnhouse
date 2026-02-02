@@ -18,7 +18,6 @@ from pydantic import ConfigDict
 from src.db.permissions.generated_enums import Action, ResourceType, Scope
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
-
 # ---------------------------------------------------------------------------
 # Permission API Models
 # ---------------------------------------------------------------------------

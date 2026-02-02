@@ -325,7 +325,11 @@ async def get_collections(
 
         # Enrich with permission metadata
         enriched = await enrich_collection_with_permissions(
-            collection, current_user, db_session, permission_service, courses=list(courses)
+            collection,
+            current_user,
+            db_session,
+            permission_service,
+            courses=list(courses),
         )
         collections_with_courses.append(enriched)
 

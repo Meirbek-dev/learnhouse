@@ -126,12 +126,15 @@ def install(
 
 @cli.command()
 def seed_rbac_v2(
-    dry_run: Annotated[bool, typer.Option(help="Preview changes without applying")] = False,
+    dry_run: Annotated[
+        bool, typer.Option(help="Preview changes without applying")
+    ] = False,
 ) -> None:
     """Seed RBAC v2 permissions from shared/permissions.yaml"""
-    import yaml
-    from pathlib import Path
     from datetime import UTC, datetime
+    from pathlib import Path
+
+    import yaml
 
     # Get the database session
     platform_config = get_platform_config()
@@ -149,7 +152,7 @@ def seed_rbac_v2(
         print(f"❌ Error: {yaml_path} not found")
         raise typer.Exit(code=1)
 
-    with open(yaml_path, "r") as f:
+    with open(yaml_path) as f:
         schema = yaml.safe_load(f)
 
     print("=" * 60)
@@ -164,7 +167,9 @@ def seed_rbac_v2(
     scopes = schema.get("scopes", [])
     roles = schema.get("roles", {})
 
-    print(f"Loaded: {len(actions)} actions, {len(resources)} resources, {len(scopes)} scopes, {len(roles)} roles")
+    print(
+        f"Loaded: {len(actions)} actions, {len(resources)} resources, {len(scopes)} scopes, {len(roles)} roles"
+    )
 
     # Seed permissions
     from sqlalchemy import text
@@ -177,7 +182,7 @@ def seed_rbac_v2(
 
                 existing = db_session.execute(
                     text("SELECT id FROM permissions_v2 WHERE name = :name"),
-                    {"name": perm_name}
+                    {"name": perm_name},
                 ).fetchone()
 
                 if existing:
@@ -198,7 +203,7 @@ def seed_rbac_v2(
                             "scope": scope,
                             "description": f"{action.capitalize()} {resource} in {scope} scope",
                             "created_at": datetime.now(UTC),
-                        }
+                        },
                     )
                 perm_count += 1
 
@@ -211,7 +216,7 @@ def seed_rbac_v2(
     for slug, role_config in roles.items():
         existing = db_session.execute(
             text("SELECT id FROM roles_v2 WHERE slug = :slug AND org_id IS NULL"),
-            {"slug": slug}
+            {"slug": slug},
         ).fetchone()
 
         if existing:
@@ -227,11 +232,13 @@ def seed_rbac_v2(
                 """),
                 {
                     "slug": slug,
-                    "name": role_config.get("description", slug.replace("-", " ").title()),
+                    "name": role_config.get(
+                        "description", slug.replace("-", " ").title()
+                    ),
                     "description": role_config.get("description"),
                     "created_at": datetime.now(UTC),
                     "updated_at": datetime.now(UTC),
-                }
+                },
             )
         role_count += 1
 

@@ -31,8 +31,8 @@ from src.db.organizations import (
     OrganizationRead,
     OrganizationUpdate,
 )
-from src.db.permissions.models_v2 import RoleV2, UserRoleV2
 from src.db.permissions.enums import Action, ResourceType
+from src.db.permissions.models_v2 import RoleV2, UserRoleV2
 from src.db.users import AnonymousUser, InternalUser, PublicUser
 from src.services.orgs.uploads import (
     upload_org_landing_content,
@@ -174,6 +174,7 @@ async def create_org(
 
     # Link user to org by assigning admin role
     from src.services.permissions import get_permission_service
+
     permission_service = get_permission_service(db_session)
     permission_service.assign_role(
         user_id=int(current_user.id),
@@ -268,6 +269,7 @@ async def create_org_with_config(
 
     # Link user to org by assigning admin role
     from src.services.permissions import get_permission_service
+
     permission_service = get_permission_service(db_session)
     permission_service.assign_role(
         user_id=int(current_user.id),
@@ -615,11 +617,16 @@ async def get_orgs_by_user_admin(
         statement = (
             select(Organization, OrganizationConfig)
             .outerjoin(OrganizationConfig)
-            .where(Organization.id.in_(org_ids), OrganizationConfig.org_id == Organization.id)
+            .where(
+                Organization.id.in_(org_ids),
+                OrganizationConfig.org_id == Organization.id,
+            )
         )
         result = db_session.exec(statement).all()
         # Map by org id to preserve the set
-        org_map: dict[int, tuple] = {org.id: (org, org_config) for org, org_config in result}
+        org_map: dict[int, tuple] = {
+            org.id: (org, org_config) for org, org_config in result
+        }
         for oid in org_ids:
             org, org_config = org_map.get(oid, (None, None))
             if not org:
@@ -657,10 +664,15 @@ async def get_orgs_by_user(
         statement = (
             select(Organization, OrganizationConfig)
             .outerjoin(OrganizationConfig)
-            .where(Organization.id.in_(org_ids), OrganizationConfig.org_id == Organization.id)
+            .where(
+                Organization.id.in_(org_ids),
+                OrganizationConfig.org_id == Organization.id,
+            )
         )
         result = db_session.exec(statement).all()
-        org_map: dict[int, tuple] = {org.id: (org, org_config) for org, org_config in result}
+        org_map: dict[int, tuple] = {
+            org.id: (org, org_config) for org, org_config in result
+        }
         for oid in org_ids:
             org, org_config = org_map.get(oid, (None, None))
             if not org:

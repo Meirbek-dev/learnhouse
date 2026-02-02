@@ -6,7 +6,7 @@ Create Date: 2026-01-31 00:00:00.000000
 
 """
 
-from typing import Sequence
+from collections.abc import Sequence
 
 from alembic import op
 from sqlalchemy import text
@@ -59,7 +59,9 @@ def upgrade() -> None:
     # Add unique constraint to prevent future duplicates
     try:
         conn.execute(
-            text("ALTER TABLE user_roles ADD CONSTRAINT uq_user_roles_user_org UNIQUE (user_id, org_id)")
+            text(
+                "ALTER TABLE user_roles ADD CONSTRAINT uq_user_roles_user_org UNIQUE (user_id, org_id)"
+            )
         )
         print("[Migration] Added unique constraint uq_user_roles_user_org")
     except Exception as e:
@@ -70,7 +72,11 @@ def downgrade() -> None:
     """Remove unique constraint (cannot restore deleted duplicate rows)."""
     conn = op.get_bind()
     try:
-        conn.execute(text("ALTER TABLE user_roles DROP CONSTRAINT IF EXISTS uq_user_roles_user_org"))
+        conn.execute(
+            text(
+                "ALTER TABLE user_roles DROP CONSTRAINT IF EXISTS uq_user_roles_user_org"
+            )
+        )
         print("[Migration] Dropped unique constraint uq_user_roles_user_org")
     except Exception as e:
         print(f"[Migration] Warning: could not drop unique constraint: {e}")

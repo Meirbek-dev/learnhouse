@@ -32,6 +32,7 @@ This consolidated migration includes all RBAC system changes and related enhance
 - Ensures all users have proper role assignments
 """
 
+import contextlib
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import Union
@@ -108,29 +109,75 @@ def upgrade() -> None:
         "permissions",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("name", sa.String(100), nullable=False),
-        sa.Column("resource_type", sa.Enum(
-            'organization', 'course', 'chapter', 'activity', 'assignment', 'quiz',
-            'user', 'usergroup', 'collection', 'role', 'certificate', 'discussion',
-            'file', 'analytics', 'trail', 'exam', 'payment', 'api_token',
-            name='resourcetype'
-        ), nullable=False),
-        sa.Column("action", sa.Enum(
-            'create', 'read', 'update', 'delete', 'manage', 'moderate',
-            'export', 'invite', 'grade', 'submit', 'enroll',
-            name='action'
-        ), nullable=False),
-        sa.Column("scope", sa.Enum('all', 'own', 'assigned', 'org', name='scope'), nullable=False, server_default="all"),
+        sa.Column(
+            "resource_type",
+            sa.Enum(
+                "organization",
+                "course",
+                "chapter",
+                "activity",
+                "assignment",
+                "quiz",
+                "user",
+                "usergroup",
+                "collection",
+                "role",
+                "certificate",
+                "discussion",
+                "file",
+                "analytics",
+                "trail",
+                "exam",
+                "payment",
+                "api_token",
+                name="resourcetype",
+            ),
+            nullable=False,
+        ),
+        sa.Column(
+            "action",
+            sa.Enum(
+                "create",
+                "read",
+                "update",
+                "delete",
+                "manage",
+                "moderate",
+                "export",
+                "invite",
+                "grade",
+                "submit",
+                "enroll",
+                name="action",
+            ),
+            nullable=False,
+        ),
+        sa.Column(
+            "scope",
+            sa.Enum("all", "own", "assigned", "org", name="scope"),
+            nullable=False,
+            server_default="all",
+        ),
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column("permission_key", sa.String(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("name", name="uq_permissions_name"),
         sa.UniqueConstraint("permission_key", name="uq_permissions_key"),
     )
     op.create_index("ix_permissions_resource_type", "permissions", ["resource_type"])
     op.create_index("ix_permissions_action", "permissions", ["action"])
-    op.create_index("ix_permissions_resource_action", "permissions", ["resource_type", "action"])
-    op.create_index("idx_permissions_resource_action", "permissions", ["resource_type", "action"])
+    op.create_index(
+        "ix_permissions_resource_action", "permissions", ["resource_type", "action"]
+    )
+    op.create_index(
+        "idx_permissions_resource_action", "permissions", ["resource_type", "action"]
+    )
     op.create_index("idx_permissions_scope", "permissions", ["scope"])
     op.create_index("idx_permissions_key", "permissions", ["permission_key"])
     op.create_index("idx_permissions_name", "permissions", ["name"], unique=True)
@@ -147,11 +194,31 @@ def upgrade() -> None:
         sa.Column("parent_role_id", sa.Integer(), nullable=True),
         sa.Column("is_system", sa.Boolean(), nullable=False, server_default="false"),
         sa.Column("priority", sa.Integer(), nullable=False, server_default="0"),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.PrimaryKeyConstraint("id"),
-        sa.ForeignKeyConstraint(["org_id"], ["organization.id"], ondelete="CASCADE", name="roles_org_id_fkey"),
-        sa.ForeignKeyConstraint(["parent_role_id"], ["roles.id"], ondelete="SET NULL", name="roles_parent_role_id_fkey"),
+        sa.ForeignKeyConstraint(
+            ["org_id"],
+            ["organization.id"],
+            ondelete="CASCADE",
+            name="roles_org_id_fkey",
+        ),
+        sa.ForeignKeyConstraint(
+            ["parent_role_id"],
+            ["roles.id"],
+            ondelete="SET NULL",
+            name="roles_parent_role_id_fkey",
+        ),
         sa.UniqueConstraint("slug", "org_id", name="uq_role_slug_org"),
     )
     op.create_index("ix_roles_org_id", "roles", ["org_id"])
@@ -164,18 +231,41 @@ def upgrade() -> None:
         sa.Column("role_id", sa.Integer(), nullable=False),
         sa.Column("permission_id", sa.Integer(), nullable=False),
         sa.Column("conditions", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-        sa.Column("grant_type", sa.Enum('ALLOW', 'DENY', name='granttype'), nullable=False, server_default="ALLOW"),
+        sa.Column(
+            "grant_type",
+            sa.Enum("ALLOW", "DENY", name="granttype"),
+            nullable=False,
+            server_default="ALLOW",
+        ),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("granted_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "granted_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.Column("granted_by", sa.Integer(), nullable=True),
         sa.PrimaryKeyConstraint("role_id", "permission_id"),
-        sa.ForeignKeyConstraint(["role_id"], ["roles.id"], ondelete="CASCADE", name="role_permissions_role_id_fkey"),
-        sa.ForeignKeyConstraint(["permission_id"], ["permissions.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["role_id"],
+            ["roles.id"],
+            ondelete="CASCADE",
+            name="role_permissions_role_id_fkey",
+        ),
+        sa.ForeignKeyConstraint(
+            ["permission_id"], ["permissions.id"], ondelete="CASCADE"
+        ),
         sa.ForeignKeyConstraint(["granted_by"], ["user.id"], ondelete="SET NULL"),
     )
     op.create_index("ix_role_permissions_role_id", "role_permissions", ["role_id"])
-    op.create_index("ix_role_permissions_role_perm", "role_permissions", ["role_id", "permission_id"])
-    op.create_index("idx_role_permissions_permission_id", "role_permissions", ["permission_id"])
+    op.create_index(
+        "ix_role_permissions_role_perm",
+        "role_permissions",
+        ["role_id", "permission_id"],
+    )
+    op.create_index(
+        "idx_role_permissions_permission_id", "role_permissions", ["permission_id"]
+    )
     print("   ✅ Created role_permissions table")
 
     # 2d. User Roles table
@@ -184,19 +274,31 @@ def upgrade() -> None:
         sa.Column("user_id", sa.Integer(), nullable=False),
         sa.Column("role_id", sa.Integer(), nullable=False),
         sa.Column("org_id", sa.Integer(), nullable=False),
-        sa.Column("granted_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "granted_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.Column("granted_by", sa.Integer(), nullable=True),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint("user_id", "role_id", "org_id"),
         sa.ForeignKeyConstraint(["user_id"], ["user.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["role_id"], ["roles.id"], ondelete="CASCADE", name="user_roles_role_id_fkey"),
+        sa.ForeignKeyConstraint(
+            ["role_id"],
+            ["roles.id"],
+            ondelete="CASCADE",
+            name="user_roles_role_id_fkey",
+        ),
         sa.ForeignKeyConstraint(["org_id"], ["organization.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["granted_by"], ["user.id"], ondelete="SET NULL"),
     )
     op.create_index("ix_user_roles_user_id", "user_roles", ["user_id"])
     op.create_index("ix_user_roles_org_id", "user_roles", ["org_id"])
     op.create_index("ix_user_roles_user_org", "user_roles", ["user_id", "org_id"])
-    op.create_index("ix_user_roles_org_user", "user_roles", ["org_id", "user_id", "expires_at"])
+    op.create_index(
+        "ix_user_roles_org_user", "user_roles", ["org_id", "user_id", "expires_at"]
+    )
     op.create_index("idx_user_roles_expires_at", "user_roles", ["expires_at"])
     op.create_index("idx_user_roles_role_id", "user_roles", ["role_id"])
     print("   ✅ Created user_roles table")
@@ -207,7 +309,12 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=True),
         sa.Column("org_id", sa.Integer(), nullable=True),
-        sa.Column("action", sa.Enum('CHECK', 'GRANT', 'REVOKE', 'DENY', name='auditaction'), nullable=False, server_default="CHECK"),
+        sa.Column(
+            "action",
+            sa.Enum("CHECK", "GRANT", "REVOKE", "DENY", name="auditaction"),
+            nullable=False,
+            server_default="CHECK",
+        ),
         sa.Column("resource_type", sa.String(50), nullable=True),
         sa.Column("resource_id", sa.String(100), nullable=True),
         sa.Column("permission_name", sa.String(100), nullable=True),
@@ -215,16 +322,40 @@ def upgrade() -> None:
         sa.Column("context", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column("ip_address", sa.String(45), nullable=True),
         sa.Column("user_agent", sa.Text(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.ForeignKeyConstraint(["user_id"], ["user.id"], ondelete="SET NULL"),
-        sa.ForeignKeyConstraint(["org_id"], ["organization.id"], ondelete="SET NULL", name="permission_audit_log_org_id_fkey"),
+        sa.ForeignKeyConstraint(
+            ["org_id"],
+            ["organization.id"],
+            ondelete="SET NULL",
+            name="permission_audit_log_org_id_fkey",
+        ),
     )
-    op.create_index("ix_permission_audit_user", "permission_audit_log", ["user_id", "created_at"])
-    op.create_index("ix_permission_audit_resource", "permission_audit_log", ["resource_type", "resource_id"])
-    op.create_index("ix_permission_audit_action", "permission_audit_log", ["action", "created_at"])
-    op.create_index("ix_audit_log_result_created", "permission_audit_log", ["result", "created_at"])
-    op.create_index("idx_audit_log_user_resource", "permission_audit_log", ["user_id", "resource_type", "created_at"])
+    op.create_index(
+        "ix_permission_audit_user", "permission_audit_log", ["user_id", "created_at"]
+    )
+    op.create_index(
+        "ix_permission_audit_resource",
+        "permission_audit_log",
+        ["resource_type", "resource_id"],
+    )
+    op.create_index(
+        "ix_permission_audit_action", "permission_audit_log", ["action", "created_at"]
+    )
+    op.create_index(
+        "ix_audit_log_result_created", "permission_audit_log", ["result", "created_at"]
+    )
+    op.create_index(
+        "idx_audit_log_user_resource",
+        "permission_audit_log",
+        ["user_id", "resource_type", "created_at"],
+    )
     print("   ✅ Created permission_audit_log table")
 
     # ============================================================================
@@ -233,7 +364,8 @@ def upgrade() -> None:
     print("\n3. Creating database functions...")
 
     # Function to get role hierarchy
-    conn.execute(text("""
+    conn.execute(
+        text("""
         CREATE OR REPLACE FUNCTION get_role_hierarchy(role_id_param INTEGER, max_depth INTEGER DEFAULT 10)
         RETURNS TABLE(role_id INTEGER, role_name VARCHAR, depth INTEGER) AS $$
         WITH RECURSIVE role_tree AS (
@@ -250,7 +382,8 @@ def upgrade() -> None:
         FROM role_tree
         ORDER BY depth;
         $$ LANGUAGE SQL STABLE;
-    """))
+    """)
+    )
     print("   ✅ Created get_role_hierarchy function")
 
     # ============================================================================
@@ -286,11 +419,13 @@ def upgrade() -> None:
     print("\n7. Cleaning up legacy role structure...")
     try:
         # Check if rights column exists in role table
-        result = conn.execute(text("""
+        result = conn.execute(
+            text("""
             SELECT column_name
             FROM information_schema.columns
             WHERE table_name='role' AND column_name='rights'
-        """))
+        """)
+        )
         if result.fetchone():
             op.drop_column("role", "rights")
             print("   ✅ Removed rights column from role table")
@@ -363,10 +498,8 @@ def downgrade() -> None:
 
     # Drop creator_id columns
     for table_name in ["course", "activity", "collection", "organization", "usergroup"]:
-        try:
+        with contextlib.suppress(BaseException):
             op.drop_column(table_name, "creator_id")
-        except:
-            pass
 
     # Drop functions
     conn.execute(text("DROP FUNCTION IF EXISTS get_role_hierarchy(INTEGER, INTEGER)"))
@@ -392,6 +525,7 @@ def downgrade() -> None:
 # ==============================================================================
 # Helper Functions
 # ==============================================================================
+
 
 def _seed_default_permissions(conn) -> None:
     """Seed the database with default permissions."""
@@ -496,27 +630,42 @@ def _seed_default_permissions(conn) -> None:
 
     for resource_type, action, scope, description in permissions:
         permission_key = f"{resource_type}:{action}:{scope}"
-        conn.execute(text("""
+        conn.execute(
+            text("""
             INSERT INTO permissions (name, resource_type, action, scope, description, permission_key)
             VALUES (:name, :resource_type::resourcetype, :action::action, :scope::scope, :description, :permission_key)
             ON CONFLICT (name) DO UPDATE SET permission_key = :permission_key
-        """), {
-            "name": permission_key,
-            "resource_type": resource_type,
-            "action": action,
-            "scope": scope,
-            "description": description,
-            "permission_key": permission_key,
-        })
+        """),
+            {
+                "name": permission_key,
+                "resource_type": resource_type,
+                "action": action,
+                "scope": scope,
+                "description": description,
+                "permission_key": permission_key,
+            },
+        )
 
 
 def _seed_default_roles(conn) -> None:
     """Seed the database with default system roles."""
     # Define roles
     roles = [
-        ("super-admin", "Super Admin", "Platform-wide administrator with full access", True, 100),
+        (
+            "super-admin",
+            "Super Admin",
+            "Platform-wide administrator with full access",
+            True,
+            100,
+        ),
         ("org-admin", "Organization Admin", "Full control over organization", True, 90),
-        ("maintainer", "Maintainer", "Content management and course administration", True, 70),
+        (
+            "maintainer",
+            "Maintainer",
+            "Content management and course administration",
+            True,
+            70,
+        ),
         ("instructor", "Instructor", "Course creation and management", True, 50),
         ("moderator", "Moderator", "Community moderation", True, 40),
         ("user", "User", "Standard authenticated user", True, 10),
@@ -524,17 +673,20 @@ def _seed_default_roles(conn) -> None:
 
     # Insert roles
     for slug, name, description, is_system, priority in roles:
-        conn.execute(text("""
+        conn.execute(
+            text("""
             INSERT INTO roles (slug, name, description, is_system, priority, org_id)
             VALUES (:slug, :name, :description, :is_system, :priority, NULL)
             ON CONFLICT (slug, org_id) DO NOTHING
-        """), {
-            "slug": slug,
-            "name": name,
-            "description": description,
-            "is_system": is_system,
-            "priority": priority,
-        })
+        """),
+            {
+                "slug": slug,
+                "name": name,
+                "description": description,
+                "is_system": is_system,
+                "priority": priority,
+            },
+        )
 
     # Get role IDs
     result = conn.execute(text("SELECT id, slug FROM roles WHERE org_id IS NULL"))
@@ -547,26 +699,72 @@ def _seed_default_roles(conn) -> None:
     # Define role-permission mappings
     role_permissions = {
         "super-admin": list(perm_ids.keys()),  # All permissions
-        "org-admin": [p for p in perm_ids if any(x in p for x in [
-            "organization:", "course:", "chapter:", "activity:", "user:",
-            "usergroup:", "collection:", "role:", "analytics:", "file:", "api_token:"
-        ])],
-        "maintainer": [p for p in perm_ids if any(x in p for x in [
-            "course:", "chapter:", "activity:", "collection:", "user:read",
-            "usergroup:read", "analytics:read"
-        ])],
+        "org-admin": [
+            p
+            for p in perm_ids
+            if any(
+                x in p
+                for x in [
+                    "organization:",
+                    "course:",
+                    "chapter:",
+                    "activity:",
+                    "user:",
+                    "usergroup:",
+                    "collection:",
+                    "role:",
+                    "analytics:",
+                    "file:",
+                    "api_token:",
+                ]
+            )
+        ],
+        "maintainer": [
+            p
+            for p in perm_ids
+            if any(
+                x in p
+                for x in [
+                    "course:",
+                    "chapter:",
+                    "activity:",
+                    "collection:",
+                    "user:read",
+                    "usergroup:read",
+                    "analytics:read",
+                ]
+            )
+        ],
         "instructor": [
-            "course:create:org", "course:read:all", "course:update:own", "course:delete:own", "course:manage:own",
-            "chapter:create:own", "chapter:read:all", "chapter:update:own", "chapter:delete:own",
-            "activity:create:own", "activity:read:all", "activity:update:own", "activity:delete:own",
-            "assignment:grade:own", "quiz:grade:own", "certificate:create:own",
-            "analytics:read:own", "user:read:own",
+            "course:create:org",
+            "course:read:all",
+            "course:update:own",
+            "course:delete:own",
+            "course:manage:own",
+            "chapter:create:own",
+            "chapter:read:all",
+            "chapter:update:own",
+            "chapter:delete:own",
+            "activity:create:own",
+            "activity:read:all",
+            "activity:update:own",
+            "activity:delete:own",
+            "assignment:grade:own",
+            "quiz:grade:own",
+            "certificate:create:own",
+            "analytics:read:own",
+            "user:read:own",
         ],
         "moderator": ["course:read:all", "user:read:org", "discussion:moderate:org"],
         "user": [
-            "course:read:all", "user:read:own", "user:update:own",
-            "assignment:submit:all", "quiz:submit:all", "analytics:read:own",
-            "collection:read:all", "certificate:read:all",
+            "course:read:all",
+            "user:read:own",
+            "user:update:own",
+            "assignment:submit:all",
+            "quiz:submit:all",
+            "analytics:read:own",
+            "collection:read:all",
+            "certificate:read:all",
         ],
     }
 
@@ -581,23 +779,28 @@ def _seed_default_roles(conn) -> None:
             if not perm_id:
                 continue
 
-            conn.execute(text("""
+            conn.execute(
+                text("""
                 INSERT INTO role_permissions (role_id, permission_id)
                 VALUES (:role_id, :permission_id)
                 ON CONFLICT (role_id, permission_id) DO NOTHING
-            """), {"role_id": role_id, "permission_id": perm_id})
+            """),
+                {"role_id": role_id, "permission_id": perm_id},
+            )
 
 
 def _migrate_user_organizations(conn) -> None:
     """Migrate existing user_organizations to user_roles (if userorganization table exists)."""
     try:
         # Check if userorganization table exists
-        result = conn.execute(text("""
+        result = conn.execute(
+            text("""
             SELECT EXISTS (
                 SELECT FROM information_schema.tables
                 WHERE table_name = 'userorganization'
             )
-        """))
+        """)
+        )
 
         if not result.scalar():
             return
@@ -615,7 +818,9 @@ def _migrate_user_organizations(conn) -> None:
         new_role_ids = {row[1]: row[0] for row in result}
 
         # Migrate each user_organization entry
-        result = conn.execute(text("SELECT user_id, org_id, role_id, creation_date FROM userorganization"))
+        result = conn.execute(
+            text("SELECT user_id, org_id, role_id, creation_date FROM userorganization")
+        )
 
         for row in result:
             user_id, org_id, old_role_id, creation_date = row
@@ -625,16 +830,19 @@ def _migrate_user_organizations(conn) -> None:
             if not new_role_id:
                 continue
 
-            conn.execute(text("""
+            conn.execute(
+                text("""
                 INSERT INTO user_roles (user_id, role_id, org_id, granted_at)
                 VALUES (:user_id, :role_id, :org_id, :granted_at)
                 ON CONFLICT (user_id, role_id, org_id) DO NOTHING
-            """), {
-                "user_id": user_id,
-                "role_id": new_role_id,
-                "org_id": org_id,
-                "granted_at": creation_date or datetime.now(UTC),
-            })
+            """),
+                {
+                    "user_id": user_id,
+                    "role_id": new_role_id,
+                    "org_id": org_id,
+                    "granted_at": creation_date or datetime.now(UTC),
+                },
+            )
     except Exception as e:
         print(f"   ⚠️  Warning during user_organizations migration: {e}")
 
@@ -643,12 +851,14 @@ def _migrate_userorganization_table(conn) -> None:
     """Migrate and drop the legacy userorganization table."""
     try:
         # Check if userorganization table exists
-        result = conn.execute(text("""
+        result = conn.execute(
+            text("""
             SELECT EXISTS (
                 SELECT FROM information_schema.tables
                 WHERE table_name = 'userorganization'
             )
-        """))
+        """)
+        )
 
         if not result.scalar():
             return
@@ -664,21 +874,20 @@ def _add_creator_id_column(conn, table_name: str, fk_name: str) -> None:
     """Add creator_id column to a table."""
     try:
         # Check if column exists
-        result = conn.execute(text(f"""
+        result = conn.execute(
+            text(f"""
             SELECT column_name
             FROM information_schema.columns
             WHERE table_name='{table_name}' AND column_name='creator_id'
-        """))
+        """)
+        )
 
         if not result.fetchone():
-            op.add_column(table_name, sa.Column("creator_id", sa.BigInteger(), nullable=True))
+            op.add_column(
+                table_name, sa.Column("creator_id", sa.BigInteger(), nullable=True)
+            )
             op.create_foreign_key(
-                fk_name,
-                table_name,
-                "user",
-                ["creator_id"],
-                ["id"],
-                ondelete="SET NULL"
+                fk_name, table_name, "user", ["creator_id"], ["id"], ondelete="SET NULL"
             )
             print(f"   ✅ Added creator_id to {table_name}")
         else:
@@ -691,17 +900,19 @@ def _cleanup_duplicate_users(conn) -> None:
     """Clean up duplicate users based on user_uuid."""
     try:
         # Find duplicate users
-        result = conn.execute(text("""
+        result = conn.execute(
+            text("""
             SELECT user_uuid, array_agg(id ORDER BY id) as ids
             FROM "user"
             WHERE user_uuid IS NOT NULL
             GROUP BY user_uuid
             HAVING COUNT(*) > 1
-        """))
+        """)
+        )
 
         duplicates = result.fetchall()
 
-        for user_uuid, ids in duplicates:
+        for _user_uuid, ids in duplicates:
             if not ids or len(ids) < 2:
                 continue
 
@@ -711,15 +922,21 @@ def _cleanup_duplicate_users(conn) -> None:
             # Migrate foreign key references
             for delete_id in delete_ids:
                 # Update user_roles
-                conn.execute(text("""
+                conn.execute(
+                    text("""
                     UPDATE user_roles
                     SET user_id = :keep_id
                     WHERE user_id = :delete_id
                     ON CONFLICT DO NOTHING
-                """), {"keep_id": keep_id, "delete_id": delete_id})
+                """),
+                    {"keep_id": keep_id, "delete_id": delete_id},
+                )
 
                 # Delete the duplicate user
-                conn.execute(text("DELETE FROM \"user\" WHERE id = :delete_id"), {"delete_id": delete_id})
+                conn.execute(
+                    text('DELETE FROM "user" WHERE id = :delete_id'),
+                    {"delete_id": delete_id},
+                )
 
         if duplicates:
             print(f"   ✅ Cleaned up {len(duplicates)} sets of duplicate users")
@@ -738,11 +955,13 @@ def _add_user_unique_constraints(conn) -> None:
     for constraint_name, column_name in constraints:
         try:
             # Check if constraint exists
-            result = conn.execute(text(f"""
+            result = conn.execute(
+                text(f"""
                 SELECT constraint_name
                 FROM information_schema.table_constraints
                 WHERE table_name='user' AND constraint_name='{constraint_name}'
-            """))
+            """)
+            )
 
             if not result.fetchone():
                 op.create_unique_constraint(constraint_name, "user", [column_name])
@@ -756,28 +975,37 @@ def _add_user_unique_constraints(conn) -> None:
 def _create_additional_indexes(conn) -> None:
     """Create additional performance indexes."""
     indexes = [
-        ("idx_resource_authors_resource_user", "resource_authors", ["resource_uuid", "user_id"], "authorship_status = 'ACTIVE'"),
+        (
+            "idx_resource_authors_resource_user",
+            "resource_authors",
+            ["resource_uuid", "user_id"],
+            "authorship_status = 'ACTIVE'",
+        ),
         ("idx_resource_authors_user_id", "resource_authors", ["user_id"], None),
     ]
 
     for index_name, table_name, columns, where_clause in indexes:
         try:
             # Check if table exists
-            result = conn.execute(text(f"""
+            result = conn.execute(
+                text(f"""
                 SELECT EXISTS (
                     SELECT FROM pg_tables
                     WHERE schemaname = 'public' AND tablename = '{table_name}'
                 )
-            """))
+            """)
+            )
 
             if result.scalar():
                 where_part = f"WHERE {where_clause}" if where_clause else ""
                 columns_str = ", ".join(columns)
-                conn.execute(text(f"""
+                conn.execute(
+                    text(f"""
                     CREATE INDEX IF NOT EXISTS {index_name}
                     ON {table_name}({columns_str})
                     {where_part}
-                """))
+                """)
+                )
                 print(f"   ✅ Created {index_name}")
         except Exception as e:
             print(f"   ⚠️  Warning creating {index_name}: {e}")

@@ -24,13 +24,13 @@ Usage:
 from src.services.rbac.audit import AuditService
 from src.services.rbac.cache import CacheService
 from src.services.rbac.dependencies import get_rbac_service
-from src.services.rbac.service import PermissionCheck, RBACService, CheckResult
+from src.services.rbac.service import CheckResult, PermissionCheck, RBACService
 
 __all__ = [
-    "RBACService",
-    "CacheService",
     "AuditService",
-    "PermissionCheck",
+    "CacheService",
     "CheckResult",
+    "PermissionCheck",
+    "RBACService",
     "get_rbac_service",
 ]

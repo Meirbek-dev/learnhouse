@@ -14,8 +14,8 @@ from src.db.permissions import (
     RoleRead,
     RoleUpdate,
 )
-from src.db.permissions.models_v2 import RoleV2, UserRoleV2
 from src.db.permissions.enums import Action, ResourceType
+from src.db.permissions.models_v2 import RoleV2, UserRoleV2
 from src.db.users import PublicUser
 from src.services.permissions import get_permission_service
 

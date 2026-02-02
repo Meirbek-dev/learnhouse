@@ -72,5 +72,6 @@ def parse_permission_name(name: str) -> tuple[str, str, str]:
     """Parse a permission name into components."""
     parts = name.split(":")
     if len(parts) != 3:
-        raise ValueError(f"Invalid permission name: {name}")
+        msg = f"Invalid permission name: {name}"
+        raise ValueError(msg)
     return parts[0], parts[1], parts[2]

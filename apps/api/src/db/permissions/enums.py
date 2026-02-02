@@ -11,9 +11,9 @@ from src.db.permissions.generated_enums import Action, ResourceType, Scope
 
 __all__ = [
     "Action",
+    "AuditAction",
     "ResourceType",
     "Scope",
-    "AuditAction",
 ]
 
 

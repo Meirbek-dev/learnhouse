@@ -6,7 +6,7 @@ Provides dependency injection for RBAC services.
 
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status, Request
+from fastapi import Depends, HTTPException, Request, status
 from sqlmodel import Session
 
 from config.config import get_platform_config
@@ -72,15 +72,16 @@ def require_permission(
         ):
             # User has permission to create courses
     """
+
     async def permission_checker(
         request: Request,
         rbac: RBACService = Depends(get_rbac_service),
-    ):
+    ) -> None:
         from src.security.auth import get_current_user
 
         # Get current user
         user = await get_current_user(request)
-        if not user or not hasattr(user, 'id'):
+        if not user or not hasattr(user, "id"):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Authentication required",
@@ -102,7 +103,5 @@ def require_permission(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Permission denied: {result.reason}",
             )
-
-        return None
 
     return permission_checker

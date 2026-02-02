@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 class AuditService:
     """Security audit logging for RBAC v2."""
 
-    def __init__(self, db: Session, redis=None, log_all: bool = False):
+    def __init__(self, db: Session, redis=None, log_all: bool = False) -> None:
         """
         Initialize audit service.
 
@@ -92,7 +92,7 @@ class AuditService:
             self.db.add(audit_log)
             self.db.commit()
         except Exception as e:
-            logger.error(f"Failed to log permission check: {e}")
+            logger.exception(f"Failed to log permission check: {e}")
             self.db.rollback()
 
     # ========================================================================
@@ -137,7 +137,7 @@ class AuditService:
             self.db.add(audit_log)
             self.db.commit()
         except Exception as e:
-            logger.error(f"Failed to log role assignment: {e}")
+            logger.exception(f"Failed to log role assignment: {e}")
             self.db.rollback()
 
     def log_role_revocation(
@@ -178,7 +178,7 @@ class AuditService:
             self.db.add(audit_log)
             self.db.commit()
         except Exception as e:
-            logger.error(f"Failed to log role revocation: {e}")
+            logger.exception(f"Failed to log role revocation: {e}")
             self.db.rollback()
 
     def log_role_creation(
@@ -218,7 +218,7 @@ class AuditService:
             self.db.add(audit_log)
             self.db.commit()
         except Exception as e:
-            logger.error(f"Failed to log role creation: {e}")
+            logger.exception(f"Failed to log role creation: {e}")
             self.db.rollback()
 
     # ========================================================================
@@ -229,8 +229,9 @@ class AuditService:
         self, user_id: int | None = None, limit: int = 100
     ) -> list[dict]:
         """Get recent permission denials for security monitoring."""
-        from src.db.permissions.models_v2 import PermissionAuditLogV2
         from sqlmodel import select
+
+        from src.db.permissions.models_v2 import PermissionAuditLogV2
 
         query = (
             select(PermissionAuditLogV2)
@@ -261,9 +262,11 @@ class AuditService:
         self, user_id: int, days: int = 30, limit: int = 1000
     ) -> list[dict]:
         """Get user's recent RBAC activity."""
-        from src.db.permissions.models_v2 import PermissionAuditLogV2
-        from sqlmodel import select
         from datetime import timedelta
+
+        from sqlmodel import select
+
+        from src.db.permissions.models_v2 import PermissionAuditLogV2
 
         since = datetime.now(UTC) - timedelta(days=days)
 

@@ -7,7 +7,6 @@ from sqlmodel import Session
 from src.core.events.database import get_db_session
 from src.db.courses.courses import CourseRead
 from src.db.permissions import Action, ResourceType
-from src.security.permissions.exceptions import PermissionDenied
 from src.db.users import (
     PublicUser,
     User,
@@ -18,6 +17,7 @@ from src.db.users import (
     UserUpdatePassword,
 )
 from src.security.auth import get_current_user
+from src.security.permissions.exceptions import PermissionDenied
 from src.security.rbac.dependencies import get_permission_service
 from src.services.courses.courses import get_user_courses
 from src.services.permissions import PermissionService
@@ -87,9 +87,7 @@ async def api_create_user_with_orgid(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     user_object: UserCreate,
     org_id: int,
 ) -> UserRead:
@@ -206,9 +204,7 @@ async def api_update_user(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     user_id: int,
     user_object: UserUpdate,
 ) -> UserRead:
@@ -247,9 +243,7 @@ async def api_update_avatar_user(
     user_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     avatar_file: UploadFile | None = None,
 ) -> UserRead:
     """
@@ -380,9 +374,7 @@ async def api_delete_user(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     user_id: int,
 ):
     """

@@ -10,18 +10,19 @@ Test coverage:
 - Edge cases and error handling
 """
 
+from datetime import UTC, datetime, timedelta
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from datetime import datetime, timedelta, UTC
-from unittest.mock import Mock, MagicMock, patch
 
-from src.services.rbac import RBACService, PermissionCheck, CheckResult
-from src.services.rbac.cache import CacheService
+from src.services.rbac import CheckResult, PermissionCheck, RBACService
 from src.services.rbac.audit import AuditService
-
+from src.services.rbac.cache import CacheService
 
 # ============================================================================
 # Fixtures
 # ============================================================================
+
 
 @pytest.fixture
 def mock_db():
@@ -75,6 +76,7 @@ def rbac_service(mock_db, mock_cache, mock_audit):
 # ============================================================================
 # Permission Check Tests
 # ============================================================================
+
 
 class TestPermissionChecks:
     """Tests for permission checking."""
@@ -185,7 +187,9 @@ class TestPermissionChecks:
         assert result.granted is False
         assert result.reason == "role_expired"
 
-    async def test_check_permission_audits_denial(self, rbac_service, mock_db, mock_audit):
+    async def test_check_permission_audits_denial(
+        self, rbac_service, mock_db, mock_audit
+    ):
         """Test that permission denials are audited."""
         # Setup: denied permission
         mock_result = Mock()
@@ -210,6 +214,7 @@ class TestPermissionChecks:
 # Batch Operations Tests
 # ============================================================================
 
+
 class TestBatchOperations:
     """Tests for batch permission checks."""
 
@@ -230,6 +235,7 @@ class TestBatchOperations:
 
         # Setup exec mock to return different results for different queries
         call_count = [0]
+
         def mock_exec(query):
             result = Mock()
             idx = call_count[0]
@@ -272,6 +278,7 @@ class TestBatchOperations:
 # ============================================================================
 # Role Management Tests
 # ============================================================================
+
 
 class TestRoleManagement:
     """Tests for role assignment and revocation."""
@@ -384,6 +391,7 @@ class TestRoleManagement:
 # Utility Tests
 # ============================================================================
 
+
 class TestUtilities:
     """Tests for utility methods."""
 
@@ -411,6 +419,7 @@ class TestUtilities:
 
     def test_get_user_permissions(self, rbac_service, mock_db):
         """Test getting user's permissions."""
+
         # Setup: user has permissions - use a proper mock with spec
         class MockPerm:
             id = 1
@@ -447,6 +456,7 @@ class TestUtilities:
 # ============================================================================
 # Edge Cases and Error Handling
 # ============================================================================
+
 
 class TestEdgeCases:
     """Tests for edge cases and error handling."""
@@ -539,6 +549,7 @@ class TestEdgeCases:
 # ============================================================================
 # Performance Tests
 # ============================================================================
+
 
 class TestPerformance:
     """Performance-related tests."""

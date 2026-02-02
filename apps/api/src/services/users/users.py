@@ -346,6 +346,7 @@ async def get_user_session(
 
     # Get roles and orgs using PermissionService
     from src.services.permissions import get_permission_service
+
     permission_service = get_permission_service(db_session)
 
     # Get all orgs where user has roles (v2 table)
@@ -612,6 +613,7 @@ async def _link_user_to_organization(
 
     # Assign role using PermissionService
     from src.services.permissions import get_permission_service
+
     permission_service = get_permission_service(db_session)
     permission_service.assign_role(
         user_id=user_id if user_id else 0,

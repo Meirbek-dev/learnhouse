@@ -33,10 +33,13 @@ router = APIRouter()
 # Request/Response Models
 # ============================================================================
 
+
 class PermissionCheckRequest(BaseModel):
     """Request to check single permission."""
 
-    action: str = Field(..., description="Action to check (create, read, update, delete, etc.)")
+    action: str = Field(
+        ..., description="Action to check (create, read, update, delete, etc.)"
+    )
     resource: str = Field(..., description="Resource type (course, user, org, etc.)")
     resource_id: str | None = Field(None, description="Optional specific resource ID")
     org_id: int | None = Field(None, description="Organization context")
@@ -54,13 +57,17 @@ class PermissionCheckResponse(BaseModel):
 class BatchPermissionCheckRequest(BaseModel):
     """Request to check multiple permissions."""
 
-    checks: list[PermissionCheckRequest] = Field(..., description="List of permissions to check")
+    checks: list[PermissionCheckRequest] = Field(
+        ..., description="List of permissions to check"
+    )
 
 
 class BatchPermissionCheckResponse(BaseModel):
     """Response for batch permission check."""
 
-    results: dict[str, bool] = Field(..., description="Map of permission_name → granted")
+    results: dict[str, bool] = Field(
+        ..., description="Map of permission_name → granted"
+    )
 
 
 class RoleInfo(BaseModel):
@@ -89,7 +96,9 @@ class UserPermissionsResponse(BaseModel):
     """Response for user permissions query."""
 
     roles: list[RoleInfo] = Field(..., description="User's roles")
-    permissions: list[PermissionInfo] = Field(..., description="User's effective permissions")
+    permissions: list[PermissionInfo] = Field(
+        ..., description="User's effective permissions"
+    )
 
 
 class RoleAssignmentRequest(BaseModel):
@@ -98,7 +107,9 @@ class RoleAssignmentRequest(BaseModel):
     user_id: int = Field(..., description="User ID to assign role to")
     role_slug: str = Field(..., description="Role slug to assign")
     org_id: int = Field(..., description="Organization context")
-    expires_at: str | None = Field(None, description="Optional expiration (ISO datetime)")
+    expires_at: str | None = Field(
+        None, description="Optional expiration (ISO datetime)"
+    )
 
 
 class RoleRevocationRequest(BaseModel):
@@ -116,7 +127,9 @@ class RoleCreateRequest(BaseModel):
     name: str = Field(..., description="Role display name")
     description: str | None = Field(None, description="Role description")
     org_id: int | None = Field(None, description="Organization (None for global)")
-    permissions: list[str] | None = Field(None, description="Optional list of permission names")
+    permissions: list[str] | None = Field(
+        None, description="Optional list of permission names"
+    )
 
 
 class AddPermissionToRoleRequest(BaseModel):
@@ -129,11 +142,12 @@ class AddPermissionToRoleRequest(BaseModel):
 # Endpoints - Permission Checks
 # ============================================================================
 
+
 @router.post("/check", response_model=PermissionCheckResponse)
 async def check_permission(
     request: PermissionCheckRequest,
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    rbac: RBACService = Depends(get_rbac_service),
+    rbac: Annotated[RBACService, Depends(get_rbac_service)],
 ):
     """
     Check if current user has permission.
@@ -186,7 +200,7 @@ async def check_permission(
 async def check_permissions_batch(
     request: BatchPermissionCheckRequest,
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    rbac: RBACService = Depends(get_rbac_service),
+    rbac: Annotated[RBACService, Depends(get_rbac_service)],
 ):
     """
     Check multiple permissions in one request (more efficient).
@@ -217,8 +231,7 @@ async def check_permissions_batch(
         return BatchPermissionCheckResponse(results=results)
 
     checks = [
-        (check.action, check.resource, check.resource_id)
-        for check in request.checks
+        (check.action, check.resource, check.resource_id) for check in request.checks
     ]
 
     # Use first check's org_id (assumes all checks are for same org)
@@ -237,11 +250,12 @@ async def check_permissions_batch(
 # Endpoints - User Permissions
 # ============================================================================
 
+
 @router.get("/me/permissions", response_model=UserPermissionsResponse)
 async def get_my_permissions(
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    rbac: RBACService = Depends(get_rbac_service),
-    org_id: int | None = Query(None, description="Filter by organization"),
+    rbac: Annotated[RBACService, Depends(get_rbac_service)],
+    org_id: Annotated[int | None, Query(description="Filter by organization")] = None,
 ):
     """
     Get all permissions for current user.
@@ -280,11 +294,12 @@ async def get_my_permissions(
 # Endpoints - Role Management (Admin Only)
 # ============================================================================
 
+
 @router.post("/roles/assign")
 async def assign_role(
     request: RoleAssignmentRequest,
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    rbac: RBACService = Depends(get_rbac_service),
+    rbac: Annotated[RBACService, Depends(get_rbac_service)],
 ):
     """
     Assign role to user (admin only).
@@ -333,7 +348,7 @@ async def assign_role(
 async def revoke_role(
     request: RoleRevocationRequest,
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    rbac: RBACService = Depends(get_rbac_service),
+    rbac: Annotated[RBACService, Depends(get_rbac_service)],
 ):
     """
     Revoke role from user (admin only).
@@ -370,7 +385,7 @@ async def revoke_role(
 async def create_role(
     request: RoleCreateRequest,
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    rbac: RBACService = Depends(get_rbac_service),
+    rbac: Annotated[RBACService, Depends(get_rbac_service)],
 ):
     """
     Create new role (admin only).
@@ -393,7 +408,7 @@ async def create_role(
     check.raise_if_denied("You don't have permission to create roles")
 
     # Create role
-    role = rbac.create_role(
+    return rbac.create_role(
         slug=request.slug,
         name=request.name,
         org_id=request.org_id,
@@ -402,16 +417,14 @@ async def create_role(
         created_by=current_user.id,
     )
 
-    return role
-
 
 @router.post("/roles/{role_slug}/permissions")
 async def add_permission_to_role(
     role_slug: str,
     request: AddPermissionToRoleRequest,
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    rbac: RBACService = Depends(get_rbac_service),
-    org_id: int | None = Query(None, description="Organization context"),
+    rbac: Annotated[RBACService, Depends(get_rbac_service)],
+    org_id: Annotated[int | None, Query(description="Organization context")] = None,
 ):
     """
     Add permission to role (admin only).

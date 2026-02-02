@@ -12,10 +12,10 @@ Usage:
 """
 
 # Re-export from new RBAC service for backwards compatibility
-from src.services.rbac.service import RBACService
-from src.services.rbac.dependencies import get_rbac_service
 from src.services.rbac.audit import AuditService
 from src.services.rbac.cache import CacheService
+from src.services.rbac.dependencies import get_rbac_service
+from src.services.rbac.service import RBACService
 
 # Backwards compatible aliases
 PermissionService = RBACService
@@ -26,11 +26,12 @@ get_permission_service = get_rbac_service
 # Cache Invalidation (backwards compatible)
 # ============================================================================
 
+
 class PermissionCache:
     """Backwards compatible permission cache interface."""
 
     @staticmethod
-    def invalidate_user_permissions(user_id: int):
+    def invalidate_user_permissions(user_id: int) -> None:
         """Invalidate cache for a specific user."""
         try:
             cache = CacheService()
@@ -39,7 +40,7 @@ class PermissionCache:
             pass  # Redis down, ignore
 
     @staticmethod
-    def invalidate_role_permissions(role_id: int):
+    def invalidate_role_permissions(role_id: int) -> None:
         """Invalidate cache for a specific role."""
         try:
             cache = CacheService()
@@ -48,7 +49,7 @@ class PermissionCache:
             pass  # Redis down, ignore
 
     @staticmethod
-    def invalidate_org_permissions(org_id: int):
+    def invalidate_org_permissions(org_id: int) -> None:
         """Invalidate cache for a specific org."""
         try:
             cache = CacheService()
@@ -62,15 +63,15 @@ permission_cache = PermissionCache()
 
 
 __all__ = [
-    # New RBAC service
-    "RBACService",
-    "get_rbac_service",
     "AuditService",
     "CacheService",
+    "PermissionCache",
     # Backwards compatible aliases
     "PermissionService",
+    # New RBAC service
+    "RBACService",
     "get_permission_service",
+    "get_rbac_service",
     # Cache interface
     "permission_cache",
-    "PermissionCache",
 ]

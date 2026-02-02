@@ -150,9 +150,7 @@ async def api_remove_user_from_org(
     org_id: int,
     user_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -187,9 +185,7 @@ async def api_get_org_signup_mechanism(
     org_id: int,
     signup_mechanism: Literal["open", "inviteOnly"],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -223,9 +219,7 @@ async def api_create_invite_code(
     request: Request,
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -257,9 +251,7 @@ async def api_create_invite_code_with_ug(
     org_id: int,
     usergroup_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -323,9 +315,7 @@ async def api_delete_invite_code(
     org_id: int,
     org_invite_code_uuid: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -362,9 +352,7 @@ async def api_invite_batch_users(
     emails: str,
     invite_code_uuid: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -413,9 +401,7 @@ async def api_delete_org_users_invites(
     org_id: int,
     email: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -462,9 +448,7 @@ async def api_update_org_logo(
     org_id: int,
     logo_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -504,9 +488,7 @@ async def api_update_org_thumbnail(
     org_id: int,
     thumbnail_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -546,9 +528,7 @@ async def api_update_org_preview(
     org_id: int,
     preview_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -620,9 +600,7 @@ async def api_update_org(
     org_object: OrganizationUpdate,
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> OrganizationRead:
     """
@@ -655,9 +633,7 @@ async def api_delete_org(
     request: Request,
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -691,9 +667,7 @@ async def api_update_org_landing(
     org_id: int,
     landing_object: dict,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -729,9 +703,7 @@ async def api_upload_org_landing_content(
     org_id: int,
     content_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """

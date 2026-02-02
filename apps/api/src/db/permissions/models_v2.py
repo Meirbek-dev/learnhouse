@@ -12,22 +12,32 @@ from sqlmodel import Field
 
 from src.db.strict_base_model import SQLModelStrictBaseModel
 
-
 # ============================================================================
 # Permission Model
 # ============================================================================
+
 
 class PermissionV2Base(SQLModelStrictBaseModel):
     """Base model for Permission v2."""
 
     model_config = ConfigDict(use_enum_values=True)
 
-    name: str = Field(max_length=100, description="Permission name: resource:action:scope")
-    resource_type: str = Field(max_length=50, description="Resource type (course, user, etc.)")
-    action: str = Field(max_length=50, description="Action (create, read, update, delete, etc.)")
+    name: str = Field(
+        max_length=100, description="Permission name: resource:action:scope"
+    )
+    resource_type: str = Field(
+        max_length=50, description="Resource type (course, user, etc.)"
+    )
+    action: str = Field(
+        max_length=50, description="Action (create, read, update, delete, etc.)"
+    )
     scope: str = Field(max_length=50, description="Scope (all, org, own)")
-    description: str | None = Field(default=None, description="Human-readable description")
-    category: str | None = Field(default=None, max_length=50, description="Permission category")
+    description: str | None = Field(
+        default=None, description="Human-readable description"
+    )
+    category: str | None = Field(
+        default=None, max_length=50, description="Permission category"
+    )
     is_dangerous: bool = Field(default=False, description="Requires extra confirmation")
 
 
@@ -49,6 +59,7 @@ class PermissionV2(PermissionV2Base, table=True):
 # Role Model
 # ============================================================================
 
+
 class RoleV2Base(SQLModelStrictBaseModel):
     """Base model for Role v2."""
 
@@ -57,8 +68,12 @@ class RoleV2Base(SQLModelStrictBaseModel):
     slug: str = Field(max_length=100, description="Unique role slug")
     name: str = Field(max_length=100, description="Role display name")
     description: str | None = Field(default=None, description="Role description")
-    is_system: bool = Field(default=False, description="System role (cannot be deleted)")
-    priority: int = Field(default=0, description="Role priority (higher = more privileged)")
+    is_system: bool = Field(
+        default=False, description="System role (cannot be deleted)"
+    )
+    priority: int = Field(
+        default=0, description="Role priority (higher = more privileged)"
+    )
 
 
 class RoleV2(RoleV2Base, table=True):
@@ -86,6 +101,7 @@ class RoleV2(RoleV2Base, table=True):
 # RolePermission Junction Table
 # ============================================================================
 
+
 class RolePermissionV2(SQLModelStrictBaseModel, table=True):
     """Role-Permission assignment table v2."""
 
@@ -102,7 +118,9 @@ class RolePermissionV2(SQLModelStrictBaseModel, table=True):
     )
     permission_id: int = Field(
         sa_column=Column(
-            Integer, ForeignKey("permissions_v2.id", ondelete="CASCADE"), primary_key=True
+            Integer,
+            ForeignKey("permissions_v2.id", ondelete="CASCADE"),
+            primary_key=True,
         )
     )
     granted_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
@@ -115,6 +133,7 @@ class RolePermissionV2(SQLModelStrictBaseModel, table=True):
 # ============================================================================
 # UserRole Table
 # ============================================================================
+
 
 class UserRoleV2(SQLModelStrictBaseModel, table=True):
     """User-Role assignment table v2."""
@@ -151,6 +170,7 @@ class UserRoleV2(SQLModelStrictBaseModel, table=True):
 # ============================================================================
 # Audit Log Table
 # ============================================================================
+
 
 class PermissionAuditLogV2(SQLModelStrictBaseModel, table=True):
     """Permission audit log table v2."""

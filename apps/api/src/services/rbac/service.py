@@ -20,11 +20,11 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 from fastapi import HTTPException, Request, status
-from sqlmodel import Session, select, and_, or_
+from sqlmodel import Session, and_, or_, select
 
 if TYPE_CHECKING:
-    from src.services.rbac.cache import CacheService
     from src.services.rbac.audit import AuditService
+    from src.services.rbac.cache import CacheService
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +33,10 @@ logger = logging.getLogger(__name__)
 # Types & Enums
 # ============================================================================
 
+
 class CheckResult(Enum):
     """Result of permission check."""
+
     GRANTED = "granted"
     DENIED = "denied"
     ERROR = "error"
@@ -43,6 +45,7 @@ class CheckResult(Enum):
 @dataclass
 class PermissionCheck:
     """Result of permission check with context."""
+
     granted: bool
     reason: str
     checked_at: datetime
@@ -60,6 +63,7 @@ class PermissionCheck:
 # ============================================================================
 # RBAC Service
 # ============================================================================
+
 
 class RBACService:
     """
@@ -92,7 +96,7 @@ class RBACService:
         *,
         cache_ttl: int = 300,  # 5 minutes
         audit_enabled: bool = True,
-    ):
+    ) -> None:
         self.db = db
         self.cache = cache
         self.audit = audit
@@ -114,9 +118,9 @@ class RBACService:
         request: Request | None = None,
         use_cache: bool = True,
         # Backwards compatible parameters (old PermissionService interface)
-        user = None,
+        user=None,
         raise_on_deny: bool = False,
-        context = None,
+        context=None,
     ) -> PermissionCheck | bool:
         """
         Check if user has permission (async for backwards compatibility).
@@ -151,12 +155,12 @@ class RBACService:
         # Handle backwards compatible user parameter
         is_legacy_call = user is not None
         if is_legacy_call:
-            user_id = getattr(user, 'id', None) or getattr(user, 'user_id', 0)
+            user_id = getattr(user, "id", None) or getattr(user, "user_id", 0)
 
         # Convert action/resource from Enum to string if needed
-        if hasattr(action, 'value'):
+        if hasattr(action, "value"):
             action = action.value
-        if hasattr(resource, 'value'):
+        if hasattr(resource, "value"):
             resource = resource.value
 
         action_str = str(action).lower() if action else ""
@@ -195,9 +199,9 @@ class RBACService:
         org_id: int | None = None,
         request: Request | None = None,
         use_cache: bool = True,
-        user = None,
+        user=None,
         raise_on_deny: bool = False,
-        context = None,
+        context=None,
     ) -> PermissionCheck | bool:
         """Async wrapper for check() - for backwards compatibility."""
         return self.check(
@@ -343,8 +347,8 @@ class RBACService:
         """
         from src.db.permissions.models_v2 import (
             PermissionV2,
-            RoleV2,
             RolePermissionV2,
+            RoleV2,
             UserRoleV2,
         )
 
@@ -374,8 +378,8 @@ class RBACService:
         try:
             result = self.db.exec(query).first()
         except Exception as e:
-            logger.error(f"Permission check query failed: {e}")
-            return False, f"db_error:{str(e)}"
+            logger.exception(f"Permission check query failed: {e}")
+            return False, f"db_error:{e!s}"
 
         # Check result
         if result is None:
@@ -397,7 +401,7 @@ class RBACService:
 
         # Check expiration (handle None and datetime types)
         if user_role:
-            expires_at = getattr(user_role, 'expires_at', None)
+            expires_at = getattr(user_role, "expires_at", None)
             if expires_at is not None and isinstance(expires_at, datetime):
                 if expires_at < datetime.now(UTC):
                     return False, "role_expired"
@@ -411,7 +415,9 @@ class RBACService:
     def check_many(
         self,
         user_id: int,
-        checks: list[tuple[str, str, str | None]],  # [(action, resource, resource_id), ...]
+        checks: list[
+            tuple[str, str, str | None]
+        ],  # [(action, resource, resource_id), ...]
         *,
         org_id: int | None = None,
     ) -> dict[str, bool]:
@@ -497,9 +503,7 @@ class RBACService:
         ).first()
 
         if not role:
-            raise HTTPException(
-                status_code=404, detail=f"Role not found: {role_slug}"
-            )
+            raise HTTPException(status_code=404, detail=f"Role not found: {role_slug}")
 
         # Check if already assigned
         existing = self.db.exec(
@@ -557,9 +561,7 @@ class RBACService:
         ).first()
 
         if not role:
-            raise HTTPException(
-                status_code=404, detail=f"Role not found: {role_slug}"
-            )
+            raise HTTPException(status_code=404, detail=f"Role not found: {role_slug}")
 
         # Find assignment
         user_role = self.db.exec(
@@ -595,9 +597,7 @@ class RBACService:
     # Utility Methods
     # ========================================================================
 
-    def get_user_roles(
-        self, user_id: int, org_id: int | None = None
-    ) -> list[dict]:
+    def get_user_roles(self, user_id: int, org_id: int | None = None) -> list[dict]:
         """Get all roles for user in organization."""
         from src.db.permissions.models_v2 import RoleV2, UserRoleV2
 
@@ -687,9 +687,9 @@ class RBACService:
     ) -> dict:
         """Create new role with optional permissions."""
         from src.db.permissions.models_v2 import (
-            RoleV2,
             PermissionV2,
             RolePermissionV2,
+            RoleV2,
         )
 
         # Check if role already exists
@@ -705,9 +705,7 @@ class RBACService:
         ).first()
 
         if existing:
-            raise HTTPException(
-                status_code=409, detail=f"Role already exists: {slug}"
-            )
+            raise HTTPException(status_code=409, detail=f"Role already exists: {slug}")
 
         # Create role
         role = RoleV2(
@@ -763,9 +761,9 @@ class RBACService:
     ) -> None:
         """Add permission to role."""
         from src.db.permissions.models_v2 import (
-            RoleV2,
             PermissionV2,
             RolePermissionV2,
+            RoleV2,
         )
 
         # Get role
@@ -776,9 +774,7 @@ class RBACService:
         ).first()
 
         if not role:
-            raise HTTPException(
-                status_code=404, detail=f"Role not found: {role_slug}"
-            )
+            raise HTTPException(status_code=404, detail=f"Role not found: {role_slug}")
 
         # Get permission
         perm = self.db.exec(

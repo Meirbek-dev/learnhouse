@@ -5,9 +5,6 @@ from fastapi import HTTPException, Request
 from sqlmodel import Session, select
 from ulid import ULID
 
-from src.security.permissions.exceptions import AuthenticationRequired, PermissionDenied
-from src.db.permissions.generated_enums import Action, ResourceType
-
 from src.db.courses.activities import (
     Activity,
     ActivitySubTypeEnum,
@@ -33,6 +30,7 @@ from src.db.courses.exams import (
     QuestionUpdate,
 )
 from src.db.organizations import Organization
+from src.db.permissions.generated_enums import Action, ResourceType
 from src.db.resource_authors import (
     ResourceAuthor,
     ResourceAuthorshipEnum,
@@ -41,6 +39,7 @@ from src.db.resource_authors import (
 from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User
+from src.security.permissions.exceptions import AuthenticationRequired, PermissionDenied
 from src.services.permissions import get_permission_service
 
 ## > Helper Functions

@@ -161,7 +161,6 @@ async def get_activity(
     return ActivityReadWithPermissions(**enriched_dict)
 
 
-
 async def get_activityby_id(
     request: Request,
     activity_id: int,

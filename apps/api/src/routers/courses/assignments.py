@@ -15,8 +15,8 @@ from src.db.courses.assignments import (
 )
 from src.db.permissions import Action, ResourceType
 from src.db.users import PublicUser
-from src.security.permissions.exceptions import PermissionDenied
 from src.security.auth import get_current_user
+from src.security.permissions.exceptions import PermissionDenied
 from src.security.rbac.dependencies import get_permission_service
 from src.services.courses.activities.assignments import (
     create_assignment,
@@ -481,9 +481,7 @@ async def api_final_grade_submission(
     assignment_uuid: str,
     user_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session=Depends(get_db_session),
 ):
     """

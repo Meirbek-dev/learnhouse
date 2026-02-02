@@ -37,7 +37,7 @@ CACHE_LOCK_TTL = 10  # 10 seconds for locks
 class CacheService:
     """Redis-based caching for RBAC v2."""
 
-    def __init__(self, redis=None, prefix: str = "rbac:v2"):
+    def __init__(self, redis=None, prefix: str = "rbac:v2") -> None:
         self.redis = redis or get_redis_client()
         self.prefix = prefix
 
@@ -73,7 +73,7 @@ class CacheService:
 
             return value == b"1"
         except Exception as e:
-            logger.error(f"Cache get error: {e}")
+            logger.exception(f"Cache get error: {e}")
             return None
 
     def set_permission(
@@ -95,7 +95,7 @@ class CacheService:
         try:
             self.redis.setex(key, ttl, value)
         except Exception as e:
-            logger.error(f"Cache set error: {e}")
+            logger.exception(f"Cache set error: {e}")
 
     # ========================================================================
     # Cache Invalidation
@@ -193,4 +193,4 @@ class CacheService:
                 if cursor == 0:
                     break
         except Exception as e:
-            logger.error(f"Cache delete pattern error: {e}")
+            logger.exception(f"Cache delete pattern error: {e}")

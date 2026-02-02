@@ -15,8 +15,8 @@ from src.db.organizations import (
 )
 from src.db.permissions import RoleRead
 from src.db.permissions.constants import ADMIN_ROLE_SLUGS
-from src.db.permissions.models_v2 import RoleV2, UserRoleV2
 from src.db.permissions.enums import Action, ResourceType
+from src.db.permissions.models_v2 import RoleV2, UserRoleV2
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.services.cache import redis_client
 from src.services.cache.redis_client import delete_keys, get_json, set_json
@@ -165,10 +165,11 @@ async def remove_user_from_org(
     admin_role_id = admin_role.id if admin_role else 1
 
     # Count admins by checking UserRoleV2 with role_id = admin_role_id
-    statement = select(UserRoleV2).where(
-        UserRoleV2.org_id == org.id,
-        UserRoleV2.role_id == admin_role_id
-    ).distinct()
+    statement = (
+        select(UserRoleV2)
+        .where(UserRoleV2.org_id == org.id, UserRoleV2.role_id == admin_role_id)
+        .distinct()
+    )
     result = db_session.exec(statement)
     admin_roles = result.all()
 
@@ -202,7 +203,11 @@ async def update_user_role(
     user_id_int = int(user_id)
 
     # normalize incoming role identifier to slug (handle legacy 'role_*' names)
-    slug = role_uuid.split("_")[-1] if isinstance(role_uuid, str) and role_uuid.startswith("role_") else role_uuid
+    slug = (
+        role_uuid.split("_")[-1]
+        if isinstance(role_uuid, str) and role_uuid.startswith("role_")
+        else role_uuid
+    )
 
     # find role by slug
     statement = select(RoleV2).where(RoleV2.slug == slug)
@@ -247,10 +252,11 @@ async def update_user_role(
     admin_role_id = admin_role.id if admin_role else 1
 
     # Count admins by checking UserRoleV2 with role_id = admin_role_id
-    statement = select(UserRoleV2).where(
-        UserRoleV2.org_id == org.id,
-        UserRoleV2.role_id == admin_role_id
-    ).distinct()
+    statement = (
+        select(UserRoleV2)
+        .where(UserRoleV2.org_id == org.id, UserRoleV2.role_id == admin_role_id)
+        .distinct()
+    )
     result = db_session.exec(statement)
     admin_roles = result.all()
 

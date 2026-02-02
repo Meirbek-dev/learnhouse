@@ -18,9 +18,9 @@ from src.db.courses.courses import (
 )
 from src.db.permissions import Action, ResourceType
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
-from src.security.permissions.exceptions import PermissionDenied
 from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user
+from src.security.permissions.exceptions import PermissionDenied
 from src.security.rbac.dependencies import get_permission_service
 from src.services.courses.contributors import (
     add_bulk_course_contributors,

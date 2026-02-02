@@ -12,16 +12,12 @@ from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from pydantic import BaseModel
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlmodel import Session, select
 
 from src.core.events.database import get_db_session
-from src.security.permissions.exceptions import (
-    AuthenticationRequired,
-    PermissionDenied,
-    InsufficientRole,
-)
 from src.db.permissions import (
     Action,
     BatchPermissionCheckRequest,
@@ -36,19 +32,22 @@ from src.db.permissions import (
     RoleWithPermissions,
     UserPermissionsResponse,
 )
-from pydantic import BaseModel
 from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user
+from src.security.permissions.exceptions import (
+    AuthenticationRequired,
+    InsufficientRole,
+    PermissionDenied,
+)
 from src.security.rbac.dependencies import get_permission_service
-from src.services.permissions import PermissionService
-from src.services.permissions import permission_cache
-
+from src.services.permissions import PermissionService, permission_cache
 
 # --- Request/Response Models for User-Role Endpoints ---
 
 
 class UserRoleAssignRequest(BaseModel):
     """Request model for assigning a role to a user."""
+
     role_id: int
     org_id: int
     expires_at: datetime | None = None
@@ -56,6 +55,7 @@ class UserRoleAssignRequest(BaseModel):
 
 class UserRoleInfo(BaseModel):
     """Response model for user role information."""
+
     role_id: int
     role_name: str
     role_slug: str
@@ -147,9 +147,7 @@ async def api_create_role(
     role_data: RoleCreate,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
 ) -> RoleRead:
     """
     Create a new role.
@@ -204,9 +202,7 @@ async def api_update_role(
     role_data: RoleUpdate,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
 ) -> RoleRead:
     """
     Update a role.
@@ -243,9 +239,7 @@ async def api_delete_role(
     role_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
 ):
     """
     Delete a role.
@@ -289,9 +283,7 @@ async def api_add_permission_to_role(
     permission_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
 ):
     """
     Add a permission to a role.
@@ -333,9 +325,7 @@ async def api_remove_permission_from_role(
     permission_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
 ):
     """
     Remove a permission from a role.
@@ -420,9 +410,7 @@ async def api_assign_role_to_user(
     role_data: UserRoleAssignRequest,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
 ):
     """
     Assign a role to a user in an organization.
@@ -455,7 +443,10 @@ async def api_assign_role_to_user(
         # ✅ INVALIDATE CACHE - user's permissions changed
         permission_cache.invalidate_user_permissions(user_id)
 
-        return {"message": "Role assigned to user", "permissions_added": result.get("permissions_added", 0)}
+        return {
+            "message": "Role assigned to user",
+            "permissions_added": result.get("permissions_added", 0),
+        }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -467,9 +458,7 @@ async def api_remove_role_from_user(
     org_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
 ):
     """
     Remove a role from a user in an organization.
@@ -509,9 +498,7 @@ async def api_remove_role_from_user(
 async def api_get_my_permissions(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     org_id: int | None = None,
 ) -> UserPermissionsResponse:
     """
@@ -560,9 +547,7 @@ async def api_check_permissions(
     body: BatchPermissionCheckRequest,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
 ) -> BatchPermissionCheckResponse:
     """
     Batch check multiple permissions.
@@ -623,9 +608,7 @@ async def api_check_single_permission(
     resource: ResourceType,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     resource_id: str | None = None,
     org_id: int | None = None,
 ) -> PermissionCheckResult:
@@ -690,9 +673,7 @@ async def api_apply_permission_template(
     template_name: str,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
 ):
     """
     Apply a permission template to a role.
@@ -746,9 +727,7 @@ async def api_apply_permission_template(
 async def api_seed_permissions(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
-    permission_service: Annotated[
-        PermissionService, Depends(get_permission_service)
-    ],
+    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
 ):
     """
     Seed default permissions and roles.

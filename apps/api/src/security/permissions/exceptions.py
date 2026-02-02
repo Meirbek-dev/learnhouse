@@ -31,7 +31,7 @@ class PermissionDenied(HTTPException):
         resource_id: str | None = None,
         reason: str | None = None,
         org_id: int | None = None,
-    ):
+    ) -> None:
         """
         Initialize permission denied exception.
 
@@ -76,7 +76,7 @@ class AuthenticationRequired(HTTPException):
         reason: str | None = None,
         resource_type: ResourceType | None = None,
         action: Action | None = None,
-    ):
+    ) -> None:
         """
         Initialize authentication required exception.
 
@@ -115,7 +115,7 @@ class InsufficientRole(HTTPException):
         self,
         required_role: str,
         user_role: str | None = None,
-    ):
+    ) -> None:
         """
         Initialize insufficient role exception.
 
@@ -148,7 +148,7 @@ class ResourceNotFound(HTTPException):
         self,
         resource_type: ResourceType,
         resource_id: str,
-    ):
+    ) -> None:
         """
         Initialize resource not found exception.
 

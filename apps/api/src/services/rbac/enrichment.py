@@ -54,7 +54,9 @@ async def enrich_with_permissions(
         data = dict(resource)
 
     # Get resource ID
-    resource_id = str(getattr(resource, resource_id_field, None) or data.get(resource_id_field))
+    resource_id = str(
+        getattr(resource, resource_id_field, None) or data.get(resource_id_field)
+    )
 
     # Get user ID
     user_id = getattr(current_user, "id", 0)
@@ -71,7 +73,7 @@ async def enrich_with_permissions(
             resource_id=resource_id,
             org_id=org_id,
         )
-        can_action = result.granted if hasattr(result, 'granted') else result
+        can_action = result.granted if hasattr(result, "granted") else result
         permissions[f"can_{action}"] = can_action
         if can_action:
             available_actions.append(action)
@@ -81,11 +83,13 @@ async def enrich_with_permissions(
     is_owner = creator_id == user_id if creator_id is not None else False
 
     # Add metadata
-    data.update({
-        "permissions": permissions,
-        "available_actions": available_actions,
-        "is_owner": is_owner,
-    })
+    data.update(
+        {
+            "permissions": permissions,
+            "available_actions": available_actions,
+            "is_owner": is_owner,
+        }
+    )
 
     return data
 
@@ -120,6 +124,7 @@ async def enrich_many_with_permissions(
 # ============================================================================
 # Collection-specific enrichment (backwards compatible)
 # ============================================================================
+
 
 async def enrich_collection_with_permissions(
     collection,
@@ -172,6 +177,7 @@ async def enrich_collections_with_permissions(
 # Course-specific enrichment
 # ============================================================================
 
+
 async def enrich_course_with_permissions(
     course,
     current_user: PublicUser,
@@ -211,6 +217,7 @@ async def enrich_courses_with_permissions(
 # Activity-specific enrichment
 # ============================================================================
 
+
 async def enrich_activity_with_permissions(
     activity,
     current_user: PublicUser,
@@ -231,6 +238,7 @@ async def enrich_activity_with_permissions(
 # ============================================================================
 # Discussion-specific enrichment
 # ============================================================================
+
 
 async def enrich_discussion_with_permissions(
     discussion,
@@ -275,6 +283,7 @@ enrich_discussion_with_permissions_typed = enrich_discussion_with_permissions
 # Organization-specific enrichment
 # ============================================================================
 
+
 async def enrich_organization_with_permissions(
     organization,
     current_user: PublicUser,
@@ -296,6 +305,7 @@ async def enrich_organization_with_permissions(
 # ============================================================================
 # User-specific enrichment
 # ============================================================================
+
 
 async def enrich_user_with_permissions(
     user,
@@ -319,6 +329,7 @@ async def enrich_user_with_permissions(
 # UserGroup-specific enrichment
 # ============================================================================
 
+
 async def enrich_usergroup_with_permissions(
     usergroup,
     current_user: PublicUser,
@@ -339,6 +350,7 @@ async def enrich_usergroup_with_permissions(
 # ============================================================================
 # Generic helper
 # ============================================================================
+
 
 async def enrich_generic_resource_with_permissions(
     resource,

@@ -48,9 +48,9 @@ from src.db.courses.courses import Course
 from src.db.organizations import Organization
 from src.db.permissions.generated_enums import Action, ResourceType
 from src.db.strict_base_model import PydanticStrictBaseModel
-from src.security.permissions.exceptions import AuthenticationRequired, PermissionDenied
 from src.db.users import AnonymousUser, PublicUser, User
 from src.security.auth import get_current_user
+from src.security.permissions.exceptions import AuthenticationRequired, PermissionDenied
 from src.services.code_challenges.grading import (
     apply_grading_strategy,
     calculate_composite_score,
@@ -119,7 +119,7 @@ async def check_challenge_access(
 ) -> Course:
     """Check user access to the challenge"""
     if isinstance(user, AnonymousUser):
-        raise AuthenticationRequired()
+        raise AuthenticationRequired
 
     course = db_session.get(Course, activity.course_id)
     if not course:
