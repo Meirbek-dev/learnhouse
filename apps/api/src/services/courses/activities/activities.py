@@ -18,7 +18,7 @@ from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
 from src.services.payments.payments_access import check_activity_paid_access
 from src.services.permissions import get_permission_service
-from src.services.permissions.response_enrichment import (
+from src.services.rbac.enrichment import (
     enrich_activity_with_permissions,
 )
 

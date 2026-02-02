@@ -10,12 +10,11 @@ from sqlmodel import Session, select
 
 from src.db.organizations import Organization
 from src.db.permissions import (
-    Role,
     RoleCreate,
     RoleRead,
     RoleUpdate,
-    UserPermission,
 )
+from src.db.permissions.models_v2 import RoleV2, UserRoleV2
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import PublicUser
 from src.services.permissions import get_permission_service
@@ -86,14 +85,14 @@ async def create_role(
             detail="Organization not found",
         )
 
-    # Check if the current user is a member of the organization via UserPermission
-    statement = select(UserPermission).where(
-        UserPermission.user_id == current_user.id,
-        UserPermission.org_id == role_object.org_id,
+    # Check if the current user is a member of the organization via UserRoleV2
+    statement = select(UserRoleV2).where(
+        UserRoleV2.user_id == current_user.id,
+        UserRoleV2.org_id == role_object.org_id,
     )
-    user_perm = db_session.exec(statement).first()
+    user_role = db_session.exec(statement).first()
 
-    if not user_perm:
+    if not user_role:
         raise HTTPException(
             status_code=403,
             detail="You are not a member of this organization",
@@ -116,9 +115,9 @@ async def create_role(
     slug = _generate_slug(role_object.name)
 
     # Check if a role with the same slug already exists in this organization
-    statement = select(Role).where(
-        Role.slug == slug,
-        Role.org_id == role_object.org_id,
+    statement = select(RoleV2).where(
+        RoleV2.slug == slug,
+        RoleV2.org_id == role_object.org_id,
     )
     existing_role = db_session.exec(statement).first()
 
@@ -128,15 +127,14 @@ async def create_role(
             detail=f"A role with the name '{role_object.name}' already exists in this organization",
         )
 
-    # Create the role
-    role = Role(
+    # Create the role (v2 table doesn't have parent_role_id)
+    role = RoleV2(
         name=role_object.name,
         slug=slug,
         description=role_object.description,
         org_id=role_object.org_id,
         is_system=False,  # User-created roles are not system roles
         priority=0,  # Default priority
-        parent_role_id=role_object.parent_role_id,
     )
 
     db_session.add(role)
@@ -178,13 +176,13 @@ async def get_roles_by_organization(
         )
 
     # Check if the current user is a member of the organization
-    statement = select(UserPermission).where(
-        UserPermission.user_id == current_user.id,
-        UserPermission.org_id == org_id,
+    statement = select(UserRoleV2).where(
+        UserRoleV2.user_id == current_user.id,
+        UserRoleV2.org_id == org_id,
     )
-    user_perm = db_session.exec(statement).first()
+    user_role = db_session.exec(statement).first()
 
-    if not user_perm:
+    if not user_role:
         raise HTTPException(
             status_code=403,
             detail="You are not a member of this organization",
@@ -206,17 +204,17 @@ async def get_roles_by_organization(
 
     # Get global roles (org_id is NULL, is_system is True)
     global_roles_statement = (
-        select(Role)
-        .where(Role.org_id.is_(None), Role.is_system == True)  # noqa: E712
-        .order_by(Role.priority.desc(), Role.name)
+        select(RoleV2)
+        .where(RoleV2.org_id.is_(None), RoleV2.is_system == True)  # noqa: E712
+        .order_by(RoleV2.priority.desc(), RoleV2.name)
     )
     global_roles = list(db_session.exec(global_roles_statement).all())
 
     # Get organization-specific roles
     org_roles_statement = (
-        select(Role)
-        .where(Role.org_id == org_id)
-        .order_by(Role.priority.desc(), Role.name)
+        select(RoleV2)
+        .where(RoleV2.org_id == org_id)
+        .order_by(RoleV2.priority.desc(), RoleV2.name)
     )
     org_roles = list(db_session.exec(org_roles_statement).all())
 
@@ -247,7 +245,7 @@ async def read_role(
     Raises:
         HTTPException: If role not found
     """
-    statement = select(Role).where(Role.id == role_id)
+    statement = select(RoleV2).where(RoleV2.id == role_id)
     role = db_session.exec(statement).first()
 
     if not role:
@@ -291,7 +289,7 @@ async def update_role(
     Raises:
         HTTPException: If role not found or is a system role
     """
-    statement = select(Role).where(Role.id == role_id)
+    statement = select(RoleV2).where(RoleV2.id == role_id)
     role = db_session.exec(statement).first()
 
     if not role:
@@ -351,7 +349,7 @@ async def delete_role(
     Raises:
         HTTPException: If role not found or is a system role
     """
-    statement = select(Role).where(Role.id == role_id)
+    statement = select(RoleV2).where(RoleV2.id == role_id)
     role = db_session.exec(statement).first()
 
     if not role:

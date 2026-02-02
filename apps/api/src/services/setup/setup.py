@@ -28,7 +28,7 @@ from src.db.organization_config import (
 from src.db.organizations import Organization, OrganizationCreate
 from src.db.users import User, UserCreate, UserRead
 from src.security.security import security_hash_password
-from src.services.permissions.permission_service_consolidated import PermissionService
+from src.services.permissions import PermissionService
 
 
 # Install Default roles

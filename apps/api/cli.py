@@ -125,6 +125,124 @@ def install(
 
 
 @cli.command()
+def seed_rbac_v2(
+    dry_run: Annotated[bool, typer.Option(help="Preview changes without applying")] = False,
+) -> None:
+    """Seed RBAC v2 permissions from shared/permissions.yaml"""
+    import yaml
+    from pathlib import Path
+    from datetime import UTC, datetime
+
+    # Get the database session
+    platform_config = get_platform_config()
+    engine: Engine = create_engine(
+        platform_config.database_config.sql_connection_string,
+        echo=False,
+        pool_pre_ping=True,
+    )
+
+    db_session = Session(engine)
+
+    # Load permissions.yaml
+    yaml_path = Path(__file__).parent.parent.parent / "shared" / "permissions.yaml"
+    if not yaml_path.exists():
+        print(f"❌ Error: {yaml_path} not found")
+        raise typer.Exit(code=1)
+
+    with open(yaml_path, "r") as f:
+        schema = yaml.safe_load(f)
+
+    print("=" * 60)
+    print("RBAC v2 Permission Seeding")
+    print("=" * 60)
+
+    if dry_run:
+        print("\n⚠️  DRY RUN MODE - No changes will be made\n")
+
+    actions = schema.get("actions", [])
+    resources = schema.get("resources", [])
+    scopes = schema.get("scopes", [])
+    roles = schema.get("roles", {})
+
+    print(f"Loaded: {len(actions)} actions, {len(resources)} resources, {len(scopes)} scopes, {len(roles)} roles")
+
+    # Seed permissions
+    from sqlalchemy import text
+
+    perm_count = 0
+    for resource in resources:
+        for action in actions:
+            for scope in scopes:
+                perm_name = f"{resource}:{action}:{scope}"
+
+                existing = db_session.execute(
+                    text("SELECT id FROM permissions_v2 WHERE name = :name"),
+                    {"name": perm_name}
+                ).fetchone()
+
+                if existing:
+                    continue
+
+                if not dry_run:
+                    db_session.execute(
+                        text("""
+                            INSERT INTO permissions_v2
+                            (name, resource_type, action, scope, description, created_at)
+                            VALUES
+                            (:name, :resource_type, :action, :scope, :description, :created_at)
+                        """),
+                        {
+                            "name": perm_name,
+                            "resource_type": resource,
+                            "action": action,
+                            "scope": scope,
+                            "description": f"{action.capitalize()} {resource} in {scope} scope",
+                            "created_at": datetime.now(UTC),
+                        }
+                    )
+                perm_count += 1
+
+    if not dry_run:
+        db_session.commit()
+    print(f"✅ Seeded {perm_count} permissions")
+
+    # Seed roles
+    role_count = 0
+    for slug, role_config in roles.items():
+        existing = db_session.execute(
+            text("SELECT id FROM roles_v2 WHERE slug = :slug AND org_id IS NULL"),
+            {"slug": slug}
+        ).fetchone()
+
+        if existing:
+            continue
+
+        if not dry_run:
+            db_session.execute(
+                text("""
+                    INSERT INTO roles_v2
+                    (slug, name, description, org_id, is_system, created_at, updated_at)
+                    VALUES
+                    (:slug, :name, :description, NULL, TRUE, :created_at, :updated_at)
+                """),
+                {
+                    "slug": slug,
+                    "name": role_config.get("description", slug.replace("-", " ").title()),
+                    "description": role_config.get("description"),
+                    "created_at": datetime.now(UTC),
+                    "updated_at": datetime.now(UTC),
+                }
+            )
+        role_count += 1
+
+    if not dry_run:
+        db_session.commit()
+    print(f"✅ Seeded {role_count} roles")
+
+    print("\n✅ RBAC v2 seeding complete!")
+
+
+@cli.command()
 def main() -> None:
     cli()
 

@@ -12,6 +12,11 @@ general:
 security:
   auth_jwt_secret_key: secret
 
+rbac:
+  audit_logging_enabled: true  # Log permission checks and role changes
+  cache_enabled: true  # Use Redis caching for permission checks
+  cache_ttl_seconds: 300  # Cache TTL for permissions (5 minutes)
+
 hosting_config:
   domain: cs-mooc.tou.edu.kz
   ssl: true

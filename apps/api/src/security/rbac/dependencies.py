@@ -2,9 +2,11 @@
 FastAPI dependencies for the permission system.
 
 This module provides FastAPI dependency injection functions for:
-- Getting the permission service
+- Getting the RBAC service
 - Getting the current permission context
 - Combining user and permission data
+
+RBAC v2: This is the only RBAC system - all legacy code has been removed.
 """
 
 from typing import Annotated
@@ -15,7 +17,8 @@ from sqlmodel import Session
 from src.core.events.database import get_db_session
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac.context import PermissionContext
-from src.services.permissions.permission_service_consolidated import PermissionService
+from src.services.rbac.service import RBACService
+from src.services.rbac.dependencies import get_rbac_service, RBACServiceDep
 
 
 async def _lazy_get_current_user(
@@ -30,9 +33,9 @@ async def _lazy_get_current_user(
 
 def get_permission_service(
     db_session: Annotated[Session, Depends(get_db_session)],
-) -> PermissionService:
+) -> RBACService:
     """
-    Get a PermissionService instance.
+    Get an RBACService instance.
 
     This is the main dependency for permission checking in routes.
 
@@ -40,9 +43,13 @@ def get_permission_service(
         db_session: Database session
 
     Returns:
-        PermissionService instance
+        RBACService instance
+
+    Note:
+        This function is kept for backwards compatibility.
+        Prefer using get_rbac_service directly.
     """
-    return PermissionService(db_session)
+    return get_rbac_service(db_session)
 
 
 def get_permission_context(
@@ -74,9 +81,8 @@ def get_permission_context(
 
 
 # Type aliases for cleaner dependency injection
-PermissionServiceDep = Annotated[
-    PermissionService, Depends(get_permission_service)
-]
+# Note: PermissionServiceDep is an alias for RBACServiceDep for backwards compatibility
+PermissionServiceDep = Annotated[RBACService, Depends(get_permission_service)]
 PermissionContextDep = Annotated[PermissionContext, Depends(get_permission_context)]
 CurrentUserDep = Annotated[PublicUser | AnonymousUser, Depends(_lazy_get_current_user)]
 
@@ -88,7 +94,7 @@ class PermissionDeps:
     This class holds all permission-related dependencies for easy injection.
     Usage:
         async def my_route(deps: Annotated[PermissionDeps, Depends()]):
-            await deps.service.check(deps.user, Action.READ, ResourceType.COURSE)
+            result = deps.service.check(user_id=deps.user.id, action="read", resource="course")
     """
 
     def __init__(
@@ -101,33 +107,34 @@ class PermissionDeps:
         self.context = context
         self.user = user
 
-    async def require(self, action, resource, resource_id=None, org_id=None):
-        """Shorthand for service.check with current user and context."""
-        result = await self.service.check(
-            user=self.user,
+    def require(self, action: str, resource: str, resource_id=None, org_id=None):
+        """Check permission and raise HTTP 403 if denied."""
+        user_id = self.user.id if hasattr(self.user, "id") else 0
+        result = self.service.check(
+            user_id=user_id,
             action=action,
             resource=resource,
             resource_id=resource_id,
             org_id=org_id,
-            context=self.context,
         )
-        if not result:
+        if not result.granted:
             from fastapi import HTTPException, status
 
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied"
+                status_code=status.HTTP_403_FORBIDDEN, detail=result.reason
             )
 
-    async def can(self, action, resource, resource_id=None, org_id=None) -> bool:
-        """Shorthand for service.check with current user."""
-        return await self.service.check(
-            user=self.user,
+    def can(self, action: str, resource: str, resource_id=None, org_id=None) -> bool:
+        """Check if user has permission without raising."""
+        user_id = self.user.id if hasattr(self.user, "id") else 0
+        result = self.service.check(
+            user_id=user_id,
             action=action,
             resource=resource,
             resource_id=resource_id,
             org_id=org_id,
-            context=self.context,
         )
+        return result.granted
 
 
 # Type alias for combined deps

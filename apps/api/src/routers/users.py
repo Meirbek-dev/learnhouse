@@ -20,7 +20,7 @@ from src.db.users import (
 from src.security.auth import get_current_user
 from src.security.rbac.dependencies import get_permission_service
 from src.services.courses.courses import get_user_courses
-from src.services.permissions.permission_service_consolidated import PermissionService
+from src.services.permissions import PermissionService
 from src.services.users.password_reset import (
     change_password_with_reset_code,
     send_reset_password_code,

@@ -43,7 +43,7 @@ from src.services.payments.payments_stripe import (
 )
 from src.services.payments.payments_users import get_owned_courses
 from src.services.payments.webhooks.payments_webhooks import handle_stripe_webhook
-from src.services.permissions.permission_service_consolidated import PermissionService
+from src.services.permissions import PermissionService
 
 router = APIRouter()
 

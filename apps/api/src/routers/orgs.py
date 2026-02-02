@@ -49,7 +49,7 @@ from src.services.orgs.users import (
     remove_user_from_org,
     update_user_role,
 )
-from src.services.permissions.permission_service_consolidated import PermissionService
+from src.services.permissions import PermissionService
 
 router = APIRouter()
 

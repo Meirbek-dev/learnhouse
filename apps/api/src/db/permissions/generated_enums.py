@@ -23,11 +23,12 @@ class Action(str, Enum):
     GRADE = "GRADE"
     SUBMIT = "SUBMIT"
     ENROLL = "ENROLL"
+    ACCESS = "ACCESS"  # For API access checks
 
 
 class ResourceType(str, Enum):
     """Types of resources in the system."""
-    
+
     ORGANIZATION = "ORGANIZATION"
     COURSE = "COURSE"
     CHAPTER = "CHAPTER"
@@ -46,11 +47,12 @@ class ResourceType(str, Enum):
     EXAM = "EXAM"
     PAYMENT = "PAYMENT"
     API_TOKEN = "API_TOKEN"
+    API = "API"  # For API access checks
 
 
 class Scope(str, Enum):
     """Scope of a permission - determines what resources it applies to."""
-    
+
     ALL = "ALL"
     OWN = "OWN"
     ASSIGNED = "ASSIGNED"

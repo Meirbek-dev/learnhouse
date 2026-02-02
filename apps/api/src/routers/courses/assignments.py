@@ -50,7 +50,7 @@ from src.services.courses.activities.assignments import (
     update_assignment_submission,
     update_assignment_task,
 )
-from src.services.permissions.permission_service_consolidated import PermissionService
+from src.services.permissions import PermissionService
 
 router = APIRouter()
 

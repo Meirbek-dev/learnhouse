@@ -1,25 +1,26 @@
 """
-Database models for the RBAC permission system.
+API Models for the RBAC permission system.
 
-This module defines the SQLModel tables for:
-- permissions: Individual permission definitions
-- roles: Role definitions with hierarchy support
-- role_permissions: Junction table for role-permission assignments
-- user_roles: User-role assignments per organization
-- resource_permissions: Resource-level permission overrides
+This module defines Pydantic models for API requests/responses.
+For database table models, use models_v2.py (PermissionV2, RoleV2, UserRoleV2, etc.)
+
+LEGACY TABLES REMOVED:
+- Permission -> Use PermissionV2
+- Role -> Use RoleV2
+- UserPermission -> Use UserRoleV2
+- ResourcePermission -> Feature never implemented, removed
 """
 
-from datetime import UTC, datetime
+from datetime import datetime
 
-from pydantic import ConfigDict, field_validator
-from sqlalchemy import JSON, Column, ForeignKey, Index, Integer, UniqueConstraint
-from sqlmodel import Field
+from pydantic import ConfigDict
 
 from src.db.permissions.generated_enums import Action, ResourceType, Scope
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
+
 # ---------------------------------------------------------------------------
-# Permission Model
+# Permission API Models
 # ---------------------------------------------------------------------------
 
 
@@ -28,51 +29,11 @@ class PermissionBase(SQLModelStrictBaseModel):
 
     model_config = ConfigDict(use_enum_values=True)
 
-    name: str = Field(
-        max_length=100, description="Unique permission name, e.g., 'course:create:org'"
-    )
-    resource_type: ResourceType = Field(
-        description="Type of resource this permission applies to"
-    )
-    action: Action = Field(description="Action this permission allows")
-    scope: Scope = Field(default=Scope.ALL, description="Scope of the permission")
-    description: str | None = Field(
-        default=None, description="Human-readable description"
-    )
-
-
-class Permission(PermissionBase, table=True):
-    """Permission table - defines individual permissions."""
-
-    __tablename__ = "permissions"
-
-    id: int | None = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-
-    @field_validator("resource_type", mode="before")
-    @classmethod
-    def validate_resource_type(cls, v):
-        if isinstance(v, str):
-            return ResourceType(v)
-        return v
-
-    @field_validator("action", mode="before")
-    @classmethod
-    def validate_action(cls, v):
-        if isinstance(v, str):
-            return Action(v)
-        return v
-
-    @field_validator("scope", mode="before")
-    @classmethod
-    def validate_scope(cls, v):
-        if isinstance(v, str):
-            return Scope(v)
-        return v
-
-
-class PermissionCreate(PermissionBase):
-    """Model for creating a new permission."""
+    name: str
+    resource_type: ResourceType
+    action: Action
+    scope: Scope = Scope.ALL
+    description: str | None = None
 
 
 class PermissionRead(PermissionBase):
@@ -83,52 +44,20 @@ class PermissionRead(PermissionBase):
 
 
 # ---------------------------------------------------------------------------
-# Role Model (New - with hierarchy)
+# Role API Models
 # ---------------------------------------------------------------------------
 
 
 class RoleBase(SQLModelStrictBaseModel):
-    """Base model for the new Role system with hierarchy support."""
+    """Base model for Role."""
 
     model_config = ConfigDict(use_enum_values=True)
 
-    name: str = Field(max_length=100, description="Role display name")
-    slug: str = Field(
-        max_length=100, description="Unique role slug, e.g., 'org-admin', 'instructor'"
-    )
-    description: str | None = Field(default=None, description="Role description")
-    is_system: bool = Field(
-        default=False, description="Whether this is a built-in system role"
-    )
-    priority: int = Field(
-        default=0,
-        description="Role priority for conflict resolution (higher = more privileged)",
-    )
-
-
-class Role(RoleBase, table=True):
-    """New Role table with hierarchy support."""
-
-    __tablename__ = "roles"
-    __table_args__ = (
-        UniqueConstraint("slug", "org_id", name="uq_role_slug_org"),
-        Index("ix_roles_org_id", "org_id"),
-        Index("ix_roles_slug", "slug"),
-    )
-
-    id: int | None = Field(default=None, primary_key=True)
-    org_id: int | None = Field(
-        default=None,
-        sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE")),
-        description="Organization ID (NULL for global roles)",
-    )
-    parent_role_id: int | None = Field(
-        default=None,
-        sa_column=Column(Integer, ForeignKey("roles.id", ondelete="SET NULL")),
-        description="Parent role for hierarchy inheritance",
-    )
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    name: str
+    slug: str
+    description: str | None = None
+    is_system: bool = False
+    priority: int = 0
 
 
 class RoleCreate(RoleBase):
@@ -143,7 +72,7 @@ class RoleRead(RoleBase):
 
     id: int
     org_id: int | None
-    parent_role_id: int | None
+    parent_role_id: int | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -155,183 +84,6 @@ class RoleUpdate(SQLModelStrictBaseModel):
     description: str | None = None
     parent_role_id: int | None = None
     priority: int | None = None
-
-
-# ---------------------------------------------------------------------------
-# User Permissions (Replaces old user_roles + role_permissions)
-# ---------------------------------------------------------------------------
-
-
-class UserPermissionBase(SQLModelStrictBaseModel):
-    """Base model for flattened user permissions."""
-
-    model_config = ConfigDict(use_enum_values=True)
-
-    scope: Scope = Field(description="Permission scope (all, org, own, assigned)")
-
-
-class UserPermission(UserPermissionBase, table=True):
-    """Flattened user permissions - replaces user_roles + role_permissions junction tables.
-
-    This table denormalizes the relationship between users, roles, and permissions
-    for better query performance (1 join instead of 3).
-
-    Migration: Created by rbac_schema_flatten migration which expands
-    user_roles + role_permissions into individual user-permission entries.
-    """
-
-    __tablename__ = "user_permissions"
-    __table_args__ = (
-        Index("idx_user_perms_lookup", "user_id", "org_id"),  # Primary lookup
-        Index("idx_user_perms_permission", "permission_id"),  # Permission queries
-        Index("idx_user_perms_role", "granted_via_role_id"),  # Audit queries
-    )
-
-    user_id: int = Field(
-        sa_column=Column(
-            Integer, ForeignKey("user.id", ondelete="CASCADE"), primary_key=True
-        ),
-        description="User ID",
-    )
-    permission_id: int = Field(
-        sa_column=Column(
-            Integer, ForeignKey("permissions.id", ondelete="CASCADE"), primary_key=True
-        ),
-        description="Permission ID",
-    )
-    org_id: int = Field(
-        sa_column=Column(
-            Integer,
-            ForeignKey("organization.id", ondelete="CASCADE"),
-            primary_key=True,
-        ),
-        description="Organization ID",
-    )
-    granted_via_role_id: int | None = Field(
-        default=None,
-        sa_column=Column(Integer, ForeignKey("roles.id", ondelete="SET NULL")),
-        description="Role that granted this permission (NULL for direct assignments) - preserves audit trail",
-    )
-    granted_at: datetime = Field(
-        default_factory=lambda: datetime.now(UTC),
-        description="When permission was granted",
-    )
-    expires_at: datetime | None = Field(
-        default=None, description="Optional permission expiry"
-    )
-
-    @field_validator("scope", mode="before")
-    @classmethod
-    def validate_scope(cls, v):
-        if isinstance(v, str):
-            return Scope(v)
-        return v
-
-
-class UserPermissionCreate(SQLModelStrictBaseModel):
-    """Model for creating a user permission."""
-
-    model_config = ConfigDict(use_enum_values=True)
-
-    user_id: int
-    permission_id: int
-    org_id: int
-    scope: Scope
-    granted_via_role_id: int | None = None
-    expires_at: datetime | None = None
-
-
-class UserPermissionRead(UserPermissionBase):
-    """Model for reading a user permission."""
-
-    user_id: int
-    permission_id: int
-    org_id: int
-    granted_via_role_id: int | None
-    granted_at: datetime
-    expires_at: datetime | None
-    permission: PermissionRead | None = None  # Can include permission details
-
-
-# ---------------------------------------------------------------------------
-# Resource-Level Permissions
-# ---------------------------------------------------------------------------
-
-
-class ResourcePermissionBase(SQLModelStrictBaseModel):
-    """Base model for resource-level permission overrides."""
-
-    model_config = ConfigDict(use_enum_values=True)
-
-    resource_type: ResourceType = Field(description="Type of resource")
-    resource_id: str = Field(
-        max_length=100, description="UUID of the specific resource"
-    )
-
-
-class ResourcePermission(ResourcePermissionBase, table=True):
-    """Resource-level permission overrides for specific resources."""
-
-    __tablename__ = "resource_permissions"
-    __table_args__ = (
-        UniqueConstraint(
-            "user_id",
-            "resource_type",
-            "resource_id",
-            "permission_id",
-            name="uq_resource_permission",
-        ),
-        Index(
-            "ix_resource_permissions_user_resource",
-            "user_id",
-            "resource_type",
-            "resource_id",
-        ),
-    )
-
-    id: int | None = Field(default=None, primary_key=True)
-    user_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE")),
-    )
-    permission_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("permissions.id", ondelete="CASCADE")),
-    )
-    granted_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    granted_by: int | None = Field(
-        default=None,
-        sa_column=Column(Integer, ForeignKey("user.id", ondelete="SET NULL")),
-    )
-    expires_at: datetime | None = Field(default=None)
-
-    @field_validator("resource_type", mode="before")
-    @classmethod
-    def validate_resource_type(cls, v):
-        if isinstance(v, str):
-            return ResourceType(v)
-        return v
-
-
-class ResourcePermissionCreate(SQLModelStrictBaseModel):
-    """Model for creating a resource-level permission."""
-
-    model_config = ConfigDict(use_enum_values=True)
-
-    user_id: int
-    resource_type: ResourceType
-    resource_id: str
-    permission_id: int
-    expires_at: datetime | None = None
-
-
-class ResourcePermissionRead(ResourcePermissionBase):
-    """Model for reading a resource-level permission."""
-
-    id: int
-    user_id: int
-    permission_id: int
-    granted_at: datetime
-    granted_by: int | None
-    expires_at: datetime | None
 
 
 # ---------------------------------------------------------------------------
@@ -396,4 +148,5 @@ class UserPermissionsResponse(PydanticStrictBaseModel):
     org_id: int | None
     roles: list[RoleRead]
     permissions: dict[str, bool]  # e.g., {"course:create:org": True, ...}
-    resource_permissions: list[ResourcePermissionRead]
+    # Note: resource_permissions feature was never implemented
+    resource_permissions: list = []

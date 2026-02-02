@@ -31,7 +31,7 @@ from src.db.organizations import (
     OrganizationRead,
     OrganizationUpdate,
 )
-from src.db.permissions import Role, UserPermission
+from src.db.permissions.models_v2 import RoleV2, UserRoleV2
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, InternalUser, PublicUser
 from src.services.orgs.uploads import (
@@ -564,14 +564,14 @@ async def delete_org(
     db_session.delete(org)
     db_session.commit()
 
-    # Delete all user permissions linked to this org
-    statement = select(UserPermission).where(UserPermission.org_id == org_id)
+    # Delete all user roles linked to this org
+    statement = select(UserRoleV2).where(UserRoleV2.org_id == org_id)
     result = db_session.exec(statement)
 
-    user_perms = result.all()
+    user_roles = result.all()
 
-    for perm in user_perms:
-        db_session.delete(perm)
+    for role in user_roles:
+        db_session.delete(role)
     db_session.commit()
 
     db_session.refresh(org)
@@ -589,19 +589,19 @@ async def get_orgs_by_user_admin(
     # Convert user_id to int for proper type matching with database
     user_id_int = int(user_id)
 
-    # Join Organization, UserPermission and OrganizationConfig in a single query
+    # Join Organization, UserRoleV2 and OrganizationConfig in a single query
     # Resolve the admin role id by slug (new RBAC system)
     admin_role = db_session.exec(
-        select(Role).where(Role.slug.in_(["super-admin", "org-admin"]))
+        select(RoleV2).where(RoleV2.slug.in_(["super-admin", "org-admin"]))
     ).first()
     admin_role_id = admin_role.id if admin_role else 1
 
     # First get distinct org IDs where the user has admin role
     org_id_query = (
-        select(UserPermission.org_id)
+        select(UserRoleV2.org_id)
         .where(
-            UserPermission.user_id == user_id_int,
-            UserPermission.granted_via_role_id == admin_role_id,
+            UserRoleV2.user_id == user_id_int,
+            UserRoleV2.role_id == admin_role_id,
         )
         .distinct()
         .offset((page - 1) * limit)
@@ -643,8 +643,8 @@ async def get_orgs_by_user(
 
     # First get distinct org IDs for this user
     org_id_query = (
-        select(UserPermission.org_id)
-        .where(UserPermission.user_id == user_id_int)
+        select(UserRoleV2.org_id)
+        .where(UserRoleV2.user_id == user_id_int)
         .distinct()
         .offset((page - 1) * limit)
         .limit(limit)

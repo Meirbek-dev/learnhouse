@@ -5,12 +5,12 @@ This file imports and runs all security-related tests to ensure complete coverag
 of the security functionality including:
 - Password hashing and verification
 - JWT authentication
-- Role-based access control (RBAC)
 - Authorization utilities
+
+Note: RBAC tests are now in src/tests/services/test_rbac_v2.py
 """
 
 from src.tests.security.test_auth import TestAuth
-from src.tests.security.test_rbac import TestPermissionEnums, TestPermissionModels
 from src.tests.security.test_security import TestSecurity
 
 
@@ -71,8 +71,6 @@ def get_security_test_classes():
     return [
         TestSecurity,
         TestAuth,
-        TestPermissionEnums,
-        TestPermissionModels,
         TestSecurityComprehensive,
     ]
 

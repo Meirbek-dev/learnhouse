@@ -13,8 +13,9 @@ from src.db.organizations import (
     PaginatedOrganizationUsers,
     rebuild_organization_models,
 )
-from src.db.permissions import Role, RoleRead, UserPermission
+from src.db.permissions import RoleRead
 from src.db.permissions.constants import ADMIN_ROLE_SLUGS
+from src.db.permissions.models_v2 import RoleV2, UserRoleV2
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.services.cache import redis_client
@@ -58,12 +59,12 @@ async def get_organization_users(
         resource_id=org.org_uuid,
     )
 
-    # Build base query joining via UserPermission (new schema)
-    # Get distinct users who have any permission in this org
+    # Build base query joining via UserRoleV2 (v2 schema)
+    # Get distinct users who have any role in this org
     base_statement = (
         select(User)
-        .join(UserPermission, UserPermission.user_id == User.id)
-        .where(UserPermission.org_id == org_id_int)
+        .join(UserRoleV2, UserRoleV2.user_id == User.id)
+        .where(UserRoleV2.org_id == org_id_int)
         .distinct()
     )
 
@@ -143,15 +144,15 @@ async def remove_user_from_org(
         resource_id=org.org_uuid,
     )
 
-    # Check if user has any permissions in this org (i.e., is a member)
-    statement = select(UserPermission).where(
-        UserPermission.user_id == user_id, UserPermission.org_id == org.id
+    # Check if user has any roles in this org (i.e., is a member)
+    statement = select(UserRoleV2).where(
+        UserRoleV2.user_id == user_id, UserRoleV2.org_id == org.id
     )
     result = db_session.exec(statement)
 
-    user_perms = result.all()
+    user_roles = result.all()
 
-    if not user_perms:
+    if not user_roles:
         raise HTTPException(
             status_code=404,
             detail="User not found",
@@ -159,20 +160,20 @@ async def remove_user_from_org(
 
     # Check if user is the last admin (lookup admin role by configured admin slugs)
     admin_role = db_session.exec(
-        select(Role).where(Role.slug.in_(list(ADMIN_ROLE_SLUGS)))
+        select(RoleV2).where(RoleV2.slug.in_(list(ADMIN_ROLE_SLUGS)))
     ).first()
     admin_role_id = admin_role.id if admin_role else 1
 
-    # Count admins by checking UserPermissions with granted_via_role_id = admin_role_id
-    statement = select(UserPermission).where(
-        UserPermission.org_id == org.id,
-        UserPermission.granted_via_role_id == admin_role_id
+    # Count admins by checking UserRoleV2 with role_id = admin_role_id
+    statement = select(UserRoleV2).where(
+        UserRoleV2.org_id == org.id,
+        UserRoleV2.role_id == admin_role_id
     ).distinct()
     result = db_session.exec(statement)
-    admin_perms = result.all()
+    admin_roles = result.all()
 
     # Get unique admin user IDs
-    admin_user_ids = {perm.user_id for perm in admin_perms}
+    admin_user_ids = {role.user_id for role in admin_roles}
 
     if len(admin_user_ids) == 1 and user_id in admin_user_ids:
         raise HTTPException(
@@ -180,9 +181,9 @@ async def remove_user_from_org(
             detail="You can't remove the last admin of the organization",
         )
 
-    # Delete all user's permissions in this org
-    for perm in user_perms:
-        db_session.delete(perm)
+    # Delete all user's roles in this org
+    for role in user_roles:
+        db_session.delete(role)
     db_session.commit()
 
     return {"detail": "User removed from org"}
@@ -204,7 +205,7 @@ async def update_user_role(
     slug = role_uuid.split("_")[-1] if isinstance(role_uuid, str) and role_uuid.startswith("role_") else role_uuid
 
     # find role by slug
-    statement = select(Role).where(Role.slug == slug)
+    statement = select(RoleV2).where(RoleV2.slug == slug)
     result = db_session.exec(statement)
 
     role = result.first()
@@ -241,20 +242,20 @@ async def update_user_role(
     # Check if user is the last admin and if the new role is not admin
     # find any admin role by configured admin slugs
     admin_role = db_session.exec(
-        select(Role).where(Role.slug.in_(list(ADMIN_ROLE_SLUGS)))
+        select(RoleV2).where(RoleV2.slug.in_(list(ADMIN_ROLE_SLUGS)))
     ).first()
     admin_role_id = admin_role.id if admin_role else 1
 
-    # Count admins by checking UserPermissions with granted_via_role_id = admin_role_id
-    statement = select(UserPermission).where(
-        UserPermission.org_id == org.id,
-        UserPermission.granted_via_role_id == admin_role_id
+    # Count admins by checking UserRoleV2 with role_id = admin_role_id
+    statement = select(UserRoleV2).where(
+        UserRoleV2.org_id == org.id,
+        UserRoleV2.role_id == admin_role_id
     ).distinct()
     result = db_session.exec(statement)
-    admin_perms = result.all()
+    admin_roles = result.all()
 
     # Get unique admin user IDs
-    admin_user_ids = {perm.user_id for perm in admin_perms}
+    admin_user_ids = {role.user_id for role in admin_roles}
 
     if not admin_user_ids:
         raise HTTPException(
@@ -272,15 +273,15 @@ async def update_user_role(
             detail="Organization must have at least one admin",
         )
 
-    # Check if user has any permissions in this org
-    statement = select(UserPermission).where(
-        UserPermission.user_id == user_id_int, UserPermission.org_id == org.id
+    # Check if user has any roles in this org
+    statement = select(UserRoleV2).where(
+        UserRoleV2.user_id == user_id_int, UserRoleV2.org_id == org.id
     )
     result = db_session.exec(statement)
 
-    user_perms = result.all()
+    user_roles = result.all()
 
-    if not user_perms:
+    if not user_roles:
         raise HTTPException(
             status_code=404,
             detail="User not found",
@@ -289,7 +290,7 @@ async def update_user_role(
     # Remove old role and assign new role using PermissionService
     if role_id is not None:
         # Get current role to remove
-        current_role_ids = {perm.granted_via_role_id for perm in user_perms if perm.granted_via_role_id}
+        current_role_ids = {r.role_id for r in user_roles if r.role_id}
 
         # Remove all current role-based permissions
         for role_id_to_remove in current_role_ids:

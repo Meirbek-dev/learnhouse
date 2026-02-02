@@ -23,6 +23,13 @@ class SecurityConfig(PydanticStrictBaseModel):
     auth_jwt_secret_key: str
 
 
+class RBACConfig(PydanticStrictBaseModel):
+    """RBAC configuration."""
+    audit_logging_enabled: bool = True
+    cache_enabled: bool = True
+    cache_ttl_seconds: int = 300  # 5 minutes
+
+
 class ChromaDBConfig(PydanticStrictBaseModel):
     isSeparateDatabaseEnabled: bool | None = None
     db_host: str | None = None
@@ -121,6 +128,7 @@ class PlatformConfig(PydanticStrictBaseModel):
     database_config: DatabaseConfig
     redis_config: RedisConfig
     security_config: SecurityConfig
+    rbac_config: RBACConfig
     ai_config: AIConfig
     mailing_config: MailingConfig
     payments_config: InternalPaymentsConfig
@@ -192,6 +200,27 @@ def get_platform_config() -> PlatformConfig:
     auth_jwt_secret_key = env_auth_jwt_secret_key or yaml_config.get(
         "security", {}
     ).get("auth_jwt_secret_key")
+
+    # RBAC Config
+    env_audit_logging_enabled = os.environ.get("PLATFORM_RBAC_AUDIT_LOGGING_ENABLED")
+    env_cache_enabled = os.environ.get("PLATFORM_RBAC_CACHE_ENABLED")
+    env_cache_ttl_seconds = os.environ.get("PLATFORM_RBAC_CACHE_TTL_SECONDS")
+
+    audit_logging_enabled = (
+        env_audit_logging_enabled.lower() == "true"
+        if env_audit_logging_enabled
+        else yaml_config.get("rbac", {}).get("audit_logging_enabled", True)
+    )
+    cache_enabled = (
+        env_cache_enabled.lower() == "true"
+        if env_cache_enabled
+        else yaml_config.get("rbac", {}).get("cache_enabled", True)
+    )
+    cache_ttl_seconds = (
+        int(env_cache_ttl_seconds)
+        if env_cache_ttl_seconds
+        else yaml_config.get("rbac", {}).get("cache_ttl_seconds", 300)
+    )
 
     # Check if environment variables are defined
     env_site_name = os.environ.get("PLATFORM_SITE_NAME")
@@ -386,6 +415,11 @@ def get_platform_config() -> PlatformConfig:
         hosting_config=hosting_config,
         database_config=database_config,
         security_config=SecurityConfig(auth_jwt_secret_key=auth_jwt_secret_key),
+        rbac_config=RBACConfig(
+            audit_logging_enabled=bool(audit_logging_enabled),
+            cache_enabled=bool(cache_enabled),
+            cache_ttl_seconds=int(cache_ttl_seconds),
+        ),
         ai_config=ai_config,
         redis_config=RedisConfig(redis_connection_string=redis_connection_string),
         mailing_config=MailingConfig(

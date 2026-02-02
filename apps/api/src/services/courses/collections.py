@@ -16,7 +16,7 @@ from src.db.courses.courses import Course
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
 from src.services.permissions import get_permission_service
-from src.services.permissions.response_enrichment import (
+from src.services.rbac.enrichment import (
     enrich_collection_with_permissions,
     enrich_collections_with_permissions,
 )

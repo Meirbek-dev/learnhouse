@@ -16,6 +16,7 @@ from src.routers import (
     health,
     orgs,
     permissions,
+    rbac_v2,
     roles,
     search,
     trail,
@@ -48,6 +49,7 @@ v1_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 v1_router.include_router(orgs.router, prefix="/orgs", tags=["orgs"])
 v1_router.include_router(roles.router, prefix="/roles", tags=["roles"])
 v1_router.include_router(permissions.router, tags=["permissions"])
+v1_router.include_router(rbac_v2.router, prefix="/rbac/v2", tags=["rbac-v2"])
 v1_router.include_router(search.router, prefix="/search", tags=["search"])
 v1_router.include_router(health.router, prefix="/health", tags=["health"])
 v1_router.include_router(utils_router, prefix="/utils", tags=["utils"])

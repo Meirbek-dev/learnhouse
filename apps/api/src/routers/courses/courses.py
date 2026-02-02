@@ -48,7 +48,7 @@ from src.services.courses.updates import (
     get_updates_by_course_uuid,
     update_update,
 )
-from src.services.permissions.permission_service_consolidated import PermissionService
+from src.services.permissions import PermissionService
 
 router = APIRouter()
 

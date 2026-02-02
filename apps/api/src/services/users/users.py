@@ -10,9 +10,9 @@ from sqlmodel import Session, select
 from ulid import ULID
 
 from src.db.organizations import Organization, OrganizationRead
-from src.db.permissions import Role, RoleRead
+from src.db.permissions import RoleRead
 from src.db.permissions.enums import Action, ResourceType
-from src.db.permissions.models import UserPermission
+from src.db.permissions.models_v2 import RoleV2, UserRoleV2
 from src.db.users import (
     AnonymousUser,
     InternalUser,
@@ -348,12 +348,12 @@ async def get_user_session(
     from src.services.permissions import get_permission_service
     permission_service = get_permission_service(db_session)
 
-    # Get all orgs where user has permissions
-    statement = select(UserPermission).where(UserPermission.user_id == user.id).distinct()
-    user_perms = db_session.exec(statement).all()
+    # Get all orgs where user has roles (v2 table)
+    statement = select(UserRoleV2).where(UserRoleV2.user_id == user.id).distinct()
+    user_roles_v2 = db_session.exec(statement).all()
 
     # Get unique org IDs
-    org_ids = {perm.org_id for perm in user_perms}
+    org_ids = {role.org_id for role in user_roles_v2 if role.org_id}
 
     roles = []
 
@@ -554,8 +554,8 @@ async def _create_and_validate_user(
     return user
 
 
-def _safe_role_read(role: Role) -> RoleRead:
-    """Convert Role to RoleRead."""
+def _safe_role_read(role: RoleV2) -> RoleRead:
+    """Convert RoleV2 to RoleRead."""
     try:
         return RoleRead.model_validate(role)
     except ValidationError as exc:  # pragma: no cover - defensive path
@@ -571,7 +571,7 @@ def _safe_role_read(role: Role) -> RoleRead:
             org_id=role.org_id,
             is_system=role.is_system,
             priority=role.priority,
-            parent_role_id=role.parent_role_id,
+            parent_role_id=None,  # RoleV2 doesn't have parent_role_id
             created_at=role.created_at,
             updated_at=role.updated_at,
             id=role.id,
@@ -598,9 +598,9 @@ async def _link_user_to_organization(
     """Link user to organization with default 'user' role using new RBAC system."""
     from datetime import UTC
 
-    # Find the default 'user' role
+    # Find the default 'user' role (v2 table)
     user_role_model = db_session.exec(
-        select(Role).where(Role.slug == "user", Role.org_id.is_(None))
+        select(RoleV2).where(RoleV2.slug == "user", RoleV2.org_id.is_(None))
     ).first()
 
     if not user_role_model:

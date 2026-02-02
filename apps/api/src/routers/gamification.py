@@ -21,7 +21,7 @@ from src.core.timezone import now as tz_now
 from src.db.permissions.generated_enums import Action, ResourceType
 from src.security.permissions.exceptions import PermissionDenied
 from src.security.rbac.dependencies import get_permission_service
-from src.services.permissions.permission_service_consolidated import PermissionService
+from src.services.permissions import PermissionService
 from src.db.gamification import (
     DashboardRead,
     GamificationProfile,
