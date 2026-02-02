@@ -22,7 +22,6 @@ from src.db.permissions.constants import (
 from src.db.permissions.enums import (
     Action,
     AuditAction,
-    PermissionErrorCode,
     ResourceType,
     Scope,
 )
@@ -54,7 +53,6 @@ __all__ = [
     # Enums
     "Action",
     "AuditAction",
-    "PermissionErrorCode",
     "ResourceType",
     "Scope",
     # API Models (Request/Response schemas)
