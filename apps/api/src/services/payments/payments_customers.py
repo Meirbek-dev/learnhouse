@@ -1,10 +1,9 @@
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from src.services.permissions import get_permission_service
+from src.security.rbac import PermissionChecker
 
 from src.db.organizations import Organization
 from src.db.payments.payments_users import PaymentsUser
-from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
 from src.services.payments.payments_products import get_payments_product
 from src.services.users.users import read_user_by_id
@@ -23,14 +22,8 @@ async def get_customers(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:read:org", org_id)
 
     # Get all payment users for the organization
     statement = select(PaymentsUser).where(PaymentsUser.org_id == org_id)

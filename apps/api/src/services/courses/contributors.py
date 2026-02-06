@@ -2,10 +2,9 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, and_, select
-from src.services.permissions import get_permission_service
+from src.security.rbac import PermissionChecker
 
 from src.db.courses.courses import Course
-from src.db.permissions.enums import Action, ResourceType
 from src.db.resource_authors import (
     ResourceAuthor,
     ResourceAuthorshipEnum,
@@ -105,15 +104,6 @@ async def update_course_contributor(
             detail="You must be logged in to perform this action",
         )
 
-    # SECURITY: Require course ownership or admin role for updating contributors
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.COURSE,
-        resource_id=course_uuid,
-    )
-
     # Check if course exists
     statement = select(Course).where(Course.course_uuid == course_uuid)
     course = db_session.exec(statement).first()
@@ -123,6 +113,10 @@ async def update_course_contributor(
             status_code=404,
             detail="Course not found",
         )
+
+    # SECURITY: Require course ownership or admin role for updating contributors
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:manage:org", course.org_id)
 
     # Check if the contributor exists for this course
     existing_authorship = db_session.exec(
@@ -183,13 +177,8 @@ async def get_course_contributors(
         )
 
     # SECURITY: Require read access to the course
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.COURSE,
-        resource_id=course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:read:org", course.org_id)
 
     # Get all contributors for this course with user information
     statement = (
@@ -234,15 +223,6 @@ async def add_bulk_course_contributors(
             detail="You must be logged in to perform this action",
         )
 
-    # SECURITY: Require course ownership or admin role for adding contributors
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.COURSE,
-        resource_id=course_uuid,
-    )
-
     # Check if course exists
     statement = select(Course).where(Course.course_uuid == course_uuid)
     course = db_session.exec(statement).first()
@@ -252,6 +232,10 @@ async def add_bulk_course_contributors(
             status_code=404,
             detail="Course not found",
         )
+
+    # SECURITY: Require course ownership or admin role for adding contributors
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:manage:org", course.org_id)
 
     # Process results
     results = {"successful": [], "failed": []}
@@ -334,15 +318,6 @@ async def remove_bulk_course_contributors(
             detail="You must be logged in to perform this action",
         )
 
-    # SECURITY: Require course ownership or admin role for removing contributors
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.COURSE,
-        resource_id=course_uuid,
-    )
-
     # Check if course exists
     statement = select(Course).where(Course.course_uuid == course_uuid)
     course = db_session.exec(statement).first()
@@ -352,6 +327,10 @@ async def remove_bulk_course_contributors(
             status_code=404,
             detail="Course not found",
         )
+
+    # SECURITY: Require course ownership or admin role for removing contributors
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:manage:org", course.org_id)
 
     # Process results
     results = {"successful": [], "failed": []}

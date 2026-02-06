@@ -2,15 +2,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
-from src.security.permissions.exceptions import PermissionDenied
-from src.services.permissions import PermissionService
+from src.security.rbac import PermissionCheckerDep, PermissionDenied
 
 from src.core.events.database import get_db_session
-from src.db.permissions import Action, ResourceType
 from src.db.usergroups import UserGroupCreate, UserGroupRead, UserGroupUpdate
 from src.db.users import PublicUser, UserRead
 from src.security.auth import get_current_user
-from src.security.rbac.dependencies import get_permission_service
 from src.services.users.usergroups import (
     add_resources_to_usergroup,
     add_users_to_usergroup,
@@ -34,7 +31,7 @@ async def api_create_usergroup(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
+    checker: PermissionCheckerDep,
     usergroup_object: UserGroupCreate,
 ) -> UserGroupRead:
     """
@@ -42,18 +39,7 @@ async def api_create_usergroup(
 
     **Required Permission**: `usergroup:create:org`
     """
-    # Check permission to create usergroups
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.CREATE,
-        resource=ResourceType.USERGROUP,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            reason="You do not have permission to create user groups in this organization"
-        )
+    checker.require(current_user.id, "usergroup:create:org")
 
     return await create_usergroup(request, db_session, current_user, usergroup_object)
 
@@ -124,7 +110,7 @@ async def api_update_usergroup(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
+    checker: PermissionCheckerDep,
     usergroup_id: int,
     usergroup_object: UserGroupUpdate,
 ) -> UserGroupRead:
@@ -133,18 +119,7 @@ async def api_update_usergroup(
 
     **Required Permission**: `usergroup:update:org`
     """
-    # Check permission to update usergroups
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.USERGROUP,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            reason=f"You do not have permission to update user group {usergroup_id}"
-        )
+    checker.require(current_user.id, "usergroup:update:org")
 
     return await update_usergroup_by_id(
         request, db_session, current_user, usergroup_id, usergroup_object
@@ -157,7 +132,7 @@ async def api_delete_usergroup(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
+    checker: PermissionCheckerDep,
     usergroup_id: int,
 ) -> str:
     """
@@ -165,18 +140,7 @@ async def api_delete_usergroup(
 
     **Required Permission**: `usergroup:delete:org`
     """
-    # Check permission to delete usergroups
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.DELETE,
-        resource=ResourceType.USERGROUP,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            reason=f"You do not have permission to delete user group {usergroup_id}"
-        )
+    checker.require(current_user.id, "usergroup:delete:org")
 
     return await delete_usergroup_by_id(request, db_session, current_user, usergroup_id)
 
@@ -187,7 +151,7 @@ async def api_add_users_to_usergroup(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
+    checker: PermissionCheckerDep,
     usergroup_id: int,
     user_ids: str,
 ) -> str:
@@ -196,18 +160,7 @@ async def api_add_users_to_usergroup(
 
     **Required Permission**: `usergroup:manage:org`
     """
-    # Check permission to manage usergroups
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.MANAGE,
-        resource=ResourceType.USERGROUP,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            reason=f"You do not have permission to manage members of user group {usergroup_id}"
-        )
+    checker.require(current_user.id, "usergroup:manage:org")
 
     return await add_users_to_usergroup(
         request, db_session, current_user, usergroup_id, user_ids

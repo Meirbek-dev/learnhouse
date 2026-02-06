@@ -1,11 +1,10 @@
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from src.services.permissions import get_permission_service
+from src.security.rbac import PermissionChecker
 
 from src.db.courses.courses import Course
 from src.db.payments.payments_courses import PaymentsCourse
 from src.db.payments.payments_products import PaymentsProduct
-from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
 
 
@@ -25,13 +24,8 @@ async def link_course_to_product(
         raise HTTPException(status_code=404, detail="Course not found")
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.COURSE,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:update:org", org_id)
 
     # Check if product exists
     statement = select(PaymentsProduct).where(
@@ -79,13 +73,8 @@ async def unlink_course_from_product(
         raise HTTPException(status_code=404, detail="Course not found")
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.COURSE,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:update:org", org_id)
 
     # Find and delete the payment course link
     statement = select(PaymentsCourse).where(

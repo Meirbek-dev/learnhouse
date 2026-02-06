@@ -2,7 +2,6 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
-from src.services.permissions import get_permission_service
 from ulid import ULID
 
 from src.db.courses.activities import Activity, ActivityRead
@@ -16,8 +15,8 @@ from src.db.courses.chapters import (
 )
 from src.db.courses.course_chapters import CourseChapter
 from src.db.courses.courses import Course
-from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
+from src.security.rbac import PermissionChecker
 
 ####################################################
 # CRUD
@@ -37,13 +36,8 @@ async def create_chapter(
     course = db_session.exec(statement).one()
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.CREATE,
-        resource=ResourceType.CHAPTER,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "chapter:create:org", course.org_id)
 
     # Complete chapter object
     chapter.course_id = chapter_object.course_id
@@ -122,13 +116,8 @@ async def get_chapter(
         )
 
     # RBAC check (use parent Course for read access so public courses allow anonymous reads)
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.COURSE,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:read:org", course.org_id)
 
     # Get activities for this chapter
     statement = (
@@ -166,13 +155,8 @@ async def update_chapter(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.CHAPTER,
-        resource_id=chapter.chapter_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "chapter:update:org", chapter.org_id)
 
     # Update only the fields that were passed in
     update_data = chapter_object.model_dump(exclude_unset=True)
@@ -202,13 +186,8 @@ async def delete_chapter(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.DELETE,
-        resource=ResourceType.CHAPTER,
-        resource_id=chapter.chapter_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "chapter:delete:org", chapter.org_id)
 
     # Remove all linked chapter activities
     statement = select(ChapterActivity).where(ChapterActivity.chapter_id == chapter.id)
@@ -242,13 +221,8 @@ async def get_course_chapters(
         )
 
     # RBAC check (rights are determined by parent Course for read access)
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.COURSE,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:read:org", course.org_id)
 
     statement = (
         select(Chapter)
@@ -302,13 +276,8 @@ async def reorder_chapters_and_activities(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.CHAPTER,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "chapter:update:org", course.org_id)
 
     ###########
     # Chapters

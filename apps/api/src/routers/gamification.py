@@ -15,8 +15,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlmodel import Session, and_, select
-from src.security.permissions.exceptions import PermissionDenied
-from src.services.permissions import PermissionService
+from src.security.rbac import PermissionCheckerDep, PermissionDenied
 
 from src.core.events.database import get_db_session
 from src.core.timezone import now as tz_now
@@ -36,11 +35,9 @@ from src.db.gamification import (
 from src.db.gamification import (
     StreakType as DBStreakType,
 )
-from src.db.permissions.generated_enums import Action, ResourceType
 from src.db.users import PublicUser
 from src.db.users import User as DBUser
 from src.security.auth import get_current_user
-from src.security.rbac.dependencies import get_permission_service
 from src.services.gamification import service
 from src.services.gamification.service import (
     DailyLimitExceededError,
@@ -134,7 +131,7 @@ async def award_xp(
     payload: XPAwardRequest,
     user: Annotated[PublicUser, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db_session)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
+    checker: PermissionCheckerDep,
 ):
     """Award XP with strong typing and idempotency."""
     logger.info(f"Award XP request: user={user.id} org={org_id} payload={payload}")
@@ -146,20 +143,7 @@ async def award_xp(
                     status_code=400,
                     detail="custom_amount allowed only with ADMIN_AWARD source",
                 )
-            # Check if user has admin permission for the organization
-            has_permission = await permission_service.check(
-                user=user,
-                action=Action.MANAGE,
-                resource=ResourceType.ORGANIZATION,
-                org_id=org_id,
-                raise_on_deny=False,
-            )
-            if not has_permission:
-                raise PermissionDenied(
-                    action=Action.MANAGE,
-                    resource_type=ResourceType.ORGANIZATION,
-                    reason="Admin privileges required for custom XP awards",
-                )
+            checker.require(user.id, "organization:manage:org", org_id)
 
         # Normalize source: allow raw string or enum from request
         try:

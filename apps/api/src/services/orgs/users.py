@@ -4,7 +4,7 @@ from datetime import UTC, datetime, timedelta
 import orjson
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from src.services.permissions import get_permission_service
+from src.security.rbac import PermissionChecker
 
 from config.config import get_platform_config
 from src.db.organizations import (
@@ -15,9 +15,8 @@ from src.db.organizations import (
     rebuild_organization_models,
 )
 from src.db.permissions import RoleRead
-from src.db.permissions.constants import ADMIN_ROLE_SLUGS
-from src.db.permissions.enums import Action, ResourceType
-from src.db.permissions.models_v2 import Role, UserRole
+from src.db.permission_enums import ADMIN_ROLE_SLUGS
+from src.db.permissions import Role, UserRole
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.services.cache import redis_client
 from src.services.cache.redis_client import delete_keys, get_json, set_json
@@ -50,14 +49,8 @@ async def get_organization_users(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:read:org", org.id)
 
     # Build base query joining via UserRole
     # Get distinct users who have any role in this org
@@ -79,11 +72,11 @@ async def get_organization_users(
 
     org_users_list = []
 
-    permission_service = get_permission_service(db_session)
+    checker = PermissionChecker(db_session)
 
     for user in users:
-        # Get user's roles via new PermissionService
-        user_roles = permission_service.get_user_roles(
+        # Get user's roles via new PermissionChecker
+        user_roles = checker.get_user_roles(
             user_id=user.id, org_id=org_id_int
         )
 
@@ -135,14 +128,8 @@ async def remove_user_from_org(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.DELETE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:delete:org", org.id)
 
     # Check if user has any roles in this org (i.e., is a member)
     statement = select(UserRole).where(
@@ -235,14 +222,8 @@ async def update_user_role(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update:org", org.id)
 
     # Check if user is the last admin and if the new role is not admin
     # find any admin role by configured admin slugs
@@ -293,21 +274,19 @@ async def update_user_role(
             detail="User not found",
         )
 
-    # Remove old role and assign new role using PermissionService
+    # Remove old role and assign new role using PermissionChecker
     if role_id is not None:
         # Get current role to remove
         current_role_ids = {r.role_id for r in user_roles if r.role_id}
 
-        # Remove all current role-based permissions
-        for role_id_to_remove in current_role_ids:
-            if role_id_to_remove:
-                permission_service.remove_role(
-                    user_id=user_id_int, role_id=role_id_to_remove, org_id=org.id
-                )
+        # Remove all current roles
+        for ur in user_roles:
+            db_session.delete(ur)
+        db_session.flush()
 
         # Assign new role
-        permission_service.assign_role(
-            user_id=user_id_int, role_id=role_id, org_id=org.id
+        checker.assign_role(
+            user_id=user_id_int, role_slug=slug, org_id=int(org.id)
         )
 
     db_session.commit()
@@ -349,14 +328,8 @@ async def invite_batch_users(
     user = db_session.exec(statement).first()
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.CREATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "user:invite:org", org.id)
 
     # Connect to Redis (use cached client)
     r = redis_client.get_redis_client()
@@ -441,14 +414,8 @@ async def get_list_of_invited_users(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:read:org", org.id)
 
     # Connect to Redis (use cached client)
     r = redis_client.get_redis_client()
@@ -501,14 +468,8 @@ async def remove_invited_user(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.DELETE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:delete:org", org.id)
 
     # Connect to Redis (use cached client)
     r = redis_client.get_redis_client()

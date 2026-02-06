@@ -2,7 +2,7 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, col, select
-from src.services.permissions import get_permission_service
+from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.courses.courses import Course
@@ -10,7 +10,6 @@ from src.db.courses.discussions import (
     CourseDiscussion,
     CourseDiscussionCreate,
     CourseDiscussionRead,
-    CourseDiscussionReadWithPermissions,
     CourseDiscussionUpdate,
     DiscussionDislike,
     DiscussionLike,
@@ -19,12 +18,7 @@ from src.db.courses.discussions import (
     DiscussionType,
 )
 from src.db.organizations import Organization
-from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser, User
-from src.services.rbac.enrichment import (
-    enrich_discussion_with_permissions_typed,
-    enrich_discussions_with_permissions,
-)
 
 
 async def create_discussion(
@@ -62,14 +56,8 @@ async def create_discussion(
         )
 
     # RBAC check - users need read access to participate in discussions
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.COURSE,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:read:org", org.id)
 
     # If it's a reply, check if parent discussion exists
     if discussion_object.parent_discussion_id:
@@ -124,7 +112,7 @@ async def get_discussions_by_course_uuid(
     include_replies: bool = False,
     limit: int = 50,
     offset: int = 0,
-) -> list[CourseDiscussionReadWithPermissions]:
+) -> list[CourseDiscussionRead]:
     """Get discussions for a course"""
     # Check if course exists
     statement = select(Course).where(Course.course_uuid == course_uuid)
@@ -136,14 +124,8 @@ async def get_discussions_by_course_uuid(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.COURSE,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:read:org", course.org_id)
 
     # Get main discussions (posts, not replies)
     query = (
@@ -188,11 +170,7 @@ async def get_discussions_by_course_uuid(
 
             discussion_data.replies = reply_data
 
-        # Enrich discussion with permissions
-        enriched = await enrich_discussion_with_permissions_typed(
-            discussion_data, current_user, db_session, permission_service
-        )
-        result.append(enriched)
+        result.append(discussion_data)
 
     return result
 
@@ -624,14 +602,8 @@ async def get_discussion_replies(
     course = db_session.exec(course_statement).first()
 
     if course:
-        permission_service = get_permission_service(db_session)
-
-        await permission_service.check(
-            user=current_user,
-            action=Action.READ,
-            resource=ResourceType.COURSE,
-            resource_id=course.course_uuid,
-        )
+        checker = PermissionChecker(db_session)
+        checker.require(current_user.id, "course:read:org", course.org_id)
 
     # Get replies
     replies_query = (

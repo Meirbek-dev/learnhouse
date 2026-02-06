@@ -2,8 +2,6 @@ from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Request, UploadFile
 from sqlmodel import Session
-from src.security.permissions.exceptions import PermissionDenied
-from src.services.permissions import PermissionService
 
 from src.core.events.database import get_db_session
 from src.db.organization_config import OrganizationConfigBase
@@ -14,10 +12,9 @@ from src.db.organizations import (
     OrganizationUser,
     PaginatedOrganizationUsers,
 )
-from src.db.permissions import Action, ResourceType
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.security.rbac.dependencies import get_permission_service
+from src.security.rbac import require_permission
 from src.services.orgs.invites import (
     create_invite_code,
     create_invite_code_with_usergroup,
@@ -144,13 +141,12 @@ async def api_update_user_role(
     )
 
 
-@router.delete("/{org_id}/users/{user_id}")
+@router.delete("/{org_id}/users/{user_id}", dependencies=[require_permission("user:delete:org")])
 async def api_remove_user_from_org(
     request: Request,
     org_id: int,
     user_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -158,34 +154,18 @@ async def api_remove_user_from_org(
 
     **Required Permission**: `user:delete:org`
     """
-    # Check permission to remove users from organization
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.DELETE,
-        resource=ResourceType.USER,
-        org_id=org_id,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            action=Action.DELETE,
-            resource_type=ResourceType.USER,
-            reason="User lacks permission to remove users from this organization",
-        )
     return await remove_user_from_org(
         request, org_id, user_id, db_session, current_user
     )
 
 
 # Config related routes
-@router.put("/{org_id}/signup_mechanism")
+@router.put("/{org_id}/signup_mechanism", dependencies=[require_permission("organization:update:org")])
 async def api_get_org_signup_mechanism(
     request: Request,
     org_id: int,
     signup_mechanism: Literal["open", "inviteOnly"],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -193,33 +173,17 @@ async def api_get_org_signup_mechanism(
 
     **Required Permission**: `organization:update:own`
     """
-    # Check permission to update organization settings
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        org_id=org_id,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            action=Action.UPDATE,
-            resource_type=ResourceType.ORGANIZATION,
-            reason="User lacks permission to update organization settings",
-        )
     return await update_org_signup_mechanism(
         request, signup_mechanism, org_id, current_user, db_session
     )
 
 
 # Invites related routes
-@router.post("/{org_id}/invites")
+@router.post("/{org_id}/invites", dependencies=[require_permission("user:invite:org")])
 async def api_create_invite_code(
     request: Request,
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -227,31 +191,15 @@ async def api_create_invite_code(
 
     **Required Permission**: `user:invite:org`
     """
-    # Check permission to invite users
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.INVITE,
-        resource=ResourceType.USER,
-        org_id=org_id,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            action=Action.INVITE,
-            resource_type=ResourceType.USER,
-            reason="User lacks permission to invite users to this organization",
-        )
     return await create_invite_code(request, org_id, current_user, db_session)
 
 
-@router.post("/{org_id}/invites_with_usergroups")
+@router.post("/{org_id}/invites_with_usergroups", dependencies=[require_permission("user:invite:org")])
 async def api_create_invite_code_with_ug(
     request: Request,
     org_id: int,
     usergroup_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -259,23 +207,6 @@ async def api_create_invite_code_with_ug(
 
     **Required Permission**: `user:invite:org`
     """
-    # Check permission to invite users
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.INVITE,
-        resource=ResourceType.USER,
-        org_id=org_id,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            action=Action.INVITE,
-            resource_type=ResourceType.USER,
-            reason="You don't have permission to invite users to this organization",
-            org_id=org_id,
-        )
-
     return await create_invite_code_with_usergroup(
         request, org_id, usergroup_id, current_user, db_session
     )
@@ -309,13 +240,12 @@ async def api_get_invite_code(
     return await get_invite_code(request, org_id, invite_code, current_user, db_session)
 
 
-@router.delete("/{org_id}/invites/{org_invite_code_uuid}")
+@router.delete("/{org_id}/invites/{org_invite_code_uuid}", dependencies=[require_permission("user:invite:org")])
 async def api_delete_invite_code(
     request: Request,
     org_id: int,
     org_invite_code_uuid: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -323,36 +253,18 @@ async def api_delete_invite_code(
 
     **Required Permission**: `user:invite:org`
     """
-    # Check permission to manage invites
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.INVITE,
-        resource=ResourceType.USER,
-        org_id=org_id,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            action=Action.INVITE,
-            resource_type=ResourceType.USER,
-            reason="You don't have permission to manage invites for this organization",
-            org_id=org_id,
-        )
-
     return await delete_invite_code(
         request, org_id, org_invite_code_uuid, current_user, db_session
     )
 
 
-@router.post("/{org_id}/invites/users/batch")
+@router.post("/{org_id}/invites/users/batch", dependencies=[require_permission("user:invite:org")])
 async def api_invite_batch_users(
     request: Request,
     org_id: int,
     emails: str,
     invite_code_uuid: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -360,23 +272,6 @@ async def api_invite_batch_users(
 
     **Required Permission**: `user:invite:org`
     """
-    # Check permission to invite users
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.INVITE,
-        resource=ResourceType.USER,
-        org_id=org_id,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            action=Action.INVITE,
-            resource_type=ResourceType.USER,
-            reason="You don't have permission to invite users to this organization",
-            org_id=org_id,
-        )
-
     return await invite_batch_users(
         request, org_id, emails, invite_code_uuid, db_session, current_user
     )
@@ -395,13 +290,12 @@ async def api_get_org_users_invites(
     return await get_list_of_invited_users(request, org_id, db_session, current_user)
 
 
-@router.delete("/{org_id}/invites/users/{email}")
+@router.delete("/{org_id}/invites/users/{email}", dependencies=[require_permission("user:invite:org")])
 async def api_delete_org_users_invites(
     request: Request,
     org_id: int,
     email: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -409,23 +303,6 @@ async def api_delete_org_users_invites(
 
     **Required Permission**: `user:invite:org`
     """
-    # Check permission to manage invites
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.INVITE,
-        resource=ResourceType.USER,
-        org_id=org_id,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            action=Action.INVITE,
-            resource_type=ResourceType.USER,
-            reason="You don't have permission to manage invites for this organization",
-            org_id=org_id,
-        )
-
     return await remove_invited_user(request, org_id, email, db_session, current_user)
 
 
@@ -442,13 +319,12 @@ async def api_get_org_by_slug(
     return await get_organization_by_slug(request, org_slug, db_session, current_user)
 
 
-@router.put("/{org_id}/logo")
+@router.put("/{org_id}/logo", dependencies=[require_permission("organization:update:org")])
 async def api_update_org_logo(
     request: Request,
     org_id: int,
     logo_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -456,23 +332,6 @@ async def api_update_org_logo(
 
     **Required Permission**: `organization:update:own`
     """
-    # Check permission to update organization
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        org_id=org_id,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            action=Action.UPDATE,
-            resource_type=ResourceType.ORGANIZATION,
-            reason="You don't have permission to update this organization's logo",
-            org_id=org_id,
-        )
-
     return await update_org_logo(
         request=request,
         logo_file=logo_file,
@@ -482,13 +341,12 @@ async def api_update_org_logo(
     )
 
 
-@router.put("/{org_id}/thumbnail")
+@router.put("/{org_id}/thumbnail", dependencies=[require_permission("organization:update:org")])
 async def api_update_org_thumbnail(
     request: Request,
     org_id: int,
     thumbnail_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -496,23 +354,6 @@ async def api_update_org_thumbnail(
 
     **Required Permission**: `organization:update:own`
     """
-    # Check permission to update organization
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        org_id=org_id,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            action=Action.UPDATE,
-            resource_type=ResourceType.ORGANIZATION,
-            reason="You don't have permission to update this organization's thumbnail",
-            org_id=org_id,
-        )
-
     return await update_org_thumbnail(
         request=request,
         thumbnail_file=thumbnail_file,
@@ -522,13 +363,12 @@ async def api_update_org_thumbnail(
     )
 
 
-@router.put("/{org_id}/preview")
+@router.put("/{org_id}/preview", dependencies=[require_permission("organization:update:org")])
 async def api_update_org_preview(
     request: Request,
     org_id: int,
     preview_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -536,23 +376,6 @@ async def api_update_org_preview(
 
     **Required Permission**: `organization:update:own`
     """
-    # Check permission to update organization
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        org_id=org_id,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            action=Action.UPDATE,
-            resource_type=ResourceType.ORGANIZATION,
-            reason="You don't have permission to update this organization's preview",
-            org_id=org_id,
-        )
-
     return await update_org_preview(
         request=request,
         preview_file=preview_file,
@@ -594,13 +417,12 @@ async def api_user_orgs_admin(
     )
 
 
-@router.put("/{org_id}")
+@router.put("/{org_id}", dependencies=[require_permission("organization:update:org")])
 async def api_update_org(
     request: Request,
     org_object: OrganizationUpdate,
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> OrganizationRead:
     """
@@ -608,32 +430,14 @@ async def api_update_org(
 
     **Required Permission**: `organization:update:own`
     """
-    # Check permission to update organization
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        org_id=org_id,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            action=Action.UPDATE,
-            resource_type=ResourceType.ORGANIZATION,
-            reason="You don't have permission to update this organization",
-            org_id=org_id,
-        )
-
     return await update_org(request, org_object, org_id, current_user, db_session)
 
 
-@router.delete("/{org_id}")
+@router.delete("/{org_id}", dependencies=[require_permission("organization:delete:org")])
 async def api_delete_org(
     request: Request,
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -641,33 +445,15 @@ async def api_delete_org(
 
     **Required Permission**: `organization:delete:own`
     """
-    # Check permission to delete organization
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.DELETE,
-        resource=ResourceType.ORGANIZATION,
-        org_id=org_id,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            action=Action.DELETE,
-            resource_type=ResourceType.ORGANIZATION,
-            reason="You don't have permission to delete this organization",
-            org_id=org_id,
-        )
-
     return await delete_org(request, org_id, current_user, db_session)
 
 
-@router.put("/{org_id}/landing")
+@router.put("/{org_id}/landing", dependencies=[require_permission("organization:update:org")])
 async def api_update_org_landing(
     request: Request,
     org_id: int,
     landing_object: dict,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -675,35 +461,17 @@ async def api_update_org_landing(
 
     **Required Permission**: `organization:update:own`
     """
-    # Check permission to update organization
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        org_id=org_id,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            action=Action.UPDATE,
-            resource_type=ResourceType.ORGANIZATION,
-            reason="You don't have permission to update this organization's landing page",
-            org_id=org_id,
-        )
-
     return await update_org_landing(
         request, landing_object, org_id, current_user, db_session
     )
 
 
-@router.post("/{org_id}/landing/content")
+@router.post("/{org_id}/landing/content", dependencies=[require_permission("organization:update:org")])
 async def api_upload_org_landing_content(
     request: Request,
     org_id: int,
     content_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
@@ -711,23 +479,6 @@ async def api_upload_org_landing_content(
 
     **Required Permission**: `organization:update:own`
     """
-    # Check permission to update organization
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        org_id=org_id,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            action=Action.UPDATE,
-            resource_type=ResourceType.ORGANIZATION,
-            reason="You don't have permission to update this organization's landing content",
-            org_id=org_id,
-        )
-
     return await upload_org_landing_content_service(
         request=request,
         content_file=content_file,

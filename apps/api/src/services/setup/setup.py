@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 import orjson
 from fastapi import HTTPException
 from sqlmodel import Session, select
-from src.services.permissions import PermissionService
+from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from config.config import get_platform_config
@@ -35,14 +35,9 @@ from src.security.security import security_hash_password
 def install_default_elements(db_session: Session) -> bool:
     """
     Install default elements including system roles and permissions.
-
-    Uses the new RBAC permission system via PermissionService.
     """
-    permission_service = PermissionService(db_session)
-
-    # Seed default roles and permissions using the new RBAC system
-    # This creates: super-admin, org-admin, maintainer, instructor, moderator, user
-    created_roles = permission_service.seed_default_roles()
+    checker = PermissionChecker(db_session)
+    created_roles = checker.seed_default_roles()
 
     return len(created_roles) > 0
 
@@ -161,12 +156,10 @@ async def install_create_organization_user(
     org_id = org.id if org else 0
 
     # Link user and organization by assigning admin role
-    from src.services.permissions import get_permission_service
-
-    permission_service = get_permission_service(db_session)
-    permission_service.assign_role(
+    checker = PermissionChecker(db_session)
+    checker.assign_role(
         user_id=user.id or 0,
-        role_id=1,  # Admin role
+        role_slug="org-admin",
         org_id=org_id or 0,
     )
 

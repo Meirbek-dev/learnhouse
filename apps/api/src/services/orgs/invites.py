@@ -4,7 +4,7 @@ import orjson
 from fastapi import HTTPException, Request
 from pydantic import EmailStr
 from sqlmodel import Session, select
-from src.services.permissions import get_permission_service
+from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from config.config import get_platform_config
@@ -12,7 +12,6 @@ from src.db.organizations import (
     Organization,
     OrganizationRead,
 )
-from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser, UserRead
 from src.security.security import generate_secure_code
 from src.services.cache.redis_client import (
@@ -52,14 +51,8 @@ async def create_invite_code(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update:org", org.id)
 
     # Connect to Redis (use cached client)
     r = get_redis_client()
@@ -132,14 +125,8 @@ async def create_invite_code_with_usergroup(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update:org", org.id)
 
     # Connect to Redis (use cached client)
     r = get_redis_client()
@@ -212,14 +199,8 @@ async def get_invite_codes(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update:org", org.id)
 
     # Connect to Redis (use cached client)
     r = get_redis_client()
@@ -273,13 +254,8 @@ async def get_invite_code(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update:org", org.id)
 
     # Connect to Redis (use cached client)
     r = get_redis_client()
@@ -334,14 +310,8 @@ async def delete_invite_code(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update:org", org.id)
 
     # Connect to Redis (use cached client)
     r = get_redis_client()

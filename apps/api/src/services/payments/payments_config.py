@@ -2,7 +2,7 @@ from typing import Literal
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from src.services.permissions import get_permission_service
+from src.security.rbac import PermissionChecker
 
 from src.db.organizations import Organization
 from src.db.payments.payments import (
@@ -11,7 +11,6 @@ from src.db.payments.payments import (
     PaymentsConfigRead,
     PaymentsConfigUpdate,
 )
-from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, InternalUser, PublicUser
 
 
@@ -28,14 +27,8 @@ async def init_payments_config(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # Verify permissions
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.CREATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:create:org", org_id)
 
     # Check for existing config
     existing_config = db_session.exec(
@@ -79,14 +72,8 @@ async def get_payments_config(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:read:org", org_id)
 
     # Get payments config
     statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
@@ -109,14 +96,8 @@ async def update_payments_config(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update:org", org_id)
 
     # Get existing payments config
     statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
@@ -148,14 +129,8 @@ async def delete_payments_config(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.DELETE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:delete:org", org_id)
 
     # Get existing payments config
     statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)

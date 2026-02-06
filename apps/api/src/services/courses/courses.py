@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlalchemy import func
 from sqlmodel import Session, and_, or_, select, text
-from src.services.permissions import get_permission_service
+from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.courses.courses import (
@@ -16,7 +16,6 @@ from src.db.courses.courses import (
     ThumbnailType,
 )
 from src.db.organizations import Organization
-from src.db.permissions.enums import Action, ResourceType
 from src.db.resource_authors import (
     ResourceAuthor,
     ResourceAuthorshipEnum,
@@ -44,13 +43,8 @@ async def get_course(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.COURSE,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:read:org", course.org_id)
 
     # Get course authors with their roles
     authors_statement = (
@@ -92,13 +86,8 @@ async def get_course_by_id(
         )
 
     # RBAC check role-based access control
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.COURSE,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:read:org", course.org_id)
 
     # Get course authors with their roles
     authors_statement = (
@@ -157,13 +146,8 @@ async def get_course_meta(
     ]
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.COURSE,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:read:org", course.org_id)
 
     # Get course chapters
     chapters = []
@@ -528,15 +512,8 @@ async def create_course(
     course = Course.model_validate(course_data)
 
     # SECURITY: Check if user has permission to create courses in this organization
-    # Since this is a new course, we need to check organization-level permissions
-    # For now, we'll use the existing RBAC check but with proper organization context
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.CREATE,
-        resource=ResourceType.COURSE,
-        resource_id=None,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:create:org", org_id)
 
     # Get org uuid
     org_statement = select(Organization).where(Organization.id == org_id)
@@ -635,13 +612,8 @@ async def update_course_thumbnail(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.COURSE,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:update:org", course.org_id)
 
     # Get org uuid
     org_statement = select(Organization).where(Organization.id == course.org_id)
@@ -744,13 +716,8 @@ async def update_course(
         )
 
     # SECURITY: Require course ownership or admin role for updating courses
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.COURSE,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:update:org", course.org_id)
 
     # SECURITY: Additional checks for sensitive access control fields
     sensitive_fields_updated = []
@@ -782,12 +749,8 @@ async def update_course(
             is_course_owner = True
 
         # Check if user has admin or maintainer role via permission service
-        permission_service = get_permission_service(db_session)
-        admin_or_maintainer = await permission_service.check(
-            user=current_user,
-            action=Action.UPDATE,
-            resource=ResourceType.ORGANIZATION,
-            org_id=course.org_id,
+        admin_or_maintainer = checker.check(
+            current_user.id, "course:manage:org", course.org_id
         )
 
         # SECURITY: Only course owners (CREATOR, MAINTAINER) or admins can change access settings
@@ -849,13 +812,8 @@ async def delete_course(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.DELETE,
-        resource=ResourceType.COURSE,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:delete:org", course.org_id)
 
     db_session.delete(course)
     db_session.commit()
@@ -1043,15 +1001,11 @@ async def get_course_user_rights(
                 rights["ownership"]["is_owner"] = True
 
     # Check user roles
-
-    permission_service = get_permission_service(db_session)
+    checker = PermissionChecker(db_session)
 
     # Check admin/maintainer role (organization-level update/management)
-    user_is_admin_or_maintainer = await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        org_id=course.org_id,
+    user_is_admin_or_maintainer = checker.check(
+        current_user.id, "course:manage:org", course.org_id
     )
 
     if user_is_admin_or_maintainer:
@@ -1059,11 +1013,8 @@ async def get_course_user_rights(
         rights["roles"]["is_maintainer_role"] = True
 
     # Check instructor role (course-level update permission)
-    user_has_instructor_role = await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.COURSE,
-        resource_id=course.course_uuid,
+    user_has_instructor_role = checker.check(
+        current_user.id, "course:update:org", course.org_id
     )
 
     if user_has_instructor_role:

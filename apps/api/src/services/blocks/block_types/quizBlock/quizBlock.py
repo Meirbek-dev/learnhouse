@@ -6,7 +6,7 @@ from datetime import UTC, datetime, timezone
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
-from src.services.permissions import get_permission_service
+from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.courses.activities import Activity
@@ -22,7 +22,6 @@ from src.db.courses.quiz import (
     QuizSubmissionResponse,
 )
 from src.db.gamification import XPSource
-from src.db.permissions.enums import Action, ResourceType
 from src.db.users import PublicUser
 from src.services.blocks.block_types.quizBlock.grading import (
     apply_attempt_penalty,
@@ -60,14 +59,8 @@ async def submit_quiz(
         )
 
     # Check permissions (students can submit, teachers can view)
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.COURSE,
-        resource_id=str(activity.course_id),
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "quiz:update:org", activity.org_id)
 
     # Get quiz block to access questions and settings
     statement = (
@@ -252,25 +245,14 @@ async def get_quiz_attempts(
         )
 
     # Check permissions
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.COURSE,
-        resource_id=str(activity.course_id),
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "quiz:read:org", activity.org_id)
 
     # Build query
     statement = select(QuizAttempt).where(QuizAttempt.activity_id == activity_id)
 
     # Check if user can view all attempts (instructor/admin) or just their own
-    can_view_all = await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.COURSE,
-        resource_id=str(activity.course_id),
-    )
+    can_view_all = checker.check(current_user.id, "quiz:update:org", activity.org_id)
 
     # If not instructor/admin, only show own attempts
     if not can_view_all:
@@ -306,13 +288,8 @@ async def get_quiz_stats(
         )
 
     # Check permissions (teacher/admin only)
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,  # Requires teacher permissions
-        resource=ResourceType.COURSE,
-        resource_id=str(activity.course_id),
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "quiz:read:org", activity.org_id)
 
     # Get stats
     statement = select(QuizQuestionStat).where(

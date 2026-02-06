@@ -8,6 +8,7 @@ from src.db.organization_config import OrganizationConfig
 from src.db.permissions import RoleRead
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
+
 if TYPE_CHECKING:
     from src.db.users import UserRead
 

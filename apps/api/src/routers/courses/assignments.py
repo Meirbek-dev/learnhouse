@@ -1,8 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Request, UploadFile
-from src.security.permissions.exceptions import PermissionDenied
-from src.services.permissions import PermissionService
+from src.security.rbac import PermissionCheckerDep, PermissionDenied
 
 from src.core.events.database import get_db_session
 from src.db.courses.assignments import (
@@ -15,10 +14,8 @@ from src.db.courses.assignments import (
     AssignmentUpdate,
     AssignmentUserSubmissionCreate,
 )
-from src.db.permissions import Action, ResourceType
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.security.rbac.dependencies import get_permission_service
 from src.services.courses.activities.assignments import (
     create_assignment,
     create_assignment_submission,
@@ -481,28 +478,15 @@ async def api_final_grade_submission(
     assignment_uuid: str,
     user_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    permission_service: Annotated[PermissionService, Depends(get_permission_service)],
+    checker: PermissionCheckerDep,
     db_session=Depends(get_db_session),
 ):
     """
     Grade submissions for an assignment from a user
 
-    **Required Permission**: `submission:grade:assigned` (instructors/graders only)
+    **Required Permission**: `submission:grade:org` (instructors/graders only)
     """
-    # Check permission to grade submissions
-    has_permission = await permission_service.check(
-        user=current_user,
-        action=Action.GRADE,
-        resource=ResourceType.SUBMISSION,
-        raise_on_deny=False,
-    )
-
-    if not has_permission:
-        raise PermissionDenied(
-            action=Action.GRADE,
-            resource_type=ResourceType.SUBMISSION,
-            reason="You don't have permission to grade assignments",
-        )
+    checker.require(current_user.id, "submission:grade:org")
 
     return await grade_assignment_submission(
         request, user_id, assignment_uuid, current_user, db_session

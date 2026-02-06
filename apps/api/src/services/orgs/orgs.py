@@ -5,7 +5,7 @@ from typing import Literal
 import orjson
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, select
-from src.services.permissions import get_permission_service
+from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.organization_config import (
@@ -32,8 +32,7 @@ from src.db.organizations import (
     OrganizationRead,
     OrganizationUpdate,
 )
-from src.db.permissions.enums import Action, ResourceType
-from src.db.permissions.models_v2 import Role, UserRole
+from src.db.permissions import Role, UserRole
 from src.db.users import AnonymousUser, InternalUser, PublicUser
 from src.services.orgs.uploads import (
     upload_org_landing_content,
@@ -69,13 +68,8 @@ async def get_organization(
         pass
     else:
         # RBAC check
-        permission_service = get_permission_service(db_session)
-        await permission_service.check(
-            user=current_user,
-            action=Action.READ,
-            resource=ResourceType.ORGANIZATION,
-            resource_id=org.org_uuid,
-        )
+        checker = PermissionChecker(db_session)
+        checker.require(current_user.id, "organization:read:org", org.id)
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -114,14 +108,8 @@ async def get_organization_by_slug(
         pass
     else:
         # RBAC check
-        permission_service = get_permission_service(db_session)
-
-        await permission_service.check(
-            user=current_user,
-            action=Action.READ,
-            resource=ResourceType.ORGANIZATION,
-            resource_id=org.org_uuid,
-        )
+        checker = PermissionChecker(db_session)
+        checker.require(current_user.id, "organization:read:org", org.id)
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -173,12 +161,12 @@ async def create_org(
     db_session.refresh(org)
 
     # Link user to org by assigning admin role
-    from src.services.permissions import get_permission_service
+    from src.security.rbac import PermissionChecker
 
-    permission_service = get_permission_service(db_session)
-    permission_service.assign_role(
+    checker = PermissionChecker(db_session)
+    checker.assign_role(
         user_id=int(current_user.id),
-        role_id=1,  # Admin role
+        role_slug="org-admin",
         org_id=int(org.id or 0),
     )
 
@@ -268,12 +256,12 @@ async def create_org_with_config(
     db_session.refresh(org)
 
     # Link user to org by assigning admin role
-    from src.services.permissions import get_permission_service
+    from src.security.rbac import PermissionChecker
 
-    permission_service = get_permission_service(db_session)
-    permission_service.assign_role(
+    checker = PermissionChecker(db_session)
+    checker.assign_role(
         user_id=int(current_user.id),
-        role_id=1,  # Admin role
+        role_slug="org-admin",
         org_id=int(org.id or 0),
     )
     org_config = submitted_config
@@ -325,14 +313,8 @@ async def update_org(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update:org", org.id)
 
     # Verify if the new slug is already in use
     statement = select(Organization).where(Organization.slug == org_object.slug)
@@ -427,14 +409,8 @@ async def update_org_logo(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update:org", org.id)
 
     # Upload logo
     name_in_disk = await upload_org_logo(logo_file, org.org_uuid)
@@ -474,14 +450,8 @@ async def update_org_thumbnail(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update:org", org.id)
 
     # Upload logo
     name_in_disk = await upload_org_thumbnail(thumbnail_file, org.org_uuid)
@@ -521,14 +491,8 @@ async def update_org_preview(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update:org", org.id)
 
     # Upload logo
     name_in_disk = await upload_org_preview(preview_file, org.org_uuid)
@@ -554,14 +518,8 @@ async def delete_org(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.DELETE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:delete:org", org.id)
 
     db_session.delete(org)
     db_session.commit()
@@ -704,14 +662,8 @@ async def update_org_signup_mechanism(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update:org", org.id)
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -761,14 +713,8 @@ async def get_org_join_mechanism(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:read:org", org.id)
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -821,14 +767,8 @@ async def update_org_landing(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update:org", org.id)
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -880,14 +820,8 @@ async def upload_org_landing_content_service(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update:org", org.id)
 
     # Upload content
     name_in_disk = await upload_org_landing_content(content_file, org.org_uuid)

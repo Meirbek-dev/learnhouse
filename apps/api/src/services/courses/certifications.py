@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
-from src.services.permissions import get_permission_service
+from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.core.timezone import now as tz_now
@@ -19,7 +19,6 @@ from src.db.courses.certifications import (
 )
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.courses import Course
-from src.db.permissions.enums import Action, ResourceType
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser
 from src.services.gamification import StreakType, XPSource
@@ -51,13 +50,8 @@ async def create_certification(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.CREATE,
-        resource=ResourceType.CERTIFICATE,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "certificate:create:org", org_id=course.org_id)
 
     # Create certification
     certification = Certifications(
@@ -106,13 +100,8 @@ async def get_certification(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.CERTIFICATE,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "certificate:read:org", org_id=course.org_id)
 
     return CertificationRead(**certification.model_dump())
 
@@ -136,13 +125,8 @@ async def get_certifications_by_course(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.CERTIFICATE,
-        resource_id=course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "certificate:read:org", org_id=course.org_id)
 
     # Get certifications for this course
     statement = select(Certifications).where(Certifications.course_id == course.id)
@@ -185,13 +169,8 @@ async def update_certification(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.CERTIFICATE,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "certificate:update:org", org_id=course.org_id)
 
     # Update only the fields that were passed in
     for var, value in vars(certification_object).items():
@@ -238,13 +217,8 @@ async def delete_certification(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.DELETE,
-        resource=ResourceType.CERTIFICATE,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "certificate:delete:org", org_id=course.org_id)
 
     db_session.delete(certification)
     db_session.commit()
@@ -311,13 +285,8 @@ async def create_certificate_user(
             )
 
         # Require course ownership or instructor role for creating certificates
-        permission_service = get_permission_service(db_session)
-        await permission_service.check(
-            user=current_user,
-            action=Action.CREATE,
-            resource=ResourceType.CERTIFICATE,
-            resource_id=course.course_uuid,
-        )
+        checker = PermissionChecker(db_session)
+        checker.require(current_user.id, "certificate:create:org", org_id=course.org_id)
 
     now = tz_now()
 
@@ -453,13 +422,8 @@ async def get_user_certificates_for_course(
 
     # RBAC check with graceful fallback for learners retrieving their own certificates
     try:
-        permission_service = get_permission_service(db_session)
-        await permission_service.check(
-            user=current_user,
-            action=Action.READ,
-            resource=ResourceType.CERTIFICATE,
-            resource_id=course_uuid,
-        )
+        checker = PermissionChecker(db_session)
+        checker.require(current_user.id, "certificate:read:org", org_id=course.org_id)
     except HTTPException as exc:
         if exc.status_code != status.HTTP_403_FORBIDDEN:
             raise

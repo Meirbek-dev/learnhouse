@@ -7,13 +7,12 @@ from typing import Literal
 from fastapi import HTTPException, Request, UploadFile, status
 from pydantic import ValidationError
 from sqlmodel import Session, select
-from src.services.permissions import get_permission_service
+from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.organizations import Organization, OrganizationRead
 from src.db.permissions import RoleRead
-from src.db.permissions.enums import Action, ResourceType
-from src.db.permissions.models_v2 import Role, UserRole
+from src.db.permissions import Role, UserRole
 from src.db.users import (
     AnonymousUser,
     InternalUser,
@@ -53,13 +52,8 @@ async def create_user(
     org_id: int,
 ):
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user="create",
-        action=Action.READ,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=current_user,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "user:create:org", org_id)
 
     # Validate organization exists
     await _validate_organization_exists(db_session, org_id)
@@ -125,13 +119,8 @@ async def create_user_without_org(
     user_object: UserCreate,
 ):
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user="create",
-        action=Action.READ,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=current_user,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "user:create:org", None)
 
     # Create and validate user
     user = await _create_and_validate_user(db_session, user_object)
@@ -177,13 +166,8 @@ async def update_user(
             return user
 
     # RBAC check (only for real updates)
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.USER,
-        resource_id=user.user_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "user:update:org", None)
 
     if user_object.username:
         await _validate_unique_username(
@@ -228,13 +212,8 @@ async def update_user_avatar(
     user = await _get_user_by_field(db_session, "id", current_user.id, use_cache=False)
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user="update",
-        action=Action.READ,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=current_user,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "user:update:org", None)
 
     # Upload avatar with security validation
     if avatar_file and avatar_file.filename:
@@ -275,13 +254,8 @@ async def update_user_password(
     user = await _get_user_by_field(db_session, "id", user_id, use_cache=False)
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user="update",
-        action=Action.READ,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=current_user,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "user:update:org", None)
 
     if not security_verify_password(form.old_password, user.password):
         raise HTTPException(
@@ -344,10 +318,10 @@ async def get_user_session(
     user = await _get_user_by_field(db_session, "user_uuid", current_user.user_uuid)
     user_read = UserRead.model_validate(user)
 
-    # Get roles and orgs using PermissionService
-    from src.services.permissions import get_permission_service
+    # Get roles and orgs using PermissionChecker
+    from src.security.rbac import PermissionChecker
 
-    permission_service = get_permission_service(db_session)
+    checker = PermissionChecker(db_session)
 
     # Get all orgs where user has roles (v2 table)
     statement = select(UserRole).where(UserRole.user_id == user.id).distinct()
@@ -364,7 +338,7 @@ async def get_user_session(
 
         if org:
             # Get user's roles in this org
-            user_roles = permission_service.get_user_roles(
+            user_roles = checker.get_user_roles(
                 user_id=user.id, org_id=org_id
             )
 
@@ -372,7 +346,7 @@ async def get_user_session(
             if user_roles:
                 roles.append(
                     UserRoleWithOrg(
-                        role=_safe_role_read(user_roles[0]),
+                        role=RoleRead.model_validate(user_roles[0]),
                         org=_safe_organization_read(org),
                     )
                 )
@@ -383,14 +357,10 @@ async def get_user_session(
     try:
         from datetime import UTC, datetime
 
-        from src.services.permissions import get_permission_service
-
-        permission_service = get_permission_service(db_session)
         # Get org_id from the current organization context if available
         org_id = org.id if org and hasattr(org, "id") else None
-        permissions = permission_service.get_user_permissions(
-            current_user, org_id=org_id
-        )
+        effective = checker.get_effective_permissions(current_user.id, org_id)
+        permissions = {p: True for p in effective}
         # Add timestamp for cache validation (Unix timestamp in seconds)
         permissions_timestamp = int(datetime.now(UTC).timestamp())
     except Exception as e:
@@ -415,22 +385,9 @@ async def authorize_user_action(
     # Get user
     await _get_user_by_field(db_session, "user_uuid", current_user.user_uuid)
 
-    permission_service = get_permission_service(db_session)
-    action_enum = (
-        Action.CREATE
-        if action == "create"
-        else Action.READ
-        if action == "read"
-        else Action.UPDATE
-        if action == "update"
-        else Action.DELETE
-    )
-    authorized = await permission_service.check(
-        user=current_user,
-        action=action_enum,
-        resource=ResourceType.USER,
-        resource_id=resource_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    permission_str = f"user:{action}:org"
+    authorized = checker.check(current_user.id, permission_str, None)
 
     if authorized:
         return True
@@ -450,13 +407,8 @@ async def delete_user_by_id(
     user = await _get_user_by_field(db_session, "id", user_id, use_cache=False)
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.DELETE,
-        resource=ResourceType.USER,
-        resource_id=user.user_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "user:delete:org", None)
 
     # Delete user
     db_session.delete(user)
@@ -597,27 +549,12 @@ async def _link_user_to_organization(
     db_session: Session, user_id: int | None, org_id: int
 ) -> None:
     """Link user to organization with default 'user' role using new RBAC system."""
-    from datetime import UTC
+    from src.security.rbac import PermissionChecker
 
-    # Find the default 'user' role (v2 table)
-    user_role_model = db_session.exec(
-        select(Role).where(Role.slug == "user", Role.org_id.is_(None))
-    ).first()
-
-    if not user_role_model:
-        # Fallback: log warning, no role assigned
-        _logger.warning("Default 'user' role not found, cannot assign role")
-        return
-
-    role_id = user_role_model.id
-
-    # Assign role using PermissionService
-    from src.services.permissions import get_permission_service
-
-    permission_service = get_permission_service(db_session)
-    permission_service.assign_role(
+    checker = PermissionChecker(db_session)
+    checker.assign_role(
         user_id=user_id or 0,
-        role_id=role_id,
+        role_slug="user",
         org_id=org_id,
     )
 

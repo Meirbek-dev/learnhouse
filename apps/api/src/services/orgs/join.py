@@ -3,10 +3,10 @@ from datetime import UTC, datetime
 from fastapi import HTTPException, Request
 from pydantic import Field
 from sqlmodel import Session, select
-from src.services.permissions import get_permission_service
+from src.security.rbac import PermissionChecker
 
 from src.db.organizations import Organization
-from src.db.permissions.models_v2 import UserRole
+from src.db.permissions import UserRole
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User
 from src.services.orgs.invites import get_invite_code
@@ -81,10 +81,10 @@ async def join_org(
             )
 
         # Link user and organization by assigning default role
-        permission_service = get_permission_service(db_session)
-        permission_service.assign_role(
+        checker = PermissionChecker(db_session)
+        checker.assign_role(
             user_id=user.id,
-            role_id=4,  # Default user role
+            role_slug="user",
             org_id=org.id,
         )
 
@@ -92,10 +92,10 @@ async def join_org(
 
     if join_method == "open":
         # Link user and organization by assigning default role
-        permission_service = get_permission_service(db_session)
-        permission_service.assign_role(
+        checker = PermissionChecker(db_session)
+        checker.assign_role(
             user_id=user.id,
-            role_id=4,  # Default user role
+            role_slug="user",
             org_id=org.id,
         )
 

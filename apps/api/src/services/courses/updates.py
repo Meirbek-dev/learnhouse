@@ -2,7 +2,7 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, col, select
-from src.services.permissions import get_permission_service
+from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.courses.course_updates import (
@@ -13,7 +13,6 @@ from src.db.courses.course_updates import (
 )
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
-from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
 
 
@@ -42,13 +41,9 @@ async def create_update(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.COURSE,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:update:org", course.org_id)
+
     # Generate UUID
     courseupdate_uuid = f"courseupdate_{ULID()}"
 
@@ -86,13 +81,8 @@ async def update_update(
             status_code=status.HTTP_409_CONFLICT, detail="Update does not exist"
         )
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.COURSE,
-        resource_id=update.courseupdate_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:update:org", update.org_id)
 
     for key, value in update_object.model_dump(exclude_unset=True).items():
         if value is not None:
@@ -124,13 +114,8 @@ async def delete_update(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.DELETE,
-        resource=ResourceType.COURSE,
-        resource_id=update.courseupdate_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:update:org", update.org_id)
 
     db_session.delete(update)
     db_session.commit()

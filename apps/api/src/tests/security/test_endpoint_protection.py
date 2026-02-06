@@ -80,15 +80,16 @@ def has_permission_check(func_source: str) -> bool:
     Check if function source code contains permission checks.
 
     Looks for:
-    - permission_service.check()
-    - @require_permission decorator
+    - checker.require() / checker.check()
+    - require_permission dependency
     - PermissionDenied exception handling
     """
     indicators = [
-        "permission_service.check",
-        "@require_permission",
+        "checker.require",
+        "checker.check",
+        "require_permission",
         "PermissionDenied",
-        "@require_authenticated",
+        "PermissionCheckerDep",
         "raise PermissionDenied",
     ]
 
@@ -151,7 +152,7 @@ def test_all_endpoints_have_rbac():
                 # Get source code
                 try:
                     source = inspect.getsource(endpoint_func)
-                except TypeError, OSError:
+                except (TypeError, OSError):
                     # Can't get source (compiled/builtin function)
                     continue
 
@@ -176,8 +177,8 @@ def test_all_endpoints_have_rbac():
             error_msg += f"    Handler: {ep['handler']} in {ep['module']}\\n\\n"
 
         error_msg += "\\n✅ Fix: Add permission checks using one of:\\n"
-        error_msg += "  1. @require_permission decorator\\n"
-        error_msg += "  2. permission_service.check() call\\n"
+        error_msg += "  1. require_permission() route dependency\n"
+        error_msg += "  2. checker.require() / checker.check() call\n"
         error_msg += "  3. Add to EXEMPT_ENDPOINTS if intentionally public\\n"
 
         pytest.fail(error_msg)
@@ -208,14 +209,13 @@ def test_exempt_endpoints_are_intentional():
         print(f"  {category}: {len(endpoints)}")
 
 
-def test_permission_service_usage():
+def test_permission_checker_usage():
     """
-    Verify PermissionService is used correctly in endpoints.
+    Verify PermissionChecker is used correctly in endpoints.
 
     Common mistakes:
-    - Not using raise_on_deny parameter correctly
-    - Not checking returned boolean
-    - Using deprecated permission methods
+    - Using old permission_service patterns
+    - Not using checker.require() for mandatory checks
     """
     routers = get_all_routers()
     issues = []
@@ -231,23 +231,18 @@ def test_permission_service_usage():
             endpoint_func = route.endpoint
             try:
                 source = inspect.getsource(endpoint_func)
-            except TypeError, OSError:
+            except (TypeError, OSError):
                 continue
 
-            # Check for common permission check anti-patterns
-            if "permission_service.check(" in source:
-                # Should use raise_on_deny or check the boolean
-                if (
-                    "raise_on_deny=False" in source
-                    and "if not has_permission" not in source
-                ):
-                    issues.append(
-                        {
-                            "endpoint": endpoint_func.__name__,
-                            "issue": "Uses raise_on_deny=False but doesn't check result",
-                            "module": module_name,
-                        }
-                    )
+            # Detect old permission patterns that should be migrated
+            if "permission_service" in source:
+                issues.append(
+                    {
+                        "endpoint": endpoint_func.__name__,
+                        "issue": "Still uses old permission_service pattern",
+                        "module": module_name,
+                    }
+                )
 
     if issues:
         error_msg = "\\n\\n⚠️  Permission Check Issues:\\n\\n"

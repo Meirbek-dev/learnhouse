@@ -2,7 +2,7 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from src.services.permissions import get_permission_service
+from src.security.rbac import PermissionChecker
 
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
@@ -15,7 +15,6 @@ from src.db.payments.payments_products import (
     PaymentsProductUpdate,
 )
 from src.db.payments.payments_users import PaymentStatusEnum, PaymentsUser
-from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
 from src.services.payments.payments_stripe import (
     archive_stripe_product,
@@ -38,14 +37,8 @@ async def create_payments_product(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.CREATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:create:org", org_id)
 
     # Check if payments config exists, has a valid id, and is active
     statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
@@ -91,14 +84,8 @@ async def get_payments_product(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:read:org", org_id)
 
     # Get payments product
     statement = select(PaymentsProduct).where(
@@ -126,14 +113,8 @@ async def update_payments_product(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update:org", org_id)
 
     # Get existing payments product
     statement = select(PaymentsProduct).where(
@@ -176,14 +157,8 @@ async def delete_payments_product(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.DELETE,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:delete:org", org_id)
 
     # Get existing payments product
     statement = select(PaymentsProduct).where(
@@ -230,14 +205,8 @@ async def list_payments_products(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=org.org_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:read:org", org_id)
 
     # Get payments products ordered by id
     statement = (
@@ -265,14 +234,8 @@ async def get_products_by_course(
         raise HTTPException(status_code=404, detail="Course not found")
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.ORGANIZATION,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:read:org", org_id)
 
     # Get all products linked to this course with explicit join
     statement = (

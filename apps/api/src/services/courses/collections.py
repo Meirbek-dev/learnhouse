@@ -2,7 +2,7 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
-from src.services.permissions import get_permission_service
+from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.collections import (
@@ -14,12 +14,7 @@ from src.db.collections import (
 )
 from src.db.collections_courses import CollectionCourse
 from src.db.courses.courses import Course
-from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
-from src.services.rbac.enrichment import (
-    enrich_collection_with_permissions,
-    enrich_collections_with_permissions,
-)
 
 ####################################################
 # CRUD
@@ -41,13 +36,8 @@ async def get_collection(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.COLLECTION,
-        resource_id=collection.collection_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "collection:read:org", org_id=collection.org_id)
 
     # get courses in collection
     statement_all = (
@@ -77,9 +67,18 @@ async def get_collection(
 
     courses = list(db_session.exec(statement).all())
 
-    # Enrich with permission metadata (will include courses in the response)
-    return await enrich_collection_with_permissions(
-        collection, current_user, db_session, permission_service, courses=courses
+    can_update = checker.check(current_user.id, "collection:update:org", collection.org_id) if current_user.id else False
+    can_delete = checker.check(current_user.id, "collection:delete:org", collection.org_id) if current_user.id else False
+    is_owner = hasattr(collection, "created_by") and collection.created_by == current_user.id
+
+    return CollectionReadWithPermissions(
+        **collection.model_dump(),
+        courses=courses,
+        can_update=can_update,
+        can_delete=can_delete,
+        is_owner=is_owner,
+        is_creator=is_owner,
+        available_actions=[a for a, ok in {"update": can_update, "delete": can_delete}.items() if ok],
     )
 
 
@@ -94,13 +93,8 @@ async def create_collection(
     # SECURITY: Check if user has permission to create collections in this organization
     # Since collections are organization-level resources, we need to check org permissions
     # For now, we'll use the existing RBAC check but with proper organization context
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.CREATE,
-        resource=ResourceType.COLLECTION,
-        resource_id=None,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "collection:create:org", org_id=collection_object.org_id)
 
     # Complete the collection object
     collection.collection_uuid = f"collection_{ULID()}"
@@ -123,13 +117,7 @@ async def create_collection(
             if course:
                 # Verify user has read access to the course before adding it to collection
                 try:
-                    permission_service = get_permission_service(db_session)
-                    await permission_service.check(
-                        user=current_user,
-                        action=Action.READ,
-                        resource=ResourceType.COLLECTION,
-                        resource_id=course.course_uuid,
-                    )
+                    checker.require(current_user.id, "course:read:org", org_id=collection.org_id)
                 except HTTPException:
                     raise HTTPException(
                         status_code=403,
@@ -179,13 +167,8 @@ async def update_collection(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.COLLECTION,
-        resource_id=collection.collection_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "collection:update:org", org_id=collection.org_id)
 
     courses = collection_object.courses
 
@@ -251,13 +234,8 @@ async def delete_collection(
         )
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.DELETE,
-        resource=ResourceType.COLLECTION,
-        resource_id=collection.collection_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "collection:delete:org", org_id=collection.org_id)
 
     # delete collection from database
     db_session.delete(collection)
@@ -293,7 +271,7 @@ async def get_collections(
     collections = db_session.exec(statement).all()
 
     collections_with_courses = []
-    permission_service = get_permission_service(db_session)
+    checker = PermissionChecker(db_session)
 
     for collection in collections:
         statement_all = (
@@ -323,13 +301,18 @@ async def get_collections(
 
         courses = db_session.exec(statement).all()
 
-        # Enrich with permission metadata
-        enriched = await enrich_collection_with_permissions(
-            collection,
-            current_user,
-            db_session,
-            permission_service,
+        can_update = checker.check(current_user.id, "collection:update:org", collection.org_id) if current_user.id else False
+        can_delete = checker.check(current_user.id, "collection:delete:org", collection.org_id) if current_user.id else False
+        is_owner = hasattr(collection, "created_by") and collection.created_by == current_user.id
+
+        enriched = CollectionReadWithPermissions(
+            **collection.model_dump(),
             courses=list(courses),
+            can_update=can_update,
+            can_delete=can_delete,
+            is_owner=is_owner,
+            is_creator=is_owner,
+            available_actions=[a for a, ok in {"update": can_update, "delete": can_delete}.items() if ok],
         )
         collections_with_courses.append(enriched)
 

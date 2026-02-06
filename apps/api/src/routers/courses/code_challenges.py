@@ -12,8 +12,7 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from pydantic import field_validator
 from sqlmodel import Session, func, select
-from src.security.permissions.exceptions import AuthenticationRequired, PermissionDenied
-from src.services.permissions import get_permission_service
+from src.security.rbac import AuthenticationRequired, PermissionChecker, PermissionDenied
 from ulid import ULID
 
 from src.core.events.database import get_db_session
@@ -48,7 +47,6 @@ from src.db.courses.code_challenges import (
 )
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
-from src.db.permissions.generated_enums import Action, ResourceType
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User
 from src.security.auth import get_current_user
@@ -125,25 +123,9 @@ async def check_challenge_access(
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    # RBAC check using standard permission service
-    permission_service = get_permission_service(db_session)
-    action = Action.UPDATE if require_instructor else Action.READ
-
-    try:
-        await permission_service.check(
-            user=user,
-            action=action,
-            resource=ResourceType.COURSE,
-            resource_id=course.course_uuid,
-        )
-    except HTTPException:
-        if require_instructor:
-            raise PermissionDenied(
-                action=Action.UPDATE,
-                resource_type=ResourceType.CODE_CHALLENGE,
-                resource_id=str(activity.activity_uuid),
-            )
-        raise
+    checker = PermissionChecker(db_session)
+    perm = "course:update:org" if require_instructor else "course:read:org"
+    checker.require(user.id, perm, course.org_id)
 
     return course
 
@@ -609,9 +591,7 @@ async def run_custom_test(
 
     if not settings.allow_custom_input:
         raise PermissionDenied(
-            action=Action.EXECUTE,
-            resource_type=ResourceType.CODE_CHALLENGE,
-            resource_id=str(activity.activity_uuid),
+            reason="Custom input is not allowed for this challenge",
         )
 
     # Decode inputs
@@ -710,9 +690,7 @@ async def get_submission_detail(
 
     if submission.user_id != current_user.id and not is_instructor:
         raise PermissionDenied(
-            action=Action.READ,
-            resource_type=ResourceType.CODE_CHALLENGE,
-            resource_id=str(submission.submission_uuid),
+            reason="You can only view your own submissions",
         )
 
     return CodeSubmissionDetail.model_validate(submission)
@@ -739,9 +717,7 @@ async def get_student_analytics(
 
     if user_id != current_user.id and not is_instructor:
         raise PermissionDenied(
-            action=Action.READ,
-            resource_type=ResourceType.CODE_CHALLENGE,
-            resource_id=str(activity.activity_uuid),
+            reason="You can only view your own analytics",
         )
 
     # Get submissions

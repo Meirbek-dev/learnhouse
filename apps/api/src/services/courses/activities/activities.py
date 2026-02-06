@@ -2,7 +2,7 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from src.services.permissions import get_permission_service
+from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.courses.activities import (
@@ -15,12 +15,9 @@ from src.db.courses.activities import (
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.chapters import Chapter
 from src.db.courses.courses import Course
-from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
 from src.services.payments.payments_access import check_activity_paid_access
-from src.services.rbac.enrichment import (
-    enrich_activity_with_permissions,
-)
+
 
 ####################################################
 # CRUD
@@ -53,13 +50,8 @@ async def create_activity(
             detail="Course not found",
         )
 
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.CREATE,
-        resource=ResourceType.ACTIVITY,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "activity:create:org", course.org_id)
 
     # Create Activity
     activity = Activity(**activity_object.model_dump())
@@ -129,13 +121,8 @@ async def get_activity(
     activity, course = result
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.ACTIVITY,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "activity:read:org", course.org_id)
 
     # Paid access check
     has_paid_access = await check_activity_paid_access(
@@ -151,14 +138,19 @@ async def get_activity(
     )
 
     # Enrich with permission metadata
-    activity_dict = activity_read.model_dump()
-    enriched_dict = await enrich_activity_with_permissions(
-        activity=activity_dict,
-        current_user=current_user,
-        permission_service=permission_service,
-    )
+    checker = PermissionChecker(db_session)
+    can_update = checker.check(current_user.id, "activity:update:org", activity.org_id)
+    can_delete = checker.check(current_user.id, "activity:delete:org", activity.org_id)
+    is_owner = hasattr(activity, "created_by") and activity.created_by == current_user.id
 
-    return ActivityReadWithPermissions(**enriched_dict)
+    return ActivityReadWithPermissions(
+        **activity_read.model_dump(),
+        can_update=can_update,
+        can_delete=can_delete,
+        is_owner=is_owner,
+        is_creator=is_owner,
+        available_actions=[a for a, ok in {"update": can_update, "delete": can_delete}.items() if ok],
+    )
 
 
 async def get_activityby_id(
@@ -180,13 +172,8 @@ async def get_activityby_id(
     activity, course = result
 
     # RBAC check
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.ACTIVITY,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "activity:read:org", course.org_id)
 
     return ActivityRead.model_validate(activity)
 
@@ -217,13 +204,8 @@ async def update_activity(
             detail="Course not found",
         )
 
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.UPDATE,
-        resource=ResourceType.ACTIVITY,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "activity:update:org", course.org_id)
 
     # Update only the fields that were passed in
     update_data = activity_object.model_dump(exclude_unset=True)
@@ -265,13 +247,8 @@ async def delete_activity(
             detail="Course not found",
         )
 
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.DELETE,
-        resource=ResourceType.ACTIVITY,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "activity:delete:org", course.org_id)
 
     # Delete activity from chapter
     statement = select(ChapterActivity).where(
@@ -336,12 +313,7 @@ async def get_activities(
             detail="Course not found",
         )
 
-    permission_service = get_permission_service(db_session)
-    await permission_service.check(
-        user=current_user,
-        action=Action.READ,
-        resource=ResourceType.ACTIVITY,
-        resource_id=course.course_uuid,
-    )
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "activity:read:org", course.org_id)
 
     return [ActivityRead.model_validate(activity) for activity in activities]

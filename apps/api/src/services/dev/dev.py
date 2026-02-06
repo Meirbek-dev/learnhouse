@@ -1,8 +1,8 @@
 from fastapi import HTTPException
-from src.security.permissions.exceptions import PermissionDenied
+from src.security.rbac import PermissionDenied
 
 from config.config import get_platform_config
-from src.db.permissions.generated_enums import Action, ResourceType
+from src.db.permission_enums import Action, ResourceType
 
 
 def isDevModeEnabled():
