@@ -34,6 +34,6 @@
     "prettier-plugin-sort-imports": "^1.8.10",
     "prettier-plugin-sort-json": "^4.2.0",
     "prettier-plugin-tailwindcss": "^0.7.2",
-    "turbo": "^2.8.1"
+    "turbo": "^2.8.3"
   }
 }
