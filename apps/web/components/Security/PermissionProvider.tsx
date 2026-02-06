@@ -31,19 +31,9 @@ import type { Action, ResourceType, Scope, Role } from '@/types/permissions';
 // ============================================================================
 
 interface UserPermissionsResponse {
-  user_id: number;
-  org_id: number | null;
   roles: Role[];
-  permissions: Record<string, boolean>;
-  resource_permissions?: any[];
-}
-
-interface ResourcePermissionResponse {
-  resource_id: string;
-  resource_type: ResourceType;
-  permissions: Record<string, boolean>;
-  user_is_owner: boolean;
-  available_actions: Action[];
+  permissions: string[]; // flat list of "resource:action:scope" strings
+  org_id: number | null;
 }
 
 interface PermissionContextValue {
@@ -63,11 +53,11 @@ interface PermissionContextValue {
   // State
   loading: boolean;
   error: any;
-  permissions: Record<string, boolean>;
+  permissions: Set<string>;
 
   // Cache management
   invalidate: () => void;
-  prefetch: (resourceType?: ResourceType, resourceId?: string) => Promise<void>;
+  prefetch: () => Promise<void>;
 }
 
 // ============================================================================
@@ -75,6 +65,13 @@ interface PermissionContextValue {
 // ============================================================================
 
 const PermissionContext = createContext<PermissionContextValue | null>(null);
+
+// Scope broadening order: own < assigned < org < all
+const SCOPE_BROADER: Record<string, string[]> = {
+  own: ['assigned', 'org', 'all'],
+  assigned: ['org', 'all'],
+  org: ['all'],
+};
 
 // ============================================================================
 // Provider Props
@@ -134,7 +131,7 @@ export function PermissionProvider({
   // Build endpoint
   const endpoint = useMemo(() => {
     const orgParam = orgId ? `?org_id=${orgId}` : '';
-    return `${getAPIUrl()}me/permissions${orgParam}`;
+    return `${getAPIUrl()}rbac/me/permissions${orgParam}`;
   }, [orgId]);
 
   // Fetch permissions (skip if we have initial data from server)
@@ -160,15 +157,43 @@ export function PermissionProvider({
   const data = apiData || initialPermissions;
 
   // Extract permissions and roles
-  const permissions = useMemo(() => data?.permissions ?? {}, [data]);
+  const permissions = useMemo(() => new Set(data?.permissions ?? []), [data]);
   const roles = useMemo(() => data?.roles ?? [], [data]);
 
-  // Core permission check
+  // Core permission check with wildcard + scope broadening
   const can = useCallback(
     (action: Action, resource: ResourceType, scope: Scope = Scopes.ALL): boolean => {
       if (!session) return false;
-      const permissionName = buildPermissionName(resource, action, scope);
-      return permissions[permissionName] === true;
+      const required = buildPermissionName(resource, action, scope);
+
+      // Exact match or super-admin wildcard
+      if (permissions.has(required) || permissions.has('*:*:*')) return true;
+
+      const r = resource.toLowerCase();
+      const a = action.toLowerCase();
+      const s = scope.toLowerCase();
+
+      // Wildcard patterns
+      const wildcards = [
+        `${r}:*:${s}`,
+        `*:${a}:${s}`,
+        `${r}:*:*`,
+        `*:*:${s}`,
+      ];
+      if (wildcards.some((p) => permissions.has(p))) return true;
+
+      // Scope broadening
+      for (const broader of SCOPE_BROADER[s] ?? []) {
+        const candidates = [
+          `${r}:${a}:${broader}`,
+          `${r}:*:${broader}`,
+          `*:${a}:${broader}`,
+          `*:*:${broader}`,
+        ];
+        if (candidates.some((c) => permissions.has(c))) return true;
+      }
+
+      return false;
     },
     [session, permissions],
   );
@@ -215,22 +240,11 @@ export function PermissionProvider({
   }, [mutate]);
 
   const prefetch = useCallback(
-    async (resourceType?: ResourceType, resourceId?: string) => {
-      // Prefetch resource-specific permissions if needed
-      if (resourceType && resourceId) {
-        const resourceEndpoint = `${getAPIUrl()}permissions/resource/${resourceType}/${resourceId}${
-          orgId ? `?org_id=${orgId}` : ''
-        }`;
-        await fetch(resourceEndpoint, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        });
-      }
+    async () => {
+      // Re-fetch permissions data
+      await mutate();
     },
-    [accessToken, orgId],
+    [mutate],
   );
 
   const value: PermissionContextValue = {

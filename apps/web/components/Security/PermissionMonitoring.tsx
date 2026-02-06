@@ -5,6 +5,8 @@
  * Import and use in development/staging to monitor RBAC performance.
  */
 
+import * as React from 'react';
+
 interface PermissionMetrics {
   totalChecks: number;
   cacheHits: number;
@@ -194,5 +196,3 @@ export function PermissionDevTools() {
 
 // Export for direct use in permission provider
 export { PermissionMonitor };
-
-import * as React from 'react';

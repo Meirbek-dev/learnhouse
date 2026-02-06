@@ -32,7 +32,6 @@ interface Role {
   slug: string;
   description: string | null;
   org_id: number | null;
-  parent_role_id: number | null;
   is_system: boolean;
   priority: number;
   created_at: string;
@@ -79,7 +78,7 @@ export default function RBACAdminClient() {
           fetch(`${getAPIUrl()}roles?org_id=${org.id}`, {
             headers: { Authorization: `Bearer ${accessToken}` },
           }),
-          fetch(`${getAPIUrl()}permissions`, {
+          fetch(`${getAPIUrl()}roles/permissions/all`, {
             headers: { Authorization: `Bearer ${accessToken}` },
           }),
         ]);
@@ -128,7 +127,6 @@ export default function RBACAdminClient() {
     name: string;
     slug: string;
     description: string;
-    parent_role_id?: number | null;
   }) => {
     if (!accessToken || !org?.id) return;
 
@@ -142,7 +140,6 @@ export default function RBACAdminClient() {
         body: JSON.stringify({
           ...data,
           org_id: org.id,
-          parent_role_id: data.parent_role_id || null,
         }),
       });
 
@@ -163,7 +160,7 @@ export default function RBACAdminClient() {
 
   const handleUpdateRole = async (
     roleId: number,
-    data: { name: string; description: string; parent_role_id?: number | null },
+    data: { name: string; description: string },
   ) => {
     if (!accessToken) return;
 
@@ -615,16 +612,14 @@ function RoleEditForm({
   role,
   onSubmit,
   onCancel,
-  availableRoles,
 }: {
   role?: Role;
-  onSubmit: (data: { name: string; slug: string; description: string; parent_role_id?: number | null }) => void;
+  onSubmit: (data: { name: string; slug: string; description: string }) => void;
   onCancel: () => void;
   availableRoles?: Role[];
 }) {
   const [name, setName] = useState(role?.name || '');
   const [description, setDescription] = useState(role?.description || '');
-  const [parentRoleId, setParentRoleId] = useState<number | null>(role?.parent_role_id || null);
 
   // Auto-generate slug from name (derived value)
   const autoSlug = role
@@ -649,16 +644,8 @@ function RoleEditForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ name, slug, description, parent_role_id: parentRoleId });
+    onSubmit({ name, slug, description });
   };
-
-  // Filter out the current role and its descendants to prevent circular hierarchy
-  const eligibleParentRoles =
-    availableRoles?.filter((r) => {
-      if (role && r.id === role.id) return false; // Can't be parent of itself
-      if (r.is_system) return false; // System roles can't be children
-      return true;
-    }) || [];
 
   return (
     <form onSubmit={handleSubmit}>
@@ -702,28 +689,6 @@ function RoleEditForm({
             placeholder="e.g., Can manage course content"
           />
         </div>
-        {eligibleParentRoles.length > 0 && (
-          <div className="grid gap-2">
-            <Label htmlFor="parent_role">Parent Role (Optional)</Label>
-            <select
-              id="parent_role"
-              value={parentRoleId || ''}
-              onChange={(e) => setParentRoleId(e.target.value ? Number.parseInt(e.target.value) : null)}
-              className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <option value="">No parent (root role)</option>
-              {eligibleParentRoles.map((r) => (
-                <option
-                  key={r.id}
-                  value={r.id}
-                >
-                  {r.name} ({r.slug})
-                </option>
-              ))}
-            </select>
-            <p className="text-muted-foreground text-xs">This role will inherit all permissions from its parent.</p>
-          </div>
-        )}
       </div>
       <DialogFooter>
         <Button

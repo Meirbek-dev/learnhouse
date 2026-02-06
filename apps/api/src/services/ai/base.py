@@ -303,7 +303,7 @@ class FastAIService:
                 logger.info("✓ Vector store created successfully")
                 return vector_store
 
-        except EmbeddingError, VectorStoreError:
+        except (EmbeddingError, VectorStoreError):
             raise
         except Exception as e:
             error_msg = f"Failed to create vector store: {e!s}"
@@ -520,7 +520,7 @@ async def ask_ai(
             logger.warning(error_msg)
             raise AITimeoutError(120, details={"question_length": len(question)}) from e
 
-    except AIProcessingError, VectorStoreError, AITimeoutError:
+    except (AIProcessingError, VectorStoreError, AITimeoutError):
         raise
     except Exception as e:
         error_msg = f"Unexpected error during AI processing: {e!s}"
@@ -655,7 +655,7 @@ async def ask_ai_stream(
             logger.warning(error_msg)
             raise AITimeoutError(60, details={"question_length": len(question)}) from e
 
-    except AIProcessingError, VectorStoreError, AITimeoutError:
+    except (AIProcessingError, VectorStoreError, AITimeoutError):
         raise
     except Exception as e:
         error_msg = f"Unexpected error during AI streaming: {e!s}"

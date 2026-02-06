@@ -38,7 +38,6 @@ export interface Role {
   slug: string;
   description?: string;
   org_id?: number | null;
-  parent_role_id?: number | null;
   is_system: boolean;
   priority: number;
   created_at: string;
@@ -59,35 +58,18 @@ export interface UserRole {
   user_id: number;
   role_id: number;
   org_id: number;
-  granted_at: string;
-  granted_by?: number | null;
-  expires_at?: string | null;
+  assigned_at: string;
+  assigned_by?: number | null;
   role?: Role;
-}
-
-/**
- * Resource-level permission override.
- */
-export interface ResourcePermission {
-  id: number;
-  user_id: number;
-  resource_type: ResourceType;
-  resource_id: string;
-  permission_id: number;
-  granted_at: string;
-  granted_by?: number | null;
-  expires_at?: string | null;
 }
 
 /**
  * User's effective permissions response from API.
  */
 export interface UserPermissionsResponse {
-  user_id: number;
-  org_id?: number | null;
   roles: Role[];
-  permissions: Record<string, boolean>;
-  resource_permissions: ResourcePermission[];
+  permissions: string[]; // flat list of permission name strings
+  org_id?: number | null;
 }
 
 // Re-export canonical helpers from generated types (no local implementations)

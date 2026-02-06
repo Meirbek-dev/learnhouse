@@ -15,10 +15,6 @@ interface PermissionGuardProps {
    */
   resource: ResourceType;
   /**
-   * Optional resource ID for resource-specific checks.
-   */
-  resourceId?: string;
-  /**
    * Permission scope (defaults to ALL).
    */
   scope?: Scope;
@@ -67,7 +63,6 @@ interface PermissionGuardProps {
 export function PermissionGuard({
   action,
   resource,
-  resourceId,
   scope,
   children,
   fallback = null,
@@ -252,49 +247,6 @@ export function AuthGuard({ children, fallback = null, showLoading = true, loadi
   }
 
   if (!isAuthenticated) {
-    return <>{fallback}</>;
-  }
-
-  return <>{children}</>;
-}
-
-interface AdminGuardProps {
-  /**
-   * Content to render if user is admin.
-   */
-  children: ReactNode;
-  /**
-   * Optional fallback content.
-   */
-  fallback?: ReactNode;
-  /**
-   * If true, requires super-admin specifically.
-   * If false (default), org-admin is sufficient.
-   */
-  superAdminOnly?: boolean;
-}
-
-/**
- * Guard component that requires admin role.
- *
- * @example
- * ```tsx
- * <AdminGuard fallback={<AccessDenied />}>
- *   <AdminDashboard />
- * </AdminGuard>
- *
- * // Require super-admin specifically
- * <AdminGuard superAdminOnly>
- *   <PlatformSettings />
- * </AdminGuard>
- * ```
- */
-export function AdminGuard({ children, fallback = null, superAdminOnly = false }: AdminGuardProps) {
-  const { isAdmin, isSuperAdmin } = usePermissions();
-
-  const hasAccess = superAdminOnly ? isSuperAdmin : isAdmin;
-
-  if (!hasAccess) {
     return <>{fallback}</>;
   }
 

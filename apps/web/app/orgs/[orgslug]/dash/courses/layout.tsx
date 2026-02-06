@@ -23,15 +23,8 @@ async function CoursesLayout({ children, params }: CoursesLayoutProps) {
 
   // Check if user has instructor-level role or higher (can create/manage courses)
   const userRoles = session.roles || [];
-  const now = new Date();
 
   const hasInstructorRole = userRoles.some((userRole: any) => {
-    // Filter expired roles
-    if (userRole.expires_at) {
-      const expiryDate = new Date(userRole.expires_at);
-      if (expiryDate <= now) return false;
-    }
-
     const roleSlug = userRole.role?.slug || '';
     return [
       RoleSlugs.SUPER_ADMIN,

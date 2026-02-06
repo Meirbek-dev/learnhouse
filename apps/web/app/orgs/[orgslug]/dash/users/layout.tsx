@@ -23,15 +23,8 @@ async function UsersLayout({ children, params }: UsersLayoutProps) {
 
   // Check if user has admin-level role (can manage users)
   const userRoles = session.roles || [];
-  const now = new Date();
 
   const hasAdminRole = userRoles.some((userRole: any) => {
-    // Filter expired roles
-    if (userRole.expires_at) {
-      const expiryDate = new Date(userRole.expires_at);
-      if (expiryDate <= now) return false;
-    }
-
     const roleSlug = userRole.role?.slug || '';
     return [RoleSlugs.SUPER_ADMIN, RoleSlugs.ORG_ADMIN].includes(roleSlug);
   });

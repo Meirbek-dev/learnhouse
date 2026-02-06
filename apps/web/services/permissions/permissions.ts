@@ -1,56 +1,50 @@
 /**
  * Permission service for interacting with the RBAC API.
  *
- * This service provides methods for:
- * - Fetching user permissions
- * - Checking permissions
- * - Managing roles (admin only)
+ * All endpoints are under /api/v1/rbac/ and /api/v1/roles/
  */
 
-import type { Action, Permission, ResourceType, Role } from '@/types/permissions';
+import type { Role } from '@/types/permissions';
 import { getAPIUrl } from '@services/config/config';
 
+// ============================================================================
+// Types
+// ============================================================================
+
 interface PermissionCheckRequest {
-  action: Action;
-  resource: ResourceType;
+  action: string;
+  resource: string;
   resource_id?: string;
   org_id?: number;
 }
 
-interface PermissionCheckResult {
-  action: Action;
-  resource: ResourceType;
-  resource_id?: string | null;
-  org_id?: number | null;
-  allowed: boolean;
+interface PermissionCheckResponse {
+  granted: boolean;
+  permission: string;
 }
 
 interface BatchPermissionCheckResponse {
-  results: PermissionCheckResult[];
-  permissions: Record<string, boolean>;
+  results: Record<string, boolean>;
 }
 
 interface UserPermissionsResponse {
-  user_id: number;
+  roles: Array<Record<string, any>>;
+  permissions: string[];
   org_id: number | null;
-  roles: Role[];
-  permissions: Record<string, boolean>;
-  resource_permissions: {
-    resource_type: string;
-    resource_id: string;
-    permission_id: number;
-  }[];
 }
+
+// ============================================================================
+// Permission checks
+// ============================================================================
 
 /**
  * Fetch the current user's effective permissions.
- *
- * @param accessToken - JWT access token
- * @param orgId - Optional organization ID to filter permissions
- * @returns Promise<UserPermissionsResponse>
  */
-export async function fetchUserPermissions(accessToken: string, orgId?: number): Promise<UserPermissionsResponse> {
-  const url = new URL(`${getAPIUrl()}me/permissions`);
+export async function fetchUserPermissions(
+  accessToken: string,
+  orgId?: number,
+): Promise<UserPermissionsResponse> {
+  const url = new URL(`${getAPIUrl()}rbac/me/permissions`);
   if (orgId) {
     url.searchParams.set('org_id', orgId.toString());
   }
@@ -58,7 +52,7 @@ export async function fetchUserPermissions(accessToken: string, orgId?: number):
   const response = await fetch(url.toString(), {
     method: 'GET',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',
@@ -72,27 +66,21 @@ export async function fetchUserPermissions(accessToken: string, orgId?: number):
 }
 
 /**
- * Batch check multiple permissions.
- *
- * This is more efficient than individual permission checks
- * when you need to verify multiple permissions at once.
- *
- * @param accessToken - JWT access token
- * @param checks - Array of permission checks to perform
- * @returns Promise<BatchPermissionCheckResponse>
+ * Batch check multiple permissions (returns map of permission → granted).
  */
 export async function batchCheckPermissions(
   accessToken: string,
   checks: PermissionCheckRequest[],
+  orgId?: number,
 ): Promise<BatchPermissionCheckResponse> {
-  const response = await fetch(`${getAPIUrl()}permissions/check`, {
+  const response = await fetch(`${getAPIUrl()}rbac/check/batch`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-    body: JSON.stringify({ checks }),
+    body: JSON.stringify({ checks, org_id: orgId }),
   });
 
   if (!response.ok) {
@@ -104,94 +92,51 @@ export async function batchCheckPermissions(
 
 /**
  * Check a single permission.
- *
- * For checking multiple permissions, use batchCheckPermissions instead.
- *
- * @param accessToken - JWT access token
- * @param action - Action to check
- * @param resource - Resource type
- * @param resourceId - Optional specific resource ID
- * @param orgId - Optional organization context
- * @returns Promise<boolean>
  */
 export async function checkPermission(
   accessToken: string,
-  action: Action,
-  resource: ResourceType,
-  resourceId?: string,
+  action: string,
+  resource: string,
   orgId?: number,
 ): Promise<boolean> {
-  const url = new URL(`${getAPIUrl()}permissions/check`);
-  url.searchParams.set('action', action);
-  url.searchParams.set('resource', resource);
-  if (resourceId) url.searchParams.set('resource_id', resourceId);
-  if (orgId) url.searchParams.set('org_id', orgId.toString());
-
-  const response = await fetch(url.toString(), {
-    method: 'GET',
+  const response = await fetch(`${getAPIUrl()}rbac/check`, {
+    method: 'POST',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',
+    body: JSON.stringify({ action, resource, org_id: orgId }),
   });
 
   if (!response.ok) {
     throw new Error(`Failed to check permission: ${response.status}`);
   }
 
-  const result: PermissionCheckResult = await response.json();
-  return result.allowed;
+  const result: PermissionCheckResponse = await response.json();
+  return result.granted;
 }
 
-/**
- * List all available permissions.
- *
- * @param accessToken - JWT access token
- * @param resourceType - Optional filter by resource type
- * @returns Promise<Permission[]>
- */
-export async function listPermissions(accessToken: string, resourceType?: string): Promise<Permission[]> {
-  const url = new URL(`${getAPIUrl()}permissions`);
-  if (resourceType) {
-    url.searchParams.set('resource_type', resourceType);
-  }
-
-  const response = await fetch(url.toString(), {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to list permissions: ${response.status}`);
-  }
-
-  return response.json();
-}
+// ============================================================================
+// Role management
+// ============================================================================
 
 /**
- * List all roles in the new system.
- *
- * @param accessToken - JWT access token
- * @param orgId - Optional organization ID filter
- * @param includeGlobal - Whether to include global roles (default: true)
- * @returns Promise<Role[]>
+ * List all roles (system + org-specific).
  */
-export async function listRoles(accessToken: string, orgId?: number, includeGlobal = true): Promise<Role[]> {
-  const url = new URL(`${getAPIUrl()}roles`);
+export async function listRoles(
+  accessToken: string,
+  orgId?: number,
+): Promise<Role[]> {
+  const url = new URL(`${getAPIUrl()}roles/`);
   if (orgId !== undefined) {
     url.searchParams.set('org_id', orgId.toString());
   }
-  url.searchParams.set('include_global', includeGlobal.toString());
 
   const response = await fetch(url.toString(), {
     method: 'GET',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',
@@ -205,20 +150,16 @@ export async function listRoles(accessToken: string, orgId?: number, includeGlob
 }
 
 /**
- * Get a role with all its permissions.
- *
- * @param accessToken - JWT access token
- * @param roleId - Role ID
- * @returns Promise<Role & { permissions: Permission[] }>
+ * Get a single role by ID.
  */
-export async function getRoleWithPermissions(
+export async function getRoleById(
   accessToken: string,
   roleId: number,
-): Promise<Role & { permissions: Permission[] }> {
+): Promise<Role> {
   const response = await fetch(`${getAPIUrl()}roles/${roleId}`, {
     method: 'GET',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',
@@ -233,32 +174,24 @@ export async function getRoleWithPermissions(
 
 /**
  * Assign a role to a user.
- *
- * @param accessToken - JWT access token
- * @param userId - User ID
- * @param roleId - Role ID
- * @param orgId - Organization ID
- * @param expiresAt - Optional expiry date
- * @returns Promise<void>
  */
 export async function assignRoleToUser(
   accessToken: string,
   userId: number,
-  roleId: number,
+  roleSlug: string,
   orgId: number,
-  expiresAt?: Date,
 ): Promise<void> {
-  const response = await fetch(`${getAPIUrl()}users/${userId}/roles`, {
+  const response = await fetch(`${getAPIUrl()}rbac/roles/assign`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',
     body: JSON.stringify({
-      role_id: roleId,
+      user_id: userId,
+      role_slug: roleSlug,
       org_id: orgId,
-      expires_at: expiresAt?.toISOString() || null,
     }),
   });
 
@@ -270,29 +203,25 @@ export async function assignRoleToUser(
 
 /**
  * Remove a role from a user.
- *
- * @param accessToken - JWT access token
- * @param userId - User ID
- * @param roleId - Role ID
- * @param orgId - Organization ID
- * @returns Promise<void>
  */
 export async function removeRoleFromUser(
   accessToken: string,
   userId: number,
-  roleId: number,
+  roleSlug: string,
   orgId: number,
 ): Promise<void> {
-  const url = new URL(`${getAPIUrl()}users/${userId}/roles/${roleId}`);
-  url.searchParams.set('org_id', orgId.toString());
-
-  const response = await fetch(url.toString(), {
-    method: 'DELETE',
+  const response = await fetch(`${getAPIUrl()}rbac/roles/revoke`, {
+    method: 'POST',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',
+    body: JSON.stringify({
+      user_id: userId,
+      role_slug: roleSlug,
+      org_id: orgId,
+    }),
   });
 
   if (!response.ok) {
