@@ -1,13 +1,7 @@
 """
-RBAC v2 Service - Production Ready
+RBAC Service
 
-This module provides the new, clean RBAC implementation.
-
-Key components:
-- RBACService: Core permission checking and role management
-- CacheService: Redis-based caching with invalidation
-- AuditService: Security event logging
-- Metrics: Prometheus instrumentation
+Core permission checking and role management.
 
 Usage:
     from src.services.rbac import RBACService, get_rbac_service

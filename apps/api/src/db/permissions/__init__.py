@@ -1,13 +1,3 @@
-"""
-Permission models and enums for the RBAC system.
-
-This module provides the core data models for the Role-Based Access Control system.
-RBAC v2 is the only supported system - all legacy tables have been removed.
-
-For v2 table models, import from src.db.permissions.models_v2:
-- PermissionV2, RoleV2, UserRoleV2, RolePermissionV2, PermissionAuditLogV2
-"""
-
 from src.db.permissions.constants import (
     ADMIN_OR_MAINTAINER_SLUGS,
     ADMIN_ROLE_SLUGS,

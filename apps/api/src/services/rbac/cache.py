@@ -35,9 +35,9 @@ CACHE_LOCK_TTL = 10  # 10 seconds for locks
 
 
 class CacheService:
-    """Redis-based caching for RBAC v2."""
+    """Redis-based caching for RBAC."""
 
-    def __init__(self, redis=None, prefix: str = "rbac:v2") -> None:
+    def __init__(self, redis=None, prefix: str = "rbac") -> None:
         self.redis = redis or get_redis_client()
         self.prefix = prefix
 

@@ -1,18 +1,18 @@
 """
-RBAC v2 API Endpoints - FastAPI Routes
+RBAC API Endpoints - FastAPI Routes
 
 All endpoints require authentication unless marked PUBLIC.
 All endpoints use consistent error responses.
 
 Endpoints:
-- POST /api/v1/rbac/v2/check - Check single permission
-- POST /api/v1/rbac/v2/check/batch - Check multiple permissions
-- GET  /api/v1/rbac/v2/me/permissions - Get current user's permissions
-- GET  /api/v1/rbac/v2/me/roles - Get current user's roles
-- POST /api/v1/rbac/v2/roles/assign - Assign role to user (admin)
-- POST /api/v1/rbac/v2/roles/revoke - Revoke role from user (admin)
-- POST /api/v1/rbac/v2/roles - Create new role (admin)
-- POST /api/v1/rbac/v2/roles/{role_slug}/permissions - Add permission to role (admin)
+- POST /api/v1/rbac/check - Check single permission
+- POST /api/v1/rbac/check/batch - Check multiple permissions
+- GET  /api/v1/rbac/me/permissions - Get current user's permissions
+- GET  /api/v1/rbac/me/roles - Get current user's roles
+- POST /api/v1/rbac/roles/assign - Assign role to user (admin)
+- POST /api/v1/rbac/roles/revoke - Revoke role from user (admin)
+- POST /api/v1/rbac/roles - Create new role (admin)
+- POST /api/v1/rbac/roles/{role_slug}/permissions - Add permission to role (admin)
 """
 
 from datetime import datetime
@@ -156,7 +156,7 @@ async def check_permission(
     Never returns 403 (use for UI state, not enforcement).
 
     Example:
-        POST /api/v1/rbac/v2/check
+        POST /api/v1/rbac/check
         {
           "action": "update",
           "resource": "course",
@@ -180,7 +180,7 @@ async def check_permission(
             cached=False,
         )
 
-    result = rbac.check(
+    result = await rbac.check(
         user_id=current_user.id,
         action=request.action,
         resource=request.resource,
@@ -206,7 +206,7 @@ async def check_permissions_batch(
     Check multiple permissions in one request (more efficient).
 
     Example:
-        POST /api/v1/rbac/v2/check/batch
+        POST /api/v1/rbac/check/batch
         {
           "checks": [
             {"action": "update", "resource": "course", "resource_id": "course_123"},
@@ -266,7 +266,7 @@ async def get_my_permissions(
     - Pre-fetch permissions for offline use
 
     Example:
-        GET /api/v1/rbac/v2/me/permissions?org_id=1
+        GET /api/v1/rbac/me/permissions?org_id=1
 
         Response:
         {
@@ -313,7 +313,7 @@ async def assign_role(
         )
 
     # Check if current user can assign roles
-    check = rbac.check(
+    check = await rbac.check(
         user_id=current_user.id,
         action="assign",
         resource="role",
@@ -362,7 +362,7 @@ async def revoke_role(
         )
 
     # Check if current user can revoke roles
-    check = rbac.check(
+    check = await rbac.check(
         user_id=current_user.id,
         action="revoke",
         resource="role",
@@ -399,7 +399,7 @@ async def create_role(
         )
 
     # Check if current user can create roles
-    check = rbac.check(
+    check = await rbac.check(
         user_id=current_user.id,
         action="create",
         resource="role",
@@ -438,7 +438,7 @@ async def add_permission_to_role(
         )
 
     # Check if current user can update roles
-    check = rbac.check(
+    check = await rbac.check(
         user_id=current_user.id,
         action="update",
         resource="role",

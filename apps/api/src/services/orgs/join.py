@@ -6,7 +6,7 @@ from sqlmodel import Session, select
 from src.services.permissions import get_permission_service
 
 from src.db.organizations import Organization
-from src.db.permissions.models_v2 import UserRoleV2
+from src.db.permissions.models_v2 import UserRole
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User
 from src.services.orgs.invites import get_invite_code
@@ -52,8 +52,8 @@ async def join_org(
         )
 
     # Check if user is already in the organization (via v2 roles)
-    statement = select(UserRoleV2).where(
-        UserRoleV2.user_id == args.user_id, UserRoleV2.org_id == args.org_id
+    statement = select(UserRole).where(
+        UserRole.user_id == args.user_id, UserRole.org_id == args.org_id
     )
     result = db_session.exec(statement)
     userorg = result.first()

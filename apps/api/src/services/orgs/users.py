@@ -17,7 +17,7 @@ from src.db.organizations import (
 from src.db.permissions import RoleRead
 from src.db.permissions.constants import ADMIN_ROLE_SLUGS
 from src.db.permissions.enums import Action, ResourceType
-from src.db.permissions.models_v2 import RoleV2, UserRoleV2
+from src.db.permissions.models_v2 import Role, UserRole
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.services.cache import redis_client
 from src.services.cache.redis_client import delete_keys, get_json, set_json
@@ -59,12 +59,12 @@ async def get_organization_users(
         resource_id=org.org_uuid,
     )
 
-    # Build base query joining via UserRoleV2 (v2 schema)
+    # Build base query joining via UserRole
     # Get distinct users who have any role in this org
     base_statement = (
         select(User)
-        .join(UserRoleV2, UserRoleV2.user_id == User.id)
-        .where(UserRoleV2.org_id == org_id_int)
+        .join(UserRole, UserRole.user_id == User.id)
+        .where(UserRole.org_id == org_id_int)
         .distinct()
     )
 
@@ -145,8 +145,8 @@ async def remove_user_from_org(
     )
 
     # Check if user has any roles in this org (i.e., is a member)
-    statement = select(UserRoleV2).where(
-        UserRoleV2.user_id == user_id, UserRoleV2.org_id == org.id
+    statement = select(UserRole).where(
+        UserRole.user_id == user_id, UserRole.org_id == org.id
     )
     result = db_session.exec(statement)
 
@@ -160,14 +160,14 @@ async def remove_user_from_org(
 
     # Check if user is the last admin (lookup admin role by configured admin slugs)
     admin_role = db_session.exec(
-        select(RoleV2).where(RoleV2.slug.in_(list(ADMIN_ROLE_SLUGS)))
+        select(Role).where(Role.slug.in_(list(ADMIN_ROLE_SLUGS)))
     ).first()
     admin_role_id = admin_role.id if admin_role else 1
 
-    # Count admins by checking UserRoleV2 with role_id = admin_role_id
+    # Count admins by checking UserRole with role_id = admin_role_id
     statement = (
-        select(UserRoleV2)
-        .where(UserRoleV2.org_id == org.id, UserRoleV2.role_id == admin_role_id)
+        select(UserRole)
+        .where(UserRole.org_id == org.id, UserRole.role_id == admin_role_id)
         .distinct()
     )
     result = db_session.exec(statement)
@@ -210,7 +210,7 @@ async def update_user_role(
     )
 
     # find role by slug
-    statement = select(RoleV2).where(RoleV2.slug == slug)
+    statement = select(Role).where(Role.slug == slug)
     result = db_session.exec(statement)
 
     role = result.first()
@@ -247,14 +247,14 @@ async def update_user_role(
     # Check if user is the last admin and if the new role is not admin
     # find any admin role by configured admin slugs
     admin_role = db_session.exec(
-        select(RoleV2).where(RoleV2.slug.in_(list(ADMIN_ROLE_SLUGS)))
+        select(Role).where(Role.slug.in_(list(ADMIN_ROLE_SLUGS)))
     ).first()
     admin_role_id = admin_role.id if admin_role else 1
 
-    # Count admins by checking UserRoleV2 with role_id = admin_role_id
+    # Count admins by checking UserRole with role_id = admin_role_id
     statement = (
-        select(UserRoleV2)
-        .where(UserRoleV2.org_id == org.id, UserRoleV2.role_id == admin_role_id)
+        select(UserRole)
+        .where(UserRole.org_id == org.id, UserRole.role_id == admin_role_id)
         .distinct()
     )
     result = db_session.exec(statement)
@@ -280,8 +280,8 @@ async def update_user_role(
         )
 
     # Check if user has any roles in this org
-    statement = select(UserRoleV2).where(
-        UserRoleV2.user_id == user_id_int, UserRoleV2.org_id == org.id
+    statement = select(UserRole).where(
+        UserRole.user_id == user_id_int, UserRole.org_id == org.id
     )
     result = db_session.exec(statement)
 

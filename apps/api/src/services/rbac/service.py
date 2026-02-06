@@ -4,11 +4,10 @@ RBAC Service - Core Permission Checking
 This is the ONLY service for RBAC operations.
 
 Design principles:
-- Simple API: check(), assign_role(), revoke_role()
+- Simple API: check(), require(), assign_role(), revoke_role()
 - Fast: < 10ms per permission check (with cache < 1ms)
 - Secure: Always logs denials, prevents bypasses
 - Testable: Pure functions, dependency injection
-- Production Ready: Error handling, logging, cache invalidation
 """
 
 from __future__ import annotations
@@ -20,7 +19,7 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 from fastapi import HTTPException, Request, status
-from sqlmodel import Session, and_, or_, select
+from sqlmodel import Session, or_, select
 
 if TYPE_CHECKING:
     from src.services.rbac.audit import AuditService
@@ -72,20 +71,20 @@ class RBACService:
     Usage:
         rbac = RBACService(db, cache, audit)
 
-        # Check permission
+        # Check permission (returns PermissionCheck)
         result = rbac.check(
             user_id=123,
             action="update",
             resource="course",
             resource_id="course_uuid",
-            org_id=1
+            org_id=1,
         )
 
         if result.granted:
-            # Allow operation
-        else:
-            # Deny with reason
-            logger.warning(f"Permission denied: {result.reason}")
+            ...
+
+        # Require permission (raises 403 on deny)
+        rbac.require(user_id=123, action="update", resource="course", org_id=1)
     """
 
     def __init__(
@@ -107,116 +106,6 @@ class RBACService:
     # Permission Checks
     # ========================================================================
 
-    async def check(
-        self,
-        user_id: int | None = None,
-        action: str = "",
-        resource: str = "",
-        *,
-        resource_id: str | None = None,
-        org_id: int | None = None,
-        request: Request | None = None,
-        use_cache: bool = True,
-        # Backwards compatible parameters (old PermissionService interface)
-        user=None,
-        raise_on_deny: bool = False,
-        context=None,
-    ) -> PermissionCheck | bool:
-        """
-        Check if user has permission (async for backwards compatibility).
-
-        This method supports both the new interface and the old PermissionService interface.
-
-        New interface:
-            result = await rbac.check(user_id=123, action="update", resource="course")
-            if result.granted:
-                ...
-
-        Old interface (backwards compatible):
-            has_perm = await rbac.check(user=user, action=Action.UPDATE, resource=ResourceType.COURSE)
-            if has_perm:
-                ...
-
-        Args:
-            user_id: User ID to check (new interface)
-            action: Action to perform (create, read, update, delete, etc.) - can be string or Enum
-            resource: Resource type (course, user, org, etc.) - can be string or Enum
-            resource_id: Optional specific resource ID
-            org_id: Organization context (required for org-scoped permissions)
-            request: Optional FastAPI request for audit context
-            use_cache: Whether to use cache (default True)
-            user: User object (old interface - extracts user_id)
-            raise_on_deny: Raise HTTP 403 if denied (old interface)
-            context: Permission context (old interface - ignored)
-
-        Returns:
-            PermissionCheck object (new interface) or bool (old interface if user param used)
-        """
-        # Handle backwards compatible user parameter
-        is_legacy_call = user is not None
-        if is_legacy_call:
-            user_id = getattr(user, "id", None) or getattr(user, "user_id", 0)
-
-        # Convert action/resource from Enum to string if needed
-        if hasattr(action, "value"):
-            action = action.value
-        if hasattr(resource, "value"):
-            resource = resource.value
-
-        action_str = str(action).lower() if action else ""
-        resource_str = str(resource).lower() if resource else ""
-
-        # Perform the actual check (sync operation)
-        result = self._check_sync(
-            user_id=user_id or 0,
-            action=action_str,
-            resource=resource_str,
-            resource_id=resource_id,
-            org_id=org_id,
-            request=request,
-            use_cache=use_cache,
-        )
-
-        # Handle old interface return behavior
-        if is_legacy_call:
-            if raise_on_deny and not result.granted:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail=result.reason,
-                )
-            return result.granted
-
-        return result
-
-    # Async alias for backwards compatibility with old PermissionService
-    async def check_async(
-        self,
-        user_id: int | None = None,
-        action: str = "",
-        resource: str = "",
-        *,
-        resource_id: str | None = None,
-        org_id: int | None = None,
-        request: Request | None = None,
-        use_cache: bool = True,
-        user=None,
-        raise_on_deny: bool = False,
-        context=None,
-    ) -> PermissionCheck | bool:
-        """Async wrapper for check() - for backwards compatibility."""
-        return self.check(
-            user_id=user_id,
-            action=action,
-            resource=resource,
-            resource_id=resource_id,
-            org_id=org_id,
-            request=request,
-            use_cache=use_cache,
-            user=user,
-            raise_on_deny=raise_on_deny,
-            context=context,
-        )
-
     def check_sync(
         self,
         user_id: int,
@@ -228,15 +117,19 @@ class RBACService:
         request: Request | None = None,
         use_cache: bool = True,
     ) -> PermissionCheck:
-        """
-        Synchronous permission check.
+        """Synchronous permission check for non-async contexts."""
+        if hasattr(action, "value"):
+            action = action.value
+        if hasattr(resource, "value"):
+            resource = resource.value
 
-        Use this when you need a sync method (e.g., in non-async contexts).
-        """
+        action_str = str(action).lower() if action else ""
+        resource_str = str(resource).lower() if resource else ""
+
         return self._check_sync(
             user_id=user_id,
-            action=action,
-            resource=resource,
+            action=action_str,
+            resource=resource_str,
             resource_id=resource_id,
             org_id=org_id,
             request=request,
@@ -254,30 +147,7 @@ class RBACService:
         request: Request | None = None,
         use_cache: bool = True,
     ) -> PermissionCheck:
-        """
-        Check if user has permission.
-
-        Args:
-            user_id: User ID to check
-            action: Action to perform (create, read, update, delete, etc.)
-            resource: Resource type (course, user, org, etc.)
-            resource_id: Optional specific resource ID
-            org_id: Organization context (required for org-scoped permissions)
-            request: Optional FastAPI request for audit context
-            use_cache: Whether to use cache (default True)
-
-        Returns:
-            PermissionCheck with granted=True/False and reason
-
-        Performance:
-            - With cache: < 1ms (Redis GET)
-            - Without cache: < 10ms (2 joins with indexes)
-
-        Security:
-            - Always logs denied checks to audit log
-            - Rate limited (handled by FastAPI middleware)
-            - Protected against cache poisoning
-        """
+        """Internal sync permission check implementation."""
         # 1. Build permission name (e.g., "course:update:org")
         perm_name = self._build_permission_name(action, resource)
 
@@ -308,7 +178,7 @@ class RBACService:
                 ttl=self.cache_ttl,
             )
 
-        # 5. Audit if denied or audit all
+        # 5. Audit if denied
         if self.audit_enabled and self.audit and (not granted):
             self.audit.log_permission_check(
                 user_id=user_id,
@@ -327,6 +197,37 @@ class RBACService:
             cached=False,
         )
 
+    def require(
+        self,
+        user_id: int,
+        action: str,
+        resource: str,
+        *,
+        resource_id: str | None = None,
+        org_id: int | None = None,
+        request: Request | None = None,
+        detail: str | None = None,
+    ) -> PermissionCheck:
+        """
+        Check permission and raise 403 if denied.
+
+        Returns:
+            PermissionCheck (only if granted)
+
+        Raises:
+            HTTPException 403 if permission denied
+        """
+        result = self.check_sync(
+            user_id=user_id,
+            action=action,
+            resource=resource,
+            resource_id=resource_id,
+            org_id=org_id,
+            request=request,
+        )
+        result.raise_if_denied(detail)
+        return result
+
     def _check_db(
         self,
         user_id: int,
@@ -337,40 +238,35 @@ class RBACService:
         """
         Check permission in database.
 
-        Query plan (with indexes):
-            1. user_roles_v2: idx_user_roles_v2_user_org (user_id, org_id)
-            2. role_permissions_v2: idx_role_permissions_v2_role (role_id)
-            3. permissions_v2: uq_permissions_v2_name (name)
-
         Returns:
             (granted: bool, reason: str)
         """
         from src.db.permissions.models_v2 import (
-            PermissionV2,
-            RolePermissionV2,
-            RoleV2,
-            UserRoleV2,
+            Permission,
+            Role,
+            RolePermission,
+            UserRole,
         )
 
         # Build query
         query = (
-            select(PermissionV2)
+            select(Permission)
             .join(
-                RolePermissionV2,
-                RolePermissionV2.permission_id == PermissionV2.id,
+                RolePermission,
+                RolePermission.permission_id == Permission.id,
             )
-            .join(RoleV2, RoleV2.id == RolePermissionV2.role_id)
-            .join(UserRoleV2, UserRoleV2.role_id == RoleV2.id)
-            .where(UserRoleV2.user_id == user_id)
-            .where(PermissionV2.name == permission_name)
+            .join(Role, Role.id == RolePermission.role_id)
+            .join(UserRole, UserRole.role_id == Role.id)
+            .where(UserRole.user_id == user_id)
+            .where(Permission.name == permission_name)
         )
 
         # Add org context if provided
         if org_id is not None:
             query = query.where(
                 or_(
-                    UserRoleV2.org_id == org_id,
-                    RoleV2.org_id.is_(None),  # Global roles
+                    UserRole.org_id == org_id,
+                    Role.org_id.is_(None),  # Global roles
                 )
             )
 
@@ -387,15 +283,15 @@ class RBACService:
 
         # Check expiration
         user_role_query = (
-            select(UserRoleV2)
-            .join(RolePermissionV2, RolePermissionV2.role_id == UserRoleV2.role_id)
-            .join(PermissionV2, PermissionV2.id == RolePermissionV2.permission_id)
-            .where(UserRoleV2.user_id == user_id)
-            .where(PermissionV2.name == permission_name)
+            select(UserRole)
+            .join(RolePermission, RolePermission.role_id == UserRole.role_id)
+            .join(Permission, Permission.id == RolePermission.permission_id)
+            .where(UserRole.user_id == user_id)
+            .where(Permission.name == permission_name)
         )
 
         if org_id is not None:
-            user_role_query = user_role_query.where(UserRoleV2.org_id == org_id)
+            user_role_query = user_role_query.where(UserRole.org_id == org_id)
 
         user_role = self.db.exec(user_role_query).first()
 
@@ -424,28 +320,13 @@ class RBACService:
         """
         Batch check multiple permissions.
 
-        More efficient than calling check() multiple times.
-        Uses single query with OR conditions + cache.
-
         Args:
             user_id: User ID
             checks: List of (action, resource, resource_id) tuples
             org_id: Organization context
 
         Returns:
-            Dict mapping permission_name → granted (bool)
-
-        Example:
-            results = rbac.check_many(
-                user_id=123,
-                checks=[
-                    ("update", "course", "course_123"),
-                    ("delete", "course", "course_123"),
-                    ("create", "assignment", None),
-                ],
-                org_id=1
-            )
-            # {"course:update:org": True, "course:delete:org": False, ...}
+            Dict mapping permission_name -> granted (bool)
         """
         results = {}
 
@@ -478,28 +359,17 @@ class RBACService:
         """
         Assign role to user.
 
-        Args:
-            user_id: User to assign role to
-            role_slug: Role slug (e.g., "instructor", "org-admin")
-            org_id: Organization context
-            assigned_by: User ID who performed assignment (for audit)
-            expires_at: Optional expiration datetime
-
         Raises:
             HTTPException 404: Role not found
             HTTPException 409: Role already assigned
-
-        Side effects:
-            - Invalidates user permission cache
-            - Logs to audit trail
         """
-        from src.db.permissions.models_v2 import RoleV2, UserRoleV2
+        from src.db.permissions.models_v2 import Role, UserRole
 
         # Get role
         role = self.db.exec(
-            select(RoleV2)
-            .where(RoleV2.slug == role_slug)
-            .where(or_(RoleV2.org_id == org_id, RoleV2.org_id.is_(None)))
+            select(Role)
+            .where(Role.slug == role_slug)
+            .where(or_(Role.org_id == org_id, Role.org_id.is_(None)))
         ).first()
 
         if not role:
@@ -507,10 +377,10 @@ class RBACService:
 
         # Check if already assigned
         existing = self.db.exec(
-            select(UserRoleV2)
-            .where(UserRoleV2.user_id == user_id)
-            .where(UserRoleV2.role_id == role.id)
-            .where(UserRoleV2.org_id == org_id)
+            select(UserRole)
+            .where(UserRole.user_id == user_id)
+            .where(UserRole.role_id == role.id)
+            .where(UserRole.org_id == org_id)
         ).first()
 
         if existing:
@@ -519,7 +389,7 @@ class RBACService:
             )
 
         # Assign role
-        user_role = UserRoleV2(
+        user_role = UserRole(
             user_id=user_id,
             role_id=role.id,
             org_id=org_id,
@@ -551,13 +421,13 @@ class RBACService:
         revoked_by: int | None = None,
     ) -> None:
         """Revoke role from user."""
-        from src.db.permissions.models_v2 import RoleV2, UserRoleV2
+        from src.db.permissions.models_v2 import Role, UserRole
 
         # Get role
         role = self.db.exec(
-            select(RoleV2)
-            .where(RoleV2.slug == role_slug)
-            .where(or_(RoleV2.org_id == org_id, RoleV2.org_id.is_(None)))
+            select(Role)
+            .where(Role.slug == role_slug)
+            .where(or_(Role.org_id == org_id, Role.org_id.is_(None)))
         ).first()
 
         if not role:
@@ -565,10 +435,10 @@ class RBACService:
 
         # Find assignment
         user_role = self.db.exec(
-            select(UserRoleV2)
-            .where(UserRoleV2.user_id == user_id)
-            .where(UserRoleV2.role_id == role.id)
-            .where(UserRoleV2.org_id == org_id)
+            select(UserRole)
+            .where(UserRole.user_id == user_id)
+            .where(UserRole.role_id == role.id)
+            .where(UserRole.org_id == org_id)
         ).first()
 
         if not user_role:
@@ -599,16 +469,16 @@ class RBACService:
 
     def get_user_roles(self, user_id: int, org_id: int | None = None) -> list[dict]:
         """Get all roles for user in organization."""
-        from src.db.permissions.models_v2 import RoleV2, UserRoleV2
+        from src.db.permissions.models_v2 import Role, UserRole
 
         query = (
-            select(RoleV2, UserRoleV2)
-            .join(UserRoleV2, UserRoleV2.role_id == RoleV2.id)
-            .where(UserRoleV2.user_id == user_id)
+            select(Role, UserRole)
+            .join(UserRole, UserRole.role_id == Role.id)
+            .where(UserRole.user_id == user_id)
         )
 
         if org_id is not None:
-            query = query.where(UserRoleV2.org_id == org_id)
+            query = query.where(UserRole.org_id == org_id)
 
         results = self.db.exec(query).all()
 
@@ -631,26 +501,26 @@ class RBACService:
     ) -> list[dict]:
         """Get all permissions for user (flattened from roles)."""
         from src.db.permissions.models_v2 import (
-            PermissionV2,
-            RolePermissionV2,
-            RoleV2,
-            UserRoleV2,
+            Permission,
+            Role,
+            RolePermission,
+            UserRole,
         )
 
         query = (
-            select(PermissionV2)
+            select(Permission)
             .join(
-                RolePermissionV2,
-                RolePermissionV2.permission_id == PermissionV2.id,
+                RolePermission,
+                RolePermission.permission_id == Permission.id,
             )
-            .join(RoleV2, RoleV2.id == RolePermissionV2.role_id)
-            .join(UserRoleV2, UserRoleV2.role_id == RoleV2.id)
-            .where(UserRoleV2.user_id == user_id)
+            .join(Role, Role.id == RolePermission.role_id)
+            .join(UserRole, UserRole.role_id == Role.id)
+            .where(UserRole.user_id == user_id)
             .distinct()
         )
 
         if org_id is not None:
-            query = query.where(UserRoleV2.org_id == org_id)
+            query = query.where(UserRole.org_id == org_id)
 
         results = self.db.exec(query).all()
 
@@ -687,19 +557,19 @@ class RBACService:
     ) -> dict:
         """Create new role with optional permissions."""
         from src.db.permissions.models_v2 import (
-            PermissionV2,
-            RolePermissionV2,
-            RoleV2,
+            Permission,
+            Role,
+            RolePermission,
         )
 
         # Check if role already exists
         existing = self.db.exec(
-            select(RoleV2)
-            .where(RoleV2.slug == slug)
+            select(Role)
+            .where(Role.slug == slug)
             .where(
                 or_(
-                    RoleV2.org_id == org_id,
-                    RoleV2.org_id.is_(None) if org_id is None else False,
+                    Role.org_id == org_id,
+                    Role.org_id.is_(None) if org_id is None else False,
                 )
             )
         ).first()
@@ -708,7 +578,7 @@ class RBACService:
             raise HTTPException(status_code=409, detail=f"Role already exists: {slug}")
 
         # Create role
-        role = RoleV2(
+        role = Role(
             slug=slug,
             name=name,
             description=description,
@@ -722,11 +592,11 @@ class RBACService:
         if permissions:
             for perm_name in permissions:
                 perm = self.db.exec(
-                    select(PermissionV2).where(PermissionV2.name == perm_name)
+                    select(Permission).where(Permission.name == perm_name)
                 ).first()
 
                 if perm:
-                    role_perm = RolePermissionV2(
+                    role_perm = RolePermission(
                         role_id=role.id,
                         permission_id=perm.id,
                         granted_by_user_id=created_by,
@@ -761,16 +631,16 @@ class RBACService:
     ) -> None:
         """Add permission to role."""
         from src.db.permissions.models_v2 import (
-            PermissionV2,
-            RolePermissionV2,
-            RoleV2,
+            Permission,
+            Role,
+            RolePermission,
         )
 
         # Get role
         role = self.db.exec(
-            select(RoleV2)
-            .where(RoleV2.slug == role_slug)
-            .where(or_(RoleV2.org_id == org_id, RoleV2.org_id.is_(None)))
+            select(Role)
+            .where(Role.slug == role_slug)
+            .where(or_(Role.org_id == org_id, Role.org_id.is_(None)))
         ).first()
 
         if not role:
@@ -778,7 +648,7 @@ class RBACService:
 
         # Get permission
         perm = self.db.exec(
-            select(PermissionV2).where(PermissionV2.name == permission_name)
+            select(Permission).where(Permission.name == permission_name)
         ).first()
 
         if not perm:
@@ -788,9 +658,9 @@ class RBACService:
 
         # Check if already assigned
         existing = self.db.exec(
-            select(RolePermissionV2)
-            .where(RolePermissionV2.role_id == role.id)
-            .where(RolePermissionV2.permission_id == perm.id)
+            select(RolePermission)
+            .where(RolePermission.role_id == role.id)
+            .where(RolePermission.permission_id == perm.id)
         ).first()
 
         if existing:
@@ -800,7 +670,7 @@ class RBACService:
             )
 
         # Add permission
-        role_perm = RolePermissionV2(
+        role_perm = RolePermission(
             role_id=role.id,
             permission_id=perm.id,
             granted_by_user_id=granted_by,

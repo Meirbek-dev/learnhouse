@@ -91,7 +91,7 @@ def require_permission(
         org_id = request.path_params.get(org_id_param)
 
         # Check permission
-        result = rbac.check(
+        result = rbac.check_sync(
             user_id=user.id,
             action=action,
             resource=resource,

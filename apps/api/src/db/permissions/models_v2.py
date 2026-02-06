@@ -1,8 +1,3 @@
-"""
-RBAC v2 Database Models
-
-Clean, production-ready models for the new RBAC system.
-"""
 
 from datetime import UTC, datetime
 
@@ -17,8 +12,8 @@ from src.db.strict_base_model import SQLModelStrictBaseModel
 # ============================================================================
 
 
-class PermissionV2Base(SQLModelStrictBaseModel):
-    """Base model for Permission v2."""
+class PermissionBase(SQLModelStrictBaseModel):
+    """Base model for Permission."""
 
     model_config = ConfigDict(use_enum_values=True)
 
@@ -41,8 +36,8 @@ class PermissionV2Base(SQLModelStrictBaseModel):
     is_dangerous: bool = Field(default=False, description="Requires extra confirmation")
 
 
-class PermissionV2(PermissionV2Base, table=True):
-    """Permission table v2."""
+class Permission(PermissionBase, table=True):
+    """Permission table."""
 
     __tablename__ = "permissions_v2"
     __table_args__ = (
@@ -60,8 +55,8 @@ class PermissionV2(PermissionV2Base, table=True):
 # ============================================================================
 
 
-class RoleV2Base(SQLModelStrictBaseModel):
-    """Base model for Role v2."""
+class RoleBase(SQLModelStrictBaseModel):
+    """Base model for Role."""
 
     model_config = ConfigDict(use_enum_values=True)
 
@@ -76,8 +71,8 @@ class RoleV2Base(SQLModelStrictBaseModel):
     )
 
 
-class RoleV2(RoleV2Base, table=True):
-    """Role table v2."""
+class Role(RoleBase, table=True):
+    """Role table."""
 
     __tablename__ = "roles_v2"
     __table_args__ = (
@@ -102,8 +97,8 @@ class RoleV2(RoleV2Base, table=True):
 # ============================================================================
 
 
-class RolePermissionV2(SQLModelStrictBaseModel, table=True):
-    """Role-Permission assignment table v2."""
+class RolePermission(SQLModelStrictBaseModel, table=True):
+    """Role-Permission assignment table."""
 
     __tablename__ = "role_permissions_v2"
     __table_args__ = (
@@ -135,8 +130,8 @@ class RolePermissionV2(SQLModelStrictBaseModel, table=True):
 # ============================================================================
 
 
-class UserRoleV2(SQLModelStrictBaseModel, table=True):
-    """User-Role assignment table v2."""
+class UserRole(SQLModelStrictBaseModel, table=True):
+    """User-Role assignment table."""
 
     __tablename__ = "user_roles_v2"
     __table_args__ = (
@@ -172,8 +167,8 @@ class UserRoleV2(SQLModelStrictBaseModel, table=True):
 # ============================================================================
 
 
-class PermissionAuditLogV2(SQLModelStrictBaseModel, table=True):
-    """Permission audit log table v2."""
+class PermissionAuditLog(SQLModelStrictBaseModel, table=True):
+    """Permission audit log table."""
 
     __tablename__ = "permission_audit_log_v2"
     __table_args__ = (
@@ -201,3 +196,16 @@ class PermissionAuditLogV2(SQLModelStrictBaseModel, table=True):
     user_agent: str | None = Field(default=None)
     request_id: str | None = Field(default=None, max_length=36)
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+# ============================================================================
+# Backwards-compatible aliases (will be removed in a future cleanup)
+# ============================================================================
+
+PermissionV2Base = PermissionBase
+PermissionV2 = Permission
+RoleV2Base = RoleBase
+RoleV2 = Role
+RolePermissionV2 = RolePermission
+UserRoleV2 = UserRole
+PermissionAuditLogV2 = PermissionAuditLog

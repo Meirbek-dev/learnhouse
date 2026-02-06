@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class AuditService:
-    """Security audit logging for RBAC v2."""
+    """Security audit logging for RBAC."""
 
     def __init__(self, db: Session, redis=None, log_all: bool = False) -> None:
         """
@@ -60,7 +60,7 @@ class AuditService:
 
         Always logs denials. Only logs grants if log_all=True.
         """
-        from src.db.permissions.models_v2 import PermissionAuditLogV2
+        from src.db.permissions.models_v2 import PermissionAuditLog
 
         # Extract request context
         ip_address = None
@@ -74,7 +74,7 @@ class AuditService:
             request_id = request.headers.get("x-request-id")
 
         # Create audit log entry
-        audit_log = PermissionAuditLogV2(
+        audit_log = PermissionAuditLog(
             user_id=user_id,
             action="permission_check",
             permission_name=permission,
@@ -108,7 +108,7 @@ class AuditService:
         request: Request | None = None,
     ) -> None:
         """Log role assignment event."""
-        from src.db.permissions.models_v2 import PermissionAuditLogV2
+        from src.db.permissions.models_v2 import PermissionAuditLog
 
         ip_address = None
         user_agent = None
@@ -119,7 +119,7 @@ class AuditService:
             user_agent = request.headers.get("user-agent")
             request_id = request.headers.get("x-request-id")
 
-        audit_log = PermissionAuditLogV2(
+        audit_log = PermissionAuditLog(
             user_id=user_id,
             action="role_assigned",
             permission_name=None,
@@ -149,7 +149,7 @@ class AuditService:
         request: Request | None = None,
     ) -> None:
         """Log role revocation event."""
-        from src.db.permissions.models_v2 import PermissionAuditLogV2
+        from src.db.permissions.models_v2 import PermissionAuditLog
 
         ip_address = None
         user_agent = None
@@ -160,7 +160,7 @@ class AuditService:
             user_agent = request.headers.get("user-agent")
             request_id = request.headers.get("x-request-id")
 
-        audit_log = PermissionAuditLogV2(
+        audit_log = PermissionAuditLog(
             user_id=user_id,
             action="role_revoked",
             permission_name=None,
@@ -189,7 +189,7 @@ class AuditService:
         request: Request | None = None,
     ) -> None:
         """Log role creation event."""
-        from src.db.permissions.models_v2 import PermissionAuditLogV2
+        from src.db.permissions.models_v2 import PermissionAuditLog
 
         ip_address = None
         user_agent = None
@@ -200,7 +200,7 @@ class AuditService:
             user_agent = request.headers.get("user-agent")
             request_id = request.headers.get("x-request-id")
 
-        audit_log = PermissionAuditLogV2(
+        audit_log = PermissionAuditLog(
             user_id=created_by,
             action="role_created",
             permission_name=None,
@@ -231,17 +231,17 @@ class AuditService:
         """Get recent permission denials for security monitoring."""
         from sqlmodel import select
 
-        from src.db.permissions.models_v2 import PermissionAuditLogV2
+        from src.db.permissions.models_v2 import PermissionAuditLog
 
         query = (
-            select(PermissionAuditLogV2)
-            .where(PermissionAuditLogV2.result == "denied")
-            .order_by(PermissionAuditLogV2.created_at.desc())
+            select(PermissionAuditLog)
+            .where(PermissionAuditLog.result == "denied")
+            .order_by(PermissionAuditLog.created_at.desc())
             .limit(limit)
         )
 
         if user_id:
-            query = query.where(PermissionAuditLogV2.user_id == user_id)
+            query = query.where(PermissionAuditLog.user_id == user_id)
 
         results = self.db.exec(query).all()
 
@@ -266,15 +266,15 @@ class AuditService:
 
         from sqlmodel import select
 
-        from src.db.permissions.models_v2 import PermissionAuditLogV2
+        from src.db.permissions.models_v2 import PermissionAuditLog
 
         since = datetime.now(UTC) - timedelta(days=days)
 
         query = (
-            select(PermissionAuditLogV2)
-            .where(PermissionAuditLogV2.user_id == user_id)
-            .where(PermissionAuditLogV2.created_at >= since)
-            .order_by(PermissionAuditLogV2.created_at.desc())
+            select(PermissionAuditLog)
+            .where(PermissionAuditLog.user_id == user_id)
+            .where(PermissionAuditLog.created_at >= since)
+            .order_by(PermissionAuditLog.created_at.desc())
             .limit(limit)
         )
 

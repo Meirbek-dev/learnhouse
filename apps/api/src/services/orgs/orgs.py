@@ -33,7 +33,7 @@ from src.db.organizations import (
     OrganizationUpdate,
 )
 from src.db.permissions.enums import Action, ResourceType
-from src.db.permissions.models_v2 import RoleV2, UserRoleV2
+from src.db.permissions.models_v2 import Role, UserRole
 from src.db.users import AnonymousUser, InternalUser, PublicUser
 from src.services.orgs.uploads import (
     upload_org_landing_content,
@@ -567,7 +567,7 @@ async def delete_org(
     db_session.commit()
 
     # Delete all user roles linked to this org
-    statement = select(UserRoleV2).where(UserRoleV2.org_id == org_id)
+    statement = select(UserRole).where(UserRole.org_id == org_id)
     result = db_session.exec(statement)
 
     user_roles = result.all()
@@ -591,19 +591,19 @@ async def get_orgs_by_user_admin(
     # Convert user_id to int for proper type matching with database
     user_id_int = int(user_id)
 
-    # Join Organization, UserRoleV2 and OrganizationConfig in a single query
+    # Join Organization, UserRole and OrganizationConfig in a single query
     # Resolve the admin role id by slug (new RBAC system)
     admin_role = db_session.exec(
-        select(RoleV2).where(RoleV2.slug.in_(["super-admin", "org-admin"]))
+        select(Role).where(Role.slug.in_(["super-admin", "org-admin"]))
     ).first()
     admin_role_id = admin_role.id if admin_role else 1
 
     # First get distinct org IDs where the user has admin role
     org_id_query = (
-        select(UserRoleV2.org_id)
+        select(UserRole.org_id)
         .where(
-            UserRoleV2.user_id == user_id_int,
-            UserRoleV2.role_id == admin_role_id,
+            UserRole.user_id == user_id_int,
+            UserRole.role_id == admin_role_id,
         )
         .distinct()
         .offset((page - 1) * limit)
@@ -650,8 +650,8 @@ async def get_orgs_by_user(
 
     # First get distinct org IDs for this user
     org_id_query = (
-        select(UserRoleV2.org_id)
-        .where(UserRoleV2.user_id == user_id_int)
+        select(UserRole.org_id)
+        .where(UserRole.user_id == user_id_int)
         .distinct()
         .offset((page - 1) * limit)
         .limit(limit)

@@ -66,14 +66,14 @@ async def enrich_with_permissions(
     permissions = {"can_read": True}
 
     for action in include_actions:
-        result = rbac.check(
+        result = rbac.check_sync(
             user_id=user_id,
             action=action,
             resource=resource_type,
             resource_id=resource_id,
             org_id=org_id,
         )
-        can_action = result.granted if hasattr(result, "granted") else result
+        can_action = result.granted
         permissions[f"can_{action}"] = can_action
         if can_action:
             available_actions.append(action)

@@ -52,7 +52,7 @@ dev = [
 
 [tool.ruff]
 target-version = "py315"
-lint.select = ["ALL"]
+# lint.select = ["ALL"]
 lint.fixable = ["ALL"]
 lint.ignore = [
   "F401",

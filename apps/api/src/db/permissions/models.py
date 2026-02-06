@@ -1,14 +1,5 @@
 """
-API Models for the RBAC permission system.
-
-This module defines Pydantic models for API requests/responses.
-For database table models, use models_v2.py (PermissionV2, RoleV2, UserRoleV2, etc.)
-
-LEGACY TABLES REMOVED:
-- Permission -> Use PermissionV2
-- Role -> Use RoleV2
-- UserPermission -> Use UserRoleV2
-- ResourcePermission -> Feature never implemented, removed
+API Models (Pydantic schemas) for the RBAC permission system.
 """
 
 from datetime import datetime
