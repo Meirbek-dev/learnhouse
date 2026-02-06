@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, StrEnum
 
 from pydantic import ConfigDict, field_validator
 from sqlalchemy import JSON, Column, ForeignKey, Integer
@@ -8,11 +8,11 @@ from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBase
 from src.db.trail_steps import TrailStepRead
 
 
-class TrailRunEnum(str, Enum):
+class TrailRunEnum(StrEnum):
     RUN_TYPE_COURSE = "RUN_TYPE_COURSE"
 
 
-class StatusEnum(str, Enum):
+class StatusEnum(StrEnum):
     STATUS_IN_PROGRESS = "STATUS_IN_PROGRESS"
     STATUS_COMPLETED = "STATUS_COMPLETED"
     STATUS_PAUSED = "STATUS_PAUSED"

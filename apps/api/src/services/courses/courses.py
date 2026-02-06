@@ -3,6 +3,7 @@ from datetime import datetime
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlalchemy import func
 from sqlmodel import Session, and_, or_, select, text
+from src.services.permissions import get_permission_service
 from ulid import ULID
 
 from src.db.courses.courses import (
@@ -25,7 +26,6 @@ from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.services.courses.thumbnails import upload_thumbnail
-from src.services.permissions import get_permission_service
 
 
 async def get_course(

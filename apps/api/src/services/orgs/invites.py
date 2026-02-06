@@ -4,6 +4,7 @@ import orjson
 from fastapi import HTTPException, Request
 from pydantic import EmailStr
 from sqlmodel import Session, select
+from src.services.permissions import get_permission_service
 from ulid import ULID
 
 from config.config import get_platform_config
@@ -21,7 +22,6 @@ from src.services.cache.redis_client import (
     set_json,
 )
 from src.services.email.utils import send_email
-from src.services.permissions import get_permission_service
 
 
 async def create_invite_code(

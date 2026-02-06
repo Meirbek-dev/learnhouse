@@ -5,7 +5,7 @@ Database models for the coding activity system with Judge0 integration.
 """
 
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 
 from pydantic import ConfigDict, field_validator
 from pydantic import Field as PydanticField
@@ -17,7 +17,7 @@ from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBase
 # Enums
 
 
-class DifficultyLevel(str, Enum):
+class DifficultyLevel(StrEnum):
     """Difficulty level for code challenges"""
 
     EASY = "EASY"
@@ -25,7 +25,7 @@ class DifficultyLevel(str, Enum):
     HARD = "HARD"
 
 
-class GradingStrategy(str, Enum):
+class GradingStrategy(StrEnum):
     """Grading strategy for code challenges"""
 
     ALL_OR_NOTHING = "ALL_OR_NOTHING"
@@ -34,14 +34,14 @@ class GradingStrategy(str, Enum):
     LATEST_SUBMISSION = "LATEST_SUBMISSION"
 
 
-class ExecutionMode(str, Enum):
+class ExecutionMode(StrEnum):
     """Execution mode for test cases"""
 
     FAST_FEEDBACK = "FAST_FEEDBACK"  # Stop on first failure
     COMPLETE_FEEDBACK = "COMPLETE_FEEDBACK"  # Run all tests
 
 
-class SubmissionStatus(str, Enum):
+class SubmissionStatus(StrEnum):
     """Status of a code submission"""
 
     PENDING = "PENDING"

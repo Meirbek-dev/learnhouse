@@ -2,6 +2,7 @@ from typing import Literal
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
+from src.services.permissions import get_permission_service
 
 from src.db.organizations import Organization
 from src.db.payments.payments import (
@@ -12,7 +13,6 @@ from src.db.payments.payments import (
 )
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, InternalUser, PublicUser
-from src.services.permissions import get_permission_service
 
 
 async def init_payments_config(

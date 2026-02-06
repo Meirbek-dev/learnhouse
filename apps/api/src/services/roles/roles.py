@@ -7,6 +7,7 @@ from src.db.permissions.
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
+from src.services.permissions import get_permission_service
 
 from src.db.organizations import Organization
 from src.db.permissions import (
@@ -17,7 +18,6 @@ from src.db.permissions import (
 from src.db.permissions.enums import Action, ResourceType
 from src.db.permissions.models_v2 import RoleV2, UserRoleV2
 from src.db.users import PublicUser
-from src.services.permissions import get_permission_service
 
 
 def _generate_slug(name: str) -> str:

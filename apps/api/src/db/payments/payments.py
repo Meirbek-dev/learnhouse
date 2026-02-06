@@ -1,5 +1,5 @@
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 
 from pydantic import field_validator
 from sqlalchemy import JSON
@@ -9,7 +9,7 @@ from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
 # PaymentsConfig
-class PaymentProviderEnum(str, Enum):
+class PaymentProviderEnum(StrEnum):
     STRIPE = "stripe"
 
 

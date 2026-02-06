@@ -2,6 +2,7 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
+from src.services.permissions import get_permission_service
 from ulid import ULID
 
 from src.db.courses.activities import (
@@ -17,7 +18,6 @@ from src.db.courses.courses import Course
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
 from src.services.payments.payments_access import check_activity_paid_access
-from src.services.permissions import get_permission_service
 from src.services.rbac.enrichment import (
     enrich_activity_with_permissions,
 )
@@ -90,7 +90,7 @@ async def create_activity(
     # Add activity to chapter
     activity_chapter = ChapterActivity(
         chapter_id=activity_object.chapter_id,
-        activity_id=activity.id if activity.id else 0,
+        activity_id=activity.id or 0,
         course_id=chapter.course_id,
         org_id=chapter.org_id,
         creation_date=str(datetime.now()),
@@ -140,7 +140,7 @@ async def get_activity(
     # Paid access check
     has_paid_access = await check_activity_paid_access(
         request=request,
-        activity_id=activity.id if activity.id else 0,
+        activity_id=activity.id or 0,
         user=current_user,
         db_session=db_session,
     )

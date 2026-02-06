@@ -1,6 +1,8 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Request, UploadFile
+from src.security.permissions.exceptions import PermissionDenied
+from src.services.permissions import PermissionService
 
 from src.core.events.database import get_db_session
 from src.db.courses.assignments import (
@@ -16,7 +18,6 @@ from src.db.courses.assignments import (
 from src.db.permissions import Action, ResourceType
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.security.permissions.exceptions import PermissionDenied
 from src.security.rbac.dependencies import get_permission_service
 from src.services.courses.activities.assignments import (
     create_assignment,
@@ -50,7 +51,6 @@ from src.services.courses.activities.assignments import (
     update_assignment_submission,
     update_assignment_task,
 )
-from src.services.permissions import PermissionService
 
 router = APIRouter()
 

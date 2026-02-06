@@ -2,15 +2,15 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
+from src.security.permissions.exceptions import PermissionDenied
+from src.services.permissions import PermissionService
 
 from src.core.events.database import get_db_session
 from src.db.permissions import Action, ResourceType
 from src.db.usergroups import UserGroupCreate, UserGroupRead, UserGroupUpdate
 from src.db.users import PublicUser, UserRead
 from src.security.auth import get_current_user
-from src.security.permissions.exceptions import PermissionDenied
 from src.security.rbac.dependencies import get_permission_service
-from src.services.permissions import PermissionService
 from src.services.users.usergroups import (
     add_resources_to_usergroup,
     add_users_to_usergroup,

@@ -2,6 +2,8 @@ from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
+from src.security.permissions.exceptions import PermissionDenied
+from src.services.permissions import PermissionService
 
 from src.core.events.database import get_db_session
 from src.db.payments.payments import PaymentsConfig, PaymentsConfigRead
@@ -13,7 +15,6 @@ from src.db.payments.payments_products import (
 from src.db.permissions import Action, ResourceType
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.security.permissions.exceptions import PermissionDenied
 from src.security.rbac.dependencies import get_permission_service
 from src.services.payments.payments_access import check_course_paid_access
 from src.services.payments.payments_config import (
@@ -43,7 +44,6 @@ from src.services.payments.payments_stripe import (
 )
 from src.services.payments.payments_users import get_owned_courses
 from src.services.payments.webhooks.payments_webhooks import handle_stripe_webhook
-from src.services.permissions import PermissionService
 
 router = APIRouter()
 

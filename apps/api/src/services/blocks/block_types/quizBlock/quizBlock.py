@@ -6,6 +6,7 @@ from datetime import UTC, datetime, timezone
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
+from src.services.permissions import get_permission_service
 from ulid import ULID
 
 from src.db.courses.activities import Activity
@@ -28,7 +29,6 @@ from src.services.blocks.block_types.quizBlock.grading import (
     grade_quiz,
 )
 from src.services.gamification.service import award_xp
-from src.services.permissions import get_permission_service
 
 
 async def submit_quiz(

@@ -7,6 +7,7 @@ from typing import Literal
 from fastapi import HTTPException, Request, UploadFile, status
 from pydantic import ValidationError
 from sqlmodel import Session, select
+from src.services.permissions import get_permission_service
 from ulid import ULID
 
 from src.db.organizations import Organization, OrganizationRead
@@ -30,7 +31,6 @@ from src.security.security import security_hash_password, security_verify_passwo
 from src.services.cache import redis_client
 from src.services.orgs.invites import get_invite_code
 from src.services.orgs.orgs import get_org_join_mechanism
-from src.services.permissions import get_permission_service
 from src.services.users.avatars import upload_avatar
 from src.services.users.emails import send_account_creation_email
 from src.services.users.usergroups import add_users_to_usergroup
@@ -616,7 +616,7 @@ async def _link_user_to_organization(
 
     permission_service = get_permission_service(db_session)
     permission_service.assign_role(
-        user_id=user_id if user_id else 0,
+        user_id=user_id or 0,
         role_id=role_id,
         org_id=org_id,
     )

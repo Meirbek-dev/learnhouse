@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
+from src.services.permissions import get_permission_service
 from ulid import ULID
 
 from src.core.timezone import now as tz_now
@@ -23,7 +24,6 @@ from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser
 from src.services.gamification import StreakType, XPSource
 from src.services.gamification import service as gamification_service
-from src.services.permissions import get_permission_service
 
 logger = logging.getLogger(__name__)
 

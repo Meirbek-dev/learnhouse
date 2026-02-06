@@ -59,11 +59,11 @@ async def create_image_block(
 
     # create block
     block = Block(
-        activity_id=activity.id if activity.id else 0,
+        activity_id=activity.id or 0,
         block_type=BlockTypeEnum.BLOCK_IMAGE,
         content=block_data.model_dump(),
-        org_id=org.id if org.id else 0,
-        course_id=course.id if course.id else 0,
+        org_id=org.id or 0,
+        course_id=course.id or 0,
         block_uuid=block_uuid,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),

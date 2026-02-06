@@ -5,6 +5,7 @@ from typing import Literal
 import orjson
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, select
+from src.services.permissions import get_permission_service
 from ulid import ULID
 
 from src.db.organization_config import (
@@ -40,7 +41,6 @@ from src.services.orgs.uploads import (
     upload_org_preview,
     upload_org_thumbnail,
 )
-from src.services.permissions import get_permission_service
 
 
 async def get_organization(
@@ -179,7 +179,7 @@ async def create_org(
     permission_service.assign_role(
         user_id=int(current_user.id),
         role_id=1,  # Admin role
-        org_id=int(org.id if org.id else 0),
+        org_id=int(org.id or 0),
     )
 
     org_config = OrganizationConfigBase(
@@ -207,7 +207,7 @@ async def create_org(
 
     # OrgSettings
     org_settings = OrganizationConfig(
-        org_id=int(org.id if org.id else 0),
+        org_id=int(org.id or 0),
         config=org_config_dict,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
@@ -274,7 +274,7 @@ async def create_org_with_config(
     permission_service.assign_role(
         user_id=int(current_user.id),
         role_id=1,  # Admin role
-        org_id=int(org.id if org.id else 0),
+        org_id=int(org.id or 0),
     )
     org_config = submitted_config
 
@@ -282,7 +282,7 @@ async def create_org_with_config(
 
     # OrgSettings
     org_settings = OrganizationConfig(
-        org_id=int(org.id if org.id else 0),
+        org_id=int(org.id or 0),
         config=org_config_dict,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),

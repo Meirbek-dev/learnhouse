@@ -4,6 +4,7 @@ from datetime import UTC, datetime, timedelta
 import orjson
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
+from src.services.permissions import get_permission_service
 
 from config.config import get_platform_config
 from src.db.organizations import (
@@ -21,7 +22,6 @@ from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.services.cache import redis_client
 from src.services.cache.redis_client import delete_keys, get_json, set_json
 from src.services.orgs.invites import send_invite_email
-from src.services.permissions import get_permission_service
 
 # Rebuild organization models to resolve forward references
 rebuild_organization_models()
@@ -204,7 +204,7 @@ async def update_user_role(
 
     # normalize incoming role identifier to slug (handle legacy 'role_*' names)
     slug = (
-        role_uuid.split("_")[-1]
+        role_uuid.rsplit("_", maxsplit=1)[-1]
         if isinstance(role_uuid, str) and role_uuid.startswith("role_")
         else role_uuid
     )

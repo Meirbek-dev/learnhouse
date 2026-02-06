@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 import orjson
 from fastapi import HTTPException
 from sqlmodel import Session, select
+from src.services.permissions import PermissionService
 from ulid import ULID
 
 from config.config import get_platform_config
@@ -28,7 +29,6 @@ from src.db.organization_config import (
 from src.db.organizations import Organization, OrganizationCreate
 from src.db.users import User, UserCreate, UserRead
 from src.security.security import security_hash_password
-from src.services.permissions import PermissionService
 
 
 # Install Default roles
@@ -87,7 +87,7 @@ def install_create_organization(org_object: OrganizationCreate, db_session: Sess
 
     # OrgSettings
     org_settings = OrganizationConfig(
-        org_id=int(org.id if org.id else 0),
+        org_id=int(org.id or 0),
         config=org_config_dict,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
@@ -165,7 +165,7 @@ async def install_create_organization_user(
 
     permission_service = get_permission_service(db_session)
     permission_service.assign_role(
-        user_id=user.id if user.id else 0,
+        user_id=user.id or 0,
         role_id=1,  # Admin role
         org_id=org_id or 0,
     )

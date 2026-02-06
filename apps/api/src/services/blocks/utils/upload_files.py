@@ -27,7 +27,7 @@ async def upload_file_and_return_file_object(
         allowed_types.append("image")
     if any(fmt in ["mp4", "webm", "mkv"] for fmt in list_of_allowed_file_formats):
         allowed_types.append("video")
-    if any(fmt in ["pdf"] for fmt in list_of_allowed_file_formats):
+    if any(fmt == "pdf" for fmt in list_of_allowed_file_formats):
         allowed_types.append("document")
 
     if not allowed_types:

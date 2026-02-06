@@ -71,7 +71,7 @@ async def upload_content(
 ) -> None:
     platform_config = get_platform_config()
 
-    file_format = file_and_format.split(".")[-1].strip().lower()
+    file_format = file_and_format.rsplit(".", maxsplit=1)[-1].strip().lower()
 
     # Get content delivery method
     content_delivery = platform_config.hosting_config.content_delivery.type

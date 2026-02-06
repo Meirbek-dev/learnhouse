@@ -4,6 +4,7 @@ from typing import Literal
 import orjson
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, select
+from src.services.permissions import get_permission_service
 from ulid import ULID
 
 from src.db.courses.activities import (
@@ -21,7 +22,6 @@ from src.db.permissions.enums import Action, ResourceType
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser
 from src.services.courses.activities.uploads.videos import upload_subtitle, upload_video
-from src.services.permissions import get_permission_service
 
 
 def _get_language_label(language_code: str) -> str:

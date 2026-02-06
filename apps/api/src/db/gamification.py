@@ -3,7 +3,7 @@ Gamification Models
 """
 
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any, Optional
 
 from sqlalchemy import JSON, CheckConstraint, Column, Index, UniqueConstraint
@@ -31,7 +31,7 @@ DAILY_XP_LIMIT = 500
 MAX_LEVEL = 100
 
 
-class XPSource(str, Enum):
+class XPSource(StrEnum):
     """XP source types"""
 
     ACTIVITY_COMPLETION = "activity_completion"
@@ -48,7 +48,7 @@ class XPSource(str, Enum):
     CODE_CHALLENGE_FIRST_SOLVE = "code_challenge_first_solve"
 
 
-class StreakType(str, Enum):
+class StreakType(StrEnum):
     """Streak types"""
 
     LOGIN = "login"

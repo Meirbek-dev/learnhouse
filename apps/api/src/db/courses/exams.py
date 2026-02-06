@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, StrEnum
 
 from pydantic import ConfigDict, field_validator
 from sqlalchemy import JSON, Column, ForeignKey, Integer
@@ -8,13 +8,13 @@ from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
 ## Exam ##
-class AccessModeEnum(str, Enum):
+class AccessModeEnum(StrEnum):
     NO_ACCESS = "NO_ACCESS"
     WHITELIST = "WHITELIST"
     ALL_ENROLLED = "ALL_ENROLLED"
 
 
-class QuestionTypeEnum(str, Enum):
+class QuestionTypeEnum(StrEnum):
     SINGLE_CHOICE = "SINGLE_CHOICE"
     MULTIPLE_CHOICE = "MULTIPLE_CHOICE"
     TRUE_FALSE = "TRUE_FALSE"
@@ -257,7 +257,7 @@ class Question(QuestionBase, table=True):
 ## Exam Attempt ##
 
 
-class AttemptStatusEnum(str, Enum):
+class AttemptStatusEnum(StrEnum):
     IN_PROGRESS = "IN_PROGRESS"
     SUBMITTED = "SUBMITTED"
     AUTO_SUBMITTED = "AUTO_SUBMITTED"

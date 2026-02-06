@@ -1,5 +1,5 @@
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 
 from pydantic import field_validator
 from sqlmodel import JSON, BigInteger, Column, Field, ForeignKey
@@ -7,7 +7,7 @@ from sqlmodel import JSON, BigInteger, Column, Field, ForeignKey
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
 
-class PaymentStatusEnum(str, Enum):
+class PaymentStatusEnum(StrEnum):
     PENDING = "pending"
     COMPLETED = "completed"
     ACTIVE = "active"

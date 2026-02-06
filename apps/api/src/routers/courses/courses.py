@@ -2,6 +2,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, Request, Response, UploadFile
 from sqlmodel import Session
+from src.security.permissions.exceptions import PermissionDenied
+from src.services.permissions import PermissionService
 
 from src.core.events.database import get_db_session
 from src.db.courses.course_updates import (
@@ -20,7 +22,6 @@ from src.db.permissions import Action, ResourceType
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
 from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user
-from src.security.permissions.exceptions import PermissionDenied
 from src.security.rbac.dependencies import get_permission_service
 from src.services.courses.contributors import (
     add_bulk_course_contributors,
@@ -48,7 +49,6 @@ from src.services.courses.updates import (
     get_updates_by_course_uuid,
     update_update,
 )
-from src.services.permissions import PermissionService
 
 router = APIRouter()
 

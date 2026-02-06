@@ -2,6 +2,7 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
+from src.services.permissions import get_permission_service
 from ulid import ULID
 
 from src.db.courses.activities import Activity, ActivityRead
@@ -17,7 +18,6 @@ from src.db.courses.course_chapters import CourseChapter
 from src.db.courses.courses import Course
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
-from src.services.permissions import get_permission_service
 
 ####################################################
 # CRUD

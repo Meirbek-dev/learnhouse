@@ -2,6 +2,7 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, and_, select
+from src.services.permissions import get_permission_service
 
 from src.db.courses.courses import Course
 from src.db.permissions.enums import Action, ResourceType
@@ -11,7 +12,6 @@ from src.db.resource_authors import (
     ResourceAuthorshipStatusEnum,
 )
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
-from src.services.permissions import get_permission_service
 
 
 async def apply_course_contributor(

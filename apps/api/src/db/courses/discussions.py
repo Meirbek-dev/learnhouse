@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, StrEnum
 
 from pydantic import field_validator
 from sqlalchemy import Column, ForeignKey, Integer
@@ -8,12 +8,12 @@ from src.db.strict_base_model import SQLModelStrictBaseModel
 from src.db.users import UserRead
 
 
-class DiscussionType(str, Enum):
+class DiscussionType(StrEnum):
     POST = "post"
     REPLY = "reply"
 
 
-class DiscussionStatusEnum(str, Enum):
+class DiscussionStatusEnum(StrEnum):
     ACTIVE = "active"
     HIDDEN = "hidden"
     DELETED = "deleted"

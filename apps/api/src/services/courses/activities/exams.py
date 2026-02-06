@@ -3,6 +3,8 @@ from datetime import UTC, datetime
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
+from src.security.permissions.exceptions import AuthenticationRequired, PermissionDenied
+from src.services.permissions import get_permission_service
 from ulid import ULID
 
 from src.db.courses.activities import (
@@ -39,8 +41,6 @@ from src.db.resource_authors import (
 from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User
-from src.security.permissions.exceptions import AuthenticationRequired, PermissionDenied
-from src.services.permissions import get_permission_service
 
 ## > Helper Functions
 

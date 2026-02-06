@@ -2,6 +2,7 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
+from src.services.permissions import get_permission_service
 
 from src.db.courses.courses import AuthorWithRole, Course, CourseRead
 from src.db.organizations import Organization
@@ -15,7 +16,6 @@ from src.db.payments.payments_users import (
 from src.db.permissions.enums import Action, ResourceType
 from src.db.resource_authors import ResourceAuthor
 from src.db.users import AnonymousUser, InternalUser, PublicUser, User, UserRead
-from src.services.permissions import get_permission_service
 
 
 async def create_payment_user(
@@ -53,7 +53,7 @@ async def create_payment_user(
         raise HTTPException(status_code=404, detail="Product not found")
 
     provider_specific_data = ProviderSpecificData(
-        stripe_customer=provider_data if provider_data else None,
+        stripe_customer=provider_data or None,
     )
 
     # Check if user already has a payment user for this product

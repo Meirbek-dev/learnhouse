@@ -2,6 +2,7 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request, UploadFile
 from sqlmodel import Session, select
+from src.services.permissions import get_permission_service
 from ulid import ULID
 
 from src.db.courses.activities import (
@@ -42,7 +43,6 @@ from src.services.courses.activities.uploads.tasks_ref_files import (
 from src.services.courses.certifications import (
     check_course_completion_and_create_certificate,
 )
-from src.services.permissions import get_permission_service
 from src.services.trail.trail import check_trail_presence
 
 ## > Assignments CRUD

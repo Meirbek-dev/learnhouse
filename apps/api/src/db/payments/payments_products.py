@@ -1,5 +1,5 @@
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 
 from pydantic import field_validator
 from sqlmodel import BigInteger, Column, Field, ForeignKey, String
@@ -7,12 +7,12 @@ from sqlmodel import BigInteger, Column, Field, ForeignKey, String
 from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
-class PaymentProductTypeEnum(str, Enum):
+class PaymentProductTypeEnum(StrEnum):
     SUBSCRIPTION = "subscription"
     ONE_TIME = "one_time"
 
 
-class PaymentPriceTypeEnum(str, Enum):
+class PaymentPriceTypeEnum(StrEnum):
     CUSTOMER_CHOICE = "customer_choice"
     FIXED_PRICE = "fixed_price"
 

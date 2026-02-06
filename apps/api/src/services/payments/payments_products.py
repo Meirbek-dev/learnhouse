@@ -2,6 +2,7 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
+from src.services.permissions import get_permission_service
 
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
@@ -21,7 +22,6 @@ from src.services.payments.payments_stripe import (
     create_stripe_product,
     update_stripe_product,
 )
-from src.services.permissions import get_permission_service
 
 
 async def create_payments_product(

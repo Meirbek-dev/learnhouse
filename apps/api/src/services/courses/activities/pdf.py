@@ -2,6 +2,7 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, select
+from src.services.permissions import get_permission_service
 from ulid import ULID
 
 from src.db.courses.activities import (
@@ -18,7 +19,6 @@ from src.db.organizations import Organization
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
 from src.services.courses.activities.uploads.pdfs import upload_pdf
-from src.services.permissions import get_permission_service
 
 
 async def create_documentpdf_activity(
@@ -82,7 +82,7 @@ async def create_documentpdf_activity(
             status_code=status.HTTP_409_CONFLICT, detail="Pdf : No pdf file provided"
         )
 
-    if pdf_file.content_type not in ["application/pdf"]:
+    if pdf_file.content_type != "application/pdf":
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Pdf : Wrong pdf format"
         )
@@ -105,7 +105,7 @@ async def create_documentpdf_activity(
             "filename": "documentpdf." + pdf_format,
             "activity_uuid": activity_uuid,
         },
-        org_id=org_id if org_id else 0,
+        org_id=org_id or 0,
         course_id=coursechapter.course_id,
         activity_uuid=activity_uuid,
         creation_date=str(datetime.now()),

@@ -2,6 +2,8 @@ from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Request, UploadFile
 from sqlmodel import Session
+from src.security.permissions.exceptions import PermissionDenied
+from src.services.permissions import PermissionService
 
 from src.core.events.database import get_db_session
 from src.db.organization_config import OrganizationConfigBase
@@ -15,7 +17,6 @@ from src.db.organizations import (
 from src.db.permissions import Action, ResourceType
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.security.permissions.exceptions import PermissionDenied
 from src.security.rbac.dependencies import get_permission_service
 from src.services.orgs.invites import (
     create_invite_code,
@@ -49,7 +50,6 @@ from src.services.orgs.users import (
     remove_user_from_org,
     update_user_role,
 )
-from src.services.permissions import PermissionService
 
 router = APIRouter()
 

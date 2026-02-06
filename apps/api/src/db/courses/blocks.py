@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, StrEnum
 
 from pydantic import ConfigDict, field_validator
 from sqlalchemy import JSON, Column, ForeignKey
@@ -7,7 +7,7 @@ from sqlmodel import Field
 from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
-class BlockTypeEnum(str, Enum):
+class BlockTypeEnum(StrEnum):
     BLOCK_QUIZ = "BLOCK_QUIZ"
     BLOCK_VIDEO = "BLOCK_VIDEO"
     BLOCK_DOCUMENT_PDF = "BLOCK_DOCUMENT_PDF"

@@ -146,7 +146,7 @@ def get_safe_filename(original_filename: str, prefix: str = "") -> str:
     if not original_filename:
         return f"{prefix}.bin"
 
-    ext = original_filename.split(".")[-1].lower()
+    ext = original_filename.rsplit(".", maxsplit=1)[-1].lower()
     # Only allow safe alphanumeric extensions
     if re.match(r"^[a-zA-Z0-9]+$", ext):
         return f"{prefix}.{ext}"

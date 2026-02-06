@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, StrEnum
 
 from pydantic import ConfigDict, field_validator
 from sqlalchemy import JSON, Column, ForeignKey
@@ -8,7 +8,7 @@ from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
 ## Assignment ##
-class GradingTypeEnum(str, Enum):
+class GradingTypeEnum(StrEnum):
     NUMERIC = "NUMERIC"
     PERCENTAGE = "PERCENTAGE"
 
@@ -103,7 +103,7 @@ class Assignment(AssignmentBase, table=True):
 ## AssignmentTask ##
 
 
-class AssignmentTaskTypeEnum(str, Enum):
+class AssignmentTaskTypeEnum(StrEnum):
     FILE_SUBMISSION = "FILE_SUBMISSION"
     QUIZ = "QUIZ"
     FORM = "FORM"  # soon to be implemented
@@ -295,7 +295,7 @@ class AssignmentTaskSubmission(AssignmentTaskSubmissionBase, table=True):
 ## AssignmentUserSubmission ##
 
 
-class AssignmentUserSubmissionStatus(str, Enum):
+class AssignmentUserSubmissionStatus(StrEnum):
     PENDING = "PENDING"
     SUBMITTED = "SUBMITTED"
     GRADED = "GRADED"

@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, StrEnum
 
 from pydantic import ConfigDict, field_validator
 from pydantic import Field as PydanticField
@@ -12,7 +12,7 @@ from src.db.trails import TrailRead
 from src.db.users import UserRead
 
 
-class ThumbnailType(str, Enum):
+class ThumbnailType(StrEnum):
     IMAGE = "image"
     VIDEO = "video"
     BOTH = "both"

@@ -1,12 +1,12 @@
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
+from src.services.permissions import get_permission_service
 
 from src.db.organizations import Organization
 from src.db.payments.payments_users import PaymentsUser
 from src.db.permissions.enums import Action, ResourceType
 from src.db.users import AnonymousUser, PublicUser
 from src.services.payments.payments_products import get_payments_product
-from src.services.permissions import get_permission_service
 from src.services.users.users import read_user_by_id
 
 
@@ -53,8 +53,8 @@ async def get_customers(
 
         customer_data = {
             "payment_user_id": payment_user.id,
-            "user": user if user else None,
-            "product": product if product else None,
+            "user": user or None,
+            "product": product or None,
             "status": payment_user.status,
             "creation_date": payment_user.creation_date,
             "update_date": payment_user.update_date,

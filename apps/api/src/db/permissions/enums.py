@@ -4,7 +4,7 @@ Enums for the RBAC permission system.
 Re-exports generated enums from permissions.yaml for consistency.
 """
 
-from enum import Enum
+from enum import Enum, StrEnum
 
 # Re-export generated enums to ensure consistency
 from src.db.permissions.generated_enums import Action, ResourceType, Scope
@@ -17,7 +17,7 @@ __all__ = [
 ]
 
 
-class AuditAction(str, Enum):
+class AuditAction(StrEnum):
     """Types of audit log entries."""
 
     CHECK = "check"  # Permission was checked
