@@ -76,7 +76,7 @@ async def get_role(
 @router.post(
     "/",
     response_model=RoleRead,
-    dependencies=[Depends(require_permission("role:create:org"))],
+    dependencies=[require_permission("role:create:org")],
 )
 async def create_role(
     body: RoleCreate,
@@ -99,7 +99,7 @@ async def create_role(
 @router.put(
     "/{role_id}",
     response_model=RoleRead,
-    dependencies=[Depends(require_permission("role:update:org"))],
+    dependencies=[require_permission("role:update:org")],
 )
 async def update_role(
     role_id: int,
@@ -121,7 +121,7 @@ async def update_role(
 
 @router.delete(
     "/{role_id}",
-    dependencies=[Depends(require_permission("role:delete:org"))],
+    dependencies=[require_permission("role:delete:org")],
 )
 async def delete_role(
     role_id: int,
@@ -161,7 +161,7 @@ async def get_role_permissions(
 
 @router.post(
     "/{role_id}/permissions",
-    dependencies=[Depends(require_permission("role:update:org"))],
+    dependencies=[require_permission("role:update:org")],
 )
 async def add_permission_to_role(
     role_id: int,
@@ -195,7 +195,7 @@ async def add_permission_to_role(
 
 @router.delete(
     "/{role_id}/permissions/{permission_id}",
-    dependencies=[Depends(require_permission("role:update:org"))],
+    dependencies=[require_permission("role:update:org")],
 )
 async def remove_permission_from_role(
     role_id: int,

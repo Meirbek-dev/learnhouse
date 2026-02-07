@@ -1,7 +1,6 @@
 import logging
 from functools import lru_cache
 
-import chromadb
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 from config.config import get_platform_config

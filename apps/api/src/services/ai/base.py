@@ -2,17 +2,19 @@ import asyncio
 import hashlib
 import logging
 import os
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from langchain.agents import create_agent
 from langchain.tools import tool
-from langchain_chroma import Chroma
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langgraph.graph.state import CompiledStateGraph
 from ulid import ULID
+
+if TYPE_CHECKING:
+    from langchain_chroma import Chroma
 
 from config.config import get_platform_config
 from src.services.ai.cache_manager import get_ai_cache_manager
@@ -194,7 +196,7 @@ class FastAIService:
         documents: list[str],
         embedding_model_name: str,
         collection_name: str | None = None,
-    ) -> Chroma | None:
+    ) -> "Chroma | None":
         """
         Get cached vector store or create new one.
 
@@ -240,12 +242,14 @@ class FastAIService:
         documents: list[str],
         embedding_model_name: str,
         collection_name: str | None = None,
-    ) -> Chroma | None:
+    ) -> "Chroma | None":
         """
         Create vector store with async batch processing.
 
         Uses parallel text splitting and batched embedding generation.
         """
+        from langchain_chroma import Chroma
+
         try:
             # Get cached embedding function
             embedding_function = self._get_cached_embedding_function(
@@ -316,7 +320,7 @@ class FastAIService:
         self,
         llm_model_name: str,
         system_prompt: str,
-        vector_store: Chroma,
+        vector_store: "Chroma",
         max_iterations: int = 15,  # Increased further for complex multi-step operations
     ) -> CompiledStateGraph | None:
         """Get cached agent or create new one."""
@@ -348,7 +352,7 @@ class FastAIService:
         self,
         llm_model_name: str,
         system_prompt: str,
-        vector_store: Chroma,
+        vector_store: "Chroma",
         max_iterations: int = 15,  # Increased further for complex multi-step operations
     ) -> CompiledStateGraph | None:
         """Create agent using LangChain v1 create_agent API."""

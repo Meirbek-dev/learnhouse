@@ -6,10 +6,11 @@ import asyncio
 import inspect
 import logging
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import chromadb
-from chromadb.config import Settings
+if TYPE_CHECKING:
+    import chromadb
+    from chromadb.config import Settings
 
 from config.config import get_platform_config
 
@@ -26,6 +27,8 @@ class ChromaDBPool:
         Args:
             max_connections: Maximum number of connections to maintain
         """
+        import chromadb  # Import here to avoid startup issues
+
         self._pool: list[chromadb.Client] = []
         self._max_connections = max_connections
         self._lock = asyncio.Lock()
@@ -33,16 +36,21 @@ class ChromaDBPool:
         self._settings = self._get_chromadb_settings()
         logger.info(f"Initialized ChromaDB pool with max {max_connections} connections")
 
-    def _get_chromadb_settings(self) -> Settings:
+    def _get_chromadb_settings(self) -> "Settings":
         """Get ChromaDB settings from config."""
+        from chromadb.config import Settings
+
         return Settings(
             anonymized_telemetry=False,
             allow_reset=True,
             is_persistent=True,
         )
 
-    def _create_client(self) -> chromadb.Client:
+    def _create_client(self) -> "chromadb.Client":
         """Create a new ChromaDB client instance."""
+        import chromadb
+        from chromadb.config import Settings
+
         try:
             config = get_platform_config()
             chromadb_config = getattr(config.ai_config, "chromadb_config", None)
