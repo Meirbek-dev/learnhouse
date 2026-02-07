@@ -233,7 +233,6 @@ samp {
 }
 
 @layer utilities {
-
   /* Shadow utilities */
   .soft-shadow {
     @apply shadow-md shadow-black/[0.08] outline-1 outline-black/[0.06];
@@ -293,7 +292,7 @@ samp {
   }
 
   /* Editor styles */
-  .ProseMirror>*+* {
+  .ProseMirror > * + * {
     margin-top: 1em;
   }
 

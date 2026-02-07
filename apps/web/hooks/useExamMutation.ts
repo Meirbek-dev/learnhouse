@@ -43,7 +43,7 @@ export function useExamMutation<TData = unknown, TVariables = void>(options: Mut
     onSettled,
     onMutate,
     retry = 3,
-    retryDelay = (attemptIndex: number) => Math.min(1000 * Math.pow(2, attemptIndex), 30_000),
+    retryDelay = (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30_000),
   } = options;
 
   const [state, setState] = useState<MutationState<TData>>({
@@ -248,7 +248,7 @@ export function useExamSubmission(accessToken: string, onSuccess?: () => void) {
       return response.json();
     },
     retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * Math.pow(2, attemptIndex), 30_000),
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30_000),
     onSuccess: (data, variables) => {
       toast.success(t('examSubmittedSuccessfully'));
       onSuccess?.();

@@ -1,6 +1,6 @@
 'use client';
-import { usePermissions } from '@/components/Security';
 import { Actions, Resources, Scopes } from '@/types/permissions';
+import { usePermissions } from '@/components/Security';
 import { useTranslations } from 'next-intl';
 
 // Terrible name and terible implementation, need to be refactored asap

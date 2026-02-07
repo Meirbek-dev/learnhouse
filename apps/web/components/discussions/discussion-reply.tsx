@@ -2,11 +2,11 @@
 
 import { ArrowBigDown, ArrowBigUp, Clock, Edit, Trash2 } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
+import { Actions, Resources, Scopes } from '@/types/permissions';
 import RichContentRenderer from './rich-content-renderer';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { usePermissions } from '@/components/Security';
-import { Actions, Resources, Scopes } from '@/types/permissions';
 import { Button } from '@/components/ui/button';
 import RichTextEditor from './rich-text-editor';
 import { useState, useTransition } from 'react';

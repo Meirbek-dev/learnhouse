@@ -10,11 +10,11 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronRight, Edit, Lock, Plus, Search, Shield, Trash2, Users } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { PermissionGuard, Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -123,11 +123,7 @@ export default function RBACAdminClient() {
     {} as Record<string, Permission[]>,
   );
 
-  const handleCreateRole = async (data: {
-    name: string;
-    slug: string;
-    description: string;
-  }) => {
+  const handleCreateRole = async (data: { name: string; slug: string; description: string }) => {
     if (!accessToken || !org?.id) return;
 
     try {
@@ -158,10 +154,7 @@ export default function RBACAdminClient() {
     }
   };
 
-  const handleUpdateRole = async (
-    roleId: number,
-    data: { name: string; description: string },
-  ) => {
+  const handleUpdateRole = async (roleId: number, data: { name: string; description: string }) => {
     if (!accessToken) return;
 
     try {

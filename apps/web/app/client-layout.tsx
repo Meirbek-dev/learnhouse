@@ -1,8 +1,8 @@
 'use client';
 
 import PlatformSessionProvider, { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { PermissionProvider } from '@/components/Security/PermissionProvider';
 import StyledComponentsRegistry from '../components/Utils/libs/styled-registry';
+import { PermissionProvider } from '@/components/Security/PermissionProvider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { updateUserTheme } from '@services/users/users';

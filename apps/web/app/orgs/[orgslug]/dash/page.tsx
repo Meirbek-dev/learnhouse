@@ -23,58 +23,58 @@ async function DashboardHome() {
         />
       </div>
       <div className="flex flex-col gap-4 sm:flex-row lg:gap-10">
-          {/* Card components */}
-          <DashboardCard
-            href="/dash/courses"
-            icon={
-              <BookCopy
-                className="mx-auto text-gray-500/100"
-                size={50}
-              />
-            }
-            title={t('Courses.title')}
-            description={t('Courses.description')}
-          />
-          <DashboardCard
-            href="/dash/org/settings/general"
-            icon={
-              <School
-                className="mx-auto text-gray-500/100"
-                size={50}
-              />
-            }
-            title={t('Organization.title')}
-            description={t('Organization.description')}
-          />
-          <DashboardCard
-            href="/dash/users/settings/users"
-            icon={
-              <Users
-                className="mx-auto text-gray-500/100"
-                size={50}
-              />
-            }
-            title={t('Users.title')}
-            description={t('Users.description')}
-          />
-        </div>
+        {/* Card components */}
+        <DashboardCard
+          href="/dash/courses"
+          icon={
+            <BookCopy
+              className="mx-auto text-gray-500/100"
+              size={50}
+            />
+          }
+          title={t('Courses.title')}
+          description={t('Courses.description')}
+        />
+        <DashboardCard
+          href="/dash/org/settings/general"
+          icon={
+            <School
+              className="mx-auto text-gray-500/100"
+              size={50}
+            />
+          }
+          title={t('Organization.title')}
+          description={t('Organization.description')}
+        />
+        <DashboardCard
+          href="/dash/users/settings/users"
+          icon={
+            <Users
+              className="mx-auto text-gray-500/100"
+              size={50}
+            />
+          }
+          title={t('Users.title')}
+          description={t('Users.description')}
+        />
+      </div>
       <div className="mt-6 flex flex-col gap-6 sm:mt-10 sm:gap-10">
-          <div className="mx-auto h-1 w-[100px] rounded-full bg-neutral-200/100" />
-          <div className="flex items-center justify-center">
-            <ServerLink
-              href="https://tou.edu.kz/ru/"
-              target="_blank"
-              className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-sky-900 px-7 py-3 shadow-lg transition-all ease-linear hover:scale-105 sm:mt-[40px]"
-            >
-              <Image
-                width={26}
-                src={touEmblemLight}
-                alt={t('touUniversity')}
-              />
-              <div className="text-sm font-bold text-gray-100/100">{t('touUniversity')}</div>
-            </ServerLink>
-          </div>
-          <div className="mx-auto mt-4 h-1 w-28 rounded-full bg-neutral-200/100 sm:mt-[40px]" />
+        <div className="mx-auto h-1 w-[100px] rounded-full bg-neutral-200/100" />
+        <div className="flex items-center justify-center">
+          <ServerLink
+            href="https://tou.edu.kz/ru/"
+            target="_blank"
+            className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-sky-900 px-7 py-3 shadow-lg transition-all ease-linear hover:scale-105 sm:mt-[40px]"
+          >
+            <Image
+              width={26}
+              src={touEmblemLight}
+              alt={t('touUniversity')}
+            />
+            <div className="text-sm font-bold text-gray-100/100">{t('touUniversity')}</div>
+          </ServerLink>
+        </div>
+        <div className="mx-auto mt-4 h-1 w-28 rounded-full bg-neutral-200/100 sm:mt-[40px]" />
 
         <ServerLink
           href="/dash/user-account/settings/general"

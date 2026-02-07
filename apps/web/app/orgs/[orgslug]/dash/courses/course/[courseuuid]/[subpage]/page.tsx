@@ -86,7 +86,9 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
 
   // Check if current subpage is accessible
   const currentTab = tabs.find((tab) => tab.key === params.subpage);
-  const hasAccessToCurrentPage = currentTab ? can(currentTab.requiredAction, currentTab.requiredResource, currentTab.requiredScope) : false;
+  const hasAccessToCurrentPage = currentTab
+    ? can(currentTab.requiredAction, currentTab.requiredResource, currentTab.requiredScope)
+    : false;
 
   // Redirect to first available tab if current page is not accessible
   useEffect(() => {

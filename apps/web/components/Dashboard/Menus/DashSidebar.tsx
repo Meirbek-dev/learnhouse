@@ -14,10 +14,10 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, School, Settings, Users } from 'lucide-react';
+import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import platformLogoLight from '@public/platform_logo_light.svg';
 import useFeatureFlag from '@components/Hooks/useFeatureFlag';
-import { usePermissions, Actions, Resources, Scopes } from '@/components/Security';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Separator } from '@/components/ui/separator';

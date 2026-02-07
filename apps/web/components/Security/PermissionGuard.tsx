@@ -1,8 +1,8 @@
 'use client';
 
-import type { ReactNode } from 'react';
 import type { Action, Resource, Scope } from '@/types/permissions';
 import { usePermissions } from './PermissionProvider';
+import type { ReactNode } from 'react';
 
 interface PermissionGuardProps {
   /** Action to check permission for. */
@@ -27,13 +27,7 @@ interface PermissionGuardProps {
  * </PermissionGuard>
  * ```
  */
-export function PermissionGuard({
-  action,
-  resource,
-  scope,
-  children,
-  fallback = null,
-}: PermissionGuardProps) {
+export function PermissionGuard({ action, resource, scope, children, fallback = null }: PermissionGuardProps) {
   const { can, loading } = usePermissions();
 
   if (loading) return null;

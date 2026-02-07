@@ -1,7 +1,7 @@
-import { auth } from '@/auth';
-import { redirect } from 'next/navigation';
 import type { Action, Resource, Scope } from '@/types/permissions';
 import { perm } from '@/types/permissions';
+import { redirect } from 'next/navigation';
+import { auth } from '@/auth';
 
 /**
  * Get the current session or redirect to login.
@@ -23,7 +23,7 @@ export function sessionCan(
   resource: Resource,
   scope: Scope,
 ): boolean {
-  const perms = new Set(session.permissions ?? []);
+  const perms = new Set(session.permissions);
   return perms.has(perm(resource, action, scope));
 }
 
@@ -49,7 +49,7 @@ export async function requirePermission(
  */
 export async function requireAnyPermission(
   orgslug: string,
-  checks: Array<{ action: Action; resource: Resource; scope: Scope }>,
+  checks: { action: Action; resource: Resource; scope: Scope }[],
   redirectTo?: string,
 ) {
   const session = await requireAuth(orgslug);

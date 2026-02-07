@@ -11,7 +11,7 @@ async function request<T>(url: string, token: string, options?: RequestInit): Pr
   const res = await fetch(url, {
     ...options,
     headers: {
-      Authorization: `Bearer ${token}`,
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
       ...options?.headers,
     },
@@ -29,10 +29,7 @@ async function request<T>(url: string, token: string, options?: RequestInit): Pr
 // ============================================================================
 
 export const fetchMyPermissions = (token: string, orgId?: number) =>
-  request<UserRBACData>(
-    api(`rbac/me/permissions${orgId ? `?org_id=${orgId}` : ''}`),
-    token,
-  );
+  request<UserRBACData>(api(`rbac/me/permissions${orgId ? `?org_id=${orgId}` : ''}`), token);
 
 // ============================================================================
 // Roles — CRUD
@@ -41,8 +38,7 @@ export const fetchMyPermissions = (token: string, orgId?: number) =>
 export const listRoles = (token: string, orgId?: number) =>
   request<Role[]>(api(`roles/${orgId !== undefined ? `?org_id=${orgId}` : ''}`), token);
 
-export const getRole = (token: string, roleId: number) =>
-  request<Role>(api(`roles/${roleId}`), token);
+export const getRole = (token: string, roleId: number) => request<Role>(api(`roles/${roleId}`), token);
 
 export const createRole = (token: string, orgId: number, body: Record<string, unknown>) =>
   request<Role>(api(`roles/org/${orgId}`), token, {

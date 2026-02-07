@@ -1,10 +1,10 @@
 'use client';
 
+import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
-import { PermissionGuard, Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import CourseGridClient from '@components/Landings/CourseGridClient';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 

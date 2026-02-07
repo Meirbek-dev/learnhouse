@@ -11,10 +11,10 @@ import {
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar, Plus, Search, Shield, Trash2, User } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { PermissionGuard, Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useCallback, useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';

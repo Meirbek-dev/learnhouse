@@ -38,7 +38,7 @@ export function AnimatedValue({
       const progress = Math.min(elapsed / duration, 1);
 
       // Easing function (ease-out)
-      const easedProgress = 1 - Math.pow(1 - progress, 3);
+      const easedProgress = 1 - (1 - progress) ** 3;
 
       const newValue = startValueRef.current + (value - startValueRef.current) * easedProgress;
       setDisplayValue(newValue);

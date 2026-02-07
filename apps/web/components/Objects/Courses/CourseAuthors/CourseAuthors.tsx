@@ -15,6 +15,7 @@ import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/update
 import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getCourseUpdatesSwrKey } from '@services/courses/keys';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
@@ -22,7 +23,6 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { usePermissions } from '@/components/Security';
-import { Actions, Resources, Scopes } from '@/types/permissions';
 import { format, formatDistanceToNow } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';

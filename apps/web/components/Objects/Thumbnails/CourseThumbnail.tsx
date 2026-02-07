@@ -28,7 +28,8 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { ResourceActionsMenu, type ResourceAction } from '@/components/Utils/ResourceActionsMenu';
+import { ResourceActionsMenu } from '@/components/Utils/ResourceActionsMenu';
+import type { ResourceAction } from '@/components/Utils/ResourceActionsMenu';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Card, CardContent, CardFooter } from '@components/ui/card';
 import { useOrg } from '@components/Contexts/OrgContext';

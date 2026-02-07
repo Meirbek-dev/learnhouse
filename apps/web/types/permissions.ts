@@ -104,7 +104,7 @@ export function perm(resource: Resource, action: Action, scope: Scope): Permissi
 }
 
 /** @deprecated Use `perm()` instead. */
-export function buildPermissionName(resource: string, action: string, scope: string = 'all'): string {
+export function buildPermissionName(resource: string, action: string, scope = 'all'): string {
   return `${resource.toLowerCase()}:${action.toLowerCase()}:${scope.toLowerCase()}`;
 }
 

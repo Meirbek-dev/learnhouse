@@ -9,11 +9,11 @@
  * The backend resolves all permissions to flat explicit strings.
  */
 
+import type { Action, Resource, Role, Scope } from '@/types/permissions';
 import { createContext, useContext, useMemo } from 'react';
-import type { ReactNode } from 'react';
+import { isAdminRole, perm } from '@/types/permissions';
 import { useSession } from 'next-auth/react';
-import type { Role, Action, Resource, Scope } from '@/types/permissions';
-import { perm, isAdminRole } from '@/types/permissions';
+import type { ReactNode } from 'react';
 
 // ============================================================================
 // Types
@@ -23,7 +23,7 @@ interface PermissionContextValue {
   /** Check if user has a specific permission (scope is required) */
   can: (action: Action, resource: Resource, scope: Scope) => boolean;
   /** Check if user has any of the specified permissions */
-  canAny: (checks: Array<{ action: Action; resource: Resource; scope: Scope }>) => boolean;
+  canAny: (checks: { action: Action; resource: Resource; scope: Scope }[]) => boolean;
   /** User's roles */
   roles: Role[];
   /** Convenience: user has an admin role */
@@ -45,15 +45,9 @@ const PermissionContext = createContext<PermissionContextValue | null>(null);
 export function PermissionProvider({ children }: { children: ReactNode }) {
   const { data: session, status } = useSession();
 
-  const permissions = useMemo(
-    () => new Set<string>(session?.permissions ?? []),
-    [session?.permissions],
-  );
+  const permissions = useMemo(() => new Set<string>(session?.permissions), [session?.permissions]);
 
-  const roles = useMemo<Role[]>(
-    () => (session?.roles as Role[] | undefined) ?? [],
-    [session?.roles],
-  );
+  const roles = useMemo<Role[]>(() => (session?.roles as Role[] | undefined) ?? [], [session?.roles]);
 
   const can = useMemo(() => {
     return (action: Action, resource: Resource, scope: Scope): boolean => {
@@ -63,15 +57,12 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
   }, [status, permissions]);
 
   const canAny = useMemo(() => {
-    return (checks: Array<{ action: Action; resource: Resource; scope: Scope }>): boolean => {
+    return (checks: { action: Action; resource: Resource; scope: Scope }[]): boolean => {
       return checks.some((c) => can(c.action, c.resource, c.scope));
     };
   }, [can]);
 
-  const isAdmin = useMemo(
-    () => roles.some((r) => isAdminRole(r.slug)),
-    [roles],
-  );
+  const isAdmin = useMemo(() => roles.some((r) => isAdminRole(r.slug)), [roles]);
 
   const value: PermissionContextValue = useMemo(
     () => ({

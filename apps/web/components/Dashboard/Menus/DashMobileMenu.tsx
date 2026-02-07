@@ -1,10 +1,10 @@
 'use client';
 
 import { Backpack, BadgeDollarSign, BookCopy, Home, School, Settings, Users } from 'lucide-react';
+import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { usePaymentsEnabled } from '@components/Hooks/usePaymentsEnabled';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import { usePermissions, Actions, Resources, Scopes } from '@/components/Security';
 import AppLink from '@/components/ui/AppLink';
 import { useTranslations } from 'next-intl';
 

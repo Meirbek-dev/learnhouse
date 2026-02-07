@@ -1,29 +1,29 @@
 'use client';
 
 import {
-  Edit,
-  Trash2,
-  Share2,
-  Eye,
-  EyeOff,
-  Copy,
-  Archive,
-  Star,
-  MoreVertical,
-  Settings,
-  UserPlus,
-  Crown,
-  Shield,
-  type LucideIcon,
-} from 'lucide-react';
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Archive,
+  Copy,
+  Crown,
+  Edit,
+  Eye,
+  EyeOff,
+  MoreVertical,
+  Settings,
+  Share2,
+  Shield,
+  Star,
+  Trash2,
+  UserPlus,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Fragment } from 'react';
 import type React from 'react';

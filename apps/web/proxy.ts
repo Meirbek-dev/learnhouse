@@ -80,7 +80,7 @@ export default async function proxy(req: NextRequest) {
   }
 
   if (pathname.startsWith('/sitemap.xml')) {
-    let orgslug: string = default_org as string;
+    const orgslug: string = default_org as string;
 
     const sitemapUrl = new URL('/api/sitemap', req.url);
 

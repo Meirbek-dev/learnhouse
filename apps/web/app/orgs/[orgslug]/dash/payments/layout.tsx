@@ -1,5 +1,5 @@
-import { requireAnyPermission } from '@/lib/server-auth';
 import { Actions, Resources, Scopes } from '@/types/permissions';
+import { requireAnyPermission } from '@/lib/server-auth';
 import type { ReactNode } from 'react';
 
 interface PaymentsLayoutProps {
