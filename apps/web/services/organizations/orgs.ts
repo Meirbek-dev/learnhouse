@@ -176,3 +176,20 @@ export async function joinOrg(
 
   return metadata;
 }
+
+export async function updateUserRole(org_id: number, user_id: number, role_uuid: string, access_token: string) {
+  const result = await fetch(
+    `${getAPIUrl()}orgs/${org_id}/users/${user_id}/role/${role_uuid}`,
+    RequestBodyWithAuthHeader('PUT', null, null, access_token),
+  );
+  const metadata = await getResponseMetadata(result);
+
+  // Revalidate organizations and users cache after role update
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.organizations, 'max');
+    revalidateTag(tags.users, 'max');
+  }
+
+  return metadata;
+}

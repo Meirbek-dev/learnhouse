@@ -32,8 +32,8 @@ import type { FC } from 'react';
 import { toast } from 'sonner';
 
 interface DeleteRoleButtonProps {
-  roleId: string;
-  onDelete: (roleId: string) => Promise<void>;
+  roleId: number | string;
+  onDelete: (roleId: number | string) => Promise<void>;
   t: (key: string) => string;
   variant?: 'default' | 'compact';
 }
@@ -98,7 +98,7 @@ const OrgRoles: FC = () => {
   const access_token = session?.data?.tokens?.access_token;
   const [createRoleModal, setCreateRoleModal] = useState(false);
   const [editRoleModal, setEditRoleModal] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<{ id: number; name: string; description: string } | null>(null);
+  const [selectedRole, setSelectedRole] = useState<{ id: number; name: string; description?: string } | null>(null);
 
   const { data: roles } = useSWR<Role[]>(org ? `${getAPIUrl()}roles/org/${org.id}` : null, (url) =>
     swrFetcher(url, access_token),
@@ -115,7 +115,7 @@ const OrgRoles: FC = () => {
     }
   };
 
-  const handleEditRoleModal = (role: { id: number; name: string; description: string }) => {
+  const handleEditRoleModal = (role: { id: number; name: string; description?: string }) => {
     setSelectedRole(role);
     setEditRoleModal(!editRoleModal);
   };
@@ -149,7 +149,7 @@ const OrgRoles: FC = () => {
     }
 
     // Check for well-known system role slugs
-    const systemSlugs = [
+    const systemSlugs: string[] = [
       RoleSlugs.SUPER_ADMIN,
       RoleSlugs.ORG_ADMIN,
       RoleSlugs.MAINTAINER,

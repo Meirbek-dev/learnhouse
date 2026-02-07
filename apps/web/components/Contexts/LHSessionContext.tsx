@@ -4,6 +4,18 @@ import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useSession } from 'next-auth/react';
 import { createContext, use } from 'react';
 import type { ReactNode } from 'react';
+import type { Role } from '@/types/permissions';
+
+// Match the global UserRoleWithOrg interface from next-auth.d.ts
+interface UserRoleWithOrg {
+  role: Role;
+  org: {
+    id: number;
+    org_uuid: string;
+    name: string;
+    slug: string;
+  };
+}
 
 // Extended session data interface — matches actual NextAuth session shape
 interface ExtendedSessionData {
@@ -12,6 +24,7 @@ interface ExtendedSessionData {
     email: string;
     username: string;
     first_name: string | undefined;
+    middle_name: string | undefined;
     last_name: string | undefined;
     avatar_image: string | undefined;
     user_uuid: string | undefined;

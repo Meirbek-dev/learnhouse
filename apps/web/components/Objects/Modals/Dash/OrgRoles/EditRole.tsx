@@ -19,7 +19,7 @@ interface EditRoleProps {
   role: {
     id: number;
     name: string;
-    description: string;
+    description?: string;
   };
   setEditRoleModal: (open: boolean) => void;
 }

@@ -264,6 +264,7 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
 
 const UpdatesListView = () => {
   const course = useCourse();
+  const session = usePlatformSession() as any;
   const { can } = usePermissions();
   const canUpdateCourse = can(Actions.UPDATE, Resources.COURSE, Scopes.OWN);
   const access_token = session?.data?.tokens?.access_token;
