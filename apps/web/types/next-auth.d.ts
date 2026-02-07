@@ -46,8 +46,6 @@ declare global {
     tokens: AuthTokens;
     /** User's effective permissions as flat string array */
     permissions: string[];
-    /** Unix timestamp (seconds) when permissions were loaded - for cache validation */
-    permissions_timestamp?: number;
   }
 
   interface TokenRefreshResult {
@@ -64,8 +62,6 @@ declare module 'next-auth' {
     expires: string;
     /** User's effective permissions as flat string array */
     permissions?: string[];
-    /** Unix timestamp (seconds) when permissions were loaded - for cache validation */
-    permissions_timestamp?: number;
   }
 
   type User = UserWithTokens;
@@ -76,7 +72,5 @@ declare module 'next-auth/jwt' {
     user?: UserWithTokens;
     /** Cached permissions */
     permissions?: string[];
-    /** Unix timestamp (seconds) when permissions were loaded */
-    permissions_timestamp?: number;
   }
 }

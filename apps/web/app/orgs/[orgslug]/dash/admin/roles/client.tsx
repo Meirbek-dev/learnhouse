@@ -15,45 +15,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ChevronRight, Edit, Lock, Plus, Search, Shield, Trash2, Users } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import type { RoleWithPermissions, Permission } from '@/types/permissions';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
-import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-
-interface Role {
-  id: number;
-  name: string;
-  slug: string;
-  description: string | null;
-  org_id: number | null;
-  is_system: boolean;
-  priority: number;
-  created_at: string;
-  updated_at: string;
-}
-
-interface Permission {
-  id: number;
-  name: string;
-  resource_type: string;
-  action: string;
-  scope: string;
-  description: string | null;
-  created_at: string;
-}
-
-interface RoleWithPermissions extends Role {
-  permissions: Permission[];
-}
+import {
+  listRoles,
+  listAllPermissions,
+  createRole as apiCreateRole,
+  updateRole as apiUpdateRole,
+  deleteRole as apiDeleteRole,
+  addPermissionToRole,
+  removePermissionFromRole,
+  getRole as apiGetRole,
+} from '@/services/rbac';
 
 export default function RBACAdminClient() {
-  const org = useOrg() as { id: number } | null;
+  const org = useOrg();
   const session = usePlatformSession();
   const { can } = usePermissions();
 
@@ -74,24 +58,12 @@ export default function RBACAdminClient() {
 
       try {
         setLoading(true);
-        const [rolesRes, permsRes] = await Promise.all([
-          fetch(`${getAPIUrl()}roles?org_id=${org.id}`, {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }),
-          fetch(`${getAPIUrl()}roles/permissions/all`, {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }),
+        const [rolesData, permsData] = await Promise.all([
+          listRoles(accessToken, org.id),
+          listAllPermissions(accessToken),
         ]);
-
-        if (rolesRes.ok) {
-          const rolesData = await rolesRes.json();
-          setRoles(rolesData);
-        }
-
-        if (permsRes.ok) {
-          const permsData = await permsRes.json();
-          setPermissions(permsData);
-        }
+        setRoles(rolesData);
+        setPermissions(permsData);
       } catch (error) {
         console.error('Failed to fetch RBAC data:', error);
         toast.error('Failed to load roles and permissions');
@@ -127,30 +99,13 @@ export default function RBACAdminClient() {
     if (!accessToken || !org?.id) return;
 
     try {
-      const res = await fetch(`${getAPIUrl()}roles`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...data,
-          org_id: org.id,
-        }),
-      });
-
-      if (res.ok) {
-        const newRole = await res.json();
-        setRoles([...roles, { ...newRole, permissions: [] }]);
-        toast.success('Role created successfully');
-        setIsEditDialogOpen(false);
-      } else {
-        const error = await res.json();
-        toast.error(error.detail || 'Failed to create role');
-      }
+      const newRole = await apiCreateRole(accessToken, org.id, data);
+      setRoles([...roles, { ...newRole, permissions: [] }]);
+      toast.success('Role created successfully');
+      setIsEditDialogOpen(false);
     } catch (error) {
       console.error('Failed to create role:', error);
-      toast.error('Failed to create role');
+      toast.error(error instanceof Error ? error.message : 'Failed to create role');
     }
   };
 
@@ -158,28 +113,14 @@ export default function RBACAdminClient() {
     if (!accessToken) return;
 
     try {
-      const res = await fetch(`${getAPIUrl()}roles/${roleId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (res.ok) {
-        const updatedRole = await res.json();
-        setRoles(roles.map((r) => (r.id === roleId ? { ...r, ...updatedRole } : r)));
-        toast.success('Role updated successfully');
-        setIsEditDialogOpen(false);
-        setSelectedRole(null);
-      } else {
-        const error = await res.json();
-        toast.error(error.detail || 'Failed to update role');
-      }
+      const updatedRole = await apiUpdateRole(accessToken, roleId, data);
+      setRoles(roles.map((r) => (r.id === roleId ? { ...r, ...updatedRole } : r)));
+      toast.success('Role updated successfully');
+      setIsEditDialogOpen(false);
+      setSelectedRole(null);
     } catch (error) {
       console.error('Failed to update role:', error);
-      toast.error('Failed to update role');
+      toast.error(error instanceof Error ? error.message : 'Failed to update role');
     }
   };
 
@@ -191,21 +132,14 @@ export default function RBACAdminClient() {
     }
 
     try {
-      const res = await fetch(`${getAPIUrl()}roles/${roleId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-
-      if (res.ok) {
-        setRoles(roles.filter((r) => r.id !== roleId));
-        toast.success('Role deleted successfully');
-      } else {
-        const error = await res.json();
-        toast.error(error.detail || 'Failed to delete role');
-      }
+      await apiDeleteRole(accessToken, roleId);
+      setRoles(roles.filter((r) => r.id !== roleId));
+      toast.success('Role deleted successfully');
+      // Refresh session so permission changes take effect immediately
+      session.update();
     } catch (error) {
       console.error('Failed to delete role:', error);
-      toast.error('Failed to delete role');
+      toast.error(error instanceof Error ? error.message : 'Failed to delete role');
     }
   };
 
@@ -213,39 +147,23 @@ export default function RBACAdminClient() {
     if (!accessToken) return;
 
     try {
-      const endpoint = hasPermission
-        ? `${getAPIUrl()}roles/${roleId}/permissions/${permissionId}`
-        : `${getAPIUrl()}roles/${roleId}/permissions`;
-
-      const res = await fetch(endpoint, {
-        method: hasPermission ? 'DELETE' : 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        ...(hasPermission ? {} : { body: JSON.stringify({ permission_id: permissionId }) }),
-      });
-
-      if (res.ok) {
-        // Refresh the role's permissions
-        const roleRes = await fetch(`${getAPIUrl()}roles/${roleId}`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-
-        if (roleRes.ok) {
-          const updatedRole = await roleRes.json();
-          setRoles(roles.map((r) => (r.id === roleId ? updatedRole : r)));
-          setSelectedRole(updatedRole);
-        }
-
-        toast.success(hasPermission ? 'Permission removed' : 'Permission added');
+      if (hasPermission) {
+        await removePermissionFromRole(accessToken, roleId, permissionId);
       } else {
-        const error = await res.json();
-        toast.error(error.detail || 'Failed to update permission');
+        await addPermissionToRole(accessToken, roleId, permissionId);
       }
+
+      // Refresh the role's permissions
+      const updatedRole = await apiGetRole(accessToken, roleId);
+      setRoles(roles.map((r) => (r.id === roleId ? updatedRole : r)));
+      setSelectedRole(updatedRole);
+
+      toast.success(hasPermission ? 'Permission removed' : 'Permission added');
+      // Refresh session so permission changes take effect immediately
+      session.update();
     } catch (error) {
       console.error('Failed to toggle permission:', error);
-      toast.error('Failed to update permission');
+      toast.error(error instanceof Error ? error.message : 'Failed to update permission');
     }
   };
 
@@ -609,10 +527,10 @@ function RoleEditForm({
   onSubmit,
   onCancel,
 }: {
-  role?: Role;
+  role?: RoleWithPermissions;
   onSubmit: (data: { name: string; slug: string; description: string }) => void;
   onCancel: () => void;
-  availableRoles?: Role[];
+  availableRoles?: RoleWithPermissions[];
 }) {
   const [name, setName] = useState(role?.name || '');
   const [description, setDescription] = useState(role?.description || '');

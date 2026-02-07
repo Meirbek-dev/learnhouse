@@ -2,7 +2,6 @@ import { LoginBonusHandler } from '@/app/orgs/[orgslug]/(withmenu)/_components/L
 import NewCollectionButton from '@components/Objects/StyledElements/Buttons/NewCollectionButton';
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import { HeroSection } from '@/components/Dashboard/Gamification/hero-section';
@@ -66,7 +65,7 @@ const EmptyCollectionsState = ({ t }: EmptyStateProps) => (
   <EmptyState
     icon={FolderKanban}
     title={t('Collections.noContent')}
-    description={<ContentPlaceHolderIfUserIsNotAdmin text={t('Collections.noContentUserAdmin')} />}
+    description={t('Collections.noContentDescription')}
   />
 );
 
@@ -74,7 +73,7 @@ const EmptyCoursesState = ({ t }: EmptyStateProps) => (
   <EmptyState
     icon={BookOpen}
     title={t('Courses.noContent')}
-    description={<ContentPlaceHolderIfUserIsNotAdmin text={t('Courses.noContentUserAdmin')} />}
+    description={t('Courses.noContentDescription')}
   />
 );
 

@@ -21,8 +21,8 @@ import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { deleteRole } from '@services/roles/roles';
-import { RoleSlugs } from '@/types/permissions';
+import { deleteRole } from '@/services/rbac';
+import { RoleSlugs, type Role } from '@/types/permissions';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
@@ -93,34 +93,34 @@ function DeleteRoleButton({ roleId, onDelete, t, variant = 'default' }: DeleteRo
 
 const OrgRoles: FC = () => {
   const t = useTranslations('Components.OrgRoles');
-  const org = useOrg() as any;
-  const session = usePlatformSession() as any;
+  const org = useOrg();
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const [createRoleModal, setCreateRoleModal] = useState(false);
   const [editRoleModal, setEditRoleModal] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<any>(null);
+  const [selectedRole, setSelectedRole] = useState<{ id: number; name: string; description: string } | null>(null);
 
-  const { data: roles } = useSWR(org ? `${getAPIUrl()}roles/org/${org.id}` : null, (url) =>
+  const { data: roles } = useSWR<Role[]>(org ? `${getAPIUrl()}roles/org/${org.id}` : null, (url) =>
     swrFetcher(url, access_token),
   );
 
-  const deleteRoleUI = async (role_id: any) => {
+  const deleteRoleUI = async (role_id: number | string) => {
     const toastId = toast.loading(t('deleting'));
-    const res = await deleteRole(role_id, org.id, access_token);
-    if (res.status === 200) {
-      mutate(`${getAPIUrl()}roles/org/${org.id}`);
+    try {
+      await deleteRole(access_token ?? '', Number(role_id));
+      mutate(`${getAPIUrl()}roles/org/${org?.id}`);
       toast.success(t('deletedRoleSuccess'), { id: toastId });
-    } else {
+    } catch {
       toast.error(t('deleteRoleError'), { id: toastId });
     }
   };
 
-  const handleEditRoleModal = (role: any) => {
+  const handleEditRoleModal = (role: { id: number; name: string; description: string }) => {
     setSelectedRole(role);
     setEditRoleModal(!editRoleModal);
   };
 
-  const getRoleBadge = (role: any) => {
+  const getRoleBadge = (role: { slug?: string }) => {
     // Use slug-based checks instead of name matching
     const { slug } = role;
 
@@ -142,7 +142,7 @@ const OrgRoles: FC = () => {
   };
 
   // Check if a role is system-wide (is_system flag or well-known system role slugs)
-  const isSystemRole = (role: any) => {
+  const isSystemRole = (role: { is_system?: boolean; slug?: string }) => {
     // Check for is_system field (new RBAC system)
     if (role.is_system === true) {
       return true;
@@ -172,7 +172,7 @@ const OrgRoles: FC = () => {
       <CardContent className="p-3 sm:p-6">
         {/* Mobile view - Cards */}
         <div className="block space-y-3 sm:hidden">
-          {roles?.map((role: any) => {
+          {roles?.map((role) => {
             const isSystem = isSystemRole(role);
             return (
               <Card key={role.id}>
@@ -250,7 +250,7 @@ const OrgRoles: FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {roles?.map((role: any) => {
+              {roles?.map((role) => {
                 const isSystem = isSystemRole(role);
                 return (
                   <TableRow key={role.id}>

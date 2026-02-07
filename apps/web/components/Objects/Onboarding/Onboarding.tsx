@@ -98,7 +98,7 @@ const Onboarding: FC = () => {
   const router = useRouter();
   const org = useOrg() as any;
   const { can } = usePermissions();
-  const isUserAdmin = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
+  const canManageOrg = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
 
   const onboardingData: OnboardingStep[] = [
     {
@@ -261,7 +261,7 @@ const Onboarding: FC = () => {
 
   return (
     <div>
-      {isUserAdmin && !isModalOpen && !isOnboardingComplete && !isMobile ? (
+      {canManageOrg && !isModalOpen && !isOnboardingComplete && !isMobile ? (
         <Modal
           isDialogOpen={isModalOpen}
           onOpenChange={setIsModalOpen}

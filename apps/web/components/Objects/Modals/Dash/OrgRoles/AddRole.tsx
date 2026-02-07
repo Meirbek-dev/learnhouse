@@ -1,11 +1,11 @@
 'use client';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { createRole } from '@/services/rbac';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
-import { createRole } from '@services/roles/roles';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
@@ -41,8 +41,8 @@ interface RoleFormValues {
 function AddRole(props: AddRoleProps) {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.OrgRoles.AddRole');
-  const org = useOrg() as { id: number };
-  const session = usePlatformSession() as { data?: { tokens?: { access_token: string } } };
+  const org = useOrg();
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const [isPending, startTransition] = React.useTransition();
   const [_error, setError] = React.useState('');
@@ -63,22 +63,14 @@ function AddRole(props: AddRoleProps) {
 
     startTransition(async () => {
       try {
-        const res = await createRole(
-          {
-            name: values.name,
-            description: values.description,
-            org_id: values.org_id,
-          },
-          access_token ?? '',
-        );
-
-        if (res.status === 200 || res.status === 201) {
-          mutate(`${getAPIUrl()}roles/org/${org.id}`);
-          props.setCreateRoleModal(false);
-          toast.success(t('createdNewRole'), { id: toastID });
-        } else {
-          toast.error(t('couldntCreateNewRole'), { id: toastID });
-        }
+        await createRole(access_token ?? '', org?.id ?? 0, {
+          name: values.name,
+          slug: values.name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''),
+          description: values.description,
+        });
+        mutate(`${getAPIUrl()}roles/org/${org?.id}`);
+        props.setCreateRoleModal(false);
+        toast.success(t('createdNewRole'), { id: toastID });
       } catch (error: unknown) {
         toast.error(t('couldntCreateNewRole'), { id: toastID });
         setError((error as Error)?.message || t('unknownError'));

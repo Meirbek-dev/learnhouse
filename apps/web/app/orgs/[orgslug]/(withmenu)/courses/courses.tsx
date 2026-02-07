@@ -19,7 +19,7 @@ interface CourseProps {
   org_id: number;
 }
 
-const EmptyStateMessage = ({ isUserAdmin, t, newCourseButtonTrigger }: any) => (
+const EmptyStateMessage = ({ canManageOrg, t, newCourseButtonTrigger }: any) => (
   <div className="col-span-full flex items-center justify-center py-12">
     <div className="max-w-md text-center">
       <div className="mb-6">
@@ -40,8 +40,8 @@ const EmptyStateMessage = ({ isUserAdmin, t, newCourseButtonTrigger }: any) => (
         </div>
       </div>
       <h1 className="mb-3 text-2xl font-bold text-gray-700">{t('noCourses')}</h1>
-      <p className="mb-6 text-lg text-gray-500">{isUserAdmin ? t('createACourse') : t('noCoursesAvailable')}</p>
-      {isUserAdmin ? <div className="flex justify-center">{newCourseButtonTrigger}</div> : null}
+      <p className="mb-6 text-lg text-gray-500">{canManageOrg ? t('createACourse') : t('noCoursesAvailable')}</p>
+      {canManageOrg ? <div className="flex justify-center">{newCourseButtonTrigger}</div> : null}
     </div>
   </div>
 );
@@ -53,7 +53,7 @@ const Courses = (props: CourseProps) => {
   const isCreatingCourse = Boolean(searchParams.get('new'));
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
   const { can } = usePermissions();
-  const isUserAdmin = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
+  const canManageOrg = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
 
   async function closeNewCourseModal() {
     setNewCourseModal(false);
@@ -107,7 +107,7 @@ const Courses = (props: CourseProps) => {
 
           {!hasCourses ? (
             <EmptyStateMessage
-              isUserAdmin={isUserAdmin}
+              canManageOrg={canManageOrg}
               t={t}
               newCourseButtonTrigger={newCourseButtonTrigger}
             />

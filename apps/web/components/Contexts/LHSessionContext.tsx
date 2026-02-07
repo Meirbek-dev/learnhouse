@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { createContext, use } from 'react';
 import type { ReactNode } from 'react';
 
-// Extended session data interface to match actual usage patterns
+// Extended session data interface — matches actual NextAuth session shape
 interface ExtendedSessionData {
   user: {
     id: number;
@@ -15,19 +15,17 @@ interface ExtendedSessionData {
     last_name: string | undefined;
     avatar_image: string | undefined;
     user_uuid: string | undefined;
-    [key: string]: any; // Allow additional properties
   };
-  roles: string[] | undefined;
+  roles: UserRoleWithOrg[] | undefined;
   tokens:
     | {
         access_token: string;
         refresh_token: string;
         expiry?: number;
-        [key: string]: any;
       }
     | undefined;
+  permissions: string[] | undefined;
   expires: string;
-  [key: string]: any; // Allow additional properties
 }
 
 // Extended session interface that ensures data is properly typed when not null
@@ -107,7 +105,7 @@ export function getTokens(session: SessionContextType): ExtendedSessionData['tok
   return session.data?.tokens;
 }
 
-export function getRoles(session: SessionContextType): string[] {
+export function getRoles(session: SessionContextType): UserRoleWithOrg[] {
   return session.data?.roles || [];
 }
 

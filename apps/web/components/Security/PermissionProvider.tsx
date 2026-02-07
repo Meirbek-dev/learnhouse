@@ -9,9 +9,9 @@
  * The backend resolves all permissions to flat explicit strings.
  */
 
-import type { Action, Resource, Role, Scope } from '@/types/permissions';
+import type { Action, Resource, Scope } from '@/types/permissions';
 import { createContext, useContext, useMemo } from 'react';
-import { isAdminRole, perm } from '@/types/permissions';
+import { perm } from '@/types/permissions';
 import { useSession } from 'next-auth/react';
 import type { ReactNode } from 'react';
 
@@ -19,15 +19,32 @@ import type { ReactNode } from 'react';
 // Types
 // ============================================================================
 
+/** Role assignment with org context, matching the session shape. */
+export interface RoleAssignment {
+  role: {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    org_id?: number | null;
+    is_system: boolean;
+    priority: number;
+  };
+  org: {
+    id: number;
+    org_uuid: string;
+    name: string;
+    slug: string;
+  };
+}
+
 interface PermissionContextValue {
   /** Check if user has a specific permission (scope is required) */
   can: (action: Action, resource: Resource, scope: Scope) => boolean;
   /** Check if user has any of the specified permissions */
   canAny: (checks: { action: Action; resource: Resource; scope: Scope }[]) => boolean;
-  /** User's roles */
-  roles: Role[];
-  /** Convenience: user has an admin role */
-  isAdmin: boolean;
+  /** User's role assignments (role + org context) */
+  roles: RoleAssignment[];
   /** Still loading session */
   loading: boolean;
 }
@@ -47,7 +64,10 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
 
   const permissions = useMemo(() => new Set<string>(session?.permissions), [session?.permissions]);
 
-  const roles = useMemo<Role[]>(() => (session?.roles as Role[] | undefined) ?? [], [session?.roles]);
+  const roles = useMemo<RoleAssignment[]>(
+    () => (session?.roles as RoleAssignment[] | undefined) ?? [],
+    [session?.roles],
+  );
 
   const can = useMemo(() => {
     return (action: Action, resource: Resource, scope: Scope): boolean => {
@@ -62,17 +82,14 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
     };
   }, [can]);
 
-  const isAdmin = useMemo(() => roles.some((r) => isAdminRole(r.slug)), [roles]);
-
   const value: PermissionContextValue = useMemo(
     () => ({
       can,
       canAny,
       roles,
-      isAdmin,
       loading: status === 'loading',
     }),
-    [can, canAny, roles, isAdmin, status],
+    [can, canAny, roles, status],
   );
 
   return <PermissionContext.Provider value={value}>{children}</PermissionContext.Provider>;
@@ -87,7 +104,7 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
  *
  * @example
  * ```tsx
- * const { can, isAdmin } = usePermissions();
+ * const { can } = usePermissions();
  *
  * if (can(Actions.CREATE, Resources.COURSE, Scopes.ORG)) {
  *   // Show create button

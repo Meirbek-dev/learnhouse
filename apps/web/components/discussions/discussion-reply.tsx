@@ -39,7 +39,7 @@ export default function DiscussionReply({
   const now = useNow();
   const org = useOrg() as any;
   const { can } = usePermissions();
-  const isAdmin = can(Actions.MODERATE, Resources.DISCUSSION, Scopes.ORG);
+  const canModerateDiscussion = can(Actions.MODERATE, Resources.DISCUSSION, Scopes.ORG);
 
   const isOwnReply = reply.username === currentUser?.username;
   const netScore = reply.upvotes - reply.downvotes;
@@ -67,7 +67,7 @@ export default function DiscussionReply({
   const isAuthorAdmin = (username: string) => {
     if (!(org?.id && reply?.username)) return false;
     // If current user is admin and is the author, show badge
-    return isAdmin && username === currentUser?.username;
+    return canModerateDiscussion && username === currentUser?.username;
   };
 
   return (
@@ -111,7 +111,7 @@ export default function DiscussionReply({
             </div>
 
             {/* Action buttons */}
-            {(isAdmin || isOwnReply) && !editing && (
+            {(canModerateDiscussion || isOwnReply) && !editing && (
               <div className="mr-5 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                 {isOwnReply && (
                   <Button

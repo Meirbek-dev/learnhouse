@@ -11,9 +11,10 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
 import type { ReactNode } from 'react';
+import type { Org } from '@/types/org';
 import useSWR from 'swr';
 
-export const OrgContext = createContext(null);
+export const OrgContext = createContext<Org | null>(null);
 
 export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslug: string }) => {
   const session = usePlatformSession();
@@ -111,6 +112,6 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
   return <OrgContext.Provider value={org}>{children}</OrgContext.Provider>;
 };
 
-export function useOrg() {
-  return useContext(OrgContext as any);
+export function useOrg(): Org | null {
+  return useContext(OrgContext);
 }

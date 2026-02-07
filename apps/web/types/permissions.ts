@@ -94,6 +94,54 @@ export interface UserRBACData {
   org_id: number | null;
 }
 
+/** Backend Permission entity. */
+export interface Permission {
+  id: number;
+  name: string;
+  resource_type: string;
+  action: string;
+  scope: string;
+  description: string | null;
+  created_at: string;
+}
+
+/** Role with its assigned permissions. */
+export interface RoleWithPermissions extends Role {
+  permissions: Permission[];
+}
+
+/** A user↔role assignment record. */
+export interface UserRoleAssignment {
+  user_id: number;
+  role_id: number;
+  org_id: number;
+  granted_at: string;
+  granted_by: number | null;
+  expires_at: string | null;
+  user?: {
+    id: number;
+    email: string;
+    username: string;
+    first_name?: string;
+    last_name?: string;
+    avatar_image?: string;
+  };
+  role?: Role;
+}
+
+/** Body for creating a role. */
+export interface CreateRoleBody {
+  name: string;
+  slug: string;
+  description?: string;
+}
+
+/** Body for updating a role. */
+export interface UpdateRoleBody {
+  name: string;
+  description?: string;
+}
+
 // ============================================================================
 // Helpers
 // ============================================================================
@@ -101,13 +149,4 @@ export interface UserRBACData {
 /** Build a permission string. Format: "resource:action:scope" */
 export function perm(resource: Resource, action: Action, scope: Scope): PermissionString {
   return `${resource}:${action}:${scope}`;
-}
-
-/** @deprecated Use `perm()` instead. */
-export function buildPermissionName(resource: string, action: string, scope = 'all'): string {
-  return `${resource.toLowerCase()}:${action.toLowerCase()}:${scope.toLowerCase()}`;
-}
-
-export function isAdminRole(slug: string): boolean {
-  return slug === RoleSlugs.SUPER_ADMIN || slug === RoleSlugs.ORG_ADMIN;
 }

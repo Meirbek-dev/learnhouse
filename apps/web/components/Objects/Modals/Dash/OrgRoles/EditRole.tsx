@@ -1,11 +1,11 @@
 'use client';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { updateRole } from '@/services/rbac';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
-import { updateRole } from '@services/roles/roles';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
@@ -46,8 +46,8 @@ interface RoleFormValues {
 function EditRole(props: EditRoleProps) {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.OrgRoles.EditRole');
-  const org = useOrg() as { id: number };
-  const session = usePlatformSession() as { data?: { tokens?: { access_token: string } } };
+  const org = useOrg();
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const roleFormSchema = createRoleFormSchema(validationT);
@@ -65,23 +65,18 @@ function EditRole(props: EditRoleProps) {
     const toastID = toast.loading(t('updating'));
     setIsSubmitting(true);
 
-    const res = await updateRole(
-      props.role.id,
-      {
+    try {
+      await updateRole(access_token ?? '', props.role.id, {
         name: values.name,
         description: values.description,
-        org_id: values.org_id,
-      },
-      access_token ?? '',
-    );
-    if (res.status === 200) {
-      setIsSubmitting(false);
-      mutate(`${getAPIUrl()}roles/org/${org.id}`);
+      });
+      mutate(`${getAPIUrl()}roles/org/${org?.id}`);
       props.setEditRoleModal(false);
       toast.success(t('updatedRole'), { id: toastID });
-    } else {
-      setIsSubmitting(false);
+    } catch {
       toast.error(t('couldntUpdateRole'), { id: toastID });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

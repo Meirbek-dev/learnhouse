@@ -102,23 +102,6 @@ export async function getOrganizationContextInfoNoAsync(org_slug: any, next: any
   return await fetch(`${getAPIUrl()}orgs/slug/${org_slug}`, RequestBodyWithAuthHeader('GET', null, next, access_token));
 }
 
-export async function updateUserRole(org_id: number, user_id: number, role_uuid: string, access_token: string) {
-  const result = await fetch(
-    `${getAPIUrl()}orgs/${org_id}/users/${user_id}/role/${role_uuid}`,
-    RequestBodyWithAuthHeader('PUT', null, null, access_token),
-  );
-  const metadata = await getResponseMetadata(result);
-
-  // Revalidate organizations and users cache after updating user role
-  if (metadata.success) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(tags.organizations, 'max');
-    revalidateTag(tags.users, 'max');
-  }
-
-  return metadata;
-}
-
 export async function updateOrgLanding(org_id: number, landing_object: any, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}orgs/${org_id}/landing`,

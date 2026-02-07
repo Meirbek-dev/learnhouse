@@ -15,52 +15,33 @@ import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/c
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar, Plus, Search, Shield, Trash2, User } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import type { UserRoleAssignment, Role } from '@/types/permissions';
+import type { OrgUserBasic } from '@/services/rbac';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useCallback, useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
-
-interface UserBasic {
-  id: number;
-  email: string;
-  username: string;
-  first_name?: string;
-  last_name?: string;
-  avatar_image?: string;
-}
-
-interface Role {
-  id: number;
-  name: string;
-  slug: string;
-  description: string | null;
-}
-
-interface UserRoleAssignment {
-  user_id: number;
-  role_id: number;
-  org_id: number;
-  granted_at: string;
-  granted_by: number | null;
-  expires_at: string | null;
-  user?: UserBasic;
-  role?: Role;
-}
+import {
+  listRoles,
+  listUserRoles,
+  listOrgUsers,
+  assignRoleToUser,
+  removeRoleFromUser,
+} from '@/services/rbac';
 
 export default function UserRolesClient() {
-  const org = useOrg() as { id: number } | null;
+  const org = useOrg();
   const session = usePlatformSession();
   const { can } = usePermissions();
 
   const [userRoles, setUserRoles] = useState<UserRoleAssignment[]>([]);
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
-  const [users, setUsers] = useState<UserBasic[]>([]);
+  const [users, setUsers] = useState<OrgUserBasic[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -70,18 +51,11 @@ export default function UserRolesClient() {
   const accessToken = session?.data?.tokens?.access_token;
 
   // Fetch user roles
-  const fetchUserRoles = useCallback(async () => {
+  const fetchUserRolesData = useCallback(async () => {
     if (!accessToken || !org?.id) return;
-
     try {
-      const res = await fetch(`${getAPIUrl()}/api/v1/orgs/${org.id}/users/roles`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setUserRoles(data);
-      }
+      const data = await listUserRoles(accessToken, org.id);
+      setUserRoles(data);
     } catch (error) {
       console.error('Failed to fetch user roles:', error);
     }
@@ -90,16 +64,9 @@ export default function UserRolesClient() {
   // Fetch available roles
   const fetchRoles = useCallback(async () => {
     if (!accessToken || !org?.id) return;
-
     try {
-      const res = await fetch(`${getAPIUrl()}roles?org_id=${org.id}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setAvailableRoles(data);
-      }
+      const data = await listRoles(accessToken, org.id);
+      setAvailableRoles(data);
     } catch (error) {
       console.error('Failed to fetch roles:', error);
     }
@@ -108,16 +75,9 @@ export default function UserRolesClient() {
   // Fetch users for search
   const fetchUsers = useCallback(async () => {
     if (!accessToken || !org?.id) return;
-
     try {
-      const res = await fetch(`${getAPIUrl()}/api/v1/orgs/${org.id}/users?limit=100`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setUsers(data.users || data);
-      }
+      const data = await listOrgUsers(accessToken, org.id);
+      setUsers(data);
     } catch (error) {
       console.error('Failed to fetch users:', error);
     }
@@ -126,11 +86,11 @@ export default function UserRolesClient() {
   useEffect(() => {
     const fetchAll = async () => {
       setLoading(true);
-      await Promise.all([fetchUserRoles(), fetchRoles(), fetchUsers()]);
+      await Promise.all([fetchUserRolesData(), fetchRoles(), fetchUsers()]);
       setLoading(false);
     };
     fetchAll();
-  }, [fetchUserRoles, fetchRoles, fetchUsers]);
+  }, [fetchUserRolesData, fetchRoles, fetchUsers]);
 
   // Filter user roles by search
   const filteredUserRoles = userRoles.filter((ur) => {
@@ -149,31 +109,17 @@ export default function UserRolesClient() {
     if (!accessToken || !selectedUserId || !selectedRoleId || !org?.id) return;
 
     try {
-      const res = await fetch(`${getAPIUrl()}/api/v1/users/${selectedUserId}/roles`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          role_id: selectedRoleId,
-          org_id: org.id,
-        }),
-      });
-
-      if (res.ok) {
-        toast.success('Role assigned successfully');
-        setIsAddDialogOpen(false);
-        setSelectedUserId(null);
-        setSelectedRoleId(null);
-        fetchUserRoles();
-      } else {
-        const error = await res.json();
-        toast.error(error.detail || 'Failed to assign role');
-      }
+      await assignRoleToUser(accessToken, selectedUserId, selectedRoleId, org.id);
+      toast.success('Role assigned successfully');
+      setIsAddDialogOpen(false);
+      setSelectedUserId(null);
+      setSelectedRoleId(null);
+      fetchUserRolesData();
+      // Refresh session so permission changes take effect immediately
+      session.update();
     } catch (error) {
       console.error('Failed to assign role:', error);
-      toast.error('Failed to assign role');
+      toast.error(error instanceof Error ? error.message : 'Failed to assign role');
     }
   };
 
@@ -186,21 +132,14 @@ export default function UserRolesClient() {
     }
 
     try {
-      const res = await fetch(`${getAPIUrl()}/api/v1/users/${userId}/roles/${roleId}?org_id=${org.id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-
-      if (res.ok) {
-        toast.success('Role removed successfully');
-        fetchUserRoles();
-      } else {
-        const error = await res.json();
-        toast.error(error.detail || 'Failed to remove role');
-      }
+      await removeRoleFromUser(accessToken, userId, roleId, org.id);
+      toast.success('Role removed successfully');
+      fetchUserRolesData();
+      // Refresh session so permission changes take effect immediately
+      session.update();
     } catch (error) {
       console.error('Failed to remove role:', error);
-      toast.error('Failed to remove role');
+      toast.error(error instanceof Error ? error.message : 'Failed to remove role');
     }
   };
 

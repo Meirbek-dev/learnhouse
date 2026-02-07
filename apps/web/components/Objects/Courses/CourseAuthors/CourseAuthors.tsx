@@ -156,7 +156,7 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
 const UpdatesSection = () => {
   const [selectedView, setSelectedView] = useState('list');
   const { can } = usePermissions();
-  const isAdmin = can(Actions.MANAGE, Resources.COURSE, Scopes.OWN);
+  const canManageCourse = can(Actions.MANAGE, Resources.COURSE, Scopes.OWN);
   const course = useCourse();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -185,7 +185,7 @@ const UpdatesSection = () => {
             </span>
           ) : null}
         </div>
-        {isAdmin ? (
+        {canManageCourse ? (
           <button
             onClick={() => {
               setSelectedView(selectedView === 'new' ? 'list' : 'new');
@@ -317,7 +317,7 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
 const UpdatesListView = () => {
   const course = useCourse();
   const { can } = usePermissions();
-  const isAdmin = can(Actions.MANAGE, Resources.COURSE, Scopes.OWN);
+  const canManageCourse = can(Actions.MANAGE, Resources.COURSE, Scopes.OWN);
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const { data: updates } = useSWR(`${getAPIUrl()}courses/${course?.courseStructure?.course_uuid}/updates`, (url) =>
@@ -362,7 +362,7 @@ const UpdatesListView = () => {
               </div>
               <p className="line-clamp-3 text-sm text-neutral-600">{update.content}</p>
             </div>
-            {isAdmin ? (
+            {canManageCourse ? (
               <div className="ml-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                 <DeleteUpdateButton update={update} />
               </div>

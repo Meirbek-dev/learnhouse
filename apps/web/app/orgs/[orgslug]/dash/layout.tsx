@@ -1,5 +1,4 @@
-import { Actions, Resources, Scopes } from '@/types/permissions';
-import { requirePermission } from '@/lib/server-auth';
+import { requireAuth } from '@/lib/server-auth';
 import ClientAdminLayout from './ClientAdminLayout';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
@@ -18,7 +17,8 @@ async function DashboardLayout(props: { children: ReactNode; params: Promise<any
   const { children } = props;
   const { orgslug } = params;
 
-  await requirePermission(orgslug, Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
+  // Only require authentication here — child layouts enforce specific permissions
+  await requireAuth(orgslug);
 
   return <ClientAdminLayout params={params}>{children}</ClientAdminLayout>;
 }

@@ -27,7 +27,7 @@ const CoursesHome = (params: CourseProps) => {
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
   const { orgslug, courses, totalCourses } = params;
   const { can } = usePermissions();
-  const isUserAdmin = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
+  const canManageOrg = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
   const t = useTranslations('DashPage.Courses.HomePageClient');
   const org = useOrg() as any;
 
@@ -100,8 +100,8 @@ const CoursesHome = (params: CourseProps) => {
           <div className="col-span-full flex items-center justify-center py-8">
             <div className="text-center">
               <h2 className="mb-2 text-2xl font-bold text-gray-600">{t('noCourses')}</h2>
-              <p className="text-lg text-gray-400">{isUserAdmin ? t('createACourse') : t('noCoursesAvailable')}</p>
-              {isUserAdmin ? (
+              <p className="text-lg text-gray-400">{canManageOrg ? t('createACourse') : t('noCoursesAvailable')}</p>
+              {canManageOrg ? (
                 <div className="mt-6 flex justify-center">
                   <PermissionGuard
                     action={Actions.CREATE}

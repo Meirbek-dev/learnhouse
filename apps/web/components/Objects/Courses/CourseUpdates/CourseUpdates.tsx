@@ -105,7 +105,7 @@ const CourseUpdates = () => {
 const UpdatesSection = () => {
   const [selectedView, setSelectedView] = useState('list');
   const { can } = usePermissions();
-  const isAdmin = can(Actions.UPDATE, Resources.COURSE, Scopes.OWN);
+  const canUpdateCourse = can(Actions.UPDATE, Resources.COURSE, Scopes.OWN);
   const t = useTranslations('Courses.CourseUpdates');
   return (
     <div className="soft-shadow w-[700px] overflow-hidden rounded-lg bg-white/95 backdrop-blur-md">
@@ -114,7 +114,7 @@ const UpdatesSection = () => {
           <Rss size={16} />
           <span>{t('updates')}</span>
         </div>
-        {isAdmin ? (
+        {canUpdateCourse ? (
           <div
             onClick={() => {
               setSelectedView('new');
@@ -265,7 +265,7 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
 const UpdatesListView = () => {
   const course = useCourse();
   const { can } = usePermissions();
-  const isAdmin = can(Actions.UPDATE, Resources.COURSE, Scopes.OWN);
+  const canUpdateCourse = can(Actions.UPDATE, Resources.COURSE, Scopes.OWN);
   const access_token = session?.data?.tokens?.access_token;
   const UPDATES_KEY = course?.courseStructure?.course_uuid
     ? getCourseUpdatesSwrKey(course?.courseStructure?.course_uuid)
@@ -296,7 +296,7 @@ const UpdatesListView = () => {
                     {formatDistanceToNow(new Date(update.creation_date), { addSuffix: true, locale })}
                   </span>
                 </div>
-                {isAdmin ? <DeleteUpdateButton update={update} /> : null}
+                {canUpdateCourse ? <DeleteUpdateButton update={update} /> : null}
               </div>
               <div className="text-gray-600">{update.content}</div>
             </div>
