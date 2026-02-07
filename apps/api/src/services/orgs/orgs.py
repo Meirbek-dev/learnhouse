@@ -62,14 +62,9 @@ async def get_organization(
             detail="Organization not found",
         )
 
-    # Allow anonymous read if the organization is marked as discoverable (explore=True)
-    if isinstance(current_user, AnonymousUser) and getattr(org, "explore", False):
-        # Skip RBAC check for public orgs
-        pass
-    else:
-        # RBAC check
-        checker = PermissionChecker(db_session)
-        checker.require(current_user.id, "organization:read:org", org.id)
+    # RBAC check
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:read:org", org.id)
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -102,14 +97,9 @@ async def get_organization_by_slug(
             detail="Organization not found",
         )
 
-    # Allow anonymous read if the organization is marked as discoverable (explore=True)
-    if isinstance(current_user, AnonymousUser) and getattr(org, "explore", False):
-        # Skip RBAC check for public orgs
-        pass
-    else:
-        # RBAC check
-        checker = PermissionChecker(db_session)
-        checker.require(current_user.id, "organization:read:org", org.id)
+    # RBAC check
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:read:org", org.id)
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)

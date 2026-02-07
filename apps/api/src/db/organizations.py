@@ -27,7 +27,6 @@ class OrganizationBase(SQLModelStrictBaseModel):
     logo_image: str | None = None
     thumbnail_image: str | None = None
     previews: dict | None = Field(default_factory=dict, sa_column=Column(JSON))
-    explore: bool | None = Field(default=False)
     label: str | None = None
     slug: str
     email: str
@@ -70,7 +69,6 @@ class OrganizationUpdate(SQLModelStrictBaseModel):
     label: str | None = None
     slug: str | None = None
     email: str | None = None
-    explore: bool | None = None
     update_date: str | None = None
 
 

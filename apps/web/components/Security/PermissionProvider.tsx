@@ -62,7 +62,7 @@ const PermissionContext = createContext<PermissionContextValue | null>(null);
 export function PermissionProvider({ children }: { children: ReactNode }) {
   const { data: session, status } = useSession();
 
-  const permissions = useMemo(() => new Set<string>(session?.permissions), [session?.permissions]);
+  const permissions = useMemo(() => new Set<string>(session?.permissions ?? []), [session?.permissions]);
 
   const roles = useMemo<RoleAssignment[]>(
     () => (session?.roles as RoleAssignment[] | undefined) ?? [],

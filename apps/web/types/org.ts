@@ -86,7 +86,6 @@ export interface Org {
   logo_image: string | null;
   thumbnail_image: string | null;
   previews: Record<string, unknown> | null;
-  explore: boolean | null;
   label: string | null;
   config: OrgConfig | null;
   creation_date: string;

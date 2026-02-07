@@ -332,6 +332,7 @@ async def get_user_session(
 
     roles = []
 
+    org = None
     for org_id in org_ids:
         org_statement = select(Organization).where(Organization.id == org_id)
         org = db_session.exec(org_statement).first()
@@ -357,8 +358,13 @@ async def get_user_session(
 
         # Get org_id from the current organization context if available
         org_id = org.id if org and hasattr(org, "id") else None
-        effective = checker.get_effective_permissions(current_user.id, org_id)
-        permissions = {p: True for p in effective}
+        effective = checker.get_effective_permissions(current_user.id, org_id) or set()
+        # Ensure effective is an iterable of strings
+        if not isinstance(effective, (set, list, tuple)):
+            _logger.warning("Expected effective permissions to be iterable, got: %s", type(effective))
+            effective = set()
+        # Return a list of permission strings for the session (canonical shape)
+        permissions = list(effective)
         # Add timestamp for cache validation (Unix timestamp in seconds)
         permissions_timestamp = int(datetime.now(UTC).timestamp())
     except Exception as e:

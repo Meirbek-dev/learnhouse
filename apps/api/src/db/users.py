@@ -70,9 +70,7 @@ class UserRoleWithOrg(PydanticStrictBaseModel):
 class UserSession(PydanticStrictBaseModel):
     user: UserRead
     roles: list[UserRoleWithOrg]
-    permissions: dict[
-        str, bool
-    ] = {}  # Effective permissions: "course:create:org" -> True
+    permissions: list[str] = []  # Effective permissions: list of permission strings, e.g. "course:create:org"
     permissions_timestamp: int | None = (
         None  # Unix timestamp when permissions were loaded
     )
