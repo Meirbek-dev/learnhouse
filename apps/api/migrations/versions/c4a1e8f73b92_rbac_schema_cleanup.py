@@ -404,25 +404,11 @@ def upgrade() -> None:
     # 5. Drop permission_audit_log table
     # ==================================================================
     print("\n5. Dropping permission_audit_log...")
-    
-    # First, drop all indexes on the table to avoid locks
-    if _table_exists(conn, "permission_audit_log"):
-        for idx in [
-            "ix_permission_audit_user",
-            "ix_permission_audit_resource",
-            "ix_permission_audit_action",
-            "ix_audit_log_result_created",
-            "idx_audit_log_user_resource",
-        ]:
-            _drop_index_if_exists(conn, idx)
-        
-        # Drop foreign key constraints explicitly
-        _drop_fk_if_exists(conn, "permission_audit_log", "permission_audit_log_user_id_fkey")
-        _drop_fk_if_exists(conn, "permission_audit_log", "permission_audit_log_org_id_fkey")
-        
-        # Now drop the table
-        conn.execute(text("DROP TABLE permission_audit_log"))
-    
+
+    # Drop the table with CASCADE to avoid lock issues
+    # CASCADE will automatically drop all indexes, constraints, and dependencies
+    conn.execute(text("DROP TABLE IF EXISTS permission_audit_log CASCADE"))
+
     print("   Done")
 
     # ==================================================================
@@ -647,8 +633,8 @@ def _reseed_permissions_and_roles(conn) -> None:
             for pid in matched:
                 conn.execute(
                     text("""
-                        INSERT INTO role_permissions (role_id, permission_id)
-                        VALUES (:role_id, :pid)
+                        INSERT INTO role_permissions (role_id, permission_id, granted_at)
+                        VALUES (:role_id, :pid, NOW())
                         ON CONFLICT (role_id, permission_id) DO NOTHING
                     """),
                     {"role_id": role_id, "pid": pid},
