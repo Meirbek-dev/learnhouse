@@ -97,13 +97,6 @@ async def get_organization_by_slug(
             detail="Organization not found",
         )
 
-    # RBAC check - allow anonymous users to read public org info (e.g., landing pages)
-    checker = PermissionChecker(db_session)
-    # AnonymousUser.id is 0; skip permission requirement for anonymous users
-    from src.db.users import AnonymousUser
-    if not isinstance(current_user, AnonymousUser):
-        checker.require(current_user.id, "organization:read:org", org.id)
-
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
     result = db_session.exec(statement)
