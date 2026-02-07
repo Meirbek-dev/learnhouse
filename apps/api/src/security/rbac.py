@@ -49,7 +49,11 @@ class PermissionDenied(HTTPException):
             message = f"Permission denied: {permission}"
         elif action and resource_type:
             a = action.value if hasattr(action, "value") else str(action)
-            r = resource_type.value if hasattr(resource_type, "value") else str(resource_type)
+            r = (
+                resource_type.value
+                if hasattr(resource_type, "value")
+                else str(resource_type)
+            )
             message = f"Permission denied: {r}:{a}"
         else:
             message = "Permission denied"
@@ -124,9 +128,7 @@ class PermissionChecker:
             .where(UserRole.user_id == user_id)
         )
         if org_id is not None:
-            query = query.where(
-                or_(UserRole.org_id == org_id, Role.org_id.is_(None))
-            )
+            query = query.where(or_(UserRole.org_id == org_id, Role.org_id.is_(None)))
         results = self.db.exec(query).all()
         return [
             {
@@ -269,9 +271,7 @@ class PermissionChecker:
                     .where(RolePermission.permission_id == perm.id)
                 ).first()
                 if not existing_rp:
-                    self.db.add(
-                        RolePermission(role_id=role.id, permission_id=perm.id)
-                    )
+                    self.db.add(RolePermission(role_id=role.id, permission_id=perm.id))
 
         self.db.commit()
         return created
@@ -299,9 +299,7 @@ class PermissionChecker:
             .distinct()
         )
         if org_id is not None:
-            query = query.where(
-                or_(UserRole.org_id == org_id, Role.org_id.is_(None))
-            )
+            query = query.where(or_(UserRole.org_id == org_id, Role.org_id.is_(None)))
 
         return set(self.db.exec(query).all())
 
@@ -388,9 +386,8 @@ def require_permission(permission: str, *, org_id_param: str = "org_id"):
             raise AuthenticationRequired()
 
         # Resolve org_id from path params, query params, or body
-        org_id_raw = (
-            request.path_params.get(org_id_param)
-            or request.query_params.get(org_id_param)
+        org_id_raw = request.path_params.get(org_id_param) or request.query_params.get(
+            org_id_param
         )
         org_id = int(org_id_raw) if org_id_raw else None
 

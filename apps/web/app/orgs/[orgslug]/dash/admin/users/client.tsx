@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar, Plus, Search, Shield, Trash2, User } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { PermissionGuard, Actions, ResourceTypes, usePermissions } from '@/components/Security';
+import { PermissionGuard, Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useCallback, useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -223,7 +223,8 @@ export default function UserRolesClient() {
         </div>
         <PermissionGuard
           action={Actions.MANAGE}
-          resource={ResourceTypes.ROLE}
+          resource={Resources.ROLE}
+          scope={Scopes.ORG}
         >
           <Dialog
             open={isAddDialogOpen}
@@ -393,7 +394,8 @@ export default function UserRolesClient() {
                   <TableCell className="text-right">
                     <PermissionGuard
                       action={Actions.DELETE}
-                      resource={ResourceTypes.ROLE}
+                      resource={Resources.ROLE}
+                      scope={Scopes.ORG}
                     >
                       <Button
                         variant="ghost"

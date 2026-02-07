@@ -9,7 +9,7 @@ import { Award, GalleryVerticalEnd, Globe, Info, Loader2, Lock, UserPen } from '
 import { CourseProvider } from '../../../../../../../../components/Contexts/CourseContext';
 import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
-import { Actions, ResourceTypes } from '@/types/permissions';
+import { Actions, Resources, Scopes } from '@/types/permissions';
 import { usePermissions } from '@/components/Security';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -38,6 +38,8 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
       icon: Info,
       href: `/dash/courses/course/${params.courseuuid}/general`,
       requiredAction: Actions.UPDATE,
+      requiredResource: Resources.COURSE,
+      requiredScope: Scopes.OWN,
     },
     {
       key: 'content',
@@ -45,6 +47,8 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
       icon: GalleryVerticalEnd,
       href: `/dash/courses/course/${params.courseuuid}/content`,
       requiredAction: Actions.UPDATE,
+      requiredResource: Resources.COURSE,
+      requiredScope: Scopes.OWN,
     },
     {
       key: 'access',
@@ -52,6 +56,8 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
       icon: Globe,
       href: `/dash/courses/course/${params.courseuuid}/access`,
       requiredAction: Actions.MANAGE,
+      requiredResource: Resources.COURSE,
+      requiredScope: Scopes.OWN,
     },
     {
       key: 'contributors',
@@ -59,6 +65,8 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
       icon: UserPen,
       href: `/dash/courses/course/${params.courseuuid}/contributors`,
       requiredAction: Actions.MANAGE,
+      requiredResource: Resources.COURSE,
+      requiredScope: Scopes.OWN,
       context: 'contributors' as const,
     },
     {
@@ -67,16 +75,18 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
       icon: Award,
       href: `/dash/courses/course/${params.courseuuid}/certification`,
       requiredAction: Actions.CREATE,
+      requiredResource: Resources.CERTIFICATE,
+      requiredScope: Scopes.ORG,
       context: 'certifications' as const,
     },
   ];
 
   // Filter tabs based on permissions
-  const visibleTabs = tabs.filter((tab) => can(tab.requiredAction, ResourceTypes.COURSE));
+  const visibleTabs = tabs.filter((tab) => can(tab.requiredAction, tab.requiredResource, tab.requiredScope));
 
   // Check if current subpage is accessible
   const currentTab = tabs.find((tab) => tab.key === params.subpage);
-  const hasAccessToCurrentPage = currentTab ? can(currentTab.requiredAction, ResourceTypes.COURSE) : false;
+  const hasAccessToCurrentPage = currentTab ? can(currentTab.requiredAction, currentTab.requiredResource, currentTab.requiredScope) : false;
 
   // Redirect to first available tab if current page is not accessible
   useEffect(() => {
@@ -122,7 +132,7 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
             {tabs.map((tab) => {
               const IconComponent = tab.icon;
               const isActive = params.subpage.toString() === tab.key;
-              const hasAccess = can(tab.requiredAction, ResourceTypes.COURSE);
+              const hasAccess = can(tab.requiredAction, tab.requiredResource, tab.requiredScope);
 
               if (!hasAccess) {
                 return (
@@ -181,19 +191,19 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
           className="relative h-full overflow-y-auto"
         >
           <div className="absolute inset-0">
-            {params.subpage === 'content' && can(Actions.UPDATE, ResourceTypes.COURSE) ? (
+            {params.subpage === 'content' && can(Actions.UPDATE, Resources.COURSE, Scopes.OWN) ? (
               <EditCourseStructure orgslug={params.orgslug} />
             ) : null}
-            {params.subpage === 'general' && can(Actions.UPDATE, ResourceTypes.COURSE) ? (
+            {params.subpage === 'general' && can(Actions.UPDATE, Resources.COURSE, Scopes.OWN) ? (
               <EditCourseGeneral orgslug={params.orgslug} />
             ) : null}
-            {params.subpage === 'access' && can(Actions.MANAGE, ResourceTypes.COURSE) ? (
+            {params.subpage === 'access' && can(Actions.MANAGE, Resources.COURSE, Scopes.OWN) ? (
               <EditCourseAccess orgslug={params.orgslug} />
             ) : null}
-            {params.subpage === 'contributors' && can(Actions.MANAGE, ResourceTypes.COURSE) ? (
+            {params.subpage === 'contributors' && can(Actions.MANAGE, Resources.COURSE, Scopes.OWN) ? (
               <EditCourseContributors orgslug={params.orgslug} />
             ) : null}
-            {params.subpage === 'certification' && can(Actions.CREATE, ResourceTypes.CERTIFICATE) ? (
+            {params.subpage === 'certification' && can(Actions.CREATE, Resources.CERTIFICATE, Scopes.ORG) ? (
               <EditCourseCertification orgslug={params.orgslug} />
             ) : null}
           </div>

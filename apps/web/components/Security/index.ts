@@ -1,23 +1,15 @@
 /**
- * RBAC Security Components
+ * RBAC Security Components — canonical barrel export.
  *
- * This module exports all permission and role-related components
- * for the new RBAC system.
- *
- * CANONICAL API - All permission-related imports should use this module.
+ * All permission-related imports should come from this module.
  */
 
 // Core provider and hook
-export { PermissionProvider } from './PermissionProvider';
-export { usePermissions } from '@/hooks/usePermissions';
-export type { UsePermissionsOptions, ResourceWithPermissions } from '@/hooks/usePermissions';
+export { PermissionProvider, usePermissions } from './PermissionProvider';
 
 // UI Components
-export { PermissionDenied } from './PermissionDenied';
 export { PermissionGuard } from './PermissionGuard';
-export { RoleHierarchyTree } from './RoleHierarchyTree';
-export { AdminGuard } from './AdminGuard';
 
-// Re-export types
-export type { Action, ResourceType, Scope, Role, Permission } from '@/types/permissions';
-export { Actions, ResourceTypes, Scopes, RoleSlugs } from '@/types/permissions';
+// Re-export types and constants from permissions for convenience
+export type { Action, Resource, Scope, Role, PermissionString } from '@/types/permissions';
+export { Actions, Resources, Scopes, RoleSlugs, perm } from '@/types/permissions';

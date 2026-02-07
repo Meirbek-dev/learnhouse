@@ -383,7 +383,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           user: api_SESSION.user,
           roles: api_SESSION.roles || [],
           tokens: tokens,
-          permissions: api_SESSION.permissions || {},
+          permissions: api_SESSION.permissions || [],
         };
 
         const updatedSession = {

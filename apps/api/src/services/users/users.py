@@ -338,9 +338,7 @@ async def get_user_session(
 
         if org:
             # Get user's roles in this org
-            user_roles = checker.get_user_roles(
-                user_id=user.id, org_id=org_id
-            )
+            user_roles = checker.get_user_roles(user_id=user.id, org_id=org_id)
 
             # Use first role (primary role)
             if user_roles:

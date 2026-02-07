@@ -1,37 +1,82 @@
 /**
- * Permission types for the RBAC system.
+ * Permission types — single source of truth for the frontend RBAC system.
  *
- * This module provides TypeScript types that mirror the backend permission system,
- * enabling type-safe permission checks in the frontend.
+ * Constants use lowercase values to match the backend format directly.
+ * No toLowerCase() conversion needed at check time.
  *
- * NOTE: Actions, ResourceTypes, Scopes, and RoleSlugs are now imported from
- * generated_permissions.ts which is auto-generated from the YAML schema.
- * This file contains only the interfaces and helper functions.
+ * Based on shared/permissions.yaml
  */
 
-import { Actions, ResourceTypes, Scopes, RoleSlugs, buildPermissionName } from './generated_permissions';
-import type { Action, ResourceType, Scope, RoleSlug } from './generated_permissions';
+// ============================================================================
+// Constants
+// ============================================================================
 
-// Re-export the generated types for convenience
-export { Actions, ResourceTypes, Scopes, RoleSlugs };
-export type { Action, ResourceType, Scope, RoleSlug };
+export const Actions = {
+  CREATE: 'create',
+  READ: 'read',
+  UPDATE: 'update',
+  DELETE: 'delete',
+  MANAGE: 'manage',
+  MODERATE: 'moderate',
+  EXPORT: 'export',
+  INVITE: 'invite',
+  GRADE: 'grade',
+  SUBMIT: 'submit',
+  ENROLL: 'enroll',
+} as const;
 
-/**
- * Permission definition.
- */
-export interface Permission {
-  id: number;
-  name: string;
-  resource_type: ResourceType;
-  action: Action;
-  scope: Scope;
-  description?: string;
-  created_at: string;
-}
+export type Action = (typeof Actions)[keyof typeof Actions];
 
-/**
- * Role definition.
- */
+export const Resources = {
+  ORGANIZATION: 'organization',
+  COURSE: 'course',
+  CHAPTER: 'chapter',
+  ACTIVITY: 'activity',
+  ASSIGNMENT: 'assignment',
+  QUIZ: 'quiz',
+  USER: 'user',
+  USERGROUP: 'usergroup',
+  COLLECTION: 'collection',
+  ROLE: 'role',
+  CERTIFICATE: 'certificate',
+  DISCUSSION: 'discussion',
+  FILE: 'file',
+  ANALYTICS: 'analytics',
+  TRAIL: 'trail',
+  EXAM: 'exam',
+  PAYMENT: 'payment',
+  API_TOKEN: 'api_token',
+} as const;
+
+export type Resource = (typeof Resources)[keyof typeof Resources];
+
+export const Scopes = {
+  ALL: 'all',
+  OWN: 'own',
+  ASSIGNED: 'assigned',
+  ORG: 'org',
+} as const;
+
+export type Scope = (typeof Scopes)[keyof typeof Scopes];
+
+export const RoleSlugs = {
+  SUPER_ADMIN: 'super-admin',
+  ORG_ADMIN: 'org-admin',
+  MAINTAINER: 'maintainer',
+  INSTRUCTOR: 'instructor',
+  MODERATOR: 'moderator',
+  USER: 'user',
+} as const;
+
+export type RoleSlug = (typeof RoleSlugs)[keyof typeof RoleSlugs];
+
+// ============================================================================
+// Types
+// ============================================================================
+
+/** Permission string format: "resource:action:scope" */
+export type PermissionString = `${Resource}:${Action}:${Scope}`;
+
 export interface Role {
   id: number;
   name: string;
@@ -40,90 +85,29 @@ export interface Role {
   org_id?: number | null;
   is_system: boolean;
   priority: number;
-  created_at: string;
-  updated_at: string;
 }
 
-/**
- * Role with its assigned permissions.
- */
-export interface RoleWithPermissions extends Role {
-  permissions: Permission[];
-}
-
-/**
- * User-role assignment.
- */
-export interface UserRole {
-  user_id: number;
-  role_id: number;
-  org_id: number;
-  assigned_at: string;
-  assigned_by?: number | null;
-  role?: Role;
-}
-
-/**
- * User's effective permissions response from API.
- */
-export interface UserPermissionsResponse {
+/** Canonical type for user RBAC data from the API. */
+export interface UserRBACData {
   roles: Role[];
-  permissions: string[]; // flat list of permission name strings
-  org_id?: number | null;
+  permissions: string[];
+  org_id: number | null;
 }
 
-// Re-export canonical helpers from generated types (no local implementations)
-export { buildPermissionName, parsePermissionName } from './generated_permissions';
+// ============================================================================
+// Helpers
+// ============================================================================
 
-/**
- * Common permission names for quick access.
- */
-export const CommonPermissions = {
-  // Course permissions
-  COURSE_CREATE: buildPermissionName(ResourceTypes.COURSE, Actions.CREATE, Scopes.ORG),
-  COURSE_READ: buildPermissionName(ResourceTypes.COURSE, Actions.READ, Scopes.ALL),
-  COURSE_UPDATE_OWN: buildPermissionName(ResourceTypes.COURSE, Actions.UPDATE, Scopes.OWN),
-  COURSE_DELETE_OWN: buildPermissionName(ResourceTypes.COURSE, Actions.DELETE, Scopes.OWN),
-  COURSE_MANAGE_OWN: buildPermissionName(ResourceTypes.COURSE, Actions.MANAGE, Scopes.OWN),
-
-  // Organization permissions
-  ORG_READ: buildPermissionName(ResourceTypes.ORGANIZATION, Actions.READ, Scopes.OWN),
-  ORG_UPDATE: buildPermissionName(ResourceTypes.ORGANIZATION, Actions.UPDATE, Scopes.OWN),
-  ORG_MANAGE: buildPermissionName(ResourceTypes.ORGANIZATION, Actions.MANAGE, Scopes.OWN),
-
-  // User permissions
-  USER_READ_OWN: buildPermissionName(ResourceTypes.USER, Actions.READ, Scopes.OWN),
-  USER_UPDATE_OWN: buildPermissionName(ResourceTypes.USER, Actions.UPDATE, Scopes.OWN),
-  USER_READ_ORG: buildPermissionName(ResourceTypes.USER, Actions.READ, Scopes.ORG),
-  USER_INVITE: buildPermissionName(ResourceTypes.USER, Actions.INVITE, Scopes.ORG),
-
-  // Role permissions
-  ROLE_CREATE: buildPermissionName(ResourceTypes.ROLE, Actions.CREATE, Scopes.ORG),
-  ROLE_READ: buildPermissionName(ResourceTypes.ROLE, Actions.READ, Scopes.ORG),
-  ROLE_UPDATE: buildPermissionName(ResourceTypes.ROLE, Actions.UPDATE, Scopes.ORG),
-  ROLE_DELETE: buildPermissionName(ResourceTypes.ROLE, Actions.DELETE, Scopes.ORG),
-
-  // Analytics permissions
-  ANALYTICS_READ_OWN: buildPermissionName(ResourceTypes.ANALYTICS, Actions.READ, Scopes.OWN),
-  ANALYTICS_READ_ORG: buildPermissionName(ResourceTypes.ANALYTICS, Actions.READ, Scopes.ORG),
-} as const;
-
-/**
- * Check if a role is an admin role.
- */
-export function isAdminRole(roleSlug: string): boolean {
-  return roleSlug === RoleSlugs.SUPER_ADMIN || roleSlug === RoleSlugs.ORG_ADMIN;
+/** Build a permission string. Format: "resource:action:scope" */
+export function perm(resource: Resource, action: Action, scope: Scope): PermissionString {
+  return `${resource}:${action}:${scope}`;
 }
 
-/**
- * Check if a role has instructor-level access.
- */
-export function isInstructorOrHigher(roleSlug: string): boolean {
-  const instructorOrHigher: string[] = [
-    RoleSlugs.SUPER_ADMIN,
-    RoleSlugs.ORG_ADMIN,
-    RoleSlugs.MAINTAINER,
-    RoleSlugs.INSTRUCTOR,
-  ];
-  return instructorOrHigher.includes(roleSlug);
+/** @deprecated Use `perm()` instead. */
+export function buildPermissionName(resource: string, action: string, scope: string = 'all'): string {
+  return `${resource.toLowerCase()}:${action.toLowerCase()}:${scope.toLowerCase()}`;
+}
+
+export function isAdminRole(slug: string): boolean {
+  return slug === RoleSlugs.SUPER_ADMIN || slug === RoleSlugs.ORG_ADMIN;
 }

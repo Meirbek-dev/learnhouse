@@ -21,7 +21,7 @@ interface UserRoleWithOrg {
 interface UserSessionResponse {
   user: AuthUser;
   roles: UserRoleWithOrg[];
-  permissions: Record<string, boolean>;
+  permissions: string[];
 }
 
 interface AuthError extends Error {

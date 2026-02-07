@@ -44,8 +44,8 @@ declare global {
     user: AuthUser;
     roles: UserRoleWithOrg[];
     tokens: AuthTokens;
-    /** User's effective permissions as permission_name -> boolean */
-    permissions: Record<string, boolean>;
+    /** User's effective permissions as flat string array */
+    permissions: string[];
     /** Unix timestamp (seconds) when permissions were loaded - for cache validation */
     permissions_timestamp?: number;
   }
@@ -62,8 +62,8 @@ declare module 'next-auth' {
     roles?: UserRoleWithOrg[];
     tokens?: AuthTokens;
     expires: string;
-    /** User's effective permissions as permission_name -> boolean */
-    permissions?: Record<string, boolean>;
+    /** User's effective permissions as flat string array */
+    permissions?: string[];
     /** Unix timestamp (seconds) when permissions were loaded - for cache validation */
     permissions_timestamp?: number;
   }
@@ -75,7 +75,7 @@ declare module 'next-auth/jwt' {
   interface JWT {
     user?: UserWithTokens;
     /** Cached permissions */
-    permissions?: Record<string, boolean>;
+    permissions?: string[];
     /** Unix timestamp (seconds) when permissions were loaded */
     permissions_timestamp?: number;
   }

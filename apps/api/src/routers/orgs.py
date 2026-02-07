@@ -141,7 +141,9 @@ async def api_update_user_role(
     )
 
 
-@router.delete("/{org_id}/users/{user_id}", dependencies=[require_permission("user:delete:org")])
+@router.delete(
+    "/{org_id}/users/{user_id}", dependencies=[require_permission("user:delete:org")]
+)
 async def api_remove_user_from_org(
     request: Request,
     org_id: int,
@@ -160,7 +162,10 @@ async def api_remove_user_from_org(
 
 
 # Config related routes
-@router.put("/{org_id}/signup_mechanism", dependencies=[require_permission("organization:update:org")])
+@router.put(
+    "/{org_id}/signup_mechanism",
+    dependencies=[require_permission("organization:update:org")],
+)
 async def api_get_org_signup_mechanism(
     request: Request,
     org_id: int,
@@ -194,7 +199,10 @@ async def api_create_invite_code(
     return await create_invite_code(request, org_id, current_user, db_session)
 
 
-@router.post("/{org_id}/invites_with_usergroups", dependencies=[require_permission("user:invite:org")])
+@router.post(
+    "/{org_id}/invites_with_usergroups",
+    dependencies=[require_permission("user:invite:org")],
+)
 async def api_create_invite_code_with_ug(
     request: Request,
     org_id: int,
@@ -240,7 +248,10 @@ async def api_get_invite_code(
     return await get_invite_code(request, org_id, invite_code, current_user, db_session)
 
 
-@router.delete("/{org_id}/invites/{org_invite_code_uuid}", dependencies=[require_permission("user:invite:org")])
+@router.delete(
+    "/{org_id}/invites/{org_invite_code_uuid}",
+    dependencies=[require_permission("user:invite:org")],
+)
 async def api_delete_invite_code(
     request: Request,
     org_id: int,
@@ -258,7 +269,10 @@ async def api_delete_invite_code(
     )
 
 
-@router.post("/{org_id}/invites/users/batch", dependencies=[require_permission("user:invite:org")])
+@router.post(
+    "/{org_id}/invites/users/batch",
+    dependencies=[require_permission("user:invite:org")],
+)
 async def api_invite_batch_users(
     request: Request,
     org_id: int,
@@ -290,7 +304,10 @@ async def api_get_org_users_invites(
     return await get_list_of_invited_users(request, org_id, db_session, current_user)
 
 
-@router.delete("/{org_id}/invites/users/{email}", dependencies=[require_permission("user:invite:org")])
+@router.delete(
+    "/{org_id}/invites/users/{email}",
+    dependencies=[require_permission("user:invite:org")],
+)
 async def api_delete_org_users_invites(
     request: Request,
     org_id: int,
@@ -319,7 +336,9 @@ async def api_get_org_by_slug(
     return await get_organization_by_slug(request, org_slug, db_session, current_user)
 
 
-@router.put("/{org_id}/logo", dependencies=[require_permission("organization:update:org")])
+@router.put(
+    "/{org_id}/logo", dependencies=[require_permission("organization:update:org")]
+)
 async def api_update_org_logo(
     request: Request,
     org_id: int,
@@ -341,7 +360,9 @@ async def api_update_org_logo(
     )
 
 
-@router.put("/{org_id}/thumbnail", dependencies=[require_permission("organization:update:org")])
+@router.put(
+    "/{org_id}/thumbnail", dependencies=[require_permission("organization:update:org")]
+)
 async def api_update_org_thumbnail(
     request: Request,
     org_id: int,
@@ -363,7 +384,9 @@ async def api_update_org_thumbnail(
     )
 
 
-@router.put("/{org_id}/preview", dependencies=[require_permission("organization:update:org")])
+@router.put(
+    "/{org_id}/preview", dependencies=[require_permission("organization:update:org")]
+)
 async def api_update_org_preview(
     request: Request,
     org_id: int,
@@ -433,7 +456,9 @@ async def api_update_org(
     return await update_org(request, org_object, org_id, current_user, db_session)
 
 
-@router.delete("/{org_id}", dependencies=[require_permission("organization:delete:org")])
+@router.delete(
+    "/{org_id}", dependencies=[require_permission("organization:delete:org")]
+)
 async def api_delete_org(
     request: Request,
     org_id: int,
@@ -448,7 +473,9 @@ async def api_delete_org(
     return await delete_org(request, org_id, current_user, db_session)
 
 
-@router.put("/{org_id}/landing", dependencies=[require_permission("organization:update:org")])
+@router.put(
+    "/{org_id}/landing", dependencies=[require_permission("organization:update:org")]
+)
 async def api_update_org_landing(
     request: Request,
     org_id: int,
@@ -466,7 +493,10 @@ async def api_update_org_landing(
     )
 
 
-@router.post("/{org_id}/landing/content", dependencies=[require_permission("organization:update:org")])
+@router.post(
+    "/{org_id}/landing/content",
+    dependencies=[require_permission("organization:update:org")],
+)
 async def api_upload_org_landing_content(
     request: Request,
     org_id: int,

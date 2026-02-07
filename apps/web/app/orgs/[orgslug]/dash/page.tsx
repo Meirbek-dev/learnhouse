@@ -1,4 +1,3 @@
-import { AdminGuard } from '@/components/Security';
 import { BookCopy, School, Settings, Users } from 'lucide-react';
 import touEmblemLight from './images/tou_emblem_light.webp';
 import ServerLink from '@/components/ui/ServerLink';
@@ -23,8 +22,7 @@ async function DashboardHome() {
           loading="eager"
         />
       </div>
-      <AdminGuard fallback={null}>
-        <div className="flex flex-col gap-4 sm:flex-row lg:gap-10">
+      <div className="flex flex-col gap-4 sm:flex-row lg:gap-10">
           {/* Card components */}
           <DashboardCard
             href="/dash/courses"
@@ -60,9 +58,7 @@ async function DashboardHome() {
             description={t('Users.description')}
           />
         </div>
-      </AdminGuard>
       <div className="mt-6 flex flex-col gap-6 sm:mt-10 sm:gap-10">
-        <AdminGuard fallback={null}>
           <div className="mx-auto h-1 w-[100px] rounded-full bg-neutral-200/100" />
           <div className="flex items-center justify-center">
             <ServerLink
@@ -79,7 +75,6 @@ async function DashboardHome() {
             </ServerLink>
           </div>
           <div className="mx-auto mt-4 h-1 w-28 rounded-full bg-neutral-200/100 sm:mt-[40px]" />
-        </AdminGuard>
 
         <ServerLink
           href="/dash/user-account/settings/general"

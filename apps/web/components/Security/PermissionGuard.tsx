@@ -1,62 +1,29 @@
 'use client';
 
 import type { ReactNode } from 'react';
-
-import type { Action, ResourceType, Scope } from '@/types/permissions';
-import { usePermissions } from '@/hooks/usePermissions';
+import type { Action, Resource, Scope } from '@/types/permissions';
+import { usePermissions } from './PermissionProvider';
 
 interface PermissionGuardProps {
-  /**
-   * Action to check permission for.
-   */
+  /** Action to check permission for. */
   action: Action;
-  /**
-   * Resource type to check permission for.
-   */
-  resource: ResourceType;
-  /**
-   * Permission scope (defaults to ALL).
-   */
-  scope?: Scope;
-  /**
-   * Content to render if permission is granted.
-   */
+  /** Resource to check permission for. */
+  resource: Resource;
+  /** Permission scope (required — no silent default). */
+  scope: Scope;
+  /** Content to render if permission is granted. */
   children: ReactNode;
-  /**
-   * Optional fallback content if permission is denied.
-   * If not provided, nothing is rendered.
-   */
+  /** Optional fallback content if permission is denied. */
   fallback?: ReactNode;
-  /**
-   * If true, shows loading state while checking permissions.
-   */
-  showLoading?: boolean;
-  /**
-   * Custom loading component.
-   */
-  loadingComponent?: ReactNode;
 }
 
 /**
  * Guard component that conditionally renders children based on permissions.
  *
- * This component checks if the current user has the required permission
- * and only renders children if the check passes.
- *
  * @example
  * ```tsx
- * // Hide delete button if user can't delete
- * <PermissionGuard action={Action.DELETE} resource={ResourceType.COURSE} resourceId={courseId}>
- *   <DeleteButton />
- * </PermissionGuard>
- *
- * // Show fallback for unauthorized users
- * <PermissionGuard
- *   action={Action.UPDATE}
- *   resource={ResourceType.COURSE}
- *   fallback={<span>Read-only mode</span>}
- * >
- *   <EditForm />
+ * <PermissionGuard action={Actions.CREATE} resource={Resources.COURSE} scope={Scopes.ORG}>
+ *   <CreateButton />
  * </PermissionGuard>
  * ```
  */
@@ -66,190 +33,11 @@ export function PermissionGuard({
   scope,
   children,
   fallback = null,
-  showLoading = false,
-  loadingComponent = null,
 }: PermissionGuardProps) {
-  const { can, loading: isLoading } = usePermissions();
+  const { can, loading } = usePermissions();
 
-  // Show loading state if requested
-  if (isLoading && showLoading) {
-    return <>{loadingComponent}</>;
-  }
-
-  // Check permission
-  const hasPermission = can(action, resource, scope);
-
-  if (!hasPermission) {
-    return <>{fallback}</>;
-  }
-
-  return <>{children}</>;
-}
-
-interface MultiPermissionGuardProps {
-  /**
-   * Array of permission checks. All must pass for children to render.
-   */
-  permissions: {
-    action: Action;
-    resource: ResourceType;
-    scope?: Scope;
-  }[];
-  /**
-   * If true, only one permission needs to pass (OR logic).
-   * If false (default), all permissions must pass (AND logic).
-   */
-  any?: boolean;
-  /**
-   * Content to render if permissions are granted.
-   */
-  children: ReactNode;
-  /**
-   * Optional fallback content if permissions are denied.
-   */
-  fallback?: ReactNode;
-}
-
-/**
- * Guard component that checks multiple permissions.
- *
- * @example
- * ```tsx
- * // Require both create and manage permissions
- * <MultiPermissionGuard
- *   permissions={[
- *     { action: Action.CREATE, resource: ResourceType.COURSE },
- *     { action: Action.MANAGE, resource: ResourceType.ORGANIZATION },
- *   ]}
- * >
- *   <AdminPanel />
- * </MultiPermissionGuard>
- *
- * // Require any of the permissions (OR logic)
- * <MultiPermissionGuard
- *   any
- *   permissions={[
- *     { action: Action.UPDATE, resource: ResourceType.COURSE },
- *     { action: Action.DELETE, resource: ResourceType.COURSE },
- *   ]}
- *   fallback={<span>No edit access</span>}
- * >
- *   <EditControls />
- * </MultiPermissionGuard>
- * ```
- */
-export function MultiPermissionGuard({
-  permissions,
-  any = false,
-  children,
-  fallback = null,
-}: MultiPermissionGuardProps) {
-  const { canAny, canAll } = usePermissions();
-
-  const hasPermission = any ? canAny(permissions) : canAll(permissions);
-
-  if (!hasPermission) {
-    return <>{fallback}</>;
-  }
-
-  return <>{children}</>;
-}
-
-interface RoleGuardProps {
-  /**
-   * Role slug or array of role slugs to check.
-   */
-  role: string | string[];
-  /**
-   * If true with array of roles, any role is sufficient.
-   * If false, user must have all specified roles.
-   */
-  any?: boolean;
-  /**
-   * Content to render if role check passes.
-   */
-  children: ReactNode;
-  /**
-   * Optional fallback content.
-   */
-  fallback?: ReactNode;
-}
-
-/**
- * Guard component that checks user roles.
- *
- * @example
- * ```tsx
- * // Require admin role
- * <RoleGuard role="org-admin">
- *   <AdminSettings />
- * </RoleGuard>
- *
- * // Require any of the instructor-level roles
- * <RoleGuard role={['instructor', 'maintainer', 'org-admin']} any>
- *   <InstructorDashboard />
- * </RoleGuard>
- * ```
- */
-export function RoleGuard({ role, any = true, children, fallback = null }: RoleGuardProps) {
-  const { hasRole, hasAnyRole } = usePermissions();
-
-  let hasRequiredRole: boolean;
-
-  if (Array.isArray(role)) {
-    hasRequiredRole = any ? hasAnyRole(role) : role.every((r) => hasRole(r));
-  } else {
-    hasRequiredRole = hasRole(role);
-  }
-
-  if (!hasRequiredRole) {
-    return <>{fallback}</>;
-  }
-
-  return <>{children}</>;
-}
-
-interface AuthGuardProps {
-  /**
-   * Content to render if user is authenticated.
-   */
-  children: ReactNode;
-  /**
-   * Optional fallback content for unauthenticated users.
-   */
-  fallback?: ReactNode;
-  /**
-   * If true, shows loading state during authentication check.
-   */
-  showLoading?: boolean;
-  /**
-   * Custom loading component.
-   */
-  loadingComponent?: ReactNode;
-}
-
-/**
- * Guard component that requires authentication.
- *
- * @example
- * ```tsx
- * <AuthGuard fallback={<LoginPrompt />}>
- *   <UserProfile />
- * </AuthGuard>
- * ```
- */
-export function AuthGuard({ children, fallback = null, showLoading = true, loadingComponent = null }: AuthGuardProps) {
-  const { loading: isLoading } = usePermissions();
-  const isAuthenticated = !isLoading;
-
-  if (isLoading && showLoading) {
-    return <>{loadingComponent}</>;
-  }
-
-  if (!isAuthenticated) {
-    return <>{fallback}</>;
-  }
-
+  if (loading) return null;
+  if (!can(action, resource, scope)) return <>{fallback}</>;
   return <>{children}</>;
 }
 

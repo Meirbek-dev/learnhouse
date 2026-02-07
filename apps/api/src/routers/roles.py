@@ -28,6 +28,7 @@ router = APIRouter()
 
 # ── List / Read ───────────────────────────────────────────────────────────
 
+
 @router.get("/permissions/all", response_model=list[PermissionRead])
 async def list_all_permissions(
     db: Annotated[Session, Depends(get_db_session)],
@@ -70,6 +71,7 @@ async def get_role(
 
 
 # ── Create / Update / Delete ──────────────────────────────────────────────
+
 
 @router.post(
     "/",
@@ -137,6 +139,7 @@ async def delete_role(
 
 
 # ── Permissions on Roles ──────────────────────────────────────────────────
+
 
 @router.get("/{role_id}/permissions", response_model=list[PermissionRead])
 async def get_role_permissions(

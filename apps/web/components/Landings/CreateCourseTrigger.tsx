@@ -2,7 +2,7 @@
 
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
-import { PermissionGuard, Actions, ResourceTypes } from '@/components/Security';
+import { PermissionGuard, Actions, Resources, Scopes } from '@/components/Security';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -23,7 +23,8 @@ export default function CreateCourseTrigger({ orgslug, org_id }: CreateCourseTri
   return (
     <PermissionGuard
       action={Actions.CREATE}
-      resource={ResourceTypes.COURSE}
+      resource={Resources.COURSE}
+      scope={Scopes.ORG}
       fallback={null}
     >
       <div>

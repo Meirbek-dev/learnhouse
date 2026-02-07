@@ -4,7 +4,7 @@ import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOf
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
-import { PermissionGuard, Actions, ResourceTypes, usePermissions } from '@/components/Security';
+import { PermissionGuard, Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import CourseGridClient from '@components/Landings/CourseGridClient';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 
@@ -52,7 +52,8 @@ const Courses = (props: CourseProps) => {
   const searchParams = useSearchParams();
   const isCreatingCourse = Boolean(searchParams.get('new'));
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
-  const { isAdmin: isUserAdmin } = usePermissions();
+  const { can } = usePermissions();
+  const isUserAdmin = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
 
   async function closeNewCourseModal() {
     setNewCourseModal(false);
@@ -62,7 +63,8 @@ const Courses = (props: CourseProps) => {
   const newCourseButtonTrigger = (
     <PermissionGuard
       action={Actions.CREATE}
-      resource={ResourceTypes.COURSE}
+      resource={Resources.COURSE}
+      scope={Scopes.ORG}
       fallback={null}
     >
       <NewCourseButton

@@ -141,7 +141,9 @@ async def get_activity(
     checker = PermissionChecker(db_session)
     can_update = checker.check(current_user.id, "activity:update:org", activity.org_id)
     can_delete = checker.check(current_user.id, "activity:delete:org", activity.org_id)
-    is_owner = hasattr(activity, "created_by") and activity.created_by == current_user.id
+    is_owner = (
+        hasattr(activity, "created_by") and activity.created_by == current_user.id
+    )
 
     return ActivityReadWithPermissions(
         **activity_read.model_dump(),
@@ -149,7 +151,9 @@ async def get_activity(
         can_delete=can_delete,
         is_owner=is_owner,
         is_creator=is_owner,
-        available_actions=[a for a, ok in {"update": can_update, "delete": can_delete}.items() if ok],
+        available_actions=[
+            a for a, ok in {"update": can_update, "delete": can_delete}.items() if ok
+        ],
     )
 
 

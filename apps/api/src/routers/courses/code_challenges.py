@@ -12,7 +12,11 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from pydantic import field_validator
 from sqlmodel import Session, func, select
-from src.security.rbac import AuthenticationRequired, PermissionChecker, PermissionDenied
+from src.security.rbac import (
+    AuthenticationRequired,
+    PermissionChecker,
+    PermissionDenied,
+)
 from ulid import ULID
 
 from src.core.events.database import get_db_session

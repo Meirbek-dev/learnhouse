@@ -7,7 +7,7 @@ import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { PermissionGuard } from '@components/Security/PermissionGuard';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import { getOrgCollections } from '@services/courses/collections';
-import { Actions, ResourceTypes } from '@/types/permissions';
+import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getUriWithOrg } from '@services/config/config';
 import { getTranslations } from 'next-intl/server';
 import Link from '@components/ui/AppLink';
@@ -73,7 +73,8 @@ const CollectionsPage = async (params: any) => {
           />
           <PermissionGuard
             action={Actions.CREATE}
-            resource={ResourceTypes.COLLECTION}
+            resource={Resources.COLLECTION}
+            scope={Scopes.ORG}
             fallback={null}
           >
             <Link href={getUriWithOrg(orgslug, '/collections/new')}>
@@ -104,7 +105,8 @@ const CollectionsPage = async (params: any) => {
                 <div className="mt-4 flex justify-center">
                   <PermissionGuard
                     action={Actions.CREATE}
-                    resource={ResourceTypes.COLLECTION}
+                    resource={Resources.COLLECTION}
+                    scope={Scopes.ORG}
                     fallback={null}
                   >
                     <Link href={getUriWithOrg(orgslug, '/collections/new')}>

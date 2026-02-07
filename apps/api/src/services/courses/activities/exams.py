@@ -3,7 +3,11 @@ from datetime import UTC, datetime
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from src.security.rbac import AuthenticationRequired, PermissionChecker, PermissionDenied
+from src.security.rbac import (
+    AuthenticationRequired,
+    PermissionChecker,
+    PermissionDenied,
+)
 from ulid import ULID
 
 from src.db.courses.activities import (
@@ -908,7 +912,9 @@ async def record_violation(
 ) -> ExamAttemptRead:
     """Record a violation during an exam attempt"""
     if isinstance(current_user, AnonymousUser):
-        raise AuthenticationRequired(reason="Authentication required to record violation")
+        raise AuthenticationRequired(
+            reason="Authentication required to record violation"
+        )
 
     statement = select(ExamAttempt).where(ExamAttempt.attempt_uuid == attempt_uuid)
     attempt = db_session.exec(statement).first()

@@ -76,9 +76,7 @@ async def get_organization_users(
 
     for user in users:
         # Get user's roles via new PermissionChecker
-        user_roles = checker.get_user_roles(
-            user_id=user.id, org_id=org_id_int
-        )
+        user_roles = checker.get_user_roles(user_id=user.id, org_id=org_id_int)
 
         if not user_roles:
             logging.warning(f"No roles found for user {user.id} in org {org_id_int}")
@@ -276,18 +274,13 @@ async def update_user_role(
 
     # Remove old role and assign new role using PermissionChecker
     if role_id is not None:
-        # Get current role to remove
-        current_role_ids = {r.role_id for r in user_roles if r.role_id}
-
         # Remove all current roles
         for ur in user_roles:
             db_session.delete(ur)
         db_session.flush()
 
         # Assign new role
-        checker.assign_role(
-            user_id=user_id_int, role_slug=slug, org_id=int(org.id)
-        )
+        checker.assign_role(user_id=user_id_int, role_slug=slug, org_id=int(org.id))
 
     db_session.commit()
 

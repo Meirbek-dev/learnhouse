@@ -7,7 +7,7 @@ import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbn
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import { HeroSection } from '@/components/Dashboard/Gamification/hero-section';
 import PermissionGuard from '@components/Security/PermissionGuard';
-import { Actions, ResourceTypes } from '@/types/permissions';
+import { Actions, Resources, Scopes } from '@/types/permissions';
 import type { DashboardData } from '@/types/gamification';
 import { getUriWithOrg } from '@services/config/config';
 import CreateCourseTrigger from './CreateCourseTrigger';
@@ -176,7 +176,8 @@ const LandingClassic = async ({
                 action={
                   <PermissionGuard
                     action={Actions.CREATE}
-                    resource={ResourceTypes.COLLECTION}
+                    resource={Resources.COLLECTION}
+                    scope={Scopes.ORG}
                   >
                     <Link
                       prefetch={false}

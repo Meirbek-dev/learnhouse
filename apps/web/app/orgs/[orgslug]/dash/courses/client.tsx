@@ -3,7 +3,7 @@
 import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
-import { PermissionGuard, Actions, ResourceTypes, usePermissions } from '@/components/Security';
+import { PermissionGuard, Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -26,7 +26,8 @@ const CoursesHome = (params: CourseProps) => {
   const isCreatingCourse = Boolean(searchParams.get('new'));
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
   const { orgslug, courses, totalCourses } = params;
-  const { isAdmin: isUserAdmin } = usePermissions();
+  const { can } = usePermissions();
+  const isUserAdmin = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
   const t = useTranslations('DashPage.Courses.HomePageClient');
   const org = useOrg() as any;
 
@@ -69,7 +70,8 @@ const CoursesHome = (params: CourseProps) => {
           </div>
           <PermissionGuard
             action={Actions.CREATE}
-            resource={ResourceTypes.COURSE}
+            resource={Resources.COURSE}
+            scope={Scopes.ORG}
             fallback={null}
           >
             <NewCourseButton
@@ -103,7 +105,8 @@ const CoursesHome = (params: CourseProps) => {
                 <div className="mt-6 flex justify-center">
                   <PermissionGuard
                     action={Actions.CREATE}
-                    resource={ResourceTypes.COURSE}
+                    resource={Resources.COURSE}
+                    scope={Scopes.ORG}
                     fallback={null}
                   >
                     <NewCourseButton

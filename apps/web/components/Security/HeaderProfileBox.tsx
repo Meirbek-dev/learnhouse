@@ -13,7 +13,8 @@ import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { PermissionProvider } from '@/components/Security/PermissionProvider';
-import { usePermissions, RoleSlugs } from '@/components/Security';
+import { usePermissions } from '@/components/Security';
+import { Actions, Resources, Scopes, RoleSlugs } from '@/types/permissions';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
@@ -36,7 +37,8 @@ interface CustomRoleInfo {
 
 export const HeaderProfileBox = () => {
   const session = usePlatformSession() as any;
-  const { isAdmin, loading: isLoading } = usePermissions();
+  const { can, loading: isLoading } = usePermissions();
+  const canAccessDashboard = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
   const org = useOrg() as any;
   const t = useTranslations('Header');
 
@@ -51,14 +53,7 @@ export const HeaderProfileBox = () => {
     if (orgRoles.length > 0) {
       // Sort by role priority using slug-based comparison
       const sortedRoles = orgRoles.toSorted((a: any, b: any) => {
-        const getRolePriority = (role: any) => {
-          const slug = role.role?.slug || '';
-          if (slug === RoleSlugs.SUPER_ADMIN || slug === RoleSlugs.ORG_ADMIN) return 4;
-          if (slug === RoleSlugs.MAINTAINER) return 3;
-          if (slug === RoleSlugs.INSTRUCTOR) return 2;
-          return 1;
-        };
-        return getRolePriority(b) - getRolePriority(a);
+        return (b.role?.priority ?? 0) - (a.role?.priority ?? 0);
       });
 
       const highestRole = sortedRoles[0];
@@ -243,7 +238,7 @@ export const HeaderProfileBox = () => {
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                {isAdmin && (
+                {canAccessDashboard && (
                   <DropdownMenuItem
                     nativeButton={false}
                     render={

@@ -25,6 +25,7 @@ import OnBoardAI from '@public/onboarding/OnBoardAI.png';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { usePermissions } from '@/components/Security';
+import { Actions, Resources, Scopes } from '@/types/permissions';
 import type { StaticImageData } from 'next/image';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useRouter } from 'next/navigation';
@@ -96,7 +97,8 @@ const Onboarding: FC = () => {
   const isMobile = useIsMobile();
   const router = useRouter();
   const org = useOrg() as any;
-  const { isAdmin: isUserAdmin } = usePermissions();
+  const { can } = usePermissions();
+  const isUserAdmin = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
 
   const onboardingData: OnboardingStep[] = [
     {

@@ -4,7 +4,7 @@ import { Backpack, BadgeDollarSign, BookCopy, Home, School, Settings, Users } fr
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { usePaymentsEnabled } from '@components/Hooks/usePaymentsEnabled';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import { usePermissions, Actions, ResourceTypes } from '@/components/Security';
+import { usePermissions, Actions, Resources, Scopes } from '@/components/Security';
 import AppLink from '@/components/ui/AppLink';
 import { useTranslations } from 'next-intl';
 
@@ -15,7 +15,7 @@ const DashMobileMenu = () => {
   const { can } = usePermissions();
 
   // Check if user has organization management rights using permission hook
-  const canManageOrganization = can(Actions.MANAGE, ResourceTypes.ORGANIZATION);
+  const canManageOrganization = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
 
   return (
     <div

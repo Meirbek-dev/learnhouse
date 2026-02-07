@@ -6,6 +6,7 @@ import RichContentRenderer from './rich-content-renderer';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { usePermissions } from '@/components/Security';
+import { Actions, Resources, Scopes } from '@/types/permissions';
 import { Button } from '@/components/ui/button';
 import RichTextEditor from './rich-text-editor';
 import { useState, useTransition } from 'react';
@@ -37,7 +38,8 @@ export default function DiscussionReply({
   const format = useFormatter();
   const now = useNow();
   const org = useOrg() as any;
-  const { isAdmin } = usePermissions();
+  const { can } = usePermissions();
+  const isAdmin = can(Actions.MODERATE, Resources.DISCUSSION, Scopes.ORG);
 
   const isOwnReply = reply.username === currentUser?.username;
   const netScore = reply.upvotes - reply.downvotes;

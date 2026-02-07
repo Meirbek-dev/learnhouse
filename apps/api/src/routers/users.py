@@ -335,7 +335,9 @@ async def api_delete_user(
 
     # Prevent self-deletion
     if user_id == current_user.id:
-        raise PermissionDenied(reason="You cannot delete your own account through this endpoint")
+        raise PermissionDenied(
+            reason="You cannot delete your own account through this endpoint"
+        )
 
     return await delete_user_by_id(request, db_session, current_user, user_id)
 

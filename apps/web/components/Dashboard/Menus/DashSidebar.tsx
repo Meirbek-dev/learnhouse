@@ -17,7 +17,7 @@ import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, School, Settings, Us
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import platformLogoLight from '@public/platform_logo_light.svg';
 import useFeatureFlag from '@components/Hooks/useFeatureFlag';
-import { usePermissions, Actions, ResourceTypes } from '@/components/Security';
+import { usePermissions, Actions, Resources, Scopes } from '@/components/Security';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Separator } from '@/components/ui/separator';
@@ -96,7 +96,7 @@ const useNavigationItems = () => {
   const { can } = usePermissions();
 
   // Check if user has organization management rights using permission hook
-  const canManageOrganization = can(Actions.MANAGE, ResourceTypes.ORGANIZATION);
+  const canManageOrganization = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
 
   return [
     {

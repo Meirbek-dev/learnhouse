@@ -23,6 +23,7 @@ import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { usePermissions } from '@/components/Security';
+import { Actions, Resources, Scopes } from '@/types/permissions';
 import { format, formatDistanceToNow } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '@components/ui/textarea';
@@ -103,7 +104,8 @@ const CourseUpdates = () => {
 
 const UpdatesSection = () => {
   const [selectedView, setSelectedView] = useState('list');
-  const { isAdmin } = usePermissions();
+  const { can } = usePermissions();
+  const isAdmin = can(Actions.UPDATE, Resources.COURSE, Scopes.OWN);
   const t = useTranslations('Courses.CourseUpdates');
   return (
     <div className="soft-shadow w-[700px] overflow-hidden rounded-lg bg-white/95 backdrop-blur-md">
@@ -262,8 +264,8 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
 
 const UpdatesListView = () => {
   const course = useCourse();
-  const { isAdmin } = usePermissions();
-  const session = usePlatformSession() as any;
+  const { can } = usePermissions();
+  const isAdmin = can(Actions.UPDATE, Resources.COURSE, Scopes.OWN);
   const access_token = session?.data?.tokens?.access_token;
   const UPDATES_KEY = course?.courseStructure?.course_uuid
     ? getCourseUpdatesSwrKey(course?.courseStructure?.course_uuid)

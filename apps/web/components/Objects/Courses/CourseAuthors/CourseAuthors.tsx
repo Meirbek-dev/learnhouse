@@ -22,6 +22,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { usePermissions } from '@/components/Security';
+import { Actions, Resources, Scopes } from '@/types/permissions';
 import { format, formatDistanceToNow } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
@@ -154,7 +155,8 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
 
 const UpdatesSection = () => {
   const [selectedView, setSelectedView] = useState('list');
-  const { isAdmin } = usePermissions();
+  const { can } = usePermissions();
+  const isAdmin = can(Actions.MANAGE, Resources.COURSE, Scopes.OWN);
   const course = useCourse();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -314,7 +316,8 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
 
 const UpdatesListView = () => {
   const course = useCourse();
-  const { isAdmin } = usePermissions();
+  const { can } = usePermissions();
+  const isAdmin = can(Actions.MANAGE, Resources.COURSE, Scopes.OWN);
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const { data: updates } = useSWR(`${getAPIUrl()}courses/${course?.courseStructure?.course_uuid}/updates`, (url) =>

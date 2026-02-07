@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ChevronRight, Edit, Lock, Plus, Search, Shield, Trash2, Users } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { PermissionGuard, Actions, ResourceTypes, usePermissions } from '@/components/Security';
+import { PermissionGuard, Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -280,7 +280,8 @@ export default function RBACAdminClient() {
         </div>
         <PermissionGuard
           action={Actions.CREATE}
-          resource={ResourceTypes.ROLE}
+          resource={Resources.ROLE}
+          scope={Scopes.ORG}
         >
           <Dialog
             open={isEditDialogOpen && !selectedRole}
@@ -422,7 +423,8 @@ export default function RBACAdminClient() {
                       <div className="flex justify-end gap-2">
                         <PermissionGuard
                           action={Actions.UPDATE}
-                          resource={ResourceTypes.ROLE}
+                          resource={Resources.ROLE}
+                          scope={Scopes.ORG}
                         >
                           <Button
                             variant="ghost"
@@ -438,7 +440,8 @@ export default function RBACAdminClient() {
                         </PermissionGuard>
                         <PermissionGuard
                           action={Actions.DELETE}
-                          resource={ResourceTypes.ROLE}
+                          resource={Resources.ROLE}
+                          scope={Scopes.ORG}
                         >
                           <Button
                             variant="ghost"

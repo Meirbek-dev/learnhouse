@@ -1,4 +1,5 @@
-import { AdminGuard } from '@/components/Security';
+import { requirePermission } from '@/lib/server-auth';
+import { Actions, Resources, Scopes } from '@/types/permissions';
 import ClientAdminLayout from './ClientAdminLayout';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
@@ -15,12 +16,11 @@ export async function generateMetadata(): Promise<Metadata> {
 async function DashboardLayout(props: { children: ReactNode; params: Promise<any> }) {
   const params = await props.params;
   const { children } = props;
+  const orgslug = params.orgslug;
 
-  return (
-    <AdminGuard fallback={null}>
-      <ClientAdminLayout params={params}>{children}</ClientAdminLayout>
-    </AdminGuard>
-  );
+  await requirePermission(orgslug, Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
+
+  return <ClientAdminLayout params={params}>{children}</ClientAdminLayout>;
 }
 
 export default DashboardLayout;

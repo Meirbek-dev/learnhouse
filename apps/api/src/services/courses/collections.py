@@ -67,9 +67,19 @@ async def get_collection(
 
     courses = list(db_session.exec(statement).all())
 
-    can_update = checker.check(current_user.id, "collection:update:org", collection.org_id) if current_user.id else False
-    can_delete = checker.check(current_user.id, "collection:delete:org", collection.org_id) if current_user.id else False
-    is_owner = hasattr(collection, "created_by") and collection.created_by == current_user.id
+    can_update = (
+        checker.check(current_user.id, "collection:update:org", collection.org_id)
+        if current_user.id
+        else False
+    )
+    can_delete = (
+        checker.check(current_user.id, "collection:delete:org", collection.org_id)
+        if current_user.id
+        else False
+    )
+    is_owner = (
+        hasattr(collection, "created_by") and collection.created_by == current_user.id
+    )
 
     return CollectionReadWithPermissions(
         **collection.model_dump(),
@@ -78,7 +88,9 @@ async def get_collection(
         can_delete=can_delete,
         is_owner=is_owner,
         is_creator=is_owner,
-        available_actions=[a for a, ok in {"update": can_update, "delete": can_delete}.items() if ok],
+        available_actions=[
+            a for a, ok in {"update": can_update, "delete": can_delete}.items() if ok
+        ],
     )
 
 
@@ -94,7 +106,9 @@ async def create_collection(
     # Since collections are organization-level resources, we need to check org permissions
     # For now, we'll use the existing RBAC check but with proper organization context
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "collection:create:org", org_id=collection_object.org_id)
+    checker.require(
+        current_user.id, "collection:create:org", org_id=collection_object.org_id
+    )
 
     # Complete the collection object
     collection.collection_uuid = f"collection_{ULID()}"
@@ -117,7 +131,9 @@ async def create_collection(
             if course:
                 # Verify user has read access to the course before adding it to collection
                 try:
-                    checker.require(current_user.id, "course:read:org", org_id=collection.org_id)
+                    checker.require(
+                        current_user.id, "course:read:org", org_id=collection.org_id
+                    )
                 except HTTPException:
                     raise HTTPException(
                         status_code=403,
@@ -301,9 +317,20 @@ async def get_collections(
 
         courses = db_session.exec(statement).all()
 
-        can_update = checker.check(current_user.id, "collection:update:org", collection.org_id) if current_user.id else False
-        can_delete = checker.check(current_user.id, "collection:delete:org", collection.org_id) if current_user.id else False
-        is_owner = hasattr(collection, "created_by") and collection.created_by == current_user.id
+        can_update = (
+            checker.check(current_user.id, "collection:update:org", collection.org_id)
+            if current_user.id
+            else False
+        )
+        can_delete = (
+            checker.check(current_user.id, "collection:delete:org", collection.org_id)
+            if current_user.id
+            else False
+        )
+        is_owner = (
+            hasattr(collection, "created_by")
+            and collection.created_by == current_user.id
+        )
 
         enriched = CollectionReadWithPermissions(
             **collection.model_dump(),
@@ -312,7 +339,11 @@ async def get_collections(
             can_delete=can_delete,
             is_owner=is_owner,
             is_creator=is_owner,
-            available_actions=[a for a, ok in {"update": can_update, "delete": can_delete}.items() if ok],
+            available_actions=[
+                a
+                for a, ok in {"update": can_update, "delete": can_delete}.items()
+                if ok
+            ],
         )
         collections_with_courses.append(enriched)
 

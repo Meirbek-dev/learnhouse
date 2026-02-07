@@ -1,7 +1,6 @@
-import { fetchUserPermissions } from '@/services/permissions/permissions';
-import { redirect } from 'next/navigation';
+import { requireAnyPermission } from '@/lib/server-auth';
+import { Actions, Resources, Scopes } from '@/types/permissions';
 import type { ReactNode } from 'react';
-import { auth } from '@/auth';
 
 interface OrgLayoutProps {
   children: ReactNode;
@@ -10,31 +9,18 @@ interface OrgLayoutProps {
 
 /**
  * Server-side authorization for organization settings.
- * Redirects unauthorized users immediately without client-side flash.
  */
 async function OrgLayout({ children, params }: OrgLayoutProps) {
   const { orgslug } = await params;
-  const session = await auth();
 
-  if (!session?.tokens?.access_token) {
-    redirect(`/auth/login?orgslug=${orgslug}`);
-  }
-
-  try {
-    const permissions = await fetchUserPermissions(session.tokens.access_token);
-
-    // Check if user has organization management rights
-    const canManageOrganization =
-      permissions?.permissions?.['organizations:read:org'] === true ||
-      permissions?.permissions?.['organizations:update:org'] === true;
-
-    if (!canManageOrganization) {
-      redirect(`/orgs/${orgslug}/dash`);
-    }
-  } catch {
-    // On permission fetch failure, redirect to dashboard
-    redirect(`/orgs/${orgslug}/dash`);
-  }
+  await requireAnyPermission(
+    orgslug,
+    [
+      { action: Actions.READ, resource: Resources.ORGANIZATION, scope: Scopes.OWN },
+      { action: Actions.UPDATE, resource: Resources.ORGANIZATION, scope: Scopes.OWN },
+    ],
+    `/orgs/${orgslug}/dash`,
+  );
 
   return <>{children}</>;
 }
