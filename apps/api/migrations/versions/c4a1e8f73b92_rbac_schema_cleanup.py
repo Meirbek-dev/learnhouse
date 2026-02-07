@@ -404,7 +404,25 @@ def upgrade() -> None:
     # 5. Drop permission_audit_log table
     # ==================================================================
     print("\n5. Dropping permission_audit_log...")
-    conn.execute(text("DROP TABLE IF EXISTS permission_audit_log CASCADE"))
+    
+    # First, drop all indexes on the table to avoid locks
+    if _table_exists(conn, "permission_audit_log"):
+        for idx in [
+            "ix_permission_audit_user",
+            "ix_permission_audit_resource",
+            "ix_permission_audit_action",
+            "ix_audit_log_result_created",
+            "idx_audit_log_user_resource",
+        ]:
+            _drop_index_if_exists(conn, idx)
+        
+        # Drop foreign key constraints explicitly
+        _drop_fk_if_exists(conn, "permission_audit_log", "permission_audit_log_user_id_fkey")
+        _drop_fk_if_exists(conn, "permission_audit_log", "permission_audit_log_org_id_fkey")
+        
+        # Now drop the table
+        conn.execute(text("DROP TABLE permission_audit_log"))
+    
     print("   Done")
 
     # ==================================================================
