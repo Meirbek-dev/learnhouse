@@ -3,8 +3,9 @@ RBAC — Permission Checker, Dependencies & Exceptions
 
 This is the ONE file for all authorization logic.
 
-Permission format: "resource:action" (2-part, no scope).
-Scope is resolved from context (org membership, ownership, assignment).
+Permission format in DB: "resource:action:scope" (3-part).
+Callers pass "resource:action" (2-part) + context (org_id, resource_owner_id).
+The checker determines which scope applies.
 """
 
 from __future__ import annotations
@@ -421,7 +422,6 @@ class PermissionChecker:
         if org_id is not None:
             query = query.where(or_(UserRole.org_id == org_id, Role.org_id.is_(None)))
 
-        # Extract scalar permission name strings (returned as single-column rows)
         return set(self.db.exec(query).all())
 
     @staticmethod
@@ -541,7 +541,7 @@ class RequirePermission:
         if raw is not None:
             try:
                 org_id = int(raw)
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 pass
 
         checker.require(current_user.id, self.permission, org_id)

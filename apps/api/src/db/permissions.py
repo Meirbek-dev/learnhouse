@@ -6,7 +6,7 @@ Single source of truth for all permission-related tables and Pydantic models.
 
 from datetime import UTC, datetime
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, field_validator
 from sqlalchemy import Column, ForeignKey, Index, Integer, UniqueConstraint
 from sqlmodel import Field
 
@@ -49,6 +49,22 @@ class Permission(SQLModelStrictBaseModel, table=True):
     scope: str = Field(max_length=50)
     description: str | None = Field(default=None)
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+    @field_validator("name")
+    @classmethod
+    def validate_permission_format(cls, v: str) -> str:
+        """Enforce 3-part 'resource:action:scope' format."""
+        parts = v.split(":")
+        if len(parts) != 3:
+            raise ValueError(
+                f"Permission name must be in format 'resource:action:scope', got: {v}"
+            )
+        resource, action, scope = parts
+        if not all([resource, action, scope]):
+            raise ValueError(
+                f"Permission name parts cannot be empty, got: {v}"
+            )
+        return v
 
 
 # ============================================================================
