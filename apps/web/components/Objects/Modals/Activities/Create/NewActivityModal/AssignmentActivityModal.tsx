@@ -4,7 +4,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
+
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -257,8 +257,7 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug 
                     <SelectValue placeholder={validationT('selectGradingType')} />
                   </SelectTrigger>
                 </FormControl>
-                <SelectPositioner>
-                  <SelectContent>
+                <SelectContent>
                     <SelectGroup>
                       {gradingTypeItems.map((item) => (
                         <SelectItem
@@ -270,7 +269,6 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug 
                       ))}
                     </SelectGroup>
                   </SelectContent>
-                </SelectPositioner>
               </Select>
               <FormMessage />
             </FormItem>

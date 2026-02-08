@@ -3,7 +3,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
+
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -449,7 +449,6 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
                                       <SelectValue>{t(`certificationTypes.${field.value}`)}</SelectValue>
                                     </SelectTrigger>
                                   </FormControl>
-                                  <SelectPositioner>
                                     <SelectContent>
                                       <SelectGroup>
                                         {certificationTypeItems.map((item) => (
@@ -462,7 +461,6 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
                                         ))}
                                       </SelectGroup>
                                     </SelectContent>
-                                  </SelectPositioner>
                                 </Select>
                                 <FormMessage />
                               </FormItem>

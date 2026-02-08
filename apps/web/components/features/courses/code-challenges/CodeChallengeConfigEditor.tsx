@@ -15,7 +15,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
+
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -429,8 +429,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                             <SelectValue placeholder={t('selectGradingStrategy')} />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectPositioner>
-                          <SelectContent>
+                        <SelectContent>
                             <SelectGroup>
                               {gradingStrategyItems.map((item) => (
                                 <SelectItem
@@ -442,7 +441,6 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                               ))}
                             </SelectGroup>
                           </SelectContent>
-                        </SelectPositioner>
                       </Select>
                       <FormDescription>{t('gradingStrategyDescription')}</FormDescription>
                       <FormMessage />

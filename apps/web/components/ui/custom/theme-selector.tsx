@@ -5,7 +5,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -106,8 +105,7 @@ export function ThemeSelector({ className }: ThemeSelectorProps) {
               </div>
             </SelectValue>
           </SelectTrigger>
-          <SelectPositioner>
-            <SelectContent>
+          <SelectContent>
               <SelectGroup>
                 {themeItems.map((theme) => (
                   <SelectItem
@@ -119,7 +117,6 @@ export function ThemeSelector({ className }: ThemeSelectorProps) {
                 ))}
               </SelectGroup>
             </SelectContent>
-          </SelectPositioner>
         </Select>
 
         {/* Optional: Show current theme description */}

@@ -14,7 +14,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
+
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -354,7 +354,6 @@ export default function ExamResultsDashboard({
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t('filterByStatus')} />
               </SelectTrigger>
-              <SelectPositioner>
                 <SelectContent>
                   <SelectGroup>
                     {statusItems.map((item) => (
@@ -367,7 +366,6 @@ export default function ExamResultsDashboard({
                     ))}
                   </SelectGroup>
                 </SelectContent>
-              </SelectPositioner>
             </Select>
             <Select
               value={sortBy}
@@ -377,7 +375,6 @@ export default function ExamResultsDashboard({
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t('sortBy')} />
               </SelectTrigger>
-              <SelectPositioner>
                 <SelectContent>
                   <SelectGroup>
                     {sortItems.map((item) => (
@@ -390,7 +387,6 @@ export default function ExamResultsDashboard({
                     ))}
                   </SelectGroup>
                 </SelectContent>
-              </SelectPositioner>
             </Select>
             <Button
               variant="outline"

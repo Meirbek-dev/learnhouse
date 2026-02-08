@@ -5,7 +5,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
+
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -395,7 +395,6 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
                           <SelectValue placeholder={t('selectAccessMode')} />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectPositioner>
                         <SelectContent>
                           <SelectGroup>
                             {accessModes.map((item) => (
@@ -408,7 +407,6 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
                             ))}
                           </SelectGroup>
                         </SelectContent>
-                      </SelectPositioner>
                     </Select>
                     <FormDescription>{t('accessModeDescription')}</FormDescription>
                   </FormItem>

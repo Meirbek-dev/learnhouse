@@ -10,7 +10,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
+
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
@@ -254,20 +254,18 @@ export default function QuestionEditor({
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectPositioner>
-                <SelectContent>
-                  <SelectGroup>
-                    {questionTypes.map((item) => (
-                      <SelectItem
-                        key={item.value}
-                        value={item.value}
-                      >
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </SelectPositioner>
+              <SelectContent>
+                <SelectGroup>
+                  {questionTypes.map((item) => (
+                    <SelectItem
+                      key={item.value}
+                      value={item.value}
+                    >
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
             </Select>
           </div>
 

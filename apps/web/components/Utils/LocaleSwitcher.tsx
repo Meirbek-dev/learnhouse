@@ -5,7 +5,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -58,12 +57,7 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
       disabled={isPending}
       items={localeItems}
     >
-      <SelectPositioner
-        className={cn(isMobile && 'z-80')}
-        side="bottom"
-        sideOffset={4}
-      >
-        <SelectContent>
+      <SelectContent className={cn(isMobile && 'z-80')} side="bottom" sideOffset={4}>
           <SelectGroup>
             {localeItems.map((locale) => (
               <SelectItem
@@ -75,7 +69,6 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
             ))}
           </SelectGroup>
         </SelectContent>
-      </SelectPositioner>
       {isMobile ? (
         <SelectTrigger
           className={cn('w-auto touch-manipulation', isMobile && 'w-full', className)}
@@ -94,12 +87,7 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
           {isMobile ? <SelectValue placeholder={t('selectLanguage')}>{t(currentLocale)}</SelectValue> : null}
         </SelectTrigger>
       )}
-      <SelectPositioner
-        className={cn(isMobile && 'z-80')}
-        side="bottom"
-        sideOffset={4}
-      >
-        <SelectContent>
+      <SelectContent className={cn(isMobile && 'z-80')} side="bottom" sideOffset={4}>
           <SelectGroup>
             {locales.map((locale) => (
               <SelectItem
@@ -111,7 +99,6 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
             ))}
           </SelectGroup>
         </SelectContent>
-      </SelectPositioner>
     </Select>
   );
 };

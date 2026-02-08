@@ -11,7 +11,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -160,7 +159,6 @@ export default function CodeChallengeActivityModal({
                           <SelectValue placeholder={t('selectDifficulty')} />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectPositioner>
                         <SelectContent>
                           <SelectGroup>
                             {difficultyItems.map((item) => (
@@ -173,7 +171,6 @@ export default function CodeChallengeActivityModal({
                             ))}
                           </SelectGroup>
                         </SelectContent>
-                      </SelectPositioner>
                     </Select>
                     <FormMessage />
                   </FormItem>
@@ -203,7 +200,6 @@ export default function CodeChallengeActivityModal({
                           <SelectValue placeholder={t('selectType')} />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectPositioner>
                         <SelectContent>
                           <SelectGroup>
                             {subtypeItems.map((item) => (
@@ -216,7 +212,6 @@ export default function CodeChallengeActivityModal({
                             ))}
                           </SelectGroup>
                         </SelectContent>
-                      </SelectPositioner>
                     </Select>
                     <FormDescription>
                       {field.value === 'competitive' ? t('typeCompetitiveHint') : t('typeGeneralHint')}

@@ -3,7 +3,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
+
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
@@ -535,8 +535,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                                   <SelectTrigger className="flex-1 text-xs">
                                     <SelectValue placeholder={t('endScenarioOption') as string} />
                                   </SelectTrigger>
-                                  <SelectPositioner>
-                                    <SelectContent>
+                                  <SelectContent>
                                       <SelectGroup>
                                         {nextScenarioOptions.map((item) => (
                                           <SelectItem
@@ -548,7 +547,6 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                                         ))}
                                       </SelectGroup>
                                     </SelectContent>
-                                  </SelectPositioner>
                                 </Select>
                               </div>
                             </div>

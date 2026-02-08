@@ -22,7 +22,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
+
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
@@ -578,18 +578,17 @@ const UserProfileBuilder = () => {
                     {t('SectionsPanel.addSectionButton')}
                   </div>
                 </SelectTrigger>
-                <SelectPositioner>
-                  <SelectContent>
-                    <SelectGroup>
-                      {Object.entries(getSectionTypesConfig(t)).map(([type, { icon: Icon, label, description }]) => (
-                        <SelectItem
-                          key={type}
-                          value={type}
-                        >
-                          <div className="flex items-center space-x-3 py-1">
-                            <div className="rounded-md bg-gray-50 p-1.5">
-                              <Icon
-                                size={16}
+                <SelectContent>
+                  <SelectGroup>
+                    {Object.entries(getSectionTypesConfig(t)).map(([type, { icon: Icon, label, description }]) => (
+                      <SelectItem
+                        key={type}
+                        value={type}
+                      >
+                        <div className="flex items-center space-x-3 py-1">
+                          <div className="rounded-md bg-gray-50 p-1.5">
+                            <Icon
+                              size={16}
                                 className="text-gray-600"
                               />
                             </div>
@@ -602,7 +601,6 @@ const UserProfileBuilder = () => {
                       ))}
                     </SelectGroup>
                   </SelectContent>
-                </SelectPositioner>
               </Select>
             </div>
           </div>
@@ -1060,7 +1058,6 @@ const SkillsEditor: FC<{
                   <SelectTrigger>
                     <SelectValue placeholder={t('SkillsEditor.selectLevelPlaceholder')} />
                   </SelectTrigger>
-                  <SelectPositioner>
                     <SelectContent>
                       <SelectGroup>
                         {skillLevelItems(t).map((item) => (
@@ -1073,7 +1070,6 @@ const SkillsEditor: FC<{
                         ))}
                       </SelectGroup>
                     </SelectContent>
-                  </SelectPositioner>
                 </Select>
                 <Input
                   value={skill.category || ''}

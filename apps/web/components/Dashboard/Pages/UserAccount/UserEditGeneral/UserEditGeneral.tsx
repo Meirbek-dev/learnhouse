@@ -25,7 +25,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
+
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
@@ -220,7 +220,6 @@ const DetailCard = ({
                 ) : null}
               </SelectValue>
             </SelectTrigger>
-            <SelectPositioner>
               <SelectContent>
                 <SelectGroup>
                   {iconItems.map((item) => (
@@ -233,7 +232,6 @@ const DetailCard = ({
                   ))}
                 </SelectGroup>
               </SelectContent>
-            </SelectPositioner>
           </Select>
         </div>
         <div>

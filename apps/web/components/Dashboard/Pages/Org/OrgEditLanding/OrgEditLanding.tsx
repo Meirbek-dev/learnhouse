@@ -21,7 +21,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
+
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
@@ -619,7 +619,6 @@ const OrgEditLanding = () => {
                         {t('SectionsPanel.addSectionButton')}
                       </div>
                     </SelectTrigger>
-                    <SelectPositioner>
                       <SelectContent>
                         <SelectGroup>
                           {sectionTypeItems.map((item) => (
@@ -632,7 +631,6 @@ const OrgEditLanding = () => {
                           ))}
                         </SelectGroup>
                       </SelectContent>
-                    </SelectPositioner>
                   </Select>
                 </div>
               </div>
@@ -930,8 +928,7 @@ const HeroSectionEditor: FC<{
                 <SelectTrigger>
                   <SelectValue placeholder={t('HeroEditor.Background.typePlaceholder')} />
                 </SelectTrigger>
-                <SelectPositioner>
-                  <SelectContent>
+                <SelectContent>
                     <SelectGroup>
                       {makeBackgroundTypeItems(t).map((item) => (
                         <SelectItem
@@ -943,7 +940,6 @@ const HeroSectionEditor: FC<{
                       ))}
                     </SelectGroup>
                   </SelectContent>
-                </SelectPositioner>
               </Select>
             </div>
 
@@ -1025,7 +1021,6 @@ const HeroSectionEditor: FC<{
                     <SelectTrigger>
                       <SelectValue placeholder={t('HeroEditor.Background.gradientTypePlaceholder')} />
                     </SelectTrigger>
-                    <SelectPositioner>
                       <SelectContent>
                         <SelectGroup>
                           {makeGradientTypeItems(t).map((item) => (
@@ -1038,7 +1033,6 @@ const HeroSectionEditor: FC<{
                           ))}
                         </SelectGroup>
                       </SelectContent>
-                    </SelectPositioner>
                   </Select>
                 </div>
 
@@ -1141,7 +1135,6 @@ const HeroSectionEditor: FC<{
                       <SelectTrigger>
                         <SelectValue placeholder={t('HeroEditor.Background.gradientPresetPlaceholder')} />
                       </SelectTrigger>
-                      <SelectPositioner>
                         <SelectContent>
                           <SelectGroup>
                             {makeGradientPresetItems(t).map((item) => (
@@ -1154,7 +1147,6 @@ const HeroSectionEditor: FC<{
                             ))}
                           </SelectGroup>
                         </SelectContent>
-                      </SelectPositioner>
                     </Select>
                   </div>
                 )}
@@ -1176,7 +1168,6 @@ const HeroSectionEditor: FC<{
                     <SelectTrigger>
                       <SelectValue placeholder={t('HeroEditor.Background.gradientDirectionPlaceholder')} />
                     </SelectTrigger>
-                    <SelectPositioner>
                       <SelectContent>
                         <SelectGroup>
                           {makeGradientDirectionItems(t).map((item) => (
@@ -1189,7 +1180,6 @@ const HeroSectionEditor: FC<{
                           ))}
                         </SelectGroup>
                       </SelectContent>
-                    </SelectPositioner>
                   </Select>
                 </div>
 
@@ -1452,7 +1442,6 @@ const HeroSectionEditor: FC<{
                     <SelectTrigger>
                       <SelectValue placeholder={t('HeroEditor.Illustration.positionPlaceholder')} />
                     </SelectTrigger>
-                    <SelectPositioner>
                       <SelectContent>
                         <SelectGroup>
                           {makeIllustrationPositionItems(t).map((item) => (
@@ -1465,7 +1454,6 @@ const HeroSectionEditor: FC<{
                           ))}
                         </SelectGroup>
                       </SelectContent>
-                    </SelectPositioner>
                   </Select>
                 </div>
 
@@ -1494,7 +1482,6 @@ const HeroSectionEditor: FC<{
                     <SelectTrigger>
                       <SelectValue placeholder={t('HeroEditor.Illustration.sizePlaceholder')} />
                     </SelectTrigger>
-                    <SelectPositioner>
                       <SelectContent>
                         <SelectGroup>
                           {makeIllustrationSizeItems(t).map((item) => (
@@ -1507,7 +1494,6 @@ const HeroSectionEditor: FC<{
                           ))}
                         </SelectGroup>
                       </SelectContent>
-                    </SelectPositioner>
                   </Select>
                 </div>
               </div>
@@ -1662,7 +1648,6 @@ const TextAndImageSectionEditor: FC<{
             <SelectTrigger>
               <SelectValue placeholder={t('TextAndImageEditor.imagePositionPlaceholder')} />
             </SelectTrigger>
-            <SelectPositioner>
               <SelectContent>
                 <SelectGroup>
                   {makeFlowItems(t).map((item) => (
@@ -1675,7 +1660,6 @@ const TextAndImageSectionEditor: FC<{
                   ))}
                 </SelectGroup>
               </SelectContent>
-            </SelectPositioner>
           </Select>
         </div>
 

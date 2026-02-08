@@ -5,7 +5,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -385,8 +384,7 @@ const CreateCourseModal = ({ closeModal, orgslug, org_id }: CreateCourseModalPro
                     <SelectValue placeholder={t('placeholderVisibility')} />
                   </SelectTrigger>
                 </FormControl>
-                <SelectPositioner>
-                  <SelectContent>
+                <SelectContent>
                     <SelectGroup>
                       {visibilityItems.map((item) => (
                         <SelectItem
@@ -398,7 +396,6 @@ const CreateCourseModal = ({ closeModal, orgslug, org_id }: CreateCourseModalPro
                       ))}
                     </SelectGroup>
                   </SelectContent>
-                </SelectPositioner>
               </Select>
 
               <FormMessage />

@@ -24,7 +24,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
+
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
@@ -403,7 +403,6 @@ export default function ExamTakingInterface({
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder={t('selectMatch')} />
                       </SelectTrigger>
-                      <SelectPositioner>
                         <SelectContent>
                           <SelectGroup>
                             {matchOptions.map((opt) => (
@@ -416,7 +415,6 @@ export default function ExamTakingInterface({
                             ))}
                           </SelectGroup>
                         </SelectContent>
-                      </SelectPositioner>
                     </Select>
                   </div>
                 </div>

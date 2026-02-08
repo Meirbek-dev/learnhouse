@@ -5,7 +5,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
@@ -91,8 +90,7 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
               <SelectTrigger className="mx-5 mt-2 w-fit min-w-32">
                 <SelectValue placeholder={t('selectUserGroup')} />
               </SelectTrigger>
-              <SelectPositioner>
-                <SelectContent>
+              <SelectContent>
                   <SelectGroup>
                     {usergroupItems.map((group) => (
                       <SelectItem
@@ -104,7 +102,6 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
                     ))}
                   </SelectGroup>
                 </SelectContent>
-              </SelectPositioner>
             </Select>
           </div>
         )}

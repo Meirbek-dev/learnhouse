@@ -5,7 +5,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
+
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
@@ -448,8 +448,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectPositioner>
-                            <SelectContent>
+                          <SelectContent>
                               <SelectGroup>
                                 {thumbnailTypeItems.map((item) => (
                                   <SelectItem
@@ -461,7 +460,6 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                                 ))}
                               </SelectGroup>
                             </SelectContent>
-                          </SelectPositioner>
                         </Select>
                       </FormControl>
                       <FormMessage />

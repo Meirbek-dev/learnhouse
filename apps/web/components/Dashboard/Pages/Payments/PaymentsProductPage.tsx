@@ -29,7 +29,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
+
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
@@ -472,20 +472,18 @@ const EditProductForm = ({
                           <SelectValue placeholder={t('currencyPlaceholder')} />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectPositioner>
                         <SelectContent>
                           <SelectGroup>
                             {currencyItems.map((currency) => (
                               <SelectItem
-                                key={currency.value}
-                                value={currency.value}
+                                key={currency.code}
+                                value={currency.code}
                               >
-                                {currency.label}
+                                {currency.name}
                               </SelectItem>
                             ))}
                           </SelectGroup>
                         </SelectContent>
-                      </SelectPositioner>
                     </Select>
                     <FormMessage />
                   </FormItem>

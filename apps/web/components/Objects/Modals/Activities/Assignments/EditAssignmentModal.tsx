@@ -4,7 +4,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
+
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -242,8 +242,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
                     <SelectValue placeholder={validationT('selectGradingType')} />
                   </SelectTrigger>
                 </FormControl>
-                <SelectPositioner>
-                  <SelectContent>
+                <SelectContent>
                     <SelectGroup>
                       {gradingTypes.map((item) => (
                         <SelectItem
@@ -255,7 +254,6 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
                       ))}
                     </SelectGroup>
                   </SelectContent>
-                </SelectPositioner>
               </Select>
               <FormMessage />
             </FormItem>

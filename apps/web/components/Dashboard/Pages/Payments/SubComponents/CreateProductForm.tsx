@@ -5,7 +5,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
+
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
@@ -171,8 +171,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                       <SelectValue placeholder={t('productTypePlaceholder')} />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectPositioner>
-                    <SelectContent>
+                  <SelectContent>
                       <SelectGroup>
                         {productTypeItems.map((item) => (
                           <SelectItem
@@ -184,7 +183,6 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                         ))}
                       </SelectGroup>
                     </SelectContent>
-                  </SelectPositioner>
                 </Select>
                 <FormMessage />
               </FormItem>
@@ -207,8 +205,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                       <SelectValue placeholder={t('priceTypePlaceholder')} />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectPositioner>
-                    <SelectContent>
+                  <SelectContent>
                       <SelectGroup>
                         {priceTypeOptions.map((item) => (
                           <SelectItem
@@ -220,7 +217,6 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                         ))}
                       </SelectGroup>
                     </SelectContent>
-                  </SelectPositioner>
                 </Select>
                 <FormMessage />
               </FormItem>
@@ -267,7 +263,6 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                           <SelectValue placeholder={t('currencyPlaceholder')} />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectPositioner>
                         <SelectContent>
                           <SelectGroup>
                             {currencyItems.map((currency) => (
@@ -280,7 +275,6 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                             ))}
                           </SelectGroup>
                         </SelectContent>
-                      </SelectPositioner>
                     </Select>
                     <FormMessage />
                   </FormItem>

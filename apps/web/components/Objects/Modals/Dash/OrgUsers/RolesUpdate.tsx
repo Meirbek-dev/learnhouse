@@ -4,7 +4,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
@@ -130,7 +129,6 @@ const RolesUpdate: FC<Props> = (props) => {
                       <SelectValue placeholder={t('selectRolePlaceholder')} />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectPositioner>
                     <SelectContent>
                       {!roles || rolesError ? (
                         <div className="text-muted-foreground px-3 py-2">{t('loadingRoles')}</div>
@@ -147,7 +145,6 @@ const RolesUpdate: FC<Props> = (props) => {
                         </SelectGroup>
                       )}
                     </SelectContent>
-                  </SelectPositioner>
                 </Select>
                 <FormMessage />
               </FormItem>

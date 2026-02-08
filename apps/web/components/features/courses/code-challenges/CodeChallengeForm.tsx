@@ -13,7 +13,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
+
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -338,7 +338,6 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                           <SelectValue placeholder={t('form.selectDifficulty')} />
                         </SelectTrigger>
                       </FieldContent>
-                      <SelectPositioner>
                         <SelectContent>
                           <SelectGroup>
                             {difficultyItems.map((item) => (
@@ -351,7 +350,6 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                             ))}
                           </SelectGroup>
                         </SelectContent>
-                      </SelectPositioner>
                     </Select>
                     <FieldError errors={[fieldState.error]} />
                   </Field>
@@ -374,7 +372,6 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                           <SelectValue placeholder={t('form.selectGradingStrategy')} />
                         </SelectTrigger>
                       </FieldContent>
-                      <SelectPositioner>
                         <SelectContent>
                           <SelectGroup>
                             {gradingStrategyItems.map((item) => (
@@ -387,7 +384,6 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                             ))}
                           </SelectGroup>
                         </SelectContent>
-                      </SelectPositioner>
                     </Select>
                     <FieldDescription>{t(`gradingStrategyOptions.${field.value}Hint`)}</FieldDescription>
                     <FieldError errors={[fieldState.error]} />

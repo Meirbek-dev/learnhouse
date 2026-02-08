@@ -5,7 +5,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectPositioner,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -206,8 +205,7 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
                     <SelectValue />
                   </SelectTrigger>
 
-                  <SelectPositioner>
-                    <SelectContent>
+                  <SelectContent>
                       <SelectGroup>
                         {visibilityItems.map((item) => (
                           <SelectItem
@@ -222,7 +220,6 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
                         ))}
                       </SelectGroup>
                     </SelectContent>
-                  </SelectPositioner>
                 </Select>
               </div>
             </div>

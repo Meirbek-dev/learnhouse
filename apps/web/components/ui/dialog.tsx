@@ -64,7 +64,7 @@ function DialogOverlay({ className, ...props }: DialogPrimitive.Backdrop.Props) 
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
       className={cn(
-        'data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 bg-black/10 duration-100  fixed inset-0 isolate z-50',
+        'data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs fixed inset-0 isolate z-50',
         className,
       )}
       {...props}
@@ -134,10 +134,11 @@ function DialogFooter({
 }: React.ComponentProps<'div'> & {
   showCloseButton?: boolean;
 }) {
+  const t = useTranslations('Components.Dialog');
   return (
     <div
       data-slot="dialog-footer"
-      className={cn('gap-2 flex flex-col-reverse sm:flex-row sm:justify-end', className)}
+      className={cn('flex flex-col-reverse gap-2 sm:flex-row sm:justify-end', className)}
       {...props}
     >
       {children}
@@ -148,7 +149,7 @@ function DialogFooter({
           // to avoid the runtime mismatch warning.
           nativeButton
         >
-          Close
+          {t('close')}
         </DialogPrimitive.Close>
       )}
     </div>
