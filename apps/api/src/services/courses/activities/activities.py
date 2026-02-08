@@ -126,7 +126,12 @@ async def get_activity(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:read", course.org_id, resource_owner_id=activity.creator_id)
+    checker.require(
+        current_user.id,
+        "activity:read",
+        course.org_id,
+        resource_owner_id=activity.creator_id,
+    )
 
     # Paid access check
     has_paid_access = await check_activity_paid_access(
@@ -142,8 +147,18 @@ async def get_activity(
     )
 
     # Enrich with permission metadata
-    can_update = checker.check(current_user.id, "activity:update", activity.org_id, resource_owner_id=activity.creator_id)
-    can_delete = checker.check(current_user.id, "activity:delete", activity.org_id, resource_owner_id=activity.creator_id)
+    can_update = checker.check(
+        current_user.id,
+        "activity:update",
+        activity.org_id,
+        resource_owner_id=activity.creator_id,
+    )
+    can_delete = checker.check(
+        current_user.id,
+        "activity:delete",
+        activity.org_id,
+        resource_owner_id=activity.creator_id,
+    )
     is_owner = (
         hasattr(activity, "created_by") and activity.created_by == current_user.id
     )
@@ -182,7 +197,12 @@ async def get_activityby_id(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:read", course.org_id, resource_owner_id=activity.creator_id)
+    checker.require(
+        current_user.id,
+        "activity:read",
+        course.org_id,
+        resource_owner_id=activity.creator_id,
+    )
 
     return ActivityRead.model_validate(activity)
 
@@ -216,7 +236,12 @@ async def update_activity(
 
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:update", course.org_id, resource_owner_id=activity.creator_id)
+    checker.require(
+        current_user.id,
+        "activity:update",
+        course.org_id,
+        resource_owner_id=activity.creator_id,
+    )
 
     # Update only the fields that were passed in
     update_data = activity_object.model_dump(exclude_unset=True)
@@ -261,7 +286,12 @@ async def delete_activity(
 
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:delete", course.org_id, resource_owner_id=activity.creator_id)
+    checker.require(
+        current_user.id,
+        "activity:delete",
+        course.org_id,
+        resource_owner_id=activity.creator_id,
+    )
 
     # Delete activity from chapter
     statement = select(ChapterActivity).where(

@@ -5,6 +5,7 @@ Revises: c72beef2c40e
 Create Date: 2026-02-08 15:28:35.017497
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -12,8 +13,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'd88e6a4f9403'
-down_revision: Union[str, None] = 'c72beef2c40e'
+revision: str = "d88e6a4f9403"
+down_revision: Union[str, None] = "c72beef2c40e"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -32,12 +33,14 @@ def upgrade() -> None:
     conn = op.get_bind()
 
     # Check if organization_config table exists
-    result = conn.execute(sa.text("""
+    result = conn.execute(
+        sa.text("""
         SELECT EXISTS (
             SELECT FROM information_schema.tables
             WHERE table_name = 'organization_config'
         );
-    """))
+    """)
+    )
     table_exists = result.scalar()
 
     if not table_exists:
@@ -48,7 +51,8 @@ def upgrade() -> None:
     # This is defensive in case migration 867d4f10ccb0 was not run or incomplete
     print("Performing final cleanup of signup_mode from organization configs...")
 
-    result = conn.execute(sa.text("""
+    result = conn.execute(
+        sa.text("""
         UPDATE organization_config
         SET config = jsonb_set(
             config::jsonb,
@@ -56,7 +60,8 @@ def upgrade() -> None:
             (config::jsonb #> '{features,members}') - 'signup_mode'
         )
         WHERE config::jsonb #> '{features,members,signup_mode}' IS NOT NULL
-    """))
+    """)
+    )
 
     rows_updated = result.rowcount
     if rows_updated > 0:
@@ -77,7 +82,8 @@ def downgrade() -> None:
 
     print("Restoring signup_mode to organization configs with default 'open' value...")
 
-    conn.execute(sa.text("""
+    conn.execute(
+        sa.text("""
         UPDATE organization_config
         SET config = jsonb_set(
             config::jsonb,
@@ -85,6 +91,7 @@ def downgrade() -> None:
             '"open"'::jsonb
         )
         WHERE config::jsonb #> '{features,members}' IS NOT NULL
-    """))
+    """)
+    )
 
     print("signup_mode field restored (data only - functionality not restored)")

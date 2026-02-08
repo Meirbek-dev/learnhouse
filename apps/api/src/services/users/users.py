@@ -337,7 +337,10 @@ async def get_user_session(
         effective = checker.get_expanded_permissions(current_user.id, org_id) or set()
         # Ensure effective is an iterable of strings
         if not isinstance(effective, (set, list, tuple)):
-            _logger.warning("Expected effective permissions to be iterable, got: %s", type(effective))
+            _logger.warning(
+                "Expected effective permissions to be iterable, got: %s",
+                type(effective),
+            )
             effective = set()
         # Return a list of permission strings for the session (canonical shape)
         permissions = list(effective)

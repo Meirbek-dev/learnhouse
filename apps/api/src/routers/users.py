@@ -3,7 +3,11 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, Depends, Request, Response, UploadFile
 from pydantic import EmailStr
 from sqlmodel import Session
-from src.security.rbac import PermissionCheckerDep, PermissionDenied, ResourceAccessDenied
+from src.security.rbac import (
+    PermissionCheckerDep,
+    PermissionDenied,
+    ResourceAccessDenied,
+)
 
 from src.core.events.database import get_db_session
 from src.db.courses.courses import CourseRead

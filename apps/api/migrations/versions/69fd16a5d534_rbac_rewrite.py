@@ -493,7 +493,7 @@ def downgrade() -> None:
         op.drop_constraint("uq_user_user_uuid", "user", type_="unique")
         op.drop_constraint("uq_user_email", "user", type_="unique")
         op.drop_constraint("uq_user_username", "user", type_="unique")
-    except:
+    except:  # noqa: E722
         pass
 
     # Drop creator_id columns

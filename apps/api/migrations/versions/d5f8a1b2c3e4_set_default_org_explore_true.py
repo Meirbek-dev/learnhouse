@@ -23,11 +23,19 @@ def upgrade() -> None:
     """
     conn = op.get_bind()
     print("Setting `explore = TRUE` on organization with slug 'openu' if present...")
-    conn.execute(text("UPDATE organization SET explore = TRUE WHERE slug = :slug"), {"slug": "openu"})
+    conn.execute(
+        text("UPDATE organization SET explore = TRUE WHERE slug = :slug"),
+        {"slug": "openu"},
+    )
 
 
 def downgrade() -> None:
     """Revert the `explore` flag back to FALSE for 'openu'."""
     conn = op.get_bind()
-    print("Reverting `explore` to FALSE on organization with slug 'openu' if present...")
-    conn.execute(text("UPDATE organization SET explore = FALSE WHERE slug = :slug"), {"slug": "openu"})
+    print(
+        "Reverting `explore` to FALSE on organization with slug 'openu' if present..."
+    )
+    conn.execute(
+        text("UPDATE organization SET explore = FALSE WHERE slug = :slug"),
+        {"slug": "openu"},
+    )

@@ -33,7 +33,9 @@ class PermissionDenied(HTTPException):
         *,
         reason: str | None = None,
     ) -> None:
-        message = f"Permission denied: {permission}" if permission else "Permission denied"
+        message = (
+            f"Permission denied: {permission}" if permission else "Permission denied"
+        )
         detail = {
             "error_code": "PERMISSION_DENIED",
             "message": message,
@@ -138,7 +140,9 @@ class PermissionChecker:
         resource_owner_id: int | None = None,
     ) -> None:
         """check() + raise PermissionDenied when False."""
-        if not self.check(user_id, permission, org_id, resource_owner_id=resource_owner_id):
+        if not self.check(
+            user_id, permission, org_id, resource_owner_id=resource_owner_id
+        ):
             raise PermissionDenied(permission=permission)
 
     def check_many(
@@ -412,7 +416,7 @@ class PermissionChecker:
             f"*:{action}:{scope}",
             f"*:*:{scope}",
             f"{resource}:*:*",
-            f"*:*:*",
+            "*:*:*",
         ]
         return any(c in granted for c in candidates)
 

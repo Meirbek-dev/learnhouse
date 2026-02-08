@@ -5,6 +5,7 @@ Revises: 867d4f10ccb0
 Create Date: 2026-02-08 14:46:28.663679
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -12,8 +13,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'c72beef2c40e'
-down_revision: Union[str, None] = '867d4f10ccb0'
+revision: str = "c72beef2c40e"
+down_revision: Union[str, None] = "867d4f10ccb0"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -24,12 +25,14 @@ def upgrade() -> None:
     conn = op.get_bind()
 
     # Check if role_permission table exists
-    result = conn.execute(sa.text("""
+    result = conn.execute(
+        sa.text("""
         SELECT EXISTS (
             SELECT FROM information_schema.tables
             WHERE table_name = 'role_permission'
         );
-    """))
+    """)
+    )
     table_exists = result.scalar()
 
     if not table_exists:
@@ -39,10 +42,12 @@ def upgrade() -> None:
     # Remove user:invite:org permission from role_permission associations
     print("Removing user:invite:org permissions from role_permission table...")
 
-    result = conn.execute(sa.text("""
+    result = conn.execute(
+        sa.text("""
         DELETE FROM role_permission
         WHERE permission = 'user:invite:org'
-    """))
+    """)
+    )
 
     deleted_count = result.rowcount
     print(f"Removed {deleted_count} user:invite:org permission entries")
@@ -56,7 +61,8 @@ def downgrade() -> None:
 
     # Find org-admin role and add user:invite:org permission back
     # Note: This is a best-effort restore - only restores to system org-admin role
-    conn.execute(sa.text("""
+    conn.execute(
+        sa.text("""
         INSERT INTO role_permission (role_id, permission)
         SELECT r.id, 'user:invite:org'
         FROM role r
@@ -66,6 +72,7 @@ def downgrade() -> None:
             SELECT 1 FROM role_permission rp
             WHERE rp.role_id = r.id AND rp.permission = 'user:invite:org'
         )
-    """))
+    """)
+    )
 
     print("user:invite:org permission restored to org-admin role")

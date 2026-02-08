@@ -71,7 +71,12 @@ async def read_usergroup_by_id(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:read", usergroup.org_id, resource_owner_id=usergroup.creator_id)
+    checker.require(
+        current_user.id,
+        "usergroup:read",
+        usergroup.org_id,
+        resource_owner_id=usergroup.creator_id,
+    )
 
     return UserGroupRead.model_validate(usergroup)
 
@@ -95,7 +100,12 @@ async def get_users_linked_to_usergroup(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:read", usergroup.org_id, resource_owner_id=usergroup.creator_id)
+    checker.require(
+        current_user.id,
+        "usergroup:read",
+        usergroup.org_id,
+        resource_owner_id=usergroup.creator_id,
+    )
 
     statement = select(UserGroupUser).where(UserGroupUser.usergroup_id == usergroup_id)
     usergroup_users = db_session.exec(statement).all()
@@ -179,7 +189,12 @@ async def update_usergroup_by_id(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:update", usergroup.org_id, resource_owner_id=usergroup.creator_id)
+    checker.require(
+        current_user.id,
+        "usergroup:update",
+        usergroup.org_id,
+        resource_owner_id=usergroup.creator_id,
+    )
 
     usergroup.name = usergroup_update.name
     usergroup.description = usergroup_update.description
@@ -211,7 +226,12 @@ async def delete_usergroup_by_id(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:delete", usergroup.org_id, resource_owner_id=usergroup.creator_id)
+    checker.require(
+        current_user.id,
+        "usergroup:delete",
+        usergroup.org_id,
+        resource_owner_id=usergroup.creator_id,
+    )
 
     db_session.delete(usergroup)
     db_session.commit()
@@ -239,7 +259,12 @@ async def add_users_to_usergroup(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:manage", usergroup.org_id, resource_owner_id=usergroup.creator_id)
+    checker.require(
+        current_user.id,
+        "usergroup:manage",
+        usergroup.org_id,
+        resource_owner_id=usergroup.creator_id,
+    )
 
     user_ids_array = user_ids.split(",")
 
@@ -304,7 +329,12 @@ async def remove_users_from_usergroup(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:manage", usergroup.org_id, resource_owner_id=usergroup.creator_id)
+    checker.require(
+        current_user.id,
+        "usergroup:manage",
+        usergroup.org_id,
+        resource_owner_id=usergroup.creator_id,
+    )
 
     user_ids_array = user_ids.split(",")
 
@@ -349,7 +379,12 @@ async def add_resources_to_usergroup(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:manage", usergroup.org_id, resource_owner_id=usergroup.creator_id)
+    checker.require(
+        current_user.id,
+        "usergroup:manage",
+        usergroup.org_id,
+        resource_owner_id=usergroup.creator_id,
+    )
 
     resources_uuids_array = resources_uuids.split(",")
 
@@ -401,7 +436,12 @@ async def remove_resources_from_usergroup(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:manage", usergroup.org_id, resource_owner_id=usergroup.creator_id)
+    checker.require(
+        current_user.id,
+        "usergroup:manage",
+        usergroup.org_id,
+        resource_owner_id=usergroup.creator_id,
+    )
 
     resources_uuids_array = resources_uuids.split(",")
 

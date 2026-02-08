@@ -39,7 +39,12 @@ async def get_collection(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "collection:read", org_id=collection.org_id, resource_owner_id=collection.creator_id)
+    checker.require(
+        current_user.id,
+        "collection:read",
+        org_id=collection.org_id,
+        resource_owner_id=collection.creator_id,
+    )
 
     # get courses in collection
     statement_all = (
@@ -70,12 +75,22 @@ async def get_collection(
     courses = list(db_session.exec(statement).all())
 
     can_update = (
-        checker.check(current_user.id, "collection:update", collection.org_id, resource_owner_id=collection.creator_id)
+        checker.check(
+            current_user.id,
+            "collection:update",
+            collection.org_id,
+            resource_owner_id=collection.creator_id,
+        )
         if current_user.id
         else False
     )
     can_delete = (
-        checker.check(current_user.id, "collection:delete", collection.org_id, resource_owner_id=collection.creator_id)
+        checker.check(
+            current_user.id,
+            "collection:delete",
+            collection.org_id,
+            resource_owner_id=collection.creator_id,
+        )
         if current_user.id
         else False
     )
@@ -190,7 +205,12 @@ async def update_collection(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "collection:update", org_id=collection.org_id, resource_owner_id=collection.creator_id)
+    checker.require(
+        current_user.id,
+        "collection:update",
+        org_id=collection.org_id,
+        resource_owner_id=collection.creator_id,
+    )
 
     courses = collection_object.courses
 
@@ -259,7 +279,12 @@ async def delete_collection(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "collection:delete", org_id=collection.org_id, resource_owner_id=collection.creator_id)
+    checker.require(
+        current_user.id,
+        "collection:delete",
+        org_id=collection.org_id,
+        resource_owner_id=collection.creator_id,
+    )
 
     # delete collection from database
     db_session.delete(collection)
@@ -328,12 +353,22 @@ async def get_collections(
         courses = db_session.exec(statement).all()
 
         can_update = (
-            checker.check(current_user.id, "collection:update", collection.org_id, resource_owner_id=collection.creator_id)
+            checker.check(
+                current_user.id,
+                "collection:update",
+                collection.org_id,
+                resource_owner_id=collection.creator_id,
+            )
             if current_user.id
             else False
         )
         can_delete = (
-            checker.check(current_user.id, "collection:delete", collection.org_id, resource_owner_id=collection.creator_id)
+            checker.check(
+                current_user.id,
+                "collection:delete",
+                collection.org_id,
+                resource_owner_id=collection.creator_id,
+            )
             if current_user.id
             else False
         )

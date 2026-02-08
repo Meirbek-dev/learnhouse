@@ -1,9 +1,7 @@
 'use client';
 
 import OrgUserGroups from '@components/Dashboard/Pages/Users/OrgUserGroups/OrgUserGroups';
-import OrgUsersAdd from '@components/Dashboard/Pages/Users/OrgUsersAdd/OrgUsersAdd';
-import { ScanEye, Shield, SquareUserRound, UserPlus, Users } from 'lucide-react';
-import OrgAccess from '@components/Dashboard/Pages/Users/OrgAccess/OrgAccess';
+import { Shield, SquareUserRound, Users } from 'lucide-react';
 import OrgUsers from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers';
 import OrgRoles from '@components/Dashboard/Pages/Users/OrgRoles/OrgRoles';
 import DesktopOnlyGuard from '@components/Dashboard/Misc/DesktopOnlyGuard';
@@ -18,7 +16,7 @@ export interface SettingsParams {
   orgslug: string;
 }
 
-type SubpageType = 'users' | 'signups' | 'add' | 'usergroups' | 'roles';
+type SubpageType = 'users' | 'usergroups' | 'roles';
 
 interface TabConfig {
   id: SubpageType;
@@ -58,22 +56,6 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
         titleKey: 'rolesTitle',
         descriptionKey: 'rolesDescription',
         component: OrgRoles,
-      },
-      {
-        id: 'signups',
-        icon: ScanEye,
-        labelKey: 'signups',
-        titleKey: 'signupsTitle',
-        descriptionKey: 'signupsDescription',
-        component: OrgAccess,
-      },
-      {
-        id: 'add',
-        icon: UserPlus,
-        labelKey: 'add',
-        titleKey: 'addTitle',
-        descriptionKey: 'addDescription',
-        component: OrgUsersAdd,
       },
     ],
     [],

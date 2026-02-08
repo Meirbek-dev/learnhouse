@@ -272,7 +272,9 @@ async def update_user_role(
         db_session.flush()
 
         # Assign new role
-        checker.assign_role(user_id=user_id_int, role_slug=role_uuid, org_id=int(org.id))
+        checker.assign_role(
+            user_id=user_id_int, role_slug=role_uuid, org_id=int(org.id)
+        )
 
     db_session.commit()
 

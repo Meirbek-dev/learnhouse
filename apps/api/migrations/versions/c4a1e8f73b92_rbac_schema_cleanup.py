@@ -218,7 +218,9 @@ def _table_exists(conn, table: str) -> bool:
     return row is not None
 
 
-def _create_index_if_not_exists(conn, index_name: str, table: str, columns: list[str]) -> None:
+def _create_index_if_not_exists(
+    conn, index_name: str, table: str, columns: list[str]
+) -> None:
     cols = ", ".join(columns)
     conn.execute(text(f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} ({cols})"))
 
@@ -228,21 +230,15 @@ def _drop_index_if_exists(conn, index_name: str) -> None:
 
 
 def _drop_fk_if_exists(conn, table: str, constraint: str) -> None:
-    conn.execute(text(
-        f"ALTER TABLE {table} DROP CONSTRAINT IF EXISTS {constraint}"
-    ))
+    conn.execute(text(f"ALTER TABLE {table} DROP CONSTRAINT IF EXISTS {constraint}"))
 
 
 def _drop_col_if_exists(conn, table: str, column: str) -> None:
-    conn.execute(text(
-        f"ALTER TABLE {table} DROP COLUMN IF EXISTS {column}"
-    ))
+    conn.execute(text(f"ALTER TABLE {table} DROP COLUMN IF EXISTS {column}"))
 
 
 def _drop_constraint_if_exists(conn, table: str, constraint: str) -> None:
-    conn.execute(text(
-        f"ALTER TABLE {table} DROP CONSTRAINT IF EXISTS {constraint}"
-    ))
+    conn.execute(text(f"ALTER TABLE {table} DROP CONSTRAINT IF EXISTS {constraint}"))
 
 
 def upgrade() -> None:
@@ -294,7 +290,9 @@ def upgrade() -> None:
     if not _col_exists(conn, "permissions", "is_dangerous"):
         op.add_column(
             "permissions",
-            sa.Column("is_dangerous", sa.Boolean(), nullable=False, server_default="false"),
+            sa.Column(
+                "is_dangerous", sa.Boolean(), nullable=False, server_default="false"
+            ),
         )
 
     # 1f. Drop extra indexes not in the current model
@@ -343,8 +341,12 @@ def upgrade() -> None:
     _drop_col_if_exists(conn, "role_permissions", "granted_by")
 
     # Fix index names
-    _create_index_if_not_exists(conn, "idx_role_permissions_role", "role_permissions", ["role_id"])
-    _create_index_if_not_exists(conn, "idx_role_permissions_permission", "role_permissions", ["permission_id"])
+    _create_index_if_not_exists(
+        conn, "idx_role_permissions_role", "role_permissions", ["role_id"]
+    )
+    _create_index_if_not_exists(
+        conn, "idx_role_permissions_permission", "role_permissions", ["permission_id"]
+    )
     for idx in [
         "ix_role_permissions_role_id",
         "ix_role_permissions_role_perm",
@@ -388,7 +390,9 @@ def upgrade() -> None:
     _drop_constraint_if_exists(conn, "user_roles", "uq_user_roles_user_org")
 
     # 4f. Fix index names
-    _create_index_if_not_exists(conn, "idx_user_roles_user_org", "user_roles", ["user_id", "org_id"])
+    _create_index_if_not_exists(
+        conn, "idx_user_roles_user_org", "user_roles", ["user_id", "org_id"]
+    )
     _create_index_if_not_exists(conn, "idx_user_roles_role", "user_roles", ["role_id"])
     for idx in [
         "ix_user_roles_user_id",
@@ -458,21 +462,27 @@ def downgrade() -> None:
     conn = op.get_bind()
 
     # Re-create enum types
-    conn.execute(text("""
+    conn.execute(
+        text("""
         CREATE TYPE resourcetype AS ENUM (
             'organization', 'course', 'chapter', 'activity', 'assignment', 'quiz',
             'user', 'usergroup', 'collection', 'role', 'certificate', 'discussion',
             'file', 'analytics', 'trail', 'exam', 'payment', 'api_token'
         )
-    """))
-    conn.execute(text("""
+    """)
+    )
+    conn.execute(
+        text("""
         CREATE TYPE action AS ENUM (
             'create', 'read', 'update', 'delete', 'manage', 'moderate',
             'export', 'invite', 'grade', 'submit', 'enroll'
         )
-    """))
+    """)
+    )
     conn.execute(text("CREATE TYPE scope AS ENUM ('all', 'own', 'assigned', 'org')"))
-    conn.execute(text("CREATE TYPE auditaction AS ENUM ('CHECK', 'GRANT', 'REVOKE', 'DENY')"))
+    conn.execute(
+        text("CREATE TYPE auditaction AS ENUM ('CHECK', 'GRANT', 'REVOKE', 'DENY')")
+    )
     conn.execute(text("CREATE TYPE granttype AS ENUM ('ALLOW', 'DENY')"))
 
     # Re-create permission_audit_log
@@ -481,7 +491,12 @@ def downgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=True),
         sa.Column("org_id", sa.Integer(), nullable=True),
-        sa.Column("action", postgresql.ENUM("CHECK", "GRANT", "REVOKE", "DENY", name="auditaction"), nullable=False, server_default="CHECK"),
+        sa.Column(
+            "action",
+            postgresql.ENUM("CHECK", "GRANT", "REVOKE", "DENY", name="auditaction"),
+            nullable=False,
+            server_default="CHECK",
+        ),
         sa.Column("resource_type", sa.String(50), nullable=True),
         sa.Column("resource_id", sa.String(100), nullable=True),
         sa.Column("permission_name", sa.String(100), nullable=True),
@@ -489,7 +504,12 @@ def downgrade() -> None:
         sa.Column("context", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column("ip_address", sa.String(45), nullable=True),
         sa.Column("user_agent", sa.Text(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.ForeignKeyConstraint(["user_id"], ["user.id"], ondelete="SET NULL"),
         sa.ForeignKeyConstraint(["org_id"], ["organization.id"], ondelete="SET NULL"),
@@ -504,48 +524,85 @@ def downgrade() -> None:
 
     # user_roles: re-add expires_at
     if not _col_exists(conn, "user_roles", "expires_at"):
-        op.add_column("user_roles", sa.Column("expires_at", sa.DateTime(timezone=True), nullable=True))
+        op.add_column(
+            "user_roles",
+            sa.Column("expires_at", sa.DateTime(timezone=True), nullable=True),
+        )
 
     # user_roles: re-add unique constraint
     if not _constraint_exists(conn, "uq_user_roles_user_org"):
-        op.create_unique_constraint("uq_user_roles_user_org", "user_roles", ["user_id", "org_id"])
+        op.create_unique_constraint(
+            "uq_user_roles_user_org", "user_roles", ["user_id", "org_id"]
+        )
 
     # role_permissions: re-add dropped columns
     if not _col_exists(conn, "role_permissions", "conditions"):
-        op.add_column("role_permissions", sa.Column("conditions", postgresql.JSONB(astext_type=sa.Text()), nullable=True))
+        op.add_column(
+            "role_permissions",
+            sa.Column(
+                "conditions", postgresql.JSONB(astext_type=sa.Text()), nullable=True
+            ),
+        )
     if not _col_exists(conn, "role_permissions", "grant_type"):
-        op.add_column("role_permissions", sa.Column("grant_type", postgresql.ENUM("ALLOW", "DENY", name="granttype"), nullable=False, server_default="ALLOW"))
+        op.add_column(
+            "role_permissions",
+            sa.Column(
+                "grant_type",
+                postgresql.ENUM("ALLOW", "DENY", name="granttype"),
+                nullable=False,
+                server_default="ALLOW",
+            ),
+        )
     if not _col_exists(conn, "role_permissions", "expires_at"):
-        op.add_column("role_permissions", sa.Column("expires_at", sa.DateTime(timezone=True), nullable=True))
+        op.add_column(
+            "role_permissions",
+            sa.Column("expires_at", sa.DateTime(timezone=True), nullable=True),
+        )
     if not _col_exists(conn, "role_permissions", "granted_by"):
-        op.add_column("role_permissions", sa.Column("granted_by", sa.Integer(), nullable=True))
+        op.add_column(
+            "role_permissions", sa.Column("granted_by", sa.Integer(), nullable=True)
+        )
 
     # roles: re-add parent_role_id
     if not _col_exists(conn, "roles", "parent_role_id"):
         op.add_column("roles", sa.Column("parent_role_id", sa.Integer(), nullable=True))
-        op.create_foreign_key("roles_parent_role_id_fkey", "roles", "roles", ["parent_role_id"], ["id"], ondelete="SET NULL")
+        op.create_foreign_key(
+            "roles_parent_role_id_fkey",
+            "roles",
+            "roles",
+            ["parent_role_id"],
+            ["id"],
+            ondelete="SET NULL",
+        )
 
     # permissions: drop is_dangerous, re-add permission_key
     _drop_col_if_exists(conn, "permissions", "is_dangerous")
     if not _col_exists(conn, "permissions", "permission_key"):
-        op.add_column("permissions", sa.Column("permission_key", sa.String(), nullable=True))
+        op.add_column(
+            "permissions", sa.Column("permission_key", sa.String(), nullable=True)
+        )
         conn.execute(text("UPDATE permissions SET permission_key = name"))
         if not _constraint_exists(conn, "uq_permissions_key"):
-            op.create_unique_constraint("uq_permissions_key", "permissions", ["permission_key"])
+            op.create_unique_constraint(
+                "uq_permissions_key", "permissions", ["permission_key"]
+            )
 
     # Convert varchar back to enums
     op.alter_column(
-        "permissions", "resource_type",
+        "permissions",
+        "resource_type",
         type_=postgresql.ENUM(name="resourcetype", create_type=False),
         postgresql_using="resource_type::resourcetype",
     )
     op.alter_column(
-        "permissions", "action",
+        "permissions",
+        "action",
         type_=postgresql.ENUM(name="action", create_type=False),
         postgresql_using="action::action",
     )
     op.alter_column(
-        "permissions", "scope",
+        "permissions",
+        "scope",
         type_=postgresql.ENUM(name="scope", create_type=False),
         postgresql_using="scope::scope",
         server_default="all",
@@ -650,8 +707,7 @@ def _expand_wildcard(pattern: str, perm_ids: dict[str, int]) -> list[int]:
         if len(name_parts) != 3:
             continue
         if all(
-            pp == "*" or pp == np
-            for pp, np in zip(parts, name_parts, strict=False)
+            pp == "*" or pp == np for pp, np in zip(parts, name_parts, strict=False)
         ):
             matched.append(pid)
     return matched

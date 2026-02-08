@@ -5,6 +5,7 @@ Revises: c6ac02f61616
 Create Date: 2026-02-08 14:05:23.278073
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -12,8 +13,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '867d4f10ccb0'
-down_revision: Union[str, None] = 'c6ac02f61616'
+revision: str = "867d4f10ccb0"
+down_revision: Union[str, None] = "c6ac02f61616"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -24,12 +25,14 @@ def upgrade() -> None:
     conn = op.get_bind()
 
     # Check if organization_config table exists
-    result = conn.execute(sa.text("""
+    result = conn.execute(
+        sa.text("""
         SELECT EXISTS (
             SELECT FROM information_schema.tables
             WHERE table_name = 'organization_config'
         );
-    """))
+    """)
+    )
     table_exists = result.scalar()
 
     if not table_exists:
@@ -41,7 +44,8 @@ def upgrade() -> None:
     print("Removing signup_mode from organization configs...")
 
     # SQL to update JSON in PostgreSQL
-    conn.execute(sa.text("""
+    conn.execute(
+        sa.text("""
         UPDATE organization_config
         SET config = jsonb_set(
             config::jsonb,
@@ -49,7 +53,8 @@ def upgrade() -> None:
             (config::jsonb #> '{features,members}') - 'signup_mode'
         )
         WHERE config::jsonb #> '{features,members,signup_mode}' IS NOT NULL
-    """))
+    """)
+    )
 
     print("signup_mode removed from organization configs")
 
@@ -65,13 +70,15 @@ def downgrade() -> None:
     print("Restoring signup_mode to organization configs...")
 
     # Add signup_mode back with default value 'open'
-    conn.execute(sa.text("""
+    conn.execute(
+        sa.text("""
         UPDATE organization_config
         SET config = jsonb_set(
             config::jsonb,
             '{features,members,signup_mode}',
             '"open"'::jsonb
         )
-    """))
+    """)
+    )
 
     print("signup_mode restored to organization configs")

@@ -5,6 +5,7 @@ Revises: d5f8a1b2c3e4
 Create Date: 2026-02-07 22:26:48.635716
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -12,17 +13,20 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'b32f34573336'
-down_revision: Union[str, None] = 'd5f8a1b2c3e4'
+revision: str = "b32f34573336"
+down_revision: Union[str, None] = "d5f8a1b2c3e4"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
     """Remove the explore column from organization table."""
-    op.drop_column('organization', 'explore')
+    op.drop_column("organization", "explore")
 
 
 def downgrade() -> None:
     """Re-add the explore column to organization table."""
-    op.add_column('organization', sa.Column('explore', sa.Boolean(), nullable=True, server_default=sa.false()))
+    op.add_column(
+        "organization",
+        sa.Column("explore", sa.Boolean(), nullable=True, server_default=sa.false()),
+    )

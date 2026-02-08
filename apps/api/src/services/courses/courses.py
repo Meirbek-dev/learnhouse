@@ -46,7 +46,12 @@ async def get_course(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read", course.org_id, resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id,
+        "course:read",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     # Get course authors with their roles
     authors_statement = (
@@ -91,7 +96,12 @@ async def get_course_by_id(
     # RBAC check role-based access control
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read", course.org_id, resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id,
+        "course:read",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     # Get course authors with their roles
     authors_statement = (
@@ -153,7 +163,12 @@ async def get_course_meta(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read", course.org_id, resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id,
+        "course:read",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     # Get course chapters
     chapters = []
@@ -623,7 +638,12 @@ async def update_course_thumbnail(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:update", course.org_id, resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id,
+        "course:update",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     # Get org uuid
     org_statement = select(Organization).where(Organization.id == course.org_id)
@@ -729,7 +749,12 @@ async def update_course(
     # SECURITY: Require course ownership or admin role for updating courses
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:update", course.org_id, resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id,
+        "course:update",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     # SECURITY: Additional checks for sensitive access control fields
     sensitive_fields_updated = []
@@ -827,7 +852,12 @@ async def delete_course(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:delete", course.org_id, resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id,
+        "course:delete",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     db_session.delete(course)
     db_session.commit()

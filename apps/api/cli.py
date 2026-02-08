@@ -156,15 +156,15 @@ def migrate_users_to_default_org() -> None:
 
     if not default_org:
         print("❌ Error: Default organization 'openu' not found")
-        print("Please create the default organization first using 'python cli.py install'")
+        print(
+            "Please create the default organization first using 'python cli.py install'"
+        )
         raise typer.Exit(code=1)
 
     print(f"✅ Found default organization: {default_org.name} (ID: {default_org.id})")
 
     # Get the default 'user' role
-    user_role = db_session.exec(
-        select(Role).where(Role.slug == RoleSlug.USER)
-    ).first()
+    user_role = db_session.exec(select(Role).where(Role.slug == RoleSlug.USER)).first()
 
     if not user_role:
         print("❌ Error: Default 'user' role not found")
@@ -211,9 +211,7 @@ def migrate_users_to_default_org() -> None:
             )
         except Exception as e:
             skipped_count += 1
-            print(
-                f"  ⚠️  Skipping user {user.username} (ID: {user.id}): {str(e)}"
-            )
+            print(f"  ⚠️  Skipping user {user.username} (ID: {user.id}): {str(e)}")
 
     # Commit changes
     db_session.commit()
