@@ -22,7 +22,8 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { deleteRole } from '@/services/rbac';
-import { RoleSlugs, type Role } from '@/types/permissions';
+import { RoleSlugs } from '@/types/permissions';
+import type { Role } from '@/types/permissions';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
@@ -120,47 +121,20 @@ const OrgRoles: FC = () => {
     setEditRoleModal(!editRoleModal);
   };
 
-  const getRoleBadge = (role: { slug?: string }) => {
-    // Use slug-based checks instead of name matching
-    const { slug } = role;
+  const getRoleBadge = (role: { priority?: number }) => {
+    const priority = role.priority ?? 0;
 
-    if (!slug) {
-      return t('basicAccess');
-    }
-
-    // Check by slug (locale-independent, type-safe)
-    if (slug === RoleSlugs.SUPER_ADMIN || slug === RoleSlugs.ORG_ADMIN) {
-      return t('fullAccess');
-    }
-    if (slug === RoleSlugs.MAINTAINER) {
-      return t('fullAccess');
-    }
-    if (slug === RoleSlugs.INSTRUCTOR) {
-      return t('instructorAccess');
-    }
+    // Use priority thresholds instead of slug matching.
+    if (priority >= 900) return t('fullAccess');
+    if (priority >= 800) return t('fullAccess');
+    if (priority >= 700) return t('instructorAccess');
     return t('basicAccess');
   };
 
   // Check if a role is system-wide (is_system flag or well-known system role slugs)
-  const isSystemRole = (role: { is_system?: boolean; slug?: string }) => {
-    // Check for is_system field (new RBAC system)
-    if (role.is_system === true) {
-      return true;
-    }
-
-    // Check for well-known system role slugs
-    const systemSlugs: string[] = [
-      RoleSlugs.SUPER_ADMIN,
-      RoleSlugs.ORG_ADMIN,
-      RoleSlugs.MAINTAINER,
-      RoleSlugs.INSTRUCTOR,
-      RoleSlugs.USER,
-    ];
-    if (role.slug && systemSlugs.includes(role.slug)) {
-      return true;
-    }
-
-    return false;
+  const isSystemRole = (role: { is_system?: boolean }) => {
+    // Prefer the explicit `is_system` flag from the backend
+    return role.is_system === true;
   };
 
   return (

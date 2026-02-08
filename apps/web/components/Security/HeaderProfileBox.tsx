@@ -37,12 +37,16 @@ interface CustomRoleInfo {
 export const HeaderProfileBox = () => {
   const session = usePlatformSession() as any;
   const { can, loading: isLoading } = usePermissions();
-  const canAccessDashboard = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
+  const canAccessDashboard =
+    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN) ||
+    can(Actions.CREATE, Resources.COURSE, Scopes.ORG) ||
+    can(Actions.UPDATE, Resources.COURSE, Scopes.ORG) ||
+    can(Actions.INVITE, Resources.USER, Scopes.ORG) ||
+    can(Actions.UPDATE, Resources.USER, Scopes.ORG);
   const org = useOrg() as any;
   const t = useTranslations('Header');
 
   const userRoles = session?.data?.roles ?? [];
-  const permissions = session?.data?.permissions ?? {};
 
   let userRoleInfo: RoleInfo | null = null;
   if (userRoles && userRoles.length > 0) {
@@ -107,16 +111,8 @@ export const HeaderProfileBox = () => {
     userRoles && userRoles.length > 0
       ? (userRoles.filter((role: any) => role.org.id === org?.id) ?? [])
           .filter((role: any) => {
-            const slug = role.role?.slug || '';
-            // Filter out system roles based on slug
-            const systemSlugs = [
-              RoleSlugs.SUPER_ADMIN,
-              RoleSlugs.ORG_ADMIN,
-              RoleSlugs.MAINTAINER,
-              RoleSlugs.INSTRUCTOR,
-              RoleSlugs.USER,
-            ];
-            return !systemSlugs.includes(slug);
+            // Filter out system roles using the `is_system` flag provided by the backend
+            return !role.role?.is_system;
           })
           .map((role: any) => ({
             name: ((role.role as any).name as string) || t('profile.customRole'),

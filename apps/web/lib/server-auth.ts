@@ -18,12 +18,13 @@ export async function requireAuth(orgslug: string) {
  * Check if the session has a specific permission.
  */
 export function sessionCan(
-  session: { permissions?: string[] },
+  session: { permissions?: string[] } | undefined,
   action: Action,
   resource: Resource,
   scope: Scope,
+  permsSet?: Set<string>,
 ): boolean {
-  const perms = new Set(session.permissions);
+  const perms = permsSet ?? new Set(session?.permissions);
   return perms.has(perm(resource, action, scope));
 }
 
@@ -38,7 +39,8 @@ export async function requirePermission(
   redirectTo?: string,
 ) {
   const session = await requireAuth(orgslug);
-  if (!sessionCan(session, action, resource, scope)) {
+  const perms = new Set(session.permissions);
+  if (!sessionCan(session, action, resource, scope, perms)) {
     redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
   }
   return session;
@@ -53,7 +55,8 @@ export async function requireAnyPermission(
   redirectTo?: string,
 ) {
   const session = await requireAuth(orgslug);
-  const hasAny = checks.some((c) => sessionCan(session, c.action, c.resource, c.scope));
+  const perms = new Set(session.permissions);
+  const hasAny = checks.some((c) => perms.has(perm(c.resource, c.action, c.scope)));
   if (!hasAny) {
     redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
   }

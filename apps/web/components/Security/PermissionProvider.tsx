@@ -19,32 +19,11 @@ import type { ReactNode } from 'react';
 // Types
 // ============================================================================
 
-/** Role assignment with org context, matching the session shape. */
-export interface RoleAssignment {
-  role: {
-    id: number;
-    name: string;
-    slug: string;
-    description?: string;
-    org_id?: number | null;
-    is_system: boolean;
-    priority: number;
-  };
-  org: {
-    id: number;
-    org_uuid: string;
-    name: string;
-    slug: string;
-  };
-}
-
+// Role assignment shape lives in the shared `types/permissions` when needed.
+// Keep the context value minimal — only what consumers actually use.
 interface PermissionContextValue {
   /** Check if user has a specific permission (scope is required) */
   can: (action: Action, resource: Resource, scope: Scope) => boolean;
-  /** Check if user has any of the specified permissions */
-  canAny: (checks: { action: Action; resource: Resource; scope: Scope }[]) => boolean;
-  /** User's role assignments (role + org context) */
-  roles: RoleAssignment[];
   /** Still loading session */
   loading: boolean;
 }
@@ -53,6 +32,12 @@ interface PermissionContextValue {
 // Context
 // ============================================================================
 
+/**
+ * Permission patterns:
+ *
+ * 1. RBAC `can()` checks — for feature/section gating (frontend UI & route guards).
+ * 2. Backend `can_*` booleans on API objects — for row-level ownership/assignment checks.
+ */
 const PermissionContext = createContext<PermissionContextValue | null>(null);
 
 // ============================================================================
@@ -62,12 +47,7 @@ const PermissionContext = createContext<PermissionContextValue | null>(null);
 export function PermissionProvider({ children }: { children: ReactNode }) {
   const { data: session, status } = useSession();
 
-  const permissions = useMemo(() => new Set<string>(session?.permissions ?? []), [session?.permissions]);
-
-  const roles = useMemo<RoleAssignment[]>(
-    () => (session?.roles as RoleAssignment[] | undefined) ?? [],
-    [session?.roles],
-  );
+  const permissions = useMemo(() => new Set<string>(session?.permissions), [session?.permissions]);
 
   const can = useMemo(() => {
     return (action: Action, resource: Resource, scope: Scope): boolean => {
@@ -76,20 +56,12 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
     };
   }, [status, permissions]);
 
-  const canAny = useMemo(() => {
-    return (checks: { action: Action; resource: Resource; scope: Scope }[]): boolean => {
-      return checks.some((c) => can(c.action, c.resource, c.scope));
-    };
-  }, [can]);
-
   const value: PermissionContextValue = useMemo(
     () => ({
       can,
-      canAny,
-      roles,
       loading: status === 'loading',
     }),
-    [can, canAny, roles, status],
+    [can, status],
   );
 
   return <PermissionContext.Provider value={value}>{children}</PermissionContext.Provider>;

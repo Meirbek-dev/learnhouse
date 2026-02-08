@@ -407,7 +407,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // Clear potentially stale cache entry
         cache.delete(cacheKey);
 
-        // Return session with available token data
+        // Return session with available token data (ensure permissions array always exists)
         return {
           ...session,
           user: {
@@ -419,6 +419,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           },
           roles: [],
           tokens: tokens,
+          permissions: [],
         };
       }
     },

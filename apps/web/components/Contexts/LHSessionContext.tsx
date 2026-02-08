@@ -85,41 +85,4 @@ export function usePlatformSession(): SessionContextType {
   return context;
 }
 
-// Type guard to check if session data exists and is authenticated
-export function isAuthenticated(session: SessionContextType): session is SessionContextType & {
-  data: ExtendedSessionData;
-} {
-  return session.status === 'authenticated' && session.data !== null;
-}
-
-// Helper hook that ensures session data is available
-export function useAuthenticatedSession(): ExtendedSessionData {
-  const session = usePlatformSession();
-
-  if (!isAuthenticated(session)) {
-    throw new Error('useAuthenticatedSession must be used when user is authenticated');
-  }
-
-  return session.data;
-}
-
-// Helper functions for safe property access
-export function getUserProperty<T>(
-  session: SessionContextType,
-  property: keyof ExtendedSessionData['user'],
-  defaultValue?: T,
-): T | undefined {
-  if (!session.data?.user) return defaultValue;
-  const value = session.data.user[property];
-  return value !== undefined ? (value as T) : defaultValue;
-}
-
-export function getTokens(session: SessionContextType): ExtendedSessionData['tokens'] {
-  return session.data?.tokens;
-}
-
-export function getRoles(session: SessionContextType): UserRoleWithOrg[] {
-  return session.data?.roles || [];
-}
-
 export default PlatformSessionProvider;

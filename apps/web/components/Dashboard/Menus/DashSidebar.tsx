@@ -95,8 +95,16 @@ const useNavigationItems = () => {
   });
   const { can } = usePermissions();
 
-  // Check if user has organization management rights using permission hook
-  const canManageOrganization = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
+  // Align sidebar visibility with the route layout guards — prefer specific checks
+  const canSeeOrg =
+    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN) ||
+    can(Actions.UPDATE, Resources.ORGANIZATION, Scopes.OWN);
+  const canSeeCourses =
+    can(Actions.CREATE, Resources.COURSE, Scopes.ORG) ||
+    can(Actions.UPDATE, Resources.COURSE, Scopes.ORG);
+  const canSeeUsers =
+    can(Actions.INVITE, Resources.USER, Scopes.ORG) ||
+    can(Actions.UPDATE, Resources.USER, Scopes.ORG);
 
   return [
     {
@@ -106,13 +114,17 @@ const useNavigationItems = () => {
       tooltip: t('tooltips.home'),
       isActive: pathname === '/dash',
     },
-    {
-      title: t('tooltips.courses'),
-      href: '/dash/courses',
-      icon: BookCopy,
-      tooltip: t('tooltips.courses'),
-      isActive: pathname.startsWith('/dash/courses'),
-    },
+    ...(canSeeCourses
+      ? [
+          {
+            title: t('tooltips.courses'),
+            href: '/dash/courses',
+            icon: BookCopy,
+            tooltip: t('tooltips.courses'),
+            isActive: pathname.startsWith('/dash/courses'),
+          },
+        ]
+      : []),
     {
       title: t('tooltips.assignments'),
       href: '/dash/assignments',
@@ -120,13 +132,17 @@ const useNavigationItems = () => {
       tooltip: t('tooltips.assignments'),
       isActive: pathname.startsWith('/dash/assignments'),
     },
-    {
-      title: t('tooltips.users'),
-      href: '/dash/users/settings/users',
-      icon: Users,
-      tooltip: t('tooltips.users'),
-      isActive: pathname.startsWith('/dash/users'),
-    },
+    ...(canSeeUsers
+      ? [
+          {
+            title: t('tooltips.users'),
+            href: '/dash/users/settings/users',
+            icon: Users,
+            tooltip: t('tooltips.users'),
+            isActive: pathname.startsWith('/dash/users'),
+          },
+        ]
+      : []),
     ...(isPaymentsEnabled
       ? [
           {
@@ -138,7 +154,7 @@ const useNavigationItems = () => {
           },
         ]
       : []),
-    ...(canManageOrganization
+    ...(canSeeOrg
       ? [
           {
             title: t('tooltips.organization'),

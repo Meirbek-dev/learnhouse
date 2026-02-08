@@ -6,13 +6,13 @@
  */
 
 import type {
+  CreateRoleBody,
+  Permission,
   Role,
   RoleWithPermissions,
-  Permission,
+  UpdateRoleBody,
   UserRBACData,
   UserRoleAssignment,
-  CreateRoleBody,
-  UpdateRoleBody,
 } from '@/types/permissions';
 import { getAPIUrl } from '@/services/config/config';
 

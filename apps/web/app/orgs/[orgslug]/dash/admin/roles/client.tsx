@@ -15,7 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ChevronRight, Edit, Lock, Plus, Search, Shield, Trash2, Users } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import type { RoleWithPermissions, Permission } from '@/types/permissions';
+import type { Permission, RoleWithPermissions } from '@/types/permissions';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -26,14 +26,14 @@ import { Badge } from '@/components/ui/badge';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import {
-  listRoles,
-  listAllPermissions,
-  createRole as apiCreateRole,
-  updateRole as apiUpdateRole,
-  deleteRole as apiDeleteRole,
   addPermissionToRole,
-  removePermissionFromRole,
+  createRole as apiCreateRole,
+  deleteRole as apiDeleteRole,
   getRole as apiGetRole,
+  updateRole as apiUpdateRole,
+  listAllPermissions,
+  listRoles,
+  removePermissionFromRole,
 } from '@/services/rbac';
 
 export default function RBACAdminClient() {

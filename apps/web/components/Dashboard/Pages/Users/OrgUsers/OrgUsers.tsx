@@ -107,19 +107,7 @@ const OrgUsers = () => {
     if (!roleObj) return 0;
     // roleObj may be the role itself or wrapped under `role`
     const role = roleObj.role || roleObj;
-    const slug = role.slug || '';
-
-    // Use slug-based priority instead of hardcoded names
-    const priorities: Record<string, number> = {
-      [RoleSlugs.SUPER_ADMIN]: 1000,
-      [RoleSlugs.ORG_ADMIN]: 900,
-      [RoleSlugs.MAINTAINER]: 800,
-      [RoleSlugs.INSTRUCTOR]: 700,
-      [RoleSlugs.MODERATOR]: 500,
-      [RoleSlugs.USER]: 100,
-    };
-
-    return priorities[slug] ?? 0;
+    return role.priority ?? 0;
   };
 
   const currentUserPriority = (() => {
@@ -255,16 +243,13 @@ const OrgUsers = () => {
                               session?.data?.user?.user_uuid === user.user.user_uuid ||
                               session?.data?.user?.id === user.user.id;
                             const targetPriority = getRolePriority(user.role);
-                            const isTargetSuperAdmin = user.role.slug === RoleSlugs.SUPER_ADMIN;
-                            const canManage = !isSelf && currentUserPriority >= targetPriority && !isTargetSuperAdmin;
+                            const canManage = !isSelf && currentUserPriority > targetPriority;
 
                             if (!canManage) {
                               // Determine specific disabled reason for clearer messaging
-                              if (isTargetSuperAdmin)
-                                return <div className="text-neutral-500">{t('noActionsForAdministrators')}</div>;
+                              if (isSelf) return <div className="text-neutral-500">{t('cannotEditSelf')}</div>;
                               if (currentUserPriority <= targetPriority)
                                 return <div className="text-neutral-500">{t('cannotManageHigherRole')}</div>;
-                              if (isSelf) return <div className="text-neutral-500">{t('cannotEditSelf')}</div>;
                               return <div className="text-neutral-500">{t('noActionsForAdministrators')}</div>;
                             }
 

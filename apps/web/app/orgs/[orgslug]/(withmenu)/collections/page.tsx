@@ -1,7 +1,7 @@
 import NewCollectionButton from '@components/Objects/StyledElements/Buttons/NewCollectionButton';
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
+import ProtectedText from '@components/Objects/ContentPlaceHolder';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { PermissionGuard } from '@components/Security/PermissionGuard';
@@ -100,7 +100,12 @@ const CollectionsPage = async (params: any) => {
               <div className="text-center">
                 <h1 className="mb-2 text-xl font-bold text-gray-600">{t('noContent')}</h1>
                 <p className="text-base text-gray-400">
-                  <ContentPlaceHolderIfUserIsNotAdmin text={t('noContentUserAdmin')} />
+                  <ProtectedText
+                    text={t('noContentUserAdmin')}
+                    action={Actions.CREATE}
+                    resource={Resources.COLLECTION}
+                    scope={Scopes.ORG}
+                  />
                 </p>
                 <div className="mt-4 flex justify-center">
                   <PermissionGuard

@@ -15,7 +15,7 @@ import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/c
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar, Plus, Search, Shield, Trash2, User } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import type { UserRoleAssignment, Role } from '@/types/permissions';
+import type { Role, UserRoleAssignment } from '@/types/permissions';
 import type { OrgUserBasic } from '@/services/rbac';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useCallback, useEffect, useState } from 'react';
@@ -27,10 +27,10 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import {
+  assignRoleToUser,
+  listOrgUsers,
   listRoles,
   listUserRoles,
-  listOrgUsers,
-  assignRoleToUser,
   removeRoleFromUser,
 } from '@/services/rbac';
 

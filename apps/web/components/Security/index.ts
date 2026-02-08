@@ -6,7 +6,6 @@
 
 // Core provider and hook
 export { PermissionProvider, usePermissions } from './PermissionProvider';
-export type { RoleAssignment } from './PermissionProvider';
 
 // UI Components
 export { PermissionGuard } from './PermissionGuard';
