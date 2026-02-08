@@ -1,34 +1,18 @@
-import { useEffect, useState } from 'react';
+import * as React from 'react';
 
 const MOBILE_BREAKPOINT = 768;
 
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = useState<boolean | undefined>(() => {
-    if (typeof globalThis.window === 'undefined') return undefined;
-    return window.innerWidth < MOBILE_BREAKPOINT;
-  });
+  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const mql = globalThis.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
     const onChange = () => {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
     };
-    if ('addEventListener' in mql) {
-      mql.addEventListener('change', onChange);
-    } else if ('addListener' in mql) {
-      // backwards compatibility
-      // @ts-ignore - addListener exists on older MediaQueryList implementations
-      mql.addListener(onChange);
-    }
-
-    return () => {
-      if ('removeEventListener' in mql) {
-        mql.removeEventListener('change', onChange);
-      } else if ('removeListener' in mql) {
-        // @ts-ignore - removeListener exists on older MediaQueryList implementations
-        mql.removeListener(onChange);
-      }
-    };
+    mql.addEventListener('change', onChange);
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    return () => mql.removeEventListener('change', onChange);
   }, []);
 
   return Boolean(isMobile);

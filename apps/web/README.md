@@ -48,8 +48,8 @@ docker compose up -d --build app
 ## Troubleshooting
 
 - If the build fails with package manager errors, ensure `bun` is installed during the Docker build
-  (the Dockerfile uses `oven/bun:1-alpine` base image). If building locally you can run `bun install`
-  in `apps/web` to verify your lockfile.
+  (the Dockerfile uses `oven/bun:1-alpine` base image). If building locally you can run
+  `bun install` in `apps/web` to verify your lockfile.
 - If changes to dependencies are not picked up, re-run the build with no cache:
 
 ```powershell

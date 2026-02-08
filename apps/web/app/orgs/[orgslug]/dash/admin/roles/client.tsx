@@ -1,6 +1,16 @@
 'use client';
 
 import {
+  addPermissionToRole,
+  createRole as apiCreateRole,
+  deleteRole as apiDeleteRole,
+  getRole as apiGetRole,
+  updateRole as apiUpdateRole,
+  listAllPermissions,
+  listRoles,
+  removePermissionFromRole,
+} from '@/services/rbac';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -25,16 +35,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import {
-  addPermissionToRole,
-  createRole as apiCreateRole,
-  deleteRole as apiDeleteRole,
-  getRole as apiGetRole,
-  updateRole as apiUpdateRole,
-  listAllPermissions,
-  listRoles,
-  removePermissionFromRole,
-} from '@/services/rbac';
 
 export default function RBACAdminClient() {
   const org = useOrg();
@@ -63,13 +63,15 @@ export default function RBACAdminClient() {
           listAllPermissions(accessToken),
         ]);
         // Sort roles so system roles and higher-priority roles appear first
-        setRoles(rolesData.toSorted((a, b) => {
-          const aSystem = a.is_system ? 0 : 1;
-          const bSystem = b.is_system ? 0 : 1;
-          if (aSystem !== bSystem) return aSystem - bSystem;
-          // Descending priority
-          return (b.priority ?? 0) - (a.priority ?? 0);
-        }));
+        setRoles(
+          rolesData.toSorted((a, b) => {
+            const aSystem = a.is_system ? 0 : 1;
+            const bSystem = b.is_system ? 0 : 1;
+            if (aSystem !== bSystem) return aSystem - bSystem;
+            // Descending priority
+            return (b.priority ?? 0) - (a.priority ?? 0);
+          }),
+        );
         setPermissions(permsData);
       } catch (error) {
         console.error('Failed to fetch RBAC data:', error);

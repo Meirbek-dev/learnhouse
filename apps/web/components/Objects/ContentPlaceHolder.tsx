@@ -1,6 +1,6 @@
 'use client';
-import { usePermissions } from '@/components/Security';
 import type { Action, Resource, Scope } from '@/types/permissions';
+import { usePermissions } from '@/components/Security';
 import { useTranslations } from 'next-intl';
 
 interface ProtectedTextProps {

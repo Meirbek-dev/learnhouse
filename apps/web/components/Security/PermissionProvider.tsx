@@ -11,8 +11,8 @@
 
 import type { Action, Resource, Scope } from '@/types/permissions';
 import { createContext, useContext, useMemo } from 'react';
-import { perm } from '@/types/permissions';
 import { useSession } from 'next-auth/react';
+import { perm } from '@/types/permissions';
 import type { ReactNode } from 'react';
 
 // ============================================================================

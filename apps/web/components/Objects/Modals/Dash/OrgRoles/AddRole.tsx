@@ -1,13 +1,13 @@
 'use client';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { createRole } from '@/services/rbac';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
+import { createRole } from '@/services/rbac';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -65,7 +65,10 @@ function AddRole(props: AddRoleProps) {
       try {
         await createRole(access_token ?? '', org?.id ?? 0, {
           name: values.name,
-          slug: values.name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''),
+          slug: values.name
+            .toLowerCase()
+            .replace(/\s+/g, '_')
+            .replace(/[^a-z0-9_]/g, ''),
           description: values.description,
         });
         mutate(`${getAPIUrl()}roles/org/${org?.id}`);

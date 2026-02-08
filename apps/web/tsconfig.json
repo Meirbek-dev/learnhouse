@@ -2,11 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "target": "es2024",
-    "lib": [
-      "ES2024",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -53,6 +49,7 @@
       "@/*": ["./*"]
     }
   },
+  "exclude": ["node_modules"],
   "include": [
     "**/*.ts",
     "**/*.tsx",
@@ -61,8 +58,5 @@
     ".next/types/**/*.ts",
     "postcss.config.mjs",
     ".next/dev/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
   ]
 }

@@ -1,11 +1,11 @@
 import NewCollectionButton from '@components/Objects/StyledElements/Buttons/NewCollectionButton';
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import ProtectedText from '@components/Objects/ContentPlaceHolder';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { PermissionGuard } from '@components/Security/PermissionGuard';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
+import ProtectedText from '@components/Objects/ContentPlaceHolder';
 import { getOrgCollections } from '@services/courses/collections';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getUriWithOrg } from '@services/config/config';

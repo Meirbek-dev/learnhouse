@@ -71,7 +71,10 @@ function PaginationPrevious({ className, ...props }: React.ComponentProps<typeof
       className={cn('ps-2!', className)}
       {...props}
     >
-      <ChevronLeftIcon data-icon="inline-start" />
+      <ChevronLeftIcon
+        data-icon="inline-start"
+        className="rtl:rotate-180"
+      />
       <span className="hidden sm:block">{t('previous')}</span>
     </PaginationLink>
   );
@@ -87,7 +90,10 @@ function PaginationNext({ className, ...props }: React.ComponentProps<typeof Pag
       {...props}
     >
       <span className="hidden sm:block">{t('next')}</span>
-      <ChevronRightIcon data-icon="inline-end" />
+      <ChevronRightIcon
+        data-icon="inline-end"
+        className="rtl:rotate-180"
+      />
     </PaginationLink>
   );
 }

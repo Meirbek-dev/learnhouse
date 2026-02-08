@@ -16,14 +16,11 @@ const DashMobileMenu = () => {
 
   // Align visibility with route guards
   const canSeeOrg =
-    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN) ||
-    can(Actions.UPDATE, Resources.ORGANIZATION, Scopes.OWN);
+    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN) || can(Actions.UPDATE, Resources.ORGANIZATION, Scopes.OWN);
   const canSeeCourses =
-    can(Actions.CREATE, Resources.COURSE, Scopes.ORG) ||
-    can(Actions.UPDATE, Resources.COURSE, Scopes.ORG);
+    can(Actions.CREATE, Resources.COURSE, Scopes.ORG) || can(Actions.UPDATE, Resources.COURSE, Scopes.ORG);
   const canSeeUsers =
-    can(Actions.INVITE, Resources.USER, Scopes.ORG) ||
-    can(Actions.UPDATE, Resources.USER, Scopes.ORG);
+    can(Actions.INVITE, Resources.USER, Scopes.ORG) || can(Actions.UPDATE, Resources.USER, Scopes.ORG);
 
   return (
     <div

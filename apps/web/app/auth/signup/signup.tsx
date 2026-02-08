@@ -1,12 +1,12 @@
 'use client';
 
-import { getUriWithOrg } from '@services/config/config';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import platformLogoFull from 'public/platform_logo_full.svg';
-import { useRouter } from 'next/navigation';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useEffect } from 'react';
+import { getUriWithOrg } from '@services/config/config';
+import { useRouter } from 'next/navigation';
 import Link from '@components/ui/AppLink';
+import { useEffect } from 'react';
 import Image from 'next/image';
 
 interface SignUpClientProps {

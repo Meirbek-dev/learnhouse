@@ -33,7 +33,6 @@ import React, { useMemo, useState, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { RoleSlugs } from '@/types/permissions';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';

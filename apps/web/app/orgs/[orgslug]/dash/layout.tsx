@@ -1,6 +1,6 @@
-import { requireAuth } from '@/lib/server-auth';
 import ClientAdminLayout from './ClientAdminLayout';
 import { getTranslations } from 'next-intl/server';
+import { requireAuth } from '@/lib/server-auth';
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 

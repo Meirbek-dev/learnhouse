@@ -34,8 +34,6 @@ interface SidebarContextProps {
   toggleSidebar: () => void;
 }
 
-import { useEffectEvent } from 'react';
-
 const SidebarContext = React.createContext<SidebarContextProps | null>(null);
 
 function useSidebar() {
@@ -67,59 +65,55 @@ function SidebarProvider({
   // We use openProp and setOpenProp for control from outside the component.
   const [_open, _setOpen] = React.useState(defaultOpen);
   const open = openProp ?? _open;
-  function setOpen(value: boolean | ((value: boolean) => boolean)) {
-    const openState = typeof value === 'function' ? value(open) : value;
-    if (setOpenProp) {
-      setOpenProp(openState);
-    } else {
-      _setOpen(openState);
-    }
+  const setOpen = React.useCallback(
+    (value: boolean | ((value: boolean) => boolean)) => {
+      const openState = typeof value === 'function' ? value(open) : value;
+      if (setOpenProp) {
+        setOpenProp(openState);
+      } else {
+        _setOpen(openState);
+      }
 
-    // This sets the cookie to keep the sidebar state.
-    document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
-  }
+      // This sets the cookie to keep the sidebar state.
+      document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
+    },
+    [setOpenProp, open],
+  );
 
   // Helper to toggle the sidebar.
-  function toggleSidebar() {
+  const toggleSidebar = React.useCallback(() => {
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
-  }
+  }, [isMobile, setOpen, setOpenMobile]);
 
   // Adds a keyboard shortcut to toggle the sidebar.
-  const handleKeyDown = useEffectEvent((event: KeyboardEvent) => {
-    if (event.key === SIDEBAR_KEYBOARD_SHORTCUT && (event.metaKey || event.ctrlKey)) {
-      event.preventDefault();
-      if (isMobile) {
-        setOpenMobile((open) => !open);
-      } else {
-        const newState = !open;
-        if (setOpenProp) {
-          setOpenProp(newState);
-        } else {
-          _setOpen(newState);
-        }
-        document.cookie = `${SIDEBAR_COOKIE_NAME}=${newState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
-      }
-    }
-  });
-
   React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === SIDEBAR_KEYBOARD_SHORTCUT && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        toggleSidebar();
+      }
+    };
+
     globalThis.addEventListener('keydown', handleKeyDown);
     return () => globalThis.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [toggleSidebar]);
 
   // We add a state so that we can do data-state="expanded" or "collapsed".
   // This makes it easier to style the sidebar with Tailwind classes.
   const state = open ? 'expanded' : 'collapsed';
 
-  const contextValue: SidebarContextProps = {
-    state,
-    open,
-    setOpen,
-    isMobile,
-    openMobile,
-    setOpenMobile,
-    toggleSidebar,
-  };
+  const contextValue = React.useMemo<SidebarContextProps>(
+    () => ({
+      state,
+      open,
+      setOpen,
+      isMobile,
+      openMobile,
+      setOpenMobile,
+      toggleSidebar,
+    }),
+    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+  );
 
   return (
     <SidebarContext.Provider value={contextValue}>
@@ -144,14 +138,15 @@ function SidebarProvider({
 function Sidebar({
   side = 'left',
   variant = 'sidebar',
-  collapsible = 'offExamples',
+  collapsible = 'offcanvas',
   className,
   children,
+  dir,
   ...props
 }: React.ComponentProps<'div'> & {
   side?: 'left' | 'right';
   variant?: 'sidebar' | 'floating' | 'inset';
-  collapsible?: 'offExamples' | 'icon' | 'none';
+  collapsible?: 'offcanvas' | 'icon' | 'none';
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
   const t = useTranslations('Components.Sidebar');
@@ -176,6 +171,7 @@ function Sidebar({
         {...props}
       >
         <SheetContent
+          dir={dir}
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
@@ -211,7 +207,7 @@ function Sidebar({
         data-slot="sidebar-gap"
         className={cn(
           'transition-[width] duration-200 ease-linear relative w-(--sidebar-width) bg-transparent',
-          'group-data-[collapsible=offExamples]:w-0',
+          'group-data-[collapsible=offcanvas]:w-0',
           'group-data-[side=right]:rotate-180',
           variant === 'floating' || variant === 'inset'
             ? 'group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]'
@@ -220,11 +216,9 @@ function Sidebar({
       />
       <div
         data-slot="sidebar-container"
+        data-side={side}
         className={cn(
-          'fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex',
-          side === 'left'
-            ? 'start-0 group-data-[collapsible=offExamples]:start-[calc(var(--sidebar-width)*-1)]'
-            : 'end-0 group-data-[collapsible=offExamples]:end-[calc(var(--sidebar-width)*-1)]',
+          'fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear data-[side=left]:left-0 data-[side=left]:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] data-[side=right]:right-0 data-[side=right]:group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)] md:flex',
           // Adjust the padding for floating and inset variants.
           variant === 'floating' || variant === 'inset'
             ? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]'
@@ -262,7 +256,7 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
       }}
       {...props}
     >
-      <PanelLeftIcon />
+      <PanelLeftIcon className="rtl:rotate-180" />
       <span className="sr-only">{t('toggleSidebar')}</span>
     </Button>
   );
@@ -281,12 +275,12 @@ function SidebarRail({ className, ...props }: React.ComponentProps<'button'>) {
       onClick={toggleSidebar}
       title={t('toggleSidebar')}
       className={cn(
-        'hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 rtl:translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:start-1/2 after:w-[2px] sm:flex',
+        'hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-4 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:start-1/2 after:w-[2px] sm:flex ltr:-translate-x-1/2 rtl:-translate-x-1/2',
         'in-data-[side=left]:cursor-w-resize rtl:in-data-[side=left]:cursor-e-resize in-data-[side=right]:cursor-e-resize rtl:in-data-[side=right]:cursor-w-resize',
         '[[data-side=left][data-state=collapsed]_&]:cursor-e-resize rtl:[[data-side=left][data-state=collapsed]_&]:cursor-w-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize rtl:[[data-side=right][data-state=collapsed]_&]:cursor-e-resize',
-        'hover:group-data-[collapsible=offExamples]:bg-sidebar group-data-[collapsible=offExamples]:translate-x-0 rtl:group-data-[collapsible=offExamples]:-translate-x-0 group-data-[collapsible=offExamples]:after:start-full',
-        '[[data-side=left][data-collapsible=offExamples]_&]:-end-2',
-        '[[data-side=right][data-collapsible=offExamples]_&]:-start-2',
+        'hover:group-data-[collapsible=offcanvas]:bg-sidebar group-data-[collapsible=offcanvas]:translate-x-0 rtl:group-data-[collapsible=offcanvas]:-translate-x-0 group-data-[collapsible=offcanvas]:after:start-full',
+        '[[data-side=left][data-collapsible=offcanvas]_&]:-end-2',
+        '[[data-side=right][data-collapsible=offcanvas]_&]:-start-2',
         className,
       )}
       {...props}
@@ -549,7 +543,7 @@ function SidebarMenuAction({
         className: cn(
           'text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground peer-hover/menu-button:text-sidebar-accent-foreground absolute top-1.5 end-1 aspect-square w-5 rounded-md p-0 peer-data-[size=default]/menu-button:top-1.5 peer-data-[size=lg]/menu-button:top-2.5 peer-data-[size=sm]/menu-button:top-1 focus-visible:ring-2 [&>svg]:size-4 flex items-center justify-center outline-hidden transition-transform group-data-[collapsible=icon]:hidden after:absolute after:-inset-2 md:after:hidden [&>svg]:shrink-0',
           showOnHover &&
-            'peer-data-active/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-open:opacity-100 md:opacity-0',
+            'peer-data-active/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 aria-expanded:opacity-100 md:opacity-0',
           className,
         ),
       },

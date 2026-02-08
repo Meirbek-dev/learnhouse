@@ -7,7 +7,7 @@
     "perf": "warn",
     "restriction": "warn",
     "style": "warn",
-    "suspicious": "warn",
+    "suspicious": "warn"
   },
   "env": {
     "builtin": true,

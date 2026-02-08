@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { assignRoleToUser, listOrgUsers, listRoles, listUserRoles, removeRoleFromUser } from '@/services/rbac';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
@@ -16,23 +17,16 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar, Plus, Search, Shield, Trash2, User } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import type { Role, UserRoleAssignment } from '@/types/permissions';
-import type { OrgUserBasic } from '@/services/rbac';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useCallback, useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { OrgUserBasic } from '@/services/rbac';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
-import {
-  assignRoleToUser,
-  listOrgUsers,
-  listRoles,
-  listUserRoles,
-  removeRoleFromUser,
-} from '@/services/rbac';
 
 export default function UserRolesClient() {
   const org = useOrg();

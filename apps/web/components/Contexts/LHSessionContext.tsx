@@ -1,10 +1,10 @@
 'use client';
 
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import type { Role } from '@/types/permissions';
 import { useSession } from 'next-auth/react';
 import { createContext, use } from 'react';
 import type { ReactNode } from 'react';
-import type { Role } from '@/types/permissions';
 
 // Match the global UserRoleWithOrg interface from next-auth.d.ts
 interface UserRoleWithOrg {

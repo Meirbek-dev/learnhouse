@@ -92,22 +92,14 @@ export function deleteRole(token: string, roleId: number): Promise<void> {
 // Role ↔ Permission assignment
 // ============================================================================
 
-export function addPermissionToRole(
-  token: string,
-  roleId: number,
-  permissionId: number,
-): Promise<void> {
+export function addPermissionToRole(token: string, roleId: number, permissionId: number): Promise<void> {
   return request(api(`roles/${roleId}/permissions`), token, {
     method: 'POST',
     body: JSON.stringify({ permission_id: permissionId }),
   });
 }
 
-export function removePermissionFromRole(
-  token: string,
-  roleId: number,
-  permissionId: number,
-): Promise<void> {
+export function removePermissionFromRole(token: string, roleId: number, permissionId: number): Promise<void> {
   return request(api(`roles/${roleId}/permissions/${permissionId}`), token, {
     method: 'DELETE',
   });
@@ -121,24 +113,14 @@ export function listUserRoles(token: string, orgId: number): Promise<UserRoleAss
   return request(api(`/api/v1/orgs/${orgId}/users/roles`), token);
 }
 
-export function assignRoleToUser(
-  token: string,
-  userId: number,
-  roleId: number,
-  orgId: number,
-): Promise<void> {
+export function assignRoleToUser(token: string, userId: number, roleId: number, orgId: number): Promise<void> {
   return request(api(`/api/v1/users/${userId}/roles`), token, {
     method: 'POST',
     body: JSON.stringify({ role_id: roleId, org_id: orgId }),
   });
 }
 
-export function removeRoleFromUser(
-  token: string,
-  userId: number,
-  roleId: number,
-  orgId: number,
-): Promise<void> {
+export function removeRoleFromUser(token: string, userId: number, roleId: number, orgId: number): Promise<void> {
   return request(api(`/api/v1/users/${userId}/roles/${roleId}?org_id=${orgId}`), token, {
     method: 'DELETE',
   });
@@ -157,11 +139,7 @@ export interface OrgUserBasic {
   avatar_image?: string;
 }
 
-export function listOrgUsers(
-  token: string,
-  orgId: number,
-  limit = 100,
-): Promise<OrgUserBasic[]> {
+export function listOrgUsers(token: string, orgId: number, limit = 100): Promise<OrgUserBasic[]> {
   // The endpoint may return { users: [...] } or a flat array.
   return request<OrgUserBasic[] | { users: OrgUserBasic[] }>(
     api(`/api/v1/orgs/${orgId}/users?limit=${limit}`),

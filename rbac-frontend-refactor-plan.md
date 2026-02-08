@@ -2,7 +2,11 @@
 
 ## Current State Assessment
 
-The frontend RBAC system has a solid architectural foundation — centralized permission provider, auto-generated types from backend, server-side route guards, and a clean `resource:action:scope` permission model. However, the implementation has accumulated significant problems: pervasive type safety violations, dead code, hardcoded role-slug logic that bypasses the permission system, and inconsistent patterns across components.
+The frontend RBAC system has a solid architectural foundation — centralized permission provider,
+auto-generated types from backend, server-side route guards, and a clean `resource:action:scope`
+permission model. However, the implementation has accumulated significant problems: pervasive type
+safety violations, dead code, hardcoded role-slug logic that bypasses the permission system, and
+inconsistent patterns across components.
 
 ---
 
@@ -10,7 +14,8 @@ The frontend RBAC system has a solid architectural foundation — centralized pe
 
 ### 1. Dead Code in PermissionProvider
 
-**`PermissionProvider.tsx`** exports `roles` and `canAny` — neither is used anywhere in the codebase.
+**`PermissionProvider.tsx`** exports `roles` and `canAny` — neither is used anywhere in the
+codebase.
 
 ```tsx
 // PermissionProvider.tsx:54-55 — computed, memoized, exported, never consumed
@@ -27,7 +32,8 @@ const canAny = useMemo(() => {
 }, [can]);
 ```
 
-Zero consumers across the entire codebase. These are computed on every render for every authenticated user, stored in context, and never read.
+Zero consumers across the entire codebase. These are computed on every render for every
+authenticated user, stored in context, and never read.
 
 ---
 
@@ -43,13 +49,15 @@ Zero consumers across the entire codebase. These are computed on every render fo
 | `isAuthenticated()`         | 64-68 | No (components check `session.status` directly) |
 | `useAuthenticatedSession()` | 70-77 | Minimally / not meaningfully                    |
 
-These expand the public API surface, confuse developers reading the module, and suggest an incomplete refactoring — someone created them anticipating usage that never materialized.
+These expand the public API surface, confuse developers reading the module, and suggest an
+incomplete refactoring — someone created them anticipating usage that never materialized.
 
 ---
 
 ### 4. Hardcoded Role-Slug Logic Bypassing the Permission System
 
-Several components check role slugs directly instead of checking permissions. This defeats the entire purpose of having a permission-based system.
+Several components check role slugs directly instead of checking permissions. This defeats the
+entire purpose of having a permission-based system.
 
 **HeaderProfileBox.tsx:46-68** — Role display configs keyed by slug:
 
@@ -68,8 +76,11 @@ userRoleInfo = roleConfigs[roleSlug] || roleConfigs[RoleSlugs.USER] || null;
 
 ```tsx
 const systemSlugs = [
-  RoleSlugs.SUPER_ADMIN, RoleSlugs.ORG_ADMIN,
-  RoleSlugs.MAINTAINER, RoleSlugs.INSTRUCTOR, RoleSlugs.USER,
+  RoleSlugs.SUPER_ADMIN,
+  RoleSlugs.ORG_ADMIN,
+  RoleSlugs.MAINTAINER,
+  RoleSlugs.INSTRUCTOR,
+  RoleSlugs.USER,
 ];
 return !systemSlugs.includes(slug);
 ```
@@ -105,14 +116,19 @@ if (slug === RoleSlugs.SUPER_ADMIN || slug === RoleSlugs.ORG_ADMIN) {
 }
 // ...
 const systemSlugs: string[] = [
-  RoleSlugs.SUPER_ADMIN, RoleSlugs.ORG_ADMIN,
-  RoleSlugs.MAINTAINER, RoleSlugs.INSTRUCTOR, RoleSlugs.USER,
+  RoleSlugs.SUPER_ADMIN,
+  RoleSlugs.ORG_ADMIN,
+  RoleSlugs.MAINTAINER,
+  RoleSlugs.INSTRUCTOR,
+  RoleSlugs.USER,
 ];
 ```
 
 Should use `role.is_system` for system detection and `role.priority` for ordering.
 
-**Why this matters:** If an org creates a custom role called "Team Lead" with higher priority than Instructor, these hardcoded maps don't know about it. The system becomes brittle — you can't add new system roles without updating every hardcoded list.
+**Why this matters:** If an org creates a custom role called "Team Lead" with higher priority than
+Instructor, these hardcoded maps don't know about it. The system becomes brittle — you can't add new
+system roles without updating every hardcoded list.
 
 ---
 
@@ -123,7 +139,9 @@ Should use `role.is_system` for system detection and `role.priority` for orderin
 const permissions = session?.data?.permissions ?? {};
 ```
 
-`permissions` is typed as `string[]` (array). Default should be `[]` (empty array), not `{}` (empty object). And this variable is declared but **never used** in the component — pure dead code with a type bug.
+`permissions` is typed as `string[]` (array). Default should be `[]` (empty array), not `{}` (empty
+object). And this variable is declared but **never used** in the component — pure dead code with a
+type bug.
 
 ---
 
@@ -154,13 +172,16 @@ export function sessionCan(...): boolean {
 }
 ```
 
-`requireAnyPermission` calls `sessionCan` in a loop (`checks.some(c => sessionCan(...))`), creating a new `Set` for every permission check. With 5 checks, that's 5 Set constructions from the same array.
+`requireAnyPermission` calls `sessionCan` in a loop (`checks.some(c => sessionCan(...))`), creating
+a new `Set` for every permission check. With 5 checks, that's 5 Set constructions from the same
+array.
 
 ---
 
 ### 8. Dashboard Access Check: `MANAGE:ORGANIZATION:OWN` Overloaded
 
-The permission `MANAGE:ORGANIZATION:OWN` is used as a catch-all "is this a dashboard user?" check in multiple unrelated places:
+The permission `MANAGE:ORGANIZATION:OWN` is used as a catch-all "is this a dashboard user?" check in
+multiple unrelated places:
 
 | File                        | Purpose                           |
 | --------------------------- | --------------------------------- |
@@ -171,7 +192,9 @@ The permission `MANAGE:ORGANIZATION:OWN` is used as a catch-all "is this a dashb
 | `courses/client.tsx`        | Course management context         |
 | `courses.tsx (withmenu)`    | Course listing context            |
 
-This permission means "can manage this organization" but it's being used as a proxy for "is a privileged user." These are conceptually different. A user with `COURSE:CREATE:ORG` should see the dashboard but may not have `MANAGE:ORGANIZATION:OWN`.
+This permission means "can manage this organization" but it's being used as a proxy for "is a
+privileged user." These are conceptually different. A user with `COURSE:CREATE:ORG` should see the
+dashboard but may not have `MANAGE:ORGANIZATION:OWN`.
 
 ---
 
@@ -189,13 +212,14 @@ const canCreate = can(Actions.CREATE, Resources.COURSE, Scopes.ORG);
 
 ```tsx
 // From API response object
-post.can_update  // boolean
-post.can_delete  // boolean
-post.can_moderate // boolean
-post.is_owner    // boolean
+post.can_update; // boolean
+post.can_delete; // boolean
+post.can_moderate; // boolean
+post.is_owner; // boolean
 ```
 
-Both are technically valid (Approach 2 handles row-level ownership checks), but there's no documentation or convention about when to use which. Some components mix both.
+Both are technically valid (Approach 2 handles row-level ownership checks), but there's no
+documentation or convention about when to use which. Some components mix both.
 
 ---
 
@@ -203,7 +227,8 @@ Both are technically valid (Approach 2 handles row-level ownership checks), but 
 
 **Step 2.1: Remove unused exports from `PermissionProvider.tsx`**
 
-Remove `roles` and `canAny` from the context value. Remove the `RoleAssignment` interface export (no consumers). Simplify to:
+Remove `roles` and `canAny` from the context value. Remove the `RoleAssignment` interface export (no
+consumers). Simplify to:
 
 ```tsx
 interface PermissionContextValue {
@@ -216,16 +241,18 @@ If `canAny` is needed in the future, it can be trivially re-added.
 
 **Step 2.2: Remove unused exports from `LHSessionContext.tsx`**
 
-Delete: `getUserProperty()`, `getTokens()`, `getRoles()`, `isAuthenticated()`, `useAuthenticatedSession()`.
+Delete: `getUserProperty()`, `getTokens()`, `getRoles()`, `isAuthenticated()`,
+`useAuthenticatedSession()`.
 
-Keep only: `usePlatformSession()` (the single hook that all components use) and the context provider.
+Keep only: `usePlatformSession()` (the single hook that all components use) and the context
+provider.
 
 **Step 2.3: Remove dead variable in `HeaderProfileBox.tsx`**
 
 Delete line 36:
 
 ```tsx
-const permissions = session?.data?.permissions ?? {};  // unused, wrong type
+const permissions = session?.data?.permissions ?? {}; // unused, wrong type
 ```
 
 **Files to modify:**
@@ -280,11 +307,16 @@ return role.priority;
 
 The role display configs (`roleConfigs` map keyed by slug) need rethinking. Options:
 
-**Option A (recommended):** Keep the slug-keyed display configs for system roles only (this is UI presentation, not access control — it's acceptable to map known system roles to specific icons/colors). But use `role.is_system` for filtering, and `role.priority` for sorting. The slug → icon/color mapping is a view concern, not a security concern.
+**Option A (recommended):** Keep the slug-keyed display configs for system roles only (this is UI
+presentation, not access control — it's acceptable to map known system roles to specific
+icons/colors). But use `role.is_system` for filtering, and `role.priority` for sorting. The slug →
+icon/color mapping is a view concern, not a security concern.
 
-**Option B:** Have the backend include display metadata (icon, color) on role objects. This is cleaner but requires backend changes.
+**Option B:** Have the backend include display metadata (icon, color) on role objects. This is
+cleaner but requires backend changes.
 
-Go with **Option A** — the slug-to-display mapping is view logic and doesn't bypass security. The important thing is that no *authorization decisions* use slug comparisons.
+Go with **Option A** — the slug-to-display mapping is view logic and doesn't bypass security. The
+important thing is that no _authorization decisions_ use slug comparisons.
 
 **Step 3.4: Fix `OrgUsers.tsx` super-admin check**
 
@@ -357,7 +389,7 @@ export async function requireAnyPermission(
 ) {
   const session = await requireAuth(orgslug);
   const perms = new Set(session.permissions);
-  const hasAny = checks.some(c => perms.has(perm(c.resource, c.action, c.scope)));
+  const hasAny = checks.some((c) => perms.has(perm(c.resource, c.action, c.scope)));
   if (!hasAny) {
     redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
   }
@@ -365,7 +397,8 @@ export async function requireAnyPermission(
 }
 ```
 
-Also update `sessionCan` to accept an optional pre-built Set, or refactor so the Set is built once and passed through.
+Also update `sessionCan` to accept an optional pre-built Set, or refactor so the Set is built once
+and passed through.
 
 **Files to modify:**
 
@@ -379,33 +412,41 @@ Also update `sessionCan` to accept an optional pre-built Set, or refactor so the
 
 Create a clear convention for "can access the dashboard." Options:
 
-**Option A (recommended):** Use the server-side layout guards as the single source of truth for dashboard section access. Each section already has its own `requireAnyPermission` in its layout. The sidebar should mirror these same checks:
+**Option A (recommended):** Use the server-side layout guards as the single source of truth for
+dashboard section access. Each section already has its own `requireAnyPermission` in its layout. The
+sidebar should mirror these same checks:
 
 ```tsx
 // DashSidebar.tsx
-const canSeeOrg = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN)
-                || can(Actions.UPDATE, Resources.ORGANIZATION, Scopes.OWN);
-const canSeeCourses = can(Actions.CREATE, Resources.COURSE, Scopes.ORG)
-                   || can(Actions.UPDATE, Resources.COURSE, Scopes.ORG);
-const canSeeUsers = can(Actions.INVITE, Resources.USER, Scopes.ORG)
-                 || can(Actions.UPDATE, Resources.USER, Scopes.ORG);
+const canSeeOrg =
+  can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN) ||
+  can(Actions.UPDATE, Resources.ORGANIZATION, Scopes.OWN);
+const canSeeCourses =
+  can(Actions.CREATE, Resources.COURSE, Scopes.ORG) ||
+  can(Actions.UPDATE, Resources.COURSE, Scopes.ORG);
+const canSeeUsers =
+  can(Actions.INVITE, Resources.USER, Scopes.ORG) ||
+  can(Actions.UPDATE, Resources.USER, Scopes.ORG);
 ```
 
 This aligns the sidebar visibility with the actual route guards, eliminating the proxy pattern.
 
-**Option B:** Add a dedicated `DASHBOARD:READ:ORG` permission on the backend. Cleaner but requires migration.
+**Option B:** Add a dedicated `DASHBOARD:READ:ORG` permission on the backend. Cleaner but requires
+migration.
 
 Go with **Option A** first — align sidebar checks with layout guards. No backend changes needed.
 
 **Step 6.2: Fix `HeaderProfileBox.tsx` dashboard link visibility**
 
-The "Dashboard" link in the profile dropdown should show when user has *any* dashboard-level permission, not just `MANAGE:ORGANIZATION:OWN`. Use `canAny` or a multi-check:
+The "Dashboard" link in the profile dropdown should show when user has _any_ dashboard-level
+permission, not just `MANAGE:ORGANIZATION:OWN`. Use `canAny` or a multi-check:
 
 ```tsx
-const canAccessDashboard = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN)
-  || can(Actions.CREATE, Resources.COURSE, Scopes.ORG)
-  || can(Actions.UPDATE, Resources.COURSE, Scopes.ORG)
-  || can(Actions.INVITE, Resources.USER, Scopes.ORG);
+const canAccessDashboard =
+  can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN) ||
+  can(Actions.CREATE, Resources.COURSE, Scopes.ORG) ||
+  can(Actions.UPDATE, Resources.COURSE, Scopes.ORG) ||
+  can(Actions.INVITE, Resources.USER, Scopes.ORG);
 ```
 
 **Files to modify:**
