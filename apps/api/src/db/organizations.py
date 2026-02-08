@@ -93,7 +93,6 @@ class OrganizationReadWithPermissions(OrganizationRead):
     can_update: bool | None = False
     can_delete: bool | None = False
     can_manage: bool | None = False
-    can_invite: bool | None = False
     is_owner: bool | None = False
     is_member: bool | None = False
 

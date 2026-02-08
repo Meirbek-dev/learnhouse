@@ -12,7 +12,6 @@ actions:
   - manage      # Full control including settings
   - moderate    # Approve/reject content
   - export      # Export data
-  - invite      # Invite users
   - grade       # Grade assignments/quizzes
   - submit      # Submit work
   - enroll      # Enroll in courses
@@ -66,7 +65,6 @@ roles:
       - "assignment:*:org"
       - "quiz:*:org"
       - "exam:*:org"
-      - "user:invite:org"
       - "user:read:org"
       - "user:update:org"
       - "usergroup:*:org"

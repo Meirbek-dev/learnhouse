@@ -89,7 +89,6 @@ SYSTEM_ROLES: dict[str, dict] = {
             "assignment:*:org",
             "quiz:*:org",
             "exam:*:org",
-            "user:invite:org",
             "user:read:org",
             "user:update:org",
             "usergroup:*:org",

@@ -28,8 +28,6 @@ EXEMPT_ENDPOINTS = {
     "/auth/refresh",
     "/auth/verify-email",
     "/auth/reset-password",
-    # Public invite acceptance
-    "/users/{org_id}/invite/{invite_code}",
     # Public organization discovery
     "/orgs/",  # Create org (public signup)
     "/orgs/{org_id}",  # GET only (public read)

@@ -24,7 +24,6 @@ export interface AIFeatureFlag extends FeatureFlag {
 }
 
 export interface MembersFeatureFlag extends FeatureFlag {
-  signup_mode: 'open' | 'inviteOnly';
   admin_limit: number;
 }
 

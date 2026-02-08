@@ -29,7 +29,6 @@ from src.db.users import (
 )
 from src.security.security import security_hash_password, security_verify_password
 from src.services.cache import redis_client
-from src.services.orgs.orgs import get_org_join_mechanism
 from src.services.users.avatars import upload_avatar
 from src.services.users.emails import send_account_creation_email
 from src.services.users.usergroups import add_users_to_usergroup
