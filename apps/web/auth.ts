@@ -3,7 +3,7 @@ import Google from 'next-auth/providers/google';
 import { createHash } from 'node:crypto';
 import { cookies } from 'next/headers';
 import NextAuth from 'next-auth';
-
+import type { NextAuthConfig, NextAuthResult } from 'next-auth'
 import {
   getNewAccessTokenUsingRefreshTokenServer,
   getUserSession,
@@ -17,12 +17,12 @@ import { getResponseMetadata } from '@/services/utils/ts/requests';
 declare global {
   var sessionCache:
     | Map<
-        string,
-        {
-          data: SessionData;
-          timestamp: number;
-        }
-      >
+      string,
+      {
+        data: SessionData;
+        timestamp: number;
+      }
+    >
     | undefined;
 }
 
@@ -123,7 +123,7 @@ const isHttpsUrl = typeof nextAuthUrl === 'string' && nextAuthUrl.startsWith('ht
 const cookieSecure = !isDevEnv && (isHttpsUrl || httpsFlag === true || sslFlag === true);
 const cookieNamePrefix = cookieSecure ? '__Secure-' : '';
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+const authConfig: NextAuthConfig = {
   debug: isDevEnv,
   providers: [
     Credentials({
@@ -455,4 +455,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       console.log(`User signed in: ${userWithTokens.email} via ${account?.provider}`);
     },
   },
-});
+};
+
+const nextAuthResult: NextAuthResult = NextAuth(authConfig);
+
+export const handlers: NextAuthResult['handlers'] = nextAuthResult.handlers;
+export const signIn: NextAuthResult['signIn'] = nextAuthResult.signIn;
+export const signOut: NextAuthResult['signOut'] = nextAuthResult.signOut;
+export const auth: NextAuthResult['auth'] = nextAuthResult.auth;

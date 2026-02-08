@@ -194,7 +194,7 @@ export const errorHandling = (res: Response) => {
   return res.json();
 };
 
-interface CustomResponseTyping {
+export interface CustomResponseTyping {
   success: boolean;
   data: any;
   status: number;
