@@ -149,7 +149,7 @@ def test_all_endpoints_have_rbac():
                 # Get source code
                 try:
                     source = inspect.getsource(endpoint_func)
-                except TypeError, OSError:
+                except (TypeError, OSError):
                     # Can't get source (compiled/builtin function)
                     continue
 

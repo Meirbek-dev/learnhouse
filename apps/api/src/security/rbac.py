@@ -51,7 +51,7 @@ class AuthenticationRequired(HTTPException):
     def __init__(self, reason: str | None = None) -> None:
         detail = {
             "error_code": "AUTHENTICATION_REQUIRED",
-            "message": reason or "Authentication required",
+            "message": reason or "Not authenticated",
         }
         super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
 
@@ -402,7 +402,8 @@ class PermissionChecker:
         if org_id is not None:
             query = query.where(or_(UserRole.org_id == org_id, Role.org_id.is_(None)))
 
-        return set(self.db.exec(query).all())
+        # Extract scalar permission name strings (returned as single-column rows)
+        return set(self.db.exec(query).scalars().all())
 
     @staticmethod
     def _has_perm(granted: set[str], resource: str, action: str, scope: str) -> bool:
