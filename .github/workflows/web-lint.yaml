@@ -17,21 +17,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          version: 10.x.x
-          run_install: false
+          bun-version: latest
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24.x
-          cache: 'pnpm'
-          cache-dependency-path: 'pnpm-lock.yaml'
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: bun install --no-frozen-lockfile
         working-directory: ./apps/web
       - name: Run Lint
-        run: pnpm run lint
+        run: bun run lint
         working-directory: ./apps/web

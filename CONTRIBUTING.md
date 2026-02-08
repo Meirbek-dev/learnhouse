@@ -49,11 +49,11 @@ Please check if you initiated your `.env` files, here is a
 
 #### Install the frontend package
 
-    pnpm i
+    bun install
 
 #### Run in Dev environment
 
-    pnpm dev
+    bun dev
 
 ## Submitting Contributions
 

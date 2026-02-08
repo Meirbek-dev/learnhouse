@@ -41,8 +41,6 @@ docker compose up -d --build app
 
 ## Environment and notes
 
-- The API Dockerfile uses `python:3.13.11-slim-trixie` and `uv` to run FastAPI. If necessary,
-  provide environment variables using `--env` on `docker run` or a compose `.env` file.
 - If you modify dependencies, rebuild the image.
 - If you need to inspect logs:
 

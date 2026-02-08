@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:latest
 # Base image for Python backend
-FROM python:3.13.11-slim-trixie AS base
+FROM python:3.14.2-slim-trixie AS base
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -28,19 +28,17 @@ RUN pip install --upgrade pip \
   && pip install uv
 
 # Frontend Build
-FROM node:25-bookworm-slim AS frontend-base
-RUN npm install -g pnpm@latest --no-fund --unsafe-perm=true
+FROM oven/bun:1-alpine AS frontend-base
 
 # Install dependencies only when needed
 FROM frontend-base AS frontend-deps
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
-COPY pnpm-workspace.yaml ./pnpm-workspace.yaml
-COPY apps/web/package.json ./package.json
-COPY pnpm-lock.yaml ./pnpm-lock.yaml
-RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
-  pnpm install --prod --no-frozen-lockfile
+COPY package.json ./package.json
+COPY bun.lock ./bun.lock
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+  bun install --production --no-frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM frontend-base AS frontend-builder
@@ -68,8 +66,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Learn more about it in the Next.js documentation: https://nextjs.org/docs/basic-features/environment-variables
 RUN rm -f .env*
 
-RUN pnpm run build
-RUN pnpm prune --prod
+RUN bun run build
+RUN bun install --production
 
 # Backend dependencies layer for better caching
 FROM base AS backend-deps

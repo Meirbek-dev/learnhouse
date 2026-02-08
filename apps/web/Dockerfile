@@ -1,5 +1,4 @@
-FROM node:25-bookworm-slim AS base
-RUN npm install -g pnpm@latest --no-fund --unsafe-perm=true
+FROM oven/bun:1-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -7,8 +6,8 @@ WORKDIR /app
 
 # Install dependencies
 COPY package.json ./package.json
-COPY ../../pnpm-lock.yaml ./pnpm-lock.yaml
-RUN pnpm i
+COPY ../../bun.lock ./bun.lock
+RUN bun install
 
 
 # Rebuild the source code only when needed
@@ -27,7 +26,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Learn more about it in the Next.js documentation: https://nextjs.org/docs/basic-features/environment-variables
 RUN rm -f .env*
 
-RUN pnpm run build
+RUN bun run build
 
 # Production image, copy all the files and run next
 FROM base AS runner

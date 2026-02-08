@@ -6,7 +6,6 @@
       "name": "ashyq-bilim",
       "devDependencies": {
         "eslint": "^9.39.2",
-        "mprocs": "^0.8.3",
         "oxlint": "^1.43.0",
         "oxlint-tsgolint": "^0.11.5",
         "prettier": "^3.8.1",
@@ -16,6 +15,10 @@
         "prettier-plugin-tailwindcss": "^0.7.2",
         "turbo": "^2.8.3",
       },
+    },
+    "apps/api": {
+      "name": "api",
+      "version": "0.1.0",
     },
     "apps/web": {
       "name": "ashyq-bilim",
@@ -64,7 +67,7 @@
         "qrcode": "^1.5.4",
         "react": "19.2.4",
         "react-confetti": "^6.4.0",
-        "react-day-picker": "9.13.1",
+        "react-day-picker": "^9.13.1",
         "react-dom": "19.2.4",
         "react-hook-form": "^7.71.1",
         "react-katex": "^3.1.0",
@@ -690,6 +693,8 @@
 
     "ansi-styles": ["ansi-styles@4.3.0", "", { "dependencies": { "color-convert": "^2.0.1" } }, "sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg=="],
 
+    "api": ["api@workspace:apps/api"],
+
     "argparse": ["argparse@2.0.1", "", {}, "sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q=="],
 
     "aria-hidden": ["aria-hidden@1.2.6", "", { "dependencies": { "tslib": "^2.0.0" } }, "sha512-ik3ZgC9dY/lYVVM++OISsaYDeg1tb0VtP5uL3ouh1koGOaUMDPpbFIei4JkFimWUFPn90sbMNMXQAIVOlnYKJA=="],
@@ -1229,8 +1234,6 @@
     "motion-dom": ["motion-dom@12.33.0", "", { "dependencies": { "motion-utils": "^12.29.2" } }, "sha512-XRPebVypsl0UM+7v0Hr8o9UAj0S2djsQWRdHBd5iVouVpMrQqAI0C/rDAT3QaYnXnHuC5hMcwDHCboNeyYjPoQ=="],
 
     "motion-utils": ["motion-utils@12.29.2", "", {}, "sha512-G3kc34H2cX2gI63RqU+cZq+zWRRPSsNIOjpdl9TN4AQwC4sgwYPl/Q/Obf/d53nOm569T0fYK+tcoSV50BWx8A=="],
-
-    "mprocs": ["mprocs@0.8.3", "", { "bin": { "mprocs": "cli.js" } }, "sha512-q3uKG6YLWF9l+fnEgu9CC4qMzEIPSYYMlbTIYdeHYCxGcIm67m4uQmQFmuDr6h69rWPHWJX5N/ih5Ei4h8G9Yg=="],
 
     "ms": ["ms@2.1.3", "", {}, "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA=="],
 
