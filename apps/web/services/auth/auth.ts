@@ -528,16 +528,6 @@ export async function signup(body: NewAccountBody): Promise<Response> {
   }
 }
 
-/**
- * @deprecated Invite codes are no longer supported. Use signup() instead.
- * Users are automatically joined to the default organization.
- */
-export async function signUpWithInviteCode(body: NewAccountBody, inviteCode: string): Promise<Response> {
-  // Redirect to normal signup - invites are no longer used
-  console.warn('signUpWithInviteCode is deprecated. Using signup() instead.');
-  return signup(body);
-}
-
 // Export types for external usage
 export type { AuthError, AuthTokens, AuthUser, LoginResponse, NewAccountBody, UserSessionResponse };
 

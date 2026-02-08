@@ -1898,7 +1898,6 @@
     "Org": {
       "fetchError": "An error occurred while loading organization data",
       "home": "Home",
-      "joinOrgCTA": "Join {orgName}",
       "notMemberInfo": "You are not part of Ashyq Bilim yet",
       "signOut": "Sign Out"
     }

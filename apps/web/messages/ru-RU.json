@@ -1892,7 +1892,6 @@
     "Org": {
       "fetchError": "Произошла ошибка при загрузке данных Ashyq Bilim",
       "home": "На главную",
-      "joinOrgCTA": "Присоединиться к Ashyq Bilim",
       "notMemberInfo": "Вы еще не являетесь членом Ashyq Bilim",
       "signOut": "Выйти"
     }

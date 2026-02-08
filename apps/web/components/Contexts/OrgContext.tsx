@@ -75,16 +75,6 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
         </div>
         <div className="flex space-x-4">
           <a
-            href={getUriWithoutOrg(`/signup?orgslug=${orgslug}`)}
-            className="flex items-center space-x-2 rounded-full bg-yellow-700 px-4 py-1 text-yellow-200 shadow-lg transition-all ease-linear hover:bg-yellow-800 "
-          >
-            <PersonStanding
-              className="text-yellow-200"
-              size={17}
-            />
-            <span className="text-md font-bold">{t('joinOrgCTA', { orgName: org?.name })}</span>
-          </a>
-          <a
             href={getUriWithoutOrg('/home')}
             className="flex items-center space-x-2 rounded-full bg-gray-700 px-4 py-1 text-gray-200 shadow-lg transition-all ease-linear hover:bg-gray-800 "
           >
