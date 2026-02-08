@@ -64,15 +64,6 @@ class RoleSlug(StrEnum):
     USER = "user"
 
 
-def build_permission_name(
-    resource: str | ResourceType,
-    action: str | Action,
-    scope: str | Scope = Scope.ORG,
-) -> str:
-    """Build a permission name string from components."""
-    return f"{str(resource)}:{str(action)}:{str(scope)}"
-
-
 # ============================================================================
 # System role definitions — what each built-in role can do
 # ============================================================================

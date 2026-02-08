@@ -52,6 +52,7 @@ async def create_assignment(
     assignment_object: AssignmentCreate,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> AssignmentRead:
     # Check if org exists
     statement = select(Course).where(Course.id == assignment_object.course_id)
@@ -64,8 +65,9 @@ async def create_assignment(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:create:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:create", course.org_id)
 
     # Create Assignment
     assignment_data = assignment_object.model_dump(exclude_unset=True)
@@ -90,6 +92,7 @@ async def read_assignment(
     assignment_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> AssignmentRead:
     # Check if assignment exists
     statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
@@ -112,8 +115,9 @@ async def read_assignment(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:read:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:read", course.org_id)
 
     # return assignment read
     return AssignmentRead.model_validate(assignment)
@@ -124,6 +128,7 @@ async def read_assignment_from_activity_uuid(
     activity_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> AssignmentRead:
     # Check if activity exists
     statement = select(Activity).where(Activity.activity_uuid == activity_uuid)
@@ -156,8 +161,9 @@ async def read_assignment_from_activity_uuid(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:read:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:read", course.org_id)
 
     # return assignment read
     return AssignmentRead.model_validate(assignment)
@@ -169,6 +175,7 @@ async def update_assignment(
     assignment_object: AssignmentUpdate,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> AssignmentRead:
     # Check if assignment exists
     statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
@@ -191,8 +198,9 @@ async def update_assignment(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:update:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:update", course.org_id)
 
     # Update only the fields that were passed in using model_dump with exclude_unset
     update_data = assignment_object.model_dump(exclude_unset=True)
@@ -215,6 +223,7 @@ async def delete_assignment(
     assignment_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> dict[str, str]:
     # Check if assignment exists
     statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
@@ -237,8 +246,9 @@ async def delete_assignment(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:delete:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:delete", course.org_id)
 
     # Delete Assignment
     db_session.delete(assignment)
@@ -252,6 +262,7 @@ async def delete_assignment_from_activity_uuid(
     activity_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> dict[str, str]:
     # Check if activity exists
     statement = select(Activity).where(Activity.activity_uuid == activity_uuid)
@@ -285,8 +296,9 @@ async def delete_assignment_from_activity_uuid(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:delete:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:delete", course.org_id)
 
     # Delete Assignment
     db_session.delete(assignment)
@@ -305,6 +317,7 @@ async def create_assignment_task(
     assignment_task_object: AssignmentTaskCreate,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> AssignmentTaskRead:
     # Check if assignment exists
     statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
@@ -327,8 +340,9 @@ async def create_assignment_task(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:create:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:create", course.org_id)
 
     # Create Assignment Task
     task_data = assignment_task_object.model_dump(exclude_unset=True)
@@ -357,6 +371,7 @@ async def read_assignment_tasks(
     assignment_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> list[AssignmentTaskRead]:
     # Find assignment
     statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
@@ -384,8 +399,9 @@ async def read_assignment_tasks(
     )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:read:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:read", course.org_id)
 
     # return assignment tasks read
     return [
@@ -399,6 +415,7 @@ async def read_assignment_task(
     assignment_task_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> AssignmentTaskRead:
     # Find assignment
     statement = select(AssignmentTask).where(
@@ -433,8 +450,9 @@ async def read_assignment_task(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:read:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:read", course.org_id)
 
     # return assignment task read
     return AssignmentTaskRead.model_validate(assignmenttask)
@@ -446,6 +464,7 @@ async def put_assignment_task_reference_file(
     assignment_task_uuid: str,
     current_user: PublicUser | AnonymousUser,
     reference_file: UploadFile | None = None,
+    checker: PermissionChecker | None = None,
 ) -> AssignmentTaskRead:
     # Check if assignment task exists
     statement = select(AssignmentTask).where(
@@ -488,8 +507,9 @@ async def put_assignment_task_reference_file(
     org = db_session.exec(org_statement).first()
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:update:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:update", course.org_id)
 
     # Upload reference file
     if reference_file and reference_file.filename and activity and org:
@@ -525,6 +545,7 @@ async def put_assignment_task_submission_file(
     assignment_task_uuid: str,
     current_user: PublicUser | AnonymousUser,
     sub_file: UploadFile | None = None,
+    checker: PermissionChecker | None = None,
 ) -> dict[str, str]:
     # Check if assignment task exists
     statement = select(AssignmentTask).where(
@@ -567,11 +588,12 @@ async def put_assignment_task_submission_file(
     org = db_session.exec(org_statement).first()
 
     # RBAC check - only need read permission to submit files
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:read:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:read", course.org_id)
 
     # Check if user is enrolled in the course
-    can_view = checker.check(current_user.id, "course:read:org", course.org_id)
+    can_view = checker.check(current_user.id, "course:read", course.org_id)
     if not can_view:
         raise HTTPException(
             status_code=403,
@@ -602,6 +624,7 @@ async def update_assignment_task(
     assignment_task_object: AssignmentTaskUpdate,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> AssignmentTaskRead:
     # Check if assignment task exists
     statement = select(AssignmentTask).where(
@@ -636,8 +659,9 @@ async def update_assignment_task(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:update:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:update", course.org_id)
 
     # Update only the fields that were passed in using model_dump with exclude_unset
     update_data = assignment_task_object.model_dump(exclude_unset=True)
@@ -660,6 +684,7 @@ async def delete_assignment_task(
     assignment_task_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> dict[str, str]:
     # Check if assignment task exists
     statement = select(AssignmentTask).where(
@@ -694,8 +719,9 @@ async def delete_assignment_task(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:delete:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:delete", course.org_id)
 
     # Delete Assignment Task
     db_session.delete(assignment_task)
@@ -713,6 +739,7 @@ async def handle_assignment_task_submission(
     assignment_task_submission_object: AssignmentTaskSubmissionUpdate,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> AssignmentTaskSubmissionRead:
     assignment_task_submission_uuid = (
         assignment_task_submission_object.assignment_task_submission_uuid
@@ -750,13 +777,14 @@ async def handle_assignment_task_submission(
         )
 
     # SECURITY: Check if user has instructor/admin permissions for grading
-    checker = PermissionChecker(db_session)
-    is_instructor = checker.check(current_user.id, "course:update:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    is_instructor = checker.check(current_user.id, "course:update", course.org_id)
 
     # For regular users, ensure they can only submit their own work
     if not is_instructor:
         # Check if user is enrolled in the course
-        can_view = checker.check(current_user.id, "course:read:org", course.org_id)
+        can_view = checker.check(current_user.id, "course:read", course.org_id)
         if not can_view:
             raise HTTPException(
                 status_code=403,
@@ -776,10 +804,10 @@ async def handle_assignment_task_submission(
             )
 
         # Only need read permission for submissions
-        checker.require(current_user.id, "assignment:read:org", course.org_id)
+        checker.require(current_user.id, "assignment:read", course.org_id)
     else:
         # SECURITY: Instructors/admins need update permission to grade
-        checker.require(current_user.id, "assignment:update:org", course.org_id)
+        checker.require(current_user.id, "assignment:update", course.org_id)
 
     # Try to find existing submission by user_id and assignment_task_id first (for save progress functionality)
     statement = select(AssignmentTaskSubmission).where(
@@ -858,6 +886,7 @@ async def read_user_assignment_task_submissions(
     user_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> AssignmentTaskSubmissionRead | None:
     # Check if assignment task exists
     statement = select(AssignmentTask).where(
@@ -892,8 +921,9 @@ async def read_user_assignment_task_submissions(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:read:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:read", course.org_id)
 
     # Check if assignment task submission exists
     statement = select(AssignmentTaskSubmission).where(
@@ -914,6 +944,7 @@ async def read_user_assignment_task_submissions_me(
     assignment_task_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ):
     # Check if assignment task exists
     statement = select(AssignmentTask).where(
@@ -948,8 +979,9 @@ async def read_user_assignment_task_submissions_me(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:read:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:read", course.org_id)
 
     # Check if assignment task submission exists
     statement = select(AssignmentTaskSubmission).where(
@@ -971,6 +1003,7 @@ async def read_assignment_task_submissions(
     assignment_task_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> list[AssignmentTaskSubmissionRead]:
     # Check if assignment task exists
     statement = select(AssignmentTask).where(
@@ -1005,8 +1038,9 @@ async def read_assignment_task_submissions(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:read:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:read", course.org_id)
 
     # return assignment task submissions list
     statement = select(AssignmentTaskSubmission).where(
@@ -1023,6 +1057,7 @@ async def update_assignment_task_submission(
     assignment_task_submission_object: AssignmentTaskSubmissionCreate,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> AssignmentTaskSubmissionRead:
     # Check if assignment task submission exists
     statement = select(AssignmentTaskSubmission).where(
@@ -1070,8 +1105,9 @@ async def update_assignment_task_submission(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:read:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:read", course.org_id)
 
     # Update only the fields that were passed in using model_dump with exclude_unset
     update_data = assignment_task_submission_object.model_dump(exclude_unset=True)
@@ -1124,6 +1160,7 @@ async def delete_assignment_task_submission(
     assignment_task_submission_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> dict[str, str]:
     # Check if assignment task submission exists
     statement = select(AssignmentTaskSubmission).where(
@@ -1171,8 +1208,9 @@ async def delete_assignment_task_submission(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:delete:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:delete", course.org_id)
 
     # Delete Assignment Task Submission
     db_session.delete(assignment_task_submission)
@@ -1189,6 +1227,7 @@ async def create_assignment_submission(
     assignment_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> AssignmentUserSubmissionRead:
     # Check if assignment exists
     statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
@@ -1238,8 +1277,9 @@ async def create_assignment_submission(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:read:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:read", course.org_id)
 
     # Create Assignment User Submission
     assignment_user_submission = AssignmentUserSubmission(
@@ -1345,6 +1385,7 @@ async def read_assignment_submissions(
     assignment_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> list[AssignmentUserSubmissionRead]:
     # Find assignment
     statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
@@ -1372,8 +1413,9 @@ async def read_assignment_submissions(
     )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:read:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:read", course.org_id)
 
     # return assignment tasks read
     return [
@@ -1388,6 +1430,7 @@ async def read_user_assignment_submissions(
     user_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> list[AssignmentUserSubmissionRead]:
     # Find assignment
     statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
@@ -1416,8 +1459,9 @@ async def read_user_assignment_submissions(
     )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:read:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:read", course.org_id)
 
     # return assignment tasks read
     return [
@@ -1447,6 +1491,7 @@ async def update_assignment_submission(
     assignment_user_submission_object: AssignmentUserSubmissionCreate,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> AssignmentUserSubmissionRead:
     # Check if assignment user submission exists
     statement = select(AssignmentUserSubmission).where(
@@ -1483,8 +1528,9 @@ async def update_assignment_submission(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:read:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:read", course.org_id)
 
     # Update only the fields that were passed in using model_dump with exclude_unset
     update_data = assignment_user_submission_object.model_dump(exclude_unset=True)
@@ -1523,6 +1569,7 @@ async def delete_assignment_submission(
     assignment_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> dict[str, str]:
     # Check if assignment exists
     statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
@@ -1558,8 +1605,9 @@ async def delete_assignment_submission(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:delete:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:delete", course.org_id)
 
     # Delete Assignment User Submission
     db_session.delete(assignment_user_submission)
@@ -1575,6 +1623,7 @@ async def grade_assignment_submission(
     assignment_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> dict[str, str]:
     # SECURITY: This function should only be accessible by course owners or instructors
     # Check if assignment exists
@@ -1597,8 +1646,9 @@ async def grade_assignment_submission(
         )
 
     # SECURITY: Require course ownership or instructor role for grading
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:grade:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:grade", course.org_id)
 
     # Check if assignment user submission exists
     statement = select(AssignmentUserSubmission).where(
@@ -1734,6 +1784,7 @@ async def mark_activity_as_done_for_user(
     assignment_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> dict[str, str]:
     # SECURITY: This function should only be accessible by course owners or instructors
     # Get Assignment
@@ -1760,8 +1811,9 @@ async def mark_activity_as_done_for_user(
         )
 
     # SECURITY: Require course ownership or instructor role for marking activities as done
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:update:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:update", course.org_id)
 
     if not activity:
         raise HTTPException(
@@ -1818,6 +1870,7 @@ async def create_assignment_with_activity(
     db_session: Session,
     chapter_id: int,
     activity_name: str,
+    checker: PermissionChecker | None = None,
 ) -> AssignmentRead:
     """
     Create assignment with activity in a single transaction for better performance.
@@ -1833,8 +1886,9 @@ async def create_assignment_with_activity(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:create:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:create", course.org_id)
 
     # Create Activity first
     activity = Activity(
@@ -1891,6 +1945,7 @@ async def get_assignments_from_course(
     course_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> list[AssignmentRead]:
     # Find course
     statement = select(Course).where(Course.course_uuid == course_uuid)
@@ -1915,8 +1970,9 @@ async def get_assignments_from_course(
             assignments.append(assignment)
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:read:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:read", course.org_id)
 
     # return assignments read
     return [AssignmentRead.model_validate(assignment) for assignment in assignments]
@@ -1927,6 +1983,7 @@ async def get_assignments_from_courses(
     course_uuids: list[str],
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> dict[str, list[AssignmentRead]]:
     """
     Get assignments for multiple courses in a single request. Returns a mapping
@@ -1941,9 +1998,10 @@ async def get_assignments_from_courses(
     course_id_to_uuid = {c.id: c.course_uuid for c in courses}
 
     # Check RBAC for each found course
-    checker = PermissionChecker(db_session)
+    if checker is None:
+        checker = PermissionChecker(db_session)
     for c in courses:
-        checker.require(current_user.id, "assignment:read:org", c.org_id)
+        checker.require(current_user.id, "assignment:read", c.org_id)
 
     course_ids = list(course_id_to_uuid.keys())
 

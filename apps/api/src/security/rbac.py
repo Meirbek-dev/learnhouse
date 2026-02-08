@@ -2,6 +2,9 @@
 RBAC — Permission Checker, Dependencies & Exceptions
 
 This is the ONE file for all authorization logic.
+
+Permission format: "resource:action" (2-part, no scope).
+Scope is resolved from context (org membership, ownership, assignment).
 """
 
 from __future__ import annotations
@@ -9,7 +12,7 @@ from __future__ import annotations
 import logging
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import Depends, HTTPException, status
 from sqlmodel import Session, or_, select
 
 from src.core.events.database import get_db_session
@@ -17,22 +20,12 @@ from src.core.events.database import get_db_session
 logger = logging.getLogger(__name__)
 
 # ============================================================================
-# Scope hierarchy: own < assigned < org < all
-# ============================================================================
-
-_SCOPE_BROADER: dict[str, list[str]] = {
-    "own": ["assigned", "org", "all"],
-    "assigned": ["org", "all"],
-    "org": ["all"],
-}
-
-# ============================================================================
 # Exceptions
 # ============================================================================
 
 
 class PermissionDenied(HTTPException):
-    """403 — user lacks required permission."""
+    """403 — user lacks required RBAC permission."""
 
     def __init__(
         self,
@@ -61,6 +54,39 @@ class AuthenticationRequired(HTTPException):
         super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
 
 
+class FeatureDisabled(HTTPException):
+    """403 — feature is disabled (not an RBAC denial)."""
+
+    def __init__(self, reason: str | None = None) -> None:
+        detail = {
+            "error_code": "FEATURE_DISABLED",
+            "message": reason or "Feature is disabled",
+        }
+        super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
+
+
+class ResourceAccessDenied(HTTPException):
+    """403 — access denied for a non-RBAC reason (e.g., attempt limit, wrong user)."""
+
+    def __init__(self, reason: str | None = None) -> None:
+        detail = {
+            "error_code": "ACCESS_DENIED",
+            "message": reason or "Access denied",
+        }
+        super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
+
+
+class InternalAuthFailed(HTTPException):
+    """401 — internal/service authentication failed."""
+
+    def __init__(self, reason: str | None = None) -> None:
+        detail = {
+            "error_code": "AUTHENTICATION_FAILED",
+            "message": reason or "Authentication failed",
+        }
+        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
+
+
 # ============================================================================
 # Permission Checker
 # ============================================================================
@@ -69,7 +95,11 @@ class AuthenticationRequired(HTTPException):
 class PermissionChecker:
     """
     Loads user's granted permission strings once per (user, org) pair,
-    then checks in-memory with wildcard + scope-fallback matching.
+    then resolves scope from context.
+
+    Permission format in DB: "resource:action:scope" (3-part).
+    Callers pass "resource:action" (2-part) + context (org_id, resource_owner_id).
+    The checker determines which scope applies.
     """
 
     def __init__(self, db: Session) -> None:
@@ -80,25 +110,61 @@ class PermissionChecker:
     # Public API
     # ------------------------------------------------------------------
 
-    def check(self, user_id: int, permission: str, org_id: int | None) -> bool:
-        """Return True if user has the permission (including wildcards/scope broadening)."""
-        granted = self._get_or_load(user_id, org_id)
-        return self._matches(permission, granted)
+    def check(
+        self,
+        user_id: int,
+        permission: str,
+        org_id: int | None,
+        *,
+        resource_owner_id: int | None = None,
+    ) -> bool:
+        """Return True if user has the permission.
 
-    def require(self, user_id: int, permission: str, org_id: int | None) -> None:
+        Args:
+            user_id: The user to check.
+            permission: "resource:action" (2-part). Scope is resolved from context.
+            org_id: Organization context. Required for org-scoped checks.
+            resource_owner_id: The creator/owner of the resource. Enables "own" scope.
+        """
+        granted = self._get_or_load(user_id, org_id)
+        return self._resolve(permission, granted, user_id, resource_owner_id)
+
+    def require(
+        self,
+        user_id: int,
+        permission: str,
+        org_id: int | None,
+        *,
+        resource_owner_id: int | None = None,
+    ) -> None:
         """check() + raise PermissionDenied when False."""
-        if not self.check(user_id, permission, org_id):
+        if not self.check(user_id, permission, org_id, resource_owner_id=resource_owner_id):
             raise PermissionDenied(permission=permission)
 
     def check_many(
         self, user_id: int, permissions: list[str], org_id: int | None
     ) -> dict[str, bool]:
-        """Batch check. Single load, N in-memory lookups."""
+        """Batch check. Returns dict of permission -> granted.
+
+        Checks if user has the permission at ANY scope. Used by frontend
+        for UI state ("can this user do X at all?").
+        """
         granted = self._get_or_load(user_id, org_id)
-        return {p: self._matches(p, granted) for p in permissions}
+        results = {}
+        for p in permissions:
+            parts = p.split(":")
+            if len(parts) != 2:
+                results[p] = False
+                continue
+            resource, action = parts
+            results[p] = any(
+                self._has_perm(granted, resource, action, scope)
+                for scope in ("all", "org", "assigned", "own")
+            )
+        return results
 
     def get_effective_permissions(self, user_id: int, org_id: int | None) -> set[str]:
-        """Return the raw set of granted permission strings."""
+        """Return the raw set of granted permission strings (3-part)."""
         return self._get_or_load(user_id, org_id)
 
     def get_expanded_permissions(self, user_id: int, org_id: int | None) -> set[str]:
@@ -194,7 +260,7 @@ class PermissionChecker:
             )
             if role.priority > assigner_max_priority:
                 raise PermissionDenied(
-                    permission="role:create:org",
+                    permission="role:create",
                     reason="Cannot assign a role with higher priority than your own",
                 )
 
@@ -318,7 +384,7 @@ class PermissionChecker:
         return self._cache[key]
 
     def _load_permissions(self, user_id: int, org_id: int | None) -> set[str]:
-        """Single JOIN query → set of permission name strings."""
+        """Single JOIN query -> set of permission name strings (3-part)."""
         from src.db.permissions import Permission, Role, RolePermission, UserRole
 
         query = (
@@ -335,43 +401,58 @@ class PermissionChecker:
         return set(self.db.exec(query).all())
 
     @staticmethod
-    def _matches(required: str, granted: set[str]) -> bool:
+    def _has_perm(granted: set[str], resource: str, action: str, scope: str) -> bool:
+        """Check if granted set contains a permission matching resource:action:scope.
+
+        Handles wildcard patterns: resource:*:scope, *:action:scope, *:*:*, etc.
         """
-        Check if `required` permission is satisfied by any entry in `granted`.
-
-        Handles:
-        - Exact match
-        - Wildcard patterns: resource:*:scope, *:action:scope, *:*:*, etc.
-        - Scope broadening: own < assigned < org < all
-        """
-        if required in granted or "*:*:*" in granted:
-            return True
-
-        parts = required.split(":")
-        if len(parts) != 3:
-            return False
-
-        resource, action, scope = parts
-
-        # Wildcard patterns
-        wildcard_patterns = [
+        candidates = [
+            f"{resource}:{action}:{scope}",
             f"{resource}:*:{scope}",
             f"*:{action}:{scope}",
-            f"{resource}:*:*",
             f"*:*:{scope}",
+            f"{resource}:*:*",
+            f"*:*:*",
         ]
-        if any(p in granted for p in wildcard_patterns):
+        return any(c in granted for c in candidates)
+
+    @staticmethod
+    def _resolve(
+        permission: str,
+        granted: set[str],
+        user_id: int,
+        resource_owner_id: int | None,
+    ) -> bool:
+        """Resolve whether a 2-part permission is satisfied by the granted set.
+
+        Checks scopes from broadest to narrowest:
+        1. all      — always passes
+        2. org      — passes (org membership implied by loaded permissions)
+        3. assigned — passes (service layer filters to assigned resources)
+        4. own      — passes if resource_owner_id == user_id
+        """
+        parts = permission.split(":")
+        if len(parts) != 2:
+            return False
+
+        resource, action = parts
+
+        # 1. "all" scope
+        if PermissionChecker._has_perm(granted, resource, action, "all"):
             return True
 
-        # Scope broadening: if user has course:update:all, they pass course:update:org
-        for broader in _SCOPE_BROADER.get(scope, []):
-            candidates = [
-                f"{resource}:{action}:{broader}",
-                f"{resource}:*:{broader}",
-                f"*:{action}:{broader}",
-                f"*:*:{broader}",
-            ]
-            if any(c in granted for c in candidates):
+        # 2. "org" scope
+        if PermissionChecker._has_perm(granted, resource, action, "org"):
+            return True
+
+        # 3. "assigned" scope — the service layer is responsible for
+        #    filtering to only assigned resources.
+        if PermissionChecker._has_perm(granted, resource, action, "assigned"):
+            return True
+
+        # 4. "own" scope — user owns the resource
+        if resource_owner_id is not None and resource_owner_id == user_id:
+            if PermissionChecker._has_perm(granted, resource, action, "own"):
                 return True
 
         return False
@@ -390,38 +471,3 @@ def get_permission_checker(
 
 
 PermissionCheckerDep = Annotated[PermissionChecker, Depends(get_permission_checker)]
-
-
-def require_permission(permission: str, *, org_id_param: str = "org_id"):
-    """
-    Declarative route-level dependency.
-
-    Usage:
-        @router.post("/courses", dependencies=[require_permission("course:create:org")])
-    """
-
-    async def _dependency(
-        request: Request,
-        checker: PermissionCheckerDep,
-    ) -> None:
-        from src.security.auth import get_current_user as _get_current_user
-
-        # Resolve current user
-        from fastapi_another_jwt_auth import AuthJWT
-
-        authorize = AuthJWT(request)
-        db = checker.db
-        current_user = await _get_current_user(request, authorize, db)
-
-        if not current_user or not hasattr(current_user, "id") or current_user.id == 0:
-            raise AuthenticationRequired()
-
-        # Resolve org_id from path params, query params, or body
-        org_id_raw = request.path_params.get(org_id_param) or request.query_params.get(
-            org_id_param
-        )
-        org_id = int(org_id_raw) if org_id_raw else None
-
-        checker.require(current_user.id, permission, org_id)
-
-    return Depends(_dependency)

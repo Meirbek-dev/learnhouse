@@ -15,7 +15,7 @@ from pydantic import BaseModel
 
 from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user
-from src.security.rbac import PermissionCheckerDep, require_permission
+from src.security.rbac import PermissionCheckerDep
 
 router = APIRouter()
 
@@ -30,6 +30,7 @@ class PermissionCheckRequest(BaseModel):
     resource: str
     resource_id: str | None = None
     org_id: int | None = None
+    scope: str | None = None
 
 
 class PermissionCheckResponse(BaseModel):
@@ -78,10 +79,10 @@ async def check_permission(
     if isinstance(current_user, AnonymousUser):
         return PermissionCheckResponse(
             granted=False,
-            permission=f"{request.resource}:{request.action}:org",
+            permission=f"{request.resource}:{request.action}",
         )
 
-    perm = f"{request.resource}:{request.action}:org"
+    perm = f"{request.resource}:{request.action}"
     granted = checker.check(current_user.id, perm, request.org_id)
     return PermissionCheckResponse(granted=granted, permission=perm)
 
@@ -92,7 +93,7 @@ async def check_permissions_batch(
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
 ):
-    perms = [f"{c.resource}:{c.action}:org" for c in request.checks]
+    perms = [f"{c.resource}:{c.action}" for c in request.checks]
 
     if isinstance(current_user, AnonymousUser):
         return BatchPermissionCheckResponse(results={p: False for p in perms})
@@ -136,7 +137,7 @@ async def assign_role(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
 ):
-    checker.require(current_user.id, "role:create:org", request.org_id)
+    checker.require(current_user.id, "role:create", request.org_id)
     checker.assign_role(
         user_id=request.user_id,
         role_slug=request.role_slug,
@@ -152,7 +153,7 @@ async def revoke_role(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
 ):
-    checker.require(current_user.id, "role:delete:org", request.org_id)
+    checker.require(current_user.id, "role:delete", request.org_id)
     checker.revoke_role(
         user_id=request.user_id,
         role_slug=request.role_slug,

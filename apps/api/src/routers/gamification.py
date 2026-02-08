@@ -143,7 +143,7 @@ async def award_xp(
                     status_code=400,
                     detail="custom_amount allowed only with ADMIN_AWARD source",
                 )
-            checker.require(user.id, "organization:manage:org", org_id)
+            checker.require(user.id, "organization:manage", org_id)
 
         # Normalize source: allow raw string or enum from request
         try:

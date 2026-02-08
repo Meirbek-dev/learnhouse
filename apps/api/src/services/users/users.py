@@ -51,10 +51,12 @@ async def create_user(
     current_user: PublicUser | AnonymousUser,
     user_object: UserCreate,
     org_id: int,
+    checker: PermissionChecker | None = None,
 ):
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:create:org", org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "user:create", org_id)
 
     # Validate organization exists
     await _validate_organization_exists(db_session, org_id)
@@ -118,10 +120,12 @@ async def create_user_without_org(
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
     user_object: UserCreate,
+    checker: PermissionChecker | None = None,
 ):
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:create:org", None)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "user:create", None)
 
     # Create and validate user
     user = await _create_and_validate_user(db_session, user_object)
@@ -143,6 +147,7 @@ async def update_user(
     user_id: int,
     current_user: PublicUser | AnonymousUser,
     user_object: UserUpdate,
+    checker: PermissionChecker | None = None,
 ):
     # Get user (bypass cache for mutations to ensure ORM-attached instance)
     user = await _get_user_by_field(db_session, "id", user_id, use_cache=False)
@@ -167,8 +172,9 @@ async def update_user(
             return user
 
     # RBAC check (only for real updates)
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:update:org", None)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "user:update", None)
 
     if user_object.username:
         await _validate_unique_username(
@@ -208,13 +214,15 @@ async def update_user_avatar(
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
     avatar_file: UploadFile | None = None,
+    checker: PermissionChecker | None = None,
 ):
     # Get user (bypass cache for mutations to ensure ORM-attached instance)
     user = await _get_user_by_field(db_session, "id", current_user.id, use_cache=False)
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:update:org", None)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "user:update", None)
 
     # Upload avatar with security validation
     if avatar_file and avatar_file.filename:
@@ -250,13 +258,15 @@ async def update_user_password(
     current_user: PublicUser | AnonymousUser,
     user_id: int,
     form: UserUpdatePassword,
+    checker: PermissionChecker | None = None,
 ):
     # Get user (bypass cache for mutations to ensure ORM-attached instance)
     user = await _get_user_by_field(db_session, "id", user_id, use_cache=False)
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:update:org", None)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "user:update", None)
 
     if not security_verify_password(form.old_password, user.password):
         raise HTTPException(
@@ -386,12 +396,14 @@ async def authorize_user_action(
     current_user: PublicUser | AnonymousUser,
     resource_uuid: str,
     action: Literal["create", "read", "update", "delete"],
+    checker: PermissionChecker | None = None,
 ) -> bool:
     # Get user
     await _get_user_by_field(db_session, "user_uuid", current_user.user_uuid)
 
-    checker = PermissionChecker(db_session)
-    permission_str = f"user:{action}:org"
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    permission_str = f"user:{action}"
     authorized = checker.check(current_user.id, permission_str, None)
 
     if authorized:
@@ -407,13 +419,15 @@ async def delete_user_by_id(
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
     user_id: int,
+    checker: PermissionChecker | None = None,
 ) -> str:
     # Get user (bypass cache for mutations to ensure ORM-attached instance)
     user = await _get_user_by_field(db_session, "id", user_id, use_cache=False)
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:delete:org", None)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "user:delete", None)
 
     # Delete user
     db_session.delete(user)

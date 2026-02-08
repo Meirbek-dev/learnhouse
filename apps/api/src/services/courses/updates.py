@@ -42,7 +42,7 @@ async def create_update(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:update:org", course.org_id)
+    checker.require(current_user.id, "course:update", course.org_id)
 
     # Generate UUID
     courseupdate_uuid = f"courseupdate_{ULID()}"
@@ -82,7 +82,7 @@ async def update_update(
         )
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:update:org", update.org_id)
+    checker.require(current_user.id, "course:update", update.org_id)
 
     for key, value in update_object.model_dump(exclude_unset=True).items():
         if value is not None:
@@ -115,7 +115,7 @@ async def delete_update(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:update:org", update.org_id)
+    checker.require(current_user.id, "course:update", update.org_id)
 
     db_session.delete(update)
     db_session.commit()

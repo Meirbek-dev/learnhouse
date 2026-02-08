@@ -6,7 +6,7 @@ from sqlmodel import Session, select
 from src.security.rbac import (
     AuthenticationRequired,
     PermissionChecker,
-    PermissionDenied,
+    ResourceAccessDenied,
 )
 from ulid import ULID
 
@@ -106,7 +106,7 @@ async def create_exam(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:create:org", course.org_id)
+    checker.require(current_user.id, "exam:create", course.org_id)
 
     # Validate settings against ExamSettingsBase so frontend limits are enforced server-side
     from src.db.courses.exams import ExamSettingsBase
@@ -160,7 +160,7 @@ async def read_exam(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:read:org", course.org_id)
+    checker.require(current_user.id, "exam:read", course.org_id)
 
     return ExamRead.model_validate(exam)
 
@@ -189,7 +189,7 @@ async def read_exam_from_activity_uuid(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:read:org", course.org_id)
+    checker.require(current_user.id, "exam:read", course.org_id)
 
     return ExamRead.model_validate(exam)
 
@@ -214,7 +214,7 @@ async def update_exam(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:update:org", course.org_id)
+    checker.require(current_user.id, "exam:update", course.org_id)
 
     # Update fields
     update_data = exam_object.model_dump(exclude_unset=True)
@@ -285,7 +285,7 @@ async def create_exam_with_activity(
 
     # RBAC check: ensure user can create content in this course
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:create:org", course.org_id)
+    checker.require(current_user.id, "exam:create", course.org_id)
 
     # Create activity
     activity_uuid = f"activity_{ULID()}"
@@ -386,7 +386,7 @@ async def create_question(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:create:org", course.org_id)
+    checker.require(current_user.id, "exam:create", course.org_id)
 
     # Input validation and sanitization
     if not question_object.question_text or not question_object.question_text.strip():
@@ -476,7 +476,7 @@ async def read_questions(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:read:org", course.org_id)
+    checker.require(current_user.id, "exam:read", course.org_id)
 
     statement = (
         select(Question)
@@ -512,7 +512,7 @@ async def update_question(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:update:org", course.org_id)
+    checker.require(current_user.id, "exam:update", course.org_id)
 
     # Update fields
     update_data = question_object.model_dump(exclude_unset=True)
@@ -551,7 +551,7 @@ async def delete_question(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:delete:org", course.org_id)
+    checker.require(current_user.id, "exam:delete", course.org_id)
 
     db_session.delete(question)
     db_session.commit()
@@ -594,16 +594,12 @@ async def start_exam_attempt(
 
     if not is_teacher:
         if access_mode == "NO_ACCESS":
-            raise PermissionDenied(
-                permission="exam:read:org", reason="Exam not accessible"
-            )
+            raise ResourceAccessDenied(reason="Exam not accessible")
 
         if access_mode == "WHITELIST":
             whitelist = settings.get("whitelist_user_ids", [])
             if current_user.id not in whitelist:
-                raise PermissionDenied(
-                    permission="exam:read:org", reason="Not in whitelist"
-                )
+                raise ResourceAccessDenied(reason="Not in whitelist")
 
     # Check attempt limit (teachers have unlimited attempts)
     if not is_teacher:
@@ -640,9 +636,7 @@ async def start_exam_attempt(
             existing_attempt_ids = db_session.exec(statement).all()
             attempt_count = len(existing_attempt_ids)
             if attempt_count >= attempt_limit:
-                raise PermissionDenied(
-                    permission="exam:submit:org", reason="Attempt limit reached"
-                )
+                raise ResourceAccessDenied(reason="Attempt limit reached")
 
     # Validate question_limit if present
     question_limit = settings.get("question_limit")
@@ -723,9 +717,7 @@ async def submit_exam_attempt(
         raise HTTPException(status_code=404, detail="Попытка не найдена")
 
     if attempt.user_id != current_user.id:
-        raise PermissionDenied(
-            permission="exam:submit:org", reason="Not your exam attempt"
-        )
+        raise ResourceAccessDenied(reason="Not your exam attempt")
 
     if attempt.status != AttemptStatusEnum.IN_PROGRESS:
         raise HTTPException(status_code=400, detail="Попытка уже отправлена")
@@ -923,9 +915,7 @@ async def record_violation(
         raise HTTPException(status_code=404, detail="Попытка не найдена")
 
     if attempt.user_id != current_user.id:
-        raise PermissionDenied(
-            permission="exam:submit:org", reason="Not your exam attempt"
-        )
+        raise ResourceAccessDenied(reason="Not your exam attempt")
 
     # Add violation
     violation = {
@@ -1215,7 +1205,7 @@ async def get_all_exam_attempts(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:read:org", course.org_id)
+    checker.require(current_user.id, "exam:read", course.org_id)
 
     # Get all attempts with user info (exclude preview attempts from analytics)
     attempts_statement = (
@@ -1305,7 +1295,7 @@ async def export_questions_csv(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:read:org", course.org_id)
+    checker.require(current_user.id, "exam:read", course.org_id)
 
     # Get questions
     questions_statement = (
@@ -1379,7 +1369,7 @@ async def import_questions_csv(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:create:org", course.org_id)
+    checker.require(current_user.id, "exam:create", course.org_id)
 
     # Parse CSV
     import csv
@@ -1488,7 +1478,7 @@ async def reorder_questions(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:update:org", course.org_id)
+    checker.require(current_user.id, "exam:update", course.org_id)
 
     # Update order_index for each question
     updated_count = 0

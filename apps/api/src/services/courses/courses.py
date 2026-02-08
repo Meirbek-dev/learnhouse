@@ -32,6 +32,7 @@ async def get_course(
     course_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ):
     statement = select(Course).where(Course.course_uuid == course_uuid)
     course = db_session.exec(statement).first()
@@ -43,8 +44,9 @@ async def get_course(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:read", course.org_id, resource_owner_id=course.creator_id)
 
     # Get course authors with their roles
     authors_statement = (
@@ -75,6 +77,7 @@ async def get_course_by_id(
     course_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ):
     statement = select(Course).where(Course.id == course_id)
     course = db_session.exec(statement).first()
@@ -86,8 +89,9 @@ async def get_course_by_id(
         )
 
     # RBAC check role-based access control
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:read", course.org_id, resource_owner_id=course.creator_id)
 
     # Get course authors with their roles
     authors_statement = (
@@ -119,6 +123,7 @@ async def get_course_meta(
     with_unpublished_activities: bool,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> FullCourseRead:
     # Avoid circular import
     from src.services.courses.chapters import get_course_chapters
@@ -146,8 +151,9 @@ async def get_course_meta(
     ]
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:read", course.org_id, resource_owner_id=course.creator_id)
 
     # Get course chapters
     chapters = []
@@ -496,6 +502,7 @@ async def create_course(
     db_session: Session,
     thumbnail_file: UploadFile | None = None,
     thumbnail_type: ThumbnailType = ThumbnailType.IMAGE,
+    checker: PermissionChecker | None = None,
 ):
     """
     Create a new course
@@ -512,8 +519,9 @@ async def create_course(
     course = Course.model_validate(course_data)
 
     # SECURITY: Check if user has permission to create courses in this organization
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:create:org", org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:create", org_id)
 
     # Get org uuid
     org_statement = select(Organization).where(Organization.id == org_id)
@@ -601,6 +609,7 @@ async def update_course_thumbnail(
     db_session: Session,
     thumbnail_file: UploadFile | None = None,
     thumbnail_type: ThumbnailType = ThumbnailType.IMAGE,
+    checker: PermissionChecker | None = None,
 ):
     statement = select(Course).where(Course.course_uuid == course_uuid)
     course = db_session.exec(statement).first()
@@ -612,8 +621,9 @@ async def update_course_thumbnail(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:update:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:update", course.org_id, resource_owner_id=course.creator_id)
 
     # Get org uuid
     org_statement = select(Organization).where(Organization.id == course.org_id)
@@ -697,6 +707,7 @@ async def update_course(
     course_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ):
     """
     Update a course
@@ -716,8 +727,9 @@ async def update_course(
         )
 
     # SECURITY: Require course ownership or admin role for updating courses
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:update:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:update", course.org_id, resource_owner_id=course.creator_id)
 
     # SECURITY: Additional checks for sensitive access control fields
     sensitive_fields_updated = []
@@ -750,7 +762,7 @@ async def update_course(
 
         # Check if user has admin or maintainer role via permission service
         admin_or_maintainer = checker.check(
-            current_user.id, "course:manage:org", course.org_id
+            current_user.id, "course:manage", course.org_id
         )
 
         # SECURITY: Only course owners (CREATOR, MAINTAINER) or admins can change access settings
@@ -801,6 +813,7 @@ async def delete_course(
     course_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ):
     statement = select(Course).where(Course.course_uuid == course_uuid)
     course = db_session.exec(statement).first()
@@ -812,8 +825,9 @@ async def delete_course(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:delete:org", course.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "course:delete", course.org_id, resource_owner_id=course.creator_id)
 
     db_session.delete(course)
     db_session.commit()
@@ -916,6 +930,7 @@ async def get_course_user_rights(
     course_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> dict:
     """
     Get detailed user rights for a specific course.
@@ -1001,11 +1016,12 @@ async def get_course_user_rights(
                 rights["ownership"]["is_owner"] = True
 
     # Check user roles
-    checker = PermissionChecker(db_session)
+    if checker is None:
+        checker = PermissionChecker(db_session)
 
     # Check admin/maintainer role (organization-level update/management)
     user_is_admin_or_maintainer = checker.check(
-        current_user.id, "course:manage:org", course.org_id
+        current_user.id, "course:manage", course.org_id
     )
 
     if user_is_admin_or_maintainer:
@@ -1014,7 +1030,7 @@ async def get_course_user_rights(
 
     # Check instructor role (course-level update permission)
     user_has_instructor_role = checker.check(
-        current_user.id, "course:update:org", course.org_id
+        current_user.id, "course:update", course.org_id
     )
 
     if user_has_instructor_role:

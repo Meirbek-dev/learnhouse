@@ -52,7 +52,7 @@ async def create_invite_code(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update:org", org.id)
+    checker.require(current_user.id, "organization:update", org.id)
 
     # Connect to Redis (use cached client)
     r = get_redis_client()
@@ -126,7 +126,7 @@ async def create_invite_code_with_usergroup(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update:org", org.id)
+    checker.require(current_user.id, "organization:update", org.id)
 
     # Connect to Redis (use cached client)
     r = get_redis_client()
@@ -200,7 +200,7 @@ async def get_invite_codes(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update:org", org.id)
+    checker.require(current_user.id, "organization:update", org.id)
 
     # Connect to Redis (use cached client)
     r = get_redis_client()
@@ -255,7 +255,7 @@ async def get_invite_code(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update:org", org.id)
+    checker.require(current_user.id, "organization:update", org.id)
 
     # Connect to Redis (use cached client)
     r = get_redis_client()
@@ -311,7 +311,7 @@ async def delete_invite_code(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update:org", org.id)
+    checker.require(current_user.id, "organization:update", org.id)
 
     # Connect to Redis (use cached client)
     r = get_redis_client()

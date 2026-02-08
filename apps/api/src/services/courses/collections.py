@@ -26,6 +26,7 @@ async def get_collection(
     collection_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> CollectionReadWithPermissions:
     statement = select(Collection).where(Collection.collection_uuid == collection_uuid)
     collection = db_session.exec(statement).first()
@@ -36,8 +37,9 @@ async def get_collection(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "collection:read:org", org_id=collection.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "collection:read", org_id=collection.org_id, resource_owner_id=collection.creator_id)
 
     # get courses in collection
     statement_all = (
@@ -68,12 +70,12 @@ async def get_collection(
     courses = list(db_session.exec(statement).all())
 
     can_update = (
-        checker.check(current_user.id, "collection:update:org", collection.org_id)
+        checker.check(current_user.id, "collection:update", collection.org_id, resource_owner_id=collection.creator_id)
         if current_user.id
         else False
     )
     can_delete = (
-        checker.check(current_user.id, "collection:delete:org", collection.org_id)
+        checker.check(current_user.id, "collection:delete", collection.org_id, resource_owner_id=collection.creator_id)
         if current_user.id
         else False
     )
@@ -99,15 +101,17 @@ async def create_collection(
     collection_object: CollectionCreate,
     current_user: PublicUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> CollectionRead:
     collection = Collection.model_validate(collection_object)
 
     # SECURITY: Check if user has permission to create collections in this organization
     # Since collections are organization-level resources, we need to check org permissions
     # For now, we'll use the existing RBAC check but with proper organization context
-    checker = PermissionChecker(db_session)
+    if checker is None:
+        checker = PermissionChecker(db_session)
     checker.require(
-        current_user.id, "collection:create:org", org_id=collection_object.org_id
+        current_user.id, "collection:create", org_id=collection_object.org_id
     )
 
     # Complete the collection object
@@ -132,7 +136,7 @@ async def create_collection(
                 # Verify user has read access to the course before adding it to collection
                 try:
                     checker.require(
-                        current_user.id, "course:read:org", org_id=collection.org_id
+                        current_user.id, "course:read", org_id=collection.org_id
                     )
                 except HTTPException:
                     raise HTTPException(
@@ -173,6 +177,7 @@ async def update_collection(
     collection_uuid: str,
     current_user: PublicUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> CollectionRead:
     statement = select(Collection).where(Collection.collection_uuid == collection_uuid)
     collection = db_session.exec(statement).first()
@@ -183,8 +188,9 @@ async def update_collection(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "collection:update:org", org_id=collection.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "collection:update", org_id=collection.org_id, resource_owner_id=collection.creator_id)
 
     courses = collection_object.courses
 
@@ -239,6 +245,7 @@ async def delete_collection(
     collection_uuid: str,
     current_user: PublicUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ):
     statement = select(Collection).where(Collection.collection_uuid == collection_uuid)
     collection = db_session.exec(statement).first()
@@ -250,8 +257,9 @@ async def delete_collection(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "collection:delete:org", org_id=collection.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "collection:delete", org_id=collection.org_id, resource_owner_id=collection.creator_id)
 
     # delete collection from database
     db_session.delete(collection)
@@ -272,6 +280,7 @@ async def get_collections(
     db_session: Session,
     page: int = 1,
     limit: int = 10,
+    checker: PermissionChecker | None = None,
 ) -> list[CollectionReadWithPermissions]:
     # Convert org_id to int for proper type matching with database
 
@@ -287,7 +296,8 @@ async def get_collections(
     collections = db_session.exec(statement).all()
 
     collections_with_courses = []
-    checker = PermissionChecker(db_session)
+    if checker is None:
+        checker = PermissionChecker(db_session)
 
     for collection in collections:
         statement_all = (
@@ -318,12 +328,12 @@ async def get_collections(
         courses = db_session.exec(statement).all()
 
         can_update = (
-            checker.check(current_user.id, "collection:update:org", collection.org_id)
+            checker.check(current_user.id, "collection:update", collection.org_id, resource_owner_id=collection.creator_id)
             if current_user.id
             else False
         )
         can_delete = (
-            checker.check(current_user.id, "collection:delete:org", collection.org_id)
+            checker.check(current_user.id, "collection:delete", collection.org_id, resource_owner_id=collection.creator_id)
             if current_user.id
             else False
         )

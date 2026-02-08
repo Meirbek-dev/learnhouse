@@ -58,7 +58,7 @@ async def create_documentpdf_activity(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:create:org", course.org_id)
+    checker.require(current_user.id, "activity:create", course.org_id)
 
     # get org_id
     org_id = coursechapter.org_id

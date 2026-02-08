@@ -486,7 +486,7 @@ async def api_final_grade_submission(
 
     **Required Permission**: `submission:grade:org` (instructors/graders only)
     """
-    checker.require(current_user.id, "submission:grade:org")
+    checker.require(current_user.id, "submission:grade", None)
 
     return await grade_assignment_submission(
         request, user_id, assignment_uuid, current_user, db_session

@@ -37,7 +37,7 @@ async def create_chapter(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "chapter:create:org", course.org_id)
+    checker.require(current_user.id, "chapter:create", course.org_id)
 
     # Complete chapter object
     chapter.course_id = chapter_object.course_id
@@ -117,7 +117,7 @@ async def get_chapter(
 
     # RBAC check (use parent Course for read access so public courses allow anonymous reads)
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read:org", course.org_id)
+    checker.require(current_user.id, "course:read", course.org_id)
 
     # Get activities for this chapter
     statement = (
@@ -156,7 +156,7 @@ async def update_chapter(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "chapter:update:org", chapter.org_id)
+    checker.require(current_user.id, "chapter:update", chapter.org_id)
 
     # Update only the fields that were passed in
     update_data = chapter_object.model_dump(exclude_unset=True)
@@ -187,7 +187,7 @@ async def delete_chapter(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "chapter:delete:org", chapter.org_id)
+    checker.require(current_user.id, "chapter:delete", chapter.org_id)
 
     # Remove all linked chapter activities
     statement = select(ChapterActivity).where(ChapterActivity.chapter_id == chapter.id)
@@ -222,7 +222,7 @@ async def get_course_chapters(
 
     # RBAC check (rights are determined by parent Course for read access)
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read:org", course.org_id)
+    checker.require(current_user.id, "course:read", course.org_id)
 
     statement = (
         select(Chapter)
@@ -277,7 +277,7 @@ async def reorder_chapters_and_activities(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "chapter:update:org", course.org_id)
+    checker.require(current_user.id, "chapter:update", course.org_id)
 
     ###########
     # Chapters

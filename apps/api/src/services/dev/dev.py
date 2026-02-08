@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from src.security.rbac import PermissionDenied
+from src.security.rbac import FeatureDisabled
 
 from config.config import get_platform_config
 
@@ -13,4 +13,4 @@ def isDevModeEnabledOrRaise() -> bool:
     config = get_platform_config()
     if config.general_config.development_mode:
         return True
-    raise PermissionDenied(reason="Development mode is disabled")
+    raise FeatureDisabled(reason="Development mode is disabled")

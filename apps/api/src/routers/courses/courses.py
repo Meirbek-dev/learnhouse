@@ -76,7 +76,7 @@ async def api_create_course(
 
     **Required Permission**: `course:create:org`
     """
-    checker.require(current_user.id, "course:create:org", org_id)
+    checker.require(current_user.id, "course:create", org_id)
 
     course = CourseCreate(
         name=name,
@@ -258,8 +258,6 @@ async def api_update_course(
 
     **Required Permission**: `course:update:own` or `course:update:org`
     """
-    checker.require(current_user.id, "course:update:org")
-
     return await update_course(
         request, course_object, course_uuid, current_user, db_session
     )
@@ -278,8 +276,6 @@ async def api_delete_course(
 
     **Required Permission**: `course:delete:own` or `course:delete:org`
     """
-    checker.require(current_user.id, "course:delete:org")
-
     return await delete_course(request, course_uuid, current_user, db_session)
 
 
@@ -389,8 +385,6 @@ async def api_update_course_contributor(
 
     **Required Permission**: `course:manage:own` or `course:manage:org`
     """
-    checker.require(current_user.id, "course:manage:org")
-
     return await update_course_contributor(
         request,
         course_uuid,
@@ -416,8 +410,6 @@ async def api_add_bulk_course_contributors(
 
     **Required Permission**: `course:manage:own` or `course:manage:org`
     """
-    checker.require(current_user.id, "course:manage:org")
-
     return await add_bulk_course_contributors(
         request, course_uuid, usernames, current_user, db_session
     )

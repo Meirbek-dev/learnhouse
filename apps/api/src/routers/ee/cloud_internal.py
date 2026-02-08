@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlmodel import Session
-from src.security.rbac import PermissionDenied
+from src.security.rbac import InternalAuthFailed
 
 from src.core.events.database import get_db_session
 from src.db.organization_config import OrganizationConfigBase
@@ -15,7 +15,7 @@ router = APIRouter()
 # Utils
 def check_internal_cloud_key(request: Request) -> None:
     if request.headers.get("CloudInternalKey") != os.environ.get("CLOUD_INTERNAL_KEY"):
-        raise PermissionDenied(reason="Invalid internal cloud key")
+        raise InternalAuthFailed(reason="Invalid internal cloud key")
 
 
 @router.put("/update_org_config")

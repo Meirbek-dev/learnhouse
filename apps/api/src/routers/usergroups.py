@@ -39,7 +39,7 @@ async def api_create_usergroup(
 
     **Required Permission**: `usergroup:create:org`
     """
-    checker.require(current_user.id, "usergroup:create:org")
+    checker.require(current_user.id, "usergroup:create", None)
 
     return await create_usergroup(request, db_session, current_user, usergroup_object)
 
@@ -119,7 +119,7 @@ async def api_update_usergroup(
 
     **Required Permission**: `usergroup:update:org`
     """
-    checker.require(current_user.id, "usergroup:update:org")
+    checker.require(current_user.id, "usergroup:update", None)
 
     return await update_usergroup_by_id(
         request, db_session, current_user, usergroup_id, usergroup_object
@@ -140,7 +140,7 @@ async def api_delete_usergroup(
 
     **Required Permission**: `usergroup:delete:org`
     """
-    checker.require(current_user.id, "usergroup:delete:org")
+    checker.require(current_user.id, "usergroup:delete", None)
 
     return await delete_usergroup_by_id(request, db_session, current_user, usergroup_id)
 
@@ -160,7 +160,7 @@ async def api_add_users_to_usergroup(
 
     **Required Permission**: `usergroup:manage:org`
     """
-    checker.require(current_user.id, "usergroup:manage:org")
+    checker.require(current_user.id, "usergroup:manage", None)
 
     return await add_users_to_usergroup(
         request, db_session, current_user, usergroup_id, user_ids

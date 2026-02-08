@@ -80,14 +80,13 @@ def has_permission_check(func_source: str) -> bool:
     Check if function source code contains permission checks.
 
     Looks for:
-    - checker.require() / checker.check()
-    - require_permission dependency
+    - checker.require() / checker.check() calls
+    - PermissionCheckerDep dependency injection
     - PermissionDenied exception handling
     """
     indicators = [
         "checker.require",
         "checker.check",
-        "require_permission",
         "PermissionDenied",
         "PermissionCheckerDep",
         "raise PermissionDenied",
@@ -177,8 +176,8 @@ def test_all_endpoints_have_rbac():
             error_msg += f"    Handler: {ep['handler']} in {ep['module']}\\n\\n"
 
         error_msg += "\\n✅ Fix: Add permission checks using one of:\\n"
-        error_msg += "  1. require_permission() route dependency\n"
-        error_msg += "  2. checker.require() / checker.check() call\n"
+        error_msg += "  1. checker.require() / checker.check() call\n"
+        error_msg += "  2. PermissionCheckerDep dependency injection\n"
         error_msg += "  3. Add to EXEMPT_ENDPOINTS if intentionally public\\n"
 
         pytest.fail(error_msg)

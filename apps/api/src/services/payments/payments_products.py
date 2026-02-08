@@ -38,7 +38,7 @@ async def create_payments_product(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:create:org", org_id)
+    checker.require(current_user.id, "organization:create", org_id)
 
     # Check if payments config exists, has a valid id, and is active
     statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
@@ -85,7 +85,7 @@ async def get_payments_product(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read:org", org_id)
+    checker.require(current_user.id, "organization:read", org_id)
 
     # Get payments product
     statement = select(PaymentsProduct).where(
@@ -114,7 +114,7 @@ async def update_payments_product(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update:org", org_id)
+    checker.require(current_user.id, "organization:update", org_id)
 
     # Get existing payments product
     statement = select(PaymentsProduct).where(
@@ -158,7 +158,7 @@ async def delete_payments_product(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:delete:org", org_id)
+    checker.require(current_user.id, "organization:delete", org_id)
 
     # Get existing payments product
     statement = select(PaymentsProduct).where(
@@ -206,7 +206,7 @@ async def list_payments_products(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read:org", org_id)
+    checker.require(current_user.id, "organization:read", org_id)
 
     # Get payments products ordered by id
     statement = (
@@ -235,7 +235,7 @@ async def get_products_by_course(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read:org", org_id)
+    checker.require(current_user.id, "organization:read", org_id)
 
     # Get all products linked to this course with explicit join
     statement = (

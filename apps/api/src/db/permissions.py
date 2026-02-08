@@ -24,7 +24,6 @@ from src.db.permission_enums import (  # noqa: E402
     RoleSlug,
     Scope,
     SYSTEM_ROLES,
-    build_permission_name,
 )
 
 # ============================================================================
@@ -49,7 +48,6 @@ class Permission(SQLModelStrictBaseModel, table=True):
     action: str = Field(max_length=50)
     scope: str = Field(max_length=50)
     description: str | None = Field(default=None)
-    is_dangerous: bool = Field(default=False)
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -197,7 +195,6 @@ __all__ = [
     "Scope",
     "RoleSlug",
     "SYSTEM_ROLES",
-    "build_permission_name",
     # Tables
     "Permission",
     "Role",

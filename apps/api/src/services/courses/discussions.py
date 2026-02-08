@@ -57,7 +57,7 @@ async def create_discussion(
 
     # RBAC check - users need read access to participate in discussions
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read:org", org.id)
+    checker.require(current_user.id, "course:read", org.id)
 
     # If it's a reply, check if parent discussion exists
     if discussion_object.parent_discussion_id:
@@ -125,7 +125,7 @@ async def get_discussions_by_course_uuid(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read:org", course.org_id)
+    checker.require(current_user.id, "course:read", course.org_id)
 
     # Get main discussions (posts, not replies)
     query = (
@@ -263,7 +263,7 @@ async def update_discussion(
     # Author can edit own discussion; moderators can edit any
     if discussion.user_id != current_user.id:
         checker = PermissionChecker(db_session)
-        checker.require(current_user.id, "discussion:moderate:org", discussion.org_id)
+        checker.require(current_user.id, "discussion:moderate", discussion.org_id)
 
     # Update fields
     for key, value in discussion_object.model_dump(exclude_unset=True).items():
@@ -304,7 +304,7 @@ async def delete_discussion(
     # Author can delete own discussion; moderators can delete any
     if discussion.user_id != current_user.id:
         checker = PermissionChecker(db_session)
-        checker.require(current_user.id, "discussion:moderate:org", discussion.org_id)
+        checker.require(current_user.id, "discussion:moderate", discussion.org_id)
 
     # Soft delete
     discussion.status = DiscussionStatusEnum.DELETED
@@ -599,7 +599,7 @@ async def get_discussion_replies(
 
     if course:
         checker = PermissionChecker(db_session)
-        checker.require(current_user.id, "course:read:org", course.org_id)
+        checker.require(current_user.id, "course:read", course.org_id)
 
     # Get replies
     replies_query = (

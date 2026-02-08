@@ -48,6 +48,7 @@ async def get_organization(
     org_id: int,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
+    checker: PermissionChecker | None = None,
 ) -> OrganizationRead:
     # Convert org_id to int for proper type matching with database
     org_id_int = int(org_id)
@@ -64,8 +65,9 @@ async def get_organization(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read:org", org.id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:read", org.id, resource_owner_id=org.creator_id)
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -287,6 +289,7 @@ async def update_org(
     org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ):
     statement = select(Organization).where(Organization.id == org_id)
     result = db_session.exec(statement)
@@ -300,8 +303,9 @@ async def update_org(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update:org", org.id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id)
 
     # Verify if the new slug is already in use
     statement = select(Organization).where(Organization.slug == org_object.slug)
@@ -380,6 +384,7 @@ async def update_org_logo(
     org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ):
     # Convert org_id to int for proper type matching with database
     org_id_int = int(org_id)
@@ -396,8 +401,9 @@ async def update_org_logo(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update:org", org.id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id)
 
     # Upload logo
     name_in_disk = await upload_org_logo(logo_file, org.org_uuid)
@@ -421,6 +427,7 @@ async def update_org_thumbnail(
     org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ):
     # Convert org_id to int for proper type matching with database
     org_id_int = int(org_id)
@@ -437,8 +444,9 @@ async def update_org_thumbnail(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update:org", org.id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id)
 
     # Upload logo
     name_in_disk = await upload_org_thumbnail(thumbnail_file, org.org_uuid)
@@ -462,6 +470,7 @@ async def update_org_preview(
     org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ):
     # Convert org_id to int for proper type matching with database
     org_id_int = int(org_id)
@@ -478,8 +487,9 @@ async def update_org_preview(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update:org", org.id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id)
 
     # Upload logo
     name_in_disk = await upload_org_preview(preview_file, org.org_uuid)
@@ -492,6 +502,7 @@ async def delete_org(
     org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ):
     statement = select(Organization).where(Organization.id == org_id)
     result = db_session.exec(statement)
@@ -505,8 +516,9 @@ async def delete_org(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:delete:org", org.id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:delete", org.id, resource_owner_id=org.creator_id)
 
     db_session.delete(org)
     db_session.commit()
@@ -636,6 +648,7 @@ async def update_org_signup_mechanism(
     org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ):
     statement = select(Organization).where(Organization.id == org_id)
     result = db_session.exec(statement)
@@ -649,8 +662,9 @@ async def update_org_signup_mechanism(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update:org", org.id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id)
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -687,6 +701,7 @@ async def get_org_join_mechanism(
     org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ):
     statement = select(Organization).where(Organization.id == org_id)
     result = db_session.exec(statement)
@@ -700,8 +715,9 @@ async def get_org_join_mechanism(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read:org", org.id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:read", org.id, resource_owner_id=org.creator_id)
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -741,6 +757,7 @@ async def update_org_landing(
     org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ):
     statement = select(Organization).where(Organization.id == org_id)
     result = db_session.exec(statement)
@@ -754,8 +771,9 @@ async def update_org_landing(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update:org", org.id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id)
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -794,6 +812,7 @@ async def upload_org_landing_content_service(
     org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    checker: PermissionChecker | None = None,
 ) -> dict:
     statement = select(Organization).where(Organization.id == org_id)
     result = db_session.exec(statement)
@@ -807,8 +826,9 @@ async def upload_org_landing_content_service(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update:org", org.id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id)
 
     # Upload content
     name_in_disk = await upload_org_landing_content(content_file, org.org_uuid)

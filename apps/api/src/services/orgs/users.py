@@ -50,7 +50,7 @@ async def get_organization_users(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read:org", org.id)
+    checker.require(current_user.id, "organization:read", org.id)
 
     # Build base query joining via UserRole
     # Get distinct users who have any role in this org
@@ -127,7 +127,7 @@ async def remove_user_from_org(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:delete:org", org.id)
+    checker.require(current_user.id, "organization:delete", org.id)
 
     # Check if user has any roles in this org (i.e., is a member)
     statement = select(UserRole).where(
@@ -214,7 +214,7 @@ async def update_user_role(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update:org", org.id)
+    checker.require(current_user.id, "organization:update", org.id)
 
     # Check if user is the last admin and if the new role is not admin
     # find any admin role by configured admin slugs
@@ -315,7 +315,7 @@ async def invite_batch_users(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:invite:org", org.id)
+    checker.require(current_user.id, "user:invite", org.id)
 
     # Connect to Redis (use cached client)
     r = redis_client.get_redis_client()
@@ -401,7 +401,7 @@ async def get_list_of_invited_users(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read:org", org.id)
+    checker.require(current_user.id, "organization:read", org.id)
 
     # Connect to Redis (use cached client)
     r = redis_client.get_redis_client()
@@ -455,7 +455,7 @@ async def remove_invited_user(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:delete:org", org.id)
+    checker.require(current_user.id, "organization:delete", org.id)
 
     # Connect to Redis (use cached client)
     r = redis_client.get_redis_client()

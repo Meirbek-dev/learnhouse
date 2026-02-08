@@ -4,7 +4,7 @@ import time
 
 from fastapi import Depends, HTTPException, Request
 from sqlmodel import Session, select
-from src.security.rbac import PermissionDenied
+from src.security.rbac import FeatureDisabled
 
 from src.core.events.database import get_db_session
 from src.db.courses.activities import Activity, ActivityRead
@@ -218,7 +218,7 @@ async def ai_start_activity_chat_session(
 
     except AIFeatureDisabledError as e:
         logger.warning(f"AI feature disabled: {e.message}")
-        raise PermissionDenied(reason=e.message) from e
+        raise FeatureDisabled(reason=e.message) from e
 
     except AITimeoutError as e:
         logger.warning(f"AI timeout: {e.message}")
@@ -338,7 +338,7 @@ async def ai_send_activity_chat_message(
 
     except AIFeatureDisabledError as e:
         logger.warning(f"AI feature disabled: {e.message}")
-        raise PermissionDenied(reason=e.message) from e
+        raise FeatureDisabled(reason=e.message) from e
 
     except AITimeoutError as e:
         logger.warning(f"AI timeout: {e.message}")

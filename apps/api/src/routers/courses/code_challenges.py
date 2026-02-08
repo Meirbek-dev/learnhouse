@@ -15,7 +15,7 @@ from sqlmodel import Session, func, select
 from src.security.rbac import (
     AuthenticationRequired,
     PermissionChecker,
-    PermissionDenied,
+    ResourceAccessDenied,
 )
 from ulid import ULID
 
@@ -128,7 +128,7 @@ async def check_challenge_access(
         raise HTTPException(status_code=404, detail="Course not found")
 
     checker = PermissionChecker(db_session)
-    perm = "course:update:org" if require_instructor else "course:read:org"
+    perm = "course:update" if require_instructor else "course:read"
     checker.require(user.id, perm, course.org_id)
 
     return course
@@ -594,7 +594,7 @@ async def run_custom_test(
     settings = get_challenge_settings(activity)
 
     if not settings.allow_custom_input:
-        raise PermissionDenied(
+        raise ResourceAccessDenied(
             reason="Custom input is not allowed for this challenge",
         )
 
@@ -693,7 +693,7 @@ async def get_submission_detail(
     )
 
     if submission.user_id != current_user.id and not is_instructor:
-        raise PermissionDenied(
+        raise ResourceAccessDenied(
             reason="You can only view your own submissions",
         )
 
@@ -720,7 +720,7 @@ async def get_student_analytics(
     )
 
     if user_id != current_user.id and not is_instructor:
-        raise PermissionDenied(
+        raise ResourceAccessDenied(
             reason="You can only view your own analytics",
         )
 

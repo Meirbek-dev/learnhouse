@@ -19,12 +19,14 @@ async def create_usergroup(
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
     usergroup_create: UserGroupCreate,
+    checker: PermissionChecker | None = None,
 ) -> UserGroupRead:
     usergroup = UserGroup.model_validate(usergroup_create)
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:create:org", usergroup_create.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "usergroup:create", usergroup_create.org_id)
 
     # Check if Organization exists
     statement = select(Organization).where(Organization.id == usergroup_create.org_id)
@@ -55,6 +57,7 @@ async def read_usergroup_by_id(
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
     usergroup_id: int,
+    checker: PermissionChecker | None = None,
 ) -> UserGroupRead:
     statement = select(UserGroup).where(UserGroup.id == usergroup_id)
     usergroup = db_session.exec(statement).first()
@@ -66,8 +69,9 @@ async def read_usergroup_by_id(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:read:org", usergroup.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "usergroup:read", usergroup.org_id, resource_owner_id=usergroup.creator_id)
 
     return UserGroupRead.model_validate(usergroup)
 
@@ -77,6 +81,7 @@ async def get_users_linked_to_usergroup(
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
     usergroup_id: int,
+    checker: PermissionChecker | None = None,
 ) -> list[UserRead]:
     statement = select(UserGroup).where(UserGroup.id == usergroup_id)
     usergroup = db_session.exec(statement).first()
@@ -88,8 +93,9 @@ async def get_users_linked_to_usergroup(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:read:org", usergroup.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "usergroup:read", usergroup.org_id, resource_owner_id=usergroup.creator_id)
 
     statement = select(UserGroupUser).where(UserGroupUser.usergroup_id == usergroup_id)
     usergroup_users = db_session.exec(statement).all()
@@ -111,13 +117,15 @@ async def read_usergroups_by_org_id(
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
     org_id: int,
+    checker: PermissionChecker | None = None,
 ) -> list[UserGroupRead]:
     statement = select(UserGroup).where(UserGroup.org_id == org_id)
     usergroups = db_session.exec(statement).all()
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:read:org", org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "usergroup:read", org_id)
 
     return [UserGroupRead.model_validate(usergroup) for usergroup in usergroups]
 
@@ -127,6 +135,7 @@ async def get_usergroups_by_resource(
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
     resource_uuid: str,
+    checker: PermissionChecker | None = None,
 ) -> list[UserGroupRead]:
     statement = select(UserGroupResource).where(
         UserGroupResource.resource_uuid == resource_uuid
@@ -134,8 +143,9 @@ async def get_usergroups_by_resource(
     usergroup_resources = db_session.exec(statement).all()
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:read:org", None)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "usergroup:read", None)
 
     usergroup_ids = [usergroup.usergroup_id for usergroup in usergroup_resources]
 
@@ -155,6 +165,7 @@ async def update_usergroup_by_id(
     current_user: PublicUser | AnonymousUser,
     usergroup_id: int,
     usergroup_update: UserGroupUpdate,
+    checker: PermissionChecker | None = None,
 ) -> UserGroupRead:
     statement = select(UserGroup).where(UserGroup.id == usergroup_id)
     usergroup = db_session.exec(statement).first()
@@ -166,8 +177,9 @@ async def update_usergroup_by_id(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:update:org", usergroup.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "usergroup:update", usergroup.org_id, resource_owner_id=usergroup.creator_id)
 
     usergroup.name = usergroup_update.name
     usergroup.description = usergroup_update.description
@@ -185,6 +197,7 @@ async def delete_usergroup_by_id(
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
     usergroup_id: int,
+    checker: PermissionChecker | None = None,
 ) -> str:
     statement = select(UserGroup).where(UserGroup.id == usergroup_id)
     usergroup = db_session.exec(statement).first()
@@ -196,8 +209,9 @@ async def delete_usergroup_by_id(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:delete:org", usergroup.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "usergroup:delete", usergroup.org_id, resource_owner_id=usergroup.creator_id)
 
     db_session.delete(usergroup)
     db_session.commit()
@@ -211,6 +225,7 @@ async def add_users_to_usergroup(
     current_user: PublicUser | AnonymousUser | InternalUser,
     usergroup_id: int,
     user_ids: str,
+    checker: PermissionChecker | None = None,
 ) -> str:
     statement = select(UserGroup).where(UserGroup.id == usergroup_id)
     usergroup = db_session.exec(statement).first()
@@ -222,8 +237,9 @@ async def add_users_to_usergroup(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:manage:org", usergroup.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "usergroup:manage", usergroup.org_id, resource_owner_id=usergroup.creator_id)
 
     user_ids_array = user_ids.split(",")
 
@@ -274,6 +290,7 @@ async def remove_users_from_usergroup(
     current_user: PublicUser | AnonymousUser,
     usergroup_id: int,
     user_ids: str,
+    checker: PermissionChecker | None = None,
 ) -> str:
     statement = select(UserGroup).where(UserGroup.id == usergroup_id)
     usergroup = db_session.exec(statement).first()
@@ -285,8 +302,9 @@ async def remove_users_from_usergroup(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:manage:org", usergroup.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "usergroup:manage", usergroup.org_id, resource_owner_id=usergroup.creator_id)
 
     user_ids_array = user_ids.split(",")
 
@@ -317,6 +335,7 @@ async def add_resources_to_usergroup(
     current_user: PublicUser | AnonymousUser,
     usergroup_id: int,
     resources_uuids: str,
+    checker: PermissionChecker | None = None,
 ) -> str:
     statement = select(UserGroup).where(UserGroup.id == usergroup_id)
     usergroup = db_session.exec(statement).first()
@@ -328,8 +347,9 @@ async def add_resources_to_usergroup(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:manage:org", usergroup.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "usergroup:manage", usergroup.org_id, resource_owner_id=usergroup.creator_id)
 
     resources_uuids_array = resources_uuids.split(",")
 
@@ -367,6 +387,7 @@ async def remove_resources_from_usergroup(
     current_user: PublicUser | AnonymousUser,
     usergroup_id: int,
     resources_uuids: str,
+    checker: PermissionChecker | None = None,
 ) -> str:
     statement = select(UserGroup).where(UserGroup.id == usergroup_id)
     usergroup = db_session.exec(statement).first()
@@ -378,8 +399,9 @@ async def remove_resources_from_usergroup(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:manage:org", usergroup.org_id)
+    if checker is None:
+        checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "usergroup:manage", usergroup.org_id, resource_owner_id=usergroup.creator_id)
 
     resources_uuids_array = resources_uuids.split(",")
 

@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, Depends, Request, Response, UploadFile
 from pydantic import EmailStr
 from sqlmodel import Session
-from src.security.rbac import PermissionCheckerDep, PermissionDenied
+from src.security.rbac import PermissionCheckerDep, PermissionDenied, ResourceAccessDenied
 
 from src.core.events.database import get_db_session
 from src.db.courses.courses import CourseRead
@@ -93,7 +93,7 @@ async def api_create_user_with_orgid(
 
     **Required Permission**: `user:create:org`
     """
-    checker.require(current_user.id, "user:create:org", org_id)
+    checker.require(current_user.id, "user:create", org_id)
 
     return await create_user_with_org_validation(
         request, db_session, current_user, user_object, org_id
@@ -199,7 +199,7 @@ async def api_update_user(
     is_own_profile = user_id == current_user.id
 
     if not is_own_profile:
-        checker.require(current_user.id, "user:update:org")
+        checker.require(current_user.id, "user:update", None)
 
     return await update_user(request, db_session, user_id, current_user, user_object)
 
@@ -223,7 +223,7 @@ async def api_update_avatar_user(
     is_own_avatar = user_id == current_user.id
 
     if not is_own_avatar:
-        checker.require(current_user.id, "user:update:org")
+        checker.require(current_user.id, "user:update", None)
 
     return await update_user_avatar(request, db_session, current_user, avatar_file)
 
@@ -244,7 +244,7 @@ async def api_update_user_password(
     """
     # Password changes restricted to own account only
     if user_id != current_user.id:
-        raise PermissionDenied(reason="You can only change your own password")
+        raise ResourceAccessDenied(reason="You can only change your own password")
 
     return await update_user_password(request, db_session, current_user, user_id, form)
 
@@ -331,11 +331,11 @@ async def api_delete_user(
 
     **Required Permission**: `user:delete:org`
     """
-    checker.require(current_user.id, "user:delete:org")
+    checker.require(current_user.id, "user:delete", None)
 
     # Prevent self-deletion
     if user_id == current_user.id:
-        raise PermissionDenied(
+        raise ResourceAccessDenied(
             reason="You cannot delete your own account through this endpoint"
         )
 

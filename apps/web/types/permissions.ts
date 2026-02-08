@@ -1,3 +1,6 @@
+// AUTO-GENERATED — do not edit manually.
+// Run: python scripts/sync-permissions.py
+
 /**
  * Permission types — single source of truth for the frontend RBAC system.
  *

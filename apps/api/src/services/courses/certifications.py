@@ -51,7 +51,7 @@ async def create_certification(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "certificate:create:org", org_id=course.org_id)
+    checker.require(current_user.id, "certificate:create", org_id=course.org_id)
 
     # Create certification
     certification = Certifications(
@@ -101,7 +101,7 @@ async def get_certification(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "certificate:read:org", org_id=course.org_id)
+    checker.require(current_user.id, "certificate:read", org_id=course.org_id)
 
     return CertificationRead(**certification.model_dump())
 
@@ -126,7 +126,7 @@ async def get_certifications_by_course(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "certificate:read:org", org_id=course.org_id)
+    checker.require(current_user.id, "certificate:read", org_id=course.org_id)
 
     # Get certifications for this course
     statement = select(Certifications).where(Certifications.course_id == course.id)
@@ -170,7 +170,7 @@ async def update_certification(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "certificate:update:org", org_id=course.org_id)
+    checker.require(current_user.id, "certificate:update", org_id=course.org_id)
 
     # Update only the fields that were passed in
     for var, value in vars(certification_object).items():
@@ -218,7 +218,7 @@ async def delete_certification(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "certificate:delete:org", org_id=course.org_id)
+    checker.require(current_user.id, "certificate:delete", org_id=course.org_id)
 
     db_session.delete(certification)
     db_session.commit()
@@ -286,7 +286,7 @@ async def create_certificate_user(
 
         # Require course ownership or instructor role for creating certificates
         checker = PermissionChecker(db_session)
-        checker.require(current_user.id, "certificate:create:org", org_id=course.org_id)
+        checker.require(current_user.id, "certificate:create", org_id=course.org_id)
 
     now = tz_now()
 
@@ -423,7 +423,7 @@ async def get_user_certificates_for_course(
     # RBAC check with graceful fallback for learners retrieving their own certificates
     try:
         checker = PermissionChecker(db_session)
-        checker.require(current_user.id, "certificate:read:org", org_id=course.org_id)
+        checker.require(current_user.id, "certificate:read", org_id=course.org_id)
     except HTTPException as exc:
         if exc.status_code != status.HTTP_403_FORBIDDEN:
             raise

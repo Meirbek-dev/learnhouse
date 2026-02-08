@@ -23,7 +23,7 @@ async def get_customers(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read:org", org_id)
+    checker.require(current_user.id, "organization:read", org_id)
 
     # Get all payment users for the organization
     statement = select(PaymentsUser).where(PaymentsUser.org_id == org_id)

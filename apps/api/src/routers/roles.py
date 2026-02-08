@@ -7,6 +7,7 @@ Role assignment/revocation to *users* is in rbac.py.
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
 from sqlmodel import Session, or_, select
 
 from src.core.events.database import get_db_session
@@ -21,9 +22,13 @@ from src.db.permissions import (
 )
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.security.rbac import require_permission
+from src.security.rbac import PermissionCheckerDep
 
 router = APIRouter()
+
+
+class AddPermissionBody(BaseModel):
+    permission_id: int
 
 
 # ── List / Read ───────────────────────────────────────────────────────────
@@ -33,8 +38,11 @@ router = APIRouter()
 async def list_all_permissions(
     db: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    checker: PermissionCheckerDep,
+    org_id: Annotated[int | None, Query()] = None,
 ):
     """List all permission definitions. Used by the RBAC admin panel."""
+    checker.require(current_user.id, "role:read", org_id)
     perms = db.exec(
         select(Permission).order_by(Permission.resource_type, Permission.action)
     ).all()
@@ -45,9 +53,11 @@ async def list_all_permissions(
 async def list_roles(
     db: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    checker: PermissionCheckerDep,
     org_id: Annotated[int | None, Query()] = None,
 ):
     """List all roles available in an org (system roles + org-specific)."""
+    checker.require(current_user.id, "role:read", org_id)
     query = select(Role)
     if org_id is not None:
         query = query.where(or_(Role.org_id == org_id, Role.org_id.is_(None)))
@@ -62,8 +72,11 @@ async def get_role(
     role_id: int,
     db: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    checker: PermissionCheckerDep,
+    org_id: Annotated[int | None, Query()] = None,
 ):
     """Get a single role by ID (includes its permissions via separate endpoint)."""
+    checker.require(current_user.id, "role:read", org_id)
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
@@ -76,13 +89,15 @@ async def get_role(
 @router.post(
     "/",
     response_model=RoleRead,
-    dependencies=[require_permission("role:create:org")],
 )
 async def create_role(
     body: RoleCreate,
     db: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    checker: PermissionCheckerDep,
 ):
     """Create a new custom role for an org."""
+    checker.require(current_user.id, "role:create", body.org_id)
     role = Role(
         slug=body.slug,
         name=body.name,
@@ -99,14 +114,17 @@ async def create_role(
 @router.put(
     "/{role_id}",
     response_model=RoleRead,
-    dependencies=[require_permission("role:update:org")],
 )
 async def update_role(
     role_id: int,
     body: RoleUpdate,
     db: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    checker: PermissionCheckerDep,
+    org_id: Annotated[int | None, Query()] = None,
 ):
     """Update a role's name, description, or priority."""
+    checker.require(current_user.id, "role:update", org_id)
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
@@ -121,13 +139,16 @@ async def update_role(
 
 @router.delete(
     "/{role_id}",
-    dependencies=[require_permission("role:delete:org")],
 )
 async def delete_role(
     role_id: int,
     db: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    checker: PermissionCheckerDep,
+    org_id: Annotated[int | None, Query()] = None,
 ):
     """Delete a custom role."""
+    checker.require(current_user.id, "role:delete", org_id)
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
@@ -146,8 +167,11 @@ async def get_role_permissions(
     role_id: int,
     db: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    checker: PermissionCheckerDep,
+    org_id: Annotated[int | None, Query()] = None,
 ):
     """Get all permissions assigned to a role."""
+    checker.require(current_user.id, "role:read", org_id)
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
@@ -161,17 +185,18 @@ async def get_role_permissions(
 
 @router.post(
     "/{role_id}/permissions",
-    dependencies=[require_permission("role:update:org")],
 )
 async def add_permission_to_role(
     role_id: int,
-    body: dict,
+    body: AddPermissionBody,
     db: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    checker: PermissionCheckerDep,
+    org_id: Annotated[int | None, Query()] = None,
 ):
     """Add a permission to a role."""
-    permission_id = body.get("permission_id")
-    if not permission_id:
-        raise HTTPException(400, detail="permission_id is required")
+    checker.require(current_user.id, "role:update", org_id)
+    permission_id = body.permission_id
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
@@ -195,14 +220,17 @@ async def add_permission_to_role(
 
 @router.delete(
     "/{role_id}/permissions/{permission_id}",
-    dependencies=[require_permission("role:update:org")],
 )
 async def remove_permission_from_role(
     role_id: int,
     permission_id: int,
     db: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    checker: PermissionCheckerDep,
+    org_id: Annotated[int | None, Query()] = None,
 ):
     """Remove a permission from a role."""
+    checker.require(current_user.id, "role:update", org_id)
     rp = db.exec(
         select(RolePermission).where(
             RolePermission.role_id == role_id,

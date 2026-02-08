@@ -55,3 +55,4 @@ fly.toml
 backups/
 .idea
 temp-restore
+tmpclaude-*-cwd

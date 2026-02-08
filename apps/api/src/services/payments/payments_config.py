@@ -28,7 +28,7 @@ async def init_payments_config(
 
     # Verify permissions
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:create:org", org_id)
+    checker.require(current_user.id, "organization:create", org_id)
 
     # Check for existing config
     existing_config = db_session.exec(
@@ -73,7 +73,7 @@ async def get_payments_config(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read:org", org_id)
+    checker.require(current_user.id, "organization:read", org_id)
 
     # Get payments config
     statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
@@ -97,7 +97,7 @@ async def update_payments_config(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update:org", org_id)
+    checker.require(current_user.id, "organization:update", org_id)
 
     # Get existing payments config
     statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
@@ -130,7 +130,7 @@ async def delete_payments_config(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:delete:org", org_id)
+    checker.require(current_user.id, "organization:delete", org_id)
 
     # Get existing payments config
     statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)

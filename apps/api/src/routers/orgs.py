@@ -14,7 +14,7 @@ from src.db.organizations import (
 )
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.security.rbac import require_permission
+from src.security.rbac import PermissionCheckerDep
 from src.services.orgs.invites import (
     create_invite_code,
     create_invite_code_with_usergroup,
@@ -158,59 +158,59 @@ async def api_remove_user_from_org(
 
 
 # Config related routes
-@router.put(
-    "/{org_id}/signup_mechanism",
-    dependencies=[require_permission("organization:update:org")],
-)
+@router.put("/{org_id}/signup_mechanism")
 async def api_get_org_signup_mechanism(
     request: Request,
     org_id: int,
     signup_mechanism: Literal["open", "inviteOnly"],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
+    checker: PermissionCheckerDep,
 ):
     """
     Update org signup mechanism
 
-    **Required Permission**: `organization:update:own`
+    **Required Permission**: `organization:update`
     """
+    await checker.require(current_user.id, "organization:update", org_id)
     return await update_org_signup_mechanism(
         request, signup_mechanism, org_id, current_user, db_session
     )
 
 
 # Invites related routes
-@router.post("/{org_id}/invites", dependencies=[require_permission("user:invite:org")])
+@router.post("/{org_id}/invites")
 async def api_create_invite_code(
     request: Request,
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
+    checker: PermissionCheckerDep,
 ):
     """
     Create invite code
 
-    **Required Permission**: `user:invite:org`
+    **Required Permission**: `user:invite`
     """
+    await checker.require(current_user.id, "user:invite", org_id)
     return await create_invite_code(request, org_id, current_user, db_session)
 
 
-@router.post(
-    "/{org_id}/invites_with_usergroups",
-    dependencies=[require_permission("user:invite:org")],
-)
+@router.post("/{org_id}/invites_with_usergroups")
 async def api_create_invite_code_with_ug(
     request: Request,
     org_id: int,
     usergroup_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
+    checker: PermissionCheckerDep,
 ):
     """
     Create invite code with usergroup
 
-    **Required Permission**: `user:invite:org`
+    **Required Permission**: `user:invite`
     """
+    await checker.require(current_user.id, "user:invite", org_id)
     return await create_invite_code_with_usergroup(
         request, org_id, usergroup_id, current_user, db_session
     )
@@ -244,31 +244,27 @@ async def api_get_invite_code(
     return await get_invite_code(request, org_id, invite_code, current_user, db_session)
 
 
-@router.delete(
-    "/{org_id}/invites/{org_invite_code_uuid}",
-    dependencies=[require_permission("user:invite:org")],
-)
+@router.delete("/{org_id}/invites/{org_invite_code_uuid}")
 async def api_delete_invite_code(
     request: Request,
     org_id: int,
     org_invite_code_uuid: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
+    checker: PermissionCheckerDep,
 ):
     """
     Delete invite code
 
-    **Required Permission**: `user:invite:org`
+    **Required Permission**: `user:invite`
     """
+    await checker.require(current_user.id, "user:invite", org_id)
     return await delete_invite_code(
         request, org_id, org_invite_code_uuid, current_user, db_session
     )
 
 
-@router.post(
-    "/{org_id}/invites/users/batch",
-    dependencies=[require_permission("user:invite:org")],
-)
+@router.post("/{org_id}/invites/users/batch")
 async def api_invite_batch_users(
     request: Request,
     org_id: int,
@@ -276,12 +272,14 @@ async def api_invite_batch_users(
     invite_code_uuid: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
+    checker: PermissionCheckerDep,
 ):
     """
     Invite batch users by emails
 
-    **Required Permission**: `user:invite:org`
+    **Required Permission**: `user:invite`
     """
+    await checker.require(current_user.id, "user:invite", org_id)
     return await invite_batch_users(
         request, org_id, emails, invite_code_uuid, db_session, current_user
     )
@@ -300,22 +298,21 @@ async def api_get_org_users_invites(
     return await get_list_of_invited_users(request, org_id, db_session, current_user)
 
 
-@router.delete(
-    "/{org_id}/invites/users/{email}",
-    dependencies=[require_permission("user:invite:org")],
-)
+@router.delete("/{org_id}/invites/users/{email}")
 async def api_delete_org_users_invites(
     request: Request,
     org_id: int,
     email: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
+    checker: PermissionCheckerDep,
 ):
     """
     Delete org users invites
 
-    **Required Permission**: `user:invite:org`
+    **Required Permission**: `user:invite`
     """
+    await checker.require(current_user.id, "user:invite", org_id)
     return await remove_invited_user(request, org_id, email, db_session, current_user)
 
 
@@ -332,21 +329,21 @@ async def api_get_org_by_slug(
     return await get_organization_by_slug(request, org_slug, db_session, current_user)
 
 
-@router.put(
-    "/{org_id}/logo", dependencies=[require_permission("organization:update:org")]
-)
+@router.put("/{org_id}/logo")
 async def api_update_org_logo(
     request: Request,
     org_id: int,
     logo_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
+    checker: PermissionCheckerDep,
 ):
     """
     Update org logo
 
-    **Required Permission**: `organization:update:own`
+    **Required Permission**: `organization:update`
     """
+    await checker.require(current_user.id, "organization:update", org_id)
     return await update_org_logo(
         request=request,
         logo_file=logo_file,
@@ -356,21 +353,21 @@ async def api_update_org_logo(
     )
 
 
-@router.put(
-    "/{org_id}/thumbnail", dependencies=[require_permission("organization:update:org")]
-)
+@router.put("/{org_id}/thumbnail")
 async def api_update_org_thumbnail(
     request: Request,
     org_id: int,
     thumbnail_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
+    checker: PermissionCheckerDep,
 ):
     """
     Update org thumbnail
 
-    **Required Permission**: `organization:update:own`
+    **Required Permission**: `organization:update`
     """
+    await checker.require(current_user.id, "organization:update", org_id)
     return await update_org_thumbnail(
         request=request,
         thumbnail_file=thumbnail_file,
@@ -380,21 +377,21 @@ async def api_update_org_thumbnail(
     )
 
 
-@router.put(
-    "/{org_id}/preview", dependencies=[require_permission("organization:update:org")]
-)
+@router.put("/{org_id}/preview")
 async def api_update_org_preview(
     request: Request,
     org_id: int,
     preview_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
+    checker: PermissionCheckerDep,
 ):
     """
     Update org preview
 
-    **Required Permission**: `organization:update:own`
+    **Required Permission**: `organization:update`
     """
+    await checker.require(current_user.id, "organization:update", org_id)
     return await update_org_preview(
         request=request,
         preview_file=preview_file,
@@ -436,75 +433,76 @@ async def api_user_orgs_admin(
     )
 
 
-@router.put("/{org_id}", dependencies=[require_permission("organization:update:org")])
+@router.put("/{org_id}")
 async def api_update_org(
     request: Request,
     org_object: OrganizationUpdate,
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
+    checker: PermissionCheckerDep,
 ) -> OrganizationRead:
     """
     Update Org by ID
 
-    **Required Permission**: `organization:update:own`
+    **Required Permission**: `organization:update`
     """
+    await checker.require(current_user.id, "organization:update", org_id)
     return await update_org(request, org_object, org_id, current_user, db_session)
 
 
-@router.delete(
-    "/{org_id}", dependencies=[require_permission("organization:delete:org")]
-)
+@router.delete("/{org_id}")
 async def api_delete_org(
     request: Request,
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
+    checker: PermissionCheckerDep,
 ):
     """
     Delete Org by ID
 
-    **Required Permission**: `organization:delete:own`
+    **Required Permission**: `organization:delete`
     """
+    await checker.require(current_user.id, "organization:delete", org_id)
     return await delete_org(request, org_id, current_user, db_session)
 
 
-@router.put(
-    "/{org_id}/landing", dependencies=[require_permission("organization:update:org")]
-)
+@router.put("/{org_id}/landing")
 async def api_update_org_landing(
     request: Request,
     org_id: int,
     landing_object: dict,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
+    checker: PermissionCheckerDep,
 ):
     """
     Update organization landing object
 
-    **Required Permission**: `organization:update:own`
+    **Required Permission**: `organization:update`
     """
+    await checker.require(current_user.id, "organization:update", org_id)
     return await update_org_landing(
         request, landing_object, org_id, current_user, db_session
     )
 
 
-@router.post(
-    "/{org_id}/landing/content",
-    dependencies=[require_permission("organization:update:org")],
-)
+@router.post("/{org_id}/landing/content")
 async def api_upload_org_landing_content(
     request: Request,
     org_id: int,
     content_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
+    checker: PermissionCheckerDep,
 ):
     """
     Upload content for organization landing page
 
-    **Required Permission**: `organization:update:own`
+    **Required Permission**: `organization:update`
     """
+    await checker.require(current_user.id, "organization:update", org_id)
     return await upload_org_landing_content_service(
         request=request,
         content_file=content_file,

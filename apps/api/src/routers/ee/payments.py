@@ -59,7 +59,7 @@ async def api_create_payments_config(
 
     **Required Permission**: `organization:manage:org` (admin only)
     """
-    checker.require(current_user.id, "organization:manage:org", org_id)
+    checker.require(current_user.id, "organization:manage", org_id)
 
     return await init_payments_config(
         request, org_id, provider, current_user, db_session
@@ -89,7 +89,7 @@ async def api_delete_payments_config(
 
     **Required Permission**: `organization:manage:org` (admin only)
     """
-    checker.require(current_user.id, "organization:manage:org", org_id)
+    checker.require(current_user.id, "organization:manage", org_id)
 
     await delete_payments_config(request, org_id, current_user, db_session)
     return {"message": "Payments config deleted successfully"}
@@ -109,7 +109,7 @@ async def api_create_payments_product(
 
     **Required Permission**: `organization:manage:org`
     """
-    checker.require(current_user.id, "organization:manage:org", org_id)
+    checker.require(current_user.id, "organization:manage", org_id)
 
     return await create_payments_product(
         request, org_id, payments_product, current_user, db_session
@@ -154,7 +154,7 @@ async def api_update_payments_product(
 
     **Required Permission**: `organization:manage:org`
     """
-    checker.require(current_user.id, "organization:manage:org", org_id)
+    checker.require(current_user.id, "organization:manage", org_id)
 
     return await update_payments_product(
         request, org_id, product_id, payments_product, current_user, db_session
@@ -175,7 +175,7 @@ async def api_delete_payments_product(
 
     **Required Permission**: `organization:manage:org`
     """
-    checker.require(current_user.id, "organization:manage:org", org_id)
+    checker.require(current_user.id, "organization:manage", org_id)
 
     await delete_payments_product(request, org_id, product_id, current_user, db_session)
     return {"message": "Payments product deleted successfully"}

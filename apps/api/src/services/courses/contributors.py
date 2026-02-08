@@ -116,7 +116,7 @@ async def update_course_contributor(
 
     # SECURITY: Require course ownership or admin role for updating contributors
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:manage:org", course.org_id)
+    checker.require(current_user.id, "course:manage", course.org_id)
 
     # Check if the contributor exists for this course
     existing_authorship = db_session.exec(
@@ -178,7 +178,7 @@ async def get_course_contributors(
 
     # SECURITY: Require read access to the course
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read:org", course.org_id)
+    checker.require(current_user.id, "course:read", course.org_id)
 
     # Get all contributors for this course with user information
     statement = (
@@ -235,7 +235,7 @@ async def add_bulk_course_contributors(
 
     # SECURITY: Require course ownership or admin role for adding contributors
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:manage:org", course.org_id)
+    checker.require(current_user.id, "course:manage", course.org_id)
 
     # Process results
     results = {"successful": [], "failed": []}
@@ -330,7 +330,7 @@ async def remove_bulk_course_contributors(
 
     # SECURITY: Require course ownership or admin role for removing contributors
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:manage:org", course.org_id)
+    checker.require(current_user.id, "course:manage", course.org_id)
 
     # Process results
     results = {"successful": [], "failed": []}
