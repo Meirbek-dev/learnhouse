@@ -146,6 +146,7 @@ async def get_usergroups_by_resource(
     current_user: PublicUser | AnonymousUser,
     resource_uuid: str,
     checker: PermissionChecker | None = None,
+    org_id: int | None = None,
 ) -> list[UserGroupRead]:
     statement = select(UserGroupResource).where(
         UserGroupResource.resource_uuid == resource_uuid
@@ -155,7 +156,7 @@ async def get_usergroups_by_resource(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:read", None)
+    checker.require(current_user.id, "usergroup:read", org_id)
 
     usergroup_ids = [usergroup.usergroup_id for usergroup in usergroup_resources]
 

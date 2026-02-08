@@ -342,9 +342,10 @@ export async function getUserInfo(token: string): Promise<AuthUser> {
 /**
  * User session retrieval with validation
  * @param token - JWT access token
+ * @param orgId - Optional organization ID to scope permissions
  * @returns Promise<UserSessionResponse> - User session information
  */
-export async function getUserSession(token: string): Promise<UserSessionResponse> {
+export async function getUserSession(token: string, orgId?: number): Promise<UserSessionResponse> {
   if (!token?.trim()) {
     throw createAuthError('Access token is required', 400, 'MISSING_TOKEN');
   }
@@ -362,7 +363,8 @@ export async function getUserSession(token: string): Promise<UserSessionResponse
       cache: 'no-cache',
     };
 
-    const response = await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.userSession}`, requestOptions);
+    const qs = orgId ? `?org_id=${orgId}` : '';
+    const response = await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.userSession}${qs}`, requestOptions);
     return await handleAuthResponse<UserSessionResponse>(response, 'get user session');
   } catch (error) {
     if (error instanceof Error) {

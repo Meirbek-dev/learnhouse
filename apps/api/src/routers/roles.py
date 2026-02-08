@@ -4,6 +4,7 @@ Roles Router — CRUD for roles + permission assignment.
 Role assignment/revocation to *users* is in rbac.py.
 """
 
+import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -23,6 +24,8 @@ from src.db.permissions import (
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
+
+audit_log = logging.getLogger("rbac.audit")
 
 router = APIRouter()
 
@@ -98,6 +101,17 @@ async def create_role(
 ):
     """Create a new custom role for an org."""
     checker.require(current_user.id, "role:create", body.org_id)
+
+    # Escalation prevention: new role priority must not exceed caller's highest
+    caller_roles = checker.get_user_roles(current_user.id, body.org_id)
+    caller_max_priority = max((r["priority"] for r in caller_roles), default=0)
+    new_priority = body.priority if hasattr(body, "priority") and body.priority is not None else 0
+    if new_priority > caller_max_priority:
+        raise HTTPException(
+            403,
+            detail="Cannot create a role with higher priority than your own",
+        )
+
     role = Role(
         slug=body.slug,
         name=body.name,
@@ -108,6 +122,15 @@ async def create_role(
     db.add(role)
     db.commit()
     db.refresh(role)
+    audit_log.info(
+        "role_created",
+        extra={
+            "actor_id": current_user.id,
+            "role_id": role.id,
+            "role_slug": role.slug,
+            "org_id": body.org_id,
+        },
+    )
     return RoleRead.model_validate(role)
 
 
@@ -134,6 +157,15 @@ async def update_role(
         setattr(role, field, value)
     db.commit()
     db.refresh(role)
+    audit_log.info(
+        "role_updated",
+        extra={
+            "actor_id": current_user.id,
+            "role_id": role_id,
+            "org_id": org_id,
+            "fields": list(body.model_dump(exclude_unset=True).keys()),
+        },
+    )
     return RoleRead.model_validate(role)
 
 
@@ -156,6 +188,15 @@ async def delete_role(
         raise HTTPException(403, detail="System roles cannot be deleted")
     db.delete(role)
     db.commit()
+    audit_log.info(
+        "role_deleted",
+        extra={
+            "actor_id": current_user.id,
+            "role_id": role_id,
+            "role_slug": role.slug,
+            "org_id": org_id,
+        },
+    )
     return {"ok": True}
 
 
@@ -200,9 +241,20 @@ async def add_permission_to_role(
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
+    if role.is_system:
+        raise HTTPException(403, detail="System roles cannot be modified")
     perm = db.get(Permission, permission_id)
     if not perm:
         raise HTTPException(404, detail="Permission not found")
+
+    # Escalation prevention: caller must themselves have the permission being added
+    caller_perms = checker.get_effective_permissions(current_user.id, org_id)
+    if perm.name not in caller_perms and "*:*:*" not in caller_perms:
+        raise HTTPException(
+            403,
+            detail=f"Cannot grant permission '{perm.name}' that you do not have",
+        )
+
     # Check if already exists
     existing = db.exec(
         select(RolePermission).where(
@@ -215,6 +267,16 @@ async def add_permission_to_role(
     rp = RolePermission(role_id=role_id, permission_id=permission_id)
     db.add(rp)
     db.commit()
+    audit_log.info(
+        "permission_added_to_role",
+        extra={
+            "actor_id": current_user.id,
+            "role_id": role_id,
+            "permission_id": permission_id,
+            "permission_name": perm.name,
+            "org_id": org_id,
+        },
+    )
     return {"ok": True}
 
 
@@ -231,6 +293,11 @@ async def remove_permission_from_role(
 ):
     """Remove a permission from a role."""
     checker.require(current_user.id, "role:update", org_id)
+    role = db.get(Role, role_id)
+    if not role:
+        raise HTTPException(404, detail="Role not found")
+    if role.is_system:
+        raise HTTPException(403, detail="System roles cannot be modified")
     rp = db.exec(
         select(RolePermission).where(
             RolePermission.role_id == role_id,
@@ -241,4 +308,13 @@ async def remove_permission_from_role(
         raise HTTPException(404, detail="Permission not assigned to this role")
     db.delete(rp)
     db.commit()
+    audit_log.info(
+        "permission_removed_from_role",
+        extra={
+            "actor_id": current_user.id,
+            "role_id": role_id,
+            "permission_id": permission_id,
+            "org_id": org_id,
+        },
+    )
     return {"ok": True}

@@ -8,14 +8,33 @@ RBAC API Endpoints
 - POST /roles/revoke    — revoke role (admin)
 """
 
+import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from sqlmodel import Session
 
+from src.core.events.database import get_db_session
 from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
+
+audit_log = logging.getLogger("rbac.audit")
+
+
+def _rbac_rate_key(request: Request) -> str:
+    auth = request.headers.get("authorization") or ""
+    if auth:
+        import hashlib
+        h = hashlib.sha256(auth.encode("utf-8")).hexdigest()[:16]
+        return f"rbac:{h}"
+    return f"rbac:{get_remote_address(request)}"
+
+
+limiter = Limiter(key_func=_rbac_rate_key)
 
 router = APIRouter()
 
@@ -75,34 +94,38 @@ class UserPermissionsResponse(BaseModel):
 
 
 @router.post("/check", response_model=PermissionCheckResponse)
+@limiter.limit("60/minute")
 async def check_permission(
-    request: PermissionCheckRequest,
+    request: Request,
+    body: PermissionCheckRequest,
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
 ):
     if isinstance(current_user, AnonymousUser):
         return PermissionCheckResponse(
             granted=False,
-            permission=f"{request.resource}:{request.action}",
+            permission=f"{body.resource}:{body.action}",
         )
 
-    perm = f"{request.resource}:{request.action}"
-    granted = checker.check(current_user.id, perm, request.org_id)
+    perm = f"{body.resource}:{body.action}"
+    granted = checker.check(current_user.id, perm, body.org_id)
     return PermissionCheckResponse(granted=granted, permission=perm)
 
 
 @router.post("/check/batch", response_model=BatchPermissionCheckResponse)
+@limiter.limit("30/minute")
 async def check_permissions_batch(
-    request: BatchPermissionCheckRequest,
+    request: Request,
+    body: BatchPermissionCheckRequest,
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
 ):
-    perms = [f"{c.resource}:{c.action}" for c in request.checks]
+    perms = [f"{c.resource}:{c.action}" for c in body.checks]
 
     if isinstance(current_user, AnonymousUser):
         return BatchPermissionCheckResponse(results={p: False for p in perms})
 
-    results = checker.check_many(current_user.id, perms, request.org_id)
+    results = checker.check_many(current_user.id, perms, body.org_id)
     return BatchPermissionCheckResponse(results=results)
 
 
@@ -140,6 +163,7 @@ async def assign_role(
     request: RoleAssignmentRequest,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Assign a role to a user.
@@ -154,6 +178,16 @@ async def assign_role(
         org_id=request.org_id,
         assigned_by=current_user.id,
     )
+    db_session.commit()
+    audit_log.info(
+        "role_assigned",
+        extra={
+            "actor_id": current_user.id,
+            "target_user_id": request.user_id,
+            "role_id": request.role_id,
+            "org_id": request.org_id,
+        },
+    )
     return {"message": "Role assigned"}
 
 
@@ -162,6 +196,7 @@ async def revoke_role(
     request: RoleRevocationRequest,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Revoke a role from a user.
@@ -174,5 +209,15 @@ async def revoke_role(
         user_id=request.user_id,
         role_id=request.role_id,
         org_id=request.org_id,
+    )
+    db_session.commit()
+    audit_log.info(
+        "role_revoked",
+        extra={
+            "actor_id": current_user.id,
+            "target_user_id": request.user_id,
+            "role_id": request.role_id,
+            "org_id": request.org_id,
+        },
     )
     return {"message": "Role revoked"}

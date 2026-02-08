@@ -2,7 +2,6 @@ import contextlib
 import logging
 from datetime import datetime
 from types import SimpleNamespace
-from typing import Literal
 
 from fastapi import HTTPException, Request, UploadFile, status
 from pydantic import ValidationError
@@ -82,11 +81,12 @@ async def create_user_without_org(
     current_user: PublicUser | AnonymousUser,
     user_object: UserCreate,
     checker: PermissionChecker | None = None,
+    org_id: int | None = None,
 ):
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:create", None)
+    checker.require(current_user.id, "user:create", org_id)
 
     # Create and validate user
     user = await _create_and_validate_user(db_session, user_object)
@@ -113,6 +113,7 @@ async def update_user(
     current_user: PublicUser | AnonymousUser,
     user_object: UserUpdate,
     checker: PermissionChecker | None = None,
+    org_id: int | None = None,
 ):
     # Get user (bypass cache for mutations to ensure ORM-attached instance)
     user = await _get_user_by_field(db_session, "id", user_id, use_cache=False)
@@ -139,7 +140,7 @@ async def update_user(
     # RBAC check (only for real updates)
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:update", None)
+    checker.require(current_user.id, "user:update", org_id)
 
     if user_object.username:
         await _validate_unique_username(
@@ -180,6 +181,7 @@ async def update_user_avatar(
     current_user: PublicUser | AnonymousUser,
     avatar_file: UploadFile | None = None,
     checker: PermissionChecker | None = None,
+    org_id: int | None = None,
 ):
     # Get user (bypass cache for mutations to ensure ORM-attached instance)
     user = await _get_user_by_field(db_session, "id", current_user.id, use_cache=False)
@@ -187,7 +189,7 @@ async def update_user_avatar(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:update", None)
+    checker.require(current_user.id, "user:update", org_id)
 
     # Upload avatar with security validation
     if avatar_file and avatar_file.filename:
@@ -224,6 +226,7 @@ async def update_user_password(
     user_id: int,
     form: UserUpdatePassword,
     checker: PermissionChecker | None = None,
+    org_id: int | None = None,
 ):
     # Get user (bypass cache for mutations to ensure ORM-attached instance)
     user = await _get_user_by_field(db_session, "id", user_id, use_cache=False)
@@ -231,7 +234,7 @@ async def update_user_password(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:update", None)
+    checker.require(current_user.id, "user:update", org_id)
 
     if not security_verify_password(form.old_password, user.password):
         raise HTTPException(
@@ -289,65 +292,47 @@ async def get_user_session(
     request: Request,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
+    org_id: int | None = None,
 ) -> UserSession:
-    # Get user
+    from datetime import UTC, datetime
+
     user = await _get_user_by_field(db_session, "user_uuid", current_user.user_uuid)
     user_read = UserRead.model_validate(user)
 
-    # Get roles and orgs using PermissionChecker
-    from src.security.rbac import PermissionChecker
-
     checker = PermissionChecker(db_session)
 
-    # Get all orgs where user has roles (v2 table)
+    # Get all orgs where user has roles
     statement = select(UserRole).where(UserRole.user_id == user.id).distinct()
-    user_roles_v2 = db_session.exec(statement).all()
+    user_role_rows = db_session.exec(statement).all()
+    all_org_ids = {ur.org_id for ur in user_role_rows if ur.org_id}
 
-    # Get unique org IDs
-    org_ids = {role.org_id for role in user_roles_v2 if role.org_id}
-
-    roles = []
-
-    org = None
-    for org_id in org_ids:
-        org_statement = select(Organization).where(Organization.id == org_id)
-        org = db_session.exec(org_statement).first()
-
-        if org:
-            # Get user's roles in this org
-            user_roles = checker.get_user_roles(user_id=user.id, org_id=org_id)
-
-            # Use first role (primary role)
-            if user_roles:
-                roles.append(
-                    UserRoleWithOrg(
-                        role=RoleRead.model_validate(user_roles[0]),
-                        org=_safe_organization_read(org),
-                    )
+    # Build roles list — return ALL roles per org, not just the first
+    roles: list[UserRoleWithOrg] = []
+    for oid in all_org_ids:
+        org = db_session.exec(
+            select(Organization).where(Organization.id == oid)
+        ).first()
+        if not org:
+            continue
+        user_roles = checker.get_user_roles(user_id=user.id, org_id=oid)
+        org_read = _safe_organization_read(org)
+        for role_dict in user_roles:
+            roles.append(
+                UserRoleWithOrg(
+                    role=RoleRead.model_validate(role_dict),
+                    org=org_read,
                 )
-
-    # Get user's effective permissions from the new RBAC system
-    permissions: dict[str, bool] = {}
-    permissions_timestamp: int | None = None
-    try:
-        from datetime import UTC, datetime
-
-        # Get org_id from the current organization context if available
-        org_id = org.id if org and hasattr(org, "id") else None
-        effective = checker.get_expanded_permissions(current_user.id, org_id) or set()
-        # Ensure effective is an iterable of strings
-        if not isinstance(effective, (set, list, tuple)):
-            _logger.warning(
-                "Expected effective permissions to be iterable, got: %s",
-                type(effective),
             )
-            effective = set()
-        # Return a list of permission strings for the session (canonical shape)
-        permissions = list(effective)
-        # Add timestamp for cache validation (Unix timestamp in seconds)
+
+    # Resolve permissions for the requested org (or None for system-only perms)
+    permissions: list[str] = []
+    permissions_timestamp: int | None = None
+    target_org_id = org_id if org_id and org_id in all_org_ids else None
+    try:
+        effective = checker.get_expanded_permissions(current_user.id, target_org_id)
+        permissions = sorted(effective)
         permissions_timestamp = int(datetime.now(UTC).timestamp())
     except Exception as e:
-        # Fallback: if error occurs, return empty permissions
         _logger.exception(f"Error loading permissions for user {current_user.id}: {e}")
 
     return UserSession(
@@ -358,36 +343,13 @@ async def get_user_session(
     )
 
 
-async def authorize_user_action(
-    request: Request,
-    db_session: Session,
-    current_user: PublicUser | AnonymousUser,
-    resource_uuid: str,
-    action: Literal["create", "read", "update", "delete"],
-    checker: PermissionChecker | None = None,
-) -> bool:
-    # Get user
-    await _get_user_by_field(db_session, "user_uuid", current_user.user_uuid)
-
-    if checker is None:
-        checker = PermissionChecker(db_session)
-    permission_str = f"user:{action}"
-    authorized = checker.check(current_user.id, permission_str, None)
-
-    if authorized:
-        return True
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="You are not authorized to perform this action",
-    )
-
-
 async def delete_user_by_id(
     request: Request,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
     user_id: int,
     checker: PermissionChecker | None = None,
+    org_id: int | None = None,
 ) -> str:
     # Get user (bypass cache for mutations to ensure ORM-attached instance)
     user = await _get_user_by_field(db_session, "id", user_id, use_cache=False)
@@ -395,7 +357,7 @@ async def delete_user_by_id(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:delete", None)
+    checker.require(current_user.id, "user:delete", org_id)
 
     # Delete user
     db_session.delete(user)

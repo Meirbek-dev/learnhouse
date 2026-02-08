@@ -154,7 +154,7 @@ class RoleCreate(PydanticStrictBaseModel):
     slug: str
     name: str
     description: str | None = None
-    org_id: int | None = None
+    org_id: int  # Required — custom roles must belong to an org
 
 
 class RoleRead(PydanticStrictBaseModel):

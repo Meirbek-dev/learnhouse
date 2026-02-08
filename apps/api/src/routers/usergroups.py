@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 from sqlmodel import Session
 from src.security.rbac import PermissionCheckerDep, PermissionDenied
 
@@ -39,7 +39,7 @@ async def api_create_usergroup(
 
     **Required Permission**: `usergroup:create:org`
     """
-    checker.require(current_user.id, "usergroup:create", None)
+    checker.require(current_user.id, "usergroup:create", usergroup_object.org_id)
 
     return await create_usergroup(request, db_session, current_user, usergroup_object)
 
@@ -113,13 +113,14 @@ async def api_update_usergroup(
     checker: PermissionCheckerDep,
     usergroup_id: int,
     usergroup_object: UserGroupUpdate,
+    org_id: Annotated[int | None, Query()] = None,
 ) -> UserGroupRead:
     """
     Update UserGroup
 
     **Required Permission**: `usergroup:update:org`
     """
-    checker.require(current_user.id, "usergroup:update", None)
+    checker.require(current_user.id, "usergroup:update", org_id)
 
     return await update_usergroup_by_id(
         request, db_session, current_user, usergroup_id, usergroup_object
@@ -134,13 +135,14 @@ async def api_delete_usergroup(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
     usergroup_id: int,
+    org_id: Annotated[int | None, Query()] = None,
 ) -> str:
     """
     Delete UserGroup
 
     **Required Permission**: `usergroup:delete:org`
     """
-    checker.require(current_user.id, "usergroup:delete", None)
+    checker.require(current_user.id, "usergroup:delete", org_id)
 
     return await delete_usergroup_by_id(request, db_session, current_user, usergroup_id)
 
@@ -154,13 +156,14 @@ async def api_add_users_to_usergroup(
     checker: PermissionCheckerDep,
     usergroup_id: int,
     user_ids: str,
+    org_id: Annotated[int | None, Query()] = None,
 ) -> str:
     """
     Add Users to UserGroup
 
     **Required Permission**: `usergroup:manage:org`
     """
-    checker.require(current_user.id, "usergroup:manage", None)
+    checker.require(current_user.id, "usergroup:manage", org_id)
 
     return await add_users_to_usergroup(
         request, db_session, current_user, usergroup_id, user_ids

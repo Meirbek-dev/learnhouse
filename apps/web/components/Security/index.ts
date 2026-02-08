@@ -8,7 +8,7 @@
 export { PermissionProvider, usePermissions } from './PermissionProvider';
 
 // UI Components
-export { PermissionGuard } from './PermissionGuard';
+export { PermissionGuard, PermissionErrorBoundary } from './PermissionGuard';
 
 // Re-export types and constants from permissions for convenience
 export type { Action, Resource, Scope, Role, PermissionString } from '@/types/permissions';

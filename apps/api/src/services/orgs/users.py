@@ -178,7 +178,7 @@ async def update_user_role(
     request: Request,
     org_id: int,
     user_id: int,
-    role_id: str,
+    role_id: int,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
 ):
@@ -186,104 +186,63 @@ async def update_user_role(
     Update a user's role in an organization.
 
     Args:
-        role_id: Accepts numeric role ID.
-                 Numeric IDs should be passed as strings (e.g., "123").
+        role_id: Numeric role ID.
     """
-    # Convert org_id and user_id to int for proper type matching with database
-    org_id_int = int(org_id)
-    user_id_int = int(user_id)
-
-    # find role by numeric ID
-    role = None
-
-    if isinstance(role_id, str) and role_id.isdigit():
-        statement = select(Role).where(Role.id == int(role_id))
-        result = db_session.exec(statement)
-        role = result.first()
-
+    role = db_session.get(Role, role_id)
     if not role:
-        raise HTTPException(
-            status_code=404,
-            detail="Role not found",
-        )
+        raise HTTPException(status_code=404, detail="Role not found")
 
-    role_id = role.id
-
-    statement = select(Organization).where(Organization.id == org_id_int)
-    result = db_session.exec(statement)
-
-    org = result.first()
-
+    org = db_session.exec(
+        select(Organization).where(Organization.id == int(org_id))
+    ).first()
     if not org:
-        raise HTTPException(
-            status_code=404,
-            detail="Organization not found",
-        )
+        raise HTTPException(status_code=404, detail="Organization not found")
 
     # RBAC check
     checker = PermissionChecker(db_session)
     checker.require(current_user.id, "organization:update", org.id)
 
-    # Check if user is the last admin and if the new role is not admin
-    # find any admin role by configured admin slugs
+    # Last-admin protection
     admin_role = db_session.exec(
         select(Role).where(Role.slug.in_(list(ADMIN_ROLE_SLUGS)))
     ).first()
     admin_role_id = admin_role.id if admin_role else 1
 
-    # Count admins by checking UserRole with role_id = admin_role_id
-    statement = (
-        select(UserRole)
-        .where(UserRole.org_id == org.id, UserRole.role_id == admin_role_id)
-        .distinct()
-    )
-    result = db_session.exec(statement)
-    admin_roles = result.all()
-
-    # Get unique admin user IDs
-    admin_user_ids = {role.user_id for role in admin_roles}
-
+    admin_user_ids = {
+        ur.user_id
+        for ur in db_session.exec(
+            select(UserRole).where(
+                UserRole.org_id == org.id, UserRole.role_id == admin_role_id
+            )
+        ).all()
+    }
     if not admin_user_ids:
         raise HTTPException(
-            status_code=400,
-            detail="There is no admin in the organization",
+            status_code=400, detail="There is no admin in the organization"
         )
 
-    # Ensure organization retains at least one admin role. Use resolved role.slug for the check
     if (
         len(admin_user_ids) == 1
-        and user_id_int in admin_user_ids
+        and user_id in admin_user_ids
         and role.slug not in ADMIN_ROLE_SLUGS
     ):
         raise HTTPException(
-            status_code=400,
-            detail="Organization must have at least one admin",
+            status_code=400, detail="Organization must have at least one admin"
         )
 
-    # Check if user has any roles in this org
-    statement = select(UserRole).where(
-        UserRole.user_id == user_id_int, UserRole.org_id == org.id
-    )
-    result = db_session.exec(statement)
+    # Verify user has existing roles in this org
+    existing_roles = db_session.exec(
+        select(UserRole).where(UserRole.user_id == user_id, UserRole.org_id == org.id)
+    ).all()
+    if not existing_roles:
+        raise HTTPException(status_code=404, detail="User not found")
 
-    user_roles = result.all()
+    # Atomic: remove all current roles and assign new one
+    for ur in existing_roles:
+        db_session.delete(ur)
+    db_session.flush()
 
-    if not user_roles:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found",
-        )
-
-    # Remove old role and assign new role using PermissionChecker
-    if role_id is not None:
-        # Remove all current roles
-        for ur in user_roles:
-            db_session.delete(ur)
-        db_session.flush()
-
-        # Assign new role
-        checker.assign_role(user_id=user_id_int, role_id=role.id, org_id=int(org.id))
-
+    checker.assign_role(user_id=user_id, role_id=role.id, org_id=int(org.id))
     db_session.commit()
 
     return {"detail": "User role updated"}

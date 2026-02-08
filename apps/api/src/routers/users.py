@@ -1,6 +1,6 @@
-from typing import Annotated, Literal
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request, Response, UploadFile
+from fastapi import APIRouter, Depends, Query, Request, Response, UploadFile
 from pydantic import EmailStr
 from sqlmodel import Session
 from src.security.rbac import (
@@ -27,7 +27,6 @@ from src.services.users.password_reset import (
     send_reset_password_code,
 )
 from src.services.users.users import (
-    authorize_user_action,
     create_user_without_org,
     delete_user_by_id,
     get_user_session,
@@ -57,27 +56,14 @@ async def api_get_current_user_session(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    org_id: Annotated[int | None, Query()] = None,
 ) -> UserSession:
     """
-    Get current user session
-    """
-    return await get_user_session(request, db_session, current_user)
+    Get current user session.
 
-
-@router.get("/authorize/ressource/{ressource_uuid}/action/{action}")
-async def api_get_authorization_status(
-    request: Request,
-    ressource_uuid: str,
-    action: Literal["create", "read", "update", "delete"],
-    db_session: Annotated[Session, Depends(get_db_session)],
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-):
+    Pass `org_id` to scope permissions to a specific organization.
     """
-    Get current user authorization status
-    """
-    return await authorize_user_action(
-        request, db_session, current_user, ressource_uuid, action
-    )
+    return await get_user_session(request, db_session, current_user, org_id=org_id)
 
 
 @router.post("/", tags=["users"])
@@ -151,6 +137,7 @@ async def api_update_user(
     checker: PermissionCheckerDep,
     user_id: int,
     user_object: UserUpdate,
+    org_id: Annotated[int | None, Query()] = None,
 ) -> UserRead:
     """
     Update User
@@ -161,7 +148,7 @@ async def api_update_user(
     is_own_profile = user_id == current_user.id
 
     if not is_own_profile:
-        checker.require(current_user.id, "user:update", None)
+        checker.require(current_user.id, "user:update", org_id)
 
     return await update_user(request, db_session, user_id, current_user, user_object)
 
@@ -175,6 +162,7 @@ async def api_update_avatar_user(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
     avatar_file: UploadFile | None = None,
+    org_id: Annotated[int | None, Query()] = None,
 ) -> UserRead:
     """
     Update User Avatar
@@ -185,7 +173,7 @@ async def api_update_avatar_user(
     is_own_avatar = user_id == current_user.id
 
     if not is_own_avatar:
-        checker.require(current_user.id, "user:update", None)
+        checker.require(current_user.id, "user:update", org_id)
 
     return await update_user_avatar(request, db_session, current_user, avatar_file)
 
@@ -287,13 +275,14 @@ async def api_delete_user(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
     user_id: int,
+    org_id: Annotated[int | None, Query()] = None,
 ):
     """
     Delete User
 
     **Required Permission**: `user:delete:org`
     """
-    checker.require(current_user.id, "user:delete", None)
+    checker.require(current_user.id, "user:delete", org_id)
 
     # Prevent self-deletion
     if user_id == current_user.id:

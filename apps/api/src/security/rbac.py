@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from sqlmodel import Session, or_, select
 
 from src.core.events.database import get_db_session
@@ -295,7 +295,7 @@ class PermissionChecker:
                 assigned_by=assigned_by,
             )
         )
-        self.db.commit()
+        self.db.flush()
         self._cache.pop((user_id, org_id), None)
 
     def revoke_role(
@@ -333,7 +333,7 @@ class PermissionChecker:
             raise HTTPException(404, detail=f"Role not assigned: ID {role_id}")
 
         self.db.delete(user_role)
-        self.db.commit()
+        self.db.flush()
         self._cache.pop((user_id, org_id), None)
 
     # ------------------------------------------------------------------
@@ -495,3 +495,53 @@ def get_permission_checker(
 
 
 PermissionCheckerDep = Annotated[PermissionChecker, Depends(get_permission_checker)]
+
+
+class RequirePermission:
+    """Declarative permission dependency for FastAPI routes.
+
+    Usage::
+
+        @router.post("/", dependencies=[Depends(RequirePermission("role:create"))])
+        async def create_role(...):
+            ...
+
+    ``org_id`` is resolved automatically from path/query parameters named
+    ``org_id``.  If the parameter is absent the check runs with
+    ``org_id=None`` (system-level).
+
+    Note: ``get_current_user`` is imported lazily inside ``__call__`` to
+    avoid a circular import with ``src.security.auth``.
+    """
+
+    def __init__(self, permission: str) -> None:
+        self.permission = permission
+
+    async def __call__(
+        self,
+        request: Request,
+        checker: PermissionCheckerDep,
+    ) -> None:
+        from fastapi_another_jwt_auth import AuthJWT
+        from src.db.users import AnonymousUser
+        from src.security.auth import get_current_user
+
+        authorize = AuthJWT(request)
+        current_user = await get_current_user(
+            request=request,
+            Authorize=authorize,
+            db_session=checker.db,
+        )
+        if isinstance(current_user, AnonymousUser):
+            raise AuthenticationRequired()
+
+        # Resolve org_id from path params or query params
+        org_id: int | None = None
+        raw = request.path_params.get("org_id") or request.query_params.get("org_id")
+        if raw is not None:
+            try:
+                org_id = int(raw)
+            except (ValueError, TypeError):
+                pass
+
+        checker.require(current_user.id, self.permission, org_id)

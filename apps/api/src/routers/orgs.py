@@ -104,16 +104,14 @@ async def api_update_user_role(
     request: Request,
     org_id: int,
     user_id: int,
-    role_id: str,
+    role_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Update user role in an organization.
 
-    **Path Parameter**: `role_id` — accepts numeric role ID
-
-    **Preferred usage**: Pass role ID as string (e.g., "123")
+    **Path Parameter**: `role_id` — numeric role ID
 
     **Required Permission**: `organization:update`
     """
@@ -165,7 +163,7 @@ async def api_update_org_logo(
 
     **Required Permission**: `organization:update`
     """
-    await checker.require(current_user.id, "organization:update", org_id)
+    checker.require(current_user.id, "organization:update", org_id)
     return await update_org_logo(
         request=request,
         logo_file=logo_file,
@@ -189,7 +187,7 @@ async def api_update_org_thumbnail(
 
     **Required Permission**: `organization:update`
     """
-    await checker.require(current_user.id, "organization:update", org_id)
+    checker.require(current_user.id, "organization:update", org_id)
     return await update_org_thumbnail(
         request=request,
         thumbnail_file=thumbnail_file,
@@ -213,7 +211,7 @@ async def api_update_org_preview(
 
     **Required Permission**: `organization:update`
     """
-    await checker.require(current_user.id, "organization:update", org_id)
+    checker.require(current_user.id, "organization:update", org_id)
     return await update_org_preview(
         request=request,
         preview_file=preview_file,
@@ -269,7 +267,7 @@ async def api_update_org(
 
     **Required Permission**: `organization:update`
     """
-    await checker.require(current_user.id, "organization:update", org_id)
+    checker.require(current_user.id, "organization:update", org_id)
     return await update_org(request, org_object, org_id, current_user, db_session)
 
 
@@ -286,7 +284,7 @@ async def api_delete_org(
 
     **Required Permission**: `organization:delete`
     """
-    await checker.require(current_user.id, "organization:delete", org_id)
+    checker.require(current_user.id, "organization:delete", org_id)
     return await delete_org(request, org_id, current_user, db_session)
 
 
@@ -304,7 +302,7 @@ async def api_update_org_landing(
 
     **Required Permission**: `organization:update`
     """
-    await checker.require(current_user.id, "organization:update", org_id)
+    checker.require(current_user.id, "organization:update", org_id)
     return await update_org_landing(
         request, landing_object, org_id, current_user, db_session
     )
@@ -324,7 +322,7 @@ async def api_upload_org_landing_content(
 
     **Required Permission**: `organization:update`
     """
-    await checker.require(current_user.id, "organization:update", org_id)
+    checker.require(current_user.id, "organization:update", org_id)
     return await upload_org_landing_content_service(
         request=request,
         content_file=content_file,

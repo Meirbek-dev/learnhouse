@@ -368,11 +368,17 @@ const authConfig: NextAuthConfig = {
           roles: cachedSession.data.roles,
           tokens: cachedSession.data.tokens,
           permissions: cachedSession.data.permissions,
+          permissions_org_id: cachedSession.data.permissions_org_id,
         };
       }
 
       try {
-        const api_SESSION = await getUserSession(tokens.access_token);
+        // Read current org from cookie so permissions are scoped correctly
+        const cookieStore = await cookies();
+        const orgIdCookie = cookieStore.get('current_org_id');
+        const currentOrgId = orgIdCookie?.value ? Number.parseInt(orgIdCookie.value, 10) : undefined;
+
+        const api_SESSION = await getUserSession(tokens.access_token, currentOrgId);
 
         if (!api_SESSION?.user) {
           console.error('Invalid session data from getUserSession');
@@ -384,6 +390,7 @@ const authConfig: NextAuthConfig = {
           roles: api_SESSION.roles || [],
           tokens: tokens,
           permissions: api_SESSION.permissions || [],
+          permissions_org_id: currentOrgId ?? null,
         };
 
         const updatedSession = {
@@ -392,6 +399,7 @@ const authConfig: NextAuthConfig = {
           roles: sessionData.roles,
           tokens: sessionData.tokens,
           permissions: sessionData.permissions,
+          permissions_org_id: sessionData.permissions_org_id,
         };
 
         // Cache the fresh session data

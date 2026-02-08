@@ -4,7 +4,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { Alert, AlertDescription } from '@components/ui/alert';
-import { updateUserRole } from '@services/organizations/orgs';
+import { assignRoleToUser, removeRoleFromUser } from '@/services/rbac';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -69,15 +69,23 @@ const RolesUpdate: FC<Props> = (props) => {
 
     startTransition(async () => {
       const toastId = toast.loading(t('toastLoading'));
-      const res = await updateUserRole(org.id, props.user.user.id, values.role, access_token);
+      try {
+        const newRoleId = Number.parseInt(values.role, 10);
+        const oldRoleId = Number.parseInt(props.alreadyAssignedRole, 10);
+        const userId = props.user.user.id;
 
-      if (res.status === 200) {
+        // Revoke old role, then assign new one
+        if (!Number.isNaN(oldRoleId)) {
+          await removeRoleFromUser(access_token, userId, oldRoleId, org.id);
+        }
+        await assignRoleToUser(access_token, userId, newRoleId, org.id);
+
         await mutate(`${getAPIUrl()}orgs/${org.id}/users`);
         props.setRolesModal(false);
         toast.success(t('toastSuccess'), { id: toastId });
-      } else {
-        const detail = res?.data?.detail ?? (res as any)?.statusText ?? res?.data?.message ?? 'Unknown error';
-        setError(`Error ${res.status}: ${detail}`);
+      } catch (err: any) {
+        const detail = err?.message ?? 'Unknown error';
+        setError(detail);
         toast.error(t('toastError'), { id: toastId });
       }
     });

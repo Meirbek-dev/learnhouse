@@ -24,6 +24,8 @@ import type { ReactNode } from 'react';
 interface PermissionContextValue {
   /** Check if user has a specific permission (scope is required) */
   can: (action: Action, resource: Resource, scope: Scope) => boolean;
+  /** The org ID these permissions are scoped to (null = no org context) */
+  orgId: number | null;
   /** Still loading session */
   loading: boolean;
 }
@@ -49,6 +51,10 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
 
   const permissions = useMemo(() => new Set<string>(session?.permissions), [session?.permissions]);
 
+  const orgId = useMemo(() => {
+    return (session as any)?.permissions_org_id ?? null;
+  }, [session]);
+
   const can = useMemo(() => {
     return (action: Action, resource: Resource, scope: Scope): boolean => {
       if (status !== 'authenticated') return false;
@@ -59,9 +65,10 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
   const value: PermissionContextValue = useMemo(
     () => ({
       can,
+      orgId,
       loading: status === 'loading',
     }),
-    [can, status],
+    [can, orgId, status],
   );
 
   return <PermissionContext.Provider value={value}>{children}</PermissionContext.Provider>;

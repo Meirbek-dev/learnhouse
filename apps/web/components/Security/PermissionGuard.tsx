@@ -2,7 +2,7 @@
 
 import type { Action, Resource, Scope } from '@/types/permissions';
 import { usePermissions } from './PermissionProvider';
-import type { ReactNode } from 'react';
+import { Component, type ReactNode } from 'react';
 
 interface PermissionGuardProps {
   /** Action to check permission for. */
@@ -15,6 +15,8 @@ interface PermissionGuardProps {
   children: ReactNode;
   /** Optional fallback content if permission is denied. */
   fallback?: ReactNode;
+  /** Optional content to render while session is loading. Defaults to children (optimistic). */
+  loadingFallback?: ReactNode;
 }
 
 /**
@@ -27,12 +29,55 @@ interface PermissionGuardProps {
  * </PermissionGuard>
  * ```
  */
-export function PermissionGuard({ action, resource, scope, children, fallback = null }: PermissionGuardProps) {
+export function PermissionGuard({
+  action,
+  resource,
+  scope,
+  children,
+  fallback = null,
+  loadingFallback,
+}: PermissionGuardProps) {
   const { can, loading } = usePermissions();
 
-  if (loading) return null;
+  if (loading) return <>{loadingFallback ?? children}</>;
   if (!can(action, resource, scope)) return <>{fallback}</>;
   return <>{children}</>;
+}
+
+/**
+ * Error boundary for permission-dependent UI.
+ * Catches render errors from children and shows a fallback
+ * instead of crashing the entire page.
+ */
+interface PermissionErrorBoundaryProps {
+  children: ReactNode;
+  fallback?: ReactNode;
+}
+
+interface PermissionErrorBoundaryState {
+  hasError: boolean;
+}
+
+export class PermissionErrorBoundary extends Component<PermissionErrorBoundaryProps, PermissionErrorBoundaryState> {
+  constructor(props: PermissionErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(): PermissionErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  override componentDidCatch(error: Error) {
+    console.error('PermissionErrorBoundary caught error:', error);
+  }
+
+  override render() {
+    if (this.state.hasError) {
+      return <>{this.props.fallback ?? null}</>;
+    }
+    return this.props.children;
+  }
 }
 
 export default PermissionGuard;

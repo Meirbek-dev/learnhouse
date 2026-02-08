@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, UploadFile
 from src.security.rbac import PermissionCheckerDep, PermissionDenied
 
 from src.core.events.database import get_db_session
@@ -480,13 +480,14 @@ async def api_final_grade_submission(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
     db_session=Depends(get_db_session),
+    org_id: Annotated[int | None, Query()] = None,
 ):
     """
     Grade submissions for an assignment from a user
 
     **Required Permission**: `submission:grade:org` (instructors/graders only)
     """
-    checker.require(current_user.id, "submission:grade", None)
+    checker.require(current_user.id, "submission:grade", org_id)
 
     return await grade_assignment_submission(
         request, user_id, assignment_uuid, current_user, db_session

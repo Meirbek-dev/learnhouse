@@ -6,10 +6,10 @@ import ErrorUI from '@components/Objects/StyledElements/Error/Error';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { Home, LogOut, PersonStanding } from 'lucide-react';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import type { Org } from '@/types/org';
 import type { ReactNode } from 'react';
 import useSWR from 'swr';
@@ -52,6 +52,25 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
 
   const isLoading = session.status === 'loading' || isOrgLoading || (isAuthenticated && isUserOrgsLoading);
   const hasError = Boolean(orgError) || (isAuthenticated && Boolean(orgsError));
+
+  // Refresh session permissions when org changes
+  const { update: updateSession } = useSession();
+  const prevOrgIdRef = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    if (!org?.id || !isAuthenticated) return;
+    const sessionOrgId = (session?.data as any)?.permissions_org_id;
+
+    // Set the current_org_id cookie so the session callback picks up the right org
+    if (prevOrgIdRef.current !== org.id) {
+      document.cookie = `current_org_id=${org.id};path=/;max-age=${60 * 60 * 24 * 365}`;
+      prevOrgIdRef.current = org.id;
+    }
+
+    // If session permissions are for a different org, trigger a refresh
+    if (sessionOrgId != null && sessionOrgId !== org.id) {
+      updateSession();
+    }
+  }, [org?.id, isAuthenticated, session?.data, updateSession]);
 
   const isUserPartOfTheOrg = (() => {
     if (!isAuthenticated || !org?.id || !Array.isArray(orgs)) {

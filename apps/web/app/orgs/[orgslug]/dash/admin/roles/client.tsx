@@ -25,7 +25,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ChevronRight, Edit, Lock, Plus, Search, Shield, Trash2, Users } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import type { Permission, RoleWithPermissions } from '@/types/permissions';
+import type { Permission, Role, RoleWithPermissions } from '@/types/permissions';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -41,7 +41,7 @@ export default function RBACAdminClient() {
   const session = usePlatformSession();
   const { can } = usePermissions();
 
-  const [roles, setRoles] = useState<RoleWithPermissions[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -60,7 +60,7 @@ export default function RBACAdminClient() {
         setLoading(true);
         const [rolesData, permsData] = await Promise.all([
           listRoles(accessToken, org.id),
-          listAllPermissions(accessToken),
+          listAllPermissions(accessToken, org.id),
         ]);
         // Sort roles so system roles and higher-priority roles appear first
         setRoles(
@@ -539,7 +539,7 @@ function RoleEditForm({
   role?: RoleWithPermissions;
   onSubmit: (data: { name: string; slug: string; description: string }) => void;
   onCancel: () => void;
-  availableRoles?: RoleWithPermissions[];
+  availableRoles?: Role[];
 }) {
   const [name, setName] = useState(role?.name || '');
   const [description, setDescription] = useState(role?.description || '');
