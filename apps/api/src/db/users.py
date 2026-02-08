@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from pydantic import ConfigDict, EmailStr
-from sqlalchemy import JSON, Column
+from sqlalchemy import JSON, Column, UniqueConstraint
 from sqlmodel import Field
 
 from src.db.permissions import RoleRead
@@ -91,6 +91,12 @@ class InternalUser(SQLModelStrictBaseModel):
 
 
 class User(UserBase, table=True):
+    __table_args__ = (
+        UniqueConstraint("username", name="uq_user_username"),
+        UniqueConstraint("email", name="uq_user_email"),
+        UniqueConstraint("user_uuid", name="uq_user_user_uuid"),
+    )
+
     id: int | None = Field(default=None, primary_key=True)
     password: str = ""
     user_uuid: str = ""
