@@ -1,20 +1,28 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "target": "ES2024",
-    "lib": ["dom", "dom.iterable", "ESNext"],
+    "target": "es2024",
+    "lib": [
+      "ES2024",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "jsx": "react-jsx",
     "incremental": true,
-    // Strict type checking options
+    "declaration": true,
+    "declarationMap": true,
+    "moduleDetection": "force",
+    "noUncheckedIndexedAccess": true,
     "noImplicitAny": false,
     "noImplicitThis": true,
     "noImplicitOverride": true,
@@ -23,32 +31,53 @@
     "strictBindCallApply": true,
     "strictPropertyInitialization": true,
     "alwaysStrict": true,
-    // Additional checks
     "exactOptionalPropertyTypes": false,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
-    // Module resolution
     "forceConsistentCasingInFileNames": true,
-    "moduleDetection": "force",
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "baseUrl": ".",
     "paths": {
-      "@components/*": ["components/*"],
-      "@public/*": ["public/*"],
-      "@images/*": ["public/img/*"],
-      "@styles/*": ["styles/*"],
-      "@services/*": ["services/*"],
-      "@editor/*": ["components/Objects/Editor/*"],
-      "@hooks/*": ["components/Hooks/*"],
-      "@/*": ["./*"]
+      "@components/*": [
+        "./components/*"
+      ],
+      "@public/*": [
+        "./public/*"
+      ],
+      "@images/*": [
+        "./public/img/*"
+      ],
+      "@styles/*": [
+        "./styles/*"
+      ],
+      "@services/*": [
+        "./services/*"
+      ],
+      "@editor/*": [
+        "./components/Objects/Editor/*"
+      ],
+      "@hooks/*": [
+        "./components/Hooks/*"
+      ],
+      "@/*": [
+        "./*"
+      ]
     }
   },
-  "exclude": ["node_modules"],
-  "include": ["next-env.d.ts", "**/*.ts", "**/**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "next-env.d.ts",
+    "next.config.ts",
+    ".next/types/**/*.ts",
+    "postcss.config.mjs",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

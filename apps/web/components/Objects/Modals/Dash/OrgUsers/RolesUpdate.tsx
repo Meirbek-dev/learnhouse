@@ -57,11 +57,21 @@ const RolesUpdate: FC<Props> = (props) => {
     },
   });
 
-  // Fetch available roles for the organization
+  // Fetch available roles for the organization and sort them by system flag + priority
   const { data: roles, error: rolesError } = useSWR(org ? `${getAPIUrl()}roles/org/${org.id}` : null, (url) =>
     swrFetcher(url, access_token),
   );
 
+  const sortedRoles = (roles ?? []).toSorted((a: any, b: any) => {
+    // System roles first, then by descending priority, then by name
+    const aSystem = a.is_system ? 0 : 1;
+    const bSystem = b.is_system ? 0 : 1;
+    if (aSystem !== bSystem) return aSystem - bSystem;
+    const aPriority = (a.priority ?? 0) * -1;
+    const bPriority = (b.priority ?? 0) * -1;
+    if (aPriority !== bPriority) return aPriority - bPriority;
+    return (a.name || '').localeCompare(b.name || '');
+  });
   const handleSubmit = async (values: FormData) => {
     setError(null);
 
@@ -112,7 +122,7 @@ const RolesUpdate: FC<Props> = (props) => {
                   items={
                     !roles || rolesError
                       ? undefined
-                      : roles.map((role: any) => ({ value: role.slug || role.id.toString(), label: role.name }))
+                      : sortedRoles.map((role: any) => ({ value: role.slug || role.id.toString(), label: role.name }))
                   }
                 >
                   <FormControl>
@@ -126,14 +136,14 @@ const RolesUpdate: FC<Props> = (props) => {
                         <div className="text-muted-foreground px-3 py-2">{t('loadingRoles')}</div>
                       ) : (
                         <SelectGroup>
-                          {roles.map((role: any) => (
+                          {sortedRoles.map((role: any) => (
                             <SelectItem
                               key={role.slug || role.id}
                               value={role.slug || role.id.toString()}
                             >
                               {role.name}
                             </SelectItem>
-                          ))}
+                          ))}{' '}
                         </SelectGroup>
                       )}
                     </SelectContent>

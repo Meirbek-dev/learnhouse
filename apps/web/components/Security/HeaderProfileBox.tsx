@@ -54,7 +54,7 @@ export const HeaderProfileBox = () => {
     const orgRoles = userRoles.filter((role: any) => role.org.id === org?.id);
 
     if (orgRoles.length > 0) {
-      // Sort by role priority using slug-based comparison
+      // Sort by role priority (higher number = higher privilege)
       const sortedRoles = orgRoles.toSorted((a: any, b: any) => {
         return (b.role?.priority ?? 0) - (a.role?.priority ?? 0);
       });
