@@ -8,15 +8,7 @@ import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { z } from 'zod';
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -338,18 +330,18 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                           <SelectValue placeholder={t('form.selectDifficulty')} />
                         </SelectTrigger>
                       </FieldContent>
-                        <SelectContent>
-                          <SelectGroup>
-                            {difficultyItems.map((item) => (
-                              <SelectItem
-                                key={item.value}
-                                value={item.value}
-                              >
-                                {item.label}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
+                      <SelectContent>
+                        <SelectGroup>
+                          {difficultyItems.map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
                     </Select>
                     <FieldError errors={[fieldState.error]} />
                   </Field>
@@ -372,18 +364,18 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                           <SelectValue placeholder={t('form.selectGradingStrategy')} />
                         </SelectTrigger>
                       </FieldContent>
-                        <SelectContent>
-                          <SelectGroup>
-                            {gradingStrategyItems.map((item) => (
-                              <SelectItem
-                                key={item.value}
-                                value={item.value}
-                              >
-                                {item.label}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
+                      <SelectContent>
+                        <SelectGroup>
+                          {gradingStrategyItems.map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
                     </Select>
                     <FieldDescription>{t(`gradingStrategyOptions.${field.value}Hint`)}</FieldDescription>
                     <FieldError errors={[fieldState.error]} />

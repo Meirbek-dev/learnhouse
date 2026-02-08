@@ -9,15 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock, Download, Eye, TrendingDown, TrendingUp, Users } from 'lucide-react';
@@ -354,18 +346,18 @@ export default function ExamResultsDashboard({
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t('filterByStatus')} />
               </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {statusItems.map((item) => (
-                      <SelectItem
-                        key={item.value}
-                        value={item.value}
-                      >
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
+              <SelectContent>
+                <SelectGroup>
+                  {statusItems.map((item) => (
+                    <SelectItem
+                      key={item.value}
+                      value={item.value}
+                    >
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
             </Select>
             <Select
               value={sortBy}
@@ -375,18 +367,18 @@ export default function ExamResultsDashboard({
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t('sortBy')} />
               </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {sortItems.map((item) => (
-                      <SelectItem
-                        key={item.value}
-                        value={item.value}
-                      >
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
+              <SelectContent>
+                <SelectGroup>
+                  {sortItems.map((item) => (
+                    <SelectItem
+                      key={item.value}
+                      value={item.value}
+                    >
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
             </Select>
             <Button
               variant="outline"

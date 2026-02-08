@@ -1,13 +1,5 @@
 'use client';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
@@ -243,17 +235,17 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                    <SelectGroup>
-                      {gradingTypes.map((item) => (
-                        <SelectItem
-                          key={item.value}
-                          value={item.value}
-                        >
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
+                  <SelectGroup>
+                    {gradingTypes.map((item) => (
+                      <SelectItem
+                        key={item.value}
+                        value={item.value}
+                      >
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
               </Select>
               <FormMessage />
             </FormItem>

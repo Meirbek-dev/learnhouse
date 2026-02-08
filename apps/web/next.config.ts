@@ -42,7 +42,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   cacheComponents: true,
   devIndicators: false,
-  typedRoutes: true,
+  typedRoutes: false,
   output: 'standalone',
   allowedDevOrigins: ['https://cs-mooc.tou.edu.kz', 'http://192.168.12.35', 'http://192.168.1.46'],
   images: {

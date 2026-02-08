@@ -158,6 +158,7 @@ async def install_create_organization_user(
 
     # Get org-admin role ID
     from src.db.permissions import Role
+
     admin_role = db_session.exec(
         select(Role).where(Role.slug == RoleSlug.ORG_ADMIN)
     ).first()

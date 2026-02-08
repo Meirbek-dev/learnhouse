@@ -1,12 +1,5 @@
 'use client';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
@@ -129,22 +122,22 @@ const RolesUpdate: FC<Props> = (props) => {
                       <SelectValue placeholder={t('selectRolePlaceholder')} />
                     </SelectTrigger>
                   </FormControl>
-                    <SelectContent>
-                      {!roles || rolesError ? (
-                        <div className="text-muted-foreground px-3 py-2">{t('loadingRoles')}</div>
-                      ) : (
-                        <SelectGroup>
-                          {sortedRoles.map((role: any) => (
-                            <SelectItem
-                              key={role.id}
-                              value={role.id.toString()}
-                            >
-                              {role.name}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      )}
-                    </SelectContent>
+                  <SelectContent>
+                    {!roles || rolesError ? (
+                      <div className="text-muted-foreground px-3 py-2">{t('loadingRoles')}</div>
+                    ) : (
+                      <SelectGroup>
+                        {sortedRoles.map((role: any) => (
+                          <SelectItem
+                            key={role.id}
+                            value={role.id.toString()}
+                          >
+                            {role.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    )}
+                  </SelectContent>
                 </Select>
                 <FormMessage />
               </FormItem>

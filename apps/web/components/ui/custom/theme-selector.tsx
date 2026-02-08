@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTheme } from '@/components/providers/theme-provider';
 import { getThemePreviewColors } from '@/lib/theme-color-utils';
 import { Label } from '@/components/ui/label';
@@ -106,17 +99,17 @@ export function ThemeSelector({ className }: ThemeSelectorProps) {
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-              <SelectGroup>
-                {themeItems.map((theme) => (
-                  <SelectItem
-                    key={theme.value}
-                    value={theme.value}
-                  >
-                    {theme.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
+            <SelectGroup>
+              {themeItems.map((theme) => (
+                <SelectItem
+                  key={theme.value}
+                  value={theme.value}
+                >
+                  {theme.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
         </Select>
 
         {/* Optional: Show current theme description */}

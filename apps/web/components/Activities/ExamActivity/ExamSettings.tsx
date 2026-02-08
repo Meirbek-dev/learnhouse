@@ -1,14 +1,6 @@
 'use client';
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -395,18 +387,18 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
                           <SelectValue placeholder={t('selectAccessMode')} />
                         </SelectTrigger>
                       </FormControl>
-                        <SelectContent>
-                          <SelectGroup>
-                            {accessModes.map((item) => (
-                              <SelectItem
-                                key={item.value}
-                                value={item.value}
-                              >
-                                {item.label}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
+                      <SelectContent>
+                        <SelectGroup>
+                          {accessModes.map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
                     </Select>
                     <FormDescription>{t('accessModeDescription')}</FormDescription>
                   </FormItem>

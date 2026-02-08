@@ -10,15 +10,7 @@ import { toast } from 'sonner';
 import useSWR from 'swr';
 import { z } from 'zod';
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -430,17 +422,17 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                            <SelectGroup>
-                              {gradingStrategyItems.map((item) => (
-                                <SelectItem
-                                  key={item.value}
-                                  value={item.value}
-                                >
-                                  {item.label}
-                                </SelectItem>
-                              ))}
-                            </SelectGroup>
-                          </SelectContent>
+                          <SelectGroup>
+                            {gradingStrategyItems.map((item) => (
+                              <SelectItem
+                                key={item.value}
+                                value={item.value}
+                              >
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
                       </Select>
                       <FormDescription>{t('gradingStrategyDescription')}</FormDescription>
                       <FormMessage />

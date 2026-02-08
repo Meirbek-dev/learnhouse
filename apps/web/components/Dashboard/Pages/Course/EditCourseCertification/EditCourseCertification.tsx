@@ -1,12 +1,4 @@
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { createCertification, deleteCertification } from '@services/courses/certifications';
@@ -449,18 +441,18 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
                                       <SelectValue>{t(`certificationTypes.${field.value}`)}</SelectValue>
                                     </SelectTrigger>
                                   </FormControl>
-                                    <SelectContent>
-                                      <SelectGroup>
-                                        {certificationTypeItems.map((item) => (
-                                          <SelectItem
-                                            key={item.value}
-                                            value={item.value}
-                                          >
-                                            {item.label}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectGroup>
-                                    </SelectContent>
+                                  <SelectContent>
+                                    <SelectGroup>
+                                      {certificationTypeItems.map((item) => (
+                                        <SelectItem
+                                          key={item.value}
+                                          value={item.value}
+                                        >
+                                          {item.label}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectGroup>
+                                  </SelectContent>
                                 </Select>
                                 <FormMessage />
                               </FormItem>

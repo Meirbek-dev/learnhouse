@@ -6,14 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -159,18 +152,18 @@ export default function CodeChallengeActivityModal({
                           <SelectValue placeholder={t('selectDifficulty')} />
                         </SelectTrigger>
                       </FormControl>
-                        <SelectContent>
-                          <SelectGroup>
-                            {difficultyItems.map((item) => (
-                              <SelectItem
-                                key={item.value}
-                                value={item.value}
-                              >
-                                {item.label}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
+                      <SelectContent>
+                        <SelectGroup>
+                          {difficultyItems.map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
@@ -200,18 +193,18 @@ export default function CodeChallengeActivityModal({
                           <SelectValue placeholder={t('selectType')} />
                         </SelectTrigger>
                       </FormControl>
-                        <SelectContent>
-                          <SelectGroup>
-                            {subtypeItems.map((item) => (
-                              <SelectItem
-                                key={item.value}
-                                value={item.value}
-                              >
-                                {item.label}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
+                      <SelectContent>
+                        <SelectGroup>
+                          {subtypeItems.map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
                     </Select>
                     <FormDescription>
                       {field.value === 'competitive' ? t('typeCompetitiveHint') : t('typeGeneralHint')}

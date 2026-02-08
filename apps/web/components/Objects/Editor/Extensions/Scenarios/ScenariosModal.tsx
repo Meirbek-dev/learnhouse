@@ -1,12 +1,4 @@
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-
-  SelectTrigger,
-  SelectValue,
-} from '@components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { ArrowRight, CheckCircle, GitBranch, Image, Play, Plus, RotateCcw, Save, Settings, Trash2 } from 'lucide-react';
 import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
@@ -536,17 +528,17 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                                     <SelectValue placeholder={t('endScenarioOption') as string} />
                                   </SelectTrigger>
                                   <SelectContent>
-                                      <SelectGroup>
-                                        {nextScenarioOptions.map((item) => (
-                                          <SelectItem
-                                            key={item.value}
-                                            value={item.value}
-                                          >
-                                            {item.label}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectGroup>
-                                    </SelectContent>
+                                    <SelectGroup>
+                                      {nextScenarioOptions.map((item) => (
+                                        <SelectItem
+                                          key={item.value}
+                                          value={item.value}
+                                        >
+                                          {item.label}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectGroup>
+                                  </SelectContent>
                                 </Select>
                               </div>
                             </div>

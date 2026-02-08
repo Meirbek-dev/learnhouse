@@ -24,15 +24,7 @@ import {
   RefreshCcw,
   SquareCheck,
 } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-
-  SelectTrigger,
-  SelectValue,
-} from '@components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { archiveProduct, getProducts, updateProduct } from '@services/payments/products';
@@ -472,18 +464,18 @@ const EditProductForm = ({
                           <SelectValue placeholder={t('currencyPlaceholder')} />
                         </SelectTrigger>
                       </FormControl>
-                        <SelectContent>
-                          <SelectGroup>
-                            {currencyItems.map((currency) => (
-                              <SelectItem
-                                key={currency.code}
-                                value={currency.code}
-                              >
-                                {currency.name}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
+                      <SelectContent>
+                        <SelectGroup>
+                          {currencyItems.map((currency) => (
+                            <SelectItem
+                              key={currency.value}
+                              value={currency.value}
+                            >
+                              {currency.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>

@@ -17,15 +17,7 @@ import {
   Trash2,
   Trophy,
 } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-
-  SelectTrigger,
-  SelectValue,
-} from '@components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { createElement, useEffect, useEffectEvent, useState } from 'react';
@@ -589,18 +581,18 @@ const UserProfileBuilder = () => {
                           <div className="rounded-md bg-gray-50 p-1.5">
                             <Icon
                               size={16}
-                                className="text-gray-600"
-                              />
-                            </div>
-                            <div className="flex-1">
-                              <div className="text-sm font-medium text-gray-700">{label}</div>
-                              <div className="text-xs text-gray-500">{description}</div>
-                            </div>
+                              className="text-gray-600"
+                            />
                           </div>
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-gray-700">{label}</div>
+                            <div className="text-xs text-gray-500">{description}</div>
+                          </div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
               </Select>
             </div>
           </div>
@@ -1058,18 +1050,18 @@ const SkillsEditor: FC<{
                   <SelectTrigger>
                     <SelectValue placeholder={t('SkillsEditor.selectLevelPlaceholder')} />
                   </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {skillLevelItems(t).map((item) => (
-                          <SelectItem
-                            key={item.value}
-                            value={item.value}
-                          >
-                            {item.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
+                  <SelectContent>
+                    <SelectGroup>
+                      {skillLevelItems(t).map((item) => (
+                        <SelectItem
+                          key={item.value}
+                          value={item.value}
+                        >
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
                 </Select>
                 <Input
                   value={skill.category || ''}

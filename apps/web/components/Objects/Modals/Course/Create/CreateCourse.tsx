@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
@@ -385,17 +378,17 @@ const CreateCourseModal = ({ closeModal, orgslug, org_id }: CreateCourseModalPro
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                    <SelectGroup>
-                      {visibilityItems.map((item) => (
-                        <SelectItem
-                          key={item.value}
-                          value={item.value}
-                        >
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
+                  <SelectGroup>
+                    {visibilityItems.map((item) => (
+                      <SelectItem
+                        key={item.value}
+                        value={item.value}
+                      >
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
               </Select>
 
               <FormMessage />

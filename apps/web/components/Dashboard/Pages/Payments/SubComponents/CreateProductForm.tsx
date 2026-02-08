@@ -1,14 +1,6 @@
 'use client';
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-
-  SelectTrigger,
-  SelectValue,
-} from '@components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
@@ -172,17 +164,17 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                      <SelectGroup>
-                        {productTypeItems.map((item) => (
-                          <SelectItem
-                            key={item.value}
-                            value={item.value}
-                          >
-                            {item.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
+                    <SelectGroup>
+                      {productTypeItems.map((item) => (
+                        <SelectItem
+                          key={item.value}
+                          value={item.value}
+                        >
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
                 </Select>
                 <FormMessage />
               </FormItem>
@@ -206,17 +198,17 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                      <SelectGroup>
-                        {priceTypeOptions.map((item) => (
-                          <SelectItem
-                            key={item.value}
-                            value={item.value}
-                          >
-                            {item.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
+                    <SelectGroup>
+                      {priceTypeOptions.map((item) => (
+                        <SelectItem
+                          key={item.value}
+                          value={item.value}
+                        >
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
                 </Select>
                 <FormMessage />
               </FormItem>
@@ -263,18 +255,18 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                           <SelectValue placeholder={t('currencyPlaceholder')} />
                         </SelectTrigger>
                       </FormControl>
-                        <SelectContent>
-                          <SelectGroup>
-                            {currencyItems.map((currency) => (
-                              <SelectItem
-                                key={currency.value}
-                                value={currency.value}
-                              >
-                                {currency.label}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
+                      <SelectContent>
+                        <SelectGroup>
+                          {currencyItems.map((currency) => (
+                            <SelectItem
+                              key={currency.value}
+                              value={currency.value}
+                            >
+                              {currency.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>

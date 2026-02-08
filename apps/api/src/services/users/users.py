@@ -539,9 +539,7 @@ async def _link_user_to_organization(
     from src.security.rbac import PermissionChecker
 
     # Get user role ID
-    user_role = db_session.exec(
-        select(Role).where(Role.slug == RoleSlug.USER)
-    ).first()
+    user_role = db_session.exec(select(Role).where(Role.slug == RoleSlug.USER)).first()
     if not user_role:
         raise HTTPException(500, detail="User role not found")
 

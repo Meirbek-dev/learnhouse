@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { updateUserLocale } from '@services/users/users';
 import { useLocale, useTranslations } from 'next-intl';
@@ -57,18 +50,22 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
       disabled={isPending}
       items={localeItems}
     >
-      <SelectContent className={cn(isMobile && 'z-80')} side="bottom" sideOffset={4}>
-          <SelectGroup>
-            {localeItems.map((locale) => (
-              <SelectItem
-                key={locale.value}
-                value={locale.value}
-              >
-                {locale.label}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
+      <SelectContent
+        className={cn(isMobile && 'z-80')}
+        side="bottom"
+        sideOffset={4}
+      >
+        <SelectGroup>
+          {localeItems.map((locale) => (
+            <SelectItem
+              key={locale.value}
+              value={locale.value}
+            >
+              {locale.label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
       {isMobile ? (
         <SelectTrigger
           className={cn('w-auto touch-manipulation', isMobile && 'w-full', className)}
@@ -87,18 +84,22 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
           {isMobile ? <SelectValue placeholder={t('selectLanguage')}>{t(currentLocale)}</SelectValue> : null}
         </SelectTrigger>
       )}
-      <SelectContent className={cn(isMobile && 'z-80')} side="bottom" sideOffset={4}>
-          <SelectGroup>
-            {locales.map((locale) => (
-              <SelectItem
-                key={locale}
-                value={locale}
-              >
-                {t(locale)}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
+      <SelectContent
+        className={cn(isMobile && 'z-80')}
+        side="bottom"
+        sideOffset={4}
+      >
+        <SelectGroup>
+          {locales.map((locale) => (
+            <SelectItem
+              key={locale}
+              value={locale}
+            >
+              {t(locale)}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
     </Select>
   );
 };

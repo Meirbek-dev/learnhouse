@@ -153,6 +153,7 @@ async def create_org(
 
     # Get org-admin role ID
     from src.db.permissions import Role
+
     admin_role = db_session.exec(
         select(Role).where(Role.slug == RoleSlug.ORG_ADMIN)
     ).first()
@@ -254,6 +255,7 @@ async def create_org_with_config(
 
     # Get org-admin role ID
     from src.db.permissions import Role
+
     admin_role = db_session.exec(
         select(Role).where(Role.slug == RoleSlug.ORG_ADMIN)
     ).first()

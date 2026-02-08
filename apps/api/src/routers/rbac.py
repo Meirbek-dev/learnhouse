@@ -49,6 +49,7 @@ class BatchPermissionCheckResponse(BaseModel):
 
 class RoleAssignmentRequest(BaseModel):
     """Assign a role to a user."""
+
     user_id: int
     role_id: int
     org_id: int
@@ -56,6 +57,7 @@ class RoleAssignmentRequest(BaseModel):
 
 class RoleRevocationRequest(BaseModel):
     """Revoke a role from a user."""
+
     user_id: int
     role_id: int
     org_id: int
