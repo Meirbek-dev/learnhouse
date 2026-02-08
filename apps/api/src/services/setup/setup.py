@@ -156,11 +156,19 @@ async def install_create_organization_user(
     org = org.first()
     org_id = org.id if org else 0
 
+    # Get org-admin role ID
+    from src.db.permissions import Role
+    admin_role = db_session.exec(
+        select(Role).where(Role.slug == RoleSlug.ORG_ADMIN)
+    ).first()
+    if not admin_role:
+        raise HTTPException(500, detail="Org admin role not found")
+
     # Link user and organization by assigning admin role
     checker = PermissionChecker(db_session)
     checker.assign_role(
         user_id=user.id or 0,
-        role_slug=RoleSlug.ORG_ADMIN,
+        role_id=admin_role.id,
         org_id=org_id or 0,
     )
 

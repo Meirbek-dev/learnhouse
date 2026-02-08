@@ -10,7 +10,7 @@ RBAC API Endpoints
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from src.db.users import AnonymousUser, PublicUser
@@ -48,14 +48,16 @@ class BatchPermissionCheckResponse(BaseModel):
 
 
 class RoleAssignmentRequest(BaseModel):
+    """Assign a role to a user."""
     user_id: int
-    role_slug: str
+    role_id: int
     org_id: int
 
 
 class RoleRevocationRequest(BaseModel):
+    """Revoke a role from a user."""
     user_id: int
-    role_slug: str
+    role_id: int
     org_id: int
 
 
@@ -137,10 +139,16 @@ async def assign_role(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
 ):
+    """
+    Assign a role to a user.
+
+    **Required Permission**: `role:create`
+    """
     checker.require(current_user.id, "role:create", request.org_id)
+
     checker.assign_role(
         user_id=request.user_id,
-        role_slug=request.role_slug,
+        role_id=request.role_id,
         org_id=request.org_id,
         assigned_by=current_user.id,
     )
@@ -153,10 +161,16 @@ async def revoke_role(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
 ):
+    """
+    Revoke a role from a user.
+
+    **Required Permission**: `role:delete`
+    """
     checker.require(current_user.id, "role:delete", request.org_id)
+
     checker.revoke_role(
         user_id=request.user_id,
-        role_slug=request.role_slug,
+        role_id=request.role_id,
         org_id=request.org_id,
     )
     return {"message": "Role revoked"}

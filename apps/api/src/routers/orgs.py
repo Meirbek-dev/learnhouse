@@ -99,20 +99,26 @@ async def api_get_org_users(
     )
 
 
-@router.put("/{org_id}/users/{user_id}/role/{role_uuid}")
+@router.put("/{org_id}/users/{user_id}/role/{role_id}")
 async def api_update_user_role(
     request: Request,
     org_id: int,
     user_id: int,
-    role_uuid: str,
+    role_id: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
-    Update user role
+    Update user role in an organization.
+
+    **Path Parameter**: `role_id` — accepts numeric role ID
+
+    **Preferred usage**: Pass role ID as string (e.g., "123")
+
+    **Required Permission**: `organization:update`
     """
     return await update_user_role(
-        request, org_id, user_id, role_uuid, db_session, current_user
+        request, org_id, user_id, role_id, db_session, current_user
     )
 
 

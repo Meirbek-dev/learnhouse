@@ -121,7 +121,7 @@ const RolesUpdate: FC<Props> = (props) => {
                   items={
                     !roles || rolesError
                       ? undefined
-                      : sortedRoles.map((role: any) => ({ value: role.slug || role.id.toString(), label: role.name }))
+                      : sortedRoles.map((role: any) => ({ value: role.id.toString(), label: role.name }))
                   }
                 >
                   <FormControl>
@@ -136,12 +136,12 @@ const RolesUpdate: FC<Props> = (props) => {
                         <SelectGroup>
                           {sortedRoles.map((role: any) => (
                             <SelectItem
-                              key={role.slug || role.id}
-                              value={role.slug || role.id.toString()}
+                              key={role.id}
+                              value={role.id.toString()}
                             >
                               {role.name}
                             </SelectItem>
-                          ))}{' '}
+                          ))}
                         </SelectGroup>
                       )}
                     </SelectContent>

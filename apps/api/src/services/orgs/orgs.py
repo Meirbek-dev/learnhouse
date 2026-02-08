@@ -151,13 +151,21 @@ async def create_org(
     db_session.commit()
     db_session.refresh(org)
 
+    # Get org-admin role ID
+    from src.db.permissions import Role
+    admin_role = db_session.exec(
+        select(Role).where(Role.slug == RoleSlug.ORG_ADMIN)
+    ).first()
+    if not admin_role:
+        raise HTTPException(500, detail="Org admin role not found")
+
     # Link user to org by assigning admin role
     from src.security.rbac import PermissionChecker
 
     checker = PermissionChecker(db_session)
     checker.assign_role(
         user_id=int(current_user.id),
-        role_slug=RoleSlug.ORG_ADMIN,
+        role_id=admin_role.id,
         org_id=int(org.id or 0),
     )
 
@@ -244,13 +252,21 @@ async def create_org_with_config(
     db_session.commit()
     db_session.refresh(org)
 
+    # Get org-admin role ID
+    from src.db.permissions import Role
+    admin_role = db_session.exec(
+        select(Role).where(Role.slug == RoleSlug.ORG_ADMIN)
+    ).first()
+    if not admin_role:
+        raise HTTPException(500, detail="Org admin role not found")
+
     # Link user to org by assigning admin role
     from src.security.rbac import PermissionChecker
 
     checker = PermissionChecker(db_session)
     checker.assign_role(
         user_id=int(current_user.id),
-        role_slug=RoleSlug.ORG_ADMIN,
+        role_id=admin_role.id,
         org_id=int(org.id or 0),
     )
     org_config = submitted_config

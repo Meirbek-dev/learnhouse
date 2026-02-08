@@ -146,9 +146,13 @@ export async function removeUserFromOrg(org_id: number, user_id: number, access_
   return metadata;
 }
 
-export async function updateUserRole(org_id: number, user_id: number, role_uuid: string, access_token: string) {
+/**
+ * Update a user's role in an organization.
+ * @param role_id - Numeric role ID.
+ */
+export async function updateUserRole(org_id: number, user_id: number, role_id: string, access_token: string) {
   const result = await fetch(
-    `${getAPIUrl()}orgs/${org_id}/users/${user_id}/role/${role_uuid}`,
+    `${getAPIUrl()}orgs/${org_id}/users/${user_id}/role/${role_id}`,
     RequestBodyWithAuthHeader('PUT', null, null, access_token),
   );
   const metadata = await getResponseMetadata(result);

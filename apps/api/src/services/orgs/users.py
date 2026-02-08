@@ -178,19 +178,28 @@ async def update_user_role(
     request: Request,
     org_id: int,
     user_id: int,
-    role_uuid: str,
+    role_id: str,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
 ):
+    """
+    Update a user's role in an organization.
+
+    Args:
+        role_id: Accepts numeric role ID.
+                 Numeric IDs should be passed as strings (e.g., "123").
+    """
     # Convert org_id and user_id to int for proper type matching with database
     org_id_int = int(org_id)
     user_id_int = int(user_id)
 
-    # find role by slug
-    statement = select(Role).where(Role.slug == role_uuid)
-    result = db_session.exec(statement)
+    # find role by numeric ID
+    role = None
 
-    role = result.first()
+    if isinstance(role_id, str) and role_id.isdigit():
+        statement = select(Role).where(Role.id == int(role_id))
+        result = db_session.exec(statement)
+        role = result.first()
 
     if not role:
         raise HTTPException(
@@ -240,10 +249,11 @@ async def update_user_role(
             detail="There is no admin in the organization",
         )
 
+    # Ensure organization retains at least one admin role. Use resolved role.slug for the check
     if (
         len(admin_user_ids) == 1
         and user_id_int in admin_user_ids
-        and role_uuid not in ADMIN_ROLE_SLUGS
+        and role.slug not in ADMIN_ROLE_SLUGS
     ):
         raise HTTPException(
             status_code=400,
@@ -273,7 +283,7 @@ async def update_user_role(
 
         # Assign new role
         checker.assign_role(
-            user_id=user_id_int, role_slug=role_uuid, org_id=int(org.id)
+            user_id=user_id_int, role_id=role.id, org_id=int(org.id)
         )
 
     db_session.commit()

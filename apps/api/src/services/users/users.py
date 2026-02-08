@@ -535,12 +535,20 @@ async def _link_user_to_organization(
     db_session: Session, user_id: int | None, org_id: int
 ) -> None:
     """Link user to organization with default 'user' role using new RBAC system."""
+    from src.db.permissions import Role
     from src.security.rbac import PermissionChecker
+
+    # Get user role ID
+    user_role = db_session.exec(
+        select(Role).where(Role.slug == RoleSlug.USER)
+    ).first()
+    if not user_role:
+        raise HTTPException(500, detail="User role not found")
 
     checker = PermissionChecker(db_session)
     checker.assign_role(
         user_id=user_id or 0,
-        role_slug=RoleSlug.USER,
+        role_id=user_role.id,
         org_id=org_id,
     )
 

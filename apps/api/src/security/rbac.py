@@ -240,20 +240,30 @@ class PermissionChecker:
     def assign_role(
         self,
         user_id: int,
-        role_slug: str,
-        org_id: int,
+        role_id: int,
+        org_id: int | None = None,
         *,
         assigned_by: int | None = None,
     ) -> None:
+        """
+        Assign a role to a user.
+
+        Args:
+            user_id: Target user ID
+            role_id: Numeric role ID
+            org_id: Organization ID (required for org-scoped roles)
+            assigned_by: User ID who is assigning the role
+        """
         from src.db.permissions import Role, UserRole
 
-        role = self.db.exec(
-            select(Role)
-            .where(Role.slug == role_slug)
-            .where(or_(Role.org_id == org_id, Role.org_id.is_(None)))
-        ).first()
+        role = self.db.get(Role, role_id)
+
         if not role:
-            raise HTTPException(404, detail=f"Role not found: {role_slug}")
+            raise HTTPException(404, detail=f"Role not found: ID {role_id}")
+
+        # Ensure org_id is set for org-scoped role validation
+        if org_id is None:
+            org_id = role.org_id
 
         # Escalation prevention: assigner cannot grant a role with higher
         # priority than their own highest role in this org.
@@ -291,18 +301,27 @@ class PermissionChecker:
     def revoke_role(
         self,
         user_id: int,
-        role_slug: str,
-        org_id: int,
+        role_id: int,
+        org_id: int | None = None,
     ) -> None:
+        """
+        Revoke a role from a user.
+
+        Args:
+            user_id: Target user ID
+            role_id: Numeric role ID
+            org_id: Organization ID (optional)
+        """
         from src.db.permissions import Role, UserRole
 
-        role = self.db.exec(
-            select(Role)
-            .where(Role.slug == role_slug)
-            .where(or_(Role.org_id == org_id, Role.org_id.is_(None)))
-        ).first()
+        role = self.db.get(Role, role_id)
+
         if not role:
-            raise HTTPException(404, detail=f"Role not found: {role_slug}")
+            raise HTTPException(404, detail=f"Role not found: ID {role_id}")
+
+        # Ensure org_id is set
+        if org_id is None:
+            org_id = role.org_id
 
         user_role = self.db.exec(
             select(UserRole)
@@ -311,7 +330,7 @@ class PermissionChecker:
             .where(UserRole.org_id == org_id)
         ).first()
         if not user_role:
-            raise HTTPException(404, detail=f"Role not assigned: {role_slug}")
+            raise HTTPException(404, detail=f"Role not assigned: ID {role_id}")
 
         self.db.delete(user_role)
         self.db.commit()
@@ -403,7 +422,7 @@ class PermissionChecker:
             query = query.where(or_(UserRole.org_id == org_id, Role.org_id.is_(None)))
 
         # Extract scalar permission name strings (returned as single-column rows)
-        return set(self.db.exec(query).scalars().all())
+        return set(self.db.exec(query).all())
 
     @staticmethod
     def _has_perm(granted: set[str], resource: str, action: str, scope: str) -> bool:
