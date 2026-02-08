@@ -10,8 +10,8 @@ import { createContext, useContext } from 'react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
-import type { ReactNode } from 'react';
 import type { Org } from '@/types/org';
+import type { ReactNode } from 'react';
 import useSWR from 'swr';
 
 export const OrgContext = createContext<Org | null>(null);

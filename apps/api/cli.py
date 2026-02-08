@@ -5,11 +5,11 @@ from typing import Annotated
 import typer
 from sqlalchemy import create_engine
 from sqlalchemy.engine.base import Engine
-from sqlmodel import Session, SQLModel
+from sqlmodel import Session, SQLModel, select
 
 from config.config import get_platform_config
-from src.db.organizations import OrganizationCreate
-from src.db.users import UserCreate
+from src.db.organizations import Organization, OrganizationCreate
+from src.db.users import User, UserCreate
 from src.services.setup.setup import (
     install_create_organization,
     install_create_organization_user,
@@ -127,6 +127,104 @@ def install(
 @cli.command()
 def main() -> None:
     cli()
+
+
+@cli.command()
+def migrate_users_to_default_org() -> None:
+    """Migrate all existing users without organization membership to the default 'openu' organization."""
+    from src.db.permission_enums import RoleSlug
+    from src.db.permissions import UserRole, Role
+
+    # Get the database session
+    platform_config = get_platform_config()
+    engine: Engine = create_engine(
+        platform_config.database_config.sql_connection_string,
+        echo=False,
+        pool_pre_ping=True,
+    )
+
+    db_session = Session(engine)
+
+    print("=" * 80)
+    print("Migrating users to default organization")
+    print("=" * 80)
+
+    # Get the default organization
+    default_org = db_session.exec(
+        select(Organization).where(Organization.slug == "openu")
+    ).first()
+
+    if not default_org:
+        print("❌ Error: Default organization 'openu' not found")
+        print("Please create the default organization first using 'python cli.py install'")
+        raise typer.Exit(code=1)
+
+    print(f"✅ Found default organization: {default_org.name} (ID: {default_org.id})")
+
+    # Get the default 'user' role
+    user_role = db_session.exec(
+        select(Role).where(Role.slug == RoleSlug.USER)
+    ).first()
+
+    if not user_role:
+        print("❌ Error: Default 'user' role not found")
+        print("Please run migrations first")
+        raise typer.Exit(code=1)
+
+    print(f"✅ Found default user role: {user_role.name} (ID: {user_role.id})")
+
+    # Get all users
+    all_users = db_session.exec(select(User)).all()
+    print(f"\n📊 Found {len(all_users)} total users in database")
+
+    # Get users who already have roles in any organization
+    users_with_roles = db_session.exec(select(UserRole.user_id).distinct()).all()
+    user_ids_with_roles = {user_id for (user_id,) in users_with_roles}
+    print(f"📊 {len(user_ids_with_roles)} users already have organization memberships")
+
+    # Filter to users without any organization membership
+    users_without_org = [u for u in all_users if u.id not in user_ids_with_roles]
+    print(
+        f"📊 {len(users_without_org)} users need to be migrated to default organization\n"
+    )
+
+    if not users_without_org:
+        print("✅ All users already have organization memberships. Nothing to do!")
+        return
+
+    # Add users to default organization
+    migrated_count = 0
+    skipped_count = 0
+
+    for user in users_without_org:
+        try:
+            # Create UserRole record
+            new_user_role = UserRole(
+                user_id=user.id,
+                role_id=user_role.id,
+                org_id=default_org.id,
+            )
+            db_session.add(new_user_role)
+            migrated_count += 1
+            print(
+                f"  ✅ Added user {user.username} (ID: {user.id}) to {default_org.name}"
+            )
+        except Exception as e:
+            skipped_count += 1
+            print(
+                f"  ⚠️  Skipping user {user.username} (ID: {user.id}): {str(e)}"
+            )
+
+    # Commit changes
+    db_session.commit()
+
+    print("\n" + "=" * 80)
+    print("Migration complete!")
+    print("=" * 80)
+    print(f"✅ Successfully migrated: {migrated_count} users")
+    if skipped_count > 0:
+        print(f"⚠️  Skipped: {skipped_count} users")
+    print()
 
 
 if __name__ == "__main__":

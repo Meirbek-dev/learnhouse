@@ -573,11 +573,11 @@ async def get_orgs_by_user_admin(
     if org_ids:
         statement = (
             select(Organization, OrganizationConfig)
-            .outerjoin(OrganizationConfig)
-            .where(
-                Organization.id.in_(org_ids),
+            .outerjoin(
+                OrganizationConfig,
                 OrganizationConfig.org_id == Organization.id,
             )
+            .where(Organization.id.in_(org_ids))
         )
         result = db_session.exec(statement).all()
         # Map by org id to preserve the set
@@ -588,7 +588,7 @@ async def get_orgs_by_user_admin(
             org, org_config = org_map.get(oid, (None, None))
             if not org:
                 continue
-            config = OrganizationConfig.model_validate(org_config) if org_config else {}
+            config = OrganizationConfig.model_validate(org_config) if org_config else None
             org_read = OrganizationRead(**org.model_dump(), config=config)
             orgsWithConfig.append(org_read)
 
@@ -620,11 +620,11 @@ async def get_orgs_by_user(
     if org_ids:
         statement = (
             select(Organization, OrganizationConfig)
-            .outerjoin(OrganizationConfig)
-            .where(
-                Organization.id.in_(org_ids),
+            .outerjoin(
+                OrganizationConfig,
                 OrganizationConfig.org_id == Organization.id,
             )
+            .where(Organization.id.in_(org_ids))
         )
         result = db_session.exec(statement).all()
         org_map: dict[int, tuple] = {
@@ -634,7 +634,7 @@ async def get_orgs_by_user(
             org, org_config = org_map.get(oid, (None, None))
             if not org:
                 continue
-            config = OrganizationConfig.model_validate(org_config) if org_config else {}
+            config = OrganizationConfig.model_validate(org_config) if org_config else None
             org_read = OrganizationRead(**org.model_dump(), config=config)
             orgsWithConfig.append(org_read)
 
