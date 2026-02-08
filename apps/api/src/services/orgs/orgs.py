@@ -67,7 +67,9 @@ async def get_organization(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read", org.id, resource_owner_id=org.creator_id)
+    checker.require(
+        current_user.id, "organization:read", org.id, resource_owner_id=org.creator_id
+    )
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -164,9 +166,7 @@ async def create_org(
         general=OrgGeneralConfig(enabled=True, color="normal"),
         features=OrgFeatureConfig(
             courses=CourseOrgConfig(enabled=True, limit=0),
-            members=MemberOrgConfig(
-                enabled=True, admin_limit=0, limit=0
-            ),
+            members=MemberOrgConfig(enabled=True, admin_limit=0, limit=0),
             usergroups=UserGroupOrgConfig(enabled=True, limit=0),
             storage=StorageOrgConfig(enabled=True, limit=0),
             ai=AIOrgConfig(enabled=True, limit=0, model="gpt-5-nano"),
@@ -305,7 +305,9 @@ async def update_org(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id)
+    checker.require(
+        current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id
+    )
 
     # Verify if the new slug is already in use
     statement = select(Organization).where(Organization.slug == org_object.slug)
@@ -403,7 +405,9 @@ async def update_org_logo(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id)
+    checker.require(
+        current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id
+    )
 
     # Upload logo
     name_in_disk = await upload_org_logo(logo_file, org.org_uuid)
@@ -446,7 +450,9 @@ async def update_org_thumbnail(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id)
+    checker.require(
+        current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id
+    )
 
     # Upload logo
     name_in_disk = await upload_org_thumbnail(thumbnail_file, org.org_uuid)
@@ -489,7 +495,9 @@ async def update_org_preview(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id)
+    checker.require(
+        current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id
+    )
 
     # Upload logo
     name_in_disk = await upload_org_preview(preview_file, org.org_uuid)
@@ -518,7 +526,9 @@ async def delete_org(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:delete", org.id, resource_owner_id=org.creator_id)
+    checker.require(
+        current_user.id, "organization:delete", org.id, resource_owner_id=org.creator_id
+    )
 
     db_session.delete(org)
     db_session.commit()
@@ -567,7 +577,7 @@ async def get_orgs_by_user_admin(
         .limit(limit)
     )
 
-    org_ids = [r[0] for r in db_session.exec(org_id_query).all()]
+    org_ids = db_session.exec(org_id_query).all()
 
     orgsWithConfig = []
     if org_ids:
@@ -588,7 +598,9 @@ async def get_orgs_by_user_admin(
             org, org_config = org_map.get(oid, (None, None))
             if not org:
                 continue
-            config = OrganizationConfig.model_validate(org_config) if org_config else None
+            config = (
+                OrganizationConfig.model_validate(org_config) if org_config else None
+            )
             org_read = OrganizationRead(**org.model_dump(), config=config)
             orgsWithConfig.append(org_read)
 
@@ -614,7 +626,7 @@ async def get_orgs_by_user(
         .limit(limit)
     )
 
-    org_ids = [r[0] for r in db_session.exec(org_id_query).all()]
+    org_ids = db_session.exec(org_id_query).all()
 
     orgsWithConfig = []
     if org_ids:
@@ -634,7 +646,9 @@ async def get_orgs_by_user(
             org, org_config = org_map.get(oid, (None, None))
             if not org:
                 continue
-            config = OrganizationConfig.model_validate(org_config) if org_config else None
+            config = (
+                OrganizationConfig.model_validate(org_config) if org_config else None
+            )
             org_read = OrganizationRead(**org.model_dump(), config=config)
             orgsWithConfig.append(org_read)
 
@@ -678,7 +692,9 @@ async def update_org_landing(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id)
+    checker.require(
+        current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id
+    )
 
     # Get org config
     statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
@@ -733,7 +749,9 @@ async def upload_org_landing_content_service(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id)
+    checker.require(
+        current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id
+    )
 
     # Upload content
     name_in_disk = await upload_org_landing_content(content_file, org.org_uuid)
