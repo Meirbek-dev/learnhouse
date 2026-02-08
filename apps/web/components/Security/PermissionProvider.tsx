@@ -5,8 +5,8 @@
  *
  * Single source of truth for client-side permission checks.
  * Reads permissions from the NextAuth session — no separate API fetch.
- * Does simple Set.has() lookups — no wildcards, no scope broadening.
- * The backend resolves all permissions to flat explicit strings.
+ * Does simple Set.has() lookups — the backend expands wildcards and
+ * scope-broadening before sending permissions to the frontend.
  */
 
 import type { Action, Resource, Scope } from '@/types/permissions';

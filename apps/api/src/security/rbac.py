@@ -7,7 +7,7 @@ This is the ONE file for all authorization logic.
 from __future__ import annotations
 
 import logging
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import Depends, HTTPException, Request, status
 from sqlmodel import Session, or_, select
@@ -38,26 +38,9 @@ class PermissionDenied(HTTPException):
         self,
         permission: str | None = None,
         *,
-        action: Any = None,
-        resource_type: Any = None,
-        resource_id: str | None = None,
         reason: str | None = None,
-        org_id: int | None = None,
     ) -> None:
-        # Accept both new style (permission=) and old style (action=, resource_type=)
-        if permission:
-            message = f"Permission denied: {permission}"
-        elif action and resource_type:
-            a = action.value if hasattr(action, "value") else str(action)
-            r = (
-                resource_type.value
-                if hasattr(resource_type, "value")
-                else str(resource_type)
-            )
-            message = f"Permission denied: {r}:{a}"
-        else:
-            message = "Permission denied"
-
+        message = f"Permission denied: {permission}" if permission else "Permission denied"
         detail = {
             "error_code": "PERMISSION_DENIED",
             "message": message,
@@ -70,7 +53,7 @@ class PermissionDenied(HTTPException):
 class AuthenticationRequired(HTTPException):
     """401 — must be logged in."""
 
-    def __init__(self, reason: str | None = None, **kwargs: Any) -> None:
+    def __init__(self, reason: str | None = None) -> None:
         detail = {
             "error_code": "AUTHENTICATION_REQUIRED",
             "message": reason or "Authentication required",
@@ -115,8 +98,43 @@ class PermissionChecker:
         return {p: self._matches(p, granted) for p in permissions}
 
     def get_effective_permissions(self, user_id: int, org_id: int | None) -> set[str]:
-        """Return the raw set of granted permission strings (for the frontend)."""
+        """Return the raw set of granted permission strings."""
         return self._get_or_load(user_id, org_id)
+
+    def get_expanded_permissions(self, user_id: int, org_id: int | None) -> set[str]:
+        """Return permissions with wildcards expanded to explicit strings.
+
+        The frontend does exact Set.has() lookups, so wildcards like ``*:*:*``
+        or ``course:*:org`` must be expanded into every concrete
+        ``resource:action:scope`` combination they cover.
+        """
+        from src.db.permission_enums import Action, ResourceType, Scope
+
+        raw = self._get_or_load(user_id, org_id)
+        expanded: set[str] = set()
+
+        all_resources = [r.value for r in ResourceType]
+        all_actions = [a.value for a in Action]
+        all_scopes = [s.value for s in Scope]
+
+        for perm_str in raw:
+            parts = perm_str.split(":")
+            if len(parts) != 3:
+                expanded.add(perm_str)
+                continue
+
+            res, act, scp = parts
+
+            resources = all_resources if res == "*" else [res]
+            actions = all_actions if act == "*" else [act]
+            scopes = all_scopes if scp == "*" else [scp]
+
+            for r in resources:
+                for a in actions:
+                    for s in scopes:
+                        expanded.add(f"{r}:{a}:{s}")
+
+        return expanded
 
     def get_user_roles(self, user_id: int, org_id: int | None) -> list[dict]:
         """Return role dicts for user in org."""
@@ -166,6 +184,19 @@ class PermissionChecker:
         ).first()
         if not role:
             raise HTTPException(404, detail=f"Role not found: {role_slug}")
+
+        # Escalation prevention: assigner cannot grant a role with higher
+        # priority than their own highest role in this org.
+        if assigned_by is not None:
+            assigner_roles = self.get_user_roles(assigned_by, org_id)
+            assigner_max_priority = max(
+                (r["priority"] for r in assigner_roles), default=0
+            )
+            if role.priority > assigner_max_priority:
+                raise PermissionDenied(
+                    permission="role:create:org",
+                    reason="Cannot assign a role with higher priority than your own",
+                )
 
         existing = self.db.exec(
             select(UserRole)

@@ -11,7 +11,6 @@ from src.security.rbac import AuthenticationRequired
 
 from config.config import get_platform_config
 from src.core.events.database import get_db_session
-from src.db.permissions import Action, ResourceType
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.security import ALGORITHM, SECRET_KEY
@@ -39,9 +38,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
 #### JWT Auth ####################################################
-
-
-# Generate a secure JWT secret for development mode if not provided
 def _get_jwt_secret() -> str:
     """
     Get JWT secret key with secure fallback for development.
@@ -87,12 +83,6 @@ def get_config() -> Settings:
     return Settings()
 
 
-#### JWT Auth ####################################################
-
-
-#### Classes ####################################################
-
-
 class Token(PydanticStrictBaseModel):
     access_token: str
     token_type: str
@@ -102,7 +92,6 @@ class TokenData(PydanticStrictBaseModel):
     username: str | None = None
 
 
-#### Classes ####################################################
 async def authenticate_user(
     request: Request,
     email: str,
@@ -156,6 +145,4 @@ async def get_current_user(
 
 async def non_public_endpoint(current_user: UserRead | AnonymousUser) -> None:
     if isinstance(current_user, AnonymousUser):
-        raise AuthenticationRequired(
-            resource_type=ResourceType.API, action=Action.ACCESS
-        )
+        raise AuthenticationRequired()

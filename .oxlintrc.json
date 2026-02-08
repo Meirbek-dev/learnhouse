@@ -7,9 +7,10 @@
     "perf": "warn",
     "restriction": "warn",
     "style": "warn",
-    "suspicious": "warn"
+    "suspicious": "warn",
   },
   "env": {
+    "builtin": true,
     "browser": true,
     "es2024": true,
     "node": true
@@ -34,17 +35,17 @@
   "overrides": [],
   "plugins": [
     "eslint",
-    "react",
-    "unicorn",
-    "typescript",
-    "oxc",
     "import",
     "jsdoc",
     "jsx-a11y",
-    "nextjs",
-    "react-perf",
+    "node",
+    "oxc",
     "promise",
-    "node"
+    "react",
+    "react-perf",
+    "typescript",
+    "unicorn",
+    "vitest"
   ],
   "rules": {
     "eslint": "warn",
@@ -89,6 +90,7 @@
     "react/jsx-filename-extension": "off",
     "react/no-array-index-key": "off",
     "react/react-in-jsx-scope": "off",
+    "react/jsx-max-depth": "off",
     "typescript": "warn",
     "typescript/explicit-function-return-type": "off",
     "typescript/no-explicit-any": "off",

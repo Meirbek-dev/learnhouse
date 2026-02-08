@@ -3,8 +3,6 @@
  *
  * Constants use lowercase values to match the backend format directly.
  * No toLowerCase() conversion needed at check time.
- *
- * Based on shared/permissions.yaml
  */
 
 // ============================================================================
@@ -115,9 +113,8 @@ export interface UserRoleAssignment {
   user_id: number;
   role_id: number;
   org_id: number;
-  granted_at: string;
-  granted_by: number | null;
-  expires_at: string | null;
+  assigned_at: string;
+  assigned_by: number | null;
   user?: {
     id: number;
     email: string;

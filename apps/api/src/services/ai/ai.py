@@ -11,7 +11,6 @@ from src.db.courses.activities import Activity, ActivityRead
 from src.db.courses.courses import Course, CourseRead
 from src.db.organization_config import OrganizationConfig
 from src.db.organizations import Organization
-from src.db.permission_enums import Action, ResourceType
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
 from src.services.ai.base import ask_ai, get_chat_session_history
@@ -219,9 +218,7 @@ async def ai_start_activity_chat_session(
 
     except AIFeatureDisabledError as e:
         logger.warning(f"AI feature disabled: {e.message}")
-        raise PermissionDenied(
-            Action.USE, ResourceType.AI_FEATURE, reason=e.message
-        ) from e
+        raise PermissionDenied(reason=e.message) from e
 
     except AITimeoutError as e:
         logger.warning(f"AI timeout: {e.message}")
@@ -341,9 +338,7 @@ async def ai_send_activity_chat_message(
 
     except AIFeatureDisabledError as e:
         logger.warning(f"AI feature disabled: {e.message}")
-        raise PermissionDenied(
-            Action.USE, ResourceType.AI_FEATURE, reason=e.message
-        ) from e
+        raise PermissionDenied(reason=e.message) from e
 
     except AITimeoutError as e:
         logger.warning(f"AI timeout: {e.message}")

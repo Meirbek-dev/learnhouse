@@ -6,6 +6,7 @@ from sqlmodel import Session, select
 from src.security.rbac import PermissionChecker
 
 from src.db.organizations import Organization
+from src.db.permission_enums import RoleSlug
 from src.db.permissions import UserRole
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User
@@ -84,7 +85,7 @@ async def join_org(
         checker = PermissionChecker(db_session)
         checker.assign_role(
             user_id=user.id,
-            role_slug="user",
+            role_slug=RoleSlug.USER,
             org_id=org.id,
         )
 
@@ -95,7 +96,7 @@ async def join_org(
         checker = PermissionChecker(db_session)
         checker.assign_role(
             user_id=user.id,
-            role_slug="user",
+            role_slug=RoleSlug.USER,
             org_id=org.id,
         )
 

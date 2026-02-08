@@ -27,6 +27,7 @@ from src.db.organization_config import (
     UserGroupOrgConfig,
 )
 from src.db.organizations import Organization, OrganizationCreate
+from src.db.permission_enums import RoleSlug
 from src.db.users import User, UserCreate, UserRead
 from src.security.security import security_hash_password
 
@@ -159,7 +160,7 @@ async def install_create_organization_user(
     checker = PermissionChecker(db_session)
     checker.assign_role(
         user_id=user.id or 0,
-        role_slug="org-admin",
+        role_slug=RoleSlug.ORG_ADMIN,
         org_id=org_id or 0,
     )
 

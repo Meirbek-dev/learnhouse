@@ -116,7 +116,7 @@ async def get_my_permissions(
         return UserPermissionsResponse(roles=[], permissions=[], org_id=org_id)
 
     roles = checker.get_user_roles(current_user.id, org_id)
-    permissions = sorted(checker.get_effective_permissions(current_user.id, org_id))
+    permissions = sorted(checker.get_expanded_permissions(current_user.id, org_id))
 
     return UserPermissionsResponse(
         roles=roles,

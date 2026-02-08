@@ -260,12 +260,10 @@ async def update_discussion(
             status_code=status.HTTP_404_NOT_FOUND, detail="Discussion does not exist"
         )
 
-    # Only the author can edit their discussion
+    # Author can edit own discussion; moderators can edit any
     if discussion.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You can only edit your own discussions",
-        )
+        checker = PermissionChecker(db_session)
+        checker.require(current_user.id, "discussion:moderate:org", discussion.org_id)
 
     # Update fields
     for key, value in discussion_object.model_dump(exclude_unset=True).items():
@@ -303,12 +301,10 @@ async def delete_discussion(
             status_code=status.HTTP_404_NOT_FOUND, detail="Discussion does not exist"
         )
 
-    # Only the author can delete their discussion
+    # Author can delete own discussion; moderators can delete any
     if discussion.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You can only delete your own discussions",
-        )
+        checker = PermissionChecker(db_session)
+        checker.require(current_user.id, "discussion:moderate:org", discussion.org_id)
 
     # Soft delete
     discussion.status = DiscussionStatusEnum.DELETED

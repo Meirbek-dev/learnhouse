@@ -141,9 +141,7 @@ async def api_update_user_role(
     )
 
 
-@router.delete(
-    "/{org_id}/users/{user_id}", dependencies=[require_permission("user:delete:org")]
-)
+@router.delete("/{org_id}/users/{user_id}")
 async def api_remove_user_from_org(
     request: Request,
     org_id: int,
@@ -153,8 +151,6 @@ async def api_remove_user_from_org(
 ):
     """
     Remove user from org
-
-    **Required Permission**: `user:delete:org`
     """
     return await remove_user_from_org(
         request, org_id, user_id, db_session, current_user

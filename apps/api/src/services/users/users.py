@@ -11,6 +11,7 @@ from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.organizations import Organization, OrganizationRead
+from src.db.permission_enums import RoleSlug
 from src.db.permissions import RoleRead
 from src.db.permissions import Role, UserRole
 from src.db.users import (
@@ -358,7 +359,7 @@ async def get_user_session(
 
         # Get org_id from the current organization context if available
         org_id = org.id if org and hasattr(org, "id") else None
-        effective = checker.get_effective_permissions(current_user.id, org_id) or set()
+        effective = checker.get_expanded_permissions(current_user.id, org_id) or set()
         # Ensure effective is an iterable of strings
         if not isinstance(effective, (set, list, tuple)):
             _logger.warning("Expected effective permissions to be iterable, got: %s", type(effective))
@@ -528,7 +529,6 @@ def _safe_role_read(role: Role) -> RoleRead:
             org_id=role.org_id,
             is_system=role.is_system,
             priority=role.priority,
-            parent_role_id=None,  # Role doesn't have parent_role_id
             created_at=role.created_at,
             updated_at=role.updated_at,
             id=role.id,
@@ -558,7 +558,7 @@ async def _link_user_to_organization(
     checker = PermissionChecker(db_session)
     checker.assign_role(
         user_id=user_id or 0,
-        role_slug="user",
+        role_slug=RoleSlug.USER,
         org_id=org_id,
     )
 

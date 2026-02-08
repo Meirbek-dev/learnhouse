@@ -25,6 +25,7 @@ async def update_org_Config(
     config_object: OrganizationConfigBase,
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
+    check_internal_cloud_key(request)
     return await update_org_with_config_no_auth(
         request, config_object, org_id, db_session
     )

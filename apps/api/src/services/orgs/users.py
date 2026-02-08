@@ -187,15 +187,8 @@ async def update_user_role(
     org_id_int = int(org_id)
     user_id_int = int(user_id)
 
-    # normalize incoming role identifier to slug (handle legacy 'role_*' names)
-    slug = (
-        role_uuid.rsplit("_", maxsplit=1)[-1]
-        if isinstance(role_uuid, str) and role_uuid.startswith("role_")
-        else role_uuid
-    )
-
     # find role by slug
-    statement = select(Role).where(Role.slug == slug)
+    statement = select(Role).where(Role.slug == role_uuid)
     result = db_session.exec(statement)
 
     role = result.first()
@@ -251,7 +244,7 @@ async def update_user_role(
     if (
         len(admin_user_ids) == 1
         and user_id_int in admin_user_ids
-        and slug not in ADMIN_ROLE_SLUGS
+        and role_uuid not in ADMIN_ROLE_SLUGS
     ):
         raise HTTPException(
             status_code=400,
@@ -280,7 +273,7 @@ async def update_user_role(
         db_session.flush()
 
         # Assign new role
-        checker.assign_role(user_id=user_id_int, role_slug=slug, org_id=int(org.id))
+        checker.assign_role(user_id=user_id_int, role_slug=role_uuid, org_id=int(org.id))
 
     db_session.commit()
 

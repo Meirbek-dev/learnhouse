@@ -25,7 +25,6 @@ from src.db.permission_enums import (  # noqa: E402
     Scope,
     SYSTEM_ROLES,
     build_permission_name,
-    parse_permission_name,
 )
 
 # ============================================================================
@@ -187,14 +186,6 @@ class PermissionRead(PydanticStrictBaseModel):
     description: str | None = None
 
 
-class UserPermissionsResponse(PydanticStrictBaseModel):
-    """What the frontend receives from GET /rbac/me/permissions."""
-
-    roles: list[RoleRead]
-    permissions: list[str]  # flat list of permission name strings
-    org_id: int | None = None
-
-
 # ============================================================================
 # Re-exports for convenience
 # ============================================================================
@@ -207,7 +198,6 @@ __all__ = [
     "RoleSlug",
     "SYSTEM_ROLES",
     "build_permission_name",
-    "parse_permission_name",
     # Tables
     "Permission",
     "Role",
@@ -218,5 +208,4 @@ __all__ = [
     "RoleRead",
     "RoleUpdate",
     "PermissionRead",
-    "UserPermissionsResponse",
 ]

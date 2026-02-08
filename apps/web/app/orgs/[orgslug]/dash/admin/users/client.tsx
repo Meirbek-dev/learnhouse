@@ -275,7 +275,7 @@ export default function UserRolesClient() {
             <TableRow>
               <TableHead>User</TableHead>
               <TableHead>Role</TableHead>
-              <TableHead>Granted At</TableHead>
+              <TableHead>Assigned At</TableHead>
               <TableHead>Expires</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -318,17 +318,11 @@ export default function UserRolesClient() {
                   <TableCell>
                     <div className="text-muted-foreground flex items-center gap-1 text-sm">
                       <Calendar className="h-3 w-3" />
-                      {new Date(ur.granted_at).toLocaleDateString()}
+                      {new Date(ur.assigned_at).toLocaleDateString()}
                     </div>
                   </TableCell>
                   <TableCell>
-                    {ur.expires_at ? (
-                      <Badge variant={new Date(ur.expires_at) < new Date() ? 'destructive' : 'outline'}>
-                        {new Date(ur.expires_at).toLocaleDateString()}
-                      </Badge>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">Never</span>
-                    )}
+                    <span className="text-muted-foreground text-sm">Never</span>
                   </TableCell>
                   <TableCell className="text-right">
                     <PermissionGuard

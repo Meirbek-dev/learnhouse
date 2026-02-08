@@ -32,6 +32,7 @@ from src.db.organizations import (
     OrganizationRead,
     OrganizationUpdate,
 )
+from src.db.permission_enums import ADMIN_ROLE_SLUGS, RoleSlug
 from src.db.permissions import Role, UserRole
 from src.db.users import AnonymousUser, InternalUser, PublicUser
 from src.services.orgs.uploads import (
@@ -152,7 +153,7 @@ async def create_org(
     checker = PermissionChecker(db_session)
     checker.assign_role(
         user_id=int(current_user.id),
-        role_slug="org-admin",
+        role_slug=RoleSlug.ORG_ADMIN,
         org_id=int(org.id or 0),
     )
 
@@ -247,7 +248,7 @@ async def create_org_with_config(
     checker = PermissionChecker(db_session)
     checker.assign_role(
         user_id=int(current_user.id),
-        role_slug="org-admin",
+        role_slug=RoleSlug.ORG_ADMIN,
         org_id=int(org.id or 0),
     )
     org_config = submitted_config
@@ -538,7 +539,7 @@ async def get_orgs_by_user_admin(
     # Join Organization, UserRole and OrganizationConfig in a single query
     # Resolve the admin role id by slug (new RBAC system)
     admin_role = db_session.exec(
-        select(Role).where(Role.slug.in_(["super-admin", "org-admin"]))
+        select(Role).where(Role.slug.in_(list(ADMIN_ROLE_SLUGS)))
     ).first()
     admin_role_id = admin_role.id if admin_role else 1
 
