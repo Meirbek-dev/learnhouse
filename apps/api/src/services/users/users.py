@@ -29,7 +29,6 @@ from src.db.users import (
 )
 from src.security.security import security_hash_password, security_verify_password
 from src.services.cache import redis_client
-from src.services.orgs.invites import get_invite_code
 from src.services.orgs.orgs import get_org_join_mechanism
 from src.services.users.avatars import upload_avatar
 from src.services.users.emails import send_account_creation_email
@@ -78,43 +77,6 @@ async def create_user(
     return user_read
 
 
-async def create_user_with_invite(
-    request: Request,
-    db_session: Session,
-    current_user: PublicUser | AnonymousUser,
-    user_object: UserCreate,
-    org_id: int,
-    invite_code: str,
-):
-    # Check if invite code exists
-    inviteCode = await get_invite_code(
-        request, org_id, invite_code, current_user, db_session
-    )
-
-    if not inviteCode:
-        raise HTTPException(
-            status_code=400,
-            detail="Invite code is incorrect",
-        )
-
-    user = await create_user(request, db_session, current_user, user_object, org_id)
-
-    # Check if invite code contains UserGroup
-    if inviteCode.get("usergroup_id"):
-        # Add user to UserGroup
-        await add_users_to_usergroup(
-            request,
-            db_session,
-            InternalUser(id=0),
-            int(
-                inviteCode.get("usergroup_id")
-            ),  # Convert to int since usergroup_id is expected to be int
-            str(user.id),
-        )
-
-    return user
-
-
 async def create_user_without_org(
     request: Request,
     db_session: Session,
@@ -129,6 +91,10 @@ async def create_user_without_org(
 
     # Create and validate user
     user = await _create_and_validate_user(db_session, user_object)
+
+    # Automatically join the default 'openu' organization
+    default_org = await _get_default_organization(db_session)
+    await _link_user_to_organization(db_session, user.id, default_org.id)
 
     user_read = UserRead.model_validate(user)
 
@@ -661,57 +627,18 @@ async def _get_user_by_field(
     return user
 
 
-## 🔒 RBAC Utils ##
+async def _get_default_organization(db_session: Session) -> Organization:
+    """Get the default 'openu' organization."""
+    statement = select(Organization).where(Organization.slug == "openu")
+    org = db_session.exec(statement).first()
 
-
-async def create_user_with_org_validation(
-    request: Request,
-    db_session: Session,
-    current_user: PublicUser | AnonymousUser,
-    user_object: UserCreate,
-    org_id: int,
-) -> UserRead:
-    """
-    Create user with organization join mechanism validation.
-    Checks if organization requires invites before creating user.
-    """
-    # Check organization join mechanism
-    join_mechanism = await get_org_join_mechanism(
-        request, org_id, current_user, db_session
-    )
-
-    if join_mechanism == "inviteOnly":
+    if not org:
         raise HTTPException(
-            status_code=403,
-            detail="You need an invite to join this organization",
+            status_code=500,
+            detail="Default organization 'openu' not found. Please contact system administrator.",
         )
 
-    return await create_user(request, db_session, current_user, user_object, org_id)
+    return org
 
 
-async def create_user_with_invite_validation(
-    request: Request,
-    db_session: Session,
-    current_user: PublicUser | AnonymousUser,
-    user_object: UserCreate,
-    invite_code: str,
-    org_id: int,
-) -> UserRead:
-    """
-    Create user with invite code and organization validation.
-    Ensures organization requires invites before processing invite code.
-    """
-    # Check organization join mechanism
-    join_mechanism = await get_org_join_mechanism(
-        request, org_id, current_user, db_session
-    )
-
-    if join_mechanism == "inviteOnly":
-        return await create_user_with_invite(
-            request, db_session, current_user, user_object, org_id, invite_code
-        )
-
-    raise HTTPException(
-        status_code=403,
-        detail="This organization does not require an invite code",
-    )
+## 🔒 RBAC Utils ##

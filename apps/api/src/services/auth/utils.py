@@ -81,11 +81,8 @@ async def signWithGoogle(
             avatar_image=picture,
         )
 
-        if org_id is not None:
-            return await create_user(
-                request, db_session, current_user, user_object, org_id
-            )
-
+        # Always create user without org - it will auto-join 'openu'
+        # The org_id parameter is now ignored as all users join the default org
         return await create_user_without_org(
             request, db_session, current_user, user_object
         )

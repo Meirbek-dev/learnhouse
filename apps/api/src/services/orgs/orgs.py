@@ -165,7 +165,7 @@ async def create_org(
         features=OrgFeatureConfig(
             courses=CourseOrgConfig(enabled=True, limit=0),
             members=MemberOrgConfig(
-                enabled=True, signup_mode="open", admin_limit=0, limit=0
+                enabled=True, admin_limit=0, limit=0
             ),
             usergroups=UserGroupOrgConfig(enabled=True, limit=0),
             storage=StorageOrgConfig(enabled=True, limit=0),
@@ -642,101 +642,6 @@ async def get_orgs_by_user(
 
 
 # Config related
-async def update_org_signup_mechanism(
-    request: Request,
-    signup_mechanism: Literal["open", "inviteOnly"],
-    org_id: int,
-    current_user: PublicUser | AnonymousUser,
-    db_session: Session,
-    checker: PermissionChecker | None = None,
-):
-    statement = select(Organization).where(Organization.id == org_id)
-    result = db_session.exec(statement)
-
-    org = result.first()
-
-    if not org:
-        raise HTTPException(
-            status_code=404,
-            detail="Organization not found",
-        )
-
-    # RBAC check
-    if checker is None:
-        checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id)
-
-    # Get org config
-    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
-    result = db_session.exec(statement)
-
-    org_config = result.first()
-
-    if org_config is None:
-        logging.error(f"Organization {org_id} has no config")
-        raise HTTPException(
-            status_code=404,
-            detail="Organization config not found",
-        )
-
-    updated_config = org_config.config
-
-    # Update config
-    updated_config = OrganizationConfigBase(**updated_config)
-    updated_config.features.members.signup_mode = signup_mechanism
-
-    # Update the database
-    org_config.config = orjson.loads(updated_config.model_dump_json())
-    org_config.update_date = str(datetime.now())
-
-    db_session.add(org_config)
-    db_session.commit()
-    db_session.refresh(org_config)
-
-    return {"detail": "Signup mechanism updated"}
-
-
-async def get_org_join_mechanism(
-    request: Request,
-    org_id: int,
-    current_user: PublicUser | AnonymousUser,
-    db_session: Session,
-    checker: PermissionChecker | None = None,
-):
-    statement = select(Organization).where(Organization.id == org_id)
-    result = db_session.exec(statement)
-
-    org = result.first()
-
-    if not org:
-        raise HTTPException(
-            status_code=404,
-            detail="Organization not found",
-        )
-
-    # RBAC check
-    if checker is None:
-        checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read", org.id, resource_owner_id=org.creator_id)
-
-    # Get org config
-    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
-    result = db_session.exec(statement)
-
-    org_config = result.first()
-
-    if org_config is None:
-        logging.error(f"Organization {org_id} has no config")
-        raise HTTPException(
-            status_code=404,
-            detail="Organization config not found",
-        )
-
-    config = org_config.config
-
-    # Get the signup mechanism
-    config = OrganizationConfigBase(**config)
-    return config.features.members.signup_mode
 
 
 async def upload_org_preview_service(

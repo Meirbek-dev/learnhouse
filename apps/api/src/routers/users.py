@@ -24,8 +24,6 @@ from src.services.users.password_reset import (
 )
 from src.services.users.users import (
     authorize_user_action,
-    create_user_with_invite_validation,
-    create_user_with_org_validation,
     create_user_without_org,
     delete_user_by_id,
     get_user_session,
@@ -75,46 +73,6 @@ async def api_get_authorization_status(
     """
     return await authorize_user_action(
         request, db_session, current_user, ressource_uuid, action
-    )
-
-
-@router.post("/{org_id}", tags=["users"])
-async def api_create_user_with_orgid(
-    *,
-    request: Request,
-    db_session: Annotated[Session, Depends(get_db_session)],
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    checker: PermissionCheckerDep,
-    user_object: UserCreate,
-    org_id: int,
-) -> UserRead:
-    """
-    Create User with Org ID
-
-    **Required Permission**: `user:create:org`
-    """
-    checker.require(current_user.id, "user:create", org_id)
-
-    return await create_user_with_org_validation(
-        request, db_session, current_user, user_object, org_id
-    )
-
-
-@router.post("/{org_id}/invite/{invite_code}", tags=["users"])
-async def api_create_user_with_orgid_and_invite(
-    *,
-    request: Request,
-    db_session: Annotated[Session, Depends(get_db_session)],
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    user_object: UserCreate,
-    invite_code: str,
-    org_id: int,
-) -> UserRead:
-    """
-    Create User with Org ID and invite code
-    """
-    return await create_user_with_invite_validation(
-        request, db_session, current_user, user_object, invite_code, org_id
     )
 
 

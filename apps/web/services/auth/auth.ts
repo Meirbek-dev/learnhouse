@@ -489,7 +489,7 @@ export async function signup(body: NewAccountBody): Promise<Response> {
     throw createAuthError('Account details are required', 400, 'MISSING_BODY');
   }
 
-  const { username, email, password, org_slug, org_id } = body;
+  const { username, email, password } = body;
 
   if (!username?.trim()) {
     throw createAuthError('Username is required', 400, 'MISSING_USERNAME');
@@ -503,22 +503,12 @@ export async function signup(body: NewAccountBody): Promise<Response> {
     throw createAuthError('Valid password is required', 400, 'INVALID_PASSWORD');
   }
 
-  if (!org_slug?.trim()) {
-    throw createAuthError('Organization slug is required', 400, 'MISSING_ORG_SLUG');
-  }
-
-  if (!Number.isInteger(org_id) || org_id <= 0) {
-    throw createAuthError('Valid organization ID is required', 400, 'INVALID_ORG_ID');
-  }
-
   try {
     const headers = createHeaders('application/json');
     const sanitizedBody = {
       username: username.trim(),
       email: sanitizeStringInput(email),
       password,
-      org_slug: org_slug.trim(),
-      org_id,
     };
 
     const requestOptions: RequestInit = {
@@ -528,7 +518,8 @@ export async function signup(body: NewAccountBody): Promise<Response> {
       redirect: 'follow',
     };
 
-    return await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.signup}/${org_id}`, requestOptions);
+    // Users are now automatically joined to 'openu' organization on the backend
+    return await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.signup}`, requestOptions);
   } catch (error) {
     if (error instanceof Error) {
       throw createAuthError(`Signup failed: ${error.message}`, undefined, 'SIGNUP_ERROR');
@@ -538,72 +529,13 @@ export async function signup(body: NewAccountBody): Promise<Response> {
 }
 
 /**
- * Signup with invite code and validation
- * @param body - New account details
- * @param inviteCode - Invitation code
- * @returns Promise<Response> - Raw response for compatibility
+ * @deprecated Invite codes are no longer supported. Use signup() instead.
+ * Users are automatically joined to the default organization.
  */
 export async function signUpWithInviteCode(body: NewAccountBody, inviteCode: string): Promise<Response> {
-  // Validate invite code first
-  if (!inviteCode?.trim()) {
-    throw createAuthError('Invite code is required', 400, 'MISSING_INVITE_CODE');
-  }
-
-  // Reuse signup validation
-  if (!body) {
-    throw createAuthError('Account details are required', 400, 'MISSING_BODY');
-  }
-
-  const { username, email, password, org_slug, org_id } = body;
-
-  if (!username?.trim()) {
-    throw createAuthError('Username is required', 400, 'MISSING_USERNAME');
-  }
-
-  if (!(email?.trim() && validateEmail(email))) {
-    throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
-  }
-
-  if (!validatePassword(password)) {
-    throw createAuthError('Valid password is required', 400, 'INVALID_PASSWORD');
-  }
-
-  if (!org_slug?.trim()) {
-    throw createAuthError('Organization slug is required', 400, 'MISSING_ORG_SLUG');
-  }
-
-  if (!Number.isInteger(org_id) || org_id <= 0) {
-    throw createAuthError('Valid organization ID is required', 400, 'INVALID_ORG_ID');
-  }
-
-  try {
-    const headers = createHeaders('application/json');
-    const sanitizedBody = {
-      username: username.trim(),
-      email: sanitizeStringInput(email),
-      password,
-      org_slug: org_slug.trim(),
-      org_id,
-    };
-
-    const requestOptions: RequestInit = {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(sanitizedBody),
-      redirect: 'follow',
-    };
-
-    const sanitizedInviteCode = inviteCode.trim();
-    return await fetch(
-      `${getAPIUrl()}${AUTH_ENDPOINTS.signup}/${org_id}/invite/${encodeURIComponent(sanitizedInviteCode)}`,
-      requestOptions,
-    );
-  } catch (error) {
-    if (error instanceof Error) {
-      throw createAuthError(`Invite signup failed: ${error.message}`, undefined, 'INVITE_SIGNUP_ERROR');
-    }
-    throw createAuthError('Unknown invite signup error', undefined, 'UNKNOWN_ERROR');
-  }
+  // Redirect to normal signup - invites are no longer used
+  console.warn('signUpWithInviteCode is deprecated. Using signup() instead.');
+  return signup(body);
 }
 
 // Export types for external usage

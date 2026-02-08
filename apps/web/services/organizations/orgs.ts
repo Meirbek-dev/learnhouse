@@ -146,37 +146,6 @@ export async function removeUserFromOrg(org_id: number, user_id: number, access_
   return metadata;
 }
 
-export async function joinOrg(
-  args: {
-    org_id: number;
-    user_id: number;
-    invite_code?: string | null;
-  },
-  next: any,
-  access_token?: string,
-) {
-  // Clean up invite_code - send null instead of empty string
-  const cleanArgs = {
-    ...args,
-    invite_code: args.invite_code?.trim() || null,
-  };
-
-  const result = await fetch(
-    `${getAPIUrl()}orgs/join`,
-    RequestBodyWithAuthHeader('POST', cleanArgs, next, access_token),
-  );
-  const metadata = await getResponseMetadata(result);
-
-  // Revalidate organizations and users cache after joining org
-  if (metadata.success) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(tags.organizations, 'max');
-    revalidateTag(tags.users, 'max');
-  }
-
-  return metadata;
-}
-
 export async function updateUserRole(org_id: number, user_id: number, role_uuid: string, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}orgs/${org_id}/users/${user_id}/role/${role_uuid}`,
