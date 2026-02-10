@@ -19,13 +19,22 @@ interface PlayerProps {
 }
 const captionsSVGString = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-captions-icon lucide-captions"><rect width="18" height="14" x="3" y="5" rx="2" ry="2" /><path d="M7 15h4M15 15h2M7 11h2M13 11h4" /></svg>`;
 
+import ruRUMessages from '@/messages/ru-RU.json';
+import kkKZMessages from '@/messages/kk-KZ.json';
+import enUSMessages from '@/messages/en-US.json';
+
 function getArtplayerLocale(locale: string) {
-  // Only import the required language object
-  try {
-    return require('@/messages/Artplayer')[locale] || undefined;
-  } catch {
-    return undefined;
-  }
+  // Map incoming locale to the messages JSON we ship
+  const map: Record<string, any> = {
+    'en': enUSMessages['Artplayer'] ?? undefined,
+    'en-US': enUSMessages['Artplayer'] ?? undefined,
+    'kk': kkKZMessages['Artplayer'] ?? undefined,
+    'kk-KZ': kkKZMessages['Artplayer'] ?? undefined,
+    'ru': ruRUMessages['Artplayer'] ?? undefined,
+    'ru-RU': ruRUMessages['Artplayer'] ?? undefined,
+  };
+
+  return map[locale] || undefined;
 }
 
 export default function ArtPlayer({

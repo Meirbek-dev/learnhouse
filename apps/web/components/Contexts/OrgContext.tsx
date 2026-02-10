@@ -3,13 +3,13 @@
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
 import ErrorUI from '@components/Objects/StyledElements/Error/Error';
+import { createContext, useContext, useEffect, useRef } from 'react';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { Home, LogOut, PersonStanding } from 'lucide-react';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { createContext, useContext, useEffect, useRef } from 'react';
+import { signOut, useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { signOut, useSession } from 'next-auth/react';
 import type { Org } from '@/types/org';
 import type { ReactNode } from 'react';
 import useSWR from 'swr';
@@ -67,7 +67,7 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
     }
 
     // If session permissions are for a different org, trigger a refresh
-    if (sessionOrgId != null && sessionOrgId !== org.id) {
+    if (sessionOrgId !== null && sessionOrgId !== org.id) {
       updateSession();
     }
   }, [org?.id, isAuthenticated, session?.data, updateSession]);

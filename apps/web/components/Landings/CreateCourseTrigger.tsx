@@ -2,9 +2,9 @@
 
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
-import { revalidateTags } from '@services/utils/ts/requests';
 import { Actions, PermissionGuard, Resources, Scopes } from '@/components/Security';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { revalidateTags } from '@services/utils/ts/requests';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 

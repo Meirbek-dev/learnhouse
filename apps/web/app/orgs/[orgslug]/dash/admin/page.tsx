@@ -1,8 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import AdminHeaderClient from './AdminHeaderClient';
 import { Shield, Users } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import AdminHeaderClient from './AdminHeaderClient';
 
 export const metadata: Metadata = {
   title: 'Admin Dashboard',

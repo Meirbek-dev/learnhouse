@@ -22,8 +22,8 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
-import RolesUpdate from '@components/Objects/Modals/Dash/OrgUsers/RolesUpdate';
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
+import RolesUpdate from '@components/Objects/Modals/Dash/OrgUsers/RolesUpdate';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 
 import { AlertTriangle, KeyRound, Loader2, LogOut, Search } from 'lucide-react';

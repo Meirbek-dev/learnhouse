@@ -6,10 +6,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { useTranslations } from 'next-intl';
 import type { JSX, SVGProps } from 'react';
 import Link from '@components/ui/AppLink';
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
 
 const Logo = (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
   <svg
@@ -81,7 +81,7 @@ export default function SignIn() {
                 className="text-muted-foreground/80 hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md transition-[color,box-shadow] outline-none focus:z-10 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
                 type="button"
                 onClick={togglePasswordVisibility}
-                aria-label={isPasswordVisible ? t('hidePassword') : t('showPassword') }
+                aria-label={isPasswordVisible ? t('hidePassword') : t('showPassword')}
                 aria-pressed={isPasswordVisible}
                 aria-controls="password"
               >

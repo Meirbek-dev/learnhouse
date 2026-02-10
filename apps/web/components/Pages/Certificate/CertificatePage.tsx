@@ -617,7 +617,9 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
             {/* Footer */}
             <View style={styles.footerSection}>
               <View style={styles.footerLine} />
-              <Text style={styles.footer}>{`${t('verificationNote')}:`} {qrCodeData.replace('https://', '').replace('http://', '')}</Text>
+              <Text style={styles.footer}>
+                {`${t('verificationNote')}:`} {qrCodeData.replace('https://', '').replace('http://', '')}
+              </Text>
             </View>
           </Page>
         </Document>

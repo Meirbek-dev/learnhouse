@@ -5,9 +5,9 @@ import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOf
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
-import { revalidateTags } from '@services/utils/ts/requests';
 import CourseGridClient from '@components/Landings/CourseGridClient';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { revalidateTags } from '@services/utils/ts/requests';
 
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';

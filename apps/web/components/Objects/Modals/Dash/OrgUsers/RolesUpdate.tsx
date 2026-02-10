@@ -2,9 +2,9 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { assignRoleToUser, removeRoleFromUser } from '@/services/rbac';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { Alert, AlertDescription } from '@components/ui/alert';
-import { assignRoleToUser, removeRoleFromUser } from '@/services/rbac';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -83,8 +83,8 @@ const RolesUpdate: FC<Props> = (props) => {
         await mutate(`${getAPIUrl()}orgs/${org.id}/users`);
         props.setRolesModal(false);
         toast.success(t('toastSuccess'), { id: toastId });
-      } catch (err: any) {
-        const detail = err?.message ?? 'Unknown error';
+      } catch (error: any) {
+        const detail = error?.message ?? 'Unknown error';
         setError(detail);
         toast.error(t('toastError'), { id: toastId });
       }

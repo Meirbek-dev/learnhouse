@@ -113,8 +113,7 @@ const useNavigationItems = () => {
     can(Actions.UPDATE, Resources.ROLE, Scopes.ORG) ||
     can(Actions.READ, Resources.ROLE, Scopes.ORG) ||
     can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.ORG);
-  const canSeePayments =
-    isPaymentsEnabled && can(Actions.MANAGE, Resources.PAYMENT, Scopes.ORG);
+  const canSeePayments = isPaymentsEnabled && can(Actions.MANAGE, Resources.PAYMENT, Scopes.ORG);
 
   return [
     {

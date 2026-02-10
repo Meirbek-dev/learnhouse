@@ -5,10 +5,10 @@ import platformLogoFull from 'public/platform_logo_full.svg';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { useEffect } from 'react';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
 
 interface SignUpClientProps {
   org: any;

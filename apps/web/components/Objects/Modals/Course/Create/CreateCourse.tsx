@@ -29,7 +29,6 @@ interface CreateCourseModalProps {
   onCreated?: () => void | Promise<void>;
 } // Note: parent must pass `org_id` to avoid an extra fetch. Use `onCreated` to run post-create work (e.g., revalidate tags)
 
-
 const CreateCourseModal = ({ closeModal, org_id, onCreated }: CreateCourseModalProps) => {
   const t = useTranslations('Components.CreateCourseModal');
 
@@ -81,8 +80,6 @@ const CreateCourseModal = ({ closeModal, org_id, onCreated }: CreateCourseModalP
     },
   });
 
-
-
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -96,8 +93,6 @@ const CreateCourseModal = ({ closeModal, org_id, onCreated }: CreateCourseModalP
 
   const onSubmit = useCallback(
     (values: FormValues) => {
-
-
       const toastId = toast.loading(t('toastLoading'));
 
       startTransition(() => {
@@ -124,8 +119,8 @@ const CreateCourseModal = ({ closeModal, org_id, onCreated }: CreateCourseModalP
               if (res.data.org_id === orgId) {
                 try {
                   await Promise.resolve(onCreated?.());
-                } catch (err) {
-                  console.warn('onCreated callback failed:', err);
+                } catch (error) {
+                  console.warn('onCreated callback failed:', error);
                 }
                 closeModal();
                 router.refresh();

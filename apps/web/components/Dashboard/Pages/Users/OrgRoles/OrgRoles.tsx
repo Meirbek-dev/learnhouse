@@ -13,8 +13,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
-import { AlertTriangle, Globe, Loader2, Pencil, Shield, X } from 'lucide-react';
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
+import { AlertTriangle, Globe, Loader2, Pencil, Shield, X } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import EditRole from '@components/Objects/Modals/Dash/OrgRoles/EditRole';
 import AddRole from '@components/Objects/Modals/Dash/OrgRoles/AddRole';

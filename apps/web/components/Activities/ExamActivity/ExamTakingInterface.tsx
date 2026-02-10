@@ -187,7 +187,10 @@ export default function ExamTakingInterface({
     trackBlur: settings.tab_switch_detection,
     trackDevTools: settings.devtools_detection,
     maxViolations: settings.violation_threshold || 999,
-    onViolation: handleViolation,
+    // Wrap the async handler to avoid passing a Promise-returning function to the hook
+    onViolation: (type, count) => {
+      void handleViolation(type, count);
+    },
     // Debounce options to reduce false positives
     blurDebounceMs: 500, // Wait 500ms before reporting blur (user might switch back quickly)
     devToolsThreshold: 180, // More conservative threshold for DevTools detection
@@ -223,7 +226,7 @@ export default function ExamTakingInterface({
       }
     };
 
-    const handleFullscreenChange = async () => {
+    const handleFullscreenChange = () => {
       const inFullscreen = Boolean(document.fullscreenElement);
       setIsFullscreen(inFullscreen);
 

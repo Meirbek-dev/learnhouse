@@ -23,9 +23,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronRight, Edit, Lock, Plus, Search, Shield, Trash2, Users } from 'lucide-react';
+import type { Permission, Role, RoleWithPermissions } from '@/types/permissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import type { Permission, Role, RoleWithPermissions } from '@/types/permissions';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -33,9 +33,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { useTranslations } from 'next-intl';
 
 export default function RBACAdminClient() {
   const org = useOrg();
@@ -74,7 +74,7 @@ export default function RBACAdminClient() {
               // Descending priority
               return (b.priority ?? 0) - (a.priority ?? 0);
             })
-            .map((r) => ({ ...r, permissions: [] })),
+            .map((r) => (Object.assign(r, {permissions:[]}))),
         );
         setPermissions(permsData);
       } catch (error) {
@@ -243,7 +243,8 @@ export default function RBACAdminClient() {
           <CardContent>
             <div className="text-2xl font-bold">{roles.length}</div>
             <p className="text-muted-foreground text-xs">
-              {roles.filter((r) => r.is_system).length} {t('system')}, {roles.filter((r) => !r.is_system).length} {t('custom')}
+              {roles.filter((r) => r.is_system).length} {t('system')}, {roles.filter((r) => !r.is_system).length}{' '}
+              {t('custom')}
             </p>
           </CardContent>
         </Card>
@@ -401,7 +402,9 @@ export default function RBACAdminClient() {
                   <div key={resourceType}>
                     <h3 className="mb-2 flex items-center gap-2 font-semibold">
                       <Badge variant="outline">{resourceType}</Badge>
-                      <span className="text-muted-foreground text-sm">({t('permissionsCount', { count: perms.length })})</span>
+                      <span className="text-muted-foreground text-sm">
+                        ({t('permissionsCount', { count: perms.length })})
+                      </span>
                     </h3>
                     <div className="ml-4 grid gap-2">
                       {perms.map((perm) => (
@@ -524,7 +527,7 @@ export default function RBACAdminClient() {
                 variant="outline"
                 onClick={() => setIsPermissionsDialogOpen(false)}
               >
-                {'Done'}
+                Done
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -580,9 +583,7 @@ function RoleEditForm({
     <form onSubmit={handleSubmit}>
       <DialogHeader>
         <DialogTitle>{role ? t('editRoleTitle') : t('createRoleTitle')}</DialogTitle>
-        <DialogDescription>
-          {role ? t('editRoleDescription') : t('createRoleDescription')}
-        </DialogDescription>
+        <DialogDescription>{role ? t('editRoleDescription') : t('createRoleDescription')}</DialogDescription>
       </DialogHeader>
       <div className="grid gap-4 py-4">
         <div className="grid gap-2">
@@ -605,9 +606,7 @@ function RoleEditForm({
             disabled={Boolean(role)}
             required
           />
-          <p className="text-muted-foreground text-xs">
-            {t('slugHelp')}
-          </p>
+          <p className="text-muted-foreground text-xs">{t('slugHelp')}</p>
         </div>
         <div className="grid gap-2">
           <Label htmlFor="description">{t('fieldDescription')}</Label>

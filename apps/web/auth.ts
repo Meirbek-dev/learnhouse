@@ -1,9 +1,3 @@
-import Credentials from 'next-auth/providers/credentials';
-import Google from 'next-auth/providers/google';
-import { createHash } from 'node:crypto';
-import { cookies } from 'next/headers';
-import NextAuth from 'next-auth';
-import type { NextAuthConfig, NextAuthResult } from 'next-auth'
 import {
   getNewAccessTokenUsingRefreshTokenServer,
   getUserSession,
@@ -12,17 +6,23 @@ import {
 } from '@/services/auth/auth';
 import { getTopLevelCookieDomain, getUriWithOrg } from '@/services/config/config';
 import { getResponseMetadata } from '@/services/utils/ts/requests';
+import type { NextAuthConfig, NextAuthResult } from 'next-auth';
+import Credentials from 'next-auth/providers/credentials';
+import Google from 'next-auth/providers/google';
+import { createHash } from 'node:crypto';
+import { cookies } from 'next/headers';
+import NextAuth from 'next-auth';
 
 // session cache with TTL and size limits
 declare global {
   var sessionCache:
     | Map<
-      string,
-      {
-        data: SessionData;
-        timestamp: number;
-      }
-    >
+        string,
+        {
+          data: SessionData;
+          timestamp: number;
+        }
+      >
     | undefined;
 }
 
@@ -467,7 +467,7 @@ const authConfig: NextAuthConfig = {
 
 const nextAuthResult: NextAuthResult = NextAuth(authConfig);
 
-export const handlers: NextAuthResult['handlers'] = nextAuthResult.handlers;
-export const signIn: NextAuthResult['signIn'] = nextAuthResult.signIn;
-export const signOut: NextAuthResult['signOut'] = nextAuthResult.signOut;
-export const auth: NextAuthResult['auth'] = nextAuthResult.auth;
+export const {handlers} = nextAuthResult;
+export const {signIn} = nextAuthResult;
+export const {signOut} = nextAuthResult;
+export const {auth} = nextAuthResult;

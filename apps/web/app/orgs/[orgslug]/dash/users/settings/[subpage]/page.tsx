@@ -66,18 +66,22 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
   const tabs = useMemo(() => {
     return allTabs.filter((tab) => {
       switch (tab.id) {
-        case 'users':
+        case 'users': {
           return (
             can(Actions.READ, Resources.USER, Scopes.ORG) ||
             can(Actions.INVITE, Resources.USER, Scopes.ORG) ||
             can(Actions.UPDATE, Resources.USER, Scopes.ORG)
           );
-        case 'usergroups':
+        }
+        case 'usergroups': {
           return can(Actions.MANAGE, Resources.USERGROUP, Scopes.ORG);
-        case 'roles':
+        }
+        case 'roles': {
           return can(Actions.READ, Resources.ROLE, Scopes.ORG);
-        default:
+        }
+        default: {
           return true;
+        }
       }
     });
   }, [allTabs, can]);
