@@ -549,7 +549,15 @@
     },
     "Login": {
       "email": "Электронная почта",
+      "emailAddress": "Адрес электронной почты",
       "emailPlaceholder": "Введите ваш email",
+      "signInToAcme": "Вход в Acme",
+      "welcomeBack": "С возвращением! Пожалуйста, введите ваши данные.",
+      "resetPassword": "Сбросить пароль",
+      "rememberMe": "Запомнить меня",
+      "signIn": "Войти",
+      "sso": "Единый вход (SSO)",
+      "newToAcme": "Впервые в Acme?",
       "forgotPassword": "Забыли пароль?",
       "hidePassword": "Скрыть пароль",
       "loading": "Загрузка...",
@@ -600,6 +608,9 @@
       "signInWithGoogle": "Войти с помощью Google",
       "submit": "Отправить",
       "title": "Регистрация — Ashyq Bilim",
+      "redirecting": "Перенаправление...",
+      "formComponentNeeded": "Требуется компонент формы регистрации.",
+      "autoJoinDefaultOrg": "Пользователи автоматически присоединяются к организации по умолчанию при регистрации.",
       "username": "Имя пользователя",
       "usernamePlaceholder": "Введите имя пользователя"
     },
@@ -855,6 +866,7 @@
     "googleLogo": "Логотип Google",
     "loading": "Загрузка...",
     "logoAlt": "Логотип Ashyq Bilim",
+    "owner": "Владелец",
     "save": "Сохранить",
     "saved": "Сохранено",
     "saving": "Сохранение...",
@@ -1530,8 +1542,21 @@
       "permissions": "Разрешения",
       "permissionsCount": "{count} разрешений",
       "roleName": "Название роли",
-      "systemWide": "На уровне всей системы"
+      "systemWide": "На уровне всей системы",
+      "userRolesTitle": "Роли пользователей",
+      "userRolesDescription": "Управляйте назначениями ролей для участников организации",
+      "assignRole": "Назначить роль",
+      "assignRoleTitle": "Назначить роль пользователю",
+      "assignRoleDescription": "Выберите пользователя и роль для назначения.",
+      "userLabel": "Пользователь",
+      "roleLabel": "Роль",
+      "assignedAt": "Назначено",
+      "expires": "Истекает",
+      "actions": "Действия",
+      "noUserRoleAssignments": "Назначения ролей пользователей не найдены",
+      "never": "Никогда"
     },
+
     "PageLoading": {
       "loading": "Загрузка..."
     },

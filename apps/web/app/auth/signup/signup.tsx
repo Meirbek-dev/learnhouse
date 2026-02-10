@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import Link from '@components/ui/AppLink';
 import { useEffect } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 interface SignUpClientProps {
   org: any;
@@ -17,6 +18,7 @@ const SignUpClient = (props: SignUpClientProps) => {
   const session = usePlatformSession() as any;
   const router = useRouter();
   const org = useOrg() as any;
+  const t = useTranslations('Auth.Signup');
 
   // Redirect authenticated users to home page
   // They're already auto-joined to 'openu' during registration
@@ -46,7 +48,7 @@ const SignUpClient = (props: SignUpClientProps) => {
         </div>
         {session.status === 'authenticated' ? (
           <div className="flex flex-col items-center justify-center space-y-4">
-            <p className="text-lg text-neutral-600">Redirecting...</p>
+            <p className="text-lg text-neutral-600">{t('redirecting')}</p>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center space-y-4 p-8">
@@ -54,9 +56,9 @@ const SignUpClient = (props: SignUpClientProps) => {
             {/* Users will be automatically joined to 'openu' organization on signup */}
             {/* Use the signup() function from @services/auth/auth.ts */}
             <p className="text-center text-neutral-600">
-              Signup form component needed.
+              {t('formComponentNeeded')}
               <br />
-              <span className="text-sm">Users auto-join to default organization on registration.</span>
+              <span className="text-sm">{t('autoJoinDefaultOrg')}</span>
             </p>
           </div>
         )}

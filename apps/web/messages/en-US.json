@@ -549,7 +549,15 @@
     },
     "Login": {
       "email": "Email",
+      "emailAddress": "Email address",
       "emailPlaceholder": "Enter your email",
+      "signInToAcme": "Sign in to Acme",
+      "welcomeBack": "Welcome back! Please enter your details.",
+      "resetPassword": "Reset password",
+      "rememberMe": "Remember me",
+      "signIn": "Sign In",
+      "sso": "Single sign-on (SSO)",
+      "newToAcme": "New to Acme?",
       "forgotPassword": "Forgot Password?",
       "hidePassword": "Hide password",
       "loading": "Loading...",
@@ -600,6 +608,9 @@
       "signInWithGoogle": "Sign in with Google",
       "submit": "Submit",
       "title": "Sign up — {orgName}",
+      "redirecting": "Redirecting...",
+      "formComponentNeeded": "Signup form component needed.",
+      "autoJoinDefaultOrg": "Users auto-join to default organization on registration.",
       "username": "Username",
       "usernamePlaceholder": "Enter your username"
     },
@@ -855,6 +866,7 @@
     "googleLogo": "Google logo",
     "loading": "Loading...",
     "logoAlt": "Ashyq Bilim logo",
+    "owner": "Owner",
     "save": "Save",
     "saved": "Saved",
     "saving": "Saving...",
@@ -1530,7 +1542,19 @@
       "permissions": "Permissions",
       "permissionsCount": "{count} permissions",
       "roleName": "Role Name",
-      "systemWide": "System-wide"
+      "systemWide": "System-wide",
+      "userRolesTitle": "User Roles",
+      "userRolesDescription": "Manage role assignments for organization members",
+      "assignRole": "Assign Role",
+      "assignRoleTitle": "Assign Role to User",
+      "assignRoleDescription": "Select a user and a role to assign to them.",
+      "userLabel": "User",
+      "roleLabel": "Role",
+      "assignedAt": "Assigned At",
+      "expires": "Expires",
+      "actions": "Actions",
+      "noUserRoleAssignments": "No user role assignments found",
+      "never": "Never"
     },
     "PageLoading": {
       "loading": "Loading..."
@@ -1899,6 +1923,8 @@
     },
     "Org": {
       "fetchError": "An error occurred while loading organization data",
+      "adminTitle": "Administration",
+      "adminDescription": "Manage organization settings and access control",
       "home": "Home",
       "notMemberInfo": "You are not part of Ashyq Bilim yet",
       "signOut": "Sign Out"

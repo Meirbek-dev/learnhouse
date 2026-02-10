@@ -1,8 +1,11 @@
+import tsParser from '@typescript-eslint/parser';
+import { defineConfig } from 'eslint/config';
+import js from '@eslint/js';
+
+// Plugins
 import unusedImports from 'eslint-plugin-unused-imports';
 import tseslint from '@typescript-eslint/eslint-plugin';
 import reactHooks from 'eslint-plugin-react-hooks';
-import tsParser from '@typescript-eslint/parser';
-import { defineConfig } from 'eslint/config';
 import next from '@next/eslint-plugin-next';
 import react from 'eslint-plugin-react';
 
@@ -15,7 +18,7 @@ const COMMON_RULES = {
   // React
   'react/prop-types': 'off',
   'react/no-unescaped-entities': 'off',
-  'react/jsx-no-literals': 'off', // Detect hardcoded strings
+  'react/jsx-no-literals': 'warn', // Detect hardcoded strings
 
   // React Hooks
   'react-hooks/rules-of-hooks': 'error',
@@ -29,6 +32,14 @@ const COMMON_RULES = {
 };
 
 export default defineConfig([
+  // ─────────────────────────────────────────────
+  // eslint:recommended
+  // ─────────────────────────────────────────────
+  {
+    ...js.configs.recommended,
+    name: 'eslint:recommended',
+  },
+
   // ─────────────────────────────────────────────
   // Global ignores
   // ─────────────────────────────────────────────
@@ -94,11 +105,12 @@ export default defineConfig([
       '@typescript-eslint/no-unsafe-function-type': 'off',
       '@typescript-eslint/triple-slash-reference': 'warn',
 
-      // Core overrides (JSX refs now tracked)
+      // Core overrides
       'no-undef': 'off',
       'no-redeclare': 'warn',
       'no-empty': 'warn',
       'no-unused-expressions': 'warn',
+      'no-unused-vars': 'off',
     },
   },
 ]);

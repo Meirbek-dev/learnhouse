@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Shield, Users } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import AdminHeaderClient from './AdminHeaderClient';
 
 export const metadata: Metadata = {
   title: 'Admin Dashboard',
@@ -27,8 +28,7 @@ export default function AdminPage() {
   return (
     <div className="container mx-auto space-y-6 p-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Administration</h1>
-        <p className="text-muted-foreground">Manage organization settings and access control</p>
+        <AdminHeaderClient />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

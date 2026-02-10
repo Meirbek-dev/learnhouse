@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import type { JSX, SVGProps } from 'react';
 import Link from '@components/ui/AppLink';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 const Logo = (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
   <svg
@@ -34,6 +35,7 @@ const Logo = (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
 
 export default function SignIn() {
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
+  const t = useTranslations('Auth.Login');
 
   const togglePasswordVisibility = () => setIsPasswordVisible((prev) => !prev);
 
@@ -45,13 +47,13 @@ export default function SignIn() {
             <Logo />
           </div>
           <div>
-            <h2 className="text-2xl font-semibold">Sign in to Acme</h2>
-            <p className="text-muted-foreground text-sm">Welcome back! Please enter your details.</p>
+            <h2 className="text-2xl font-semibold">{t('signInToAcme')}</h2>
+            <p className="text-muted-foreground text-sm">{t('welcomeBack')}</p>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="email">Email address</Label>
+            <Label htmlFor="email">{t('emailAddress')}</Label>
             <Input
               id="email"
               type="email"
@@ -65,21 +67,21 @@ export default function SignIn() {
                 href="#"
                 className="text-primary text-sm hover:underline"
               >
-                Reset password
+                {t('resetPassword')}
               </Link>
             </div>
             <div className="relative">
               <Input
                 id="password"
                 className="pe-9"
-                placeholder="Enter your password"
+                placeholder={t('passwordPlaceholder')}
                 type={isPasswordVisible ? 'text' : 'password'}
               />
               <button
                 className="text-muted-foreground/80 hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md transition-[color,box-shadow] outline-none focus:z-10 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
                 type="button"
                 onClick={togglePasswordVisibility}
-                aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
+                aria-label={isPasswordVisible ? t('hidePassword') : t('showPassword') }
                 aria-pressed={isPasswordVisible}
                 aria-controls="password"
               >
@@ -106,7 +108,7 @@ export default function SignIn() {
               htmlFor="remember"
               className="text-sm font-normal"
             >
-              Remember me
+              {t('rememberMe')}
             </Label>
           </div>
 
@@ -115,7 +117,7 @@ export default function SignIn() {
               className="w-full"
               type="submit"
             >
-              Sign In
+              {t('signIn')}
             </Button>
             <Button
               variant="outline"
@@ -123,18 +125,18 @@ export default function SignIn() {
               type="button"
             >
               <Key className="mr-2 h-4 w-4" />
-              Single sign-on (SSO)
+              {t('sso')}
             </Button>
           </div>
         </CardContent>
         <CardFooter className="flex justify-center border-t py-4!">
           <p className="text-muted-foreground text-center text-sm">
-            New to Acme?{' '}
+            {t('newToAcme')}{' '}
             <Link
               href="#"
               className="text-primary hover:underline"
             >
-              Sign up
+              {t('signup')}
             </Link>
           </p>
         </CardFooter>
