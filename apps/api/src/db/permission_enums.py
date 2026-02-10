@@ -80,9 +80,9 @@ SYSTEM_ROLES: dict[str, dict] = {
         "description": "Organization administrator with full org control",
         "priority": 90,
         "permissions": [
-            "organization:manage:own",
-            "organization:update:own",
-            "organization:read:own",
+            "organization:manage:org",
+            "organization:update:org",
+            "organization:read:org",
             "course:*:org",
             "chapter:*:org",
             "activity:*:org",

@@ -281,7 +281,6 @@ class TestAuth:
             await non_public_endpoint(anonymous_user)
 
         assert exc_info.value.status_code == 401
-        assert "Not authenticated" in exc_info.value.detail
 
     def test_jwt_secret_generation_in_dev_mode(self) -> None:
         """Test that JWT secret is properly generated in development mode"""

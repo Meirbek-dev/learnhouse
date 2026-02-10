@@ -469,12 +469,12 @@ const FlipcardExtension: React.FC<ReactNodeViewProps> = ({ node, updateAttribute
   );
 
   return (
-    <NodeViewWrapper className={twMerge('flipcard-wrapper my-4 flex', alignmentClass)}>
+    <NodeViewWrapper className={twMerge('my-4 flex', alignmentClass)}>
       <div className="group relative inline-flex flex-col items-center">
         {/* Card */}
         <div
           ref={cardRef}
-          className={twMerge('flipcard-container [perspective:1000px]', sizeConfig.container)}
+          className={twMerge('[perspective:1000px]', sizeConfig.container)}
           tabIndex={isEditable ? -1 : 0}
           role="button"
           aria-disabled={isEditable}
@@ -489,7 +489,7 @@ const FlipcardExtension: React.FC<ReactNodeViewProps> = ({ node, updateAttribute
         >
           <div
             className={twMerge(
-              'flipcard-inner relative h-full w-full transition-transform duration-500',
+              'relative h-full w-full transition-transform duration-500',
               '[transform-style:preserve-3d]',
               isFlipped && '[transform:rotateY(180deg)]',
             )}
@@ -497,7 +497,7 @@ const FlipcardExtension: React.FC<ReactNodeViewProps> = ({ node, updateAttribute
             {/* Front (Question) */}
             <div
               className={twMerge(
-                'flipcard-front absolute inset-0 rounded-2xl border-2 shadow-lg [backface-visibility:hidden]',
+                'absolute inset-0 rounded-2xl border-2 shadow-lg [backface-visibility:hidden]',
                 colorConfig.front,
               )}
             >
@@ -519,7 +519,7 @@ const FlipcardExtension: React.FC<ReactNodeViewProps> = ({ node, updateAttribute
             {/* Back (Answer) */}
             <div
               className={twMerge(
-                'flipcard-back absolute inset-0 rounded-2xl border-2 shadow-lg [backface-visibility:hidden] [transform:rotateY(180deg)]',
+                'absolute inset-0 rounded-2xl border-2 shadow-lg [backface-visibility:hidden] [transform:rotateY(180deg)]',
                 colorConfig.back,
               )}
             >
