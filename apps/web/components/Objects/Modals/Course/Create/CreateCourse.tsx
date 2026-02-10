@@ -2,12 +2,11 @@
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
+
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Image as ImageIcon, Loader2, UploadCloud, X } from 'lucide-react';
 import { TagsInput } from '@components/ui/custom/tags-input';
-import { revalidateTags } from '@services/utils/ts/requests';
 import { createNewCourse } from '@services/courses/courses';
 import { Card, CardFooter } from '@components/ui/card';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,15 +25,16 @@ const VALID_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp',
 
 interface CreateCourseModalProps {
   closeModal: () => void;
-  orgslug: string;
-  org_id?: number;
-}
+  org_id: number;
+  onCreated?: () => void | Promise<void>;
+} // Note: parent must pass `org_id` to avoid an extra fetch. Use `onCreated` to run post-create work (e.g., revalidate tags)
 
-const CreateCourseModal = ({ closeModal, orgslug, org_id }: CreateCourseModalProps) => {
+
+const CreateCourseModal = ({ closeModal, org_id, onCreated }: CreateCourseModalProps) => {
   const t = useTranslations('Components.CreateCourseModal');
 
-  // If parent already passed org_id, use it immediately instead of fetching by slug
-  const [orgId, setOrgId] = useState<number | null>(org_id ?? null);
+  // Parent must provide `org_id` to avoid fetching by slug
+  const orgId = org_id;
   const router = useRouter();
   const session = usePlatformSession() as any;
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -81,31 +81,7 @@ const CreateCourseModal = ({ closeModal, orgslug, org_id }: CreateCourseModalPro
     },
   });
 
-  // Load organization ID when not already provided by props
-  useEffect(() => {
-    if (org_id !== undefined && org_id !== null) return; // parent provided it
-    if (!orgslug) return;
 
-    const loadOrgId = async () => {
-      try {
-        console.debug('Loading organization metadata for slug', orgslug);
-        const org = await getOrganizationContextInfoWithoutCredentials(orgslug, {
-          revalidate: 360,
-          tags: ['organizations'],
-        });
-        console.debug('Organization metadata loaded', org);
-        if (org && org.id) {
-          setOrgId(org.id);
-        } else {
-          console.error('Organization metadata missing id', org);
-        }
-      } catch (error) {
-        console.error('Failed to load org metadata', error);
-      }
-    };
-
-    void loadOrgId();
-  }, [orgslug, org_id]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -120,10 +96,7 @@ const CreateCourseModal = ({ closeModal, orgslug, org_id }: CreateCourseModalPro
 
   const onSubmit = useCallback(
     (values: FormValues) => {
-      if (orgId === null) {
-        toast.error(t('toastErrorOrgMissing'));
-        return;
-      }
+
 
       const toastId = toast.loading(t('toastLoading'));
 
@@ -149,7 +122,11 @@ const CreateCourseModal = ({ closeModal, orgslug, org_id }: CreateCourseModalPro
               toast.success(t('toastSuccess'));
 
               if (res.data.org_id === orgId) {
-                await revalidateTags(['courses'], orgslug);
+                try {
+                  await Promise.resolve(onCreated?.());
+                } catch (err) {
+                  console.warn('onCreated callback failed:', err);
+                }
                 closeModal();
                 router.refresh();
               }
@@ -171,7 +148,7 @@ const CreateCourseModal = ({ closeModal, orgslug, org_id }: CreateCourseModalPro
         })();
       });
     },
-    [orgId, session, orgslug, closeModal, router, t],
+    [t, orgId, session.data?.tokens?.access_token, closeModal, router, onCreated],
   );
 
   const handleFileChange = useCallback(

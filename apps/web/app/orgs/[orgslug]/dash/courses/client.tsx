@@ -4,6 +4,7 @@ import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbna
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
+import { revalidateTags } from '@services/utils/ts/requests';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -44,8 +45,10 @@ const CoursesHome = (params: CourseProps) => {
       dialogContent={
         <CreateCourseModal
           closeModal={closeNewCourseModal}
-          orgslug={orgslug}
           org_id={params.org_id}
+          onCreated={async () => {
+            await revalidateTags(['courses'], orgslug);
+          }}
         />
       }
       dialogTitle={t('createCourse')}

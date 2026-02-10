@@ -5,6 +5,7 @@ import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOf
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
+import { revalidateTags } from '@services/utils/ts/requests';
 import CourseGridClient from '@components/Landings/CourseGridClient';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 
@@ -97,8 +98,11 @@ const Courses = (props: CourseProps) => {
             dialogContent={
               <CreateCourseModal
                 closeModal={closeNewCourseModal}
-                orgslug={orgslug}
                 org_id={org_id}
+                onCreated={async () => {
+                  // Revalidate pages for this org after a course is created
+                  await revalidateTags(['courses'], orgslug);
+                }}
               />
             }
             dialogTitle={t('createCourse')}

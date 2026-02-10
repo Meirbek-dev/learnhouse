@@ -2,6 +2,7 @@
 
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
+import { revalidateTags } from '@services/utils/ts/requests';
 import { Actions, PermissionGuard, Resources, Scopes } from '@/components/Security';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useTranslations } from 'next-intl';
@@ -36,8 +37,10 @@ export default function CreateCourseTrigger({ orgslug, org_id }: CreateCourseTri
           dialogContent={
             <CreateCourseModal
               closeModal={closeNewCourseModal}
-              orgslug={orgslug}
               org_id={org_id}
+              onCreated={async () => {
+                await revalidateTags(['courses'], orgslug);
+              }}
             />
           }
           dialogTitle={t('createCourse')}
