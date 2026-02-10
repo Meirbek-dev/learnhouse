@@ -68,7 +68,8 @@ async def search_across_org(
             UserRole,
             and_(UserRole.user_id == User.id, UserRole.org_id == org.id),
         )
-        .distinct()
+        # Use DISTINCT on `User.id` to avoid comparing JSON columns
+        .distinct(User.id)
         .where(
             or_(
                 text(

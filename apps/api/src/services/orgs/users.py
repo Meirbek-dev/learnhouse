@@ -52,17 +52,23 @@ async def get_organization_users(
     checker.require(current_user.id, "organization:read", org.id)
 
     # Build base query joining via UserRole
-    # Get distinct users who have any role in this org
+    # Get distinct users who have any role in this org; use DISTINCT on `User.id`
+    # to avoid comparing JSON columns (which don't have equality operators).
     base_statement = (
         select(User)
         .join(UserRole, UserRole.user_id == User.id)
         .where(UserRole.org_id == org_id_int)
-        .distinct()
+        .distinct(User.id)
     )
 
-    # Get total count
-    all_users = db_session.exec(base_statement).all()
-    total = len(all_users)
+    # Get total count by selecting distinct user IDs only (avoids JSON equality issues)
+    all_user_ids = db_session.exec(
+        select(User.id)
+        .join(UserRole, UserRole.user_id == User.id)
+        .where(UserRole.org_id == org_id_int)
+        .distinct()
+    ).all()
+    total = len(all_user_ids)
 
     # Apply pagination
     offset = (page - 1) * per_page
