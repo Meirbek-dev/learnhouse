@@ -41,7 +41,7 @@ export default function RBACAdminClient() {
   const session = usePlatformSession();
   const { can } = usePermissions();
 
-  const [roles, setRoles] = useState<Role[]>([]);
+  const [roles, setRoles] = useState<RoleWithPermissions[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,13 +64,15 @@ export default function RBACAdminClient() {
         ]);
         // Sort roles so system roles and higher-priority roles appear first
         setRoles(
-          rolesData.toSorted((a, b) => {
-            const aSystem = a.is_system ? 0 : 1;
-            const bSystem = b.is_system ? 0 : 1;
-            if (aSystem !== bSystem) return aSystem - bSystem;
-            // Descending priority
-            return (b.priority ?? 0) - (a.priority ?? 0);
-          }),
+          rolesData
+            .toSorted((a, b) => {
+              const aSystem = a.is_system ? 0 : 1;
+              const bSystem = b.is_system ? 0 : 1;
+              if (aSystem !== bSystem) return aSystem - bSystem;
+              // Descending priority
+              return (b.priority ?? 0) - (a.priority ?? 0);
+            })
+            .map((r) => ({ ...r, permissions: [] })),
         );
         setPermissions(permsData);
       } catch (error) {
@@ -123,7 +125,7 @@ export default function RBACAdminClient() {
 
     try {
       const updatedRole = await apiUpdateRole(accessToken, roleId, data);
-      setRoles(roles.map((r) => (r.id === roleId ? { ...r, ...updatedRole } : r)));
+      setRoles(roles.map((r) => (r.id === roleId ? { ...r, ...updatedRole, permissions: r.permissions ?? [] } : r)));
       toast.success('Role updated successfully');
       setIsEditDialogOpen(false);
       setSelectedRole(null);
