@@ -180,9 +180,10 @@ export const SearchBar: FC<SearchBarProps> = ({
         console.error('Error searching content:', error);
         setSearchResults({ courses: [], collections: [], users: [] });
       } finally {
-        if (controller.signal.aborted) return;
-        setIsLoading(false);
-        setIsInitialLoad(false);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+          setIsInitialLoad(false);
+        }
       }
     })();
 
