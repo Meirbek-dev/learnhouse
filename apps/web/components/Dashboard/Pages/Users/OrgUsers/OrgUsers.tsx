@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/pagination';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import RolesUpdate from '@components/Objects/Modals/Dash/OrgUsers/RolesUpdate';
+import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 
 import { AlertTriangle, KeyRound, Loader2, LogOut, Search } from 'lucide-react';
@@ -101,6 +102,9 @@ const OrgUsers = () => {
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.UserSettings.usersSection');
   const userRoles = session?.data?.roles ?? [];
+  const { can } = usePermissions();
+  const canUpdateRole = can(Actions.UPDATE, Resources.ROLE, Scopes.ORG);
+  const canDeleteUser = can(Actions.DELETE, Resources.USER, Scopes.ORG);
 
   const getRolePriority = (roleObj: any) => {
     if (!roleObj) return 0;
@@ -244,58 +248,67 @@ const OrgUsers = () => {
                             const targetPriority = getRolePriority(user.role);
                             const canManage = !isSelf && currentUserPriority > targetPriority;
 
-                            if (!canManage) {
-                              // Determine specific disabled reason for clearer messaging
-                              if (isSelf) return <div className="text-neutral-500">{t('cannotEditSelf')}</div>;
-                              if (currentUserPriority <= targetPriority)
-                                return <div className="text-neutral-500">{t('cannotManageHigherRole')}</div>;
+                            if (isSelf) return <div className="text-neutral-500">{t('cannotEditSelf')}</div>;
+                            if (currentUserPriority <= targetPriority)
+                              return <div className="text-neutral-500">{t('cannotManageHigherRole')}</div>;
+                            if (!canManage)
+                              return <div className="text-neutral-500">{t('noActionsForAdministrators')}</div>;
+
+                            const showEditRole = canUpdateRole;
+                            const showRemoveUser = canDeleteUser;
+
+                            if (!showEditRole && !showRemoveUser) {
                               return <div className="text-neutral-500">{t('noActionsForAdministrators')}</div>;
                             }
 
                             return (
                               <>
-                                <Modal
-                                  isDialogOpen={
-                                    rolesModal ? selectedUser?.user?.user_uuid === user.user.user_uuid : false
-                                  }
-                                  onOpenChange={(isOpen) => {
-                                    if (!isOpen) handleCloseRolesModal();
-                                  }}
-                                  minHeight="no-min"
-                                  dialogContent={
-                                    selectedUser ? (
-                                      <RolesUpdate
-                                        alreadyAssignedRole={selectedUser.role?.id?.toString()}
-                                        setRolesModal={setRolesModal}
-                                        user={selectedUser}
-                                      />
-                                    ) : null
-                                  }
-                                  dialogTitle={t('updateRoleModalTitle')}
-                                  dialogDescription={t('updateRoleModalDescription', {
-                                    username: user.user.username,
-                                  })}
-                                  dialogTrigger={
-                                    <span>
-                                      <button
-                                        className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer"
-                                        onClick={() => {
-                                          handleRolesModal(user);
-                                        }}
-                                      >
-                                        <KeyRound className="h-4 w-4" />
-                                        <span>{t('editRoleButton')}</span>
-                                      </button>
-                                    </span>
-                                  }
-                                />
+                                {showEditRole && (
+                                  <Modal
+                                    isDialogOpen={
+                                      rolesModal ? selectedUser?.user?.user_uuid === user.user.user_uuid : false
+                                    }
+                                    onOpenChange={(isOpen) => {
+                                      if (!isOpen) handleCloseRolesModal();
+                                    }}
+                                    minHeight="no-min"
+                                    dialogContent={
+                                      selectedUser ? (
+                                        <RolesUpdate
+                                          alreadyAssignedRole={selectedUser.role?.id?.toString()}
+                                          setRolesModal={setRolesModal}
+                                          user={selectedUser}
+                                        />
+                                      ) : null
+                                    }
+                                    dialogTitle={t('updateRoleModalTitle')}
+                                    dialogDescription={t('updateRoleModalDescription', {
+                                      username: user.user.username,
+                                    })}
+                                    dialogTrigger={
+                                      <span>
+                                        <button
+                                          className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer"
+                                          onClick={() => {
+                                            handleRolesModal(user);
+                                          }}
+                                        >
+                                          <KeyRound className="h-4 w-4" />
+                                          <span>{t('editRoleButton')}</span>
+                                        </button>
+                                      </span>
+                                    }
+                                  />
+                                )}
 
-                                <RemoveUserButton
-                                  userId={user.user.id}
-                                  username={user.user.username}
-                                  onRemove={handleRemoveUser}
-                                  t={t}
-                                />
+                                {showRemoveUser && (
+                                  <RemoveUserButton
+                                    userId={user.user.id}
+                                    username={user.user.username}
+                                    onRemove={handleRemoveUser}
+                                    t={t}
+                                  />
+                                )}
                               </>
                             );
                           })()}

@@ -247,9 +247,11 @@ async def add_permission_to_role(
     if not perm:
         raise HTTPException(404, detail="Permission not found")
 
-    # Escalation prevention: caller must themselves have the permission being added
-    caller_perms = checker.get_effective_permissions(current_user.id, org_id)
-    if perm.name not in caller_perms and "*:*:*" not in caller_perms:
+    # Escalation prevention: caller must themselves have the permission being added.
+    # Use expanded permissions so wildcards (e.g. course:*:org) resolve to concrete
+    # permission strings (e.g. course:create:org) before comparison.
+    caller_perms = checker.get_expanded_permissions(current_user.id, org_id)
+    if perm.name not in caller_perms:
         raise HTTPException(
             403,
             detail=f"Cannot grant permission '{perm.name}' that you do not have",

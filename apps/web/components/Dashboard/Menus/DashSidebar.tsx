@@ -13,7 +13,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, School, Settings, Users } from 'lucide-react';
+import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, School, Settings, ShieldCheck, Users } from 'lucide-react';
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import platformLogoLight from '@public/platform_logo_light.svg';
@@ -104,7 +104,17 @@ const useNavigationItems = () => {
   const canSeeCourses =
     can(Actions.CREATE, Resources.COURSE, Scopes.ORG) || can(Actions.UPDATE, Resources.COURSE, Scopes.ORG);
   const canSeeUsers =
-    can(Actions.INVITE, Resources.USER, Scopes.ORG) || can(Actions.UPDATE, Resources.USER, Scopes.ORG);
+    can(Actions.INVITE, Resources.USER, Scopes.ORG) ||
+    can(Actions.UPDATE, Resources.USER, Scopes.ORG) ||
+    can(Actions.READ, Resources.USER, Scopes.ORG) ||
+    can(Actions.UPDATE, Resources.ROLE, Scopes.ORG) ||
+    can(Actions.MANAGE, Resources.USERGROUP, Scopes.ORG);
+  const canSeeAdmin =
+    can(Actions.UPDATE, Resources.ROLE, Scopes.ORG) ||
+    can(Actions.READ, Resources.ROLE, Scopes.ORG) ||
+    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.ORG);
+  const canSeePayments =
+    isPaymentsEnabled && can(Actions.MANAGE, Resources.PAYMENT, Scopes.ORG);
 
   return [
     {
@@ -125,13 +135,17 @@ const useNavigationItems = () => {
           },
         ]
       : []),
-    {
-      title: t('tooltips.assignments'),
-      href: '/dash/assignments',
-      icon: Backpack,
-      tooltip: t('tooltips.assignments'),
-      isActive: pathname.startsWith('/dash/assignments'),
-    },
+    ...(canSeeCourses
+      ? [
+          {
+            title: t('tooltips.assignments'),
+            href: '/dash/assignments',
+            icon: Backpack,
+            tooltip: t('tooltips.assignments'),
+            isActive: pathname.startsWith('/dash/assignments'),
+          },
+        ]
+      : []),
     ...(canSeeUsers
       ? [
           {
@@ -143,7 +157,7 @@ const useNavigationItems = () => {
           },
         ]
       : []),
-    ...(isPaymentsEnabled
+    ...(canSeePayments
       ? [
           {
             title: t('tooltips.payments'),
@@ -162,6 +176,17 @@ const useNavigationItems = () => {
             icon: School,
             tooltip: t('tooltips.organization'),
             isActive: pathname.startsWith('/dash/org'),
+          },
+        ]
+      : []),
+    ...(canSeeAdmin
+      ? [
+          {
+            title: t('tooltips.admin'),
+            href: '/dash/admin',
+            icon: ShieldCheck,
+            tooltip: t('tooltips.admin'),
+            isActive: pathname.startsWith('/dash/admin'),
           },
         ]
       : []),

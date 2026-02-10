@@ -19,6 +19,7 @@ async function AdminLayout({ children, params }: AdminLayoutProps) {
     { action: Actions.MANAGE, resource: Resources.ORGANIZATION, scope: Scopes.ORG },
     { action: Actions.UPDATE, resource: Resources.ORGANIZATION, scope: Scopes.ORG },
     { action: Actions.UPDATE, resource: Resources.ROLE, scope: Scopes.ORG },
+    { action: Actions.READ, resource: Resources.ROLE, scope: Scopes.ORG },
   ]);
 
   return <>{children}</>;

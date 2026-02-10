@@ -50,7 +50,7 @@ const RolesUpdate: FC<Props> = (props) => {
   });
 
   // Fetch available roles for the organization and sort them by system flag + priority
-  const { data: roles, error: rolesError } = useSWR(org ? `${getAPIUrl()}roles/org/${org.id}` : null, (url) =>
+  const { data: roles, error: rolesError } = useSWR(org ? `${getAPIUrl()}roles?org_id=${org.id}` : null, (url) =>
     swrFetcher(url, access_token),
   );
 

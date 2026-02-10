@@ -1,6 +1,6 @@
 'use client';
 
-import { Backpack, BadgeDollarSign, BookCopy, Home, School, Settings, Users } from 'lucide-react';
+import { Backpack, BadgeDollarSign, BookCopy, Home, School, Settings, ShieldCheck, Users } from 'lucide-react';
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { usePaymentsEnabled } from '@components/Hooks/usePaymentsEnabled';
@@ -23,7 +23,17 @@ const DashMobileMenu = () => {
   const canSeeCourses =
     can(Actions.CREATE, Resources.COURSE, Scopes.ORG) || can(Actions.UPDATE, Resources.COURSE, Scopes.ORG);
   const canSeeUsers =
-    can(Actions.INVITE, Resources.USER, Scopes.ORG) || can(Actions.UPDATE, Resources.USER, Scopes.ORG);
+    can(Actions.INVITE, Resources.USER, Scopes.ORG) ||
+    can(Actions.UPDATE, Resources.USER, Scopes.ORG) ||
+    can(Actions.READ, Resources.USER, Scopes.ORG) ||
+    can(Actions.UPDATE, Resources.ROLE, Scopes.ORG) ||
+    can(Actions.MANAGE, Resources.USERGROUP, Scopes.ORG);
+  const canSeeAdmin =
+    can(Actions.UPDATE, Resources.ROLE, Scopes.ORG) ||
+    can(Actions.READ, Resources.ROLE, Scopes.ORG) ||
+    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.ORG);
+  const canSeePayments =
+    arePaymentsEnabled && can(Actions.MANAGE, Resources.PAYMENT, Scopes.ORG);
 
   return (
     <div
@@ -66,22 +76,24 @@ const DashMobileMenu = () => {
             </AppLink>
           </ToolTip>
         ) : null}
-        <ToolTip
-          content={t('tooltips.assignments')}
-          slateBlack
-          sideOffset={8}
-          side="top"
-        >
-          <AppLink
-            href="/dash/assignments"
-            className="flex flex-col items-center p-2"
-            aria-label={t('ariaLabels.manageAssignments')}
+        {canSeeCourses ? (
+          <ToolTip
+            content={t('tooltips.assignments')}
+            slateBlack
+            sideOffset={8}
+            side="top"
           >
-            <Backpack size={20} />
-            <span className="mt-1 text-xs">{t('mobile.assignments')}</span>
-          </AppLink>
-        </ToolTip>
-        {arePaymentsEnabled ? (
+            <AppLink
+              href="/dash/assignments"
+              className="flex flex-col items-center p-2"
+              aria-label={t('ariaLabels.manageAssignments')}
+            >
+              <Backpack size={20} />
+              <span className="mt-1 text-xs">{t('mobile.assignments')}</span>
+            </AppLink>
+          </ToolTip>
+        ) : null}
+        {canSeePayments ? (
           <ToolTip
             content={t('tooltips.payments')}
             slateBlack
@@ -129,6 +141,23 @@ const DashMobileMenu = () => {
             >
               <School size={20} />
               <span className="mt-1 text-xs">{t('mobile.org')}</span>
+            </AppLink>
+          </ToolTip>
+        ) : null}
+        {canSeeAdmin ? (
+          <ToolTip
+            content={t('tooltips.admin')}
+            slateBlack
+            sideOffset={8}
+            side="top"
+          >
+            <AppLink
+              href="/dash/admin"
+              className="flex flex-col items-center p-2"
+              aria-label={t('ariaLabels.admin')}
+            >
+              <ShieldCheck size={20} />
+              <span className="mt-1 text-xs">{t('mobile.admin')}</span>
             </AppLink>
           </ToolTip>
         ) : null}

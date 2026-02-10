@@ -71,7 +71,7 @@ function AddRole(props: AddRoleProps) {
             .replace(/[^a-z0-9_]/g, ''),
           description: values.description,
         });
-        mutate(`${getAPIUrl()}roles/org/${org?.id}`);
+        mutate(`${getAPIUrl()}roles?org_id=${org?.id}`);
         props.setCreateRoleModal(false);
         toast.success(t('createdNewRole'), { id: toastID });
       } catch (error: unknown) {

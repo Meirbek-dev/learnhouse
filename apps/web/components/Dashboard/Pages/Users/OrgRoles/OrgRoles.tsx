@@ -14,6 +14,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
 import { AlertTriangle, Globe, Loader2, Pencil, Shield, X } from 'lucide-react';
+import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import EditRole from '@components/Objects/Modals/Dash/OrgRoles/EditRole';
 import AddRole from '@components/Objects/Modals/Dash/OrgRoles/AddRole';
@@ -99,8 +100,12 @@ const OrgRoles: FC = () => {
   const [createRoleModal, setCreateRoleModal] = useState(false);
   const [editRoleModal, setEditRoleModal] = useState(false);
   const [selectedRole, setSelectedRole] = useState<{ id: number; name: string; description?: string } | null>(null);
+  const { can } = usePermissions();
+  const canUpdateRole = can(Actions.UPDATE, Resources.ROLE, Scopes.ORG);
+  const canDeleteRole = can(Actions.DELETE, Resources.ROLE, Scopes.ORG);
+  const canCreateRole = can(Actions.CREATE, Resources.ROLE, Scopes.ORG);
 
-  const { data: roles } = useSWR<Role[]>(org ? `${getAPIUrl()}roles/org/${org.id}` : null, (url) =>
+  const { data: roles } = useSWR<Role[]>(org ? `${getAPIUrl()}roles?org_id=${org.id}` : null, (url) =>
     swrFetcher(url, access_token),
   );
 
@@ -108,7 +113,7 @@ const OrgRoles: FC = () => {
     const toastId = toast.loading(t('deleting'));
     try {
       await deleteRole(access_token ?? '', Number(role_id));
-      mutate(`${getAPIUrl()}roles/org/${org?.id}`);
+      mutate(`${getAPIUrl()}roles?org_id=${org?.id}`);
       toast.success(t('deletedRoleSuccess'), { id: toastId });
     } catch {
       toast.error(t('deleteRoleError'), { id: toastId });
@@ -172,36 +177,40 @@ const OrgRoles: FC = () => {
                   <div className="flex space-x-2">
                     {!isSystem ? (
                       <>
-                        <Modal
-                          isDialogOpen={editRoleModal && selectedRole?.id === role.id}
-                          onOpenChange={() => handleEditRoleModal(role)}
-                          minHeight="lg"
-                          minWidth="xl"
-                          customWidth="max-w-7xl"
-                          dialogContent={
-                            <EditRole
-                              role={role}
-                              setEditRoleModal={setEditRoleModal}
-                            />
-                          }
-                          dialogTitle={t('editRoleTitle')}
-                          dialogDescription={t('editRoleDescription')}
-                          dialogTrigger={
-                            <Button
-                              variant="default"
-                              size="sm"
-                              className="flex-1"
-                            >
-                              <Pencil className="h-4 w-4" />
-                              {t('edit')}
-                            </Button>
-                          }
-                        />
-                        <DeleteRoleButton
-                          roleId={role.id}
-                          onDelete={deleteRoleUI}
-                          t={t}
-                        />
+                        {canUpdateRole && (
+                          <Modal
+                            isDialogOpen={editRoleModal && selectedRole?.id === role.id}
+                            onOpenChange={() => handleEditRoleModal(role)}
+                            minHeight="lg"
+                            minWidth="xl"
+                            customWidth="max-w-7xl"
+                            dialogContent={
+                              <EditRole
+                                role={role}
+                                setEditRoleModal={setEditRoleModal}
+                              />
+                            }
+                            dialogTitle={t('editRoleTitle')}
+                            dialogDescription={t('editRoleDescription')}
+                            dialogTrigger={
+                              <Button
+                                variant="default"
+                                size="sm"
+                                className="flex-1"
+                              >
+                                <Pencil className="h-4 w-4" />
+                                {t('edit')}
+                              </Button>
+                            }
+                          />
+                        )}
+                        {canDeleteRole && (
+                          <DeleteRoleButton
+                            roleId={role.id}
+                            onDelete={deleteRoleUI}
+                            t={t}
+                          />
+                        )}
                       </>
                     ) : null}
                   </div>
@@ -252,36 +261,40 @@ const OrgRoles: FC = () => {
                       <div className="flex space-x-2">
                         {!isSystem ? (
                           <>
-                            <Modal
-                              isDialogOpen={editRoleModal && selectedRole?.id === role.id}
-                              onOpenChange={() => handleEditRoleModal(role)}
-                              minHeight="lg"
-                              minWidth="xl"
-                              customWidth="max-w-7xl"
-                              dialogContent={
-                                <EditRole
-                                  role={role}
-                                  setEditRoleModal={setEditRoleModal}
-                                />
-                              }
-                              dialogTitle={t('editRoleTitle')}
-                              dialogDescription={t('editRoleDescription')}
-                              dialogTrigger={
-                                <Button
-                                  variant="default"
-                                  size="sm"
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                  {t('edit')}
-                                </Button>
-                              }
-                            />
-                            <DeleteRoleButton
-                              roleId={role.id}
-                              onDelete={deleteRoleUI}
-                              t={t}
-                              variant="compact"
-                            />
+                            {canUpdateRole && (
+                              <Modal
+                                isDialogOpen={editRoleModal && selectedRole?.id === role.id}
+                                onOpenChange={() => handleEditRoleModal(role)}
+                                minHeight="lg"
+                                minWidth="xl"
+                                customWidth="max-w-7xl"
+                                dialogContent={
+                                  <EditRole
+                                    role={role}
+                                    setEditRoleModal={setEditRoleModal}
+                                  />
+                                }
+                                dialogTitle={t('editRoleTitle')}
+                                dialogDescription={t('editRoleDescription')}
+                                dialogTrigger={
+                                  <Button
+                                    variant="default"
+                                    size="sm"
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                    {t('edit')}
+                                  </Button>
+                                }
+                              />
+                            )}
+                            {canDeleteRole && (
+                              <DeleteRoleButton
+                                roleId={role.id}
+                                onDelete={deleteRoleUI}
+                                t={t}
+                                variant="compact"
+                              />
+                            )}
                           </>
                         ) : null}
                       </div>
@@ -293,24 +306,26 @@ const OrgRoles: FC = () => {
           </Table>
         </div>
 
-        <div className="mt-6 flex justify-end">
-          <Modal
-            isDialogOpen={createRoleModal}
-            onOpenChange={() => setCreateRoleModal(!createRoleModal)}
-            minHeight="no-min"
-            minWidth="xl"
-            customWidth="max-w-7xl"
-            dialogContent={<AddRole setCreateRoleModal={setCreateRoleModal} />}
-            dialogTitle={t('createRoleTitle')}
-            dialogDescription={t('createRoleDescription')}
-            dialogTrigger={
-              <Button>
-                <Shield className="h-4 w-4" />
-                {t('createRole')}
-              </Button>
-            }
-          />
-        </div>
+        {canCreateRole && (
+          <div className="mt-6 flex justify-end">
+            <Modal
+              isDialogOpen={createRoleModal}
+              onOpenChange={() => setCreateRoleModal(!createRoleModal)}
+              minHeight="no-min"
+              minWidth="xl"
+              customWidth="max-w-7xl"
+              dialogContent={<AddRole setCreateRoleModal={setCreateRoleModal} />}
+              dialogTitle={t('createRoleTitle')}
+              dialogDescription={t('createRoleDescription')}
+              dialogTrigger={
+                <Button>
+                  <Shield className="h-4 w-4" />
+                  {t('createRole')}
+                </Button>
+              }
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );

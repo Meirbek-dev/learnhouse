@@ -42,8 +42,16 @@ export const HeaderProfileBox = () => {
     can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.ORG) ||
     can(Actions.CREATE, Resources.COURSE, Scopes.ORG) ||
     can(Actions.UPDATE, Resources.COURSE, Scopes.ORG) ||
+    can(Actions.UPDATE, Resources.COURSE, Scopes.OWN) ||
     can(Actions.INVITE, Resources.USER, Scopes.ORG) ||
-    can(Actions.UPDATE, Resources.USER, Scopes.ORG);
+    can(Actions.UPDATE, Resources.USER, Scopes.ORG) ||
+    can(Actions.READ, Resources.USER, Scopes.ORG) ||
+    can(Actions.GRADE, Resources.ASSIGNMENT, Scopes.ORG) ||
+    can(Actions.READ, Resources.ANALYTICS, Scopes.ORG) ||
+    can(Actions.READ, Resources.ROLE, Scopes.ORG) ||
+    can(Actions.UPDATE, Resources.ROLE, Scopes.ORG) ||
+    can(Actions.MANAGE, Resources.USERGROUP, Scopes.ORG) ||
+    can(Actions.MANAGE, Resources.PAYMENT, Scopes.ORG);
   const org = useOrg() as any;
   const t = useTranslations('Header');
 

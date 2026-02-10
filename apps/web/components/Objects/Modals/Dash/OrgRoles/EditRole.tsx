@@ -70,7 +70,7 @@ function EditRole(props: EditRoleProps) {
         name: values.name,
         description: values.description,
       });
-      mutate(`${getAPIUrl()}roles/org/${org?.id}`);
+      mutate(`${getAPIUrl()}roles?org_id=${org?.id}`);
       props.setEditRoleModal(false);
       toast.success(t('updatedRole'), { id: toastID });
     } catch {

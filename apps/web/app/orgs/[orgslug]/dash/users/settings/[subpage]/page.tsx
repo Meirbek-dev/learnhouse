@@ -1,6 +1,7 @@
 'use client';
 
 import OrgUserGroups from '@components/Dashboard/Pages/Users/OrgUserGroups/OrgUserGroups';
+import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import OrgUsers from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers';
 import OrgRoles from '@components/Dashboard/Pages/Users/OrgRoles/OrgRoles';
 import DesktopOnlyGuard from '@components/Dashboard/Misc/DesktopOnlyGuard';
@@ -30,8 +31,9 @@ interface TabConfig {
 const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
   const params = use(props.params);
   const t = useTranslations('DashPage.UserSettings');
+  const { can } = usePermissions();
 
-  const tabs: TabConfig[] = useMemo(
+  const allTabs: TabConfig[] = useMemo(
     () => [
       {
         id: 'users',
@@ -60,6 +62,25 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
     ],
     [],
   );
+
+  const tabs = useMemo(() => {
+    return allTabs.filter((tab) => {
+      switch (tab.id) {
+        case 'users':
+          return (
+            can(Actions.READ, Resources.USER, Scopes.ORG) ||
+            can(Actions.INVITE, Resources.USER, Scopes.ORG) ||
+            can(Actions.UPDATE, Resources.USER, Scopes.ORG)
+          );
+        case 'usergroups':
+          return can(Actions.MANAGE, Resources.USERGROUP, Scopes.ORG);
+        case 'roles':
+          return can(Actions.READ, Resources.ROLE, Scopes.ORG);
+        default:
+          return true;
+      }
+    });
+  }, [allTabs, can]);
 
   const currentTab: TabConfig = useMemo(
     () => tabs.find((tab) => tab.id === params.subpage) ?? tabs[0]!,
