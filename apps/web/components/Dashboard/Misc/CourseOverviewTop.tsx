@@ -68,20 +68,6 @@ export const CourseOverviewTop = ({ params }: { params: CourseOverviewParams }) 
             <BookOpen className="size-4" />
             <span>{t('downloadMoocRequirements')}</span>
           </Button>
-          <Button
-            nativeButton={false}
-            render={
-              <Link
-                prefetch={false}
-                href={getUriWithOrg(org?.slug, '/dash/documentation/rights')}
-              />
-            }
-            size="sm"
-            className="gap-2"
-          >
-            <BookOpen className="size-4" />
-            <span>{t('rightsGuide')}</span>
-          </Button>
           <SaveState orgslug={params.orgslug} />
         </div>
       </div>

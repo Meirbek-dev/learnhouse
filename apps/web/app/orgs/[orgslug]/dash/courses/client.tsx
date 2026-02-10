@@ -63,13 +63,6 @@ const CoursesHome = (params: CourseProps) => {
         <div className="mt-4 flex flex-col items-start justify-between sm:flex-row sm:items-center">
           <div className="flex items-center space-x-4">
             <h1 className="mb-4 text-3xl font-bold sm:mb-0">{t('courses')}</h1>
-            <Link
-              href={getUriWithOrg(org?.slug, '/dash/documentation/rights')}
-              className="bg-primary text-primary-foreground flex items-center space-x-2 rounded-md p-2 px-4 text-xs font-bold antialiased drop-shadow-lg transition-all duration-100 ease-linear hover:scale-105"
-            >
-              <BookOpen className="h-4 w-4" />
-              <span>{t('rightsGuide')}</span>
-            </Link>
           </div>
           <PermissionGuard
             action={Actions.CREATE}
