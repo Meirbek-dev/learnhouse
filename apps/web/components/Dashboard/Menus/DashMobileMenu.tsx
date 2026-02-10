@@ -16,7 +16,10 @@ const DashMobileMenu = () => {
 
   // Align visibility with route guards
   const canSeeOrg =
-    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN) || can(Actions.UPDATE, Resources.ORGANIZATION, Scopes.OWN);
+    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN) ||
+    can(Actions.UPDATE, Resources.ORGANIZATION, Scopes.OWN) ||
+    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.ORG) ||
+    can(Actions.UPDATE, Resources.ORGANIZATION, Scopes.ORG);
   const canSeeCourses =
     can(Actions.CREATE, Resources.COURSE, Scopes.ORG) || can(Actions.UPDATE, Resources.COURSE, Scopes.ORG);
   const canSeeUsers =
@@ -46,21 +49,23 @@ const DashMobileMenu = () => {
             <span className="mt-1 text-xs">{t('mobile.home')}</span>
           </AppLink>
         </ToolTip>
-        <ToolTip
-          content={t('tooltips.courses')}
-          slateBlack
-          sideOffset={8}
-          side="top"
-        >
-          <AppLink
-            href="/dash/courses"
-            className="flex flex-col items-center p-2"
-            aria-label={t('ariaLabels.manageCourses')}
+        {canSeeCourses ? (
+          <ToolTip
+            content={t('tooltips.courses')}
+            slateBlack
+            sideOffset={8}
+            side="top"
           >
-            <BookCopy size={20} />
-            <span className="mt-1 text-xs">{t('mobile.courses')}</span>
-          </AppLink>
-        </ToolTip>
+            <AppLink
+              href="/dash/courses"
+              className="flex flex-col items-center p-2"
+              aria-label={t('ariaLabels.manageCourses')}
+            >
+              <BookCopy size={20} />
+              <span className="mt-1 text-xs">{t('mobile.courses')}</span>
+            </AppLink>
+          </ToolTip>
+        ) : null}
         <ToolTip
           content={t('tooltips.assignments')}
           slateBlack
@@ -93,21 +98,23 @@ const DashMobileMenu = () => {
             </AppLink>
           </ToolTip>
         ) : null}
-        <ToolTip
-          content={t('tooltips.users')}
-          slateBlack
-          sideOffset={8}
-          side="top"
-        >
-          <AppLink
-            href="/dash/users/settings/users"
-            className="flex flex-col items-center p-2"
-            aria-label={t('ariaLabels.manageUsers')}
+        {canSeeUsers ? (
+          <ToolTip
+            content={t('tooltips.users')}
+            slateBlack
+            sideOffset={8}
+            side="top"
           >
-            <Users size={20} />
-            <span className="mt-1 text-xs">{t('mobile.users')}</span>
-          </AppLink>
-        </ToolTip>
+            <AppLink
+              href="/dash/users/settings/users"
+              className="flex flex-col items-center p-2"
+              aria-label={t('ariaLabels.manageUsers')}
+            >
+              <Users size={20} />
+              <span className="mt-1 text-xs">{t('mobile.users')}</span>
+            </AppLink>
+          </ToolTip>
+        ) : null}
         {canSeeOrg ? (
           <ToolTip
             content={t('tooltips.organization')}

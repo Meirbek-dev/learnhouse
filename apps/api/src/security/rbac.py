@@ -205,7 +205,26 @@ class PermissionChecker:
                     for s in scopes:
                         expanded.add(f"{r}:{a}:{s}")
 
-        return expanded
+        # Scope hierarchy expansion: broader scopes imply narrower ones.
+        # "all"  → also implies "org", "assigned", "own"
+        # "org"  → also implies "own"
+        # This ensures the frontend's exact Set.has() lookups work correctly
+        # (e.g. a user with course:update:org also passes a check for course:update:own).
+        scope_implies: dict[str, list[str]] = {
+            "all": ["org", "assigned", "own"],
+            "org": ["own"],
+        }
+
+        hierarchy_expanded: set[str] = set()
+        for perm_str in expanded:
+            hierarchy_expanded.add(perm_str)
+            parts = perm_str.split(":")
+            if len(parts) == 3:
+                res, act, scp = parts
+                for implied_scope in scope_implies.get(scp, []):
+                    hierarchy_expanded.add(f"{res}:{act}:{implied_scope}")
+
+        return hierarchy_expanded
 
     def get_user_roles(self, user_id: int, org_id: int | None) -> list[dict]:
         """Return role dicts for user in org."""
@@ -541,7 +560,7 @@ class RequirePermission:
         if raw is not None:
             try:
                 org_id = int(raw)
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 pass
 
         checker.require(current_user.id, self.permission, org_id)

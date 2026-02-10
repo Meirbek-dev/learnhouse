@@ -39,6 +39,7 @@ export const HeaderProfileBox = () => {
   const { can, loading: isLoading } = usePermissions();
   const canAccessDashboard =
     can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN) ||
+    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.ORG) ||
     can(Actions.CREATE, Resources.COURSE, Scopes.ORG) ||
     can(Actions.UPDATE, Resources.COURSE, Scopes.ORG) ||
     can(Actions.INVITE, Resources.USER, Scopes.ORG) ||

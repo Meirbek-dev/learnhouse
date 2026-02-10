@@ -132,7 +132,7 @@ async def remove_user_from_org(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:delete", org.id)
+    checker.require(current_user.id, "organization:manage", org.id)
 
     # Check if user has any roles in this org (i.e., is a member)
     statement = select(UserRole).where(

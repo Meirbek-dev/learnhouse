@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, Request, Response, UploadFile
 from pydantic import EmailStr
-from sqlmodel import Session
+from sqlmodel import Session, select
 from src.security.rbac import (
     PermissionCheckerDep,
     PermissionDenied,
@@ -11,6 +11,7 @@ from src.security.rbac import (
 
 from src.core.events.database import get_db_session
 from src.db.courses.courses import CourseRead
+from src.db.permissions import UserRole
 from src.db.users import (
     PublicUser,
     User,
@@ -39,6 +40,16 @@ from src.services.users.users import (
 )
 
 router = APIRouter()
+
+
+def _resolve_org_id(db_session: Session, user_id: int, org_id: int | None) -> int | None:
+    """Resolve org_id from user's role membership when not explicitly provided."""
+    if org_id is not None:
+        return org_id
+    ur = db_session.exec(
+        select(UserRole.org_id).where(UserRole.user_id == user_id).limit(1)
+    ).first()
+    return ur if ur else None
 
 
 @router.get("/profile")
@@ -148,6 +159,7 @@ async def api_update_user(
     is_own_profile = user_id == current_user.id
 
     if not is_own_profile:
+        org_id = _resolve_org_id(db_session, current_user.id, org_id)
         checker.require(current_user.id, "user:update", org_id)
 
     return await update_user(request, db_session, user_id, current_user, user_object)
@@ -173,6 +185,7 @@ async def api_update_avatar_user(
     is_own_avatar = user_id == current_user.id
 
     if not is_own_avatar:
+        org_id = _resolve_org_id(db_session, current_user.id, org_id)
         checker.require(current_user.id, "user:update", org_id)
 
     return await update_user_avatar(request, db_session, current_user, avatar_file)
@@ -282,6 +295,7 @@ async def api_delete_user(
 
     **Required Permission**: `user:delete:org`
     """
+    org_id = _resolve_org_id(db_session, current_user.id, org_id)
     checker.require(current_user.id, "user:delete", org_id)
 
     # Prevent self-deletion

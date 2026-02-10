@@ -105,7 +105,8 @@ const CourseUpdates = () => {
 const UpdatesSection = () => {
   const [selectedView, setSelectedView] = useState('list');
   const { can } = usePermissions();
-  const canUpdateCourse = can(Actions.UPDATE, Resources.COURSE, Scopes.OWN);
+  const canUpdateCourse =
+    can(Actions.UPDATE, Resources.COURSE, Scopes.OWN) || can(Actions.UPDATE, Resources.COURSE, Scopes.ORG);
   const t = useTranslations('Courses.CourseUpdates');
   return (
     <div className="soft-shadow w-[700px] overflow-hidden rounded-lg bg-white/95 backdrop-blur-md">
@@ -266,7 +267,8 @@ const UpdatesListView = () => {
   const course = useCourse();
   const session = usePlatformSession() as any;
   const { can } = usePermissions();
-  const canUpdateCourse = can(Actions.UPDATE, Resources.COURSE, Scopes.OWN);
+  const canUpdateCourse =
+    can(Actions.UPDATE, Resources.COURSE, Scopes.OWN) || can(Actions.UPDATE, Resources.COURSE, Scopes.ORG);
   const access_token = session?.data?.tokens?.access_token;
   const UPDATES_KEY = course?.courseStructure?.course_uuid
     ? getCourseUpdatesSwrKey(course?.courseStructure?.course_uuid)

@@ -18,6 +18,9 @@ async function OrgLayout({ children, params }: OrgLayoutProps) {
     [
       { action: Actions.READ, resource: Resources.ORGANIZATION, scope: Scopes.OWN },
       { action: Actions.UPDATE, resource: Resources.ORGANIZATION, scope: Scopes.OWN },
+      { action: Actions.READ, resource: Resources.ORGANIZATION, scope: Scopes.ORG },
+      { action: Actions.UPDATE, resource: Resources.ORGANIZATION, scope: Scopes.ORG },
+      { action: Actions.MANAGE, resource: Resources.ORGANIZATION, scope: Scopes.ORG },
     ],
     `/orgs/${orgslug}/dash`,
   );

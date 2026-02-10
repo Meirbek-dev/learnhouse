@@ -16,6 +16,8 @@ async function AdminLayout({ children, params }: AdminLayoutProps) {
   await requireAnyPermission(orgslug, [
     { action: Actions.MANAGE, resource: Resources.ORGANIZATION, scope: Scopes.OWN },
     { action: Actions.UPDATE, resource: Resources.ORGANIZATION, scope: Scopes.OWN },
+    { action: Actions.MANAGE, resource: Resources.ORGANIZATION, scope: Scopes.ORG },
+    { action: Actions.UPDATE, resource: Resources.ORGANIZATION, scope: Scopes.ORG },
     { action: Actions.UPDATE, resource: Resources.ROLE, scope: Scopes.ORG },
   ]);
 

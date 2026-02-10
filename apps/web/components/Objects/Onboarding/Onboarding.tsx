@@ -98,7 +98,8 @@ const Onboarding: FC = () => {
   const router = useRouter();
   const org = useOrg() as any;
   const { can } = usePermissions();
-  const canManageOrg = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
+  const canManageOrg =
+    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN) || can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.ORG);
 
   const onboardingData: OnboardingStep[] = [
     {

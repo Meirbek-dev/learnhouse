@@ -98,7 +98,7 @@ const ContentRenderer = ({ subpage }: { subpage: string }) => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
         transition={{ duration: 0.2, ease: 'easeOut' }}
-        className="flex-1 overflow-y-auto"
+        className="flex-1 overflow-y-auto p-1"
       >
         {content}
       </motion.div>
