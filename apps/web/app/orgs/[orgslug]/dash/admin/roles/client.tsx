@@ -35,11 +35,13 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 export default function RBACAdminClient() {
   const org = useOrg();
   const session = usePlatformSession();
   const { can } = usePermissions();
+  const t = useTranslations('Components.OrgRoles');
 
   const [roles, setRoles] = useState<RoleWithPermissions[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
@@ -112,11 +114,11 @@ export default function RBACAdminClient() {
     try {
       const newRole = await apiCreateRole(accessToken, org.id, data);
       setRoles([...roles, { ...newRole, permissions: [] }]);
-      toast.success('Role created successfully');
+      toast.success(t('AddRole.createdNewRole'));
       setIsEditDialogOpen(false);
     } catch (error) {
       console.error('Failed to create role:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to create role');
+      toast.error(error instanceof Error ? error.message : t('AddRole.couldntCreateNewRole'));
     }
   };
 
@@ -131,21 +133,21 @@ export default function RBACAdminClient() {
       setSelectedRole(null);
     } catch (error) {
       console.error('Failed to update role:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to update role');
+      toast.error(error instanceof Error ? error.message : t('EditRole.couldntUpdateRole'));
     }
   };
 
   const handleDeleteRole = async (roleId: number) => {
     if (!accessToken) return;
 
-    if (!confirm('Are you sure you want to delete this role? This action cannot be undone.')) {
+    if (!confirm(t('deleteRoleConfirmation'))) {
       return;
     }
 
     try {
       await apiDeleteRole(accessToken, roleId);
       setRoles(roles.filter((r) => r.id !== roleId));
-      toast.success('Role deleted successfully');
+      toast.success(t('deletedRoleSuccess'));
       // Refresh session so permission changes take effect immediately
       session.update();
     } catch (error) {
@@ -169,12 +171,12 @@ export default function RBACAdminClient() {
       setRoles(roles.map((r) => (r.id === roleId ? updatedRole : r)));
       setSelectedRole(updatedRole);
 
-      toast.success(hasPermission ? 'Permission removed' : 'Permission added');
+      toast.success(hasPermission ? t('permissionRemoved') : t('permissionAdded'));
       // Refresh session so permission changes take effect immediately
       session.update();
     } catch (error) {
       console.error('Failed to toggle permission:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to update permission');
+      toast.error(error instanceof Error ? error.message : t('failedToUpdatePermission'));
     }
   };
 
@@ -197,8 +199,8 @@ export default function RBACAdminClient() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Access Control</h1>
-          <p className="text-muted-foreground">Manage roles and permissions for your organization</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('cardDescription')}</p>
         </div>
         <PermissionGuard
           action={Actions.CREATE}
@@ -216,7 +218,7 @@ export default function RBACAdminClient() {
               render={
                 <Button>
                   <Plus className="mr-2 h-4 w-4" />
-                  New Role
+                  {t('createRole')}
                 </Button>
               }
             />
@@ -235,25 +237,25 @@ export default function RBACAdminClient() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Roles</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalRoles')}</CardTitle>
             <Shield className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{roles.length}</div>
             <p className="text-muted-foreground text-xs">
-              {roles.filter((r) => r.is_system).length} system, {roles.filter((r) => !r.is_system).length} custom
+              {roles.filter((r) => r.is_system).length} {t('system')}, {roles.filter((r) => !r.is_system).length} {t('custom')}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Permissions</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('permissions')}</CardTitle>
             <Lock className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{permissions.length}</div>
             <p className="text-muted-foreground text-xs">
-              Across {Object.keys(permissionsByResource).length} resource types
+              {t('acrossResourceTypes', { count: Object.keys(permissionsByResource).length })}
             </p>
           </CardContent>
         </Card>
@@ -275,8 +277,8 @@ export default function RBACAdminClient() {
         className="space-y-4"
       >
         <TabsList>
-          <TabsTrigger value="roles">Roles</TabsTrigger>
-          <TabsTrigger value="permissions">Permissions</TabsTrigger>
+          <TabsTrigger value="roles">{t('rolesTab')}</TabsTrigger>
+          <TabsTrigger value="permissions">{t('permissionsTab')}</TabsTrigger>
         </TabsList>
 
         {/* Roles Tab */}
@@ -300,12 +302,12 @@ export default function RBACAdminClient() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Slug</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Priority</TableHead>
-                  <TableHead>Permissions</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('tableHead.role')}</TableHead>
+                  <TableHead>{t('tableHead.slug')}</TableHead>
+                  <TableHead>{t('tableHead.type')}</TableHead>
+                  <TableHead>{t('tableHead.priority')}</TableHead>
+                  <TableHead>{t('tableHead.permissions')}</TableHead>
+                  <TableHead className="text-right">{t('tableHead.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -322,9 +324,9 @@ export default function RBACAdminClient() {
                     </TableCell>
                     <TableCell>
                       {role.is_system ? (
-                        <Badge variant="secondary">System</Badge>
+                        <Badge variant="secondary">{t('system')}</Badge>
                       ) : (
-                        <Badge variant="outline">Custom</Badge>
+                        <Badge variant="outline">{t('custom')}</Badge>
                       )}
                     </TableCell>
                     <TableCell>{role.priority}</TableCell>
@@ -337,7 +339,7 @@ export default function RBACAdminClient() {
                           setIsPermissionsDialogOpen(true);
                         }}
                       >
-                        {role.permissions?.length || 0} permissions
+                        {t('permissionsCount', { count: role.permissions?.length || 0 })}
                         <ChevronRight className="ml-1 h-4 w-4" />
                       </Button>
                     </TableCell>
@@ -390,8 +392,8 @@ export default function RBACAdminClient() {
         >
           <Card>
             <CardHeader>
-              <CardTitle>All Permissions</CardTitle>
-              <CardDescription>These are the system permissions available to assign to roles.</CardDescription>
+              <CardTitle>{t('allPermissionsTitle')}</CardTitle>
+              <CardDescription>{t('allPermissionsDescription')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
@@ -399,7 +401,7 @@ export default function RBACAdminClient() {
                   <div key={resourceType}>
                     <h3 className="mb-2 flex items-center gap-2 font-semibold">
                       <Badge variant="outline">{resourceType}</Badge>
-                      <span className="text-muted-foreground text-sm">({perms.length} permissions)</span>
+                      <span className="text-muted-foreground text-sm">({t('permissionsCount', { count: perms.length })})</span>
                     </h3>
                     <div className="ml-4 grid gap-2">
                       {perms.map((perm) => (
@@ -460,8 +462,8 @@ export default function RBACAdminClient() {
         >
           <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Manage Permissions - {selectedRole.name}</DialogTitle>
-              <DialogDescription>Toggle permissions for this role. Changes are saved automatically.</DialogDescription>
+              <DialogTitle>{t('managePermissionsTitle', { roleName: selectedRole.name })}</DialogTitle>
+              <DialogDescription>{t('managePermissionsDescription')}</DialogDescription>
             </DialogHeader>
             <div className="space-y-6 py-4">
               {Object.entries(permissionsByResource).map(([resourceType, perms]) => (
@@ -522,7 +524,7 @@ export default function RBACAdminClient() {
                 variant="outline"
                 onClick={() => setIsPermissionsDialogOpen(false)}
               >
-                Done
+                {'Done'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -537,12 +539,14 @@ function RoleEditForm({
   role,
   onSubmit,
   onCancel,
+  availableRoles,
 }: {
   role?: RoleWithPermissions;
   onSubmit: (data: { name: string; slug: string; description: string }) => void;
   onCancel: () => void;
   availableRoles?: Role[];
 }) {
+  const t = useTranslations('Components.OrgRoles');
   const [name, setName] = useState(role?.name || '');
   const [description, setDescription] = useState(role?.description || '');
 
@@ -575,14 +579,14 @@ function RoleEditForm({
   return (
     <form onSubmit={handleSubmit}>
       <DialogHeader>
-        <DialogTitle>{role ? 'Edit Role' : 'Create Role'}</DialogTitle>
+        <DialogTitle>{role ? t('editRoleTitle') : t('createRoleTitle')}</DialogTitle>
         <DialogDescription>
-          {role ? 'Update the role details below.' : 'Create a new role for your organization.'}
+          {role ? t('editRoleDescription') : t('createRoleDescription')}
         </DialogDescription>
       </DialogHeader>
       <div className="grid gap-4 py-4">
         <div className="grid gap-2">
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name">{t('fieldName')}</Label>
           <Input
             id="name"
             value={name}
@@ -592,7 +596,7 @@ function RoleEditForm({
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="slug">Slug</Label>
+          <Label htmlFor="slug">{t('fieldSlug')}</Label>
           <Input
             id="slug"
             value={slug}
@@ -602,11 +606,11 @@ function RoleEditForm({
             required
           />
           <p className="text-muted-foreground text-xs">
-            Used for programmatic access. Cannot be changed after creation.
+            {t('slugHelp')}
           </p>
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">{t('fieldDescription')}</Label>
           <Input
             id="description"
             value={description}
@@ -621,9 +625,9 @@ function RoleEditForm({
           variant="outline"
           onClick={onCancel}
         >
-          Cancel
+          {t('AddRole.cancel')}
         </Button>
-        <Button type="submit">{role ? 'Update' : 'Create'}</Button>
+        <Button type="submit">{role ? t('updateRole') : t('createRole')}</Button>
       </DialogFooter>
     </form>
   );

@@ -663,7 +663,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
               {/* Top section with ID and QR code */}
               <View style={styles.topSection}>
                 <View style={styles.idContainer}>
-                  <Text style={styles.idLabel}>Certificate ID</Text>
+                  <Text style={styles.idLabel}>{t('certificateId')}</Text>
                   <Text style={styles.idText}>{certificateId}</Text>
                 </View>
                 <View style={styles.qrWrapper}>
@@ -673,7 +673,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
                       style={styles.qrImage}
                     />
                   </View>
-                  <Text style={styles.qrLabel}>Verify Authenticity</Text>
+                  <Text style={styles.qrLabel}>{t('authenticityGuaranteed')}</Text>
                 </View>
               </View>
 
@@ -748,7 +748,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
             <View style={styles.footerSection}>
               <View style={styles.footerLine} />
               <Text style={styles.footer}>
-                {t('certificateCanBeVerified')}: {qrCodeLink.replace('https://', '').replace('http://', '')}
+                {`${t('certificateCanBeVerified')}:`} {qrCodeLink.replace('https://', '').replace('http://', '')}
               </Text>
             </View>
           </Page>
@@ -839,7 +839,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
             </div>
           </div>
 
-          <h1 className="text-4xl font-bold text-gray-900">{t('congratulations')} 🎉</h1>
+          <h1 className="text-4xl font-bold text-gray-900">{`${t('congratulations')} 🎉`}</h1>
 
           <p className="text-xl text-gray-600">
             {t('courseCompleted')}
@@ -980,7 +980,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
           </div>
         </div>
 
-        <h1 className="text-4xl font-bold text-gray-900">{t('keepGoing')} 💪</h1>
+        <h1 className="text-4xl font-bold text-gray-900">{`${t('keepGoing')} 💪`}</h1>
 
         <p className="text-xl text-gray-600">
           {t('youAreMakingProgress')}
@@ -997,7 +997,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">{t('progress')}</span>
-                <span className="font-semibold text-gray-900">{progressInfo.percentage}%</span>
+                <span className="font-semibold text-gray-900">{`${progressInfo.percentage}%`}</span>
               </div>
 
               <div className="h-3 w-full rounded-full bg-gray-200">

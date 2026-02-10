@@ -161,7 +161,7 @@ const CourseImage: FC<CourseImageProps> = ({
           className="absolute top-2 left-2 gap-1 backdrop-blur-sm"
         >
           <Crown className="h-3 w-3" />
-          Owner
+          {t('ownerBadge')}
         </Badge>
       )}
 

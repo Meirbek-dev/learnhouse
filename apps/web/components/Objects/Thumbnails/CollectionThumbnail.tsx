@@ -38,6 +38,7 @@ const removeCollectionPrefix = (collectionid: string) => {
 
 const CollectionThumbnail = (props: PropsType) => {
   const t = useTranslations('Components.CollectionThumbnail');
+  const tCommon = useTranslations('Common');
   const org = useOrg() as any;
 
   // Use backend metadata for ownership and permissions
@@ -55,7 +56,7 @@ const CollectionThumbnail = (props: PropsType) => {
             className="absolute top-2 left-2 z-10 gap-1 backdrop-blur-sm"
           >
             <Crown className="h-3 w-3" />
-            Owner
+            {tCommon('owner')}
           </Badge>
         )}
 

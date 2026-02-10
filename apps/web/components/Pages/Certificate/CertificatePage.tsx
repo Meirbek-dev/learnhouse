@@ -533,7 +533,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
               {/* Top section with ID and QR code */}
               <View style={styles.topSection}>
                 <View style={styles.idContainer}>
-                  <Text style={styles.idLabel}>Certificate ID</Text>
+                  <Text style={styles.idLabel}>{t('certificateId')}</Text>
                   <Text style={styles.idText}>{certificateUUID}</Text>
                 </View>
                 <View style={styles.qrWrapper}>
@@ -543,7 +543,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
                       style={styles.qrImage}
                     />
                   </View>
-                  <Text style={styles.qrLabel}>Verify Authenticity</Text>
+                  <Text style={styles.qrLabel}>{t('authenticityGuaranteed')}</Text>
                 </View>
               </View>
 
@@ -617,7 +617,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
             {/* Footer */}
             <View style={styles.footerSection}>
               <View style={styles.footerLine} />
-              <Text style={styles.footer}>Verify at: {qrCodeData.replace('https://', '').replace('http://', '')}</Text>
+              <Text style={styles.footer}>{`${t('verificationNote')}:`} {qrCodeData.replace('https://', '').replace('http://', '')}</Text>
             </View>
           </Page>
         </Document>

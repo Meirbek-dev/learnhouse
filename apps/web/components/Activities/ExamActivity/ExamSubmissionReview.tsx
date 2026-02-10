@@ -82,7 +82,7 @@ export default function ExamSubmissionReview({
             <div className="overflow-hidden rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white shadow-sm">
               <div className="grid gap-0 divide-y divide-gray-100">
                 <div className="flex items-center justify-between p-4">
-                  <span className="font-medium text-gray-700">{t('totalQuestions')}:</span>
+                  <span className="font-medium text-gray-700">{`${t('totalQuestions')}:`}</span>
                   <span className="text-xl font-bold text-blue-600">{totalQuestions}</span>
                 </div>
                 <div className="flex items-center justify-between bg-gradient-to-r from-green-50 to-white p-4">
@@ -90,7 +90,7 @@ export default function ExamSubmissionReview({
                     <div className="rounded-lg bg-green-600 p-1.5">
                       <CheckCircle2 className="h-4 w-4 text-white" />
                     </div>
-                    <span className="font-medium text-green-700">{t('answered')}:</span>
+                    <span className="font-medium text-green-700">{`${t('answered')}:`}</span>
                   </div>
                   <span className="text-xl font-bold text-green-600">{answeredCount}</span>
                 </div>
@@ -99,7 +99,7 @@ export default function ExamSubmissionReview({
                     <div className="rounded-lg bg-orange-600 p-1.5">
                       <AlertTriangle className="h-4 w-4 text-white" />
                     </div>
-                    <span className="font-medium text-orange-700">{t('unanswered')}:</span>
+                    <span className="font-medium text-orange-700">{`${t('unanswered')}:`}</span>
                   </div>
                   <span className="text-xl font-bold text-orange-600">{unansweredQuestions.length}</span>
                 </div>
@@ -109,7 +109,7 @@ export default function ExamSubmissionReview({
                       <div className="rounded-lg bg-blue-600 p-1.5">
                         <Flag className="h-4 w-4 text-white" />
                       </div>
-                      <span className="font-medium text-blue-700">{t('flagged')}:</span>
+                      <span className="font-medium text-blue-700">{`${t('flagged')}:`}</span>
                     </div>
                     <span className="text-xl font-bold text-blue-600">{flaggedQuestions.length}</span>
                   </div>

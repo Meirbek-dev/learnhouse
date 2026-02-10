@@ -30,7 +30,8 @@ import type React from 'react';
 
 export interface ResourceAction {
   id: string;
-  label: string;
+  label?: string;
+  labelKey?: string;
   icon?: LucideIcon;
   onClick: () => void;
   variant?: 'default' | 'destructive';
@@ -123,7 +124,7 @@ export function ResourceActionsMenu({ availableActions, actions, trigger, align 
                 className={action.variant === 'destructive' ? 'text-destructive focus:text-destructive' : ''}
               >
                 {Icon && <Icon className="mr-2 h-4 w-4" />}
-                {action.label}
+                {action.labelKey ? t(action.labelKey) : action.label}
               </DropdownMenuItem>
               {showSeparator && <DropdownMenuSeparator />}
             </Fragment>
@@ -140,7 +141,7 @@ export function ResourceActionsMenu({ availableActions, actions, trigger, align 
 export const CommonActions = {
   edit: (onClick: () => void): ResourceAction => ({
     id: 'edit',
-    label: 'Edit',
+    labelKey: 'edit',
     icon: Edit,
     onClick,
     requiresAction: 'update',
@@ -148,7 +149,7 @@ export const CommonActions = {
 
   delete: (onClick: () => void): ResourceAction => ({
     id: 'delete',
-    label: 'Delete',
+    labelKey: 'delete',
     icon: Trash2,
     onClick,
     variant: 'destructive',
@@ -158,7 +159,7 @@ export const CommonActions = {
 
   publish: (onClick: () => void, isPublished: boolean): ResourceAction => ({
     id: 'publish',
-    label: isPublished ? 'Unpublish' : 'Publish',
+    labelKey: isPublished ? 'unpublish' : 'publish',
     icon: isPublished ? EyeOff : Eye,
     onClick,
     requiresAction: 'update',
@@ -166,14 +167,14 @@ export const CommonActions = {
 
   share: (onClick: () => void): ResourceAction => ({
     id: 'share',
-    label: 'Share',
+    labelKey: 'share',
     icon: Share2,
     onClick,
   }),
 
   duplicate: (onClick: () => void): ResourceAction => ({
     id: 'duplicate',
-    label: 'Duplicate',
+    labelKey: 'duplicate',
     icon: Copy,
     onClick,
     requiresAction: 'create',
@@ -181,7 +182,7 @@ export const CommonActions = {
 
   archive: (onClick: () => void): ResourceAction => ({
     id: 'archive',
-    label: 'Archive',
+    labelKey: 'archive',
     icon: Archive,
     onClick,
     requiresAction: 'update',
@@ -189,14 +190,14 @@ export const CommonActions = {
 
   favorite: (onClick: () => void, isFavorite: boolean): ResourceAction => ({
     id: 'favorite',
-    label: isFavorite ? 'Unfavorite' : 'Favorite',
+    labelKey: isFavorite ? 'unfavorite' : 'favorite',
     icon: Star,
     onClick,
   }),
 
   settings: (onClick: () => void): ResourceAction => ({
     id: 'settings',
-    label: 'Settings',
+    labelKey: 'settings',
     icon: Settings,
     onClick,
     requiresAction: 'manage',
@@ -204,7 +205,7 @@ export const CommonActions = {
 
   manageContributors: (onClick: () => void): ResourceAction => ({
     id: 'contributors',
-    label: 'Manage Contributors',
+    labelKey: 'manageContributors',
     icon: UserPlus,
     onClick,
     requiresAction: 'manage',
@@ -212,7 +213,7 @@ export const CommonActions = {
 
   managePermissions: (onClick: () => void): ResourceAction => ({
     id: 'permissions',
-    label: 'Permissions',
+    labelKey: 'permissions',
     icon: Shield,
     onClick,
     requiresAction: 'manage',
@@ -220,7 +221,7 @@ export const CommonActions = {
 
   transferOwnership: (onClick: () => void): ResourceAction => ({
     id: 'transfer',
-    label: 'Transfer Ownership',
+    labelKey: 'transferOwnership',
     icon: Crown,
     onClick,
     requiresAction: 'manage',

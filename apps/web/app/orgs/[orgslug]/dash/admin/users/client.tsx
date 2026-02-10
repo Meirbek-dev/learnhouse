@@ -26,12 +26,14 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 export default function UserRolesClient() {
   const org = useOrg();
   const session = usePlatformSession();
   const { can } = usePermissions();
+  const t = useTranslations('Components.OrgRoles');
 
   const [userRoles, setUserRoles] = useState<UserRoleAssignment[]>([]);
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
@@ -104,7 +106,7 @@ export default function UserRolesClient() {
 
     try {
       await assignRoleToUser(accessToken, selectedUserId, selectedRoleId, org.id);
-      toast.success('Role assigned successfully');
+      toast.success(t('assignedRoleSuccess'));
       setIsAddDialogOpen(false);
       setSelectedUserId(null);
       setSelectedRoleId(null);
@@ -127,7 +129,7 @@ export default function UserRolesClient() {
 
     try {
       await removeRoleFromUser(accessToken, userId, roleId, org.id);
-      toast.success('Role removed successfully');
+      toast.success(t('removedRoleSuccess'));
       fetchUserRolesData();
       // Refresh session so permission changes take effect immediately
       session.update();
@@ -151,8 +153,8 @@ export default function UserRolesClient() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">User Roles</h1>
-          <p className="text-muted-foreground">Manage role assignments for organization members</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t('userRolesTitle')}</h1>
+          <p className="text-muted-foreground">{t('userRolesDescription')}</p>
         </div>
         <PermissionGuard
           action={Actions.MANAGE}
@@ -167,24 +169,24 @@ export default function UserRolesClient() {
               render={
                 <Button>
                   <Plus className="mr-2 h-4 w-4" />
-                  Assign Role
+                  {t('assignRole')}
                 </Button>
               }
             />
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Assign Role to User</DialogTitle>
-                <DialogDescription>Select a user and a role to assign to them.</DialogDescription>
+                <DialogTitle>{t('assignRoleTitle')}</DialogTitle>
+                <DialogDescription>{t('assignRoleDescription')}</DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="user">User</Label>
+                  <Label htmlFor="user">{t('userLabel')}</Label>
                   <Select
                     value={selectedUserId?.toString() || ''}
                     onValueChange={(v) => setSelectedUserId(Number(v))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a user" />
+                      <SelectValue placeholder={t('selectUserPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
                       {users.map((user) => (
@@ -200,7 +202,7 @@ export default function UserRolesClient() {
                               </AvatarFallback>
                             </Avatar>
                             <span>
-                              {user.first_name || user.username} ({user.email})
+                              {user.first_name || user.username} {`(${user.email})`}
                             </span>
                           </div>
                         </SelectItem>
@@ -209,13 +211,13 @@ export default function UserRolesClient() {
                   </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="role">Role</Label>
+                  <Label htmlFor="role">{t('roleLabel')}</Label>
                   <Select
                     value={selectedRoleId?.toString() || ''}
                     onValueChange={(v) => setSelectedRoleId(Number(v))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a role" />
+                      <SelectValue placeholder={t('selectRolePlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
                       {availableRoles.map((role) => (
@@ -235,13 +237,13 @@ export default function UserRolesClient() {
                   variant="outline"
                   onClick={() => setIsAddDialogOpen(false)}
                 >
-                  Cancel
+                  {t('AddRole.cancel')}
                 </Button>
                 <Button
                   onClick={handleAddUserRole}
                   disabled={!selectedUserId || !selectedRoleId}
                 >
-                  Assign
+                  {t('assignRole')}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -254,7 +256,7 @@ export default function UserRolesClient() {
         <div className="relative max-w-sm flex-1">
           <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
           <Input
-            placeholder="Search users or roles..."
+            placeholder={t('searchUsersOrRoles')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-8"
@@ -267,11 +269,11 @@ export default function UserRolesClient() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>User</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Assigned At</TableHead>
-              <TableHead>Expires</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t('userLabel')}</TableHead>
+              <TableHead>{t('roleLabel')}</TableHead>
+              <TableHead>{t('assignedAt')}</TableHead>
+              <TableHead>{t('expires')}</TableHead>
+              <TableHead className="text-right">{t('actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -281,7 +283,7 @@ export default function UserRolesClient() {
                   colSpan={5}
                   className="text-muted-foreground py-8 text-center"
                 >
-                  No user role assignments found
+                  {t('noUserRoleAssignments')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -316,7 +318,7 @@ export default function UserRolesClient() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className="text-muted-foreground text-sm">Never</span>
+                    <span className="text-muted-foreground text-sm">{t('never')}</span>
                   </TableCell>
                   <TableCell className="text-right">
                     <PermissionGuard
