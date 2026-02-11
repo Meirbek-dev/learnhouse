@@ -55,7 +55,7 @@ router = APIRouter()
 # ---------------------------------------------------------------------------
 
 
-@router.post("/")
+@router.post("")
 async def api_create_course(
     request: Request,
     org_id: int,

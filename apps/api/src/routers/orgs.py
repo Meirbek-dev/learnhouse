@@ -39,7 +39,7 @@ from src.services.orgs.users import (
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("")
 async def api_create_org(
     request: Request,
     org_object: OrganizationCreate,

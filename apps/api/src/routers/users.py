@@ -77,7 +77,7 @@ async def api_get_current_user_session(
     return await get_user_session(request, db_session, current_user, org_id=org_id)
 
 
-@router.post("/", tags=["users"])
+@router.post("", tags=["users"])
 async def api_create_user_without_org(
     *,
     request: Request,

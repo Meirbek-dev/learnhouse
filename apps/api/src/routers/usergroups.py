@@ -25,7 +25,7 @@ from src.services.users.usergroups import (
 router = APIRouter()
 
 
-@router.post("/", tags=["usergroups"])
+@router.post("", tags=["usergroups"])
 async def api_create_usergroup(
     *,
     request: Request,

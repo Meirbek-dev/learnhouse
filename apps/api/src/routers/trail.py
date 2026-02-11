@@ -30,7 +30,7 @@ async def api_start_trail(
     return await create_user_trail(request, user, trail_object, db_session)
 
 
-@router.get("/")
+@router.get("")
 async def api_get_user_trail(
     request: Request,
     user=Depends(get_current_user),

@@ -23,7 +23,7 @@ from src.services.users.users import PublicUser
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("")
 async def api_create_coursechapter(
     request: Request,
     coursechapter_object: ChapterCreate,

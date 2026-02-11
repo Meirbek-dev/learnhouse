@@ -36,6 +36,7 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
     error: orgError,
     isLoading: isOrgLoading,
   } = useSWR(`${getAPIUrl()}orgs/slug/${orgslug}`, (url) => swrFetcher(url, accessToken));
+
   const {
     data: orgs,
     error: orgsError,

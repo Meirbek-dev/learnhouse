@@ -29,7 +29,7 @@ from src.services.courses.activities.video import (
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("")
 async def api_create_activity(
     request: Request,
     activity_object: ActivityCreate,

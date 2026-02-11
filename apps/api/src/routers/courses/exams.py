@@ -66,7 +66,7 @@ async def api_get_exam_config():
 ## EXAMS ##
 
 
-@router.post("/")
+@router.post("")
 async def api_create_exam(
     request: Request,
     exam_object: ExamCreate,

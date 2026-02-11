@@ -25,7 +25,7 @@ from src.services.courses.certifications import (
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("")
 async def api_create_certification(
     request: Request,
     certification_object: CertificationCreate,

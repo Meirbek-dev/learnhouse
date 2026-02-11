@@ -22,7 +22,7 @@ from src.services.users.users import PublicUser
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("")
 async def api_create_collection(
     request: Request,
     collection_object: CollectionCreate,

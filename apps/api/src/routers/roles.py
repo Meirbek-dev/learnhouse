@@ -52,7 +52,7 @@ async def list_all_permissions(
     return [PermissionRead.model_validate(p) for p in perms]
 
 
-@router.get("/", response_model=list[RoleRead])
+@router.get("", response_model=list[RoleRead])
 async def list_roles(
     db: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
@@ -89,10 +89,7 @@ async def get_role(
 # ── Create / Update / Delete ──────────────────────────────────────────────
 
 
-@router.post(
-    "/",
-    response_model=RoleRead,
-)
+@router.post("", response_model=RoleRead)
 async def create_role(
     body: RoleCreate,
     db: Annotated[Session, Depends(get_db_session)],

@@ -54,7 +54,7 @@ router = APIRouter()
 ## ASSIGNMENTS ##
 
 
-@router.post("/")
+@router.post("")
 async def api_create_assignments(
     request: Request,
     assignment_object: AssignmentCreate,

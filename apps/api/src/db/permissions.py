@@ -174,6 +174,8 @@ class RoleCreate(PydanticStrictBaseModel):
 
 
 class RoleRead(PydanticStrictBaseModel):
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+
     id: int
     slug: str
     name: str
@@ -192,6 +194,8 @@ class RoleUpdate(PydanticStrictBaseModel):
 
 
 class PermissionRead(PydanticStrictBaseModel):
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+
     id: int
     name: str
     resource_type: str
