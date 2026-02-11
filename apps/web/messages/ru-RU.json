@@ -5408,8 +5408,7 @@
         "emailSentNo": "Нет",
         "emailSentYes": "Отправлено",
         "enterEmailAddress": "Введите адрес электронной почты",
-        "errors": {
-        },
+        "errors": {},
         "signupStatusHeader": "Статус регистрации",
         "statusPending": "В ожидании",
         "statusSigned": "Зарегистрирован",

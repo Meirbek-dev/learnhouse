@@ -1,3 +1,4 @@
+import logging
 import random
 from datetime import UTC, datetime
 
@@ -18,6 +19,9 @@ from src.db.courses.activities import (
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.courses import Course
 from src.db.courses.exams import (
+    ATTEMPT_LIMIT_MAX,
+    ATTEMPT_LIMIT_MIN,
+    QUESTION_LIMIT_MIN,
     AccessModeEnum,
     AttemptStatusEnum,
     Exam,
@@ -28,10 +32,13 @@ from src.db.courses.exams import (
     ExamCreate,
     ExamCreateWithActivity,
     ExamRead,
+    ExamSettingsBase,
     ExamUpdate,
     Question,
     QuestionCreate,
     QuestionRead,
+    QuestionReadStudent,
+    QuestionTypeEnum,
     QuestionUpdate,
 )
 from src.db.organizations import Organization
@@ -40,9 +47,15 @@ from src.db.resource_authors import (
     ResourceAuthorshipEnum,
     ResourceAuthorshipStatusEnum,
 )
-from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User
+
+logger = logging.getLogger(__name__)
+
+
+def _utc_now_iso() -> str:
+    """Return current UTC time as ISO string."""
+    return datetime.now(UTC).isoformat()
 
 ## > Helper Functions
 
@@ -109,8 +122,6 @@ async def create_exam(
     checker.require(current_user.id, "exam:create", course.org_id)
 
     # Validate settings against ExamSettingsBase so frontend limits are enforced server-side
-    from src.db.courses.exams import ExamSettingsBase
-
     try:
         validated_settings = ExamSettingsBase.model_validate(exam_object.settings or {})
         settings_dict = validated_settings.model_dump()
@@ -119,7 +130,7 @@ async def create_exam(
 
     # Create exam
     exam_uuid = f"exam_{ULID()}"
-    now = datetime.now().isoformat()
+    now = _utc_now_iso()
 
     exam = Exam(
         exam_uuid=exam_uuid,
@@ -221,8 +232,6 @@ async def update_exam(
 
     # If settings are provided, validate them and replace with normalized dict
     if "settings" in update_data:
-        from src.db.courses.exams import ExamSettingsBase
-
         try:
             validated_settings = ExamSettingsBase.model_validate(
                 update_data.get("settings") or {}
@@ -234,7 +243,7 @@ async def update_exam(
     for key, value in update_data.items():
         setattr(exam, key, value)
 
-    exam.update_date = datetime.now().isoformat()
+    exam.update_date = _utc_now_iso()
 
     db_session.add(exam)
     db_session.commit()
@@ -261,6 +270,12 @@ async def delete_exam(
     course = db_session.get(Course, exam.course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "exam:delete", course.org_id)
+
+    db_session.delete(exam)
+    db_session.commit()
+
     return {"message": "Экзамен успешно удалён"}
 
 
@@ -287,9 +302,16 @@ async def create_exam_with_activity(
     checker = PermissionChecker(db_session)
     checker.require(current_user.id, "exam:create", course.org_id)
 
+    # Validate settings
+    try:
+        validated_settings = ExamSettingsBase.model_validate(exam_object.settings or {})
+        settings_dict = validated_settings.model_dump()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Неверные настройки: {e}")
+
     # Create activity
     activity_uuid = f"activity_{ULID()}"
-    now = datetime.now().isoformat()
+    now = _utc_now_iso()
 
     activity = Activity(
         activity_uuid=activity_uuid,
@@ -347,7 +369,7 @@ async def create_exam_with_activity(
         course_id=course.id,
         chapter_id=chapter.id,
         activity_id=activity.id,
-        settings=exam_object.settings,
+        settings=settings_dict,
         creation_date=now,
         update_date=now,
     )
@@ -417,8 +439,6 @@ async def create_question(
         )
 
     # Validate that at least one correct answer exists (except for essay/custom)
-    from src.db.courses.exams import QuestionTypeEnum
-
     if question_object.question_type in [
         QuestionTypeEnum.SINGLE_CHOICE,
         QuestionTypeEnum.MULTIPLE_CHOICE,
@@ -435,7 +455,7 @@ async def create_question(
 
     # Create question
     question_uuid = f"question_{ULID()}"
-    now = datetime.now().isoformat()
+    now = _utc_now_iso()
 
     question = Question(
         question_uuid=question_uuid,
@@ -463,8 +483,12 @@ async def read_questions(
     exam_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
-) -> list[QuestionRead]:
-    """Read all questions for an exam"""
+) -> list[QuestionRead] | list[QuestionReadStudent]:
+    """Read all questions for an exam.
+
+    Teachers get full data (including is_correct).
+    Students get stripped data (is_correct removed, answers shuffled).
+    """
     statement = select(Exam).where(Exam.exam_uuid == exam_uuid)
     exam = db_session.exec(statement).first()
 
@@ -485,7 +509,17 @@ async def read_questions(
     )
     questions = db_session.exec(statement).all()
 
-    return [QuestionRead.model_validate(q) for q in questions]
+    # Teachers get full data
+    is_teacher = await is_course_contributor_or_admin(
+        current_user.id, course, db_session
+    )
+    if is_teacher:
+        return [QuestionRead.model_validate(q) for q in questions]
+
+    # Students get stripped data (is_correct removed, answers shuffled)
+    settings = exam.settings or {}
+    shuffle_answers = settings.get("shuffle_answers", True)
+    return [QuestionReadStudent.from_question(q, shuffle_answers=shuffle_answers) for q in questions]
 
 
 async def update_question(
@@ -519,7 +553,7 @@ async def update_question(
     for key, value in update_data.items():
         setattr(question, key, value)
 
-    question.update_date = datetime.now().isoformat()
+    question.update_date = _utc_now_iso()
 
     db_session.add(question)
     db_session.commit()
@@ -606,12 +640,6 @@ async def start_exam_attempt(
         attempt_limit = settings.get("attempt_limit")
         if attempt_limit is not None:
             # validate configured value against allowed bounds
-            from src.db.courses.exams import (
-                ATTEMPT_LIMIT_MAX,
-                ATTEMPT_LIMIT_MIN,
-                QUESTION_LIMIT_MIN,
-            )
-
             if not (ATTEMPT_LIMIT_MIN <= attempt_limit <= ATTEMPT_LIMIT_MAX):
                 raise HTTPException(
                     status_code=400,
@@ -672,10 +700,7 @@ async def start_exam_attempt(
 
     # Create attempt
     attempt_uuid = f"attempt_{ULID()}"
-    from datetime import timezone
-
-    now = datetime.now(UTC)
-    now_iso = now.isoformat()
+    now_iso = _utc_now_iso()
 
     attempt = ExamAttempt(
         attempt_uuid=attempt_uuid,
@@ -697,6 +722,98 @@ async def start_exam_attempt(
     db_session.refresh(attempt)
 
     return ExamAttemptRead.model_validate(attempt)
+
+
+async def _grade_and_finalize_attempt(
+    attempt: ExamAttempt,
+    answers: dict,
+    status: AttemptStatusEnum,
+    db_session: Session,
+    request: Request,
+    user_id: int,
+) -> None:
+    """Grade an attempt, set score/status, award XP, and mark activity complete.
+
+    Shared by submit_exam_attempt and record_violation (auto-submit).
+    Does NOT commit — caller must commit.
+    """
+    # Calculate score
+    total_score = 0
+    max_score = 0
+
+    for question_id in attempt.question_order:
+        question = db_session.get(Question, question_id)
+        if not question:
+            continue
+
+        max_score += question.points
+
+        user_answer = answers.get(str(question_id))
+        if user_answer is None:
+            continue
+
+        try:
+            if check_answer_correctness(question, user_answer):
+                total_score += question.points
+        except Exception as e:
+            logger.exception(
+                f"Error validating answer for question {question_id}: {e}"
+            )
+            continue
+
+    now = _utc_now_iso()
+    attempt.answers = answers
+    attempt.score = total_score
+    attempt.max_score = max_score
+    attempt.status = status
+    attempt.submitted_at = now
+    attempt.update_date = now
+
+    db_session.add(attempt)
+    db_session.flush()
+
+    # Award gamification XP (skip preview attempts)
+    if not attempt.is_preview:
+        percentage = (
+            (total_score / max_score * 100) if max_score > 0 else 0
+        )
+
+        try:
+            from src.services.gamification.service import award_xp
+
+            award_xp(
+                db=db_session,
+                user_id=user_id,
+                org_id=attempt.org_id,
+                source="exam_completion",
+                source_id=f"exam_{attempt.attempt_uuid}",
+                idempotency_key=f"exam_completion_{attempt.attempt_uuid}",
+            )
+
+            if percentage == 100:
+                award_xp(
+                    db=db_session,
+                    user_id=user_id,
+                    org_id=attempt.org_id,
+                    source="streak_bonus",
+                    source_id=f"exam_perfect_{attempt.attempt_uuid}",
+                    idempotency_key=f"exam_perfect_{attempt.attempt_uuid}",
+                )
+        except Exception as e:
+            logger.exception(f"Failed to award XP for exam {attempt.attempt_uuid}: {e}")
+
+        # Mark activity as complete only if score percentage exceeds 50%
+        if percentage > 50:
+            exam = db_session.get(Exam, attempt.exam_id)
+            if exam:
+                try:
+                    await mark_exam_complete(
+                        request, exam.activity_id, user_id, db_session
+                    )
+                except Exception as e:
+                    logger.exception(
+                        f"Failed to mark exam complete for attempt {attempt.attempt_uuid}: {e}"
+                    )
 
 
 async def submit_exam_attempt(
@@ -728,13 +845,11 @@ async def submit_exam_attempt(
         raise HTTPException(status_code=404, detail="Тест не найден")
 
     # SERVER-SIDE TIME LIMIT VALIDATION (Security: prevent client bypass)
+    status = AttemptStatusEnum.SUBMITTED
     settings = exam.settings or {}
     time_limit_minutes = settings.get("time_limit")
     if time_limit_minutes:
-        from datetime import timezone
-
         try:
-            # Use timezone-aware datetime for accurate comparison
             started_at = datetime.fromisoformat(attempt.started_at)
             if started_at.tzinfo is None:
                 started_at = started_at.replace(tzinfo=UTC)
@@ -743,8 +858,7 @@ async def submit_exam_attempt(
 
             # Add 30-second grace period for network latency
             if elapsed_minutes > (time_limit_minutes + 0.5):
-                # Auto-submit with time violation flag
-                attempt.status = AttemptStatusEnum.AUTO_SUBMITTED
+                status = AttemptStatusEnum.AUTO_SUBMITTED
                 attempt.violations = attempt.violations or []
                 attempt.violations.append(
                     {
@@ -754,10 +868,6 @@ async def submit_exam_attempt(
                     }
                 )
         except (ValueError, AttributeError) as e:
-            # Log but don't fail - allow submission
-            import logging
-
-            logger = logging.getLogger(__name__)
             logger.warning(
                 f"Failed to validate time limit for attempt {attempt_uuid}: {e}"
             )
@@ -771,121 +881,16 @@ async def submit_exam_attempt(
                 detail=f"Недопустимый идентификатор вопроса в ответах: {answer_key}",
             )
 
-    # Calculate score
-    total_score = 0
-    max_score = 0
-
     try:
-        for question_id in attempt.question_order:
-            question = db_session.get(Question, question_id)
-            if not question:
-                continue
-
-            max_score += question.points
-
-            user_answer = answers.get(str(question_id))
-            if user_answer is None:
-                continue
-
-            # Check answer correctness based on question type
-            try:
-                is_correct = check_answer_correctness(question, user_answer)
-                if is_correct:
-                    total_score += question.points
-            except Exception as e:
-                # Log validation error but continue grading
-                import logging
-
-                logger = logging.getLogger(__name__)
-                logger.exception(
-                    f"Error validating answer for question {question_id}: {e}"
-                )
-                continue
-
-        # Update attempt (will auto-rollback if any subsequent operation fails)
-        now = datetime.now().isoformat()
-        attempt.answers = answers
-        attempt.score = total_score
-        attempt.max_score = max_score
-        if attempt.status == AttemptStatusEnum.IN_PROGRESS:
-            attempt.status = AttemptStatusEnum.SUBMITTED
-        attempt.submitted_at = now
-        attempt.update_date = now
-
-        db_session.add(attempt)
-        db_session.flush()  # Flush to catch DB errors before committing
-
-        # Award gamification XP (skip preview attempts to avoid gaming the system)
-        if not attempt.is_preview:
-            percentage = (
-                (attempt.score / attempt.max_score * 100)
-                if attempt.max_score and attempt.max_score > 0
-                else 0
-            )
-
-            # Award base XP for exam completion (50 XP as defined in XP_REWARDS)
-            try:
-                from src.services.gamification.service import award_xp
-
-                award_xp(
-                    db=db_session,
-                    user_id=current_user.id,
-                    org_id=attempt.org_id,
-                    source="exam_completion",
-                    source_id=f"exam_{attempt_uuid}",
-                    idempotency_key=f"exam_completion_{attempt_uuid}",
-                )
-
-                # Award streak bonus for perfect score (50 bonus XP)
-                if percentage == 100:
-                    award_xp(
-                        db=db_session,
-                        user_id=current_user.id,
-                        org_id=attempt.org_id,
-                        source="streak_bonus",
-                        source_id=f"exam_perfect_{attempt_uuid}",
-                        idempotency_key=f"exam_perfect_{attempt_uuid}",
-                    )
-            except Exception as e:
-                # Log error but don't fail the submission
-                import logging
-
-                logger = logging.getLogger(__name__)
-                logger.exception(f"Failed to award XP for exam {attempt_uuid}: {e}")
-
-        # Mark activity as complete only if score percentage exceeds 50%
-        percentage = (
-            (attempt.score / attempt.max_score * 100)
-            if attempt.max_score and attempt.max_score > 0
-            else 0
+        await _grade_and_finalize_attempt(
+            attempt, answers, status, db_session, request, current_user.id
         )
-        exam = db_session.get(Exam, attempt.exam_id)
-        if exam and percentage > 50:
-            try:
-                await mark_exam_complete(
-                    request, exam.activity_id, current_user.id, db_session
-                )
-            except Exception as e:
-                # Log but don't fail submission
-                import logging
-
-                logger = logging.getLogger(__name__)
-                logger.exception(
-                    f"Failed to mark exam complete for attempt {attempt_uuid}: {e}"
-                )
-
-        # Commit all changes atomically
         db_session.commit()
         db_session.refresh(attempt)
-
         return ExamAttemptRead.model_validate(attempt)
 
     except Exception as e:
-        # Rollback all changes on any error
         db_session.rollback()
-        import logging
-
-        logger = logging.getLogger(__name__)
         logger.error(
             f"Failed to submit exam attempt {attempt_uuid}: {e}", exc_info=True
         )
@@ -917,21 +922,19 @@ async def record_violation(
     if attempt.user_id != current_user.id:
         raise ResourceAccessDenied(reason="Not your exam attempt")
 
+    now = _utc_now_iso()
+
     # Add violation
     violation = {
         "type": violation_type,
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": now,
     }
 
     violations = attempt.violations or []
     violations.append(violation)
     attempt.violations = violations
-    attempt.update_date = datetime.now().isoformat()
+    attempt.update_date = now
 
-    # Structured logging for violation events
-    import logging
-
-    logger = logging.getLogger(__name__)
     logger.warning(
         "Exam violation recorded",
         extra={
@@ -941,21 +944,16 @@ async def record_violation(
             "exam_id": attempt.exam_id,
             "violation_type": violation_type,
             "violation_count": len(violations),
-            "timestamp": violation["timestamp"],
+            "timestamp": now,
         },
     )
 
-    # Check violation threshold
+    # Check violation threshold — grade and finalize on auto-submit
     exam = db_session.get(Exam, attempt.exam_id)
     if exam:
         settings = exam.settings or {}
         threshold = settings.get("violation_threshold")
         if threshold and len(violations) >= threshold:
-            # Auto-submit
-            attempt.status = AttemptStatusEnum.AUTO_SUBMITTED
-            attempt.submitted_at = datetime.now().isoformat()
-
-            # Log auto-submit event
             logger.warning(
                 "Exam auto-submitted due to violation threshold",
                 extra={
@@ -965,9 +963,21 @@ async def record_violation(
                     "exam_id": attempt.exam_id,
                     "violation_count": len(violations),
                     "threshold": threshold,
-                    "timestamp": datetime.now().isoformat(),
                 },
             )
+            # Grade with whatever answers are saved
+            answers = attempt.answers or {}
+            await _grade_and_finalize_attempt(
+                attempt,
+                answers,
+                AttemptStatusEnum.AUTO_SUBMITTED,
+                db_session,
+                request,
+                current_user.id,
+            )
+            db_session.commit()
+            db_session.refresh(attempt)
+            return ExamAttemptRead.model_validate(attempt)
 
     db_session.add(attempt)
     db_session.commit()
@@ -1094,8 +1104,6 @@ async def get_attempt_by_uuid(
 
 def check_answer_correctness(question: Question, user_answer: any) -> bool:
     """Check if a user's answer is correct with strict validation"""
-    from src.db.courses.exams import QuestionTypeEnum
-
     if question.question_type == QuestionTypeEnum.SINGLE_CHOICE:
         # user_answer must be a valid integer index
         if not isinstance(user_answer, int):
@@ -1174,7 +1182,7 @@ async def mark_exam_complete(
 
     if trail_step:
         trail_step.complete = True
-        trail_step.update_date = datetime.now().isoformat()
+        trail_step.update_date = _utc_now_iso()
         db_session.add(trail_step)
         db_session.commit()
 
@@ -1207,23 +1215,21 @@ async def get_all_exam_attempts(
     checker = PermissionChecker(db_session)
     checker.require(current_user.id, "exam:read", course.org_id)
 
-    # Get all attempts with user info (exclude preview attempts from analytics)
+    # Joined query: fetch attempts + users in one query (fixes N+1)
+    # Use == False for SQLAlchemy column comparison (not Python `not`)
     attempts_statement = (
-        select(ExamAttempt)
-        .where(ExamAttempt.exam_id == exam.id, not ExamAttempt.is_preview)
+        select(ExamAttempt, User)
+        .join(User, User.id == ExamAttempt.user_id)
+        .where(
+            ExamAttempt.exam_id == exam.id,
+            ExamAttempt.is_preview == False,  # noqa: E712
+        )
         .order_by(ExamAttempt.started_at.desc())
     )
-    attempts = db_session.exec(attempts_statement).all()
+    rows = db_session.exec(attempts_statement).all()
 
-    # Fetch user details
     result = []
-    for attempt in attempts:
-        user_statement = select(User).where(User.id == attempt.user_id)
-        user = db_session.exec(user_statement).first()
-
-        if not user:
-            continue
-
+    for attempt, user in rows:
         # Calculate duration
         duration_seconds = None
         duration_minutes = None
@@ -1249,7 +1255,7 @@ async def get_all_exam_attempts(
                 or user.username,
                 "user_email": user.email,
                 "started_at": attempt.started_at,
-                "finished_at": attempt.submitted_at,  # Map submitted_at to finished_at for frontend compatibility
+                "finished_at": attempt.submitted_at,
                 "duration_minutes": duration_minutes,
                 "duration_seconds": duration_seconds,
                 "status": attempt.status,
@@ -1257,7 +1263,7 @@ async def get_all_exam_attempts(
                 "max_score": attempt.max_score,
                 "percentage": round(
                     (attempt.score / attempt.max_score * 100)
-                    if attempt.max_score > 0
+                    if attempt.max_score and attempt.max_score > 0
                     else 0,
                     1,
                 ),
@@ -1430,8 +1436,10 @@ async def import_questions_csv(
                 continue
 
             # Create question
+            now = _utc_now_iso()
             new_question = Question(
                 exam_id=exam.id,
+                org_id=exam.org_id,
                 question_uuid=str(ULID()),
                 question_text=question_text,
                 question_type=question_type,
@@ -1439,8 +1447,8 @@ async def import_questions_csv(
                 answer_options=answer_options,
                 explanation=explanation,
                 order_index=next_order_index,
-                creation_date=datetime.now().isoformat(),
-                update_date=datetime.now().isoformat(),
+                creation_date=now,
+                update_date=now,
             )
 
             db_session.add(new_question)
@@ -1496,7 +1504,7 @@ async def reorder_questions(
 
         if question and question.exam_id == exam.id:
             question.order_index = new_order
-            question.update_date = datetime.now().isoformat()
+            question.update_date = _utc_now_iso()
             updated_count += 1
 
     db_session.commit()

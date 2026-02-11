@@ -5408,8 +5408,7 @@
         "emailSentNo": "Жоқ",
         "emailSentYes": "Жіберілді",
         "enterEmailAddress": "Электрондық пошта мекенжайын енгізіңіз",
-        "errors": {
-        },
+        "errors": {},
         "signupStatusHeader": "Тіркелу күйі",
         "statusPending": "Күтуде",
         "statusSigned": "Тіркелді",

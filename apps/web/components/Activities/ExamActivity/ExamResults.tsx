@@ -5,23 +5,15 @@ import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
+import type { AttemptData, ExamData, QuestionData } from './state/examFlowReducer';
 import { Progress } from '@components/ui/progress';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 
-interface Question {
-  id: number;
-  question_text: string;
-  question_type: string;
-  answer_options: { text: string; is_correct?: boolean; left?: string; right?: string }[];
-  explanation?: string;
-  points: number;
-}
-
 interface ExamResultsProps {
-  exam: any;
-  attempt: any;
-  questions: Question[];
+  exam: ExamData;
+  attempt: AttemptData;
+  questions: QuestionData[];
   onReturnToCourse: () => void;
   onProceedToNextActivity?: () => void;
   onRetry?: () => void;
@@ -54,7 +46,7 @@ export default function ExamResults({
   const orderedQuestions = useMemo(() => {
     return (attempt.question_order || [])
       .map((id: number) => questions.find((q) => q.id === id))
-      .filter(Boolean) as Question[];
+      .filter(Boolean) as QuestionData[];
   }, [attempt.question_order, questions]);
 
   const getPerformance = (percentage: number) => {
@@ -115,7 +107,7 @@ export default function ExamResults({
   }, [percentage, t]);
 
   const getAnswerStatus = useCallback(
-    (question: Question) => {
+    (question: QuestionData) => {
       const userAnswer = attempt.answers ? attempt.answers[question.id] : undefined;
       if (userAnswer === undefined || userAnswer === null) return 'unanswered';
 
@@ -166,8 +158,8 @@ export default function ExamResults({
     [orderedQuestions, getAnswerStatus],
   );
 
-  const renderUserAnswer = (question: Question) => {
-    const userAnswer = attempt.answers[question.id];
+  const renderUserAnswer = (question: QuestionData) => {
+    const userAnswer = attempt.answers?.[question.id];
 
     if (userAnswer === undefined || userAnswer === null) {
       return <span className="text-gray-500">{t('notAnswered')}</span>;
@@ -211,7 +203,7 @@ export default function ExamResults({
     }
   };
 
-  const renderCorrectAnswer = (question: Question) => {
+  const renderCorrectAnswer = (question: QuestionData) => {
     if (!showCorrectAnswers) return null;
 
     switch (question.question_type) {

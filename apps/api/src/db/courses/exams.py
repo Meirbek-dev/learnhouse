@@ -1,7 +1,7 @@
 from enum import Enum, StrEnum
 
 from pydantic import ConfigDict, field_validator
-from sqlalchemy import JSON, Column, ForeignKey, Integer
+from sqlalchemy import JSON, Column, ForeignKey, Index, Integer
 from sqlmodel import Field
 
 from src.db.strict_base_model import SQLModelStrictBaseModel
@@ -211,12 +211,47 @@ class QuestionCreate(QuestionBase):
 
 
 class QuestionRead(QuestionBase):
-    """Model for reading a question"""
+    """Model for reading a question (full data for teachers)"""
 
     id: int
     question_uuid: str
     creation_date: str | None = None
     update_date: str | None = None
+
+
+class QuestionReadStudent(SQLModelStrictBaseModel):
+    """Model for reading a question as a student — is_correct stripped from answer_options"""
+
+    id: int
+    question_uuid: str
+    question_text: str
+    question_type: QuestionTypeEnum
+    points: int
+    order_index: int
+    answer_options: list[dict]  # is_correct stripped
+
+    @classmethod
+    def from_question(cls, q: "Question | QuestionRead", shuffle_answers: bool = False) -> "QuestionReadStudent":
+        """Create a student-facing question, stripping is_correct from answer_options."""
+        import random as _random
+
+        stripped = []
+        for opt in (q.answer_options or []):
+            clean = {k: v for k, v in opt.items() if k != "is_correct"}
+            stripped.append(clean)
+
+        if shuffle_answers and q.question_type != QuestionTypeEnum.MATCHING:
+            _random.shuffle(stripped)
+
+        return cls(
+            id=q.id,
+            question_uuid=q.question_uuid,
+            question_text=q.question_text,
+            question_type=q.question_type,
+            points=q.points,
+            order_index=q.order_index,
+            answer_options=stripped,
+        )
 
 
 class QuestionUpdate(SQLModelStrictBaseModel):
@@ -340,6 +375,10 @@ class ExamAttemptUpdate(SQLModelStrictBaseModel):
 
 class ExamAttempt(ExamAttemptBase, table=True):
     """Exam attempt database model"""
+
+    __table_args__ = (
+        Index("idx_exam_attempt_exam_user", "exam_id", "user_id"),
+    )
 
     id: int | None = Field(default=None, primary_key=True)
     attempt_uuid: str = ""

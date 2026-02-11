@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
+import type { AttemptData, ExamData, QuestionData } from './state/examFlowReducer';
 import { RadioGroup, RadioGroupItem } from '@components/ui/radio-group';
 import { Alert, AlertDescription } from '@components/ui/alert';
 import { getAPIUrl } from '@/services/config/config';
@@ -30,30 +31,10 @@ import { Checkbox } from '@components/ui/checkbox';
 import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
 
-interface Question {
-  id: number;
-  question_uuid: string;
-  question_text: string;
-  question_type: 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'MATCHING';
-  points: number;
-  explanation?: string;
-  answer_options: { text: string; is_correct?: boolean; left?: string; right?: string }[];
-}
-
-interface ExamAttempt {
-  id: number;
-  attempt_uuid: string;
-  exam_id: number;
-  status: 'IN_PROGRESS' | 'SUBMITTED' | 'AUTO_SUBMITTED';
-  question_order: number[];
-  started_at: string;
-  violations: { type: string; timestamp: string }[];
-}
-
 interface ExamTakingInterfaceProps {
-  exam: any;
-  questions: Question[];
-  attempt: ExamAttempt;
+  exam: ExamData;
+  questions: QuestionData[];
+  attempt: AttemptData;
   accessToken: string;
   onComplete: () => void;
 }
@@ -100,7 +81,7 @@ export default function ExamTakingInterface({
   const settings = exam.settings || {};
   const orderedQuestions = attempt.question_order
     .map((id) => questions.find((q) => q.id === id))
-    .filter(Boolean) as Question[];
+    .filter(Boolean) as QuestionData[];
 
   // Extract current state
   const currentIndex = state.mode === 'submitting' ? 0 : state.currentIndex;
@@ -286,7 +267,7 @@ export default function ExamTakingInterface({
     persistence.saveAnswers(updated);
   };
 
-  const renderQuestion = (question: Question) => {
+  const renderQuestion = (question: QuestionData) => {
     const questionId = question.id;
 
     switch (question.question_type) {

@@ -2,8 +2,8 @@
 
 import type { Action, Resource, Scope } from '@/types/permissions';
 import { usePermissions } from './PermissionProvider';
-import { Component } from 'react';
 import type { ReactNode } from 'react';
+import { Component } from 'react';
 
 interface PermissionGuardProps {
   /** Action to check permission for. */

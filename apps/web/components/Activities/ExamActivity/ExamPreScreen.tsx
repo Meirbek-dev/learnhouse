@@ -271,7 +271,7 @@ export default function ExamPreScreen({
                               {attempt.score}/{attempt.max_score}
                             </p>
                             <p className="text-sm text-gray-600">
-                              {Math.round((attempt.score / attempt.max_score) * 100)}%
+                              {attempt.max_score > 0 ? Math.round((attempt.score / attempt.max_score) * 100) : 0}%
                             </p>
                           </div>
                           {onReviewAttempt && exam.settings?.allow_result_review && (
@@ -366,7 +366,7 @@ export default function ExamPreScreen({
                           {attempt.score}/{attempt.max_score}
                         </p>
                         <p className="text-sm text-gray-600">
-                          {Math.round((attempt.score / attempt.max_score) * 100)}%
+                          {attempt.max_score > 0 ? Math.round((attempt.score / attempt.max_score) * 100) : 0}%
                         </p>
                       </div>
                     </div>

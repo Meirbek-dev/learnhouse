@@ -7,9 +7,7 @@
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
-      "dependsOn": [
-        "^lint"
-      ]
+      "dependsOn": ["^lint"]
     },
     "start": {
       "dependsOn": ["^build"]
@@ -18,9 +16,7 @@
       "dependsOn": ["^check-types"]
     },
     "format": {
-      "dependsOn": [
-        "^format"
-      ]
+      "dependsOn": ["^format"]
     },
     "dev": {
       "cache": false,

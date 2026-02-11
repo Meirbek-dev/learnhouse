@@ -2,10 +2,6 @@
 import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
 import type { AIEditorStateTypes } from '@components/Contexts/AI/AIEditorContext';
 
-import { ToolbarButtons } from './Toolbar/ToolbarButtons';
-// Extensions
-import QuizBlock from './Extensions/Quiz/QuizBlock';
-
 import MathEquationBlock from './Extensions/MathEquation/MathEquationBlock';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import WarningCallout from './Extensions/Callout/Warning/WarningCallout';
@@ -18,6 +14,7 @@ import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import InfoCallout from './Extensions/Callout/Info/InfoCallout';
 import platformLogoLight from 'public/platform_logo_light.svg';
 import WebPreview from './Extensions/WebPreview/WebPreview';
+import { ToolbarButtons } from './Toolbar/ToolbarButtons';
 import Scenarios from './Extensions/Scenarios/Scenarios';
 import TableHeader from '@tiptap/extension-table-header';
 import { EditorContent, useEditor } from '@tiptap/react';
@@ -30,6 +27,8 @@ import ImageBlock from './Extensions/Image/ImageBlock';
 import Flipcard from './Extensions/Flipcard/Flipcard';
 import TableCell from '@tiptap/extension-table-cell';
 import UserBlock from './Extensions/Users/UserBlock';
+// Extensions
+import QuizBlock from './Extensions/Quiz/QuizBlock';
 import platformLogo from 'public/platform_logo.svg';
 import java from 'highlight.js/lib/languages/java';
 import Buttons from './Extensions/Buttons/Buttons';

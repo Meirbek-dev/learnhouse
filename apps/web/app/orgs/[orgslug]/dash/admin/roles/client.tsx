@@ -74,7 +74,7 @@ export default function RBACAdminClient() {
               // Descending priority
               return (b.priority ?? 0) - (a.priority ?? 0);
             })
-            .map((r) => (Object.assign(r, {permissions:[]}))),
+            .map((r) => Object.assign(r, { permissions: [] })),
         );
         setPermissions(permsData);
       } catch (error) {

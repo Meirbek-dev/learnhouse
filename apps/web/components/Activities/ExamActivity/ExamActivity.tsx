@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useReducer, useState } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
@@ -40,6 +40,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
   // Centralized state management with reducer
   const [state, dispatch] = useReducer(examFlowReducer, { phase: 'loading' });
   const [activeTab, setActiveTab] = useState('questions');
+  const isCompletingRef = useRef(false);
 
   const isTeacher = contributorStatus === 'ACTIVE';
 
@@ -94,9 +95,9 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
 
     const userAttemptsList = userAttempts || [];
 
-    // Check for in-progress attempt
+    // Check for in-progress attempt (skip if completion handler is running)
     const inProgressAttempt = userAttemptsList.find((a: AttemptData) => a.status === 'IN_PROGRESS');
-    if (inProgressAttempt && state.phase !== 'taking') {
+    if (inProgressAttempt && state.phase !== 'taking' && !isCompletingRef.current) {
       // Ensure we have pre-exam state set before starting
       if (state.phase === 'loading') {
         dispatch(examActions.setPreExam(exam, questions, userAttemptsList));
@@ -127,6 +128,8 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
   );
 
   const handleCompleteExam = useCallback(async () => {
+    isCompletingRef.current = true;
+
     // Refresh attempts data
     await mutateAttempts();
 
@@ -154,14 +157,15 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
 
     const lastAttempt = completedAttempt[0];
     dispatch(examActions.submitExam(lastAttempt));
+    isCompletingRef.current = false;
   }, [mutateAttempts, exam, course, examUuid, accessToken]);
 
   const router = useRouter();
 
   const handleReturnToCourse = useCallback(() => {
     const courseuuid = course.course_uuid?.replace('course_', '');
-    globalThis.location.href = `/course/${courseuuid}`;
-  }, [course]);
+    router.push(`/course/${courseuuid}`);
+  }, [course, router]);
 
   const handleProceedToNextActivity = useCallback(() => {
     try {
@@ -296,6 +300,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
                 <ExamResultsDashboard
                   examUuid={examUuid}
                   attempts={allAttempts}
+                  accessToken={accessToken!}
                   onViewAttempt={(attemptUuid) => {
                     toast.info(t('viewAttempt', { attempt: attemptUuid }));
                   }}

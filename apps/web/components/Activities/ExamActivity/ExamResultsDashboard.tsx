@@ -41,6 +41,7 @@ interface AttemptData {
 interface ExamResultsDashboardProps {
   examUuid: string;
   attempts: AttemptData[];
+  accessToken: string;
   // optional callback for parent-level navigation; dashboard also provides internal modal
   onViewAttempt?: (attemptUuid: string) => void;
   onReviewAttempt?: (attempt: any) => void;
@@ -49,6 +50,7 @@ interface ExamResultsDashboardProps {
 export default function ExamResultsDashboard({
   examUuid,
   attempts,
+  accessToken,
   onViewAttempt,
   onReviewAttempt,
 }: ExamResultsDashboardProps) {
@@ -228,7 +230,9 @@ export default function ExamResultsDashboard({
     setIsAttemptLoading(true);
 
     try {
-      const res = await fetch(`${getAPIUrl()}exams/${examUuid}/attempts/${attemptUuid}`);
+      const res = await fetch(`${getAPIUrl()}exams/${examUuid}/attempts/${attemptUuid}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
       if (!res.ok) throw new Error('Failed to fetch attempt');
       const data = await res.json();
       setSelectedAttempt(data);
