@@ -1,4 +1,4 @@
-// eslint.config.mjs  —  ESLint v10 flat config
+// eslint.config.mjs  -  ESLint v10 flat config
 import tsParser from '@typescript-eslint/parser';
 import { defineConfig } from 'eslint/config';
 import js from '@eslint/js';
@@ -72,7 +72,7 @@ export default defineConfig([
       'out/**',
       'build/**',
       'next-env.d.ts',
-      '*.config.{js,mjs,ts}', // Build tool configs — often intentionally loose
+      '*.config.{js,mjs,ts}', // Build tool configs - often intentionally loose
     ],
   },
 

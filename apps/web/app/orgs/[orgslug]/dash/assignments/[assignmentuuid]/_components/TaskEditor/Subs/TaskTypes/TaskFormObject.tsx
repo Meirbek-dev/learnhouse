@@ -392,7 +392,7 @@ function BlankInputGrading({ blank, questionUUID, userAnswer }: BlankInputGradin
           <Type className={cn('h-4 w-4', isCorrect ? 'text-green-600' : 'text-red-600')} />
         </div>
         <div className="min-w-0 flex-1 space-y-1">
-          <p className="truncate font-medium">{userAnswer || '—'}</p>
+          <p className="truncate font-medium">{userAnswer || '-'}</p>
           <p className="text-muted-foreground text-xs">
             <span className="font-semibold">{t('expected')}</span> {blank.correctAnswer}
           </p>

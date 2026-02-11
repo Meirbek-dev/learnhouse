@@ -1,5 +1,5 @@
 """
-RBAC — Permission Checker, Dependencies & Exceptions
+RBAC - Permission Checker, Dependencies & Exceptions
 
 This is the ONE file for all authorization logic.
 
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class PermissionDenied(HTTPException):
-    """403 — user lacks required RBAC permission."""
+    """403 - user lacks required RBAC permission."""
 
     def __init__(
         self,
@@ -47,7 +47,7 @@ class PermissionDenied(HTTPException):
 
 
 class AuthenticationRequired(HTTPException):
-    """401 — must be logged in."""
+    """401 - must be logged in."""
 
     def __init__(self, reason: str | None = None) -> None:
         detail = {
@@ -58,7 +58,7 @@ class AuthenticationRequired(HTTPException):
 
 
 class FeatureDisabled(HTTPException):
-    """403 — feature is disabled (not an RBAC denial)."""
+    """403 - feature is disabled (not an RBAC denial)."""
 
     def __init__(self, reason: str | None = None) -> None:
         detail = {
@@ -69,7 +69,7 @@ class FeatureDisabled(HTTPException):
 
 
 class ResourceAccessDenied(HTTPException):
-    """403 — access denied for a non-RBAC reason (e.g., attempt limit, wrong user)."""
+    """403 - access denied for a non-RBAC reason (e.g., attempt limit, wrong user)."""
 
     def __init__(self, reason: str | None = None) -> None:
         detail = {
@@ -80,7 +80,7 @@ class ResourceAccessDenied(HTTPException):
 
 
 class InternalAuthFailed(HTTPException):
-    """401 — internal/service authentication failed."""
+    """401 - internal/service authentication failed."""
 
     def __init__(self, reason: str | None = None) -> None:
         detail = {
@@ -469,10 +469,10 @@ class PermissionChecker:
         """Resolve whether a 2-part permission is satisfied by the granted set.
 
         Checks scopes from broadest to narrowest:
-        1. all      — always passes
-        2. org      — passes (org membership implied by loaded permissions)
-        3. assigned — passes (service layer filters to assigned resources)
-        4. own      — passes if resource_owner_id == user_id
+        1. all      - always passes
+        2. org      - passes (org membership implied by loaded permissions)
+        3. assigned - passes (service layer filters to assigned resources)
+        4. own      - passes if resource_owner_id == user_id
         """
         parts = permission.split(":")
         if len(parts) != 2:
@@ -488,12 +488,12 @@ class PermissionChecker:
         if PermissionChecker._has_perm(granted, resource, action, "org"):
             return True
 
-        # 3. "assigned" scope — the service layer is responsible for
+        # 3. "assigned" scope - the service layer is responsible for
         #    filtering to only assigned resources.
         if PermissionChecker._has_perm(granted, resource, action, "assigned"):
             return True
 
-        # 4. "own" scope — user owns the resource
+        # 4. "own" scope - user owns the resource
         if resource_owner_id is not None and resource_owner_id == user_id:
             if PermissionChecker._has_perm(granted, resource, action, "own"):
                 return True

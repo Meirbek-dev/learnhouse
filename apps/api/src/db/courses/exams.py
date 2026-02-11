@@ -220,7 +220,7 @@ class QuestionRead(QuestionBase):
 
 
 class QuestionReadStudent(SQLModelStrictBaseModel):
-    """Model for reading a question as a student — is_correct stripped from answer_options"""
+    """Model for reading a question as a student - is_correct stripped from answer_options"""
 
     id: int
     question_uuid: str

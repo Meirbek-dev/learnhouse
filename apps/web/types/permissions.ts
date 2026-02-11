@@ -1,8 +1,8 @@
-// AUTO-GENERATED — do not edit manually.
+// AUTO-GENERATED - do not edit manually.
 // Run: python scripts/sync-permissions.py
 
 /**
- * Permission types — single source of truth for the frontend RBAC system.
+ * Permission types - single source of truth for the frontend RBAC system.
  *
  * Constants use lowercase values to match the backend format directly.
  * No toLowerCase() conversion needed at check time.

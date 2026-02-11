@@ -620,7 +620,7 @@ async def check_course_completion_and_create_certificate(
                 )
                 raise
         else:
-            # No certification configured for this course — course completion still processed
+            # No certification configured for this course - course completion still processed
             logger.warning(
                 f"No certification found for course {course_id} ({course.course_uuid}). "
                 f"User {user_id} completed the course but no certificate will be issued."

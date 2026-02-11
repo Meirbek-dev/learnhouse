@@ -1456,7 +1456,7 @@ const AssignmentTools = (props: {
     }
   }
 
-  // Load final grade when submission is graded — only fetch once and guard against unmounted component
+  // Load final grade when submission is graded - only fetch once and guard against unmounted component
   useEffect(() => {
     if (!(submission && submission.length > 0 && submission[0]?.submission_status === 'GRADED')) {
       return;
@@ -1498,7 +1498,7 @@ const AssignmentTools = (props: {
           setFinalGrade(displayGrade);
         }
       } catch (error) {
-        // Fail silently — keep `finalGrade` null so we can retry if submission changes
+        // Fail silently - keep `finalGrade` null so we can retry if submission changes
         console.error('Failed to load final grade:', error);
       }
     };

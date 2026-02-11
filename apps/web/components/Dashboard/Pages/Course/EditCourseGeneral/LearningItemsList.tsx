@@ -86,7 +86,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
   const emojiFocusRafRef = useRef<number | null>(null);
   const t = useTranslations('CourseEdit.General.LearningItems');
 
-  // Cleanup on unmount — cancel any scheduled animation frames
+  // Cleanup on unmount - cancel any scheduled animation frames
   useEffect(() => {
     return () => {
       if (initialSyncRafRef.current) cancelAnimationFrame(initialSyncRafRef.current);

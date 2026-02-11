@@ -386,7 +386,7 @@ export function useContextualPosition(
       window.removeEventListener('resize', scheduleCompute, listenerOptions);
       window.removeEventListener('scroll', scheduleCompute, listenerOptions);
       globalThis.removeEventListener('orientationchange', scheduleCompute, listenerOptions);
-      // Note: if the element can be inside a scrollable container, consider listening on the nearest scroll container or using IntersectionObserver — manual review may be needed.
+      // Note: if the element can be inside a scrollable container, consider listening on the nearest scroll container or using IntersectionObserver - manual review may be needed.
     };
   }, [contextElement]);
 

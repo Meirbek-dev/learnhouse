@@ -1,5 +1,5 @@
 /**
- * Organization types — matches the backend OrganizationRead schema.
+ * Organization types - matches the backend OrganizationRead schema.
  *
  * Source: apps/api/src/db/organizations.py (OrganizationBase + OrganizationRead)
  */

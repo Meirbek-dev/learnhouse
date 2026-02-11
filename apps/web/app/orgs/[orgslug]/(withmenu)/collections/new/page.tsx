@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ orgslug: 
   const org = await getOrganizationContextInfo(orgslug);
 
   return {
-    title: `${t('metaTitle')} — Ashyq Bilim`,
+    title: `${t('metaTitle')} - Ashyq Bilim`,
     description: t('metaDescription', { orgName: 'Ashyq Bilim' }),
     robots: {
       index: true,
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ orgslug: 
       },
     },
     openGraph: {
-      title: `${t('metaTitle')} — Ashyq Bilim`,
+      title: `${t('metaTitle')} - Ashyq Bilim`,
       description: t('metaDescription', { orgName: 'Ashyq Bilim' }),
       type: 'website',
       images: org.thumbnail_image

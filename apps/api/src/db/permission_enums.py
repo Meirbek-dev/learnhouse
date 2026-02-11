@@ -1,5 +1,5 @@
 """
-Permission Enums — single source of truth for RBAC definitions.
+Permission Enums - single source of truth for RBAC definitions.
 """
 
 from enum import StrEnum
@@ -65,7 +65,7 @@ class RoleSlug(StrEnum):
 
 
 # ============================================================================
-# System role definitions — what each built-in role can do
+# System role definitions - what each built-in role can do
 # ============================================================================
 
 SYSTEM_ROLES: dict[str, dict] = {

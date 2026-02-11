@@ -594,7 +594,7 @@ export default function ExamResultsDashboard({
         <AlertDialogContent className="max-w-3xl">
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {selectedAttempt ? `${selectedAttempt.user_name} — ${selectedAttempt.percentage}%` : t('loadingAttempt')}
+              {selectedAttempt ? `${selectedAttempt.user_name} - ${selectedAttempt.percentage}%` : t('loadingAttempt')}
             </AlertDialogTitle>
             {/* Keep the dialog description minimal to avoid block-level children inside the rendered <p> */}
             <AlertDialogDescription>{selectedAttempt ? '' : t('loading')}</AlertDialogDescription>
@@ -638,7 +638,7 @@ export default function ExamResultsDashboard({
                   <ul className="mt-2 list-disc pl-4 text-sm text-gray-700">
                     {selectedAttempt.violations?.map((v: any, idx: number) => (
                       <li key={idx}>
-                        {v.type} — {new Date(v.timestamp).toLocaleString()}
+                        {v.type} - {new Date(v.timestamp).toLocaleString()}
                       </li>
                     ))}
                   </ul>

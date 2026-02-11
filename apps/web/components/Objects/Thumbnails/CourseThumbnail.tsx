@@ -283,7 +283,7 @@ const LoadingProgressBar: FC<LoadingProgressBarProps> = ({ courseName, t }) => (
     >
       <div className="bg-muted/70 h-full w-3/5 animate-pulse" />
     </div>
-    <span className="text-muted-foreground w-10 text-right text-xs">—%</span>
+    <span className="text-muted-foreground w-10 text-right text-xs">-%</span>
   </div>
 );
 

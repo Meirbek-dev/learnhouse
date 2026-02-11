@@ -54,7 +54,7 @@ export async function requirePermission(
   const session = await requireAuth(orgslug);
   const currentOrgId = resolveOrgId(session, orgslug);
 
-  // If permissions were loaded for a different org, they're stale — deny access
+  // If permissions were loaded for a different org, they're stale - deny access
   if (currentOrgId && session.permissions_org_id !== currentOrgId) {
     redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
   }
@@ -78,7 +78,7 @@ export async function requireAnyPermission(
   const session = await requireAuth(orgslug);
   const currentOrgId = resolveOrgId(session, orgslug);
 
-  // If permissions were loaded for a different org, they're stale — deny access
+  // If permissions were loaded for a different org, they're stale - deny access
   if (currentOrgId && session.permissions_org_id !== currentOrgId) {
     redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
   }

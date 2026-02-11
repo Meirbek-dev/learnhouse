@@ -177,7 +177,7 @@ SYSTEM_ROLES = {
 
 
 # ===========================================================================
-# Helpers — use IF EXISTS to stay safe inside a single PG transaction
+# Helpers - use IF EXISTS to stay safe inside a single PG transaction
 # ===========================================================================
 
 

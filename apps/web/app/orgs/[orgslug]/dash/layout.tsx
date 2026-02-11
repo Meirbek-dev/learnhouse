@@ -17,7 +17,7 @@ async function DashboardLayout(props: { children: ReactNode; params: Promise<any
   const { children } = props;
   const { orgslug } = params;
 
-  // Only require authentication here — child layouts enforce specific permissions
+  // Only require authentication here - child layouts enforce specific permissions
   await requireAuth(orgslug);
 
   return <ClientAdminLayout params={params}>{children}</ClientAdminLayout>;

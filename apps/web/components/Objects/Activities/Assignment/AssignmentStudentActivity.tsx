@@ -76,7 +76,7 @@ const AssignmentStudentActivity = () => {
 
   const { assignment_object, assignment_tasks, course_object, activity_object } = assignments;
 
-  // Sort tasks (plain computation — avoid conditional hooks)
+  // Sort tasks (plain computation - avoid conditional hooks)
   const sortedTasks: AssignmentTask[] = assignment_tasks ? [...assignment_tasks].toSorted((a, b) => a.id - b.id) : [];
 
   const hasTasks = sortedTasks.length > 0;

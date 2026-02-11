@@ -95,7 +95,7 @@ const useNavigationItems = () => {
   });
   const { can } = usePermissions();
 
-  // Align sidebar visibility with the route layout guards — prefer specific checks
+  // Align sidebar visibility with the route layout guards - prefer specific checks
   const canSeeOrg =
     can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN) ||
     can(Actions.UPDATE, Resources.ORGANIZATION, Scopes.OWN) ||
@@ -255,7 +255,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
     }
   }
 
-  // Keyboard shortcut handler — useEffectEvent so the handler is stable and reads latest toggleSidebar
+  // Keyboard shortcut handler - useEffectEvent so the handler is stable and reads latest toggleSidebar
   const handleKeyDown = useEffectEvent((event: KeyboardEvent) => {
     // Check for Ctrl+B (or Cmd+B on Mac)
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'b') {

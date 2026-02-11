@@ -111,7 +111,7 @@ async def api_update_user_role(
     """
     Update user role in an organization.
 
-    **Path Parameter**: `role_id` — numeric role ID
+    **Path Parameter**: `role_id` - numeric role ID
 
     **Required Permission**: `organization:update`
     """

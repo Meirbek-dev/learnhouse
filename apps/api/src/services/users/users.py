@@ -306,7 +306,7 @@ async def get_user_session(
     user_role_rows = db_session.exec(statement).all()
     all_org_ids = {ur.org_id for ur in user_role_rows if ur.org_id}
 
-    # Build roles list — return ALL roles per org, not just the first
+    # Build roles list - return ALL roles per org, not just the first
     roles: list[UserRoleWithOrg] = []
     for oid in all_org_ids:
         org = db_session.exec(

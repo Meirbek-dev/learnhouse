@@ -133,7 +133,7 @@ export default function QuestionEditor({
   };
 
   const addOption = () => {
-    // Prevent adding options for TRUE_FALSE — it's a fixed two-option question
+    // Prevent adding options for TRUE_FALSE - it's a fixed two-option question
     if (formData.question_type === 'TRUE_FALSE') return;
 
     setFormData({
@@ -146,7 +146,7 @@ export default function QuestionEditor({
   };
 
   const removeOption = (index: number) => {
-    // Prevent removing options for TRUE_FALSE — options are fixed
+    // Prevent removing options for TRUE_FALSE - options are fixed
     if (formData.question_type === 'TRUE_FALSE') return;
 
     setFormData({
@@ -334,7 +334,7 @@ export default function QuestionEditor({
                 </div>
               ))
             ) : formData.question_type === 'TRUE_FALSE' ? (
-              // TRUE_FALSE: fixed two-option UI (True / False) — no add/remove, no editable labels
+              // TRUE_FALSE: fixed two-option UI (True / False) - no add/remove, no editable labels
               <RadioGroup
                 value={(() => {
                   const idx = formData.answer_options.findIndex((o) => o.is_correct);
@@ -376,7 +376,7 @@ export default function QuestionEditor({
                 </div>
               </RadioGroup>
             ) : (
-              // SINGLE_CHOICE — radio with editable labels and add/remove allowed
+              // SINGLE_CHOICE - radio with editable labels and add/remove allowed
               <RadioGroup
                 value={(() => {
                   const idx = formData.answer_options.findIndex((o) => o.is_correct);

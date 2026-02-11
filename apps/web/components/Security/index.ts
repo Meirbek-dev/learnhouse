@@ -1,5 +1,5 @@
 /**
- * RBAC Security Components — canonical barrel export.
+ * RBAC Security Components - canonical barrel export.
  *
  * All permission-related imports should come from this module.
  */

@@ -307,7 +307,7 @@
       "correct": "Correct",
       "correctAnswer": "Correct Answer",
       "current": "Current",
-      "devToolsDetected": "Developer tools detected — violation recorded",
+      "devToolsDetected": "Developer tools detected - violation recorded",
       "downloadCsv": "Download CSV",
       "errorLoadingExam": "Failed to load exam",
       "errorStartingExam": "Failed to start exam",
@@ -318,7 +318,7 @@
       "explanation": "Explanation",
       "flagged": "Flagged",
       "flaggedForReview": "Flagged for review",
-      "fullscreenExited": "Fullscreen exited — violation recorded",
+      "fullscreenExited": "Fullscreen exited - violation recorded",
       "fullscreenNotSupported": "Fullscreen mode not supported by your browser",
       "fullscreenRecommended": "Fullscreen mode is recommended for this exam",
       "grade": "Grade {grade}",
@@ -357,7 +357,7 @@
       "proceedToNextActivity": "Next activity",
       "progress": "Progress",
       "question": "Question",
-      "questionAriaLabel": "Question {number}{answered, select, true { — answered} other {}}",
+      "questionAriaLabel": "Question {number}{answered, select, true { - answered} other {}}",
       "questionNavigator": "Question Navigator",
       "questionNavigatorDescription": "Click to jump to any question",
       "questionNumber": "Question {number}",
@@ -569,7 +569,7 @@
       "showPassword": "Show password",
       "signInWithGoogle": "Sign in with Google",
       "signup": "Sign up",
-      "title": "Login — {orgName}",
+      "title": "Login - {orgName}",
       "wrongCredentials": "Wrong email or password"
     },
     "Reset": {
@@ -607,7 +607,7 @@
       "passwordPlaceholder": "Enter your password",
       "signInWithGoogle": "Sign in with Google",
       "submit": "Submit",
-      "title": "Sign up — {orgName}",
+      "title": "Sign up - {orgName}",
       "redirecting": "Redirecting...",
       "formComponentNeeded": "Signup form component needed.",
       "autoJoinDefaultOrg": "Users auto-join to default organization on registration.",
@@ -720,12 +720,12 @@
       "openGraph": {
         "description": "Check and verify the authenticity of the {certificationName} certificate for {courseName}.",
         "siteName": "Ashyq Bilim",
-        "title": "Verify {certificationName} Certificate — {courseName}"
+        "title": "Verify {certificationName} Certificate - {courseName}"
       },
-      "title": "Certificate Verification — {certificationName} ({courseName})",
+      "title": "Certificate Verification - {certificationName} ({courseName})",
       "twitter": {
         "description": "Check and verify the authenticity of the {certificationName} certificate for {courseName}.",
-        "title": "Verify {certificationName} Certificate — {courseName}"
+        "title": "Verify {certificationName} Certificate - {courseName}"
       }
     },
     "CourseEndView": {
@@ -5549,7 +5549,7 @@
   "General": {
     "actions": "Actions",
     "active": "Active",
-    "activityTitle": "{activity} — {course} Course",
+    "activityTitle": "{activity} - {course} Course",
     "addTag": "Add tag",
     "alreadyLinked": "Already Linked",
     "amount": "Amount",
@@ -5563,7 +5563,7 @@
     "collections": "collections",
     "content": "Content",
     "course": "Course",
-    "courseEndTitle": "Congratulations — {course} Course",
+    "courseEndTitle": "Congratulations - {course} Course",
     "courses": "Courses",
     "creating": "Creating...",
     "currency": "Currency",
@@ -6038,7 +6038,7 @@
       "name": "Soft Pop"
     },
     "solarDusk": {
-      "description": "Warm, golden tones fading into deep shadows—captures the calm glow of dusk before nightfall",
+      "description": "Warm, golden tones fading into deep shadows-captures the calm glow of dusk before nightfall",
       "name": "Solar Dusk"
     },
     "spotify": {

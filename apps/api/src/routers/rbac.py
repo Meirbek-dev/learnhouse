@@ -1,11 +1,11 @@
 """
 RBAC API Endpoints
 
-- POST /check           — check single permission (returns granted/denied, never 403)
-- POST /check/batch     — batch check
-- GET  /me/permissions  — get current user's roles + permission strings
-- POST /roles/assign    — assign role (admin)
-- POST /roles/revoke    — revoke role (admin)
+- POST /check           - check single permission (returns granted/denied, never 403)
+- POST /check/batch     - batch check
+- GET  /me/permissions  - get current user's roles + permission strings
+- POST /roles/assign    - assign role (admin)
+- POST /roles/revoke    - revoke role (admin)
 """
 
 import logging
@@ -89,7 +89,7 @@ class UserPermissionsResponse(BaseModel):
 
 
 # ============================================================================
-# Permission check endpoints (never 403 — used by frontend for UI state)
+# Permission check endpoints (never 403 - used by frontend for UI state)
 # ============================================================================
 
 

@@ -29,7 +29,7 @@ export async function getUserLocale(cookieStore?: { get: (name: string) => { val
       if (c && c.value) return c.value as Locale;
     }
   } catch {
-    // Don't throw — callers should fall back to default locale
+    // Don't throw - callers should fall back to default locale
     // Logging omitted to avoid noisy output during static builds
   }
 
@@ -41,7 +41,7 @@ export async function setUserLocale(locale: Locale) {
   // This function is safe to call from client components. Server
   // code should use the request/response cookie store instead.
   if (typeof document === 'undefined') {
-    // Not running in browser — caller should handle server-side
+    // Not running in browser - caller should handle server-side
     // persistence separately.
     throw new Error('setUserLocale can only be called in the browser');
   }
@@ -53,7 +53,7 @@ export async function setUserLocale(locale: Locale) {
     // this function can be used in development over http.
     document.cookie = `${COOKIE_NAME}=${value}; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
   } catch (error) {
-    // Log but don't throw further — callers may not expect failures
+    // Log but don't throw further - callers may not expect failures
     // from cookie writes in constrained environments.
     console.error('[setUserLocale] Failed to set cookie:', error);
   }

@@ -282,7 +282,7 @@ const SubmissionGradedCard = ({ grade, t }: SubmissionGradedCardProps) => {
             </div>
 
             <div className="text-right">
-              <p className="text-3xl font-bold tracking-tight text-emerald-600">{isGraded ? grade : '—'}</p>
+              <p className="text-3xl font-bold tracking-tight text-emerald-600">{isGraded ? grade : '-'}</p>
             </div>
           </div>
         </div>

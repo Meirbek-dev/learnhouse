@@ -246,7 +246,7 @@ const authConfig: NextAuthConfig = {
           }
         }
 
-        // Subsequent requests — refresh if needed
+        // Subsequent requests - refresh if needed
         const userWithTokens = token.user as UserWithTokens | undefined;
         if (!userWithTokens?.tokens) {
           console.warn('No user tokens found in JWT callback');

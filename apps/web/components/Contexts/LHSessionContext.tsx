@@ -17,7 +17,7 @@ interface UserRoleWithOrg {
   };
 }
 
-// Extended session data interface — matches actual NextAuth session shape
+// Extended session data interface - matches actual NextAuth session shape
 interface ExtendedSessionData {
   user: {
     id: number;

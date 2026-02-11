@@ -122,7 +122,7 @@ type CodeChallengeFormData = z.infer<typeof codeChallengeFormSchema>;
 
 interface CodeChallengeFormProps {
   activityUuid: string;
-  // Accept partial input values (or parsed data — parsed data is assignable to input)
+  // Accept partial input values (or parsed data - parsed data is assignable to input)
   initialData?: Partial<CodeChallengeFormInput>;
   onSubmit: (data: CodeChallengeFormData) => Promise<void>;
   onCancel?: () => void;

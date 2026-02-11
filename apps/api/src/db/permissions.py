@@ -13,7 +13,7 @@ from sqlmodel import Field
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
 # ============================================================================
-# Enums — generated from shared/permissions.yaml
+# Enums - generated from shared/permissions.yaml
 # ============================================================================
 # These are imported from the generated file and re-exported here
 # so the entire codebase can do: from src.db.permissions import Action, ResourceType, ...
@@ -170,7 +170,7 @@ class RoleCreate(PydanticStrictBaseModel):
     slug: str
     name: str
     description: str | None = None
-    org_id: int  # Required — custom roles must belong to an org
+    org_id: int  # Required - custom roles must belong to an org
 
 
 class RoleRead(PydanticStrictBaseModel):

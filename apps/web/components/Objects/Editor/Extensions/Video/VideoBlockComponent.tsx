@@ -226,7 +226,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
       setError(null);
       setUploadProgress(0);
 
-      // Simulate upload progress — store interval id in a ref so we can clear it on unmount
+      // Simulate upload progress - store interval id in a ref so we can clear it on unmount
       progressIntervalRef.current = globalThis.setInterval(() => {
         setUploadProgress((prev) => Math.min(prev + 10, 90));
       }, 200);
@@ -366,7 +366,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
                     lang: locale,
                     pip: true,
                   }}
-                  // Do not provide a default subtitle in the editor preview —
+                  // Do not provide a default subtitle in the editor preview -
                   // subtitles should only be loaded when an actual file exists
                   locale={locale}
                   subtitleEntries={subtitleEntries}
@@ -578,7 +578,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
                         lang: locale,
                         pip: true,
                       }}
-                      // Do not provide a default subtitle in the editor preview —
+                      // Do not provide a default subtitle in the editor preview -
                       // subtitles should only be loaded when an actual file exists
                       locale={locale}
                       subtitleEntries={subtitleEntries}

@@ -10,7 +10,7 @@ interface PermissionGuardProps {
   action: Action;
   /** Resource to check permission for. */
   resource: Resource;
-  /** Permission scope (required — no silent default). */
+  /** Permission scope (required - no silent default). */
   scope: Scope;
   /** Content to render if permission is granted. */
   children: ReactNode;

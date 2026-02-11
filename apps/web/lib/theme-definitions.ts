@@ -365,7 +365,7 @@ export const solarDuskTheme = createThemeFromCSS(
   --secondary: oklch(0.8276 0.0752 74.4400);
   --accent: oklch(0.9000 0.0500 74.9889);
   `,
-  'Warm, golden tones fading into deep shadows—captures the calm glow of dusk before nightfall',
+  'Warm, golden tones fading into deep shadows-captures the calm glow of dusk before nightfall',
 );
 
 export const starryNightTheme = createThemeFromCSS(

@@ -4,8 +4,8 @@
  * Centralized Permission Provider
  *
  * Single source of truth for client-side permission checks.
- * Reads permissions from the NextAuth session — no separate API fetch.
- * Does simple Set.has() lookups — the backend expands wildcards and
+ * Reads permissions from the NextAuth session - no separate API fetch.
+ * Does simple Set.has() lookups - the backend expands wildcards and
  * scope-broadening before sending permissions to the frontend.
  */
 
@@ -20,7 +20,7 @@ import type { ReactNode } from 'react';
 // ============================================================================
 
 // Role assignment shape lives in the shared `types/permissions` when needed.
-// Keep the context value minimal — only what consumers actually use.
+// Keep the context value minimal - only what consumers actually use.
 interface PermissionContextValue {
   /** Check if user has a specific permission (scope is required) */
   can: (action: Action, resource: Resource, scope: Scope) => boolean;
@@ -37,8 +37,8 @@ interface PermissionContextValue {
 /**
  * Permission patterns:
  *
- * 1. RBAC `can()` checks — for feature/section gating (frontend UI & route guards).
- * 2. Backend `can_*` booleans on API objects — for row-level ownership/assignment checks.
+ * 1. RBAC `can()` checks - for feature/section gating (frontend UI & route guards).
+ * 2. Backend `can_*` booleans on API objects - for row-level ownership/assignment checks.
  */
 const PermissionContext = createContext<PermissionContextValue | null>(null);
 

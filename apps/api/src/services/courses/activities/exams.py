@@ -735,7 +735,7 @@ async def _grade_and_finalize_attempt(
     """Grade an attempt, set score/status, award XP, and mark activity complete.
 
     Shared by submit_exam_attempt and record_violation (auto-submit).
-    Does NOT commit — caller must commit.
+    Does NOT commit - caller must commit.
     """
     # Calculate score
     total_score = 0
@@ -948,7 +948,7 @@ async def record_violation(
         },
     )
 
-    # Check violation threshold — grade and finalize on auto-submit
+    # Check violation threshold - grade and finalize on auto-submit
     exam = db_session.get(Exam, attempt.exam_id)
     if exam:
         settings = exam.settings or {}

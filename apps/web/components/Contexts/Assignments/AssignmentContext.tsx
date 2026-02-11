@@ -59,7 +59,7 @@ export const AssignmentProvider = ({
     (url) => swrFetcher(url, accessToken),
   );
 
-  // Derive assignmentsFull (no explicit memoization — cheap computation)
+  // Derive assignmentsFull (no explicit memoization - cheap computation)
   const assignmentsFull: AssignmentContextType =
     assignment && assignment_tasks && (!course_id || course_object) && (!activity_id || activity_object)
       ? {

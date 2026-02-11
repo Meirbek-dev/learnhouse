@@ -24,7 +24,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
   // SEO
   return {
-    title: `${t('collection')}: ${col.name} — Ashyq Bilim`,
+    title: `${t('collection')}: ${col.name} - Ashyq Bilim`,
     description: `${col.description}`,
     robots: {
       index: true,
@@ -37,7 +37,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       },
     },
     openGraph: {
-      title: `${t('collection')}: ${col.name} — Ashyq Bilim`,
+      title: `${t('collection')}: ${col.name} - Ashyq Bilim`,
       description: `${col.description}`,
       type: 'website',
     },

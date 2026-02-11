@@ -1,5 +1,5 @@
 /**
- * Unified RBAC service — single file for all permission and role API calls.
+ * Unified RBAC service - single file for all permission and role API calls.
  *
  * Every RBAC-related fetch in the frontend should go through this module.
  * No inline fetch() calls for roles/permissions anywhere else.
@@ -51,7 +51,7 @@ export function fetchMyPermissions(token: string, orgId?: number): Promise<UserR
 }
 
 // ============================================================================
-// Permissions — read-only
+// Permissions - read-only
 // ============================================================================
 
 export function listAllPermissions(token: string, orgId?: number): Promise<Permission[]> {
@@ -60,7 +60,7 @@ export function listAllPermissions(token: string, orgId?: number): Promise<Permi
 }
 
 // ============================================================================
-// Roles — CRUD
+// Roles - CRUD
 // ============================================================================
 
 export function listRoles(token: string, orgId: number): Promise<Role[]> {
