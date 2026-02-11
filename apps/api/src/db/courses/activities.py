@@ -1,8 +1,9 @@
 from enum import Enum, StrEnum
 
 from pydantic import ConfigDict, field_validator
-from sqlalchemy import JSON, BigInteger, Column, ForeignKey, Integer
+from sqlalchemy import JSON, BigInteger, Column, ForeignKey, Integer, DateTime, func
 from sqlmodel import Field
+from datetime import datetime, timezone
 
 from src.db.strict_base_model import SQLModelStrictBaseModel
 
@@ -76,8 +77,8 @@ class Activity(ActivityBase, table=True):
         sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="SET NULL")),
     )
     activity_uuid: str = ""
-    creation_date: str = ""
-    update_date: str = ""
+    creation_date: datetime = Field(default_factory=lambda: datetime.now(tz=timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now()))
+    update_date: datetime = Field(default_factory=lambda: datetime.now(tz=timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now()))
 
 
 class ActivityCreate(ActivityBase):
@@ -105,8 +106,8 @@ class ActivityRead(ActivityBase):
     org_id: int
     course_id: int | None
     activity_uuid: str
-    creation_date: str
-    update_date: str
+    creation_date: datetime
+    update_date: datetime
 
 
 class ActivityReadWithPermissions(ActivityRead):

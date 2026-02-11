@@ -1,0 +1,86 @@
+"""add_uuid_uniques
+
+Revision ID: 2a3b4c5d6e7f
+Revises: f1a2b3c4d5e6
+Create Date: 2026-02-11 00:00:00.000000
+
+"""
+
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+# revision identifiers, used by Alembic.
+revision: str = "2a3b4c5d6e7f"
+down_revision: Union[str, None] = "f1a2b3c4d5e6"
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+# Tables/columns to make unique (table, column, constraint_name, index_name)
+TARGETS = [
+    ("activity", "activity_uuid", "uq_activity_activity_uuid", "idx_activity_activity_uuid"),
+    ("course", "course_uuid", "uq_course_course_uuid", "idx_course_course_uuid"),
+    ("collection", "collection_uuid", "uq_collection_collection_uuid", "idx_collection_collection_uuid"),
+    ("chapter", "chapter_uuid", "uq_chapter_chapter_uuid", "idx_chapter_chapter_uuid"),
+    ("assignment", "assignment_uuid", "uq_assignment_assignment_uuid", "idx_assignment_assignment_uuid"),
+    ("assignmenttask", "assignment_task_uuid", "uq_assignmenttask_assignment_task_uuid", "idx_assignmenttask_assignment_task_uuid"),
+    ("assignmenttasksubmission", "assignment_task_submission_uuid", "uq_assignmenttasksubmission_assignment_task_submission_uuid", "idx_assignmenttasksubmission_assignment_task_submission_uuid"),
+    ("assignmentusersubmission", "assignmentusersubmission_uuid", "uq_assignmentusersubmission_assignmentusersubmission_uuid", "idx_assignmentusersubmission_assignmentusersubmission_uuid"),
+    ("block", "block_uuid", "uq_block_block_uuid", "idx_block_block_uuid"),
+    ("collection", "collection_uuid", "uq_collection_collection_uuid", "idx_collection_collection_uuid"),
+    ("courseupdate", "courseupdate_uuid", "uq_courseupdate_courseupdate_uuid", "idx_courseupdate_courseupdate_uuid"),
+    ("certifications", "certification_uuid", "uq_certifications_certification_uuid", "idx_certifications_certification_uuid"),
+    ("certificateuser", "user_certification_uuid", "uq_certificateuser_user_certification_uuid", "idx_certificateuser_user_certification_uuid"),
+    ("usergroup", "usergroup_uuid", "uq_usergroup_usergroup_uuid", "idx_usergroup_usergroup_uuid"),
+]
+
+
+def _check_duplicates(conn: sa.engine.Connection, table: str, column: str) -> list:
+    stmt = sa.text(f"SELECT {column} as val, count(*) as c FROM {table} GROUP BY {column} HAVING count(*) > 1 LIMIT 10")
+    res = conn.execute(stmt).fetchall()
+    return [dict(r) for r in res]
+
+
+def upgrade() -> None:
+    conn = op.get_bind()
+
+    # Pre-check for duplicates before attempting to add unique constraints
+    duplicates = {}
+    for table, column, _, _ in TARGETS:
+        dups = _check_duplicates(conn, table, column)
+        if dups:
+            duplicates[f"{table}.{column}"] = dups
+
+    if duplicates:
+        # Present a helpful message and abort migration so the operator can fix duplicates first
+        raise RuntimeError(
+            "Cannot add UNIQUE constraints because duplicates were found: "
+            + "; ".join(f"{k}:{v}" for k, v in duplicates.items())
+        )
+
+    # No duplicates - create constraints and indexes
+    for table, column, constraint_name, index_name in TARGETS:
+        try:
+            op.create_unique_constraint(constraint_name, table, [column])
+        except Exception:
+            # If constraint exists, ignore
+            pass
+        try:
+            op.create_index(index_name, table, [column])
+        except Exception:
+            pass
+
+
+def downgrade() -> None:
+    # Remove constraints and indexes added by this revision
+    for table, column, constraint_name, index_name in TARGETS:
+        try:
+            op.drop_index(index_name, table_name=table)
+        except Exception:
+            pass
+        try:
+            op.drop_constraint(constraint_name, table_name=table, type_="unique")
+        except Exception:
+            pass
