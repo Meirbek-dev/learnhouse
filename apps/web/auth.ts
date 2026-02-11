@@ -5,117 +5,101 @@ import {
   loginWithOAuthToken,
 } from '@/services/auth/auth';
 import { getTopLevelCookieDomain, getUriWithOrg } from '@/services/config/config';
+import type { NextAuthConfig, NextAuthResult, Session } from 'next-auth';
 import { getResponseMetadata } from '@/services/utils/ts/requests';
-import type { NextAuthConfig, NextAuthResult } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
+import type { JWT } from 'next-auth/jwt';
 import { createHash } from 'node:crypto';
 import { cookies } from 'next/headers';
 import NextAuth from 'next-auth';
 
-// session cache with TTL and size limits
+// ─── Session Cache Types ──────────────────────────────────────────────────────
+
 declare global {
-  var sessionCache:
-    | Map<
-        string,
-        {
-          data: SessionData;
-          timestamp: number;
-        }
-      >
-    | undefined;
+  var sessionCache: Map<string, { data: SessionData; timestamp: number }> | undefined;
 }
 
-// Constants
+// ─── Constants ────────────────────────────────────────────────────────────────
+
 const CACHE_TTL = 1 * 60 * 1000; // 1 minute
 const TOKEN_REFRESH_BUFFER = 2 * 60 * 1000; // 2 minutes before expiry
-const MAX_CACHE_SIZE = 1000; // Prevent memory leaks
+const MAX_CACHE_SIZE = 1000;
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 days
 const SESSION_UPDATE_AGE = 24 * 60 * 60; // 24 hours
-
-// Cache implementation with size limits and cleanup
-const getSessionCache = () => {
-  if (typeof globalThis !== 'undefined') {
-    if (!(globalThis.sessionCache && globalThis.sessionCache instanceof Map)) {
-      globalThis.sessionCache = new Map();
-    }
-
-    const cache = globalThis.sessionCache;
-
-    // Cleanup old entries and limit size
-    if (cache.size > MAX_CACHE_SIZE) {
-      const entries = [...cache.entries()];
-      const now = Date.now();
-
-      // Remove expired entries first
-      for (const [key, value] of entries) {
-        if (now - value.timestamp > CACHE_TTL) {
-          cache.delete(key);
-        }
-      }
-
-      // If still over limit, remove oldest entries
-      if (cache.size > MAX_CACHE_SIZE) {
-        const sortedEntries = entries
-          .toSorted((a, b) => a[1].timestamp - b[1].timestamp)
-          .slice(0, cache.size - MAX_CACHE_SIZE);
-
-        for (const [key] of sortedEntries) {
-          cache.delete(key);
-        }
-      }
-    }
-
-    return cache;
-  }
-  // Fallback for environments without globalThis
-  return new Map();
-};
+const DEFAULT_TOKEN_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours fallback
 
 export const isDevEnv = process.env.NODE_ENV !== 'production';
 
-// Helper function to validate token expiry
-const isTokenExpiringSoon = (expiry: number, bufferMs: number = TOKEN_REFRESH_BUFFER): boolean => {
-  // Handle missing or invalid expiry - but don't force unnecessary refreshes
-  if (!expiry || typeof expiry !== 'number' || expiry <= 0) {
-    // If expiry is invalid, assume token is still valid but check on next session callback
-    // This prevents constant refresh attempts when backend doesn't send expiry
-    console.warn('Token missing expiry timestamp, assuming valid for this request');
-    return false; // Don't trigger refresh for missing expiry
+// ─── Cache Helpers ────────────────────────────────────────────────────────────
+
+const getSessionCache = (): Map<string, { data: SessionData; timestamp: number }> => {
+  if (typeof globalThis === 'undefined') return new Map();
+
+  if (!(globalThis.sessionCache instanceof Map)) {
+    globalThis.sessionCache = new Map();
   }
 
-  // Token is expiring soon if current time + buffer is past expiry
-  const isExpiring = Date.now() + bufferMs >= expiry;
+  const cache = globalThis.sessionCache;
 
-  if (isExpiring) {
+  if (cache.size > MAX_CACHE_SIZE) {
+    const now = Date.now();
+    const entries = [...cache.entries()];
+
+    // Evict expired entries first
+    for (const [key, value] of entries) {
+      if (now - value.timestamp > CACHE_TTL) cache.delete(key);
+    }
+
+    // Evict oldest if still over limit
+    if (cache.size > MAX_CACHE_SIZE) {
+      [...cache.entries()]
+        .toSorted((a, b) => a[1].timestamp - b[1].timestamp)
+        .slice(0, cache.size - MAX_CACHE_SIZE)
+        .forEach(([key]) => cache.delete(key));
+    }
+  }
+
+  return cache;
+};
+
+const createCacheKey = (accessToken: string): string => {
+  if (!accessToken) return 'user_session_anonymous';
+  return `user_session_${createHash('sha256').update(accessToken).digest('hex')}`;
+};
+
+// ─── Token Helpers ────────────────────────────────────────────────────────────
+
+const isTokenExpiringSoon = (expiry: number, bufferMs = TOKEN_REFRESH_BUFFER): boolean => {
+  if (!expiry || typeof expiry !== 'number' || expiry <= 0) {
+    console.warn('Token missing expiry timestamp, assuming valid for this request');
+    return false;
+  }
+
+  const expiring = Date.now() + bufferMs >= expiry;
+  if (expiring) {
     console.log('Token expiring soon, will refresh', {
       expiresAt: new Date(expiry).toISOString(),
       bufferMs,
     });
   }
-
-  return isExpiring;
+  return expiring;
 };
 
-// Helper function to create cache key
-const createCacheKey = (accessToken: string): string => {
-  if (!accessToken) return 'user_session_anonymous';
+const safeExpiry = (expiry: unknown, fallback = Date.now() + DEFAULT_TOKEN_TTL_MS): number =>
+  typeof expiry === 'number' && expiry > 0 ? expiry : fallback;
 
-  // Hash the full token to avoid collisions while still not storing raw tokens.
-  const tokenHash = createHash('sha256').update(accessToken).digest('hex');
-  return `user_session_${tokenHash}`;
-};
+// ─── Cookie / Secure Config ───────────────────────────────────────────────────
 
-const cookieDomain = !isDevEnv ? getTopLevelCookieDomain() : undefined;
-
-const normalizeBoolean = (value?: string | null) => {
+const normalizeBoolean = (value?: string | null): boolean | undefined => {
   if (!value) return undefined;
-  const normalized = value.trim().toLowerCase();
-  if (['true', '1', 'yes', 'on'].includes(normalized)) return true;
-  if (['false', '0', 'no', 'off'].includes(normalized)) return false;
+  const v = value.trim().toLowerCase();
+  if (['true', '1', 'yes', 'on'].includes(v)) return true;
+  if (['false', '0', 'no', 'off'].includes(v)) return false;
   return undefined;
 };
 
+const cookieDomain = !isDevEnv ? getTopLevelCookieDomain() : undefined;
 const httpsFlag = normalizeBoolean(process.env.NEXT_PUBLIC_PLATFORM_HTTPS);
 const sslFlag = normalizeBoolean(process.env.PLATFORM_SSL);
 const nextAuthUrl = process.env.NEXTAUTH_URL;
@@ -123,8 +107,11 @@ const isHttpsUrl = typeof nextAuthUrl === 'string' && nextAuthUrl.startsWith('ht
 const cookieSecure = !isDevEnv && (isHttpsUrl || httpsFlag === true || sslFlag === true);
 const cookieNamePrefix = cookieSecure ? '__Secure-' : '';
 
+// ─── Auth Config ──────────────────────────────────────────────────────────────
+
 const authConfig: NextAuthConfig = {
   debug: isDevEnv,
+
   providers: [
     Credentials({
       name: 'Credentials',
@@ -133,75 +120,65 @@ const authConfig: NextAuthConfig = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials): Promise<any> {
-        // Type & presence validation (credentials props are unknown by default)
         if (!credentials || typeof credentials !== 'object') {
-          console.warn('Missing credentials object in authorization attempt');
+          console.warn('Missing credentials object');
           return null;
         }
 
-        const rawEmail = (credentials as Record<string, unknown>).email;
-        const rawPassword = (credentials as Record<string, unknown>).password;
+        const { email: rawEmail, password: rawPassword } = credentials as Record<string, unknown>;
 
         if (typeof rawEmail !== 'string' || typeof rawPassword !== 'string') {
           console.warn('Credentials must be strings');
           return null;
         }
 
-        if (!(rawEmail.trim() && rawPassword.trim())) {
-          console.warn('Empty email or password provided');
+        if (!rawEmail.trim() || !rawPassword.trim()) {
+          console.warn('Empty email or password');
           return null;
         }
 
-        // Basic email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(rawEmail)) {
-          console.warn('Invalid email format in authorization attempt');
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail)) {
+          console.warn('Invalid email format');
           return null;
         }
 
         try {
-          const sanitizedEmail = rawEmail.toLowerCase().trim();
-          // password trimming avoided to preserve intentional leading/trailing spaces (only strip line breaks)
-          const password = rawPassword;
-          const unsanitized_req = await loginAndGetToken(sanitizedEmail, password);
-          const res = await getResponseMetadata(unsanitized_req);
+          const res = await getResponseMetadata(await loginAndGetToken(rawEmail.toLowerCase().trim(), rawPassword));
 
-          if (res.success && res.data) {
-            // Validate required user data
-            const userData = res.data as UserWithTokens;
-            if (!(userData.tokens?.access_token && userData.tokens?.refresh_token)) {
-              console.error('Missing required tokens in authorization response');
-              return null;
-            }
-            // Cast to NextAuth User shape (augment ensures tokens allowed)
-            return userData as any;
+          if (!res.success || !res.data) {
+            console.warn('Authorization failed: invalid credentials or server error');
+            return null;
           }
 
-          console.warn('Authorization failed: Invalid credentials or server error');
-          return null;
+          const userData = res.data as UserWithTokens;
+          if (!userData.tokens?.access_token || !userData.tokens?.refresh_token) {
+            console.error('Missing required tokens in authorization response');
+            return null;
+          }
+
+          return userData as any;
         } catch (error) {
           console.error('Authorization error:', error);
           return null;
         }
       },
     }),
+
     Google({
       clientId: process.env.PLATFORM_GOOGLE_CLIENT_ID,
       clientSecret: process.env.PLATFORM_GOOGLE_CLIENT_SECRET,
       authorization: {
-        params: {
-          prompt: 'consent',
-          access_type: 'offline',
-          response_type: 'code',
-        },
+        params: { prompt: 'consent', access_type: 'offline', response_type: 'code' },
       },
     }),
   ],
+
   pages: {
     signIn: getUriWithOrg('auth', '/'),
     verifyRequest: getUriWithOrg('auth', '/'),
     error: getUriWithOrg('auth', '/'),
   },
+
   cookies: {
     sessionToken: {
       name: `${cookieNamePrefix}next-auth.session-token`,
@@ -214,208 +191,164 @@ const authConfig: NextAuthConfig = {
       },
     },
   },
+
   session: {
     strategy: 'jwt',
     maxAge: SESSION_MAX_AGE,
     updateAge: SESSION_UPDATE_AGE,
   },
-  trustHost: true, // Required for NextAuth v5
-  callbacks: {
-    async jwt({ token, user, account, trigger }) {
-      try {
-        // Handle sign in with Credentials provider
-        if (account?.provider === 'credentials' && user) {
-          const userWithTokens = user as unknown as UserWithTokens;
 
-          // Validate token data
-          if (!(userWithTokens.tokens?.access_token && userWithTokens.tokens?.refresh_token)) {
+  trustHost: true,
+
+  callbacks: {
+    // ── jwt ────────────────────────────────────────────────────────────────
+    async jwt({ token, user, account }): Promise<JWT | null> {
+      try {
+        // Credentials sign-in
+        if (account?.provider === 'credentials' && user) {
+          const u = user as unknown as UserWithTokens;
+          if (!u.tokens?.access_token || !u.tokens?.refresh_token) {
             console.error('Invalid token data from credentials provider');
             return null;
           }
-
-          token.user = userWithTokens;
+          token.user = u;
           return token;
         }
 
-        // Handle Google OAuth sign in
+        // Google OAuth sign-in
         if (account?.provider === 'google' && user?.email && account.access_token) {
           try {
-            // Try to get org_id from cookie
             const cookieStore = await cookies();
             const orgIdCookie = cookieStore.get('oauth_org_id');
             const orgId = orgIdCookie?.value ? Number.parseInt(orgIdCookie.value, 10) : undefined;
+            if (orgIdCookie) cookieStore.delete('oauth_org_id');
 
-            // Clear the cookie after reading it
-            if (orgIdCookie) {
-              cookieStore.delete('oauth_org_id');
-            }
-
-            const unsanitized_req = await loginWithOAuthToken(
-              user.email.toLowerCase().trim(),
-              'google',
-              account.access_token,
-              orgId,
+            const res = await getResponseMetadata(
+              await loginWithOAuthToken(user.email.toLowerCase().trim(), 'google', account.access_token, orgId),
             );
-            const userFromOAuth = await getResponseMetadata(unsanitized_req);
 
-            if (userFromOAuth.success && userFromOAuth.data) {
-              const userData = userFromOAuth.data as UserWithTokens;
-
-              // Validate OAuth token data
-              if (!(userData.tokens?.access_token && userData.tokens?.refresh_token)) {
-                console.error('Invalid token data from OAuth provider');
-                return null;
-              }
-
-              token.user = userData;
-              return token;
+            if (!res.success || !res.data) {
+              console.error('OAuth authentication failed:', res);
+              return null;
             }
-            console.error('OAuth authentication failed:', userFromOAuth);
-            return null;
+
+            const userData = res.data as UserWithTokens;
+            if (!userData.tokens?.access_token || !userData.tokens?.refresh_token) {
+              console.error('Invalid token data from OAuth provider');
+              return null;
+            }
+
+            token.user = userData;
+            return token;
           } catch (error) {
             console.error('OAuth authentication error:', error);
             return null;
           }
         }
 
-        // Handle token refresh for existing sessions
-        const userWithTokens = token.user as UserWithTokens;
+        // Subsequent requests — refresh if needed
+        const userWithTokens = token.user as UserWithTokens | undefined;
         if (!userWithTokens?.tokens) {
           console.warn('No user tokens found in JWT callback');
           return token;
         }
 
         const { tokens } = userWithTokens;
+        // If expiry is missing/invalid force a refresh attempt
+        const tokenExpiry = safeExpiry(tokens.expiry, Date.now() - 1);
 
-        // Ensure expiry exists and is valid
-        const tokenExpiry =
-          tokens.expiry && typeof tokens.expiry === 'number' && tokens.expiry > 0 ? tokens.expiry : Date.now() - 1; // Force refresh if invalid
+        if (!isTokenExpiringSoon(tokenExpiry)) return token;
 
-        // Check if token needs refreshing
-        if (isTokenExpiringSoon(tokenExpiry)) {
-          console.log('Token is expiring soon, attempting refresh...');
+        console.log('Token expiring soon, attempting refresh...');
 
-          try {
-            const { refresh_token } = tokens;
-            if (!refresh_token) {
-              console.error('No refresh token available');
-              return null;
-            }
-
-            const refreshedToken = await getNewAccessTokenUsingRefreshTokenServer(refresh_token);
-
-            if (refreshedToken?.access_token) {
-              // Ensure new expiry is set and valid
-              const newExpiry =
-                refreshedToken.expiry && typeof refreshedToken.expiry === 'number' && refreshedToken.expiry > 0
-                  ? refreshedToken.expiry
-                  : Date.now() + 8 * 60 * 60 * 1000; // Default 8 hours
-
-              token.user = {
-                ...userWithTokens,
-                tokens: {
-                  ...tokens,
-                  access_token: refreshedToken.access_token,
-                  refresh_token: refreshedToken.refresh_token || refresh_token,
-                  expiry: newExpiry,
-                },
-              } as UserWithTokens;
-
-              console.log('Token refreshed successfully', { newExpiry });
-            } else {
-              console.error('Token refresh failed: No access token in response');
-              return null; // Kill session on refresh failure
-            }
-          } catch (error) {
-            console.error('Token refresh failed:', error);
-            const cache = getSessionCache();
-            const cacheKey = createCacheKey(tokens.access_token);
-            cache.delete(cacheKey);
-            return null; // Kill session on error
-          }
+        if (!tokens.refresh_token) {
+          console.error('No refresh token available');
+          return null;
         }
 
-        return token;
+        try {
+          const refreshed = await getNewAccessTokenUsingRefreshTokenServer(tokens.refresh_token);
+
+          if (!refreshed?.access_token) {
+            console.error('Token refresh failed: no access token in response');
+            return null;
+          }
+
+          token.user = {
+            ...userWithTokens,
+            tokens: {
+              ...tokens,
+              access_token: refreshed.access_token,
+              refresh_token: refreshed.refresh_token ?? tokens.refresh_token,
+              expiry: safeExpiry(refreshed.expiry),
+            },
+          } as UserWithTokens;
+
+          console.log('Token refreshed successfully');
+          return token;
+        } catch (error) {
+          console.error('Token refresh error:', error);
+          getSessionCache().delete(createCacheKey(tokens.access_token));
+          return null;
+        }
       } catch (error) {
         console.error('JWT callback error:', error);
         return null;
       }
     },
 
-    async session({ session, token }) {
-      const userWithTokens = token.user as UserWithTokens;
-      if (!userWithTokens) {
-        console.warn('No user data in token for session callback');
+    // ── session ────────────────────────────────────────────────────────────
+    async session({ session, token }): Promise<Session> {
+      const userWithTokens = token.user as UserWithTokens | undefined;
+
+      if (!userWithTokens?.tokens?.access_token) {
+        console.warn('No valid token data for session callback');
         return session;
       }
 
       const { tokens } = userWithTokens;
-      if (!tokens?.access_token) {
-        console.warn('No access token available for session');
-        return session;
-      }
-
-      // Caching with proper key management
-      const cacheKey = createCacheKey(tokens.access_token);
       const cache = getSessionCache();
-      const cachedSession = cache.get(cacheKey);
+      const cacheKey = createCacheKey(tokens.access_token);
+      const cached = cache.get(cacheKey);
 
-      // Return cached session if valid
-      if (cachedSession && Date.now() - cachedSession.timestamp < CACHE_TTL) {
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
         return {
           ...session,
-          user: cachedSession.data.user,
-          roles: cachedSession.data.roles,
-          tokens: cachedSession.data.tokens,
-          permissions: cachedSession.data.permissions,
-          permissions_org_id: cachedSession.data.permissions_org_id,
+          user: cached.data.user,
+          roles: cached.data.roles,
+          tokens: cached.data.tokens,
+          permissions: cached.data.permissions,
+          permissions_org_id: cached.data.permissions_org_id,
         };
       }
 
       try {
-        // Read current org from cookie so permissions are scoped correctly
         const cookieStore = await cookies();
         const orgIdCookie = cookieStore.get('current_org_id');
         const currentOrgId = orgIdCookie?.value ? Number.parseInt(orgIdCookie.value, 10) : undefined;
 
-        const api_SESSION = await getUserSession(tokens.access_token, currentOrgId);
+        const apiSession = await getUserSession(tokens.access_token, currentOrgId);
 
-        if (!api_SESSION?.user) {
+        if (!apiSession?.user) {
           console.error('Invalid session data from getUserSession');
           return session;
         }
 
         const sessionData: SessionData = {
-          user: api_SESSION.user,
-          roles: api_SESSION.roles || [],
-          tokens: tokens,
-          permissions: api_SESSION.permissions || [],
+          user: apiSession.user,
+          roles: apiSession.roles ?? [],
+          tokens,
+          permissions: apiSession.permissions ?? [],
           permissions_org_id: currentOrgId ?? null,
         };
 
-        const updatedSession = {
-          ...session,
-          user: sessionData.user,
-          roles: sessionData.roles,
-          tokens: sessionData.tokens,
-          permissions: sessionData.permissions,
-          permissions_org_id: sessionData.permissions_org_id,
-        };
+        cache.set(cacheKey, { data: sessionData, timestamp: Date.now() });
 
-        // Cache the fresh session data
-        cache.set(cacheKey, {
-          data: sessionData,
-          timestamp: Date.now(),
-        });
-
-        return updatedSession;
+        return { ...session, ...sessionData };
       } catch (error) {
         console.error('Failed to fetch user session:', error);
-
-        // Clear potentially stale cache entry
         cache.delete(cacheKey);
 
-        // Return session with available token data (ensure permissions array always exists)
         return {
           ...session,
           user: {
@@ -426,48 +359,39 @@ const authConfig: NextAuthConfig = {
             last_name: userWithTokens.last_name,
           },
           roles: [],
-          tokens: tokens,
+          tokens,
           permissions: [],
         };
       }
     },
 
+    // ── authorized ─────────────────────────────────────────────────────────
     async authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = Boolean(auth?.user);
       const isAuthPage = nextUrl.pathname.startsWith('/auth');
 
       if (isAuthPage) {
-        if (isLoggedIn) {
-          return Response.redirect(new URL('/redirect_from_auth', nextUrl));
-        }
-        return true;
+        return isLoggedIn ? Response.redirect(new URL('/redirect_from_auth', nextUrl)) : true;
       }
 
       return isLoggedIn;
     },
   },
+
   events: {
     async signOut(message) {
-      // Defensive extraction: event shape may differ across versions
       const token = (message as any)?.token;
       const userWithTokens = token?.user as UserWithTokens | undefined;
       if (userWithTokens?.tokens?.access_token) {
-        const cache = getSessionCache();
-        const cacheKey = createCacheKey(userWithTokens.tokens.access_token);
-        cache.delete(cacheKey);
+        getSessionCache().delete(createCacheKey(userWithTokens.tokens.access_token));
       }
     },
-    async signIn({ user, account, profile, isNewUser }) {
-      // Log successful sign-ins for monitoring
-      const userWithTokens = user as unknown as UserWithTokens;
-      console.log(`User signed in: ${userWithTokens.email} via ${account?.provider}`);
+    async signIn({ user, account }) {
+      const u = user as unknown as UserWithTokens;
+      console.log(`User signed in: ${u.email} via ${account?.provider}`);
     },
   },
 };
+const { handlers, signIn, signOut, auth }: NextAuthResult = NextAuth(authConfig);
 
-const nextAuthResult: NextAuthResult = NextAuth(authConfig);
-
-export const {handlers} = nextAuthResult;
-export const {signIn} = nextAuthResult;
-export const {signOut} = nextAuthResult;
-export const {auth} = nextAuthResult;
+export { handlers, signIn, signOut, auth };
