@@ -2,8 +2,9 @@ from enum import Enum, StrEnum
 
 from pydantic import ConfigDict, field_validator
 from pydantic import Field as PydanticField
-from sqlalchemy import BigInteger, Column, ForeignKey, Integer
+from sqlalchemy import BigInteger, Column, ForeignKey, Integer, DateTime, func
 from sqlmodel import Field
+from datetime import datetime, timezone
 
 from src.db.courses.chapters import ChapterRead
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
@@ -70,8 +71,8 @@ class Course(CourseBase, table=True):
         sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="SET NULL")),
     )
     course_uuid: str = ""
-    creation_date: str = ""
-    update_date: str = ""
+    creation_date: datetime = Field(default_factory=lambda: datetime.now(tz=timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now()))
+    update_date: datetime = Field(default_factory=lambda: datetime.now(tz=timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now()))
 
 
 class CourseCreate(CourseBase):
@@ -112,8 +113,8 @@ class CourseRead(PydanticStrictBaseModel):
     org_id: int = PydanticField(default=None)
     authors: list[AuthorWithRole] = PydanticField(default_factory=list)
     course_uuid: str
-    creation_date: str
-    update_date: str
+    creation_date: datetime
+    update_date: datetime
     thumbnail_type: ThumbnailType | None = PydanticField(default=ThumbnailType.IMAGE)
     thumbnail_image: str | None = PydanticField(default="")
     thumbnail_video: str | None = PydanticField(default="")
@@ -165,6 +166,16 @@ class FullCourseRead(PydanticStrictBaseModel):
             return ThumbnailType(v)
         return v
 
+    @field_validator("creation_date", "update_date", mode="before")
+    @classmethod
+    def validate_dates(cls, v):
+        # Accept datetime values and coerce to ISO strings centrally
+        from datetime import datetime
+
+        if isinstance(v, datetime):
+            return v.isoformat()
+        return v
+
 
 class FullCourseReadWithTrail(PydanticStrictBaseModel):
     id: int
@@ -194,4 +205,14 @@ class FullCourseReadWithTrail(PydanticStrictBaseModel):
     def validate_thumbnail_type(cls, v):
         if isinstance(v, str):
             return ThumbnailType(v)
+        return v
+
+    @field_validator("creation_date", "update_date", mode="before")
+    @classmethod
+    def validate_dates(cls, v):
+        # Accept datetime values and coerce to ISO strings centrally
+        from datetime import datetime
+
+        if isinstance(v, datetime):
+            return v.isoformat()
         return v

@@ -37,21 +37,58 @@ TARGETS = [
 ]
 
 
-def _check_duplicates(conn: sa.engine.Connection, table: str, column: str) -> list:
-    stmt = sa.text(f"SELECT {column} as val, count(*) as c FROM {table} GROUP BY {column} HAVING count(*) > 1 LIMIT 10")
-    res = conn.execute(stmt).fetchall()
-    return [dict(r) for r in res]
+def _check_duplicates(conn: sa.engine.Connection, table: str, column: str) -> tuple[list, str | None]:
+    """Return (duplicates_list, error_message).
+
+    - If table does not exist, returns ([], None)
+    - If query fails, returns ([], error_message) so caller can decide how to handle it
+    """
+    # Check table existence first
+    try:
+        exists = conn.execute(
+            sa.text(
+                "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = :t)"
+            ),
+            {"t": table},
+        ).scalar()
+    except Exception as e:  # pragma: no cover - defensive
+        return ([], f"failed to check existence of table {table}: {e}")
+
+    if not exists:
+        # table not present in this DB state - skip gracefully
+        return ([], None)
+
+    try:
+        stmt = sa.text(
+            f"SELECT {column} as val, count(*) as c FROM {table} GROUP BY {column} HAVING count(*) > 1 LIMIT 10"
+        )
+        res = conn.execute(stmt).fetchall()
+        return ([dict(r) for r in res], None)
+    except Exception as e:
+        # Query failed - surface an error message instead of letting DB abort the transaction
+        return ([], f"failed to query duplicates for {table}.{column}: {e}")
 
 
 def upgrade() -> None:
     conn = op.get_bind()
 
     # Pre-check for duplicates before attempting to add unique constraints
-    duplicates = {}
+    duplicates: dict = {}
+    errors: dict = {}
+
     for table, column, _, _ in TARGETS:
-        dups = _check_duplicates(conn, table, column)
+        dups, err = _check_duplicates(conn, table, column)
+        if err:
+            errors[f"{table}.{column}"] = err
+            continue
         if dups:
             duplicates[f"{table}.{column}"] = dups
+
+    if errors:
+        raise RuntimeError(
+            "Cannot add UNIQUE constraints because errors occurred during pre-check: "
+            + "; ".join(f"{k}:{v}" for k, v in errors.items())
+        )
 
     if duplicates:
         # Present a helpful message and abort migration so the operator can fix duplicates first

@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:latest
 # Base image for Python backend
-FROM python:3.14.2-slim-trixie AS base
+FROM python:3.14.3-slim-trixie AS base
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \

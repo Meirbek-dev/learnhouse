@@ -128,7 +128,7 @@ const CourseClient = (props: any) => {
         }
         // Legacy: plain text list. Prefer newlines/semicolons/bullets; avoid splitting on commas aggressively.
         const parts = raw
-          .split(/\r?\n|\u2022|\u2023|\u25E6|;|\||·|–|-/)
+          .split(/\r?\n|\u2022|\u2023|\u25E6|;|\||·|–|—/)
           .map((s) => s.replace(/^[-*\s]+/, '').trim())
           .filter((s) => s.length > 0 && s.toLowerCase() !== 'null' && s.toLowerCase() !== 'undefined');
         // If nothing split out meaningfully, keep as single item

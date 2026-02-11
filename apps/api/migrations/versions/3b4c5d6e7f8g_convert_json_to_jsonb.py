@@ -31,16 +31,25 @@ TARGETS = [
 
 def upgrade() -> None:
     # Convert JSON columns to JSONB and create GIN indexes. Casts use USING col::jsonb
+    failed = []
     for table, column, index_name in TARGETS:
         try:
-            op.execute(sa.text(f"ALTER TABLE {table} ALTER COLUMN {column} TYPE jsonb USING {column}::jsonb"))
-        except Exception:
-            # If conversion fails (invalid JSON), let the operator handle it manually
-            raise RuntimeError(f"Failed to convert {table}.{column} to jsonb - ensure all rows contain valid JSON")
+            # Run the ALTER in an autocommit block so a single failure doesn't abort the whole migration
+            with op.get_context().autocommit_block():
+                op.execute(sa.text(f"ALTER TABLE {table} ALTER COLUMN {column} TYPE jsonb USING {column}::jsonb"))
+        except Exception as e:
+            # Record the failure and continue with other conversions
+            failed.append((table, column, str(e)))
+            continue
         try:
-            op.create_index(index_name, table, [sa.text(column)], postgresql_using="gin")
+            # Create GIN index if possible (ignore failures such as index already exists)
+            with op.get_context().autocommit_block():
+                op.execute(sa.text(f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} USING gin ({column})"))
         except Exception:
             pass
+    if failed:
+        msgs = ", ".join([f"{t}.{c}: {err}" for t, c, err in failed])
+        raise RuntimeError(f"Failed to convert some columns to jsonb: {msgs}")
 
 
 def downgrade() -> None:

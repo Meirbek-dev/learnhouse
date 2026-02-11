@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlalchemy import func
@@ -486,24 +486,23 @@ async def search_courses(
             for resource_author, user in author_results
         ]
 
-        course_read = CourseRead.model_validate(
-            {
-                "id": course.id or 0,  # Ensure id is never None
-                "org_id": course.org_id,
-                "name": course.name,
-                "description": course.description or "",
-                "about": course.about or "",
-                "learnings": course.learnings or "",
-                "tags": course.tags or "",
-                "thumbnail_image": course.thumbnail_image or "",
-                "public": course.public,
-                "open_to_contributors": course.open_to_contributors,
-                "course_uuid": course.course_uuid,
-                "creation_date": course.creation_date,
-                "update_date": course.update_date,
-                "authors": authors,
-            }
-        )
+        course_dict = {
+            "id": course.id or 0,  # Ensure id is never None
+            "org_id": course.org_id,
+            "name": course.name,
+            "description": course.description or "",
+            "about": course.about or "",
+            "learnings": course.learnings or "",
+            "tags": course.tags or "",
+            "thumbnail_image": course.thumbnail_image or "",
+            "public": course.public,
+            "open_to_contributors": course.open_to_contributors,
+            "course_uuid": course.course_uuid,
+            "creation_date": course.creation_date,
+            "update_date": course.update_date,
+            "authors": authors,
+        }
+        course_read = CourseRead.model_validate(course_dict)
         course_reads.append(course_read)
 
     return course_reads
@@ -549,8 +548,8 @@ async def create_course(
         )
 
     course.course_uuid = f"course_{ULID()}"
-    course.creation_date = str(datetime.now())
-    course.update_date = str(datetime.now())
+    course.creation_date = datetime.now(tz=timezone.utc)
+    course.update_date = datetime.now(tz=timezone.utc)
     course.creator_id = current_user.id  # Track creator
 
     # Upload thumbnail
@@ -584,13 +583,9 @@ async def create_course(
         user_id=current_user.id,
         authorship=ResourceAuthorshipEnum.CREATOR,
         authorship_status=ResourceAuthorshipStatusEnum.ACTIVE,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
+        creation_date=datetime.now(tz=timezone.utc),
+        update_date=datetime.now(tz=timezone.utc),
     )
-
-    # Insert course author
-    db_session.add(resource_author)
-    db_session.commit()
     db_session.refresh(resource_author)
 
     # Get course authors with their roles
@@ -691,7 +686,7 @@ async def update_course_thumbnail(
         )
 
     # Complete the course object
-    course.update_date = str(datetime.now())
+    course.update_date = datetime.now(tz=timezone.utc)
 
     db_session.add(course)
     db_session.commit()
@@ -803,7 +798,7 @@ async def update_course(
         setattr(course, field, value)
 
     # Complete the course object
-    course.update_date = str(datetime.now())
+    course.update_date = datetime.now(tz=timezone.utc)
 
     db_session.add(course)
     db_session.commit()
@@ -830,7 +825,7 @@ async def update_course(
         for resource_author, user in author_results
     ]
 
-    return CourseRead(**course.model_dump(), authors=authors)
+    return CourseRead.model_validate({**course.model_dump(), "authors": authors})
 
 
 async def delete_course(
@@ -949,7 +944,6 @@ async def get_user_courses(
                 "authors": authors_with_role,
             }
         )
-
         result.append(course_read)
 
     return result
