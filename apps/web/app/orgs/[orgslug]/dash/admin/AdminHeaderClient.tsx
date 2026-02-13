@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 export default function AdminHeaderClient() {
-  const t = useTranslations('Org');
+  const t = useTranslations('Contexts.Org');
 
   return (
     <div>

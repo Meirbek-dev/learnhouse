@@ -35,7 +35,10 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
     data: org,
     error: orgError,
     isLoading: isOrgLoading,
-  } = useSWR(`${getAPIUrl()}orgs/slug/${orgslug}`, (url) => swrFetcher(url, accessToken));
+  } = useSWR(`${getAPIUrl()}orgs/slug/${orgslug}`, (url) => swrFetcher(url, accessToken), {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  });
 
   const {
     data: orgs,
@@ -48,30 +51,43 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
     {
       // Revalidate on mount but use global dedupingInterval (60s) to prevent hammering.
       revalidateOnMount: true,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
     },
   );
 
-  const isLoading = session.status === 'loading' || isOrgLoading || (isAuthenticated && isUserOrgsLoading);
+  // Only show loading on initial load (no cached data), not during revalidation
+  const isLoading =
+    session.status === 'loading' || (!org && isOrgLoading) || (isAuthenticated && !orgs && isUserOrgsLoading);
   const hasError = Boolean(orgError) || (isAuthenticated && Boolean(orgsError));
 
   // Refresh session permissions when org changes
   const { update: updateSession } = useSession();
   const prevOrgIdRef = useRef<number | undefined>(undefined);
+  const isInitialMount = useRef(true);
+
   useEffect(() => {
     if (!org?.id || !isAuthenticated) return;
-    const sessionOrgId = (session?.data as any)?.permissions_org_id;
 
     // Set the current_org_id cookie so the session callback picks up the right org
     if (prevOrgIdRef.current !== org.id) {
       document.cookie = `current_org_id=${org.id};path=/;max-age=${60 * 60 * 24 * 365}`;
-      prevOrgIdRef.current = org.id;
-    }
 
-    // If session permissions are for a different org, trigger a refresh
-    if (sessionOrgId !== null && sessionOrgId !== org.id) {
-      updateSession();
+      // Only update session if this is a user-initiated org change (not initial mount)
+      // and only if we have a previous org (meaning we actually switched orgs)
+      if (!isInitialMount.current && prevOrgIdRef.current !== undefined) {
+        // Use setTimeout to defer the session update and prevent navigation interruption
+        const timeoutId = setTimeout(() => {
+          updateSession();
+        }, 100);
+
+        return () => clearTimeout(timeoutId);
+      }
+
+      prevOrgIdRef.current = org.id;
+      isInitialMount.current = false;
     }
-  }, [org?.id, isAuthenticated, session?.data, updateSession]);
+  }, [org?.id, isAuthenticated, updateSession]);
 
   const isUserPartOfTheOrg = (() => {
     if (!isAuthenticated || !org?.id || !Array.isArray(orgs)) {

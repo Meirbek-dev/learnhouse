@@ -60,9 +60,10 @@ export const SessionContext = createContext<SessionContextType | null>(null);
 const PlatformSessionProvider = ({ children }: { children: ReactNode }) => {
   const session = useSession();
 
-  const isLoading = session.status === 'loading';
+  // Only show loading on initial load, not during session updates/revalidation
+  const isInitialLoad = session.status === 'loading' && session.data === undefined;
 
-  if (isLoading) {
+  if (isInitialLoad) {
     return <PageLoading />;
   }
 
@@ -71,7 +72,7 @@ const PlatformSessionProvider = ({ children }: { children: ReactNode }) => {
     ...session,
     data: session.data as ExtendedSessionData | null,
     update: session.update as () => Promise<ExtendedSessionData | null>,
-    isLoading,
+    isLoading: session.status === 'loading',
   };
 
   return <SessionContext value={extendedSession}>{children}</SessionContext>;
