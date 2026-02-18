@@ -3,7 +3,6 @@ from typing import Literal
 
 from fastapi import HTTPException, UploadFile
 
-from config.config import get_platform_config
 from src.security.file_validation import validate_upload
 
 
@@ -67,12 +66,7 @@ async def upload_content(
     file_and_format: str,
     allowed_formats: list[str] | None = None,
 ) -> None:
-    platform_config = get_platform_config()
-
     file_format = file_and_format.rsplit(".", maxsplit=1)[-1].strip().lower()
-
-    # Get content delivery method
-    content_delivery = platform_config.hosting_config.content_delivery.type
 
     # Check if format file is allowed
     if allowed_formats and file_format not in allowed_formats:
@@ -83,17 +77,9 @@ async def upload_content(
 
     ensure_directory_exists(f"content/{type_of_dir}/{uuid}/{directory}")
 
-    if content_delivery == "filesystem":
-        # upload file to server
-        with open(
-            f"content/{type_of_dir}/{uuid}/{directory}/{file_and_format}",
-            "wb",
-        ) as f:
-            f.write(file_binary)
-            f.close()
-    else:
-        # s3 support has been removed — only filesystem is supported
-        raise HTTPException(
-            status_code=500,
-            detail=f"Unsupported content delivery type: {content_delivery}",
-        )
+    with open(
+        f"content/{type_of_dir}/{uuid}/{directory}/{file_and_format}",
+        "wb",
+    ) as f:
+        f.write(file_binary)
+        f.close()

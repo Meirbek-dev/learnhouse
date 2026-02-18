@@ -22,8 +22,6 @@ hosting_config:
   cookies_config:
     domain: '.localhost'
   allowed_regexp: '\b((?:https?://)[^\s/$.?#].[^\s]*)\b'
-  content_delivery:
-    type: 'filesystem'
 
 mailing_config:
   resend_api_key: ""

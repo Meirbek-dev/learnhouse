@@ -73,10 +73,6 @@ class AIConfig(PydanticStrictBaseModel):
     chat: AIChatConfig = AIChatConfig()
 
 
-class ContentDeliveryConfig(PydanticStrictBaseModel):
-    type: Literal["filesystem"]
-
-
 class HostingConfig(PydanticStrictBaseModel):
     domain: str
     ssl: bool
@@ -86,7 +82,6 @@ class HostingConfig(PydanticStrictBaseModel):
     allowed_regexp: str
     self_hosted: bool
     cookie_config: CookieConfig
-    content_delivery: ContentDeliveryConfig
 
 
 class MailingConfig(PydanticStrictBaseModel):
@@ -261,14 +256,6 @@ def get_platform_config() -> PlatformConfig:
     ).get("domain")
     cookie_config = CookieConfig(domain=_normalize_cookie_domain(cookies_domain))
 
-    env_content_delivery_type = os.environ.get("PLATFORM_CONTENT_DELIVERY_TYPE")
-    content_delivery_type: str = env_content_delivery_type or (
-        (yaml_config.get("hosting_config", {}).get("content_delivery", {}).get("type"))
-        or "filesystem"
-    )  # default to filesystem
-
-    content_delivery = ContentDeliveryConfig(type=content_delivery_type)
-
     # Database config
     sql_connection_string = env_sql_connection_string or yaml_config.get(
         "database_config", {}
@@ -362,7 +349,6 @@ def get_platform_config() -> PlatformConfig:
         allowed_regexp=allowed_regexp,
         self_hosted=bool(self_hosted),
         cookie_config=cookie_config,
-        content_delivery=content_delivery,
     )
     database_config = DatabaseConfig(
         sql_connection_string=sql_connection_string,
