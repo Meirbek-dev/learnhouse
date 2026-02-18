@@ -8,6 +8,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Image as ImageIcon, Loader2, UploadCloud, X } from 'lucide-react';
 import { TagsInput } from '@components/ui/custom/tags-input';
 import { createNewCourse } from '@services/courses/courses';
+import { useOrg } from '@components/Contexts/OrgContext';
 import { Card, CardFooter } from '@components/ui/card';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '@components/ui/textarea';
@@ -19,7 +20,6 @@ import { useForm } from 'react-hook-form';
 import type { ChangeEvent } from 'react';
 import { toast } from 'sonner';
 import * as z from 'zod';
-import { useOrg } from '@components/Contexts/OrgContext';
 
 const MAX_FILE_SIZE = 8_000_000; // 8MB
 const VALID_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'] as const;

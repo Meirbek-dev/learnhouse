@@ -1,4 +1,4 @@
-import { getDefaultOrg, getTopLevelCookieDomain, getUriWithOrg } from './services/config/config';
+import { defaultOrg, getTopLevelCookieDomain, getUriWithOrg } from './services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
@@ -20,7 +20,6 @@ export const config = {
 
 export default async function proxy(req: NextRequest) {
   // Get initial data
-  const default_org = getDefaultOrg();
   const cookieDomain = getTopLevelCookieDomain();
   const { pathname, search } = req.nextUrl;
   const cookie_orgslug = req.cookies.get('current_orgslug')?.value;
@@ -79,8 +78,8 @@ export default async function proxy(req: NextRequest) {
     return 'Did not find the orgslug in the cookie';
   }
 
+  const orgslug: string = defaultOrg as string;
   if (pathname.startsWith('/sitemap.xml')) {
-    const orgslug: string = default_org as string;
 
     const sitemapUrl = new URL('/api/sitemap', req.url);
 
@@ -94,7 +93,6 @@ export default async function proxy(req: NextRequest) {
   }
 
   // Single Organization Mode
-  const orgslug = default_org as string;
   const response = NextResponse.rewrite(new URL(`/orgs/${orgslug}${pathname}`, req.url));
 
   // Set the cookie with the orgslug value

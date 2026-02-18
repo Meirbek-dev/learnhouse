@@ -153,7 +153,7 @@ const DashMobileMenu = () => {
             <AppLink
               href="/dash/admin"
               className="flex flex-col items-center p-2"
-              aria-label='dash-admin'
+              aria-label="dash-admin"
             >
               <ShieldCheck size={20} />
               <span className="mt-1 text-xs">{t('mobile.admin')}</span>

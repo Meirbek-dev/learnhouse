@@ -68,8 +68,8 @@ export const getAPIUrl = () => {
     if (typeof globalThis.window === 'undefined') {
       console.warn(
         '[Config] Using fallback API URL in server context. ' +
-          'Please set NEXT_PUBLIC_PLATFORM_API_URL or PLATFORM_INTERNAL_API_URL environment variable. ' +
-          `Current fallback: ${base}`,
+        'Please set NEXT_PUBLIC_PLATFORM_API_URL or PLATFORM_INTERNAL_API_URL environment variable. ' +
+        `Current fallback: ${base}`,
       );
     }
   }
@@ -82,33 +82,18 @@ export const getAPIUrl = () => {
 
 export const getBackendUrl = () => PLATFORM_BACKEND_URL;
 
-// Multi Organization Mode
-export const isMultiOrgModeEnabled = () => process.env.NEXT_PUBLIC_PLATFORM_MULTI_ORG === 'true';
-
 export const getUriWithOrg = (orgslug: string, path: string) => {
-  const multi_org = isMultiOrgModeEnabled();
-  if (multi_org) {
-    return `${PLATFORM_HTTP_PROTOCOL}${orgslug}.${PLATFORM_DOMAIN}${path}`;
-  }
   return `${PLATFORM_HTTP_PROTOCOL}${PLATFORM_DOMAIN}${path}`;
 };
 
 export const getUriWithoutOrg = (path: string) => `${PLATFORM_HTTP_PROTOCOL}${PLATFORM_DOMAIN}${path}`;
 
 export const getOrgFromUri = () => {
-  const multi_org = isMultiOrgModeEnabled();
-  if (multi_org) {
-    // When multi-org mode is enabled, prefer the configured default org if present.
-    // Previously this function called getDefaultOrg() but didn't return its value.
-    // Return the default org from env when available, otherwise undefined in server context.
-    const def = getDefaultOrg();
-    if (def) return def;
-    return undefined;
-  } else if (typeof globalThis.window !== 'undefined') {
+  if (typeof globalThis.window !== 'undefined') {
     const { hostname } = globalThis.location;
 
     return hostname.replace(`.${PLATFORM_DOMAIN}`, '');
   }
 };
 
-export const getDefaultOrg = () => process.env.NEXT_PUBLIC_PLATFORM_DEFAULT_ORG;
+export const defaultOrg = "openu";
