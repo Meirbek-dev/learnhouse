@@ -2,7 +2,6 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, and_, select
-from src.security.rbac import PermissionChecker
 
 from src.db.courses.courses import Course
 from src.db.resource_authors import (
@@ -11,6 +10,7 @@ from src.db.resource_authors import (
     ResourceAuthorshipStatusEnum,
 )
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
+from src.security.rbac import PermissionChecker
 
 
 async def apply_course_contributor(

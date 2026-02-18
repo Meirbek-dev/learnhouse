@@ -2,7 +2,6 @@ from typing import Literal
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from src.security.rbac import PermissionChecker
 
 from src.db.organizations import Organization
 from src.db.payments.payments import (
@@ -12,6 +11,7 @@ from src.db.payments.payments import (
     PaymentsConfigUpdate,
 )
 from src.db.users import AnonymousUser, InternalUser, PublicUser
+from src.security.rbac import PermissionChecker
 
 
 async def init_payments_config(

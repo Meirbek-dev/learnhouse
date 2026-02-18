@@ -706,8 +706,6 @@ def _expand_wildcard(pattern: str, perm_ids: dict[str, int]) -> list[int]:
         name_parts = name.split(":")
         if len(name_parts) != 3:
             continue
-        if all(
-            pp == "*" or pp == np for pp, np in zip(parts, name_parts, strict=False)
-        ):
+        if all(pp in ("*", np) for pp, np in zip(parts, name_parts, strict=False)):
             matched.append(pid)
     return matched

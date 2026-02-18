@@ -102,7 +102,9 @@ async def create_role(
     # Escalation prevention: new role priority must not exceed caller's highest
     caller_roles = checker.get_user_roles(current_user.id, body.org_id)
     caller_max_priority = max((r["priority"] for r in caller_roles), default=0)
-    new_priority = body.priority if hasattr(body, "priority") and body.priority is not None else 0
+    new_priority = (
+        body.priority if hasattr(body, "priority") and body.priority is not None else 0
+    )
     if new_priority > caller_max_priority:
         raise HTTPException(
             403,

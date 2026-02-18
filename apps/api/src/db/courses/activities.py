@@ -1,9 +1,9 @@
+from datetime import UTC, datetime, timezone
 from enum import Enum, StrEnum
 
 from pydantic import ConfigDict, field_validator
-from sqlalchemy import JSON, BigInteger, Column, ForeignKey, Integer, DateTime, func
+from sqlalchemy import JSON, BigInteger, Column, DateTime, ForeignKey, Integer, func
 from sqlmodel import Field
-from datetime import datetime, timezone
 
 from src.db.strict_base_model import SQLModelStrictBaseModel
 
@@ -77,8 +77,16 @@ class Activity(ActivityBase, table=True):
         sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="SET NULL")),
     )
     activity_uuid: str = ""
-    creation_date: datetime = Field(default_factory=lambda: datetime.now(tz=timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now()))
-    update_date: datetime = Field(default_factory=lambda: datetime.now(tz=timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now()))
+    creation_date: datetime = Field(
+        default_factory=lambda: datetime.now(tz=UTC),
+        sa_column=Column(DateTime(timezone=True), server_default=func.now()),
+    )
+    update_date: datetime = Field(
+        default_factory=lambda: datetime.now(tz=UTC),
+        sa_column=Column(
+            DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+        ),
+    )
 
 
 class ActivityCreate(ActivityBase):

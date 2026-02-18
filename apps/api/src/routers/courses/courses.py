@@ -2,7 +2,6 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, Request, Response, UploadFile
 from sqlmodel import Session
-from src.security.rbac import PermissionCheckerDep, PermissionDenied
 
 from src.core.events.database import get_db_session
 from src.db.courses.course_updates import (
@@ -20,6 +19,7 @@ from src.db.courses.courses import (
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
 from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user
+from src.security.rbac import PermissionCheckerDep, PermissionDenied
 from src.services.courses.contributors import (
     add_bulk_course_contributors,
     apply_course_contributor,

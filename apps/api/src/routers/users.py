@@ -3,11 +3,6 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, Request, Response, UploadFile
 from pydantic import EmailStr
 from sqlmodel import Session, select
-from src.security.rbac import (
-    PermissionCheckerDep,
-    PermissionDenied,
-    ResourceAccessDenied,
-)
 
 from src.core.events.database import get_db_session
 from src.db.courses.courses import CourseRead
@@ -22,6 +17,11 @@ from src.db.users import (
     UserUpdatePassword,
 )
 from src.security.auth import get_current_user
+from src.security.rbac import (
+    PermissionCheckerDep,
+    PermissionDenied,
+    ResourceAccessDenied,
+)
 from src.services.courses.courses import get_user_courses
 from src.services.users.password_reset import (
     change_password_with_reset_code,
@@ -42,14 +42,16 @@ from src.services.users.users import (
 router = APIRouter()
 
 
-def _resolve_org_id(db_session: Session, user_id: int, org_id: int | None) -> int | None:
+def _resolve_org_id(
+    db_session: Session, user_id: int, org_id: int | None
+) -> int | None:
     """Resolve org_id from user's role membership when not explicitly provided."""
     if org_id is not None:
         return org_id
     ur = db_session.exec(
         select(UserRole.org_id).where(UserRole.user_id == user_id).limit(1)
     ).first()
-    return ur if ur else None
+    return ur or None
 
 
 @router.get("/profile")

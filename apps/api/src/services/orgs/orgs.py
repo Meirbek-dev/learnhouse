@@ -5,7 +5,6 @@ from typing import Literal
 import orjson
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, select
-from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.organization_config import (
@@ -35,6 +34,7 @@ from src.db.organizations import (
 from src.db.permission_enums import ADMIN_ROLE_SLUGS, RoleSlug
 from src.db.permissions import Role, UserRole
 from src.db.users import AnonymousUser, InternalUser, PublicUser
+from src.security.rbac import PermissionChecker
 from src.services.orgs.uploads import (
     upload_org_landing_content,
     upload_org_logo,

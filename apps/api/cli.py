@@ -133,7 +133,7 @@ def main() -> None:
 def migrate_users_to_default_org() -> None:
     """Migrate all existing users without organization membership to the default 'openu' organization."""
     from src.db.permission_enums import RoleSlug
-    from src.db.permissions import UserRole, Role
+    from src.db.permissions import Role, UserRole
 
     # Get the database session
     platform_config = get_platform_config()
@@ -211,7 +211,7 @@ def migrate_users_to_default_org() -> None:
             )
         except Exception as e:
             skipped_count += 1
-            print(f"  ⚠️  Skipping user {user.username} (ID: {user.id}): {str(e)}")
+            print(f"  ⚠️  Skipping user {user.username} (ID: {user.id}): {e!s}")
 
     # Commit changes
     db_session.commit()

@@ -6,16 +6,18 @@ Create Date: 2026-02-11 00:10:00.000000
 
 """
 
-from typing import Sequence, Union
+import contextlib
+from collections.abc import Sequence
+from typing import Union
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "3b4c5d6e7f8g"
-down_revision: Union[str, None] = "2a3b4c5d6e7f"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "2a3b4c5d6e7f"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 # (table, column, index_name)
 TARGETS = [
@@ -36,7 +38,11 @@ def upgrade() -> None:
         try:
             # Run the ALTER in an autocommit block so a single failure doesn't abort the whole migration
             with op.get_context().autocommit_block():
-                op.execute(sa.text(f"ALTER TABLE {table} ALTER COLUMN {column} TYPE jsonb USING {column}::jsonb"))
+                op.execute(
+                    sa.text(
+                        f"ALTER TABLE {table} ALTER COLUMN {column} TYPE jsonb USING {column}::jsonb"
+                    )
+                )
         except Exception as e:
             # Record the failure and continue with other conversions
             failed.append((table, column, str(e)))
@@ -44,22 +50,27 @@ def upgrade() -> None:
         try:
             # Create GIN index if possible (ignore failures such as index already exists)
             with op.get_context().autocommit_block():
-                op.execute(sa.text(f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} USING gin ({column})"))
+                op.execute(
+                    sa.text(
+                        f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} USING gin ({column})"
+                    )
+                )
         except Exception:
             pass
     if failed:
         msgs = ", ".join([f"{t}.{c}: {err}" for t, c, err in failed])
-        raise RuntimeError(f"Failed to convert some columns to jsonb: {msgs}")
+        msg = f"Failed to convert some columns to jsonb: {msgs}"
+        raise RuntimeError(msg)
 
 
 def downgrade() -> None:
     # Downgrade: revert jsonb back to json and drop GIN indexes
     for table, column, index_name in TARGETS:
-        try:
+        with contextlib.suppress(Exception):
             op.drop_index(index_name, table_name=table)
-        except Exception:
-            pass
-        try:
-            op.execute(sa.text(f"ALTER TABLE {table} ALTER COLUMN {column} TYPE json USING {column}::json"))
-        except Exception:
-            pass
+        with contextlib.suppress(Exception):
+            op.execute(
+                sa.text(
+                    f"ALTER TABLE {table} ALTER COLUMN {column} TYPE json USING {column}::json"
+                )
+            )

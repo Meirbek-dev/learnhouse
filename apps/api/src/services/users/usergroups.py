@@ -4,7 +4,6 @@ from typing import Literal
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.organizations import Organization
@@ -12,6 +11,7 @@ from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
 from src.db.usergroups import UserGroup, UserGroupCreate, UserGroupRead, UserGroupUpdate
 from src.db.users import AnonymousUser, InternalUser, PublicUser, User, UserRead
+from src.security.rbac import PermissionChecker
 
 
 async def create_usergroup(

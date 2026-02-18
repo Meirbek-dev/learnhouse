@@ -6,13 +6,11 @@ from types import SimpleNamespace
 from fastapi import HTTPException, Request, UploadFile, status
 from pydantic import ValidationError
 from sqlmodel import Session, select
-from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.organizations import Organization, OrganizationRead
 from src.db.permission_enums import RoleSlug
-from src.db.permissions import RoleRead
-from src.db.permissions import Role, UserRole
+from src.db.permissions import Role, RoleRead, UserRole
 from src.db.users import (
     AnonymousUser,
     InternalUser,
@@ -26,6 +24,7 @@ from src.db.users import (
     UserUpdatePassword,
     rebuild_user_models,
 )
+from src.security.rbac import PermissionChecker
 from src.security.security import security_hash_password, security_verify_password
 from src.services.cache import redis_client
 from src.services.users.avatars import upload_avatar

@@ -2,7 +2,6 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.courses.activities import (
@@ -16,8 +15,8 @@ from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.chapters import Chapter
 from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
+from src.security.rbac import PermissionChecker
 from src.services.payments.payments_access import check_activity_paid_access
-
 
 ####################################################
 # CRUD

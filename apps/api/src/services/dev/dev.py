@@ -1,7 +1,7 @@
 from fastapi import HTTPException
-from src.security.rbac import FeatureDisabled
 
 from config.config import get_platform_config
+from src.security.rbac import FeatureDisabled
 
 
 def isDevModeEnabled():

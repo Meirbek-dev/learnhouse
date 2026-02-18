@@ -2,7 +2,6 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request, UploadFile
 from sqlmodel import Session, select
-from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.courses.activities import (
@@ -35,6 +34,7 @@ from src.db.organizations import Organization
 from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User
+from src.security.rbac import PermissionChecker
 from src.services.courses.activities.uploads.sub_file import upload_submission_file
 from src.services.courses.activities.uploads.tasks_ref_files import (
     upload_reference_file,

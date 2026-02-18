@@ -1,11 +1,11 @@
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from src.security.rbac import PermissionChecker
 
 from src.db.courses.courses import Course
 from src.db.payments.payments_courses import PaymentsCourse
 from src.db.payments.payments_products import PaymentsProduct
 from src.db.users import AnonymousUser, PublicUser
+from src.security.rbac import PermissionChecker
 
 
 async def link_course_to_product(

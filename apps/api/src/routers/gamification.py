@@ -15,7 +15,6 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlmodel import Session, and_, select
-from src.security.rbac import PermissionCheckerDep, PermissionDenied
 
 from src.core.events.database import get_db_session
 from src.core.timezone import now as tz_now
@@ -38,6 +37,7 @@ from src.db.gamification import (
 from src.db.users import PublicUser
 from src.db.users import User as DBUser
 from src.security.auth import get_current_user
+from src.security.rbac import PermissionCheckerDep, PermissionDenied
 from src.services.gamification import service
 from src.services.gamification.service import (
     DailyLimitExceededError,

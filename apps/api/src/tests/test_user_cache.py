@@ -83,4 +83,3 @@ async def test_update_user_invalidates_cache(monkeypatch):
     keys = delete_calls[0]
     assert f"user:id:{user.id}" in keys
     assert f"user:username:{user.username.lower()}" in keys
-

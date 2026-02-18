@@ -12,11 +12,6 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from pydantic import field_validator
 from sqlmodel import Session, func, select
-from src.security.rbac import (
-    AuthenticationRequired,
-    PermissionChecker,
-    ResourceAccessDenied,
-)
 from ulid import ULID
 
 from src.core.events.database import get_db_session
@@ -54,6 +49,11 @@ from src.db.organizations import Organization
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User
 from src.security.auth import get_current_user
+from src.security.rbac import (
+    AuthenticationRequired,
+    PermissionChecker,
+    ResourceAccessDenied,
+)
 from src.services.code_challenges.grading import (
     apply_grading_strategy,
     calculate_composite_score,

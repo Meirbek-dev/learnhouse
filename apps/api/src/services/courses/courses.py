@@ -1,9 +1,8 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlalchemy import func
 from sqlmodel import Session, and_, or_, select, text
-from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.courses.courses import (
@@ -24,6 +23,7 @@ from src.db.resource_authors import (
 from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
+from src.security.rbac import PermissionChecker
 from src.services.courses.thumbnails import upload_thumbnail
 
 
@@ -548,8 +548,8 @@ async def create_course(
         )
 
     course.course_uuid = f"course_{ULID()}"
-    course.creation_date = datetime.now(tz=timezone.utc)
-    course.update_date = datetime.now(tz=timezone.utc)
+    course.creation_date = datetime.now(tz=UTC)
+    course.update_date = datetime.now(tz=UTC)
     course.creator_id = current_user.id  # Track creator
 
     # Upload thumbnail
@@ -583,8 +583,8 @@ async def create_course(
         user_id=current_user.id,
         authorship=ResourceAuthorshipEnum.CREATOR,
         authorship_status=ResourceAuthorshipStatusEnum.ACTIVE,
-        creation_date=datetime.now(tz=timezone.utc),
-        update_date=datetime.now(tz=timezone.utc),
+        creation_date=datetime.now(tz=UTC),
+        update_date=datetime.now(tz=UTC),
     )
     db_session.refresh(resource_author)
 
@@ -686,7 +686,7 @@ async def update_course_thumbnail(
         )
 
     # Complete the course object
-    course.update_date = datetime.now(tz=timezone.utc)
+    course.update_date = datetime.now(tz=UTC)
 
     db_session.add(course)
     db_session.commit()
@@ -798,7 +798,7 @@ async def update_course(
         setattr(course, field, value)
 
     # Complete the course object
-    course.update_date = datetime.now(tz=timezone.utc)
+    course.update_date = datetime.now(tz=UTC)
 
     db_session.add(course)
     db_session.commit()

@@ -7,12 +7,12 @@ from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from fastapi_another_jwt_auth import AuthJWT
 from sqlmodel import Session
-from src.security.rbac import AuthenticationRequired
 
 from config.config import get_platform_config
 from src.core.events.database import get_db_session
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
+from src.security.rbac import AuthenticationRequired
 from src.security.security import ALGORITHM, SECRET_KEY
 from src.services.dev.dev import isDevModeEnabled
 from src.services.users.users import security_get_user, security_verify_password
@@ -145,4 +145,4 @@ async def get_current_user(
 
 async def non_public_endpoint(current_user: UserRead | AnonymousUser) -> None:
     if isinstance(current_user, AnonymousUser):
-        raise AuthenticationRequired()
+        raise AuthenticationRequired

@@ -4,7 +4,6 @@ import time
 
 from fastapi import Depends, HTTPException, Request
 from sqlmodel import Session, select
-from src.security.rbac import FeatureDisabled
 
 from src.core.events.database import get_db_session
 from src.db.courses.activities import Activity, ActivityRead
@@ -13,6 +12,7 @@ from src.db.organization_config import OrganizationConfig
 from src.db.organizations import Organization
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
+from src.security.rbac import FeatureDisabled
 from src.services.ai.base import ask_ai, get_chat_session_history
 from src.services.ai.cache_manager import get_ai_cache_manager
 from src.services.ai.exceptions import (

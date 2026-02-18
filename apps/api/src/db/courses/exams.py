@@ -231,12 +231,14 @@ class QuestionReadStudent(SQLModelStrictBaseModel):
     answer_options: list[dict]  # is_correct stripped
 
     @classmethod
-    def from_question(cls, q: "Question | QuestionRead", shuffle_answers: bool = False) -> "QuestionReadStudent":
+    def from_question(
+        cls, q: "Question | QuestionRead", shuffle_answers: bool = False
+    ) -> "QuestionReadStudent":
         """Create a student-facing question, stripping is_correct from answer_options."""
         import random as _random
 
         stripped = []
-        for opt in (q.answer_options or []):
+        for opt in q.answer_options or []:
             clean = {k: v for k, v in opt.items() if k != "is_correct"}
             stripped.append(clean)
 
@@ -376,9 +378,7 @@ class ExamAttemptUpdate(SQLModelStrictBaseModel):
 class ExamAttempt(ExamAttemptBase, table=True):
     """Exam attempt database model"""
 
-    __table_args__ = (
-        Index("idx_exam_attempt_exam_user", "exam_id", "user_id"),
-    )
+    __table_args__ = (Index("idx_exam_attempt_exam_user", "exam_id", "user_id"),)
 
     id: int | None = Field(default=None, primary_key=True)
     attempt_uuid: str = ""

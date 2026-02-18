@@ -2,12 +2,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, Request
 from sqlmodel import Session
-from src.security.rbac import PermissionCheckerDep, PermissionDenied
 
 from src.core.events.database import get_db_session
 from src.db.usergroups import UserGroup, UserGroupCreate, UserGroupRead, UserGroupUpdate
 from src.db.users import PublicUser, UserRead
 from src.security.auth import get_current_user
+from src.security.rbac import PermissionCheckerDep, PermissionDenied
 from src.services.users.usergroups import (
     add_resources_to_usergroup,
     add_users_to_usergroup,

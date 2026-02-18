@@ -2,7 +2,6 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from src.security.rbac import PermissionChecker
 
 from src.db.courses.courses import AuthorWithRole, Course, CourseRead
 from src.db.organizations import Organization
@@ -15,6 +14,7 @@ from src.db.payments.payments_users import (
 )
 from src.db.resource_authors import ResourceAuthor
 from src.db.users import AnonymousUser, InternalUser, PublicUser, User, UserRead
+from src.security.rbac import PermissionChecker
 
 
 async def create_payment_user(

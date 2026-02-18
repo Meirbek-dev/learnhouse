@@ -4,7 +4,6 @@ from typing import Literal
 import orjson
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, select
-from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.courses.activities import (
@@ -20,6 +19,7 @@ from src.db.courses.courses import Course
 from src.db.organizations import Organization
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser
+from src.security.rbac import PermissionChecker
 from src.services.courses.activities.uploads.videos import upload_subtitle, upload_video
 
 

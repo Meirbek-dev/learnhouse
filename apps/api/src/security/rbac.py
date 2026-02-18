@@ -10,6 +10,7 @@ The checker determines which scope applies.
 
 from __future__ import annotations
 
+import contextlib
 import logging
 from typing import Annotated
 
@@ -362,8 +363,8 @@ class PermissionChecker:
 
     def seed_default_roles(self) -> list[str]:
         """Create system roles & permissions from SYSTEM_ROLES. Idempotent."""
-        from src.db.permissions import Permission, Role, RolePermission
         from src.db.permission_enums import SYSTEM_ROLES
+        from src.db.permissions import Permission, Role, RolePermission
 
         created: list[str] = []
 
@@ -542,6 +543,7 @@ class RequirePermission:
         checker: PermissionCheckerDep,
     ) -> None:
         from fastapi_another_jwt_auth import AuthJWT
+
         from src.db.users import AnonymousUser
         from src.security.auth import get_current_user
 
@@ -552,15 +554,13 @@ class RequirePermission:
             db_session=checker.db,
         )
         if isinstance(current_user, AnonymousUser):
-            raise AuthenticationRequired()
+            raise AuthenticationRequired
 
         # Resolve org_id from path params or query params
         org_id: int | None = None
         raw = request.path_params.get("org_id") or request.query_params.get("org_id")
         if raw is not None:
-            try:
+            with contextlib.suppress(ValueError, TypeError):
                 org_id = int(raw)
-            except (ValueError, TypeError):
-                pass
 
         checker.require(current_user.id, self.permission, org_id)

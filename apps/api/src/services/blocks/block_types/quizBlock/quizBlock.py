@@ -6,7 +6,6 @@ from datetime import UTC, datetime, timezone
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
-from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.courses.activities import Activity
@@ -23,6 +22,7 @@ from src.db.courses.quiz import (
 )
 from src.db.gamification import XPSource
 from src.db.users import PublicUser
+from src.security.rbac import PermissionChecker
 from src.services.blocks.block_types.quizBlock.grading import (
     apply_attempt_penalty,
     grade_quiz,

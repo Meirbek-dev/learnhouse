@@ -2,7 +2,6 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, select
-from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.db.courses.activities import (
@@ -17,6 +16,7 @@ from src.db.courses.course_chapters import CourseChapter
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
 from src.db.users import AnonymousUser, PublicUser
+from src.security.rbac import PermissionChecker
 from src.services.courses.activities.uploads.pdfs import upload_pdf
 
 

@@ -4,11 +4,6 @@ from datetime import UTC, datetime
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from src.security.rbac import (
-    AuthenticationRequired,
-    PermissionChecker,
-    ResourceAccessDenied,
-)
 from ulid import ULID
 
 from src.db.courses.activities import (
@@ -49,6 +44,11 @@ from src.db.resource_authors import (
 )
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User
+from src.security.rbac import (
+    AuthenticationRequired,
+    PermissionChecker,
+    ResourceAccessDenied,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +56,7 @@ logger = logging.getLogger(__name__)
 def _utc_now_iso() -> str:
     """Return current UTC time as ISO string."""
     return datetime.now(UTC).isoformat()
+
 
 ## > Helper Functions
 
@@ -519,7 +520,10 @@ async def read_questions(
     # Students get stripped data (is_correct removed, answers shuffled)
     settings = exam.settings or {}
     shuffle_answers = settings.get("shuffle_answers", True)
-    return [QuestionReadStudent.from_question(q, shuffle_answers=shuffle_answers) for q in questions]
+    return [
+        QuestionReadStudent.from_question(q, shuffle_answers=shuffle_answers)
+        for q in questions
+    ]
 
 
 async def update_question(
@@ -756,9 +760,7 @@ async def _grade_and_finalize_attempt(
             if check_answer_correctness(question, user_answer):
                 total_score += question.points
         except Exception as e:
-            logger.exception(
-                f"Error validating answer for question {question_id}: {e}"
-            )
+            logger.exception(f"Error validating answer for question {question_id}: {e}")
             continue
 
     now = _utc_now_iso()
@@ -774,9 +776,7 @@ async def _grade_and_finalize_attempt(
 
     # Award gamification XP (skip preview attempts)
     if not attempt.is_preview:
-        percentage = (
-            (total_score / max_score * 100) if max_score > 0 else 0
-        )
+        percentage = (total_score / max_score * 100) if max_score > 0 else 0
 
         try:
             from src.services.gamification.service import award_xp

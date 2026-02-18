@@ -4,7 +4,6 @@ from datetime import UTC, datetime
 import orjson
 from fastapi import HTTPException
 from sqlmodel import Session, select
-from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from config.config import get_platform_config
@@ -29,6 +28,7 @@ from src.db.organization_config import (
 from src.db.organizations import Organization, OrganizationCreate
 from src.db.permission_enums import RoleSlug
 from src.db.users import User, UserCreate, UserRead
+from src.security.rbac import PermissionChecker
 from src.security.security import security_hash_password
 
 

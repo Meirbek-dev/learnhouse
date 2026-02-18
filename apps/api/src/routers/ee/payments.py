@@ -2,7 +2,6 @@ from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
-from src.security.rbac import PermissionCheckerDep, PermissionDenied
 
 from src.core.events.database import get_db_session
 from src.db.payments.payments import PaymentsConfig, PaymentsConfigRead
@@ -13,6 +12,7 @@ from src.db.payments.payments_products import (
 )
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
+from src.security.rbac import PermissionCheckerDep, PermissionDenied
 from src.services.payments.payments_access import check_course_paid_access
 from src.services.payments.payments_config import (
     delete_payments_config,

@@ -5,7 +5,6 @@ from datetime import datetime, timezone
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
-from src.security.rbac import PermissionChecker
 from ulid import ULID
 
 from src.core.timezone import now as tz_now
@@ -21,6 +20,7 @@ from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.courses import Course
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser
+from src.security.rbac import PermissionChecker
 from src.services.gamification import StreakType, XPSource
 from src.services.gamification import service as gamification_service
 

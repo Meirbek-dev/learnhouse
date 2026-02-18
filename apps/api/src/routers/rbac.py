@@ -29,6 +29,7 @@ def _rbac_rate_key(request: Request) -> str:
     auth = request.headers.get("authorization") or ""
     if auth:
         import hashlib
+
         h = hashlib.sha256(auth.encode("utf-8")).hexdigest()[:16]
         return f"rbac:{h}"
     return f"rbac:{get_remote_address(request)}"
@@ -123,7 +124,7 @@ async def check_permissions_batch(
     perms = [f"{c.resource}:{c.action}" for c in body.checks]
 
     if isinstance(current_user, AnonymousUser):
-        return BatchPermissionCheckResponse(results={p: False for p in perms})
+        return BatchPermissionCheckResponse(results=dict.fromkeys(perms, False))
 
     results = checker.check_many(current_user.id, perms, body.org_id)
     return BatchPermissionCheckResponse(results=results)

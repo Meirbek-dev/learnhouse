@@ -2,7 +2,6 @@ from datetime import datetime
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from src.security.rbac import PermissionChecker
 
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
@@ -16,6 +15,7 @@ from src.db.payments.payments_products import (
 )
 from src.db.payments.payments_users import PaymentStatusEnum, PaymentsUser
 from src.db.users import AnonymousUser, PublicUser
+from src.security.rbac import PermissionChecker
 from src.services.payments.payments_stripe import (
     archive_stripe_product,
     create_stripe_product,

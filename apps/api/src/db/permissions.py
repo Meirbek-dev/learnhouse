@@ -10,21 +10,19 @@ from pydantic import ConfigDict, field_validator
 from sqlalchemy import Column, ForeignKey, Index, Integer, UniqueConstraint
 from sqlmodel import Field
 
-from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
-
 # ============================================================================
 # Enums - generated from shared/permissions.yaml
 # ============================================================================
 # These are imported from the generated file and re-exported here
 # so the entire codebase can do: from src.db.permissions import Action, ResourceType, ...
-
-from src.db.permission_enums import (  # noqa: E402
+from src.db.permission_enums import (
+    SYSTEM_ROLES,
     Action,
     ResourceType,
     RoleSlug,
     Scope,
-    SYSTEM_ROLES,
 )
+from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
 # ============================================================================
 # Permission Table
@@ -56,14 +54,12 @@ class Permission(SQLModelStrictBaseModel, table=True):
         """Enforce 3-part 'resource:action:scope' format."""
         parts = v.split(":")
         if len(parts) != 3:
-            raise ValueError(
-                f"Permission name must be in format 'resource:action:scope', got: {v}"
-            )
+            msg = f"Permission name must be in format 'resource:action:scope', got: {v}"
+            raise ValueError(msg)
         resource, action, scope = parts
         if not all([resource, action, scope]):
-            raise ValueError(
-                f"Permission name parts cannot be empty, got: {v}"
-            )
+            msg = f"Permission name parts cannot be empty, got: {v}"
+            raise ValueError(msg)
         return v
 
 
@@ -209,20 +205,20 @@ class PermissionRead(PydanticStrictBaseModel):
 # ============================================================================
 
 __all__ = [
+    "SYSTEM_ROLES",
     # Enums
     "Action",
-    "ResourceType",
-    "Scope",
-    "RoleSlug",
-    "SYSTEM_ROLES",
     # Tables
     "Permission",
+    "PermissionRead",
+    "ResourceType",
     "Role",
-    "RolePermission",
-    "UserRole",
     # Schemas
     "RoleCreate",
+    "RolePermission",
     "RoleRead",
+    "RoleSlug",
     "RoleUpdate",
-    "PermissionRead",
+    "Scope",
+    "UserRole",
 ]

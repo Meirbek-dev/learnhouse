@@ -1,7 +1,6 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, UploadFile
-from src.security.rbac import PermissionCheckerDep, PermissionDenied
 
 from src.core.events.database import get_db_session
 from src.db.courses.assignments import (
@@ -16,6 +15,7 @@ from src.db.courses.assignments import (
 )
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
+from src.security.rbac import PermissionCheckerDep, PermissionDenied
 from src.services.courses.activities.assignments import (
     create_assignment,
     create_assignment_submission,

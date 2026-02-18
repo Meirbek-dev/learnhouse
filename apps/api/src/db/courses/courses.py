@@ -1,10 +1,10 @@
+from datetime import UTC, datetime, timezone
 from enum import Enum, StrEnum
 
 from pydantic import ConfigDict, field_validator
 from pydantic import Field as PydanticField
-from sqlalchemy import BigInteger, Column, ForeignKey, Integer, DateTime, func
+from sqlalchemy import BigInteger, Column, DateTime, ForeignKey, Integer, func
 from sqlmodel import Field
-from datetime import datetime, timezone
 
 from src.db.courses.chapters import ChapterRead
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
@@ -71,8 +71,16 @@ class Course(CourseBase, table=True):
         sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="SET NULL")),
     )
     course_uuid: str = ""
-    creation_date: datetime = Field(default_factory=lambda: datetime.now(tz=timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now()))
-    update_date: datetime = Field(default_factory=lambda: datetime.now(tz=timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now()))
+    creation_date: datetime = Field(
+        default_factory=lambda: datetime.now(tz=UTC),
+        sa_column=Column(DateTime(timezone=True), server_default=func.now()),
+    )
+    update_date: datetime = Field(
+        default_factory=lambda: datetime.now(tz=UTC),
+        sa_column=Column(
+            DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+        ),
+    )
 
 
 class CourseCreate(CourseBase):
