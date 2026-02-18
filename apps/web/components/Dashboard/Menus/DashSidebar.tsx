@@ -207,8 +207,8 @@ const NavItem = ({ item, isCollapsed }: { item: NavigationItem; isCollapsed: boo
       isActive={item.isActive}
       size="default"
       className={`group hover:bg-sidebar-accent/50 relative transition-all duration-200 ${
-        isCollapsed ? 'flex h-10 w-10 items-center justify-center p-0' : 'w-full'
-      } flex min-w-0 items-center ${isCollapsed ? 'h-full w-full justify-center' : 'w-full gap-3'}`}
+        isCollapsed ? 'flex h-10 w-10 items-center justify-center p-0' : 'w-full gap-3'
+      } flex min-w-0 items-center`}
       disabled={item.disabled}
     >
       <item.icon

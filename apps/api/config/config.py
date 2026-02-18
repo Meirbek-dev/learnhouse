@@ -3,7 +3,7 @@ import os
 from functools import lru_cache
 from typing import Literal
 
-import yaml  # PyYAML types not available
+import yaml
 from dotenv import load_dotenv
 
 from src.db.strict_base_model import PydanticStrictBaseModel
