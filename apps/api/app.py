@@ -20,7 +20,7 @@ platform_config: PlatformConfig = get_platform_config()
 
 # Global Config
 app = FastAPI(
-    title=platform_config.site_name,
+    title="Ashyq Bilim",
     description=platform_config.site_description,
     docs_url="/docs" if platform_config.general_config.development_mode else None,
     redoc_url="/redoc" if platform_config.general_config.development_mode else None,
@@ -39,7 +39,7 @@ app.add_middleware(
 if platform_config.general_config.logfire_enabled:
     logfire.configure(
         console=False,
-        service_name=platform_config.site_name,
+        service_name="Ashyq Bilim",
     )
     logfire.instrument_fastapi(app)
     # Instrument database after logfire is configured
