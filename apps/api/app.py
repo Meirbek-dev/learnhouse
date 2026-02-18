@@ -21,7 +21,7 @@ platform_config: PlatformConfig = get_platform_config()
 # Global Config
 app = FastAPI(
     title="Ashyq Bilim",
-    description=platform_config.site_description,
+    description="Образовательная платформа Ashyq Bilim",
     docs_url="/docs" if platform_config.general_config.development_mode else None,
     redoc_url="/redoc" if platform_config.general_config.development_mode else None,
     version="0.1.0",

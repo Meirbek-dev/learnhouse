@@ -109,7 +109,6 @@ class InternalPaymentsConfig(PydanticStrictBaseModel):
 
 
 class PlatformConfig(PydanticStrictBaseModel):
-    site_description: str
     contact_email: str
     general_config: GeneralConfig
     hosting_config: HostingConfig
@@ -211,7 +210,6 @@ def get_platform_config() -> PlatformConfig:
     )
 
     # Check if environment variables are defined
-    env_site_description = os.environ.get("PLATFORM_SITE_DESCRIPTION")
     env_contact_email = os.environ.get("PLATFORM_CONTACT_EMAIL")
     env_domain = os.environ.get("PLATFORM_DOMAIN")
     env_ssl = os.environ.get("PLATFORM_SSL")
@@ -228,7 +226,6 @@ def get_platform_config() -> PlatformConfig:
     env_sql_connection_string = os.environ.get("PLATFORM_SQL_CONNECTION_STRING")
 
     # Fill in values with YAML file if they are not provided
-    site_description = env_site_description or yaml_config.get("site_description")
     contact_email = env_contact_email or yaml_config.get("contact_email")
 
     domain = env_domain or yaml_config.get("hosting_config", {}).get("domain")
@@ -358,7 +355,6 @@ def get_platform_config() -> PlatformConfig:
 
     # Create PlatformConfig object
     return PlatformConfig(
-        site_description=site_description,
         contact_email=contact_email,
         general_config=GeneralConfig(
             development_mode=bool(development_mode),
