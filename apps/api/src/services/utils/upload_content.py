@@ -1,8 +1,6 @@
 import os
 from typing import Literal
 
-import boto3
-from botocore.exceptions import ClientError
 from fastapi import HTTPException, UploadFile
 
 from config.config import get_platform_config
@@ -93,40 +91,9 @@ async def upload_content(
         ) as f:
             f.write(file_binary)
             f.close()
-
-    elif content_delivery == "s3api":
-        # Upload to server then to s3 (AWS Keys are stored in environment variables and are loaded by boto3)
-        # TODO: Improve implementation of this
-        print("Uploading to s3...")
-        s3 = boto3.client(
-            "s3",
-            endpoint_url=platform_config.hosting_config.content_delivery.s3api.endpoint_url,
+    else:
+        # s3 support has been removed — only filesystem is supported
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unsupported content delivery type: {content_delivery}",
         )
-
-        # Upload file to server
-        with open(
-            f"content/{type_of_dir}/{uuid}/{directory}/{file_and_format}",
-            "wb",
-        ) as f:
-            f.write(file_binary)
-            f.close()
-
-        print("Uploading to s3 using boto3...")
-        try:
-            s3.upload_file(
-                f"content/{type_of_dir}/{uuid}/{directory}/{file_and_format}",
-                "csmooc-media",
-                f"content/{type_of_dir}/{uuid}/{directory}/{file_and_format}",
-            )
-        except ClientError as e:
-            print(e)
-
-        print("Checking if file exists in s3...")
-        try:
-            s3.head_object(
-                Bucket="csmooc-media",
-                Key=f"content/{type_of_dir}/{uuid}/{directory}/{file_and_format}",
-            )
-            print("File upload successful!")
-        except Exception as e:
-            print(f"An error occurred: {e!s}")
