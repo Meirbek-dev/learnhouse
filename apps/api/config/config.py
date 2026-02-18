@@ -65,7 +65,6 @@ class AIChatConfig(PydanticStrictBaseModel):
 
 class AIConfig(PydanticStrictBaseModel):
     openai_api_key: str | None = None
-    is_ai_enabled: bool | None = None
     chromadb_config: ChromaDBConfig | None = None
     performance: AIPerformanceConfig = AIPerformanceConfig()
     cache: AICacheConfig = AICacheConfig()
@@ -263,16 +262,12 @@ def get_platform_config() -> PlatformConfig:
 
     # AI Config
     env_openai_api_key = os.environ.get("PLATFORM_OPENAI_API_KEY")
-    env_is_ai_enabled = os.environ.get("PLATFORM_IS_AI_ENABLED")
     env_chromadb_separate = os.environ.get("PLATFORM_CHROMADB_SEPARATE")
     env_chromadb_host = os.environ.get("PLATFORM_CHROMADB_HOST")
     env_chromadb_port = os.environ.get("PLATFORM_CHROMADB_PORT")
 
     openai_api_key = env_openai_api_key or yaml_config.get("ai_config", {}).get(
         "openai_api_key"
-    )
-    is_ai_enabled = env_is_ai_enabled or yaml_config.get("ai_config", {}).get(
-        "is_ai_enabled"
     )
     chromadb_separate = env_chromadb_separate or yaml_config.get("ai_config", {}).get(
         "chromadb_config", {}
@@ -357,7 +352,6 @@ def get_platform_config() -> PlatformConfig:
     # AI Config
     ai_config = AIConfig(
         openai_api_key=openai_api_key,
-        is_ai_enabled=bool(is_ai_enabled),
         chromadb_config=ChromaDBConfig(
             isSeparateDatabaseEnabled=bool(chromadb_separate),
             db_host=chromadb_host,

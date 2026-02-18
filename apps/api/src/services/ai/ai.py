@@ -131,14 +131,6 @@ async def ai_start_activity_chat_session(
             f"Data fetch took {(time.perf_counter() - data_fetch_start) * 1000:.1f}ms"
         )
 
-        # Check if AI feature is enabled
-        ai_enabled = (
-            org_config.config.get("features", {}).get("ai", {}).get("enabled", False)
-        )
-        if not ai_enabled:
-            msg = "activity_ask"
-            raise AIFeatureDisabledError(msg, course.org_id)
-
         # Process content in parallel
         content_process_start = time.perf_counter()
         content_task = asyncio.to_thread(
@@ -258,14 +250,6 @@ async def ai_send_activity_chat_message(
             chat_session_object.activity_uuid, db_session
         )
 
-        # Check if AI feature is enabled
-        ai_enabled = (
-            org_config.config.get("features", {}).get("ai", {}).get("enabled", False)
-        )
-        if not ai_enabled:
-            msg = "activity_ask"
-            raise AIFeatureDisabledError(msg, course.org_id)
-
         # Process content and get chat session in parallel
         content_task = asyncio.to_thread(
             structure_activity_content_by_type, activity.content
@@ -376,14 +360,6 @@ async def ai_start_activity_chat_session_stream(
         activity, course, org_config = await _get_activity_data(
             chat_session_object.activity_uuid, db_session
         )
-
-        # Check if AI feature is enabled
-        ai_enabled = (
-            org_config.config.get("features", {}).get("ai", {}).get("enabled", False)
-        )
-        if not ai_enabled:
-            msg = "activity_ask"
-            raise AIFeatureDisabledError(msg, course.org_id)
 
         # Check if streaming is enabled
         streaming_enabled = (
@@ -531,14 +507,6 @@ async def ai_send_activity_chat_message_stream(
         activity, course, org_config = await _get_activity_data(
             chat_session_object.activity_uuid, db_session
         )
-
-        # Check if AI feature is enabled
-        ai_enabled = (
-            org_config.config.get("features", {}).get("ai", {}).get("enabled", False)
-        )
-        if not ai_enabled:
-            msg = "activity_ask"
-            raise AIFeatureDisabledError(msg, course.org_id)
 
         # Check if streaming is enabled
         streaming_enabled = (

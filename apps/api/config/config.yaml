@@ -42,7 +42,6 @@ payments_config:
 
 ai_config:
   openai_api_key: ""
-  is_ai_enabled: false
   chromadb_config:
     isSeparateDatabaseEnabled: True
     db_host: "localhost"
