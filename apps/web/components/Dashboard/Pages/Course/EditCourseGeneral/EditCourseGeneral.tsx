@@ -387,7 +387,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                           <LearningItemsList
                             value={field.value}
                             onChange={field.onChange}
-                            error={form.formState.errors.learnings?.message as string | undefined}
+                            error={form.formState.errors.learnings?.message}
                           />
                         </div>
                       </FormControl>

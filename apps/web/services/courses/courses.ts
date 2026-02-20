@@ -31,7 +31,7 @@ async function fetchOrgCourses(
 
   const headers: HeadersInit = { 'Content-Type': 'application/json' };
   if (access_token) {
-    headers['Authorization'] = `Bearer ${access_token}`;
+    headers.Authorization = `Bearer ${access_token}`;
   }
 
   const result = await fetch(`${getAPIUrl()}courses/org_slug/${org_slug}/page/${page}/limit/${limit}`, {
@@ -80,7 +80,7 @@ async function fetchCourseMetadata(course_uuid: string, access_token?: string) {
 
   const headers: HeadersInit = { 'Content-Type': 'application/json' };
   if (access_token) {
-    headers['Authorization'] = `Bearer ${access_token}`;
+    headers.Authorization = `Bearer ${access_token}`;
   }
 
   const result = await fetch(`${getAPIUrl()}courses/course_${course_uuid}/meta`, {

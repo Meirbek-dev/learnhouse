@@ -23,15 +23,23 @@ import ruRUMessages from '@/messages/ru-RU.json';
 import kkKZMessages from '@/messages/kk-KZ.json';
 import enUSMessages from '@/messages/en-US.json';
 
+interface MessagesWithArtplayer {
+  Artplayer?: Record<string, string>;
+}
+
+const getArtplayerSection = (messages: unknown): Record<string, string> | undefined => {
+  return (messages as MessagesWithArtplayer).Artplayer;
+};
+
 function getArtplayerLocale(locale: string) {
   // Map incoming locale to the messages JSON we ship
   const map: Record<string, any> = {
-    'en': enUSMessages['Artplayer'] ?? undefined,
-    'en-US': enUSMessages['Artplayer'] ?? undefined,
-    'kk': kkKZMessages['Artplayer'] ?? undefined,
-    'kk-KZ': kkKZMessages['Artplayer'] ?? undefined,
-    'ru': ruRUMessages['Artplayer'] ?? undefined,
-    'ru-RU': ruRUMessages['Artplayer'] ?? undefined,
+    'en': getArtplayerSection(enUSMessages),
+    'en-US': getArtplayerSection(enUSMessages),
+    'kk': getArtplayerSection(kkKZMessages),
+    'kk-KZ': getArtplayerSection(kkKZMessages),
+    'ru': getArtplayerSection(ruRUMessages),
+    'ru-RU': getArtplayerSection(ruRUMessages),
   };
 
   return map[locale] || undefined;

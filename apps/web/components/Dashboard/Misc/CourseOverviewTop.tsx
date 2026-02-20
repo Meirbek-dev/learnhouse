@@ -1,4 +1,4 @@
-import type { CourseOverviewParams } from 'app/orgs/[orgslug]/dash/courses/course/[courseuuid]/[subpage]/page';
+import type { CourseOverviewParams } from '@/app/orgs/[orgslug]/dash/courses/course/[courseuuid]/[subpage]/page';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';

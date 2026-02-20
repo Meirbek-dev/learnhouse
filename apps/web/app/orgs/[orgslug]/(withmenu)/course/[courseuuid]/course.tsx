@@ -91,14 +91,14 @@ const CourseClient = (props: any) => {
             }
             if (item && typeof item === 'object') {
               // Keep shape but ensure text field exists if possible
-              const text = (item as any).text ?? (item as any).name ?? (item as any).title;
+              const text = item.text ?? item.name ?? item.title;
               const t = typeof text === 'string' ? text.trim() : text !== null ? String(text).trim() : '';
               if (!t || t.toLowerCase() === 'null' || t.toLowerCase() === 'undefined') return null;
-              return { ...(item as any), text: t };
+              return { ...item, text: t };
             }
             return null;
           })
-          .filter(Boolean) as any[];
+          .filter(Boolean);
       }
 
       // Object: maybe { learnings: [...] } or similar

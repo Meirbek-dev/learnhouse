@@ -147,29 +147,35 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
       }
     };
 
+    let timeoutId: number | null = null;
+    let previousOverflow: string | undefined;
+
     if (isMenuOpen) {
       document.addEventListener('keydown', handleEscape);
       // Use a small delay to prevent immediate closing when opening
-      const timeoutId = setTimeout(() => {
+      timeoutId = globalThis.setTimeout(() => {
         document.addEventListener('click', handleClickOutside);
       }, 100);
 
-      const previousOverflow = document.body.style.overflow;
+      previousOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
+    } else {
+      // Ensure we don't overwrite other components' overflow state when closed
+      if (document.body.style.overflow === 'hidden') {
+        document.body.style.overflow = '';
+      }
+    }
 
-      return () => {
+    return () => {
+      if (timeoutId !== null) {
         clearTimeout(timeoutId);
-        document.removeEventListener('keydown', handleEscape);
-        document.removeEventListener('click', handleClickOutside);
-        // Restore previous overflow value to avoid interfering with other components
+      }
+      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('click', handleClickOutside);
+      if (previousOverflow !== undefined) {
         document.body.style.overflow = previousOverflow || '';
-      };
-    }
-
-    // Ensure we don't overwrite other components' overflow state when closed
-    if (document.body.style.overflow === 'hidden') {
-      document.body.style.overflow = '';
-    }
+      }
+    };
   }, [isMenuOpen]);
 
   // Hide menu in focus mode during activities

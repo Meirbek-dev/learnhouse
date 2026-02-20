@@ -231,7 +231,7 @@ export async function getServerGamificationDashboard(orgId: number): Promise<Das
     return null;
   }
 
-  const profile = normalizeProfile(json.profile as Record<string, unknown> | undefined);
+  const profile = normalizeProfile(json.profile);
   if (!profile) {
     return null;
   }

@@ -55,7 +55,7 @@ async function fetchOrganizationBySlug(org_slug: string, access_token?: string) 
 
   const headers: HeadersInit = { 'Content-Type': 'application/json' };
   if (access_token) {
-    headers['Authorization'] = `Bearer ${access_token}`;
+    headers.Authorization = `Bearer ${access_token}`;
   }
 
   const result = await fetch(`${getAPIUrl()}orgs/slug/${org_slug}`, {

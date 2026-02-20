@@ -148,14 +148,14 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
 
   const sendMessage = async (message: string) => {
     // Add user message
-    await dispatchAIChatBot({
+    dispatchAIChatBot({
       type: 'addMessage',
       payload: { sender: 'user', message, type: 'user' },
     });
 
-    await dispatchAIChatBot({ type: 'setIsWaitingForResponse' });
-    await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
-    await dispatchAIChatBot({ type: 'setStatusMessage', payload: 'Думаю...' });
+    dispatchAIChatBot({ type: 'setIsWaitingForResponse' });
+    dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
+    dispatchAIChatBot({ type: 'setStatusMessage', payload: 'Думаю...' });
     resetStreamingState();
     const controller = getController();
 
@@ -257,8 +257,8 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
         );
       }
     } catch (error) {
-      await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
-      await dispatchAIChatBot({
+      dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
+      dispatchAIChatBot({
         type: 'setError',
         payload: {
           isError: true,

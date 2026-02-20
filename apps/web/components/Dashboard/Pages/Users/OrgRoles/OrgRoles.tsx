@@ -105,7 +105,7 @@ const OrgRoles: FC = () => {
   const canDeleteRole = can(Actions.DELETE, Resources.ROLE, Scopes.ORG);
   const canCreateRole = can(Actions.CREATE, Resources.ROLE, Scopes.ORG);
 
-  const { data: roles } = useSWR<Role[]>(org ? `${getAPIUrl()}roles?org_id=${org.id}` : null, (url) =>
+  const { data: roles } = useSWR<Role[]>(org ? `${getAPIUrl()}roles?org_id=${org.id}` : null, (url: string) =>
     swrFetcher(url, access_token),
   );
 

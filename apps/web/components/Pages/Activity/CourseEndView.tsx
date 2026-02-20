@@ -115,7 +115,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
 
           // Refetch gamification data to show course completion XP in recent activity
           if (typeof gamificationRefetch === 'function') {
-            gamificationRefetch().catch((error) =>
+            gamificationRefetch().catch((error: unknown) =>
               console.warn('Failed to refetch gamification after course completion:', error),
             );
           }
@@ -146,7 +146,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
     refetchedOnMountRef.current = true;
 
     const timer = setTimeout(() => {
-      gamificationRefetch().catch((error) =>
+      gamificationRefetch().catch((error: unknown) =>
         console.warn('Failed to refetch gamification on CourseEndView mount:', error),
       );
     }, 1000);

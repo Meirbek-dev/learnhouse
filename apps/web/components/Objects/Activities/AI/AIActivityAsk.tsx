@@ -194,8 +194,8 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
 
   const resetStreamingState = useCallback(async () => {
     streamingBufferRef.current = '';
-    await dispatchAIChatBot({ type: 'clearStreamingMessage' });
-    await dispatchAIChatBot({ type: 'setStatusMessage', payload: null });
+    dispatchAIChatBot({ type: 'clearStreamingMessage' });
+    dispatchAIChatBot({ type: 'setStatusMessage', payload: null });
   }, [dispatchAIChatBot]);
 
   const startNewController = useCallback(() => {
@@ -212,14 +212,14 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
       if (!message.trim() || !access_token) return;
 
       // Add user message
-      await dispatchAIChatBot({
+      dispatchAIChatBot({
         type: 'addMessage',
         payload: { sender: 'user', message, type: 'user' },
       });
 
       startTransition(() => dispatchAIChatBot({ type: 'setIsWaitingForResponse' }));
-      await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
-      await dispatchAIChatBot({ type: 'setStatusMessage', payload: 'Thinking...' });
+      dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
+      dispatchAIChatBot({ type: 'setStatusMessage', payload: 'Thinking...' });
 
       await resetStreamingState();
       const controller = startNewController();
@@ -233,20 +233,16 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
 
       const handleStatus = (status: { aichat_uuid?: string; message?: string }) => {
         if (status.aichat_uuid) {
-          startTransition(() =>
-            dispatchAIChatBot({ type: 'setAichat_uuid', payload: (status.aichat_uuid ?? null) as string | null }),
-          );
+          startTransition(() => dispatchAIChatBot({ type: 'setAichat_uuid', payload: status.aichat_uuid ?? null }));
         }
-        dispatchAIChatBot({ type: 'setStatusMessage', payload: (status.message ?? null) as string | null });
+        dispatchAIChatBot({ type: 'setStatusMessage', payload: status.message ?? null });
       };
 
       const handleComplete = (final: { content?: string; aichat_uuid?: string }) => {
         startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
 
         if (final.aichat_uuid) {
-          startTransition(() =>
-            dispatchAIChatBot({ type: 'setAichat_uuid', payload: (final.aichat_uuid ?? null) as string | null }),
-          );
+          startTransition(() => dispatchAIChatBot({ type: 'setAichat_uuid', payload: final.aichat_uuid ?? null }));
         }
 
         dispatchAIChatBot({

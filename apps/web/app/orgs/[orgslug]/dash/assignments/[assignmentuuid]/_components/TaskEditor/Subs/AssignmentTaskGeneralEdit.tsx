@@ -269,7 +269,7 @@ const UpdateTaskRef = () => {
       assignment.course_object.course_uuid,
       assignment.activity_object.activity_uuid,
       assignment.assignment_object.assignment_uuid,
-      assignmentTaskState.assignmentTask!.assignment_task_uuid,
+      assignmentTaskState.assignmentTask.assignment_task_uuid,
       fileName,
     );
   };

@@ -51,7 +51,7 @@ async function fetchCollectionById(collection_uuid: string, access_token?: strin
 
   const headers: HeadersInit = { 'Content-Type': 'application/json' };
   if (access_token) {
-    headers['Authorization'] = `Bearer ${access_token}`;
+    headers.Authorization = `Bearer ${access_token}`;
   }
 
   const result = await fetch(`${getAPIUrl()}collections/collection_${collection_uuid}`, {
@@ -75,7 +75,7 @@ async function fetchOrgCollections(org_id: number, access_token?: string) {
 
   const headers: HeadersInit = { 'Content-Type': 'application/json' };
   if (access_token) {
-    headers['Authorization'] = `Bearer ${access_token}`;
+    headers.Authorization = `Bearer ${access_token}`;
   }
 
   const result = await fetch(`${getAPIUrl()}collections/org/${org_id}/page/1/limit/10`, {

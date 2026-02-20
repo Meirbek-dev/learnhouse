@@ -104,7 +104,7 @@ function FormControl({ children }: FormControlProps) {
     'aria-invalid': error ? true : undefined,
   };
 
-  return React.cloneElement(children, mergeProps(slotProps, children.props as Record<string, unknown>));
+  return React.cloneElement(children, mergeProps(slotProps, children.props));
 }
 
 function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {

@@ -182,7 +182,7 @@ export default function RichTextEditor({
 
     // Extract YouTube video ID from URL
     const youtubeRegex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[&?]v=)|youtu\.be\/)([^\s"&/?]{11})/;
-    const match = videoUrl.match(youtubeRegex);
+    const match = youtubeRegex.exec(videoUrl);
 
     if (match) {
       editor.chain().focus().setYoutubeVideo({ src: videoUrl }).run();

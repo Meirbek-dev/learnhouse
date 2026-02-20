@@ -8,7 +8,7 @@ export async function uploadNewPDFFile(file: File, activity_uuid: string, access
   formData.append('activity_uuid', activity_uuid);
   return fetch(`${getAPIUrl()}blocks/pdf`, RequestBodyFormWithAuthHeader('POST', formData, null, access_token))
     .then((result) => result.json())
-    .catch((error) => {
+    .catch((error: unknown) => {
       console.log('error', error);
     });
 }
@@ -20,7 +20,7 @@ export async function getPDFFile(file_id: string, access_token: string) {
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   )
     .then((result) => result.json())
-    .catch((error) => {
+    .catch((error: unknown) => {
       console.log('error', error);
     });
 }

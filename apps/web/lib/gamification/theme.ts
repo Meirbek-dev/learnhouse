@@ -71,7 +71,7 @@ const xpSourceThemes: Record<string, XPSourceTheme> = {
 } as const;
 
 export function getXPSourceTheme(source: string): XPSourceTheme {
-  return (xpSourceThemes[source] || xpSourceThemes.default) as XPSourceTheme;
+  return (xpSourceThemes[source] || xpSourceThemes.default)!;
 }
 
 // ============================================
@@ -138,7 +138,7 @@ export function getLevelTheme(level: number): LevelTheme {
   // Find the closest level milestone
   const milestones = [1, 5, 10, 15, 25, 50];
   const milestone = milestones.toReversed().find((m) => level >= m) || 1;
-  const theme = levelThemes[milestone as keyof typeof levelThemes];
+  const theme = levelThemes[milestone];
   // Guaranteed fallback to novice level
   return theme || { icon: Target, color: colors.level[1], titleKey: 'novice' };
 }

@@ -232,7 +232,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
 
       await applyForContributor(`course_${courseuuid}`, data, session.data?.tokens?.access_token);
       await revalidateTags(['courses'], orgslug);
-      await refetch();
+      refetch();
       toast.success(t('contributorApplicationSuccess'), { id: loadingToast });
     } catch (error) {
       console.error('Failed to apply as contributor:', error);

@@ -374,7 +374,7 @@ async function fetchActivityWithAuth(activity_uuid: string, access_token?: strin
 
   const headers: HeadersInit = { 'Content-Type': 'application/json' };
   if (access_token) {
-    headers['Authorization'] = `Bearer ${access_token}`;
+    headers.Authorization = `Bearer ${access_token}`;
   }
 
   const result = await fetch(`${getAPIUrl()}activities/activity_${activity_uuid}`, {

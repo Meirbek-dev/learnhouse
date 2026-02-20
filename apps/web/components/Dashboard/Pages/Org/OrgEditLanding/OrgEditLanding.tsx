@@ -37,7 +37,6 @@ import { toast } from 'sonner';
 import useSWR from 'swr';
 
 import type {
-  LandingBackground,
   LandingButton,
   LandingFeaturedCourses,
   LandingHeroSection,
@@ -203,13 +202,10 @@ const GRADIENT_DIRECTION_KEYS: Record<string, string> = {
 
 // Function to get translated gradient directions
 const getGradientDirections = (t: Function) => {
-  return Object.entries(GRADIENT_DIRECTION_KEYS).reduce(
-    (acc, [key, tKey]) => {
-      acc[key] = t(`GradientDirections.${tKey}`);
-      return acc;
-    },
-    {} as Record<string, string>,
-  );
+  return Object.entries(GRADIENT_DIRECTION_KEYS).reduce<Record<string, string>>((acc, [key, tKey]) => {
+    acc[key] = t(`GradientDirections.${tKey}`);
+    return acc;
+  }, {});
 };
 
 // Function to get translated gradient preset names
@@ -908,7 +904,7 @@ const HeroSectionEditor: FC<{
                   onChange({
                     ...section,
                     background: {
-                      type: value as LandingBackground['type'],
+                      type: value!,
                       color: value === 'solid' ? '#ffffff' : undefined,
                       colors: value === 'gradient' ? PREDEFINED_GRADIENTS.sunrise.colors : undefined,
                       image: value === 'image' ? '' : undefined,
@@ -1537,7 +1533,7 @@ const ImageUploader: FC<ImageUploaderProps> = ({ t, onImageUploaded, className, 
     const validation = validateFile(file, ['image']);
 
     if (!validation.valid) {
-      toast.error(validation.error!);
+      toast.error(validation.error);
       e.target.value = ''; // Clear the input
       return;
     }
@@ -1633,7 +1629,7 @@ const TextAndImageSectionEditor: FC<{
           <Select
             value={section.flow}
             onValueChange={(value) => {
-              onChange({ ...section, flow: value as 'left' | 'right' });
+              onChange({ ...section, flow: value! });
             }}
             items={makeFlowItems(t)}
           >

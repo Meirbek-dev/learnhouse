@@ -131,9 +131,7 @@ export default function ExamResults({
         }
 
         case 'MATCHING': {
-          const allCorrect = question.answer_options.every(
-            (opt) => (userAnswer && userAnswer[opt.left || '']) === opt.right,
-          );
+          const allCorrect = question.answer_options.every((opt) => userAnswer?.[opt.left || ''] === opt.right);
           return allCorrect ? 'correct' : 'incorrect';
         }
 

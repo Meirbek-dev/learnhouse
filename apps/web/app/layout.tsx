@@ -6,7 +6,7 @@ import ClientLayout from './client-layout';
 import { isDevEnv } from '@/auth';
 import { Suspense } from 'react';
 
-import '../styles/globals.css';
+import '@styles/globals.css';
 
 async function LocalizedLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();

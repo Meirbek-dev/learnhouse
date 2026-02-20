@@ -87,9 +87,10 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
       prevOrgIdRef.current = org.id;
       isInitialMount.current = false;
     }
+    return;
   }, [org?.id, isAuthenticated, updateSession]);
 
-  const isUserPartOfTheOrg = (() => {
+  const isUserPartOfTheOrg: boolean = (() => {
     if (!isAuthenticated || !org?.id || !Array.isArray(orgs)) {
       return false;
     }

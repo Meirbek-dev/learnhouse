@@ -8,7 +8,7 @@ export async function uploadNewImageFile(file: File, activity_uuid: string, acce
   formData.append('activity_uuid', activity_uuid);
   return fetch(`${getAPIUrl()}blocks/image`, RequestBodyFormWithAuthHeader('POST', formData, null, access_token))
     .then((result) => result.json())
-    .catch((error) => {
+    .catch((error: unknown) => {
       console.log('error', error);
     });
 }
@@ -20,7 +20,7 @@ export async function getImageFile(file_id: string, access_token: string) {
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   )
     .then((result) => result.json())
-    .catch((error) => {
+    .catch((error: unknown) => {
       console.log('error', error);
     });
 }

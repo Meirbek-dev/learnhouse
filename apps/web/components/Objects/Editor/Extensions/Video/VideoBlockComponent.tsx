@@ -243,12 +243,12 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
       );
 
       // If we got a temporary block, set it immediately so UI updates predictably
-      if (object && object.block_uuid && object.content) {
+      if (object?.block_uuid && object.content) {
         const optimisticBlock = {
           ...object,
           size: selectedSize,
         };
-        setBlockObject(optimisticBlock as any);
+        setBlockObject(optimisticBlock);
         updateAttributes({ blockObject: optimisticBlock });
       }
 

@@ -53,7 +53,7 @@ export default async function proxy(req: NextRequest) {
   }
 
   // Dynamic Pages Editor
-  if (pathname.match(/^\/course\/[^/]+\/activity\/[^/]+\/edit$/)) {
+  if (/^\/course\/[^/]+\/activity\/[^/]+\/edit$/.exec(pathname)) {
     return NextResponse.rewrite(new URL(`/editor${pathname}`, req.url));
   }
 
@@ -80,7 +80,6 @@ export default async function proxy(req: NextRequest) {
 
   const orgslug: string = defaultOrg as string;
   if (pathname.startsWith('/sitemap.xml')) {
-
     const sitemapUrl = new URL('/api/sitemap', req.url);
 
     // Create a response object

@@ -50,7 +50,7 @@ const AssignmentSubmissionProvider = ({ children, assignment_uuid }: AssignmentS
     assignment_uuid && assignment_uuid !== 'undefined'
       ? `${getAPIUrl()}assignments/${assignment_uuid}/submissions/me`
       : null,
-    (url) => swrFetcher(url, accessToken),
+    (url: string) => swrFetcher(url, accessToken),
   );
 
   const contextValue: AssignmentSubmissionContextType = {

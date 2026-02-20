@@ -700,9 +700,9 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
     const currentIndex = allBlanks.findIndex((b) => b.questionUUID === questionUUID && b.blankUUID === blankUUID);
     const nextBlank = allBlanks[currentIndex + 1];
 
-    if (nextBlank && nextBlank.blankUUID) {
+    if (nextBlank?.blankUUID) {
       setTimeout(() => {
-        const nextInput = document.querySelector(`[data-blank-id="${nextBlank.blankUUID}"]`) as HTMLInputElement;
+        const nextInput = document.querySelector<HTMLElement>(`[data-blank-id="${nextBlank.blankUUID}"]`);
         nextInput?.focus();
       }, 100);
     }

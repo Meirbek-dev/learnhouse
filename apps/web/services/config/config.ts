@@ -68,8 +68,8 @@ export const getAPIUrl = () => {
     if (typeof globalThis.window === 'undefined') {
       console.warn(
         '[Config] Using fallback API URL in server context. ' +
-        'Please set NEXT_PUBLIC_PLATFORM_API_URL or PLATFORM_INTERNAL_API_URL environment variable. ' +
-        `Current fallback: ${base}`,
+          'Please set NEXT_PUBLIC_PLATFORM_API_URL or PLATFORM_INTERNAL_API_URL environment variable. ' +
+          `Current fallback: ${base}`,
       );
     }
   }
@@ -88,12 +88,16 @@ export const getUriWithOrg = (orgslug: string, path: string) => {
 
 export const getUriWithoutOrg = (path: string) => `${PLATFORM_HTTP_PROTOCOL}${PLATFORM_DOMAIN}${path}`;
 
-export const getOrgFromUri = () => {
+export const getOrgFromUri = (): string | undefined => {
   if (typeof globalThis.window !== 'undefined') {
     const { hostname } = globalThis.location;
 
     return hostname.replace(`.${PLATFORM_DOMAIN}`, '');
   }
+
+  // Explicitly return undefined when running on the server or if window
+  // isn't available.
+  return undefined;
 };
 
-export const defaultOrg = "openu";
+export const defaultOrg = 'openu';

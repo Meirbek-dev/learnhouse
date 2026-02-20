@@ -36,7 +36,7 @@ function ThemeSync() {
       const s = sessionRef.current;
       if (s?.data?.user?.id && s?.data?.tokens?.access_token) {
         // Fire-and-forget and surface failures to console to avoid unhandled rejections
-        updateUserTheme(s.data.user.id, theme, s.data.tokens.access_token).catch((error) =>
+        updateUserTheme(s.data.user.id, theme, s.data.tokens.access_token).catch((error: unknown) =>
           console.error('Failed to sync theme to server:', error),
         );
       }

@@ -292,6 +292,7 @@ export function XPGainAnimation({ amount, trigger, position, onComplete }: XPGai
         if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
       };
     }
+    return;
   }, [trigger, prefersReducedMotion]);
 
   if (!isVisible) return null;

@@ -97,16 +97,13 @@ export default function RBACAdminClient() {
   );
 
   // Group permissions by resource
-  const permissionsByResource = permissions.reduce(
-    (acc, perm) => {
-      if (!acc[perm.resource_type]) {
-        acc[perm.resource_type] = [];
-      }
-      acc[perm.resource_type]!.push(perm);
-      return acc;
-    },
-    {} as Record<string, Permission[]>,
-  );
+  const permissionsByResource = permissions.reduce<Record<string, Permission[]>>((acc, perm) => {
+    if (!acc[perm.resource_type]) {
+      acc[perm.resource_type] = [];
+    }
+    acc[perm.resource_type]!.push(perm);
+    return acc;
+  }, {});
 
   const handleCreateRole = async (data: { name: string; slug: string; description: string }) => {
     if (!accessToken || !org?.id) return;

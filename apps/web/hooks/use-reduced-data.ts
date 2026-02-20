@@ -80,7 +80,7 @@ export function useReducedData(): boolean {
         connection.addEventListener('change', handleNetworkChange);
       } else {
         // preserve existing handler if any
-        prevOnChange = (connection as any).onchange;
+        prevOnChange = connection.onchange;
         // @ts-ignore
         connection.onchange = handleNetworkChange;
       }

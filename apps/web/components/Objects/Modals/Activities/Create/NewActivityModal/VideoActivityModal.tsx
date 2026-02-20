@@ -900,7 +900,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
     }
 
     // Validate org data is available
-    if (!org || !org.org_uuid || !org.id) {
+    if (!org?.org_uuid || !org.id) {
       console.error('Organization data not available:', org);
       toast.error(t('organizationDataNotLoaded'));
       return;
@@ -909,7 +909,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
     // Handle course data structure (it might be the context object or the course object directly)
     const courseData = course?.courseStructure || course;
 
-    if (!courseData || !courseData.course_uuid) {
+    if (!courseData?.course_uuid) {
       console.error('Course data missing:', course);
       toast.error(t('courseDataMissing'));
       return;

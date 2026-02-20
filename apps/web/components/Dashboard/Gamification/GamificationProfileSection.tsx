@@ -108,7 +108,7 @@ export function GamificationProfileSection({
               className={cn('flex items-center gap-1', levelInfo.color)}
             >
               {(() => {
-                const Icon = (levelInfo as any).icon;
+                const Icon = levelInfo.icon;
                 return Icon ? <Icon className="h-3 w-3" /> : null;
               })()}
               {levelInfo.title}

@@ -110,9 +110,7 @@ export async function uploadFileChunked(options: ChunkedUploadOptions): Promise<
       });
       // Throw a clearer error message for the caller
       throw new Error(
-        body && body.detail
-          ? JSON.stringify(body.detail)
-          : `Failed to initiate upload (status ${initiateResponse.status})`,
+        body?.detail ? JSON.stringify(body.detail) : `Failed to initiate upload (status ${initiateResponse.status})`,
       );
     }
 
@@ -143,9 +141,7 @@ export async function uploadFileChunked(options: ChunkedUploadOptions): Promise<
         const body = await chunkResponse.json().catch(() => null);
         console.error(`Failed to upload chunk ${i}`, { status: chunkResponse.status, body });
         throw new Error(
-          body && body.detail
-            ? JSON.stringify(body.detail)
-            : `Failed to upload chunk ${i} (status ${chunkResponse.status})`,
+          body?.detail ? JSON.stringify(body.detail) : `Failed to upload chunk ${i} (status ${chunkResponse.status})`,
         );
       }
 
@@ -185,9 +181,7 @@ export async function uploadFileChunked(options: ChunkedUploadOptions): Promise<
       const body = await completeResponse.json().catch(() => null);
       console.error('Failed to complete upload', { status: completeResponse.status, body });
       throw new Error(
-        body && body.detail
-          ? JSON.stringify(body.detail)
-          : `Failed to complete upload (status ${completeResponse.status})`,
+        body?.detail ? JSON.stringify(body.detail) : `Failed to complete upload (status ${completeResponse.status})`,
       );
     }
 

@@ -247,7 +247,7 @@ const authConfig: NextAuthConfig = {
         }
 
         // Subsequent requests - refresh if needed
-        const userWithTokens = token.user as UserWithTokens | undefined;
+        const userWithTokens = token.user;
         if (!userWithTokens?.tokens) {
           console.warn('No user tokens found in JWT callback');
           return token;
@@ -299,7 +299,7 @@ const authConfig: NextAuthConfig = {
 
     // ── session ────────────────────────────────────────────────────────────
     async session({ session, token }): Promise<Session> {
-      const userWithTokens = token.user as UserWithTokens | undefined;
+      const userWithTokens = token.user;
 
       if (!userWithTokens?.tokens?.access_token) {
         console.warn('No valid token data for session callback');

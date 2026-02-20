@@ -119,7 +119,7 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
   };
 
   const extractExternalUrl = (url: string): string | null => {
-    const matches = url.match(/avatars\/(https?:\/\/[^/]+.*$)/);
+    const matches = /avatars\/(https?:\/\/[^/]+.*$)/.exec(url);
     if (matches?.[1]) {
       return matches[1];
     }

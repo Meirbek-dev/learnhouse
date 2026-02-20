@@ -151,7 +151,7 @@ const getYouTubeEmbedUrl = (url: string): string => {
   if (!isYouTubeUrl(url)) return url;
 
   const youtubeRegex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[&?]v=)|youtu\.be\/)([^\s"&/?]{11})/i;
-  const match = url.match(youtubeRegex);
+  const match = youtubeRegex.exec(url);
 
   if (match?.[1]?.length === YOUTUBE_VIDEO_ID_LENGTH) {
     return `https://www.youtube.com/embed/${match[1]}?autoplay=0&rel=0`;

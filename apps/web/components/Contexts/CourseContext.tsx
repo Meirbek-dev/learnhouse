@@ -97,7 +97,7 @@ export const CourseProvider = ({ children, courseuuid, withUnpublishedActivities
     isLoading: isSWRLoading,
   } = useSWR<CourseStructure>(
     `${getAPIUrl()}courses/${courseuuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
-    (url) => swrFetcher(url, access_token),
+    (url: string) => swrFetcher(url, access_token),
   );
 
   const initialState: CourseState = {

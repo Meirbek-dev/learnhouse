@@ -33,7 +33,6 @@ import {
   submitAssignmentForGrading,
 } from '@services/courses/assignments';
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
-import type { AssignmentSubmission } from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
@@ -499,6 +498,7 @@ const ActivityClient = (props: ActivityClientProps) => {
         };
       }
     }
+    return;
   }, [isFocusMode, isInitialRender]);
 
   // Listen for the auto-initiated flag to hide manual toggles immediately
@@ -1187,7 +1187,7 @@ export const MarkStatus = (props: {
         }
 
         // Refetch in background to update profile with actual XP from backend
-        refetchGamification().catch((error) => console.error('Failed to refetch gamification:', error));
+        refetchGamification().catch((error: unknown) => console.error('Failed to refetch gamification:', error));
       } else {
         // Fallback for non-gamified orgs
         toast.success(t('activityCompleted'));
@@ -1528,7 +1528,7 @@ const AssignmentTools = (props: {
   }
 
   // At this point, submission is guaranteed to be an array with at least one element
-  const firstSubmission = (submission as AssignmentSubmission[])[0];
+  const firstSubmission = submission[0];
 
   if (firstSubmission?.submission_status === 'SUBMITTED') {
     return (

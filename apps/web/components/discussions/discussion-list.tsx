@@ -386,7 +386,7 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
       // Update local state
       setPosts(
         posts.map((post) =>
-          post.id === postId ? { ...post, replies: post.replies?.filter((reply) => reply.id !== replyId) } : post,
+          post.id === postId ? { ...post, replies: post.replies?.filter((reply: any) => reply.id !== replyId) } : post,
         ),
       );
 
@@ -453,7 +453,7 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
           post.id === postId
             ? {
                 ...post,
-                replies: post.replies?.map((reply) =>
+                replies: post.replies?.map((reply: any) =>
                   reply.id === replyId
                     ? {
                         ...reply,

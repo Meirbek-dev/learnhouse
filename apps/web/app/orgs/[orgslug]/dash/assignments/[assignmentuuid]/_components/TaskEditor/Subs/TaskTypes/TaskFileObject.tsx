@@ -148,9 +148,15 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
     }
   };
 
-  const submitFile = async () => {
-    if (!accessToken) return toast.error(t('authRequiredSubmit'));
-    if (!assignmentTaskUUID || !assignmentUUID) return toast.error(t('missingAssignmentInfo'));
+  const submitFile = async (): Promise<void> => {
+    if (!accessToken) {
+      toast.error(t('authRequiredSubmit'));
+      return;
+    }
+    if (!assignmentTaskUUID || !assignmentUUID) {
+      toast.error(t('missingAssignmentInfo'));
+      return;
+    }
 
     const values = {
       assignment_task_submission_uuid: userSubmissions.assignment_task_submission_uuid || null,
@@ -161,7 +167,10 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
 
     try {
       const res = await handleAssignmentTaskSubmission(values, assignmentTaskUUID, assignmentUUID, accessToken);
-      if (!res) return toast.error(t('errorSaving'));
+      if (!res) {
+        toast.error(t('errorSaving'));
+        return;
+      }
 
       assignmentTaskDispatch({ type: 'reload' });
       toast.success(t('saveSuccess'));
@@ -179,12 +188,14 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
     }
   };
 
-  const gradeSubmission = async (grade: number) => {
+  const gradeSubmission = async (grade: number): Promise<void> => {
     if (!assignmentTaskUUID || !assignmentUUID || !accessToken || !assignmentTask || !username) {
-      return toast.error(t('missingGradingInfo'));
+      toast.error(t('missingGradingInfo'));
+      return;
     }
     if (grade < 0 || grade > 100) {
-      return toast.error(t('gradeRangeError', { maxGradeValue: 100 }));
+      toast.error(t('gradeRangeError', { maxGradeValue: 100 }));
+      return;
     }
 
     const values = {
@@ -196,7 +207,10 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
 
     try {
       const res = await handleAssignmentTaskSubmission(values, assignmentTaskUUID, assignmentUUID, accessToken);
-      if (!res) return toast.error(t('gradeError'));
+      if (!res) {
+        toast.error(t('gradeError'));
+        return;
+      }
       await fetchUserSubmission();
       toast.success(t('gradeSuccess', { grade }));
     } catch (error) {

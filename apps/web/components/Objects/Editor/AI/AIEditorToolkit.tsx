@@ -375,7 +375,7 @@ function useStreamingChat(activityUuid: string, accessToken: string) {
                 },
               );
 
-        streamFn().catch((error) => {
+        streamFn().catch((error: unknown) => {
           handleError({ error: error instanceof Error ? error.message : 'Unknown error' });
           resolve('');
         });

@@ -525,7 +525,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                                   items={nextScenarioOptions}
                                 >
                                   <SelectTrigger className="flex-1 text-xs">
-                                    <SelectValue placeholder={t('endScenarioOption') as string} />
+                                    <SelectValue placeholder={t('endScenarioOption')} />
                                   </SelectTrigger>
                                   <SelectContent>
                                     <SelectGroup>

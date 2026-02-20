@@ -153,8 +153,7 @@ function useImageResize(initialWidth: number, onResize: (width: number) => void)
       const startWidth = width;
 
       const handleMove = (moveEvent: MouseEvent | TouchEvent) => {
-        const currentX =
-          'touches' in moveEvent ? (moveEvent.touches?.[0]?.clientX ?? startX) : (moveEvent as MouseEvent).clientX;
+        const currentX = 'touches' in moveEvent ? (moveEvent.touches?.[0]?.clientX ?? startX) : moveEvent.clientX;
         const delta = currentX - startX;
         const newWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, startWidth + delta * 2)); // *2 because handle is centered
         setWidth(newWidth);

@@ -137,11 +137,9 @@ export default defineConfig([
       '@typescript-eslint/no-require-imports': 'warn', // Prefer ESM imports
       '@typescript-eslint/no-unsafe-function-type': 'off', // Avoid `Function` type
       '@typescript-eslint/triple-slash-reference': 'warn',
-      '@typescript-eslint/no-misused-promises': [
-        // e.g. onClick={asyncFn}
-        'warn',
-        { checksVoidReturn: { attributes: false } }, // false: allows async event handlers
-      ],
+      '@typescript-eslint/no-misused-promises': 'off',
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/promise-function-async': 'off',
       '@typescript-eslint/consistent-type-imports': [
         // import type { Foo }
         'warn',

@@ -663,7 +663,7 @@ const UserEditGeneral = () => {
             getUserLocale(),
           ]);
           setUserData(userDataResponse);
-          setCurrentLocale(localeResponse as Locale);
+          setCurrentLocale(localeResponse);
 
           // Reset form with fetched data
           form.reset({

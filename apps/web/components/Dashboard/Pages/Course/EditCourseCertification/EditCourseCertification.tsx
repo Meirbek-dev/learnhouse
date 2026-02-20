@@ -314,6 +314,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
         }
       };
     }
+    return;
   }, [
     certificationName,
     certificationDescription,

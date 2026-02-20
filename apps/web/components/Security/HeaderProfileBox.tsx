@@ -124,8 +124,8 @@ export const HeaderProfileBox = () => {
             return !role.role?.is_system;
           })
           .map((role: any) => ({
-            name: ((role.role as any).name as string) || t('profile.customRole'),
-            description: (role.role as any).description,
+            name: (role.role.name as string) || t('profile.customRole'),
+            description: role.role.description,
           }))
       : [];
 

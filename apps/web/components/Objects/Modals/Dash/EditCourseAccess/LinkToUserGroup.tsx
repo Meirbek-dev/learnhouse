@@ -85,7 +85,7 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  {usergroupItems.map((group) => (
+                  {usergroupItems.map((group: { value: string; label: string }) => (
                     <SelectItem
                       key={group.value}
                       value={group.value}

@@ -1,8 +1,8 @@
 'use client';
 
+import TaskQuizObject from '@/app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskQuizObject';
 import TaskFormObject from '@/app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFormObject';
-import TaskQuizObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskQuizObject';
-import TaskFileObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
+import TaskFileObject from '@/app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
 import { Backpack, Calendar, Download, Info } from 'lucide-react';

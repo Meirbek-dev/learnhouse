@@ -32,7 +32,7 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
 
     // Only fetch gamification data if user is authenticated
     const gamificationPromise = access_token
-      ? getServerGamificationDashboard(org.id).catch((error) => {
+      ? getServerGamificationDashboard(org.id).catch((error: unknown) => {
           console.error('[LandingContent] Gamification fetch failed:', {
             message: error instanceof Error ? error.message : 'Unknown error',
             org_id: org.id,
@@ -42,14 +42,14 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
       : Promise.resolve(null);
 
     const [coursesData, collections, gamificationData] = await Promise.all([
-      getOrgCourses(orgslug, undefined, access_token || null).catch((error) => {
+      getOrgCourses(orgslug, undefined, access_token || null).catch((error: unknown) => {
         console.error('[LandingContent] Courses fetch failed:', {
           message: error instanceof Error ? error.message : 'Unknown error',
           orgslug,
         });
         return { courses: [], total: 0 };
       }),
-      getOrgCollections(org.id, access_token).catch((error) => {
+      getOrgCollections(org.id, access_token).catch((error: unknown) => {
         console.error('[LandingContent] Collections fetch failed:', {
           message: error instanceof Error ? error.message : 'Unknown error',
           org_id: org.id,

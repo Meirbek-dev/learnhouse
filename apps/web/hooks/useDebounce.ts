@@ -16,7 +16,7 @@ export function useDebounce<T>(valueOrCallback: T, delay: number): T {
   // stable debounced function
   const debouncedFn = useCallback(
     (...args: any[]) => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current as ReturnType<typeof setTimeout>);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
         if (callbackRef.current) callbackRef.current(...args);
       }, delay);
@@ -30,18 +30,18 @@ export function useDebounce<T>(valueOrCallback: T, delay: number): T {
   useEffect(() => {
     if (typeof valueOrCallback === 'function') return; // nothing for function case
 
-    if (timeoutRef.current) clearTimeout(timeoutRef.current as ReturnType<typeof setTimeout>);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => setDebouncedValue(valueOrCallback), delay);
 
     return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current as ReturnType<typeof setTimeout>);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [valueOrCallback, delay]);
 
   // Ensure cleanup on unmount
   useEffect(() => {
     return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current as ReturnType<typeof setTimeout>);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
 
