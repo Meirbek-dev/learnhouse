@@ -7,7 +7,7 @@ import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
 import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
 import { SearchBar } from '@/components/Objects/Search/SearchBar';
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import platformLogoFull from 'public/platform_logo_full.svg';
+import platformLogoFull from '@public/platform_logo_full.svg';
 import { getUriWithOrg } from '@/services/config/config';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';

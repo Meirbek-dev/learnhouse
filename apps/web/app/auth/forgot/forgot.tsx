@@ -2,7 +2,7 @@
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { AlertTriangle, ArrowLeft, Info, Loader2 } from 'lucide-react';
-import platformLogoFull from 'public/platform_logo_full.svg';
+import platformLogoFull from '@public/platform_logo_full.svg';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { zodResolver } from '@hookform/resolvers/zod';

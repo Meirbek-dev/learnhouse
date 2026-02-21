@@ -4,7 +4,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import { BookOpen, FormInput, Languages } from 'lucide-react';
-import platformLogo from 'public/platform_logo.svg';
+import platformLogo from '@public/platform_logo.svg';
 import { BubbleMenu } from '@tiptap/react/menus';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';

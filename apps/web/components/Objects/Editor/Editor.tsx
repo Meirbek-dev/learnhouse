@@ -12,7 +12,7 @@ import { CourseProvider } from '@components/Contexts/CourseContext';
 import EmbedObjects from './Extensions/EmbedObjects/EmbedObjects';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import InfoCallout from './Extensions/Callout/Info/InfoCallout';
-import platformLogoLight from 'public/platform_logo_light.svg';
+import platformLogoLight from '@public/platform_logo_light.svg';
 import WebPreview from './Extensions/WebPreview/WebPreview';
 import { ToolbarButtons } from './Toolbar/ToolbarButtons';
 import Scenarios from './Extensions/Scenarios/Scenarios';
@@ -29,7 +29,7 @@ import TableCell from '@tiptap/extension-table-cell';
 import UserBlock from './Extensions/Users/UserBlock';
 // Extensions
 import QuizBlock from './Extensions/Quiz/QuizBlock';
-import platformLogo from 'public/platform_logo.svg';
+import platformLogo from '@public/platform_logo.svg';
 import java from 'highlight.js/lib/languages/java';
 import Buttons from './Extensions/Buttons/Buttons';
 import TableRow from '@tiptap/extension-table-row';

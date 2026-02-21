@@ -6,7 +6,7 @@ import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { useCallback, useEffect, useRef, useTransition } from 'react';
-import platformLogoLight from 'public/platform_logo_light.svg';
+import platformLogoLight from '@public/platform_logo_light.svg';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { ScrollArea } from '@components/ui/scroll-area';
 import { Card, CardContent } from '@components/ui/card';

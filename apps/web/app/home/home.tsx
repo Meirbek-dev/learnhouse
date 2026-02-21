@@ -1,7 +1,7 @@
 'use client';
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import platformLogoFull from 'public/platform_logo_full.svg';
+import platformLogoFull from '@public/platform_logo_full.svg';
 import { getUriWithoutOrg } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useTranslations } from 'next-intl';

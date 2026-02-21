@@ -4,7 +4,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { AlertTriangle, Loader2, UserRoundPlus } from 'lucide-react';
 import PasswordInput from '@components/ui/custom/password-input';
-import platformLogoFull from 'public/platform_logo_full.svg';
+import platformLogoFull from '@public/platform_logo_full.svg';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';

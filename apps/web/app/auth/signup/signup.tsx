@@ -1,7 +1,7 @@
 'use client';
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import platformLogoFull from 'public/platform_logo_full.svg';
+import platformLogoFull from '@public/platform_logo_full.svg';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useRouter } from 'next/navigation';

@@ -4,7 +4,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { verifyStripeConnection } from '@services/payments/payments';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { AlertTriangle, Check, Loader2 } from 'lucide-react';
-import platformLogo from 'public/platform_logo.svg';
+import platformLogo from '@public/platform_logo.svg';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { motion } from 'motion/react';
