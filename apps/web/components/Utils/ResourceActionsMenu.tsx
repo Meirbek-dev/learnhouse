@@ -111,7 +111,10 @@ export function ResourceActionsMenu({ availableActions, actions, trigger, align 
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>{trigger || defaultTrigger}</DropdownMenuTrigger>
+      {/* always render the provided trigger node (or default) as children */}
+      <DropdownMenuTrigger>
+        {trigger ?? defaultTrigger}
+      </DropdownMenuTrigger>
       <DropdownMenuContent align={align}>
         {filteredActions.map((action, index) => {
           const Icon = action.icon;

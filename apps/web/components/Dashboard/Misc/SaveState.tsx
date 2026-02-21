@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { mutate } from 'swr';
+import { toast } from 'sonner';
 
 const SaveState = (props: { orgslug: string }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -81,7 +82,9 @@ const SaveState = (props: { orgslug: string }) => {
       try {
         await updateCertification(certData.certification_uuid, certData.config, session.data?.tokens?.access_token);
         console.log('Certification data saved successfully');
+        toast.success('Данные сертификата успешно сохранены');
       } catch (error) {
+        toast.error('Не удалось сохранить данные сертификата. Пожалуйста, попробуйте снова.');
         console.error('Failed to save certification data:', error);
         // Don't throw error to prevent breaking the main save flow
       }
