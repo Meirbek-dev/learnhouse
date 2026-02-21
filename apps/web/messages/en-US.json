@@ -2413,6 +2413,14 @@
   },
   "DashPage": {
     "Admin": {
+      "Index": {
+        "title": "Admin Dashboard",
+        "description": "Organization administration and settings",
+        "rolesTitle": "Roles & Permissions",
+        "rolesDescription": "Manage roles and their permissions",
+        "userRolesTitle": "User Roles",
+        "userRolesDescription": "Assign roles to organization members"
+      },
       "Alerts": {
         "actionRequired": "Action Required",
         "activateUsers": "Activate Users",

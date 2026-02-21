@@ -2413,6 +2413,14 @@
   },
   "DashPage": {
     "Admin": {
+      "Index": {
+        "title": "Панель администратора",
+        "description": "Управление и настройки организации",
+        "rolesTitle": "Роли и разрешения",
+        "rolesDescription": "Управляйте ролями и их разрешениями",
+        "userRolesTitle": "Роли пользователей",
+        "userRolesDescription": "Назначайте роли участникам организации"
+      },
       "Alerts": {
         "actionRequired": "Требуется действие",
         "activateUsers": "Активировать пользователей",

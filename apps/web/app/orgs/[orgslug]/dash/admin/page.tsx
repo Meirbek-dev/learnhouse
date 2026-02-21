@@ -1,30 +1,40 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AdminHeaderClient from './AdminHeaderClient';
 import { Shield, Users } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-export const metadata: Metadata = {
-  title: 'Admin Dashboard',
-  description: 'Organization administration and settings',
-};
+// metadata is built server-side so we can localize it with next-intl
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('DashPage.Admin.Index');
+  return {
+    title: t('title'),
+    description: t('description'),
+  };
+}
 
-const adminSections = [
-  {
-    title: 'Roles & Permissions',
-    description: 'Manage roles and their permissions',
-    href: 'admin/roles',
-    icon: Shield,
-  },
-  {
-    title: 'User Roles',
-    description: 'Assign roles to organization members',
-    href: 'admin/users',
-    icon: Users,
-  },
-];
+// note: we no longer need a top-level `adminSections` because we build it inside
+// the component once we have the translation function.
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const t = await getTranslations('DashPage.Admin.Index');
+
+  const adminSections = [
+    {
+      title: t('rolesTitle'),
+      description: t('rolesDescription'),
+      href: 'admin/roles',
+      icon: Shield,
+    },
+    {
+      title: t('userRolesTitle'),
+      description: t('userRolesDescription'),
+      href: 'admin/users',
+      icon: Users,
+    },
+  ];
+
   return (
     <div className="container mx-auto space-y-6 p-6">
       <div>

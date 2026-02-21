@@ -2413,6 +2413,14 @@
   },
   "DashPage": {
     "Admin": {
+      "Index": {
+        "title": "Әкімші панелі",
+        "description": "Ұйымды басқару және параметрлер",
+        "rolesTitle": "Рөлдер мен рұқсаттар",
+        "rolesDescription": "Рөлдер мен олардың рұқсаттарын басқару",
+        "userRolesTitle": "Пайдаланушы рөлдері",
+        "userRolesDescription": "Ұйым мүшелеріне рөлдер тағайындау"
+      },
       "Alerts": {
         "actionRequired": "Іс-әрекет қажет",
         "activateUsers": "Пайдаланушыларды іске қосыңыз",
