@@ -96,14 +96,6 @@ interface EditorState {
   isEditable: boolean;
 }
 
-interface Session {
-  data?: {
-    tokens?: {
-      access_token?: string;
-    };
-  };
-}
-
 interface VideoBlockObject {
   block_uuid: string;
   content: {
@@ -137,7 +129,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
     { html: t('subtitles.kazakh'), url: '/subtitle.kz.srt' },
   ];
   const editorState = useEditorProvider();
-  const session = usePlatformSession() as Session;
+  const session = usePlatformSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadZoneRef = useRef<HTMLDivElement>(null);
 

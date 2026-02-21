@@ -43,19 +43,6 @@ interface ErrorState {
   error_message?: string;
 }
 
-interface Session {
-  status: string;
-  data?: {
-    tokens?: {
-      access_token?: string;
-    };
-    user?: {
-      first_name?: string;
-      username?: string;
-    };
-  };
-}
-
 type PredefinedQuestionType = 'about' | 'flashcards' | 'examples';
 
 // Main Component
@@ -123,7 +110,7 @@ interface ActivityChatMessageBoxProps {
 
 const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
   const t = useTranslations('Activities.AIActivityAsk');
-  const session = usePlatformSession() as Session | null;
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const aiChatBotState = useAIChatBot();
   const dispatchAIChatBot = useAIChatBotDispatch();

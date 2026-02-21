@@ -63,8 +63,8 @@ const getSessionCache = (): Map<string, { data: SessionData; timestamp: number }
   return cache;
 };
 
-const createCacheKey = (accessToken: string): string => {
-  if (!accessToken) return 'user_session_anonymous';
+const createCacheKey = (accessToken: string): string | null => {
+  if (!accessToken) return null;
   return `user_session_${createHash('sha256').update(accessToken).digest('hex')}`;
 };
 
@@ -288,7 +288,10 @@ const authConfig: NextAuthConfig = {
           return token;
         } catch (error) {
           console.error('Token refresh error:', error);
-          getSessionCache().delete(createCacheKey(tokens.access_token));
+          const cacheKey = createCacheKey(tokens.access_token);
+          if (cacheKey) {
+            getSessionCache().delete(cacheKey);
+          }
           return null;
         }
       } catch (error) {
@@ -309,7 +312,7 @@ const authConfig: NextAuthConfig = {
       const { tokens } = userWithTokens;
       const cache = getSessionCache();
       const cacheKey = createCacheKey(tokens.access_token);
-      const cached = cache.get(cacheKey);
+      const cached = cacheKey ? cache.get(cacheKey) : null;
 
       if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
         return {
@@ -342,12 +345,16 @@ const authConfig: NextAuthConfig = {
           permissions_org_id: currentOrgId ?? null,
         };
 
-        cache.set(cacheKey, { data: sessionData, timestamp: Date.now() });
+        if (cacheKey) {
+          cache.set(cacheKey, { data: sessionData, timestamp: Date.now() });
+        }
 
         return { ...session, ...sessionData };
       } catch (error) {
         console.error('Failed to fetch user session:', error);
-        cache.delete(cacheKey);
+        if (cacheKey) {
+          cache.delete(cacheKey);
+        }
 
         return {
           ...session,
@@ -383,7 +390,10 @@ const authConfig: NextAuthConfig = {
       const token = (message as any)?.token;
       const userWithTokens = token?.user as UserWithTokens | undefined;
       if (userWithTokens?.tokens?.access_token) {
-        getSessionCache().delete(createCacheKey(userWithTokens.tokens.access_token));
+        const cacheKey = createCacheKey(userWithTokens.tokens.access_token);
+        if (cacheKey) {
+          getSessionCache().delete(cacheKey);
+        }
       }
     },
     async signIn({ user, account }) {

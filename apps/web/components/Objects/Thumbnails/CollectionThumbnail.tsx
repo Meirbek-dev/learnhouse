@@ -44,7 +44,6 @@ const CollectionThumbnail = (props: PropsType) => {
   // Use backend metadata for ownership and permissions
   const isOwner = props.collection.is_owner ?? false;
   const canDelete = props.collection.can_delete ?? false;
-  const availableActions = props.collection.available_actions ?? [];
 
   return (
     <div className="group relative overflow-hidden rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
@@ -100,7 +99,6 @@ const CollectionThumbnail = (props: PropsType) => {
           collection_uuid={props.collection.collection_uuid}
           collection={props.collection}
           canDelete={canDelete}
-          availableActions={availableActions}
         />
       </div>
     </div>

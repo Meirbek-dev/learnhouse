@@ -75,11 +75,8 @@ export interface Course {
   // Backend permission metadata
   can_update?: boolean;
   can_delete?: boolean;
-  can_publish?: boolean;
   can_manage_contributors?: boolean;
   is_owner?: boolean;
-  is_contributor?: boolean;
-  available_actions?: string[];
 }
 
 export interface CourseThumbnailProps {
@@ -386,7 +383,10 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, orgSlug, onDelete }) => {
   const canUpdate = course.can_update ?? false;
   const canDelete = course.can_delete ?? false;
   const isOwner = course.is_owner ?? false;
-  const availableActions = course.available_actions ?? [];
+  const availableActions = [
+    ...(canUpdate ? ['update'] : []),
+    ...(canDelete ? ['delete'] : []),
+  ];
 
   const handleDelete = () => {
     startTransition(async () => {

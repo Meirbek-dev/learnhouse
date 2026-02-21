@@ -25,20 +25,11 @@ class CourseReadWithPermissions(CourseRead):
     can_delete: bool = PydanticField(
         default=False, description="Whether the user can delete this course"
     )
-    can_publish: bool = PydanticField(
-        default=False, description="Whether the user can publish/unpublish this course"
-    )
     can_manage_contributors: bool = PydanticField(
         default=False, description="Whether the user can manage course contributors"
     )
     is_owner: bool = PydanticField(
         default=False, description="Whether the current user is the course owner/author"
-    )
-    is_contributor: bool = PydanticField(
-        default=False, description="Whether the current user is a contributor"
-    )
-    available_actions: list[str] = PydanticField(
-        default_factory=list, description="List of all actions available to the user"
     )
 
 
@@ -51,8 +42,5 @@ class FullCourseReadWithPermissions(FullCourseRead):
 
     can_update: bool = PydanticField(default=False)
     can_delete: bool = PydanticField(default=False)
-    can_publish: bool = PydanticField(default=False)
     can_manage_contributors: bool = PydanticField(default=False)
     is_owner: bool = PydanticField(default=False)
-    is_contributor: bool = PydanticField(default=False)
-    available_actions: list[str] = PydanticField(default_factory=list)

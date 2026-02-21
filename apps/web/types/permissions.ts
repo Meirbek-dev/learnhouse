@@ -20,7 +20,6 @@ export const Actions = {
   MANAGE: 'manage',
   MODERATE: 'moderate',
   EXPORT: 'export',
-  INVITE: 'invite',
   GRADE: 'grade',
   SUBMIT: 'submit',
   ENROLL: 'enroll',

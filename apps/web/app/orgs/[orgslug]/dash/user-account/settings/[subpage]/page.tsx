@@ -18,11 +18,6 @@ interface User {
   // Add other user properties as needed
 }
 
-interface Session {
-  user?: User;
-  // Add other session properties as needed
-}
-
 export interface SettingsParams {
   subpage: string;
   orgslug: string;

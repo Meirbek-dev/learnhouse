@@ -15,7 +15,6 @@ class Action(StrEnum):
     MANAGE = "manage"
     MODERATE = "moderate"
     EXPORT = "export"
-    INVITE = "invite"
     GRADE = "grade"
     SUBMIT = "submit"
     ENROLL = "enroll"
@@ -94,7 +93,6 @@ SYSTEM_ROLES: dict[str, dict] = {
             "user:create:org",
             "user:update:org",
             "user:delete:org",
-            "user:invite:org",
             "usergroup:*:org",
             "collection:*:org",
             "role:read:org",

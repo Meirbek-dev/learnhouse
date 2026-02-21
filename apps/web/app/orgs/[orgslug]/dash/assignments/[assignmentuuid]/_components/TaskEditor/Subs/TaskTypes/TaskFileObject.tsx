@@ -50,13 +50,6 @@ interface TaskFileObjectProps {
   user_id?: number;
 }
 
-interface Session {
-  data?: {
-    tokens?: { access_token?: string };
-    user?: { username: string };
-  };
-}
-
 interface Org {
   org_uuid: string;
 }
@@ -85,7 +78,7 @@ const formatUUID = (uuid: string): string => `${uuid.slice(0, UUID_PREVIEW_START
 // ================= Component =================
 export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: TaskFileObjectProps) {
   const t = useTranslations('DashPage.Assignments.TaskFileObject');
-  const session = usePlatformSession() as Session | null;
+  const session = usePlatformSession();
   const org = useOrg() as Org | null;
   const assignment = useAssignments() as Assignment | null;
   const assignmentTaskDispatch = useAssignmentsTaskDispatch();

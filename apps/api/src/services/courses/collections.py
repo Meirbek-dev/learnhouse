@@ -94,9 +94,7 @@ async def get_collection(
         if current_user.id
         else False
     )
-    is_owner = (
-        hasattr(collection, "created_by") and collection.created_by == current_user.id
-    )
+    is_owner = current_user.id is not None and collection.creator_id == current_user.id
 
     return CollectionReadWithPermissions(
         **collection.model_dump(),
@@ -104,10 +102,6 @@ async def get_collection(
         can_update=can_update,
         can_delete=can_delete,
         is_owner=is_owner,
-        is_creator=is_owner,
-        available_actions=[
-            a for a, ok in {"update": can_update, "delete": can_delete}.items() if ok
-        ],
     )
 
 
@@ -372,10 +366,7 @@ async def get_collections(
             if current_user.id
             else False
         )
-        is_owner = (
-            hasattr(collection, "created_by")
-            and collection.created_by == current_user.id
-        )
+        is_owner = current_user.id is not None and collection.creator_id == current_user.id
 
         enriched = CollectionReadWithPermissions(
             **collection.model_dump(),
@@ -383,12 +374,6 @@ async def get_collections(
             can_update=can_update,
             can_delete=can_delete,
             is_owner=is_owner,
-            is_creator=is_owner,
-            available_actions=[
-                a
-                for a, ok in {"update": can_update, "delete": can_delete}.items()
-                if ok
-            ],
         )
         collections_with_courses.append(enriched)
 

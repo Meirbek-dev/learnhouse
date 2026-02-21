@@ -52,7 +52,7 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
   const permissions = useMemo(() => new Set<string>(session?.permissions), [session?.permissions]);
 
   const orgId = useMemo(() => {
-    return (session as any)?.permissions_org_id ?? null;
+    return session?.permissions_org_id ?? null;
   }, [session]);
 
   const can = useMemo(() => {

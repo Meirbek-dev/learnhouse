@@ -84,7 +84,7 @@ export async function requireAnyPermission(
   }
 
   const perms = new Set(session.permissions);
-  const hasAny = checks.some((c) => perms.has(perm(c.resource, c.action, c.scope)));
+  const hasAny = checks.some((c) => sessionCan(session, c.action, c.resource, c.scope, perms));
   if (!hasAny) {
     redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
   }

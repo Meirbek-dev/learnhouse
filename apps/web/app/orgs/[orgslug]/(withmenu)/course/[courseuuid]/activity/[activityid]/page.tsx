@@ -12,12 +12,6 @@ interface MetadataProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-interface Session {
-  tokens?: {
-    access_token?: string;
-  };
-}
-
 // Add this function at the top level to avoid duplicate fetches
 async function fetchCourseMetadata(courseuuid: string, access_token: string | null | undefined) {
   return await getCourseMetadata(courseuuid, undefined, access_token || null);

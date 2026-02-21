@@ -50,5 +50,3 @@ class CollectionReadWithPermissions(CollectionRead):
     can_update: bool
     can_delete: bool
     is_owner: bool
-    is_creator: bool
-    available_actions: list[str]

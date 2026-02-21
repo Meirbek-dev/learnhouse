@@ -70,7 +70,6 @@ roles:
       - "user:create:org"
       - "user:update:org"
       - "user:delete:org"
-      - "user:invite:org"
       - "usergroup:*:org"
       - "collection:*:org"
       - "role:read:org"
