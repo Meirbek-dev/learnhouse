@@ -22,7 +22,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
+import { Actions, PermissionGuard, Resources, RoleSlugs, Scopes, usePermissions } from '@/components/Security';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChevronRight,
@@ -93,6 +93,13 @@ export default function RBACAdminClient() {
   const [isAuditLoading, setIsAuditLoading] = useState(false);
 
   const accessToken = session?.data?.tokens?.access_token;
+  const isSuperAdmin = useMemo(
+    () =>
+      (session?.data?.roles ?? []).some(
+        (assignment) => assignment.role?.slug === RoleSlugs.SUPER_ADMIN,
+      ),
+    [session?.data?.roles],
+  );
   const currentUserMaxPriority = useMemo(() => {
     const sessionRoles = session?.data?.roles ?? [];
     const orgRoles = sessionRoles.filter((assignment) => assignment.org?.id === org?.id);
@@ -518,6 +525,7 @@ export default function RBACAdminClient() {
                 mode={roleDialogMode}
                 role={roleDialogRole ?? undefined}
                 maxPriority={currentUserMaxPriority}
+                isSuperAdmin={isSuperAdmin}
                 onSubmit={(data) => {
                   if (roleDialogMode === 'edit' && roleDialogRole) {
                     return handleUpdateRole(roleDialogRole.id, data);
@@ -674,7 +682,7 @@ export default function RBACAdminClient() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            disabled={role.is_system}
+                            disabled={role.is_system && !isSuperAdmin}
                             aria-label={t('editRoleAria', { roleName: role.name })}
                             onClick={() => openEditDialog(role)}
                           >
@@ -689,7 +697,7 @@ export default function RBACAdminClient() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            disabled={role.is_system || deletingRoleId === role.id}
+                            disabled={(role.is_system && !isSuperAdmin) || deletingRoleId === role.id}
                             aria-label={t('deleteRoleAria', { roleName: role.name })}
                             onClick={() => handleDeleteRole(role)}
                           >
@@ -844,7 +852,7 @@ export default function RBACAdminClient() {
               <DialogDescription>{t('managePermissionsDescription')}</DialogDescription>
             </DialogHeader>
 
-            {permissionsRole.is_system && (
+            {permissionsRole.is_system && !isSuperAdmin && (
               <div className="rounded-md border bg-muted p-3 text-sm">{t('systemRoleReadOnlyBanner')}</div>
             )}
 
@@ -904,7 +912,7 @@ export default function RBACAdminClient() {
                           <Checkbox
                             id={`resource-toggle-${resourceType}`}
                             checked={allSelected}
-                            disabled={permissionsRole.is_system || isResourcePending}
+                            disabled={(permissionsRole.is_system && !isSuperAdmin) || isResourcePending}
                             onCheckedChange={() => handleToggleResourcePermissions(resourceType, perms)}
                           />
                           <label
@@ -930,7 +938,7 @@ export default function RBACAdminClient() {
                                 <Checkbox
                                   id={`perm-${perm.id}`}
                                   checked={hasPermission}
-                                  disabled={permissionsRole.is_system || pending}
+                                  disabled={(permissionsRole.is_system && !isSuperAdmin) || pending}
                                   onCheckedChange={() => handleTogglePermission(perm, hasPermission)}
                                 />
                                 <label
@@ -991,12 +999,14 @@ function RoleEditForm({
   mode,
   role,
   maxPriority,
+  isSuperAdmin,
   onSubmit,
   onCancel,
 }: {
   mode: RoleDialogMode;
   role?: RoleWithPermissions;
   maxPriority: number;
+  isSuperAdmin: boolean;
   onSubmit: (data: { name: string; slug: string; description: string; priority: number }) => Promise<void>;
   onCancel: () => void;
 }) {
@@ -1085,12 +1095,12 @@ function RoleEditForm({
             id="priority"
             type="number"
             min={0}
-            max={maxPriority}
+            max={isSuperAdmin ? undefined : maxPriority}
             value={priority}
             onChange={(e) => setPriority(Number(e.target.value || 0))}
             required
           />
-          <p className="text-muted-foreground text-xs">{t('priorityMaxHelp', { max: maxPriority })}</p>
+          {!isSuperAdmin && <p className="text-muted-foreground text-xs">{t('priorityMaxHelp', { max: maxPriority })}</p>}
         </div>
 
         <div className="grid gap-2">

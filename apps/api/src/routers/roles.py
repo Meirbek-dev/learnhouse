@@ -31,10 +31,15 @@ from src.security.rbac import PermissionCheckerDep
 audit_log = logging.getLogger("rbac.audit")
 
 router = APIRouter()
+SUPER_ADMIN_SLUG = "super-admin"
 
 
 class AddPermissionBody(BaseModel):
     permission_id: int
+
+
+def _is_super_admin(checker: PermissionCheckerDep, user_id: int, org_id: int | None) -> bool:
+    return any(role["slug"] == SUPER_ADMIN_SLUG for role in checker.get_user_roles(user_id, org_id))
 
 
 # ── List / Read ───────────────────────────────────────────────────────────
@@ -223,18 +228,20 @@ async def update_role(
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
-    if role.is_system:
+    target_org_id = role.org_id if role.org_id is not None else org_id
+    actor_is_super_admin = _is_super_admin(checker, current_user.id, target_org_id)
+    if role.is_system and not actor_is_super_admin:
         raise HTTPException(403, detail="System roles cannot be modified")
 
-    target_org_id = role.org_id
-    caller_roles = checker.get_user_roles(current_user.id, target_org_id)
-    caller_max_priority = max((r["priority"] for r in caller_roles), default=0)
     requested_priority = body.priority if body.priority is not None else role.priority
-    if requested_priority > caller_max_priority:
-        raise HTTPException(
-            403,
-            detail="Cannot set a role priority higher than your own",
-        )
+    if not actor_is_super_admin:
+        caller_roles = checker.get_user_roles(current_user.id, target_org_id)
+        caller_max_priority = max((r["priority"] for r in caller_roles), default=0)
+        if requested_priority > caller_max_priority:
+            raise HTTPException(
+                403,
+                detail="Cannot set a role priority higher than your own",
+            )
 
     changed_fields = body.model_dump(exclude_unset=True)
     for field, value in body.model_dump(exclude_unset=True).items():
@@ -277,7 +284,9 @@ async def delete_role(
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
-    if role.is_system:
+    target_org_id = role.org_id if role.org_id is not None else org_id
+    actor_is_super_admin = _is_super_admin(checker, current_user.id, target_org_id)
+    if role.is_system and not actor_is_super_admin:
         raise HTTPException(403, detail="System roles cannot be deleted")
     db.delete(role)
     db.commit()
@@ -359,7 +368,9 @@ async def add_permission_to_role(
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
-    if role.is_system:
+    target_org_id = role.org_id if role.org_id is not None else org_id
+    actor_is_super_admin = _is_super_admin(checker, current_user.id, target_org_id)
+    if role.is_system and not actor_is_super_admin:
         raise HTTPException(403, detail="System roles cannot be modified")
     perm = db.get(Permission, permission_id)
     if not perm:
@@ -368,12 +379,13 @@ async def add_permission_to_role(
     # Escalation prevention: caller must themselves have the permission being added.
     # Use expanded permissions so wildcards (e.g. course:*:org) resolve to concrete
     # permission strings (e.g. course:create:org) before comparison.
-    caller_perms = checker.get_expanded_permissions(current_user.id, org_id)
-    if perm.name not in caller_perms:
-        raise HTTPException(
-            403,
-            detail=f"Cannot grant permission '{perm.name}' that you do not have",
-        )
+    if not actor_is_super_admin:
+        caller_perms = checker.get_expanded_permissions(current_user.id, target_org_id)
+        if perm.name not in caller_perms:
+            raise HTTPException(
+                403,
+                detail=f"Cannot grant permission '{perm.name}' that you do not have",
+            )
 
     # Check if already exists
     existing = db.exec(
@@ -424,7 +436,9 @@ async def remove_permission_from_role(
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
-    if role.is_system:
+    target_org_id = role.org_id if role.org_id is not None else org_id
+    actor_is_super_admin = _is_super_admin(checker, current_user.id, target_org_id)
+    if role.is_system and not actor_is_super_admin:
         raise HTTPException(403, detail="System roles cannot be modified")
     rp = db.exec(
         select(RolePermission).where(
