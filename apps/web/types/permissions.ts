@@ -85,6 +85,8 @@ export interface Role {
   org_id?: number | null;
   is_system: boolean;
   priority: number;
+  permissions_count?: number;
+  users_count?: number;
 }
 
 /** Canonical type for user RBAC data from the API. */
@@ -133,12 +135,31 @@ export interface CreateRoleBody {
   name: string;
   slug: string;
   description?: string;
+  priority?: number;
 }
 
 /** Body for updating a role. */
 export interface UpdateRoleBody {
   name: string;
   description?: string;
+  priority?: number;
+}
+
+export interface RoleAuditEvent {
+  timestamp: string;
+  actor_id: number | null;
+  action: string;
+  target_role_id: number | null;
+  target_role_slug: string | null;
+  org_id: number | null;
+  diff_summary: string | null;
+}
+
+export interface RoleAuditListResponse {
+  items: RoleAuditEvent[];
+  total: number;
+  page: number;
+  page_size: number;
 }
 
 // ============================================================================

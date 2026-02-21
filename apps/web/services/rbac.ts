@@ -9,7 +9,7 @@ import type {
   CreateRoleBody,
   Permission,
   Role,
-  RoleWithPermissions,
+  RoleAuditListResponse,
   UpdateRoleBody,
   UserRBACData,
   UserRoleAssignment,
@@ -67,8 +67,13 @@ export function listRoles(token: string, orgId: number): Promise<Role[]> {
   return request(api(`roles?org_id=${orgId}`), token);
 }
 
-export function getRole(token: string, roleId: number): Promise<RoleWithPermissions> {
+export function getRole(token: string, roleId: number): Promise<Role> {
   return request(api(`roles/${roleId}`), token);
+}
+
+export function getRolePermissions(token: string, roleId: number, orgId?: number): Promise<Permission[]> {
+  const qs = orgId ? `?org_id=${orgId}` : '';
+  return request(api(`roles/${roleId}/permissions${qs}`), token);
 }
 
 export function createRole(token: string, orgId: number, body: CreateRoleBody): Promise<Role> {
@@ -87,6 +92,20 @@ export function updateRole(token: string, roleId: number, body: UpdateRoleBody):
 
 export function deleteRole(token: string, roleId: number): Promise<void> {
   return request(api(`roles/${roleId}`), token, { method: 'DELETE' });
+}
+
+export function getRoleUsersCount(token: string, roleId: number, orgId?: number): Promise<{ count: number }> {
+  const qs = orgId ? `?org_id=${orgId}` : '';
+  return request(api(`roles/${roleId}/users/count${qs}`), token);
+}
+
+export function listRoleAuditLog(
+  token: string,
+  orgId: number,
+  page = 1,
+  pageSize = 20,
+): Promise<RoleAuditListResponse> {
+  return request(api(`roles/audit-log?org_id=${orgId}&page=${page}&page_size=${pageSize}`), token);
 }
 
 // ============================================================================

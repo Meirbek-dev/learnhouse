@@ -9,6 +9,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
+from sqlalchemy import func
 from sqlmodel import Session, or_, select
 
 from src.core.events.database import get_db_session
@@ -20,8 +21,10 @@ from src.db.permissions import (
     RolePermission,
     RoleRead,
     RoleUpdate,
+    UserRole,
 )
 from src.db.users import PublicUser
+from src.routers.role_audit_store import RoleAuditListResponse, append_role_audit_event, list_role_audit_events
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
 
@@ -67,7 +70,58 @@ async def list_roles(
     else:
         query = query.where(Role.org_id.is_(None))
     roles = db.exec(query.order_by(Role.priority.desc())).all()
-    return [RoleRead.model_validate(r) for r in roles]
+
+    role_ids = [role.id for role in roles if role.id is not None]
+    permission_count_map: dict[int, int] = {}
+    user_count_map: dict[int, int] = {}
+
+    if role_ids:
+        permission_counts = db.exec(
+            select(RolePermission.role_id, func.count(RolePermission.permission_id))
+            .where(RolePermission.role_id.in_(role_ids))
+            .group_by(RolePermission.role_id)
+        ).all()
+        permission_count_map = {role_id: count for role_id, count in permission_counts}
+
+        user_counts = db.exec(
+            select(UserRole.role_id, func.count(UserRole.user_id))
+            .where(UserRole.role_id.in_(role_ids))
+            .group_by(UserRole.role_id)
+        ).all()
+        user_count_map = {role_id: count for role_id, count in user_counts}
+
+    return [
+        RoleRead.model_validate(r).model_copy(
+            update={
+                "permissions_count": permission_count_map.get(r.id or 0, 0),
+                "users_count": user_count_map.get(r.id or 0, 0),
+            }
+        )
+        for r in roles
+    ]
+
+
+@router.get("/audit-log", response_model=RoleAuditListResponse)
+async def get_role_audit_log(
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    checker: PermissionCheckerDep,
+    org_id: Annotated[int | None, Query()] = None,
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100)] = 20,
+):
+    checker.require(current_user.id, "role:read", org_id)
+
+    events = list_role_audit_events(org_id=org_id)
+    total = len(events)
+    start = (page - 1) * page_size
+    end = start + page_size
+
+    return RoleAuditListResponse(
+        items=events[start:end],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
 
 
 @router.get("/{role_id}", response_model=RoleRead)
@@ -83,7 +137,17 @@ async def get_role(
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
-    return RoleRead.model_validate(role)
+
+    permissions_count = db.exec(
+        select(func.count(RolePermission.permission_id)).where(RolePermission.role_id == role_id)
+    ).one()
+    users_count = db.exec(
+        select(func.count(UserRole.user_id)).where(UserRole.role_id == role_id)
+    ).one()
+
+    return RoleRead.model_validate(role).model_copy(
+        update={"permissions_count": permissions_count or 0, "users_count": users_count or 0}
+    )
 
 
 # ── Create / Update / Delete ──────────────────────────────────────────────
@@ -115,6 +179,7 @@ async def create_role(
         slug=body.slug,
         name=body.name,
         description=body.description,
+        priority=new_priority,
         org_id=body.org_id,
         is_system=False,
     )
@@ -129,6 +194,14 @@ async def create_role(
             "role_slug": role.slug,
             "org_id": body.org_id,
         },
+    )
+    append_role_audit_event(
+        actor_id=current_user.id,
+        action="created",
+        target_role_id=role.id,
+        target_role_slug=role.slug,
+        org_id=body.org_id,
+        diff_summary=f"Created role '{role.name}' with priority {new_priority}",
     )
     return RoleRead.model_validate(role)
 
@@ -152,6 +225,18 @@ async def update_role(
         raise HTTPException(404, detail="Role not found")
     if role.is_system:
         raise HTTPException(403, detail="System roles cannot be modified")
+
+    target_org_id = role.org_id
+    caller_roles = checker.get_user_roles(current_user.id, target_org_id)
+    caller_max_priority = max((r["priority"] for r in caller_roles), default=0)
+    requested_priority = body.priority if body.priority is not None else role.priority
+    if requested_priority > caller_max_priority:
+        raise HTTPException(
+            403,
+            detail="Cannot set a role priority higher than your own",
+        )
+
+    changed_fields = body.model_dump(exclude_unset=True)
     for field, value in body.model_dump(exclude_unset=True).items():
         setattr(role, field, value)
     db.commit()
@@ -162,9 +247,18 @@ async def update_role(
             "actor_id": current_user.id,
             "role_id": role_id,
             "org_id": org_id,
-            "fields": list(body.model_dump(exclude_unset=True).keys()),
+            "fields": list(changed_fields.keys()),
         },
     )
+    if changed_fields:
+        append_role_audit_event(
+            actor_id=current_user.id,
+            action="updated",
+            target_role_id=role.id,
+            target_role_slug=role.slug,
+            org_id=target_org_id,
+            diff_summary=f"Updated fields: {', '.join(changed_fields.keys())}",
+        )
     return RoleRead.model_validate(role)
 
 
@@ -196,7 +290,32 @@ async def delete_role(
             "org_id": org_id,
         },
     )
+    append_role_audit_event(
+        actor_id=current_user.id,
+        action="deleted",
+        target_role_id=role_id,
+        target_role_slug=role.slug,
+        org_id=role.org_id,
+        diff_summary=f"Deleted role '{role.name}'",
+    )
     return {"ok": True}
+
+
+@router.get("/{role_id}/users/count")
+async def get_role_users_count(
+    role_id: int,
+    db: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    checker: PermissionCheckerDep,
+    org_id: Annotated[int | None, Query()] = None,
+):
+    checker.require(current_user.id, "role:read", org_id)
+    role = db.get(Role, role_id)
+    if not role:
+        raise HTTPException(404, detail="Role not found")
+
+    count = db.exec(select(func.count(UserRole.user_id)).where(UserRole.role_id == role_id)).one()
+    return {"count": count or 0}
 
 
 # ── Permissions on Roles ──────────────────────────────────────────────────
@@ -278,6 +397,14 @@ async def add_permission_to_role(
             "org_id": org_id,
         },
     )
+    append_role_audit_event(
+        actor_id=current_user.id,
+        action="permission_added",
+        target_role_id=role.id,
+        target_role_slug=role.slug,
+        org_id=org_id,
+        diff_summary=f"Granted permission '{perm.name}'",
+    )
     return {"ok": True}
 
 
@@ -309,6 +436,7 @@ async def remove_permission_from_role(
         raise HTTPException(404, detail="Permission not assigned to this role")
     db.delete(rp)
     db.commit()
+    perm = db.get(Permission, permission_id)
     audit_log.info(
         "permission_removed_from_role",
         extra={
@@ -317,5 +445,15 @@ async def remove_permission_from_role(
             "permission_id": permission_id,
             "org_id": org_id,
         },
+    )
+    append_role_audit_event(
+        actor_id=current_user.id,
+        action="permission_removed",
+        target_role_id=role.id,
+        target_role_slug=role.slug,
+        org_id=org_id,
+        diff_summary=(
+            f"Revoked permission '{perm.name}'" if perm else f"Revoked permission id={permission_id}"
+        ),
     )
     return {"ok": True}
