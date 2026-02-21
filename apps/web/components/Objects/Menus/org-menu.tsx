@@ -147,7 +147,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
       }
     };
 
-    let timeoutId: number | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let previousOverflow: string | undefined;
 
     if (isMenuOpen) {

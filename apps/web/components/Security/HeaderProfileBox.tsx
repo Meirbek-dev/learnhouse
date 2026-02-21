@@ -43,7 +43,6 @@ export const HeaderProfileBox = () => {
     can(Actions.CREATE, Resources.COURSE, Scopes.ORG) ||
     can(Actions.UPDATE, Resources.COURSE, Scopes.ORG) ||
     can(Actions.UPDATE, Resources.COURSE, Scopes.OWN) ||
-    can(Actions.INVITE, Resources.USER, Scopes.ORG) ||
     can(Actions.UPDATE, Resources.USER, Scopes.ORG) ||
     can(Actions.READ, Resources.USER, Scopes.ORG) ||
     can(Actions.GRADE, Resources.ASSIGNMENT, Scopes.ORG) ||

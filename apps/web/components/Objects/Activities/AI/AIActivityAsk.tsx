@@ -4,6 +4,9 @@ import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } fro
 import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
 import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+
+// for typing the session prop without exporting internal types
+export type PlatformSession = ReturnType<typeof usePlatformSession>;
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { useCallback, useEffect, useRef, useTransition } from 'react';
 import platformLogoLight from '@public/platform_logo_light.svg';
@@ -503,7 +506,8 @@ const ErrorDisplay = ({ error, t }: ErrorDisplayProps) => (
 interface AIMessagePlaceHolderProps {
   activity: Activity;
   sendMessage: (message: string) => void;
-  session: Session | null;
+  // use ReturnType of hook for accurate session shape
+  session: PlatformSession | null;
 }
 
 const AIMessagePlaceHolder = ({ sendMessage, session }: AIMessagePlaceHolderProps) => {

@@ -69,7 +69,6 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
         case 'users': {
           return (
             can(Actions.READ, Resources.USER, Scopes.ORG) ||
-            can(Actions.INVITE, Resources.USER, Scopes.ORG) ||
             can(Actions.UPDATE, Resources.USER, Scopes.ORG)
           );
         }

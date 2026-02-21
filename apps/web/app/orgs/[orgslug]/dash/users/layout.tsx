@@ -14,7 +14,6 @@ async function UsersLayout({ children, params }: UsersLayoutProps) {
   const { orgslug } = await params;
 
   await requireAnyPermission(orgslug, [
-    { action: Actions.INVITE, resource: Resources.USER, scope: Scopes.ORG },
     { action: Actions.UPDATE, resource: Resources.USER, scope: Scopes.ORG },
     { action: Actions.READ, resource: Resources.USER, scope: Scopes.ORG },
     { action: Actions.UPDATE, resource: Resources.ROLE, scope: Scopes.ORG },
