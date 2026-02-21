@@ -31,6 +31,7 @@ import {
 import { ResourceActionsMenu } from '@/components/Utils/ResourceActionsMenu';
 import type { ResourceAction } from '@/components/Utils/ResourceActionsMenu';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { perm, Resources, Actions, Scopes } from '@/types/permissions';
 import { Card, CardContent, CardFooter } from '@components/ui/card';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -376,13 +377,29 @@ interface AdminMenuProps {
 const AdminMenu: FC<AdminMenuProps> = ({ course, orgSlug, onDelete }) => {
   const t = useTranslations('Components.CourseThumbnail');
   const router = useRouter();
+  const session = usePlatformSession();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  // Use backend permission metadata directly from course object
-  const canUpdate = course.can_update ?? false;
-  const canDelete = course.can_delete ?? false;
-  const isOwner = course.is_owner ?? false;
+  // Derive admin/owner status from session permissions + course authors
+  const permissions = session?.data?.permissions ?? [];
+  const currentUserId = session?.data?.user?.id;
+
+  const isOwner = useMemo(() => {
+    if (!currentUserId || !course.authors?.length) return course.is_owner ?? false;
+    return course.authors.some(
+      (a) => a.authorship_status === 'ACTIVE' && (a.authorship === 'CREATOR' || a.authorship === 'MAINTAINER') && a.user.id === currentUserId,
+    );
+  }, [currentUserId, course.authors, course.is_owner]);
+
+  const canUpdate =
+    permissions.includes(perm(Resources.COURSE, Actions.UPDATE, Scopes.ALL)) ||
+    (isOwner && permissions.includes(perm(Resources.COURSE, Actions.UPDATE, Scopes.OWN)));
+
+  const canDelete =
+    permissions.includes(perm(Resources.COURSE, Actions.DELETE, Scopes.ALL)) ||
+    (isOwner && permissions.includes(perm(Resources.COURSE, Actions.DELETE, Scopes.OWN)));
+
   const availableActions = [
     ...(canUpdate ? ['update'] : []),
     ...(canDelete ? ['delete'] : []),

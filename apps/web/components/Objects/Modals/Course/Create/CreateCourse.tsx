@@ -244,7 +244,7 @@ const CreateCourseModal = ({ closeModal, org_id, onCreated }: CreateCourseModalP
             <FormItem>
               <FormLabel>{t('labelThumbnail')}</FormLabel>
               <FormControl>
-                <Card className="overflow-hidden pt-0">
+                <Card className="overflow-hidden pt-0 min-w-100">
                   <div className="bg-card/5 relative aspect-video w-full">
                     {thumbnailValue ? (
                       <>
