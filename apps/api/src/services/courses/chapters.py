@@ -4,12 +4,13 @@ from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
 from ulid import ULID
 
-from src.db.courses.activities import Activity, ActivityRead
+from src.db.courses.activities import Activity, ActivityRead, ActivityReadWithPermissions
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.chapters import (
     Chapter,
     ChapterCreate,
     ChapterRead,
+    ChapterReadWithPermissions,
     ChapterUpdate,
     ChapterUpdateOrder,
 )
@@ -211,7 +212,7 @@ async def get_course_chapters(
     with_unpublished_activities: bool,
     page: int = 1,
     limit: int = 10,
-) -> list[ChapterRead]:
+) -> list[ChapterReadWithPermissions]:
     statement = select(Course).where(Course.id == course_id)
     course = db_session.exec(statement).first()
 
@@ -235,11 +236,11 @@ async def get_course_chapters(
     chapters = db_session.exec(statement).all()
 
     chapter_reads = [
-        ChapterRead.model_validate(chapter, update={"activities": []})
+        ChapterReadWithPermissions.model_validate(chapter, update={"activities": []})
         for chapter in chapters
     ]
 
-    # Get activities for each chapter
+    # Get activities for each chapter, enriched with permission metadata
     for chapter in chapter_reads:
         statement = (
             select(ChapterActivity)
@@ -255,7 +256,36 @@ async def get_course_chapters(
             )
             activity = db_session.exec(statement).first()
             if activity and (with_unpublished_activities or activity.published):
-                chapter.activities.append(ActivityRead.model_validate(activity))
+                can_update = checker.check(
+                    current_user.id,
+                    "activity:update",
+                    activity.org_id,
+                    resource_owner_id=activity.creator_id,
+                )
+                can_delete = checker.check(
+                    current_user.id,
+                    "activity:delete",
+                    activity.org_id,
+                    resource_owner_id=activity.creator_id,
+                )
+                is_owner = activity.creator_id == current_user.id
+
+                activity_with_perms = ActivityReadWithPermissions(
+                    **ActivityRead.model_validate(activity).model_dump(),
+                    can_update=can_update,
+                    can_delete=can_delete,
+                    is_owner=is_owner,
+                    is_creator=is_owner,
+                    available_actions=[
+                        a
+                        for a, ok in {
+                            "update": can_update,
+                            "delete": can_delete,
+                        }.items()
+                        if ok
+                    ],
+                )
+                chapter.activities.append(activity_with_perms)
 
     return chapter_reads
 

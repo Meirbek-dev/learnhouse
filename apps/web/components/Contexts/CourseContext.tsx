@@ -16,6 +16,13 @@ interface Activity {
   name?: string;
   activity_type?: string;
   public?: boolean;
+  published?: boolean;
+  // Backend permission metadata (returned by /courses/{uuid}/meta)
+  can_update?: boolean;
+  can_delete?: boolean;
+  is_owner?: boolean;
+  is_creator?: boolean;
+  available_actions?: string[];
   [key: string]: any;
 }
 

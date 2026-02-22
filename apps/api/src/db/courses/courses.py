@@ -6,7 +6,7 @@ from pydantic import Field as PydanticField
 from sqlalchemy import BigInteger, Column, DateTime, ForeignKey, Integer, func
 from sqlmodel import Field
 
-from src.db.courses.chapters import ChapterRead
+from src.db.courses.chapters import ChapterRead, ChapterReadWithPermissions
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 from src.db.trails import TrailRead
@@ -154,7 +154,7 @@ class FullCourseRead(PydanticStrictBaseModel):
     thumbnail_type: ThumbnailType | None = PydanticField(default=ThumbnailType.IMAGE)
     thumbnail_image: str | None = PydanticField(default="")
     thumbnail_video: str | None = PydanticField(default="")
-    chapters: list[ChapterRead]
+    chapters: list[ChapterReadWithPermissions]
     authors: list[AuthorWithRole]
 
     name: str

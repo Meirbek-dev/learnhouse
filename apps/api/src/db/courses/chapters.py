@@ -1,7 +1,7 @@
 from pydantic import ConfigDict
 from sqlmodel import Column, Field, ForeignKey, Integer
 
-from src.db.courses.activities import ActivityRead
+from src.db.courses.activities import ActivityRead, ActivityReadWithPermissions
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
 
@@ -45,6 +45,17 @@ class ChapterUpdate(SQLModelStrictBaseModel):
 class ChapterRead(ChapterBase):
     id: int
     activities: list[ActivityRead]
+    chapter_uuid: str
+    creation_date: str
+    update_date: str
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+
+class ChapterReadWithPermissions(ChapterBase):
+    """ChapterRead that includes per-activity permission metadata."""
+
+    id: int
+    activities: list[ActivityReadWithPermissions]
     chapter_uuid: str
     creation_date: str
     update_date: str

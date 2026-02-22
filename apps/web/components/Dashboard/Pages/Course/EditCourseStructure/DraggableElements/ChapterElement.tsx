@@ -42,6 +42,12 @@ interface Activity {
   activity_type: ActivityType;
   name: string;
   published: boolean;
+  // Backend permission metadata
+  can_update?: boolean;
+  can_delete?: boolean;
+  is_owner?: boolean;
+  is_creator?: boolean;
+  available_actions?: string[];
   [key: string]: any;
 }
 

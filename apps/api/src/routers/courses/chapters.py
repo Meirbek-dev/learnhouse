@@ -6,6 +6,7 @@ from src.core.events.database import get_db_session
 from src.db.courses.chapters import (
     ChapterCreate,
     ChapterRead,
+    ChapterReadWithPermissions,
     ChapterUpdate,
     ChapterUpdateOrder,
 )
@@ -73,12 +74,12 @@ async def api_get_chapter_by(
     limit: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
-) -> list[ChapterRead]:
+) -> list[ChapterReadWithPermissions]:
     """
     Get Course Chapters by page and limit
     """
     return await get_course_chapters(
-        request, course_id, db_session, current_user, page, limit
+        request, course_id, db_session, current_user, False, page, limit
     )
 
 
