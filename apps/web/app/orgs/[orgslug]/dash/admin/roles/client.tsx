@@ -196,7 +196,11 @@ export default function RBACAdminClient() {
       setIsAuditLoading(true);
       try {
         const data = await listRoleAuditLog(accessToken, org.id, auditPage, 20);
-        setAuditData({ items: data.items, total: data.total, page_size: data.page_size });
+        setAuditData({
+          items: Array.isArray(data.items) ? data.items : [],
+          total: typeof data.total === 'number' ? data.total : 0,
+          page_size: typeof data.page_size === 'number' && data.page_size > 0 ? data.page_size : 20,
+        });
       } catch (error) {
         console.error('Failed to fetch audit log:', error);
         toast.error(t('auditLogLoadFailed'));
@@ -797,7 +801,7 @@ export default function RBACAdminClient() {
                     </TableBody>
                   </Table>
 
-                  {(auditData?.items.length ?? 0) === 0 && (
+                  {(auditData?.items?.length ?? 0) === 0 && (
                     <div className="text-muted-foreground text-sm">{t('audit.empty')}</div>
                   )}
 

@@ -24,6 +24,11 @@ from src.db.permissions import (
     UserRole,
 )
 from src.db.users import PublicUser
+from src.routers.role_audit_store import (
+    RoleAuditListResponse,
+    append_role_audit_event,
+    list_role_audit_events,
+)
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
 
@@ -111,7 +116,7 @@ async def list_roles(
     ]
 
 
-@router.get("/audit-log", response_model=list[dict])
+@router.get("/audit-log", response_model=RoleAuditListResponse)
 async def get_role_audit_log(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
@@ -120,7 +125,16 @@ async def get_role_audit_log(
     page_size: Annotated[int, Query(ge=1, le=100)] = 20,
 ):
     checker.require(current_user.id, "role:read", org_id)
-    return []
+    events = list_role_audit_events(org_id)
+    total = len(events)
+    start = (page - 1) * page_size
+    end = start + page_size
+    return RoleAuditListResponse(
+        items=events[start:end],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
 
 
 @router.get("/{role_id}", response_model=RoleRead)
@@ -197,6 +211,13 @@ async def create_role(
             "org_id": body.org_id,
         },
     )
+    append_role_audit_event(
+        actor_id=current_user.id,
+        action="role_created",
+        target_role_id=role.id,
+        target_role_slug=role.slug,
+        org_id=body.org_id,
+    )
     return RoleRead.model_validate(role)
 
 
@@ -246,6 +267,14 @@ async def update_role(
             "fields": list(changed_fields.keys()),
         },
     )
+    append_role_audit_event(
+        actor_id=current_user.id,
+        action="role_updated",
+        target_role_id=role_id,
+        target_role_slug=role.slug,
+        org_id=target_org_id,
+        diff_summary=", ".join(changed_fields.keys()) if changed_fields else None,
+    )
     return RoleRead.model_validate(role)
 
 
@@ -278,6 +307,13 @@ async def delete_role(
             "role_slug": role.slug,
             "org_id": org_id,
         },
+    )
+    append_role_audit_event(
+        actor_id=current_user.id,
+        action="role_deleted",
+        target_role_id=role_id,
+        target_role_slug=role.slug,
+        org_id=target_org_id,
     )
     return {"ok": True}
 
@@ -383,6 +419,14 @@ async def add_permission_to_role(
             "org_id": org_id,
         },
     )
+    append_role_audit_event(
+        actor_id=current_user.id,
+        action="permission_added_to_role",
+        target_role_id=role_id,
+        target_role_slug=role.slug,
+        org_id=target_org_id,
+        diff_summary=perm.name,
+    )
     return {"ok": True}
 
 
@@ -416,7 +460,7 @@ async def remove_permission_from_role(
         raise HTTPException(404, detail="Permission not assigned to this role")
     db.delete(rp)
     db.commit()
-    db.get(Permission, permission_id)
+    perm = db.get(Permission, permission_id)
     (
         audit_log.info(
             "permission_removed_from_role",
@@ -427,5 +471,13 @@ async def remove_permission_from_role(
                 "org_id": org_id,
             },
         ),
+    )
+    append_role_audit_event(
+        actor_id=current_user.id,
+        action="permission_removed_from_role",
+        target_role_id=role_id,
+        target_role_slug=role.slug,
+        org_id=target_org_id,
+        diff_summary=perm.name if perm else None,
     )
     return {"ok": True}
