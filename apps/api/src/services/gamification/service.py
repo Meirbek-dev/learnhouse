@@ -12,6 +12,7 @@ Notes:
 - Policy (rewards/daily limit) resolution is handled via PolicyRepo with a TTL cache
 """
 
+from sqlmodel.sql._expression_select_cls import SelectOfScalar
 from __future__ import annotations
 
 import contextlib
@@ -67,7 +68,7 @@ def _update_daily_tracking_with_policy(
     profile.last_xp_award_date = now
 
 
-def _fetch_count(db: Session, stmt) -> int:
+def _fetch_count(db: Session, stmt: SelectOfScalar[int]) -> int:
     """Reliable count(*) helper that works across SQL backends."""
     try:
         value = db.scalar(stmt)

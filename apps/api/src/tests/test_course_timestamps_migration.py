@@ -4,7 +4,7 @@ import sqlalchemy as sa
 from config.config import get_platform_config
 
 
-def test_course_creation_update_columns_are_timestamptz():
+def test_course_creation_update_columns_are_timestamptz() -> None:
     cfg = get_platform_config()
     try:
         engine = sa.create_engine(

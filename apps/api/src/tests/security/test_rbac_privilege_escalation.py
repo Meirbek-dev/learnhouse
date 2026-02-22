@@ -8,7 +8,7 @@ from src.security.rbac import PermissionChecker, PermissionDenied
 
 
 class _QueryResult:
-    def __init__(self, first_value):
+    def __init__(self, first_value) -> None:
         self._first_value = first_value
 
     def first(self):
@@ -16,24 +16,24 @@ class _QueryResult:
 
 
 class _FakeDb:
-    def __init__(self, role):
+    def __init__(self, role) -> None:
         self.role = role
         self.added = []
 
     def get(self, _model, _id):
         return self.role
 
-    def exec(self, _query):
+    def exec(self, _query) -> _QueryResult:
         return _QueryResult(None)
 
-    def add(self, value):
+    def add(self, value) -> None:
         self.added.append(value)
 
-    def flush(self):
+    def flush(self) -> None:
         return None
 
 
-def test_assign_role_blocks_higher_priority_assignment(monkeypatch):
+def test_assign_role_blocks_higher_priority_assignment(monkeypatch) -> None:
     role = SimpleNamespace(id=2, org_id=1, priority=90)
     db = _FakeDb(role)
     checker = PermissionChecker(db)  # type: ignore[arg-type]
@@ -48,7 +48,7 @@ def test_assign_role_blocks_higher_priority_assignment(monkeypatch):
         checker.assign_role(user_id=100, role_id=2, org_id=1, assigned_by=200)
 
 
-def test_assign_role_allows_equal_or_lower_priority_assignment(monkeypatch):
+def test_assign_role_allows_equal_or_lower_priority_assignment(monkeypatch) -> None:
     role = SimpleNamespace(id=2, org_id=1, priority=50)
     db = _FakeDb(role)
     checker = PermissionChecker(db)  # type: ignore[arg-type]

@@ -36,7 +36,9 @@ class AddPermissionBody(BaseModel):
     permission_id: int
 
 
-def _is_super_admin(checker: PermissionCheckerDep, user_id: int, org_id: int | None) -> bool:
+def _is_super_admin(
+    checker: PermissionCheckerDep, user_id: int, org_id: int | None
+) -> bool:
     """Check if user is a super-admin using the permission system itself.
 
     Uses the *:*:* wildcard path rather than slug-matching so the check stays
@@ -136,14 +138,19 @@ async def get_role(
         raise HTTPException(404, detail="Role not found")
 
     permissions_count = db.exec(
-        select(func.count(RolePermission.permission_id)).where(RolePermission.role_id == role_id)
+        select(func.count(RolePermission.permission_id)).where(
+            RolePermission.role_id == role_id
+        )
     ).one()
     users_count = db.exec(
         select(func.count(UserRole.user_id)).where(UserRole.role_id == role_id)
     ).one()
 
     return RoleRead.model_validate(role).model_copy(
-        update={"permissions_count": permissions_count or 0, "users_count": users_count or 0}
+        update={
+            "permissions_count": permissions_count or 0,
+            "users_count": users_count or 0,
+        }
     )
 
 
@@ -288,7 +295,9 @@ async def get_role_users_count(
     if not role:
         raise HTTPException(404, detail="Role not found")
 
-    count = db.exec(select(func.count(UserRole.user_id)).where(UserRole.role_id == role_id)).one()
+    count = db.exec(
+        select(func.count(UserRole.user_id)).where(UserRole.role_id == role_id)
+    ).one()
     return {"count": count or 0}
 
 
@@ -408,13 +417,15 @@ async def remove_permission_from_role(
     db.delete(rp)
     db.commit()
     perm = db.get(Permission, permission_id)
-    audit_log.info(
-        "permission_removed_from_role",
-        extra={
-            "actor_id": current_user.id,
-            "role_id": role_id,
-            "permission_id": permission_id,
-            "org_id": org_id,
-        },
-    ),
+    (
+        audit_log.info(
+            "permission_removed_from_role",
+            extra={
+                "actor_id": current_user.id,
+                "role_id": role_id,
+                "permission_id": permission_id,
+                "org_id": org_id,
+            },
+        ),
+    )
     return {"ok": True}

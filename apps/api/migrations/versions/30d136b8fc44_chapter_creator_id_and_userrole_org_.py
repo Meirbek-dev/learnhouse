@@ -5,6 +5,7 @@ Revises: 5447127d3297
 Create Date: 2026-02-22 12:55:05.338583
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -12,8 +13,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '30d136b8fc44'
-down_revision: Union[str, None] = '5447127d3297'
+revision: str = "30d136b8fc44"
+down_revision: Union[str, None] = "5447127d3297"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -21,10 +22,14 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Upgrade schema."""
     # --- chapter: add creator_id ---
-    op.add_column('chapter', sa.Column('creator_id', sa.Integer(), nullable=True))
+    op.add_column("chapter", sa.Column("creator_id", sa.Integer(), nullable=True))
     op.create_foreign_key(
-        'chapter_creator_id_fkey', 'chapter', 'user',
-        ['creator_id'], ['id'], ondelete='SET NULL'
+        "chapter_creator_id_fkey",
+        "chapter",
+        "user",
+        ["creator_id"],
+        ["id"],
+        ondelete="SET NULL",
     )
 
     # --- user_roles: replace composite PK with a surrogate id ---
@@ -74,10 +79,8 @@ def downgrade() -> None:
     op.execute("ALTER TABLE user_roles ALTER COLUMN org_id SET NOT NULL")
 
     # Restore composite primary key
-    op.execute(
-        "ALTER TABLE user_roles ADD PRIMARY KEY (user_id, role_id, org_id)"
-    )
+    op.execute("ALTER TABLE user_roles ADD PRIMARY KEY (user_id, role_id, org_id)")
 
     # Drop chapter creator_id
-    op.drop_constraint('chapter_creator_id_fkey', 'chapter', type_='foreignkey')
-    op.drop_column('chapter', 'creator_id')
+    op.drop_constraint("chapter_creator_id_fkey", "chapter", type_="foreignkey")
+    op.drop_column("chapter", "creator_id")

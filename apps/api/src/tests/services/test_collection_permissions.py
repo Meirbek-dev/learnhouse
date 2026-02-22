@@ -10,7 +10,7 @@ from src.services.courses.collections import get_collection
 
 
 class _ExecResult:
-    def __init__(self, *, first_value=None, all_value=None):
+    def __init__(self, *, first_value=None, all_value=None) -> None:
         self._first_value = first_value
         self._all_value = all_value
 
@@ -22,11 +22,11 @@ class _ExecResult:
 
 
 class _FakeSession:
-    def __init__(self, responses: list[_ExecResult]):
+    def __init__(self, responses: list[_ExecResult]) -> None:
         self._responses = responses
         self._index = 0
 
-    def exec(self, _statement):
+    def exec(self, _statement) -> _ExecResult:
         response = self._responses[self._index]
         self._index += 1
         return response

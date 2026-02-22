@@ -1,3 +1,4 @@
+from resend import Emails
 import resend
 from pydantic import EmailStr
 
@@ -8,7 +9,7 @@ def send_email(to: EmailStr, subject: str, body: str) -> None:
     print("We don't have email domain configured, so we're not sending emails, duh...")
 
 
-def future_send_email(to: EmailStr, subject: str, body: str):
+def future_send_email(to: EmailStr, subject: str, body: str) -> Emails.SendResponse:
     platform_config = get_platform_config()
 
     params = {

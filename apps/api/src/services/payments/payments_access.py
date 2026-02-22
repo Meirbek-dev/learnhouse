@@ -15,7 +15,7 @@ from src.db.users import AnonymousUser, PublicUser
 # Inline helper to check resource authorship for payments access
 
 
-def is_resource_author(db_session, user_id: int, resource_uuid: str) -> bool:
+def is_resource_author(db_session: Session, user_id: int, resource_uuid: str) -> bool:
     statement = select(ResourceAuthor).where(
         ResourceAuthor.resource_uuid == resource_uuid,
         ResourceAuthor.user_id == user_id,

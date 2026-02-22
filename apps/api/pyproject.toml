@@ -89,3 +89,9 @@ format.quote-style = "double"
 
 [tool.logfire]
 ignore_no_config = true
+
+[tool.pyrefly]
+project-includes = [
+    "**/*.py*",
+    "**/*.ipynb",
+]

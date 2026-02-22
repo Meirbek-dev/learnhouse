@@ -24,7 +24,7 @@ NEW_PERMISSIONS = [
 ]
 
 
-def upgrade():
+def upgrade() -> None:
     conn = op.get_bind()
 
     # Get org-admin role id
@@ -82,7 +82,7 @@ def upgrade():
             )
 
 
-def downgrade():
+def downgrade() -> None:
     conn = op.get_bind()
 
     # Get org-admin role id

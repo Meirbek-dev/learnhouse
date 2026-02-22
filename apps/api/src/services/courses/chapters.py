@@ -4,7 +4,11 @@ from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
 from ulid import ULID
 
-from src.db.courses.activities import Activity, ActivityRead, ActivityReadWithPermissions
+from src.db.courses.activities import (
+    Activity,
+    ActivityRead,
+    ActivityReadWithPermissions,
+)
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.chapters import (
     Chapter,
@@ -158,7 +162,12 @@ async def update_chapter(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "chapter:update", chapter.org_id, resource_owner_id=chapter.creator_id)
+    checker.require(
+        current_user.id,
+        "chapter:update",
+        chapter.org_id,
+        resource_owner_id=chapter.creator_id,
+    )
 
     # Update only the fields that were passed in
     update_data = chapter_object.model_dump(exclude_unset=True)
@@ -189,7 +198,12 @@ async def delete_chapter(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "chapter:delete", chapter.org_id, resource_owner_id=chapter.creator_id)
+    checker.require(
+        current_user.id,
+        "chapter:delete",
+        chapter.org_id,
+        resource_owner_id=chapter.creator_id,
+    )
 
     # Remove all linked chapter activities
     statement = select(ChapterActivity).where(ChapterActivity.chapter_id == chapter.id)

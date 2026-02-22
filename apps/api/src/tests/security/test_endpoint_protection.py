@@ -108,7 +108,7 @@ def is_read_only_endpoint(method: str, path: str) -> bool:
     return any(pattern in path for pattern in public_patterns)
 
 
-def test_all_endpoints_have_rbac():
+def test_all_endpoints_have_rbac() -> None:
     """
     Verify all protected endpoints have permission checks.
 
@@ -181,7 +181,7 @@ def test_all_endpoints_have_rbac():
         pytest.fail(error_msg)
 
 
-def test_exempt_endpoints_are_intentional():
+def test_exempt_endpoints_are_intentional() -> None:
     """
     Document and validate exempt endpoints.
 
@@ -206,7 +206,7 @@ def test_exempt_endpoints_are_intentional():
         print(f"  {category}: {len(endpoints)}")
 
 
-def test_permission_checker_usage():
+def test_permission_checker_usage() -> None:
     """
     Verify PermissionChecker is used correctly in endpoints.
 

@@ -366,7 +366,9 @@ async def get_collections(
             if current_user.id
             else False
         )
-        is_owner = current_user.id is not None and collection.creator_id == current_user.id
+        is_owner = (
+            current_user.id is not None and collection.creator_id == current_user.id
+        )
 
         enriched = CollectionReadWithPermissions(
             **collection.model_dump(),

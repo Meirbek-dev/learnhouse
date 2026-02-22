@@ -226,7 +226,12 @@ async def update_exam(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:update", course.org_id)
+    checker.require(
+        current_user.id,
+        "exam:update",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     # Update fields
     update_data = exam_object.model_dump(exclude_unset=True)
@@ -272,7 +277,12 @@ async def delete_exam(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:delete", course.org_id)
+    checker.require(
+        current_user.id,
+        "exam:delete",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     db_session.delete(exam)
     db_session.commit()
@@ -550,7 +560,12 @@ async def update_question(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:update", course.org_id)
+    checker.require(
+        current_user.id,
+        "exam:update",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     # Update fields
     update_data = question_object.model_dump(exclude_unset=True)
@@ -589,7 +604,12 @@ async def delete_question(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:delete", course.org_id)
+    checker.require(
+        current_user.id,
+        "exam:delete",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     db_session.delete(question)
     db_session.commit()
@@ -1213,7 +1233,9 @@ async def get_all_exam_attempts(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:read", course.org_id)
+    checker.require(
+        current_user.id, "exam:read", course.org_id, resource_owner_id=course.creator_id
+    )
 
     # Joined query: fetch attempts + users in one query (fixes N+1)
     # Use == False for SQLAlchemy column comparison (not Python `not`)
@@ -1301,7 +1323,9 @@ async def export_questions_csv(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:read", course.org_id)
+    checker.require(
+        current_user.id, "exam:read", course.org_id, resource_owner_id=course.creator_id
+    )
 
     # Get questions
     questions_statement = (
@@ -1486,7 +1510,12 @@ async def reorder_questions(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:update", course.org_id)
+    checker.require(
+        current_user.id,
+        "exam:update",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     # Update order_index for each question
     updated_count = 0

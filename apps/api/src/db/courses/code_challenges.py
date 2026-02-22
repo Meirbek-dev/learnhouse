@@ -178,7 +178,7 @@ class CodeChallengeSettings(PydanticStrictBaseModel):
 
     @field_validator("memory_limit", mode="before")
     @classmethod
-    def validate_memory_limit(cls, v):
+    def validate_memory_limit(cls, v) -> int | None:
         """Ensure memory_limit is an integer MB and clamp to sensible bounds (64-2048 MB)"""
         if v is None:
             return v

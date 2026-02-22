@@ -776,7 +776,9 @@ async def handle_assignment_task_submission(
             )
 
         # Only need read permission for submissions
-        checker.require(current_user.id, "assignment:read", course.org_id, is_assigned=True)
+        checker.require(
+            current_user.id, "assignment:read", course.org_id, is_assigned=True
+        )
     else:
         # SECURITY: Instructors/admins need update permission to grade
         checker.require(current_user.id, "assignment:update", course.org_id)

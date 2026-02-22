@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 
 
-def test_permissions_yaml_role_actions_are_declared():
+def test_permissions_yaml_role_actions_are_declared() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     permissions_yaml = repo_root / "shared" / "permissions.yaml"
 
@@ -27,4 +27,6 @@ def test_permissions_yaml_role_actions_are_declared():
             if action not in declared_actions:
                 invalid_permissions.append((role_slug, permission))
 
-    assert not invalid_permissions, f"Undeclared actions found in role permissions: {invalid_permissions}"
+    assert not invalid_permissions, (
+        f"Undeclared actions found in role permissions: {invalid_permissions}"
+    )

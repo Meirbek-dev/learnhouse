@@ -78,7 +78,7 @@ class TrailStepRead(PydanticStrictBaseModel):
 
     @field_validator("grade", mode="before")
     @classmethod
-    def _validate_grade(cls, v):
+    def _validate_grade(cls, v) -> int:
         # Normalize empty strings and non-int strings to 0, preserve ints
         if v is None:
             return 0

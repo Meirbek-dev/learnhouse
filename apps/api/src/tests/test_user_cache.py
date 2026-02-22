@@ -58,7 +58,7 @@ async def test_update_user_invalidates_cache(monkeypatch):
     # Mock _get_user_by_field to return a user
     user = SimpleNamespace(id=3, username="charlie", user_uuid="user_3")
 
-    async def fake_get_user(db, field, value, use_cache=True):
+    async def fake_get_user(db, field, value, use_cache: bool = True):
         return user
 
     monkeypatch.setattr("src.services.users.users._get_user_by_field", fake_get_user)

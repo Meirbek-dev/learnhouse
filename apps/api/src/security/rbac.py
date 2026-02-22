@@ -138,7 +138,9 @@ class PermissionChecker:
                 Required to unlock ``assigned``-scope permissions.
         """
         granted = self._get_or_load(user_id, org_id)
-        return self._resolve(permission, granted, user_id, resource_owner_id, is_assigned)
+        return self._resolve(
+            permission, granted, user_id, resource_owner_id, is_assigned
+        )
 
     def require(
         self,
@@ -505,7 +507,9 @@ class PermissionChecker:
         # 3. "assigned" scope — the caller must pass is_assigned=True to confirm
         #    the service layer has verified the resource is assigned to this user
         #    (e.g. confirmed course enrollment, explicit assignment record, etc.).
-        if is_assigned and PermissionChecker._has_perm(granted, resource, action, "assigned"):
+        if is_assigned and PermissionChecker._has_perm(
+            granted, resource, action, "assigned"
+        ):
             return True
 
         # 4. "own" scope - user owns the resource

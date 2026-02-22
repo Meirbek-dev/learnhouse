@@ -25,7 +25,7 @@ MAPPINGS = {
 }
 
 
-def upgrade():
+def upgrade() -> None:
     conn = op.get_bind()
     for old_name, new_name in MAPPINGS.items():
         # Ensure new permission exists
@@ -82,7 +82,7 @@ def upgrade():
         )
 
 
-def downgrade():
+def downgrade() -> None:
     conn = op.get_bind()
     # Reverse mappings
     for old_name, new_name in MAPPINGS.items():

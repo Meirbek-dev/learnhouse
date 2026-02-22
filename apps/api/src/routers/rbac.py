@@ -190,7 +190,9 @@ async def get_my_permissions(
 # ============================================================================
 
 
-@router.get("/orgs/{org_id}/user-roles", response_model=list[UserRoleAssignmentResponse])
+@router.get(
+    "/orgs/{org_id}/user-roles", response_model=list[UserRoleAssignmentResponse]
+)
 async def list_org_user_roles(
     org_id: int,
     db_session: Session = Depends(get_db_session),
