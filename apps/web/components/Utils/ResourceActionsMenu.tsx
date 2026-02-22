@@ -42,7 +42,7 @@ export interface ResourceAction {
 interface ResourceActionsMenuProps {
   availableActions: string[];
   actions: ResourceAction[];
-  trigger?: React.ReactNode;
+  trigger?: React.ReactElement;
   align?: 'start' | 'center' | 'end';
 }
 
@@ -111,8 +111,7 @@ export function ResourceActionsMenu({ availableActions, actions, trigger, align 
 
   return (
     <DropdownMenu>
-      {/* always render the provided trigger node (or default) as children */}
-      <DropdownMenuTrigger>{trigger ?? defaultTrigger}</DropdownMenuTrigger>
+      <DropdownMenuTrigger render={trigger ?? defaultTrigger} />
       <DropdownMenuContent align={align}>
         {filteredActions.map((action, index) => {
           const Icon = action.icon;
