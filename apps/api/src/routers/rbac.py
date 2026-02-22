@@ -108,6 +108,7 @@ class UserSummary(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
     avatar_image: str | None = None
+    user_uuid: str | None = None
 
 
 class UserRoleAssignmentResponse(BaseModel):
@@ -224,6 +225,7 @@ async def list_org_user_roles(
                 first_name=user.first_name,
                 last_name=user.last_name,
                 avatar_image=user.avatar_image,
+                user_uuid=user.user_uuid,
             ),
             role=UserRoleSummary(
                 id=role.id or 0,

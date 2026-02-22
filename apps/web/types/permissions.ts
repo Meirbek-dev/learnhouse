@@ -126,6 +126,7 @@ export interface UserRoleAssignment {
     first_name?: string;
     last_name?: string;
     avatar_image?: string;
+    user_uuid?: string;
   };
   role?: Role;
 }

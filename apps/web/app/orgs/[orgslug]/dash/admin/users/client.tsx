@@ -21,6 +21,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { assignRoleToUser, listOrgUsers, listRoles, listUserRoles, removeRoleFromUser } from '@/services/rbac';
+import { getUserAvatarMediaDirectory } from '@/services/media/media';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertTriangle, Calendar, Plus, Search, Shield, Trash2, User } from 'lucide-react';
@@ -323,7 +324,17 @@ export default function UserRolesClient() {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarImage src={ur.user?.avatar_image} />
+                        <AvatarImage
+                          src={
+                            ur.user?.avatar_image
+                              ? ur.user.avatar_image.startsWith('http')
+                                ? ur.user.avatar_image
+                                : ur.user.user_uuid
+                                  ? getUserAvatarMediaDirectory(ur.user.user_uuid, ur.user.avatar_image)
+                                  : undefined
+                              : undefined
+                          }
+                        />
                         <AvatarFallback>
                           <User className="h-4 w-4" />
                         </AvatarFallback>
