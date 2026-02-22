@@ -9,8 +9,9 @@
  * scope-broadening before sending permissions to the frontend.
  */
 
-import { type Action, type Resource, Resources, type Scope } from '@/types/permissions';
+import type { Action, Resource, Scope } from '@/types/permissions';
 import { createContext, useContext, useMemo } from 'react';
+import { Resources } from '@/types/permissions';
 import { useSession } from 'next-auth/react';
 import { perm } from '@/types/permissions';
 import type { ReactNode } from 'react';

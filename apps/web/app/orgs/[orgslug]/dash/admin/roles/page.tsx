@@ -1,6 +1,6 @@
 import RBACAdminClient from '@/app/orgs/[orgslug]/dash/admin/roles/client';
-import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Components.OrgRoles');

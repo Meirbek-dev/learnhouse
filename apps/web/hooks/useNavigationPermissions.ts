@@ -7,8 +7,8 @@ import {
   canSeePayments,
   canSeeUsers,
 } from '@/lib/rbac/navigation-policy';
-import { usePermissions } from '@/components/Security';
 import { usePaymentsEnabled } from '@components/Hooks/usePaymentsEnabled';
+import { usePermissions } from '@/components/Security';
 
 export function useNavigationPermissions() {
   const { can } = usePermissions();

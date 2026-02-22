@@ -31,9 +31,9 @@ import {
 import { ResourceActionsMenu } from '@/components/Utils/ResourceActionsMenu';
 import type { ResourceAction } from '@/components/Utils/ResourceActionsMenu';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { Resources, Actions, Scopes } from '@/types/permissions';
 import { usePermissions } from '@/components/Security/PermissionProvider';
 import { Card, CardContent, CardFooter } from '@components/ui/card';
+import { Resources, Actions, Scopes } from '@/types/permissions';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { Button } from '@components/ui/button';
@@ -388,22 +388,20 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, orgSlug, onDelete }) => {
   const isOwner = useMemo(() => {
     if (!currentUserId || !course.authors?.length) return course.is_owner ?? false;
     return course.authors.some(
-      (a) => a.authorship_status === 'ACTIVE' && (a.authorship === 'CREATOR' || a.authorship === 'MAINTAINER') && a.user.id === currentUserId,
+      (a) =>
+        a.authorship_status === 'ACTIVE' &&
+        (a.authorship === 'CREATOR' || a.authorship === 'MAINTAINER') &&
+        a.user.id === currentUserId,
     );
   }, [currentUserId, course.authors, course.is_owner]);
 
   const canUpdate =
-    can(Resources.COURSE, Actions.UPDATE, Scopes.ORG) ||
-    (isOwner && can(Resources.COURSE, Actions.UPDATE, Scopes.OWN));
+    can(Resources.COURSE, Actions.UPDATE, Scopes.ORG) || (isOwner && can(Resources.COURSE, Actions.UPDATE, Scopes.OWN));
 
   const canDelete =
-    can(Resources.COURSE, Actions.DELETE, Scopes.ORG) ||
-    (isOwner && can(Resources.COURSE, Actions.DELETE, Scopes.OWN));
+    can(Resources.COURSE, Actions.DELETE, Scopes.ORG) || (isOwner && can(Resources.COURSE, Actions.DELETE, Scopes.OWN));
 
-  const availableActions = [
-    ...(canUpdate ? ['update'] : []),
-    ...(canDelete ? ['delete'] : []),
-  ];
+  const availableActions = [...(canUpdate ? ['update'] : []), ...(canDelete ? ['delete'] : [])];
 
   const handleDelete = () => {
     startTransition(async () => {

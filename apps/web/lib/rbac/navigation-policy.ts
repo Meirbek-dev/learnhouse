@@ -1,4 +1,5 @@
-import { Actions, Resources, Scopes, type Action, type Resource, type Scope } from '@/types/permissions';
+import type { Action, Resource, Scope } from '@/types/permissions';
+import { Actions, Resources, Scopes } from '@/types/permissions';
 
 type CanCheck = (action: Action, resource: Resource, scope: Scope) => boolean;
 
@@ -49,12 +50,16 @@ export function canSeeAdmin(can: CanCheck): boolean {
 }
 
 export function canSeePayments(can: CanCheck): boolean {
-  return (
-    can(Actions.MANAGE, Resources.PAYMENT, Scopes.ORG) ||
-    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN)
-  );
+  return can(Actions.MANAGE, Resources.PAYMENT, Scopes.ORG) || can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
 }
 
 export function canAccessDashboard(can: CanCheck): boolean {
-  return canSeeOrg(can) || canSeeCourses(can) || canSeeAssignments(can) || canSeeUsers(can) || canSeeAdmin(can) || canSeePayments(can);
+  return (
+    canSeeOrg(can) ||
+    canSeeCourses(can) ||
+    canSeeAssignments(can) ||
+    canSeeUsers(can) ||
+    canSeeAdmin(can) ||
+    canSeePayments(can)
+  );
 }

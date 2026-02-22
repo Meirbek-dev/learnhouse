@@ -8,12 +8,12 @@ import {
 } from '@components/ui/dropdown-menu';
 import { ChevronDown, Crown, LogOut, Shield, User, User as UserIcon, Users } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
-import { RoleSlugs } from '@/types/permissions';
+import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import UserAvatar from '@components/Objects/UserAvatar';
+import { RoleSlugs } from '@/types/permissions';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';

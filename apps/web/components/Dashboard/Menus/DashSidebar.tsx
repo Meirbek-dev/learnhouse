@@ -14,9 +14,9 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, School, Settings, ShieldCheck, Users } from 'lucide-react';
+import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import platformLogoLight from '@public/platform_logo_light.svg';
-import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Separator } from '@/components/ui/separator';

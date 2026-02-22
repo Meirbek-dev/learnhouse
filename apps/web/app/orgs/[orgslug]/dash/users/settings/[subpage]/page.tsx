@@ -6,11 +6,11 @@ import OrgUsers from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers';
 import DesktopOnlyGuard from '@components/Dashboard/Misc/DesktopOnlyGuard';
 import SettingsHeader from '@components/Dashboard/Misc/SettingsHeader';
 import SettingsTabs from '@components/Dashboard/Misc/SettingsTabs';
-import { SquareUserRound, Users } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
-import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { SquareUserRound, Users } from 'lucide-react';
 import { use, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 export interface SettingsParams {
   subpage: string;
@@ -65,10 +65,7 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
     return allTabs.filter((tab) => {
       switch (tab.id) {
         case 'users': {
-          return (
-            can(Actions.READ, Resources.USER, Scopes.ORG) ||
-            can(Actions.UPDATE, Resources.USER, Scopes.ORG)
-          );
+          return can(Actions.READ, Resources.USER, Scopes.ORG) || can(Actions.UPDATE, Resources.USER, Scopes.ORG);
         }
         case 'usergroups': {
           return can(Actions.MANAGE, Resources.USERGROUP, Scopes.ORG);

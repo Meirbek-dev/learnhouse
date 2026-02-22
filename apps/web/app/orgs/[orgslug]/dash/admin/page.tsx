@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AdminHeaderClient from './AdminHeaderClient';
-import { Shield, Users } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
+import { Shield, Users } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 

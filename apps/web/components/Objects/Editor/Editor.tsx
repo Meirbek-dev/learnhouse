@@ -27,9 +27,9 @@ import ImageBlock from './Extensions/Image/ImageBlock';
 import Flipcard from './Extensions/Flipcard/Flipcard';
 import TableCell from '@tiptap/extension-table-cell';
 import UserBlock from './Extensions/Users/UserBlock';
+import platformLogo from '@public/platform_logo.svg';
 // Extensions
 import QuizBlock from './Extensions/Quiz/QuizBlock';
-import platformLogo from '@public/platform_logo.svg';
 import java from 'highlight.js/lib/languages/java';
 import Buttons from './Extensions/Buttons/Buttons';
 import TableRow from '@tiptap/extension-table-row';

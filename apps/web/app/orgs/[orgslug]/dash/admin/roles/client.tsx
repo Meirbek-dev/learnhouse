@@ -21,25 +21,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { ChevronRight, Copy, Edit, Loader2, Lock, Pencil, Plus, Search, Shield, Trash2, Users } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  ChevronRight,
-  Copy,
-  Edit,
-  Loader2,
-  Lock,
-  Pencil,
-  Plus,
-  Search,
-  Shield,
-  Trash2,
-  Users,
-} from 'lucide-react';
 import type { Permission, RoleAuditEvent, RoleWithPermissions } from '@/types/permissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -47,17 +37,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import useSWR from 'swr';
 import { toast } from 'sonner';
+import useSWR from 'swr';
 
 type RoleDialogMode = 'create' | 'edit' | 'clone';
 
@@ -108,7 +90,7 @@ export default function RBACAdminClient() {
     accessToken && org?.id ? ['rbac-permissions', accessToken, org.id] : null,
     ([, token, orgId]) => listAllPermissions(token, orgId),
     {
-      dedupingInterval: 3600000,
+      dedupingInterval: 3_600_000,
       revalidateOnFocus: false,
     },
   );
@@ -126,7 +108,7 @@ export default function RBACAdminClient() {
           if (aSystem !== bSystem) return aSystem - bSystem;
           return (b.priority ?? 0) - (a.priority ?? 0);
         })
-        .map((role) => ({ ...role, permissions: [] }));
+        .map((role) => Object.assign(role, { permissions: [] }));
       setRoles(sortedRoles);
     } catch (error) {
       console.error('Failed to fetch RBAC roles:', error);
@@ -235,18 +217,22 @@ export default function RBACAdminClient() {
         permission.name.toLowerCase().includes(permissionSearchQuery.toLowerCase()) ||
         permission.resource_type.toLowerCase().includes(permissionSearchQuery.toLowerCase()) ||
         (permission.description ?? '').toLowerCase().includes(permissionSearchQuery.toLowerCase());
-      const matchesResource = permissionResourceFilter === 'all' || permission.resource_type === permissionResourceFilter;
+      const matchesResource =
+        permissionResourceFilter === 'all' || permission.resource_type === permissionResourceFilter;
       return matchesSearch && matchesResource;
     });
   }, [permissionSearchQuery, permissionResourceFilter, permissions]);
 
-  const filteredDialogPermissionsByResource = filteredDialogPermissions.reduce<Record<string, Permission[]>>((acc, perm) => {
-    if (!acc[perm.resource_type]) {
-      acc[perm.resource_type] = [];
-    }
-    acc[perm.resource_type]!.push(perm);
-    return acc;
-  }, {});
+  const filteredDialogPermissionsByResource = filteredDialogPermissions.reduce<Record<string, Permission[]>>(
+    (acc, perm) => {
+      if (!acc[perm.resource_type]) {
+        acc[perm.resource_type] = [];
+      }
+      acc[perm.resource_type]!.push(perm);
+      return acc;
+    },
+    {},
+  );
 
   const openCreateDialog = () => {
     setRoleDialogMode('create');
@@ -277,7 +263,12 @@ export default function RBACAdminClient() {
     }
   };
 
-  const handleCreateOrCloneRole = async (data: { name: string; slug: string; description: string; priority: number }) => {
+  const handleCreateOrCloneRole = async (data: {
+    name: string;
+    slug: string;
+    description: string;
+    priority: number;
+  }) => {
     if (!accessToken || !org?.id) return;
 
     const sourceRole = roleDialogMode === 'clone' ? roleDialogRole : null;
@@ -302,7 +293,10 @@ export default function RBACAdminClient() {
     }
   };
 
-  const handleUpdateRole = async (roleId: number, data: { name: string; slug: string; description: string; priority: number }) => {
+  const handleUpdateRole = async (
+    roleId: number,
+    data: { name: string; slug: string; description: string; priority: number },
+  ) => {
     if (!accessToken) return;
 
     try {
@@ -348,7 +342,9 @@ export default function RBACAdminClient() {
 
     const currentPermissions = permissionsRole.permissions ?? [];
     const updatedPermissions = grant
-      ? [...currentPermissions, permission].filter((perm, index, arr) => arr.findIndex((p) => p.id === perm.id) === index)
+      ? [...currentPermissions, permission].filter(
+          (perm, index, arr) => arr.findIndex((p) => p.id === perm.id) === index,
+        )
       : currentPermissions.filter((perm) => perm.id !== permission.id);
 
     const updatedRole: RoleWithPermissions = {
@@ -605,7 +601,7 @@ export default function RBACAdminClient() {
             </div>
           </div>
 
-          <Card className='p-2'>
+          <Card className="p-2">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -632,12 +628,18 @@ export default function RBACAdminClient() {
                     </TableCell>
                     <TableCell>
                       {role.is_system ? (
-                        <Badge variant="secondary" className="gap-1">
+                        <Badge
+                          variant="secondary"
+                          className="gap-1"
+                        >
                           <Lock className="h-3 w-3" />
                           {t('system')}
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="gap-1">
+                        <Badge
+                          variant="outline"
+                          className="gap-1"
+                        >
                           <Pencil className="h-3 w-3" />
                           {t('custom')}
                         </Badge>
@@ -1098,7 +1100,9 @@ function RoleEditForm({
             onChange={(e) => setPriority(Number(e.target.value || 0))}
             required
           />
-          {!isSuperAdmin && <p className="text-muted-foreground text-xs">{t('priorityMaxHelp', { max: maxPriority })}</p>}
+          {!isSuperAdmin && (
+            <p className="text-muted-foreground text-xs">{t('priorityMaxHelp', { max: maxPriority })}</p>
+          )}
         </div>
 
         <div className="grid gap-2">

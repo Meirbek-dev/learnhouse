@@ -1,6 +1,6 @@
-import UserRolesClient from './client';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { requirePermission } from '@/lib/server-auth';
+import UserRolesClient from './client';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {

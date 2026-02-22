@@ -11,8 +11,8 @@ import { getAPIUrl } from '@services/config/config';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { mutate } from 'swr';
 import { toast } from 'sonner';
+import { mutate } from 'swr';
 
 const SaveState = (props: { orgslug: string }) => {
   const [isLoading, setIsLoading] = useState(false);
