@@ -129,6 +129,7 @@ SYSTEM_ROLES: dict[str, dict] = {
             "discussion:moderate:org",
             "analytics:read:own",
             "certificate:create:own",
+            "certificate:read:own",
         ],
     },
     RoleSlug.INSTRUCTOR: {

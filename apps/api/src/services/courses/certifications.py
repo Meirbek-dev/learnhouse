@@ -51,7 +51,12 @@ async def create_certification(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "certificate:create", org_id=course.org_id)
+    checker.require(
+        current_user.id,
+        "certificate:create",
+        org_id=course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     # Create certification
     certification = Certifications(
@@ -101,7 +106,12 @@ async def get_certification(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "certificate:read", org_id=course.org_id)
+    checker.require(
+        current_user.id,
+        "certificate:read",
+        org_id=course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     return CertificationRead(**certification.model_dump())
 
@@ -126,7 +136,12 @@ async def get_certifications_by_course(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "certificate:read", org_id=course.org_id)
+    checker.require(
+        current_user.id,
+        "certificate:read",
+        org_id=course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     # Get certifications for this course
     statement = select(Certifications).where(Certifications.course_id == course.id)
@@ -286,7 +301,12 @@ async def create_certificate_user(
 
         # Require course ownership or instructor role for creating certificates
         checker = PermissionChecker(db_session)
-        checker.require(current_user.id, "certificate:create", org_id=course.org_id)
+        checker.require(
+            current_user.id,
+            "certificate:create",
+            org_id=course.org_id,
+            resource_owner_id=course.creator_id,
+        )
 
     now = tz_now()
 
@@ -423,7 +443,12 @@ async def get_user_certificates_for_course(
     # RBAC check with graceful fallback for learners retrieving their own certificates
     try:
         checker = PermissionChecker(db_session)
-        checker.require(current_user.id, "certificate:read", org_id=course.org_id)
+        checker.require(
+            current_user.id,
+            "certificate:read",
+            org_id=course.org_id,
+            resource_owner_id=current_user.id,
+        )
     except HTTPException as exc:
         if exc.status_code != status.HTTP_403_FORBIDDEN:
             raise

@@ -139,7 +139,9 @@ async def update_user(
     # RBAC check (only for real updates)
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:update", org_id)
+    checker.require(
+        current_user.id, "user:update", org_id, resource_owner_id=user_id
+    )
 
     if user_object.username:
         await _validate_unique_username(
@@ -188,7 +190,9 @@ async def update_user_avatar(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:update", org_id)
+    checker.require(
+        current_user.id, "user:update", org_id, resource_owner_id=current_user.id
+    )
 
     # Upload avatar with security validation
     if avatar_file and avatar_file.filename:
@@ -233,7 +237,9 @@ async def update_user_password(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:update", org_id)
+    checker.require(
+        current_user.id, "user:update", org_id, resource_owner_id=user_id
+    )
 
     if not security_verify_password(form.old_password, user.password):
         raise HTTPException(

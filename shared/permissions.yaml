@@ -104,6 +104,7 @@ roles:
       - "discussion:moderate:org"
       - "analytics:read:own"
       - "certificate:create:own"
+      - "certificate:read:own"
 
   instructor:
     description: "Course instructor with content creation abilities"
