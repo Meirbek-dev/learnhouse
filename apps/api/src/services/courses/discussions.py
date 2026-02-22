@@ -9,6 +9,7 @@ from src.db.courses.discussions import (
     CourseDiscussion,
     CourseDiscussionCreate,
     CourseDiscussionRead,
+    CourseDiscussionReadWithPermissions,
     CourseDiscussionUpdate,
     DiscussionDislike,
     DiscussionLike,
@@ -112,7 +113,7 @@ async def get_discussions_by_course_uuid(
     include_replies: bool = False,
     limit: int = 50,
     offset: int = 0,
-) -> list[CourseDiscussionRead]:
+) -> list[CourseDiscussionReadWithPermissions]:
     """Get discussions for a course"""
     # Check if course exists
     statement = select(Course).where(Course.course_uuid == course_uuid)
@@ -126,6 +127,11 @@ async def get_discussions_by_course_uuid(
     # RBAC check
     checker = PermissionChecker(db_session)
     checker.require(current_user.id, "course:read", course.org_id)
+
+    is_authenticated = not isinstance(current_user, AnonymousUser)
+    can_moderate = is_authenticated and checker.check(
+        current_user.id, "discussion:moderate", course.org_id
+    )
 
     # Get main discussions (posts, not replies)
     query = (
@@ -170,7 +176,27 @@ async def get_discussions_by_course_uuid(
 
             discussion_data.replies = reply_data
 
-        result.append(discussion_data)
+        is_owner = is_authenticated and discussion.user_id == current_user.id
+        can_edit = is_owner or can_moderate
+        available_actions: list[str] = []
+        if can_edit:
+            available_actions.append("update")
+        if can_edit:
+            available_actions.append("delete")
+        if can_moderate:
+            available_actions.append("moderate")
+
+        result.append(
+            CourseDiscussionReadWithPermissions(
+                **discussion_data.model_dump(),
+                can_update=can_edit,
+                can_delete=can_edit,
+                can_moderate=can_moderate,
+                is_owner=is_owner,
+                is_creator=is_owner,
+                available_actions=available_actions,
+            )
+        )
 
     return result
 

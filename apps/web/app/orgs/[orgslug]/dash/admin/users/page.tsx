@@ -1,12 +1,17 @@
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { requirePermission } from '@/lib/server-auth';
+import { getTranslations } from 'next-intl/server';
 import UserRolesClient from './client';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = {
-  title: 'User Roles',
-  description: 'Manage role assignments for organization members',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('Components.OrgRoles');
+
+  return {
+    title: t('userRolesTitle'),
+    description: t('userRolesDescription'),
+  };
+}
 
 export default async function UserRolesPage({ params }: { params: Promise<{ orgslug: string }> }) {
   const { orgslug } = await params;

@@ -1,6 +1,17 @@
 'use client';
 
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -12,10 +23,10 @@ import {
 import { assignRoleToUser, listOrgUsers, listRoles, listUserRoles, removeRoleFromUser } from '@/services/rbac';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { AlertTriangle, Calendar, Plus, Search, Shield, Trash2, User } from 'lucide-react';
 import { Actions, PermissionGuard, Resources, Scopes } from '@/components/Security';
 import type { OrgUserBasic, Role, UserRoleAssignment } from '@/types/permissions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Calendar, Plus, Search, Shield, Trash2, User } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useCallback, useEffect, useState } from 'react';
@@ -41,6 +52,11 @@ export default function UserRolesClient() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
+  const [assignmentToRemove, setAssignmentToRemove] = useState<{
+    userId: number;
+    roleId: number;
+    roleName?: string;
+  } | null>(null);
 
   const accessToken = session?.data?.tokens?.access_token;
 
@@ -89,7 +105,6 @@ export default function UserRolesClient() {
       console.error('Failed to fetch users:', error);
     }
   }, [accessToken, org?.id]);
-
   useEffect(() => {
     const fetchAll = async () => {
       setLoading(true);
@@ -130,13 +145,17 @@ export default function UserRolesClient() {
     }
   };
 
-  // Remove role from user
-  const handleRemoveUserRole = async (userId: number, roleId: number) => {
-    if (!accessToken || !org?.id) return;
+  // Open remove confirmation dialog
+  const handleRemoveUserRole = (userId: number, roleId: number, roleName?: string) => {
+    setAssignmentToRemove({ userId, roleId, roleName });
+  };
 
-    if (!confirm('Are you sure you want to remove this role from the user?')) {
-      return;
-    }
+  // Confirm remove role from user
+  const confirmRemoveUserRole = async () => {
+    if (!accessToken || !org?.id || !assignmentToRemove) return;
+
+    const { userId, roleId } = assignmentToRemove;
+    setAssignmentToRemove(null);
 
     try {
       await removeRoleFromUser(accessToken, userId, roleId, org.id);
@@ -200,24 +219,26 @@ export default function UserRolesClient() {
                       <SelectValue placeholder={t('selectUserPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                      {users.map((user) => (
-                        <SelectItem
-                          key={user.id}
-                          value={user.id.toString()}
-                        >
-                          <div className="flex items-center gap-2">
-                            <Avatar className="h-6 w-6">
-                              <AvatarImage src={user.avatar_image} />
-                              <AvatarFallback>
-                                {(user.first_name?.[0] || user.username?.[0] || 'U').toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span>
-                              {user.first_name || user.username} {`(${user.email})`}
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                      {users
+                        .filter((user) => user.id != null)
+                        .map((user) => (
+                          <SelectItem
+                            key={user.id}
+                            value={user.id.toString()}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-6 w-6">
+                                <AvatarImage src={user.avatar_image} />
+                                <AvatarFallback>
+                                  {(user.first_name?.[0] || user.username?.[0] || 'U').toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span>
+                                {user.first_name || user.username} {`(${user.email})`}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -283,7 +304,6 @@ export default function UserRolesClient() {
               <TableHead>{t('userLabel')}</TableHead>
               <TableHead>{t('roleLabel')}</TableHead>
               <TableHead>{t('assignedAt')}</TableHead>
-              <TableHead>{t('expires')}</TableHead>
               <TableHead className="text-right">{t('actions')}</TableHead>
             </TableRow>
           </TableHeader>
@@ -328,9 +348,6 @@ export default function UserRolesClient() {
                       {new Date(ur.assigned_at).toLocaleDateString()}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <span className="text-muted-foreground text-sm">{t('never')}</span>
-                  </TableCell>
                   <TableCell className="text-right">
                     <PermissionGuard
                       action={Actions.DELETE}
@@ -340,7 +357,7 @@ export default function UserRolesClient() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleRemoveUserRole(ur.user_id, ur.role_id)}
+                        onClick={() => handleRemoveUserRole(ur.user_id, ur.role_id, ur.role?.name)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -352,6 +369,31 @@ export default function UserRolesClient() {
           </TableBody>
         </Table>
       </Card>
+
+      <AlertDialog
+        open={assignmentToRemove !== null}
+        onOpenChange={(open) => {
+          if (!open) setAssignmentToRemove(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20">
+              <AlertTriangle />
+            </AlertDialogMedia>
+            <AlertDialogTitle>{t('removeRoleConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('removeRoleConfirmDescription', { roleName: assignmentToRemove?.roleName ?? '' })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel />
+            <AlertDialogAction variant="destructive" onClick={confirmRemoveUserRole}>
+              {t('removeRoleConfirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

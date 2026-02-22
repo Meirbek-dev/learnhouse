@@ -1245,8 +1245,9 @@ async def get_all_exam_attempts(
         current_user.id, "exam:read", course.org_id, resource_owner_id=course.creator_id
     )
     is_contributor = await is_course_contributor_or_admin(current_user.id, course, db_session)
+    is_course_creator = bool(course.creator_id and course.creator_id == current_user.id)
 
-    if not has_rbac_access and not is_contributor:
+    if not has_rbac_access and not is_contributor and not is_course_creator:
         raise PermissionDenied(permission="exam:read")
 
     # Joined query: fetch attempts + users in one query (fixes N+1)

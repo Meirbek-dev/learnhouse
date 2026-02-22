@@ -13,6 +13,17 @@ import {
   updateRole as apiUpdateRole,
 } from '@/services/rbac';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -21,7 +32,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { ChevronRight, Copy, Edit, Loader2, Lock, Pencil, Plus, Search, Shield, Trash2, Users } from 'lucide-react';
+import { AlertTriangle, ChevronRight, Copy, Edit, Loader2, Lock, Pencil, Plus, Search, Shield, Trash2, Users } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
@@ -67,6 +78,7 @@ export default function RBACAdminClient() {
   const [pendingResourceToggles, setPendingResourceToggles] = useState<string[]>([]);
 
   const [deletingRoleId, setDeletingRoleId] = useState<number | null>(null);
+  const [roleToDelete, setRoleToDelete] = useState<RoleWithPermissions | null>(null);
 
   const [auditPage, setAuditPage] = useState(1);
   const [auditData, setAuditData] = useState<{ items: RoleAuditEvent[]; total: number; page_size: number } | null>(
@@ -316,16 +328,17 @@ export default function RBACAdminClient() {
     }
   };
 
-  const handleDeleteRole = async (role: RoleWithPermissions) => {
-    if (!accessToken) return;
+  const handleDeleteRole = (role: RoleWithPermissions) => {
+    setRoleToDelete(role);
+  };
 
-    const usersCount = role.users_count ?? 0;
-    const confirmed = confirm(t('deleteRoleConfirmationWithUsers', { count: usersCount }));
-    if (!confirmed) return;
+  const confirmDeleteRole = async () => {
+    if (!accessToken || !roleToDelete) return;
 
-    setDeletingRoleId(role.id);
+    setDeletingRoleId(roleToDelete.id);
+    setRoleToDelete(null);
     try {
-      await apiDeleteRole(accessToken, role.id);
+      await apiDeleteRole(accessToken, roleToDelete.id);
       await fetchRoles();
       await refreshSession();
       toast.success(t('deletedRoleSuccess'));
@@ -991,6 +1004,34 @@ export default function RBACAdminClient() {
           </DialogContent>
         </Dialog>
       )}
+
+      <AlertDialog
+        open={roleToDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setRoleToDelete(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20">
+              <AlertTriangle />
+            </AlertDialogMedia>
+            <AlertDialogTitle>{t('deleteRoleAria', { roleName: roleToDelete?.name ?? '' })}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('deleteRoleConfirmationWithUsers', { count: roleToDelete?.users_count ?? 0 })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel />
+            <AlertDialogAction
+              variant="destructive"
+              onClick={confirmDeleteRole}
+            >
+              {t('deleteRoleConfirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
