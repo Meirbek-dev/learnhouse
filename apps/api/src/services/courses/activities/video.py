@@ -114,7 +114,7 @@ async def create_video_activity(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:create", course.org_id)
+    checker.require(current_user.id, "activity:create", course.org_id, resource_owner_id=course.creator_id)
 
     # Get org_uuid
     statement = select(Organization).where(Organization.id == coursechapter.org_id)
@@ -303,7 +303,7 @@ async def create_external_video_activity(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:create", course.org_id)
+    checker.require(current_user.id, "activity:create", course.org_id, resource_owner_id=course.creator_id)
 
     # generate activity_uuid
     activity_uuid = f"activity_{ULID()}"

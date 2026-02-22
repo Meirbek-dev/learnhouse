@@ -91,14 +91,14 @@ async def list_roles(
             .where(RolePermission.role_id.in_(role_ids))
             .group_by(RolePermission.role_id)
         ).all()
-        permission_count_map = {role_id: count for role_id, count in permission_counts}
+        permission_count_map = dict(permission_counts)
 
         user_counts = db.exec(
             select(UserRole.role_id, func.count(UserRole.user_id))
             .where(UserRole.role_id.in_(role_ids))
             .group_by(UserRole.role_id)
         ).all()
-        user_count_map = {role_id: count for role_id, count in user_counts}
+        user_count_map = dict(user_counts)
 
     return [
         RoleRead.model_validate(r).model_copy(
@@ -416,7 +416,7 @@ async def remove_permission_from_role(
         raise HTTPException(404, detail="Permission not assigned to this role")
     db.delete(rp)
     db.commit()
-    perm = db.get(Permission, permission_id)
+    db.get(Permission, permission_id)
     (
         audit_log.info(
             "permission_removed_from_role",

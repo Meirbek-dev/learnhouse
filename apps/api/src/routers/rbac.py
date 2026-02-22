@@ -195,7 +195,7 @@ async def get_my_permissions(
 )
 async def list_org_user_roles(
     org_id: int,
-    db_session: Session = Depends(get_db_session),
+    db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     checker: PermissionCheckerDep = None,
 ):

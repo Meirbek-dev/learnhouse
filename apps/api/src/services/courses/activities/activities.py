@@ -50,7 +50,7 @@ async def create_activity(
         )
 
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:create", course.org_id)
+    checker.require(current_user.id, "activity:create", course.org_id, resource_owner_id=course.creator_id)
 
     # Create Activity
     activity = Activity(**activity_object.model_dump())

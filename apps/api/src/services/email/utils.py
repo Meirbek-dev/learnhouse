@@ -1,6 +1,6 @@
-from resend import Emails
 import resend
 from pydantic import EmailStr
+from resend import Emails
 
 from config.config import get_platform_config
 

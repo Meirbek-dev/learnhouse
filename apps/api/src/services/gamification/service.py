@@ -12,7 +12,6 @@ Notes:
 - Policy (rewards/daily limit) resolution is handled via PolicyRepo with a TTL cache
 """
 
-from sqlmodel.sql._expression_select_cls import SelectOfScalar
 from __future__ import annotations
 
 import contextlib
@@ -23,6 +22,7 @@ from typing import Any
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, and_, select
+from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
 from src.core.timezone import now as tz_now
 from src.db.gamification import (
