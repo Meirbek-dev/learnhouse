@@ -1,37 +1,17 @@
 'use client';
 
 import { Backpack, BadgeDollarSign, BookCopy, Home, School, Settings, ShieldCheck, Users } from 'lucide-react';
-import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { usePaymentsEnabled } from '@components/Hooks/usePaymentsEnabled';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import AppLink from '@/components/ui/AppLink';
 import { useTranslations } from 'next-intl';
 
 const DashMobileMenu = () => {
   const session = usePlatformSession() as any;
   const t = useTranslations('SidebarMenu');
-  const { isEnabled: arePaymentsEnabled } = usePaymentsEnabled();
-  const { can } = usePermissions();
-
-  // Align visibility with route guards
-  const canSeeOrg =
-    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN) ||
-    can(Actions.UPDATE, Resources.ORGANIZATION, Scopes.OWN) ||
-    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.ORG) ||
-    can(Actions.UPDATE, Resources.ORGANIZATION, Scopes.ORG);
-  const canSeeCourses =
-    can(Actions.CREATE, Resources.COURSE, Scopes.ORG) || can(Actions.UPDATE, Resources.COURSE, Scopes.ORG);
-  const canSeeUsers =
-    can(Actions.UPDATE, Resources.USER, Scopes.ORG) ||
-    can(Actions.READ, Resources.USER, Scopes.ORG) ||
-    can(Actions.UPDATE, Resources.ROLE, Scopes.ORG) ||
-    can(Actions.MANAGE, Resources.USERGROUP, Scopes.ORG);
-  const canSeeAdmin =
-    can(Actions.UPDATE, Resources.ROLE, Scopes.ORG) ||
-    can(Actions.READ, Resources.ROLE, Scopes.ORG) ||
-    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.ORG);
-  const canSeePayments = arePaymentsEnabled && can(Actions.MANAGE, Resources.PAYMENT, Scopes.ORG);
+  const { canSeeOrg, canSeeCourses, canSeeAssignments, canSeeUsers, canSeeAdmin, canSeePayments } =
+    useNavigationPermissions();
 
   return (
     <div
@@ -74,7 +54,7 @@ const DashMobileMenu = () => {
             </AppLink>
           </ToolTip>
         ) : null}
-        {canSeeCourses ? (
+        {canSeeAssignments ? (
           <ToolTip
             content={t('tooltips.assignments')}
             slateBlack
@@ -152,7 +132,7 @@ const DashMobileMenu = () => {
             <AppLink
               href="/dash/admin"
               className="flex flex-col items-center p-2"
-              aria-label="dash-admin"
+              aria-label={t('ariaLabels.admin')}
             >
               <ShieldCheck size={20} />
               <span className="mt-1 text-xs">{t('mobile.admin')}</span>

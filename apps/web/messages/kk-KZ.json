@@ -5875,6 +5875,7 @@
   },
   "SidebarMenu": {
     "ariaLabels": {
+      "admin": "Әкімші панеліне өту",
       "collapseSidebar": "Бүйірлік панельді жию",
       "expandSidebar": "Бүйірлік панельді кеңейту",
       "goToHomepage": "Басты бетке өту",

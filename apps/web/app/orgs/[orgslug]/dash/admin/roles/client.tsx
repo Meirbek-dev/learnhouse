@@ -22,7 +22,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Actions, PermissionGuard, Resources, RoleSlugs, Scopes, usePermissions } from '@/components/Security';
+import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChevronRight,
@@ -93,13 +93,7 @@ export default function RBACAdminClient() {
   const [isAuditLoading, setIsAuditLoading] = useState(false);
 
   const accessToken = session?.data?.tokens?.access_token;
-  const isSuperAdmin = useMemo(
-    () =>
-      (session?.data?.roles ?? []).some(
-        (assignment) => assignment.role?.slug === RoleSlugs.SUPER_ADMIN,
-      ),
-    [session?.data?.roles],
-  );
+  const isSuperAdmin = can(Resources.ROLE, Actions.MANAGE, Scopes.ALL);
   const currentUserMaxPriority = useMemo(() => {
     const sessionRoles = session?.data?.roles ?? [];
     const orgRoles = sessionRoles.filter((assignment) => assignment.org?.id === org?.id);

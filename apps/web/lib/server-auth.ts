@@ -31,8 +31,8 @@ export async function requireAuth(orgslug: string) {
  */
 export function sessionCan(
   session: { permissions?: string[] } | undefined,
-  action: Action,
   resource: Resource,
+  action: Action,
   scope: Scope,
   permsSet?: Set<string>,
 ): boolean {
@@ -54,13 +54,19 @@ export async function requirePermission(
   const session = await requireAuth(orgslug);
   const currentOrgId = resolveOrgId(session, orgslug);
 
-  // If permissions were loaded for a different org, they're stale - deny access
+  // If we can resolve the org and permissions were loaded for another org, they're stale - deny access.
   if (currentOrgId && session.permissions_org_id !== currentOrgId) {
     redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
   }
 
+  // If we cannot resolve org membership for this orgslug but the session is scoped to another org,
+  // deny access to avoid carrying over stale permissions from a previous org context.
+  if (!currentOrgId && session.permissions_org_id) {
+    redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
+  }
+
   const perms = new Set(session.permissions);
-  if (!sessionCan(session, action, resource, scope, perms)) {
+  if (!sessionCan(session, resource, action, scope, perms)) {
     redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
   }
   return session;
@@ -78,13 +84,19 @@ export async function requireAnyPermission(
   const session = await requireAuth(orgslug);
   const currentOrgId = resolveOrgId(session, orgslug);
 
-  // If permissions were loaded for a different org, they're stale - deny access
+  // If we can resolve the org and permissions were loaded for another org, they're stale - deny access.
   if (currentOrgId && session.permissions_org_id !== currentOrgId) {
     redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
   }
 
+  // If we cannot resolve org membership for this orgslug but the session is scoped to another org,
+  // deny access to avoid carrying over stale permissions from a previous org context.
+  if (!currentOrgId && session.permissions_org_id) {
+    redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
+  }
+
   const perms = new Set(session.permissions);
-  const hasAny = checks.some((c) => sessionCan(session, c.action, c.resource, c.scope, perms));
+  const hasAny = checks.some((c) => sessionCan(session, c.resource, c.action, c.scope, perms));
   if (!hasAny) {
     redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
   }

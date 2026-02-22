@@ -130,6 +130,16 @@ export interface UserRoleAssignment {
   role?: Role;
 }
 
+/** Basic org user info used by role assignment screens. */
+export interface OrgUserBasic {
+  id: number;
+  email: string;
+  username: string;
+  first_name?: string;
+  last_name?: string;
+  avatar_image?: string;
+}
+
 /** Body for creating a role. */
 export interface CreateRoleBody {
   name: string;

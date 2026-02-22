@@ -5875,6 +5875,7 @@
   },
   "SidebarMenu": {
     "ariaLabels": {
+      "admin": "Перейти в панель администратора",
       "collapseSidebar": "Свернуть боковую панель",
       "expandSidebar": "Развернуть боковую панель",
       "goToHomepage": "Перейти на главную",

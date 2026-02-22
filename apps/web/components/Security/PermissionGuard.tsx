@@ -16,7 +16,7 @@ interface PermissionGuardProps {
   children: ReactNode;
   /** Optional fallback content if permission is denied. */
   fallback?: ReactNode;
-  /** Optional content to render while session is loading. Defaults to children (optimistic). */
+  /** Optional content to render while session is loading. Defaults to null (secure by default). */
   loadingFallback?: ReactNode;
 }
 
@@ -40,8 +40,8 @@ export function PermissionGuard({
 }: PermissionGuardProps) {
   const { can, loading } = usePermissions();
 
-  if (loading) return <>{loadingFallback ?? children}</>;
-  if (!can(action, resource, scope)) return <>{fallback}</>;
+  if (loading) return <>{loadingFallback ?? null}</>;
+  if (!can(resource, action, scope)) return <>{fallback}</>;
   return <>{children}</>;
 }
 

@@ -16,7 +16,6 @@ async function UsersLayout({ children, params }: UsersLayoutProps) {
   await requireAnyPermission(orgslug, [
     { action: Actions.UPDATE, resource: Resources.USER, scope: Scopes.ORG },
     { action: Actions.READ, resource: Resources.USER, scope: Scopes.ORG },
-    { action: Actions.UPDATE, resource: Resources.ROLE, scope: Scopes.ORG },
     { action: Actions.MANAGE, resource: Resources.USERGROUP, scope: Scopes.ORG },
   ]);
 

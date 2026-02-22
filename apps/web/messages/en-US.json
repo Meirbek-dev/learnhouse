@@ -5875,6 +5875,7 @@
   },
   "SidebarMenu": {
     "ariaLabels": {
+      "admin": "Go to admin dashboard",
       "collapseSidebar": "Collapse sidebar",
       "expandSidebar": "Expand sidebar",
       "goToHomepage": "Go to homepage",

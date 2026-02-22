@@ -3,21 +3,21 @@
 import OrgUserGroups from '@components/Dashboard/Pages/Users/OrgUserGroups/OrgUserGroups';
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import OrgUsers from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers';
-import OrgRoles from '@components/Dashboard/Pages/Users/OrgRoles/OrgRoles';
 import DesktopOnlyGuard from '@components/Dashboard/Misc/DesktopOnlyGuard';
 import SettingsHeader from '@components/Dashboard/Misc/SettingsHeader';
 import SettingsTabs from '@components/Dashboard/Misc/SettingsTabs';
-import { Shield, SquareUserRound, Users } from 'lucide-react';
+import { SquareUserRound, Users } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
 import { useTranslations } from 'next-intl';
-import { use, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { use, useEffect, useMemo } from 'react';
 
 export interface SettingsParams {
   subpage: string;
   orgslug: string;
 }
 
-type SubpageType = 'users' | 'usergroups' | 'roles';
+type SubpageType = 'users' | 'usergroups';
 
 interface TabConfig {
   id: SubpageType;
@@ -30,6 +30,7 @@ interface TabConfig {
 
 const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
   const params = use(props.params);
+  const router = useRouter();
   const t = useTranslations('DashPage.UserSettings');
   const { can } = usePermissions();
 
@@ -51,17 +52,14 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
         descriptionKey: 'usergroupsDescription',
         component: OrgUserGroups,
       },
-      {
-        id: 'roles',
-        icon: Shield,
-        labelKey: 'roles',
-        titleKey: 'rolesTitle',
-        descriptionKey: 'rolesDescription',
-        component: OrgRoles,
-      },
     ],
     [],
   );
+
+  useEffect(() => {
+    if (params.subpage !== 'roles') return;
+    router.replace(`${getUriWithOrg(params.orgslug, '')}/dash/admin/roles`);
+  }, [params.orgslug, params.subpage, router]);
 
   const tabs = useMemo(() => {
     return allTabs.filter((tab) => {
@@ -74,9 +72,6 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
         }
         case 'usergroups': {
           return can(Actions.MANAGE, Resources.USERGROUP, Scopes.ORG);
-        }
-        case 'roles': {
-          return can(Actions.READ, Resources.ROLE, Scopes.ORG);
         }
         default: {
           return true;

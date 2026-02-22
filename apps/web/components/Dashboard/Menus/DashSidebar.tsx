@@ -14,10 +14,9 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, School, Settings, ShieldCheck, Users } from 'lucide-react';
-import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import platformLogoLight from '@public/platform_logo_light.svg';
-import useFeatureFlag from '@components/Hooks/useFeatureFlag';
+import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Separator } from '@/components/ui/separator';
@@ -87,32 +86,9 @@ const SidebarSkeleton = () => (
 // Custom hook for navigation items
 const useNavigationItems = () => {
   const pathname = usePathname();
-  const session = usePlatformSession() as any;
   const t = useTranslations('SidebarMenu');
-  const isPaymentsEnabled = useFeatureFlag({
-    path: ['features', 'payments', 'enabled'],
-    defaultValue: false,
-  });
-  const { can } = usePermissions();
-
-  // Align sidebar visibility with the route layout guards - prefer specific checks
-  const canSeeOrg =
-    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN) ||
-    can(Actions.UPDATE, Resources.ORGANIZATION, Scopes.OWN) ||
-    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.ORG) ||
-    can(Actions.UPDATE, Resources.ORGANIZATION, Scopes.ORG);
-  const canSeeCourses =
-    can(Actions.CREATE, Resources.COURSE, Scopes.ORG) || can(Actions.UPDATE, Resources.COURSE, Scopes.ORG);
-  const canSeeUsers =
-    can(Actions.UPDATE, Resources.USER, Scopes.ORG) ||
-    can(Actions.READ, Resources.USER, Scopes.ORG) ||
-    can(Actions.UPDATE, Resources.ROLE, Scopes.ORG) ||
-    can(Actions.MANAGE, Resources.USERGROUP, Scopes.ORG);
-  const canSeeAdmin =
-    can(Actions.UPDATE, Resources.ROLE, Scopes.ORG) ||
-    can(Actions.READ, Resources.ROLE, Scopes.ORG) ||
-    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.ORG);
-  const canSeePayments = isPaymentsEnabled && can(Actions.MANAGE, Resources.PAYMENT, Scopes.ORG);
+  const { canSeeOrg, canSeeCourses, canSeeAssignments, canSeeUsers, canSeeAdmin, canSeePayments } =
+    useNavigationPermissions();
 
   return [
     {
@@ -133,7 +109,7 @@ const useNavigationItems = () => {
           },
         ]
       : []),
-    ...(canSeeCourses
+    ...(canSeeAssignments
       ? [
           {
             title: t('tooltips.assignments'),
@@ -233,7 +209,7 @@ const NavItem = ({ item, isCollapsed }: { item: NavigationItem; isCollapsed: boo
 );
 
 const DashSidebar = ({ className }: SidebarProps) => {
-  const org = useOrg() as any;
+  const org = useOrg();
   const session = usePlatformSession();
   const { state, toggleSidebar } = useSidebar();
   const t = useTranslations('SidebarMenu');

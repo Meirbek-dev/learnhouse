@@ -12,15 +12,14 @@ import {
 import { assignRoleToUser, listOrgUsers, listRoles, listUserRoles, removeRoleFromUser } from '@/services/rbac';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
+import { Actions, PermissionGuard, Resources, Scopes } from '@/components/Security';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar, Plus, Search, Shield, Trash2, User } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import type { Role, UserRoleAssignment } from '@/types/permissions';
+import type { OrgUserBasic, Role, UserRoleAssignment } from '@/types/permissions';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useCallback, useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { OrgUserBasic } from '@/services/rbac';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -32,7 +31,6 @@ import { toast } from 'sonner';
 export default function UserRolesClient() {
   const org = useOrg();
   const session = usePlatformSession();
-  const { can } = usePermissions();
   const t = useTranslations('Components.OrgRoles');
 
   const [userRoles, setUserRoles] = useState<UserRoleAssignment[]>([]);
@@ -46,6 +44,18 @@ export default function UserRolesClient() {
 
   const accessToken = session?.data?.tokens?.access_token;
 
+  const refreshSession = useCallback(async () => {
+    const timeoutMs = 5000;
+    try {
+      await Promise.race([
+        session.update(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs)),
+      ]);
+    } catch {
+      toast.warning(t('sessionRefreshWarning'));
+    }
+  }, [session, t]);
+
   // Fetch user roles
   const fetchUserRolesData = useCallback(async () => {
     if (!accessToken || !org?.id) return;
@@ -54,8 +64,9 @@ export default function UserRolesClient() {
       setUserRoles(data);
     } catch (error) {
       console.error('Failed to fetch user roles:', error);
+      toast.error(t('loadFailed'));
     }
-  }, [accessToken, org?.id]);
+  }, [accessToken, org?.id, t]);
 
   // Fetch available roles
   const fetchRoles = useCallback(async () => {
@@ -110,9 +121,9 @@ export default function UserRolesClient() {
       setIsAddDialogOpen(false);
       setSelectedUserId(null);
       setSelectedRoleId(null);
-      fetchUserRolesData();
+      await fetchUserRolesData();
       // Refresh session so permission changes take effect immediately
-      session.update();
+      await refreshSession();
     } catch (error) {
       console.error('Failed to assign role:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to assign role');
@@ -130,9 +141,9 @@ export default function UserRolesClient() {
     try {
       await removeRoleFromUser(accessToken, userId, roleId, org.id);
       toast.success(t('removedRoleSuccess'));
-      fetchUserRolesData();
+      await fetchUserRolesData();
       // Refresh session so permission changes take effect immediately
-      session.update();
+      await refreshSession();
     } catch (error) {
       console.error('Failed to remove role:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to remove role');

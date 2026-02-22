@@ -15,10 +15,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from src.core.events.database import get_db_session
+from src.db.permissions import Role, UserRole
 from src.db.users import AnonymousUser, PublicUser
+from src.db.users import User as UserModel
 from src.routers.role_audit_store import append_role_audit_event
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
@@ -90,6 +92,35 @@ class UserPermissionsResponse(BaseModel):
     org_id: int | None = None
 
 
+class UserRoleSummary(BaseModel):
+    id: int
+    name: str
+    slug: str
+    description: str | None = None
+    org_id: int | None = None
+    is_system: bool
+    priority: int
+
+
+class UserSummary(BaseModel):
+    id: int
+    email: str
+    username: str
+    first_name: str | None = None
+    last_name: str | None = None
+    avatar_image: str | None = None
+
+
+class UserRoleAssignmentResponse(BaseModel):
+    user_id: int
+    role_id: int
+    org_id: int
+    assigned_at: str
+    assigned_by: int | None = None
+    user: UserSummary
+    role: UserRoleSummary
+
+
 # ============================================================================
 # Permission check endpoints (never 403 - used by frontend for UI state)
 # ============================================================================
@@ -158,6 +189,53 @@ async def get_my_permissions(
 # ============================================================================
 # Role assignment / revocation (admin)
 # ============================================================================
+
+
+@router.get("/orgs/{org_id}/user-roles", response_model=list[UserRoleAssignmentResponse])
+async def list_org_user_roles(
+    org_id: int,
+    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
+    checker: PermissionCheckerDep = None,
+):
+    """List user↔role assignments for a given organization."""
+    checker.require(current_user.id, "role:read", org_id)
+
+    rows = db_session.exec(
+        select(UserRole, UserModel, Role)
+        .join(UserModel, UserModel.id == UserRole.user_id)
+        .join(Role, Role.id == UserRole.role_id)
+        .where(UserRole.org_id == org_id)
+        .order_by(UserRole.assigned_at.desc())
+    ).all()
+
+    return [
+        UserRoleAssignmentResponse(
+            user_id=user_role.user_id,
+            role_id=user_role.role_id,
+            org_id=user_role.org_id,
+            assigned_at=user_role.assigned_at.isoformat(),
+            assigned_by=user_role.assigned_by,
+            user=UserSummary(
+                id=user.id or 0,
+                email=user.email,
+                username=user.username,
+                first_name=user.first_name,
+                last_name=user.last_name,
+                avatar_image=user.avatar_image,
+            ),
+            role=UserRoleSummary(
+                id=role.id or 0,
+                name=role.name,
+                slug=role.slug,
+                description=role.description,
+                org_id=role.org_id,
+                is_system=role.is_system,
+                priority=role.priority,
+            ),
+        )
+        for user_role, user, role in rows
+    ]
 
 
 @router.post("/roles/assign")

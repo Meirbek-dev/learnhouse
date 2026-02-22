@@ -8,12 +8,12 @@ import {
 } from '@components/ui/dropdown-menu';
 import { ChevronDown, Crown, LogOut, Shield, User, User as UserIcon, Users } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
-import { Actions, Resources, RoleSlugs, Scopes } from '@/types/permissions';
+import { RoleSlugs } from '@/types/permissions';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import UserAvatar from '@components/Objects/UserAvatar';
-import { usePermissions } from '@/components/Security';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
@@ -36,22 +36,8 @@ interface CustomRoleInfo {
 
 export const HeaderProfileBox = () => {
   const session = usePlatformSession() as any;
-  const { can, loading: isLoading } = usePermissions();
-  const canAccessDashboard =
-    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN) ||
-    can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.ORG) ||
-    can(Actions.CREATE, Resources.COURSE, Scopes.ORG) ||
-    can(Actions.UPDATE, Resources.COURSE, Scopes.ORG) ||
-    can(Actions.UPDATE, Resources.COURSE, Scopes.OWN) ||
-    can(Actions.UPDATE, Resources.USER, Scopes.ORG) ||
-    can(Actions.READ, Resources.USER, Scopes.ORG) ||
-    can(Actions.GRADE, Resources.ASSIGNMENT, Scopes.ORG) ||
-    can(Actions.READ, Resources.ANALYTICS, Scopes.ORG) ||
-    can(Actions.READ, Resources.ROLE, Scopes.ORG) ||
-    can(Actions.UPDATE, Resources.ROLE, Scopes.ORG) ||
-    can(Actions.MANAGE, Resources.USERGROUP, Scopes.ORG) ||
-    can(Actions.MANAGE, Resources.PAYMENT, Scopes.ORG);
-  const org = useOrg() as any;
+  const { canAccessDashboard } = useNavigationPermissions();
+  const org = useOrg();
   const t = useTranslations('Header');
 
   const userRoles = session?.data?.roles ?? [];

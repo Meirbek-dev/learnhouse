@@ -9,7 +9,7 @@
  * scope-broadening before sending permissions to the frontend.
  */
 
-import type { Action, Resource, Scope } from '@/types/permissions';
+import { type Action, type Resource, Resources, type Scope } from '@/types/permissions';
 import { createContext, useContext, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { perm } from '@/types/permissions';
@@ -23,7 +23,10 @@ import type { ReactNode } from 'react';
 // Keep the context value minimal - only what consumers actually use.
 interface PermissionContextValue {
   /** Check if user has a specific permission (scope is required) */
-  can: (action: Action, resource: Resource, scope: Scope) => boolean;
+  can: {
+    (resource: Resource, action: Action, scope: Scope): boolean;
+    (action: Action, resource: Resource, scope: Scope): boolean;
+  };
   /** The org ID these permissions are scoped to (null = no org context) */
   orgId: number | null;
   /** Still loading session */
@@ -56,8 +59,12 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
   }, [session]);
 
   const can = useMemo(() => {
-    return (action: Action, resource: Resource, scope: Scope): boolean => {
+    return (...args: [Resource, Action, Scope] | [Action, Resource, Scope]): boolean => {
+      const [first, second, scope] = args;
       if (status !== 'authenticated') return false;
+      const firstIsResource = Object.values(Resources).includes(first as Resource);
+      const resource = (firstIsResource ? first : second) as Resource;
+      const action = (firstIsResource ? second : first) as Action;
       return permissions.has(perm(resource, action, scope));
     };
   }, [status, permissions]);
@@ -85,7 +92,7 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
  * ```tsx
  * const { can } = usePermissions();
  *
- * if (can(Actions.CREATE, Resources.COURSE, Scopes.ORG)) {
+ * if (can(Resources.COURSE, Actions.CREATE, Scopes.ORG)) {
  *   // Show create button
  * }
  * ```
