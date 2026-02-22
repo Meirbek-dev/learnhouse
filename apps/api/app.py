@@ -5,7 +5,7 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import ORJSONResponse
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_another_jwt_auth.exceptions import AuthJWTException
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -60,8 +60,8 @@ app.add_event_handler("shutdown", shutdown_app(app))
 @app.exception_handler(AuthJWTException)
 def authjwt_exception_handler(
     request: Request, exc: AuthJWTException
-) -> ORJSONResponse:
-    return ORJSONResponse(
+) -> JSONResponse:
+    return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.message},
     )
