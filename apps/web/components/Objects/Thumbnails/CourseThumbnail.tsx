@@ -31,7 +31,8 @@ import {
 import { ResourceActionsMenu } from '@/components/Utils/ResourceActionsMenu';
 import type { ResourceAction } from '@/components/Utils/ResourceActionsMenu';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { perm, Resources, Actions, Scopes } from '@/types/permissions';
+import { Resources, Actions, Scopes } from '@/types/permissions';
+import { usePermissions } from '@/components/Security/PermissionProvider';
 import { Card, CardContent, CardFooter } from '@components/ui/card';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -378,11 +379,10 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, orgSlug, onDelete }) => {
   const t = useTranslations('Components.CourseThumbnail');
   const router = useRouter();
   const session = usePlatformSession();
+  const { can } = usePermissions();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  // Derive admin/owner status from session permissions + course authors
-  const permissions = session?.data?.permissions ?? [];
   const currentUserId = session?.data?.user?.id;
 
   const isOwner = useMemo(() => {
@@ -393,12 +393,12 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, orgSlug, onDelete }) => {
   }, [currentUserId, course.authors, course.is_owner]);
 
   const canUpdate =
-    permissions.includes(perm(Resources.COURSE, Actions.UPDATE, Scopes.ALL)) ||
-    (isOwner && permissions.includes(perm(Resources.COURSE, Actions.UPDATE, Scopes.OWN)));
+    can(Resources.COURSE, Actions.UPDATE, Scopes.ORG) ||
+    (isOwner && can(Resources.COURSE, Actions.UPDATE, Scopes.OWN));
 
   const canDelete =
-    permissions.includes(perm(Resources.COURSE, Actions.DELETE, Scopes.ALL)) ||
-    (isOwner && permissions.includes(perm(Resources.COURSE, Actions.DELETE, Scopes.OWN)));
+    can(Resources.COURSE, Actions.DELETE, Scopes.ORG) ||
+    (isOwner && can(Resources.COURSE, Actions.DELETE, Scopes.OWN));
 
   const availableActions = [
     ...(canUpdate ? ['update'] : []),

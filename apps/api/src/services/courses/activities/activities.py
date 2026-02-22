@@ -28,7 +28,6 @@ async def create_activity(
     activity_object: ActivityCreate,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
-    checker: PermissionChecker | None = None,
 ):
     # CHeck if org exists
     statement = select(Chapter).where(Chapter.id == activity_object.chapter_id)
@@ -50,16 +49,15 @@ async def create_activity(
             detail="Course not found",
         )
 
-    if checker is None:
-        checker = PermissionChecker(db_session)
+    checker = PermissionChecker(db_session)
     checker.require(current_user.id, "activity:create", course.org_id)
 
     # Create Activity
     activity = Activity(**activity_object.model_dump())
 
     activity.activity_uuid = f"activity_{ULID()}"
-    activity.creation_date = str(datetime.now())
-    activity.update_date = str(datetime.now())
+    activity.creation_date = datetime.now()
+    activity.update_date = datetime.now()
     activity.org_id = chapter.org_id
     activity.course_id = chapter.course_id
     activity.creator_id = current_user.id  # Track creator
@@ -104,7 +102,6 @@ async def get_activity(
     activity_uuid: str,
     current_user: PublicUser,
     db_session: Session,
-    checker: PermissionChecker | None = None,
 ):
     # Optimize by joining Activity with Course in a single query
     statement = (
@@ -123,8 +120,7 @@ async def get_activity(
     activity, course = result
 
     # RBAC check
-    if checker is None:
-        checker = PermissionChecker(db_session)
+    checker = PermissionChecker(db_session)
     checker.require(
         current_user.id,
         "activity:read",
@@ -179,7 +175,6 @@ async def get_activityby_id(
     activity_id: int,
     current_user: PublicUser,
     db_session: Session,
-    checker: PermissionChecker | None = None,
 ):
     # Optimize by joining Activity with Course in a single query
     statement = select(Activity, Course).join(Course).where(Activity.id == activity_id)
@@ -194,8 +189,7 @@ async def get_activityby_id(
     activity, course = result
 
     # RBAC check
-    if checker is None:
-        checker = PermissionChecker(db_session)
+    checker = PermissionChecker(db_session)
     checker.require(
         current_user.id,
         "activity:read",
@@ -212,7 +206,6 @@ async def update_activity(
     activity_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
-    checker: PermissionChecker | None = None,
 ):
     statement = select(Activity).where(Activity.activity_uuid == activity_uuid)
     activity = db_session.exec(statement).first()
@@ -233,8 +226,7 @@ async def update_activity(
             detail="Course not found",
         )
 
-    if checker is None:
-        checker = PermissionChecker(db_session)
+    checker = PermissionChecker(db_session)
     checker.require(
         current_user.id,
         "activity:update",
@@ -248,7 +240,7 @@ async def update_activity(
         if value is not None:
             setattr(activity, field, value)
 
-    activity.update_date = str(datetime.now())
+    activity.update_date = datetime.now()
 
     db_session.add(activity)
     db_session.commit()
@@ -262,7 +254,6 @@ async def delete_activity(
     activity_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
-    checker: PermissionChecker | None = None,
 ):
     statement = select(Activity).where(Activity.activity_uuid == activity_uuid)
     activity = db_session.exec(statement).first()
@@ -283,8 +274,7 @@ async def delete_activity(
             detail="Course not found",
         )
 
-    if checker is None:
-        checker = PermissionChecker(db_session)
+    checker = PermissionChecker(db_session)
     checker.require(
         current_user.id,
         "activity:delete",
@@ -321,7 +311,6 @@ async def get_activities(
     coursechapter_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
-    checker: PermissionChecker | None = None,
 ) -> list[ActivityRead]:
     # Get activities that are published and belong to the chapter
     statement = (
@@ -356,8 +345,7 @@ async def get_activities(
             detail="Course not found",
         )
 
-    if checker is None:
-        checker = PermissionChecker(db_session)
+    checker = PermissionChecker(db_session)
     checker.require(current_user.id, "activity:read", course.org_id)
 
     return [ActivityRead.model_validate(activity) for activity in activities]

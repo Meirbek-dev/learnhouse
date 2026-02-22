@@ -98,12 +98,15 @@ class InternalAuthFailed(HTTPException):
 
 class PermissionChecker:
     """
-    Loads user's granted permission strings once per (user, org) pair,
-    then resolves scope from context.
+    Loads user's granted permission strings once per (user, org) pair within a
+    request, then resolves scope from context.
 
     Permission format in DB: "resource:action:scope" (3-part).
-    Callers pass "resource:action" (2-part) + context (org_id, resource_owner_id).
-    The checker determines which scope applies.
+    Callers pass "resource:action" (2-part) + context (org_id, resource_owner_id,
+    is_assigned).  The checker determines which scope applies.
+
+    Note: _cache is per-instance, which is per-request (see get_permission_checker).
+    It deduplicates DB hits within a single request — not a cross-request cache.
     """
 
     def __init__(self, db: Session) -> None:
@@ -121,6 +124,7 @@ class PermissionChecker:
         org_id: int | None,
         *,
         resource_owner_id: int | None = None,
+        is_assigned: bool = False,
     ) -> bool:
         """Return True if user has the permission.
 
@@ -129,9 +133,12 @@ class PermissionChecker:
             permission: "resource:action" (2-part). Scope is resolved from context.
             org_id: Organization context. Required for org-scoped checks.
             resource_owner_id: The creator/owner of the resource. Enables "own" scope.
+            is_assigned: Set to True when the service layer has already verified that
+                this resource is assigned to the user (e.g. course enrollment confirmed).
+                Required to unlock ``assigned``-scope permissions.
         """
         granted = self._get_or_load(user_id, org_id)
-        return self._resolve(permission, granted, user_id, resource_owner_id)
+        return self._resolve(permission, granted, user_id, resource_owner_id, is_assigned)
 
     def require(
         self,
@@ -140,10 +147,15 @@ class PermissionChecker:
         org_id: int | None,
         *,
         resource_owner_id: int | None = None,
+        is_assigned: bool = False,
     ) -> None:
         """check() + raise PermissionDenied when False."""
         if not self.check(
-            user_id, permission, org_id, resource_owner_id=resource_owner_id
+            user_id,
+            permission,
+            org_id,
+            resource_owner_id=resource_owner_id,
+            is_assigned=is_assigned,
         ):
             raise PermissionDenied(permission=permission)
 
@@ -466,13 +478,14 @@ class PermissionChecker:
         granted: set[str],
         user_id: int,
         resource_owner_id: int | None,
+        is_assigned: bool = False,
     ) -> bool:
         """Resolve whether a 2-part permission is satisfied by the granted set.
 
         Checks scopes from broadest to narrowest:
         1. all      - always passes
         2. org      - passes (org membership implied by loaded permissions)
-        3. assigned - passes (service layer filters to assigned resources)
+        3. assigned - passes only when is_assigned=True (caller verified assignment)
         4. own      - passes if resource_owner_id == user_id
         """
         parts = permission.split(":")
@@ -489,9 +502,10 @@ class PermissionChecker:
         if PermissionChecker._has_perm(granted, resource, action, "org"):
             return True
 
-        # 3. "assigned" scope - the service layer is responsible for
-        #    filtering to only assigned resources.
-        if PermissionChecker._has_perm(granted, resource, action, "assigned"):
+        # 3. "assigned" scope — the caller must pass is_assigned=True to confirm
+        #    the service layer has verified the resource is assigned to this user
+        #    (e.g. confirmed course enrollment, explicit assignment record, etc.).
+        if is_assigned and PermissionChecker._has_perm(granted, resource, action, "assigned"):
             return True
 
         # 4. "own" scope - user owns the resource

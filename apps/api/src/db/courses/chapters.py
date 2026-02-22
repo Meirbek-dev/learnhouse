@@ -26,6 +26,10 @@ class Chapter(ChapterBase, table=True):
     chapter_uuid: str = ""
     creation_date: str = ""
     update_date: str = ""
+    creator_id: int | None = Field(
+        default=None,
+        sa_column=Column(Integer, ForeignKey("user.id", ondelete="SET NULL")),
+    )
 
 
 class ChapterCreate(ChapterBase):

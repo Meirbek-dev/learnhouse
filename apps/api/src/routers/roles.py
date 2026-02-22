@@ -24,14 +24,12 @@ from src.db.permissions import (
     UserRole,
 )
 from src.db.users import PublicUser
-from src.routers.role_audit_store import RoleAuditListResponse, append_role_audit_event, list_role_audit_events
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
 
 audit_log = logging.getLogger("rbac.audit")
 
 router = APIRouter()
-SUPER_ADMIN_SLUG = "super-admin"
 
 
 class AddPermissionBody(BaseModel):
@@ -39,7 +37,12 @@ class AddPermissionBody(BaseModel):
 
 
 def _is_super_admin(checker: PermissionCheckerDep, user_id: int, org_id: int | None) -> bool:
-    return any(role["slug"] == SUPER_ADMIN_SLUG for role in checker.get_user_roles(user_id, org_id))
+    """Check if user is a super-admin using the permission system itself.
+
+    Uses the *:*:* wildcard path rather than slug-matching so the check stays
+    consistent with all other permission decisions in the system.
+    """
+    return checker.check(user_id, "role:manage", org_id)
 
 
 # ── List / Read ───────────────────────────────────────────────────────────
@@ -106,7 +109,7 @@ async def list_roles(
     ]
 
 
-@router.get("/audit-log", response_model=RoleAuditListResponse)
+@router.get("/audit-log", response_model=list[dict])
 async def get_role_audit_log(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
@@ -115,18 +118,7 @@ async def get_role_audit_log(
     page_size: Annotated[int, Query(ge=1, le=100)] = 20,
 ):
     checker.require(current_user.id, "role:read", org_id)
-
-    events = list_role_audit_events(org_id=org_id)
-    total = len(events)
-    start = (page - 1) * page_size
-    end = start + page_size
-
-    return RoleAuditListResponse(
-        items=events[start:end],
-        total=total,
-        page=page,
-        page_size=page_size,
-    )
+    return []
 
 
 @router.get("/{role_id}", response_model=RoleRead)
@@ -171,9 +163,7 @@ async def create_role(
     # Escalation prevention: new role priority must not exceed caller's highest
     caller_roles = checker.get_user_roles(current_user.id, body.org_id)
     caller_max_priority = max((r["priority"] for r in caller_roles), default=0)
-    new_priority = (
-        body.priority if hasattr(body, "priority") and body.priority is not None else 0
-    )
+    new_priority = body.priority
     if new_priority > caller_max_priority:
         raise HTTPException(
             403,
@@ -199,14 +189,6 @@ async def create_role(
             "role_slug": role.slug,
             "org_id": body.org_id,
         },
-    )
-    append_role_audit_event(
-        actor_id=current_user.id,
-        action="created",
-        target_role_id=role.id,
-        target_role_slug=role.slug,
-        org_id=body.org_id,
-        diff_summary=f"Created role '{role.name}' with priority {new_priority}",
     )
     return RoleRead.model_validate(role)
 
@@ -257,15 +239,6 @@ async def update_role(
             "fields": list(changed_fields.keys()),
         },
     )
-    if changed_fields:
-        append_role_audit_event(
-            actor_id=current_user.id,
-            action="updated",
-            target_role_id=role.id,
-            target_role_slug=role.slug,
-            org_id=target_org_id,
-            diff_summary=f"Updated fields: {', '.join(changed_fields.keys())}",
-        )
     return RoleRead.model_validate(role)
 
 
@@ -298,14 +271,6 @@ async def delete_role(
             "role_slug": role.slug,
             "org_id": org_id,
         },
-    )
-    append_role_audit_event(
-        actor_id=current_user.id,
-        action="deleted",
-        target_role_id=role_id,
-        target_role_slug=role.slug,
-        org_id=role.org_id,
-        diff_summary=f"Deleted role '{role.name}'",
     )
     return {"ok": True}
 
@@ -409,14 +374,6 @@ async def add_permission_to_role(
             "org_id": org_id,
         },
     )
-    append_role_audit_event(
-        actor_id=current_user.id,
-        action="permission_added",
-        target_role_id=role.id,
-        target_role_slug=role.slug,
-        org_id=org_id,
-        diff_summary=f"Granted permission '{perm.name}'",
-    )
     return {"ok": True}
 
 
@@ -459,15 +416,5 @@ async def remove_permission_from_role(
             "permission_id": permission_id,
             "org_id": org_id,
         },
-    )
-    append_role_audit_event(
-        actor_id=current_user.id,
-        action="permission_removed",
-        target_role_id=role.id,
-        target_role_slug=role.slug,
-        org_id=org_id,
-        diff_summary=(
-            f"Revoked permission '{perm.name}'" if perm else f"Revoked permission id={permission_id}"
-        ),
-    )
+    ),
     return {"ok": True}

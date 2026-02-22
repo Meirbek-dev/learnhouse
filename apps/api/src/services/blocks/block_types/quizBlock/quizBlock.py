@@ -246,7 +246,7 @@ async def get_quiz_attempts(
 
     # Check permissions
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "quiz:read", activity.org_id)
+    checker.require(current_user.id, "quiz:read", activity.org_id, is_assigned=True)
 
     # Build query
     statement = select(QuizAttempt).where(QuizAttempt.activity_id == activity_id)

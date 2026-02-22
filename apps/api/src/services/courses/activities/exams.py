@@ -172,7 +172,7 @@ async def read_exam(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:read", course.org_id)
+    checker.require(current_user.id, "exam:read", course.org_id, is_assigned=True)
 
     return ExamRead.model_validate(exam)
 
@@ -201,7 +201,7 @@ async def read_exam_from_activity_uuid(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:read", course.org_id)
+    checker.require(current_user.id, "exam:read", course.org_id, is_assigned=True)
 
     return ExamRead.model_validate(exam)
 
@@ -501,7 +501,7 @@ async def read_questions(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:read", course.org_id)
+    checker.require(current_user.id, "exam:read", course.org_id, is_assigned=True)
 
     statement = (
         select(Question)

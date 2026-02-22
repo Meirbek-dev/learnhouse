@@ -46,6 +46,7 @@ async def create_chapter(
     chapter.creation_date = str(datetime.now())
     chapter.update_date = str(datetime.now())
     chapter.org_id = course.org_id
+    chapter.creator_id = current_user.id
 
     # Find the last chapter in the course and add it to the list
     statement = (
@@ -157,7 +158,7 @@ async def update_chapter(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "chapter:update", chapter.org_id)
+    checker.require(current_user.id, "chapter:update", chapter.org_id, resource_owner_id=chapter.creator_id)
 
     # Update only the fields that were passed in
     update_data = chapter_object.model_dump(exclude_unset=True)
@@ -188,7 +189,7 @@ async def delete_chapter(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "chapter:delete", chapter.org_id)
+    checker.require(current_user.id, "chapter:delete", chapter.org_id, resource_owner_id=chapter.creator_id)
 
     # Remove all linked chapter activities
     statement = select(ChapterActivity).where(ChapterActivity.chapter_id == chapter.id)

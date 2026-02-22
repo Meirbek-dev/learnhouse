@@ -21,7 +21,6 @@ from src.core.events.database import get_db_session
 from src.db.permissions import Role, UserRole
 from src.db.users import AnonymousUser, PublicUser
 from src.db.users import User as UserModel
-from src.routers.role_audit_store import append_role_audit_event
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
 
@@ -75,7 +74,7 @@ class RoleAssignmentRequest(BaseModel):
 
     user_id: int
     role_id: int
-    org_id: int
+    org_id: int | None = None
 
 
 class RoleRevocationRequest(BaseModel):
@@ -83,7 +82,7 @@ class RoleRevocationRequest(BaseModel):
 
     user_id: int
     role_id: int
-    org_id: int
+    org_id: int | None = None
 
 
 class UserPermissionsResponse(BaseModel):
@@ -114,7 +113,7 @@ class UserSummary(BaseModel):
 class UserRoleAssignmentResponse(BaseModel):
     user_id: int
     role_id: int
-    org_id: int
+    org_id: int | None
     assigned_at: str
     assigned_by: int | None = None
     user: UserSummary
@@ -268,14 +267,6 @@ async def assign_role(
             "org_id": request.org_id,
         },
     )
-    append_role_audit_event(
-        actor_id=current_user.id,
-        action="assigned",
-        target_role_id=request.role_id,
-        target_role_slug=None,
-        org_id=request.org_id,
-        diff_summary=f"Assigned role_id={request.role_id} to user_id={request.user_id}",
-    )
     return {"message": "Role assigned"}
 
 
@@ -307,13 +298,5 @@ async def revoke_role(
             "role_id": request.role_id,
             "org_id": request.org_id,
         },
-    )
-    append_role_audit_event(
-        actor_id=current_user.id,
-        action="revoked",
-        target_role_id=request.role_id,
-        target_role_slug=None,
-        org_id=request.org_id,
-        diff_summary=f"Revoked role_id={request.role_id} from user_id={request.user_id}",
     )
     return {"message": "Role revoked"}
