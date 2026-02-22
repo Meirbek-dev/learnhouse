@@ -47,6 +47,7 @@ from src.db.users import AnonymousUser, PublicUser, User
 from src.security.rbac import (
     AuthenticationRequired,
     PermissionChecker,
+    PermissionDenied,
     ResourceAccessDenied,
 )
 
@@ -1238,10 +1239,15 @@ async def get_all_exam_attempts(
     course = db_session.get(Course, activity.course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
+
     checker = PermissionChecker(db_session)
-    checker.require(
+    has_rbac_access = checker.check(
         current_user.id, "exam:read", course.org_id, resource_owner_id=course.creator_id
     )
+    is_contributor = await is_course_contributor_or_admin(current_user.id, course, db_session)
+
+    if not has_rbac_access and not is_contributor:
+        raise PermissionDenied(permission="exam:read")
 
     # Joined query: fetch attempts + users in one query (fixes N+1)
     # Use == False for SQLAlchemy column comparison (not Python `not`)
@@ -1330,7 +1336,7 @@ async def export_questions_csv(
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
     checker.require(
-        current_user.id, "exam:read", course.org_id, resource_owner_id=course.creator_id
+        current_user.id, "exam:read", course.org_id
     )
 
     # Get questions
@@ -1405,7 +1411,7 @@ async def import_questions_csv(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:create", course.org_id, resource_owner_id=course.creator_id)
+    checker.require(current_user.id, "exam:create", course.org_id)
 
     # Parse CSV
     import csv

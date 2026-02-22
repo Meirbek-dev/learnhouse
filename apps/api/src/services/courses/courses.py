@@ -586,6 +586,8 @@ async def create_course(
         creation_date=datetime.now(tz=UTC),
         update_date=datetime.now(tz=UTC),
     )
+    db_session.add(resource_author)
+    db_session.commit()
     db_session.refresh(resource_author)
 
     # Get course authors with their roles
