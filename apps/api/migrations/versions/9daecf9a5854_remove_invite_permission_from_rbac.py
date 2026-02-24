@@ -47,7 +47,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Restore invite permission and assign it to system org-admin role."""
+    """Restore invite permission and assign it to system super-admin role."""
     conn = op.get_bind()
 
     conn.execute(
@@ -74,7 +74,7 @@ def downgrade() -> None:
             SELECT r.id, p.id
             FROM roles r
             JOIN permissions p ON p.name = 'user:invite:org'
-            WHERE r.slug = 'org-admin'
+                        WHERE r.slug = 'super-admin'
               AND r.is_system = true
               AND r.org_id IS NULL
               AND NOT EXISTS (

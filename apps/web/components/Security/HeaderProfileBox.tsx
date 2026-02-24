@@ -66,13 +66,6 @@ export const HeaderProfileBox = () => {
             textColor: 'text-white',
             description: t('profile.roles.admin.description'),
           },
-          [RoleSlugs.ORG_ADMIN]: {
-            name: t('profile.roles.admin.name'),
-            icon: <Crown size={12} />,
-            bgColor: 'bg-purple-600',
-            textColor: 'text-white',
-            description: t('profile.roles.admin.description'),
-          },
           [RoleSlugs.MAINTAINER]: {
             name: t('profile.roles.maintainer.name'),
             icon: <Shield size={12} />,

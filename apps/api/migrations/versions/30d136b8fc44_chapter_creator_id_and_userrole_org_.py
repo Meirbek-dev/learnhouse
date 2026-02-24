@@ -22,14 +22,24 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Upgrade schema."""
     # --- chapter: add creator_id ---
-    op.add_column("chapter", sa.Column("creator_id", sa.Integer(), nullable=True))
-    op.create_foreign_key(
-        "chapter_creator_id_fkey",
-        "chapter",
-        "user",
-        ["creator_id"],
-        ["id"],
-        ondelete="SET NULL",
+    op.execute("ALTER TABLE chapter ADD COLUMN IF NOT EXISTS creator_id INTEGER")
+    op.execute(
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1
+                FROM information_schema.table_constraints
+                WHERE constraint_schema = 'public'
+                  AND table_name = 'chapter'
+                  AND constraint_name = 'chapter_creator_id_fkey'
+            ) THEN
+                ALTER TABLE chapter
+                ADD CONSTRAINT chapter_creator_id_fkey
+                FOREIGN KEY (creator_id) REFERENCES "user"(id) ON DELETE SET NULL;
+            END IF;
+        END $$;
+        """
     )
 
     # --- user_roles: replace composite PK with a surrogate id ---
@@ -39,26 +49,41 @@ def upgrade() -> None:
     # org_id nullable, and enforce uniqueness via partial indexes.
 
     # 1. Drop the existing composite primary key
-    op.execute("ALTER TABLE user_roles DROP CONSTRAINT user_roles_pkey")
+    op.execute("ALTER TABLE user_roles DROP CONSTRAINT IF EXISTS user_roles_pkey")
 
     # 2. Add a new serial id column
-    op.execute("ALTER TABLE user_roles ADD COLUMN id SERIAL")
+    op.execute("ALTER TABLE user_roles ADD COLUMN IF NOT EXISTS id SERIAL")
 
     # 3. Make org_id nullable (now safe since it is no longer part of the PK)
     op.execute("ALTER TABLE user_roles ALTER COLUMN org_id DROP NOT NULL")
 
     # 4. Set the new id column as the primary key
-    op.execute("ALTER TABLE user_roles ADD PRIMARY KEY (id)")
+    op.execute(
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1
+                FROM information_schema.table_constraints
+                WHERE constraint_schema = 'public'
+                  AND table_name = 'user_roles'
+                  AND constraint_name = 'user_roles_pkey'
+            ) THEN
+                ALTER TABLE user_roles ADD PRIMARY KEY (id);
+            END IF;
+        END $$;
+        """
+    )
 
     # 5. Enforce uniqueness for (user_id, role_id, org_id) — two partial indexes
     #    handle NULL and non-NULL org_id separately (compatible with PG 13+).
     op.execute(
-        "CREATE UNIQUE INDEX user_roles_unique_with_org "
+        "CREATE UNIQUE INDEX IF NOT EXISTS user_roles_unique_with_org "
         "ON user_roles (user_id, role_id, org_id) "
         "WHERE org_id IS NOT NULL"
     )
     op.execute(
-        "CREATE UNIQUE INDEX user_roles_unique_no_org "
+        "CREATE UNIQUE INDEX IF NOT EXISTS user_roles_unique_no_org "
         "ON user_roles (user_id, role_id) "
         "WHERE org_id IS NULL"
     )

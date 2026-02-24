@@ -1,11 +1,11 @@
-"""Update ORG admin permission scopes to :org
+"""Update organization permission scopes from :own to :org
 
 Revision ID: d8f9a1e3b5f9
 Revises: c4a1e8f73b92
 Create Date: 2026-02-10 03:56:00.000000
 
-Change the ORG admin permissions from :own to :org scope and reassign
-existing RolePermission rows accordingly.
+Change organization permissions from :own to :org scope and reassign
+existing role_permissions rows accordingly.
 """
 
 from alembic import op
@@ -39,7 +39,8 @@ def upgrade() -> None:
             resource, action, scope = parts
             conn.execute(
                 text(
-                    "INSERT INTO permissions (name, resource_type, action, scope) VALUES (:name, :resource, :action, :scope)"
+                    "INSERT INTO permissions (name, resource_type, action, scope, created_at) "
+                    "VALUES (:name, :resource, :action, :scope, NOW())"
                 ),
                 {
                     "name": new_name,
@@ -96,7 +97,8 @@ def downgrade() -> None:
             resource, action, scope = parts
             conn.execute(
                 text(
-                    "INSERT INTO permissions (name, resource_type, action, scope) VALUES (:name, :resource, :action, :scope)"
+                    "INSERT INTO permissions (name, resource_type, action, scope, created_at) "
+                    "VALUES (:name, :resource, :action, :scope, NOW())"
                 ),
                 {
                     "name": old_name,

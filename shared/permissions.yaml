@@ -47,44 +47,13 @@ resources:
 # Role definitions with hierarchy
 roles:
   super-admin:
-    description: "Platform super administrator with full system access"
+    description: "Администратор платформы с полным доступом к системе"
     inherits: null
     permissions:
       - "*:*:*"  # Wildcard: all actions on all resources
 
-  org-admin:
-    description: "Organization administrator with full org control"
-    inherits: null
-    permissions:
-      - "organization:manage:org"
-      - "organization:update:org"
-      - "organization:read:org"
-      - "organization:delete:org"
-      - "course:*:org"
-      - "chapter:*:org"
-      - "activity:*:org"
-      - "assignment:*:org"
-      - "quiz:*:org"
-      - "exam:*:org"
-      - "user:read:org"
-      - "user:create:org"
-      - "user:update:org"
-      - "user:delete:org"
-      - "usergroup:*:org"
-      - "collection:*:org"
-      - "role:read:org"
-      - "role:create:org"
-      - "role:update:org"
-      - "role:delete:org"
-      - "certificate:*:org"
-      - "discussion:moderate:org"
-      - "file:*:org"
-      - "analytics:read:org"
-      - "analytics:export:org"
-      - "payment:manage:org"
-
   maintainer:
-    description: "Course maintainer with broad content permissions"
+    description: "Куратор курсов с расширенными правами на контент"
     inherits: null
     permissions:
       - "course:create:org"
@@ -107,7 +76,7 @@ roles:
       - "certificate:read:own"
 
   instructor:
-    description: "Course instructor with content creation abilities"
+    description: "Преподаватель с возможностью создавать контент"
     inherits: null
     permissions:
       - "course:create:org"
@@ -133,7 +102,7 @@ roles:
       - "user:read:assigned"
 
   moderator:
-    description: "Content moderator for discussions and user content"
+    description: "Модератор контента и обсуждений"
     inherits: null
     permissions:
       - "course:read:all"
@@ -144,7 +113,7 @@ roles:
       - "user:read:org"
 
   user:
-    description: "Regular user with basic access"
+    description: "Пользователь с базовым доступом"
     inherits: null
     permissions:
       - "course:read:all"

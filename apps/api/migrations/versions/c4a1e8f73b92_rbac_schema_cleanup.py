@@ -50,42 +50,14 @@ depends_on: str | Sequence[str] | None = None
 # ---------------------------------------------------------------------------
 SYSTEM_ROLES = {
     "super-admin": {
-        "name": "Super Admin",
-        "description": "Platform super administrator with full system access",
+        "name": "Администратор",
+        "description": "Администратор платформы с полным доступом к системе",
         "priority": 100,
         "permissions": ["*:*:*"],
     },
-    "org-admin": {
-        "name": "Organization Admin",
-        "description": "Organization administrator with full org control",
-        "priority": 90,
-        "permissions": [
-            "organization:manage:own",
-            "organization:update:own",
-            "organization:read:own",
-            "course:*:org",
-            "chapter:*:org",
-            "activity:*:org",
-            "assignment:*:org",
-            "quiz:*:org",
-            "exam:*:org",
-            "user:invite:org",
-            "user:read:org",
-            "user:update:org",
-            "usergroup:*:org",
-            "collection:*:org",
-            "role:read:org",
-            "role:create:org",
-            "role:update:org",
-            "certificate:*:org",
-            "discussion:moderate:org",
-            "analytics:read:org",
-            "payment:manage:org",
-        ],
-    },
     "maintainer": {
-        "name": "Maintainer",
-        "description": "Course maintainer with broad content permissions",
+        "name": "Куратор",
+        "description": "Куратор курсов с расширенными правами на контент",
         "priority": 70,
         "permissions": [
             "course:create:org",
@@ -108,8 +80,8 @@ SYSTEM_ROLES = {
         ],
     },
     "instructor": {
-        "name": "Instructor",
-        "description": "Course instructor with content creation abilities",
+        "name": "Преподаватель",
+        "description": "Преподаватель с возможностью создавать контент",
         "priority": 50,
         "permissions": [
             "course:create:org",
@@ -136,8 +108,8 @@ SYSTEM_ROLES = {
         ],
     },
     "moderator": {
-        "name": "Moderator",
-        "description": "Content moderator for discussions and user content",
+        "name": "Модератор",
+        "description": "Модератор контента и обсуждений",
         "priority": 40,
         "permissions": [
             "course:read:all",
@@ -149,8 +121,8 @@ SYSTEM_ROLES = {
         ],
     },
     "user": {
-        "name": "User",
-        "description": "Regular user with basic access",
+        "name": "Пользователь",
+        "description": "Пользователь с базовым доступом",
         "priority": 10,
         "permissions": [
             "course:read:all",
@@ -446,6 +418,23 @@ def upgrade() -> None:
     print("   Done")
 
     # ==================================================================
+    # 8.5 Remove deprecated org-admin role rows
+    # ==================================================================
+    print("\n8.5 Removing deprecated org-admin role...")
+    conn.execute(
+        text(
+            """
+            DELETE FROM user_roles
+            WHERE role_id IN (
+                SELECT id FROM roles WHERE slug = 'org-admin'
+            )
+            """
+        )
+    )
+    conn.execute(text("DELETE FROM roles WHERE slug = 'org-admin'"))
+    print("   Done")
+
+    # ==================================================================
     # 9. Re-seed permissions and role-permission mappings
     # ==================================================================
     print("\n9. Re-seeding permissions and role-permission assignments...")
@@ -626,13 +615,13 @@ def _reseed_permissions_and_roles(conn) -> None:
             if "*" not in p:
                 all_perms.add(p)
 
-    # Upsert each permission
+    # Upsert each permission (include created_at so default constraints aren't required)
     for perm_name in sorted(all_perms):
         resource_type, action_val, scope_val = perm_name.split(":")
         conn.execute(
             text("""
-                INSERT INTO permissions (name, resource_type, action, scope)
-                VALUES (:name, :resource_type, :action, :scope)
+                INSERT INTO permissions (name, resource_type, action, scope, created_at)
+                VALUES (:name, :resource_type, :action, :scope, NOW())
                 ON CONFLICT (name) DO NOTHING
             """),
             {
@@ -652,10 +641,15 @@ def _reseed_permissions_and_roles(conn) -> None:
         # Ensure the role exists
         conn.execute(
             text("""
-                INSERT INTO roles (slug, name, description, is_system, priority, org_id)
-                VALUES (:slug, :name, :description, true, :priority, NULL)
+                INSERT INTO roles (
+                    slug, name, description, is_system, priority, org_id, created_at, updated_at
+                )
+                VALUES (:slug, :name, :description, true, :priority, NULL, NOW(), NOW())
                 ON CONFLICT ON CONSTRAINT uq_roles_slug_org DO UPDATE
-                SET name = :name, description = :description, priority = :priority
+                SET name = :name,
+                    description = :description,
+                    priority = :priority,
+                    updated_at = NOW()
             """),
             {
                 "slug": slug,

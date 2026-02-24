@@ -6,7 +6,6 @@ Create Date: 2026-02-11 00:00:00.000000
 
 """
 
-import contextlib
 from collections.abc import Sequence
 from typing import Union
 
@@ -128,6 +127,63 @@ def _check_duplicates(
         return ([], f"failed to query duplicates for {table}.{column}: {e}")
 
 
+def _table_exists(conn: sa.engine.Connection, table: str) -> bool:
+    return bool(
+        conn.execute(
+            sa.text(
+                """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM information_schema.tables
+                    WHERE table_schema = 'public' AND table_name = :table
+                )
+                """
+            ),
+            {"table": table},
+        ).scalar()
+    )
+
+
+def _column_exists(conn: sa.engine.Connection, table: str, column: str) -> bool:
+    return bool(
+        conn.execute(
+            sa.text(
+                """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM information_schema.columns
+                    WHERE table_schema = 'public'
+                      AND table_name = :table
+                      AND column_name = :column
+                )
+                """
+            ),
+            {"table": table, "column": column},
+        ).scalar()
+    )
+
+
+def _constraint_exists(conn: sa.engine.Connection, table: str, constraint: str) -> bool:
+    return bool(
+        conn.execute(
+            sa.text(
+                """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM pg_constraint c
+                    JOIN pg_class t ON t.oid = c.conrelid
+                    JOIN pg_namespace n ON n.oid = t.relnamespace
+                    WHERE n.nspname = 'public'
+                      AND t.relname = :table
+                      AND c.conname = :constraint
+                )
+                """
+            ),
+            {"table": table, "constraint": constraint},
+        ).scalar()
+    )
+
+
 def upgrade() -> None:
     conn = op.get_bind()
 
@@ -158,19 +214,28 @@ def upgrade() -> None:
 
     # No duplicates - create constraints and indexes
     for table, column, constraint_name, index_name in TARGETS:
-        try:
+        if not _table_exists(conn, table) or not _column_exists(conn, table, column):
+            continue
+
+        if not _constraint_exists(conn, table, constraint_name):
             op.create_unique_constraint(constraint_name, table, [column])
-        except Exception:
-            # If constraint exists, ignore
-            pass
-        with contextlib.suppress(Exception):
-            op.create_index(index_name, table, [column])
+
+        conn.execute(
+            sa.text(
+                f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} ({column})"
+            )
+        )
 
 
 def downgrade() -> None:
+    conn = op.get_bind()
+
     # Remove constraints and indexes added by this revision
     for table, _column, constraint_name, index_name in TARGETS:
-        with contextlib.suppress(Exception):
-            op.drop_index(index_name, table_name=table)
-        with contextlib.suppress(Exception):
-            op.drop_constraint(constraint_name, table_name=table, type_="unique")
+        if _table_exists(conn, table):
+            conn.execute(sa.text(f"DROP INDEX IF EXISTS {index_name}"))
+            conn.execute(
+                sa.text(
+                    f"ALTER TABLE {table} DROP CONSTRAINT IF EXISTS {constraint_name}"
+                )
+            )

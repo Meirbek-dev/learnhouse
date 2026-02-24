@@ -86,39 +86,6 @@ ls -lh ./backups/backup-openu-latest.tar.gz
 points to a `.tar.zst` file. This is a known behavior of the backup tool. Always use the `--zstd`
 flag when extracting or listing the contents of the backup.
 
-## Remote Storage (Optional)
-
-The backup system supports multiple remote storage backends:
-
-### S3-Compatible Storage (AWS, MinIO, DigitalOcean Spaces, etc.)
-
-Uncomment and configure in `extra/backup.env`:
-
-```env
-AWS_S3_BUCKET_NAME="your-backup-bucket"
-AWS_S3_PATH="openu-backups"
-AWS_ACCESS_KEY_ID="your-access-key"
-AWS_SECRET_ACCESS_KEY="your-secret-key"
-AWS_ENDPOINT="s3.amazonaws.com"  # Or your S3-compatible endpoint
-```
-
-### Azure Blob Storage
-
-```env
-AZURE_STORAGE_ACCOUNT_NAME="your-account"
-AZURE_STORAGE_PRIMARY_ACCOUNT_KEY="your-key"
-AZURE_STORAGE_CONTAINER_NAME="backups"
-```
-
-### Dropbox
-
-```env
-DROPBOX_REMOTE_PATH="/backups"
-DROPBOX_APP_KEY="your-app-key"
-DROPBOX_APP_SECRET="your-app-secret"
-DROPBOX_REFRESH_TOKEN="your-refresh-token"
-```
-
 ## Restoring from Backup
 
 ### On Linux/macOS
@@ -258,6 +225,7 @@ tar -xf .\backups\backup-2026-01-23T02-00-00.tar -C temp-restore
 **Option D: Using Git Bash or WSL (Recommended)**
 
 If you have Git Bash or WSL installed, this is the simplest and most reliable method:
+R
 
 ```bash
 # In Git Bash or WSL terminal
@@ -267,7 +235,7 @@ tar --zstd -xf ./backups/backup-2026-01-23T02-00-00.tar.zst -C temp-restore
 
 After extraction, you should have the following structure:
 
-```
+```bash
 temp-restore/
   backup/
     postgres/

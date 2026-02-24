@@ -54,19 +54,19 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Restore invite permissions to org-admin role."""
+    """Restore invite permissions to super-admin role."""
     conn = op.get_bind()
 
-    print("Restoring user:invite:org permission to org-admin role...")
+    print("Restoring user:invite:org permission to super-admin role...")
 
-    # Find org-admin role and add user:invite:org permission back
-    # Note: This is a best-effort restore - only restores to system org-admin role
+    # Find super-admin role and add user:invite:org permission back
+    # Note: This is a best-effort restore - only restores to system super-admin role
     conn.execute(
         sa.text("""
         INSERT INTO role_permission (role_id, permission)
         SELECT r.id, 'user:invite:org'
         FROM role r
-        WHERE r.slug = 'org-admin'
+        WHERE r.slug = 'super-admin'
         AND r.is_system = true
         AND NOT EXISTS (
             SELECT 1 FROM role_permission rp
@@ -75,4 +75,4 @@ def downgrade() -> None:
     """)
     )
 
-    print("user:invite:org permission restored to org-admin role")
+    print("user:invite:org permission restored to super-admin role")

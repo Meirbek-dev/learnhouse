@@ -1,7 +1,7 @@
 """RBAC rewrite - Consolidated
 
 Revision ID: 69fd16a5d534
-Revises: 103e657f0164
+Revises:
 Create Date: 2026-01-23 22:37:32.359114
 
 This consolidated migration includes all RBAC system changes and related enhancements:
@@ -15,7 +15,7 @@ This consolidated migration includes all RBAC system changes and related enhance
 
 ## Features
 - Complete permission seeding for all resources
-- System role creation (super-admin, org-admin, maintainer, instructor, moderator, user)
+- System role creation (super-admin, maintainer, instructor, moderator, user)
 - Performance indexes for permission lookups
 - PostgreSQL functions for role hierarchy and permission checking
 - Support for permission expiration and conditional grants
@@ -44,6 +44,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = "69fd16a5d534"
+# This migration is the root of the history; no parent revision exists.
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -653,22 +654,21 @@ def _seed_default_roles(conn) -> None:
     roles = [
         (
             "super-admin",
-            "Super Admin",
-            "Platform-wide administrator with full access",
+            "Администратор",
+            "Администратор платформы с полным доступом",
             True,
             100,
         ),
-        ("org-admin", "Organization Admin", "Full control over organization", True, 90),
         (
             "maintainer",
-            "Maintainer",
-            "Content management and course administration",
+            "Куратор",
+            "Управление контентом и администрирование курсов",
             True,
             70,
         ),
-        ("instructor", "Instructor", "Course creation and management", True, 50),
-        ("moderator", "Moderator", "Community moderation", True, 40),
-        ("user", "User", "Standard authenticated user", True, 10),
+        ("instructor", "Преподаватель", "Создание и ведение курсов", True, 50),
+        ("moderator", "Модератор", "Модерация сообщества", True, 40),
+        ("user", "Пользователь", "Стандартный авторизованный пользователь", True, 10),
     ]
 
     # Insert roles
@@ -699,26 +699,6 @@ def _seed_default_roles(conn) -> None:
     # Define role-permission mappings
     role_permissions = {
         "super-admin": list(perm_ids.keys()),  # All permissions
-        "org-admin": [
-            p
-            for p in perm_ids
-            if any(
-                x in p
-                for x in [
-                    "organization:",
-                    "course:",
-                    "chapter:",
-                    "activity:",
-                    "user:",
-                    "usergroup:",
-                    "collection:",
-                    "role:",
-                    "analytics:",
-                    "file:",
-                    "api_token:",
-                ]
-            )
-        ],
         "maintainer": [
             p
             for p in perm_ids
@@ -807,7 +787,7 @@ def _migrate_user_organizations(conn) -> None:
 
         # Map old role IDs to new role slugs
         old_role_mapping = {
-            1: "org-admin",
+            1: "super-admin",
             2: "maintainer",
             3: "instructor",
             4: "user",

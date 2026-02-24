@@ -56,7 +56,6 @@ class RoleSlug(StrEnum):
     """Standard role slugs."""
 
     SUPER_ADMIN = "super-admin"
-    ORG_ADMIN = "org-admin"
     MAINTAINER = "maintainer"
     INSTRUCTOR = "instructor"
     MODERATOR = "moderator"
@@ -69,47 +68,14 @@ class RoleSlug(StrEnum):
 
 SYSTEM_ROLES: dict[str, dict] = {
     RoleSlug.SUPER_ADMIN: {
-        "name": "Super Admin",
-        "description": "Platform super administrator with full system access",
+        "name": "Администратор",
+        "description": "Администратор платформы с полным доступом к системе",
         "priority": 100,
         "permissions": ["*:*:*"],
     },
-    RoleSlug.ORG_ADMIN: {
-        "name": "Organization Admin",
-        "description": "Organization administrator with full org control",
-        "priority": 90,
-        "permissions": [
-            "organization:manage:org",
-            "organization:update:org",
-            "organization:read:org",
-            "organization:delete:org",
-            "course:*:org",
-            "chapter:*:org",
-            "activity:*:org",
-            "assignment:*:org",
-            "quiz:*:org",
-            "exam:*:org",
-            "user:read:org",
-            "user:create:org",
-            "user:update:org",
-            "user:delete:org",
-            "usergroup:*:org",
-            "collection:*:org",
-            "role:read:org",
-            "role:create:org",
-            "role:update:org",
-            "role:delete:org",
-            "certificate:*:org",
-            "discussion:moderate:org",
-            "file:*:org",
-            "analytics:read:org",
-            "analytics:export:org",
-            "payment:manage:org",
-        ],
-    },
     RoleSlug.MAINTAINER: {
-        "name": "Maintainer",
-        "description": "Course maintainer with broad content permissions",
+        "name": "Куратор",
+        "description": "Куратор курсов с расширенными правами на контент",
         "priority": 70,
         "permissions": [
             "course:create:org",
@@ -133,8 +99,8 @@ SYSTEM_ROLES: dict[str, dict] = {
         ],
     },
     RoleSlug.INSTRUCTOR: {
-        "name": "Instructor",
-        "description": "Course instructor with content creation abilities",
+        "name": "Преподаватель",
+        "description": "Преподаватель с возможностью создавать контент",
         "priority": 50,
         "permissions": [
             "course:create:org",
@@ -161,8 +127,8 @@ SYSTEM_ROLES: dict[str, dict] = {
         ],
     },
     RoleSlug.MODERATOR: {
-        "name": "Moderator",
-        "description": "Content moderator for discussions and user content",
+        "name": "Модератор",
+        "description": "Модератор контента и обсуждений",
         "priority": 40,
         "permissions": [
             "course:read:all",
@@ -174,8 +140,8 @@ SYSTEM_ROLES: dict[str, dict] = {
         ],
     },
     RoleSlug.USER: {
-        "name": "User",
-        "description": "Regular user with basic access",
+        "name": "Пользователь",
+        "description": "Пользователь с базовым доступом",
         "priority": 10,
         "permissions": [
             "course:read:all",
@@ -205,4 +171,4 @@ SYSTEM_ROLES: dict[str, dict] = {
 # Role group helpers
 # ============================================================================
 
-ADMIN_ROLE_SLUGS = frozenset({RoleSlug.SUPER_ADMIN, RoleSlug.ORG_ADMIN})
+ADMIN_ROLE_SLUGS = frozenset({RoleSlug.SUPER_ADMIN})
