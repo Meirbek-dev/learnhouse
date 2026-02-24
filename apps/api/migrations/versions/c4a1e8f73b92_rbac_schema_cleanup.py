@@ -418,20 +418,99 @@ def upgrade() -> None:
     print("   Done")
 
     # ==================================================================
-    # 8.5 Remove deprecated org-admin role rows
+    # 8.5 Remove deprecated org-admin role rows (with assignment remap)
     # ==================================================================
     print("\n8.5 Removing deprecated org-admin role...")
+    org_admin_rows = conn.execute(
+        text("SELECT id FROM roles WHERE slug = 'org-admin'")
+    ).fetchall()
+    org_admin_ids = [row[0] for row in org_admin_rows]
+
+    if org_admin_ids:
+        super_admin_row = conn.execute(
+            text("SELECT id FROM roles WHERE slug = 'super-admin' AND org_id IS NULL LIMIT 1")
+        ).fetchone()
+        maintainer_row = conn.execute(
+            text("SELECT id FROM roles WHERE slug = 'maintainer' AND org_id IS NULL LIMIT 1")
+        ).fetchone()
+        user_row = conn.execute(
+            text("SELECT id FROM roles WHERE slug = 'user' AND org_id IS NULL LIMIT 1")
+        ).fetchone()
+        replacement_role_id = (
+            super_admin_row[0]
+            if super_admin_row
+            else (maintainer_row[0] if maintainer_row else (user_row[0] if user_row else None))
+        )
+
+        if replacement_role_id is not None:
+            # Explicitly guarantee admin user_id=1 keeps privileged role per org.
+            for org_admin_id in org_admin_ids:
+                conn.execute(
+                    text(
+                        """
+                        INSERT INTO user_roles (user_id, role_id, org_id, assigned_at, assigned_by)
+                        SELECT ur.user_id, :replacement_role_id, ur.org_id, NOW(), NULL
+                        FROM user_roles ur
+                        WHERE ur.user_id = 1
+                          AND ur.role_id = :org_admin_id
+                          AND NOT EXISTS (
+                              SELECT 1
+                              FROM user_roles x
+                              WHERE x.user_id = ur.user_id
+                                AND x.org_id IS NOT DISTINCT FROM ur.org_id
+                                AND x.role_id = :replacement_role_id
+                          )
+                        """
+                    ),
+                    {
+                        "replacement_role_id": replacement_role_id,
+                        "org_admin_id": org_admin_id,
+                    },
+                )
+
+            for org_admin_id in org_admin_ids:
+                conn.execute(
+                    text(
+                        """
+                        UPDATE user_roles
+                        SET role_id = :replacement_role_id
+                        WHERE role_id = :org_admin_id
+                          AND NOT EXISTS (
+                              SELECT 1
+                              FROM user_roles ur2
+                              WHERE ur2.user_id = user_roles.user_id
+                                AND ur2.org_id IS NOT DISTINCT FROM user_roles.org_id
+                                AND ur2.role_id = :replacement_role_id
+                          )
+                        """
+                    ),
+                    {
+                        "replacement_role_id": replacement_role_id,
+                        "org_admin_id": org_admin_id,
+                    },
+                )
+                conn.execute(
+                    text("DELETE FROM user_roles WHERE role_id = :org_admin_id"),
+                    {"org_admin_id": org_admin_id},
+                )
+        else:
+            print(
+                "   Warning: no replacement role found for org-admin assignments; "
+                "keeping user_roles rows to avoid data loss"
+            )
+
+    # Remove deprecated role row only when there are no remaining assignments.
     conn.execute(
         text(
             """
-            DELETE FROM user_roles
-            WHERE role_id IN (
-                SELECT id FROM roles WHERE slug = 'org-admin'
-            )
+            DELETE FROM roles r
+            WHERE r.slug = 'org-admin'
+              AND NOT EXISTS (
+                  SELECT 1 FROM user_roles ur WHERE ur.role_id = r.id
+              )
             """
         )
     )
-    conn.execute(text("DELETE FROM roles WHERE slug = 'org-admin'"))
     print("   Done")
 
     # ==================================================================

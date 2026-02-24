@@ -19,16 +19,36 @@ depends_on = None
 
 
 def upgrade() -> None:
-    """Consolidate multiple user_roles per (user_id, org_id), keep earliest granted_at, then add unique constraint."""
+    """Remove exact duplicate role assignments safely and add unique
+    (user_id, org_id) constraint only when data is compatible.
+
+    This migration must not collapse legitimate multi-role assignments.
+    """
     conn = op.get_bind()
+
+    table_exists = conn.execute(
+        text(
+            """
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_schema = 'public' AND table_name = 'user_roles'
+            )
+            """
+        )
+    ).scalar()
+    if not table_exists:
+        print("[Migration] user_roles table does not exist, skipping")
+        return
 
     print("[Migration] Checking for duplicate user_roles (user_id, org_id)...")
 
+    # Only detect exact duplicates of the same role assignment.
     dup_rows = conn.execute(
         text("""
-            SELECT user_id, org_id, COUNT(*) as cnt
+            SELECT user_id, org_id, role_id, COUNT(*) as cnt
             FROM user_roles
-            GROUP BY user_id, org_id
+            GROUP BY user_id, org_id, role_id
             HAVING COUNT(*) > 1
         """)
     ).fetchall()
@@ -38,25 +58,46 @@ def upgrade() -> None:
     else:
         print(f"[Migration] Found {len(dup_rows)} duplicated (user_id, org_id) groups")
 
-        # Delete duplicates keeping the earliest granted_at for each (user_id, org_id)
-        # This uses a CTE with row_number to remove rows where rn > 1
+        # Delete only exact duplicate assignments, keeping the earliest granted_at.
         conn.execute(
             text("""
                 WITH ranked AS (
-                    SELECT user_id, org_id, role_id, granted_at,
-                           ROW_NUMBER() OVER (PARTITION BY user_id, org_id ORDER BY granted_at ASC NULLS FIRST) AS rn
+                    SELECT ctid,
+                           ROW_NUMBER() OVER (
+                               PARTITION BY user_id, org_id, role_id
+                               ORDER BY granted_at ASC NULLS FIRST
+                           ) AS rn
                     FROM user_roles
                 )
                 DELETE FROM user_roles
-                WHERE (user_id, org_id, role_id) IN (
-                    SELECT user_id, org_id, role_id FROM ranked WHERE rn > 1
-                )
+                WHERE ctid IN (SELECT ctid FROM ranked WHERE rn > 1)
             """)
         )
 
         print("[Migration] Removed duplicate user_roles rows")
 
-    # Add unique constraint to prevent future duplicates
+    # If users have multiple distinct roles in same org, do not enforce
+    # one-role-per-org constraint.
+    multi_role_groups = conn.execute(
+        text(
+            """
+            SELECT user_id, org_id, COUNT(DISTINCT role_id) AS role_cnt
+            FROM user_roles
+            GROUP BY user_id, org_id
+            HAVING COUNT(DISTINCT role_id) > 1
+            LIMIT 5
+            """
+        )
+    ).fetchall()
+
+    if multi_role_groups:
+        print(
+            "[Migration] Detected multi-role assignments per (user_id, org_id); "
+            "skipping uq_user_roles_user_org creation to preserve role data"
+        )
+        return
+
+    # Add unique constraint only if safe.
     try:
         conn.execute(
             text(

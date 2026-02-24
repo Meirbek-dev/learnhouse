@@ -27,47 +27,13 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    """Delete user_roles rows for the 'user' role where the same user already
-    holds a higher-priority role in the same org."""
-    conn = op.get_bind()
+    """Keep user_roles intact.
 
-    # Find the id of the 'user' system role (lowest priority, slug='user').
-    user_role_row = conn.execute(
-        text("SELECT id FROM roles WHERE slug = 'user' AND org_id IS NULL LIMIT 1")
-    ).fetchone()
-
-    if not user_role_row:
-        print("[Migration] 'user' role not found – nothing to do.")
-        return
-
-    user_role_id = user_role_row[0]
-
-    # Delete assignments to the 'user' role for any user who already has a
-    # different (higher-priority) role in the same org.
-    result = conn.execute(
-        text("""
-            DELETE FROM user_roles ur
-            WHERE ur.role_id = :user_role_id
-              AND EXISTS (
-                  SELECT 1
-                  FROM user_roles ur2
-                  JOIN roles r ON r.id = ur2.role_id
-                  WHERE ur2.user_id = ur.user_id
-                    AND (ur2.org_id = ur.org_id OR (ur2.org_id IS NULL AND ur.org_id IS NULL))
-                    AND ur2.role_id != :user_role_id
-                    AND r.priority > (
-                        SELECT priority FROM roles WHERE id = :user_role_id
-                    )
-              )
-        """),
-        {"user_role_id": user_role_id},
-    )
-
-    deleted = result.rowcount
-    if deleted:
-        print(f"[Migration] Removed {deleted} redundant 'user' role assignment(s).")
-    else:
-        print("[Migration] No redundant 'user' role assignments found.")
+    Previous version removed lower-priority roles for promoted users. That can
+    cause accidental loss of expected assignments during drifted/stamped
+    environments. We intentionally preserve all rows here.
+    """
+    print("[Migration] Data-preserving mode: no user_roles rows deleted.")
 
 
 def downgrade() -> None:
