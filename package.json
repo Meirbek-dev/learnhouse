@@ -14,8 +14,8 @@
     "check:permissions": "uv run --project apps/api python scripts/validate-permissions-yaml.py"
   },
   "devDependencies": {
-    "eslint": "^10.0.1",
-    "oxlint": "^1.49.0",
+    "eslint": "^10.0.2",
+    "oxlint": "^1.50.0",
     "oxlint-tsgolint": "^0.14.2",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",

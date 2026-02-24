@@ -21,7 +21,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { assignRoleToUser, listOrgUsers, listRoles, listUserRoles, removeRoleFromUser } from '@/services/rbac';
-import { getUserAvatarMediaDirectory } from '@/services/media/media';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertTriangle, Calendar, Plus, Search, Shield, Trash2, User } from 'lucide-react';
@@ -29,6 +28,7 @@ import { Actions, PermissionGuard, Resources, Scopes } from '@/components/Securi
 import type { OrgUserBasic, Role, UserRoleAssignment } from '@/types/permissions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { getUserAvatarMediaDirectory } from '@/services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useCallback, useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -221,7 +221,7 @@ export default function UserRolesClient() {
                     </SelectTrigger>
                     <SelectContent>
                       {users
-                        .filter((user) => user.id != null)
+                        .filter((user) => user.id !== null)
                         .map((user) => (
                           <SelectItem
                             key={user.id}
@@ -399,7 +399,10 @@ export default function UserRolesClient() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel />
-            <AlertDialogAction variant="destructive" onClick={confirmRemoveUserRole}>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={confirmRemoveUserRole}
+            >
               {t('removeRoleConfirm')}
             </AlertDialogAction>
           </AlertDialogFooter>

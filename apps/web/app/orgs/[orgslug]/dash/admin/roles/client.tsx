@@ -32,7 +32,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { AlertTriangle, ChevronRight, Copy, Edit, Loader2, Lock, Pencil, Plus, Search, Shield, Trash2, Users } from 'lucide-react';
+import {
+  AlertTriangle,
+  ChevronRight,
+  Copy,
+  Edit,
+  Loader2,
+  Lock,
+  Pencil,
+  Plus,
+  Search,
+  Shield,
+  Trash2,
+  Users,
+} from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
