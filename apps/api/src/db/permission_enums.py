@@ -55,7 +55,7 @@ class Scope(StrEnum):
 class RoleSlug(StrEnum):
     """Standard role slugs."""
 
-    SUPER_ADMIN = "super-admin"
+    ADMIN = "admin"
     MAINTAINER = "maintainer"
     INSTRUCTOR = "instructor"
     MODERATOR = "moderator"
@@ -67,7 +67,7 @@ class RoleSlug(StrEnum):
 # ============================================================================
 
 SYSTEM_ROLES: dict[str, dict] = {
-    RoleSlug.SUPER_ADMIN: {
+    RoleSlug.ADMIN: {
         "name": "Администратор",
         "description": "Администратор платформы с полным доступом к системе",
         "priority": 100,
@@ -171,4 +171,4 @@ SYSTEM_ROLES: dict[str, dict] = {
 # Role group helpers
 # ============================================================================
 
-ADMIN_ROLE_SLUGS = frozenset({RoleSlug.SUPER_ADMIN})
+ADMIN_ROLE_SLUGS = frozenset({RoleSlug.ADMIN})

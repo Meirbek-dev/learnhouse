@@ -4,14 +4,14 @@ Revision ID: e3f4a5b6c7d8
 Revises: 30d136b8fc44
 Create Date: 2026-02-22 18:00:00.000000
 
-When a user is assigned a higher-priority role (e.g. super-admin), the old
+When a user is assigned a higher-priority role (e.g. admin), the old
 lower-priority role assigned during initial seeding is not automatically removed.
 This migration strips out any "user" role (priority 10) assignment for users who
 also hold a higher-priority role in the same org.
 
 Concretely, the only affected row in the current dataset is:
   user_id=1, role_id=6 (user), org_id=1, id=20
-which became redundant when user 1 was promoted to super-admin (role_id=1).
+which became redundant when user 1 was promoted to admin (role_id=1).
 """
 
 from typing import Sequence, Union

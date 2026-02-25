@@ -59,7 +59,7 @@ export const HeaderProfileBox = () => {
         // Define role configurations based on slug
         const roleSlug = highestRole.role?.slug || '';
         const roleConfigs: Record<string, RoleInfo> = {
-          [RoleSlugs.SUPER_ADMIN]: {
+          [RoleSlugs.ADMIN]: {
             name: t('profile.roles.admin.name'),
             icon: <Crown size={12} />,
             bgColor: 'bg-purple-600',

@@ -46,7 +46,7 @@ resources:
 
 # Role definitions with hierarchy
 roles:
-  super-admin:
+  admin:
     description: "Администратор платформы с полным доступом к системе"
     inherits: null
     permissions:
@@ -147,4 +147,4 @@ roles:
 # Wildcard support:
 # - course:*:own = all actions on owned courses
 # - *:read:all = read all resource types
-# - *:*:* = super admin (all permissions)
+# - *:*:* = admin (all permissions)

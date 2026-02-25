@@ -154,10 +154,10 @@ async def create_org(
     from src.db.permissions import Role
 
     admin_role = db_session.exec(
-        select(Role).where(Role.slug == RoleSlug.SUPER_ADMIN)
+        select(Role).where(Role.slug == RoleSlug.ADMIN)
     ).first()
     if not admin_role:
-        raise HTTPException(500, detail="Super admin role not found")
+        raise HTTPException(500, detail="Admin role not found")
 
     # Link user to org by assigning admin role
     from src.security.rbac import PermissionChecker
@@ -255,10 +255,10 @@ async def create_org_with_config(
     from src.db.permissions import Role
 
     admin_role = db_session.exec(
-        select(Role).where(Role.slug == RoleSlug.SUPER_ADMIN)
+        select(Role).where(Role.slug == RoleSlug.ADMIN)
     ).first()
     if not admin_role:
-        raise HTTPException(500, detail="Super admin role not found")
+        raise HTTPException(500, detail="Admin role not found")
 
     # Link user to org by assigning admin role
     from src.security.rbac import PermissionChecker

@@ -60,7 +60,7 @@ export const Scopes = {
 export type Scope = (typeof Scopes)[keyof typeof Scopes];
 
 export const RoleSlugs = {
-  SUPER_ADMIN: 'super-admin',
+  ADMIN: 'admin',
   MAINTAINER: 'maintainer',
   INSTRUCTOR: 'instructor',
   MODERATOR: 'moderator',

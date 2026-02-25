@@ -49,7 +49,7 @@ depends_on: str | Sequence[str] | None = None
 # Current system role definitions (must stay in sync with permission_enums.py)
 # ---------------------------------------------------------------------------
 SYSTEM_ROLES = {
-    "super-admin": {
+    "admin": {
         "name": "Администратор",
         "description": "Администратор платформы с полным доступом к системе",
         "priority": 100,
@@ -427,8 +427,8 @@ def upgrade() -> None:
     org_admin_ids = [row[0] for row in org_admin_rows]
 
     if org_admin_ids:
-        super_admin_row = conn.execute(
-            text("SELECT id FROM roles WHERE slug = 'super-admin' AND org_id IS NULL LIMIT 1")
+        admin_row = conn.execute(
+            text("SELECT id FROM roles WHERE slug = 'admin' AND org_id IS NULL LIMIT 1")
         ).fetchone()
         maintainer_row = conn.execute(
             text("SELECT id FROM roles WHERE slug = 'maintainer' AND org_id IS NULL LIMIT 1")
@@ -437,8 +437,8 @@ def upgrade() -> None:
             text("SELECT id FROM roles WHERE slug = 'user' AND org_id IS NULL LIMIT 1")
         ).fetchone()
         replacement_role_id = (
-            super_admin_row[0]
-            if super_admin_row
+            admin_row[0]
+            if admin_row
             else (maintainer_row[0] if maintainer_row else (user_row[0] if user_row else None))
         )
 

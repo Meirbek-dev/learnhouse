@@ -15,7 +15,7 @@ This consolidated migration includes all RBAC system changes and related enhance
 
 ## Features
 - Complete permission seeding for all resources
-- System role creation (super-admin, maintainer, instructor, moderator, user)
+- System role creation (admin, maintainer, instructor, moderator, user)
 - Performance indexes for permission lookups
 - PostgreSQL functions for role hierarchy and permission checking
 - Support for permission expiration and conditional grants
@@ -112,7 +112,7 @@ def upgrade() -> None:
         sa.Column("name", sa.String(100), nullable=False),
         sa.Column(
             "resource_type",
-            sa.Enum(
+            postgresql.ENUM(
                 "organization",
                 "course",
                 "chapter",
@@ -132,12 +132,13 @@ def upgrade() -> None:
                 "payment",
                 "api_token",
                 name="resourcetype",
+                create_type=False,
             ),
             nullable=False,
         ),
         sa.Column(
             "action",
-            sa.Enum(
+            postgresql.ENUM(
                 "create",
                 "read",
                 "update",
@@ -150,12 +151,20 @@ def upgrade() -> None:
                 "submit",
                 "enroll",
                 name="action",
+                create_type=False,
             ),
             nullable=False,
         ),
         sa.Column(
             "scope",
-            sa.Enum("all", "own", "assigned", "org", name="scope"),
+            postgresql.ENUM(
+                "all",
+                "own",
+                "assigned",
+                "org",
+                name="scope",
+                create_type=False,
+            ),
             nullable=False,
             server_default="all",
         ),
@@ -234,7 +243,7 @@ def upgrade() -> None:
         sa.Column("conditions", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column(
             "grant_type",
-            sa.Enum("ALLOW", "DENY", name="granttype"),
+            postgresql.ENUM("ALLOW", "DENY", name="granttype", create_type=False),
             nullable=False,
             server_default="ALLOW",
         ),
@@ -312,7 +321,14 @@ def upgrade() -> None:
         sa.Column("org_id", sa.Integer(), nullable=True),
         sa.Column(
             "action",
-            sa.Enum("CHECK", "GRANT", "REVOKE", "DENY", name="auditaction"),
+            postgresql.ENUM(
+                "CHECK",
+                "GRANT",
+                "REVOKE",
+                "DENY",
+                name="auditaction",
+                create_type=False,
+            ),
             nullable=False,
             server_default="CHECK",
         ),
@@ -634,7 +650,14 @@ def _seed_default_permissions(conn) -> None:
         conn.execute(
             text("""
             INSERT INTO permissions (name, resource_type, action, scope, description, permission_key)
-            VALUES (:name, :resource_type::resourcetype, :action::action, :scope::scope, :description, :permission_key)
+            VALUES (
+                :name,
+                CAST(:resource_type AS resourcetype),
+                CAST(:action AS action),
+                CAST(:scope AS scope),
+                :description,
+                :permission_key
+            )
             ON CONFLICT (name) DO UPDATE SET permission_key = :permission_key
         """),
             {
@@ -653,7 +676,7 @@ def _seed_default_roles(conn) -> None:
     # Define roles
     roles = [
         (
-            "super-admin",
+            "admin",
             "Администратор",
             "Администратор платформы с полным доступом",
             True,
@@ -698,7 +721,7 @@ def _seed_default_roles(conn) -> None:
 
     # Define role-permission mappings
     role_permissions = {
-        "super-admin": list(perm_ids.keys()),  # All permissions
+        "admin": list(perm_ids.keys()),  # All permissions
         "maintainer": [
             p
             for p in perm_ids
@@ -787,7 +810,7 @@ def _migrate_user_organizations(conn) -> None:
 
         # Map old role IDs to new role slugs
         old_role_mapping = {
-            1: "super-admin",
+            1: "admin",
             2: "maintainer",
             3: "instructor",
             4: "user",
