@@ -117,6 +117,18 @@ class ActivityRead(ActivityBase):
     creation_date: datetime
     update_date: datetime
 
+    @field_validator("creation_date", "update_date", mode="before")
+    @classmethod
+    def validate_datetimes(cls, v):
+        if isinstance(v, datetime):
+            return v
+        if isinstance(v, str):
+            value = v.strip()
+            if value.endswith("Z"):
+                value = f"{value[:-1]}+00:00"
+            return datetime.fromisoformat(value)
+        return v
+
 
 class ActivityReadWithPermissions(ActivityRead):
     """Activity response with permission metadata."""
