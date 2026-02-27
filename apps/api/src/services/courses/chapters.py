@@ -243,7 +243,8 @@ async def get_course_chapters(
 
     # RBAC check (rights are determined by parent Course for read access)
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read", course.org_id)
+    if not course.public:
+        checker.require(current_user.id, "course:read", course.org_id)
 
     statement = (
         select(Chapter)

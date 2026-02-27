@@ -233,9 +233,10 @@ async def get_products_by_course(
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    # RBAC check
+    # RBAC check — skip for public courses (needed to display pricing to anonymous users)
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read", org_id)
+    if not course.public:
+        checker.require(current_user.id, "organization:read", org_id)
 
     # Get all products linked to this course with explicit join
     statement = (

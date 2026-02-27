@@ -160,15 +160,16 @@ async def get_course_meta(
         (ra, u) for _, ra, u in results if ra is not None and u is not None
     ]
 
-    # RBAC check
-    if checker is None:
-        checker = PermissionChecker(db_session)
-    checker.require(
-        current_user.id,
-        "course:read",
-        course.org_id,
-        resource_owner_id=course.creator_id,
-    )
+    # RBAC check — skip for public courses
+    if not course.public:
+        if checker is None:
+            checker = PermissionChecker(db_session)
+        checker.require(
+            current_user.id,
+            "course:read",
+            course.org_id,
+            resource_owner_id=course.creator_id,
+        )
 
     # Get course chapters
     chapters = []
