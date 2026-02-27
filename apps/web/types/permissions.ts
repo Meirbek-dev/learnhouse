@@ -107,6 +107,34 @@ export interface Permission {
 /** Role with its assigned permissions. */
 export interface RoleWithPermissions extends Role {
   permissions: Permission[];
+  permissions_count?: number;
+  users_count?: number;
+}
+
+export interface RoleAuditEvent {
+  timestamp: string;
+  actor_id: number | null;
+  action: string;
+  target_role_id: number | null;
+  target_role_slug: string | null;
+  diff_summary: string | null;
+}
+
+export interface RoleAuditListResponse {
+  items: RoleAuditEvent[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface OrgUserBasic {
+  id: number;
+  user_uuid?: string;
+  email: string;
+  username: string;
+  first_name?: string;
+  last_name?: string;
+  avatar_image?: string;
 }
 
 /** A user↔role assignment record. */
@@ -118,6 +146,7 @@ export interface UserRoleAssignment {
   assigned_by: number | null;
   user?: {
     id: number;
+    user_uuid?: string;
     email: string;
     username: string;
     first_name?: string;
@@ -132,12 +161,15 @@ export interface CreateRoleBody {
   name: string;
   slug: string;
   description?: string;
+  priority?: number;
 }
 
 /** Body for updating a role. */
 export interface UpdateRoleBody {
   name: string;
+  slug?: string;
   description?: string;
+  priority?: number;
 }
 
 // ============================================================================

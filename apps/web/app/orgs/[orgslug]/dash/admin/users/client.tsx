@@ -221,7 +221,7 @@ export default function UserRolesClient() {
                     </SelectTrigger>
                     <SelectContent>
                       {users
-                        .filter((user) => user.id !== null)
+                        .filter((user) => user.id !== undefined)
                         .map((user) => (
                           <SelectItem
                             key={user.id}
