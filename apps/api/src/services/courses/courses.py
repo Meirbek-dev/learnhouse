@@ -1056,7 +1056,10 @@ async def get_course_user_rights(
 
     # Check instructor role (course-level update permission)
     user_has_instructor_role = checker.check(
-        current_user.id, "course:update", course.org_id, resource_owner_id=course.creator_id
+        current_user.id,
+        "course:update",
+        course.org_id,
+        resource_owner_id=course.creator_id,
     )
 
     if user_has_instructor_role:

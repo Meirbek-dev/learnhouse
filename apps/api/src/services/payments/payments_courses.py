@@ -25,7 +25,9 @@ async def link_course_to_product(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:update", org_id, resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id, "course:update", org_id, resource_owner_id=course.creator_id
+    )
 
     # Check if product exists
     statement = select(PaymentsProduct).where(
@@ -74,7 +76,9 @@ async def unlink_course_from_product(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:update", org_id, resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id, "course:update", org_id, resource_owner_id=course.creator_id
+    )
 
     # Find and delete the payment course link
     statement = select(PaymentsCourse).where(

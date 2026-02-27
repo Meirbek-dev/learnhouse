@@ -431,7 +431,9 @@ def upgrade() -> None:
             text("SELECT id FROM roles WHERE slug = 'admin' AND org_id IS NULL LIMIT 1")
         ).fetchone()
         maintainer_row = conn.execute(
-            text("SELECT id FROM roles WHERE slug = 'maintainer' AND org_id IS NULL LIMIT 1")
+            text(
+                "SELECT id FROM roles WHERE slug = 'maintainer' AND org_id IS NULL LIMIT 1"
+            )
         ).fetchone()
         user_row = conn.execute(
             text("SELECT id FROM roles WHERE slug = 'user' AND org_id IS NULL LIMIT 1")
@@ -439,7 +441,11 @@ def upgrade() -> None:
         replacement_role_id = (
             admin_row[0]
             if admin_row
-            else (maintainer_row[0] if maintainer_row else (user_row[0] if user_row else None))
+            else (
+                maintainer_row[0]
+                if maintainer_row
+                else (user_row[0] if user_row else None)
+            )
         )
 
         if replacement_role_id is not None:

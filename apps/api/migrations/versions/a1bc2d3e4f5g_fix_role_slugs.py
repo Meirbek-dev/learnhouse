@@ -13,29 +13,33 @@ The slug generation logic mirrors the lightweight "slugify" helper used in
 `src/db/permissions.py`.
 """
 
-from typing import Sequence, Union
-
-from alembic import op
-import sqlalchemy as sa
-from sqlalchemy import text
 import re
+from collections.abc import Sequence
+from typing import Union
+
+import sqlalchemy as sa
+from alembic import op
+from sqlalchemy import text
 
 # attempt to leverage shared slugify logic so we don't drift; fall back to
 # local copy if import fails (e.g. when migrations run in isolated context).
 try:
     from src.db.permissions import slugify as _slugify
 except ImportError:  # pragma: no cover - defensive
+
     def _slugify(name: str) -> str:  # type: ignore
         return re.sub(r"[^a-z0-9_]", "", re.sub(r"\s+", "_", name.strip().lower()))
 
+
 # revision identifiers, used by Alembic.
 revision: str = "a1bc2d3e4f5g"
-down_revision: Union[str, None] = "5447127d3297"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "5447127d3297"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 # lightweight slugify to match frontend behaviour
+
 
 def _slugify(name: str) -> str:
     return re.sub(r"[^a-z0-9_]", "", re.sub(r"\s+", "_", name.strip().lower()))

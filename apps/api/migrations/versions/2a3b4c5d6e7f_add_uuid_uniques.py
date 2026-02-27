@@ -221,9 +221,7 @@ def upgrade() -> None:
             op.create_unique_constraint(constraint_name, table, [column])
 
         conn.execute(
-            sa.text(
-                f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} ({column})"
-            )
+            sa.text(f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} ({column})")
         )
 
 

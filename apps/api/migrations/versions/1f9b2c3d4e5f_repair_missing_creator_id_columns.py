@@ -68,7 +68,9 @@ def upgrade() -> None:
 
     for table_name, fk_name in TABLES:
         if not _column_exists(conn, table_name, "creator_id"):
-            op.add_column(table_name, sa.Column("creator_id", sa.BigInteger(), nullable=True))
+            op.add_column(
+                table_name, sa.Column("creator_id", sa.BigInteger(), nullable=True)
+            )
 
         if not _fk_exists(conn, table_name, fk_name):
             op.create_foreign_key(

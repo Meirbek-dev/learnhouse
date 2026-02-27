@@ -60,7 +60,13 @@ async def submit_quiz(
 
     # Check permissions (students can submit, teachers can view)
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "quiz:submit", activity.org_id, resource_owner_id=activity.creator_id, is_assigned=True)
+    checker.require(
+        current_user.id,
+        "quiz:submit",
+        activity.org_id,
+        resource_owner_id=activity.creator_id,
+        is_assigned=True,
+    )
 
     # Get quiz block to access questions and settings
     statement = (
@@ -258,7 +264,12 @@ async def get_quiz_attempts(
     statement = select(QuizAttempt).where(QuizAttempt.activity_id == activity_id)
 
     # Check if user can view all attempts (instructor/admin) or just their own
-    can_view_all = checker.check(current_user.id, "quiz:update", activity.org_id, resource_owner_id=activity.creator_id)
+    can_view_all = checker.check(
+        current_user.id,
+        "quiz:update",
+        activity.org_id,
+        resource_owner_id=activity.creator_id,
+    )
 
     # If not instructor/admin, only show own attempts
     if not can_view_all:
@@ -295,7 +306,12 @@ async def get_quiz_stats(
 
     # Check permissions (teacher/admin only)
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "quiz:read", activity.org_id, resource_owner_id=activity.creator_id)
+    checker.require(
+        current_user.id,
+        "quiz:read",
+        activity.org_id,
+        resource_owner_id=activity.creator_id,
+    )
 
     # Get stats
     statement = select(QuizQuestionStat).where(

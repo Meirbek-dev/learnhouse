@@ -121,7 +121,12 @@ async def create_exam(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:create", course.org_id, resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id,
+        "exam:create",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     # Validate settings against ExamSettingsBase so frontend limits are enforced server-side
     try:
@@ -174,7 +179,11 @@ async def read_exam(
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
     checker.require(
-        current_user.id, "exam:read", course.org_id, is_assigned=True, resource_owner_id=course.creator_id
+        current_user.id,
+        "exam:read",
+        course.org_id,
+        is_assigned=True,
+        resource_owner_id=course.creator_id,
     )
 
     return ExamRead.model_validate(exam)
@@ -205,7 +214,11 @@ async def read_exam_from_activity_uuid(
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
     checker.require(
-        current_user.id, "exam:read", course.org_id, is_assigned=True, resource_owner_id=course.creator_id
+        current_user.id,
+        "exam:read",
+        course.org_id,
+        is_assigned=True,
+        resource_owner_id=course.creator_id,
     )
 
     return ExamRead.model_validate(exam)
@@ -316,7 +329,12 @@ async def create_exam_with_activity(
 
     # RBAC check: ensure user can create content in this course
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:create", course.org_id, resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id,
+        "exam:create",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     # Validate settings
     try:
@@ -424,7 +442,12 @@ async def create_question(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:create", course.org_id, resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id,
+        "exam:create",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     # Input validation and sanitization
     if not question_object.question_text or not question_object.question_text.strip():
@@ -517,7 +540,11 @@ async def read_questions(
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
     checker.require(
-        current_user.id, "exam:read", course.org_id, is_assigned=True, resource_owner_id=course.creator_id
+        current_user.id,
+        "exam:read",
+        course.org_id,
+        is_assigned=True,
+        resource_owner_id=course.creator_id,
     )
 
     statement = (
@@ -1244,7 +1271,9 @@ async def get_all_exam_attempts(
     has_rbac_access = checker.check(
         current_user.id, "exam:read", course.org_id, resource_owner_id=course.creator_id
     )
-    is_contributor = await is_course_contributor_or_admin(current_user.id, course, db_session)
+    is_contributor = await is_course_contributor_or_admin(
+        current_user.id, course, db_session
+    )
     is_course_creator = bool(course.creator_id and course.creator_id == current_user.id)
 
     if not has_rbac_access and not is_contributor and not is_course_creator:
@@ -1336,9 +1365,7 @@ async def export_questions_csv(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(
-        current_user.id, "exam:read", course.org_id
-    )
+    checker.require(current_user.id, "exam:read", course.org_id)
 
     # Get questions
     questions_statement = (

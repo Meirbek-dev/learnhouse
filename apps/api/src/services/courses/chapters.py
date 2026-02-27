@@ -42,7 +42,12 @@ async def create_chapter(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "chapter:create", course.org_id, resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id,
+        "chapter:create",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     # Complete chapter object
     chapter.course_id = chapter_object.course_id
@@ -322,7 +327,12 @@ async def reorder_chapters_and_activities(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "chapter:update", course.org_id, resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id,
+        "chapter:update",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     ###########
     # Chapters

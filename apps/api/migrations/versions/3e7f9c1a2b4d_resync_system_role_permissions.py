@@ -36,13 +36,36 @@ depends_on: str | Sequence[str] | None = None
 # Full enum lists (must stay in sync with permission_enums.py)
 # ---------------------------------------------------------------------------
 ALL_RESOURCES = [
-    "organization", "course", "chapter", "activity", "assignment", "quiz",
-    "user", "usergroup", "collection", "role", "certificate", "discussion",
-    "file", "analytics", "trail", "exam", "payment", "api_token",
+    "organization",
+    "course",
+    "chapter",
+    "activity",
+    "assignment",
+    "quiz",
+    "user",
+    "usergroup",
+    "collection",
+    "role",
+    "certificate",
+    "discussion",
+    "file",
+    "analytics",
+    "trail",
+    "exam",
+    "payment",
+    "api_token",
 ]
 ALL_ACTIONS = [
-    "create", "read", "update", "delete", "manage", "moderate",
-    "export", "grade", "submit", "enroll",
+    "create",
+    "read",
+    "update",
+    "delete",
+    "manage",
+    "moderate",
+    "export",
+    "grade",
+    "submit",
+    "enroll",
 ]
 ALL_SCOPES = ["all", "own", "assigned", "org"]
 
@@ -61,14 +84,24 @@ SYSTEM_ROLES: dict[str, dict] = {
         "description": "Куратор курсов с расширенными правами на контент",
         "priority": 70,
         "permissions": [
-            "course:create:org", "course:read:all", "course:update:org",
-            "course:delete:own", "course:manage:own",
-            "chapter:*:org", "activity:*:org",
-            "assignment:*:org", "quiz:*:org", "exam:*:org",
-            "collection:create:org", "collection:read:all",
-            "collection:update:own", "collection:delete:own",
-            "discussion:moderate:org", "analytics:read:own",
-            "certificate:create:own", "certificate:read:own",
+            "course:create:org",
+            "course:read:all",
+            "course:update:org",
+            "course:delete:own",
+            "course:manage:own",
+            "chapter:*:org",
+            "activity:*:org",
+            "assignment:*:org",
+            "quiz:*:org",
+            "exam:*:org",
+            "collection:create:org",
+            "collection:read:all",
+            "collection:update:own",
+            "collection:delete:own",
+            "discussion:moderate:org",
+            "analytics:read:own",
+            "certificate:create:own",
+            "certificate:read:own",
         ],
     },
     "instructor": {
@@ -76,16 +109,26 @@ SYSTEM_ROLES: dict[str, dict] = {
         "description": "Преподаватель с возможностью создавать контент",
         "priority": 50,
         "permissions": [
-            "course:create:org", "course:read:all", "course:update:own",
+            "course:create:org",
+            "course:read:all",
+            "course:update:own",
             "course:delete:own",
-            "chapter:create:own", "chapter:read:all", "chapter:update:own",
+            "chapter:create:own",
+            "chapter:read:all",
+            "chapter:update:own",
             "chapter:delete:own",
-            "activity:create:own", "activity:read:all", "activity:update:own",
+            "activity:create:own",
+            "activity:read:all",
+            "activity:update:own",
             "activity:delete:own",
-            "assignment:*:own", "quiz:*:own", "exam:*:own",
-            "collection:create:org", "collection:read:all",
+            "assignment:*:own",
+            "quiz:*:own",
+            "exam:*:own",
+            "collection:create:org",
+            "collection:read:all",
             "collection:update:own",
-            "discussion:moderate:own", "analytics:read:own",
+            "discussion:moderate:own",
+            "analytics:read:own",
             "user:read:assigned",
         ],
     },
@@ -95,8 +138,10 @@ SYSTEM_ROLES: dict[str, dict] = {
         "priority": 40,
         "permissions": [
             "course:read:all",
-            "discussion:moderate:org", "discussion:read:all",
-            "discussion:update:org", "discussion:delete:org",
+            "discussion:moderate:org",
+            "discussion:read:all",
+            "discussion:update:org",
+            "discussion:delete:org",
             "user:read:org",
         ],
     },
@@ -105,15 +150,23 @@ SYSTEM_ROLES: dict[str, dict] = {
         "description": "Пользователь с базовым доступом",
         "priority": 10,
         "permissions": [
-            "course:read:all", "course:enroll:all",
-            "chapter:read:all", "activity:read:all",
-            "assignment:submit:assigned", "assignment:read:assigned",
-            "quiz:submit:assigned", "quiz:read:assigned",
-            "exam:submit:assigned", "exam:read:assigned",
+            "course:read:all",
+            "course:enroll:all",
+            "chapter:read:all",
+            "activity:read:all",
+            "assignment:submit:assigned",
+            "assignment:read:assigned",
+            "quiz:submit:assigned",
+            "quiz:read:assigned",
+            "exam:submit:assigned",
+            "exam:read:assigned",
             "collection:read:all",
-            "discussion:create:org", "discussion:read:all",
-            "discussion:update:own", "discussion:delete:own",
-            "user:read:own", "user:update:own",
+            "discussion:create:org",
+            "discussion:read:all",
+            "discussion:update:own",
+            "discussion:delete:own",
+            "user:read:own",
+            "user:update:own",
             "certificate:read:own",
         ],
     },
@@ -175,7 +228,9 @@ def upgrade() -> None:
             )
             inserted += 1
 
-    print(f"   Inserted {inserted} new permissions ({len(existing_names)} already existed)")
+    print(
+        f"   Inserted {inserted} new permissions ({len(existing_names)} already existed)"
+    )
 
     # ------------------------------------------------------------------
     # 3. Reload permission id map
@@ -276,7 +331,9 @@ def upgrade() -> None:
               AND p.name = 'organization:read:org'
         """)
     ).scalar()
-    print(f"\n6. organization:read:org assigned to admin: {'✅ yes' if check else '❌ NO'}")
+    print(
+        f"\n6. organization:read:org assigned to admin: {'✅ yes' if check else '❌ NO'}"
+    )
 
     print("\n✅ Resync complete")
 

@@ -41,9 +41,7 @@ class AddPermissionBody(BaseModel):
     permission_id: int
 
 
-def _is_admin(
-    checker: PermissionCheckerDep, user_id: int, org_id: int | None
-) -> bool:
+def _is_admin(checker: PermissionCheckerDep, user_id: int, org_id: int | None) -> bool:
     """Check if user is an admin using the permission system itself.
 
     Uses the *:*:* wildcard path rather than slug-matching so the check stays

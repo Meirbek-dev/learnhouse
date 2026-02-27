@@ -225,7 +225,6 @@ tar -xf .\backups\backup-2026-01-23T02-00-00.tar -C temp-restore
 **Option D: Using Git Bash or WSL (Recommended)**
 
 If you have Git Bash or WSL installed, this is the simplest and most reliable method:
-R
 
 ```bash
 # In Git Bash or WSL terminal
