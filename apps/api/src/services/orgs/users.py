@@ -48,7 +48,7 @@ async def get_organization_users(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read", org.id)
+    checker.require(current_user.id, "organization:read", org.id, resource_owner_id=org.creator_id)
 
     # Build base query joining via UserRole
     # Get distinct users who have any role in this org; use DISTINCT on `User.id`
@@ -131,7 +131,7 @@ async def remove_user_from_org(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:manage", org.id)
+    checker.require(current_user.id, "organization:manage", org.id, resource_owner_id=org.creator_id)
 
     # Check if user has any roles in this org (i.e., is a member)
     statement = select(UserRole).where(
@@ -205,7 +205,7 @@ async def update_user_role(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update", org.id)
+    checker.require(current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id)
 
     # Last-admin protection
     admin_role = db_session.exec(
