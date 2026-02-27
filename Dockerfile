@@ -35,10 +35,10 @@ FROM frontend-base AS frontend-deps
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
-COPY package.json ./package.json
+COPY apps/web/package.json ./package.json
 COPY bun.lock ./bun.lock
 RUN --mount=type=cache,target=/root/.bun/install/cache \
-  bun install --production --no-frozen-lockfile
+  bun install --no-frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM frontend-base AS frontend-builder
@@ -79,7 +79,7 @@ RUN --mount=type=cache,target=/root/.cache/uv uv sync --locked --no-dev
 # Production image, copy all the files and run next
 FROM frontend-base AS frontend-runner
 WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache curl
 
 ENV NODE_ENV=production
 # Uncomment the following line in case you want to disable telemetry during runtime.
