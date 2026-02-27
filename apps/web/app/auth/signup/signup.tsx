@@ -1,69 +1,272 @@
 'use client';
 
+import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import platformLogoFull from '@public/platform_logo_full.svg';
+import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import PasswordInput from '@components/ui/custom/password-input';
+import { SiGoogle } from '@icons-pack/react-simple-icons';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { getUriWithOrg } from '@services/config/config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Separator } from '@components/ui/separator';
+import { passwordSchema } from '@/lib/schemas/auth';
+import { useEffect, useState, useTransition } from 'react';
+import { Button } from '@components/ui/button';
+import { signup } from '@services/auth/auth';
+import { AlertTriangle, Loader2 } from 'lucide-react';
+import AuthLogo from '@components/auth/logo';
+import AuthCard from '@components/auth/card';
+import { Input } from '@components/ui/input';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import { useEffect } from 'react';
-import Image from 'next/image';
+import { useForm } from 'react-hook-form';
+import { signIn } from 'next-auth/react';
+import * as z from 'zod';
 
 interface SignUpClientProps {
   org: any;
 }
+
+const buildFormSchema = (t: (key: string) => string) =>
+  z
+    .object({
+      firstName: z.string().min(1, { message: t('required') }),
+      lastName: z.string().min(1, { message: t('required') }),
+      email: z.email({ message: t('invalidEmail') }),
+      password: passwordSchema(t),
+      confirmPassword: z.string(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t('passwordsDontMatch'),
+      path: ['confirmPassword'],
+    });
+
+type SignUpFormData = z.infer<ReturnType<typeof buildFormSchema>>;
 
 const SignUpClient = (props: SignUpClientProps) => {
   const session = usePlatformSession() as any;
   const router = useRouter();
   const org = useOrg() as any;
   const t = useTranslations('Auth.Signup');
+  const validationT = useTranslations('Validation');
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState('');
+  const formSchema = buildFormSchema(validationT);
 
-  // Redirect authenticated users to home page
-  // They're already auto-joined to 'openu' during registration
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignUpFormData>({
+    defaultValues: { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' },
+    resolver: zodResolver(formSchema),
+  });
+
   useEffect(() => {
     if (session?.status === 'authenticated' && org?.slug) {
       router.push(getUriWithOrg(org.slug, '/'));
     }
   }, [session?.status, org?.slug, router]);
 
+  const onSubmit = (data: SignUpFormData) => {
+    setError('');
+    startTransition(async () => {
+      try {
+        const username = `${data.firstName.toLowerCase()}.${data.lastName.toLowerCase()}`;
+        const res = await signup({
+          username,
+          email: data.email,
+          password: data.password,
+          org_slug: props.org?.slug || '',
+          org_id: props.org?.id || 0,
+          first_name: data.firstName,
+          last_name: data.lastName,
+        });
+
+        if (res.ok) {
+          const signInRes = await signIn('credentials', {
+            redirect: false,
+            email: data.email,
+            password: data.password,
+          });
+          if (signInRes?.ok) {
+            globalThis.location.href = '/redirect_from_auth';
+          } else {
+            router.push(getUriWithoutOrg(`/login?orgslug=${props.org?.slug || ''}`));
+          }
+        } else {
+          const body = await res.json().catch(() => ({}));
+          const detail = body?.detail;
+          const msg =
+            typeof detail === 'string'
+              ? detail
+              : detail?.message || body?.message || t('errorSomethingWentWrong');
+          setError(msg);
+        }
+      } catch (err: any) {
+        setError(err.message || t('errorSomethingWentWrong'));
+      }
+    });
+  };
+
+  const handleGoogleSignIn = () => {
+    startTransition(() => {
+      if (props.org?.id) {
+        document.cookie = `oauth_org_id=${props.org.id}; path=/; max-age=600; samesite=lax`;
+      }
+      signIn('google', {
+        callbackUrl: `/redirect_from_auth?org_id=${props.org?.id || ''}&org_slug=${props.org?.slug || ''}`,
+      });
+    });
+  };
+
+  if (session?.status === 'authenticated') {
+    return (
+      <AuthCard>
+        <AuthLogo />
+        <p className="text-muted-foreground mt-4 text-sm">{t('redirecting')}</p>
+      </AuthCard>
+    );
+  }
+
   return (
-    <div className="flex h-screen flex-col items-center justify-center bg-neutral-100">
-      <div className="rounded-xl border-2 bg-white p-12 shadow-lg">
-        <div className="flex justify-center pb-8">
-          <Link
-            prefetch={false}
-            href={getUriWithOrg(props.org.slug, '/')}
-          >
-            <Image
-              quality={100}
-              width={230}
-              src={platformLogoFull}
-              alt="Ashyq Bilim logo"
-              style={{ height: 'auto' }}
-              loading="eager"
-            />
-          </Link>
-        </div>
-        {session.status === 'authenticated' ? (
-          <div className="flex flex-col items-center justify-center space-y-4">
-            <p className="text-lg text-neutral-600">{t('redirecting')}</p>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center space-y-4 p-8">
-            {/* TODO: Add signup form component here */}
-            {/* Users will be automatically joined to 'openu' organization on signup */}
-            {/* Use the signup() function from @services/auth/auth.ts */}
-            <p className="text-center text-neutral-600">
-              {t('formComponentNeeded')}
-              <br />
-              <span className="text-sm">{t('autoJoinDefaultOrg')}</span>
-            </p>
-          </div>
-        )}
+    <AuthCard className="max-w-md">
+      <Link
+        prefetch={false}
+        href={getUriWithOrg(props.org.slug, '/')}
+      >
+        <AuthLogo />
+      </Link>
+      <p className="mt-4 text-xl font-semibold tracking-tight">{t('title')}</p>
+
+      <Button
+        className="mt-8 w-full gap-3"
+        onClick={handleGoogleSignIn}
+        disabled={isPending}
+      >
+        <SiGoogle />
+        {t('continueWithGoogle')}
+      </Button>
+
+      <div className="my-7 flex w-full items-center justify-center overflow-hidden">
+        <Separator />
+        <span className="px-2 text-sm">{t('or')}</span>
+        <Separator />
       </div>
-    </div>
+
+      <form
+        className="w-full space-y-4"
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        {error ? (
+          <div className="flex items-center gap-2 rounded-md bg-red-200 p-3 text-red-950">
+            <AlertTriangle size={18} />
+            <span className="text-sm font-semibold">{error}</span>
+          </div>
+        ) : null}
+        <div className="grid grid-cols-2 gap-3">
+          <Field>
+            <FieldLabel>{t('firstName')}</FieldLabel>
+            <FieldContent>
+              <Input
+                type="text"
+                placeholder={t('firstNamePlaceholder')}
+                autoComplete="given-name"
+                className="w-full"
+                {...register('firstName')}
+              />
+            </FieldContent>
+            <FieldError>{errors.firstName?.message}</FieldError>
+          </Field>
+
+          <Field>
+            <FieldLabel>{t('lastName')}</FieldLabel>
+            <FieldContent>
+              <Input
+                type="text"
+                placeholder={t('lastNamePlaceholder')}
+                autoComplete="family-name"
+                className="w-full"
+                {...register('lastName')}
+              />
+            </FieldContent>
+            <FieldError>{errors.lastName?.message}</FieldError>
+          </Field>
+        </div>
+
+        <Field>
+          <FieldLabel>{t('email')}</FieldLabel>
+          <FieldContent>
+            <Input
+              type="email"
+              placeholder={t('emailPlaceholder')}
+              autoComplete="email"
+              className="w-full"
+              {...register('email')}
+            />
+          </FieldContent>
+          <FieldError>{errors.email?.message}</FieldError>
+        </Field>
+
+        <Field>
+          <FieldLabel>{t('password')}</FieldLabel>
+          <FieldContent>
+            <PasswordInput
+              placeholder={t('passwordPlaceholder')}
+              autoComplete="new-password"
+              className="w-full"
+              {...register('password')}
+            />
+          </FieldContent>
+          <FieldError>{errors.password?.message}</FieldError>
+        </Field>
+
+        <Field>
+          <FieldLabel>{t('confirmPassword')}</FieldLabel>
+          <FieldContent>
+            <PasswordInput
+              placeholder={t('confirmPasswordPlaceholder')}
+              autoComplete="new-password"
+              className="w-full"
+              {...register('confirmPassword')}
+            />
+          </FieldContent>
+          <FieldError>{errors.confirmPassword?.message}</FieldError>
+        </Field>
+
+        <Button
+          type="submit"
+          className="mt-2 w-full"
+          disabled={isPending}
+        >
+          {isPending ? (
+            <>
+              <Loader2
+                className="mr-2 h-4 w-4 animate-spin"
+                aria-hidden="true"
+              />
+              {t('loading')}
+            </>
+          ) : (
+            t('createAccount')
+          )}
+        </Button>
+      </form>
+
+      <p className="mt-5 text-center text-sm">
+        {t('alreadyHaveAccount')}
+        <Link
+          prefetch={false}
+          href={{
+            pathname: getUriWithoutOrg('/login'),
+            query: props.org.slug ? { orgslug: props.org.slug } : undefined,
+          }}
+          className="text-muted-foreground ml-1 underline"
+        >
+          {t('signIn')}
+        </Link>
+      </p>
+    </AuthCard>
   );
 };
 

@@ -570,7 +570,9 @@
       "sso": "Единый вход (SSO)",
       "title": "Вход - Ashyq Bilim",
       "welcomeBack": "С возвращением! Пожалуйста, введите ваши данные.",
-      "wrongCredentials": "Неверный адрес электронной почты или пароль"
+      "wrongCredentials": "Неверный адрес электронной почты или пароль",
+      "loginTitle": "Войти",
+      "noAccount": "Нет аккаунта?"
     },
     "Reset": {
       "changePassword": "Изменить пароль",
@@ -610,9 +612,19 @@
       "redirecting": "Перенаправление...",
       "signInWithGoogle": "Войти с помощью Google",
       "submit": "Отправить",
-      "title": "Регистрация - Ashyq Bilim",
+      "title": "Регистрация",
       "username": "Имя пользователя",
-      "usernamePlaceholder": "Введите имя пользователя"
+      "usernamePlaceholder": "Введите имя пользователя",
+      "continueWithGoogle": "Войти через Google",
+      "or": "ИЛИ",
+      "firstName": "Имя",
+      "firstNamePlaceholder": "Введите имя",
+      "lastName": "Фамилия",
+      "lastNamePlaceholder": "Введите фамилию",
+      "confirmPassword": "Подтвердить пароль",
+      "confirmPasswordPlaceholder": "Подтвердите пароль",
+      "alreadyHaveAccount": "Уже есть аккаунт?",
+      "signIn": "Войти"
     },
     "password": "Пароль",
     "passwordPlaceholder": "Введите ваш пароль"
@@ -6199,7 +6211,14 @@
     "selectGradingType": "Выберите тип оценивания",
     "titleRequired": "Требуется название",
     "usernameMinLength": "Имя пользователя должно содержать не менее {length} символов",
-    "wrongCredentials": "Неверный email или пароль"
+    "wrongCredentials": "Неверный email или пароль",
+    "passwordsDoNotMatch": "Пароли не совпадают",
+    "passwordsDontMatch": "Пароли не совпадают",
+    "passwordTooShort": "Пароль должен содержать не менее 8 символов",
+    "passwordTooLong": "Пароль должен содержать не более 128 символов",
+    "passwordNeedsLowercase": "Пароль должен содержать хотя бы одну строчную букву",
+    "passwordNeedsUppercase": "Пароль должен содержать хотя бы одну заглавную букву",
+    "passwordNeedsNumber": "Пароль должен содержать хотя бы одну цифру"
   },
   "activity": "Активность",
   "additionalSettings": "Дополнительные настройки",

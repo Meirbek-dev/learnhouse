@@ -1,7 +1,6 @@
 'use client';
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import PasswordInput from '@components/ui/custom/password-input';
+import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -10,6 +9,9 @@ import { resetPassword } from '@services/auth/auth';
 import { useSearchParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
+import AuthLogo from '@components/auth/logo';
+import AuthCard from '@components/auth/card';
+import PasswordInput from '@components/ui/custom/password-input';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -46,17 +48,16 @@ const ResetPasswordClient = () => {
   const [isPending, startTransition] = useTransition();
   const validationSchema = createValidationSchema(validationT);
 
-  const form = useForm<ResetPasswordFormData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ResetPasswordFormData>({
     resolver: zodResolver(validationSchema),
-    defaultValues: {
-      email,
-      new_password: '',
-      confirm_password: '',
-      reset_code,
-    },
+    defaultValues: { email, new_password: '', confirm_password: '', reset_code },
   });
 
-  const handleSubmit = (values: ResetPasswordFormData) => {
+  const onSubmit = (values: ResetPasswordFormData) => {
     setError('');
     setMessage('');
     startTransition(async () => {
@@ -68,139 +69,112 @@ const ResetPasswordClient = () => {
       }
     });
   };
+
   return (
-    <div className="grid h-screen grid-flow-col justify-stretch">
-      <div className="flex h-screen flex-col items-center justify-center bg-neutral-100">
-        <div className="rounded-xl border-2 bg-white p-12 shadow-lg">
-          <div className="m-auto w-72">
-            <h1 className="mb-4 text-2xl font-bold">{t('title')}</h1>
-            <p className="mb-4 text-sm text-gray-600">{t('enterResetDetails')}</p>
+    <AuthCard className="max-w-md">
+      <AuthLogo />
+      <p className="mt-4 text-xl font-semibold tracking-tight">{t('title')}</p>
+      <p className="text-muted-foreground mt-2 text-center text-sm">{t('enterResetDetails')}</p>
 
-            {error ? (
-              <div className="my-4 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-3 text-red-950 shadow-xs transition-all">
-                <AlertTriangle size={22} />
-                <div className="text-sm font-bold">{error}</div>
-              </div>
-            ) : null}
-            {message ? (
-              <div className="mb-4 flex flex-col gap-2">
-                <div className="flex items-center justify-center space-x-2 rounded-md bg-green-200 p-4 text-green-950 shadow-xs transition-all">
-                  <Info size={18} />
-                  <div className="text-sm font-bold">{t('success')}</div>
-                </div>
-                <Link
-                  href={getUriWithoutOrg(`/login?orgslug=${org.slug}`)}
-                  className="text-center text-sm text-blue-600 transition-colors hover:text-blue-800 hover:underline"
-                >
-                  {t('loginAgain')}
-                </Link>
-              </div>
-            ) : null}
-
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(handleSubmit)}
-                className="space-y-4"
-              >
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('email')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="email"
-                          placeholder={t('emailPlaceholder')}
-                          autoComplete="email"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="reset_code"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('resetCode')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          placeholder={t('resetCodePlaceholder')}
-                          autoComplete="one-time-code"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="new_password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('newPassword')}</FormLabel>
-                      <FormControl>
-                        <PasswordInput
-                          placeholder={t('newPasswordPlaceholder')}
-                          autoComplete="new-password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="confirm_password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('confirmPassword')}</FormLabel>
-                      <FormControl>
-                        <PasswordInput
-                          placeholder={t('confirmPasswordPlaceholder')}
-                          autoComplete="new-password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="flex py-4">
-                  <Button
-                    type="submit"
-                    className="w-full font-bold shadow-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled={isPending}
-                  >
-                    {isPending ? (
-                      <div className="flex items-center gap-2">
-                        <Loader2
-                          className="h-4 w-4 animate-spin"
-                          aria-hidden="true"
-                        />
-                        {t('loading')}
-                      </div>
-                    ) : (
-                      t('changePassword')
-                    )}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </div>
+      {error ? (
+        <div className="mt-4 flex w-full items-center gap-2 rounded-md bg-red-200 p-3 text-red-950">
+          <AlertTriangle size={18} />
+          <span className="text-sm font-semibold">{error}</span>
         </div>
-      </div>
-    </div>
+      ) : null}
+
+      {message ? (
+        <div className="mt-4 w-full space-y-2">
+          <div className="flex items-center gap-2 rounded-md bg-green-200 p-3 text-green-950">
+            <Info size={18} />
+            <span className="text-sm font-semibold">{t('success')}</span>
+          </div>
+          <Link
+            href={getUriWithoutOrg(`/login?orgslug=${org?.slug}`)}
+            className="block text-center text-sm underline"
+          >
+            {t('loginAgain')}
+          </Link>
+        </div>
+      ) : null}
+
+      <form
+        className="mt-6 w-full space-y-4"
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        <Field>
+          <FieldLabel>{t('email')}</FieldLabel>
+          <FieldContent>
+            <Input
+              type="email"
+              placeholder={t('emailPlaceholder')}
+              autoComplete="email"
+              className="w-full"
+              {...register('email')}
+            />
+          </FieldContent>
+          <FieldError>{errors.email?.message}</FieldError>
+        </Field>
+
+        <Field>
+          <FieldLabel>{t('resetCode')}</FieldLabel>
+          <FieldContent>
+            <Input
+              type="text"
+              placeholder={t('resetCodePlaceholder')}
+              autoComplete="one-time-code"
+              className="w-full"
+              {...register('reset_code')}
+            />
+          </FieldContent>
+          <FieldError>{errors.reset_code?.message}</FieldError>
+        </Field>
+
+        <Field>
+          <FieldLabel>{t('newPassword')}</FieldLabel>
+          <FieldContent>
+            <PasswordInput
+              placeholder={t('newPasswordPlaceholder')}
+              autoComplete="new-password"
+              className="w-full"
+              {...register('new_password')}
+            />
+          </FieldContent>
+          <FieldError>{errors.new_password?.message}</FieldError>
+        </Field>
+
+        <Field>
+          <FieldLabel>{t('confirmPassword')}</FieldLabel>
+          <FieldContent>
+            <PasswordInput
+              placeholder={t('confirmPasswordPlaceholder')}
+              autoComplete="new-password"
+              className="w-full"
+              {...register('confirm_password')}
+            />
+          </FieldContent>
+          <FieldError>{errors.confirm_password?.message}</FieldError>
+        </Field>
+
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isPending}
+        >
+          {isPending ? (
+            <>
+              <Loader2
+                className="mr-2 h-4 w-4 animate-spin"
+                aria-hidden="true"
+              />
+              {t('loading')}
+            </>
+          ) : (
+            t('changePassword')
+          )}
+        </Button>
+      </form>
+    </AuthCard>
   );
 };
 

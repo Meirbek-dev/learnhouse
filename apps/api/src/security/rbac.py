@@ -438,8 +438,28 @@ class PermissionChecker:
     def _get_or_load(self, user_id: int, org_id: int | None) -> set[str]:
         key = (user_id, org_id)
         if key not in self._cache:
-            self._cache[key] = self._load_permissions(user_id, org_id)
+            if user_id == 0:
+                # Anonymous user — load permissions granted to the "guest" system
+                # role so that public endpoints (e.g. self-registration) resolve
+                # correctly through the normal RBAC path.
+                self._cache[key] = self._load_guest_permissions()
+            else:
+                self._cache[key] = self._load_permissions(user_id, org_id)
         return self._cache[key]
+
+    def _load_guest_permissions(self) -> set[str]:
+        """Return the permissions assigned to the global ``guest`` system role."""
+        from src.db.permissions import Permission, Role, RolePermission
+
+        query = (
+            select(Permission.name)
+            .join(RolePermission, RolePermission.permission_id == Permission.id)
+            .join(Role, Role.id == RolePermission.role_id)
+            .where(Role.slug == "guest")
+            .where(Role.org_id.is_(None))
+            .distinct()
+        )
+        return set(self.db.exec(query).all())
 
     def _load_permissions(self, user_id: int, org_id: int | None) -> set[str]:
         """Single JOIN query -> set of permission name strings (3-part)."""

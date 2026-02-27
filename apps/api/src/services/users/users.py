@@ -82,10 +82,14 @@ async def create_user_without_org(
     checker: PermissionChecker | None = None,
     org_id: int | None = None,
 ):
-    # RBAC check
-    if checker is None:
-        checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:create", org_id)
+    # Public self-registration: anonymous users may always create their own
+    # account.  Authenticated callers (e.g. admins creating users on behalf of
+    # others) still need the `user:create` permission so that privilege
+    # escalation is not possible through this endpoint.
+    if not isinstance(current_user, AnonymousUser):
+        if checker is None:
+            checker = PermissionChecker(db_session)
+        checker.require(current_user.id, "user:create", org_id)
 
     # Create and validate user
     user = await _create_and_validate_user(db_session, user_object)

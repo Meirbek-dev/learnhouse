@@ -570,7 +570,9 @@
       "signInWithGoogle": "Sign in with Google",
       "signup": "Sign up",
       "title": "Login - {orgName}",
-      "wrongCredentials": "Wrong email or password"
+      "wrongCredentials": "Wrong email or password",
+      "loginTitle": "Login",
+      "noAccount": "Don't have an account?"
     },
     "Reset": {
       "changePassword": "Change Password",
@@ -612,7 +614,17 @@
       "formComponentNeeded": "Signup form component needed.",
       "autoJoinDefaultOrg": "Users auto-join to default organization on registration.",
       "username": "Username",
-      "usernamePlaceholder": "Enter your username"
+      "usernamePlaceholder": "Enter your username",
+      "continueWithGoogle": "Continue with Google",
+      "or": "OR",
+      "firstName": "First Name",
+      "firstNamePlaceholder": "Enter first name",
+      "lastName": "Last Name",
+      "lastNamePlaceholder": "Enter last name",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm your password",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign in"
     },
     "password": "Password",
     "passwordPlaceholder": "Enter your password"
@@ -6199,7 +6211,14 @@
     "selectGradingType": "Select grading type",
     "titleRequired": "Title is required",
     "usernameMinLength": "Username must be at least {length} characters",
-    "wrongCredentials": "Wrong Email or Password"
+    "wrongCredentials": "Wrong Email or Password",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "passwordsDontMatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "passwordTooLong": "Password must be at most 128 characters",
+    "passwordNeedsLowercase": "Password must contain at least one lowercase letter",
+    "passwordNeedsUppercase": "Password must contain at least one uppercase letter",
+    "passwordNeedsNumber": "Password must contain at least one number"
   },
   "activity": "Activity",
   "additionalSettings": "Additional Settings",

@@ -570,7 +570,9 @@
       "sso": "Бір реттік жүйеге кіру (SSO)",
       "title": "Кіру - {orgName}",
       "welcomeBack": "Қайтып келуіңізбен! Тіркелгі деректеріңізді енгізіңіз.",
-      "wrongCredentials": "Қате электронды пошта немесе құпия сөз"
+      "wrongCredentials": "Қате электронды пошта немесе құпия сөз",
+      "loginTitle": "Кіру",
+      "noAccount": "Аккаунтыңыз жоқ па?"
     },
     "Reset": {
       "changePassword": "Құпия сөзді өзгерту",
@@ -612,7 +614,17 @@
       "submit": "Жіберу",
       "title": "Тіркелу - {orgName}",
       "username": "Пайдаланушы аты",
-      "usernamePlaceholder": "Пайдаланушы атыңызды енгізіңіз"
+      "usernamePlaceholder": "Пайдаланушы атыңызды енгізіңіз",
+      "continueWithGoogle": "Google арқылы жалғастыру",
+      "or": "НЕМЕСЕ",
+      "firstName": "Аты",
+      "firstNamePlaceholder": "Атыңызды енгізіңіз",
+      "lastName": "Тегі",
+      "lastNamePlaceholder": "Тегіңізді енгізіңіз",
+      "confirmPassword": "Құпиясөзді растаңыз",
+      "confirmPasswordPlaceholder": "Құпиясөзді қайта енгізіңіз",
+      "alreadyHaveAccount": "Аккаунтыңыз бар ма?",
+      "signIn": "Кіру"
     },
     "password": "Пароль",
     "passwordPlaceholder": "Құпия сөзді енгізіңіз"
@@ -6199,7 +6211,14 @@
     "selectGradingType": "Бағалау түрін таңдаңыз",
     "titleRequired": "Атау қажет",
     "usernameMinLength": "Пайдаланушы аты кем дегенде {length} таңбадан тұруы керек",
-    "wrongCredentials": "Электрондық пошта немесе құпия сөз қате"
+    "wrongCredentials": "Электрондық пошта немесе құпия сөз қате",
+    "passwordsDoNotMatch": "Құпиясөздер сәйкес келмейді",
+    "passwordsDontMatch": "Құпиясөздер сәйкес келмейді",
+    "passwordTooShort": "Құпиясөз кемінде 8 таңбадан тұруы керек",
+    "passwordTooLong": "Құпиясөз ең көбі 128 таңбадан тұруы керек",
+    "passwordNeedsLowercase": "Құпиясөзде кем дегенде бір кіші әріп болуы керек",
+    "passwordNeedsUppercase": "Құпиясөзде кем дегенде бір бас әріп болуы керек",
+    "passwordNeedsNumber": "Құпиясөзде кем дегенде бір сан болуы керек"
   },
   "activity": "Белсенділік",
   "additionalSettings": "Қосымша параметрлер",

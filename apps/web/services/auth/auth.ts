@@ -35,6 +35,8 @@ interface NewAccountBody {
   password: string;
   org_slug: string;
   org_id: number;
+  first_name?: string;
+  last_name?: string;
 }
 
 // Auth API configuration
@@ -491,7 +493,7 @@ export async function signup(body: NewAccountBody): Promise<Response> {
     throw createAuthError('Account details are required', 400, 'MISSING_BODY');
   }
 
-  const { username, email, password } = body;
+  const { username, email, password, first_name, last_name } = body;
 
   if (!username?.trim()) {
     throw createAuthError('Username is required', 400, 'MISSING_USERNAME');
@@ -501,16 +503,21 @@ export async function signup(body: NewAccountBody): Promise<Response> {
     throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
   }
 
-  if (!validatePassword(password)) {
-    throw createAuthError('Valid password is required', 400, 'INVALID_PASSWORD');
+  if (!first_name?.trim()) {
+    throw createAuthError('First name is required', 400, 'MISSING_FIRST_NAME');
+  }
+
+  if (!last_name?.trim()) {
+    throw createAuthError('Last name is required', 400, 'MISSING_LAST_NAME');
   }
 
   try {
     const headers = createHeaders('application/json');
-    const sanitizedBody = {
+    const sanitizedBody: Record<string, string> = {
       username: username.trim(),
       email: sanitizeStringInput(email),
       password,
+      first_name, last_name
     };
 
     const requestOptions: RequestInit = {
