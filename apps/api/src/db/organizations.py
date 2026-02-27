@@ -22,7 +22,6 @@ class OrganizationBase(SQLModelStrictBaseModel):
     about: str | None = None
     socials: dict | None = Field(default_factory=dict, sa_column=Column(JSON))
     links: dict | None = Field(default_factory=dict, sa_column=Column(JSON))
-    scripts: dict | None = Field(default_factory=dict, sa_column=Column(JSON))
     logo_image: str | None = None
     thumbnail_image: str | None = None
     previews: dict | None = Field(default_factory=dict, sa_column=Column(JSON))
@@ -61,7 +60,6 @@ class OrganizationUpdate(SQLModelStrictBaseModel):
     about: str | None = None
     socials: dict | None = None
     links: dict | None = None
-    scripts: dict | None = None
     logo_image: str | None = None
     thumbnail_image: str | None = None
     previews: dict | None = None

@@ -3998,12 +3998,6 @@
       "userGroupDeletedSuccess": "Группа пользователей удалена.",
       "userRemovedSuccess": "Пользователь удален из Ashyq Bilim."
     },
-    "OrgScripts": {
-      "failedToLoadExternalScript": "Не удалось загрузить внешний скрипт \"{scriptName}\":",
-      "failedToLoadScript": "Не удалось загрузить скрипт {scriptName}:",
-      "invalidScriptUrl": "Неверный URL скрипта в \"{scriptName}\":",
-      "scriptError": "Ошибка скрипта в {scriptName}:"
-    },
     "OrgSettings": {
       "CollectionPage": {
         "courses": "Курсы в этой коллекции",
@@ -4360,34 +4354,6 @@
       "socials": "Социальные сети",
       "socialsDescription": "Управление ссылками на социальные сети",
       "socialsTitle": "Социальные сети"
-    },
-    "Other": {
-      "addFirstScript": "Добавьте свой первый скрипт, чтобы начать.",
-      "addScript": "Добавить скрипт",
-      "cancel": "Отмена",
-      "cancelButton": "Отмена",
-      "deletingScript": "Удаление скрипта...",
-      "noScripts": "Скриптов пока нет",
-      "saveScript": "Сохранить скрипт",
-      "saveScriptButton": "Сохранить скрипт",
-      "saving": "Сохранение...",
-      "scriptContentLabel": "Содержимое скрипта",
-      "scriptContentPlaceholder": "Введите код JavaScript",
-      "scriptDeleteError": "Не удалось удалить скрипт",
-      "scriptDeletedSuccess": "Скрипт успешно удален",
-      "scriptNameLabel": "Название скрипта",
-      "scriptNamePlaceholder": "Введите название скрипта",
-      "scriptSaveError": "Не удалось сохранить скрипт",
-      "scriptSavedSuccess": "Скрипт успешно сохранен",
-      "scripts": "Скрипты",
-      "scriptsDescription": "Управляйте пользовательскими скриптами. Используйте с осторожностью.",
-      "scriptsWarning": "Для безопасности, пожалуйста, убедитесь, что вы доверяете и понимаете любые скрипты, прежде чем добавлять их. Скрипты могут взаимодействовать со страницами.",
-      "tooltipWarning": "Скрипты мощные и могут влиять на безопасность и производительность сайта. Добавляйте скрипты только из надежных источников. Убедитесь, что скрипты соответствуют правилам конфиденциальности и ответственно обрабатывают пользовательские данные. Неправильно реализованные скрипты могут нарушить функциональность или создать уязвимости.",
-      "updatingOrganization": "Обновление данных Ashyq Bilim...",
-      "validation": {
-        "contentRequired": "Содержимое скрипта обязательно",
-        "nameRequired": "Название скрипта обязательно"
-      }
     },
     "Payments": {
       "Configuration": {

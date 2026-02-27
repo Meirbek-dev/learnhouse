@@ -66,11 +66,6 @@ export interface OrgConfig {
 // Organization
 // ============================================================================
 
-export interface OrgScript {
-  content: string;
-  name: string;
-}
-
 export interface Org {
   id: number;
   org_uuid: string;
@@ -81,7 +76,6 @@ export interface Org {
   email: string;
   socials: Record<string, string> | null;
   links: Record<string, string> | null;
-  scripts: { scripts: OrgScript[] } | null;
   logo_image: string | null;
   thumbnail_image: string | null;
   previews: Record<string, unknown> | null;

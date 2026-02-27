@@ -5,7 +5,6 @@ import OrgEditSocials from '@components/Dashboard/Pages/Org/OrgEditSocials/OrgEd
 import OrgEditLanding from '@components/Dashboard/Pages/Org/OrgEditLanding/OrgEditLanding';
 import OrgEditGeneral from '@components/Dashboard/Pages/Org/OrgEditGeneral/OrgEditGeneral';
 import OrgEditImages from '@components/Dashboard/Pages/Org/OrgEditImages/OrgEditImages';
-import OrgEditOther from '@components/Dashboard/Pages/Org/OrgEditOther/OrgEditOther';
 import SettingsHeader from '@components/Dashboard/Misc/SettingsHeader';
 import SettingsTabs from '@components/Dashboard/Misc/SettingsTabs';
 import { getUriWithOrg } from '@services/config/config';
@@ -57,13 +56,6 @@ const SETTING_TABS: TabItem[] = [
     titleKey: 'socialsTitle',
     descriptionKey: 'socialsDescription',
   },
-  {
-    id: 'other',
-    label: 'other',
-    icon: CodeIcon,
-    titleKey: 'other',
-    descriptionKey: 'Manage additional organization settings',
-  },
 ];
 
 const ContentRenderer = ({ subpage }: { subpage: string }) => {
@@ -80,9 +72,6 @@ const ContentRenderer = ({ subpage }: { subpage: string }) => {
       }
       case 'landing': {
         return <OrgEditLanding />;
-      }
-      case 'other': {
-        return <OrgEditOther />;
       }
       default: {
         return null;

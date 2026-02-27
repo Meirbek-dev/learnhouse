@@ -1,5 +1,4 @@
 import OrgClientProviders from './org-client-providers';
-import Footer from '@components/Footer/Footer';
 import '@styles/globals.css';
 
 export default async function RootLayout(props: { children: React.ReactNode; params: Promise<any> }) {
@@ -9,7 +8,6 @@ export default async function RootLayout(props: { children: React.ReactNode; par
   return (
     <div>
       <OrgClientProviders orgslug={params.orgslug}>{children}</OrgClientProviders>
-      <Footer />
     </div>
   );
 }

@@ -3998,12 +3998,6 @@
       "userGroupDeletedSuccess": "User group deleted.",
       "userRemovedSuccess": "User removed from organization."
     },
-    "OrgScripts": {
-      "failedToLoadExternalScript": "Failed to load external script \"{scriptName}\":",
-      "failedToLoadScript": "Failed to load script {scriptName}:",
-      "invalidScriptUrl": "Invalid script URL in \"{scriptName}\":",
-      "scriptError": "Script error in {scriptName}:"
-    },
     "OrgSettings": {
       "CollectionPage": {
         "courses": "Courses in this collection",
@@ -4360,34 +4354,6 @@
       "socials": "Socials",
       "socialsDescription": "Manage your organization social media links",
       "socialsTitle": "Socials"
-    },
-    "Other": {
-      "addFirstScript": "Add your first script to get started.",
-      "addScript": "Add Script",
-      "cancel": "cancel",
-      "cancelButton": "Cancel",
-      "deletingScript": "Deleting script...",
-      "noScripts": "No scripts yet",
-      "saveScript": "Save Script",
-      "saveScriptButton": "Save Script",
-      "saving": "Saving...",
-      "scriptContentLabel": "Script Content",
-      "scriptContentPlaceholder": "Enter JavaScript code",
-      "scriptDeleteError": "Failed to delete script",
-      "scriptDeletedSuccess": "Script deleted successfully",
-      "scriptNameLabel": "Script Name",
-      "scriptNamePlaceholder": "Enter script name",
-      "scriptSaveError": "Failed to save script",
-      "scriptSavedSuccess": "Script saved successfully",
-      "scripts": "Scripts",
-      "scriptsDescription": "Manage custom scripts for your organization. Use with caution.",
-      "scriptsWarning": "For your organization's safety, please ensure you trust and understand any scripts before adding them. Scripts can interact with your organization's pages.",
-      "tooltipWarning": "Scripts are powerful and can affect your site's security and performance. Only add scripts from trusted sources. Ensure scripts comply with privacy regulations and handle user data responsibly. Incorrectly implemented scripts can break functionality or expose vulnerabilities.",
-      "updatingOrganization": "Updating organization...",
-      "validation": {
-        "contentRequired": "Script content is required",
-        "nameRequired": "Script name is required"
-      }
     },
     "Payments": {
       "Configuration": {

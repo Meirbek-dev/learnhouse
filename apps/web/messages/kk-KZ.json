@@ -3998,12 +3998,6 @@
       "userGroupDeletedSuccess": "Пайдаланушы тобы жойылды.",
       "userRemovedSuccess": "Пайдаланушы ұйымнан жойылды."
     },
-    "OrgScripts": {
-      "failedToLoadExternalScript": "Сыртқы скрипті жүктеу сәтсіз аяқталды \"{scriptName}\":",
-      "failedToLoadScript": "Скрипті жүктеу сәтсіз аяқталды {scriptName}:",
-      "invalidScriptUrl": "\"{scriptName}\" ішіндегі жарамсыз скрипт URL:",
-      "scriptError": "{scriptName} ішіндегі скрипт қатесі:"
-    },
     "OrgSettings": {
       "CollectionPage": {
         "courses": "Осы жинақтағы курстар",
@@ -4360,34 +4354,6 @@
       "socials": "Әлеуметтік желілер",
       "socialsDescription": "Ұйымыңыздың әлеуметтік желі сілтемелерін басқару",
       "socialsTitle": "Әлеуметтік желілер"
-    },
-    "Other": {
-      "addFirstScript": "Бастау үшін алғашқы скриптіңізді қосыңыз.",
-      "addScript": "Скрипт қосу",
-      "cancel": "болдырмау",
-      "cancelButton": "Болдырмау",
-      "deletingScript": "Скрипт жойылуда...",
-      "noScripts": "Әлі скрипттер жоқ",
-      "saveScript": "Скриптті сақтау",
-      "saveScriptButton": "Скриптті сақтау",
-      "saving": "Сақталуда...",
-      "scriptContentLabel": "Скрипт мазмұны",
-      "scriptContentPlaceholder": "JavaScript кодын енгізіңіз",
-      "scriptDeleteError": "Скриптті жою сәтсіз аяқталды",
-      "scriptDeletedSuccess": "Скрипт сәтті жойылды",
-      "scriptNameLabel": "Скрипт атауы",
-      "scriptNamePlaceholder": "Скрипт атауын енгізіңіз",
-      "scriptSaveError": "Скриптті сақтау сәтсіз аяқталды",
-      "scriptSavedSuccess": "Скрипт сәтті сақталды",
-      "scripts": "Скрипттер",
-      "scriptsDescription": "Ұйымыңыз үшін реттелетін скрипттерді басқарыңыз. Сақтықпен қолданыңыз.",
-      "scriptsWarning": "Ұйымыңыздың қауіпсіздігі үшін, кез келген скриптті қоспас бұрын оған сенім артып, түсінгеніңізге көз жеткізіңіз. Скрипттер ұйымыңыздың беттерімен әрекеттесе алады.",
-      "tooltipWarning": "Скрипттер өте қуатты және сайтыңыздың қауіпсіздігі мен өнімділігіне әсер етуі мүмкін. Тек сенімді дереккөздерден скрипттерді қосыңыз. Скрипттердің құпиялылық ережелеріне сәйкес келетініне және пайдаланушы деректерін жауапкершілікпен өңдейтініне көз жеткізіңіз. Қате енгізілген скрипттер функционалдылықты бұзуы немесе осалдықтарды ашуы мүмкін.",
-      "updatingOrganization": "Ұйым жаңартылуда...",
-      "validation": {
-        "contentRequired": "Скрипт мазмұны қажет",
-        "nameRequired": "Скрипт атауы қажет"
-      }
     },
     "Payments": {
       "Configuration": {
