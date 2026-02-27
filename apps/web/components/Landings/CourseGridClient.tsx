@@ -41,6 +41,7 @@ export default function CourseGridClient({ initialCourses, initialTotal, orgslug
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      revalidateIfStale: page !== 1,
       dedupingInterval: 60_000,
       fallbackData:
         page === 1 ? { data: initialCourses, headers: { 'x-total-count': String(initialTotal) } } : undefined,
@@ -126,23 +127,6 @@ export default function CourseGridClient({ initialCourses, initialTotal, orgslug
                 />
               </div>
             ))}
-
-        {/* If trail is loading, show subtle loading state on thumbnails */}
-        {isTrailLoading &&
-          courses.length > 0 &&
-          !coursesLoading &&
-          Array.from({ length: Math.min(4, courses.length) }).map((_, i) => (
-            <div
-              key={`trail-skeleton-${i}`}
-              className="flex w-full max-w-sm justify-center"
-            >
-              <div className="w-full animate-pulse">
-                <div className="bg-muted h-44 w-full rounded-md" />
-                <div className="bg-muted mt-3 h-4 w-3/4 rounded" />
-                <div className="bg-muted mt-2 h-3 w-1/2 rounded" />
-              </div>
-            </div>
-          ))}
       </div>
 
       {/* Pagination Controls */}
