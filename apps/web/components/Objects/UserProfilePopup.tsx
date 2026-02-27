@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { getUser } from '@services/users/users';
 import { Badge } from '@/components/ui/badge';
@@ -76,42 +76,32 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Track previous inputs so we don't refetch when only `t` (translations fn) changes
-  const prevUserIdRef = useRef<number | null>(null);
-  const prevTokenRef = useRef<string | null | undefined>(null);
+  const hasFetchedRef = useRef(false);
 
-  useEffect(() => {
-    const token = session?.data?.tokens?.access_token;
+  const fetchOnOpen = useCallback(
+    async (open: boolean) => {
+      if (!open || hasFetchedRef.current || !userId) return;
+      hasFetchedRef.current = true;
 
-    const shouldFetch = prevUserIdRef.current !== userId || prevTokenRef.current !== token;
-    prevUserIdRef.current = userId ?? null;
-    prevTokenRef.current = token;
-
-    if (!shouldFetch) return;
-
-    const fetchUserData = async () => {
-      if (!userId) return;
-
+      const token = session?.data?.tokens?.access_token;
       setIsLoading(true);
       setError(null);
 
       try {
         const data = await getUser(userId, token);
         setUserData(data);
-      } catch (error) {
+      } catch (err) {
         setError(t('loadingError'));
-        console.error('Error fetching user data:', error);
+        console.error('Error fetching user data:', err);
       } finally {
         setIsLoading(false);
       }
-    };
-
-    fetchUserData();
-    // Keep `t` in deps to avoid hook-size mismatch across renders (HMR/rehydration)
-  }, [userId, session?.data?.tokens?.access_token, t]);
+    },
+    [userId, session?.data?.tokens?.access_token, t],
+  );
 
   return (
-    <HoverCard>
+    <HoverCard onOpenChange={fetchOnOpen}>
       <HoverCardTrigger render={<span />}>{children}</HoverCardTrigger>
       <HoverCardContent className="soft-shadow w-auto max-w-196 min-w-96 bg-white/95 p-0 backdrop-blur-md">
         {isLoading ? (

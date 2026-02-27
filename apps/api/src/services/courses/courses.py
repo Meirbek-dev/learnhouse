@@ -275,22 +275,21 @@ async def get_courses_orgslug(
         except Exception:
             # Redis errors should not break the request
             pass
+    from collections import OrderedDict
+
+    from sqlalchemy.orm import aliased
+
     offset = (page - 1) * limit
 
-    # Base query
-    query = select(Course).join(Organization).where(Organization.slug == org_slug)
+    # Step 1: Build a subquery that selects the paginated course IDs
+    # with proper access filtering
+    id_query = select(Course.id).join(Organization).where(Organization.slug == org_slug)
 
     if isinstance(current_user, AnonymousUser):
-        # For anonymous users, only show public courses
-        query = query.where(Course.public)
+        id_query = id_query.where(Course.public)
     else:
-        # For authenticated users, show:
-        # 1. Public courses
-        # 2. Courses not in any UserGroup
-        # 3. Courses in UserGroups where the user is a member
-        # 4. Courses where the user is a resource author
-        query = (
-            query.outerjoin(
+        id_query = (
+            id_query.outerjoin(
                 UserGroupResource, UserGroupResource.resource_uuid == Course.course_uuid
             )
             .outerjoin(
@@ -307,57 +306,58 @@ async def get_courses_orgslug(
                 or_(
                     Course.public,
                     UserGroupResource.resource_uuid
-                    is None,  # Courses not in any UserGroup
+                    is None,
                     UserGroupUser.user_id
-                    == current_user.id,  # Courses in UserGroups where user is a member
+                    == current_user.id,
                     ResourceAuthor.user_id
-                    == current_user.id,  # Courses where user is a resource author
+                    == current_user.id,
                 )
             )
         )
 
-    # Apply pagination
-    query = query.offset(offset).limit(limit).distinct()
+    id_query = id_query.distinct().offset(offset).limit(limit)
+    id_subquery = id_query.subquery()
 
-    courses = db_session.exec(query).all()
+    # Step 2: Single query – fetch courses + authors via outer join
+    AuthorRA = aliased(ResourceAuthor)
+    AuthorUser = aliased(User)
 
-    if not courses:
-        return []
-
-    # Get all course UUIDs
-    course_uuids = [course.course_uuid for course in courses]
-
-    # Fetch all authors for all courses in a single query
-    authors_query = (
-        select(ResourceAuthor, User)
-        .join(User, ResourceAuthor.user_id == User.id)
-        .where(ResourceAuthor.resource_uuid.in_(course_uuids))
-        .order_by(ResourceAuthor.id.asc())
+    combined_query = (
+        select(Course, AuthorRA, AuthorUser)
+        .where(Course.id.in_(select(id_subquery.c.id)))
+        .outerjoin(AuthorRA, AuthorRA.resource_uuid == Course.course_uuid)
+        .outerjoin(AuthorUser, AuthorRA.user_id == AuthorUser.id)
+        .order_by(Course.id, AuthorRA.id.asc())
     )
 
-    author_results = db_session.exec(authors_query).all()
+    results = db_session.exec(combined_query).all()
 
-    # Create a dictionary mapping course_uuid to list of authors
-    course_authors = {}
-    for resource_author, user in author_results:
-        if resource_author.resource_uuid not in course_authors:
-            course_authors[resource_author.resource_uuid] = []
-        course_authors[resource_author.resource_uuid].append(
-            AuthorWithRole(
-                user=UserRead.model_validate(user),
-                authorship=resource_author.authorship,
-                authorship_status=resource_author.authorship_status,
-                creation_date=resource_author.creation_date,
-                update_date=resource_author.update_date,
+    if not results:
+        return []
+
+    # Group results by course, preserving insertion order
+    courses_map: OrderedDict[int, tuple] = OrderedDict()
+    for course, ra, author_user in results:
+        cid = course.id
+        if cid not in courses_map:
+            courses_map[cid] = (course, [])
+        if ra is not None and author_user is not None:
+            courses_map[cid][1].append(
+                AuthorWithRole(
+                    user=UserRead.model_validate(author_user),
+                    authorship=ra.authorship,
+                    authorship_status=ra.authorship_status,
+                    creation_date=ra.creation_date,
+                    update_date=ra.update_date,
+                )
             )
-        )
 
-    # Create CourseRead objects with authors
+    # Build CourseRead objects
     course_reads = []
-    for course in courses:
+    for course, authors in courses_map.values():
         course_read = CourseRead.model_validate(
             {
-                "id": course.id or 0,  # Ensure id is never None
+                "id": course.id or 0,
                 "org_id": course.org_id,
                 "name": course.name,
                 "description": course.description or "",
@@ -370,7 +370,7 @@ async def get_courses_orgslug(
                 "course_uuid": course.course_uuid,
                 "creation_date": course.creation_date,
                 "update_date": course.update_date,
-                "authors": course_authors.get(course.course_uuid, []),
+                "authors": authors,
             }
         )
         course_reads.append(course_read)
