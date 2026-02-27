@@ -16,7 +16,7 @@ import useSWR from 'swr';
 
 export const OrgContext = createContext<Org | null>(null);
 
-export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslug: string }) => {
+export const OrgProvider = ({ children, orgslug, initialOrg }: { children: ReactNode; orgslug: string; initialOrg?: any }) => {
   const session = usePlatformSession();
   const pathname = usePathname();
   const accessToken = session?.data?.tokens?.access_token;
@@ -38,6 +38,8 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
   } = useSWR(`${getAPIUrl()}orgs/slug/${orgslug}`, (url) => swrFetcher(url, accessToken), {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
+    revalidateIfStale: !initialOrg,
+    fallbackData: initialOrg || undefined,
   });
 
   const {

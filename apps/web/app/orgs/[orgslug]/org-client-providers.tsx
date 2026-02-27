@@ -8,9 +8,10 @@ import type { ReactNode } from 'react';
 interface OrgClientProvidersProps {
   children: ReactNode;
   orgslug: string;
+  initialOrg?: any;
 }
 
-export default function OrgClientProviders({ children, orgslug }: OrgClientProvidersProps) {
+export default function OrgClientProviders({ children, orgslug, initialOrg }: OrgClientProvidersProps) {
   const { theme: currentTheme } = useTheme();
 
   // NextTopLoader props
@@ -27,7 +28,7 @@ export default function OrgClientProviders({ children, orgslug }: OrgClientProvi
   };
 
   return (
-    <OrgProvider orgslug={orgslug}>
+    <OrgProvider orgslug={orgslug} initialOrg={initialOrg}>
       <NextTopLoader {...topLoaderProps} />
       {children}
     </OrgProvider>
