@@ -223,23 +223,23 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           <ChevronDown size={18} />
         </ToolBtn>
         {showListMenu ? (
-          <ListDropdown>
+          <div className="absolute top-full left-0 bg-white border border-[rgba(217,217,217,0.5)] rounded-[6px] shadow-[0_2px_4px_rgba(0,0,0,0.1)] z-[1000] min-w-[180px] mt-1">
             {listOptions.map((option, index) => (
-              <ListMenuItem
+              <div
                 key={index}
                 onClick={() => {
                   option.action();
                   setShowListMenu(false);
                 }}
-                className={
-                  editor.isActive(option.label === 'Bullet List' ? 'bulletList' : 'orderedList') ? 'is-active' : ''
-                }
+                className={`flex items-center py-2 px-3 cursor-pointer [transition:background_0.2s] hover:bg-[rgba(217,217,217,0.24)] ${
+                  editor.isActive(option.label === 'Bullet List' ? 'bulletList' : 'orderedList') ? 'bg-[rgba(176,176,176,0.5)]' : ''
+                }`}
               >
-                <span className="icon">{option.icon}</span>
-                <span className="label">{option.label}</span>
-              </ListMenuItem>
+                <span className="flex items-center mr-2">{option.icon}</span>
+                <span className="text-xs [font-family:Inter,sans-serif]">{option.label}</span>
+              </div>
             ))}
-          </ListDropdown>
+          </div>
         ) : null}
       </div>
       <ToolSelect
@@ -311,20 +311,21 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           </ToolBtn>
         </ToolTip>
         {showTableMenu ? (
-          <TableDropdown>
+          <div className="absolute top-full left-0 bg-white border border-[rgba(217,217,217,0.5)] rounded-[6px] shadow-[0_2px_4px_rgba(0,0,0,0.1)] z-[1000] min-w-[180px] mt-1">
             {tableOptions.map((option, index) => (
-              <TableMenuItem
+              <div
                 key={index}
                 onClick={() => {
                   option.action();
                   setShowTableMenu(false);
                 }}
+                className="flex items-center py-2 px-3 cursor-pointer [transition:background_0.2s] hover:bg-[rgba(217,217,217,0.24)]"
               >
-                <span className="icon">{option.icon}</span>
-                <span className="label">{option.label}</span>
-              </TableMenuItem>
+                <span className="flex items-center mr-2">{option.icon}</span>
+                <span className="text-xs [font-family:Inter,sans-serif]">{option.label}</span>
+              </div>
             ))}
-          </TableDropdown>
+          </div>
         ) : null}
       </div>
       <DividerVerticalIcon style={{ marginTop: 'auto', marginBottom: 'auto', color: 'grey' }} />
@@ -680,79 +681,3 @@ const ToolSelect = styled.select`
 `;
 
 
-const TableDropdown = styled.div`
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background: white;
-  border: 1px solid rgba(217, 217, 217, 0.5);
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  min-width: 180px;
-  margin-top: 4px;
-`;
-
-const TableMenuItem = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: background 0.2s;
-
-  &:hover {
-    background: rgba(217, 217, 217, 0.24);
-  }
-
-  .icon {
-    display: flex;
-    align-items: center;
-    margin-right: 8px;
-  }
-
-  .label {
-    font-size: 12px;
-    font-family: Inter, sans-serif;
-  }
-`;
-
-
-const ListDropdown = styled.div`
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background: white;
-  border: 1px solid rgba(217, 217, 217, 0.5);
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  min-width: 180px;
-  margin-top: 4px;
-`;
-
-const ListMenuItem = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: background 0.2s;
-
-  &:hover {
-    background: rgba(217, 217, 217, 0.24);
-  }
-
-  &.is-active {
-    background: rgba(176, 176, 176, 0.5);
-  }
-
-  .icon {
-    display: flex;
-    align-items: center;
-    margin-right: 8px;
-  }
-
-  .label {
-    font-size: 12px;
-    font-family: Inter, sans-serif;
-  }
-`;

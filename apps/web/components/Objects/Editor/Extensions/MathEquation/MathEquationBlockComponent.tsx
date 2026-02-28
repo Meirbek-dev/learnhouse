@@ -85,13 +85,6 @@ const mathSymbols = [
   { symbol: '\\approx', display: '≈' },
 ];
 
-// Styled components
-const MathEqWrapper = styled.div`
-  transition: all 0.2s ease;
-  background-color: #f9f9f9;
-  border: 1px solid #eaeaea;
-`;
-
 const EditBar = styled.div`
   display: flex;
   justify-content: space-between;
@@ -141,66 +134,6 @@ const SaveButton = styled(motion.button)`
 `;
 
 
-const TemplateButton = styled.button`
-  display: flex;
-  align-items: center;
-  padding: 6px 10px;
-  background: rgba(217, 217, 217, 0.4);
-  border-radius: 6px;
-  border: none;
-  font-size: 13px;
-  color: #494949;
-  cursor: pointer;
-`;
-
-const TemplateDropdown = styled.div`
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #e2e2e2;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-`;
-
-const TemplateItem = styled.div`
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: background 0.15s;
-
-  &:hover {
-    background: rgba(217, 217, 217, 0.24);
-  }
-`;
-
-const SymbolsDropdown = styled.div`
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #e2e2e2;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-`;
-
-const SymbolButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  margin: 2px;
-  background: rgba(217, 217, 217, 0.3);
-  border-radius: 4px;
-  border: none;
-  font-size: 16px;
-  color: #494949;
-  cursor: pointer;
-`;
-
-const HelpDropdown = styled.div`
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #e2e2e2;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-`;
 
 const MathEquationBlockComponent = (props: any) => {
   const t = useTranslations('DashPage.Editor.MathEquationBlock');
@@ -290,7 +223,7 @@ const MathEquationBlockComponent = (props: any) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <MathEqWrapper className="flex flex-col space-y-3 rounded-lg px-5 py-6">
+        <div className="flex flex-col space-y-3 rounded-lg px-5 py-6 [transition:all_0.2s_ease] bg-[#f9f9f9] border border-[#eaeaea]">
           <div className="mb-1 flex items-center space-x-2 text-sm text-zinc-500">
             <Sigma size={16} />
             <span className="font-medium">{t('title')}</span>
@@ -312,11 +245,11 @@ const MathEquationBlockComponent = (props: any) => {
                   ref={templatesRef}
                   className="relative"
                 >
-                  <TemplateButton
+                  <button
                     onClick={() => {
                       setShowTemplates(!showTemplates);
                     }}
-                    className="flex items-center space-x-1"
+                    className="flex items-center space-x-1 py-[6px] px-[10px] bg-[rgba(217,217,217,0.4)] rounded-[6px] border-0 text-[13px] text-[#494949] cursor-pointer"
                   >
                     <BookOpen size={14} />
                     <span>{t('templates')}</span>
@@ -324,25 +257,26 @@ const MathEquationBlockComponent = (props: any) => {
                       size={14}
                       className={`transition-transform ${showTemplates ? 'rotate-180' : ''}`}
                     />
-                  </TemplateButton>
+                  </button>
 
                   {showTemplates ? (
-                    <TemplateDropdown className="absolute left-0 z-10 mt-1 max-h-80 w-64 overflow-y-auto">
+                    <div className="absolute left-0 z-10 mt-1 max-h-80 w-64 overflow-y-auto bg-white rounded-[8px] border border-[#e2e2e2] shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
                       <div className="border-b p-2 text-xs text-zinc-500">{t('selectTemplate')}</div>
                       {mathTemplates.map((template, index) => (
-                        <TemplateItem
+                        <div
                           key={index}
                           onClick={() => {
                             insertTemplate(template.latex);
                           }}
+                          className="py-2 px-3 cursor-pointer [transition:background_0.15s] hover:bg-[rgba(217,217,217,0.24)]"
                         >
                           <div className="flex flex-col">
                             <span className="font-medium">{t(template.name)}</span>
                             <span className="text-xs text-zinc-500">{t(template.description)}</span>
                           </div>
-                        </TemplateItem>
+                        </div>
                       ))}
-                    </TemplateDropdown>
+                    </div>
                   ) : null}
                 </div>
 
@@ -350,11 +284,11 @@ const MathEquationBlockComponent = (props: any) => {
                   ref={symbolsRef}
                   className="relative"
                 >
-                  <TemplateButton
+                  <button
                     onClick={() => {
                       setShowSymbols(!showSymbols);
                     }}
-                    className="flex items-center space-x-1"
+                    className="flex items-center space-x-1 py-[6px] px-[10px] bg-[rgba(217,217,217,0.4)] rounded-[6px] border-0 text-[13px] text-[#494949] cursor-pointer"
                   >
                     <Sigma size={14} />
                     <span>{t('symbols')}</span>
@@ -362,25 +296,26 @@ const MathEquationBlockComponent = (props: any) => {
                       size={14}
                       className={`transition-transform ${showSymbols ? 'rotate-180' : ''}`}
                     />
-                  </TemplateButton>
+                  </button>
 
                   {showSymbols ? (
-                    <SymbolsDropdown className="absolute left-0 z-10 mt-1 w-64">
+                    <div className="absolute left-0 z-10 mt-1 w-64 bg-white rounded-[8px] border border-[#e2e2e2] shadow-[0_4px_12px_rgba(0,0,0,0.08)] overflow-hidden">
                       <div className="border-b p-2 text-xs text-zinc-500">{t('insertSymbol')}</div>
                       <div className="flex flex-wrap p-2">
                         {mathSymbols.map((symbol, index) => (
-                          <SymbolButton
+                          <button
                             key={index}
                             onClick={() => {
                               insertSymbol(symbol.symbol);
                             }}
                             title={symbol.symbol}
+                            className="flex items-center justify-center w-8 h-8 m-[2px] bg-[rgba(217,217,217,0.3)] rounded-[4px] border-0 text-base text-[#494949] cursor-pointer"
                           >
                             {symbol.display}
-                          </SymbolButton>
+                          </button>
                         ))}
                       </div>
-                    </SymbolsDropdown>
+                    </div>
                   ) : null}
                 </div>
 
@@ -388,11 +323,11 @@ const MathEquationBlockComponent = (props: any) => {
                   ref={helpRef}
                   className="relative"
                 >
-                  <TemplateButton
+                  <button
                     onClick={() => {
                       setShowHelp(!showHelp);
                     }}
-                    className="flex items-center space-x-1"
+                    className="flex items-center space-x-1 py-[6px] px-[10px] bg-[rgba(217,217,217,0.4)] rounded-[6px] border-0 text-[13px] text-[#494949] cursor-pointer"
                   >
                     <Lightbulb size={14} />
                     <span>{t('help')}</span>
@@ -400,10 +335,10 @@ const MathEquationBlockComponent = (props: any) => {
                       size={14}
                       className={`transition-transform ${showHelp ? 'rotate-180' : ''}`}
                     />
-                  </TemplateButton>
+                  </button>
 
                   {showHelp ? (
-                    <HelpDropdown className="absolute left-0 z-10 mt-1 w-72">
+                    <div className="absolute left-0 z-10 mt-1 w-72 bg-white rounded-[8px] border border-[#e2e2e2] shadow-[0_4px_12px_rgba(0,0,0,0.08)] overflow-hidden">
                       <div className="border-b p-2 text-xs font-medium text-zinc-700">{t('quickReference')}</div>
                       <div className="space-y-2 p-3 text-xs">
                         <div>
@@ -448,7 +383,7 @@ const MathEquationBlockComponent = (props: any) => {
                           </Link>
                         </div>
                       </div>
-                    </HelpDropdown>
+                    </div>
                   ) : null}
                 </div>
               </div>
@@ -491,7 +426,7 @@ const MathEquationBlockComponent = (props: any) => {
               </div>
             </motion.div>
           ) : null}
-        </MathEqWrapper>
+        </div>
       </motion.div>
     </NodeViewWrapper>
   );

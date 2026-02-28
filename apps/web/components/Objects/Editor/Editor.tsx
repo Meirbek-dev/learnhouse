@@ -203,7 +203,8 @@ const Editor = (props: EditorProps) => {
                   target="_blank"
                   href={`/course/${courseUuid}`}
                 >
-                  <EditorInfoThumbnail
+                  <img
+                    className="h-[25px] w-14 object-cover object-top rounded-[7px] ml-[5px] hover:cursor-pointer"
                     src={`${
                       props.course.thumbnail_image
                         ? getCourseThumbnailMediaDirectory(
@@ -380,18 +381,6 @@ const EditorInfoDocName = styled.div`
   }
 `;
 
-const EditorInfoThumbnail = styled.img`
-  height: 25px;
-  width: 56px;
-  object-fit: cover;
-  object-position: top;
-  border-radius: 7px;
-  margin-left: 5px;
-
-  &:hover {
-    cursor: pointer;
-  }
-`;
 
 export const EditorContentWrapper = styled.div`
   margin: 40px;

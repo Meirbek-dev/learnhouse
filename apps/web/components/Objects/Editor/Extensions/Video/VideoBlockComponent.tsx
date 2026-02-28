@@ -32,11 +32,6 @@ const VIDEO_SIZES = {
 
 type VideoSize = keyof typeof VIDEO_SIZES;
 
-const VideoWrapper = styled.div`
-  transition: all 0.2s ease;
-  background-color: #f9f9f9;
-  border: 1px solid #eaeaea;
-`;
 
 
 const UploadZone = styled(motion.div)<{ isDragging: boolean }>`
@@ -413,7 +408,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <VideoWrapper className="flex flex-col space-y-4 rounded-lg px-5 py-6">
+        <div className="flex flex-col space-y-4 rounded-lg px-5 py-6 [transition:all_0.2s_ease] bg-[#f9f9f9] border border-[#eaeaea]">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 text-sm text-zinc-500">
               <Video size={16} />
@@ -595,7 +590,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
               </div>
             </motion.div>
           ) : null}
-        </VideoWrapper>
+        </div>
         {blockObject && videoUrl ? (
           <Modal
             isDialogOpen={isModalOpen}
