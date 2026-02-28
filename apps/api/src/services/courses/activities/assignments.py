@@ -1334,19 +1334,6 @@ async def create_assignment_submission(
             detail="Course not found",
         )
 
-    # Check if User already submitted the assignment
-    statement = select(AssignmentUserSubmission).where(
-        AssignmentUserSubmission.assignment_id == assignment.id,
-        AssignmentUserSubmission.user_id == current_user.id,
-    )
-    assignment_user_submission = db_session.exec(statement).first()
-
-    if assignment_user_submission:
-        raise HTTPException(
-            status_code=400,
-            detail="Assignment User Submission already exists",
-        )
-
     # RBAC check
     checker = PermissionChecker(db_session)
     checker.require(
@@ -1765,14 +1752,21 @@ async def grade_assignment_submission(
     if not assignment_tasks:
         raise HTTPException(status_code=400, detail="Assignment has no tasks to grade")
 
+    # Batch-fetch all task submissions for this user in one query
+    task_ids = [task.id for task in assignment_tasks]
+    submissions_map: dict[int, AssignmentTaskSubmission] = {}
+    if task_ids:
+        all_subs = db_session.exec(
+            select(AssignmentTaskSubmission).where(
+                AssignmentTaskSubmission.assignment_task_id.in_(task_ids),
+                AssignmentTaskSubmission.user_id == user_id,
+            )
+        ).all()
+        submissions_map = {s.assignment_task_id: s for s in all_subs}
+
     total = 0
     for task in assignment_tasks:
-        # Find user's submission for this task (if missing treat as 0)
-        statement = select(AssignmentTaskSubmission).where(
-            AssignmentTaskSubmission.assignment_task_id == task.id,
-            AssignmentTaskSubmission.user_id == user_id,
-        )
-        submission = db_session.exec(statement).first()
+        submission = submissions_map.get(task.id)
         task_grade = 0
         if submission:
             # Validate range
@@ -1849,19 +1843,6 @@ async def get_grade_assignment_submission(
     assignment_tasks = db_session.exec(statement).all()
 
     max_grade = 100 if assignment_tasks else 0
-
-    # Now get the grade from the user submission
-    statement = select(AssignmentUserSubmission).where(
-        AssignmentUserSubmission.user_id == user_id,
-        AssignmentUserSubmission.assignment_id == assignment.id,
-    )
-    assignment_user_submission = db_session.exec(statement).first()
-
-    if not assignment_user_submission:
-        raise HTTPException(
-            status_code=404,
-            detail="Assignment User Submission not found",
-        )
 
     # return the grade
     return {
@@ -2059,13 +2040,13 @@ async def get_assignments_from_course(
     statement = select(Activity).where(Activity.course_id == course.id)
     activities = db_session.exec(statement).all()
 
-    # Get Assignments
+    # Get Assignments in a single batch query
+    activity_ids = [a.id for a in activities]
     assignments = []
-    for activity in activities:
-        statement = select(Assignment).where(Assignment.activity_id == activity.id)
-        assignment = db_session.exec(statement).first()
-        if assignment:
-            assignments.append(assignment)
+    if activity_ids:
+        assignments = db_session.exec(
+            select(Assignment).where(Assignment.activity_id.in_(activity_ids))
+        ).all()
 
     # RBAC check
     checker = PermissionChecker(db_session)

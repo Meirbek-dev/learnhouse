@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime
 
 from fastapi import HTTPException, Request, status
@@ -261,21 +262,32 @@ async def get_course_chapters(
         for chapter in chapters
     ]
 
-    # Get activities for each chapter, enriched with permission metadata
-    for chapter in chapter_reads:
-        statement = (
+    # Batch-fetch all ChapterActivities and Activities for all chapters in 2 queries
+    chapter_ids = [c.id for c in chapter_reads]
+    all_chapter_activities: list[ChapterActivity] = []
+    activities_by_id: dict[int, Activity] = {}
+    if chapter_ids:
+        all_chapter_activities = db_session.exec(
             select(ChapterActivity)
-            .where(ChapterActivity.chapter_id == chapter.id)
+            .where(ChapterActivity.chapter_id.in_(chapter_ids))
             .order_by(ChapterActivity.order)
             .distinct(ChapterActivity.id, ChapterActivity.order)
-        )
-        chapter_activities = db_session.exec(statement).all()
+        ).all()
+        activity_ids = list({ca.activity_id for ca in all_chapter_activities})
+        if activity_ids:
+            activities = db_session.exec(
+                select(Activity).where(Activity.id.in_(activity_ids))
+            ).all()
+            activities_by_id = {a.id: a for a in activities}
 
-        for chapter_activity in chapter_activities:
-            statement = select(Activity).where(
-                Activity.id == chapter_activity.activity_id
-            )
-            activity = db_session.exec(statement).first()
+    chapter_activities_map: dict[int, list[ChapterActivity]] = defaultdict(list)
+    for ca in all_chapter_activities:
+        chapter_activities_map[ca.chapter_id].append(ca)
+
+    # Get activities for each chapter, enriched with permission metadata
+    for chapter in chapter_reads:
+        for chapter_activity in chapter_activities_map.get(chapter.id, []):
+            activity = activities_by_id.get(chapter_activity.activity_id)
             if activity and (with_unpublished_activities or activity.published):
                 can_update = checker.check(
                     current_user.id,

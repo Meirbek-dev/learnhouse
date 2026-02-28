@@ -1,9 +1,10 @@
 import logging
+from collections import defaultdict
 from datetime import UTC, datetime, timedelta
 
 import orjson
 from fastapi import HTTPException, Request
-from sqlmodel import Session, select
+from sqlmodel import Session, or_, select
 
 from config.config import get_platform_config
 from src.db.organizations import (
@@ -78,15 +79,24 @@ async def get_organization_users(
 
     org_users_list = []
 
-    checker = PermissionChecker(db_session)
+    # Batch-fetch roles for all users on this page in a single query
+    user_ids = [u.id for u in users]
+    roles_by_user: dict[int, list] = defaultdict(list)
+    if user_ids:
+        all_role_rows = db_session.exec(
+            select(Role, UserRole)
+            .join(UserRole, UserRole.role_id == Role.id)
+            .where(UserRole.user_id.in_(user_ids))
+            .where(or_(UserRole.org_id == org_id_int, Role.org_id.is_(None)))
+        ).all()
+        for role, user_role in all_role_rows:
+            roles_by_user[user_role.user_id].append(role)
 
     for user in users:
-        # Get user's roles via new PermissionChecker
-        user_roles = checker.get_user_roles(user_id=user.id, org_id=org_id_int)
+        user_roles = roles_by_user.get(user.id, [])
 
         if not user_roles:
             logging.warning(f"No roles found for user {user.id} in org {org_id_int}")
-            # skip this user
             continue
 
         # Use the first role (primary role)
