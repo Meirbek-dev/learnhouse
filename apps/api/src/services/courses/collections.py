@@ -135,32 +135,32 @@ async def create_collection(
     db_session.refresh(collection)
 
     # SECURITY: Link courses to collection - ensure user has access to all courses being added
-    if collection:
-        for course_id in collection_object.courses:
-            # Check if user has access to this course
-            statement = select(Course).where(Course.id == course_id)
-            course = db_session.exec(statement).first()
+    if collection and collection_object.courses:
+        # Batch-fetch all requested courses in a single query instead of one per course
+        found_courses = db_session.exec(
+            select(Course).where(Course.id.in_(collection_object.courses))
+        ).all()
 
-            if course:
-                # Verify user has read access to the course before adding it to collection
-                try:
-                    checker.require(
-                        current_user.id, "course:read", org_id=collection.org_id
-                    )
-                except HTTPException:
-                    raise HTTPException(
-                        status_code=403,
-                        detail=f"You don't have permission to add course {course.name} to this collection",
-                    )
+        if found_courses:
+            # Permission check uses the same org_id for every course — run it once
+            try:
+                checker.require(
+                    current_user.id, "course:read", org_id=collection.org_id
+                )
+            except HTTPException:
+                raise HTTPException(
+                    status_code=403,
+                    detail="You don't have permission to add courses to this collection",
+                )
 
+            for course in found_courses:
                 collection_course = CollectionCourse(
                     collection_id=int(collection.id),
-                    course_id=course_id,
+                    course_id=course.id,
                     org_id=int(collection_object.org_id),
                     creation_date=str(datetime.now()),
                     update_date=str(datetime.now()),
                 )
-                # Add collection_course to database
                 db_session.add(collection_course)
 
     db_session.commit()

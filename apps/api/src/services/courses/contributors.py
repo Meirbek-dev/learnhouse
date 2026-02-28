@@ -301,13 +301,13 @@ async def add_bulk_course_contributors(
             )
 
             db_session.add(resource_author)
-            db_session.commit()
-            db_session.refresh(resource_author)
-
             results["successful"].append({"username": username, "user_id": user.id})
 
         except Exception as e:
             results["failed"].append({"username": username, "reason": str(e)})
+
+    if results["successful"]:
+        db_session.commit()
 
     return results
 
@@ -406,11 +406,12 @@ async def remove_bulk_course_contributors(
 
             # Remove the contributor
             db_session.delete(existing_authorship)
-            db_session.commit()
-
             results["successful"].append({"username": username, "user_id": user.id})
 
         except Exception as e:
             results["failed"].append({"username": username, "reason": str(e)})
+
+    if results["successful"]:
+        db_session.commit()
 
     return results
