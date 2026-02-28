@@ -252,11 +252,27 @@ async def add_bulk_course_contributors(
 
     current_time = str(datetime.now())
 
+    # Pre-fetch all users and existing authorships in 2 batch queries
+    user_map = {
+        u.username: u
+        for u in db_session.exec(select(User).where(User.username.in_(usernames))).all()
+    }
+    existing_user_ids = [u.id for u in user_map.values() if u.id is not None]
+    existing_authorship_map = {
+        ea.user_id: ea
+        for ea in db_session.exec(
+            select(ResourceAuthor).where(
+                and_(
+                    ResourceAuthor.resource_uuid == course_uuid,
+                    ResourceAuthor.user_id.in_(existing_user_ids),
+                )
+            )
+        ).all()
+    }
+
     for username in usernames:
         try:
-            # Find user by username
-            user_statement = select(User).where(User.username == username)
-            user = db_session.exec(user_statement).first()
+            user = user_map.get(username)
 
             if not user or user.id is None:
                 results["failed"].append(
@@ -265,16 +281,7 @@ async def add_bulk_course_contributors(
                 continue
 
             # Check if user already has any authorship role for this course
-            existing_authorship = db_session.exec(
-                select(ResourceAuthor).where(
-                    and_(
-                        ResourceAuthor.resource_uuid == course_uuid,
-                        ResourceAuthor.user_id == user.id,
-                    )
-                )
-            ).first()
-
-            if existing_authorship:
+            if user.id in existing_authorship_map:
                 results["failed"].append(
                     {
                         "username": username,
@@ -350,11 +357,27 @@ async def remove_bulk_course_contributors(
     # Process results
     results = {"successful": [], "failed": []}
 
+    # Pre-fetch all users and existing authorships in 2 batch queries
+    user_map = {
+        u.username: u
+        for u in db_session.exec(select(User).where(User.username.in_(usernames))).all()
+    }
+    existing_user_ids = [u.id for u in user_map.values() if u.id is not None]
+    existing_authorship_map = {
+        ea.user_id: ea
+        for ea in db_session.exec(
+            select(ResourceAuthor).where(
+                and_(
+                    ResourceAuthor.resource_uuid == course_uuid,
+                    ResourceAuthor.user_id.in_(existing_user_ids),
+                )
+            )
+        ).all()
+    }
+
     for username in usernames:
         try:
-            # Find user by username
-            user_statement = select(User).where(User.username == username)
-            user = db_session.exec(user_statement).first()
+            user = user_map.get(username)
 
             if not user or user.id is None:
                 results["failed"].append(
@@ -363,14 +386,7 @@ async def remove_bulk_course_contributors(
                 continue
 
             # Check if user has any authorship role for this course
-            existing_authorship = db_session.exec(
-                select(ResourceAuthor).where(
-                    and_(
-                        ResourceAuthor.resource_uuid == course_uuid,
-                        ResourceAuthor.user_id == user.id,
-                    )
-                )
-            ).first()
+            existing_authorship = existing_authorship_map.get(user.id)
 
             if not existing_authorship:
                 results["failed"].append(

@@ -463,20 +463,17 @@ async def search_courses(
 
     courses = db_session.exec(query).all()
 
-    # Fetch authors for each course
-    course_reads = []
-    for course in courses:
-        # Get course authors with their roles
-        authors_statement = (
-            select(ResourceAuthor, User)
-            .join(User, ResourceAuthor.user_id == User.id)
-            .where(ResourceAuthor.resource_uuid == course.course_uuid)
-            .order_by(ResourceAuthor.id.asc())
-        )
-        author_results = db_session.exec(authors_statement).all()
-
-        # Convert to AuthorWithRole objects
-        authors = [
+    # Batch fetch all authors for all courses in one query
+    course_uuids = [course.course_uuid for course in courses]
+    all_authors_statement = (
+        select(ResourceAuthor, User)
+        .join(User, ResourceAuthor.user_id == User.id)
+        .where(ResourceAuthor.resource_uuid.in_(course_uuids))
+        .order_by(ResourceAuthor.id.asc())
+    )
+    authors_by_course: dict[str, list] = {}
+    for resource_author, user in db_session.exec(all_authors_statement).all():
+        authors_by_course.setdefault(resource_author.resource_uuid, []).append(
             AuthorWithRole(
                 user=UserRead.model_validate(user),
                 authorship=resource_author.authorship,
@@ -484,9 +481,10 @@ async def search_courses(
                 creation_date=resource_author.creation_date,
                 update_date=resource_author.update_date,
             )
-            for resource_author, user in author_results
-        ]
+        )
 
+    course_reads = []
+    for course in courses:
         course_dict = {
             "id": course.id or 0,  # Ensure id is never None
             "org_id": course.org_id,
@@ -501,7 +499,7 @@ async def search_courses(
             "course_uuid": course.course_uuid,
             "creation_date": course.creation_date,
             "update_date": course.update_date,
-            "authors": authors,
+            "authors": authors_by_course.get(course.course_uuid, []),
         }
         course_read = CourseRead.model_validate(course_dict)
         course_reads.append(course_read)
@@ -902,32 +900,27 @@ async def get_user_courses(
     courses = db_session.exec(statement).all()
 
     # Convert to CourseRead objects
+    # Batch fetch all authors and users for all courses in 2 queries (instead of N*M)
+    course_uuids = [course.course_uuid for course in courses]
+    all_authors_statement = (
+        select(ResourceAuthor, User)
+        .join(User, ResourceAuthor.user_id == User.id)
+        .where(ResourceAuthor.resource_uuid.in_(course_uuids))
+    )
+    authors_by_course: dict[str, list] = {}
+    for resource_author, user in db_session.exec(all_authors_statement).all():
+        authors_by_course.setdefault(resource_author.resource_uuid, []).append(
+            AuthorWithRole(
+                user=UserRead.model_validate(user),
+                authorship=resource_author.authorship,
+                authorship_status=resource_author.authorship_status,
+                creation_date=resource_author.creation_date,
+                update_date=resource_author.update_date,
+            )
+        )
+
     result = []
     for course in courses:
-        # Get authors for the course
-        authors_statement = select(ResourceAuthor).where(
-            ResourceAuthor.resource_uuid == course.course_uuid
-        )
-        authors = db_session.exec(authors_statement).all()
-
-        # Convert authors to AuthorWithRole objects
-        authors_with_role = []
-        for author in authors:
-            # Get user for the author
-            user_statement = select(User).where(User.id == author.user_id)
-            user = db_session.exec(user_statement).first()
-
-            if user:
-                authors_with_role.append(
-                    AuthorWithRole(
-                        user=UserRead.model_validate(user),
-                        authorship=author.authorship,
-                        authorship_status=author.authorship_status,
-                        creation_date=author.creation_date,
-                        update_date=author.update_date,
-                    )
-                )
-
         # Create CourseRead object
         course_read = CourseRead.model_validate(
             {
@@ -944,7 +937,7 @@ async def get_user_courses(
                 "course_uuid": course.course_uuid,
                 "creation_date": course.creation_date,
                 "update_date": course.update_date,
-                "authors": authors_with_role,
+                "authors": authors_by_course.get(course.course_uuid, []),
             }
         )
         result.append(course_read)

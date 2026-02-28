@@ -484,34 +484,39 @@ async def get_user_certificates_for_course(
     if not certification_ids:
         return []
 
-    # Query certificate users for this user and these certifications
-    result = []
-    for cert_id in certification_ids:
-        statement = select(CertificateUser).where(
+    # Batch fetch all matching certificate users and certifications in 2 queries
+    cert_users = db_session.exec(
+        select(CertificateUser).where(
             CertificateUser.user_id == current_user.id,
-            CertificateUser.certification_id == cert_id,
+            CertificateUser.certification_id.in_(certification_ids),
         )
-        cert_user = db_session.exec(statement).first()
-        if cert_user:
-            # Get the associated certification
-            statement = select(Certifications).where(Certifications.id == cert_id)
-            certification = db_session.exec(statement).first()
+    ).all()
 
-            result.append(
-                {
-                    "certificate_user": CertificateUserRead(**cert_user.model_dump()),
-                    "certification": CertificationRead(**certification.model_dump())
-                    if certification
-                    else None,
-                    "course": {
-                        "id": course.id,
-                        "course_uuid": course.course_uuid,
-                        "name": course.name,
-                        "description": course.description,
-                        "thumbnail_image": course.thumbnail_image,
-                    },
-                }
-            )
+    if not cert_users:
+        return []
+
+    found_cert_ids = [cu.certification_id for cu in cert_users]
+    certifications_list = db_session.exec(
+        select(Certifications).where(Certifications.id.in_(found_cert_ids))
+    ).all()
+    certs_by_id = {c.id: c for c in certifications_list}
+
+    result = [
+        {
+            "certificate_user": CertificateUserRead(**cert_user.model_dump()),
+            "certification": CertificationRead(**certs_by_id[cert_user.certification_id].model_dump())
+            if cert_user.certification_id in certs_by_id
+            else None,
+            "course": {
+                "id": course.id,
+                "course_uuid": course.course_uuid,
+                "name": course.name,
+                "description": course.description,
+                "thumbnail_image": course.thumbnail_image,
+            },
+        }
+        for cert_user in cert_users
+    ]
 
     logger.info(
         f"Found {len(result)} certificates for user {current_user.id} in course {course_uuid}. "
@@ -735,29 +740,38 @@ async def get_all_user_certificates(
     if not certificate_users:
         return []
 
+    from src.db.users import User
+
+    # Batch fetch certifications, courses, and users in 3 queries
+    cert_ids = [cu.certification_id for cu in certificate_users if cu.certification_id]
+    certifications_list = db_session.exec(
+        select(Certifications).where(Certifications.id.in_(cert_ids))
+    ).all()
+    certs_by_id = {c.id: c for c in certifications_list}
+
+    course_ids = [c.course_id for c in certifications_list if c.course_id]
+    courses_list = db_session.exec(
+        select(Course).where(Course.id.in_(course_ids))
+    ).all()
+    courses_by_id = {c.id: c for c in courses_list}
+
+    user_ids = [cu.user_id for cu in certificate_users if cu.user_id]
+    users_list = db_session.exec(
+        select(User).where(User.id.in_(user_ids))
+    ).all()
+    users_by_id = {u.id: u for u in users_list}
+
     result = []
     for cert_user in certificate_users:
-        # Get the associated certification
-        statement = select(Certifications).where(
-            Certifications.id == cert_user.certification_id
-        )
-        certification = db_session.exec(statement).first()
-
+        certification = certs_by_id.get(cert_user.certification_id)
         if not certification:
             continue
 
-        # Get course information
-        statement = select(Course).where(Course.id == certification.course_id)
-        course = db_session.exec(statement).first()
-
+        course = courses_by_id.get(certification.course_id)
         if not course:
             continue
 
-        # Get user information
-        from src.db.users import User
-
-        statement = select(User).where(User.id == cert_user.user_id)
-        user = db_session.exec(statement).first()
+        user = users_by_id.get(cert_user.user_id)
 
         result.append(
             {

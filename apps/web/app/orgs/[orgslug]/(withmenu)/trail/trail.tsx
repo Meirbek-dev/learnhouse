@@ -76,11 +76,15 @@ const Trail = (params: any) => {
     const totalCourses = trail.runs.length;
 
     try {
-      for (let i = 0; i < trail.runs.length; i += 1) {
-        const run = trail.runs[i];
-        await removeCourse(run.course.course_uuid, orgslug, access_token);
-        setQuittingProgress(Math.round(((i + 1) / totalCourses) * 100));
-      }
+      let completed = 0;
+      await Promise.all(
+        trail.runs.map((run: any) =>
+          removeCourse(run.course.course_uuid, orgslug, access_token).then(() => {
+            completed += 1;
+            setQuittingProgress(Math.round((completed / totalCourses) * 100));
+          }),
+        ),
+      );
 
       await revalidateTags(['courses'], orgslug);
       router.refresh();

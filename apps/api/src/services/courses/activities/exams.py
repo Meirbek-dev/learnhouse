@@ -799,8 +799,19 @@ async def _grade_and_finalize_attempt(
     total_score = 0
     max_score = 0
 
-    for question_id in attempt.question_order:
-        question = db_session.get(Question, question_id)
+    # Batch fetch all questions for this attempt in one query
+    question_ids = attempt.question_order or []
+    questions_map: dict[int, Question] = {}
+    if question_ids:
+        questions_map = {
+            q.id: q
+            for q in db_session.exec(
+                select(Question).where(Question.id.in_(question_ids))
+            ).all()
+        }
+
+    for question_id in question_ids:
+        question = questions_map.get(question_id)
         if not question:
             continue
 

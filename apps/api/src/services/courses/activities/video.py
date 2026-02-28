@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 from typing import Literal
 
@@ -195,6 +196,9 @@ async def create_video_activity(
     # Process and upload subtitle files
     if subtitle_files:
         subtitle_info = []
+
+        # Pre-process valid subtitle files and extract language
+        valid_subtitles: list[tuple] = []
         for subtitle_file in subtitle_files:
             if subtitle_file.filename and subtitle_file.size > 0:
                 # Validate subtitle file format
@@ -211,16 +215,25 @@ async def create_video_activity(
                     if 2 <= len(potential_lang) <= 3 and potential_lang.isalpha():
                         language = potential_lang
 
-                # Upload subtitle file with standardized naming
-                upload_result = await upload_subtitle(
-                    subtitle_file,
-                    activity.activity_uuid,
-                    organization.org_uuid,
-                    course.course_uuid,
-                    language,
-                    None,  # subtitle_id not needed anymore
-                )
+                valid_subtitles.append((subtitle_file, language))
 
+        if valid_subtitles:
+            # Upload all subtitle files in parallel
+            upload_results = await asyncio.gather(
+                *[
+                    upload_subtitle(
+                        subtitle_file,
+                        activity.activity_uuid,
+                        organization.org_uuid,
+                        course.course_uuid,
+                        language,
+                        None,  # subtitle_id not needed anymore
+                    )
+                    for subtitle_file, language in valid_subtitles
+                ]
+            )
+
+            for (_, language), upload_result in zip(valid_subtitles, upload_results):
                 if upload_result.get("success"):
                     subtitle_info.append(
                         {

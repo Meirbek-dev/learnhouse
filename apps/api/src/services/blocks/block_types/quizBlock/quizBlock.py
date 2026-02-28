@@ -352,18 +352,25 @@ async def _update_question_stats(
 
     per_question_results = grading_result.get("per_question", [])
 
+    question_ids = [r.get("question_id") for r in per_question_results if r.get("question_id")]
+    if not question_ids:
+        return
+
+    # Batch fetch all existing stats for this activity in one query
+    existing_stats = db_session.exec(
+        select(QuizQuestionStat).where(
+            QuizQuestionStat.activity_id == activity_id,
+            QuizQuestionStat.question_id.in_(question_ids),
+        )
+    ).all()
+    stats_by_qid = {s.question_id: s for s in existing_stats}
+
     for result in per_question_results:
         question_id = result.get("question_id")
         if not question_id:
             continue
 
-        # Get or create stat record
-        statement = select(QuizQuestionStat).where(
-            QuizQuestionStat.activity_id == activity_id,
-            QuizQuestionStat.question_id == question_id,
-        )
-        stat = db_session.exec(statement).first()
-
+        stat = stats_by_qid.get(question_id)
         if not stat:
             stat = QuizQuestionStat(
                 activity_id=activity_id,
@@ -375,6 +382,7 @@ async def _update_question_stats(
                 update_date=str(datetime.now(UTC)),
             )
             db_session.add(stat)
+            stats_by_qid[question_id] = stat
 
         # Update counts
         stat.total_attempts += 1

@@ -318,33 +318,38 @@ async def get_collections(
     if checker is None:
         checker = PermissionChecker(db_session)
 
-    for collection in collections:
-        statement_all = (
-            select(Course)
-            .join(CollectionCourse)
+    collection_ids = [c.id for c in collections]
+    is_public_user = current_user.id == 0
+
+    # Batch fetch all courses for all collections in one query
+    if is_public_user:
+        batch_stmt = (
+            select(CollectionCourse, Course)
+            .join(Course, CollectionCourse.course_id == Course.id)
             .where(
-                CollectionCourse.collection_id == collection.id,
-                CollectionCourse.org_id == collection.org_id,
-            )
-            .distinct()
-        )
-        statement_public = (
-            select(Course)
-            .join(CollectionCourse)
-            .where(
-                CollectionCourse.collection_id == collection.id,
+                CollectionCourse.collection_id.in_(collection_ids),
                 CollectionCourse.org_id == org_id,
                 Course.public,
             )
             .distinct()
         )
-        if current_user.id == 0:
-            statement = statement_public
-        else:
-            # RBAC check
-            statement = statement_all
+    else:
+        batch_stmt = (
+            select(CollectionCourse, Course)
+            .join(Course, CollectionCourse.course_id == Course.id)
+            .where(
+                CollectionCourse.collection_id.in_(collection_ids),
+                CollectionCourse.org_id == org_id,
+            )
+            .distinct()
+        )
 
-        courses = db_session.exec(statement).all()
+    courses_by_collection: dict[int, list] = {}
+    for cc, course in db_session.exec(batch_stmt).all():
+        courses_by_collection.setdefault(cc.collection_id, []).append(course)
+
+    for collection in collections:
+        courses = courses_by_collection.get(collection.id, [])
 
         can_update = (
             checker.check(

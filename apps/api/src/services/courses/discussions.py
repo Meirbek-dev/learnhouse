@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 
 from fastapi import HTTPException, Request, status
@@ -149,33 +150,45 @@ async def get_discussions_by_course_uuid(
 
     discussions = db_session.exec(query).all()
 
-    result = []
-    for discussion in discussions:
-        discussion_data = await get_discussion_with_details(
-            discussion.id, db_session, current_user
+    # Gather all top-level discussion details in parallel
+    all_discussion_data = list(
+        await asyncio.gather(
+            *[get_discussion_with_details(d.id, db_session, current_user) for d in discussions]
         )
+    )
 
-        if include_replies:
-            # Get replies for this discussion
-            replies_query = (
-                select(CourseDiscussion)
-                .where(
-                    CourseDiscussion.parent_discussion_id == discussion.id,
-                    CourseDiscussion.status == DiscussionStatusEnum.ACTIVE,
-                )
-                .order_by(col(CourseDiscussion.creation_date).asc())
+    if include_replies and discussions:
+        # Batch fetch all replies for all discussions in one query
+        discussion_ids = [d.id for d in discussions if d.id is not None]
+        all_replies_query = (
+            select(CourseDiscussion)
+            .where(
+                CourseDiscussion.parent_discussion_id.in_(discussion_ids),
+                CourseDiscussion.status == DiscussionStatusEnum.ACTIVE,
             )
-            replies = db_session.exec(replies_query).all()
+            .order_by(col(CourseDiscussion.creation_date).asc())
+        )
+        all_replies = db_session.exec(all_replies_query).all()
 
-            reply_data = []
-            for reply in replies:
-                reply_detail = await get_discussion_with_details(
-                    reply.id, db_session, current_user
-                )
-                reply_data.append(reply_detail)
+        # Group replies by parent discussion id
+        replies_by_discussion_id: dict[int, list] = {}
+        for reply in all_replies:
+            replies_by_discussion_id.setdefault(reply.parent_discussion_id, []).append(reply)
 
-            discussion_data.replies = reply_data
+        # Gather all reply details in parallel
+        all_reply_details = list(
+            await asyncio.gather(
+                *[get_discussion_with_details(r.id, db_session, current_user) for r in all_replies]
+            )
+        )
+        reply_details_by_id = {r.id: detail for r, detail in zip(all_replies, all_reply_details)}
 
+        for discussion, discussion_data in zip(discussions, all_discussion_data):
+            replies = replies_by_discussion_id.get(discussion.id, [])
+            discussion_data.replies = [reply_details_by_id[r.id] for r in replies]
+
+    result = []
+    for discussion, discussion_data in zip(discussions, all_discussion_data):
         is_owner = is_authenticated and discussion.user_id == current_user.id
         can_edit = is_owner or can_moderate
         available_actions: list[str] = []
@@ -641,11 +654,10 @@ async def get_discussion_replies(
 
     replies = db_session.exec(replies_query).all()
 
-    result = []
-    for reply in replies:
-        reply_data = await get_discussion_with_details(
-            reply.id, db_session, current_user
+    result = list(
+        await asyncio.gather(
+            *[get_discussion_with_details(reply.id, db_session, current_user) for reply in replies]
         )
-        result.append(reply_data)
+    )
 
     return result

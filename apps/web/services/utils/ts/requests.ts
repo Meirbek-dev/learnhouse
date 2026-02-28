@@ -245,9 +245,11 @@ export const revalidateTags = async (tags: string[], orgslug: string) => {
       throw new Error(`Failed to revalidate tags (${response.status})`);
     }
   } catch {
-    for (const tag of uniqueTags) {
-      const url = `${endpoint}?tag=${encodeURIComponent(tag)}`;
-      await fetch(url);
-    }
+    await Promise.all(
+      uniqueTags.map((tag) => {
+        const url = `${endpoint}?tag=${encodeURIComponent(tag)}`;
+        return fetch(url);
+      }),
+    );
   }
 };
