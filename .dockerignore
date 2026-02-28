@@ -118,6 +118,8 @@ docs/
 # Backups & restore data
 backups/
 temp-restore/
+apps/api/logs/
+apps/api/temp-restore/
 
 # Extra configs (mounted at runtime, not baked in)
 extra/.env
