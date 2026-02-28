@@ -10,7 +10,6 @@ from collections.abc import AsyncGenerator
 from typing import Any
 
 from langchain_community.chat_message_histories import RedisChatMessageHistory
-from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.graph.state import CompiledStateGraph
 
 from src.services.ai.exceptions import (
@@ -18,34 +17,9 @@ from src.services.ai.exceptions import (
     AITimeoutError,
     VectorStoreError,
 )
+from src.services.ai.message_utils import convert_history_to_messages
 
 logger = logging.getLogger(__name__)
-
-
-def _convert_history_to_messages(
-    message_history: RedisChatMessageHistory | list,
-) -> list[dict[str, str]]:
-    """Convert message history to LangChain v1 message format."""
-    messages: list[dict[str, str]] = []
-
-    if isinstance(message_history, list):
-        # Already a list, convert to message format
-        for msg in message_history:
-            if isinstance(msg, HumanMessage):
-                messages.append({"role": "user", "content": msg.content})
-            elif isinstance(msg, AIMessage):
-                messages.append({"role": "assistant", "content": msg.content})
-            elif isinstance(msg, dict):
-                messages.append(msg)
-    elif hasattr(message_history, "messages"):
-        # RedisChatMessageHistory or similar
-        for msg in message_history.messages:
-            if isinstance(msg, HumanMessage):
-                messages.append({"role": "user", "content": msg.content})
-            elif isinstance(msg, AIMessage):
-                messages.append({"role": "assistant", "content": msg.content})
-
-    return messages
 
 
 async def ask_ai_stream(
@@ -126,7 +100,7 @@ async def ask_ai_stream(
                 raise AIProcessingError(msg)
 
         # Convert message history to LangChain v1 format
-        history_messages = _convert_history_to_messages(message_history)
+        history_messages = convert_history_to_messages(message_history)
 
         # Add current question to messages
         messages = [*history_messages, {"role": "user", "content": question.strip()}]

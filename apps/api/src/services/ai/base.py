@@ -2,6 +2,7 @@ import asyncio
 import hashlib
 import logging
 import os
+from collections.abc import AsyncGenerator, Callable
 from typing import TYPE_CHECKING, Any
 
 from langchain.agents import create_agent
@@ -9,6 +10,7 @@ from langchain.tools import tool
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.vectorstores import VectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langgraph.graph.state import CompiledStateGraph
 from ulid import ULID
@@ -27,6 +29,7 @@ from src.services.ai.exceptions import (
     VectorStoreError,
 )
 from src.services.ai.init import get_embedding_function, get_llm
+from src.services.ai.message_utils import convert_history_to_messages
 
 # Disable ChromaDB telemetry
 os.environ.update(
@@ -89,7 +92,7 @@ class OptimizedTextSplitter:
         self,
         chunk_size: int = 3000,  # Larger chunks = fewer embeddings (50% faster, was 1500)
         chunk_overlap: int = 200,  # Better context preservation (increased proportionally)
-        length_function: callable = len,
+        length_function: Callable[[str], int] = len,
     ) -> None:
         self.splitter = RecursiveCharacterTextSplitter(
             chunk_size=chunk_size,
@@ -196,7 +199,7 @@ class FastAIService:
         documents: list[str],
         embedding_model_name: str,
         collection_name: str | None = None,
-    ) -> "Chroma | None":
+    ) -> VectorStore | None:
         """
         Get cached vector store or create new one.
 
@@ -242,15 +245,28 @@ class FastAIService:
         documents: list[str],
         embedding_model_name: str,
         collection_name: str | None = None,
-    ) -> "Chroma | None":
+    ) -> VectorStore | None:
         """
         Create vector store with async batch processing.
 
         Uses parallel text splitting and batched embedding generation.
         """
-        from langchain_chroma import Chroma
+        from langchain_core.vectorstores import InMemoryVectorStore
 
         try:
+            chroma_cls = None
+            chroma_import_error: Exception | None = None
+            try:
+                from langchain_chroma import Chroma
+
+                chroma_cls = Chroma
+            except Exception as import_error:
+                chroma_import_error = import_error
+                logger.warning(
+                    "Chroma import failed, using InMemoryVectorStore fallback: %s",
+                    import_error,
+                )
+
             # Get cached embedding function
             embedding_function = self._get_cached_embedding_function(
                 embedding_model_name
@@ -287,25 +303,37 @@ class FastAIService:
                 f"✓ Created {len(all_chunks)} chunks from {len(documents)} documents"
             )
 
-            # Use ChromaDB connection pool for better performance
-            pool = get_chromadb_pool()
+            if chroma_cls is not None:
+                # Use ChromaDB connection pool for better performance
+                pool = get_chromadb_pool()
 
-            async with pool.get_client() as chroma_client:
-                collection_name = collection_name or f"doc_collection_{ULID()}"
+                async with pool.get_client() as chroma_client:
+                    collection_name = collection_name or f"doc_collection_{ULID()}"
 
-                # Create vector store with batch embedding processing
-                # The OpenAIEmbeddings with chunk_size parameter handles batching internally
-                logger.info("Creating vector store with batched embeddings...")
-                vector_store = await asyncio.to_thread(
-                    Chroma.from_texts,
-                    texts=all_chunks,
-                    embedding=embedding_function,
-                    client=chroma_client,
-                    collection_name=collection_name,
-                )
+                    # Create vector store with batch embedding processing
+                    # The OpenAIEmbeddings with chunk_size parameter handles batching internally
+                    logger.info("Creating Chroma vector store with batched embeddings...")
+                    vector_store = await asyncio.to_thread(
+                        chroma_cls.from_texts,
+                        texts=all_chunks,
+                        embedding=embedding_function,
+                        client=chroma_client,
+                        collection_name=collection_name,
+                    )
 
-                logger.info("✓ Vector store created successfully")
-                return vector_store
+                    logger.info("✓ Chroma vector store created successfully")
+                    return vector_store
+
+            logger.info("Creating InMemoryVectorStore fallback with batched embeddings...")
+            vector_store = await asyncio.to_thread(
+                InMemoryVectorStore.from_texts,
+                texts=all_chunks,
+                embedding=embedding_function,
+            )
+            logger.info("✓ InMemoryVectorStore fallback created successfully")
+            if chroma_import_error:
+                logger.debug("Chroma import exception details: %r", chroma_import_error)
+            return vector_store
 
         except EmbeddingError, VectorStoreError:
             raise
@@ -320,7 +348,7 @@ class FastAIService:
         self,
         llm_model_name: str,
         system_prompt: str,
-        vector_store: "Chroma",
+        vector_store: VectorStore,
         max_iterations: int = 15,  # Increased further for complex multi-step operations
     ) -> CompiledStateGraph | None:
         """Get cached agent or create new one."""
@@ -352,13 +380,13 @@ class FastAIService:
         self,
         llm_model_name: str,
         system_prompt: str,
-        vector_store: "Chroma",
+        vector_store: VectorStore,
         max_iterations: int = 15,  # Increased further for complex multi-step operations
     ) -> CompiledStateGraph | None:
         """Create agent using LangChain v1 create_agent API."""
         try:
             # Get cached LLM with streaming enabled
-            llm = get_llm(llm_model_name, streaming=True)
+            llm = self._get_cached_llm(llm_model_name)
             if not llm:
                 error_msg = f"LLM model {llm_model_name} not available"
                 logger.error(error_msg)
@@ -404,32 +432,6 @@ class FastAIService:
             ) from e
 
 
-def _convert_history_to_messages(
-    message_history: RedisChatMessageHistory | list,
-) -> list[dict[str, str]]:
-    """Convert message history to LangChain v1 message format."""
-    messages: list[dict[str, str]] = []
-
-    if isinstance(message_history, list):
-        # Already a list, convert to message format
-        for msg in message_history:
-            if isinstance(msg, HumanMessage):
-                messages.append({"role": "user", "content": msg.content})
-            elif isinstance(msg, AIMessage):
-                messages.append({"role": "assistant", "content": msg.content})
-            elif isinstance(msg, dict):
-                messages.append(msg)
-    elif hasattr(message_history, "messages"):
-        # RedisChatMessageHistory or similar
-        for msg in message_history.messages:
-            if isinstance(msg, HumanMessage):
-                messages.append({"role": "user", "content": msg.content})
-            elif isinstance(msg, AIMessage):
-                messages.append({"role": "assistant", "content": msg.content})
-
-    return messages
-
-
 async def ask_ai(
     question: str,
     message_history: RedisChatMessageHistory | list,
@@ -438,6 +440,7 @@ async def ask_ai(
     embedding_model_name: str,
     openai_model_name: str,
     session_id: str = "default",
+    cancel_event: asyncio.Event | None = None,
     collection_name: str | None = None,
 ) -> dict[str, Any]:
     """Fast AI processing using LangChain v1 create_agent API."""
@@ -480,7 +483,7 @@ async def ask_ai(
             raise AIProcessingError(msg)
 
         # Convert message history to LangChain v1 format
-        history_messages = _convert_history_to_messages(message_history)
+        history_messages = convert_history_to_messages(message_history)
 
         # Add current question to messages
         messages = [*history_messages, {"role": "user", "content": question.strip()}]
@@ -489,24 +492,25 @@ async def ask_ai(
         logger.info(f"Processing AI query: {question[:100]}...")
 
         try:
+            if cancel_event and cancel_event.is_set():
+                error_msg = "AI processing cancelled before invocation"
+                logger.info(error_msg)
+                raise AIProcessingError(error_msg)
+
             result = await asyncio.wait_for(
-                asyncio.to_thread(
-                    agent.invoke,
-                    {"messages": messages},
-                ),
-                timeout=120.0,  # Increased timeout for complex operations
+                agent.ainvoke({"messages": messages}),
+                timeout=120.0,
             )
 
             # Extract response from result
             output_messages = result.get("messages", [])
             if output_messages:
                 last_message = output_messages[-1]
-                # Use .text property for LangChain v1 (replaces .text() method)
-                response_text = (
-                    last_message.text
-                    if hasattr(last_message, "text")
-                    else str(last_message.content)
-                )
+                text_attr = getattr(last_message, "text", None)
+                if text_attr is not None:
+                    response_text = text_attr() if callable(text_attr) else str(text_attr)
+                else:
+                    response_text = str(getattr(last_message, "content", ""))
             else:
                 response_text = ""
 
@@ -544,7 +548,7 @@ async def ask_ai_stream(
     openai_model_name: str,
     session_id: str = "default",
     collection_name: str | None = None,
-):
+) -> AsyncGenerator[str]:
     """
     Stream AI responses using LangChain v1 streaming API.
 
@@ -567,107 +571,19 @@ async def ask_ai_stream(
         VectorStoreError: If vector store creation fails
         AITimeoutError: If processing times out
     """
-    # Input validation
-    if not question or not question.strip():
-        error_msg = "Question cannot be empty"
-        logger.warning(error_msg)
-        raise AIProcessingError(error_msg)
+    from src.services.ai.streaming import ask_ai_stream as ask_ai_stream_sse
 
-    if not text_reference or not text_reference.strip():
-        error_msg = "Text reference cannot be empty"
-        logger.warning(error_msg)
-        raise AIProcessingError(error_msg)
-
-    try:
-        # Initialize fast AI service
-        ai_service = FastAIService()
-
-        # Get or create vector store (cached)
-        vector_store = await ai_service.get_or_create_vector_store(
-            documents=[text_reference],
-            embedding_model_name=embedding_model_name,
-            collection_name=collection_name,  # Use activity UUID for persistence
-        )
-
-        if not vector_store:
-            msg = "Failed to create knowledge base"
-            raise VectorStoreError(msg)
-
-        # Get or create agent (cached)
-        agent = await ai_service.get_or_create_agent(
-            llm_model_name=openai_model_name,
-            system_prompt=message_for_the_prompt,
-            vector_store=vector_store,
-        )
-
-        if not agent:
-            msg = "Failed to create AI agent"
-            raise AIProcessingError(msg)
-
-        # Convert message history to LangChain v1 format
-        history_messages = _convert_history_to_messages(message_history)
-
-        # Add current question to messages
-        messages = [*history_messages, {"role": "user", "content": question.strip()}]
-
-        logger.info(f"Streaming AI query: {question[:100]}...")
-
-        # Stream response chunks using LangGraph stream_mode="messages" for LLM tokens
-        full_response = ""
-        try:
-            async for message_chunk, metadata in agent.astream(
-                {"messages": messages},
-                stream_mode="messages",
-            ):
-                # Filter: only stream from the model/agent node, not tool outputs
-                node_name = metadata.get("langgraph_node", "")
-
-                # Skip tool node outputs - we only want the final AI response
-                if "tool" in node_name.lower():
-                    continue
-
-                # Skip if this is a tool message (context retrieval results)
-                if hasattr(message_chunk, "type") and message_chunk.type == "tool":
-                    continue
-
-                # Extract content from the message chunk
-                content = ""
-                if hasattr(message_chunk, "content"):
-                    # Only stream if it's an AI message chunk, not a tool response
-                    msg_type = getattr(message_chunk, "type", "")
-                    if msg_type == "tool":
-                        continue
-                    content = message_chunk.content
-                elif isinstance(message_chunk, str):
-                    content = message_chunk
-
-                # Yield content if present
-                if content:
-                    full_response += content
-                    yield content
-
-            # Update message history with new messages
-            if hasattr(message_history, "add_user_message"):
-                message_history.add_user_message(question.strip())
-            if hasattr(message_history, "add_ai_message") and full_response:
-                message_history.add_ai_message(full_response)
-
-            logger.info("AI streaming completed successfully")
-
-        except TimeoutError as e:
-            error_msg = "AI streaming timed out"
-            logger.warning(error_msg)
-            raise AITimeoutError(60, details={"question_length": len(question)}) from e
-
-    except AIProcessingError, VectorStoreError, AITimeoutError:
-        raise
-    except Exception as e:
-        error_msg = f"Unexpected error during AI streaming: {e!s}"
-        logger.exception(error_msg)
-        raise AIProcessingError(
-            error_msg,
-            details={"error_type": type(e).__name__, "session_id": session_id},
-        ) from e
+    async for payload in ask_ai_stream_sse(
+        question=question,
+        message_history=message_history,
+        text_reference=text_reference,
+        message_for_the_prompt=message_for_the_prompt,
+        embedding_model_name=embedding_model_name,
+        openai_model_name=openai_model_name,
+        session_id=session_id,
+        collection_name=collection_name,
+    ):
+        yield payload
 
 
 def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
