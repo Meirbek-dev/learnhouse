@@ -98,26 +98,26 @@ async def search_across_org(
 
     # Convert collections to CollectionRead objects with courses
     collection_reads = []
-    for collection in collections:
-        # Get courses in collection
-        statement = (
-            select(Course)
-            .select_from(Course)
-            .join(
-                CollectionCourse,
-                and_(
-                    CollectionCourse.course_id == Course.id,
-                    CollectionCourse.collection_id == collection.id,
-                    CollectionCourse.org_id == collection.org_id,
-                ),
+    if collections:
+        collection_ids = [c.id for c in collections]
+        batch_stmt = (
+            select(CollectionCourse, Course)
+            .join(Course, CollectionCourse.course_id == Course.id)
+            .where(
+                CollectionCourse.collection_id.in_(collection_ids),
+                CollectionCourse.org_id == org.id,
             )
             .distinct()
         )
-        collection_courses = list(db_session.exec(statement).all())
-        collection_read = CollectionRead.model_validate(
-            {**collection.model_dump(), "courses": collection_courses}
-        )
-        collection_reads.append(collection_read)
+        courses_by_collection: dict[int, list] = {}
+        for cc, course in db_session.exec(batch_stmt).all():
+            courses_by_collection.setdefault(cc.collection_id, []).append(course)
+
+        for collection in collections:
+            collection_read = CollectionRead.model_validate(
+                {**collection.model_dump(), "courses": courses_by_collection.get(collection.id, [])}
+            )
+            collection_reads.append(collection_read)
 
     # Convert users to UserRead objects
     user_reads = [UserRead.model_validate(user) for user in users]

@@ -311,12 +311,18 @@ async def get_user_session(
     user_role_rows = db_session.exec(statement).all()
     all_org_ids = {ur.org_id for ur in user_role_rows if ur.org_id}
 
+    # Batch fetch all orgs in one query
+    orgs_by_id = {
+        o.id: o
+        for o in db_session.exec(
+            select(Organization).where(Organization.id.in_(all_org_ids))
+        ).all()
+    }
+
     # Build roles list - return ALL roles per org, not just the first
     roles: list[UserRoleWithOrg] = []
     for oid in all_org_ids:
-        org = db_session.exec(
-            select(Organization).where(Organization.id == oid)
-        ).first()
+        org = orgs_by_id.get(oid)
         if not org:
             continue
         user_roles = checker.get_user_roles(user_id=user.id, org_id=oid)

@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
 
@@ -29,29 +31,30 @@ async def get_customers(
     statement = select(PaymentsUser).where(PaymentsUser.org_id == org_id)
     payment_users = db_session.exec(statement).all()
 
-    customers_data = []
+    if not payment_users:
+        return []
 
-    for payment_user in payment_users:
-        # Get user data
-        user = await read_user_by_id(
-            request, db_session, current_user, payment_user.user_id
-        )
+    # Gather all user and product lookups in parallel
+    all_users = await asyncio.gather(
+        *[read_user_by_id(request, db_session, current_user, pu.user_id) for pu in payment_users]
+    )
+    all_products = await asyncio.gather(
+        *[
+            get_payments_product(request, org.id, pu.payment_product_id, current_user, db_session)
+            for pu in payment_users
+        ]
+    )
 
-        # Get product data
-        if org.id is None:
-            raise HTTPException(status_code=400, detail="Invalid organization ID")
-        product = await get_payments_product(
-            request, org.id, payment_user.payment_product_id, current_user, db_session
-        )
-
-        customer_data = {
-            "payment_user_id": payment_user.id,
+    customers_data = [
+        {
+            "payment_user_id": pu.id,
             "user": user or None,
             "product": product or None,
-            "status": payment_user.status,
-            "creation_date": payment_user.creation_date,
-            "update_date": payment_user.update_date,
+            "status": pu.status,
+            "creation_date": pu.creation_date,
+            "update_date": pu.update_date,
         }
-        customers_data.append(customer_data)
+        for pu, user, product in zip(payment_users, all_users, all_products)
+    ]
 
     return customers_data

@@ -37,33 +37,47 @@ def _hydrate_trail(trail: Trail, user_id: int, db_session: Session) -> TrailRead
         for tr in runs
     ]
 
+    if not run_reads:
+        return TrailRead(**trail.model_dump(), runs=run_reads)
+
+    run_ids = [rr.id for rr in run_reads if rr.id is not None]
+    course_ids = list({rr.course_id for rr in run_reads if rr.course_id})
+
+    # Batch fetch all steps, courses, and chapter activity counts in 3 queries
+    all_steps = db_session.exec(
+        select(TrailStep).where(
+            TrailStep.trailrun_id.in_(run_ids),
+            TrailStep.user_id == user_id,
+        )
+    ).all()
+    steps_by_run: dict[int, list[TrailStep]] = {}
+    for s in all_steps:
+        steps_by_run.setdefault(s.trailrun_id, []).append(s)
+
+    courses_by_id = {
+        c.id: c
+        for c in db_session.exec(select(Course).where(Course.id.in_(course_ids))).all()
+    }
+
+    chapter_act_count: dict[int, int] = {}
+    for ca in db_session.exec(
+        select(ChapterActivity).where(ChapterActivity.course_id.in_(course_ids))
+    ).all():
+        chapter_act_count[ca.course_id] = chapter_act_count.get(ca.course_id, 0) + 1
+
     # Hydrate each run with steps and course data
     for rr in run_reads:
-        # Steps
-
-        step_stmt = select(TrailStep).where(
-            TrailStep.trailrun_id == rr.id, TrailStep.user_id == user_id
-        )
-        steps = db_session.exec(step_stmt).all()
+        steps = steps_by_run.get(rr.id, [])
         rr.steps = [TrailStepRead(**s.model_dump()) for s in steps]
 
-        # Course object
-        course_stmt = select(Course).where(Course.id == rr.course_id)
-        course_obj = db_session.exec(course_stmt).first()
+        course_obj = courses_by_id.get(rr.course_id)
         rr.course = course_obj.model_dump() if course_obj else {}
-
-        # Total steps in course
-        chapter_act_stmt = select(ChapterActivity).where(
-            ChapterActivity.course_id == rr.course_id
-        )
-        rr.course_total_steps = len(db_session.exec(chapter_act_stmt).all())
+        rr.course_total_steps = chapter_act_count.get(rr.course_id, 0)
 
         # Embed course per step for convenience
         for s in rr.steps:
             if s.course_id:
-                c_stmt = select(Course).where(Course.id == s.course_id)
-                c_obj = db_session.exec(c_stmt).first()
-                s.data = {"course": c_obj}
+                s.data = {"course": courses_by_id.get(s.course_id)}
 
     return TrailRead(**trail.model_dump(), runs=run_reads)
 
@@ -430,6 +444,7 @@ async def remove_course_from_trail(
 
     for trail_step in trail_steps:
         db_session.delete(trail_step)
+    if trail_steps:
         db_session.commit()
 
     return _hydrate_trail(trail, user.id, db_session)
