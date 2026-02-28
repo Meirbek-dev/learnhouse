@@ -2,14 +2,15 @@ import asyncio
 import hashlib
 import logging
 import os
-from collections.abc import AsyncGenerator, Callable
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 
+from cachetools import LRUCache
 from langchain.agents import create_agent
 from langchain.tools import tool
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from langchain_core.vectorstores import VectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langgraph.graph.state import CompiledStateGraph
@@ -74,89 +75,58 @@ class WindowedChatMessageHistory(BaseChatMessageHistory):
     def messages(self) -> list[BaseMessage]:
         return self._messages
 
-    def add_message(self, message: BaseMessage) -> None:
+    def add_messages(self, messages: Sequence[BaseMessage]) -> None:
         if self._base_history:
-            self._base_history.add_message(message)
-        self._append_to_window(message)
-
-    def add_user_message(self, message: str) -> None:
-        if self._base_history:
-            self._base_history.add_user_message(message)
-        self._append_to_window(HumanMessage(content=message))
-
-    def add_ai_message(self, message: str) -> None:
-        if self._base_history:
-            self._base_history.add_ai_message(message)
-        self._append_to_window(AIMessage(content=message))
+            self._base_history.add_messages(messages)
+        for message in messages:
+            self._messages = ([*self._messages, message])[-self._window_size :]
 
     def clear(self) -> None:
         if self._base_history:
             self._base_history.clear()
         self._messages = []
 
-    def _append_to_window(self, message: BaseMessage) -> None:
-        self._messages = ([*self._messages, message])[-self._window_size :]
-
 
 class OptimizedTextSplitter:
-    """Optimized text splitter with async support and caching."""
+    """Optimized text splitter with async support and bounded caching."""
 
     def __init__(
         self,
-        chunk_size: int = 3000,  # Larger chunks = fewer embeddings (50% faster, was 1500)
-        chunk_overlap: int = 200,  # Better context preservation (increased proportionally)
-        length_function: Callable[[str], int] = len,
+        chunk_size: int = 3000,
+        chunk_overlap: int = 200,
     ) -> None:
         self.splitter = RecursiveCharacterTextSplitter(
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
-            length_function=length_function,
+            length_function=len,
             separators=["\n\n", "\n", ". ", " ", ""],
         )
-        self._chunk_cache: dict[str, list[str]] = {}
+        self._chunk_cache: LRUCache[str, list[str]] = LRUCache(maxsize=512)
 
     def split_text(self, text: str) -> list[str]:
-        """Split text with caching (synchronous)."""
+        """Split text with bounded LRU caching (synchronous)."""
         if not text or not isinstance(text, str):
             return []
 
-        # Create cache key from text hash
         text_hash = hashlib.md5(text.encode()).hexdigest()
 
-        if text_hash in self._chunk_cache:
-            return self._chunk_cache[text_hash]
+        cached = self._chunk_cache.get(text_hash)
+        if cached is not None:
+            return cached
 
-        # Clean text
         clean_text = " ".join(text.split())
-
-        # Split into chunks
         chunks = self.splitter.split_text(clean_text)
+        filtered = [chunk for chunk in chunks if len(chunk.strip()) > 50]
 
-        # Filter short chunks
-        filtered_chunks = [chunk for chunk in chunks if len(chunk.strip()) > 50]
-
-        # Cache result
-        self._chunk_cache[text_hash] = filtered_chunks
-
-        return filtered_chunks
+        self._chunk_cache[text_hash] = filtered
+        return filtered
 
     async def split_text_async(self, text: str) -> list[str]:
-        """Split text asynchronously with caching."""
         return await asyncio.to_thread(self.split_text, text)
 
     async def batch_split_texts(self, texts: list[str]) -> list[list[str]]:
-        """
-        Split multiple texts in parallel batches.
-
-        Args:
-            texts: List of texts to split
-
-        Returns:
-            List of chunk lists for each text
-        """
-        # Process in parallel using asyncio.gather
         tasks = [self.split_text_async(text) for text in texts]
-        return await asyncio.gather(*tasks, return_exceptions=False)
+        return await asyncio.gather(*tasks)
 
 
 class FastAIService:
@@ -167,44 +137,10 @@ class FastAIService:
         self.config = get_platform_config()
         self.cache_manager = get_ai_cache_manager()
 
-    def _get_cached_embedding_function(self, model_name: str):
-        """Cache embedding functions."""
-        cache_key = f"embedding_{model_name}"
-
-        cached = self.cache_manager.embedding_cache.get(cache_key)
-        if cached:
-            return cached
-
-        embedding_fn = get_embedding_function(model_name)
-        if embedding_fn:
-            self.cache_manager.embedding_cache.set(cache_key, embedding_fn)
-
-        return embedding_fn
-
-    def _get_cached_llm(self, model_name: str):
-        """Cache LLM instances."""
-        cache_key = f"llm_{model_name}"
-
-        cached = self.cache_manager.llm_cache.get(cache_key)
-        if cached:
-            return cached
-
-        llm = get_llm(model_name, streaming=True)
-        if llm:
-            self.cache_manager.llm_cache.set(cache_key, llm)
-
-        return llm
-
     def _generate_content_hash(self, documents: list[str]) -> str:
-        """
-        Generate deterministic hash for document content.
-
-        Normalizes documents before hashing to ensure consistent cache hits.
-        """
-        # Normalize and sort documents for consistent hashing
-        normalized = [" ".join(doc.split()) for doc in documents if doc.strip()]
-        normalized.sort()
-        content = "||".join(normalized)  # Use delimiter to prevent hash collisions
+        """Generate deterministic hash for document content."""
+        normalized = sorted(" ".join(doc.split()) for doc in documents if doc.strip())
+        content = "||".join(normalized)
         return hashlib.sha256(content.encode()).hexdigest()
 
     async def get_or_create_vector_store(
@@ -213,43 +149,26 @@ class FastAIService:
         embedding_model_name: str,
         collection_name: str | None = None,
     ) -> VectorStore | None:
-        """
-        Get cached vector store or create new one.
-
-        Uses collection name (activity UUID) for persistent storage and caching.
-        This allows vector stores to be reused across requests and server restarts.
-        """
-
-        # Use collection name as primary cache key for activity-based persistence
-        # Fall back to content hash only if no collection name provided
+        """Get cached vector store or create new one."""
         if collection_name:
             cache_key = f"{embedding_model_name}_{collection_name}"
         else:
             content_hash = self._generate_content_hash(documents)
             cache_key = f"{embedding_model_name}_{content_hash}"
 
-        # Check cache first
         cached_store = self.cache_manager.vector_store_cache.get(cache_key)
         if cached_store:
-            logger.info(f"✓ Cache HIT for vector store: {cache_key[:50]}...")
-            # Log cache statistics for monitoring
-            cache_stats = self.cache_manager.vector_store_cache.get_stats()
-            logger.debug(f"Vector store cache stats: {cache_stats}")
+            logger.info("✓ Vector store cache HIT: %s", cache_key[:50])
             return cached_store
 
-        logger.info(f"✗ Cache MISS for vector store: {cache_key[:50]}..., creating new")
-        # Log cache statistics for monitoring
-        cache_stats = self.cache_manager.vector_store_cache.get_stats()
-        logger.debug(f"Vector store cache stats: {cache_stats}")
+        logger.info("✗ Vector store cache MISS: %s — creating", cache_key[:50])
 
-        # Create new vector store
         vector_store = await self._create_vector_store(
             documents, embedding_model_name, collection_name
         )
 
         if vector_store:
             self.cache_manager.vector_store_cache.set(cache_key, vector_store)
-            logger.info(f"Cached new vector store with key: {cache_key[:50]}...")
 
         return vector_store
 
@@ -259,11 +178,7 @@ class FastAIService:
         embedding_model_name: str,
         collection_name: str | None = None,
     ) -> VectorStore | None:
-        """
-        Create vector store with async batch processing.
-
-        Uses parallel text splitting and batched embedding generation.
-        """
+        """Create vector store with async batch processing."""
         from langchain_core.vectorstores import InMemoryVectorStore
 
         try:
@@ -271,93 +186,71 @@ class FastAIService:
             chroma_import_error: Exception | None = None
             try:
                 from langchain_chroma import Chroma
-
                 chroma_cls = Chroma
             except Exception as import_error:
                 chroma_import_error = import_error
-                logger.warning(
-                    "Chroma import failed, using InMemoryVectorStore fallback: %s",
-                    import_error,
-                )
+                logger.warning("Chroma import failed, falling back to InMemoryVectorStore: %s", import_error)
 
-            # Get cached embedding function
-            embedding_function = self._get_cached_embedding_function(
-                embedding_model_name
-            )
+            # lru_cache handles caching — call directly
+            embedding_function = get_embedding_function(embedding_model_name)
             if not embedding_function:
-                error_msg = f"Embedding model {embedding_model_name} not available"
-                logger.error(error_msg)
                 raise EmbeddingError(
-                    error_msg, details={"model_name": embedding_model_name}
+                    f"Embedding model {embedding_model_name} not available",
+                    details={"model_name": embedding_model_name},
                 )
 
-            # Process documents in parallel using optimized batch splitting
-            logger.info(f"Processing {len(documents)} documents in parallel batches")
-            all_chunks = []
-
-            # Use batch processing for better performance
+            logger.info("Processing %d documents", len(documents))
             chunk_results = await asyncio.gather(
-                *(self.text_splitter.split_text_async(document) for document in documents),
+                *(self.text_splitter.split_text_async(doc) for doc in documents),
                 return_exceptions=True,
             )
 
+            all_chunks: list[str] = []
             for result in chunk_results:
                 if isinstance(result, Exception):
-                    logger.warning(f"Failed to process document chunk: {result}")
+                    logger.warning("Failed to chunk document: %s", result)
                     continue
                 if isinstance(result, list):
                     all_chunks.extend(result)
 
             if not all_chunks:
-                error_msg = "No valid chunks created from documents"
-                logger.warning(error_msg)
                 raise VectorStoreError(
-                    error_msg, details={"document_count": len(documents)}
+                    "No valid chunks created from documents",
+                    details={"document_count": len(documents)},
                 )
 
-            logger.info(
-                f"✓ Created {len(all_chunks)} chunks from {len(documents)} documents"
-            )
+            logger.info("✓ Created %d chunks from %d documents", len(all_chunks), len(documents))
 
             if chroma_cls is not None:
-                # Use ChromaDB connection pool for better performance
                 pool = get_chromadb_pool()
-
                 async with pool.get_client() as chroma_client:
-                    collection_name = collection_name or f"doc_collection_{ULID()}"
-
-                    # Create vector store with batch embedding processing
-                    # The OpenAIEmbeddings with chunk_size parameter handles batching internally
-                    logger.info("Creating Chroma vector store with batched embeddings...")
+                    cname = collection_name or f"doc_collection_{ULID()}"
                     vector_store = await asyncio.to_thread(
                         chroma_cls.from_texts,
                         texts=all_chunks,
                         embedding=embedding_function,
                         client=chroma_client,
-                        collection_name=collection_name,
+                        collection_name=cname,
                     )
-
-                    logger.info("✓ Chroma vector store created successfully")
+                    logger.info("✓ Chroma vector store created")
                     return vector_store
 
-            logger.info("Creating InMemoryVectorStore fallback with batched embeddings...")
             vector_store = await asyncio.to_thread(
                 InMemoryVectorStore.from_texts,
                 texts=all_chunks,
                 embedding=embedding_function,
             )
-            logger.info("✓ InMemoryVectorStore fallback created successfully")
+            logger.info("✓ InMemoryVectorStore fallback created")
             if chroma_import_error:
-                logger.debug("Chroma import exception details: %r", chroma_import_error)
+                logger.debug("Chroma import error: %r", chroma_import_error)
             return vector_store
 
-        except EmbeddingError, VectorStoreError:
+        except (EmbeddingError, VectorStoreError):
             raise
         except Exception as e:
-            error_msg = f"Failed to create vector store: {e!s}"
-            logger.exception(error_msg)
             raise VectorStoreError(
-                error_msg, details={"error_type": type(e).__name__}
+                f"Failed to create vector store: {e!s}",
+                details={"error_type": type(e).__name__},
             ) from e
 
     async def get_or_create_agent(
@@ -365,30 +258,29 @@ class FastAIService:
         llm_model_name: str,
         system_prompt: str,
         vector_store: VectorStore,
-        max_iterations: int = 15,  # Increased further for complex multi-step operations
+        collection_name: str | None = None,
+        max_iterations: int = 15,
     ) -> CompiledStateGraph | None:
-        """Get cached agent or create new one."""
+        """Get cached agent or create new one.
 
-        # Generate cache key
+        ``collection_name`` is used as part of the cache key so that agents
+        tied to different vector stores are never confused with each other.
+        """
         prompt_hash = hashlib.md5(system_prompt.encode()).hexdigest()
-        cache_key = f"{llm_model_name}_{prompt_hash}_{max_iterations}"
+        # Include collection_name so agents bound to different retrievers don't collide.
+        cache_key = f"{llm_model_name}_{prompt_hash}_{max_iterations}_{collection_name or ''}"
 
-        # Check cache - agents are stateless between invocations
         cached_agent = self.cache_manager.agent_cache.get(cache_key)
         if cached_agent:
-            logger.info(f"✓ Cache HIT for agent: {cache_key[:50]}...")
+            logger.info("✓ Agent cache HIT: %s", cache_key[:50])
             return cached_agent
 
-        logger.info(f"✗ Cache MISS for agent: {cache_key[:50]}..., creating new")
+        logger.info("✗ Agent cache MISS: %s — creating", cache_key[:50])
 
-        # Create new agent (LLM and vector store are still cached)
-        agent = await self._create_agent(
-            llm_model_name, system_prompt, vector_store, max_iterations
-        )
+        agent = await self._create_agent(llm_model_name, system_prompt, vector_store, max_iterations)
 
         if agent:
             self.cache_manager.agent_cache.set(cache_key, agent)
-            logger.info(f"Cached new agent: {cache_key[:50]}...")
 
         return agent
 
@@ -397,28 +289,23 @@ class FastAIService:
         llm_model_name: str,
         system_prompt: str,
         vector_store: VectorStore,
-        max_iterations: int = 15,  # Increased further for complex multi-step operations
+        max_iterations: int = 15,
     ) -> CompiledStateGraph | None:
         """Create agent using LangChain v1 create_agent API."""
         try:
-            # Get cached LLM with streaming enabled
-            llm = self._get_cached_llm(llm_model_name)
+            # lru_cache handles caching — call directly
+            llm = get_llm(llm_model_name, streaming=True)
             if not llm:
-                error_msg = f"LLM model {llm_model_name} not available"
-                logger.error(error_msg)
                 raise AIProcessingError(
-                    error_msg, details={"model_name": llm_model_name}
+                    f"LLM model {llm_model_name} not available",
+                    details={"model_name": llm_model_name},
                 )
 
-            # Create highly optimized retriever with minimal results
             retriever = vector_store.as_retriever(
                 search_type="similarity",
-                search_kwargs={
-                    "k": 3
-                },  # Get top 3 results for better context in complex queries
+                search_kwargs={"k": 3},
             )
 
-            # Create retriever tool using LangChain v1 @tool decorator pattern
             @tool
             def find_context_text(query: str) -> str:
                 """Find relevant context from the knowledge base. Use this to search for information related to the user's question."""
@@ -427,24 +314,21 @@ class FastAIService:
                     return "No relevant context found."
                 return "\n\n".join(doc.page_content for doc in docs)
 
-            # Create agent using LangChain v1 create_agent API
-            # This returns a LangGraph-based agent with built-in streaming support
             agent = create_agent(
                 model=llm,
                 tools=[find_context_text],
                 system_prompt=system_prompt,
             )
 
-            logger.info("✓ Agent created successfully using LangChain v1 create_agent")
+            logger.info("✓ Agent created successfully")
             return agent
 
         except AIProcessingError:
             raise
         except Exception as e:
-            error_msg = f"Failed to create agent: {e!s}"
-            logger.exception(error_msg)
             raise AIProcessingError(
-                error_msg, details={"error_type": type(e).__name__}
+                f"Failed to create agent: {e!s}",
+                details={"error_type": type(e).__name__},
             ) from e
 
 
@@ -461,22 +345,15 @@ async def ask_ai(
 ) -> dict[str, Any]:
     """Fast AI processing using LangChain v1 create_agent API."""
 
-    # Input validation
     if not question or not question.strip():
-        error_msg = "Question cannot be empty"
-        logger.warning(error_msg)
-        raise AIProcessingError(error_msg)
+        raise AIProcessingError("Question cannot be empty")
 
     if not text_reference or not text_reference.strip():
-        error_msg = "Text reference cannot be empty"
-        logger.warning(error_msg)
-        raise AIProcessingError(error_msg)
+        raise AIProcessingError("Text reference cannot be empty")
 
     try:
-        # Initialize fast AI service
         ai_service = get_fast_ai_service()
 
-        # Get or create vector store (cached)
         vector_store = await ai_service.get_or_create_vector_store(
             documents=[text_reference],
             embedding_model_name=embedding_model_name,
@@ -484,152 +361,88 @@ async def ask_ai(
         )
 
         if not vector_store:
-            msg = "Failed to create knowledge base"
-            raise VectorStoreError(msg)
+            raise VectorStoreError("Failed to create knowledge base")
 
-        # Get or create agent (cached)
         agent = await ai_service.get_or_create_agent(
             llm_model_name=openai_model_name,
             system_prompt=message_for_the_prompt,
             vector_store=vector_store,
+            collection_name=collection_name,
         )
 
         if not agent:
-            msg = "Failed to create AI agent"
-            raise AIProcessingError(msg)
+            raise AIProcessingError("Failed to create AI agent")
 
-        # Convert message history to LangChain v1 format
         history_messages = convert_history_to_messages(message_history)
-
-        # Add current question to messages
         messages = [*history_messages, {"role": "user", "content": question.strip()}]
 
-        # Process with timeout using LangChain v1 agent.invoke pattern
-        logger.info(f"Processing AI query: {question[:100]}...")
+        logger.info("Processing AI query: %s...", question[:100])
 
         try:
             if cancel_event and cancel_event.is_set():
-                error_msg = "AI processing cancelled before invocation"
-                logger.info(error_msg)
-                raise AIProcessingError(error_msg)
+                raise AIProcessingError("AI processing cancelled before invocation")
 
             result = await asyncio.wait_for(
                 agent.ainvoke({"messages": messages}),
                 timeout=120.0,
             )
 
-            # Extract response from result
             output_messages = result.get("messages", [])
             if output_messages:
                 last_message = output_messages[-1]
                 text_attr = getattr(last_message, "text", None)
                 if text_attr is not None:
-                    response_text = (
-                        text_attr() if callable(text_attr) else str(text_attr)
-                    )
+                    response_text = text_attr() if callable(text_attr) else str(text_attr)
                 else:
                     content = getattr(last_message, "content", "")
-                    if isinstance(content, list):
-                        response_text = "".join(str(part) for part in content)
-                    else:
-                        response_text = str(content)
+                    response_text = (
+                        "".join(str(part) for part in content)
+                        if isinstance(content, list)
+                        else str(content)
+                    )
             else:
                 response_text = ""
 
-            # Update message history with new messages
-            if hasattr(message_history, "add_user_message"):
-                message_history.add_user_message(question.strip())
-            if hasattr(message_history, "add_ai_message") and response_text:
-                message_history.add_ai_message(response_text)
+            if hasattr(message_history, "add_messages"):
+                msgs: list[BaseMessage] = [HumanMessage(content=question.strip())]
+                if response_text:
+                    msgs.append(AIMessage(content=response_text))
+                message_history.add_messages(msgs)
 
             logger.info("AI query processed successfully")
             return {"output": response_text, "messages": output_messages}
 
         except TimeoutError as e:
-            error_msg = "AI processing timed out after 60 seconds"
-            logger.warning(error_msg)
             raise AITimeoutError(120, details={"question_length": len(question)}) from e
 
-    except AIProcessingError, VectorStoreError, AITimeoutError:
+    except (AIProcessingError, VectorStoreError, AITimeoutError):
         raise
     except Exception as e:
-        error_msg = f"Unexpected error during AI processing: {e!s}"
-        logger.exception(error_msg)
         raise AIProcessingError(
-            error_msg,
+            f"Unexpected error during AI processing: {e!s}",
             details={"error_type": type(e).__name__, "session_id": session_id},
         ) from e
 
 
-async def ask_ai_stream(
-    question: str,
-    message_history: RedisChatMessageHistory | list,
-    text_reference: str,
-    message_for_the_prompt: str,
-    embedding_model_name: str,
-    openai_model_name: str,
-    session_id: str = "default",
-    collection_name: str | None = None,
-) -> AsyncGenerator[str]:
-    """
-    Stream AI responses using LangChain v1 streaming API.
-
-    Yields response chunks as they're generated instead of waiting for complete response.
-
-    Args:
-        question: User's question
-        message_history: Chat history
-        text_reference: Reference text for context
-        message_for_the_prompt: System message
-        embedding_model_name: Embedding model to use
-        openai_model_name: LLM model to use
-        session_id: Chat session ID
-
-    Yields:
-        Response chunks as they're generated
-
-    Raises:
-        AIProcessingError: If processing fails
-        VectorStoreError: If vector store creation fails
-        AITimeoutError: If processing times out
-    """
-    from src.services.ai.streaming import ask_ai_stream as ask_ai_stream_sse
-
-    async for payload in ask_ai_stream_sse(
-        question=question,
-        message_history=message_history,
-        text_reference=text_reference,
-        message_for_the_prompt=message_for_the_prompt,
-        embedding_model_name=embedding_model_name,
-        openai_model_name=openai_model_name,
-        session_id=session_id,
-        collection_name=collection_name,
-    ):
-        yield payload
-
-
 def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
     """
-    Optimized chat session history with windowed loading for better performance.
+    Chat session history with windowed loading for performance.
 
-    Uses sliding window approach to load only recent messages instead of full history.
-    This significantly improves performance for long conversations.
+    Uses a sliding window to load only recent messages instead of full history.
     """
     try:
         session_id = aichat_uuid or f"aichat_{ULID()}"
         config = get_platform_config()
         redis_conn_string = config.redis_config.redis_connection_string
 
-        # Get window size from config
         window_size = getattr(
             getattr(config.ai_config, "chat", None),
             "history_window_size",
-            10,  # Default to last 10 messages
+            10,
         )
 
         if redis_conn_string:
             try:
-                # Use connection pooling for Redis
                 message_history = RedisChatMessageHistory(
                     url=redis_conn_string,
                     ttl=2160000,  # 25 days
@@ -637,22 +450,16 @@ def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
                     key_prefix="openu_chat:",
                 )
 
-                # Get windowed messages for better performance
                 all_messages = message_history.messages
                 total_count = len(all_messages)
+                windowed_messages = all_messages[-window_size:] if total_count > window_size else all_messages
 
-                # Use sliding window - get last N messages
-                if total_count > window_size:
-                    windowed_messages = all_messages[-window_size:]
-                    logger.info(
-                        f"Using windowed chat history: {len(windowed_messages)}/{total_count} messages "
-                        f"for session {session_id}"
-                    )
-                else:
-                    windowed_messages = all_messages
-                    logger.info(
-                        f"Using full chat history: {total_count} messages for session {session_id}"
-                    )
+                logger.info(
+                    "Chat history for %s: using %d/%d messages",
+                    session_id,
+                    len(windowed_messages),
+                    total_count,
+                )
 
                 windowed_history = WindowedChatMessageHistory(
                     base_history=message_history,
@@ -670,63 +477,36 @@ def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
                 }
 
             except Exception as redis_error:
-                logger.warning(f"Redis connection failed: {redis_error}")
-                windowed_history = WindowedChatMessageHistory(
-                    base_history=None,
-                    windowed_messages=[],
-                    window_size=window_size,
-                )
-                return {
-                    "message_history": [],
-                    "windowed_history": windowed_history,
-                    "aichat_uuid": session_id,
-                    "storage_type": "memory",
-                    "total_messages": 0,
-                    "window_size": window_size,
-                }
-        else:
-            logger.info("Redis not configured, using in-memory chat history")
-            windowed_history = WindowedChatMessageHistory(
-                base_history=None,
-                windowed_messages=[],
-                window_size=window_size,
-            )
-            return {
-                "message_history": [],
-                "windowed_history": windowed_history,
-                "aichat_uuid": session_id,
-                "storage_type": "memory",
-                "total_messages": 0,
-                "window_size": window_size,
-            }
+                logger.warning("Redis connection failed: %s", redis_error)
+
+        logger.info("Using in-memory chat history for session %s", session_id)
+        windowed_history = WindowedChatMessageHistory(
+            base_history=None,
+            windowed_messages=[],
+            window_size=window_size,
+        )
+        return {
+            "message_history": [],
+            "windowed_history": windowed_history,
+            "aichat_uuid": session_id,
+            "storage_type": "memory",
+            "total_messages": 0,
+            "window_size": window_size,
+        }
 
     except Exception as e:
-        error_msg = f"Failed to create chat session: {e!s}"
-        logger.exception(error_msg)
         raise ChatSessionError(
-            error_msg, details={"error_type": type(e).__name__}
+            f"Failed to create chat session: {e!s}",
+            details={"error_type": type(e).__name__},
         ) from e
 
 
-# Cleanup function for cache management
 def cleanup_expired_cache() -> None:
-    """
-    Clean up expired cache entries.
-    This function can be called periodically by a background task.
-    """
+    """Clean up expired cache entries (TTL is handled by TTLCache automatically)."""
     try:
         cache_manager = get_ai_cache_manager()
-
-        # Get stats before cleanup
-        stats_before = cache_manager.get_all_stats()
-
-        # Clear all caches (TTL is handled automatically by TTLCache)
-        # This is just a safety measure to ensure memory doesn't grow unbounded
-        total_items = sum(stats["size"] for stats in stats_before.values())
-
-        logger.info(f"Cache cleanup check: {total_items} total items cached")
-
+        stats = cache_manager.get_all_stats()
+        total_items = sum(s["size"] for s in stats.values())
+        logger.info("Cache check: %d total items cached", total_items)
     except Exception as e:
-        error_msg = f"Error during cache cleanup: {e!s}"
-        logger.exception(error_msg)
-        # Don't raise exception in cleanup function - log and continue
+        logger.exception("Error during cache cleanup: %s", e)

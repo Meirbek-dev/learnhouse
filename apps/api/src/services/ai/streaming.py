@@ -10,6 +10,7 @@ from collections.abc import AsyncGenerator
 from typing import Any
 
 from langchain_community.chat_message_histories import RedisChatMessageHistory
+from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.graph.state import CompiledStateGraph
 
 from src.services.ai.exceptions import (
@@ -198,10 +199,11 @@ async def ask_ai_stream(
                 return
 
             # Update message history
-            if hasattr(message_history, "add_user_message"):
-                message_history.add_user_message(question.strip())
-            if hasattr(message_history, "add_ai_message") and full_response:
-                message_history.add_ai_message(full_response)
+            if hasattr(message_history, "add_messages"):
+                msgs = [HumanMessage(content=question.strip())]
+                if full_response:
+                    msgs.append(AIMessage(content=full_response))
+                message_history.add_messages(msgs)
 
             # Send final response
             try:
@@ -237,7 +239,7 @@ async def ask_ai_stream(
             )
             raise AITimeoutError(120, details={"question_length": len(question)}) from e
 
-    except AIProcessingError, VectorStoreError, AITimeoutError:
+    except (AIProcessingError, VectorStoreError, AITimeoutError):
         raise
     except Exception as e:
         error_msg = f"Unexpected error during AI streaming: {e!s}"

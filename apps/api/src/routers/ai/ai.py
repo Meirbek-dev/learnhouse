@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 import logging
 from typing import Annotated
 
@@ -41,16 +42,8 @@ def _rate_limit_key(request: Request) -> str:
             parts = auth.split()
             if len(parts) == 2 and parts[0].lower() == "bearer":
                 token = parts[1]
-                # Hash token for privacy before using as limiter key
-                import hashlib
-
-                h = hashlib.sha256(token.encode("utf-8")).hexdigest()
-                return f"token:{h}"
-            # Fallback: hash the whole auth header
-            import hashlib
-
-            h = hashlib.sha256(auth.encode("utf-8")).hexdigest()
-            return f"auth:{h}"
+                return f"token:{hashlib.sha256(token.encode()).hexdigest()}"
+            return f"auth:{hashlib.sha256(auth.encode()).hexdigest()}"
         except Exception:
             pass
 

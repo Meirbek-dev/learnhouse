@@ -1,6 +1,8 @@
 import asyncio
 import logging
 import time
+from dataclasses import dataclass
+from typing import Any
 
 from fastapi import Depends, HTTPException, Request
 from sqlmodel import Session, select
@@ -36,79 +38,135 @@ from src.services.courses.activities.utils import (
 
 logger = logging.getLogger(__name__)
 
+_EMBEDDING_MODEL = "text-embedding-3-small"
+
+
+@dataclass(frozen=True, slots=True)
+class _ChatContext:
+    activity: ActivityRead
+    course: CourseRead
+    ai_text: str
+    system_message: str
+    ai_model: str
+    chat_session: dict[str, Any]
+    streaming_enabled: bool
+
 
 async def _get_activity_data(
     activity_uuid: str, db_session: Session
 ) -> tuple[ActivityRead, CourseRead, OrganizationConfig]:
-    """Optimized data fetching with thread-safe caching and parallel queries."""
+    """Fetch and cache activity, course, and org config."""
 
     cache_manager = get_ai_cache_manager()
     cache_key = f"activity_{activity_uuid}"
 
-    # Check cache first
     cached_data = cache_manager.db_cache.get(cache_key)
     if cached_data:
-        logger.info(f"✓ Cache HIT for activity data: {activity_uuid}")
+        logger.info("✓ Activity data cache HIT: %s", activity_uuid)
         return cached_data
 
     try:
-        # Query activity first (required for subsequent queries)
         def get_activity():
-            activity_query = select(Activity).where(
-                Activity.activity_uuid == activity_uuid
+            result = db_session.exec(
+                select(Activity).where(Activity.activity_uuid == activity_uuid)
             )
-            result = db_session.exec(activity_query)
             return result.first()
 
         activity = await asyncio.to_thread(get_activity)
 
         if not activity:
-            error_msg = f"Activity {activity_uuid} not found"
-            logger.warning(error_msg)
             raise ActivityNotFoundError(activity_uuid)
 
-        # Fetch course
         course = await asyncio.to_thread(db_session.get, Course, activity.course_id)
 
         if not course:
-            error_msg = f"Course {activity.course_id} not found"
-            logger.warning(error_msg)
-            raise ActivityNotFoundError(
-                activity_uuid, details={"course_not_found": True}
-            )
+            raise ActivityNotFoundError(activity_uuid, details={"course_not_found": True})
 
-        # Fetch org_config
         def get_org_config():
-            org_config_query = select(OrganizationConfig).where(
-                OrganizationConfig.org_id == course.org_id
+            result = db_session.exec(
+                select(OrganizationConfig).where(OrganizationConfig.org_id == course.org_id)
             )
-            result = db_session.exec(org_config_query)
             return result.first()
 
         org_config = await asyncio.to_thread(get_org_config)
 
         if not org_config:
-            error_msg = f"Organization config not found for org {course.org_id}"
-            logger.warning(error_msg)
-            raise ActivityNotFoundError(
-                activity_uuid, details={"org_config_not_found": True}
-            )
+            raise ActivityNotFoundError(activity_uuid, details={"org_config_not_found": True})
 
-        # Cache for 5 minutes
         result = (activity, course, org_config)
         cache_manager.db_cache.set(cache_key, result)
-        logger.info(f"✓ Cached activity data for {activity_uuid}")
-
         return result
 
     except ActivityNotFoundError:
         raise
     except Exception as e:
-        error_msg = f"Failed to fetch activity data: {e!s}"
-        logger.exception(error_msg)
         raise ActivityNotFoundError(
             activity_uuid, details={"error": str(e), "type": type(e).__name__}
         ) from e
+
+
+async def _prepare_context(
+    activity_uuid: str,
+    aichat_uuid: str | None,
+    db_session: Session,
+    *,
+    streaming: bool = False,
+) -> _ChatContext:
+    """Build the full context needed for any AI chat request."""
+    activity, course, org_config = await _get_activity_data(activity_uuid, db_session)
+
+    content_task = asyncio.to_thread(structure_activity_content_by_type, activity.content)
+    chat_session_task = asyncio.to_thread(get_chat_session_history, aichat_uuid)
+
+    structured, chat_session = await asyncio.gather(content_task, chat_session_task)
+
+    ai_text = serialize_activity_text_to_ai_comprehensible_text(
+        structured, course, activity, isActivityEmpty=not structured
+    )
+
+    if streaming:
+        system_message = (
+            f"You are a helpful Education Assistant for '{course.name}' course, "
+            f"helping with the '{activity.name}' lecture. "
+            "Use available tools to get context and provide accurate, helpful responses. "
+            "If context is insufficient, use your knowledge to assist the student."
+        )
+    else:
+        system_message = (
+            f"You are a helpful Education Assistant for '{course.name}' course, "
+            f"helping with the '{activity.name}' lecture. "
+            "Use the find_context_text tool ONCE to get relevant context, then provide your response immediately. "
+            "Be efficient: retrieve context first, then answer directly without additional tool calls. "
+            "If context is insufficient, use your knowledge to assist the student."
+        )
+
+    ai_model = org_config.config["features"]["ai"]["model"]
+    streaming_enabled = (
+        org_config.config.get("features", {}).get("ai", {}).get("streaming_enabled", True)
+    )
+
+    return _ChatContext(
+        activity=activity,
+        course=course,
+        ai_text=ai_text,
+        system_message=system_message,
+        ai_model=ai_model,
+        chat_session=chat_session,
+        streaming_enabled=streaming_enabled,
+    )
+
+
+def _map_ai_errors_to_http(e: Exception) -> HTTPException:
+    """Convert AI service exceptions to appropriate HTTP responses."""
+    if isinstance(e, ActivityNotFoundError):
+        return HTTPException(status_code=404, detail=e.message)
+    if isinstance(e, AIFeatureDisabledError):
+        raise FeatureDisabled(reason=e.message)
+    if isinstance(e, AITimeoutError):
+        return HTTPException(status_code=504, detail=e.message)
+    if isinstance(e, (AIProcessingError, VectorStoreError, ChatSessionError)):
+        return HTTPException(status_code=500, detail=f"AI processing failed: {e.message}")
+    return HTTPException(status_code=500, detail="An unexpected error occurred. Please try again later.")
 
 
 async def ai_start_activity_chat_session(
@@ -118,120 +176,54 @@ async def ai_start_activity_chat_session(
     db_session: Session = Depends(get_db_session),
     cancel_event: asyncio.Event | None = None,
 ) -> ActivityAIChatSessionResponse:
-    """Optimized AI chat session start with proper error handling."""
+    """Start a new AI chat session."""
 
     try:
         trace_start = time.perf_counter()
-        # Get cached activity data
-        data_fetch_start = time.perf_counter()
-        activity, course, org_config = await _get_activity_data(
-            chat_session_object.activity_uuid, db_session
-        )
-        logger.debug(
-            f"Data fetch took {(time.perf_counter() - data_fetch_start) * 1000:.1f}ms"
+
+        ctx = await _prepare_context(
+            chat_session_object.activity_uuid, None, db_session
         )
 
-        # Process content in parallel
-        content_process_start = time.perf_counter()
-        content_task = asyncio.to_thread(
-            structure_activity_content_by_type, activity.content
-        )
-        chat_session_task = asyncio.to_thread(get_chat_session_history)
-
-        structured, chat_session = await asyncio.gather(
-            content_task, chat_session_task, return_exceptions=False
-        )
-        logger.debug(
-            f"Content processing took {(time.perf_counter() - content_process_start) * 1000:.1f}ms"
-        )
-
-        # Generate AI-friendly text
-        isEmpty = not structured
-        ai_friendly_text = serialize_activity_text_to_ai_comprehensible_text(
-            structured, course, activity, isActivityEmpty=isEmpty
-        )
-
-        # Get AI configuration
-        embeddings = "text-embedding-3-small"
-        ai_model = org_config.config["features"]["ai"]["model"]
-
-        # Optimized system message with explicit tool usage guidance
-        system_message = (
-            f"You are a helpful Education Assistant for '{course.name}' course, "
-            f"helping with the '{activity.name}' lecture. "
-            "Use the find_context_text tool ONCE to get relevant context, then provide your response immediately. "
-            "Be efficient: retrieve context first, then answer directly without additional tool calls. "
-            "If context is insufficient, use your knowledge to assist the student."
-        )
-
-        # Use fast AI processing
-        logger.info(f"Starting AI chat session for activity {activity.activity_uuid}")
         ai_process_start = time.perf_counter()
-
         response = await ask_ai(
             chat_session_object.message,
-            chat_session["windowed_history"],
-            ai_friendly_text,
-            system_message,
-            embeddings,
-            ai_model,
-            session_id=chat_session["aichat_uuid"],
+            ctx.chat_session["windowed_history"],
+            ctx.ai_text,
+            ctx.system_message,
+            _EMBEDDING_MODEL,
+            ctx.ai_model,
+            session_id=ctx.chat_session["aichat_uuid"],
             cancel_event=cancel_event,
-            collection_name=f"activity_{activity.activity_uuid}",
+            collection_name=f"activity_{ctx.activity.activity_uuid}",
         )
-
-        ai_process_time = (time.perf_counter() - ai_process_start) * 1000
-        logger.info(f"AI processing took {ai_process_time:.1f}ms")
+        ai_ms = (time.perf_counter() - ai_process_start) * 1000
 
         ai_message = response.get("output", "")
         if not ai_message:
-            logger.warning("AI response is empty")
-            msg = "AI returned an empty response"
-            raise AIProcessingError(msg)
+            raise AIProcessingError("AI returned an empty response")
 
-        total_time = (time.perf_counter() - trace_start) * 1000
         logger.info(
-            "AI chat session %s completed in %.1fms (AI: %.1fms, overhead: %.1fms)",
-            chat_session["aichat_uuid"],
-            total_time,
-            ai_process_time,
-            total_time - ai_process_time,
+            "AI chat session %s completed in %.1fms (AI: %.1fms)",
+            ctx.chat_session["aichat_uuid"],
+            (time.perf_counter() - trace_start) * 1000,
+            ai_ms,
         )
 
         return ActivityAIChatSessionResponse(
-            aichat_uuid=chat_session["aichat_uuid"],
-            activity_uuid=activity.activity_uuid,
+            aichat_uuid=ctx.chat_session["aichat_uuid"],
+            activity_uuid=ctx.activity.activity_uuid,
             message=ai_message,
         )
 
-    except ActivityNotFoundError as e:
-        logger.warning(f"Activity not found: {e.message}")
-        raise HTTPException(status_code=404, detail=e.message) from e
-
-    except AIFeatureDisabledError as e:
-        logger.warning(f"AI feature disabled: {e.message}")
-        raise FeatureDisabled(reason=e.message) from e
-
-    except AITimeoutError as e:
-        logger.warning(f"AI timeout: {e.message}")
-        raise HTTPException(status_code=504, detail=e.message) from e
-
-    except (AIProcessingError, VectorStoreError, ChatSessionError) as e:
-        logger.error(f"AI processing error: {e.message}", exc_info=True)
-        raise HTTPException(
-            status_code=500, detail=f"AI processing failed: {e.message}"
-        ) from e
-
+    except (ActivityNotFoundError, AIFeatureDisabledError, AITimeoutError,
+            AIProcessingError, VectorStoreError, ChatSessionError) as e:
+        raise _map_ai_errors_to_http(e) from e
     except HTTPException:
         raise
-
     except Exception as e:
-        error_msg = f"Unexpected error in AI chat session: {e!s}"
-        logger.exception(error_msg)
-        raise HTTPException(
-            status_code=500,
-            detail="An unexpected error occurred. Please try again later.",
-        ) from e
+        logger.exception("Unexpected error in AI start: %s", e)
+        raise HTTPException(status_code=500, detail="An unexpected error occurred. Please try again later.") from e
 
 
 async def ai_send_activity_chat_message(
@@ -241,68 +233,30 @@ async def ai_send_activity_chat_message(
     db_session: Session = Depends(get_db_session),
     cancel_event: asyncio.Event | None = None,
 ) -> ActivityAIChatSessionResponse:
-    """Optimized AI chat message sending with proper error handling."""
+    """Send a message in an existing AI chat session."""
 
     try:
         trace_start = time.perf_counter()
-        # Get cached activity data
-        activity, course, org_config = await _get_activity_data(
-            chat_session_object.activity_uuid, db_session
-        )
 
-        # Process content and get chat session in parallel
-        content_task = asyncio.to_thread(
-            structure_activity_content_by_type, activity.content
-        )
-        chat_session_task = asyncio.to_thread(
-            get_chat_session_history, chat_session_object.aichat_uuid
-        )
-
-        structured, chat_session = await asyncio.gather(
-            content_task, chat_session_task, return_exceptions=False
-        )
-
-        # Generate AI-friendly text
-        isEmpty = not structured
-        ai_friendly_text = serialize_activity_text_to_ai_comprehensible_text(
-            structured, course, activity, isActivityEmpty=isEmpty
-        )
-
-        # Get AI configuration
-        embeddings = "text-embedding-3-small"
-        ai_model = org_config.config["features"]["ai"]["model"]
-
-        # Optimized system message with explicit tool usage guidance
-        system_message = (
-            f"You are a helpful Education Assistant for '{course.name}' course, "
-            f"helping with the '{activity.name}' lecture. "
-            "Use the find_context_text tool ONCE to get relevant context, then provide your response immediately. "
-            "Be efficient: retrieve context first, then answer directly without additional tool calls. "
-            "If context is insufficient, use your knowledge to assist the student."
-        )
-
-        # Use fast AI processing
-        logger.info(
-            f"Sending AI chat message for session {chat_session_object.aichat_uuid}"
+        ctx = await _prepare_context(
+            chat_session_object.activity_uuid, chat_session_object.aichat_uuid, db_session
         )
 
         response = await ask_ai(
             chat_session_object.message,
-            chat_session["windowed_history"],
-            ai_friendly_text,
-            system_message,
-            embeddings,
-            ai_model,
-            session_id=chat_session["aichat_uuid"],
+            ctx.chat_session["windowed_history"],
+            ctx.ai_text,
+            ctx.system_message,
+            _EMBEDDING_MODEL,
+            ctx.ai_model,
+            session_id=ctx.chat_session["aichat_uuid"],
             cancel_event=cancel_event,
-            collection_name=f"activity_{activity.activity_uuid}",
+            collection_name=f"activity_{ctx.activity.activity_uuid}",
         )
 
         ai_message = response.get("output", "")
         if not ai_message:
-            logger.warning("AI response is empty")
-            msg = "AI returned an empty response"
-            raise AIProcessingError(msg)
+            raise AIProcessingError("AI returned an empty response")
 
         logger.info(
             "AI chat message %s completed in %.1fms",
@@ -311,39 +265,19 @@ async def ai_send_activity_chat_message(
         )
 
         return ActivityAIChatSessionResponse(
-            aichat_uuid=chat_session["aichat_uuid"],
-            activity_uuid=activity.activity_uuid,
+            aichat_uuid=ctx.chat_session["aichat_uuid"],
+            activity_uuid=ctx.activity.activity_uuid,
             message=ai_message,
         )
 
-    except ActivityNotFoundError as e:
-        logger.warning(f"Activity not found: {e.message}")
-        raise HTTPException(status_code=404, detail=e.message) from e
-
-    except AIFeatureDisabledError as e:
-        logger.warning(f"AI feature disabled: {e.message}")
-        raise FeatureDisabled(reason=e.message) from e
-
-    except AITimeoutError as e:
-        logger.warning(f"AI timeout: {e.message}")
-        raise HTTPException(status_code=504, detail=e.message) from e
-
-    except (AIProcessingError, VectorStoreError, ChatSessionError) as e:
-        logger.error(f"AI processing error: {e.message}", exc_info=True)
-        raise HTTPException(
-            status_code=500, detail=f"AI processing failed: {e.message}"
-        ) from e
-
+    except (ActivityNotFoundError, AIFeatureDisabledError, AITimeoutError,
+            AIProcessingError, VectorStoreError, ChatSessionError) as e:
+        raise _map_ai_errors_to_http(e) from e
     except HTTPException:
         raise
-
     except Exception as e:
-        error_msg = f"Unexpected error sending AI chat message: {e!s}"
-        logger.exception(error_msg)
-        raise HTTPException(
-            status_code=500,
-            detail="An unexpected error occurred. Please try again later.",
-        ) from e
+        logger.exception("Unexpected error sending AI message: %s", e)
+        raise HTTPException(status_code=500, detail="An unexpected error occurred. Please try again later.") from e
 
 
 async def ai_start_activity_chat_session_stream(
@@ -356,20 +290,12 @@ async def ai_start_activity_chat_session_stream(
     """Streaming version of AI chat session start."""
 
     try:
-        # Get cached activity data
-        activity, course, org_config = await _get_activity_data(
-            chat_session_object.activity_uuid, db_session
+        ctx = await _prepare_context(
+            chat_session_object.activity_uuid, None, db_session, streaming=True
         )
 
-        # Check if streaming is enabled
-        streaming_enabled = (
-            org_config.config.get("features", {})
-            .get("ai", {})
-            .get("streaming_enabled", True)
-        )
-        if not streaming_enabled:
-            logger.info("Streaming disabled, falling back to regular response")
-            # Fall back to non-streaming version
+        if not ctx.streaming_enabled:
+            logger.info("Streaming disabled for this org, falling back to non-streaming")
             response = await ai_start_activity_chat_session(
                 request, chat_session_object, current_user, db_session
             )
@@ -383,114 +309,38 @@ async def ai_start_activity_chat_session_stream(
             )
             return
 
-        # Process content in parallel
-        content_task = asyncio.to_thread(
-            structure_activity_content_by_type, activity.content
-        )
-        chat_session_task = asyncio.to_thread(get_chat_session_history)
-
-        structured, chat_session = await asyncio.gather(
-            content_task, chat_session_task, return_exceptions=False
-        )
-
-        # Generate AI-friendly text
-        isEmpty = not structured
-        ai_friendly_text = serialize_activity_text_to_ai_comprehensible_text(
-            structured, course, activity, isActivityEmpty=isEmpty
-        )
-
-        # Get AI configuration
-        embeddings = "text-embedding-3-small"
-        ai_model = org_config.config["features"]["ai"]["model"]
-
-        # Optimized system message
-        system_message = (
-            f"You are a helpful Education Assistant for '{course.name}' course, "
-            f"helping with the '{activity.name}' lecture. "
-            "Use available tools to get context and provide accurate, helpful responses. "
-            "If context is insufficient, use your knowledge to assist the student."
-        )
-
-        # Send status update
         yield format_sse_message(
-            {
-                "type": "status",
-                "status": "processing",
-                "aichat_uuid": chat_session["aichat_uuid"],
-            }
+            {"type": "status", "status": "processing", "aichat_uuid": ctx.chat_session["aichat_uuid"]}
         )
 
-        # Stream AI responses immediately
-        logger.info(f"Streaming AI chat session for activity {activity.activity_uuid}")
+        logger.info("Streaming AI chat session for activity %s", ctx.activity.activity_uuid)
 
         async for chunk in ask_ai_stream(
             chat_session_object.message,
-            chat_session["windowed_history"],
-            ai_friendly_text,
-            system_message,
-            embeddings,
-            ai_model,
-            session_id=chat_session["aichat_uuid"],
+            ctx.chat_session["windowed_history"],
+            ctx.ai_text,
+            ctx.system_message,
+            _EMBEDDING_MODEL,
+            ctx.ai_model,
+            session_id=ctx.chat_session["aichat_uuid"],
             cancel_event=cancel_event,
-            collection_name=f"activity_{activity.activity_uuid}",
+            collection_name=f"activity_{ctx.activity.activity_uuid}",
         ):
-            # ask_ai_stream now yields SSE-formatted strings
             yield chunk
 
-        logger.info(
-            f"Streaming AI chat session completed: {chat_session['aichat_uuid']}"
-        )
+        logger.info("Streaming session completed: %s", ctx.chat_session["aichat_uuid"])
 
     except ActivityNotFoundError as e:
-        logger.warning(f"Activity not found: {e.message}")
-        yield format_sse_message(
-            {
-                "type": "error",
-                "error": e.message,
-                "status": 404,
-            }
-        )
-
+        yield format_sse_message({"type": "error", "error": e.message, "status": 404})
     except AIFeatureDisabledError as e:
-        logger.warning(f"AI feature disabled: {e.message}")
-        yield format_sse_message(
-            {
-                "type": "error",
-                "error": e.message,
-                "status": 403,
-            }
-        )
-
+        yield format_sse_message({"type": "error", "error": e.message, "status": 403})
     except AITimeoutError as e:
-        logger.warning(f"AI timeout: {e.message}")
-        yield format_sse_message(
-            {
-                "type": "error",
-                "error": e.message,
-                "status": 504,
-            }
-        )
-
+        yield format_sse_message({"type": "error", "error": e.message, "status": 504})
     except (AIProcessingError, VectorStoreError, ChatSessionError) as e:
-        logger.error(f"AI processing error: {e.message}", exc_info=True)
-        yield format_sse_message(
-            {
-                "type": "error",
-                "error": f"AI processing failed: {e.message}",
-                "status": 500,
-            }
-        )
-
+        yield format_sse_message({"type": "error", "error": f"AI processing failed: {e.message}", "status": 500})
     except Exception as e:
-        error_msg = f"Unexpected error in streaming AI chat session: {e!s}"
-        logger.exception(error_msg)
-        yield format_sse_message(
-            {
-                "type": "error",
-                "error": "An unexpected error occurred. Please try again later.",
-                "status": 500,
-            }
-        )
+        logger.exception("Unexpected error in streaming AI session: %s", e)
+        yield format_sse_message({"type": "error", "error": "An unexpected error occurred.", "status": 500})
 
 
 async def ai_send_activity_chat_message_stream(
@@ -503,20 +353,15 @@ async def ai_send_activity_chat_message_stream(
     """Streaming version of AI chat message sending."""
 
     try:
-        # Get cached activity data
-        activity, course, org_config = await _get_activity_data(
-            chat_session_object.activity_uuid, db_session
+        ctx = await _prepare_context(
+            chat_session_object.activity_uuid,
+            chat_session_object.aichat_uuid,
+            db_session,
+            streaming=True,
         )
 
-        # Check if streaming is enabled
-        streaming_enabled = (
-            org_config.config.get("features", {})
-            .get("ai", {})
-            .get("streaming_enabled", True)
-        )
-        if not streaming_enabled:
-            logger.info("Streaming disabled, falling back to regular response")
-            # Fall back to non-streaming version
+        if not ctx.streaming_enabled:
+            logger.info("Streaming disabled for this org, falling back to non-streaming")
             response = await ai_send_activity_chat_message(
                 request, chat_session_object, current_user, db_session
             )
@@ -530,112 +375,35 @@ async def ai_send_activity_chat_message_stream(
             )
             return
 
-        # Process content and get chat session in parallel
-        content_task = asyncio.to_thread(
-            structure_activity_content_by_type, activity.content
-        )
-        chat_session_task = asyncio.to_thread(
-            get_chat_session_history, chat_session_object.aichat_uuid
-        )
-
-        structured, chat_session = await asyncio.gather(
-            content_task, chat_session_task, return_exceptions=False
-        )
-
-        # Generate AI-friendly text
-        isEmpty = not structured
-        ai_friendly_text = serialize_activity_text_to_ai_comprehensible_text(
-            structured, course, activity, isActivityEmpty=isEmpty
-        )
-
-        # Get AI configuration
-        embeddings = "text-embedding-3-small"
-        ai_model = org_config.config["features"]["ai"]["model"]
-
-        # Optimized system message
-        system_message = (
-            f"You are a helpful Education Assistant for '{course.name}' course, "
-            f"helping with the '{activity.name}' lecture. "
-            "Use available tools to get context and provide accurate, helpful responses. "
-            "If context is insufficient, use your knowledge to assist the student."
-        )
-
-        # Send status update
         yield format_sse_message(
-            {
-                "type": "status",
-                "status": "processing",
-                "aichat_uuid": chat_session_object.aichat_uuid,
-            }
+            {"type": "status", "status": "processing", "aichat_uuid": chat_session_object.aichat_uuid}
         )
 
-        # Stream AI responses immediately
-        logger.info(f"Streaming AI message: {chat_session_object.aichat_uuid}")
+        logger.info("Streaming AI message for session %s", chat_session_object.aichat_uuid)
 
         async for chunk in ask_ai_stream(
             chat_session_object.message,
-            chat_session["windowed_history"],
-            ai_friendly_text,
-            system_message,
-            embeddings,
-            ai_model,
-            session_id=chat_session["aichat_uuid"],
+            ctx.chat_session["windowed_history"],
+            ctx.ai_text,
+            ctx.system_message,
+            _EMBEDDING_MODEL,
+            ctx.ai_model,
+            session_id=ctx.chat_session["aichat_uuid"],
             cancel_event=cancel_event,
-            collection_name=f"activity_{activity.activity_uuid}",
+            collection_name=f"activity_{ctx.activity.activity_uuid}",
         ):
             yield chunk
 
-        logger.info(
-            f"Streaming AI chat message completed: {chat_session_object.aichat_uuid}"
-        )
+        logger.info("Streaming message completed: %s", chat_session_object.aichat_uuid)
 
     except ActivityNotFoundError as e:
-        logger.warning(f"Activity not found: {e.message}")
-        yield format_sse_message(
-            {
-                "type": "error",
-                "error": e.message,
-                "status": 404,
-            }
-        )
-
+        yield format_sse_message({"type": "error", "error": e.message, "status": 404})
     except AIFeatureDisabledError as e:
-        logger.warning(f"AI feature disabled: {e.message}")
-        yield format_sse_message(
-            {
-                "type": "error",
-                "error": e.message,
-                "status": 403,
-            }
-        )
-
+        yield format_sse_message({"type": "error", "error": e.message, "status": 403})
     except AITimeoutError as e:
-        logger.warning(f"AI timeout: {e.message}")
-        yield format_sse_message(
-            {
-                "type": "error",
-                "error": e.message,
-                "status": 504,
-            }
-        )
-
+        yield format_sse_message({"type": "error", "error": e.message, "status": 504})
     except (AIProcessingError, VectorStoreError, ChatSessionError) as e:
-        logger.error(f"AI processing error: {e.message}", exc_info=True)
-        yield format_sse_message(
-            {
-                "type": "error",
-                "error": f"AI processing failed: {e.message}",
-                "status": 500,
-            }
-        )
-
+        yield format_sse_message({"type": "error", "error": f"AI processing failed: {e.message}", "status": 500})
     except Exception as e:
-        error_msg = f"Unexpected error in streaming AI chat message: {e!s}"
-        logger.exception(error_msg)
-        yield format_sse_message(
-            {
-                "type": "error",
-                "error": "An unexpected error occurred. Please try again later.",
-                "status": 500,
-            }
-        )
+        logger.exception("Unexpected error in streaming AI message: %s", e)
+        yield format_sse_message({"type": "error", "error": "An unexpected error occurred.", "status": 500})
