@@ -44,6 +44,19 @@ os.environ.update(
 logger = logging.getLogger(__name__)
 
 
+_fast_ai_service: "FastAIService | None" = None
+
+
+def get_fast_ai_service() -> "FastAIService":
+    """Get a process-wide FastAIService instance for cache warmness."""
+    global _fast_ai_service
+
+    if _fast_ai_service is None:
+        _fast_ai_service = FastAIService()
+
+    return _fast_ai_service
+
+
 class WindowedChatMessageHistory(BaseChatMessageHistory):
     """Adapter that exposes only the last N messages while persisting full history."""
 
@@ -283,7 +296,10 @@ class FastAIService:
             all_chunks = []
 
             # Use batch processing for better performance
-            chunk_results = await self.text_splitter.batch_split_texts(documents)
+            chunk_results = await asyncio.gather(
+                *(self.text_splitter.split_text_async(document) for document in documents),
+                return_exceptions=True,
+            )
 
             for result in chunk_results:
                 if isinstance(result, Exception):
@@ -458,7 +474,7 @@ async def ask_ai(
 
     try:
         # Initialize fast AI service
-        ai_service = FastAIService()
+        ai_service = get_fast_ai_service()
 
         # Get or create vector store (cached)
         vector_store = await ai_service.get_or_create_vector_store(
@@ -508,9 +524,15 @@ async def ask_ai(
                 last_message = output_messages[-1]
                 text_attr = getattr(last_message, "text", None)
                 if text_attr is not None:
-                    response_text = text_attr() if callable(text_attr) else str(text_attr)
+                    response_text = (
+                        text_attr() if callable(text_attr) else str(text_attr)
+                    )
                 else:
-                    response_text = str(getattr(last_message, "content", ""))
+                    content = getattr(last_message, "content", "")
+                    if isinstance(content, list):
+                        response_text = "".join(str(part) for part in content)
+                    else:
+                        response_text = str(content)
             else:
                 response_text = ""
 

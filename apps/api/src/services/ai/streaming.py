@@ -22,6 +22,23 @@ from src.services.ai.message_utils import convert_history_to_messages
 logger = logging.getLogger(__name__)
 
 
+def _extract_chunk_text(message_chunk: Any) -> str:
+    """Extract plain text from a LangChain/LangGraph message chunk."""
+    if isinstance(message_chunk, str):
+        return message_chunk
+
+    msg_type = getattr(message_chunk, "type", "")
+    if msg_type == "tool":
+        return ""
+
+    content = getattr(message_chunk, "content", "")
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        return "".join(str(part) for part in content)
+    return str(content) if content else ""
+
+
 async def ask_ai_stream(
     question: str,
     message_history: RedisChatMessageHistory | list,
@@ -73,9 +90,9 @@ async def ask_ai_stream(
     try:
         # If no agent provided, create one
         if agent_executor is None:
-            from src.services.ai.base import FastAIService
+            from src.services.ai.base import get_fast_ai_service
 
-            ai_service = FastAIService()
+            ai_service = get_fast_ai_service()
 
             # Get or create vector store
             vector_store = await ai_service.get_or_create_vector_store(
@@ -149,20 +166,7 @@ async def ask_ai_stream(
                     if "tool" in node_name.lower():
                         continue
 
-                    # Skip if this is a tool message (context retrieval results)
-                    if hasattr(message_chunk, "type") and message_chunk.type == "tool":
-                        continue
-
-                    # Extract content from the message chunk
-                    content = ""
-                    if hasattr(message_chunk, "content"):
-                        # Only stream if it's an AI message chunk, not a tool response
-                        msg_type = getattr(message_chunk, "type", "")
-                        if msg_type == "tool":
-                            continue
-                        content = message_chunk.content
-                    elif isinstance(message_chunk, str):
-                        content = message_chunk
+                    content = _extract_chunk_text(message_chunk)
 
                     # Stream content if present
                     if content:

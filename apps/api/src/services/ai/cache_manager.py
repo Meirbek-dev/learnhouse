@@ -5,10 +5,9 @@ Thread-safe cache manager for AI services with proper TTL management.
 import asyncio
 import inspect
 import logging
-from collections.abc import Callable
-from datetime import datetime, timedelta
+from collections.abc import Awaitable, Callable
 from threading import Lock
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 from cachetools import TTLCache
 
@@ -129,7 +128,9 @@ class ThreadSafeCache[T]:
             }
 
     async def get_or_set(
-        self, key: str, factory: Callable[[], Any] | Callable[[], asyncio.Future[Any]]
+        self,
+        key: str,
+        factory: Callable[[], T | Awaitable[T]],
     ) -> T | None:
         """
         Get value from cache or compute and cache it.
@@ -163,7 +164,7 @@ class ThreadSafeCache[T]:
                     return cached_value
 
                 if value is not None:
-                    await self.async_set(key, value)
+                    self.set(key, value)
 
                 return value
 
