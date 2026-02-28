@@ -14,21 +14,6 @@ const nextConfig: NextConfig = {
   //     },
   //   ];
   // },
-  webpack(config, { isServer }) {
-    // The university's nginx rate-limits bursts of requests (~20 concurrent).
-    // A hard refresh triggers ~37 simultaneous JS chunk requests, causing 429s.
-    // Reducing maxInitialRequests merges smaller chunks so the browser makes
-    // fewer parallel requests on first load.
-    if (!isServer && config.optimization?.splitChunks) {
-      config.optimization.splitChunks = {
-        ...config.optimization.splitChunks,
-        maxInitialRequests: 12,
-        maxAsyncRequests: 15,
-        minSize: 30000,
-      };
-    }
-    return config;
-  },
   experimental: {
     optimizePackageImports: [
       '@base-ui/react',
