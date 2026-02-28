@@ -188,10 +188,11 @@ const Editor = (props: EditorProps) => {
           exit={{ opacity: 0 }}
         >
           <EditorTop className="bg-opacity-95 fixed bg-white backdrop-blur-sm backdrop-brightness-125">
-            <EditorDocSection>
-              <EditorInfoWrapper>
+            <div className="flex flex-col">
+              <div className="flex flex-row mb-[5px]">
                 <Link href="/">
-                  <EditorInfoPlatformLogo
+                  <Image
+                    className="rounded-[6px]"
                     width={25}
                     height={25}
                     src={platformLogo}
@@ -218,12 +219,12 @@ const Editor = (props: EditorProps) => {
                 <EditorInfoDocName>
                   <b>{props.course.name}</b> <DividerVerticalIcon className="size-7" /> {props.activity.name}{' '}
                 </EditorInfoDocName>
-              </EditorInfoWrapper>
-              <EditorButtonsWrapper>
+              </div>
+              <div>
                 <ToolbarButtons editor={editor} />
-              </EditorButtonsWrapper>
-            </EditorDocSection>
-            <EditorUsersSection className="space-x-2">
+              </div>
+            </div>
+            <div className="flex justify-center items-center space-x-2">
               <div>
                 <div className="rounded-md text-teal-100 transition-all ease-linear hover:cursor-pointer">
                   {isButtonAvailable && dispatchAIEditor && aiEditorState ? (
@@ -260,7 +261,7 @@ const Editor = (props: EditorProps) => {
                   opacity: '0.5',
                 }}
               />
-              <EditorLeftOptionsSection className="space-x-2">
+              <div className="flex justify-center items-center space-x-2">
                 <div
                   className="rounded-lg bg-sky-600 px-3 py-2 text-sm font-bold text-teal-100 shadow-sm transition-all ease-linear hover:cursor-pointer hover:bg-sky-700"
                   onClick={handleContentSave}
@@ -280,7 +281,7 @@ const Editor = (props: EditorProps) => {
                     </div>
                   </Link>
                 </ToolTip>
-              </EditorLeftOptionsSection>
+              </div>
               <DividerVerticalIcon
                 style={{
                   marginTop: 'auto',
@@ -297,7 +298,7 @@ const Editor = (props: EditorProps) => {
                   use_with_session
                 />
               </EditorUserProfileWrapper>
-            </EditorUsersSection>
+            </div>
           </EditorTop>
         </motion.div>
         <motion.div
@@ -354,33 +355,6 @@ const EditorTop = styled.div`
   width: -moz-available;
 `;
 
-// Inside EditorTop
-const EditorDocSection = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-const EditorUsersSection = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-`;
-
-const EditorLeftOptionsSection = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-`;
-
-// Inside EditorDocSection
-const EditorInfoWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  margin-bottom: 5px;
-`;
-const EditorButtonsWrapper = styled.div``;
-
 // Inside EditorUsersSection
 const EditorUserProfileWrapper = styled.div`
   padding-right: 8px;
@@ -390,11 +364,6 @@ const EditorUserProfileWrapper = styled.div`
 `;
 
 // Inside EditorInfoWrapper
-// ..todo
-const EditorInfoPlatformLogo = styled(Image)`
-  border-radius: 6px;
-  margin-right: 0px;
-`;
 const EditorInfoDocName = styled.div`
   font-size: 16px;
   justify-content: center;

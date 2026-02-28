@@ -57,8 +57,8 @@ const TableOfContents = ({ editor }: TableOfContentsProps) => {
   if (headings.length === 0) return <div style={{ display: 'none' }} />;
 
   return (
-    <TOCCard>
-      <TOCList>
+    <div className="w-full bg-transparent border-0 shadow-none p-0 m-0 flex flex-col items-stretch h-fit">
+      <ul className="!list-none !p-0 m-0">
         {headings.map((heading, index) => (
           <TOCItem
             key={index}
@@ -78,30 +78,11 @@ const TableOfContents = ({ editor }: TableOfContentsProps) => {
             </a>
           </TOCItem>
         ))}
-      </TOCList>
-    </TOCCard>
+      </ul>
+    </div>
   );
 };
 
-const TOCCard = styled.div`
-  width: 100%;
-  background: none;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  margin: 0;
-  font-family: inherit;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  height: fit-content;
-`;
-
-const TOCList = styled.ul`
-  list-style: none !important;
-  padding: 0 !important;
-  margin: 0;
-`;
 
 const TOCItem = styled.li<{ $level: number }>`
   margin: 0.5rem 0;

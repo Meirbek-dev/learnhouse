@@ -38,12 +38,6 @@ const VideoWrapper = styled.div`
   border: 1px solid #eaeaea;
 `;
 
-const VideoContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-`;
 
 const UploadZone = styled(motion.div)<{ isDragging: boolean }>`
   border: 2px dashed ${(props) => (props.isDragging ? '#3b82f6' : '#e5e7eb')};
@@ -548,7 +542,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
                 </SizeButton>
               </div>
 
-              <VideoContainer>
+              <div className="flex justify-center items-center w-full">
                 <div
                   style={{
                     maxWidth:
@@ -598,7 +592,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
                     </div>
                   </div>
                 </div>
-              </VideoContainer>
+              </div>
             </motion.div>
           ) : null}
         </VideoWrapper>

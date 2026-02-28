@@ -140,9 +140,6 @@ const SaveButton = styled(motion.button)`
   cursor: pointer;
 `;
 
-const InfoLink = styled.div`
-  padding-left: 2px;
-`;
 
 const TemplateButton = styled.button`
   display: flex;
@@ -477,7 +474,7 @@ const MathEquationBlockComponent = (props: any) => {
                 </SaveButton>
               </EditBar>
 
-              <InfoLink className="flex items-center text-sm text-zinc-500">
+              <div className="flex items-center text-sm text-zinc-500 pl-[2px]">
                 <span>{t('referTo')}</span>
                 <Link
                   className="mx-1 inline-flex items-center font-medium text-blue-600 hover:text-blue-800"
@@ -491,7 +488,7 @@ const MathEquationBlockComponent = (props: any) => {
                   />
                 </Link>
                 <span>{t('supportedFunctions')}</span>
-              </InfoLink>
+              </div>
             </motion.div>
           ) : null}
         </MathEqWrapper>

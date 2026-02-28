@@ -32,26 +32,6 @@ const IconWrapper = styled.div<{ size?: string }>`
   }
 `;
 
-const ContentWrapper = styled.div`
-  width: 100%;
-  overflow-wrap: break-word;
-`;
-
-const DismissButton = styled.button`
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  margin-left: 8px;
-  border-radius: 50%;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-  }
-`;
 
 const CalloutWrapper = styled.div.withConfig({
   shouldForwardProp: (prop) => !['isEditable'].includes(prop),
@@ -136,17 +116,18 @@ const WarningCalloutComponent = (props: any) => {
         <IconWrapper size={options.size}>
           <AlertTriangle />
         </IconWrapper>
-        <ContentWrapper className="grow">
+        <div className="w-full break-words grow">
           <NodeViewContent className="content" />
-        </ContentWrapper>
+        </div>
         {options.dismissible && !isEditable ? (
-          <DismissButton
+          <button
+            className="bg-transparent border-0 cursor-pointer flex items-center justify-center p-1 ml-2 rounded-full hover:bg-black/10"
             onClick={() => {
               setDismissed(true);
             }}
           >
             <X size={16} />
-          </DismissButton>
+          </button>
         ) : null}
       </CalloutWrapper>
     </NodeViewWrapper>

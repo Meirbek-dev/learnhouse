@@ -1,5 +1,14 @@
 {
   "permissions": {
-    "allow": ["Bash(wc:*)", "Bash(git mv:*)", "Bash(xargs:*)", "Bash(echo:*)", "Bash(uv run alembic revision:*)"]
+    "allow": [
+      "Bash(wc:*)",
+      "Bash(git mv:*)",
+      "Bash(xargs:*)",
+      "Bash(echo:*)",
+      "Bash(uv run alembic revision:*)",
+      "Bash(bun oxlint:*)",
+      "Bash(bun tsc:*)",
+      "Bash(grep:*)"
+    ]
   }
 }

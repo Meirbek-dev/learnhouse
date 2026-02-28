@@ -162,7 +162,7 @@ const Canva = (props: Editor) => {
 
   return (
     <EditorOptionsProvider options={{ isEditable: false }}>
-      <CanvaWrapper>
+      <div className="w-full mx-auto relative">
         <AIToolkitWrapper>
           <AICanvaToolkit
             activity={props.activity}
@@ -173,16 +173,11 @@ const Canva = (props: Editor) => {
           {!isMobile && <TableOfContents editor={editor} />}
           <EditorContent editor={editor} />
         </ContentWrapper>
-      </CanvaWrapper>
+      </div>
     </EditorOptionsProvider>
   );
 };
 
-const CanvaWrapper = styled.div`
-  width: 100%;
-  margin: 0 auto;
-  position: relative;
-`;
 
 const AIToolkitWrapper = styled.div`
   position: absolute;

@@ -169,7 +169,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
   };
 
   return (
-    <ToolButtonsWrapper>
+    <div className="flex">
       <ToolBtn onClick={() => editor.chain().focus().undo().run()}>
         <ArrowLeft size={18} />
       </ToolBtn>
@@ -194,7 +194,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       >
         <Minus size={18} />
       </ToolBtn>
-      <ListMenuWrapper
+      <div className="relative inline-block"
         onMouseEnter={() => {
           if (listHideTimerRef.current) {
             clearTimeout(listHideTimerRef.current);
@@ -241,7 +241,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
             ))}
           </ListDropdown>
         ) : null}
-      </ListMenuWrapper>
+      </div>
       <ToolSelect
         value={
           editor.isActive('heading', { level: 1 })
@@ -280,7 +280,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
         <option value="5">{t('headingLevel', { level: 5 })}</option>
         <option value="6">{t('headingLevel', { level: 6 })}</option>
       </ToolSelect>
-      <TableMenuWrapper
+      <div className="relative inline-block"
         onMouseEnter={() => {
           if (tableHideTimerRef.current) {
             clearTimeout(tableHideTimerRef.current);
@@ -326,7 +326,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
             ))}
           </TableDropdown>
         ) : null}
-      </TableMenuWrapper>
+      </div>
       <DividerVerticalIcon style={{ marginTop: 'auto', marginBottom: 'auto', color: 'grey' }} />
       <ToolTip content={t('infoCallout')}>
         <ToolBtn
@@ -614,16 +614,10 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           <GitBranch size={18} />
         </ToolBtn>
       </ToolTip>
-    </ToolButtonsWrapper>
+    </div>
   );
 };
 
-const ToolButtonsWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: left;
-  justify-content: left;
-`;
 
 const ToolBtn = styled.div`
   display: flex;
@@ -685,10 +679,6 @@ const ToolSelect = styled.select`
   }
 `;
 
-const TableMenuWrapper = styled.div`
-  position: relative;
-  display: inline-block;
-`;
 
 const TableDropdown = styled.div`
   position: absolute;
@@ -726,10 +716,6 @@ const TableMenuItem = styled.div`
   }
 `;
 
-const ListMenuWrapper = styled.div`
-  position: relative;
-  display: inline-block;
-`;
 
 const ListDropdown = styled.div`
   position: absolute;
