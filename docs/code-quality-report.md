@@ -48,31 +48,6 @@ org: any;                       // line 22
 
 ---
 
-### 6. Styled-components mixed with Tailwind — dual CSS runtime
-
-**Effort: M | Gain: performance, bundle size, maintainability**
-
-10 files still use `styled-components` alongside Tailwind CSS. Styled-components adds a runtime CSS-in-JS layer (~12kB gzipped) and makes SSR more complex (requires the `styled-registry` wrapper).
-
-```
-apps/web/components/Objects/Activities/DynamicCanva/DynamicCanva.tsx
-apps/web/components/Objects/Activities/DynamicCanva/TableOfContents.tsx
-apps/web/components/Objects/Editor/Editor.tsx
-apps/web/components/Objects/Editor/Extensions/Callout/Info/InfoCalloutComponent.tsx
-apps/web/components/Objects/Editor/Extensions/Callout/Warning/WarningCalloutComponent.tsx
-apps/web/components/Objects/Editor/Extensions/MathEquation/MathEquationBlockComponent.tsx
-apps/web/components/Objects/Editor/Extensions/Video/VideoBlockComponent.tsx
-apps/web/components/Objects/Editor/Toolbar/ToolbarButtons.tsx
-apps/web/components/Objects/StyledElements/Tooltip/Tooltip.tsx
-apps/web/components/Utils/libs/styled-registry.tsx
-```
-
-Previous refactoring was started (commit `6fef51df`, `b95bc7ac`) but did not fully complete the migration.
-
-**Fix**: Migrate these 10 files to Tailwind utility classes. Then remove `styled-components`, `@types/styled-components` from `package.json`, and delete `styled-registry.tsx`.
-
----
-
 ### 7. Inline SWR fetcher construction — raw API URLs in components
 
 **Effort: M | Gain: maintainability, DX, type safety**
@@ -147,46 +122,3 @@ Several components massively exceed reasonable limits, making them hard to revie
 **Fix**: Apply the Single Responsibility Principle. Split by feature section. Each sub-component should be independently importable and testable. A target of ~500 lines per component is reasonable.
 
 ---
-
-### 11. Missing `response_model` on FastAPI routes
-
-**Effort: M | Gain: API documentation, serialization safety, data leakage prevention**
-
-Many routes omit `response_model`, meaning FastAPI cannot filter the response to only expected fields. This risks accidentally serializing and returning internal fields (e.g. password hashes, internal IDs).
-
-```python
-@router.post("/start/activity_chat_session")   # no response_model
-@router.post("/send/activity_chat_message")    # no response_model
-@router.post("/login")                          # no response_model
-```
-
-**Fix**: Add `response_model=YourResponseSchema` to all route decorators. This ensures FastAPI auto-validates and filters output, and it powers the OpenAPI docs.
-
----
-
-### 12. `print()` → `logging` in all service layer code
-
-**Effort: S | Gain: observability, production readiness**
-
-Related to issue #1 but broader: the service layer uses `print()` statements instead of Python's `logging` module. This means:
-
-- No log levels (can't filter debug vs. warning in production)
-- No structured output (incompatible with log aggregators)
-- Output goes to stdout unformatted
-- Leave CLI.py prints
-
-```
-apps/api/src/services/courses/activities/assignments.py:1503  — print(assignment_uuid)
-apps/api/src/services/blocks/block_types/quizBlock/quizBlock.py:215
-apps/api/src/services/courses/certifications.py:648
-apps/api/src/services/payments/payments_stripe.py:131
-```
-
-**Fix**: Add to each file:
-
-```python
-import logging
-logger = logging.getLogger(__name__)
-```
-
-Then replace `print(...)` with `logger.debug(...)` / `logger.warning(...)` / `logger.error(...)`.

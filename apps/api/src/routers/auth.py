@@ -17,6 +17,18 @@ from src.services.auth.utils import signWithGoogle
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+
+class TokensResponse(PydanticStrictBaseModel):
+    access_token: str
+    refresh_token: str
+    expiry: int
+
+
+class LoginResponse(PydanticStrictBaseModel):
+    user: UserRead
+    tokens: TokensResponse
+
+
 COOKIE_TTL_SECONDS = int(timedelta(hours=8).total_seconds())
 
 
@@ -103,7 +115,7 @@ def refresh(
     }
 
 
-@router.post("/login")
+@router.post("/login", response_model=LoginResponse)
 async def login(
     request: Request,
     response: Response,
@@ -178,7 +190,7 @@ class ThirdPartyLogin(PydanticStrictBaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-@router.post("/oauth")
+@router.post("/oauth", response_model=LoginResponse)
 async def third_party_login(
     request: Request,
     response: Response,

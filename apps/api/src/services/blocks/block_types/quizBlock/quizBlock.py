@@ -2,6 +2,7 @@
 Quiz block service for handling quiz submissions and analytics.
 """
 
+import logging
 from datetime import UTC, datetime, timezone
 
 from fastapi import HTTPException, Request, status
@@ -28,6 +29,8 @@ from src.services.blocks.block_types.quizBlock.grading import (
     grade_quiz,
 )
 from src.services.gamification.service import award_xp
+
+logger = logging.getLogger(__name__)
 
 
 async def submit_quiz(
@@ -212,7 +215,7 @@ async def submit_quiz(
             triggered_level_up = xp_result.get("level_up", False)
         except Exception as e:
             # Log but don't fail the submission
-            print(f"Failed to award XP: {e}")
+            logger.warning(f"Failed to award XP: {e}")
 
     # Build response
     grading_result["xp_awarded"] = xp_awarded

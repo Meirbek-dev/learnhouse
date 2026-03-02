@@ -57,7 +57,7 @@ limiter = Limiter(key_func=_rate_limit_key)
 router = APIRouter()
 
 
-@router.post("/start/activity_chat_session")
+@router.post("/start/activity_chat_session", response_model=ActivityAIChatSessionResponse)
 @limiter.limit("10/minute")  # 10 requests per minute per IP
 async def api_ai_start_activity_chat_session(
     request: Request,
@@ -90,7 +90,7 @@ async def api_ai_start_activity_chat_session(
         raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
-@router.post("/send/activity_chat_message")
+@router.post("/send/activity_chat_message", response_model=ActivityAIChatSessionResponse)
 @limiter.limit(
     "20/minute"
 )  # 20 requests per minute per IP (higher limit for chat messages)

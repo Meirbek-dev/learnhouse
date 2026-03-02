@@ -23,6 +23,8 @@ from src.services.payments.payments_users import (
     delete_payment_user,
 )
 
+logger = logging.getLogger(__name__)
+
 
 async def get_stripe_connected_account_id(
     request: Request,
@@ -128,7 +130,7 @@ async def archive_stripe_product(
         )
 
     except stripe.StripeError as e:
-        print(f"Error archiving Stripe product: {e!s}")
+        logger.error(f"Error archiving Stripe product: {e!s}")
         raise HTTPException(
             status_code=400, detail=f"Error archiving Stripe product: {e!s}"
         )
@@ -330,7 +332,7 @@ async def create_checkout_session(
             await delete_payment_user(
                 request, org_id, payment_user.id, InternalUser(), db_session
             )
-        logging.exception(f"Error creating checkout session: {e!s}")
+        logger.exception(f"Error creating checkout session: {e!s}")
         raise HTTPException(status_code=400, detail=str(e))
 
 
@@ -381,7 +383,7 @@ async def create_stripe_account(
     existing_config = db_session.exec(statement).first()
 
     if existing_config and existing_config.provider_specific_id:
-        logging.error(
+        logger.error(
             f"A Stripe Account is already linked to this organization: {existing_config.provider_specific_id}"
         )
         return existing_config.provider_specific_id
@@ -490,7 +492,7 @@ async def handle_stripe_oauth_callback(
         return {"success": True, "account_id": connected_account_id}
 
     except stripe.StripeError as e:
-        logging.exception(f"Error connecting Stripe account: {e!s}")
+        logger.exception(f"Error connecting Stripe account: {e!s}")
         raise HTTPException(
             status_code=400, detail=f"Error connecting Stripe account: {e!s}"
         )

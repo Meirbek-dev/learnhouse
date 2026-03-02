@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from fastapi import HTTPException, Request, UploadFile
@@ -43,6 +44,8 @@ from src.services.courses.certifications import (
     check_course_completion_and_create_certificate,
 )
 from src.services.trail.trail import check_trail_presence
+
+logger = logging.getLogger(__name__)
 
 ## > Assignments CRUD
 
@@ -1500,7 +1503,7 @@ async def read_user_assignment_submissions(
     # Find assignment
     statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
     assignment = db_session.exec(statement).first()
-    print(assignment_uuid)
+    logger.debug(f"Fetching submissions for assignment UUID: {assignment_uuid}")
     if not assignment:
         raise HTTPException(
             status_code=404,

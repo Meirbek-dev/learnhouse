@@ -645,7 +645,7 @@ async def check_course_completion_and_create_certificate(
 
             except Exception as general_error:
                 # Log unexpected errors but don't fail silently
-                print(
+                logger.error(
                     f"Unexpected error during course completion (user_id: {user_id}, course_id: {course_id}): {general_error}"
                 )
                 raise
