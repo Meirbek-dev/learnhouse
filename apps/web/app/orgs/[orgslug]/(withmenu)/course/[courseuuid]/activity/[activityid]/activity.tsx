@@ -32,7 +32,8 @@ import {
   getFinalGrade,
   submitAssignmentForGrading,
 } from '@services/courses/assignments';
-import { CourseProvider, type Activity, type Chapter, type CourseStructure } from '@components/Contexts/CourseContext';
+import { CourseProvider } from '@components/Contexts/CourseContext';
+import type { Activity, Chapter, CourseStructure } from '@components/Contexts/CourseContext';
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
