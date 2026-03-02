@@ -23,6 +23,14 @@ import { useTranslations } from 'next-intl';
 import type { ChangeEvent } from 'react';
 import { toast } from 'sonner';
 
+interface CourseListItem {
+  id: number;
+  name: string;
+  description?: string | null;
+  course_uuid: string;
+  thumbnail_image?: string | null;
+}
+
 const NewCollection = ({ params }: { params: { orgslug: string } }) => {
   const t = useTranslations('NewCollectionPage');
   const org = useOrg() as any;
@@ -42,7 +50,7 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
     if (!courses || !searchQuery.trim()) return courses || [];
     const query = searchQuery.toLowerCase();
     return courses.filter(
-      (course: any) => course.name.toLowerCase().includes(query) || course.description?.toLowerCase().includes(query),
+      (course: CourseListItem) => course.name.toLowerCase().includes(query) || course.description?.toLowerCase().includes(query),
     );
   }, [courses, searchQuery]);
 
@@ -104,7 +112,7 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
 
   const selectAll = () => {
     if (filteredCourses.length === 0) return;
-    const allIds = filteredCourses.map((c: any) => c.id);
+    const allIds = filteredCourses.map((c: CourseListItem) => c.id);
     setSelectedCourses(allIds);
   };
 
@@ -311,7 +319,7 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
                         {t('noCoursesFound', { query: searchQuery })}
                       </div>
                     ) : (
-                      filteredCourses.map((course: any) => {
+                      filteredCourses.map((course: CourseListItem) => {
                         const isSelected = selectedCourses.includes(course.id);
                         return (
                           <div

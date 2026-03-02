@@ -48,7 +48,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import CourseEndView from '@components/Pages/Activity/CourseEndView';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
-import { CourseProvider } from '@components/Contexts/CourseContext';
+import { CourseProvider, type Activity, type Chapter, type CourseStructure } from '@components/Contexts/CourseContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -215,26 +215,26 @@ interface ActivityClientProps {
   activityid: string;
   courseuuid: string;
   orgslug: string;
-  activity: any | null;
-  course: any;
+  activity: Activity | null;
+  course: CourseStructure;
 }
 
 interface ActivityActionsProps {
-  activity: any | null;
+  activity: Activity | null;
   activityid: string;
-  course: any;
+  course: CourseStructure;
   orgslug: string;
-  assignment: any;
+  assignment: { assignment_uuid: string } | null;
   showNavigation?: boolean;
 }
 
 // Custom hook for activity position
-function useActivityPosition(course: any, activityId: string) {
-  const allActivities: any[] = [];
+function useActivityPosition(course: CourseStructure, activityId: string) {
+  const allActivities: (Activity & { cleanUuid?: string; chapterName?: string })[] = [];
   let currentIndex = -1;
 
-  course.chapters.forEach((chapter: any) => {
-    chapter.activities.forEach((activity: any) => {
+  course.chapters.forEach((chapter: Chapter) => {
+    chapter.activities?.forEach((activity: Activity) => {
       const cleanActivityUuid = activity.activity_uuid?.replace('activity_', '');
       allActivities.push({
         ...activity,
@@ -414,7 +414,7 @@ const ActivityClient = (props: ActivityClientProps) => {
           <Suspense fallback={<LoadingFallback />}>
             <VideoActivity
               course={course}
-              activity={activity}
+              activity={activity as any}
             />
           </Suspense>
         );
@@ -754,7 +754,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                             title={
                               prevActivity
                                 ? t('previousActivityTooltip', {
-                                    activityName: prevActivity.name,
+                                    activityName: prevActivity.name ?? '',
                                   })
                                 : t('noPreviousActivity')
                             }
@@ -791,7 +791,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                             title={
                               nextActivity
                                 ? t('nextActivityTooltip', {
-                                    activityName: nextActivity.name,
+                                    activityName: nextActivity.name ?? '',
                                   })
                                 : t('noNextActivity')
                             }
@@ -819,10 +819,10 @@ const ActivityClient = (props: ActivityClientProps) => {
               {/* Original non-focus mode UI */}
               {activityid === 'end' ? (
                 <CourseEndView
-                  courseName={course.name}
+                  courseName={course.name ?? ''}
                   orgslug={orgslug}
                   courseUuid={course.course_uuid}
-                  thumbnailImage={course.thumbnail_image}
+                  thumbnailImage={course.thumbnail_image ?? ''}
                   course={course}
                   trailData={trailData}
                 />
@@ -877,9 +877,9 @@ const ActivityClient = (props: ActivityClientProps) => {
                         <div className="flex flex-1/3 items-center space-x-3">
                           <div className="flex flex-col -space-y-1">
                             <p className="text-base font-bold text-gray-700">
-                              {getChapterNameByActivityId(course, activity.id)}
+                              {getChapterNameByActivityId(course, activity!.id)}
                             </p>
-                            <h1 className="text-2xl font-bold text-gray-950 first-letter:uppercase">{activity.name}</h1>
+                            <h1 className="text-2xl font-bold text-gray-950 first-letter:uppercase">{activity!.name}</h1>
                             {/* Authors and Dates Section */}
                             <div className="mt-2 flex flex-wrap items-center gap-3">
                               {/* Avatars */}
@@ -1314,20 +1314,20 @@ const NextActivityButton = ({
   currentActivityId,
   orgslug,
 }: {
-  course: any;
-  currentActivityId: string;
+  course: CourseStructure;
+  currentActivityId: number;
   orgslug: string;
 }) => {
   const router = useRouter();
   const t = useTranslations('ActivityPage');
 
   const nextActivity = (() => {
-    const allActivities: any[] = [];
+    const allActivities: (Activity & { cleanUuid?: string; chapterName?: string })[] = [];
     let currentIndex = -1;
 
     // Flatten all activities from all chapters
-    course.chapters.forEach((chapter: any) => {
-      chapter.activities.forEach((activity: any) => {
+    course.chapters.forEach((chapter: Chapter) => {
+      chapter.activities?.forEach((activity: Activity) => {
         const cleanActivityUuid = activity.activity_uuid?.replace('activity_', '');
         allActivities.push({
           ...activity,
@@ -1373,20 +1373,20 @@ const PreviousActivityButton = ({
   currentActivityId,
   orgslug,
 }: {
-  course: any;
-  currentActivityId: string;
+  course: CourseStructure;
+  currentActivityId: number;
   orgslug: string;
 }) => {
   const router = useRouter();
   const t = useTranslations('ActivityPage');
 
   const previousActivity = (() => {
-    const allActivities: any[] = [];
+    const allActivities: (Activity & { cleanUuid?: string; chapterName?: string })[] = [];
     let currentIndex = -1;
 
     // Flatten all activities from all chapters
-    course.chapters.forEach((chapter: any) => {
-      chapter.activities.forEach((activity: any) => {
+    course.chapters.forEach((chapter: Chapter) => {
+      chapter.activities?.forEach((activity: Activity) => {
         const cleanActivityUuid = activity.activity_uuid?.replace('activity_', '');
         allActivities.push({
           ...activity,

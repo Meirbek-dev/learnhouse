@@ -16,10 +16,11 @@ import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
+import type { Org } from '@/types/org';
 import * as z from 'zod';
 
 interface LoginClientProps {
-  org: any;
+  org: Org;
 }
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>

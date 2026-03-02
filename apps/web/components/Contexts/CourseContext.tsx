@@ -10,7 +10,7 @@ import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import useSWR from 'swr';
 
-interface Activity {
+export interface Activity {
   id: number;
   activity_uuid: string;
   name?: string;
@@ -26,7 +26,7 @@ interface Activity {
   [key: string]: any;
 }
 
-interface Chapter {
+export interface Chapter {
   id: number;
   chapter_uuid: string;
   name?: string;
@@ -37,7 +37,7 @@ interface Chapter {
 type Learnings = string | object | null;
 
 // Course structure interface with improved typing
-interface CourseStructure {
+export interface CourseStructure {
   course_uuid: string;
   name?: string;
   description?: string;

@@ -1513,7 +1513,7 @@
 
     "typed-array-length": ["typed-array-length@1.0.7", "https://registry.npmmirror.com/typed-array-length/-/typed-array-length-1.0.7.tgz", { "dependencies": { "call-bind": "^1.0.7", "for-each": "^0.3.3", "gopd": "^1.0.1", "is-typed-array": "^1.1.13", "possible-typed-array-names": "^1.0.0", "reflect.getprototypeof": "^1.0.6" } }, "sha512-3KS2b+kL7fsuk/eJZ7EQdnEmQoaho/r6KUef7hxvltNA5DR8NAUM+8wJMbJyZ4G9/7i3v5zPBIMN5aybAh2/Jg=="],
 
-    "typescript": ["typescript@6.0.0-dev.20260301", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-utLDBF4c0FnGI/cs1TX7qXdBKptg36Q2KY8X+KFtgMoYM7HnbZ6XT/N/Mtm4DwioPD7S0bBBW+9bKJ8TwdmfAQ=="],
+    "typescript": ["typescript@6.0.0-dev.20260302", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-f1OyfRwerbx6t8dQdNRa3YLgPqAbmE3ugnqDvf7dJBq40ZSTN9NpibhfTcGuUBP0kB/o0MHFOlxv2Cznguk65Q=="],
 
     "typescript-eslint": ["typescript-eslint@8.56.0", "https://registry.npmmirror.com/typescript-eslint/-/typescript-eslint-8.56.0.tgz", { "dependencies": { "@typescript-eslint/eslint-plugin": "8.56.0", "@typescript-eslint/parser": "8.56.0", "@typescript-eslint/typescript-estree": "8.56.0", "@typescript-eslint/utils": "8.56.0" }, "peerDependencies": { "eslint": "^8.57.0 || ^9.0.0 || ^10.0.0", "typescript": ">=4.8.4 <6.0.0" } }, "sha512-c7toRLrotJ9oixgdW7liukZpsnq5CZ7PuKztubGYlNppuTqhIoWfhgHo/7EU0v06gS2l/x0i2NEFK1qMIf0rIg=="],
 
