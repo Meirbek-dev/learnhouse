@@ -14,6 +14,7 @@ from src.db.courses.courses import (
     FullCourseRead,
     ThumbnailType,
 )
+from src.db.courses.enhanced_responses import CourseReadWithPermissions
 from src.db.organizations import Organization
 from src.db.resource_authors import (
     ResourceAuthor,
@@ -255,7 +256,7 @@ async def get_courses_orgslug(
     db_session: Session,
     page: int = 1,
     limit: int = 20,
-) -> list[CourseRead]:
+) -> list[CourseReadWithPermissions]:
     # Simple caching for anonymous (public) course listings to reduce
     # load and avoid upstream rate limits. Uses Redis if available.
     try:
@@ -271,7 +272,7 @@ async def get_courses_orgslug(
             cached = get_json(cache_key)
             if cached:
                 # cached is a list of serialised course dicts
-                return [CourseRead.model_validate(c) for c in cached]
+                return [CourseReadWithPermissions.model_validate(c) for c in cached]
         except Exception:
             # Redis errors should not break the request
             pass
@@ -352,10 +353,37 @@ async def get_courses_orgslug(
                 )
             )
 
-    # Build CourseRead objects
+    # Build CourseReadWithPermissions objects
     course_reads = []
+
+    # Pre-load permission grants once for authenticated users
+    has_broad_update = has_broad_delete = has_own_update = has_own_delete = False
+    if not isinstance(current_user, AnonymousUser) and current_user.id and courses_map:
+        first_course = next(iter(courses_map.values()))[0]
+        checker = PermissionChecker(db_session)
+        granted = checker._get_or_load(current_user.id, first_course.org_id)
+        has_broad_update = PermissionChecker._has_perm(
+            granted, "course", "update", "all"
+        ) or PermissionChecker._has_perm(granted, "course", "update", "org")
+        has_broad_delete = PermissionChecker._has_perm(
+            granted, "course", "delete", "all"
+        ) or PermissionChecker._has_perm(granted, "course", "delete", "org")
+        has_own_update = PermissionChecker._has_perm(granted, "course", "update", "own")
+        has_own_delete = PermissionChecker._has_perm(granted, "course", "delete", "own")
+
     for course, authors in courses_map.values():
-        course_read = CourseRead.model_validate(
+        can_update = can_delete = is_owner = False
+        if not isinstance(current_user, AnonymousUser) and current_user.id:
+            is_author = any(
+                a.user.id == current_user.id
+                and a.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE
+                for a in authors
+            )
+            is_owner = course.creator_id == current_user.id
+            can_update = has_broad_update or (has_own_update and is_author)
+            can_delete = has_broad_delete or (has_own_delete and is_author)
+
+        course_read = CourseReadWithPermissions.model_validate(
             {
                 "id": course.id or 0,
                 "org_id": course.org_id,
@@ -371,11 +399,12 @@ async def get_courses_orgslug(
                 "creation_date": course.creation_date,
                 "update_date": course.update_date,
                 "authors": authors,
+                "can_update": can_update,
+                "can_delete": can_delete,
+                "is_owner": is_owner,
             }
         )
         course_reads.append(course_read)
-
-    # Cache anonymous/public responses if Redis is configured
     try:
         if (
             isinstance(current_user, AnonymousUser)
@@ -952,7 +981,7 @@ async def get_editable_courses_orgslug(
     db_session: Session,
     page: int = 1,
     limit: int = 20,
-) -> list[CourseRead]:
+) -> list[CourseReadWithPermissions]:
     """
     Return courses for an org that the current user has permission to edit
     (i.e. course:update). Anonymous users always get an empty list.
@@ -1050,8 +1079,22 @@ async def get_editable_courses_orgslug(
             )
 
     course_reads = []
+
+    has_broad_delete = PermissionChecker._has_perm(
+        granted, "course", "delete", "all"
+    ) or PermissionChecker._has_perm(granted, "course", "delete", "org")
+    has_own_delete = PermissionChecker._has_perm(granted, "course", "delete", "own")
+
     for course, authors in courses_map.values():
-        course_read = CourseRead.model_validate(
+        is_author = any(
+            a.user.id == current_user.id
+            and a.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE
+            for a in authors
+        )
+        is_owner = course.creator_id == current_user.id
+        can_delete = has_broad_delete or (has_own_delete and is_author)
+
+        course_read = CourseReadWithPermissions.model_validate(
             {
                 "id": course.id or 0,
                 "org_id": course.org_id,
@@ -1067,6 +1110,9 @@ async def get_editable_courses_orgslug(
                 "creation_date": course.creation_date,
                 "update_date": course.update_date,
                 "authors": authors,
+                "can_update": True,
+                "can_delete": can_delete,
+                "is_owner": is_owner,
             }
         )
         course_reads.append(course_read)

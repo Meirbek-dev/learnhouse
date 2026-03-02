@@ -16,6 +16,7 @@ from src.db.courses.courses import (
     FullCourseRead,
     ThumbnailType,
 )
+from src.db.courses.enhanced_responses import CourseReadWithPermissions
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
 from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user
@@ -175,7 +176,7 @@ async def api_get_course_by_orgslug(
     org_slug: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db_session=Depends(get_db_session),
-) -> list[CourseRead]:
+) -> list[CourseReadWithPermissions]:
     """
     Get courses by org slug with pagination
     Adds basic HTTP caching headers for public (anonymous) requests to allow
@@ -237,7 +238,7 @@ async def api_get_editable_courses_by_orgslug(
     org_slug: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db_session=Depends(get_db_session),
-) -> list[CourseRead]:
+) -> list[CourseReadWithPermissions]:
     """
     Get courses by org slug that the current user can edit.
 
