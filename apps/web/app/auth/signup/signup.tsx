@@ -4,18 +4,18 @@ import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/fiel
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import PasswordInput from '@components/ui/custom/password-input';
+import { useEffect, useState, useTransition } from 'react';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 import { Separator } from '@components/ui/separator';
 import { passwordSchema } from '@/lib/schemas/auth';
-import { useEffect, useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
-import { signup } from '@services/auth/auth';
-import { AlertTriangle, Loader2 } from 'lucide-react';
 import AuthLogo from '@components/auth/logo';
 import AuthCard from '@components/auth/card';
 import { Input } from '@components/ui/input';
+import { signup } from '@services/auth/auth';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -98,9 +98,7 @@ const SignUpClient = (props: SignUpClientProps) => {
           const body = await res.json().catch(() => ({}));
           const detail = body?.detail;
           const msg =
-            typeof detail === 'string'
-              ? detail
-              : detail?.message || body?.message || t('errorSomethingWentWrong');
+            typeof detail === 'string' ? detail : detail?.message || body?.message || t('errorSomethingWentWrong');
           setError(msg);
         }
       } catch (error: any) {

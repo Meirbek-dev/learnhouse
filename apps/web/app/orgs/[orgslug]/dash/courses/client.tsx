@@ -2,10 +2,10 @@
 
 import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
-import NewCourseButton from '@/components/Objects/Elements/Buttons/NewCourseButton';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
-import Modal from '@/components/Objects/Elements/Modal/Modal';
+import NewCourseButton from '@/components/Objects/Elements/Buttons/NewCourseButton';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useSearchParams } from 'next/navigation';

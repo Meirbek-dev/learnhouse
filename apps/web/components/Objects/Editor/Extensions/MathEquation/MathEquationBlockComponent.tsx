@@ -84,7 +84,6 @@ const mathSymbols = [
   { symbol: '\\approx', display: '≈' },
 ];
 
-
 const MathEquationBlockComponent = (props: any) => {
   const t = useTranslations('DashPage.Editor.MathEquationBlock');
   const [equation, setEquation] = useState(props.node.attrs.math_equation);
@@ -347,7 +346,8 @@ const MathEquationBlockComponent = (props: any) => {
                   type="text"
                   className="focus:ring-1 focus:ring-blue-300"
                 />
-                <motion.button className="flex items-center justify-center w-[30px] h-[30px] rounded-[6px] border-0 bg-[rgba(217,217,217,0.5)] text-[#494949] cursor-pointer"
+                <motion.button
+                  className="flex items-center justify-center w-[30px] h-[30px] rounded-[6px] border-0 bg-[rgba(217,217,217,0.5)] text-[#494949] cursor-pointer"
                   onClick={() => {
                     saveEquation();
                   }}

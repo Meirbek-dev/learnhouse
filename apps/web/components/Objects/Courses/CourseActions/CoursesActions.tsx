@@ -14,9 +14,9 @@ import {
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
-import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { getProductsByCourse } from '@services/payments/products';
 import { applyForContributor } from '@services/courses/courses';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import CourseProgress from '../CourseProgress/CourseProgress';
 import { checkPaidAccess } from '@services/payments/payments';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -124,11 +124,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
     const checkAccess = async () => {
       if (!userId) return;
       try {
-        const response = await checkPaidAccess(
-          course.id,
-          course.org_id,
-          accessToken,
-        );
+        const response = await checkPaidAccess(course.id, course.org_id, accessToken);
         setHasAccess(response.has_access);
       } catch {
         console.error('Failed to check course access');

@@ -4,9 +4,9 @@ import { AlertCircle, BookOpen, Loader2, LogIn, ShoppingCart } from 'lucide-reac
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
-import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { getProductsByCourse } from '@services/payments/products';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { checkPaidAccess } from '@services/payments/payments';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { startCourse } from '@services/courses/activity';
@@ -191,11 +191,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
     const checkAccess = async () => {
       if (!userId) return;
       try {
-        const response = await checkPaidAccess(
-          course.id,
-          course.org_id,
-          accessToken,
-        );
+        const response = await checkPaidAccess(course.id, course.org_id, accessToken);
         setHasAccess(response.has_access);
       } catch {
         console.error('Failed to check course access');

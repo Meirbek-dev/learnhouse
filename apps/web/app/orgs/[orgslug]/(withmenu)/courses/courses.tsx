@@ -2,9 +2,9 @@
 
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
 import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfContentTitle';
-import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
-import NewCourseButton from '@/components/Objects/Elements/Buttons/NewCourseButton';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
+import NewCourseButton from '@/components/Objects/Elements/Buttons/NewCourseButton';
+import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import CourseGridClient from '@components/Landings/CourseGridClient';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { revalidateTags } from '@services/utils/ts/requests';

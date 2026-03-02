@@ -33,9 +33,9 @@ import {
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { SiYoutube } from '@icons-pack/react-simple-icons';
 import { useEffect, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
 import type { ComponentPropsWithRef } from 'react';
 import styles from './ToolbarButtons.module.css';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 import DividerVerticalIcon from '@components/svg/DividerVerticalIcon';
@@ -219,7 +219,8 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       >
         <Minus size={18} />
       </ToolBtn>
-      <div className="relative inline-block"
+      <div
+        className="relative inline-block"
         onMouseEnter={() => {
           if (listHideTimerRef.current) {
             clearTimeout(listHideTimerRef.current);
@@ -257,7 +258,9 @@ export const ToolbarButtons = ({ editor, props }: any) => {
                   setShowListMenu(false);
                 }}
                 className={`flex items-center py-2 px-3 cursor-pointer [transition:background_0.2s] hover:bg-[rgba(217,217,217,0.24)] ${
-                  editor.isActive(option.label === 'Bullet List' ? 'bulletList' : 'orderedList') ? 'bg-[rgba(176,176,176,0.5)]' : ''
+                  editor.isActive(option.label === 'Bullet List' ? 'bulletList' : 'orderedList')
+                    ? 'bg-[rgba(176,176,176,0.5)]'
+                    : ''
                 }`}
               >
                 <span className="flex items-center mr-2">{option.icon}</span>
@@ -305,7 +308,8 @@ export const ToolbarButtons = ({ editor, props }: any) => {
         <option value="5">{t('headingLevel', { level: 5 })}</option>
         <option value="6">{t('headingLevel', { level: 6 })}</option>
       </ToolSelect>
-      <div className="relative inline-block"
+      <div
+        className="relative inline-block"
         onMouseEnter={() => {
           if (tableHideTimerRef.current) {
             clearTimeout(tableHideTimerRef.current);
@@ -643,4 +647,3 @@ export const ToolbarButtons = ({ editor, props }: any) => {
     </div>
   );
 };
-

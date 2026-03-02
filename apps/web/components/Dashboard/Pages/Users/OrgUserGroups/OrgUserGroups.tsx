@@ -18,8 +18,8 @@ import EditUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/EditUse
 import AddUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/AddUserGroup';
 import ManageUsers from '@components/Objects/Modals/Dash/OrgUserGroups/ManageUsers';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { deleteUserGroup } from '@services/usergroups/usergroups';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';

@@ -3,11 +3,11 @@ import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEdit
 import type { AIEditorStateTypes } from '@components/Contexts/AI/AIEditorContext';
 
 import MathEquationBlock from './Extensions/MathEquation/MathEquationBlock';
-import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import WarningCallout from './Extensions/Callout/Warning/WarningCallout';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import DividerVerticalIcon from '@components/svg/DividerVerticalIcon';
+import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import EmbedObjects from './Extensions/EmbedObjects/EmbedObjects';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
@@ -68,12 +68,12 @@ const EDITOR_EXTENSIONS = [
   // other extensions can be added here if needed
 ];
 import { useTranslations } from 'next-intl';
-import styles from './Editor.module.css';
-import { cn } from '@/lib/utils';
 import Link from '@components/ui/AppLink';
-import type { ReactNode } from 'react';
+import styles from './Editor.module.css';
 import UserAvatar from '../UserAvatar';
+import type { ReactNode } from 'react';
 import { motion } from 'motion/react';
+import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
 interface EditorProps {
@@ -189,7 +189,9 @@ const Editor = (props: EditorProps) => {
           }}
           exit={{ opacity: 0 }}
         >
-          <div className={cn(styles.editorTop, "bg-opacity-95 fixed bg-white backdrop-blur-sm backdrop-brightness-125")}>
+          <div
+            className={cn(styles.editorTop, 'bg-opacity-95 fixed bg-white backdrop-blur-sm backdrop-brightness-125')}
+          >
             <div className="flex flex-col">
               <div className="flex flex-row mb-[5px]">
                 <Link href="/">
@@ -333,4 +335,3 @@ export default Editor;
 export const EditorContentWrapper = ({ children, className }: { children: ReactNode; className?: string }) => (
   <div className={cn(styles.editorContentWrapper, className)}>{children}</div>
 );
-

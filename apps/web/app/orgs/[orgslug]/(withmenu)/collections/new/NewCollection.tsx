@@ -4,13 +4,14 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, Globe, Image as ImageIcon, Loader2, Lock, Search } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { revalidateTags } from '@services/utils/ts/requests';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { getUriWithOrg } from '@services/config/config';
 import { createCollection } from '@services/courses/collections';
+import { useCourseListByOrg } from '@/hooks/useCourseListByOrg';
+import { revalidateTags } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useMemo, useState, useTransition } from 'react';
+import { getUriWithOrg } from '@services/config/config';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,6 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { ChangeEvent } from 'react';
 import { toast } from 'sonner';
-import { useCourseListByOrg } from '@/hooks/useCourseListByOrg';
 
 const NewCollection = ({ params }: { params: { orgslug: string } }) => {
   const t = useTranslations('NewCollectionPage');
@@ -35,11 +35,7 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
   const [isPending, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
-  const {
-    data: courses,
-    error,
-    isLoading,
-  } = useCourseListByOrg(orgslug);
+  const { data: courses, error, isLoading } = useCourseListByOrg(orgslug);
   const [isPublic, setIsPublic] = useState(true);
 
   const filteredCourses = useMemo(() => {

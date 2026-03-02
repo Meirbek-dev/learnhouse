@@ -517,7 +517,8 @@ export async function signup(body: NewAccountBody): Promise<Response> {
       username: username.trim(),
       email: sanitizeStringInput(email),
       password,
-      first_name, last_name
+      first_name,
+      last_name,
     };
 
     const requestOptions: RequestInit = {

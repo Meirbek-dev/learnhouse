@@ -1,6 +1,7 @@
 'use client';
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
+import PasswordInput from '@components/ui/custom/password-input';
 import { AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -11,7 +12,6 @@ import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import AuthLogo from '@components/auth/logo';
 import AuthCard from '@components/auth/card';
-import PasswordInput from '@components/ui/custom/password-input';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';

@@ -17,9 +17,9 @@ import {
 // Import custom components
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile';
-import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import CoursesActions from '@components/Objects/Courses/CourseActions/CoursesActions';
 import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAuthors';
+import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';

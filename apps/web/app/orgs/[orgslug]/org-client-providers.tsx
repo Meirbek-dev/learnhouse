@@ -28,7 +28,10 @@ export default function OrgClientProviders({ children, orgslug, initialOrg }: Or
   };
 
   return (
-    <OrgProvider orgslug={orgslug} initialOrg={initialOrg}>
+    <OrgProvider
+      orgslug={orgslug}
+      initialOrg={initialOrg}
+    >
       <NextTopLoader {...topLoaderProps} />
       {children}
     </OrgProvider>

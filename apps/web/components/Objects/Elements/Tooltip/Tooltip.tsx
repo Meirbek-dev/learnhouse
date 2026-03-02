@@ -1,9 +1,9 @@
 'use client';
 import { Tooltip, TooltipContent as TooltipContentPrimitive, TooltipTrigger } from '@/components/ui/tooltip';
 import React, { Children, cloneElement, isValidElement } from 'react';
+import styles from './Tooltip.module.css';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import styles from './Tooltip.module.css';
 
 interface TooltipProps {
   sideOffset?: number;
@@ -33,11 +33,7 @@ const ToolTip = ({ sideOffset, content, children, side = 'bottom', slateBlack, u
       <TooltipContentPrimitive
         side={side}
         sideOffset={sideOffset}
-        className={cn(
-          styles.tooltipContent,
-          slateBlack && styles.slateBlack,
-          unstyled && styles.unstyled,
-        )}
+        className={cn(styles.tooltipContent, slateBlack && styles.slateBlack, unstyled && styles.unstyled)}
       >
         {content}
       </TooltipContentPrimitive>

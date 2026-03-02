@@ -1,7 +1,7 @@
 'use client';
 
-import NewCourseButton from '@/components/Objects/Elements/Buttons/NewCourseButton';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
+import NewCourseButton from '@/components/Objects/Elements/Buttons/NewCourseButton';
 import { Actions, PermissionGuard, Resources, Scopes } from '@/components/Security';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { revalidateTags } from '@services/utils/ts/requests';

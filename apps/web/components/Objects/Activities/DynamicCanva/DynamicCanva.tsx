@@ -34,8 +34,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import Youtube from '@tiptap/extension-youtube';
 import { Table } from '@tiptap/extension-table';
 import TableOfContents from './TableOfContents';
-import StarterKit from '@tiptap/starter-kit';
 import styles from './DynamicCanva.module.css';
+import StarterKit from '@tiptap/starter-kit';
 
 // Lowlight initialization at module scope (one-time)
 const LOWLIGHT = (() => {

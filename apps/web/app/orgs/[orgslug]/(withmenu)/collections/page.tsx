@@ -1,7 +1,7 @@
 import NewCollectionButton from '@/components/Objects/Elements/Buttons/NewCollectionButton';
 import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfContentTitle';
-import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
+import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { PermissionGuard } from '@components/Security/PermissionGuard';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';

@@ -1,22 +1,50 @@
 @keyframes slideUpAndFade {
-  0% { opacity: 0; transform: translateY(2px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes slideRightAndFade {
-  0% { opacity: 0; transform: translateX(-2px); }
-  100% { opacity: 1; transform: translateX(0); }
+  0% {
+    opacity: 0;
+    transform: translateX(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 @keyframes slideDownAndFade {
-  0% { opacity: 0; transform: translateY(-2px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes slideLeftAndFade {
-  0% { opacity: 0; transform: translateX(2px); }
-  100% { opacity: 1; transform: translateX(0); }
+  0% {
+    opacity: 0;
+    transform: translateX(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 @keyframes closeAndFade {
-  0% { opacity: 1; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .tooltipContent {
@@ -36,14 +64,24 @@
   will-change: transform, opacity;
 }
 
-.tooltipContent[data-state='delayed-open'][data-side='top'] { animation-name: slideDownAndFade; }
-.tooltipContent[data-state='delayed-open'][data-side='right'] { animation-name: slideLeftAndFade; }
-.tooltipContent[data-state='delayed-open'][data-side='bottom'] { animation-name: slideUpAndFade; }
-.tooltipContent[data-state='delayed-open'][data-side='left'] { animation-name: slideRightAndFade; }
+.tooltipContent[data-state='delayed-open'][data-side='top'] {
+  animation-name: slideDownAndFade;
+}
+.tooltipContent[data-state='delayed-open'][data-side='right'] {
+  animation-name: slideLeftAndFade;
+}
+.tooltipContent[data-state='delayed-open'][data-side='bottom'] {
+  animation-name: slideUpAndFade;
+}
+.tooltipContent[data-state='delayed-open'][data-side='left'] {
+  animation-name: slideRightAndFade;
+}
 .tooltipContent[data-state='closed'][data-side='top'],
 .tooltipContent[data-state='closed'][data-side='right'],
 .tooltipContent[data-state='closed'][data-side='bottom'],
-.tooltipContent[data-state='closed'][data-side='left'] { animation-name: closeAndFade; }
+.tooltipContent[data-state='closed'][data-side='left'] {
+  animation-name: closeAndFade;
+}
 
 .slateBlack {
   background-color: #0d0d0d;

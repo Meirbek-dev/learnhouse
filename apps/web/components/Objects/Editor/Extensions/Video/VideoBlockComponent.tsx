@@ -5,9 +5,9 @@ import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
-import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { uploadNewVideoFile } from '@services/blocks/Video/video';
 import { useCourse } from '@components/Contexts/CourseContext';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import { AnimatePresence, motion } from 'motion/react';
@@ -16,9 +16,9 @@ import { useEffect, useRef, useState } from 'react';
 import type { ChangeEvent, DragEvent } from 'react';
 import type { NodeViewProps } from '@tiptap/react';
 import { NodeViewWrapper } from '@tiptap/react';
-import { cn } from '@/lib/utils';
 import type ArtplayerType from 'artplayer';
 import type { Node } from '@tiptap/core';
+import { cn } from '@/lib/utils';
 
 const SUPPORTED_FILES = constructAcceptValue(['webm', 'mkv', 'mp4']);
 

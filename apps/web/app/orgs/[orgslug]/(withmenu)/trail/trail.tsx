@@ -11,10 +11,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfContentTitle';
-import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { RecentActivityFeed } from '@/components/Dashboard/Gamification/recent-activity-feed';
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
+import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfContentTitle';
+import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { Leaderboard } from '@/components/Dashboard/Gamification/leaderboard';
 import TrailCourseElement from '@components/Pages/Trail/TrailCourseElement';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';

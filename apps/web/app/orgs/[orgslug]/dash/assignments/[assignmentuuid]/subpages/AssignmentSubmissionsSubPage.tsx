@@ -3,10 +3,10 @@
 import AssignmentSubmissionProvider from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
+import { useAssignmentSubmissions } from '@/hooks/useAssignmentSubmissions';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { SendHorizonal, UserCheck, X } from 'lucide-react';
-import { useAssignmentSubmissions } from '@/hooks/useAssignmentSubmissions';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useLocale, useTranslations } from 'next-intl'; // Import useLocale
 import { useUserById } from '@/hooks/useUserById';

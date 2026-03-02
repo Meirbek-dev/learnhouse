@@ -60,9 +60,7 @@ const WarningCalloutComponent = (props: any) => {
           'flex items-center rounded-lg shadow-inner',
           getVariantClasses(),
           getSizeClasses(),
-          options.size === 'sm'
-            ? 'max-sm:flex-row max-sm:items-center'
-            : 'max-sm:flex-col max-sm:items-start',
+          options.size === 'sm' ? 'max-sm:flex-row max-sm:items-center' : 'max-sm:flex-col max-sm:items-start',
         )}
       >
         <div

@@ -3,7 +3,9 @@
   width: 100%;
   padding-top: 30px;
   background-image: radial-gradient(#4744446b 1px, transparent 1px), radial-gradient(#4744446b 1px, transparent 1px);
-  background-position: 0 0, 25px 25px;
+  background-position:
+    0 0,
+    25px 25px;
   background-size: 50px 50px;
   background-attachment: fixed;
   background-repeat: repeat;
@@ -82,11 +84,21 @@
   margin-bottom: 24px;
 }
 
-.editorContentWrapper :global(.ProseMirror h1) { font-size: 2.25rem; }
-.editorContentWrapper :global(.ProseMirror h2) { font-size: 2rem; }
-.editorContentWrapper :global(.ProseMirror h3) { font-size: 1.5rem; }
-.editorContentWrapper :global(.ProseMirror h4) { font-size: 1.25rem; }
-.editorContentWrapper :global(.ProseMirror h5) { font-size: 1.125rem; }
+.editorContentWrapper :global(.ProseMirror h1) {
+  font-size: 2.25rem;
+}
+.editorContentWrapper :global(.ProseMirror h2) {
+  font-size: 2rem;
+}
+.editorContentWrapper :global(.ProseMirror h3) {
+  font-size: 1.5rem;
+}
+.editorContentWrapper :global(.ProseMirror h4) {
+  font-size: 1.25rem;
+}
+.editorContentWrapper :global(.ProseMirror h5) {
+  font-size: 1.125rem;
+}
 
 .editorContentWrapper :global(.ProseMirror a) {
   color: #1a0dab;
@@ -103,15 +115,35 @@
 }
 
 .editorContentWrapper :global(.ProseMirror ul),
-.editorContentWrapper :global(.ProseMirror ol) { padding: 0 1rem; padding-left: 20px; }
-.editorContentWrapper :global(.ProseMirror ul) { list-style-type: disc; }
-.editorContentWrapper :global(.ProseMirror ol) { list-style-type: decimal; }
+.editorContentWrapper :global(.ProseMirror ol) {
+  padding: 0 1rem;
+  padding-left: 20px;
+}
+.editorContentWrapper :global(.ProseMirror ul) {
+  list-style-type: disc;
+}
+.editorContentWrapper :global(.ProseMirror ol) {
+  list-style-type: decimal;
+}
 
-.editorContentWrapper :global(.ProseMirror pre) { padding: 0.75rem 1rem; color: #fff; font-family: var(--font-jetbrains-mono), monospace; background: #0d0d0d; border-radius: 0.5rem; }
-.editorContentWrapper :global(.ProseMirror pre code) { padding: 0; color: inherit; font-size: 0.8rem; background: none; }
+.editorContentWrapper :global(.ProseMirror pre) {
+  padding: 0.75rem 1rem;
+  color: #fff;
+  font-family: var(--font-jetbrains-mono), monospace;
+  background: #0d0d0d;
+  border-radius: 0.5rem;
+}
+.editorContentWrapper :global(.ProseMirror pre code) {
+  padding: 0;
+  color: inherit;
+  font-size: 0.8rem;
+  background: none;
+}
 
 .editorContentWrapper :global(.ProseMirror .hljs-comment),
-.editorContentWrapper :global(.ProseMirror .hljs-quote) { color: #616161; }
+.editorContentWrapper :global(.ProseMirror .hljs-quote) {
+  color: #616161;
+}
 .editorContentWrapper :global(.ProseMirror .hljs-variable),
 .editorContentWrapper :global(.ProseMirror .hljs-template-variable),
 .editorContentWrapper :global(.ProseMirror .hljs-attribute),
@@ -120,34 +152,96 @@
 .editorContentWrapper :global(.ProseMirror .hljs-regexp),
 .editorContentWrapper :global(.ProseMirror .hljs-link),
 .editorContentWrapper :global(.ProseMirror .hljs-selector-id),
-.editorContentWrapper :global(.ProseMirror .hljs-selector-class) { color: #f98181; }
+.editorContentWrapper :global(.ProseMirror .hljs-selector-class) {
+  color: #f98181;
+}
 .editorContentWrapper :global(.ProseMirror .hljs-number),
 .editorContentWrapper :global(.ProseMirror .hljs-meta),
 .editorContentWrapper :global(.ProseMirror .hljs-built_in),
 .editorContentWrapper :global(.ProseMirror .hljs-builtin-name),
 .editorContentWrapper :global(.ProseMirror .hljs-literal),
 .editorContentWrapper :global(.ProseMirror .hljs-type),
-.editorContentWrapper :global(.ProseMirror .hljs-params) { color: #fbbc88; }
+.editorContentWrapper :global(.ProseMirror .hljs-params) {
+  color: #fbbc88;
+}
 .editorContentWrapper :global(.ProseMirror .hljs-string),
 .editorContentWrapper :global(.ProseMirror .hljs-symbol),
-.editorContentWrapper :global(.ProseMirror .hljs-bullet) { color: #b9f18d; }
+.editorContentWrapper :global(.ProseMirror .hljs-bullet) {
+  color: #b9f18d;
+}
 .editorContentWrapper :global(.ProseMirror .hljs-title),
-.editorContentWrapper :global(.ProseMirror .hljs-section) { color: #faf594; }
+.editorContentWrapper :global(.ProseMirror .hljs-section) {
+  color: #faf594;
+}
 .editorContentWrapper :global(.ProseMirror .hljs-keyword),
-.editorContentWrapper :global(.ProseMirror .hljs-selector-tag) { color: #70cff8; }
-.editorContentWrapper :global(.ProseMirror .hljs-emphasis) { font-style: italic; }
-.editorContentWrapper :global(.ProseMirror .hljs-strong) { font-weight: 700; }
+.editorContentWrapper :global(.ProseMirror .hljs-selector-tag) {
+  color: #70cff8;
+}
+.editorContentWrapper :global(.ProseMirror .hljs-emphasis) {
+  font-style: italic;
+}
+.editorContentWrapper :global(.ProseMirror .hljs-strong) {
+  font-weight: 700;
+}
 
-.editorContentWrapper :global(.ProseMirror.resize-cursor) { cursor: col-resize; }
+.editorContentWrapper :global(.ProseMirror.resize-cursor) {
+  cursor: col-resize;
+}
 
-.editorContentWrapper :global(.ProseMirror .tableWrapper) { margin: 1.5rem 0; overflow-x: auto; }
-.editorContentWrapper :global(.ProseMirror table) { width: 100%; margin: 0; overflow: hidden; table-layout: fixed; border-collapse: collapse; }
+.editorContentWrapper :global(.ProseMirror .tableWrapper) {
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+.editorContentWrapper :global(.ProseMirror table) {
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
 .editorContentWrapper :global(.ProseMirror table td),
-.editorContentWrapper :global(.ProseMirror table th) { position: relative; box-sizing: border-box; min-width: 1em; padding: 6px 8px; vertical-align: top; border: 1px solid rgba(139, 139, 139, 0.4); }
+.editorContentWrapper :global(.ProseMirror table th) {
+  position: relative;
+  box-sizing: border-box;
+  min-width: 1em;
+  padding: 6px 8px;
+  vertical-align: top;
+  border: 1px solid rgba(139, 139, 139, 0.4);
+}
 .editorContentWrapper :global(.ProseMirror table td > *),
-.editorContentWrapper :global(.ProseMirror table th > *) { margin-bottom: 0; }
-.editorContentWrapper :global(.ProseMirror table th) { font-weight: bold; text-align: left; background-color: rgba(217, 217, 217, 0.4); }
-.editorContentWrapper :global(.ProseMirror table .selectedCell:after) { position: absolute; inset: 0; z-index: 2; background: rgba(139, 139, 139, 0.2); content: ''; pointer-events: none; }
-.editorContentWrapper :global(.ProseMirror table .column-resize-handle) { position: absolute; top: 0; right: -2px; bottom: -2px; width: 4px; background-color: #8d78eb; pointer-events: none; }
+.editorContentWrapper :global(.ProseMirror table th > *) {
+  margin-bottom: 0;
+}
+.editorContentWrapper :global(.ProseMirror table th) {
+  font-weight: bold;
+  text-align: left;
+  background-color: rgba(217, 217, 217, 0.4);
+}
+.editorContentWrapper :global(.ProseMirror table .selectedCell:after) {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: rgba(139, 139, 139, 0.2);
+  content: '';
+  pointer-events: none;
+}
+.editorContentWrapper :global(.ProseMirror table .column-resize-handle) {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  bottom: -2px;
+  width: 4px;
+  background-color: #8d78eb;
+  pointer-events: none;
+}
 
-.editorContentWrapper :global(iframe) { display: block; width: 100%; min-width: 200px; height: 440px; min-height: 200px; border: none; border-radius: 6px; outline: 0px solid transparent; }
+.editorContentWrapper :global(iframe) {
+  display: block;
+  width: 100%;
+  min-width: 200px;
+  height: 440px;
+  min-height: 200px;
+  border: none;
+  border-radius: 6px;
+  outline: 0px solid transparent;
+}

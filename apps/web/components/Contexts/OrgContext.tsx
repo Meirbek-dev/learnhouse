@@ -2,9 +2,9 @@
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
-import ErrorUI from '@/components/Objects/Elements/Error/Error';
 import { createContext, useContext, useEffect, useRef } from 'react';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import ErrorUI from '@/components/Objects/Elements/Error/Error';
 import { Home, LogOut, PersonStanding } from 'lucide-react';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { signOut, useSession } from 'next-auth/react';
@@ -16,7 +16,15 @@ import useSWR from 'swr';
 
 export const OrgContext = createContext<Org | null>(null);
 
-export const OrgProvider = ({ children, orgslug, initialOrg }: { children: ReactNode; orgslug: string; initialOrg?: any }) => {
+export const OrgProvider = ({
+  children,
+  orgslug,
+  initialOrg,
+}: {
+  children: ReactNode;
+  orgslug: string;
+  initialOrg?: any;
+}) => {
   const session = usePlatformSession();
   const pathname = usePathname();
   const accessToken = session?.data?.tokens?.access_token;

@@ -17,7 +17,12 @@ export default async function RootLayout(props: { children: React.ReactNode; par
 
   return (
     <div>
-      <OrgClientProviders orgslug={params.orgslug} initialOrg={initialOrg}>{children}</OrgClientProviders>
+      <OrgClientProviders
+        orgslug={params.orgslug}
+        initialOrg={initialOrg}
+      >
+        {children}
+      </OrgClientProviders>
     </div>
   );
 }

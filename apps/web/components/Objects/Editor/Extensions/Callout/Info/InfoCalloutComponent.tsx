@@ -1,7 +1,7 @@
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
-import { cn } from '@/lib/utils';
 import { Info, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
 interface CalloutOptions {
@@ -60,9 +60,7 @@ const InfoCalloutComponent = (props: any) => {
           'flex items-center rounded-xl shadow-inner',
           getVariantClasses(),
           getSizeClasses(),
-          options.size === 'sm'
-            ? 'max-sm:flex-row max-sm:items-center'
-            : 'max-sm:flex-col max-sm:items-start',
+          options.size === 'sm' ? 'max-sm:flex-row max-sm:items-center' : 'max-sm:flex-col max-sm:items-start',
         )}
       >
         <div
