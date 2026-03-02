@@ -62,6 +62,7 @@ async def create_user(
 
     # Link user and organization
     await _link_user_to_organization(db_session, user.id, org_id)
+    db_session.commit()
 
     user_read = UserRead.model_validate(user)
 
@@ -97,6 +98,7 @@ async def create_user_without_org(
     # Automatically join the default 'openu' organization
     default_org = await _get_default_organization(db_session)
     await _link_user_to_organization(db_session, user.id, default_org.id)
+    db_session.commit()
 
     user_read = UserRead.model_validate(user)
 

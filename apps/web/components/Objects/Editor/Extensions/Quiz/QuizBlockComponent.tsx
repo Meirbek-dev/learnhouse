@@ -191,7 +191,7 @@ const QuizBlockComponent = (props: any) => {
     <NodeViewWrapper className="block-quiz">
       <div className="rounded-xl bg-slate-100 px-3 py-2 transition-all ease-linear sm:px-5">
         {/* Header section */}
-        <div className="flex flex-wrap items-center gap-2 pt-1 text-sm">
+        <div className="flex flex-wrap items-center gap-2 pt-1 text-sm z-50">
           {submitted && submissionMessage === t('allCorrect') ? (
             <ReactConfetti
               numberOfPieces={submitted ? 1400 : 0}

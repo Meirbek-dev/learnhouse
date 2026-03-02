@@ -809,7 +809,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
     // Show congratulations for completed course
     return (
       <div className="relative flex min-h-[70vh] flex-col items-center justify-center overflow-hidden px-4 text-center">
-        <div className="pointer-events-none fixed inset-0">
+        <div className="pointer-events-none fixed inset-0 z-50">
           <ReactConfetti
             width={width}
             height={height}
