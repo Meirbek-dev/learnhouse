@@ -358,7 +358,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
       });
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({}) as any);
+        const error = await response.json().catch(() => ({}));
         toast.error(error.detail || t('errorStartingExam'));
         return;
       }

@@ -130,10 +130,10 @@ export default function ArtPlayer({
       const handleTimeUpdate = () => {
         if (art.currentTime >= endTime) {
           art.pause();
-          art.off('timeupdate' as any, handleTimeUpdate);
+          art.off('timeupdate', handleTimeUpdate);
         }
       };
-      art.on('timeupdate' as any, handleTimeUpdate);
+      art.on('timeupdate', handleTimeUpdate);
     }
 
     return () => {

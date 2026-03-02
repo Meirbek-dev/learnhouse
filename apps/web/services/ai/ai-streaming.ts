@@ -66,7 +66,7 @@ export async function startActivityAIChatSessionStream(
     const data = { message, activity_uuid };
     const requestInit = RequestBodyWithAuthHeader('POST', data, null, access_token);
     // Attach abort signal if provided
-    if (signal) (requestInit as any).signal = signal;
+    if (signal) (requestInit).signal = signal;
     const response = await fetch(`${getAPIUrl()}ai/start/activity_chat_session_stream`, requestInit);
 
     if (!response.ok) {
@@ -166,7 +166,7 @@ export async function sendActivityAIChatMessageStream(
   try {
     const data = { aichat_uuid, message, activity_uuid };
     const requestInit = RequestBodyWithAuthHeader('POST', data, null, access_token);
-    if (signal) (requestInit as any).signal = signal;
+    if (signal) (requestInit).signal = signal;
     const response = await fetch(`${getAPIUrl()}ai/send/activity_chat_message_stream`, requestInit);
 
     if (!response.ok) {

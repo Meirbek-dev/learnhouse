@@ -468,7 +468,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                         {t('thumbnail.label')}
                       </FormLabel>
                       <FormControl>
-                        <ThumbnailUpdate thumbnailType={field.value as any} />
+                        <ThumbnailUpdate thumbnailType={field.value} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -32,7 +32,7 @@ const ScenariosExtension: React.FC = (props: any) => {
   const [currentScenarioId, setCurrentScenarioId] = useState<string>(initialNodeCurrentId);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scenarioComplete, setScenarioComplete] = useState(false);
-  const editorState = useEditorProvider() as any;
+  const editorState = useEditorProvider();
   const isEditable = editorState?.isEditable ?? true;
 
   const getCurrentScenario = (scenarioId: string = currentScenarioId): Scenario | null => {

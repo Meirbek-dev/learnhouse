@@ -24,7 +24,7 @@ const PaymentsPage = (props: { params: Promise<PaymentsParams> }) => {
   const params = use(props.params);
   const t = useTranslations('DashPage.Payments');
   const _session = usePlatformSession();
-  const _org = useOrg() as any;
+  const _org = useOrg();
   const subpage = params.subpage || 'customers';
 
   const isPaymentsEnabled = useFeatureFlag({

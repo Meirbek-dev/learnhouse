@@ -47,7 +47,7 @@ export function ThemeSelector({ className }: ThemeSelectorProps) {
             <span className="text-muted-foreground text-xs">{tThemes(`${theme.name}.description`)}</span>
           </div>
         </div>
-      ) as any,
+      ),
     };
   });
   const currentColors = getThemePreviewColors(currentTheme);

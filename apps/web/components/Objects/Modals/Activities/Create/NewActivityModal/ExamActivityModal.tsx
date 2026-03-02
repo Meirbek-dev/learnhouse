@@ -46,7 +46,7 @@ interface FormValues {
 const NewExam = ({ submitActivity, chapterId, course, closeModal, orgslug }: any) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.NewExamModal');
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession();
 
   const { data: limits } = useSWR(`${getAPIUrl()}exams/config`, swrFetcher);
   const validationSchema = createValidationSchema(validationT, limits);

@@ -44,9 +44,9 @@ const buildFormSchema = (t: (key: string) => string) =>
 type SignUpFormData = z.infer<ReturnType<typeof buildFormSchema>>;
 
 const SignUpClient = (props: SignUpClientProps) => {
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession();
   const router = useRouter();
-  const org = useOrg() as any;
+  const org = useOrg();
   const t = useTranslations('Auth.Signup');
   const validationT = useTranslations('Validation');
   const [isPending, startTransition] = useTransition();

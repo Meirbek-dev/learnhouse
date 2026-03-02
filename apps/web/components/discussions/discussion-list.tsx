@@ -84,7 +84,7 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
     }
     return [];
   });
-  const org = useOrg() as any;
+  const org = useOrg();
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const postsRafRef = useRef<number | null>(null);

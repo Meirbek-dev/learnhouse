@@ -798,7 +798,7 @@ const VideoSettingsForm = ({
 
 const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course }: any) => {
   const t = useTranslations('Components.VideoModal');
-  const org = useOrg() as any;
+  const org = useOrg();
   const [video, setVideo] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState('');

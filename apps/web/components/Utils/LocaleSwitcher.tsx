@@ -22,7 +22,7 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
   const currentLocale = useLocale();
   const [isPending, startTransition] = useTransition();
   const t = useTranslations('Components.LocaleSwitcher');
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession();
 
   const localeItems = locales.map((locale) => ({ value: locale, label: t(locale) }));
 

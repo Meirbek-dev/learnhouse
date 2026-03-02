@@ -237,7 +237,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
             listHideTimerRef.current = null;
           }, 180);
         }}
-        contentEditable={false as any}
+        contentEditable={false}
       >
         <ToolBtn
           onClick={() => {
@@ -326,7 +326,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
             tableHideTimerRef.current = null;
           }, 180);
         }}
-        contentEditable={false as any}
+        contentEditable={false}
       >
         <ToolTip content={t('table')}>
           <ToolBtn

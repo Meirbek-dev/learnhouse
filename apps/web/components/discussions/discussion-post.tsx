@@ -65,7 +65,7 @@ export default function DiscussionPost({
   const [editContent, setEditContent] = useState(post.postMessage);
   const format = useFormatter();
   const now = useNow();
-  const org = useOrg() as any;
+  const org = useOrg();
 
   // Use backend permission metadata
   const canUpdate = post.can_update ?? false;

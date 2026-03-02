@@ -37,7 +37,7 @@ function XPToast({ notification, onDismiss }: XPToastProps) {
   const prefersReducedData = useReducedData();
 
   const getSourceLabel = (sourceKey: string): string => {
-    const labelKey = `xpSources.${sourceKey}` as any;
+    const labelKey = `xpSources.${sourceKey}`;
     const translated = t(labelKey);
     return translated === labelKey ? sourceKey.replace(/_/g, ' ') : translated;
   };

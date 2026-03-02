@@ -5,7 +5,7 @@ interface UseGetAIFeatures {
 }
 
 function useGetAIFeatures(_props: UseGetAIFeatures) {
-  const org = useOrg() as any;
+  const org = useOrg();
   return org?.config?.config?.features.ai.enabled || false;
 }
 

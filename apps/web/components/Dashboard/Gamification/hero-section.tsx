@@ -28,7 +28,7 @@ interface HeroSectionProps {
  */
 export function HeroSection({ profile, userRank, className }: HeroSectionProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession();
 
   const xpToNext = Math.max(0, profile.xp_to_next_level || 0);
   const currentLevelXp = profile.xp_in_current_level || 0;

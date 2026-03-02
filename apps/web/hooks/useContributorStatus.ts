@@ -13,7 +13,7 @@ interface Contributor {
 }
 
 export function useContributorStatus(courseUuid: string) {
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession();
   const [contributorStatus, setContributorStatus] = useState<ContributorStatus>('NONE');
   const [isLoading, setIsLoading] = useState(true);
   const [refetchTrigger, setRefetchTrigger] = useState(0);

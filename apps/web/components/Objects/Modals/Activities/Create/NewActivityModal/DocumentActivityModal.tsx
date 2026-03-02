@@ -32,7 +32,7 @@ const DocumentPdfModal = ({ submitFileActivity, chapterId, course }: any) => {
     resolver: zodResolver(validationSchema),
     defaultValues: {
       name: '',
-      file: undefined as any,
+      file: undefined,
     },
   });
 

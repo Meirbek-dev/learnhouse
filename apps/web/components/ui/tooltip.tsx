@@ -32,7 +32,7 @@ function TooltipTrigger({ children, ...props }: TooltipPrimitive.Trigger.Props) 
 
   // If a single child was passed as children (and no explicit `render` prop), use it as the `render` prop.
   // This prevents Base UI from rendering its own wrapper (which could be a <button>) and thus avoids nested <button> elements.
-  if (singleChild && !(props as any).render) {
+  if (singleChild && !(props).render) {
     return (
       <TooltipPrimitive.Trigger
         data-slot="tooltip-trigger"

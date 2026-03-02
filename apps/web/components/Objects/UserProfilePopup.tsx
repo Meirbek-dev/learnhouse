@@ -71,7 +71,7 @@ const IconComponent = ({ iconName }: { iconName: string }) => {
 
 const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
   const t = useTranslations('Components.UserProfilePopup');
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession();
   const router = useRouter();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(false);

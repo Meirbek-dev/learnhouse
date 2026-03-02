@@ -27,8 +27,8 @@ interface CourseGridClientProps {
 }
 
 export default function CourseGridClient({ initialCourses, initialTotal, orgslug }: CourseGridClientProps) {
-  const session = usePlatformSession() as any;
-  const org = useOrg() as any;
+  const session = usePlatformSession();
+  const org = useOrg();
   const accessToken = session?.data?.tokens?.access_token;
   const orgId = org?.id;
   const [page, setPage] = useState(1);

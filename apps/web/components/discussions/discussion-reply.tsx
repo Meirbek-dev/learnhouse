@@ -37,7 +37,7 @@ export default function DiscussionReply({
   const [_isPending, startTransition] = useTransition();
   const format = useFormatter();
   const now = useNow();
-  const org = useOrg() as any;
+  const org = useOrg();
   const { can } = usePermissions();
   const canModerateDiscussion = can(Actions.MODERATE, Resources.DISCUSSION, Scopes.ORG);
 

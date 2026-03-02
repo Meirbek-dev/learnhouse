@@ -27,7 +27,7 @@ const CoursesHome = (params: CourseProps) => {
   const { can } = usePermissions();
   const canManageOrg = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
   const t = useTranslations('DashPage.Courses.HomePageClient');
-  const org = useOrg() as any;
+  const org = useOrg();
 
   async function closeNewCourseModal() {
     setNewCourseModal(false);

@@ -71,7 +71,7 @@ export function RecentActivityFeed({ transactions, isLoading }: RecentActivityFe
                   <theme.icon className={cn('h-4 w-4', theme.color)} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{t(`xpSources.${transaction.source}` as any)}</p>
+                  <p className="truncate text-sm font-medium">{t(`xpSources.${transaction.source}`)}</p>
                   <p className="text-muted-foreground text-xs">{timeAgo}</p>
                 </div>
                 <div className="shrink-0 text-right">

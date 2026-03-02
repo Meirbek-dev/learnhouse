@@ -22,7 +22,7 @@ function DialogTrigger({ nativeButton, ...props }: DialogPrimitive.Trigger.Props
   // attempt to detect whether the `render` prop is a native <button> element
   // or our local `Button` component (which returns a <button>). We compute
   // this to avoid Base UI runtime warnings about mismatches.
-  const renderProp = (props as any).render;
+  const renderProp = (props).render;
   const isNativeRenderButton =
     React.isValidElement(renderProp) && typeof renderProp.type === 'string' && renderProp.type === 'button';
   const isLocalButtonComponent = React.isValidElement(renderProp) && renderProp.type === Button;

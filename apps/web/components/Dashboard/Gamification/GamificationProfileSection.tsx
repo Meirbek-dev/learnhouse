@@ -36,8 +36,8 @@ export function GamificationProfileSection({
   const { levelInfo, nextMilestone, unlockedFrames, unlockedAccessories } = (() => {
     if (!profile) {
       return {
-        levelInfo: null as any,
-        nextMilestone: null as any,
+        levelInfo: null,
+        nextMilestone: null,
         unlockedFrames: [] as (typeof AVATAR_UNLOCKS.frames)[number][],
         unlockedAccessories: [] as (typeof AVATAR_UNLOCKS.accessories)[number][],
       };
@@ -139,7 +139,7 @@ export function GamificationProfileSection({
               <div className="text-right text-sm">
                 <div className="font-semibold">{profile.total_xp.toLocaleString()} XP</div>
                 <div className="text-muted-foreground text-xs">
-                  {(profile as any).xp_to_next_level?.toLocaleString() || 0} {t('levelIndicators.xpToNext')}
+                  {(profile).xp_to_next_level?.toLocaleString() || 0} {t('levelIndicators.xpToNext')}
                 </div>
               </div>
             </div>

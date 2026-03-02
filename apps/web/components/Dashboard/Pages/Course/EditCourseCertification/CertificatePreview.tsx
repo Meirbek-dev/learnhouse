@@ -28,7 +28,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
   qrCodeLink,
 }) => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
-  const org = useOrg() as any;
+  const org = useOrg();
   const tTypes = useTranslations('Certificates.EditCourseCertification.certificationTypes');
   const t = useTranslations('Certificates.CertificatePreview');
 
