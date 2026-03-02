@@ -2,10 +2,10 @@
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import PasswordInput from '@components/ui/custom/password-input';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { resetPassword } from '@services/auth/auth';
 import { useSearchParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
@@ -16,25 +16,31 @@ import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
-import * as z from 'zod';
+import * as v from 'valibot';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
-  z
-    .object({
-      email: z.email(t('invalidEmail')).min(1, t('required')),
-      new_password: z
-        .string()
-        .min(1, t('required'))
-        .min(8, t('passwordMinLength', { length: 8 })),
-      confirm_password: z.string().min(1, t('required')),
-      reset_code: z.string().min(1, t('required')),
-    })
-    .refine((data) => data.new_password === data.confirm_password, {
-      message: t('passwordsDoNotMatch'),
-      path: ['confirm_password'],
-    });
+  v.pipe(
+    v.object({
+      email: v.pipe(v.string(), v.minLength(1, t('required')), v.email(t('invalidEmail'))),
+      new_password: v.pipe(
+        v.string(),
+        v.minLength(1, t('required')),
+        v.minLength(8, t('passwordMinLength', { length: 8 })),
+      ),
+      confirm_password: v.pipe(v.string(), v.minLength(1, t('required'))),
+      reset_code: v.pipe(v.string(), v.minLength(1, t('required'))),
+    }),
+    v.forward(
+      v.partialCheck(
+        [['new_password'], ['confirm_password']],
+        (data) => data.new_password === data.confirm_password,
+        t('passwordsDoNotMatch'),
+      ),
+      ['confirm_password'],
+    ),
+  );
 
-type ResetPasswordFormData = z.infer<ReturnType<typeof createValidationSchema>>;
+type ResetPasswordFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 const ResetPasswordClient = () => {
   const validationT = useTranslations('Validation');
@@ -53,7 +59,7 @@ const ResetPasswordClient = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<ResetPasswordFormData>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: { email, new_password: '', confirm_password: '', reset_code },
   });
 

@@ -1,14 +1,14 @@
 'use client';
 
 import { ArrowLeft, Eye, EyeOff, Loader2, Plus, Trash2 } from 'lucide-react';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useFieldArray, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import * as v from 'valibot';
 import useSWR from 'swr';
-import { z } from 'zod';
 
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -29,64 +29,68 @@ interface CodeChallengeConfigEditorProps {
   courseId: string;
 }
 
-const testCaseSchema = z.object({
-  id: z.string().optional(),
-  input: z.string(),
-  expected_output: z.string(),
-  is_visible: z.boolean(),
-  description: z.string().optional(),
-  weight: z.number().min(1).max(100),
+const testCaseSchema = v.object({
+  id: v.optional(v.string()),
+  input: v.string(),
+  expected_output: v.string(),
+  is_visible: v.boolean(),
+  description: v.optional(v.string()),
+  weight: v.pipe(v.number(), v.minValue(1), v.maxValue(100)),
 });
 
-const formSchema = z.object({
-  allowed_languages: z.array(z.number()).min(1),
-  time_limit: z.number().min(1).max(60),
-  memory_limit: z.number().min(16).max(2048),
-  grading_strategy: z.enum(['ALL_OR_NOTHING', 'PARTIAL_CREDIT', 'BEST_SUBMISSION', 'LATEST_SUBMISSION']),
-  execution_mode: z.enum(['FAST_FEEDBACK', 'COMPLETE_FEEDBACK']),
-  allow_custom_input: z.boolean(),
-  points: z.number().min(0).max(10_000),
-  visible_tests: z.array(testCaseSchema),
-  hidden_tests: z.array(testCaseSchema),
+const formSchema = v.object({
+  allowed_languages: v.pipe(v.array(v.number()), v.minLength(1)),
+  time_limit: v.pipe(v.number(), v.minValue(1), v.maxValue(60)),
+  memory_limit: v.pipe(v.number(), v.minValue(16), v.maxValue(2048)),
+  grading_strategy: v.picklist(['ALL_OR_NOTHING', 'PARTIAL_CREDIT', 'BEST_SUBMISSION', 'LATEST_SUBMISSION']),
+  execution_mode: v.picklist(['FAST_FEEDBACK', 'COMPLETE_FEEDBACK']),
+  allow_custom_input: v.boolean(),
+  points: v.pipe(v.number(), v.minValue(0), v.maxValue(10_000)),
+  visible_tests: v.array(testCaseSchema),
+  hidden_tests: v.array(testCaseSchema),
 });
 
 // Create a schema factory that accepts the translation function so validation messages are localized
 export function createConfigFormSchema(t: (key: string, params?: any) => string) {
-  const tc = z.object({
-    id: z.string().optional(),
-    input: z.string(),
-    expected_output: z.string(),
-    is_visible: z.boolean(),
-    description: z.string().optional(),
-    weight: z
-      .number()
-      .min(1, t('validation.testWeightRange', { min: 1, max: 100 }))
-      .max(100, t('validation.testWeightRange', { min: 1, max: 100 })),
+  const tc = v.object({
+    id: v.optional(v.string()),
+    input: v.string(),
+    expected_output: v.string(),
+    is_visible: v.boolean(),
+    description: v.optional(v.string()),
+    weight: v.pipe(
+      v.number(),
+      v.minValue(1, t('validation.testWeightRange', { min: 1, max: 100 })),
+      v.maxValue(100, t('validation.testWeightRange', { min: 1, max: 100 })),
+    ),
   });
 
-  return z.object({
-    allowed_languages: z.array(z.number()).min(1, t('validation.atLeastOneLanguage')),
-    time_limit: z
-      .number()
-      .min(1, t('validation.timeLimitRange', { min: 1, max: 60 }))
-      .max(60, t('validation.timeLimitRange', { min: 1, max: 60 })),
-    memory_limit: z
-      .number()
-      .min(16, t('validation.memoryLimitRange', { min: 16, max: 2048 }))
-      .max(2048, t('validation.memoryLimitRange', { min: 16, max: 2048 })),
-    grading_strategy: z.enum(['ALL_OR_NOTHING', 'PARTIAL_CREDIT', 'BEST_SUBMISSION', 'LATEST_SUBMISSION']),
-    execution_mode: z.enum(['FAST_FEEDBACK', 'COMPLETE_FEEDBACK']),
-    allow_custom_input: z.boolean(),
-    points: z
-      .number()
-      .min(0, t('validation.pointsRange', { min: 0, max: 10_000 }))
-      .max(10_000, t('validation.pointsRange', { min: 0, max: 10_000 })),
-    visible_tests: z.array(tc),
-    hidden_tests: z.array(tc),
+  return v.object({
+    allowed_languages: v.pipe(v.array(v.number()), v.minLength(1, t('validation.atLeastOneLanguage'))),
+    time_limit: v.pipe(
+      v.number(),
+      v.minValue(1, t('validation.timeLimitRange', { min: 1, max: 60 })),
+      v.maxValue(60, t('validation.timeLimitRange', { min: 1, max: 60 })),
+    ),
+    memory_limit: v.pipe(
+      v.number(),
+      v.minValue(16, t('validation.memoryLimitRange', { min: 16, max: 2048 })),
+      v.maxValue(2048, t('validation.memoryLimitRange', { min: 16, max: 2048 })),
+    ),
+    grading_strategy: v.picklist(['ALL_OR_NOTHING', 'PARTIAL_CREDIT', 'BEST_SUBMISSION', 'LATEST_SUBMISSION']),
+    execution_mode: v.picklist(['FAST_FEEDBACK', 'COMPLETE_FEEDBACK']),
+    allow_custom_input: v.boolean(),
+    points: v.pipe(
+      v.number(),
+      v.minValue(0, t('validation.pointsRange', { min: 0, max: 10_000 })),
+      v.maxValue(10_000, t('validation.pointsRange', { min: 0, max: 10_000 })),
+    ),
+    visible_tests: v.array(tc),
+    hidden_tests: v.array(tc),
   });
 }
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = v.InferOutput<typeof formSchema>;
 
 const fetcher = async ([url, token]: [string, string]) => {
   const res = await fetch(url, {
@@ -116,7 +120,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
   const schema = useMemo(() => createConfigFormSchema(t), [t]);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: valibotResolver(schema),
     defaultValues: {
       allowed_languages: [71],
       time_limit: 2,

@@ -1,10 +1,10 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { Code2, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import * as v from 'valibot';
 
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -13,11 +13,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 const createValidationSchema = (t: (key: string) => string) =>
-  z.object({
-    name: z.string().min(1, t('challengeNameRequired')),
-    description: z.string().min(1, t('challengeDescriptionRequired')),
-    difficulty: z.enum(['easy', 'medium', 'hard']),
-    subtype: z.enum(['general', 'competitive']),
+  v.object({
+    name: v.pipe(v.string(), v.minLength(1, t('challengeNameRequired'))),
+    description: v.pipe(v.string(), v.minLength(1, t('challengeDescriptionRequired'))),
+    difficulty: v.picklist(['easy', 'medium', 'hard']),
+    subtype: v.picklist(['general', 'competitive']),
   });
 
 interface FormValues {
@@ -45,10 +45,10 @@ export default function CodeChallengeActivityModal({
   const t = useTranslations('Components.NewActivity.CodeChallenge');
 
   const validationSchema = createValidationSchema(t);
-  type ValidationSchema = z.infer<typeof validationSchema>;
+  type ValidationSchema = v.InferOutput<typeof validationSchema>;
 
   const form = useForm<ValidationSchema>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       name: '',
       description: '',

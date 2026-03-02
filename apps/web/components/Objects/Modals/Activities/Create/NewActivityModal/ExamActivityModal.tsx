@@ -1,14 +1,14 @@
 'use client';
 
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { zodResolver } from '@hookform/resolvers/zod';
 import type { SubmitHandler } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
+import * as v from 'valibot';
 import useSWR from 'swr';
-import { z } from 'zod';
 
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
@@ -19,18 +19,16 @@ import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 
 const createValidationSchema = (t: (key: string) => string, limits?: any) =>
-  z.object({
-    exam_title: z.string().min(1, t('examTitleRequired')),
-    activity_name: z.string().min(1, t('activityNameRequired')),
-    exam_description: z.string().min(1, t('examDescriptionRequired')),
-    time_limit: z
-      .number()
-      .min(limits?.time_limit?.min ?? 1)
-      .max(limits?.time_limit?.max ?? 180)
-      .optional(),
-    has_time_limit: z.boolean(),
-    shuffle_questions: z.boolean(),
-    allow_result_review: z.boolean(),
+  v.object({
+    exam_title: v.pipe(v.string(), v.minLength(1, t('examTitleRequired'))),
+    activity_name: v.pipe(v.string(), v.minLength(1, t('activityNameRequired'))),
+    exam_description: v.pipe(v.string(), v.minLength(1, t('examDescriptionRequired'))),
+    time_limit: v.optional(
+      v.pipe(v.number(), v.minValue(limits?.time_limit?.min ?? 1), v.maxValue(limits?.time_limit?.max ?? 180)),
+    ),
+    has_time_limit: v.boolean(),
+    shuffle_questions: v.boolean(),
+    allow_result_review: v.boolean(),
   });
 
 interface FormValues {
@@ -50,11 +48,11 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal, orgslug }: any
 
   const { data: limits } = useSWR(`${getAPIUrl()}exams/config`, swrFetcher);
   const validationSchema = createValidationSchema(validationT, limits);
-  type ZFormValues = z.infer<typeof validationSchema>;
+  type ZFormValues = v.InferOutput<typeof validationSchema>;
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
   const form = useForm<ZFormValues, any, ZFormValues>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       exam_title: '',
       activity_name: '',

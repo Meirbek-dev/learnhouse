@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import * as z from 'zod';
+import * as v from 'valibot';
 
 /**
  * User Profile and Level Types
@@ -67,52 +67,51 @@ export interface StreakInfo {
   };
 }
 
-// Zod schemas
-export const UserGamificationProfileSchema = z.object({
-  id: z.number().optional(),
-  user_id: z.number(),
-  org_id: z.number(),
-  total_xp: z.number().min(0),
-  level: z.number().min(1).max(100),
-  login_streak: z.number().min(0),
-  learning_streak: z.number().min(0),
-  longest_login_streak: z.number().min(0),
-  longest_learning_streak: z.number().min(0),
-  total_activities_completed: z.number().min(0),
-  total_courses_completed: z.number().min(0),
-  daily_xp_earned: z.number().min(0),
-  xp_in_current_level: z.number().min(0).optional(),
-  xp_to_next_level: z.number().min(0).optional(),
-  level_progress_percent: z.number().min(0).max(100).optional(),
-  last_xp_award_date: z.string().nullable().optional(),
-  last_login_date: z.string().nullable().optional(),
-  last_learning_date: z.string().nullable().optional(),
-  preferences: z.record(z.string(), z.unknown()),
-  created_at: z.string(),
-  updated_at: z.string(),
+export const UserGamificationProfileSchema = v.object({
+  id: v.optional(v.number()),
+  user_id: v.number(),
+  org_id: v.number(),
+  total_xp: v.pipe(v.number(), v.minValue(0)),
+  level: v.pipe(v.number(), v.minValue(1), v.maxValue(100)),
+  login_streak: v.pipe(v.number(), v.minValue(0)),
+  learning_streak: v.pipe(v.number(), v.minValue(0)),
+  longest_login_streak: v.pipe(v.number(), v.minValue(0)),
+  longest_learning_streak: v.pipe(v.number(), v.minValue(0)),
+  total_activities_completed: v.pipe(v.number(), v.minValue(0)),
+  total_courses_completed: v.pipe(v.number(), v.minValue(0)),
+  daily_xp_earned: v.pipe(v.number(), v.minValue(0)),
+  xp_in_current_level: v.optional(v.pipe(v.number(), v.minValue(0))),
+  xp_to_next_level: v.optional(v.pipe(v.number(), v.minValue(0))),
+  level_progress_percent: v.optional(v.pipe(v.number(), v.minValue(0), v.maxValue(100))),
+  last_xp_award_date: v.optional(v.nullable(v.string())),
+  last_login_date: v.optional(v.nullable(v.string())),
+  last_learning_date: v.optional(v.nullable(v.string())),
+  preferences: v.record(v.string(), v.unknown()),
+  created_at: v.string(),
+  updated_at: v.string(),
 });
 
-export const LevelInfoSchema = z.object({
-  level: z.number(),
-  title: z.string(),
-  titleKey: z.string().optional(),
-  color: z.string(),
-  icon: z.any(), // Can't validate React component with Zod
-  minXP: z.number(),
-  maxXP: z.number().optional(),
-  unlocks: z.array(z.string()).optional(),
+export const LevelInfoSchema = v.object({
+  level: v.number(),
+  title: v.string(),
+  titleKey: v.optional(v.string()),
+  color: v.string(),
+  icon: v.any(),
+  minXP: v.number(),
+  maxXP: v.optional(v.number()),
+  unlocks: v.optional(v.array(v.string())),
 });
 
-export const StreakInfoSchema = z.object({
-  login: z.object({
-    current: z.number(),
-    longest: z.number(),
-    lastDate: z.string().nullable(),
+export const StreakInfoSchema = v.object({
+  login: v.object({
+    current: v.number(),
+    longest: v.number(),
+    lastDate: v.nullable(v.string()),
   }),
-  learning: z.object({
-    current: z.number(),
-    longest: z.number(),
-    lastDate: z.string().nullable(),
+  learning: v.object({
+    current: v.number(),
+    longest: v.number(),
+    lastDate: v.nullable(v.string()),
   }),
 });
 

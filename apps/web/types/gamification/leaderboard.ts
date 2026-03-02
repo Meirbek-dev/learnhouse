@@ -1,4 +1,4 @@
-import * as z from 'zod';
+import * as v from 'valibot';
 
 /**
  * Leaderboard Types
@@ -50,42 +50,41 @@ export interface UserRank {
   rank_badge: LeaderboardBadge | null;
 }
 
-// Zod schemas
-export const LeaderboardEntrySchema = z.object({
-  user_id: z.number(),
-  username: z.string().nullable(),
-  first_name: z.string().nullable().optional(),
-  middle_name: z.string().nullable().optional(),
-  last_name: z.string().nullable().optional(),
-  avatar_url: z.string().nullable().optional(),
-  total_xp: z.number().min(0),
-  level: z.number().min(1),
-  rank: z.number().min(1),
-  is_current_user: z.boolean().optional(),
-  rank_change: z.number().optional(),
-  badge: z.enum(['gold', 'silver', 'bronze']).nullable().optional(),
+export const LeaderboardEntrySchema = v.object({
+  user_id: v.number(),
+  username: v.nullable(v.string()),
+  first_name: v.optional(v.nullable(v.string())),
+  middle_name: v.optional(v.nullable(v.string())),
+  last_name: v.optional(v.nullable(v.string())),
+  avatar_url: v.optional(v.nullable(v.string())),
+  total_xp: v.pipe(v.number(), v.minValue(0)),
+  level: v.pipe(v.number(), v.minValue(1)),
+  rank: v.pipe(v.number(), v.minValue(1)),
+  is_current_user: v.optional(v.boolean()),
+  rank_change: v.optional(v.number()),
+  badge: v.optional(v.nullable(v.picklist(['gold', 'silver', 'bronze']))),
 });
 
-export const OrganizationLeaderboardSchema = z.object({
-  entries: z.array(LeaderboardEntrySchema),
-  total_participants: z.number().min(0),
-  last_updated: z.string(),
+export const OrganizationLeaderboardSchema = v.object({
+  entries: v.array(LeaderboardEntrySchema),
+  total_participants: v.pipe(v.number(), v.minValue(0)),
+  last_updated: v.string(),
 });
 
-export const LeaderboardFiltersSchema = z.object({
-  timeframe: z.enum(['daily', 'weekly', 'monthly', 'all-time']).optional(),
-  scope: z.enum(['organization', 'friends', 'global']).optional(),
-  limit: z.number().min(1).max(100).optional(),
-  offset: z.number().min(0).optional(),
+export const LeaderboardFiltersSchema = v.object({
+  timeframe: v.optional(v.picklist(['daily', 'weekly', 'monthly', 'all-time'])),
+  scope: v.optional(v.picklist(['organization', 'friends', 'global'])),
+  limit: v.optional(v.pipe(v.number(), v.minValue(1), v.maxValue(100))),
+  offset: v.optional(v.pipe(v.number(), v.minValue(0))),
 });
 
-export const UserRankSchema = z.object({
-  rank: z.number().min(1),
-  total_participants: z.number().min(0),
-  percentile: z.number().min(0).max(100),
-  is_top_10: z.boolean(),
-  is_top_50: z.boolean(),
-  rank_badge: z.enum(['gold', 'silver', 'bronze']).nullable(),
+export const UserRankSchema = v.object({
+  rank: v.pipe(v.number(), v.minValue(1)),
+  total_participants: v.pipe(v.number(), v.minValue(0)),
+  percentile: v.pipe(v.number(), v.minValue(0), v.maxValue(100)),
+  is_top_10: v.boolean(),
+  is_top_50: v.boolean(),
+  rank_badge: v.nullable(v.picklist(['gold', 'silver', 'bronze'])),
 });
 
 // Helper functions

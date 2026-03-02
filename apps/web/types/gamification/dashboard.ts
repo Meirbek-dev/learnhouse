@@ -1,6 +1,6 @@
 import type { StreakInfo, UserGamificationProfile } from './profile';
 import type { OrganizationLeaderboard } from './leaderboard';
-import * as z from 'zod';
+import * as v from 'valibot';
 
 /**
  * Dashboard and Aggregate Types
@@ -26,31 +26,30 @@ export interface StreakUpdate {
   bonus_xp_awarded: number;
 }
 
-// Zod schemas
-export const DashboardDataSchema = z.object({
-  profile: z.any(), // Imported schema to avoid circular dependency
-  recent_transactions: z.array(z.any()),
-  leaderboard: z.any(),
-  user_rank: z.number().nullable(),
-  streak_info: z.object({
-    login: z.object({
-      current: z.number(),
-      longest: z.number(),
-      lastDate: z.string().nullable(),
+export const DashboardDataSchema = v.object({
+  profile: v.any(), // Imported schema to avoid circular dependency
+  recent_transactions: v.array(v.any()),
+  leaderboard: v.any(),
+  user_rank: v.nullable(v.number()),
+  streak_info: v.object({
+    login: v.object({
+      current: v.number(),
+      longest: v.number(),
+      lastDate: v.nullable(v.string()),
     }),
-    learning: z.object({
-      current: z.number(),
-      longest: z.number(),
-      lastDate: z.string().nullable(),
+    learning: v.object({
+      current: v.number(),
+      longest: v.number(),
+      lastDate: v.nullable(v.string()),
     }),
   }),
 });
 
-export const StreakUpdateSchema = z.object({
-  type: z.enum(['login', 'learning']),
-  current_streak: z.number(),
-  longest_streak: z.number(),
-  streak_maintained: z.boolean(),
-  streak_broken: z.boolean(),
-  bonus_xp_awarded: z.number(),
+export const StreakUpdateSchema = v.object({
+  type: v.picklist(['login', 'learning']),
+  current_streak: v.number(),
+  longest_streak: v.number(),
+  streak_maintained: v.boolean(),
+  streak_broken: v.boolean(),
+  bonus_xp_awarded: v.number(),
 });

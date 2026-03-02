@@ -3,8 +3,8 @@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { createUserGroup } from '@services/usergroups/usergroups';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -12,21 +12,21 @@ import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
+import * as v from 'valibot';
 import { mutate } from 'swr';
-import * as z from 'zod';
 
 interface AddUserGroupProps {
   setCreateUserGroupModal: any;
 }
 
 const createValidationSchema = (t: (key: string) => string) =>
-  z.object({
-    name: z.string().min(1, t('nameRequiredError')),
-    description: z.string().optional(),
-    org_id: z.number(),
+  v.object({
+    name: v.pipe(v.string(), v.minLength(1, t('nameRequiredError'))),
+    description: v.optional(v.string()),
+    org_id: v.number(),
   });
 
-type UserGroupFormValues = z.infer<ReturnType<typeof createValidationSchema>>;
+type UserGroupFormValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 const AddUserGroup = (props: AddUserGroupProps) => {
   const t = useTranslations('Components.AddUserGroup');
@@ -36,7 +36,7 @@ const AddUserGroup = (props: AddUserGroupProps) => {
   const validationSchema = createValidationSchema(t);
 
   const form = useForm<UserGroupFormValues>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       name: '',
       description: '',

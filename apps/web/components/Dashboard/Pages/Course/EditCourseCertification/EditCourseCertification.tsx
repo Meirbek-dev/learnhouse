@@ -7,8 +7,8 @@ import { AlertTriangle, Award, FileText, Loader2, Sparkles } from 'lucide-react'
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { Separator } from '@/components/ui/separator';
-import { zodResolver } from '@hookform/resolvers/zod';
 import CertificatePreview from './CertificatePreview';
 import { Textarea } from '@/components/ui/textarea';
 import { getAPIUrl } from '@services/config/config';
@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import * as z from 'zod';
+import * as v from 'valibot';
 import useSWR from 'swr';
 
 interface EditCourseCertificationProps {
@@ -54,12 +54,12 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
   const t = useTranslations('Certificates.EditCourseCertification');
 
   // Form schema
-  const formSchema = z
-    .object({
-      enable_certification: z.boolean(),
-      certification_name: z.string().max(100, t('maxCharacters100')),
-      certification_description: z.string().max(500, t('maxCharacters500')),
-      certification_type: z.enum([
+  const formSchema = v.pipe(
+    v.object({
+      enable_certification: v.boolean(),
+      certification_name: v.pipe(v.string(), v.maxLength(100, t('maxCharacters100'))),
+      certification_description: v.pipe(v.string(), v.maxLength(500, t('maxCharacters500'))),
+      certification_type: v.picklist([
         'completion',
         'achievement',
         'assessment',
@@ -70,7 +70,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
         'workshop',
         'specialization',
       ]),
-      certificate_pattern: z.enum([
+      certificate_pattern: v.picklist([
         'royal',
         'tech',
         'nature',
@@ -82,21 +82,17 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
         'academic',
         'modern',
       ]),
-      certificate_instructor: z.string().optional(),
-    })
-    .refine(
-      (data) => {
-        if (data.enable_certification) {
-          return data.certification_name?.trim() && data.certification_description?.trim();
-        }
-        return true;
-      },
-      {
-        message: t('validationRequiredFields'),
-      },
-    );
+      certificate_instructor: v.optional(v.string()),
+    }),
+    v.check((data) => {
+      if (data.enable_certification) {
+        return Boolean(data.certification_name?.trim() && data.certification_description?.trim());
+      }
+      return true;
+    }, t('validationRequiredFields')),
+  );
 
-  type FormValues = z.infer<typeof formSchema>;
+  type FormValues = v.InferOutput<typeof formSchema>;
 
   // Fetch certifications
   const {
@@ -129,7 +125,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
   const hasExistingCertification = Boolean(existingCertification);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: valibotResolver(formSchema),
     defaultValues: {
       enable_certification: false,
       certification_name: '',

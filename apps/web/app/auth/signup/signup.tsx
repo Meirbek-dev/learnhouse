@@ -4,10 +4,10 @@ import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/fiel
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import PasswordInput from '@components/ui/custom/password-input';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useEffect, useState, useTransition } from 'react';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import { Separator } from '@components/ui/separator';
 import { passwordSchema } from '@/lib/schemas/auth';
@@ -21,27 +21,32 @@ import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
-import * as z from 'zod';
+import * as v from 'valibot';
 
 interface SignUpClientProps {
   org: any;
 }
 
 const buildFormSchema = (t: (key: string) => string) =>
-  z
-    .object({
-      firstName: z.string().min(1, { message: t('required') }),
-      lastName: z.string().min(1, { message: t('required') }),
-      email: z.email({ message: t('invalidEmail') }),
+  v.pipe(
+    v.object({
+      firstName: v.pipe(v.string(), v.minLength(1, t('required'))),
+      lastName: v.pipe(v.string(), v.minLength(1, t('required'))),
+      email: v.pipe(v.string(), v.email(t('invalidEmail'))),
       password: passwordSchema(t),
-      confirmPassword: z.string(),
-    })
-    .refine((data) => data.password === data.confirmPassword, {
-      message: t('passwordsDontMatch'),
-      path: ['confirmPassword'],
-    });
+      confirmPassword: v.string(),
+    }),
+    v.forward(
+      v.partialCheck(
+        [['password'], ['confirmPassword']],
+        (data) => data.password === data.confirmPassword,
+        t('passwordsDontMatch'),
+      ),
+      ['confirmPassword'],
+    ),
+  );
 
-type SignUpFormData = z.infer<ReturnType<typeof buildFormSchema>>;
+type SignUpFormData = v.InferOutput<ReturnType<typeof buildFormSchema>>;
 
 const SignUpClient = (props: SignUpClientProps) => {
   const session = usePlatformSession();
@@ -59,7 +64,7 @@ const SignUpClient = (props: SignUpClientProps) => {
     formState: { errors },
   } = useForm<SignUpFormData>({
     defaultValues: { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' },
-    resolver: zodResolver(formSchema),
+    resolver: valibotResolver(formSchema),
   });
 
   useEffect(() => {

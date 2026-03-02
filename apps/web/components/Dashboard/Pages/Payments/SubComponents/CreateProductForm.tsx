@@ -4,9 +4,9 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { createProduct } from '@services/payments/products';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -16,25 +16,27 @@ import currencyCodes from 'currency-codes';
 import { useForm } from 'react-hook-form';
 import type { FC } from 'react';
 import { toast } from 'sonner';
+import * as v from 'valibot';
 import { mutate } from 'swr';
-import * as z from 'zod';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
-  z.object({
-    name: z.string().min(1, t('Payments.ProductForm.errors.nameRequired')),
-    description: z.string().min(1, t('Payments.ProductForm.errors.descriptionRequired')),
-    amount: z.number().min(1, t('Payments.ProductForm.errors.amountMin')),
-    benefits: z.string().optional(),
-    currency: z.string().min(1, t('Payments.ProductForm.errors.currencyRequired')),
-    product_type: z.enum(['one_time', 'subscription'] as const, {
-      message: t('Payments.ProductForm.errors.productTypeRequired'),
-    }),
-    price_type: z.enum(['fixed_price', 'customer_choice'] as const, {
-      message: t('Payments.ProductForm.errors.priceTypeRequired'),
-    }),
+  v.object({
+    name: v.pipe(v.string(), v.minLength(1, t('Payments.ProductForm.errors.nameRequired'))),
+    description: v.pipe(v.string(), v.minLength(1, t('Payments.ProductForm.errors.descriptionRequired'))),
+    amount: v.pipe(v.number(), v.minValue(1, t('Payments.ProductForm.errors.amountMin'))),
+    benefits: v.optional(v.string()),
+    currency: v.pipe(v.string(), v.minLength(1, t('Payments.ProductForm.errors.currencyRequired'))),
+    product_type: v.picklist(
+      ['one_time', 'subscription'] as const,
+      t('Payments.ProductForm.errors.productTypeRequired'),
+    ),
+    price_type: v.picklist(
+      ['fixed_price', 'customer_choice'] as const,
+      t('Payments.ProductForm.errors.priceTypeRequired'),
+    ),
   });
 
-type ProductFormValues = z.infer<ReturnType<typeof createValidationSchema>>;
+type ProductFormValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   const org = useOrg() as any;
@@ -55,7 +57,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   }, []);
 
   const form = useForm<ProductFormValues>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       name: '',
       description: '',

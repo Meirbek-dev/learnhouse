@@ -1,12 +1,12 @@
 'use client';
 
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useFieldArray, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import type { SubmitHandler } from 'react-hook-form';
 import { Grip, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { z } from 'zod';
+import * as v from 'valibot';
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
@@ -27,98 +27,112 @@ import { generateUUID } from '@/lib/utils';
 import { CodeEditor } from './CodeEditor';
 
 // Form schema
-const testCaseSchema = z.object({
-  id: z.string(),
-  input: z.string(),
-  expected_output: z.string().min(1),
-  description: z.string().optional(),
-  is_visible: z.boolean().default(true),
-  points: z.number().min(0).max(10_000).default(10),
+const testCaseSchema = v.object({
+  id: v.string(),
+  input: v.string(),
+  expected_output: v.pipe(v.string(), v.minLength(1)),
+  description: v.optional(v.string()),
+  is_visible: v.optional(v.boolean(), true),
+  points: v.optional(v.pipe(v.number(), v.minValue(0), v.maxValue(10_000)), 10),
 });
 
-const codeChallengeFormSchema = z.object({
-  title: z.string().min(1),
-  description: z.string().optional(),
-  difficulty: z.enum(['easy', 'medium', 'hard']),
-  time_limit_ms: z.number().min(100).max(30_000).default(2000),
+const codeChallengeFormSchema = v.object({
+  title: v.pipe(v.string(), v.minLength(1)),
+  description: v.optional(v.string()),
+  difficulty: v.picklist(['easy', 'medium', 'hard']),
+  time_limit_ms: v.optional(v.pipe(v.number(), v.minValue(100), v.maxValue(30_000)), 2000),
   // memory_limit_kb is in KB. Increase default to 256MB and allow up to 2GB.
-  memory_limit_kb: z.number().min(1024).max(2_097_152).default(262_144),
-  max_submissions: z.number().min(0).max(10_000).optional(),
-  grading_strategy: z.enum(['all_or_nothing', 'partial', 'weighted']),
-  allowed_languages: z.array(z.number()).min(1, 'At least one language is required'),
-  test_cases: z.array(testCaseSchema).min(1, 'At least one test case is required'),
-  enable_hints: z.boolean().default(false),
-  hints: z
-    .array(
-      z.object({
-        text: z.string(),
-        penalty_percent: z.number().min(0).max(100).default(10),
+  memory_limit_kb: v.optional(v.pipe(v.number(), v.minValue(1024), v.maxValue(2_097_152)), 262_144),
+  max_submissions: v.optional(v.pipe(v.number(), v.minValue(0), v.maxValue(10_000))),
+  grading_strategy: v.picklist(['all_or_nothing', 'partial', 'weighted']),
+  allowed_languages: v.pipe(v.array(v.number()), v.minLength(1, 'At least one language is required')),
+  test_cases: v.pipe(v.array(testCaseSchema), v.minLength(1, 'At least one test case is required')),
+  enable_hints: v.optional(v.boolean(), false),
+  hints: v.optional(
+    v.array(
+      v.object({
+        text: v.string(),
+        penalty_percent: v.optional(v.pipe(v.number(), v.minValue(0), v.maxValue(100)), 10),
       }),
-    )
-    .optional(),
-  starter_code: z.record(z.string(), z.string()).optional(),
-  solution_code: z.record(z.string(), z.string()).optional(),
+    ),
+  ),
+  starter_code: v.optional(v.record(v.string(), v.string())),
+  solution_code: v.optional(v.record(v.string(), v.string())),
 });
 
 // Create a localized schema factory to supply messages from next-intl
 export function createCodeChallengeFormSchema(t: (key: string, params?: any) => string) {
-  const tc = z.object({
-    id: z.string(),
-    input: z.string(),
-    expected_output: z.string().min(1, t('validation.expectedOutputRequired')),
-    description: z.string().optional(),
-    is_visible: z.boolean().default(true),
-    points: z
-      .number()
-      .min(0, t('validation.pointsRange', { min: 0, max: 10_000 }))
-      .max(10_000, t('validation.pointsRange', { min: 0, max: 10_000 }))
-      .default(10),
+  const tc = v.object({
+    id: v.string(),
+    input: v.string(),
+    expected_output: v.pipe(v.string(), v.minLength(1, t('validation.expectedOutputRequired'))),
+    description: v.optional(v.string()),
+    is_visible: v.optional(v.boolean(), true),
+    points: v.optional(
+      v.pipe(
+        v.number(),
+        v.minValue(0, t('validation.pointsRange', { min: 0, max: 10_000 })),
+        v.maxValue(10_000, t('validation.pointsRange', { min: 0, max: 10_000 })),
+      ),
+      10,
+    ),
   });
 
-  return z.object({
-    title: z.string().min(1, t('validation.titleRequired')),
-    description: z.string().optional(),
-    difficulty: z.enum(['easy', 'medium', 'hard']),
-    time_limit_ms: z
-      .number()
-      .min(100, t('validation.timeLimitRange', { min: 100, max: 30_000 }))
-      .max(30_000, t('validation.timeLimitRange', { min: 100, max: 30_000 }))
-      .default(2000),
-    memory_limit_kb: z
-      .number()
-      .min(1024, t('validation.memoryLimitRange', { min: 1024, max: 2_097_152 }))
-      .max(2_097_152, t('validation.memoryLimitRange', { min: 1024, max: 2_097_152 }))
-      .default(262_144),
-    max_submissions: z
-      .number()
-      .min(0, t('validation.maxSubmissionsRange', { min: 0, max: 10_000 }))
-      .max(10_000, t('validation.maxSubmissionsRange', { min: 0, max: 10_000 }))
-      .optional(),
-    grading_strategy: z.enum(['all_or_nothing', 'partial', 'weighted']),
-    allowed_languages: z.array(z.number()).min(1, t('validation.atLeastOneLanguage')),
-    test_cases: z.array(tc).min(1, t('validation.atLeastOneTestCase')),
-    enable_hints: z.boolean().default(false),
-    hints: z
-      .array(
-        z.object({
-          text: z.string(),
-          penalty_percent: z
-            .number()
-            .min(0, t('validation.penaltyRange', { min: 0, max: 100 }))
-            .max(100, t('validation.penaltyRange', { min: 0, max: 100 }))
-            .default(10),
+  return v.object({
+    title: v.pipe(v.string(), v.minLength(1, t('validation.titleRequired'))),
+    description: v.optional(v.string()),
+    difficulty: v.picklist(['easy', 'medium', 'hard']),
+    time_limit_ms: v.optional(
+      v.pipe(
+        v.number(),
+        v.minValue(100, t('validation.timeLimitRange', { min: 100, max: 30_000 })),
+        v.maxValue(30_000, t('validation.timeLimitRange', { min: 100, max: 30_000 })),
+      ),
+      2000,
+    ),
+    memory_limit_kb: v.optional(
+      v.pipe(
+        v.number(),
+        v.minValue(1024, t('validation.memoryLimitRange', { min: 1024, max: 2_097_152 })),
+        v.maxValue(2_097_152, t('validation.memoryLimitRange', { min: 1024, max: 2_097_152 })),
+      ),
+      262_144,
+    ),
+    max_submissions: v.optional(
+      v.pipe(
+        v.number(),
+        v.minValue(0, t('validation.maxSubmissionsRange', { min: 0, max: 10_000 })),
+        v.maxValue(10_000, t('validation.maxSubmissionsRange', { min: 0, max: 10_000 })),
+      ),
+    ),
+    grading_strategy: v.picklist(['all_or_nothing', 'partial', 'weighted']),
+    allowed_languages: v.pipe(v.array(v.number()), v.minLength(1, t('validation.atLeastOneLanguage'))),
+    test_cases: v.pipe(v.array(tc), v.minLength(1, t('validation.atLeastOneTestCase'))),
+    enable_hints: v.optional(v.boolean(), false),
+    hints: v.optional(
+      v.array(
+        v.object({
+          text: v.string(),
+          penalty_percent: v.optional(
+            v.pipe(
+              v.number(),
+              v.minValue(0, t('validation.penaltyRange', { min: 0, max: 100 })),
+              v.maxValue(100, t('validation.penaltyRange', { min: 0, max: 100 })),
+            ),
+            10,
+          ),
         }),
-      )
-      .optional(),
-    starter_code: z.record(z.string(), z.string()).optional(),
-    solution_code: z.record(z.string(), z.string()).optional(),
+      ),
+    ),
+    starter_code: v.optional(v.record(v.string(), v.string())),
+    solution_code: v.optional(v.record(v.string(), v.string())),
   });
 }
 
-// Use Zod's input (pre-parse) type for form interactions and the inferred output type for the
+// Use Valibot's input (pre-parse) type for form interactions and the inferred output type for the
 // canonical, parsed form data we pass to the parent on submit.
-type CodeChallengeFormInput = z.input<typeof codeChallengeFormSchema>;
-type CodeChallengeFormData = z.infer<typeof codeChallengeFormSchema>;
+type CodeChallengeFormInput = v.InferInput<typeof codeChallengeFormSchema>;
+type CodeChallengeFormData = v.InferOutput<typeof codeChallengeFormSchema>;
 
 interface CodeChallengeFormProps {
   activityUuid: string;
@@ -134,7 +148,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
   const schema = useMemo(() => createCodeChallengeFormSchema(t), [t]);
 
   const form = useForm<CodeChallengeFormInput>({
-    resolver: zodResolver(schema),
+    resolver: valibotResolver(schema),
     defaultValues: {
       title: '',
       description: '',
@@ -224,7 +238,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
   const handleFormSubmit: SubmitHandler<CodeChallengeFormInput> = async (data) => {
     try {
       // Parse the raw input into the canonical, fully-populated output type
-      const parsed: CodeChallengeFormData = schema.parse(data);
+      const parsed: CodeChallengeFormData = v.parse(schema, data);
       await onSubmit(parsed);
       toast.success(t('challengeSaved'));
     } catch (error) {

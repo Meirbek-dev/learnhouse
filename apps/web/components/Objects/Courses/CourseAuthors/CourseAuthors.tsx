@@ -18,13 +18,13 @@ import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getCourseUpdatesSwrKey } from '@services/courses/keys';
 import { useCourse } from '@components/Contexts/CourseContext';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { usePermissions } from '@/components/Security';
 import { format, formatDistanceToNow } from 'date-fns';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -36,7 +36,7 @@ import { useForm } from 'react-hook-form';
 import { motion } from 'motion/react';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
-import * as z from 'zod';
+import * as v from 'valibot';
 
 interface Author {
   user: {
@@ -218,12 +218,12 @@ const UpdatesSection = () => {
 };
 
 const createUpdateFormSchema = (t: (key: string) => string) =>
-  z.object({
-    title: z.string().min(1, t('titleRequired')),
-    content: z.string().min(1, t('contentRequired')),
+  v.object({
+    title: v.pipe(v.string(), v.minLength(1, t('titleRequired'))),
+    content: v.pipe(v.string(), v.minLength(1, t('contentRequired'))),
   });
 
-type UpdateFormValues = z.infer<ReturnType<typeof createUpdateFormSchema>>;
+type UpdateFormValues = v.InferOutput<ReturnType<typeof createUpdateFormSchema>>;
 
 const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) => void }) => {
   const org = useOrg() as any;
@@ -233,7 +233,7 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
   const validationSchema = createUpdateFormSchema(t);
 
   const form = useForm<UpdateFormValues>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       title: '',
       content: '',

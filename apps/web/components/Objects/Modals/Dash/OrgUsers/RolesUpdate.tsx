@@ -5,9 +5,9 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { assignRoleToUser, removeRoleFromUser } from '@/services/rbac';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { Alert, AlertDescription } from '@components/ui/alert';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -16,7 +16,7 @@ import { useForm } from 'react-hook-form';
 import useSWR, { mutate } from 'swr';
 import type { FC } from 'react';
 import { toast } from 'sonner';
-import * as z from 'zod';
+import * as v from 'valibot';
 
 interface Props {
   user: any;
@@ -24,8 +24,8 @@ interface Props {
   alreadyAssignedRole: string;
 }
 const createValidationSchema = (t: (key: string) => string) =>
-  z.object({
-    role: z.string().min(1, t('roleRequired')),
+  v.object({
+    role: v.pipe(v.string(), v.minLength(1, t('roleRequired'))),
   });
 
 interface FormData {
@@ -43,7 +43,7 @@ const RolesUpdate: FC<Props> = (props) => {
   const [error, setError] = useState<any>(null);
 
   const form = useForm<FormData>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       role: props.alreadyAssignedRole,
     },

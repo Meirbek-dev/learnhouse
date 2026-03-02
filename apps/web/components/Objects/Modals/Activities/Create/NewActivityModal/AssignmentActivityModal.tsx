@@ -5,11 +5,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { createAssignmentWithActivity } from '@services/courses/assignments';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { de, enUS, es, fr, ru } from 'date-fns/locale';
 import { useLocale, useTranslations } from 'next-intl';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { getAPIUrl } from '@services/config/config';
@@ -21,15 +21,15 @@ import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import * as v from 'valibot';
 import { mutate } from 'swr';
-import * as z from 'zod';
 
 const createValidationSchema = (t: (key: string) => string) =>
-  z.object({
-    name: z.string().min(1, t('assignmentTitleRequired')),
-    description: z.string().min(1, t('assignmentDescriptionRequired')),
-    dueDate: z.string().optional(),
-    gradingType: z.enum(['NUMERIC', 'PERCENTAGE']),
+  v.object({
+    name: v.pipe(v.string(), v.minLength(1, t('assignmentTitleRequired'))),
+    description: v.pipe(v.string(), v.minLength(1, t('assignmentDescriptionRequired'))),
+    dueDate: v.optional(v.string()),
+    gradingType: v.picklist(['NUMERIC', 'PERCENTAGE']),
   });
 
 interface FormValues {
@@ -77,7 +77,7 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug 
   const today = todayRef.current;
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       name: '',
       description: '',

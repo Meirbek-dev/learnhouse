@@ -5,9 +5,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { updateAssignment } from '@services/courses/assignments';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { de, enUS, es, fr, ru } from 'date-fns/locale';
 import { useLocale, useTranslations } from 'next-intl';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { getAPIUrl } from '@services/config/config';
@@ -20,8 +20,8 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import type { FC } from 'react';
 import { toast } from 'sonner';
+import * as v from 'valibot';
 import { mutate } from 'swr';
-import * as z from 'zod';
 
 interface Assignment {
   assignment_uuid: string;
@@ -52,11 +52,11 @@ interface FormValues {
 }
 
 const createValidationSchema = (t: (key: string) => string) =>
-  z.object({
-    title: z.string().min(1, t('assignmentTitleRequired')),
-    description: z.string().min(1, t('assignmentDescriptionRequired')),
-    due_date: z.string(),
-    grading_type: z.enum(['NUMERIC', 'PERCENTAGE']),
+  v.object({
+    title: v.pipe(v.string(), v.minLength(1, t('assignmentTitleRequired'))),
+    description: v.pipe(v.string(), v.minLength(1, t('assignmentDescriptionRequired'))),
+    due_date: v.string(),
+    grading_type: v.picklist(['NUMERIC', 'PERCENTAGE']),
   });
 
 const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, accessToken }) => {
@@ -89,7 +89,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
   const today = todayRef.current;
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       title: assignment.title || '',
       description: assignment.description || '',

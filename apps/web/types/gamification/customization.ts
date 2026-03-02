@@ -1,4 +1,4 @@
-import * as z from 'zod';
+import * as v from 'valibot';
 
 /**
  * Avatar Customization Types
@@ -55,50 +55,49 @@ export interface AvatarPreset {
   isDefault: boolean;
 }
 
-// Zod schemas
-export const AvatarFrameSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  nameKey: z.string(),
-  unlockLevel: z.number().min(1),
-  rarity: z.enum(['common', 'rare', 'epic', 'legendary']),
-  color: z.string(),
-  glowColor: z.string().optional(),
-  isUnlocked: z.boolean(),
-  isEquipped: z.boolean(),
+export const AvatarFrameSchema = v.object({
+  id: v.string(),
+  name: v.string(),
+  nameKey: v.string(),
+  unlockLevel: v.pipe(v.number(), v.minValue(1)),
+  rarity: v.picklist(['common', 'rare', 'epic', 'legendary']),
+  color: v.string(),
+  glowColor: v.optional(v.string()),
+  isUnlocked: v.boolean(),
+  isEquipped: v.boolean(),
 });
 
-export const AvatarAccessorySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  nameKey: z.string(),
-  unlockLevel: z.number().min(1),
-  icon: z.string(),
-  position: z.enum(['hat', 'glasses', 'badge', 'background']),
-  rarity: z.enum(['common', 'rare', 'epic', 'legendary']),
-  isUnlocked: z.boolean(),
-  isEquipped: z.boolean(),
+export const AvatarAccessorySchema = v.object({
+  id: v.string(),
+  name: v.string(),
+  nameKey: v.string(),
+  unlockLevel: v.pipe(v.number(), v.minValue(1)),
+  icon: v.string(),
+  position: v.picklist(['hat', 'glasses', 'badge', 'background']),
+  rarity: v.picklist(['common', 'rare', 'epic', 'legendary']),
+  isUnlocked: v.boolean(),
+  isEquipped: v.boolean(),
 });
 
-export const AvatarCustomizationSchema = z.object({
-  frame: AvatarFrameSchema.nullable(),
-  accessories: z.array(AvatarAccessorySchema),
-  backgroundColor: z.string().optional(),
+export const AvatarCustomizationSchema = v.object({
+  frame: v.nullable(AvatarFrameSchema),
+  accessories: v.array(AvatarAccessorySchema),
+  backgroundColor: v.optional(v.string()),
 });
 
-export const AvatarUnlockSchema = z.object({
-  type: z.enum(['frame', 'accessory']),
-  item: z.union([AvatarFrameSchema, AvatarAccessorySchema]),
-  unlockedAt: z.string(),
-  level: z.number(),
+export const AvatarUnlockSchema = v.object({
+  type: v.picklist(['frame', 'accessory']),
+  item: v.union([AvatarFrameSchema, AvatarAccessorySchema]),
+  unlockedAt: v.string(),
+  level: v.number(),
 });
 
-export const AvatarPresetSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
+export const AvatarPresetSchema = v.object({
+  id: v.string(),
+  name: v.string(),
+  description: v.string(),
   customization: AvatarCustomizationSchema,
-  isDefault: z.boolean(),
+  isDefault: v.boolean(),
 });
 
 // Frame definitions (synced with backend)

@@ -2,9 +2,9 @@
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PasswordInput from '@components/ui/custom/password-input';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { updatePassword } from '@services/settings/password';
 import { getUriWithoutOrg } from '@services/config/config';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
@@ -13,28 +13,32 @@ import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { signOut } from 'next-auth/react';
 import { toast } from 'sonner';
-import * as z from 'zod';
+import * as v from 'valibot';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
-  z.object({
-    old_password: z.string().min(
-      1,
-      t('Form.requiredField', {
-        fieldName: t('currentPasswordLabel'),
-      }),
+  v.object({
+    old_password: v.pipe(
+      v.string(),
+      v.minLength(
+        1,
+        t('Form.requiredField', {
+          fieldName: t('currentPasswordLabel'),
+        }),
+      ),
     ),
-    new_password: z
-      .string()
-      .min(
+    new_password: v.pipe(
+      v.string(),
+      v.minLength(
         1,
         t('Form.requiredField', {
           fieldName: t('newPasswordLabel'),
         }),
-      )
-      .min(8, t('Form.minChars', { count: 8 })),
+      ),
+      v.minLength(8, t('Form.minChars', { count: 8 })),
+    ),
   });
 
-type PasswordFormData = z.infer<ReturnType<typeof createValidationSchema>>;
+type PasswordFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 const UserEditPassword = () => {
   const session = usePlatformSession();
@@ -48,7 +52,7 @@ const UserEditPassword = () => {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<PasswordFormData>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       old_password: '',
       new_password: '',

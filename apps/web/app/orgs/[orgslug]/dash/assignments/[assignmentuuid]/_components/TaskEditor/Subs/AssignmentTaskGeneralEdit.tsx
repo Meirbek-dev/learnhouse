@@ -10,10 +10,10 @@ import { useAssignments } from '@components/Contexts/Assignments/AssignmentConte
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { Alert, AlertDescription } from '@components/ui/alert';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { getTaskRefFileDir } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { DragDropContext } from '@hello-pangea/dnd';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
@@ -24,19 +24,23 @@ import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import * as z from 'zod';
+import * as v from 'valibot';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf', 'docx', 'mp4', 'mkv', 'jpg', 'png', 'pptx', 'zip']);
 
 const createValidationSchema = (t: (key: string) => string) =>
-  z.object({
-    title: z.string().min(1, t('titleRequired')),
-    description: z.string().optional(),
-    hint: z.string().optional(),
-    max_grade_value: z.number().min(20, t('gradeValidationError')).max(100, t('gradeValidationError')),
+  v.object({
+    title: v.pipe(v.string(), v.minLength(1, t('titleRequired'))),
+    description: v.optional(v.string()),
+    hint: v.optional(v.string()),
+    max_grade_value: v.pipe(
+      v.number(),
+      v.minValue(20, t('gradeValidationError')),
+      v.maxValue(100, t('gradeValidationError')),
+    ),
   });
 
-type TaskFormData = z.infer<ReturnType<typeof createValidationSchema>>;
+type TaskFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 export const AssignmentTaskGeneralEdit = () => {
   const t = useTranslations('DashPage.Assignments.TaskGeneralEdit');
@@ -55,7 +59,7 @@ export const AssignmentTaskGeneralEdit = () => {
     assignmentTaskState.selectedAssignmentTaskUUID === assignmentTaskState.assignmentTask.assignment_task_uuid;
 
   const form = useForm<TaskFormData>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       title: '',
       description: '',

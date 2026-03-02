@@ -3,8 +3,8 @@
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import PasswordInput from '@components/ui/custom/password-input';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import { Separator } from '@components/ui/separator';
 import { useState, useTransition } from 'react';
@@ -17,22 +17,19 @@ import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
 import type { Org } from '@/types/org';
-import * as z from 'zod';
+import * as v from 'valibot';
 
 interface LoginClientProps {
   org: Org;
 }
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
-  z.object({
-    email: z.email(t('invalidEmail')).min(1, t('required')),
-    password: z
-      .string()
-      .min(1, t('required'))
-      .min(8, t('passwordMinLength', { length: 8 })),
+  v.object({
+    email: v.pipe(v.string(), v.minLength(1, t('required')), v.email(t('invalidEmail'))),
+    password: v.pipe(v.string(), v.minLength(1, t('required')), v.minLength(8, t('passwordMinLength', { length: 8 }))),
   });
 
-type LoginFormData = z.infer<ReturnType<typeof createValidationSchema>>;
+type LoginFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 const LoginClient = (props: LoginClientProps) => {
   const validationT = useTranslations('Validation');
@@ -46,7 +43,7 @@ const LoginClient = (props: LoginClientProps) => {
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: { email: '', password: '' },
   });
 

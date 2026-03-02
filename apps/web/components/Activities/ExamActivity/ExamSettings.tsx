@@ -4,10 +4,10 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { swrFetcher } from '@services/utils/ts/requests';
 import WhitelistManagement from './WhitelistManagement';
 import { Separator } from '@/components/ui/separator';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
 import { useEffect, useTransition } from 'react';
 import { Switch } from '@/components/ui/switch';
@@ -17,8 +17,8 @@ import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import * as v from 'valibot';
 import useSWR from 'swr';
-import { z } from 'zod';
 
 const createValidationSchema = (
   limits = {
@@ -28,26 +28,29 @@ const createValidationSchema = (
     violation_threshold: { min: 1, max: 10 },
   },
 ) =>
-  z.object({
-    time_limit: z.number().min(limits.time_limit.min).max(limits.time_limit.max).optional().nullable(),
-    attempt_limit: z.number().min(limits.attempt_limit.min).max(limits.attempt_limit.max).optional().nullable(),
-    shuffle_questions: z.boolean(),
+  v.object({
+    time_limit: v.nullable(
+      v.optional(v.pipe(v.number(), v.minValue(limits.time_limit.min), v.maxValue(limits.time_limit.max))),
+    ),
+    attempt_limit: v.nullable(
+      v.optional(v.pipe(v.number(), v.minValue(limits.attempt_limit.min), v.maxValue(limits.attempt_limit.max))),
+    ),
+    shuffle_questions: v.boolean(),
     // shuffle_answers is always true (enforced server-side)
-    question_limit: z.number().min(limits.question_limit.min).optional().nullable(),
-    access_mode: z.enum(['NO_ACCESS', 'WHITELIST', 'ALL_ENROLLED']),
-    allow_result_review: z.boolean(),
-    show_correct_answers: z.boolean(),
-    copy_paste_protection: z.boolean(),
-    tab_switch_detection: z.boolean(),
-    devtools_detection: z.boolean(),
-    right_click_disable: z.boolean(),
-    fullscreen_enforcement: z.boolean(),
-    violation_threshold: z
-      .number()
-      .min(limits.violation_threshold.min)
-      .max(limits.violation_threshold.max)
-      .optional()
-      .nullable(),
+    question_limit: v.nullable(v.optional(v.pipe(v.number(), v.minValue(limits.question_limit.min)))),
+    access_mode: v.picklist(['NO_ACCESS', 'WHITELIST', 'ALL_ENROLLED']),
+    allow_result_review: v.boolean(),
+    show_correct_answers: v.boolean(),
+    copy_paste_protection: v.boolean(),
+    tab_switch_detection: v.boolean(),
+    devtools_detection: v.boolean(),
+    right_click_disable: v.boolean(),
+    fullscreen_enforcement: v.boolean(),
+    violation_threshold: v.nullable(
+      v.optional(
+        v.pipe(v.number(), v.minValue(limits.violation_threshold.min), v.maxValue(limits.violation_threshold.max)),
+      ),
+    ),
   });
 
 interface ExamSettingsProps {
@@ -73,7 +76,7 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
   const validationSchema = createValidationSchema(limits);
 
   const form = useForm({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       time_limit: settings.time_limit || null,
       attempt_limit: settings.attempt_limit || null,

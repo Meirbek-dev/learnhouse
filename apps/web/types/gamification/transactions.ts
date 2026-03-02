@@ -1,5 +1,5 @@
 import type { UserGamificationProfile } from './profile';
-import * as z from 'zod';
+import * as v from 'valibot';
 
 /**
  * XP Transactions and Award Types
@@ -48,29 +48,28 @@ export interface XPAwardResponse {
   previous_level: number;
 }
 
-// Zod schemas
-export const XPAwardRequestSchema = z.object({
-  source: z.string().min(1),
-  amount: z.number().positive().optional(),
-  source_id: z.string().optional(),
-  idempotency_key: z.string().optional(),
+export const XPAwardRequestSchema = v.object({
+  source: v.pipe(v.string(), v.minLength(1)),
+  amount: v.optional(v.pipe(v.number(), v.minValue(1))),
+  source_id: v.optional(v.string()),
+  idempotency_key: v.optional(v.string()),
 });
 
-export const XPTransactionSchema = z.object({
-  id: z.number(),
-  user_id: z.number(),
-  org_id: z.number(),
-  amount: z.number(),
-  source: z.string(),
-  source_id: z.string().nullable(),
-  triggered_level_up: z.boolean(),
-  previous_level: z.number(),
-  created_at: z.string(),
+export const XPTransactionSchema = v.object({
+  id: v.number(),
+  user_id: v.number(),
+  org_id: v.number(),
+  amount: v.number(),
+  source: v.string(),
+  source_id: v.nullable(v.string()),
+  triggered_level_up: v.boolean(),
+  previous_level: v.number(),
+  created_at: v.string(),
 });
 
-export const XPAwardResponseSchema = z.object({
+export const XPAwardResponseSchema = v.object({
   transaction: XPTransactionSchema,
-  profile: z.any(), // Import would create circular dependency; validate separately
-  triggered_level_up: z.boolean(),
-  previous_level: z.number(),
+  profile: v.any(), // Import would create circular dependency; validate separately
+  triggered_level_up: v.boolean(),
+  previous_level: v.number(),
 });

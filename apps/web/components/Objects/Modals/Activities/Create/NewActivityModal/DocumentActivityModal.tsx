@@ -1,21 +1,21 @@
 'use client';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { constructAcceptValue } from '@/lib/constants';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { useTransition } from 'react';
-import * as z from 'zod';
+import * as v from 'valibot';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 
 const createValidationSchema = (t: (key: string) => string) =>
-  z.object({
-    name: z.string().min(1, t('documentNameRequired')),
-    file: z.instanceof(File, { message: t('pdfFileRequired') }),
+  v.object({
+    name: v.pipe(v.string(), v.minLength(1, t('documentNameRequired'))),
+    file: v.instance(File, t('pdfFileRequired')),
   });
 
 interface FormValues {
@@ -29,7 +29,7 @@ const DocumentPdfModal = ({ submitFileActivity, chapterId, course }: any) => {
   const validationSchema = createValidationSchema(validationT);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       name: '',
       file: undefined,

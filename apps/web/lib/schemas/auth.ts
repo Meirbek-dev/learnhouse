@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as v from 'valibot';
 
 /**
  * Reusable password schema factory.
@@ -12,10 +12,11 @@ import { z } from 'zod';
  *   - at least one digit
  */
 export const passwordSchema = (t: (key: string) => string) =>
-  z
-    .string()
-    .min(8, { message: t('passwordTooShort') })
-    .max(128, { message: t('passwordTooLong') })
-    .regex(/[a-z]/, { message: t('passwordNeedsLowercase') })
-    .regex(/[A-Z]/, { message: t('passwordNeedsUppercase') })
-    .regex(/[0-9]/, { message: t('passwordNeedsNumber') });
+  v.pipe(
+    v.string(),
+    v.minLength(8, t('passwordTooShort')),
+    v.maxLength(128, t('passwordTooLong')),
+    v.regex(/[a-z]/, t('passwordNeedsLowercase')),
+    v.regex(/[A-Z]/, t('passwordNeedsUppercase')),
+    v.regex(/[0-9]/, t('passwordNeedsNumber')),
+  );

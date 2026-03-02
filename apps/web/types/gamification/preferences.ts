@@ -1,4 +1,4 @@
-import * as z from 'zod';
+import * as v from 'valibot';
 
 /**
  * User Preferences Types
@@ -83,44 +83,43 @@ export const DEFAULT_GAMIFICATION_PREFERENCES: GamificationPreferences = {
   display: DEFAULT_DISPLAY_PREFERENCES,
 };
 
-// Zod schemas
-export const NotificationPreferencesSchema = z.object({
-  levelUp: z.boolean(),
-  xpGain: z.boolean(),
-  streakReminder: z.boolean(),
-  weeklyReport: z.boolean(),
-  achievements: z.boolean(),
-  leaderboardPosition: z.boolean(),
+export const NotificationPreferencesSchema = v.object({
+  levelUp: v.boolean(),
+  xpGain: v.boolean(),
+  streakReminder: v.boolean(),
+  weeklyReport: v.boolean(),
+  achievements: v.boolean(),
+  leaderboardPosition: v.boolean(),
 });
 
-export const PrivacyPreferencesSchema = z.object({
-  showOnLeaderboard: z.boolean(),
-  publicProfileStats: z.boolean(),
-  shareProgress: z.boolean(),
-  showAvatar: z.boolean(),
-  showUsername: z.boolean(),
+export const PrivacyPreferencesSchema = v.object({
+  showOnLeaderboard: v.boolean(),
+  publicProfileStats: v.boolean(),
+  shareProgress: v.boolean(),
+  showAvatar: v.boolean(),
+  showUsername: v.boolean(),
 });
 
-export const DisplayPreferencesSchema = z.object({
-  animatedEffects: z.boolean(),
-  compactMode: z.boolean(),
-  showLevelIndicator: z.boolean(),
-  autoHideToasts: z.boolean(),
-  soundEffects: z.boolean(),
-  showXPNumbers: z.boolean(),
-  theme: z.enum(['auto', 'light', 'dark']),
+export const DisplayPreferencesSchema = v.object({
+  animatedEffects: v.boolean(),
+  compactMode: v.boolean(),
+  showLevelIndicator: v.boolean(),
+  autoHideToasts: v.boolean(),
+  soundEffects: v.boolean(),
+  showXPNumbers: v.boolean(),
+  theme: v.picklist(['auto', 'light', 'dark']),
 });
 
-export const GamificationPreferencesSchema = z.object({
+export const GamificationPreferencesSchema = v.object({
   notifications: NotificationPreferencesSchema,
   privacy: PrivacyPreferencesSchema,
   display: DisplayPreferencesSchema,
 });
 
-export const PartialGamificationPreferencesSchema = z.object({
-  notifications: NotificationPreferencesSchema.partial().optional(),
-  privacy: PrivacyPreferencesSchema.partial().optional(),
-  display: DisplayPreferencesSchema.partial().optional(),
+export const PartialGamificationPreferencesSchema = v.object({
+  notifications: v.optional(v.partial(NotificationPreferencesSchema)),
+  privacy: v.optional(v.partial(PrivacyPreferencesSchema)),
+  display: v.optional(v.partial(DisplayPreferencesSchema)),
 });
 
 // Helper functions
@@ -149,12 +148,12 @@ export function mergePreferences(
 }
 
 export function validatePreferences(prefs: unknown): GamificationPreferences {
-  const result = GamificationPreferencesSchema.safeParse(prefs);
+  const result = v.safeParse(GamificationPreferencesSchema, prefs);
   if (result.success) {
-    return result.data;
+    return result.output;
   }
   // Return defaults if validation fails
-  console.warn('Invalid preferences, using defaults:', result.error);
+  console.warn('Invalid preferences, using defaults:', result.issues);
   return createDefaultPreferences();
 }
 

@@ -36,10 +36,10 @@ import { useEffect, useEffectEvent, useRef, useState, useTransition } from 'reac
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { getUriWithoutOrg } from '@services/config/config';
 import { SiStripe } from '@icons-pack/react-simple-icons';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
@@ -47,7 +47,7 @@ import { useForm } from 'react-hook-form';
 import useSWR, { mutate } from 'swr';
 import type { FC } from 'react';
 import { toast } from 'sonner';
-import * as z from 'zod';
+import * as v from 'valibot';
 
 interface ConfirmDeleteStripeConfigProps {
   onDelete: () => Promise<void>;
@@ -341,18 +341,18 @@ interface EditStripeConfigModalProps {
 }
 
 const createStripeConfigSchema = (t: (key: string) => string) =>
-  z.object({
-    stripeAccountId: z.string().min(1, t('stripeAccountIdRequired')),
+  v.object({
+    stripeAccountId: v.pipe(v.string(), v.minLength(1, t('stripeAccountIdRequired'))),
   });
 
-type StripeConfigFormValues = z.infer<ReturnType<typeof createStripeConfigSchema>>;
+type StripeConfigFormValues = v.InferOutput<ReturnType<typeof createStripeConfigSchema>>;
 
 const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ orgId, configId, accessToken, isOpen, onClose }) => {
   const t = useTranslations('Payments.Configuration');
   const validationSchema = createStripeConfigSchema(t);
 
   const form = useForm<StripeConfigFormValues>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       stripeAccountId: '',
     },

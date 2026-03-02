@@ -1,10 +1,10 @@
 'use client';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { updateOrganization } from '@services/settings/org';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
@@ -14,19 +14,20 @@ import { useForm } from 'react-hook-form';
 import { useTransition } from 'react';
 import type { FC } from 'react';
 import { toast } from 'sonner';
+import * as v from 'valibot';
 import { mutate } from 'swr';
-import * as z from 'zod';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
-  z.object({
-    description: z.string().min(1, t('Form.descriptionRequired')).max(100, t('Form.descriptionMax')),
-    about: z.string().max(400, t('Form.aboutMax')).optional().or(z.literal('')),
+  v.object({
+    description: v.pipe(
+      v.string(),
+      v.minLength(1, t('Form.descriptionRequired')),
+      v.maxLength(100, t('Form.descriptionMax')),
+    ),
+    about: v.optional(v.pipe(v.string(), v.maxLength(400, t('Form.aboutMax')))),
   });
 
-interface OrganizationValues {
-  description: string;
-  about?: string;
-}
+type OrganizationValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 const OrgEditGeneral: FC = () => {
   const session = usePlatformSession() as any;
@@ -36,7 +37,7 @@ const OrgEditGeneral: FC = () => {
   const validationSchema = createValidationSchema(t);
 
   const form = useForm<OrganizationValues>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       description: org?.description || '',
       about: org?.about || '',

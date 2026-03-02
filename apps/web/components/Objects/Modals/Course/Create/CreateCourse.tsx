@@ -6,11 +6,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Image as ImageIcon, Loader2, UploadCloud, X } from 'lucide-react';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { TagsInput } from '@components/ui/custom/tags-input';
 import { createNewCourse } from '@services/courses/courses';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Card, CardFooter } from '@components/ui/card';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -19,7 +19,7 @@ import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import type { ChangeEvent } from 'react';
 import { toast } from 'sonner';
-import * as z from 'zod';
+import * as v from 'valibot';
 
 const MAX_FILE_SIZE = 8_000_000; // 8MB
 const VALID_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'] as const;
@@ -43,35 +43,39 @@ const CreateCourseModal = ({ closeModal, org_id, onCreated }: CreateCourseModalP
   const [isUploading, setIsUploading] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
-  const validationSchema = z.object({
-    name: z.string().min(1, t('schemaNameRequired')).max(100, t('schemaNameMax')),
-    description: z.string().min(5, t('schemaDescriptionMin')).max(1000, t('schemaDescriptionMax')),
-    learnings: z.array(z.string()).optional(),
-    tags: z.array(z.string()).optional(),
-    visibility: z.boolean(),
-    thumbnail: z
-      .any()
-      .nullable()
-      .refine(
+  const validationSchema = v.object({
+    name: v.pipe(v.string(), v.minLength(1, t('schemaNameRequired')), v.maxLength(100, t('schemaNameMax'))),
+    description: v.pipe(
+      v.string(),
+      v.minLength(5, t('schemaDescriptionMin')),
+      v.maxLength(1000, t('schemaDescriptionMax')),
+    ),
+    learnings: v.optional(v.array(v.string())),
+    tags: v.optional(v.array(v.string())),
+    visibility: v.boolean(),
+    thumbnail: v.pipe(
+      v.nullable(v.any()),
+      v.check(
         (file) => {
           if (!file) return true;
           return file.size <= MAX_FILE_SIZE;
         },
-        { message: t('thumbnailTooLarge') || 'File size must be less than 8MB' },
-      )
-      .refine(
+        t('thumbnailTooLarge') || 'File size must be less than 8MB',
+      ),
+      v.check(
         (file) => {
           if (!file) return true;
           return VALID_IMAGE_TYPES.includes(file.type);
         },
-        { message: t('thumbnailInvalidType') || 'Invalid file type' },
+        t('thumbnailInvalidType') || 'Invalid file type',
       ),
+    ),
   });
 
-  type FormValues = z.infer<typeof validationSchema>;
+  type FormValues = v.InferOutput<typeof validationSchema>;
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       name: '',
       description: '',

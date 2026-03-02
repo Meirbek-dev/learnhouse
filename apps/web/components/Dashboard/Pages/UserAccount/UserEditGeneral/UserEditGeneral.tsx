@@ -24,11 +24,11 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUser, updateUserAvatar } from '@services/users/users';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { updateProfile } from '@services/settings/profile';
 import { getUriWithoutOrg } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { constructAcceptValue } from '@/lib/constants';
-import { zodResolver } from '@hookform/resolvers/zod';
 import type { ChangeEvent, ElementType } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { Textarea } from '@components/ui/textarea';
@@ -44,7 +44,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { signOut } from 'next-auth/react';
 import { toast } from 'sonner';
-import * as z from 'zod';
+import * as v from 'valibot';
 
 const SUPPORTED_FILES = constructAcceptValue(['jpg', 'png', 'webp', 'gif']);
 
@@ -87,26 +87,24 @@ interface FormValues {
 }
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
-  z.object({
-    email: z.email(t('Form.invalidEmail')).min(1, t('Form.requiredField', { fieldName: 'Email' })),
-    username: z.string().min(1, t('Form.requiredField', { fieldName: 'Username' })),
-    first_name: z.string().min(1, t('Form.requiredField', { fieldName: 'First name' })),
-    middle_name: z
-      .string()
-      .max(100, t('Form.maxChars', { count: 100 }))
-      .optional(),
-    last_name: z.string().min(1, t('Form.requiredField', { fieldName: 'Last name' })),
-    bio: z
-      .string()
-      .max(400, t('Form.maxChars', { count: 400 }))
-      .optional(),
-    details: z.record(
-      z.string(),
-      z.object({
-        id: z.string(),
-        label: z.string(),
-        icon: z.string(),
-        text: z.string(),
+  v.object({
+    email: v.pipe(
+      v.string(),
+      v.minLength(1, t('Form.requiredField', { fieldName: 'Email' })),
+      v.email(t('Form.invalidEmail')),
+    ),
+    username: v.pipe(v.string(), v.minLength(1, t('Form.requiredField', { fieldName: 'Username' }))),
+    first_name: v.pipe(v.string(), v.minLength(1, t('Form.requiredField', { fieldName: 'First name' }))),
+    middle_name: v.optional(v.pipe(v.string(), v.maxLength(100, t('Form.maxChars', { count: 100 })))),
+    last_name: v.pipe(v.string(), v.minLength(1, t('Form.requiredField', { fieldName: 'Last name' }))),
+    bio: v.optional(v.pipe(v.string(), v.maxLength(400, t('Form.maxChars', { count: 400 })))),
+    details: v.record(
+      v.string(),
+      v.object({
+        id: v.string(),
+        label: v.string(),
+        icon: v.string(),
+        text: v.string(),
       }),
     ),
   });
@@ -641,7 +639,7 @@ const UserEditGeneral = () => {
   const validationSchema = createValidationSchema(t);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       username: '',
       first_name: '',

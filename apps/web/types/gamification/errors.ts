@@ -1,4 +1,4 @@
-import * as z from 'zod';
+import * as v from 'valibot';
 
 /**
  * Gamification Error Types
@@ -72,60 +72,59 @@ export type GamificationError =
   | ServerError
   | UnknownError;
 
-// Zod schemas for validation
-export const NetworkErrorSchema = z.object({
-  type: z.literal(ERROR_TYPES.NETWORK_ERROR),
-  message: z.string(),
-  timestamp: z.string(),
-  statusCode: z.number().optional(),
-  retryable: z.boolean(),
+export const NetworkErrorSchema = v.object({
+  type: v.literal(ERROR_TYPES.NETWORK_ERROR),
+  message: v.string(),
+  timestamp: v.string(),
+  statusCode: v.optional(v.number()),
+  retryable: v.boolean(),
 });
 
-export const AuthErrorSchema = z.object({
-  type: z.literal(ERROR_TYPES.AUTH_ERROR),
-  message: z.string(),
-  timestamp: z.string(),
-  requiresReauth: z.boolean(),
+export const AuthErrorSchema = v.object({
+  type: v.literal(ERROR_TYPES.AUTH_ERROR),
+  message: v.string(),
+  timestamp: v.string(),
+  requiresReauth: v.boolean(),
 });
 
-export const DailyLimitExceededErrorSchema = z.object({
-  type: z.literal(ERROR_TYPES.DAILY_LIMIT_EXCEEDED),
-  message: z.string(),
-  timestamp: z.string(),
-  currentXP: z.number(),
-  dailyLimit: z.number(),
-  resetTime: z.string(),
+export const DailyLimitExceededErrorSchema = v.object({
+  type: v.literal(ERROR_TYPES.DAILY_LIMIT_EXCEEDED),
+  message: v.string(),
+  timestamp: v.string(),
+  currentXP: v.number(),
+  dailyLimit: v.number(),
+  resetTime: v.string(),
 });
 
-export const ValidationErrorSchema = z.object({
-  type: z.literal(ERROR_TYPES.VALIDATION_ERROR),
-  message: z.string(),
-  timestamp: z.string(),
-  field: z.string().optional(),
-  validationErrors: z.array(
-    z.object({
-      field: z.string(),
-      message: z.string(),
+export const ValidationErrorSchema = v.object({
+  type: v.literal(ERROR_TYPES.VALIDATION_ERROR),
+  message: v.string(),
+  timestamp: v.string(),
+  field: v.optional(v.string()),
+  validationErrors: v.array(
+    v.object({
+      field: v.string(),
+      message: v.string(),
     }),
   ),
 });
 
-export const ServerErrorSchema = z.object({
-  type: z.literal(ERROR_TYPES.SERVER_ERROR),
-  message: z.string(),
-  timestamp: z.string(),
-  statusCode: z.number(),
-  errorCode: z.string().optional(),
+export const ServerErrorSchema = v.object({
+  type: v.literal(ERROR_TYPES.SERVER_ERROR),
+  message: v.string(),
+  timestamp: v.string(),
+  statusCode: v.number(),
+  errorCode: v.optional(v.string()),
 });
 
-export const UnknownErrorSchema = z.object({
-  type: z.literal(ERROR_TYPES.UNKNOWN_ERROR),
-  message: z.string(),
-  timestamp: z.string(),
-  originalError: z.unknown().optional(),
+export const UnknownErrorSchema = v.object({
+  type: v.literal(ERROR_TYPES.UNKNOWN_ERROR),
+  message: v.string(),
+  timestamp: v.string(),
+  originalError: v.optional(v.unknown()),
 });
 
-export const GamificationErrorSchema = z.discriminatedUnion('type', [
+export const GamificationErrorSchema = v.variant('type', [
   NetworkErrorSchema,
   AuthErrorSchema,
   DailyLimitExceededErrorSchema,

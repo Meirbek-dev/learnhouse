@@ -2,9 +2,9 @@
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { AlertTriangle, ArrowLeft, Info, Loader2 } from 'lucide-react';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { sendResetLink } from '@services/auth/auth';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -14,14 +14,14 @@ import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
-import * as z from 'zod';
+import * as v from 'valibot';
 
 const createValidationSchema = (t: (key: string) => string) =>
-  z.object({
-    email: z.email(t('invalidEmail')).min(1, t('required')),
+  v.object({
+    email: v.pipe(v.string(), v.minLength(1, t('required')), v.email(t('invalidEmail'))),
   });
 
-type ForgotPasswordFormData = z.infer<ReturnType<typeof createValidationSchema>>;
+type ForgotPasswordFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 const ForgotPasswordClient = () => {
   const t = useTranslations('Auth.Forgot');
@@ -36,7 +36,7 @@ const ForgotPasswordClient = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<ForgotPasswordFormData>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: { email: '' },
   });
 

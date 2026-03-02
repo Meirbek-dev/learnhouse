@@ -1,19 +1,19 @@
 'use client';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { useTransition } from 'react';
-import * as z from 'zod';
+import * as v from 'valibot';
 
 const createValidationSchema = (t: (key: string) => string) =>
-  z.object({
-    name: z.string().min(1, t('chapterNameRequired')),
-    description: z.string().min(1, t('chapterDescriptionRequired')),
+  v.object({
+    name: v.pipe(v.string(), v.minLength(1, t('chapterNameRequired'))),
+    description: v.pipe(v.string(), v.minLength(1, t('chapterDescriptionRequired'))),
   });
 
 interface FormValues {
@@ -27,7 +27,7 @@ const NewChapterModal = ({ submitChapter, closeModal, course }: any) => {
   const validationSchema = createValidationSchema(validationT);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       name: '',
       description: '',

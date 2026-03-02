@@ -35,8 +35,8 @@ import CreateProductForm from './SubComponents/CreateProductForm';
 import { getPaymentConfigs } from '@services/payments/payments';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '@components/ui/textarea';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -47,33 +47,42 @@ import currencyCodes from 'currency-codes';
 import { useForm } from 'react-hook-form';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
-import * as z from 'zod';
+import * as v from 'valibot';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
-  z.object({
-    name: z.string().min(
-      1,
-      t('Components.Form.requiredField', {
-        fieldName: t('DashPage.Payments.ProductPage.editForm.nameLabel'),
-      }),
+  v.object({
+    name: v.pipe(
+      v.string(),
+      v.minLength(
+        1,
+        t('Components.Form.requiredField', {
+          fieldName: t('DashPage.Payments.ProductPage.editForm.nameLabel'),
+        }),
+      ),
     ),
-    description: z.string().min(
-      1,
-      t('Components.Form.requiredField', {
-        fieldName: t('DashPage.Payments.ProductPage.editForm.descriptionLabel'),
-      }),
+    description: v.pipe(
+      v.string(),
+      v.minLength(
+        1,
+        t('Components.Form.requiredField', {
+          fieldName: t('DashPage.Payments.ProductPage.editForm.descriptionLabel'),
+        }),
+      ),
     ),
-    amount: z.number().min(0, t('Components.Form.positiveNumber')),
-    benefits: z.string().optional(),
-    currency: z.string().min(
-      1,
-      t('Components.Form.requiredField', {
-        fieldName: t('DashPage.Payments.ProductPage.editForm.currencyLabel'),
-      }),
+    amount: v.pipe(v.number(), v.minValue(0, t('Components.Form.positiveNumber'))),
+    benefits: v.optional(v.string()),
+    currency: v.pipe(
+      v.string(),
+      v.minLength(
+        1,
+        t('Components.Form.requiredField', {
+          fieldName: t('DashPage.Payments.ProductPage.editForm.currencyLabel'),
+        }),
+      ),
     ),
   });
 
-type EditProductFormData = z.infer<ReturnType<typeof createValidationSchema>>;
+type EditProductFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 interface ArchiveProductButtonProps {
   productId: string;
@@ -361,7 +370,7 @@ const EditProductForm = ({
   const validationSchema = createValidationSchema(t);
 
   const form = useForm<EditProductFormData>({
-    resolver: zodResolver(validationSchema),
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       name: product.name,
       description: product.description,
