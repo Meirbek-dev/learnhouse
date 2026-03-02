@@ -8,8 +8,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_another_jwt_auth.exceptions import AuthJWTException
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import Response
+from starlette.types import Receive, Scope, Send
 
 from config.config import PlatformConfig, get_platform_config
 from src.core.events.events import shutdown_app, startup_app
@@ -17,6 +16,27 @@ from src.router import v1_router
 
 # Get Platform Config
 platform_config: PlatformConfig = get_platform_config()
+
+
+# ── Cached static files ────────────────────────────────────────────────────────
+# Starlette's default StaticFiles sets no meaningful Cache-Control header.
+# Content files are content-addressed (UUID paths), so aggressive caching is safe.
+_STATIC_CACHE_HEADER = "public, max-age=31536000, immutable"
+
+
+class CachedStaticFiles(StaticFiles):
+    """StaticFiles that appends a long-lived cache header to every response."""
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        async def send_with_cache(message: dict) -> None:
+            if message["type"] == "http.response.start":
+                headers = dict(message.get("headers", []))
+                headers[b"cache-control"] = _STATIC_CACHE_HEADER.encode()
+                message = {**message, "headers": list(headers.items())}
+            await send(message)
+
+        await super().__call__(scope, receive, send_with_cache)
+
 
 # Global Config
 app = FastAPI(
@@ -65,8 +85,8 @@ def authjwt_exception_handler(request: Request, exc: AuthJWTException) -> JSONRe
     )
 
 
-# Static Files
-app.mount("/content", StaticFiles(directory="content"), name="content")
+# Static Files (served with long-lived cache headers; paths are UUID-based and immutable)
+app.mount("/content", CachedStaticFiles(directory="content"), name="content")
 
 # Global Routes
 app.include_router(v1_router)

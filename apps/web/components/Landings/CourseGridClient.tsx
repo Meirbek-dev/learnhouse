@@ -114,7 +114,7 @@ export default function CourseGridClient({ initialCourses, initialTotal, orgslug
                 </div>
               </div>
             ))
-          : courses.map((course: any) => (
+          : courses.map((course: any, index: number) => (
               <div
                 key={course.course_uuid}
                 className="flex w-full max-w-sm justify-center"
@@ -124,6 +124,7 @@ export default function CourseGridClient({ initialCourses, initialTotal, orgslug
                   orgslug={orgslug}
                   trailData={trailData}
                   trailLoading={isTrailLoading}
+                  priority={page === 1 && index < 3}
                 />
               </div>
             ))}

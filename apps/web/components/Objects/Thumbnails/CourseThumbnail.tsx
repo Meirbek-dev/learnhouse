@@ -87,6 +87,8 @@ export interface CourseThumbnailProps {
   customLink?: string;
   trailData?: any;
   trailLoading?: boolean;
+  /** Set to true for above-the-fold cards to eager-load the thumbnail (fixes LCP) */
+  priority?: boolean;
 }
 
 // ============================================================================
@@ -122,6 +124,7 @@ interface CourseImageProps {
   courseUrl: string;
   t: any;
   isOwner?: boolean;
+  priority?: boolean;
 }
 
 const CourseImage: FC<CourseImageProps> = ({
@@ -132,6 +135,7 @@ const CourseImage: FC<CourseImageProps> = ({
   courseUrl,
   t,
   isOwner = false,
+  priority = false,
 }) => (
   <Link
     prefetch={false}
@@ -144,9 +148,9 @@ const CourseImage: FC<CourseImageProps> = ({
         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         src={thumbnailUrl}
         alt={courseName}
-        loading="lazy"
-        decoding="async"
-        fetchPriority="low"
+        loading={priority ? 'eager' : 'lazy'}
+        decoding={priority ? 'sync' : 'async'}
+        fetchPriority={priority ? 'high' : 'low'}
       />
 
       <div
@@ -155,9 +159,11 @@ const CourseImage: FC<CourseImageProps> = ({
       />
 
       {isOwner && (
+        // aria-hidden: badge text is decorative; the card aria-label already conveys ownership
         <Badge
           variant="default"
           className="absolute top-2 left-2 gap-1 backdrop-blur-sm"
+          aria-hidden="true"
         >
           <Crown className="h-3 w-3" />
           {t('ownerBadge')}
@@ -165,9 +171,11 @@ const CourseImage: FC<CourseImageProps> = ({
       )}
 
       {updateDate && (
+        // aria-hidden: date is decorative inside the link; the link aria-label names the course
         <Badge
           variant="secondary"
           className="bg-background/90 absolute right-2 bottom-2 text-xs backdrop-blur-sm"
+          aria-hidden="true"
         >
           <Calendar className="mr-1 h-3 w-3" />
           {formatDate(updateDate, locale)}
@@ -507,6 +515,7 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
   customLink,
   trailData,
   trailLoading = false,
+  priority = false,
 }) => {
   const t = useTranslations('Components.CourseThumbnail');
   const locale = useLocale();
@@ -601,6 +610,7 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
         courseUrl={courseUrl}
         t={t}
         isOwner={isOwner}
+        priority={priority}
       />
 
       <CardContent className="flex flex-1 flex-col gap-1 px-4 pb-2">

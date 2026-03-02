@@ -1,6 +1,6 @@
 'use client';
 
-import { NavigationMenu, NavigationMenuList } from '@/components/ui/navigation-menu';
+import { NavigationMenu, NavigationMenuList, NavigationMenuItem } from '@/components/ui/navigation-menu';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { HeaderProfileBox } from '@/components/Security/HeaderProfileBox';
 import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
@@ -41,7 +41,7 @@ const NavigationLinkItem = ({ href, type, orgslug }: NavigationLinkProps) => {
   const isActive = pathname.includes(href);
 
   return (
-    <div>
+    <NavigationMenuItem>
       <Link
         prefetch={false}
         href={getUriWithOrg(orgslug, href)}
@@ -55,7 +55,7 @@ const NavigationLinkItem = ({ href, type, orgslug }: NavigationLinkProps) => {
         />
         <span className={`text-base font-medium whitespace-nowrap ${isActive ? 'font-semibold' : ''}`}>{label}</span>
       </Link>
-    </div>
+    </NavigationMenuItem>
   );
 };
 
