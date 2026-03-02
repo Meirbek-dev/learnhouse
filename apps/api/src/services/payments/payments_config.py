@@ -71,10 +71,6 @@ async def get_payments_config(
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
 
-    # RBAC check
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read", org_id)
-
     # Get payments config
     statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
     configs = db_session.exec(statement).all()
