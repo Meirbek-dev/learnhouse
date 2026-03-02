@@ -106,6 +106,7 @@ SYSTEM_ROLES: dict[str, dict] = {
             "course:create:org",
             "course:read:all",
             "course:update:own",
+            "course:manage:own",
             "course:delete:own",
             "chapter:create:own",
             "chapter:read:all",
@@ -127,6 +128,8 @@ SYSTEM_ROLES: dict[str, dict] = {
             "discussion:moderate:own",
             "analytics:read:own",
             "user:read:assigned",
+            "certificate:create:org",
+            "certificate:read:own",
         ],
     },
     RoleSlug.MODERATOR: {
