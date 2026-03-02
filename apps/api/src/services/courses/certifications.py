@@ -185,7 +185,7 @@ async def update_certification(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "certificate:update", org_id=course.org_id)
+    checker.require(current_user.id, "certificate:update", org_id=course.org_id, resource_owner_id=course.creator_id)
 
     # Update only the fields that were passed in
     for var, value in vars(certification_object).items():
@@ -233,7 +233,7 @@ async def delete_certification(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "certificate:delete", org_id=course.org_id)
+    checker.require(current_user.id, "certificate:delete", org_id=course.org_id, resource_owner_id=course.creator_id)
 
     db_session.delete(certification)
     db_session.commit()

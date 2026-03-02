@@ -128,8 +128,12 @@ SYSTEM_ROLES: dict[str, dict] = {
             "discussion:moderate:own",
             "analytics:read:own",
             "user:read:assigned",
+            "usergroup:read:org",
+            "usergroup:manage:org",
             "certificate:create:org",
             "certificate:read:own",
+            "certificate:update:own",
+            "certificate:delete:own",
         ],
     },
     RoleSlug.MODERATOR: {
