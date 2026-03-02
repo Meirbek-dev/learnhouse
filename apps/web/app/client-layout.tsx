@@ -1,7 +1,6 @@
 'use client';
 
 import PlatformSessionProvider, { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import StyledComponentsRegistry from '../components/Utils/libs/styled-registry';
 import { PermissionProvider } from '@/components/Security/PermissionProvider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -90,10 +89,8 @@ function ThemeProviderWrapper({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider userTheme={userTheme}>
       <ThemeSync />
-      <StyledComponentsRegistry>
-        <main>{children}</main>
-        <Toaster />
-      </StyledComponentsRegistry>
+      <main>{children}</main>
+      <Toaster />
     </ThemeProvider>
   );
 }

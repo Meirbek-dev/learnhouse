@@ -31,7 +31,7 @@ import { archiveProduct, getProducts, updateProduct } from '@services/payments/p
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import CreateProductForm from './SubComponents/CreateProductForm';
 import { getPaymentConfigs } from '@services/payments/payments';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';

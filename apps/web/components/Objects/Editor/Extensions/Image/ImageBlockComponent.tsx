@@ -17,7 +17,7 @@ import { useTranslations } from 'next-intl';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { uploadNewImageFile } from '@services/blocks/Image/images';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';

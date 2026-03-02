@@ -1,6 +1,5 @@
 import type { Editor } from '@tiptap/react';
 import { useEffect, useState } from 'react';
-import { styled } from 'styled-components';
 import { Check } from 'lucide-react';
 
 interface TableOfContentsProps {
@@ -60,66 +59,32 @@ const TableOfContents = ({ editor }: TableOfContentsProps) => {
     <div className="w-full bg-transparent border-0 shadow-none p-0 m-0 flex flex-col items-stretch h-fit">
       <ul className="!list-none !p-0 m-0">
         {headings.map((heading, index) => (
-          <TOCItem
+          <li
             key={index}
-            $level={heading.level}
+            style={{ paddingLeft: `${(heading.level - 1) * 1.2}rem` }}
+            className="my-2 !list-none flex items-start gap-2"
           >
-            <span className="toc-check">
+            <span className="flex shrink-0 items-center mt-[0.1rem] text-[#23272f]">
               <Check
                 size={15}
                 strokeWidth={1.7}
               />
             </span>
             <a
-              className={`toc-link toc-link-h${heading.level}`}
+              style={{
+                fontWeight: heading.level === 1 ? 500 : 400,
+                fontSize: heading.level === 1 ? '1rem' : heading.level === 2 ? '0.97rem' : '0.95rem',
+              }}
+              className="block flex-1 min-w-0 p-0 text-[#23272f] leading-[1.4] no-underline break-words hyphens-auto bg-transparent transition-none hover:text-[#007acc]"
               href={`#${heading.id}`}
             >
               {heading.text}
             </a>
-          </TOCItem>
+          </li>
         ))}
       </ul>
     </div>
   );
 };
-
-
-const TOCItem = styled.li<{ $level: number }>`
-  margin: 0.5rem 0;
-  padding-left: ${({ $level }) => `${($level - 1) * 1.2}rem`};
-  list-style: none !important;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-
-  .toc-check {
-    display: flex;
-    flex-shrink: 0;
-    align-items: center;
-    margin-top: 0.1rem;
-    color: #23272f;
-  }
-
-  .toc-link {
-    display: block;
-    flex: 1;
-    min-width: 0;
-    padding: 0;
-    color: #23272f;
-    font-weight: ${({ $level }) => ($level === 1 ? 500 : 400)};
-    font-size: ${({ $level }) => ($level === 1 ? '1rem' : $level === 2 ? '0.97rem' : '0.95rem')};
-    line-height: 1.4;
-    text-decoration: none;
-    word-break: break-word;
-    hyphens: auto;
-    background: none;
-    border-radius: 0;
-    transition: none;
-
-    &:hover {
-      color: #007acc;
-    }
-  }
-`;
 
 export default TableOfContents;

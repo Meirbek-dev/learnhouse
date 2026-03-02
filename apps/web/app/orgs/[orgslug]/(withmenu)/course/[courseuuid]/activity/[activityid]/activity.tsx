@@ -35,7 +35,7 @@ import {
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
+import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity';
 import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar';
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
@@ -45,7 +45,7 @@ import { Suspense, lazy, useEffect, useRef, useState, useTransition } from 'reac
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import CourseEndView from '@components/Pages/Activity/CourseEndView';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { CourseProvider } from '@components/Contexts/CourseContext';
@@ -815,7 +815,7 @@ const ActivityClient = (props: ActivityClientProps) => {
               </motion.div>
             </AnimatePresence>
           ) : (
-            <GeneralWrapperStyled>
+            <GeneralWrapper>
               {/* Original non-focus mode UI */}
               {activityid === 'end' ? (
                 <CourseEndView
@@ -1111,7 +1111,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                   </div>
                 </div>
               )}
-            </GeneralWrapperStyled>
+            </GeneralWrapper>
           )}
         </AIChatBotProvider>
       </Suspense>

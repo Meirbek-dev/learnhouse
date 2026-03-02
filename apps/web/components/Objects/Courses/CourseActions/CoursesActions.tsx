@@ -14,7 +14,7 @@ import {
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { getProductsByCourse } from '@services/payments/products';
 import { applyForContributor } from '@services/courses/courses';
 import CourseProgress from '../CourseProgress/CourseProgress';

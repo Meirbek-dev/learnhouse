@@ -3,7 +3,7 @@ import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEdit
 import type { AIEditorStateTypes } from '@components/Contexts/AI/AIEditorContext';
 
 import MathEquationBlock from './Extensions/MathEquation/MathEquationBlock';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import WarningCallout from './Extensions/Callout/Warning/WarningCallout';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
@@ -68,8 +68,10 @@ const EDITOR_EXTENSIONS = [
   // other extensions can be added here if needed
 ];
 import { useTranslations } from 'next-intl';
-import { styled } from 'styled-components';
+import styles from './Editor.module.css';
+import { cn } from '@/lib/utils';
 import Link from '@components/ui/AppLink';
+import type { ReactNode } from 'react';
 import UserAvatar from '../UserAvatar';
 import { motion } from 'motion/react';
 import Image from 'next/image';
@@ -173,7 +175,7 @@ const Editor = (props: EditorProps) => {
   }
 
   return (
-    <Page>
+    <div className={styles.page}>
       <CourseProvider courseuuid={props.course.course_uuid}>
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
@@ -187,7 +189,7 @@ const Editor = (props: EditorProps) => {
           }}
           exit={{ opacity: 0 }}
         >
-          <EditorTop className="bg-opacity-95 fixed bg-white backdrop-blur-sm backdrop-brightness-125">
+          <div className={cn(styles.editorTop, "bg-opacity-95 fixed bg-white backdrop-blur-sm backdrop-brightness-125")}>
             <div className="flex flex-col">
               <div className="flex flex-row mb-[5px]">
                 <Link href="/">
@@ -217,9 +219,9 @@ const Editor = (props: EditorProps) => {
                     alt={`${props.course.name} Thumbnail`}
                   />
                 </Link>
-                <EditorInfoDocName>
+                <div className={styles.editorInfoDocName}>
                   <b>{props.course.name}</b> <DividerVerticalIcon className="size-7" /> {props.activity.name}{' '}
-                </EditorInfoDocName>
+                </div>
               </div>
               <div>
                 <ToolbarButtons editor={editor} />
@@ -292,15 +294,15 @@ const Editor = (props: EditorProps) => {
                 }}
               />
 
-              <EditorUserProfileWrapper>
+              <div className={styles.editorUserProfileWrapper}>
                 <UserAvatar
                   size="lg"
                   variant="outline"
                   use_with_session
                 />
-              </EditorUserProfileWrapper>
+              </div>
             </div>
-          </EditorTop>
+          </div>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, scale: 0.99 }}
@@ -313,292 +315,22 @@ const Editor = (props: EditorProps) => {
           }}
           exit={{ opacity: 0 }}
         >
-          <EditorContentWrapper>
+          <div className={styles.editorContentWrapper}>
             <AIEditorToolkit
               activity={props.activity}
               editor={editor}
             />
             <EditorContent editor={editor} />
-          </EditorContentWrapper>
+          </div>
         </motion.div>
       </CourseProvider>
-    </Page>
+    </div>
   );
 };
 
-const Page = styled.div`
-  height: 100vh;
-  width: 100%;
-  padding-top: 30px;
-
-  // dots background
-  background-image: radial-gradient(#4744446b 1px, transparent 1px), radial-gradient(#4744446b 1px, transparent 1px);
-  background-position:
-    0 0,
-    25px 25px;
-  background-size: 50px 50px;
-  background-attachment: fixed;
-  background-repeat: repeat;
-`;
-
-const EditorTop = styled.div`
-  border-radius: 15px;
-  margin: 40px;
-  margin-top: 0px;
-  margin-bottom: 20px;
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.03);
-  position: fixed;
-  z-index: 303;
-  width: -webkit-fill-available;
-  width: -moz-available;
-`;
-
-// Inside EditorUsersSection
-const EditorUserProfileWrapper = styled.div`
-  padding-right: 8px;
-  svg {
-    border-radius: 7px;
-  }
-`;
-
-// Inside EditorInfoWrapper
-const EditorInfoDocName = styled.div`
-  font-size: 16px;
-  justify-content: center;
-  align-items: center;
-  display: flex;
-  margin-left: 10px;
-  color: #494949;
-
-  svg {
-    margin-right: 4px;
-    margin-left: 4px;
-    padding: 3px;
-    color: #353535;
-  }
-`;
-
-
-export const EditorContentWrapper = styled.div`
-  margin: 40px;
-  margin-top: 90px;
-  background-color: white;
-  border-radius: 10px;
-  z-index: 300;
-  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.03);
-
-  // disable chrome outline
-
-  .ProseMirror {
-    font-family: var(--font-inter), Inter, system-ui, 'Segoe UI', Arial, sans-serif;
-    font-size: 1.1rem;
-    color: #222;
-
-    h1,
-    h2,
-    h3,
-    h4,
-    h5 {
-      font-family: inherit;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-      line-height: 1.2;
-      color: #18181b;
-      margin-bottom: 24px;
-    }
-    h1 {
-      font-size: 2.25rem;
-    }
-    h2 {
-      font-size: 2rem;
-    }
-    h3 {
-      font-size: 1.5rem;
-    }
-    h4 {
-      font-size: 1.25rem;
-    }
-    h5 {
-      font-size: 1.125rem;
-    }
-
-    a {
-      color: #1a0dab;
-      text-decoration: underline;
-      cursor: pointer;
-      transition: color 0.2s ease;
-
-      &:hover,
-      &:focus {
-        color: #0b0080;
-        text-decoration: underline;
-        outline: 2px solid #0b0080;
-        outline-offset: 2px;
-      }
-    }
-    padding: 20px;
-
-    &:focus {
-      outline: none !important;
-      box-shadow: none !important;
-    }
-
-    // Code Block
-    pre {
-      padding: 0.75rem 1rem;
-      color: #fff;
-      font-family: var(--font-jetbrains-mono), monospace;
-      background: #0d0d0d;
-      border-radius: 0.5rem;
-
-      code {
-        padding: 0;
-        color: inherit;
-        font-size: 0.8rem;
-        background: none;
-      }
-
-      .hljs-comment,
-      .hljs-quote {
-        color: #616161;
-      }
-
-      .hljs-variable,
-      .hljs-template-variable,
-      .hljs-attribute,
-      .hljs-tag,
-      .hljs-name,
-      .hljs-regexp,
-      .hljs-link,
-      .hljs-name,
-      .hljs-selector-id,
-      .hljs-selector-class {
-        color: #f98181;
-      }
-
-      .hljs-number,
-      .hljs-meta,
-      .hljs-built_in,
-      .hljs-builtin-name,
-      .hljs-literal,
-      .hljs-type,
-      .hljs-params {
-        color: #fbbc88;
-      }
-
-      .hljs-string,
-      .hljs-symbol,
-      .hljs-bullet {
-        color: #b9f18d;
-      }
-
-      .hljs-title,
-      .hljs-section {
-        color: #faf594;
-      }
-
-      .hljs-keyword,
-      .hljs-selector-tag {
-        color: #70cff8;
-      }
-
-      .hljs-emphasis {
-        font-style: italic;
-      }
-
-      .hljs-strong {
-        font-weight: 700;
-      }
-    }
-
-    &.resize-cursor {
-      cursor: ew-resize;
-      cursor: col-resize;
-    }
-
-    .tableWrapper {
-      margin: 1.5rem 0;
-      overflow-x: auto;
-    }
-  }
-
-  iframe {
-    display: block;
-    width: 100%;
-    min-width: 200px;
-    height: 440px;
-    min-height: 200px;
-    border: none;
-    border-radius: 6px;
-    outline: 0px solid transparent;
-  }
-
-  ul,
-  ol {
-    padding: 0 1rem;
-    padding-left: 20px;
-  }
-
-  ul {
-    list-style-type: disc;
-  }
-
-  ol {
-    list-style-type: decimal;
-  }
-
-  table {
-    width: 100%;
-    margin: 0;
-    overflow: hidden;
-    table-layout: fixed;
-    border-collapse: collapse;
-
-    td,
-    th {
-      position: relative;
-      box-sizing: border-box;
-      min-width: 1em;
-      padding: 6px 8px;
-      vertical-align: top;
-      border: 1px solid rgba(139, 139, 139, 0.4);
-
-      > * {
-        margin-bottom: 0;
-      }
-    }
-
-    th {
-      font-weight: bold;
-      text-align: left;
-      background-color: rgba(217, 217, 217, 0.4);
-    }
-
-    .selectedCell:after {
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      z-index: 2;
-      background: rgba(139, 139, 139, 0.2);
-      content: '';
-      pointer-events: none;
-    }
-
-    .column-resize-handle {
-      position: absolute;
-      top: 0;
-      right: -2px;
-      bottom: -2px;
-      width: 4px;
-      background-color: #8d78eb;
-      pointer-events: none;
-    }
-  }
-`;
-
 export default Editor;
+
+export const EditorContentWrapper = ({ children, className }: { children: ReactNode; className?: string }) => (
+  <div className={cn(styles.editorContentWrapper, className)}>{children}</div>
+);
+

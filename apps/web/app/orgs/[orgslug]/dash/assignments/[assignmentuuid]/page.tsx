@@ -3,7 +3,7 @@ import { BookOpen, BookX, EllipsisVertical, Eye, Layers2, Monitor, Pencil, UserR
 import EditAssignmentModal from '@components/Objects/Modals/Activities/Assignments/EditAssignmentModal';
 import { AssignmentProvider, useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { updateAssignment } from '@services/courses/assignments';
 import { updateActivity } from '@services/courses/activities';

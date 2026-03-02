@@ -3,7 +3,7 @@
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import NewChapterModal from '@components/Objects/Modals/Chapters/NewChapter';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import { revalidateTags } from '@services/utils/ts/requests';

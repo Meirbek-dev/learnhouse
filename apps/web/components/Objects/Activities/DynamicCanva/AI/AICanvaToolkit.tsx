@@ -1,7 +1,7 @@
 import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
 import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import { BookOpen, FormInput, Languages } from 'lucide-react';
 import platformLogo from '@public/platform_logo.svg';

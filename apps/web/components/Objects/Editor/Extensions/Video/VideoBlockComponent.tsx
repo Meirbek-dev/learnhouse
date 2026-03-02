@@ -5,7 +5,7 @@ import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { uploadNewVideoFile } from '@services/blocks/Video/video';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -16,10 +16,9 @@ import { useEffect, useRef, useState } from 'react';
 import type { ChangeEvent, DragEvent } from 'react';
 import type { NodeViewProps } from '@tiptap/react';
 import { NodeViewWrapper } from '@tiptap/react';
-import { styled } from 'styled-components';
+import { cn } from '@/lib/utils';
 import type ArtplayerType from 'artplayer';
 import type { Node } from '@tiptap/core';
-import { cn } from '@/lib/utils';
 
 const SUPPORTED_FILES = constructAcceptValue(['webm', 'mkv', 'mp4']);
 
@@ -32,44 +31,13 @@ const VIDEO_SIZES = {
 
 type VideoSize = keyof typeof VIDEO_SIZES;
 
-
-
-const UploadZone = styled(motion.div)<{ isDragging: boolean }>`
-  border: 2px dashed ${(props) => (props.isDragging ? '#3b82f6' : '#e5e7eb')};
-  background: ${(props) => (props.isDragging ? 'rgba(59, 130, 246, 0.05)' : '#ffffff')};
-  transition: all 0.2s ease;
-  border-radius: 0.75rem;
-  padding: 2rem;
-  text-align: center;
-  cursor: pointer;
-
-  &:hover {
-    background: rgba(59, 130, 246, 0.05);
-    border-color: #3b82f6;
-  }
-`;
-
-const SizeButton = styled(motion.button)<{ isActive: boolean }>`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  color: ${(props) => (props.isActive ? '#ffffff' : '#4b5563')};
-  background: ${(props) => (props.isActive ? '#3b82f6' : 'transparent')};
-  border: 1px solid ${(props) => (props.isActive ? '#3b82f6' : '#e5e7eb')};
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${(props) => (props.isActive ? '#2563eb' : '#f9fafb')};
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-`;
+const sizeButtonCn = (isActive: boolean) =>
+  cn(
+    'flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-all duration-200 cursor-pointer border',
+    isActive
+      ? 'text-white bg-blue-500 border-blue-500 hover:bg-blue-600'
+      : 'text-gray-600 bg-transparent border-gray-200 hover:bg-gray-50',
+  );
 
 interface Organization {
   org_uuid: string;
@@ -444,15 +412,18 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
                 title={t('selectVideoFile')}
               />
 
-              <UploadZone
+              <motion.div
                 ref={uploadZoneRef}
-                isDragging={isDragging}
+                className={cn(
+                  'relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200',
+                  'hover:bg-blue-500/5 hover:border-blue-500',
+                  isDragging ? 'border-blue-500 bg-blue-500/5' : 'border-gray-200 bg-white',
+                )}
                 onDragEnter={handleDragEnter}
                 onDragOver={handleDragEnter}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className="relative"
               >
                 <AnimatePresence>
                   {isLoading ? (
@@ -488,7 +459,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </UploadZone>
+              </motion.div>
 
               {error ? (
                 <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm font-medium text-red-500">
@@ -512,9 +483,9 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
                   {t('sizeLabel')}
                 </div>
                 {(Object.keys(VIDEO_SIZES) as VideoSize[]).map((size) => (
-                  <SizeButton
+                  <motion.button
                     key={size}
-                    isActive={selectedSize === size}
+                    className={sizeButtonCn(selectedSize === size)}
                     onClick={() => {
                       handleSizeChange(size);
                     }}
@@ -523,18 +494,17 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
                   >
                     {size === selectedSize && <CheckCircle2 size={14} />}
                     {t(VIDEO_SIZES[size].label)}
-                  </SizeButton>
+                  </motion.button>
                 ))}
-                <SizeButton
-                  isActive={false}
+                <motion.button
+                  className={cn(sizeButtonCn(false), 'ml-auto')}
                   onClick={handleDownload}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="ml-auto"
                 >
                   <Download size={14} />
                   {t('download')}
-                </SizeButton>
+                </motion.button>
               </div>
 
               <div className="flex justify-center items-center w-full">

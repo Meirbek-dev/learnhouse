@@ -2,7 +2,7 @@
 
 import { getCoursesLinkedToProduct, unlinkCourseFromProduct } from '@services/payments/products';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { BookOpen, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@components/ui/button';

@@ -5,7 +5,6 @@ import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
-import { styled } from 'styled-components';
 import Link from '@components/ui/AppLink';
 import type { ChangeEvent } from 'react';
 import { BlockMath } from 'react-katex';
@@ -84,55 +83,6 @@ const mathSymbols = [
   { symbol: '\\neq', display: '≠' },
   { symbol: '\\approx', display: '≈' },
 ];
-
-const EditBar = styled.div`
-  display: flex;
-  justify-content: space-between;
-  border-radius: 8px;
-  padding: 0 5px 0 12px;
-  background-color: white;
-  color: #5252528d;
-  align-items: center;
-  height: 45px;
-  border: solid 1px #e2e2e2;
-  transition: all 0.2s ease;
-
-  &:focus-within {
-    border-color: #d1d1d1;
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.03);
-  }
-
-  input {
-    width: 100%;
-    color: #494949;
-    font-size: 14px;
-    font-family: Inter, sans-serif;
-    background: none;
-    border: none;
-
-    &:focus {
-      outline: none;
-    }
-
-    &::placeholder {
-      color: #49494980;
-    }
-  }
-`;
-
-const SaveButton = styled(motion.button)`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  border: none;
-  background: rgba(217, 217, 217, 0.5);
-  color: #494949;
-  cursor: pointer;
-`;
-
 
 
 const MathEquationBlockComponent = (props: any) => {
@@ -388,7 +338,7 @@ const MathEquationBlockComponent = (props: any) => {
                 </div>
               </div>
 
-              <EditBar>
+              <div className="flex justify-between rounded-lg px-[5px] pl-3 bg-white text-[#5252528d] items-center h-[45px] border border-[#e2e2e2] transition-all duration-200 focus-within:border-[#d1d1d1] focus-within:shadow-[0_0_0_2px_rgba(0,0,0,0.03)] [&>input]:w-full [&>input]:text-[#494949] [&>input]:text-sm [&>input]:font-sans [&>input]:bg-transparent [&>input]:border-none [&>input]:outline-none [&>input::placeholder]:text-[#49494980]">
                 <input
                   ref={inputRef}
                   value={equation}
@@ -397,7 +347,7 @@ const MathEquationBlockComponent = (props: any) => {
                   type="text"
                   className="focus:ring-1 focus:ring-blue-300"
                 />
-                <SaveButton
+                <motion.button className="flex items-center justify-center w-[30px] h-[30px] rounded-[6px] border-0 bg-[rgba(217,217,217,0.5)] text-[#494949] cursor-pointer"
                   onClick={() => {
                     saveEquation();
                   }}
@@ -406,8 +356,8 @@ const MathEquationBlockComponent = (props: any) => {
                   title={t('save')}
                 >
                   <Save size={15} />
-                </SaveButton>
-              </EditBar>
+                </motion.button>
+              </div>
 
               <div className="flex items-center text-sm text-zinc-500 pl-[2px]">
                 <span>{t('referTo')}</span>

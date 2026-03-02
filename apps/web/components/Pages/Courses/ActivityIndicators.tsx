@@ -12,7 +12,7 @@ import {
   Trophy,
   Video,
 } from 'lucide-react';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { getUriWithOrg } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';

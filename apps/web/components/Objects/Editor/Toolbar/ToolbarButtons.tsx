@@ -30,14 +30,39 @@ import {
   User,
   Video,
 } from 'lucide-react';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { SiYoutube } from '@icons-pack/react-simple-icons';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { styled } from 'styled-components';
+import type { ComponentPropsWithRef } from 'react';
+import styles from './ToolbarButtons.module.css';
+import { cn } from '@/lib/utils';
 
 import DividerVerticalIcon from '@components/svg/DividerVerticalIcon';
 import LinkInputTooltip from './LinkInputTooltip';
+
+const ToolBtn = ({ className, ...props }: ComponentPropsWithRef<'div'>) => (
+  <div
+    className={cn(
+      'flex bg-[rgba(217,217,217,0.24)] rounded-[6px] min-w-[28px] h-[28px] p-[6px] mr-[6px] transition-all duration-200 ease-in-out [&>svg]:p-px cursor-pointer',
+      'hover:bg-[rgba(217,217,217,0.48)]',
+      className === 'is-active' && 'bg-[rgba(176,176,176,0.5)] hover:bg-[rgba(139,139,139,0.5)]',
+    )}
+    {...props}
+  />
+);
+
+const ToolSelect = ({ className, ...props }: ComponentPropsWithRef<'select'>) => (
+  <select
+    className={cn(
+      'bg-[rgba(217,217,217,0.185)] rounded-[6px] w-[120px] border-none h-[28px] px-[6px] pr-[20px] text-[11px] font-[Inter,sans-serif] mr-[6px] cursor-pointer',
+      'hover:bg-[rgba(217,217,217,0.3)] focus:outline-none focus:shadow-[0_0_0_2px_rgba(217,217,217,0.5)]',
+      styles.toolSelect,
+      className,
+    )}
+    {...props}
+  />
+);
 
 export const ToolbarButtons = ({ editor, props }: any) => {
   const t = useTranslations('DashPage.Editor.Toolbar');
@@ -618,66 +643,4 @@ export const ToolbarButtons = ({ editor, props }: any) => {
     </div>
   );
 };
-
-
-const ToolBtn = styled.div`
-  display: flex;
-  background: rgba(217, 217, 217, 0.24);
-  border-radius: 6px;
-  min-width: 28px;
-  height: 28px;
-  padding: 6px;
-  margin-right: 6px;
-  transition: all 0.2s ease-in-out;
-
-  svg {
-    padding: 1px;
-  }
-
-  &.is-active {
-    background: rgba(176, 176, 176, 0.5);
-
-    &:hover {
-      background: rgba(139, 139, 139, 0.5);
-      cursor: pointer;
-    }
-  }
-
-  &:hover {
-    background: rgba(217, 217, 217, 0.48);
-    cursor: pointer;
-  }
-`;
-
-const ToolSelect = styled.select`
-  display: flex;
-  background: rgba(217, 217, 217, 0.185);
-  border-radius: 6px;
-  width: 120px;
-  border: none;
-  height: 28px;
-  padding: 2px 6px;
-  font-size: 11px;
-  font-family: Inter, sans-serif;
-  margin-right: 6px;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 6px center;
-  background-size: 12px;
-  padding-right: 20px;
-
-  &:hover {
-    background-color: rgba(217, 217, 217, 0.3);
-  }
-
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(217, 217, 217, 0.5);
-  }
-`;
-
 

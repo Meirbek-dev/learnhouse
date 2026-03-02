@@ -35,7 +35,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useEffect, useEffectEvent, useRef, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { getUriWithoutOrg } from '@services/config/config';
 import { SiStripe } from '@icons-pack/react-simple-icons';
 import { useOrg } from '@components/Contexts/OrgContext';

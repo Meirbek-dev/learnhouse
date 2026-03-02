@@ -27,7 +27,7 @@ import RolesUpdate from '@components/Objects/Modals/Dash/OrgUsers/RolesUpdate';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 
 import { AlertTriangle, KeyRound, Loader2, LogOut, Search } from 'lucide-react';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { removeUserFromOrg } from '@services/organizations/orgs';
 import React, { useMemo, useState, useTransition } from 'react';

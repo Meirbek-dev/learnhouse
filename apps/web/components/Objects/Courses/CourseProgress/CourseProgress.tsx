@@ -1,5 +1,5 @@
 import { ArrowRight, BookOpenCheck, Check, ChevronDown, Circle, FileText, Layers, Trophy, Video } from 'lucide-react';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getUriWithOrg } from '@services/config/config';
 import AppLink from '@/components/ui/AppLink';

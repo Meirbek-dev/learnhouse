@@ -1,6 +1,6 @@
-import NewCollectionButton from '@components/Objects/StyledElements/Buttons/NewCollectionButton';
-import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
+import NewCollectionButton from '@/components/Objects/Elements/Buttons/NewCollectionButton';
+import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfContentTitle';
+import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { PermissionGuard } from '@components/Security/PermissionGuard';
@@ -64,7 +64,7 @@ const CollectionsPage = async (params: any) => {
   const collections = await getOrgCollections(org_id, access_token);
 
   return (
-    <GeneralWrapperStyled>
+    <GeneralWrapper>
       <div className="mb-8 flex flex-col space-y-4">
         <div className="flex items-center justify-between">
           <TypeOfContentTitle
@@ -124,7 +124,7 @@ const CollectionsPage = async (params: any) => {
           )}
         </div>
       </div>
-    </GeneralWrapperStyled>
+    </GeneralWrapper>
   );
 };
 

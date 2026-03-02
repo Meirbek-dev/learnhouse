@@ -18,7 +18,7 @@ import { AlertTriangle, Globe, Info, Loader2, SquareUserRound, Users, X } from '
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { useEffect, useState, useTransition } from 'react';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';

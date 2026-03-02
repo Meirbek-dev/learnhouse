@@ -4,7 +4,7 @@ import { AlertCircle, BookOpen, Loader2, LogIn, ShoppingCart } from 'lucide-reac
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { getProductsByCourse } from '@services/payments/products';
 import { checkPaidAccess } from '@services/payments/payments';

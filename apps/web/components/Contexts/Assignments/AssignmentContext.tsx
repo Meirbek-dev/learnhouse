@@ -1,7 +1,7 @@
 'use client';
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import ErrorUI from '@components/Objects/StyledElements/Error/Error';
+import ErrorUI from '@/components/Objects/Elements/Error/Error';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';

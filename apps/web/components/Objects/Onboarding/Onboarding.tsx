@@ -14,7 +14,7 @@ import {
 import OnBoardAssignments from '@public/onboarding/OnBoardAssignments.png';
 import OnBoardActivities from '@public/onboarding/OnBoardActivities.png';
 import OnBoardPayments from '@public/onboarding/OnBoardPayments.png';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import OnBoardWelcome from '@public/onboarding/OnBoardWelcome.png';
 import OnBoardCourses from '@public/onboarding/OnBoardCourses.png';
 import OnBoardEditor from '@public/onboarding/OnBoardEditor.png';

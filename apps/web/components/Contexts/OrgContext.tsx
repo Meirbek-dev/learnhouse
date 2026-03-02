@@ -2,7 +2,7 @@
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
-import ErrorUI from '@components/Objects/StyledElements/Error/Error';
+import ErrorUI from '@/components/Objects/Elements/Error/Error';
 import { createContext, useContext, useEffect, useRef } from 'react';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { Home, LogOut, PersonStanding } from 'lucide-react';

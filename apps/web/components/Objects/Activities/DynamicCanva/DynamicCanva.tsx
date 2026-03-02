@@ -35,7 +35,7 @@ import Youtube from '@tiptap/extension-youtube';
 import { Table } from '@tiptap/extension-table';
 import TableOfContents from './TableOfContents';
 import StarterKit from '@tiptap/starter-kit';
-import { styled } from 'styled-components';
+import styles from './DynamicCanva.module.css';
 
 // Lowlight initialization at module scope (one-time)
 const LOWLIGHT = (() => {
@@ -163,254 +163,19 @@ const Canva = (props: Editor) => {
   return (
     <EditorOptionsProvider options={{ isEditable: false }}>
       <div className="w-full mx-auto relative">
-        <AIToolkitWrapper>
+        <div className="absolute inset-0 pointer-events-none z-[1000] [&>*]:pointer-events-auto">
           <AICanvaToolkit
             activity={props.activity}
             editor={editor}
           />
-        </AIToolkitWrapper>
-        <ContentWrapper>
+        </div>
+        <div className={styles.contentWrapper}>
           {!isMobile && <TableOfContents editor={editor} />}
           <EditorContent editor={editor} />
-        </ContentWrapper>
+        </div>
       </div>
     </EditorOptionsProvider>
   );
 };
-
-
-const AIToolkitWrapper = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 1000;
-
-  // Allow pointer events for the bubble menu content
-  * {
-    pointer-events: auto;
-  }
-`;
-
-const ContentWrapper = styled.div`
-  display: flex;
-  width: 100%;
-  height: 100%;
-
-  // Default: when TableOfContents has content, it takes 20% and editor takes 80%
-  > div:first-child:not(:empty) {
-    flex-shrink: 0;
-    width: 20%;
-    padding-right: 1rem;
-  }
-
-  > div:last-child {
-    flex: 1;
-  }
-
-  // When TableOfContents is empty, editor takes full width
-  > div:first-child:empty {
-    width: 0;
-    padding-right: 0;
-    overflow: hidden;
-  }
-
-  > div:first-child:empty + div {
-    width: 100%;
-  }
-
-  .ProseMirror {
-    flex: 1;
-    padding: 1rem;
-    font-family: var(--font-inter), Inter, system-ui, 'Segoe UI', Arial, sans-serif;
-    font-size: 1.1rem;
-    color: #222;
-    // disable chrome outline
-    caret-color: transparent;
-
-    h1 {
-      font-size: 32px;
-      font-weight: 600;
-      margin-bottom: 24px;
-    }
-
-    h2 {
-      font-size: 28px;
-      font-weight: 600;
-      margin-bottom: 24px;
-    }
-
-    h3 {
-      font-size: 24px;
-      font-weight: 600;
-      margin-bottom: 24px;
-    }
-
-    h4 {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 24px;
-    }
-
-    h5 {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 24px;
-    }
-
-    // Link styling
-    a {
-      color: #2563eb;
-      text-decoration: underline;
-      cursor: pointer;
-      transition: color 0.2s ease;
-
-      &:hover {
-        color: #1d4ed8;
-        text-decoration: none;
-      }
-    }
-
-    ul,
-    ol {
-      padding: 0 1rem;
-      padding-left: 20px;
-    }
-
-    ul {
-      list-style-type: disc;
-    }
-
-    ol {
-      list-style-type: decimal;
-    }
-
-    table {
-      width: 100%;
-      margin: 0;
-      overflow: hidden;
-      table-layout: fixed;
-      border-collapse: collapse;
-
-      td,
-      th {
-        position: relative;
-        box-sizing: border-box;
-        min-width: 1em;
-        padding: 6px 8px;
-        vertical-align: top;
-        border: 1px solid rgba(139, 139, 139, 0.4);
-
-        > * {
-          margin-bottom: 0;
-        }
-      }
-
-      th {
-        font-weight: bold;
-        text-align: left;
-        background-color: rgba(217, 217, 217, 0.4);
-      }
-
-      .selectedCell:after {
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        z-index: 2;
-        background: rgba(139, 139, 139, 0.2);
-        content: '';
-        pointer-events: none;
-      }
-
-      .column-resize-handle {
-        position: absolute;
-        top: 0;
-        right: -2px;
-        bottom: -2px;
-        width: 4px;
-        background-color: #8d78eb;
-        pointer-events: none;
-      }
-    }
-
-    &:focus {
-      outline: none !important;
-      outline-style: none !important;
-      box-shadow: none !important;
-    }
-
-    // Code Block
-    pre {
-      padding: 0.75rem 1rem;
-      color: #fff;
-      font-family: var(--font-jetbrains-mono), monospace;
-      background: #0d0d0d;
-      border-radius: 0.5rem;
-
-      code {
-        padding: 0;
-        color: inherit;
-        font-size: 0.8rem;
-        background: none;
-      }
-
-      .hljs-comment,
-      .hljs-quote {
-        color: #616161;
-      }
-
-      .hljs-variable,
-      .hljs-template-variable,
-      .hljs-attribute,
-      .hljs-tag,
-      .hljs-name,
-      .hljs-regexp,
-      .hljs-link,
-      .hljs-name,
-      .hljs-selector-id,
-      .hljs-selector-class {
-        color: #f98181;
-      }
-
-      .hljs-number,
-      .hljs-meta,
-      .hljs-built_in,
-      .hljs-builtin-name,
-      .hljs-literal,
-      .hljs-type,
-      .hljs-params {
-        color: #fbbc88;
-      }
-
-      .hljs-string,
-      .hljs-symbol,
-      .hljs-bullet {
-        color: #b9f18d;
-      }
-
-      .hljs-title,
-      .hljs-section {
-        color: #faf594;
-      }
-
-      .hljs-keyword,
-      .hljs-selector-tag {
-        color: #70cff8;
-      }
-
-      .hljs-emphasis {
-        font-style: italic;
-      }
-
-      .hljs-strong {
-        font-weight: 700;
-      }
-    }
-  }
-`;
 
 export default Canva;

@@ -4,7 +4,7 @@ import {
 } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { FileUp, ListTodo, PanelLeftOpen, Plus, Type } from 'lucide-react';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 

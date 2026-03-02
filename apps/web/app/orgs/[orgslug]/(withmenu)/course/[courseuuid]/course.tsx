@@ -17,7 +17,7 @@ import {
 // Import custom components
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile';
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
+import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import CoursesActions from '@components/Objects/Courses/CourseActions/CoursesActions';
 import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAuthors';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
@@ -209,7 +209,7 @@ const CourseClient = (props: any) => {
         <PageLoading />
       ) : (
         <>
-          <GeneralWrapperStyled>
+          <GeneralWrapper>
             <CourseBreadcrumbs
               course={course}
               orgslug={orgslug}
@@ -578,7 +578,7 @@ const CourseClient = (props: any) => {
               courseUuid={course?.course_uuid}
               onMutate={mutateDiscussions}
             />
-          </GeneralWrapperStyled>
+          </GeneralWrapper>
           {/* Mobile Actions Box */}
           {isMobile ? (
             <CourseActionsMobile

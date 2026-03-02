@@ -1,6 +1,6 @@
 'use client';
 
-import ErrorUI from '@components/Objects/StyledElements/Error/Error';
+import ErrorUI from '@/components/Objects/Elements/Error/Error';
 import { OrgProvider } from '@components/Contexts/OrgContext';
 import { Spinner } from '@components/ui/spinner';
 import { useTranslations } from 'next-intl';

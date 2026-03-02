@@ -3,7 +3,7 @@
 import { Backpack, BadgeDollarSign, BookCopy, Home, School, Settings, ShieldCheck, Users } from 'lucide-react';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import AppLink from '@/components/ui/AppLink';
 import { useTranslations } from 'next-intl';
 

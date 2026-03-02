@@ -2,7 +2,7 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { updateAssignment } from '@services/courses/assignments';
 import { de, enUS, es, fr, ru } from 'date-fns/locale';

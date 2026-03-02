@@ -5,7 +5,7 @@ import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/Assign
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { SendHorizonal, UserCheck, X } from 'lucide-react';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';

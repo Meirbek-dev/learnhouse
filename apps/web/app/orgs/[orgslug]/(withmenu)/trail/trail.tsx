@@ -11,8 +11,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
+import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfContentTitle';
+import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { RecentActivityFeed } from '@/components/Dashboard/Gamification/recent-activity-feed';
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import { Leaderboard } from '@/components/Dashboard/Gamification/leaderboard';
@@ -99,7 +99,7 @@ const Trail = (params: any) => {
   };
 
   return (
-    <GeneralWrapperStyled>
+    <GeneralWrapper>
       <div className="mb-6 flex items-center justify-between">
         <TypeOfContentTitle
           title={t('title')}
@@ -210,7 +210,7 @@ const Trail = (params: any) => {
           />
         </div>
       </div>
-    </GeneralWrapperStyled>
+    </GeneralWrapper>
   );
 };
 

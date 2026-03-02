@@ -1,12 +1,12 @@
 'use client';
 
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
-import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
+import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfContentTitle';
+import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
+import NewCourseButton from '@/components/Objects/Elements/Buttons/NewCourseButton';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
 import CourseGridClient from '@components/Landings/CourseGridClient';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { revalidateTags } from '@services/utils/ts/requests';
 
 import { useSearchParams } from 'next/navigation';
@@ -80,7 +80,7 @@ const Courses = (props: CourseProps) => {
 
   return (
     <div className="w-full">
-      <GeneralWrapperStyled>
+      <GeneralWrapper>
         <div className="mb-2 flex flex-col space-y-2">
           <div className="flex items-center justify-between">
             <TypeOfContentTitle
@@ -123,7 +123,7 @@ const Courses = (props: CourseProps) => {
             />
           )}
         </div>
-      </GeneralWrapperStyled>
+      </GeneralWrapper>
     </div>
   );
 };

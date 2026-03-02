@@ -3,7 +3,7 @@ import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { AlertTriangle, Download, Expand, FileText } from 'lucide-react';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { uploadNewPDFFile } from '@services/blocks/Pdf/pdf';
 import { useOrg } from '@components/Contexts/OrgContext';

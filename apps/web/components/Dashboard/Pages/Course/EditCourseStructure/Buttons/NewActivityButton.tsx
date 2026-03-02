@@ -4,7 +4,7 @@ import { createActivity, createExternalVideoActivity, createFileActivity } from 
 import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
 import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';

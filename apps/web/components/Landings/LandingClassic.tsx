@@ -1,7 +1,7 @@
 import { LoginBonusHandler } from '@/app/orgs/[orgslug]/(withmenu)/_components/LoginBonusHandler';
-import NewCollectionButton from '@components/Objects/StyledElements/Buttons/NewCollectionButton';
-import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
+import NewCollectionButton from '@/components/Objects/Elements/Buttons/NewCollectionButton';
+import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfContentTitle';
+import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import { HeroSection } from '@/components/Dashboard/Gamification/hero-section';
@@ -129,7 +129,7 @@ const LandingClassic = async ({
     >
       <LoginBonusHandler orgId={org_id} />
       <div className="min-h-screen w-full">
-        <GeneralWrapperStyled>
+        <GeneralWrapper>
           <div className="space-y-12">
             {/* Gamification Hero Section */}
             {gamificationProfile && (
@@ -202,7 +202,7 @@ const LandingClassic = async ({
               </div>
             </section>
           </div>
-        </GeneralWrapperStyled>
+        </GeneralWrapper>
       </div>
     </GamificationProvider>
   );

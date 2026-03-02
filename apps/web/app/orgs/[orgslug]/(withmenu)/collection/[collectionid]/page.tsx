@@ -1,4 +1,4 @@
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
+import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getCollectionById } from '@services/courses/collections';
@@ -58,7 +58,7 @@ const CollectionPage = async (params: any) => {
   };
 
   return (
-    <GeneralWrapperStyled>
+    <GeneralWrapper>
       <h2 className="text-sm font-semibold text-gray-400">{t('collection')}</h2>
       <h1 className="text-3xl font-semibold">{col.name}</h1>
       <br />
@@ -89,7 +89,7 @@ const CollectionPage = async (params: any) => {
           </div>
         ))}
       </div>
-    </GeneralWrapperStyled>
+    </GeneralWrapper>
   );
 };
 

@@ -35,9 +35,6 @@ const nextConfig: NextConfig = {
       '@tiptap/extension-code-block-lowlight',
     ],
   },
-  compiler: {
-    styledComponents: true,
-  },
   reactCompiler: true,
   reactStrictMode: true,
   cacheComponents: true,
