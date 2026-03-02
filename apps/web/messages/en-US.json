@@ -2953,6 +2953,7 @@
         "courseEditor": "Course Editor",
         "editor": "Editor",
         "noAssignments": "There are no assignments available for this course, create assignments in the course editor",
+        "noCourses": "You don't have any courses you can edit. Create a course or ask an admin to add you as a contributor.",
         "submissions": "Submissions"
       },
       "NewTaskModal": {

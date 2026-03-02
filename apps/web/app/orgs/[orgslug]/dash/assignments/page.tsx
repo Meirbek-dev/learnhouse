@@ -3,7 +3,7 @@ import { FileText } from 'lucide-react';
 import { getAssignmentsFromCourses } from '@services/courses/assignments';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
-import { getOrgCourses } from '@services/courses/courses';
+import { getEditableOrgCourses } from '@services/courses/courses';
 import { Card, CardContent } from '@/components/ui/card';
 import { getTranslations } from 'next-intl/server';
 import { Spinner } from '@components/ui/spinner';
@@ -34,7 +34,7 @@ const AssignmentsHome = async (params: any) => {
   }
   const org = await getOrganizationContextInfo(orgslug, undefined, access_token);
 
-  const coursesData = await getOrgCourses(orgslug, undefined, access_token);
+  const coursesData = await getEditableOrgCourses(orgslug, access_token);
   const courses = coursesData?.courses || [];
 
   // Fetch assignments in one batched request

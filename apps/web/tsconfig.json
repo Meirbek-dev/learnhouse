@@ -3,8 +3,8 @@
   "compilerOptions": {
     "noImplicitOverride": true,
     "alwaysStrict": true,
-    "target": "ES2024",
-    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "target": "esnext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "moduleDetection": "force",

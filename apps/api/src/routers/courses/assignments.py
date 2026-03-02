@@ -28,6 +28,7 @@ from src.services.courses.activities.assignments import (
     delete_assignment_task_submission,
     get_assignments_from_course,
     get_assignments_from_courses,
+    get_editable_assignments_from_courses,
     get_grade_assignment_submission,
     grade_assignment_submission,
     handle_assignment_task_submission,
@@ -539,6 +540,25 @@ async def api_get_assignments_for_courses(
     """
     course_uuids: list[str] = payload.get("course_uuids", [])
     return await get_assignments_from_courses(
+        request, course_uuids, current_user, db_session
+    )
+
+
+@router.post("/courses/editable")
+async def api_get_editable_assignments_for_courses(
+    request: Request,
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session=Depends(get_db_session),
+    payload: dict = Body(...),
+):
+    """
+    Get assignments the current user can edit for multiple courses.
+    Body: { "course_uuids": ["course_xxx", ...] }
+    Returns a mapping course_uuid -> list of assignments.
+    Only includes courses/assignments where the user has assignment:update permission.
+    """
+    course_uuids: list[str] = payload.get("course_uuids", [])
+    return await get_editable_assignments_from_courses(
         request, course_uuids, current_user, db_session
     )
 

@@ -582,8 +582,8 @@ async def create_course(
         user_id=current_user.id,
         authorship=ResourceAuthorshipEnum.CREATOR,
         authorship_status=ResourceAuthorshipStatusEnum.ACTIVE,
-        creation_date=datetime.now(tz=UTC),
-        update_date=datetime.now(tz=UTC),
+        creation_date=datetime.now(tz=UTC).isoformat(),
+        update_date=datetime.now(tz=UTC).isoformat(),
     )
     db_session.add(resource_author)
     db_session.commit()
@@ -943,6 +943,185 @@ async def get_user_courses(
         result.append(course_read)
 
     return result
+
+
+async def get_editable_courses_orgslug(
+    request: Request,
+    current_user: PublicUser | AnonymousUser,
+    org_slug: str,
+    db_session: Session,
+    page: int = 1,
+    limit: int = 20,
+) -> list[CourseRead]:
+    """
+    Return courses for an org that the current user has permission to edit
+    (i.e. course:update). Anonymous users always get an empty list.
+
+    Scope resolution:
+    - course:update:all or course:update:org  → all courses in the org
+    - course:update:own                        → only courses where user is an
+                                                 active ResourceAuthor
+    """
+    from collections import OrderedDict
+
+    from sqlalchemy.orm import aliased
+
+    if isinstance(current_user, AnonymousUser):
+        return []
+
+    org = db_session.exec(
+        select(Organization).where(Organization.slug == org_slug)
+    ).first()
+    if not org:
+        return []
+
+    checker = PermissionChecker(db_session)
+    granted = checker._get_or_load(current_user.id, org.id)
+
+    has_broad_update = PermissionChecker._has_perm(
+        granted, "course", "update", "all"
+    ) or PermissionChecker._has_perm(granted, "course", "update", "org")
+
+    offset = (page - 1) * limit
+
+    if has_broad_update:
+        id_query = (
+            select(Course.id)
+            .join(Organization)
+            .where(Organization.slug == org_slug)
+            .distinct()
+            .offset(offset)
+            .limit(limit)
+        )
+    else:
+        has_own_update = PermissionChecker._has_perm(
+            granted, "course", "update", "own"
+        )
+        if not has_own_update:
+            return []
+
+        id_query = (
+            select(Course.id)
+            .join(Organization, Organization.id == Course.org_id)
+            .join(ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid)
+            .where(
+                Organization.slug == org_slug,
+                ResourceAuthor.user_id == current_user.id,
+                ResourceAuthor.authorship_status
+                == ResourceAuthorshipStatusEnum.ACTIVE,
+            )
+            .distinct()
+            .offset(offset)
+            .limit(limit)
+        )
+
+    id_subquery = id_query.subquery()
+
+    AuthorRA = aliased(ResourceAuthor)
+    AuthorUser = aliased(User)
+
+    combined_query = (
+        select(Course, AuthorRA, AuthorUser)
+        .where(Course.id.in_(select(id_subquery.c.id)))
+        .outerjoin(AuthorRA, AuthorRA.resource_uuid == Course.course_uuid)
+        .outerjoin(AuthorUser, AuthorRA.user_id == AuthorUser.id)
+        .order_by(Course.id, AuthorRA.id.asc())
+    )
+
+    results = db_session.exec(combined_query).all()
+
+    if not results:
+        return []
+
+    courses_map: OrderedDict[int, tuple] = OrderedDict()
+    for course, ra, author_user in results:
+        cid = course.id
+        if cid not in courses_map:
+            courses_map[cid] = (course, [])
+        if ra is not None and author_user is not None:
+            courses_map[cid][1].append(
+                AuthorWithRole(
+                    user=UserRead.model_validate(author_user),
+                    authorship=ra.authorship,
+                    authorship_status=ra.authorship_status,
+                    creation_date=ra.creation_date,
+                    update_date=ra.update_date,
+                )
+            )
+
+    course_reads = []
+    for course, authors in courses_map.values():
+        course_read = CourseRead.model_validate(
+            {
+                "id": course.id or 0,
+                "org_id": course.org_id,
+                "name": course.name,
+                "description": course.description or "",
+                "about": course.about or "",
+                "learnings": course.learnings or "",
+                "tags": course.tags or "",
+                "thumbnail_image": course.thumbnail_image or "",
+                "public": course.public,
+                "open_to_contributors": course.open_to_contributors,
+                "course_uuid": course.course_uuid,
+                "creation_date": course.creation_date,
+                "update_date": course.update_date,
+                "authors": authors,
+            }
+        )
+        course_reads.append(course_read)
+
+    return course_reads
+
+
+async def count_editable_courses_orgslug(
+    current_user: PublicUser | AnonymousUser,
+    org_slug: str,
+    db_session: Session,
+) -> int:
+    """Count courses the current user can edit in an org."""
+    if isinstance(current_user, AnonymousUser):
+        return 0
+
+    org = db_session.exec(
+        select(Organization).where(Organization.slug == org_slug)
+    ).first()
+    if not org:
+        return 0
+
+    checker = PermissionChecker(db_session)
+    granted = checker._get_or_load(current_user.id, org.id)
+
+    has_broad_update = PermissionChecker._has_perm(
+        granted, "course", "update", "all"
+    ) or PermissionChecker._has_perm(granted, "course", "update", "org")
+
+    if has_broad_update:
+        query = (
+            select(func.count(Course.id.distinct()))
+            .join(Organization)
+            .where(Organization.slug == org_slug)
+        )
+    else:
+        has_own_update = PermissionChecker._has_perm(
+            granted, "course", "update", "own"
+        )
+        if not has_own_update:
+            return 0
+
+        query = (
+            select(func.count(Course.id.distinct()))
+            .join(Organization, Organization.id == Course.org_id)
+            .join(ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid)
+            .where(
+                Organization.slug == org_slug,
+                ResourceAuthor.user_id == current_user.id,
+                ResourceAuthor.authorship_status
+                == ResourceAuthorshipStatusEnum.ACTIVE,
+            )
+        )
+
+    return db_session.exec(query).one()
 
 
 async def get_course_user_rights(

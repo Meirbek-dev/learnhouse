@@ -20,6 +20,7 @@ export function gamificationTags(orgId: number): string[] {
 export const tags = {
   organizations: 'organizations',
   courses: 'courses',
+  editableCourses: 'editable_courses',
   collections: 'collections',
   activities: 'activities',
   users: 'users',

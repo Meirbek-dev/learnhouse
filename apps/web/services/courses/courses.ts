@@ -55,6 +55,50 @@ export async function getOrgCourses(org_slug: string, _next?: any, access_token?
   return fetchOrgCourses(org_slug, page, limit, access_token);
 }
 
+/**
+ * Cached fetch for courses the current user can edit in an org
+ */
+async function fetchEditableOrgCourses(
+  org_slug: string,
+  page = 1,
+  limit = 20,
+  access_token?: string,
+): Promise<{ courses: any[]; total: number }> {
+  'use cache';
+  cacheTag(tags.editableCourses);
+  cacheLife(CacheProfiles.courses);
+
+  if (!access_token) {
+    return { courses: [], total: 0 };
+  }
+
+  const result = await fetch(
+    `${getAPIUrl()}courses/org_slug/${org_slug}/editable/page/${page}/limit/${limit}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${access_token}`,
+      },
+    },
+  );
+
+  if (!result.ok) {
+    const error: any = new Error(result.statusText || 'Request failed');
+    error.status = result.status;
+    throw error;
+  }
+
+  const courses = await result.json();
+  const total = Number.parseInt(result.headers.get('X-Total-Count') ?? '0', 10);
+
+  return { courses, total };
+}
+
+export async function getEditableOrgCourses(org_slug: string, access_token?: any, page = 1, limit = 20) {
+  return fetchEditableOrgCourses(org_slug, page, limit, access_token);
+}
+
 export async function searchOrgCourses(
   org_slug: string,
   query: string,
@@ -112,6 +156,7 @@ export async function updateCourse(course_uuid: string, data: any, access_token:
   if (result.ok) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
+    revalidateTag(tags.editableCourses, 'max');
   }
 
   return data_result;
@@ -178,6 +223,7 @@ export async function updateCourseThumbnail(course_uuid: string, formData: FormD
   if (metadata.success) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
+    revalidateTag(tags.editableCourses, 'max');
   }
 
   return metadata;
@@ -198,7 +244,7 @@ export async function createNewCourse(org_id: number, course_body: any, thumbnai
   }
 
   const result = await fetch(
-    `${getAPIUrl()}courses/?org_id=${org_id}`,
+    `${getAPIUrl()}courses?org_id=${org_id}`,
     RequestBodyFormWithAuthHeader('POST', formData, null, access_token),
   );
   const metadata = await getResponseMetadata(result);
@@ -207,6 +253,7 @@ export async function createNewCourse(org_id: number, course_body: any, thumbnai
   if (metadata.success) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
+    revalidateTag(tags.editableCourses, 'max');
   }
 
   return metadata;
@@ -223,6 +270,7 @@ export async function deleteCourseFromBackend(course_uuid: string, access_token:
   if (result.ok) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
+    revalidateTag(tags.editableCourses, 'max');
   }
 
   return data_result;
@@ -253,6 +301,7 @@ export async function editContributor(
   if (metadata.success) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
+    revalidateTag(tags.editableCourses, 'max');
   }
 
   return metadata;
@@ -285,6 +334,7 @@ export async function bulkAddContributors(course_uuid: string, data: any, access
   if (metadata.success) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
+    revalidateTag(tags.editableCourses, 'max');
   }
 
   return metadata;
@@ -301,6 +351,7 @@ export async function bulkRemoveContributors(course_uuid: string, data: any, acc
   if (result.ok) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
+    revalidateTag(tags.editableCourses, 'max');
   }
 
   return data_result;

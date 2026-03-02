@@ -2123,3 +2123,73 @@ async def get_assignments_from_courses(
             )
 
     return result
+
+
+async def get_editable_assignments_from_courses(
+    request: Request,
+    course_uuids: list[str],
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> dict[str, list[AssignmentRead]]:
+    """
+    Get assignments the current user can edit for multiple courses.
+
+    Only includes assignments from courses where the user has
+    assignment:update permission. Returns a mapping of
+    course_uuid -> list[AssignmentRead]; every input uuid is present
+    (empty list when the user lacks edit access or there are no assignments).
+    """
+    result: dict[str, list[AssignmentRead]] = {uuid: [] for uuid in course_uuids}
+
+    if isinstance(current_user, AnonymousUser) or not course_uuids:
+        return result
+
+    statement = select(Course).where(Course.course_uuid.in_(course_uuids))
+    courses = db_session.exec(statement).all()
+
+    checker = PermissionChecker(db_session)
+
+    # Filter to courses where the user has assignment:update permission
+    editable_course_ids: set[int] = set()
+    course_id_to_uuid: dict[int, str] = {}
+    for c in courses:
+        if checker.check(
+            current_user.id,
+            "assignment:update",
+            c.org_id,
+            resource_owner_id=c.creator_id,
+        ):
+            editable_course_ids.add(c.id)
+            course_id_to_uuid[c.id] = c.course_uuid
+
+    if not editable_course_ids:
+        return result
+
+    # Load activities for editable courses
+    activities_statement = select(Activity).where(
+        Activity.course_id.in_(list(editable_course_ids))
+    )
+    activities = db_session.exec(activities_statement).all()
+
+    activity_id_to_course_uuid = {
+        a.id: course_id_to_uuid.get(a.course_id) for a in activities
+    }
+    activity_ids = list(activity_id_to_course_uuid.keys())
+
+    if not activity_ids:
+        return result
+
+    # Load assignments for those activities
+    assignments_statement = select(Assignment).where(
+        Assignment.activity_id.in_(activity_ids)
+    )
+    assignments = db_session.exec(assignments_statement).all()
+
+    for assignment in assignments:
+        course_uuid = activity_id_to_course_uuid.get(assignment.activity_id)
+        if course_uuid:
+            result.setdefault(course_uuid, []).append(
+                AssignmentRead.model_validate(assignment)
+            )
+
+    return result

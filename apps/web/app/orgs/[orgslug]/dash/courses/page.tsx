@@ -1,5 +1,5 @@
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { getOrgCourses } from '@services/courses/courses';
+import { getEditableOrgCourses } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { auth } from '@/auth';
@@ -50,7 +50,7 @@ async function CoursesPage(props: {
   const org = await getOrganizationContextInfo(orgslug);
   const session = await auth();
   const access_token = session?.tokens?.access_token;
-  const { courses, total } = await getOrgCourses(orgslug, undefined, access_token || null, 1, COURSES_PER_PAGE);
+  const { courses, total } = await getEditableOrgCourses(orgslug, access_token || undefined, 1, COURSES_PER_PAGE);
 
   return (
     <CoursesHome
