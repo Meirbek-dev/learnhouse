@@ -120,7 +120,7 @@ function normalizeLeaderboard(payload?: RawLeaderboardResponse | null): Organiza
 async function getAccessToken(): Promise<string | null> {
   try {
     const session = await auth();
-    const token = (session)?.tokens?.access_token as string | undefined;
+    const token = session?.tokens?.access_token as string | undefined;
     return token || null;
   } catch {
     // Silently fail for unauthorized users - this is expected behavior

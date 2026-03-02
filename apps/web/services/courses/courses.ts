@@ -72,16 +72,13 @@ async function fetchEditableOrgCourses(
     return { courses: [], total: 0 };
   }
 
-  const result = await fetch(
-    `${getAPIUrl()}courses/org_slug/${org_slug}/editable/page/${page}/limit/${limit}`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${access_token}`,
-      },
+  const result = await fetch(`${getAPIUrl()}courses/org_slug/${org_slug}/editable/page/${page}/limit/${limit}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${access_token}`,
     },
-  );
+  });
 
   if (!result.ok) {
     const error: any = new Error(result.statusText || 'Request failed');

@@ -32,6 +32,7 @@ import {
   getFinalGrade,
   submitAssignmentForGrading,
 } from '@services/courses/assignments';
+import { CourseProvider, type Activity, type Chapter, type CourseStructure } from '@components/Contexts/CourseContext';
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
@@ -48,7 +49,6 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import CourseEndView from '@components/Pages/Activity/CourseEndView';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
-import { CourseProvider, type Activity, type Chapter, type CourseStructure } from '@components/Contexts/CourseContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -879,7 +879,9 @@ const ActivityClient = (props: ActivityClientProps) => {
                             <p className="text-base font-bold text-gray-700">
                               {getChapterNameByActivityId(course, activity!.id)}
                             </p>
-                            <h1 className="text-2xl font-bold text-gray-950 first-letter:uppercase">{activity!.name}</h1>
+                            <h1 className="text-2xl font-bold text-gray-950 first-letter:uppercase">
+                              {activity!.name}
+                            </h1>
                             {/* Authors and Dates Section */}
                             <div className="mt-2 flex flex-wrap items-center gap-3">
                               {/* Avatars */}

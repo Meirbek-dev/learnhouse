@@ -12,7 +12,7 @@ export default function AppLink({ prefetch = false, children, ...rest }: AppLink
   return (
     <NextLink
       prefetch={prefetch}
-      {...(rest)}
+      {...rest}
     >
       {children}
     </NextLink>

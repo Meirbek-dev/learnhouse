@@ -139,7 +139,7 @@ export function GamificationProfileSection({
               <div className="text-right text-sm">
                 <div className="font-semibold">{profile.total_xp.toLocaleString()} XP</div>
                 <div className="text-muted-foreground text-xs">
-                  {(profile).xp_to_next_level?.toLocaleString() || 0} {t('levelIndicators.xpToNext')}
+                  {profile.xp_to_next_level?.toLocaleString() || 0} {t('levelIndicators.xpToNext')}
                 </div>
               </div>
             </div>

@@ -2,8 +2,8 @@ import { FileText } from 'lucide-react';
 
 import { getAssignmentsFromCourses } from '@services/courses/assignments';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { getEditableOrgCourses } from '@services/courses/courses';
+import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { Card, CardContent } from '@/components/ui/card';
 import { getTranslations } from 'next-intl/server';
 import { Spinner } from '@components/ui/spinner';

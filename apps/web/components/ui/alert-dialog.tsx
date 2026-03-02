@@ -20,7 +20,7 @@ function AlertDialogTrigger({ nativeButton, ...props }: AlertDialogPrimitive.Tri
   // If the caller explicitly provides `nativeButton`, honor it. Otherwise,
   // attempt to detect whether the `render` prop or `children` is a native
   // <button> element (string type === 'button') or a local `Button` component.
-  const renderProp = (props).render ?? (props).children;
+  const renderProp = props.render ?? props.children;
   const isNativeRenderButton =
     React.isValidElement(renderProp) && typeof renderProp.type === 'string' && renderProp.type === 'button';
   const isLocalButtonComponent = React.isValidElement(renderProp) && renderProp.type === Button;
@@ -34,12 +34,8 @@ function AlertDialogTrigger({ nativeButton, ...props }: AlertDialogPrimitive.Tri
   // didn't provide a `render` prop, explicitly use a non-button wrapper
   // element (a <div>) for the trigger. This prevents the primitive from
   // rendering an outer native <button> around the inner native <button>.
-  const shouldProvideNonButtonWrapper = isLocalButtonComponent && !(props).render;
-  const renderWrapper = shouldProvideNonButtonWrapper ? (
-    <div data-slot="alert-dialog-trigger" />
-  ) : (
-    (props).render
-  );
+  const shouldProvideNonButtonWrapper = isLocalButtonComponent && !props.render;
+  const renderWrapper = shouldProvideNonButtonWrapper ? <div data-slot="alert-dialog-trigger" /> : props.render;
 
   return (
     <AlertDialogPrimitive.Trigger

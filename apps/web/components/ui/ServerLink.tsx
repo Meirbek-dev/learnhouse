@@ -10,7 +10,7 @@ export default function ServerLink({ prefetch = false, children, ...rest }: Serv
   return (
     <NextLink
       prefetch={prefetch}
-      {...(rest)}
+      {...rest}
     >
       {children}
     </NextLink>

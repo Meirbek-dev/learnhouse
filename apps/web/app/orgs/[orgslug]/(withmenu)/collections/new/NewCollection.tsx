@@ -50,7 +50,8 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
     if (!courses || !searchQuery.trim()) return courses || [];
     const query = searchQuery.toLowerCase();
     return courses.filter(
-      (course: CourseListItem) => course.name.toLowerCase().includes(query) || course.description?.toLowerCase().includes(query),
+      (course: CourseListItem) =>
+        course.name.toLowerCase().includes(query) || course.description?.toLowerCase().includes(query),
     );
   }, [courses, searchQuery]);
 
