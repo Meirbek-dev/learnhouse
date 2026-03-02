@@ -15,7 +15,7 @@ import useSWR from 'swr';
 
 interface CoursePaidOptionsProps {
   course: {
-    id: string;
+    id: number;
     org_id: number;
   };
 }

@@ -45,7 +45,7 @@ interface CourseRun {
 }
 
 interface Course {
-  id: string;
+  id: number;
   course_uuid: string;
   trail?: {
     runs: CourseRun[];
@@ -125,7 +125,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
       if (!userId) return;
       try {
         const response = await checkPaidAccess(
-          Number.parseInt(course.id, 10), // TODO: why parsing course id as int?
+          course.id,
           course.org_id,
           accessToken,
         );

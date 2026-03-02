@@ -103,8 +103,8 @@ const SignUpClient = (props: SignUpClientProps) => {
               : detail?.message || body?.message || t('errorSomethingWentWrong');
           setError(msg);
         }
-      } catch (err: any) {
-        setError(err.message || t('errorSomethingWentWrong'));
+      } catch (error: any) {
+        setError(error.message || t('errorSomethingWentWrong'));
       }
     });
   };

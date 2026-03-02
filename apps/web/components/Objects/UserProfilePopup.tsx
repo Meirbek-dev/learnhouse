@@ -90,9 +90,9 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
       try {
         const data = await getUser(userId, token);
         setUserData(data);
-      } catch (err) {
+      } catch (error) {
         setError(t('loadingError'));
-        console.error('Error fetching user data:', err);
+        console.error('Error fetching user data:', error);
       } finally {
         setIsLoading(false);
       }

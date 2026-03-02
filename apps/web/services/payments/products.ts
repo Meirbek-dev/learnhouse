@@ -67,7 +67,7 @@ export async function getProductDetails(orgId: number, productId: string, access
   return await getResponseMetadata(result);
 }
 
-export async function linkCourseToProduct(orgId: number, productId: string, courseId: string, access_token: string) {
+export async function linkCourseToProduct(orgId: number, productId: string, courseId: number, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}payments/${orgId}/products/${productId}/courses/${courseId}`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
@@ -112,7 +112,7 @@ export async function getCoursesLinkedToProduct(orgId: number, productId: string
   return await getResponseMetadata(result);
 }
 
-export async function getProductsByCourse(orgId: number, courseId: string, access_token: string) {
+export async function getProductsByCourse(orgId: number, courseId: number, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}payments/${orgId}/courses/${courseId}/products`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),

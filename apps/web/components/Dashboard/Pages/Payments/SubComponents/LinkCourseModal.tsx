@@ -21,14 +21,14 @@ interface LinkCourseModalProps {
 
 interface CoursePreviewProps {
   course: {
-    id: string;
+    id: number;
     name: string;
     description: string;
     thumbnail_image: string;
     course_uuid: string;
   };
   orgslug: string;
-  onLink: (courseId: string) => void;
+  onLink: (courseId: number) => void;
   isLinked: boolean;
 }
 
@@ -103,7 +103,7 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
     ([_, token]) => getCoursesLinkedToProduct(orgId, productId, token),
   );
 
-  const handleLinkCourse = async (courseId: string) => {
+  const handleLinkCourse = async (courseId: number) => {
     try {
       const response = await linkCourseToProduct(orgId, productId, courseId, accessToken);
       if (response.success) {

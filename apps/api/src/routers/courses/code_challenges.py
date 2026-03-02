@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
-from pydantic import field_validator
+from pydantic import ValidationError, field_validator
 from sqlmodel import Session, func, select
 from ulid import ULID
 
@@ -138,7 +138,7 @@ def get_challenge_settings(activity: Activity) -> CodeChallengeSettings:
     """Parse challenge settings from activity.details"""
     try:
         return CodeChallengeSettings.model_validate(activity.details or {})
-    except Exception:
+    except (ValidationError, ValueError):
         return CodeChallengeSettings()
 
 
@@ -289,7 +289,7 @@ async def update_challenge_settings(
     # Validate the merged settings
     try:
         updated_settings = CodeChallengeSettings.model_validate(current_dict)
-    except Exception as e:
+    except (ValidationError, ValueError) as e:
         raise HTTPException(status_code=400, detail=f"Invalid settings: {e!s}")
 
     # Update activity.details
@@ -333,7 +333,7 @@ async def submit_code_challenge(
         source_code = sanitize_code(source_code)
     except CodeValidationError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception:
+    except (ValueError, UnicodeDecodeError):
         raise HTTPException(status_code=400, detail="Invalid source code encoding")
 
     # Get language name
@@ -343,7 +343,7 @@ async def submit_code_challenge(
             (lang.name for lang in languages if lang.id == submission.language_id),
             f"Language {submission.language_id}",
         )
-    except Exception:
+    except (Judge0Error, Judge0UnavailableError):
         language_name = f"Language {submission.language_id}"
 
     # Create submission record
@@ -536,7 +536,7 @@ async def run_visible_tests(
         source_code = sanitize_code(source_code)
     except CodeValidationError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception:
+    except (ValueError, UnicodeDecodeError):
         raise HTTPException(status_code=400, detail="Invalid source code encoding")
 
     # Run only visible tests
@@ -609,7 +609,7 @@ async def run_custom_test(
         )
     except CodeValidationError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception:
+    except (ValueError, UnicodeDecodeError):
         raise HTTPException(status_code=400, detail="Invalid encoding")
 
     try:

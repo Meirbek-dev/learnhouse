@@ -4,9 +4,9 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, Globe, Image as ImageIcon, Loader2, Lock, Search } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
+import { revalidateTags } from '@services/utils/ts/requests';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { getUriWithOrg } from '@services/config/config';
 import { createCollection } from '@services/courses/collections';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -21,17 +21,16 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { ChangeEvent } from 'react';
 import { toast } from 'sonner';
-import useSWR from 'swr';
+import { useCourseListByOrg } from '@/hooks/useCourseListByOrg';
 
 const NewCollection = ({ params }: { params: { orgslug: string } }) => {
   const t = useTranslations('NewCollectionPage');
   const org = useOrg() as any;
   const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const { orgslug } = params;
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+  const [selectedCourses, setSelectedCourses] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,7 +39,7 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
     data: courses,
     error,
     isLoading,
-  } = useSWR(`${getAPIUrl()}courses/org_slug/${orgslug}/page/1/limit/20`, (url) => swrFetcher(url, access_token));
+  } = useCourseListByOrg(orgslug);
   const [isPublic, setIsPublic] = useState(true);
 
   const filteredCourses = useMemo(() => {
@@ -101,7 +100,7 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
     }
   };
 
-  const toggleCourse = (courseId: string) => {
+  const toggleCourse = (courseId: number) => {
     setSelectedCourses((prev) =>
       prev.includes(courseId) ? prev.filter((id) => id !== courseId) : [...prev, courseId],
     );

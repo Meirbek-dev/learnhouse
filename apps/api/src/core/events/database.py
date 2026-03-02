@@ -6,6 +6,7 @@ from collections.abc import Iterator
 from fastapi import FastAPI, HTTPException
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.pool import QueuePool
 from sqlmodel import Session, SQLModel, create_engine
 
@@ -62,12 +63,12 @@ def import_all_models() -> None:
                         logger.warning(
                             f"Failed to import module {full_module_path}: {e}"
                         )
-                    except Exception as e:
+                    except (AttributeError, TypeError) as e:
                         logger.exception(
                             f"Unexpected error importing {full_module_path}: {e}"
                         )
 
-    except Exception as e:
+    except OSError as e:
         logger.exception(f"Critical error during model import: {e}")
         raise
 
@@ -115,7 +116,7 @@ except ImportError:
         "Could not import 'rebuild_trail_models'. "
         "Ensure it exists if you have Pydantic V2 forward references."
     )
-except Exception as e:
+except (AttributeError, RuntimeError) as e:
     logger.exception(f"Error during rebuilding trail models: {e}")
 
 
@@ -204,7 +205,7 @@ async def connect_to_db(app: FastAPI) -> None:
         if not is_testing:
             SQLModel.metadata.create_all(db_engine)
 
-    except Exception as e:
+    except (SQLAlchemyError, OSError) as e:
         logger.exception(f"Database initialization failed: {e}")
         # Log additional context for debugging
         logger.exception(
@@ -230,7 +231,7 @@ async def close_database(app: FastAPI) -> None:
 
         logger.info("Database shutdown completed")
 
-    except Exception as e:
+    except (SQLAlchemyError, OSError) as e:
         logger.exception(f"Error during database shutdown: {e}")
         # Don't raise here to allow graceful shutdown
 
@@ -260,7 +261,7 @@ def get_db_session() -> Iterator[Session]:
             # rolling back any pending transaction.
             session.rollback()
             raise
-        except Exception as e:
+        except SQLAlchemyError as e:
             logger.exception(f"Database session error: {e}")
             session.rollback()
             raise
@@ -306,7 +307,7 @@ def get_db_health() -> dict:
                 "error": f"Invalid health check response: {health_value}",
             }
 
-    except Exception as e:
+    except (SQLAlchemyError, OSError) as e:
         logger.exception(f"Database health check failed: {e}")
         return {"status": "unhealthy", "error": str(e)}
 
@@ -333,5 +334,5 @@ async def optimize_database_performance() -> None:
                 session.exec("PRAGMA optimize;")
                 logger.info("SQLite optimization completed")
 
-    except Exception as e:
+    except SQLAlchemyError as e:
         logger.warning(f"Database optimization failed: {e}")

@@ -1,6 +1,6 @@
 'use client';
 
-import { CodeIcon, ImageIcon, LayoutDashboardIcon, Share2Icon, TextIcon } from 'lucide-react';
+import { ImageIcon, LayoutDashboardIcon, Share2Icon, TextIcon } from 'lucide-react';
 import OrgEditSocials from '@components/Dashboard/Pages/Org/OrgEditSocials/OrgEditSocials';
 import OrgEditLanding from '@components/Dashboard/Pages/Org/OrgEditLanding/OrgEditLanding';
 import OrgEditGeneral from '@components/Dashboard/Pages/Org/OrgEditGeneral/OrgEditGeneral';
