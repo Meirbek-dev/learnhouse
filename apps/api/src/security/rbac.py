@@ -580,15 +580,24 @@ class RequirePermission:
         request: Request,
         checker: PermissionCheckerDep,
     ) -> None:
-        from fastapi_another_jwt_auth import AuthJWT
-
         from src.db.users import AnonymousUser
-        from src.security.auth import get_current_user
+        from src.security.auth import (
+            get_access_token_from_request,
+            get_current_user_from_token,
+        )
 
-        authorize = AuthJWT(request)
-        current_user = await get_current_user(
+        header_value = request.headers.get("Authorization", "")
+        header_token = None
+        if header_value.startswith("Bearer "):
+            header_token = header_value.removeprefix("Bearer ").strip()
+
+        token = get_access_token_from_request(request, header_token)
+        if not token:
+            raise AuthenticationRequired
+
+        current_user = await get_current_user_from_token(
             request=request,
-            Authorize=authorize,
+            token=token,
             db_session=checker.db,
         )
         if isinstance(current_user, AnonymousUser):

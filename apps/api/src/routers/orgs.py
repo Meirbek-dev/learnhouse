@@ -12,8 +12,8 @@ from src.db.organizations import (
     OrganizationUser,
     PaginatedOrganizationUsers,
 )
-from src.db.users import PublicUser
-from src.security.auth import get_current_user
+from src.db.users import AnonymousUser, PublicUser
+from src.security.auth import get_current_user, get_current_user_optional
 from src.security.rbac import PermissionCheckerDep
 from src.services.orgs.orgs import (
     create_org,
@@ -143,7 +143,9 @@ async def api_remove_user_from_org(
 async def api_get_org_by_slug(
     request: Request,
     org_slug: str,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    current_user: Annotated[
+        PublicUser | AnonymousUser, Depends(get_current_user_optional)
+    ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> OrganizationRead:
     """

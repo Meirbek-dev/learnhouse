@@ -1,86 +1,27 @@
 import logging
-import secrets
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import jwt
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
-from fastapi_another_jwt_auth import AuthJWT
 from sqlmodel import Session
 
-from config.config import get_platform_config
 from src.core.events.database import get_db_session
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.rbac import AuthenticationRequired
 from src.security.security import ALGORITHM, SECRET_KEY
-from src.services.dev.dev import isDevModeEnabled
 from src.services.users.users import security_get_user, security_verify_password
 
 logger = logging.getLogger(__name__)
 
-
-def _normalize_secure_flag(value: bool | str | None) -> bool:
-    if isinstance(value, str):
-        lowered = value.strip().lower()
-        if lowered in {"true", "1", "yes", "on"}:
-            return True
-        if lowered in {"false", "0", "no", "off"}:
-            return False
-    return bool(value)
-
-
-_PLATFORM_CONFIG = get_platform_config()
-_COOKIE_DOMAIN = _PLATFORM_CONFIG.hosting_config.cookie_config.domain
-_COOKIE_SECURE = _normalize_secure_flag(_PLATFORM_CONFIG.hosting_config.ssl)
+ACCESS_TOKEN_EXPIRE = timedelta(hours=8)
+REFRESH_TOKEN_EXPIRE = timedelta(days=30)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
-
-
-#### JWT Auth ####################################################
-def _get_jwt_secret() -> str:
-    """
-    Get JWT secret key with secure fallback for development.
-
-    Security improvements:
-    - Auto-generates secure random key in dev mode
-    - Logs warning when using generated key
-    """
-    if SECRET_KEY:
-        return SECRET_KEY
-
-    # Only generate in dev mode, production must have SECRET_KEY
-    if isDevModeEnabled():
-        generated_key = secrets.token_urlsafe(32)
-        logger.warning(
-            "⚠️  Using auto-generated JWT secret in development mode. "
-            "Set PLATFORM_AUTH_JWT_SECRET_KEY environment variable for production."
-        )
-        return generated_key
-
-    # Production without SECRET_KEY should fail explicitly
-    msg = (
-        "PLATFORM_AUTH_JWT_SECRET_KEY must be set in production environment. "
-        "Generate one with: python -c 'import secrets; print(secrets.token_urlsafe(32))'"
-    )
-    raise ValueError(msg)
-
-
-class Settings(PydanticStrictBaseModel):
-    authjwt_secret_key: str = _get_jwt_secret()
-    authjwt_token_location: set[str] = {"cookies", "headers"}
-    authjwt_cookie_csrf_protect: bool = False
-    authjwt_access_token_expires: float | bool = (
-        False if isDevModeEnabled() else timedelta(hours=8).total_seconds()
-    )
-    authjwt_cookie_samesite: str = "lax"
-    authjwt_cookie_secure: bool = _COOKIE_SECURE
-    authjwt_cookie_domain: str | None = _COOKIE_DOMAIN
-
-
-@AuthJWT.load_config
-def get_config() -> Settings:
-    return Settings()
+oauth2_scheme_optional = OAuth2PasswordBearer(
+    tokenUrl="/api/auth/login", auto_error=False
+)
 
 
 class Token(PydanticStrictBaseModel):
@@ -90,6 +31,29 @@ class Token(PydanticStrictBaseModel):
 
 class TokenData(PydanticStrictBaseModel):
     username: str | None = None
+
+
+def _credentials_exception() -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
+def _decode_token(token: str, expected_type: str) -> TokenData:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except jwt.PyJWTError as exc:
+        raise _credentials_exception() from exc
+
+    token_type = payload.get("type")
+    username = payload.get("sub")
+
+    if token_type != expected_type or not isinstance(username, str) or not username:
+        raise _credentials_exception()
+
+    return TokenData(username=username)
 
 
 async def authenticate_user(
@@ -108,39 +72,80 @@ async def authenticate_user(
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(UTC) + expires_delta
-    else:
-        expire = datetime.now(UTC) + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
+    expire = datetime.now(UTC) + (expires_delta or ACCESS_TOKEN_EXPIRE)
+    to_encode.update({"exp": expire, "type": "access"})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def create_refresh_token(data: dict, expires_delta: timedelta | None = None) -> str:
+    to_encode = data.copy()
+    expire = datetime.now(UTC) + (expires_delta or REFRESH_TOKEN_EXPIRE)
+    to_encode.update({"exp": expire, "type": "refresh"})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def decode_access_token(token: str) -> TokenData:
+    return _decode_token(token, expected_type="access")
+
+
+def decode_refresh_token(token: str) -> TokenData:
+    return _decode_token(token, expected_type="refresh")
+
+
+def get_access_token_from_request(
+    request: Request,
+    header_token: str | None = None,
+) -> str | None:
+    if isinstance(header_token, str) and header_token.strip():
+        return header_token
+
+    cookie_token = request.cookies.get("access_token_cookie")
+    if isinstance(cookie_token, str) and cookie_token.strip():
+        return cookie_token
+
+    return None
+
+
+async def get_current_user_from_token(
+    request: Request,
+    token: str,
+    db_session: Session,
+) -> PublicUser:
+    token_data = decode_access_token(token)
+    user = await security_get_user(request, db_session, email=token_data.username)
+    if user is None:
+        raise _credentials_exception()
+    return PublicUser(**user.model_dump())
 
 
 async def get_current_user(
     request: Request,
-    Authorize: AuthJWT = Depends(),
-    db_session=Depends(get_db_session),
-):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    token: str | None = Depends(oauth2_scheme_optional),
+    db_session: Session = Depends(get_db_session),
+) -> PublicUser:
+    resolved_token = get_access_token_from_request(request, token)
+    if resolved_token is None:
+        raise _credentials_exception()
+    return await get_current_user_from_token(request, resolved_token, db_session)
 
-    try:
-        Authorize.jwt_optional()
-        username = Authorize.get_jwt_subject() or None
-        token_data = TokenData(username=username)
-    except jwt.PyJWTError:
-        raise credentials_exception
-    if username:
-        user = await security_get_user(
-            request, db_session, email=token_data.username
-        )  # treated as an email
-        if user is None:
-            raise credentials_exception
-        return PublicUser(**user.model_dump())
-    return AnonymousUser()
+
+async def get_current_user_bearer(
+    request: Request,
+    token: str = Depends(oauth2_scheme),
+    db_session: Session = Depends(get_db_session),
+) -> PublicUser:
+    return await get_current_user_from_token(request, token, db_session)
+
+
+async def get_current_user_optional(
+    request: Request,
+    token: str | None = Depends(oauth2_scheme_optional),
+    db_session: Session = Depends(get_db_session),
+) -> PublicUser | AnonymousUser:
+    resolved_token = get_access_token_from_request(request, token)
+    if resolved_token is None:
+        return AnonymousUser()
+    return await get_current_user_from_token(request, resolved_token, db_session)
 
 
 async def non_public_endpoint(current_user: UserRead | AnonymousUser) -> None:

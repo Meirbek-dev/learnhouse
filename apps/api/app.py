@@ -8,7 +8,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi_another_jwt_auth.exceptions import AuthJWTException
 from starlette.types import Receive, Scope, Send
 
 from config.config import PlatformConfig, get_platform_config
@@ -75,15 +74,6 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 # Events
 app.add_event_handler("startup", startup_app(app))
 app.add_event_handler("shutdown", shutdown_app(app))
-
-
-# JWT Exception Handler
-@app.exception_handler(AuthJWTException)
-def authjwt_exception_handler(request: Request, exc: AuthJWTException) -> JSONResponse:
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"error_code": "AUTH_ERROR", "message": str(exc.message)},
-    )
 
 
 @app.exception_handler(HTTPException)

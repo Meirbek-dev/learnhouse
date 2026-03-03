@@ -10,8 +10,17 @@ from sqlmodel import Session
 from config.config import get_platform_config
 from src.core.events.database import get_db_session
 from src.db.strict_base_model import PydanticStrictBaseModel
-from src.db.users import AnonymousUser, UserRead
-from src.security.auth import AuthJWT, authenticate_user, get_current_user
+from src.db.users import AnonymousUser, PublicUser, UserRead
+from src.security.auth import (
+    authenticate_user,
+    create_access_token,
+    create_refresh_token,
+    decode_access_token,
+    decode_refresh_token,
+    get_access_token_from_request,
+    get_current_user_optional,
+    oauth2_scheme_optional,
+)
 from src.services.auth.utils import signWithGoogle
 
 router = APIRouter()
@@ -30,6 +39,9 @@ class LoginResponse(PydanticStrictBaseModel):
 
 
 COOKIE_TTL_SECONDS = int(timedelta(hours=8).total_seconds())
+REFRESH_COOKIE_TTL_SECONDS = int(timedelta(days=30).total_seconds())
+ACCESS_COOKIE_KEY = "access_token_cookie"
+REFRESH_COOKIE_KEY = "refresh_token_cookie"
 
 
 def _set_access_cookie(response: Response, value: str) -> None:
@@ -56,17 +68,50 @@ def _set_access_cookie(response: Response, value: str) -> None:
         cookie_kwargs["domain"] = cookie_domain
 
     response.set_cookie(
-        key="access_token_cookie",
+        key=ACCESS_COOKIE_KEY,
         value=value,
         **cookie_kwargs,
     )
+
+
+def _set_refresh_cookie(response: Response, value: str) -> None:
+    platform_config = get_platform_config()
+    cookie_domain = platform_config.hosting_config.cookie_config.domain
+    is_ssl_enabled = platform_config.hosting_config.ssl
+
+    cookie_kwargs: dict[str, object] = {
+        "httponly": True,
+        "secure": is_ssl_enabled,
+        "samesite": "lax",
+        "max_age": REFRESH_COOKIE_TTL_SECONDS,
+    }
+
+    if cookie_domain:
+        cookie_kwargs["domain"] = cookie_domain
+
+    response.set_cookie(
+        key=REFRESH_COOKIE_KEY,
+        value=value,
+        **cookie_kwargs,
+    )
+
+
+def _clear_auth_cookies(response: Response) -> None:
+    platform_config = get_platform_config()
+    cookie_domain = platform_config.hosting_config.cookie_config.domain
+
+    delete_kwargs: dict[str, object] = {}
+    if cookie_domain:
+        delete_kwargs["domain"] = cookie_domain
+
+    response.delete_cookie(ACCESS_COOKIE_KEY, **delete_kwargs)
+    response.delete_cookie(REFRESH_COOKIE_KEY, **delete_kwargs)
 
 
 @router.get("/refresh")
 def refresh(
     request: Request,
     response: Response,
-    Authorize: Annotated[AuthJWT, Depends()],
 ) -> dict[str, str | int]:
     """
     Token refresh with rotation.
@@ -79,16 +124,23 @@ def refresh(
 
     This prevents stolen refresh tokens from being used indefinitely.
     """
-    Authorize.jwt_refresh_token_required()
+    refresh_token = request.cookies.get(REFRESH_COOKIE_KEY)
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
-    current_user = Authorize.get_jwt_subject()
+    token_data = decode_refresh_token(refresh_token)
+    current_user = token_data.username
 
     # Create NEW tokens (both access and refresh)
-    new_access_token = Authorize.create_access_token(subject=current_user)
-    new_refresh_token = Authorize.create_refresh_token(subject=current_user)
+    new_access_token = create_access_token({"sub": current_user})
+    new_refresh_token = create_refresh_token({"sub": current_user})
 
     # Set the new refresh token in cookies (this invalidates the old one)
-    Authorize.set_refresh_cookies(new_refresh_token)
+    _set_refresh_cookie(response, new_refresh_token)
 
     # Calculate token expiry timestamp (8 hours from now in milliseconds)
     expiry_timestamp = int(
@@ -119,7 +171,6 @@ def refresh(
 async def login(
     request: Request,
     response: Response,
-    Authorize: Annotated[AuthJWT, Depends()],
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
@@ -148,9 +199,9 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token = Authorize.create_access_token(subject=form_data.username)
-    refresh_token = Authorize.create_refresh_token(subject=form_data.username)
-    Authorize.set_refresh_cookies(refresh_token)
+    access_token = create_access_token({"sub": form_data.username})
+    refresh_token = create_refresh_token({"sub": form_data.username})
+    _set_refresh_cookie(response, refresh_token)
 
     # set cookies using fastapi
     _set_access_cookie(response, access_token)
@@ -196,9 +247,10 @@ async def third_party_login(
     response: Response,
     body: ThirdPartyLogin,
     org_id: int | None = None,
-    current_user: Annotated[AnonymousUser, Depends(get_current_user)] = None,
+    current_user: Annotated[
+        PublicUser | AnonymousUser, Depends(get_current_user_optional)
+    ] = None,
     db_session=Depends(get_db_session),
-    Authorize: Annotated[AuthJWT, Depends()] = None,
 ):
     # Extract client info for security logging
     client_ip = request.client.host if request.client else "unknown"
@@ -228,9 +280,9 @@ async def third_party_login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token = Authorize.create_access_token(subject=user.email)
-    refresh_token = Authorize.create_refresh_token(subject=user.email)
-    Authorize.set_refresh_cookies(refresh_token)
+    access_token = create_access_token({"sub": user.email})
+    refresh_token = create_refresh_token({"sub": user.email})
+    _set_refresh_cookie(response, refresh_token)
 
     # set cookies using fastapi
     _set_access_cookie(response, access_token)
@@ -267,17 +319,25 @@ async def third_party_login(
 @router.delete("/logout")
 def logout(
     request: Request,
-    Authorize: Annotated[AuthJWT, Depends()],
+    response: Response,
+    token: Annotated[str | None, Depends(oauth2_scheme_optional)],
 ) -> dict[str, str]:
     """
     Because the JWT are stored in an httponly cookie now, we cannot
     log the user out by simply deleting the cookies in the frontend.
     We need the backend to send us a response to delete the cookies.
     """
-    Authorize.jwt_required()
+    resolved_token = get_access_token_from_request(request, token)
+    if not resolved_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     # Get user info before logout for logging
-    current_user = Authorize.get_jwt_subject()
+    token_data = decode_access_token(resolved_token)
+    current_user = token_data.username
     client_ip = request.client.host if request.client else "unknown"
 
     # Log logout event
@@ -289,5 +349,5 @@ def logout(
         },
     )
 
-    Authorize.unset_jwt_cookies()
+    _clear_auth_cookies(response)
     return {"msg": "Successfully logout"}
