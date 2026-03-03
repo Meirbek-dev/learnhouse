@@ -251,7 +251,7 @@ class FastAIService:
                 logger.debug("Chroma import error: %r", chroma_import_error)
             return vector_store
 
-        except EmbeddingError, VectorStoreError:
+        except (EmbeddingError, VectorStoreError):
             raise
         except Exception as e:
             raise VectorStoreError(
@@ -342,6 +342,43 @@ class FastAIService:
             ) from e
 
 
+async def prepare_agent(
+    text_reference: str,
+    message_for_the_prompt: str,
+    embedding_model_name: str,
+    openai_model_name: str,
+    collection_name: str | None = None,
+) -> CompiledStateGraph:
+    """Shared setup: create (or retrieve cached) vector store and agent.
+
+    Raises:
+        AIProcessingError: If agent creation fails.
+        VectorStoreError: If vector store creation fails.
+    """
+    ai_service = get_fast_ai_service()
+
+    vector_store = await ai_service.get_or_create_vector_store(
+        documents=[text_reference],
+        embedding_model_name=embedding_model_name,
+        collection_name=collection_name,
+    )
+
+    if not vector_store:
+        raise VectorStoreError("Failed to create knowledge base")
+
+    agent = await ai_service.get_or_create_agent(
+        llm_model_name=openai_model_name,
+        system_prompt=message_for_the_prompt,
+        vector_store=vector_store,
+        collection_name=collection_name,
+    )
+
+    if not agent:
+        raise AIProcessingError("Failed to create AI agent")
+
+    return agent
+
+
 async def ask_ai(
     question: str,
     message_history: RedisChatMessageHistory | list,
@@ -362,26 +399,13 @@ async def ask_ai(
         raise AIProcessingError("Text reference cannot be empty")
 
     try:
-        ai_service = get_fast_ai_service()
-
-        vector_store = await ai_service.get_or_create_vector_store(
-            documents=[text_reference],
+        agent = await prepare_agent(
+            text_reference=text_reference,
+            message_for_the_prompt=message_for_the_prompt,
             embedding_model_name=embedding_model_name,
+            openai_model_name=openai_model_name,
             collection_name=collection_name,
         )
-
-        if not vector_store:
-            raise VectorStoreError("Failed to create knowledge base")
-
-        agent = await ai_service.get_or_create_agent(
-            llm_model_name=openai_model_name,
-            system_prompt=message_for_the_prompt,
-            vector_store=vector_store,
-            collection_name=collection_name,
-        )
-
-        if not agent:
-            raise AIProcessingError("Failed to create AI agent")
 
         history_messages = convert_history_to_messages(message_history)
         messages = [*history_messages, {"role": "user", "content": question.strip()}]
@@ -427,7 +451,7 @@ async def ask_ai(
         except TimeoutError as e:
             raise AITimeoutError(120, details={"question_length": len(question)}) from e
 
-    except AIProcessingError, VectorStoreError, AITimeoutError:
+    except (AIProcessingError, VectorStoreError, AITimeoutError):
         raise
     except Exception as e:
         raise AIProcessingError(

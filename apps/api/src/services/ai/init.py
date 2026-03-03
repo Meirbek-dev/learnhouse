@@ -19,13 +19,13 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
             logger.warning("OpenAI API key not configured")
             return None
 
-        model_name = "text-embedding-3-small"
         batch_size = getattr(
             getattr(config.ai_config, "vector_store", None),
             "embedding_batch_size",
             2048,
         )
 
+        model_name = "text-embedding-3-small"
         logger.info(
             "Creating embedding function: model=%s batch_size=%d",
             model_name,
@@ -60,7 +60,6 @@ def get_llm(model_name: str, streaming: bool = True) -> ChatOpenAI | None:
             logger.warning("OpenAI API key not configured")
             return None
 
-        model_name = "gpt-5-nano"
         logger.info("Creating LLM: model=%s streaming=%s", model_name, streaming)
         return ChatOpenAI(
             model=model_name,

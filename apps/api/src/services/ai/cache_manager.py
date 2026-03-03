@@ -76,8 +76,7 @@ class ThreadSafeCache[T]:
 
     async def async_set(self, key: str, value: T) -> None:
         """Async-safe setter wrapper."""
-        # Use thread-safe sync set to modify the underlying cache
-        return await asyncio.to_thread(self.set, key, value)
+        self.set(key, value)
 
     def delete(self, key: str) -> None:
         """
@@ -95,7 +94,7 @@ class ThreadSafeCache[T]:
 
     async def async_delete(self, key: str) -> None:
         """Async-safe delete wrapper."""
-        return await asyncio.to_thread(self.delete, key)
+        self.delete(key)
 
     def clear(self) -> None:
         """Clear all cache entries."""
@@ -181,12 +180,9 @@ class AICacheManager:
 
         platform_config = get_platform_config()
         vector_config = getattr(platform_config.ai_config, "vector_store", None)
-        cache_config = getattr(platform_config.ai_config, "cache", None)
 
         vector_ttl = getattr(vector_config, "collection_retention", 86400)
         vector_maxsize = max(100, getattr(vector_config, "chromadb_pool_size", 10) * 10)
-
-        embedding_ttl = getattr(cache_config, "embedding_cache_ttl", 7200)
 
         # Vector store cache - large TTL, smaller size
         self.vector_store_cache: ThreadSafeCache = ThreadSafeCache(
@@ -206,15 +202,6 @@ class AICacheManager:
             ttl=300,  # 5 minutes
         )
 
-        # Embedding cache - long TTL, medium size
-        self.embedding_cache: ThreadSafeCache = ThreadSafeCache(
-            maxsize=100,
-            ttl=embedding_ttl,
-        )
-
-        # LLM instance cache - long TTL, small size
-        self.llm_cache: ThreadSafeCache = ThreadSafeCache(maxsize=10, ttl=embedding_ttl)
-
         logger.info("AI Cache Manager initialized")
 
     def clear_all(self) -> None:
@@ -222,8 +209,6 @@ class AICacheManager:
         self.vector_store_cache.clear()
         self.agent_cache.clear()
         self.db_cache.clear()
-        self.embedding_cache.clear()
-        self.llm_cache.clear()
         logger.info("All AI caches cleared")
 
     def get_all_stats(self) -> dict[str, Any]:
@@ -237,8 +222,6 @@ class AICacheManager:
             "vector_store": self.vector_store_cache.get_stats(),
             "agent": self.agent_cache.get_stats(),
             "database": self.db_cache.get_stats(),
-            "embedding": self.embedding_cache.get_stats(),
-            "llm": self.llm_cache.get_stats(),
         }
 
     def invalidate_activity_cache(self, activity_uuid: str) -> None:

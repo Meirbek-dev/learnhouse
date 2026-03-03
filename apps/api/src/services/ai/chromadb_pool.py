@@ -117,10 +117,11 @@ class ChromaDBPool:
             if self._pool:
                 client = self._pool.pop()
                 logger.debug(f"Reusing client from pool (pool size: {len(self._pool)})")
-            else:
-                # Creating Chroma clients can be blocking; perform in thread
-                client = await asyncio.to_thread(self._create_client)
-                logger.debug("Created new client (pool empty)")
+
+        if client is None:
+            # Create outside the lock so other coroutines can still check out/return
+            client = await asyncio.to_thread(self._create_client)
+            logger.debug("Created new client (pool empty)")
 
         try:
             yield client

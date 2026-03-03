@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import time
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass
 from typing import Any
 
@@ -11,7 +12,6 @@ from src.core.events.database import get_db_session
 from src.db.courses.activities import Activity, ActivityRead
 from src.db.courses.courses import Course, CourseRead
 from src.db.organization_config import OrganizationConfig
-from src.db.organizations import Organization
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
 from src.security.rbac import FeatureDisabled
@@ -21,6 +21,7 @@ from src.services.ai.exceptions import (
     ActivityNotFoundError,
     AIFeatureDisabledError,
     AIProcessingError,
+    AIServiceException,
     AITimeoutError,
     ChatSessionError,
     VectorStoreError,
@@ -184,157 +185,102 @@ def _map_ai_errors_to_http(e: Exception) -> HTTPException:
     )
 
 
-async def ai_start_activity_chat_session(
-    request: Request,
-    chat_session_object: StartActivityAIChatSession,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+# ---------------------------------------------------------------------------
+# Shared non-streaming handler
+# ---------------------------------------------------------------------------
+
+
+async def _handle_ai_chat(
+    activity_uuid: str,
+    aichat_uuid: str | None,
+    message: str,
+    db_session: Session,
     cancel_event: asyncio.Event | None = None,
 ) -> ActivityAIChatSessionResponse:
-    """Start a new AI chat session."""
+    """Shared logic for non-streaming start/send AI chat."""
+    trace_start = time.perf_counter()
 
-    try:
-        trace_start = time.perf_counter()
+    ctx = await _prepare_context(activity_uuid, aichat_uuid, db_session)
 
-        ctx = await _prepare_context(
-            chat_session_object.activity_uuid, None, db_session
+    ai_process_start = time.perf_counter()
+    response = await ask_ai(
+        message,
+        ctx.chat_session["windowed_history"],
+        ctx.ai_text,
+        ctx.system_message,
+        _EMBEDDING_MODEL,
+        ctx.ai_model,
+        session_id=ctx.chat_session["aichat_uuid"],
+        cancel_event=cancel_event,
+        collection_name=f"activity_{ctx.activity.activity_uuid}",
+    )
+    ai_ms = (time.perf_counter() - ai_process_start) * 1000
+
+    ai_message = response.get("output", "")
+    if not ai_message:
+        raise AIProcessingError("AI returned an empty response")
+
+    logger.info(
+        "AI chat %s completed in %.1fms (AI: %.1fms)",
+        ctx.chat_session["aichat_uuid"],
+        (time.perf_counter() - trace_start) * 1000,
+        ai_ms,
+    )
+
+    return ActivityAIChatSessionResponse(
+        aichat_uuid=ctx.chat_session["aichat_uuid"],
+        activity_uuid=ctx.activity.activity_uuid,
+        message=ai_message,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Shared streaming handler
+# ---------------------------------------------------------------------------
+
+
+def _map_ai_error_to_sse(e: Exception) -> str:
+    """Convert AI service exceptions to SSE error messages."""
+    if isinstance(e, ActivityNotFoundError):
+        return format_sse_message({"type": "error", "error": e.message, "status": 404})
+    if isinstance(e, AIFeatureDisabledError):
+        return format_sse_message({"type": "error", "error": e.message, "status": 403})
+    if isinstance(e, AITimeoutError):
+        return format_sse_message({"type": "error", "error": e.message, "status": 504})
+    if isinstance(e, (AIProcessingError, VectorStoreError, ChatSessionError)):
+        return format_sse_message(
+            {
+                "type": "error",
+                "error": f"AI processing failed: {e.message}",
+                "status": 500,
+            }
         )
-
-        ai_process_start = time.perf_counter()
-        response = await ask_ai(
-            chat_session_object.message,
-            ctx.chat_session["windowed_history"],
-            ctx.ai_text,
-            ctx.system_message,
-            _EMBEDDING_MODEL,
-            ctx.ai_model,
-            session_id=ctx.chat_session["aichat_uuid"],
-            cancel_event=cancel_event,
-            collection_name=f"activity_{ctx.activity.activity_uuid}",
-        )
-        ai_ms = (time.perf_counter() - ai_process_start) * 1000
-
-        ai_message = response.get("output", "")
-        if not ai_message:
-            raise AIProcessingError("AI returned an empty response")
-
-        logger.info(
-            "AI chat session %s completed in %.1fms (AI: %.1fms)",
-            ctx.chat_session["aichat_uuid"],
-            (time.perf_counter() - trace_start) * 1000,
-            ai_ms,
-        )
-
-        return ActivityAIChatSessionResponse(
-            aichat_uuid=ctx.chat_session["aichat_uuid"],
-            activity_uuid=ctx.activity.activity_uuid,
-            message=ai_message,
-        )
-
-    except (
-        ActivityNotFoundError,
-        AIFeatureDisabledError,
-        AITimeoutError,
-        AIProcessingError,
-        VectorStoreError,
-        ChatSessionError,
-    ) as e:
-        raise _map_ai_errors_to_http(e) from e
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.exception("Unexpected error in AI start: %s", e)
-        raise HTTPException(
-            status_code=500,
-            detail="An unexpected error occurred. Please try again later.",
-        ) from e
+    return format_sse_message(
+        {"type": "error", "error": "An unexpected error occurred.", "status": 500}
+    )
 
 
-async def ai_send_activity_chat_message(
+async def _handle_ai_chat_stream(
+    activity_uuid: str,
+    aichat_uuid: str | None,
+    message: str,
     request: Request,
-    chat_session_object: SendActivityAIChatMessage,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser,
+    db_session: Session,
     cancel_event: asyncio.Event | None = None,
-) -> ActivityAIChatSessionResponse:
-    """Send a message in an existing AI chat session."""
-
-    try:
-        trace_start = time.perf_counter()
-
-        ctx = await _prepare_context(
-            chat_session_object.activity_uuid,
-            chat_session_object.aichat_uuid,
-            db_session,
-        )
-
-        response = await ask_ai(
-            chat_session_object.message,
-            ctx.chat_session["windowed_history"],
-            ctx.ai_text,
-            ctx.system_message,
-            _EMBEDDING_MODEL,
-            ctx.ai_model,
-            session_id=ctx.chat_session["aichat_uuid"],
-            cancel_event=cancel_event,
-            collection_name=f"activity_{ctx.activity.activity_uuid}",
-        )
-
-        ai_message = response.get("output", "")
-        if not ai_message:
-            raise AIProcessingError("AI returned an empty response")
-
-        logger.info(
-            "AI chat message %s completed in %.1fms",
-            chat_session_object.aichat_uuid,
-            (time.perf_counter() - trace_start) * 1000,
-        )
-
-        return ActivityAIChatSessionResponse(
-            aichat_uuid=ctx.chat_session["aichat_uuid"],
-            activity_uuid=ctx.activity.activity_uuid,
-            message=ai_message,
-        )
-
-    except (
-        ActivityNotFoundError,
-        AIFeatureDisabledError,
-        AITimeoutError,
-        AIProcessingError,
-        VectorStoreError,
-        ChatSessionError,
-    ) as e:
-        raise _map_ai_errors_to_http(e) from e
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.exception("Unexpected error sending AI message: %s", e)
-        raise HTTPException(
-            status_code=500,
-            detail="An unexpected error occurred. Please try again later.",
-        ) from e
-
-
-async def ai_start_activity_chat_session_stream(
-    request: Request,
-    chat_session_object: StartActivityAIChatSession,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
-    cancel_event: asyncio.Event | None = None,
-):
-    """Streaming version of AI chat session start."""
-
+) -> AsyncGenerator[str]:
+    """Shared logic for streaming start/send AI chat."""
     try:
         ctx = await _prepare_context(
-            chat_session_object.activity_uuid, None, db_session, streaming=True
+            activity_uuid, aichat_uuid, db_session, streaming=True
         )
 
         if not ctx.streaming_enabled:
             logger.info(
                 "Streaming disabled for this org, falling back to non-streaming"
             )
-            response = await ai_start_activity_chat_session(
-                request, chat_session_object, current_user, db_session
+            response = await _handle_ai_chat(
+                activity_uuid, aichat_uuid, message, db_session, cancel_event
             )
             yield format_sse_message(
                 {
@@ -354,12 +300,10 @@ async def ai_start_activity_chat_session_stream(
             }
         )
 
-        logger.info(
-            "Streaming AI chat session for activity %s", ctx.activity.activity_uuid
-        )
+        logger.info("Streaming AI chat for activity %s", ctx.activity.activity_uuid)
 
         async for chunk in ask_ai_stream(
-            chat_session_object.message,
+            message,
             ctx.chat_session["windowed_history"],
             ctx.ai_text,
             ctx.system_message,
@@ -371,27 +315,94 @@ async def ai_start_activity_chat_session_stream(
         ):
             yield chunk
 
-        logger.info("Streaming session completed: %s", ctx.chat_session["aichat_uuid"])
+        logger.info("Streaming completed: %s", ctx.chat_session["aichat_uuid"])
 
-    except ActivityNotFoundError as e:
-        yield format_sse_message({"type": "error", "error": e.message, "status": 404})
-    except AIFeatureDisabledError as e:
-        yield format_sse_message({"type": "error", "error": e.message, "status": 403})
-    except AITimeoutError as e:
-        yield format_sse_message({"type": "error", "error": e.message, "status": 504})
-    except (AIProcessingError, VectorStoreError, ChatSessionError) as e:
-        yield format_sse_message(
-            {
-                "type": "error",
-                "error": f"AI processing failed: {e.message}",
-                "status": 500,
-            }
-        )
+    except AIServiceException as e:
+        yield _map_ai_error_to_sse(e)
     except Exception as e:
-        logger.exception("Unexpected error in streaming AI session: %s", e)
-        yield format_sse_message(
-            {"type": "error", "error": "An unexpected error occurred.", "status": 500}
+        logger.exception("Unexpected error in streaming AI chat: %s", e)
+        yield _map_ai_error_to_sse(e)
+
+
+# ---------------------------------------------------------------------------
+# Public service functions (called by routers)
+# ---------------------------------------------------------------------------
+
+
+async def ai_start_activity_chat_session(
+    request: Request,
+    chat_session_object: StartActivityAIChatSession,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+    cancel_event: asyncio.Event | None = None,
+) -> ActivityAIChatSessionResponse:
+    """Start a new AI chat session."""
+    try:
+        return await _handle_ai_chat(
+            chat_session_object.activity_uuid,
+            None,
+            chat_session_object.message,
+            db_session,
+            cancel_event,
         )
+    except (AIServiceException, HTTPException) as e:
+        if isinstance(e, HTTPException):
+            raise
+        raise _map_ai_errors_to_http(e) from e
+    except Exception as e:
+        logger.exception("Unexpected error in AI start: %s", e)
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred. Please try again later.",
+        ) from e
+
+
+async def ai_send_activity_chat_message(
+    request: Request,
+    chat_session_object: SendActivityAIChatMessage,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+    cancel_event: asyncio.Event | None = None,
+) -> ActivityAIChatSessionResponse:
+    """Send a message in an existing AI chat session."""
+    try:
+        return await _handle_ai_chat(
+            chat_session_object.activity_uuid,
+            chat_session_object.aichat_uuid,
+            chat_session_object.message,
+            db_session,
+            cancel_event,
+        )
+    except (AIServiceException, HTTPException) as e:
+        if isinstance(e, HTTPException):
+            raise
+        raise _map_ai_errors_to_http(e) from e
+    except Exception as e:
+        logger.exception("Unexpected error sending AI message: %s", e)
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred. Please try again later.",
+        ) from e
+
+
+async def ai_start_activity_chat_session_stream(
+    request: Request,
+    chat_session_object: StartActivityAIChatSession,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+    cancel_event: asyncio.Event | None = None,
+):
+    """Streaming version of AI chat session start."""
+    async for chunk in _handle_ai_chat_stream(
+        chat_session_object.activity_uuid,
+        None,
+        chat_session_object.message,
+        request,
+        current_user,
+        db_session,
+        cancel_event,
+    ):
+        yield chunk
 
 
 async def ai_send_activity_chat_message_stream(
@@ -402,75 +413,13 @@ async def ai_send_activity_chat_message_stream(
     cancel_event: asyncio.Event | None = None,
 ):
     """Streaming version of AI chat message sending."""
-
-    try:
-        ctx = await _prepare_context(
-            chat_session_object.activity_uuid,
-            chat_session_object.aichat_uuid,
-            db_session,
-            streaming=True,
-        )
-
-        if not ctx.streaming_enabled:
-            logger.info(
-                "Streaming disabled for this org, falling back to non-streaming"
-            )
-            response = await ai_send_activity_chat_message(
-                request, chat_session_object, current_user, db_session
-            )
-            yield format_sse_message(
-                {
-                    "type": "final",
-                    "aichat_uuid": response.aichat_uuid,
-                    "activity_uuid": response.activity_uuid,
-                    "message": response.message,
-                }
-            )
-            return
-
-        yield format_sse_message(
-            {
-                "type": "status",
-                "status": "processing",
-                "aichat_uuid": chat_session_object.aichat_uuid,
-            }
-        )
-
-        logger.info(
-            "Streaming AI message for session %s", chat_session_object.aichat_uuid
-        )
-
-        async for chunk in ask_ai_stream(
-            chat_session_object.message,
-            ctx.chat_session["windowed_history"],
-            ctx.ai_text,
-            ctx.system_message,
-            _EMBEDDING_MODEL,
-            ctx.ai_model,
-            session_id=ctx.chat_session["aichat_uuid"],
-            cancel_event=cancel_event,
-            collection_name=f"activity_{ctx.activity.activity_uuid}",
-        ):
-            yield chunk
-
-        logger.info("Streaming message completed: %s", chat_session_object.aichat_uuid)
-
-    except ActivityNotFoundError as e:
-        yield format_sse_message({"type": "error", "error": e.message, "status": 404})
-    except AIFeatureDisabledError as e:
-        yield format_sse_message({"type": "error", "error": e.message, "status": 403})
-    except AITimeoutError as e:
-        yield format_sse_message({"type": "error", "error": e.message, "status": 504})
-    except (AIProcessingError, VectorStoreError, ChatSessionError) as e:
-        yield format_sse_message(
-            {
-                "type": "error",
-                "error": f"AI processing failed: {e.message}",
-                "status": 500,
-            }
-        )
-    except Exception as e:
-        logger.exception("Unexpected error in streaming AI message: %s", e)
-        yield format_sse_message(
-            {"type": "error", "error": "An unexpected error occurred.", "status": 500}
-        )
+    async for chunk in _handle_ai_chat_stream(
+        chat_session_object.activity_uuid,
+        chat_session_object.aichat_uuid,
+        chat_session_object.message,
+        request,
+        current_user,
+        db_session,
+        cancel_event,
+    ):
+        yield chunk

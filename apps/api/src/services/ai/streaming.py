@@ -89,33 +89,17 @@ async def ask_ai_stream(
         raise AIProcessingError(error_msg)
 
     try:
-        # If no agent provided, create one
+        # If no agent provided, create one using shared setup
         if agent_executor is None:
-            from src.services.ai.base import get_fast_ai_service
+            from src.services.ai.base import prepare_agent
 
-            ai_service = get_fast_ai_service()
-
-            # Get or create vector store
-            vector_store = await ai_service.get_or_create_vector_store(
-                documents=[text_reference],
+            agent_executor = await prepare_agent(
+                text_reference=text_reference,
+                message_for_the_prompt=message_for_the_prompt,
                 embedding_model_name=embedding_model_name,
+                openai_model_name=openai_model_name,
                 collection_name=collection_name,
             )
-
-            if not vector_store:
-                msg = "Failed to create knowledge base"
-                raise VectorStoreError(msg)
-
-            # Get or create agent (cached)
-            agent_executor = await ai_service.get_or_create_agent(
-                llm_model_name=openai_model_name,
-                system_prompt=message_for_the_prompt,
-                vector_store=vector_store,
-            )
-
-            if not agent_executor:
-                msg = "Failed to create AI agent"
-                raise AIProcessingError(msg)
 
         # Convert message history to LangChain v1 format
         history_messages = convert_history_to_messages(message_history)
@@ -232,14 +216,14 @@ async def ask_ai_stream(
             )
 
         except TimeoutError as e:
-            error_msg = "AI processing timed out after 60 seconds"
+            error_msg = "AI processing timed out after 120 seconds"
             logger.warning(error_msg)
             yield format_sse_message(
                 {"type": "error", "error": error_msg, "error_code": "TIMEOUT"}
             )
             raise AITimeoutError(120, details={"question_length": len(question)}) from e
 
-    except AIProcessingError, VectorStoreError, AITimeoutError:
+    except (AIProcessingError, VectorStoreError, AITimeoutError):
         raise
     except Exception as e:
         error_msg = f"Unexpected error during AI streaming: {e!s}"
