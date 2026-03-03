@@ -266,7 +266,6 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
                         message={{
                           sender: 'ai',
                           message: activeStreamingText,
-                          type: 'ai',
                         }}
                         animated
                       />

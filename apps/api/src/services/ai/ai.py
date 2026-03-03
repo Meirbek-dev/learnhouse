@@ -44,6 +44,7 @@ class _ChatContext:
     activity: ActivityRead
     course: CourseRead
     ai_text: str
+    structured_sections: list[str]
     system_message: str
     ai_model: str
     max_tokens: int
@@ -54,59 +55,63 @@ class _ChatContext:
 async def _get_activity_data(
     activity_uuid: str, db_session: Session
 ) -> tuple[ActivityRead, CourseRead, OrganizationConfig]:
-    """Fetch and cache activity, course, and org config."""
+    """Fetch and cache activity+course (5 min TTL); org_config always fresh.
+
+    org_config is NOT cached because it carries short-lived feature flags
+    (e.g. streaming_enabled) that must propagate within seconds.
+    """
 
     cache_manager = get_ai_cache_manager()
     cache_key = f"activity_{activity_uuid}"
 
-    cached_data = cache_manager.db_cache.get(cache_key)
-    if cached_data:
+    cached_pair = cache_manager.db_cache.get(cache_key)
+    if cached_pair:
         logger.info("Activity data cache HIT: %s", activity_uuid)
-        return cached_data
+        activity, course = cached_pair
+    else:
+        try:
+            activity = db_session.exec(
+                select(Activity).where(Activity.activity_uuid == activity_uuid)
+            ).first()
 
-    try:
-        # SQLAlchemy Session is not thread-safe: run all DB calls on the
-        # event-loop thread directly instead of passing the session into
-        # asyncio.to_thread.
-        activity = db_session.exec(
-            select(Activity).where(Activity.activity_uuid == activity_uuid)
-        ).first()
+            if not activity:
+                raise ActivityNotFoundError(activity_uuid)
 
-        if not activity:
-            raise ActivityNotFoundError(activity_uuid)
+            course = db_session.get(Course, activity.course_id)
 
-        course = db_session.get(Course, activity.course_id)
+            if not course:
+                raise ActivityNotFoundError(
+                    activity_uuid, details={"course_not_found": True}
+                )
 
-        if not course:
+            cache_manager.db_cache.set(cache_key, (activity, course))
+
+        except ActivityNotFoundError:
+            raise
+        except Exception as e:
             raise ActivityNotFoundError(
-                activity_uuid, details={"course_not_found": True}
-            )
+                activity_uuid, details={"error": str(e), "type": type(e).__name__}
+            ) from e
 
-        org_config = db_session.exec(
-            select(OrganizationConfig).where(OrganizationConfig.org_id == course.org_id)
-        ).first()
+    # Always fetch org_config fresh — it carries feature flags that must
+    # propagate quickly (e.g. disabling AI should take effect in seconds).
+    org_config = db_session.exec(
+        select(OrganizationConfig).where(OrganizationConfig.org_id == course.org_id)
+    ).first()
 
-        if not org_config:
-            raise ActivityNotFoundError(
-                activity_uuid, details={"org_config_not_found": True}
-            )
-
-        result = (activity, course, org_config)
-        cache_manager.db_cache.set(cache_key, result)
-        return result
-
-    except ActivityNotFoundError:
-        raise
-    except Exception as e:
+    if not org_config:
         raise ActivityNotFoundError(
-            activity_uuid, details={"error": str(e), "type": type(e).__name__}
-        ) from e
+            activity_uuid, details={"org_config_not_found": True}
+        )
+
+    return activity, course, org_config
 
 
 async def _prepare_context(
     activity_uuid: str,
     aichat_uuid: str | None,
     db_session: Session,
+    user_id: int | None = None,
 ) -> _ChatContext:
     """Build the full context needed for any AI chat request."""
     activity, course, org_config = await _get_activity_data(activity_uuid, db_session)
@@ -114,7 +119,7 @@ async def _prepare_context(
     content_task = asyncio.to_thread(
         structure_activity_content_by_type, activity.content
     )
-    chat_session_task = asyncio.to_thread(get_chat_session_history, aichat_uuid)
+    chat_session_task = asyncio.to_thread(get_chat_session_history, aichat_uuid, user_id)
 
     structured, chat_session = await asyncio.gather(content_task, chat_session_task)
 
@@ -148,6 +153,7 @@ async def _prepare_context(
         activity=activity,
         course=course,
         ai_text=ai_text,
+        structured_sections=structured,
         system_message=system_message,
         ai_model=ai_model,
         max_tokens=4000,
@@ -184,11 +190,12 @@ async def _handle_ai_chat(
     message: str,
     db_session: Session,
     cancel_event: asyncio.Event | None = None,
+    user_id: int | None = None,
 ) -> ActivityAIChatSessionResponse:
     """Shared logic for non-streaming start/send AI chat."""
     trace_start = time.perf_counter()
 
-    ctx = await _prepare_context(activity_uuid, aichat_uuid, db_session)
+    ctx = await _prepare_context(activity_uuid, aichat_uuid, db_session, user_id=user_id)
 
     ai_process_start = time.perf_counter()
     response = await ask_ai(
@@ -202,6 +209,7 @@ async def _handle_ai_chat(
         cancel_event=cancel_event,
         collection_name=f"activity_{ctx.activity.activity_uuid}",
         max_tokens=ctx.max_tokens,
+        documents=ctx.structured_sections if ctx.structured_sections else None,
     )
     ai_ms = (time.perf_counter() - ai_process_start) * 1000
 
@@ -260,7 +268,9 @@ async def _handle_ai_chat_stream(
 ) -> AsyncGenerator[str]:
     """Shared logic for streaming start/send AI chat."""
     try:
-        ctx = await _prepare_context(activity_uuid, aichat_uuid, db_session)
+        ctx = await _prepare_context(
+            activity_uuid, aichat_uuid, db_session, user_id=current_user.id
+        )
 
         if not ctx.streaming_enabled:
             logger.info(
@@ -279,6 +289,7 @@ async def _handle_ai_chat_stream(
                 cancel_event=cancel_event,
                 collection_name=f"activity_{ctx.activity.activity_uuid}",
                 max_tokens=ctx.max_tokens,
+                documents=ctx.structured_sections if ctx.structured_sections else None,
             )
             ai_message = response.get("output", "")
             yield format_sse_message(
@@ -312,6 +323,7 @@ async def _handle_ai_chat_stream(
             cancel_event=cancel_event,
             collection_name=f"activity_{ctx.activity.activity_uuid}",
             max_tokens=ctx.max_tokens,
+            documents=ctx.structured_sections if ctx.structured_sections else None,
         ):
             yield chunk
 
@@ -344,6 +356,7 @@ async def ai_start_activity_chat_session(
             chat_session_object.message,
             db_session,
             cancel_event,
+            user_id=current_user.id,
         )
     except (AIServiceException, HTTPException) as e:
         if isinstance(e, HTTPException):
@@ -372,6 +385,7 @@ async def ai_send_activity_chat_message(
             chat_session_object.message,
             db_session,
             cancel_event,
+            user_id=current_user.id,
         )
     except (AIServiceException, HTTPException) as e:
         if isinstance(e, HTTPException):

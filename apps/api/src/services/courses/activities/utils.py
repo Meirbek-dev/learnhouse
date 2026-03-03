@@ -104,7 +104,7 @@ def _extract_block_text(node: dict) -> str:
     return ""
 
 
-def structure_activity_content_by_type(activity):
+def structure_activity_content_by_type(activity: ActivityRead | dict) -> list[str]:
     """Extract structured sections from activity content.
 
     Returns a list of text sections preserving document order and structure.

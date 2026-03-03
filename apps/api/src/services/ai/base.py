@@ -142,7 +142,7 @@ class OptimizedTextSplitter:
         if not text or not isinstance(text, str):
             return []
 
-        text_hash = hashlib.sha256(text.encode(), usedforsecurity=False).hexdigest()
+        text_hash = hashlib.sha1(text.encode(), usedforsecurity=False).hexdigest()
 
         with self._chunk_cache_lock:
             cached = self._chunk_cache.get(text_hash)
@@ -345,12 +345,13 @@ class FastAIService:
     ) -> CompiledStateGraph | None:
         """Get cached compiled agent or create a new one.
 
-        Agents are cached per (model, collection, system_prompt, content_hash) tuple.
+        Agents are cached per (model, collection, system_prompt, content_hash, max_tokens) tuple.
         Including content_hash ensures a stale agent (with a retriever pointing at
         an old vector store) is never served after content changes.
         """
-        prompt_hash = hashlib.sha256(system_prompt.encode()).hexdigest()[:16]
-        cache_key = f"agent_{llm_model_name}_{collection_name or 'anon'}_{prompt_hash}_{content_hash[:16]}"
+        prompt_hash = hashlib.sha1(system_prompt.encode(), usedforsecurity=False).hexdigest()[:16]
+        safe_content_hash = (content_hash or "no-content")[:32]
+        cache_key = f"agent_{llm_model_name}_{collection_name or 'anon'}_{prompt_hash}_{safe_content_hash}_{max_tokens}"
 
         cached_agent = self.cache_manager.agent_cache.get(cache_key)
         if cached_agent is not None:
@@ -363,6 +364,10 @@ class FastAIService:
         )
         if agent:
             self.cache_manager.agent_cache.set(cache_key, agent)
+            # Register agent cache key for activity-level invalidation
+            if collection_name:
+                activity_uuid = collection_name.removeprefix("activity_")
+                self.cache_manager.register_agent_cache_key(activity_uuid, cache_key)
         return agent
 
     async def _create_agent(
@@ -426,6 +431,7 @@ async def prepare_agent(
     openai_model_name: str,
     collection_name: str | None = None,
     max_tokens: int = 4000,
+    documents: list[str] | None = None,
 ) -> CompiledStateGraph:
     """Shared setup: create (or retrieve cached) vector store and agent.
 
@@ -435,8 +441,12 @@ async def prepare_agent(
     """
     ai_service = get_fast_ai_service()
 
+    # Use structured documents when provided for better retrieval precision;
+    # fall back to a single text_reference blob for backward-compat callers.
+    docs = documents if documents else [text_reference]
+
     vector_store, content_hash = await ai_service.get_or_create_vector_store(
-        documents=[text_reference],
+        documents=docs,
         embedding_model_name=embedding_model_name,
         collection_name=collection_name,
     )
@@ -470,6 +480,7 @@ async def ask_ai(
     cancel_event: asyncio.Event | None = None,
     collection_name: str | None = None,
     max_tokens: int = 4000,
+    documents: list[str] | None = None,
 ) -> dict[str, Any]:
     """Fast AI processing using langgraph.prebuilt.create_react_agent."""
 
@@ -487,6 +498,7 @@ async def ask_ai(
             openai_model_name=openai_model_name,
             collection_name=collection_name,
             max_tokens=max_tokens,
+            documents=documents,
         )
 
         history_messages = convert_history_to_messages(message_history)
@@ -543,14 +555,29 @@ async def ask_ai(
         ) from e
 
 
-def get_chat_session_history(aichat_uuid: str | None = None) -> ChatSessionInfo:
+def get_chat_session_history(aichat_uuid: str | None = None, user_id: int | None = None) -> ChatSessionInfo:
     """
     Chat session history with windowed loading for performance.
 
     Uses a sliding window to load only recent messages instead of full history.
     """
     try:
-        session_id = aichat_uuid or f"aichat_{ULID()}"
+        # Validate ownership and compute session_id.
+        # New sessions are prefixed "user_{id}_" so ownership can be verified
+        # on subsequent requests.  Old (unprefixed) sessions are allowed through
+        # for backward compatibility.
+        # TODO: Remove backward compat at some point
+        if aichat_uuid and user_id is not None:
+            if aichat_uuid.startswith("user_") and not aichat_uuid.startswith(f"user_{user_id}_"):
+                raise ChatSessionError(
+                    "Session does not belong to this user",
+                    details={"session": aichat_uuid},
+                )
+            session_id = aichat_uuid
+        elif aichat_uuid:
+            session_id = aichat_uuid
+        else:
+            session_id = f"user_{user_id}_{ULID()}" if user_id is not None else f"aichat_{ULID()}"
         config = get_platform_config()
         redis_conn_string = config.redis_config.redis_connection_string
 

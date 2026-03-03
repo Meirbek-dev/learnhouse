@@ -209,6 +209,7 @@ class AICacheManager:
         # Secondary index: activity_uuid -> set of vector store cache keys
         # Allows deterministic vector cache invalidation when content changes.
         self._vector_key_index: dict[str, set[str]] = {}
+        self._agent_key_index: dict[str, set[str]] = {}
         self._index_lock = Lock()
 
         logger.info("AI Cache Manager initialized")
@@ -218,6 +219,11 @@ class AICacheManager:
         with self._index_lock:
             self._vector_key_index.setdefault(activity_uuid, set()).add(cache_key)
 
+    def register_agent_cache_key(self, activity_uuid: str, cache_key: str) -> None:
+        """Record that an agent *cache_key* belongs to *activity_uuid* for future invalidation."""
+        with self._index_lock:
+            self._agent_key_index.setdefault(activity_uuid, set()).add(cache_key)
+
     def clear_all(self) -> None:
         """Clear all caches."""
         self.vector_store_cache.clear()
@@ -225,17 +231,20 @@ class AICacheManager:
         self.db_cache.clear()
         with self._index_lock:
             self._vector_key_index.clear()
+            self._agent_key_index.clear()
         logger.info("All AI caches cleared")
 
     def get_all_stats(self) -> dict[str, Any]:
         """Get statistics for all caches."""
         with self._index_lock:
-            index_size = sum(len(v) for v in self._vector_key_index.values())
+            vector_index_size = sum(len(v) for v in self._vector_key_index.values())
+            agent_index_size = sum(len(v) for v in self._agent_key_index.values())
         return {
             "vector_store": self.vector_store_cache.get_stats(),
             "agent": self.agent_cache.get_stats(),
             "database": self.db_cache.get_stats(),
-            "vector_key_index_entries": index_size,
+            "vector_key_index_entries": vector_index_size,
+            "agent_key_index_entries": agent_index_size,
         }
 
     def invalidate_activity_cache(self, activity_uuid: str) -> None:
@@ -244,21 +253,26 @@ class AICacheManager:
         Clears:
         - DB query cache for the activity
         - All vector store cache entries registered for the activity
+        - All agent cache entries registered for the activity
         """
         # Clear DB cache entry
         self.db_cache.delete(f"activity_{activity_uuid}")
 
-        # Clear all vector store entries tracked for this activity
+        # Clear all vector store and agent entries tracked for this activity
         with self._index_lock:
-            keys = self._vector_key_index.pop(activity_uuid, set())
+            vector_keys = self._vector_key_index.pop(activity_uuid, set())
+            agent_keys = self._agent_key_index.pop(activity_uuid, set())
 
-        for key in keys:
+        for key in vector_keys:
             self.vector_store_cache.delete(key)
+        for key in agent_keys:
+            self.agent_cache.delete(key)
 
         logger.info(
-            "Invalidated caches for activity %s: %d vector store entries cleared",
+            "Invalidated caches for activity %s: %d vector store, %d agent entries cleared",
             activity_uuid,
-            len(keys),
+            len(vector_keys),
+            len(agent_keys),
         )
 
 

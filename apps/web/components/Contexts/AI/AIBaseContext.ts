@@ -8,7 +8,6 @@
 export interface AIMessage {
   sender: 'ai' | 'user';
   message: string;
-  type: 'ai' | 'user';
 }
 
 export interface AIError {

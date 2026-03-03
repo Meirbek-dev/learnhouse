@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 import hashlib
 import logging
 from typing import Annotated
@@ -166,7 +167,19 @@ async def api_ai_start_activity_chat_session_stream(
     try:
         cancel_event = asyncio.Event()
 
+        async def disconnect_monitor_start() -> None:
+            try:
+                while not cancel_event.is_set():
+                    if await request.is_disconnected():
+                        cancel_event.set()
+                        logger.info("Disconnect monitor: client gone, aborting start-session stream")
+                        break
+                    await asyncio.sleep(0.5)
+            except asyncio.CancelledError:
+                pass
+
         async def event_generator():
+            monitor_task = asyncio.create_task(disconnect_monitor_start())
             try:
                 async for sse_string in ai_start_activity_chat_session_stream(
                     request,
@@ -175,19 +188,19 @@ async def api_ai_start_activity_chat_session_stream(
                     db_session,
                     cancel_event=cancel_event,
                 ):
-                    # If client disconnected, set cancel event and stop the generator
-                    if await request.is_disconnected():
-                        cancel_event.set()
-                        logger.info("Client disconnected; aborting streaming generator")
+                    if cancel_event.is_set():
                         return
-
-                    # The service yields SSE-formatted strings already
                     yield sse_string
             except Exception as e:
                 logger.exception(f"Error in streaming generator: {e}")
                 yield format_sse_message(
-                    {"type": "error", "error": str(e), "error_code": "STREAM_ERROR"}
+                    {"type": "error", "error": "Внутренняя ошибка.", "error_code": "STREAM_ERROR"}
                 )
+            finally:
+                cancel_event.set()
+                monitor_task.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await monitor_task
 
         return StreamingResponse(
             event_generator(),
@@ -234,7 +247,19 @@ async def api_ai_send_activity_chat_message_stream(
     try:
         cancel_event = asyncio.Event()
 
+        async def disconnect_monitor_send() -> None:
+            try:
+                while not cancel_event.is_set():
+                    if await request.is_disconnected():
+                        cancel_event.set()
+                        logger.info("Disconnect monitor: client gone, aborting send-message stream")
+                        break
+                    await asyncio.sleep(0.5)
+            except asyncio.CancelledError:
+                pass
+
         async def event_generator():
+            monitor_task = asyncio.create_task(disconnect_monitor_send())
             try:
                 async for sse_string in ai_send_activity_chat_message_stream(
                     request,
@@ -243,17 +268,19 @@ async def api_ai_send_activity_chat_message_stream(
                     db_session,
                     cancel_event=cancel_event,
                 ):
-                    if await request.is_disconnected():
-                        cancel_event.set()
-                        logger.info("Client disconnected; aborting streaming generator")
+                    if cancel_event.is_set():
                         return
-
                     yield sse_string
             except Exception as e:
                 logger.exception(f"Error in streaming generator: {e}")
                 yield format_sse_message(
-                    {"type": "error", "error": str(e), "error_code": "STREAM_ERROR"}
+                    {"type": "error", "error": "Внутренняя ошибка.", "error_code": "STREAM_ERROR"}
                 )
+            finally:
+                cancel_event.set()
+                monitor_task.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await monitor_task
 
         return StreamingResponse(
             event_generator(),

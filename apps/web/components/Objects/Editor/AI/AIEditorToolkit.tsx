@@ -302,7 +302,7 @@ function useStreamingChat(activityUuid: string, accessToken: string) {
 
   const sendMessage = useCallback(
     async (message: string): Promise<string> => {
-      dispatchAIEditor({ type: 'addMessage', payload: { sender: 'user', message, type: 'user' } });
+      dispatchAIEditor({ type: 'addMessage', payload: { sender: 'user', message } });
       dispatchAIEditor({ type: 'setIsWaitingForResponse' });
       dispatchAIEditor({ type: 'setChatInputValue', payload: '' });
 
@@ -340,7 +340,7 @@ function useStreamingChat(activityUuid: string, accessToken: string) {
           const finalMessage = final.content || streamingContent;
           dispatchAIEditor({
             type: 'addMessage',
-            payload: { sender: 'ai', message: finalMessage, type: 'ai' },
+            payload: { sender: 'ai', message: finalMessage },
           });
           resolve(finalMessage);
         };

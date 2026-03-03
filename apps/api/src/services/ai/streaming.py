@@ -53,6 +53,7 @@ async def ask_ai_stream(
     cancel_event: asyncio.Event | None = None,
     collection_name: str | None = None,
     max_tokens: int = 4000,
+    documents: list[str] | None = None,
 ) -> AsyncGenerator[str]:
     """
     Stream AI responses using LangChain v1 streaming API.
@@ -102,6 +103,7 @@ async def ask_ai_stream(
                 openai_model_name=openai_model_name,
                 collection_name=collection_name,
                 max_tokens=max_tokens,
+                documents=documents,
             )
 
         # Convert message history to LangChain v1 format
@@ -124,7 +126,6 @@ async def ask_ai_stream(
             {
                 "type": "status",
                 "status": "processing",
-                "message": "Думаю...",
                 "aichat_uuid": session_id,
             }
         )
@@ -162,6 +163,14 @@ async def ask_ai_stream(
                         continue
 
                     content = _extract_chunk_text(message_chunk)
+
+                    # Send a granular status update after the first tool call result
+                    # so the user sees meaningful progress in their language (Russian).
+                    if "tool" in node_name.lower() and not content:
+                        yield format_sse_message(
+                            {"type": "status", "status": "reading_context", "aichat_uuid": session_id}
+                        )
+                        continue
 
                     # Stream content if present
                     if content:
@@ -236,13 +245,14 @@ async def ask_ai_stream(
     except (AIProcessingError, VectorStoreError, AITimeoutError):
         raise
     except Exception as e:
-        error_msg = f"Unexpected error during AI streaming: {e!s}"
-        logger.exception(error_msg)
+        # Log full details server-side; send only a generic message to the client
+        # to avoid leaking internal paths, stack frames, or credentials.
+        logger.exception("Unexpected error during AI streaming (session=%s): %s", session_id, e)
         yield format_sse_message(
-            {"type": "error", "error": error_msg, "error_code": "PROCESSING_ERROR"}
+            {"type": "error", "error": "Произошла внутренняя ошибка. Пожалуйста, попробуйте снова.", "error_code": "PROCESSING_ERROR"}
         )
         raise AIProcessingError(
-            error_msg,
+            f"Unexpected error during AI streaming: {e!s}",
             details={"error_type": type(e).__name__, "session_id": session_id},
         ) from e
 

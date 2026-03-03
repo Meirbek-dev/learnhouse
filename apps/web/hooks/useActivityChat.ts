@@ -1,8 +1,9 @@
 'use client';
 
 import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
-import { useCallback, useRef, useState, useTransition } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import type { AIMessage } from '@components/Contexts/AI/AIBaseContext';
+import { INITIAL_AI_ERROR } from '@components/Contexts/AI/AIBaseContext';
 
 // Minimal dispatcher shape — compatible with both AIChatBotContext and
 // any other context that shares the same action vocabulary.
@@ -74,7 +75,12 @@ export function useActivityChat({
 
   const controllerRef = useRef<AbortController | null>(null);
   const streamingBufferRef = useRef('');
+  const chatUuidRef = useRef<string | null>(chatUuid);
   const [, startTransition] = useTransition();
+
+  useEffect(() => {
+    chatUuidRef.current = chatUuid;
+  }, [chatUuid]);
 
   const cleanup = useCallback(() => {
     controllerRef.current?.abort();
@@ -97,8 +103,11 @@ export function useActivityChat({
     async (message: string) => {
       if (!message.trim() || !accessToken) return;
 
+      // Clear any previous error state so stale errors don't linger.
+      dispatch({ type: 'setError', payload: INITIAL_AI_ERROR });
+
       // Add the user's message to the committed message list immediately.
-      dispatch({ type: 'addMessage', payload: { sender: 'user', message, type: 'user' } as AIMessage });
+      dispatch({ type: 'addMessage', payload: { sender: 'user', message } as AIMessage });
       dispatch({ type: 'setChatInputValue', payload: '' });
       startTransition(() => dispatch({ type: 'setIsWaitingForResponse' }));
 
@@ -146,7 +155,7 @@ export function useActivityChat({
         const finalMessage = final.content || streamingBufferRef.current;
         dispatch({
           type: 'addMessage',
-          payload: { sender: 'ai', message: finalMessage, type: 'ai' } as AIMessage,
+          payload: { sender: 'ai', message: finalMessage } as AIMessage,
         });
 
         // Clear all streaming state.
@@ -186,10 +195,10 @@ export function useActivityChat({
 
       // ── Fire the right endpoint ────────────────────────────────────
       try {
-        if (chatUuid) {
+        if (chatUuidRef.current) {
           await sendActivityAIChatMessageStream(
             message,
-            chatUuid,
+            chatUuidRef.current,
             activityUuid,
             accessToken,
             handleChunk,
@@ -214,9 +223,7 @@ export function useActivityChat({
         handleError({ error: err instanceof Error ? err.message : 'Unknown error' });
       }
     },
-    // chatUuid intentionally excluded — it's read from the ref at call time
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [accessToken, activityUuid, chatUuid, dispatch, localStreamingDisplay],
+    [accessToken, activityUuid, dispatch, localStreamingDisplay],
   );
 
   return { sendMessage, localStreamingText, statusMessage, isLocalStreaming, cancelStream, cleanup };
