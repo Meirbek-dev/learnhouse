@@ -4,7 +4,6 @@ import {
   loginAndGetToken,
   loginWithOAuthToken,
 } from '@/services/auth/auth';
-import { getServerEnv } from '@/lib/env';
 import { SESSION_CACHE_MAX_SIZE, SESSION_CACHE_TTL_MS, TOKEN_REFRESH_BUFFER_MS } from '@/lib/constants';
 import { getTopLevelCookieDomain, getUriWithOrg } from '@/services/config/config';
 import type { NextAuthConfig, NextAuthResult, Session } from 'next-auth';
@@ -83,12 +82,18 @@ const isTokenExpiringSoon = (expiry: number, bufferMs = TOKEN_REFRESH_BUFFER_MS)
 };
 
 // ─── Cookie / Secure Config ───────────────────────────────────────────────────
-
-const { NEXTAUTH_URL, PLATFORM_SSL } = getServerEnv();
+const normalizeBoolean = (value?: string | null): boolean | undefined => {
+  if (!value) return undefined;
+  const v = value.trim().toLowerCase();
+  if (['true', '1', 'yes', 'on'].includes(v)) return true;
+  if (['false', '0', 'no', 'off'].includes(v)) return false;
+  return undefined;
+};
 
 const cookieDomain = !isDevEnv ? getTopLevelCookieDomain() : undefined;
-const isHttpsUrl = NEXTAUTH_URL.startsWith('https://');
-const sslFlag = PLATFORM_SSL === 'true';
+const sslFlag = normalizeBoolean(process.env.PLATFORM_SSL);
+const nextAuthUrl = process.env.NEXTAUTH_URL;
+const isHttpsUrl = typeof nextAuthUrl === 'string' && nextAuthUrl.startsWith('https://');
 const cookieSecure = !isDevEnv && (isHttpsUrl || sslFlag);
 const cookieNamePrefix = cookieSecure ? '__Secure-' : '';
 
