@@ -49,7 +49,9 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
 
 
 @lru_cache(maxsize=10)
-def get_llm(model_name: str, streaming: bool = True) -> ChatOpenAI | None:
+def get_llm(
+    model_name: str, streaming: bool = True, max_tokens: int = 4000
+) -> ChatOpenAI | None:
     """Get cached LLM instance with OpenAI configuration."""
     try:
         config = get_platform_config()
@@ -59,7 +61,12 @@ def get_llm(model_name: str, streaming: bool = True) -> ChatOpenAI | None:
             logger.warning("OpenAI API key not configured")
             return None
 
-        logger.info("Creating LLM: model=%s streaming=%s", model_name, streaming)
+        logger.info(
+            "Creating LLM: model=%s streaming=%s max_tokens=%d",
+            model_name,
+            streaming,
+            max_tokens,
+        )
         return ChatOpenAI(
             model=model_name,
             api_key=api_key,
@@ -68,7 +75,7 @@ def get_llm(model_name: str, streaming: bool = True) -> ChatOpenAI | None:
             frequency_penalty=0.0,
             presence_penalty=0.0,
             request_timeout=30.0,
-            max_tokens=4000,
+            max_tokens=max_tokens,
         )
 
     except Exception as e:

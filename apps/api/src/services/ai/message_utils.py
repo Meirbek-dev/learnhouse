@@ -33,7 +33,11 @@ def _message_to_dict(msg: BaseMessage) -> dict[str, str] | None:
     content = msg.content
     if isinstance(content, list):
         # Multi-part content (e.g. vision) — flatten to plain text parts only
-        text_parts = [p if isinstance(p, str) else p.get("text", "") for p in content if isinstance(p, (str, dict))]
+        text_parts = [
+            p if isinstance(p, str) else p.get("text", "")
+            for p in content
+            if isinstance(p, (str, dict))
+        ]
         content = "".join(text_parts)
 
     return {"role": role, "content": str(content)}

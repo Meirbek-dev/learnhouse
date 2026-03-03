@@ -46,6 +46,7 @@ class _ChatContext:
     ai_text: str
     system_message: str
     ai_model: str
+    max_tokens: int
     chat_session: dict[str, Any]
     streaming_enabled: bool
 
@@ -149,6 +150,7 @@ async def _prepare_context(
         ai_text=ai_text,
         system_message=system_message,
         ai_model=ai_model,
+        max_tokens=4000,
         chat_session=chat_session,
         streaming_enabled=streaming_enabled,
     )
@@ -199,6 +201,7 @@ async def _handle_ai_chat(
         session_id=ctx.chat_session["aichat_uuid"],
         cancel_event=cancel_event,
         collection_name=f"activity_{ctx.activity.activity_uuid}",
+        max_tokens=ctx.max_tokens,
     )
     ai_ms = (time.perf_counter() - ai_process_start) * 1000
 
@@ -296,6 +299,7 @@ async def _handle_ai_chat_stream(
             session_id=ctx.chat_session["aichat_uuid"],
             cancel_event=cancel_event,
             collection_name=f"activity_{ctx.activity.activity_uuid}",
+            max_tokens=ctx.max_tokens,
         ):
             yield chunk
 

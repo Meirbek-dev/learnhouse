@@ -52,6 +52,7 @@ async def ask_ai_stream(
     agent_executor: CompiledStateGraph | None = None,
     cancel_event: asyncio.Event | None = None,
     collection_name: str | None = None,
+    max_tokens: int = 4000,
 ) -> AsyncGenerator[str]:
     """
     Stream AI responses using LangChain v1 streaming API.
@@ -100,6 +101,7 @@ async def ask_ai_stream(
                 embedding_model_name=embedding_model_name,
                 openai_model_name=openai_model_name,
                 collection_name=collection_name,
+                max_tokens=max_tokens,
             )
 
         # Convert message history to LangChain v1 format
@@ -134,6 +136,7 @@ async def ask_ai_stream(
                 # Yields (message_chunk, metadata) tuples for each token.
                 async for message_chunk, metadata in agent_executor.astream(
                     {"messages": messages},
+                    config={"recursion_limit": 30},
                     stream_mode="messages",
                 ):
                     # Check cancellation at the top of the loop to abort promptly
@@ -230,7 +233,7 @@ async def ask_ai_stream(
             )
             raise AITimeoutError(60, details={"question_length": len(question)}) from e
 
-    except (AIProcessingError, VectorStoreError, AITimeoutError):
+    except AIProcessingError, VectorStoreError, AITimeoutError:
         raise
     except Exception as e:
         error_msg = f"Unexpected error during AI streaming: {e!s}"

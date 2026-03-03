@@ -9,19 +9,28 @@ import {
 } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { tags } from '@/lib/cacheTags';
+import { auth } from '@/auth';
+
+async function resolveToken(access_token?: string): Promise<string | undefined> {
+  if (access_token) return access_token;
+  const session = await auth();
+  return (session as any)?.tokens?.access_token ?? undefined;
+}
 
 export async function getUser(user_id: number, access_token?: string) {
+  const token = await resolveToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}users/id/${user_id}`,
-    access_token ? RequestBodyWithAuthHeader('GET', null, null, access_token) : RequestBody('GET', null, null),
+    token ? RequestBodyWithAuthHeader('GET', null, null, token) : RequestBody('GET', null, null),
   );
   return await errorHandling(result);
 }
 
 export async function getUserByUsername(username: string, access_token?: string) {
+  const token = await resolveToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}users/username/${username}`,
-    access_token ? RequestBodyWithAuthHeader('GET', null, null, access_token) : RequestBody('GET', null, null),
+    token ? RequestBodyWithAuthHeader('GET', null, null, token) : RequestBody('GET', null, null),
   );
   return await errorHandling(result);
 }

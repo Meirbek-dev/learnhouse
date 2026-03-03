@@ -1,22 +1,21 @@
 import asyncio
 import hashlib
-import json
 import logging
-import os
 import re
+import threading
 from collections.abc import Sequence
 from threading import Lock
 from typing import TYPE_CHECKING, Any
 
 from cachetools import LRUCache
-from langchain.agents import create_agent
-from langchain.tools import tool
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, messages_from_dict
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.tools import tool
 from langchain_core.vectorstores import VectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langgraph.graph.state import CompiledStateGraph
+from langgraph.prebuilt import create_react_agent
 from ulid import ULID
 
 if TYPE_CHECKING:
@@ -34,16 +33,6 @@ from src.services.ai.exceptions import (
 )
 from src.services.ai.init import get_embedding_function, get_llm
 from src.services.ai.message_utils import convert_history_to_messages
-
-# Disable ChromaDB telemetry
-os.environ.update(
-    {
-        "ANONYMIZED_TELEMETRY": "False",
-        "CHROMA_TELEMETRY": "0",
-        "CHROMA_TELEMETRY_ENABLED": "False",
-        "POSTHOG_DISABLED": "True",
-    }
-)
 
 logger = logging.getLogger(__name__)
 
@@ -108,6 +97,8 @@ class OptimizedTextSplitter:
             separators=["\n\n", "\n", ". ", " ", ""],
         )
         self._chunk_cache: LRUCache[str, list[str]] = LRUCache(maxsize=512)
+        # cachetools.LRUCache is not thread-safe; guard it explicitly.
+        self._chunk_cache_lock = threading.Lock()
 
     def split_text(self, text: str) -> list[str]:
         """Split text with bounded LRU caching (synchronous).
@@ -120,7 +111,8 @@ class OptimizedTextSplitter:
 
         text_hash = hashlib.md5(text.encode()).hexdigest()
 
-        cached = self._chunk_cache.get(text_hash)
+        with self._chunk_cache_lock:
+            cached = self._chunk_cache.get(text_hash)
         if cached is not None:
             return cached
 
@@ -132,7 +124,8 @@ class OptimizedTextSplitter:
         # definitions are semantically meaningful and must be kept.
         filtered = [chunk for chunk in chunks if chunk.strip()]
 
-        self._chunk_cache[text_hash] = filtered
+        with self._chunk_cache_lock:
+            self._chunk_cache[text_hash] = filtered
         return filtered
 
     async def split_text_async(self, text: str) -> list[str]:
@@ -164,7 +157,8 @@ class FastAIService:
         collection_name: str | None = None,
     ) -> VectorStore | None:
         """Get cached vector store or create new one."""
-        content_hash = self._generate_content_hash(documents)
+        # Offload CPU-bound hashing to a thread so the event loop stays free.
+        content_hash = await asyncio.to_thread(self._generate_content_hash, documents)
         cache_key = f"{embedding_model_name}_{collection_name or 'anon'}_{content_hash}"
 
         cached_store = self.cache_manager.vector_store_cache.get(cache_key)
@@ -232,24 +226,33 @@ class FastAIService:
                             existing = await asyncio.to_thread(
                                 chroma_client.get_collection, cname
                             )
-                            existing_hash = (existing.metadata or {}).get("content_hash")
+                            existing_hash = (existing.metadata or {}).get(
+                                "content_hash"
+                            )
                             if existing_hash == content_hash:
                                 vector_store = chroma_cls(
                                     client=chroma_client,
                                     collection_name=cname,
                                     embedding_function=embedding_function,
                                 )
-                                logger.info("Reusing existing Chroma collection: %s", cname)
+                                logger.info(
+                                    "Reusing existing Chroma collection: %s", cname
+                                )
                                 return vector_store
                             # Content changed — delete stale collection
-                            await asyncio.to_thread(chroma_client.delete_collection, cname)
+                            await asyncio.to_thread(
+                                chroma_client.delete_collection, cname
+                            )
                             logger.info("Deleted stale Chroma collection: %s", cname)
                         except Exception:
                             pass  # Collection doesn't exist yet
 
                     logger.info("Processing %d documents", len(documents))
                     chunk_results = await asyncio.gather(
-                        *(self.text_splitter.split_text_async(doc) for doc in documents),
+                        *(
+                            self.text_splitter.split_text_async(doc)
+                            for doc in documents
+                        ),
                         return_exceptions=True,
                     )
 
@@ -268,7 +271,9 @@ class FastAIService:
                         )
 
                     logger.info(
-                        "Created %d chunks from %d documents", len(all_chunks), len(documents)
+                        "Created %d chunks from %d documents",
+                        len(all_chunks),
+                        len(documents),
                     )
 
                     vector_store = await asyncio.to_thread(
@@ -313,7 +318,7 @@ class FastAIService:
                 logger.debug("Chroma import error: %r", chroma_import_error)
             return vector_store
 
-        except (EmbeddingError, VectorStoreError):
+        except EmbeddingError, VectorStoreError:
             raise
         except Exception as e:
             raise VectorStoreError(
@@ -328,16 +333,34 @@ class FastAIService:
         vector_store: VectorStore,
         collection_name: str | None = None,
         max_iterations: int = 15,
+        max_tokens: int = 4000,
     ) -> CompiledStateGraph | None:
-        """Create a fresh agent bound to the current vector store.
+        """Get cached compiled agent or create a new one.
 
-        Agents are not cached because they capture retriever closures over the
-        vector store. Caching agents leads to stale context when the vector
-        store is evicted and recreated with updated content.
+        Agents are cached per (model, collection, system_prompt) tuple.
+        Compiling the LangGraph StateGraph is the most expensive per-request
+        operation (~20-50 ms); caching eliminates that overhead entirely.
+
+        The cached agent retains a reference to the retriever closure over the
+        vector store. When the vector store TTL expires and a new one is
+        created, the agent cache entry will also have expired (agent TTL ≤
+        vector store TTL), so a fresh agent is built against the new store.
         """
-        return await self._create_agent(
-            llm_model_name, system_prompt, vector_store, max_iterations
+        prompt_hash = hashlib.sha256(system_prompt.encode()).hexdigest()[:16]
+        cache_key = f"agent_{llm_model_name}_{collection_name or 'anon'}_{prompt_hash}"
+
+        cached_agent = self.cache_manager.agent_cache.get(cache_key)
+        if cached_agent is not None:
+            logger.info("Agent cache HIT: %s", cache_key[:60])
+            return cached_agent
+
+        logger.info("Agent cache MISS: %s — creating", cache_key[:60])
+        agent = await self._create_agent(
+            llm_model_name, system_prompt, vector_store, max_iterations, max_tokens
         )
+        if agent:
+            self.cache_manager.agent_cache.set(cache_key, agent)
+        return agent
 
     async def _create_agent(
         self,
@@ -345,11 +368,12 @@ class FastAIService:
         system_prompt: str,
         vector_store: VectorStore,
         max_iterations: int = 15,
+        max_tokens: int = 4000,
     ) -> CompiledStateGraph | None:
-        """Create agent using LangChain v1 create_agent API."""
+        """Compile a ReAct agent using langgraph.prebuilt.create_react_agent."""
         try:
             # lru_cache handles caching — call directly
-            llm = get_llm(llm_model_name, streaming=True)
+            llm = get_llm(llm_model_name, streaming=True, max_tokens=max_tokens)
             if not llm:
                 raise AIProcessingError(
                     f"LLM model {llm_model_name} not available",
@@ -369,13 +393,15 @@ class FastAIService:
                     return "No relevant context found."
                 return "\n\n".join(doc.page_content for doc in docs)
 
-            agent = create_agent(
+            # create_react_agent from langgraph.prebuilt is the canonical way to
+            # build a tool-calling ReAct agent with a proper compiled StateGraph.
+            agent = create_react_agent(
                 model=llm,
                 tools=[find_context_text],
-                system_prompt=system_prompt,
+                prompt=system_prompt,
             )
 
-            logger.info("✓ Agent created successfully")
+            logger.info("✓ Agent created successfully (model=%s)", llm_model_name)
             return agent
 
         except AIProcessingError:
@@ -393,6 +419,7 @@ async def prepare_agent(
     embedding_model_name: str,
     openai_model_name: str,
     collection_name: str | None = None,
+    max_tokens: int = 4000,
 ) -> CompiledStateGraph:
     """Shared setup: create (or retrieve cached) vector store and agent.
 
@@ -416,6 +443,7 @@ async def prepare_agent(
         system_prompt=message_for_the_prompt,
         vector_store=vector_store,
         collection_name=collection_name,
+        max_tokens=max_tokens,
     )
 
     if not agent:
@@ -434,8 +462,9 @@ async def ask_ai(
     session_id: str = "default",
     cancel_event: asyncio.Event | None = None,
     collection_name: str | None = None,
+    max_tokens: int = 4000,
 ) -> dict[str, Any]:
-    """Fast AI processing using LangChain v1 create_agent API."""
+    """Fast AI processing using langgraph.prebuilt.create_react_agent."""
 
     if not question or not question.strip():
         raise AIProcessingError("Question cannot be empty")
@@ -450,6 +479,7 @@ async def ask_ai(
             embedding_model_name=embedding_model_name,
             openai_model_name=openai_model_name,
             collection_name=collection_name,
+            max_tokens=max_tokens,
         )
 
         history_messages = convert_history_to_messages(message_history)
@@ -462,7 +492,10 @@ async def ask_ai(
                 raise AIProcessingError("AI processing cancelled before invocation")
 
             result = await asyncio.wait_for(
-                agent.ainvoke({"messages": messages}),
+                agent.ainvoke(
+                    {"messages": messages},
+                    config={"recursion_limit": 30},
+                ),
                 timeout=60.0,
             )
 
@@ -496,7 +529,7 @@ async def ask_ai(
         except TimeoutError as e:
             raise AITimeoutError(60, details={"question_length": len(question)}) from e
 
-    except (AIProcessingError, VectorStoreError, AITimeoutError):
+    except AIProcessingError, VectorStoreError, AITimeoutError:
         raise
     except Exception as e:
         raise AIProcessingError(
@@ -531,35 +564,16 @@ def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
                     key_prefix="openu_chat:",
                 )
 
-                # Bounded tail fetch: use raw Redis LRANGE to avoid deserialising
-                # the full history when only the last N messages are needed.
-                # RedisChatMessageHistory stores entries via lpush (newest at index 0).
-                redis_client = getattr(message_history, "redis_client", None)
-                history_key = getattr(message_history, "key", None)
-
-                if redis_client is not None and history_key is not None:
-                    total_count = redis_client.llen(history_key)
-                    if total_count > window_size:
-                        raw = redis_client.lrange(history_key, 0, window_size - 1)
-                        windowed_messages = [
-                            messages_from_dict(
-                                [json.loads(m.decode() if isinstance(m, bytes) else m)]
-                            )[0]
-                            for m in raw
-                        ]
-                        # reverse to chronological order (oldest first)
-                        windowed_messages = list(reversed(windowed_messages))
-                    else:
-                        windowed_messages = message_history.messages
-                else:
-                    # Fallback: full load (internal API not available)
-                    all_messages = message_history.messages
-                    total_count = len(all_messages)
-                    windowed_messages = (
-                        all_messages[-window_size:]
-                        if total_count > window_size
-                        else all_messages
-                    )
+                # Use the public API to load history and slice to the window.
+                # Direct access to redis_client / key internals is fragile and
+                # breaks silently across library versions.
+                all_messages = message_history.messages
+                total_count = len(all_messages)
+                windowed_messages = (
+                    all_messages[-window_size:]
+                    if total_count > window_size
+                    else all_messages
+                )
 
                 logger.info(
                     "Chat history for %s: using %d/%d messages",
