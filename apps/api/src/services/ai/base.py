@@ -3,6 +3,7 @@ import hashlib
 import logging
 import os
 from collections.abc import Sequence
+from threading import Lock
 from typing import TYPE_CHECKING, Any
 
 from cachetools import LRUCache
@@ -46,6 +47,7 @@ logger = logging.getLogger(__name__)
 
 
 _fast_ai_service: "FastAIService | None" = None
+_fast_ai_service_lock = Lock()
 
 
 def get_fast_ai_service() -> "FastAIService":
@@ -53,7 +55,9 @@ def get_fast_ai_service() -> "FastAIService":
     global _fast_ai_service
 
     if _fast_ai_service is None:
-        _fast_ai_service = FastAIService()
+        with _fast_ai_service_lock:
+            if _fast_ai_service is None:
+                _fast_ai_service = FastAIService()
 
     return _fast_ai_service
 
@@ -92,7 +96,7 @@ class OptimizedTextSplitter:
 
     def __init__(
         self,
-        chunk_size: int = 3000,
+        chunk_size: int = 1000,
         chunk_overlap: int = 200,
     ) -> None:
         self.splitter = RecursiveCharacterTextSplitter(
@@ -150,21 +154,18 @@ class FastAIService:
         collection_name: str | None = None,
     ) -> VectorStore | None:
         """Get cached vector store or create new one."""
-        if collection_name:
-            cache_key = f"{embedding_model_name}_{collection_name}"
-        else:
-            content_hash = self._generate_content_hash(documents)
-            cache_key = f"{embedding_model_name}_{content_hash}"
+        content_hash = self._generate_content_hash(documents)
+        cache_key = f"{embedding_model_name}_{collection_name or 'anon'}_{content_hash}"
 
         cached_store = self.cache_manager.vector_store_cache.get(cache_key)
         if cached_store:
-            logger.info("✓ Vector store cache HIT: %s", cache_key[:50])
+            logger.info("Vector store cache HIT: %s", cache_key[:60])
             return cached_store
 
-        logger.info("✗ Vector store cache MISS: %s — creating", cache_key[:50])
+        logger.info("Vector store cache MISS: %s — creating", cache_key[:60])
 
         vector_store = await self._create_vector_store(
-            documents, embedding_model_name, collection_name
+            documents, embedding_model_name, collection_name, content_hash
         )
 
         if vector_store:
@@ -177,6 +178,7 @@ class FastAIService:
         documents: list[str],
         embedding_model_name: str,
         collection_name: str | None = None,
+        content_hash: str = "",
     ) -> VectorStore | None:
         """Create vector store with async batch processing."""
         from langchain_core.vectorstores import InMemoryVectorStore
@@ -203,6 +205,68 @@ class FastAIService:
                     details={"model_name": embedding_model_name},
                 )
 
+            if chroma_cls is not None:
+                pool = get_chromadb_pool()
+                async with pool.get_client() as chroma_client:
+                    cname = collection_name or f"doc_collection_{ULID()}"
+
+                    # Try to reuse existing collection if content hasn't changed
+                    if collection_name and content_hash:
+                        try:
+                            existing = await asyncio.to_thread(
+                                chroma_client.get_collection, cname
+                            )
+                            existing_hash = (existing.metadata or {}).get("content_hash")
+                            if existing_hash == content_hash:
+                                vector_store = chroma_cls(
+                                    client=chroma_client,
+                                    collection_name=cname,
+                                    embedding_function=embedding_function,
+                                )
+                                logger.info("Reusing existing Chroma collection: %s", cname)
+                                return vector_store
+                            # Content changed — delete stale collection
+                            await asyncio.to_thread(chroma_client.delete_collection, cname)
+                            logger.info("Deleted stale Chroma collection: %s", cname)
+                        except Exception:
+                            pass  # Collection doesn't exist yet
+
+                    logger.info("Processing %d documents", len(documents))
+                    chunk_results = await asyncio.gather(
+                        *(self.text_splitter.split_text_async(doc) for doc in documents),
+                        return_exceptions=True,
+                    )
+
+                    all_chunks: list[str] = []
+                    for result in chunk_results:
+                        if isinstance(result, Exception):
+                            logger.warning("Failed to chunk document: %s", result)
+                            continue
+                        if isinstance(result, list):
+                            all_chunks.extend(result)
+
+                    if not all_chunks:
+                        raise VectorStoreError(
+                            "No valid chunks created from documents",
+                            details={"document_count": len(documents)},
+                        )
+
+                    logger.info(
+                        "Created %d chunks from %d documents", len(all_chunks), len(documents)
+                    )
+
+                    vector_store = await asyncio.to_thread(
+                        chroma_cls.from_texts,
+                        texts=all_chunks,
+                        embedding=embedding_function,
+                        client=chroma_client,
+                        collection_name=cname,
+                        collection_metadata={"content_hash": content_hash},
+                    )
+                    logger.info("Chroma vector store created: %s", cname)
+                    return vector_store
+
+            # Fallback to InMemoryVectorStore
             logger.info("Processing %d documents", len(documents))
             chunk_results = await asyncio.gather(
                 *(self.text_splitter.split_text_async(doc) for doc in documents),
@@ -223,30 +287,12 @@ class FastAIService:
                     details={"document_count": len(documents)},
                 )
 
-            logger.info(
-                "✓ Created %d chunks from %d documents", len(all_chunks), len(documents)
-            )
-
-            if chroma_cls is not None:
-                pool = get_chromadb_pool()
-                async with pool.get_client() as chroma_client:
-                    cname = collection_name or f"doc_collection_{ULID()}"
-                    vector_store = await asyncio.to_thread(
-                        chroma_cls.from_texts,
-                        texts=all_chunks,
-                        embedding=embedding_function,
-                        client=chroma_client,
-                        collection_name=cname,
-                    )
-                    logger.info("✓ Chroma vector store created")
-                    return vector_store
-
             vector_store = await asyncio.to_thread(
                 InMemoryVectorStore.from_texts,
                 texts=all_chunks,
                 embedding=embedding_function,
             )
-            logger.info("✓ InMemoryVectorStore fallback created")
+            logger.info("InMemoryVectorStore fallback created")
             if chroma_import_error:
                 logger.debug("Chroma import error: %r", chroma_import_error)
             return vector_store
@@ -267,32 +313,15 @@ class FastAIService:
         collection_name: str | None = None,
         max_iterations: int = 15,
     ) -> CompiledStateGraph | None:
-        """Get cached agent or create new one.
+        """Create a fresh agent bound to the current vector store.
 
-        ``collection_name`` is used as part of the cache key so that agents
-        tied to different vector stores are never confused with each other.
+        Agents are not cached because they capture retriever closures over the
+        vector store. Caching agents leads to stale context when the vector
+        store is evicted and recreated with updated content.
         """
-        prompt_hash = hashlib.md5(system_prompt.encode()).hexdigest()
-        # Include collection_name so agents bound to different retrievers don't collide.
-        cache_key = (
-            f"{llm_model_name}_{prompt_hash}_{max_iterations}_{collection_name or ''}"
-        )
-
-        cached_agent = self.cache_manager.agent_cache.get(cache_key)
-        if cached_agent:
-            logger.info("✓ Agent cache HIT: %s", cache_key[:50])
-            return cached_agent
-
-        logger.info("✗ Agent cache MISS: %s — creating", cache_key[:50])
-
-        agent = await self._create_agent(
+        return await self._create_agent(
             llm_model_name, system_prompt, vector_store, max_iterations
         )
-
-        if agent:
-            self.cache_manager.agent_cache.set(cache_key, agent)
-
-        return agent
 
     async def _create_agent(
         self,
@@ -313,7 +342,7 @@ class FastAIService:
 
             retriever = vector_store.as_retriever(
                 search_type="similarity",
-                search_kwargs={"k": 3},
+                search_kwargs={"k": 5},
             )
 
             @tool
@@ -418,7 +447,7 @@ async def ask_ai(
 
             result = await asyncio.wait_for(
                 agent.ainvoke({"messages": messages}),
-                timeout=120.0,
+                timeout=60.0,
             )
 
             output_messages = result.get("messages", [])
@@ -449,7 +478,7 @@ async def ask_ai(
             return {"output": response_text, "messages": output_messages}
 
         except TimeoutError as e:
-            raise AITimeoutError(120, details={"question_length": len(question)}) from e
+            raise AITimeoutError(60, details={"question_length": len(question)}) from e
 
     except (AIProcessingError, VectorStoreError, AITimeoutError):
         raise

@@ -122,7 +122,7 @@ async def ask_ai_stream(
 
         try:
             # Process with streaming and timeout using asyncio.timeout
-            async with asyncio.timeout(120.0):
+            async with asyncio.timeout(60.0):
                 # Use LangGraph streaming with stream_mode="messages" for LLM tokens
                 # This streams (message_chunk, metadata) tuples for each LLM token
                 async for message_chunk, metadata in agent_executor.astream(
@@ -216,12 +216,12 @@ async def ask_ai_stream(
             )
 
         except TimeoutError as e:
-            error_msg = "AI processing timed out after 120 seconds"
+            error_msg = "AI processing timed out after 60 seconds"
             logger.warning(error_msg)
             yield format_sse_message(
                 {"type": "error", "error": error_msg, "error_code": "TIMEOUT"}
             )
-            raise AITimeoutError(120, details={"question_length": len(question)}) from e
+            raise AITimeoutError(60, details={"question_length": len(question)}) from e
 
     except (AIProcessingError, VectorStoreError, AITimeoutError):
         raise

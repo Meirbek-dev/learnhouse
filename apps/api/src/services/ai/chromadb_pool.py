@@ -6,6 +6,7 @@ import asyncio
 import inspect
 import logging
 from contextlib import asynccontextmanager
+from threading import Lock
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -175,6 +176,7 @@ class ChromaDBPool:
 
 # Global pool instance
 _chromadb_pool: ChromaDBPool | None = None
+_chromadb_pool_lock = Lock()
 
 
 def get_chromadb_pool() -> ChromaDBPool:
@@ -187,14 +189,16 @@ def get_chromadb_pool() -> ChromaDBPool:
     global _chromadb_pool
 
     if _chromadb_pool is None:
-        config = get_platform_config()
-        pool_size = getattr(
-            getattr(config.ai_config, "vector_store", None),
-            "chromadb_pool_size",
-            10,
-        )
-        _chromadb_pool = ChromaDBPool(max_connections=pool_size)
-        logger.info(f"Created global ChromaDB pool with size {pool_size}")
+        with _chromadb_pool_lock:
+            if _chromadb_pool is None:
+                config = get_platform_config()
+                pool_size = getattr(
+                    getattr(config.ai_config, "vector_store", None),
+                    "chromadb_pool_size",
+                    10,
+                )
+                _chromadb_pool = ChromaDBPool(max_connections=pool_size)
+                logger.info("Created global ChromaDB pool with size %d", pool_size)
 
     return _chromadb_pool
 

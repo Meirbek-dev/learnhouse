@@ -25,7 +25,6 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
             2048,
         )
 
-        model_name = "text-embedding-3-small"
         logger.info(
             "Creating embedding function: model=%s batch_size=%d",
             model_name,
@@ -35,11 +34,11 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
             model=model_name,
             api_key=api_key,
             chunk_size=batch_size,
-            max_retries=1,
-            request_timeout=20,
+            max_retries=3,
+            request_timeout=30,
             retry_min_seconds=1,
-            retry_max_seconds=5,
-            dimensions=256,
+            retry_max_seconds=10,
+            dimensions=512,
         )
 
     except Exception as e:
@@ -64,7 +63,7 @@ def get_llm(model_name: str, streaming: bool = True) -> ChatOpenAI | None:
         return ChatOpenAI(
             model=model_name,
             api_key=api_key,
-            max_retries=2,
+            max_retries=3,
             streaming=streaming,
             frequency_penalty=0.0,
             presence_penalty=0.0,

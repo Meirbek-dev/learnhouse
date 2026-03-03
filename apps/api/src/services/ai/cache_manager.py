@@ -241,6 +241,7 @@ class AICacheManager:
 
 # Global cache manager instance
 _cache_manager: AICacheManager | None = None
+_cache_manager_lock = Lock()
 
 
 def get_ai_cache_manager() -> AICacheManager:
@@ -253,6 +254,8 @@ def get_ai_cache_manager() -> AICacheManager:
     global _cache_manager
 
     if _cache_manager is None:
-        _cache_manager = AICacheManager()
+        with _cache_manager_lock:
+            if _cache_manager is None:
+                _cache_manager = AICacheManager()
 
     return _cache_manager

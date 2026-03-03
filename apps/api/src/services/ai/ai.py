@@ -5,16 +5,13 @@ from collections.abc import AsyncGenerator
 from dataclasses import dataclass
 from typing import Any
 
-from fastapi import Depends, HTTPException, Request
+from fastapi import HTTPException, Request
 from sqlmodel import Session, select
 
-from src.core.events.database import get_db_session
 from src.db.courses.activities import Activity, ActivityRead
 from src.db.courses.courses import Course, CourseRead
 from src.db.organization_config import OrganizationConfig
 from src.db.users import PublicUser
-from src.security.auth import get_current_user
-from src.security.rbac import FeatureDisabled
 from src.services.ai.base import ask_ai, get_chat_session_history
 from src.services.ai.cache_manager import get_ai_cache_manager
 from src.services.ai.exceptions import (
@@ -117,8 +114,6 @@ async def _prepare_context(
     activity_uuid: str,
     aichat_uuid: str | None,
     db_session: Session,
-    *,
-    streaming: bool = False,
 ) -> _ChatContext:
     """Build the full context needed for any AI chat request."""
     activity, course, org_config = await _get_activity_data(activity_uuid, db_session)
@@ -134,23 +129,22 @@ async def _prepare_context(
         structured, course, activity, isActivityEmpty=not structured
     )
 
-    if streaming:
-        system_message = (
-            f"You are a helpful Education Assistant for '{course.name}' course, "
-            f"helping with the '{activity.name}' lecture. "
-            "Use available tools to get context and provide accurate, helpful responses. "
-            "If context is insufficient, use your knowledge to assist the student."
-        )
-    else:
-        system_message = (
-            f"You are a helpful Education Assistant for '{course.name}' course, "
-            f"helping with the '{activity.name}' lecture. "
-            "Use the find_context_text tool ONCE to get relevant context, then provide your response immediately. "
-            "Be efficient: retrieve context first, then answer directly without additional tool calls. "
-            "If context is insufficient, use your knowledge to assist the student."
-        )
+    system_message = (
+        f"You are an educational assistant for the course '{course.name}', "
+        f"specifically helping with the lecture '{activity.name}'.\n\n"
+        "Instructions:\n"
+        "- Use the find_context_text tool to retrieve relevant lecture content before answering.\n"
+        "- You may call the tool multiple times with different queries if needed.\n"
+        "- Base your answers on the lecture content when available.\n"
+        "- If the lecture content doesn't cover the topic, use your general knowledge but note this.\n"
+        "- Stay on topic — only answer questions related to the course material or the subject area.\n"
+        "- Politely decline requests unrelated to education or the course.\n"
+        "- Respond in the same language the student uses.\n"
+        "- Use clear, educational explanations appropriate for a student.\n"
+        "- Format responses with markdown when helpful (headings, lists, code blocks)."
+    )
 
-    ai_model = org_config.config["features"]["ai"]["model"]
+    ai_model = "gpt-5-nano"
     streaming_enabled = (
         org_config.config.get("features", {})
         .get("ai", {})
@@ -173,7 +167,7 @@ def _map_ai_errors_to_http(e: Exception) -> HTTPException:
     if isinstance(e, ActivityNotFoundError):
         return HTTPException(status_code=404, detail=e.message)
     if isinstance(e, AIFeatureDisabledError):
-        raise FeatureDisabled(reason=e.message)
+        return HTTPException(status_code=403, detail=e.message)
     if isinstance(e, AITimeoutError):
         return HTTPException(status_code=504, detail=e.message)
     if isinstance(e, (AIProcessingError, VectorStoreError, ChatSessionError)):
@@ -272,7 +266,7 @@ async def _handle_ai_chat_stream(
     """Shared logic for streaming start/send AI chat."""
     try:
         ctx = await _prepare_context(
-            activity_uuid, aichat_uuid, db_session, streaming=True
+            activity_uuid, aichat_uuid, db_session
         )
 
         if not ctx.streaming_enabled:
@@ -332,8 +326,8 @@ async def _handle_ai_chat_stream(
 async def ai_start_activity_chat_session(
     request: Request,
     chat_session_object: StartActivityAIChatSession,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser,
+    db_session: Session,
     cancel_event: asyncio.Event | None = None,
 ) -> ActivityAIChatSessionResponse:
     """Start a new AI chat session."""
@@ -360,8 +354,8 @@ async def ai_start_activity_chat_session(
 async def ai_send_activity_chat_message(
     request: Request,
     chat_session_object: SendActivityAIChatMessage,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser,
+    db_session: Session,
     cancel_event: asyncio.Event | None = None,
 ) -> ActivityAIChatSessionResponse:
     """Send a message in an existing AI chat session."""
@@ -388,8 +382,8 @@ async def ai_send_activity_chat_message(
 async def ai_start_activity_chat_session_stream(
     request: Request,
     chat_session_object: StartActivityAIChatSession,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser,
+    db_session: Session,
     cancel_event: asyncio.Event | None = None,
 ):
     """Streaming version of AI chat session start."""
@@ -408,8 +402,8 @@ async def ai_start_activity_chat_session_stream(
 async def ai_send_activity_chat_message_stream(
     request: Request,
     chat_session_object: SendActivityAIChatMessage,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser,
+    db_session: Session,
     cancel_event: asyncio.Event | None = None,
 ):
     """Streaming version of AI chat message sending."""
