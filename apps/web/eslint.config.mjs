@@ -46,7 +46,7 @@ const COMMON_RULES = {
   'no-console': 'off',
   'no-var': 'error',
   'prefer-const': 'warn',
-  'eqeqeq': 'warn',
+  'eqeqeq': ['error', 'always', { null: 'always' }],
   'no-unused-expressions': ['warn', { allowShortCircuit: true, allowTernary: true }],
   'no-empty': ['warn', { allowEmptyCatch: false }],
   'no-redeclare': 'warn',

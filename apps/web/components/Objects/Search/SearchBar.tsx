@@ -18,7 +18,7 @@ import type { ChangeEvent, FC, KeyboardEvent } from 'react';
 import { searchOrgContent } from '@services/search/search';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
-import { useDebounce } from '@/hooks/useDebounce';
+import { useDebouncedValue } from '@/hooks/useDebounce';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -81,7 +81,6 @@ interface SearchResults {
 }
 
 interface SearchBarProps {
-  orgslug: string;
   className?: string;
   isMobile?: boolean;
   showSearchSuggestions?: boolean;
@@ -109,13 +108,13 @@ const CourseResultsSkeleton = () => (
 );
 
 export const SearchBar: FC<SearchBarProps> = ({
-  orgslug,
   className = '',
   isMobile = false,
   showSearchSuggestions = false,
 }) => {
   const t = useTranslations('Components.SearchBar');
   const org = useOrg() as any;
+  const orgslug = org?.slug;
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResults>({
     courses: [],
@@ -130,7 +129,7 @@ export const SearchBar: FC<SearchBarProps> = ({
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Debounce the search query value
-  const debouncedSearch = useDebounce(searchQuery, 300);
+  const debouncedSearch = useDebouncedValue(searchQuery, 300);
 
   const handleClickOutside = useEffectEvent((event: MouseEvent) => {
     if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -148,6 +147,13 @@ export const SearchBar: FC<SearchBarProps> = ({
   useEffect(() => {
     const controller = new AbortController();
     const currentQuery = debouncedSearch.trim();
+
+    if (!orgslug) {
+      setSearchResults({ courses: [], collections: [], users: [] });
+      setIsLoading(false);
+      setIsInitialLoad(false);
+      return () => {};
+    }
 
     if (currentQuery.length === 0) {
       setSearchResults({ courses: [], collections: [], users: [] });

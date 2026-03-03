@@ -242,7 +242,6 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
           <div className="hidden max-w-2xl flex-1 justify-center px-8 md:flex">
             <div className="w-full max-w-lg">
               <SearchBar
-                orgslug={orgslug}
                 className="w-full"
               />
             </div>
@@ -326,7 +325,6 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                 </div>
                 <div>
                   <SearchBar
-                    orgslug={orgslug}
                     isMobile
                     className="w-full"
                   />

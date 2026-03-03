@@ -88,6 +88,7 @@ async def api_get_org_users(
     org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
+    checker: PermissionCheckerDep,
     page: int = 1,
     per_page: int = 20,
 ) -> PaginatedOrganizationUsers:
@@ -95,7 +96,7 @@ async def api_get_org_users(
     Get organization users with pagination
     """
     return await get_organization_users(
-        request, org_id, db_session, current_user, page, per_page
+        request, org_id, db_session, current_user, checker, page, per_page
     )
 
 
@@ -107,6 +108,7 @@ async def api_update_user_role(
     role_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
+    checker: PermissionCheckerDep,
 ):
     """
     Update user role in an organization.
@@ -116,7 +118,7 @@ async def api_update_user_role(
     **Required Permission**: `organization:update`
     """
     return await update_user_role(
-        request, org_id, user_id, role_id, db_session, current_user
+        request, org_id, user_id, role_id, db_session, current_user, checker
     )
 
 
@@ -127,12 +129,13 @@ async def api_remove_user_from_org(
     user_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
+    checker: PermissionCheckerDep,
 ):
     """
     Remove user from org
     """
     return await remove_user_from_org(
-        request, org_id, user_id, db_session, current_user
+        request, org_id, user_id, db_session, current_user, checker
     )
 
 

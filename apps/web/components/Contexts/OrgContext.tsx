@@ -43,7 +43,7 @@ export const OrgProvider = ({
     data: org,
     error: orgError,
     isLoading: isOrgLoading,
-  } = useSWR(`${getAPIUrl()}orgs/slug/${orgslug}`, (url) => swrFetcher(url, accessToken), {
+  } = useSWR(`${getAPIUrl()}orgs/slug/${orgslug}`, (url: string) => swrFetcher(url, accessToken), {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     revalidateIfStale: !initialOrg,

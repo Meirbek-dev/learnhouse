@@ -123,12 +123,13 @@ async def api_get_course(
     course_uuid: str,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    checker: PermissionCheckerDep,
 ) -> CourseRead:
     """
     Get single Course by course_uuid
     """
     return await get_course(
-        request, course_uuid, current_user=current_user, db_session=db_session
+        request, course_uuid, current_user=current_user, db_session=db_session, checker=checker
     )
 
 
@@ -138,12 +139,13 @@ async def api_get_course_by_id(
     course_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
+    checker: PermissionCheckerDep,
 ) -> CourseRead:
     """
     Get single Course by id
     """
     return await get_course_by_id(
-        request, course_id, current_user=current_user, db_session=db_session
+        request, course_id, current_user=current_user, db_session=db_session, checker=checker
     )
 
 
@@ -154,6 +156,7 @@ async def api_get_course_meta(
     with_unpublished_activities: bool = False,
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db_session=Depends(get_db_session),
+    checker: PermissionCheckerDep = None,
 ) -> FullCourseRead:
     """
     Get single Course Metadata (chapters, activities) by course_uuid
@@ -164,6 +167,7 @@ async def api_get_course_meta(
         with_unpublished_activities,
         current_user=current_user,
         db_session=db_session,
+        checker=checker,
     )
 
 

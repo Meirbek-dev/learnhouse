@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import { calculateExponentialBackoffDelay } from '@/lib/retry';
 
 export interface MutationOptions<TData, TVariables> {
   mutationFn: (variables: TVariables) => Promise<TData>;
@@ -154,10 +155,14 @@ export function useExamMutation<TData = unknown, TVariables = void>(options: Mut
               }));
             }
 
-            // Wait before retry with exponential backoff
+            // Wait before retry with exponential backoff + jitter
             const delay = getRetryDelay(currentFailureCount - 1);
-            const jitter = delay * 0.5 * Math.random(); // Add jitter to prevent thundering herd
-            await sleep(delay + jitter);
+            const retryWaitMs = calculateExponentialBackoffDelay(0, {
+              baseDelayMs: delay,
+              maxDelayMs: delay,
+              jitterRatio: 0.5,
+            });
+            await sleep(retryWaitMs);
 
             // Check if aborted during sleep
             if (abortControllerRef.current?.signal.aborted) {

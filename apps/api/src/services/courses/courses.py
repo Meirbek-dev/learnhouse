@@ -33,7 +33,7 @@ async def get_course(
     course_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
-    checker: PermissionChecker | None = None,
+    checker: PermissionChecker,
 ):
     statement = select(Course).where(Course.course_uuid == course_uuid)
     course = db_session.exec(statement).first()
@@ -45,8 +45,6 @@ async def get_course(
         )
 
     # RBAC check
-    if checker is None:
-        checker = PermissionChecker(db_session)
     checker.require(
         current_user.id,
         "course:read",
@@ -83,7 +81,7 @@ async def get_course_by_id(
     course_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
-    checker: PermissionChecker | None = None,
+    checker: PermissionChecker,
 ):
     statement = select(Course).where(Course.id == course_id)
     course = db_session.exec(statement).first()
@@ -95,8 +93,6 @@ async def get_course_by_id(
         )
 
     # RBAC check role-based access control
-    if checker is None:
-        checker = PermissionChecker(db_session)
     checker.require(
         current_user.id,
         "course:read",
@@ -134,7 +130,7 @@ async def get_course_meta(
     with_unpublished_activities: bool,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
-    checker: PermissionChecker | None = None,
+    checker: PermissionChecker,
 ) -> FullCourseRead:
     # Avoid circular import
     from src.services.courses.chapters import get_course_chapters
@@ -163,8 +159,6 @@ async def get_course_meta(
 
     # RBAC check — skip for public courses
     if not course.public:
-        if checker is None:
-            checker = PermissionChecker(db_session)
         checker.require(
             current_user.id,
             "course:read",

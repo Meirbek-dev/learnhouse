@@ -44,6 +44,7 @@
     "highlight.js": "^11.11.1",
     "katex": "^0.16.33",
     "lowlight": "^3.3.0",
+    "lru-cache": "^11.2.6",
     "lucide-react": "^0.576.0",
     "marked": "^17.0.3",
     "motion": "^12.34.4",

@@ -1,51 +1,44 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-// Function debouncing
-type AnyFunction = (...args: any[]) => any;
+type AnyFunction = (...args: any[]) => unknown;
 
-// Implementation
-export function useDebounce<T>(valueOrCallback: T, delay: number): T {
+export function useDebouncedValue<T>(value: T, delay: number): T {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const callbackRef = useRef<AnyFunction | null>(null);
-
-  // keep latest callback reference (safe to call on every render)
-  useEffect(() => {
-    if (typeof valueOrCallback === 'function') callbackRef.current = valueOrCallback as AnyFunction;
-  }, [valueOrCallback]);
-
-  // stable debounced function
-  const debouncedFn = useCallback(
-    (...args: any[]) => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => {
-        if (callbackRef.current) callbackRef.current(...args);
-      }, delay);
-    },
-    [delay],
-  );
-
-  // value debouncing state
-  const [debouncedValue, setDebouncedValue] = useState<T>(valueOrCallback);
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
   useEffect(() => {
-    if (typeof valueOrCallback === 'function') return; // nothing for function case
-
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => setDebouncedValue(valueOrCallback), delay);
+    timeoutRef.current = setTimeout(() => setDebouncedValue(value), delay);
 
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [valueOrCallback, delay]);
+  }, [value, delay]);
 
-  // Ensure cleanup on unmount
+  return debouncedValue;
+}
+
+export function useDebouncedCallback<T extends AnyFunction>(callback: T, delay: number): (...args: Parameters<T>) => void {
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const callbackRef = useRef<T>(callback);
+
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
+
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
 
-  // return appropriate type
-  if (typeof valueOrCallback === 'function') return debouncedFn as unknown as T;
-  return debouncedValue;
+  return useCallback(
+    (...args: Parameters<T>) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        callbackRef.current(...args);
+      }, delay);
+    },
+    [delay],
+  );
 }

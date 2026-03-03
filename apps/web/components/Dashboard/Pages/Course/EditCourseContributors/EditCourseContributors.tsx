@@ -32,7 +32,7 @@ import UserAvatar from '@components/Objects/UserAvatar';
 import { useLocale, useTranslations } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import { getAPIUrl } from '@services/config/config';
-import { useDebounce } from '@/hooks/useDebounce';
+import { useDebouncedValue } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { Locale } from '@/i18n/config';
@@ -286,7 +286,7 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
   const [searchResults, setSearchResults] = useState<SearchUser[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const debouncedSearch = useDebounce(searchQuery, 300);
+  const debouncedSearch = useDebouncedValue(searchQuery, 300);
   const [selectedContributors, setSelectedContributors] = useState<number[]>([]);
 
   useEffect(() => {

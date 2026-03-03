@@ -1,3 +1,5 @@
+import { calculateExponentialBackoffDelay } from './retry';
+
 export interface FetchRetryOptions {
   retries?: number;
   baseDelay?: number; // ms
@@ -21,7 +23,10 @@ export async function fetchWithRetry(
       if (res.status === 429) {
         // Honor Retry-After header if present
         const ra = res.headers.get('Retry-After');
-        let wait = baseDelay * 2 ** (attempt - 1);
+        let wait = calculateExponentialBackoffDelay(attempt - 1, {
+          baseDelayMs: baseDelay,
+          jitterRatio: 0.5,
+        });
         if (ra) {
           const parsed = Number(ra);
           if (!Number.isNaN(parsed)) {
@@ -33,8 +38,6 @@ export async function fetchWithRetry(
             }
           }
         }
-        // jitter
-        wait = Math.floor(wait * (0.5 + Math.random() * 0.5));
         await sleep(wait);
         continue;
       }
@@ -55,7 +58,10 @@ export async function fetchWithRetry(
       });
 
       if (attempt === retries) throw error;
-      const wait = Math.floor(baseDelay * 2 ** (attempt - 1) * (0.5 + Math.random() * 0.5));
+      const wait = calculateExponentialBackoffDelay(attempt - 1, {
+        baseDelayMs: baseDelay,
+        jitterRatio: 0.5,
+      });
       await sleep(wait);
       continue;
     }

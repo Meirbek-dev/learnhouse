@@ -3,7 +3,7 @@ from collections.abc import Callable
 from fastapi import FastAPI
 
 from config.config import PlatformConfig, get_platform_config
-from src.core.events.autoinstall import auto_install
+from src.core.events.autoinstall import check_migration_health
 from src.core.events.content import check_content_directory
 from src.core.events.database import close_database, connect_to_db
 from src.core.events.logs import create_logs_dir
@@ -24,8 +24,8 @@ def startup_app(app: FastAPI) -> Callable:
         # Create content directory
         await check_content_directory()
 
-        # Check if auto-installation is needed
-        auto_install()
+        # Fail-fast when migrations are not applied
+        check_migration_health()
 
     return start_app
 

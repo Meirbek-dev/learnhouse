@@ -16,6 +16,10 @@ export const ACCEPTED_FILE_FORMATS = {
   vtt: 'text/vtt',
 } as const;
 
+export const SESSION_CACHE_TTL_MS = 1 * 60 * 1000;
+export const TOKEN_REFRESH_BUFFER_MS = 2 * 60 * 1000;
+export const SESSION_CACHE_MAX_SIZE = 1000;
+
 /**
  * Constructs the 'accept' attribute value for an input element.
  */

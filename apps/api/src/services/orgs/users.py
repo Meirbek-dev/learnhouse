@@ -30,6 +30,7 @@ async def get_organization_users(
     org_id: int,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
+    checker: PermissionChecker,
     page: int = 1,
     per_page: int = 20,
 ) -> PaginatedOrganizationUsers:
@@ -48,7 +49,6 @@ async def get_organization_users(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
     checker.require(
         current_user.id, "organization:read", org.id, resource_owner_id=org.creator_id
     )
@@ -129,6 +129,7 @@ async def remove_user_from_org(
     user_id: int,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
+    checker: PermissionChecker,
 ):
     statement = select(Organization).where(Organization.id == org_id)
     result = db_session.exec(statement)
@@ -142,7 +143,6 @@ async def remove_user_from_org(
         )
 
     # RBAC check
-    checker = PermissionChecker(db_session)
     checker.require(
         current_user.id, "organization:manage", org.id, resource_owner_id=org.creator_id
     )
@@ -200,6 +200,7 @@ async def update_user_role(
     role_id: int,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
+    checker: PermissionChecker,
 ):
     """
     Update a user's role in an organization.
@@ -218,7 +219,6 @@ async def update_user_role(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # RBAC check
-    checker = PermissionChecker(db_session)
     checker.require(
         current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id
     )

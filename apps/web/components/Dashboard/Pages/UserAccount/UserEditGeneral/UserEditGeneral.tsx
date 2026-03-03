@@ -33,7 +33,7 @@ import type { ChangeEvent, ElementType } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { Textarea } from '@components/ui/textarea';
 import { ThemeSelector } from '@/lib/theme-system';
-import { useDebounce } from '@/hooks/useDebounce';
+import { useDebouncedCallback } from '@/hooks/useDebounce';
 import { Button } from '@components/ui/button';
 import { getUserLocale } from '@/i18n/locale';
 import { Label } from '@components/ui/label';
@@ -151,7 +151,7 @@ const DetailCard = ({
   };
 
   // Debounce the label change handler
-  const debouncedLabelChange = useDebounce(stableLabelChangeCallback, 500);
+  const debouncedLabelChange = useDebouncedCallback(stableLabelChangeCallback, 500);
 
   const handleLabelChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newLabel = e.target.value;
