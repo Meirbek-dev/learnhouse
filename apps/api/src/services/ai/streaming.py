@@ -13,6 +13,7 @@ from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.graph.state import CompiledStateGraph
 
+from config.config import get_platform_config
 from src.services.ai.exceptions import (
     AIProcessingError,
     AITimeoutError,
@@ -107,7 +108,7 @@ async def ask_ai_stream(
         # Add current question to messages
         messages = [*history_messages, {"role": "user", "content": question.strip()}]
 
-        logger.info(f"Starting streaming AI query: {question[:100]}...")
+        logger.info("Starting streaming AI query: %s...", question[:100])
 
         # Stream response chunks
         chunk_count = 0
@@ -115,16 +116,22 @@ async def ask_ai_stream(
         start_time = time.perf_counter()
         first_chunk_time: float | None = None
 
-        # Send initial status as SSE string
+        # Send initial status as SSE string — include the session id so the
+        # client can correlate the stream back to its request immediately.
         yield format_sse_message(
-            {"type": "status", "status": "processing", "message": "Думаю..."}
+            {
+                "type": "status",
+                "status": "processing",
+                "message": "Думаю...",
+                "aichat_uuid": session_id,
+            }
         )
 
         try:
             # Process with streaming and timeout using asyncio.timeout
             async with asyncio.timeout(60.0):
                 # Use LangGraph streaming with stream_mode="messages" for LLM tokens
-                # This streams (message_chunk, metadata) tuples for each LLM token
+                # Yields (message_chunk, metadata) tuples for each token.
                 async for message_chunk, metadata in agent_executor.astream(
                     {"messages": messages},
                     stream_mode="messages",

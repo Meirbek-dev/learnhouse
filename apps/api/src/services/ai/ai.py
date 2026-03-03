@@ -60,38 +60,30 @@ async def _get_activity_data(
 
     cached_data = cache_manager.db_cache.get(cache_key)
     if cached_data:
-        logger.info("✓ Activity data cache HIT: %s", activity_uuid)
+        logger.info("Activity data cache HIT: %s", activity_uuid)
         return cached_data
 
     try:
-
-        def get_activity():
-            result = db_session.exec(
-                select(Activity).where(Activity.activity_uuid == activity_uuid)
-            )
-            return result.first()
-
-        activity = await asyncio.to_thread(get_activity)
+        # SQLAlchemy Session is not thread-safe: run all DB calls on the
+        # event-loop thread directly instead of passing the session into
+        # asyncio.to_thread.
+        activity = db_session.exec(
+            select(Activity).where(Activity.activity_uuid == activity_uuid)
+        ).first()
 
         if not activity:
             raise ActivityNotFoundError(activity_uuid)
 
-        course = await asyncio.to_thread(db_session.get, Course, activity.course_id)
+        course = db_session.get(Course, activity.course_id)
 
         if not course:
             raise ActivityNotFoundError(
                 activity_uuid, details={"course_not_found": True}
             )
 
-        def get_org_config():
-            result = db_session.exec(
-                select(OrganizationConfig).where(
-                    OrganizationConfig.org_id == course.org_id
-                )
-            )
-            return result.first()
-
-        org_config = await asyncio.to_thread(get_org_config)
+        org_config = db_session.exec(
+            select(OrganizationConfig).where(OrganizationConfig.org_id == course.org_id)
+        ).first()
 
         if not org_config:
             raise ActivityNotFoundError(
@@ -265,9 +257,7 @@ async def _handle_ai_chat_stream(
 ) -> AsyncGenerator[str]:
     """Shared logic for streaming start/send AI chat."""
     try:
-        ctx = await _prepare_context(
-            activity_uuid, aichat_uuid, db_session
-        )
+        ctx = await _prepare_context(activity_uuid, aichat_uuid, db_session)
 
         if not ctx.streaming_enabled:
             logger.info(

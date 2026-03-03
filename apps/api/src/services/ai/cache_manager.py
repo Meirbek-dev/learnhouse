@@ -202,41 +202,60 @@ class AICacheManager:
             ttl=300,  # 5 minutes
         )
 
+        # Secondary index: activity_uuid -> set of vector store cache keys
+        # Allows deterministic vector cache invalidation when content changes.
+        self._vector_key_index: dict[str, set[str]] = {}
+        self._index_lock = Lock()
+
         logger.info("AI Cache Manager initialized")
+
+    def register_vector_cache_key(self, activity_uuid: str, cache_key: str) -> None:
+        """Record that *cache_key* belongs to *activity_uuid* for future invalidation."""
+        with self._index_lock:
+            self._vector_key_index.setdefault(activity_uuid, set()).add(cache_key)
 
     def clear_all(self) -> None:
         """Clear all caches."""
         self.vector_store_cache.clear()
         self.agent_cache.clear()
         self.db_cache.clear()
+        with self._index_lock:
+            self._vector_key_index.clear()
         logger.info("All AI caches cleared")
 
     def get_all_stats(self) -> dict[str, Any]:
-        """
-        Get statistics for all caches.
-
-        Returns:
-            Dictionary with stats for each cache
-        """
+        """Get statistics for all caches."""
+        with self._index_lock:
+            index_size = sum(len(v) for v in self._vector_key_index.values())
         return {
             "vector_store": self.vector_store_cache.get_stats(),
             "agent": self.agent_cache.get_stats(),
             "database": self.db_cache.get_stats(),
+            "vector_key_index_entries": index_size,
         }
 
     def invalidate_activity_cache(self, activity_uuid: str) -> None:
-        """
-        Invalidate all caches related to a specific activity.
+        """Invalidate all caches related to a specific activity.
 
-        Args:
-            activity_uuid: Activity UUID
+        Clears:
+        - DB query cache for the activity
+        - All vector store cache entries registered for the activity
         """
-        # Clear related database cache
+        # Clear DB cache entry
         self.db_cache.delete(f"activity_{activity_uuid}")
 
-        # Clear vector store cache (activity-specific)
-        # Note: This requires knowing the cache key format
-        logger.info(f"Invalidated caches for activity: {activity_uuid}")
+        # Clear all vector store entries tracked for this activity
+        with self._index_lock:
+            keys = self._vector_key_index.pop(activity_uuid, set())
+
+        for key in keys:
+            self.vector_store_cache.delete(key)
+
+        logger.info(
+            "Invalidated caches for activity %s: %d vector store entries cleared",
+            activity_uuid,
+            len(keys),
+        )
 
 
 # Global cache manager instance

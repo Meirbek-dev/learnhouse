@@ -1,7 +1,9 @@
 import asyncio
 import hashlib
+import json
 import logging
 import os
+import re
 from collections.abc import Sequence
 from threading import Lock
 from typing import TYPE_CHECKING, Any
@@ -11,7 +13,7 @@ from langchain.agents import create_agent
 from langchain.tools import tool
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, messages_from_dict
 from langchain_core.vectorstores import VectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langgraph.graph.state import CompiledStateGraph
@@ -108,7 +110,11 @@ class OptimizedTextSplitter:
         self._chunk_cache: LRUCache[str, list[str]] = LRUCache(maxsize=512)
 
     def split_text(self, text: str) -> list[str]:
-        """Split text with bounded LRU caching (synchronous)."""
+        """Split text with bounded LRU caching (synchronous).
+
+        Preserves meaningful document structure (headings, code blocks, lists)
+        instead of collapsing all whitespace. Only drops truly empty chunks.
+        """
         if not text or not isinstance(text, str):
             return []
 
@@ -118,9 +124,13 @@ class OptimizedTextSplitter:
         if cached is not None:
             return cached
 
-        clean_text = " ".join(text.split())
+        # Normalise only excessive blank lines; preserve intentional newlines and
+        # markdown/code-block structure so retrieval quality isn't degraded.
+        clean_text = re.sub(r"\n{3,}", "\n\n", text.strip())
         chunks = self.splitter.split_text(clean_text)
-        filtered = [chunk for chunk in chunks if len(chunk.strip()) > 50]
+        # Only filter truly empty/whitespace-only chunks — short titles and
+        # definitions are semantically meaningful and must be kept.
+        filtered = [chunk for chunk in chunks if chunk.strip()]
 
         self._chunk_cache[text_hash] = filtered
         return filtered
@@ -170,6 +180,12 @@ class FastAIService:
 
         if vector_store:
             self.cache_manager.vector_store_cache.set(cache_key, vector_store)
+            # Register the cache key under the activity collection so it can be
+            # fully invalidated when lecture content changes.
+            if collection_name:
+                # collection_name is typically "activity_{uuid}"
+                activity_uuid = collection_name.removeprefix("activity_")
+                self.cache_manager.register_vector_cache_key(activity_uuid, cache_key)
 
         return vector_store
 
@@ -515,13 +531,35 @@ def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
                     key_prefix="openu_chat:",
                 )
 
-                all_messages = message_history.messages
-                total_count = len(all_messages)
-                windowed_messages = (
-                    all_messages[-window_size:]
-                    if total_count > window_size
-                    else all_messages
-                )
+                # Bounded tail fetch: use raw Redis LRANGE to avoid deserialising
+                # the full history when only the last N messages are needed.
+                # RedisChatMessageHistory stores entries via lpush (newest at index 0).
+                redis_client = getattr(message_history, "redis_client", None)
+                history_key = getattr(message_history, "key", None)
+
+                if redis_client is not None and history_key is not None:
+                    total_count = redis_client.llen(history_key)
+                    if total_count > window_size:
+                        raw = redis_client.lrange(history_key, 0, window_size - 1)
+                        windowed_messages = [
+                            messages_from_dict(
+                                [json.loads(m.decode() if isinstance(m, bytes) else m)]
+                            )[0]
+                            for m in raw
+                        ]
+                        # reverse to chronological order (oldest first)
+                        windowed_messages = list(reversed(windowed_messages))
+                    else:
+                        windowed_messages = message_history.messages
+                else:
+                    # Fallback: full load (internal API not available)
+                    all_messages = message_history.messages
+                    total_count = len(all_messages)
+                    windowed_messages = (
+                        all_messages[-window_size:]
+                        if total_count > window_size
+                        else all_messages
+                    )
 
                 logger.info(
                     "Chat history for %s: using %d/%d messages",

@@ -79,7 +79,7 @@ async def api_ai_start_activity_chat_session(
         HTTPException 504: AI processing timeout
         HTTPException 500: AI processing error
     """
-    logger.info(f"AI chat session start request from user {current_user.id}")
+    logger.info("AI chat session start request from user %s", current_user.id)
 
     try:
         return await ai_start_activity_chat_session(
@@ -116,7 +116,7 @@ async def api_ai_send_activity_chat_message(
         HTTPException 504: AI processing timeout
         HTTPException 500: AI processing error
     """
-    logger.info(f"AI chat message request from user {current_user.id}")
+    logger.info("AI chat message request from user %s", current_user.id)
 
     try:
         return await ai_send_activity_chat_message(
@@ -161,7 +161,7 @@ async def api_ai_start_activity_chat_session_stream(
         HTTPException 504: AI processing timeout
         HTTPException 500: AI processing error
     """
-    logger.info(f"AI streaming chat session start request from user {current_user.id}")
+    logger.info("AI streaming chat session start request from user %s", current_user.id)
 
     try:
         cancel_event = asyncio.Event()
@@ -229,7 +229,7 @@ async def api_ai_send_activity_chat_message_stream(
         HTTPException 504: AI processing timeout
         HTTPException 500: AI processing error
     """
-    logger.info(f"AI streaming chat message request from user {current_user.id}")
+    logger.info("AI streaming chat message request from user %s", current_user.id)
 
     try:
         cancel_event = asyncio.Event()
