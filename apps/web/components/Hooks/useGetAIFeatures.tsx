@@ -1,12 +1,10 @@
-import { useOrg } from '@components/Contexts/OrgContext';
-
 interface UseGetAIFeatures {
   feature: 'editor' | 'activity_ask' | 'course_ask' | 'global_ai_ask';
 }
 
+// TODO: It's no longer needed. Remove it fully
 function useGetAIFeatures(_props: UseGetAIFeatures) {
-  const org = useOrg();
-  return org?.config?.config?.features.ai.enabled || false;
+  return true;
 }
 
 export default useGetAIFeatures;

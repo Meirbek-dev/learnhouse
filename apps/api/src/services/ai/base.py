@@ -3,6 +3,7 @@ import hashlib
 import logging
 import re
 import threading
+import warnings
 from collections.abc import Sequence
 from dataclasses import dataclass
 from threading import Lock
@@ -21,6 +22,23 @@ from ulid import ULID
 
 if TYPE_CHECKING:
     from langchain_chroma import Chroma
+
+# Import Chroma once at module level so the ChromaDB/Pydantic v2 Settings
+# initialisation only runs on startup, not on every first request.
+# The UserWarning about `chroma_server_nofile` is a known chromadb packaging
+# quirk — suppress it so it doesn't surface as a spurious import failure.
+try:
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message=".*chroma_server_nofile.*")
+        warnings.filterwarnings("ignore", category=UserWarning, module="chromadb")
+        from langchain_chroma import Chroma as _ChromaCls
+    _CHROMA_IMPORT_ERROR: Exception | None = None
+except Exception as _e:
+    _ChromaCls = None  # type: ignore[assignment,misc]
+    _CHROMA_IMPORT_ERROR = _e
+    logging.getLogger(__name__).warning(
+        "langchain_chroma unavailable, vector store will use InMemoryVectorStore fallback: %s", _e
+    )
 
 from config.config import get_platform_config
 from src.services.ai.cache_manager import get_ai_cache_manager
@@ -239,18 +257,11 @@ class FastAIService:
         from langchain_core.vectorstores import InMemoryVectorStore
 
         try:
-            chroma_cls = None
-            chroma_import_error: Exception | None = None
-            try:
-                from langchain_chroma import Chroma
-
-                chroma_cls = Chroma
-            except Exception as import_error:
-                chroma_import_error = import_error
-                logger.warning(
-                    "Chroma import failed, falling back to InMemoryVectorStore: %s",
-                    import_error,
-                )
+            # Use the module-level import result (avoids re-triggering the
+            # chromadb/pydantic warning on every cold-path call).
+            chroma_cls: "type[Chroma] | None" = _ChromaCls
+            if chroma_cls is None and _CHROMA_IMPORT_ERROR is not None:
+                logger.debug("Chroma unavailable (import error at startup): %s", _CHROMA_IMPORT_ERROR)
 
             # lru_cache handles caching — call directly
             embedding_function = get_embedding_function(embedding_model_name)
@@ -312,8 +323,6 @@ class FastAIService:
                 embedding=embedding_function,
             )
             logger.info("InMemoryVectorStore fallback created")
-            if chroma_import_error:
-                logger.debug("Chroma import error: %r", chroma_import_error)
             return vector_store
 
         except (EmbeddingError, VectorStoreError):
