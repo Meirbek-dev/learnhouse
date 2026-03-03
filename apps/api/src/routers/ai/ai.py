@@ -44,7 +44,7 @@ def _rate_limit_key(request: Request) -> str:
                 token = parts[1]
                 return f"token:{hashlib.sha256(token.encode()).hexdigest()}"
             return f"auth:{hashlib.sha256(auth.encode()).hexdigest()}"
-        except (IndexError, AttributeError):
+        except IndexError, AttributeError:
             pass
 
     # Fallback to remote address
@@ -57,7 +57,9 @@ limiter = Limiter(key_func=_rate_limit_key)
 router = APIRouter()
 
 
-@router.post("/start/activity_chat_session", response_model=ActivityAIChatSessionResponse)
+@router.post(
+    "/start/activity_chat_session", response_model=ActivityAIChatSessionResponse
+)
 @limiter.limit("10/minute")  # 10 requests per minute per IP
 async def api_ai_start_activity_chat_session(
     request: Request,
@@ -90,7 +92,9 @@ async def api_ai_start_activity_chat_session(
         raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
-@router.post("/send/activity_chat_message", response_model=ActivityAIChatSessionResponse)
+@router.post(
+    "/send/activity_chat_message", response_model=ActivityAIChatSessionResponse
+)
 @limiter.limit(
     "20/minute"
 )  # 20 requests per minute per IP (higher limit for chat messages)

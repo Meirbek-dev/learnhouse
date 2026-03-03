@@ -300,12 +300,9 @@ async def get_courses_orgslug(
             .where(
                 or_(
                     Course.public,
-                    UserGroupResource.resource_uuid
-                    is None,
-                    UserGroupUser.user_id
-                    == current_user.id,
-                    ResourceAuthor.user_id
-                    == current_user.id,
+                    UserGroupResource.resource_uuid is None,
+                    UserGroupUser.user_id == current_user.id,
+                    ResourceAuthor.user_id == current_user.id,
                 )
             )
         )
@@ -1017,9 +1014,7 @@ async def get_editable_courses_orgslug(
             .limit(limit)
         )
     else:
-        has_own_update = PermissionChecker._has_perm(
-            granted, "course", "update", "own"
-        )
+        has_own_update = PermissionChecker._has_perm(granted, "course", "update", "own")
         if not has_own_update:
             return []
 
@@ -1030,8 +1025,7 @@ async def get_editable_courses_orgslug(
             .where(
                 Organization.slug == org_slug,
                 ResourceAuthor.user_id == current_user.id,
-                ResourceAuthor.authorship_status
-                == ResourceAuthorshipStatusEnum.ACTIVE,
+                ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
             )
             .distinct()
             .offset(offset)
@@ -1143,9 +1137,7 @@ async def count_editable_courses_orgslug(
             .where(Organization.slug == org_slug)
         )
     else:
-        has_own_update = PermissionChecker._has_perm(
-            granted, "course", "update", "own"
-        )
+        has_own_update = PermissionChecker._has_perm(granted, "course", "update", "own")
         if not has_own_update:
             return 0
 
@@ -1156,8 +1148,7 @@ async def count_editable_courses_orgslug(
             .where(
                 Organization.slug == org_slug,
                 ResourceAuthor.user_id == current_user.id,
-                ResourceAuthor.authorship_status
-                == ResourceAuthorshipStatusEnum.ACTIVE,
+                ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
             )
         )
 

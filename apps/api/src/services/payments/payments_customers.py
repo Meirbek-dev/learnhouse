@@ -36,16 +36,21 @@ async def get_customers(
 
     # Gather all user and product lookups in parallel
     all_users = await asyncio.gather(
-        *[read_user_by_id(request, db_session, current_user, pu.user_id) for pu in payment_users]
+        *[
+            read_user_by_id(request, db_session, current_user, pu.user_id)
+            for pu in payment_users
+        ]
     )
     all_products = await asyncio.gather(
         *[
-            get_payments_product(request, org.id, pu.payment_product_id, current_user, db_session)
+            get_payments_product(
+                request, org.id, pu.payment_product_id, current_user, db_session
+            )
             for pu in payment_users
         ]
     )
 
-    customers_data = [
+    return [
         {
             "payment_user_id": pu.id,
             "user": user or None,
@@ -54,7 +59,7 @@ async def get_customers(
             "creation_date": pu.creation_date,
             "update_date": pu.update_date,
         }
-        for pu, user, product in zip(payment_users, all_users, all_products)
+        for pu, user, product in zip(
+            payment_users, all_users, all_products, strict=False
+        )
     ]
-
-    return customers_data

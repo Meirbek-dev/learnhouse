@@ -161,7 +161,9 @@ async def get_usergroups_by_resource(
     if not usergroup_ids:
         return []
 
-    usergroups = db_session.exec(select(UserGroup).where(UserGroup.id.in_(usergroup_ids))).all()
+    usergroups = db_session.exec(
+        select(UserGroup).where(UserGroup.id.in_(usergroup_ids))
+    ).all()
 
     return [UserGroupRead.model_validate(usergroup) for usergroup in usergroups]
 
@@ -278,7 +280,8 @@ async def add_users_to_usergroup(
 
     # Batch fetch all users and existing memberships in 2 queries
     users_map = {
-        u.id: u for u in db_session.exec(select(User).where(User.id.in_(parsed_ids))).all()
+        u.id: u
+        for u in db_session.exec(select(User).where(User.id.in_(parsed_ids))).all()
     }
     existing_user_ids = {
         ugu.user_id

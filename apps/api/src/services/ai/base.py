@@ -186,10 +186,14 @@ class FastAIService:
             chroma_import_error: Exception | None = None
             try:
                 from langchain_chroma import Chroma
+
                 chroma_cls = Chroma
             except Exception as import_error:
                 chroma_import_error = import_error
-                logger.warning("Chroma import failed, falling back to InMemoryVectorStore: %s", import_error)
+                logger.warning(
+                    "Chroma import failed, falling back to InMemoryVectorStore: %s",
+                    import_error,
+                )
 
             # lru_cache handles caching — call directly
             embedding_function = get_embedding_function(embedding_model_name)
@@ -219,7 +223,9 @@ class FastAIService:
                     details={"document_count": len(documents)},
                 )
 
-            logger.info("✓ Created %d chunks from %d documents", len(all_chunks), len(documents))
+            logger.info(
+                "✓ Created %d chunks from %d documents", len(all_chunks), len(documents)
+            )
 
             if chroma_cls is not None:
                 pool = get_chromadb_pool()
@@ -245,7 +251,7 @@ class FastAIService:
                 logger.debug("Chroma import error: %r", chroma_import_error)
             return vector_store
 
-        except (EmbeddingError, VectorStoreError):
+        except EmbeddingError, VectorStoreError:
             raise
         except Exception as e:
             raise VectorStoreError(
@@ -268,7 +274,9 @@ class FastAIService:
         """
         prompt_hash = hashlib.md5(system_prompt.encode()).hexdigest()
         # Include collection_name so agents bound to different retrievers don't collide.
-        cache_key = f"{llm_model_name}_{prompt_hash}_{max_iterations}_{collection_name or ''}"
+        cache_key = (
+            f"{llm_model_name}_{prompt_hash}_{max_iterations}_{collection_name or ''}"
+        )
 
         cached_agent = self.cache_manager.agent_cache.get(cache_key)
         if cached_agent:
@@ -277,7 +285,9 @@ class FastAIService:
 
         logger.info("✗ Agent cache MISS: %s — creating", cache_key[:50])
 
-        agent = await self._create_agent(llm_model_name, system_prompt, vector_store, max_iterations)
+        agent = await self._create_agent(
+            llm_model_name, system_prompt, vector_store, max_iterations
+        )
 
         if agent:
             self.cache_manager.agent_cache.set(cache_key, agent)
@@ -392,7 +402,9 @@ async def ask_ai(
                 last_message = output_messages[-1]
                 text_attr = getattr(last_message, "text", None)
                 if text_attr is not None:
-                    response_text = text_attr() if callable(text_attr) else str(text_attr)
+                    response_text = (
+                        text_attr() if callable(text_attr) else str(text_attr)
+                    )
                 else:
                     content = getattr(last_message, "content", "")
                     response_text = (
@@ -415,7 +427,7 @@ async def ask_ai(
         except TimeoutError as e:
             raise AITimeoutError(120, details={"question_length": len(question)}) from e
 
-    except (AIProcessingError, VectorStoreError, AITimeoutError):
+    except AIProcessingError, VectorStoreError, AITimeoutError:
         raise
     except Exception as e:
         raise AIProcessingError(
@@ -452,7 +464,11 @@ def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
 
                 all_messages = message_history.messages
                 total_count = len(all_messages)
-                windowed_messages = all_messages[-window_size:] if total_count > window_size else all_messages
+                windowed_messages = (
+                    all_messages[-window_size:]
+                    if total_count > window_size
+                    else all_messages
+                )
 
                 logger.info(
                     "Chat history for %s: using %d/%d messages",

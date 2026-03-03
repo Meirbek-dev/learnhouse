@@ -367,4 +367,3 @@ class TestAuth:
             await non_public_endpoint(anonymous_user)
 
         assert exc_info.value.status_code == 401
-

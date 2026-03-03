@@ -130,7 +130,7 @@ async def archive_stripe_product(
         )
 
     except stripe.StripeError as e:
-        logger.error(f"Error archiving Stripe product: {e!s}")
+        logger.exception(f"Error archiving Stripe product: {e!s}")
         raise HTTPException(
             status_code=400, detail=f"Error archiving Stripe product: {e!s}"
         )

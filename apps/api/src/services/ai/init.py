@@ -26,7 +26,11 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
             2048,
         )
 
-        logger.info("Creating embedding function: model=%s batch_size=%d", model_name, batch_size)
+        logger.info(
+            "Creating embedding function: model=%s batch_size=%d",
+            model_name,
+            batch_size,
+        )
         return OpenAIEmbeddings(
             model=model_name,
             api_key=api_key,
@@ -39,7 +43,9 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
         )
 
     except Exception as e:
-        logger.exception("Failed to create embedding function (model=%s): %s", model_name, e)
+        logger.exception(
+            "Failed to create embedding function (model=%s): %s", model_name, e
+        )
         return None
 
 

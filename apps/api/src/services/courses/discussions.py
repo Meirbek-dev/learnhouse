@@ -153,7 +153,10 @@ async def get_discussions_by_course_uuid(
     # Gather all top-level discussion details in parallel
     all_discussion_data = list(
         await asyncio.gather(
-            *[get_discussion_with_details(d.id, db_session, current_user) for d in discussions]
+            *[
+                get_discussion_with_details(d.id, db_session, current_user)
+                for d in discussions
+            ]
         )
     )
 
@@ -173,22 +176,34 @@ async def get_discussions_by_course_uuid(
         # Group replies by parent discussion id
         replies_by_discussion_id: dict[int, list] = {}
         for reply in all_replies:
-            replies_by_discussion_id.setdefault(reply.parent_discussion_id, []).append(reply)
+            replies_by_discussion_id.setdefault(reply.parent_discussion_id, []).append(
+                reply
+            )
 
         # Gather all reply details in parallel
         all_reply_details = list(
             await asyncio.gather(
-                *[get_discussion_with_details(r.id, db_session, current_user) for r in all_replies]
+                *[
+                    get_discussion_with_details(r.id, db_session, current_user)
+                    for r in all_replies
+                ]
             )
         )
-        reply_details_by_id = {r.id: detail for r, detail in zip(all_replies, all_reply_details)}
+        reply_details_by_id = {
+            r.id: detail
+            for r, detail in zip(all_replies, all_reply_details, strict=False)
+        }
 
-        for discussion, discussion_data in zip(discussions, all_discussion_data):
+        for discussion, discussion_data in zip(
+            discussions, all_discussion_data, strict=False
+        ):
             replies = replies_by_discussion_id.get(discussion.id, [])
             discussion_data.replies = [reply_details_by_id[r.id] for r in replies]
 
     result = []
-    for discussion, discussion_data in zip(discussions, all_discussion_data):
+    for discussion, discussion_data in zip(
+        discussions, all_discussion_data, strict=False
+    ):
         is_owner = is_authenticated and discussion.user_id == current_user.id
         can_edit = is_owner or can_moderate
         available_actions: list[str] = []
@@ -654,10 +669,11 @@ async def get_discussion_replies(
 
     replies = db_session.exec(replies_query).all()
 
-    result = list(
+    return list(
         await asyncio.gather(
-            *[get_discussion_with_details(reply.id, db_session, current_user) for reply in replies]
+            *[
+                get_discussion_with_details(reply.id, db_session, current_user)
+                for reply in replies
+            ]
         )
     )
-
-    return result

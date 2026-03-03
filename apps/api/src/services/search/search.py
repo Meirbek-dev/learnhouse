@@ -115,7 +115,10 @@ async def search_across_org(
 
         for collection in collections:
             collection_read = CollectionRead.model_validate(
-                {**collection.model_dump(), "courses": courses_by_collection.get(collection.id, [])}
+                {
+                    **collection.model_dump(),
+                    "courses": courses_by_collection.get(collection.id, []),
+                }
             )
             collection_reads.append(collection_read)
 

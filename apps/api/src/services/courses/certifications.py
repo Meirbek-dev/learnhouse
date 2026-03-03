@@ -185,7 +185,12 @@ async def update_certification(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "certificate:update", org_id=course.org_id, resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id,
+        "certificate:update",
+        org_id=course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     # Update only the fields that were passed in
     for var, value in vars(certification_object).items():
@@ -233,7 +238,12 @@ async def delete_certification(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "certificate:delete", org_id=course.org_id, resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id,
+        "certificate:delete",
+        org_id=course.org_id,
+        resource_owner_id=course.creator_id,
+    )
 
     db_session.delete(certification)
     db_session.commit()
@@ -504,7 +514,9 @@ async def get_user_certificates_for_course(
     result = [
         {
             "certificate_user": CertificateUserRead(**cert_user.model_dump()),
-            "certification": CertificationRead(**certs_by_id[cert_user.certification_id].model_dump())
+            "certification": CertificationRead(
+                **certs_by_id[cert_user.certification_id].model_dump()
+            )
             if cert_user.certification_id in certs_by_id
             else None,
             "course": {
@@ -645,7 +657,7 @@ async def check_course_completion_and_create_certificate(
 
             except Exception as general_error:
                 # Log unexpected errors but don't fail silently
-                logger.error(
+                logger.exception(
                     f"Unexpected error during course completion (user_id: {user_id}, course_id: {course_id}): {general_error}"
                 )
                 raise
@@ -756,9 +768,7 @@ async def get_all_user_certificates(
     courses_by_id = {c.id: c for c in courses_list}
 
     user_ids = [cu.user_id for cu in certificate_users if cu.user_id]
-    users_list = db_session.exec(
-        select(User).where(User.id.in_(user_ids))
-    ).all()
+    users_list = db_session.exec(select(User).where(User.id.in_(user_ids))).all()
     users_by_id = {u.id: u for u in users_list}
 
     result = []

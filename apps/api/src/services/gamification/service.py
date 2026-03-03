@@ -20,8 +20,7 @@ from datetime import datetime
 from typing import Any
 
 from sqlalchemy import func
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlmodel import Session, and_, select
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
@@ -35,7 +34,6 @@ from src.db.gamification import (
     calculate_level,
 )
 from src.services.gamification.policy import get_org_policy
-
 
 logger = logging.getLogger(__name__)
 
@@ -86,10 +84,10 @@ def _fetch_count(db: Session, stmt: SelectOfScalar[int]) -> int:
         first = None
         try:
             first = result.one_or_none()
-        except (AttributeError, TypeError):
+        except AttributeError, TypeError:
             try:
                 first = result.first()
-            except (AttributeError, TypeError):
+            except AttributeError, TypeError:
                 first = None
         if first is None:
             return 0
@@ -98,7 +96,7 @@ def _fetch_count(db: Session, stmt: SelectOfScalar[int]) -> int:
         return 0
     try:
         return int(value)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return 0
 
 
@@ -259,7 +257,7 @@ def award_xp(
             return profile, existing_tx, False, False
         msg = f"Database error: {e}"
         raise GamificationError(msg)
-    except (SQLAlchemyError, ValueError, TypeError):
+    except SQLAlchemyError, ValueError, TypeError:
         db.rollback()
         raise
 

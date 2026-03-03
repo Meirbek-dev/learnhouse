@@ -129,7 +129,11 @@ async def api_get_course(
     Get single Course by course_uuid
     """
     return await get_course(
-        request, course_uuid, current_user=current_user, db_session=db_session, checker=checker
+        request,
+        course_uuid,
+        current_user=current_user,
+        db_session=db_session,
+        checker=checker,
     )
 
 
@@ -145,7 +149,11 @@ async def api_get_course_by_id(
     Get single Course by id
     """
     return await get_course_by_id(
-        request, course_id, current_user=current_user, db_session=db_session, checker=checker
+        request,
+        course_id,
+        current_user=current_user,
+        db_session=db_session,
+        checker=checker,
     )
 
 
@@ -253,7 +261,9 @@ async def api_get_editable_courses_by_orgslug(
         request, current_user, org_slug, db_session, page, limit
     )
 
-    total_count = await count_editable_courses_orgslug(current_user, org_slug, db_session)
+    total_count = await count_editable_courses_orgslug(
+        current_user, org_slug, db_session
+    )
     response.headers["X-Total-Count"] = str(total_count)
     response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
 

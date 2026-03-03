@@ -355,7 +355,9 @@ async def _update_question_stats(
 
     per_question_results = grading_result.get("per_question", [])
 
-    question_ids = [r.get("question_id") for r in per_question_results if r.get("question_id")]
+    question_ids = [
+        r.get("question_id") for r in per_question_results if r.get("question_id")
+    ]
     if not question_ids:
         return
 

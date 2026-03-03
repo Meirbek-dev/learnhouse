@@ -239,7 +239,7 @@ async def ask_ai_stream(
             )
             raise AITimeoutError(120, details={"question_length": len(question)}) from e
 
-    except (AIProcessingError, VectorStoreError, AITimeoutError):
+    except AIProcessingError, VectorStoreError, AITimeoutError:
         raise
     except Exception as e:
         error_msg = f"Unexpected error during AI streaming: {e!s}"

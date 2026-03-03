@@ -233,7 +233,9 @@ async def create_video_activity(
                 ]
             )
 
-            for (_, language), upload_result in zip(valid_subtitles, upload_results):
+            for (_, language), upload_result in zip(
+                valid_subtitles, upload_results, strict=False
+            ):
                 if upload_result.get("success"):
                     subtitle_info.append(
                         {
