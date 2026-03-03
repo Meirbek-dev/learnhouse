@@ -1,6 +1,5 @@
 'use client';
 
-import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
 import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
 import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
@@ -8,13 +7,14 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 // for typing the session prop without exporting internal types
 export type PlatformSession = ReturnType<typeof usePlatformSession>;
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
-import { useCallback, useEffect, useRef, useTransition } from 'react';
+import { useEffect, useRef } from 'react';
 import platformLogoLight from '@public/platform_logo_light.svg';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { ScrollArea } from '@components/ui/scroll-area';
 import { Card, CardContent } from '@components/ui/card';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { useActivityChat } from '@/hooks/useActivityChat';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { Badge } from '@components/ui/badge';
@@ -22,7 +22,7 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
-import useGetAIFeatures from '../../../Hooks/useGetAIFeatures';
+import type { AIMessage } from '@components/Contexts/AI/AIBaseContext';
 
 // Type definitions
 interface Activity {
@@ -32,12 +32,6 @@ interface Activity {
 
 interface AIActivityAskProps {
   activity: Activity;
-}
-
-export interface AIMessage {
-  sender: 'ai' | 'user';
-  message: string;
-  type: 'ai' | 'user';
 }
 
 interface ErrorState {
@@ -51,13 +45,8 @@ type PredefinedQuestionType = 'about' | 'flashcards' | 'examples';
 // Main Component
 const AIActivityAsk = ({ activity }: AIActivityAskProps) => {
   const t = useTranslations('Activities.AIActivityAsk');
-  const is_ai_feature_enabled = useGetAIFeatures({ feature: 'activity_ask' });
   const dispatchAIChatBot = useAIChatBotDispatch();
   const aiChatBotState = useAIChatBot();
-
-  if (!is_ai_feature_enabled) {
-    return null;
-  }
 
   const handleToggleModal = () => {
     dispatchAIChatBot({
@@ -118,11 +107,25 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
   const aiChatBotState = useAIChatBot();
   const dispatchAIChatBot = useAIChatBotDispatch();
 
-  const [isPending, startTransition] = useTransition();
-  const controllerRef = useRef<AbortController | null>(null);
-  const streamingBufferRef = useRef('');
   const scrollYRef = useRef<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // All streaming + send logic is encapsulated in useActivityChat.
+  // `localStreamingDisplay: true` keeps live token updates in component-local
+  // state so only THIS component re-renders during streaming, not every
+  // consumer of AIChatBotContext.
+  const { sendMessage, localStreamingText, statusMessage, cleanup } = useActivityChat({
+    activityUuid: activity.activity_uuid,
+    accessToken: access_token,
+    chatUuid: aiChatBotState.aichat_uuid,
+    dispatch: dispatchAIChatBot as any,
+    localStreamingDisplay: true,
+  });
+
+  // Show local streaming text when this component triggered the stream;
+  // fall back to context's streamingMessage when AICanvaToolkit did.
+  const activeStreamingText = localStreamingText || aiChatBotState.streamingMessage;
+  const activeStatusMessage = statusMessage || aiChatBotState.statusMessage;
 
   // Lock scroll on mobile when modal is open
   useEffect(() => {
@@ -159,149 +162,22 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
     };
   }, [aiChatBotState.isModalOpen]);
 
-  // Auto-scroll to bottom when messages change
+  // Auto-scroll to bottom when messages or streaming text changes.
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [aiChatBotState.messages, aiChatBotState.streamingMessage]);
+  }, [aiChatBotState.messages, activeStreamingText]);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      controllerRef.current?.abort();
-    };
-  }, []);
+  // Abort stream on unmount.
+  useEffect(() => cleanup, [cleanup]);
 
-  // Abort and reset when modal closes
+  // Abort and clear when the modal closes.
   useEffect(() => {
-    if (!aiChatBotState.isModalOpen && controllerRef.current) {
-      controllerRef.current.abort();
-      controllerRef.current = null;
-      streamingBufferRef.current = '';
+    if (!aiChatBotState.isModalOpen) {
+      cleanup();
       dispatchAIChatBot({ type: 'clearStreamingMessage' });
       dispatchAIChatBot({ type: 'setStatusMessage', payload: null });
     }
-  }, [aiChatBotState.isModalOpen, dispatchAIChatBot]);
-
-  const resetStreamingState = useCallback(async () => {
-    streamingBufferRef.current = '';
-    dispatchAIChatBot({ type: 'clearStreamingMessage' });
-    dispatchAIChatBot({ type: 'setStatusMessage', payload: null });
-  }, [dispatchAIChatBot]);
-
-  const startNewController = useCallback(() => {
-    if (controllerRef.current) {
-      controllerRef.current.abort();
-    }
-    const controller = new AbortController();
-    controllerRef.current = controller;
-    return controller;
-  }, []);
-
-  const sendMessage = useCallback(
-    async (message: string) => {
-      if (!message.trim() || !access_token) return;
-
-      // Add user message
-      dispatchAIChatBot({
-        type: 'addMessage',
-        payload: { sender: 'user', message, type: 'user' },
-      });
-
-      startTransition(() => dispatchAIChatBot({ type: 'setIsWaitingForResponse' }));
-      dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
-      dispatchAIChatBot({ type: 'setStatusMessage', payload: 'Thinking...' });
-
-      await resetStreamingState();
-      const controller = startNewController();
-
-      const handleChunk = (chunk: { content?: string }) => {
-        if (chunk.content) {
-          streamingBufferRef.current += chunk.content;
-          dispatchAIChatBot({ type: 'setStreamingMessage', payload: streamingBufferRef.current });
-        }
-      };
-
-      const handleStatus = (status: { aichat_uuid?: string; message?: string }) => {
-        if (status.aichat_uuid) {
-          startTransition(() => dispatchAIChatBot({ type: 'setAichat_uuid', payload: status.aichat_uuid ?? null }));
-        }
-        dispatchAIChatBot({ type: 'setStatusMessage', payload: status.message ?? null });
-      };
-
-      const handleComplete = (final: { content?: string; aichat_uuid?: string }) => {
-        startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
-
-        if (final.aichat_uuid) {
-          startTransition(() => dispatchAIChatBot({ type: 'setAichat_uuid', payload: final.aichat_uuid ?? null }));
-        }
-
-        dispatchAIChatBot({
-          type: 'addMessage',
-          payload: {
-            sender: 'ai',
-            message: final.content || streamingBufferRef.current,
-            type: 'ai',
-          },
-        });
-
-        resetStreamingState();
-        controllerRef.current = null;
-      };
-
-      const handleError = (error: { error?: string }) => {
-        startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
-        dispatchAIChatBot({
-          type: 'setError',
-          payload: {
-            isError: true,
-            status: 500,
-            error_message: error.error || 'Streaming failed',
-          },
-        });
-        resetStreamingState();
-        controllerRef.current = null;
-      };
-
-      try {
-        if (aiChatBotState.aichat_uuid) {
-          await sendActivityAIChatMessageStream(
-            message,
-            aiChatBotState.aichat_uuid,
-            activity.activity_uuid,
-            access_token,
-            handleChunk,
-            handleStatus,
-            handleComplete,
-            handleError,
-            controller.signal,
-          );
-        } else {
-          await startActivityAIChatSessionStream(
-            message,
-            activity.activity_uuid,
-            access_token,
-            handleChunk,
-            handleStatus,
-            handleComplete,
-            handleError,
-            controller.signal,
-          );
-        }
-      } catch (error) {
-        handleError({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        });
-      }
-    },
-    [
-      access_token,
-      activity.activity_uuid,
-      aiChatBotState.aichat_uuid,
-      dispatchAIChatBot,
-      resetStreamingState,
-      startNewController,
-    ],
-  );
+  }, [aiChatBotState.isModalOpen, cleanup, dispatchAIChatBot]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter' && !aiChatBotState.isWaitingForResponse) {
@@ -325,7 +201,7 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
   }
 
   const hasMessages = aiChatBotState.messages.length > 0;
-  const isDisabled = aiChatBotState.isWaitingForResponse || isPending;
+  const isDisabled = aiChatBotState.isWaitingForResponse;
 
   return (
     <AnimatePresence>
@@ -369,8 +245,8 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
             </div>
 
             {/* Status Message */}
-            {aiChatBotState.statusMessage && (
-              <p className="mb-2 text-xs text-white/60">{aiChatBotState.statusMessage}</p>
+            {activeStatusMessage && (
+              <p className="mb-2 text-xs text-white/60">{activeStatusMessage}</p>
             )}
 
             {/* Messages Area */}
@@ -385,11 +261,11 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
                         animated={message.sender === 'ai'}
                       />
                     ))}
-                    {aiChatBotState.streamingMessage && (
+                    {activeStreamingText && (
                       <AIMessageComponent
                         message={{
                           sender: 'ai',
-                          message: aiChatBotState.streamingMessage,
+                          message: activeStreamingText,
                           type: 'ai',
                         }}
                         animated

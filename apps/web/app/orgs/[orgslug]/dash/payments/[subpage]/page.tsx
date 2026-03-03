@@ -5,7 +5,6 @@ import PaymentsCustomersPage from '@components/Dashboard/Pages/Payments/Payments
 import PaymentsProductPage from '@components/Dashboard/Pages/Payments/PaymentsProductPage';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
-import useFeatureFlag from '@components/Hooks/useFeatureFlag';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { Gem, Settings, Users } from 'lucide-react';
@@ -26,11 +25,6 @@ const PaymentsPage = (props: { params: Promise<PaymentsParams> }) => {
   const _session = usePlatformSession();
   const _org = useOrg();
   const subpage = params.subpage || 'customers';
-
-  const isPaymentsEnabled = useFeatureFlag({
-    path: ['features', 'payments', 'enabled'],
-    defaultValue: false,
-  });
 
   const getPageTitle = () => {
     switch (subpage) {
@@ -60,18 +54,6 @@ const PaymentsPage = (props: { params: Promise<PaymentsParams> }) => {
       }
     }
   };
-
-  if (!isPaymentsEnabled) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#f8f8f8] p-4">
-        <div className="max-w-md rounded-lg bg-white p-6 text-center shadow-md">
-          <h2 className="mb-4 text-xl font-bold">{t('notAvailable')}</h2>
-          <p className="text-gray-600">{t('notEnabledMessage')}</p>
-          <p className="mt-2 text-gray-600">{t('contactAdmin')}</p>
-        </div>
-      </div>
-    );
-  }
 
   const { h1, h2 } = getPageTitle();
 

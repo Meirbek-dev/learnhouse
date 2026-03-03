@@ -1,18 +1,14 @@
 /**
- * AI Service with Streaming Support
+ * AI Service — Streaming + Non-Streaming
+ *
+ * Single source of truth for all AI network calls. The non-streaming helpers
+ * are kept here for completeness; streaming variants should be preferred for
+ * all interactive chat flows.
  */
 
 import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { useRef, useState } from 'react';
-
-interface AIResponse {
-  success: boolean;
-  data: any;
-  status: number;
-  HTTPmessage: string;
-  duration?: number;
-}
+import { useCallback, useRef, useState } from 'react';
 
 interface AIStreamChunk {
   type: 'status' | 'chunk' | 'final' | 'error';
@@ -24,6 +20,71 @@ interface AIStreamChunk {
   error?: string;
   error_code?: string;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Non-streaming helpers (legacy fallback — prefer streaming variants above)
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface AIResponse {
+  success: boolean;
+  data: any;
+  status: number;
+  HTTPmessage: string;
+  duration?: number;
+}
+
+export async function startActivityAIChatSession(
+  message: string,
+  access_token: string,
+  activity_uuid?: string,
+): Promise<AIResponse> {
+  try {
+    const data = { message, activity_uuid };
+    const result = await fetch(
+      `${getAPIUrl()}ai/start/activity_chat_session`,
+      RequestBodyWithAuthHeader('POST', data, null, access_token),
+    );
+    const responseData = await result.json();
+    return {
+      success: result.status === 200,
+      data: responseData,
+      status: result.status,
+      HTTPmessage: result.statusText,
+    };
+  } catch (error) {
+    console.error('AI chat session failed:', error);
+    return { success: false, data: { error: 'Network error' }, status: 0, HTTPmessage: 'Network Error' };
+  }
+}
+
+export async function sendActivityAIChatMessage(
+  message: string,
+  aichat_uuid: string,
+  activity_uuid: string,
+  access_token: string,
+): Promise<AIResponse> {
+  try {
+    const data = { aichat_uuid, message, activity_uuid };
+    const result = await fetch(
+      `${getAPIUrl()}ai/send/activity_chat_message`,
+      RequestBodyWithAuthHeader('POST', data, null, access_token),
+    );
+    const responseData = await result.json();
+    return {
+      success: result.status === 200,
+      data: responseData,
+      status: result.status,
+      HTTPmessage: result.statusText,
+    };
+  } catch (error) {
+    console.error('AI message failed:', error);
+    return { success: false, data: { error: 'Network error' }, status: 0, HTTPmessage: 'Network Error' };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Streaming helpers
+// ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * Provides real-time AI responses
@@ -270,88 +331,79 @@ export async function sendActivityAIChatMessageStream(
  * }
  * ```
  */
-export function useAIStream() {
+export function useAIStream(dispatch?: React.Dispatch<{ type: string; payload?: any }>) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentText, setCurrentText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const currentControllerRef = useRef<AbortController | null>(null);
 
-  const streamResponse = async (message: string, activity_uuid: string, access_token: string, aichat_uuid?: string) => {
-    // Cancel any previous running stream
-    if (currentControllerRef.current) {
-      currentControllerRef.current.abort();
-    }
+  const streamResponse = useCallback(
+    async (message: string, activity_uuid: string, access_token: string, aichat_uuid?: string) => {
+      // Cancel any previous running stream
+      if (currentControllerRef.current) {
+        currentControllerRef.current.abort();
+      }
 
-    const controller = new AbortController();
-    currentControllerRef.current = controller;
-    setIsStreaming(true);
-    setCurrentText('');
-    setError(null);
+      const controller = new AbortController();
+      currentControllerRef.current = controller;
+      setIsStreaming(true);
+      setCurrentText('');
+      setError(null);
 
-    if (aichat_uuid) {
-      await sendActivityAIChatMessageStream(
-        message,
-        aichat_uuid,
-        activity_uuid,
-        access_token,
-        // onChunk
-        (chunk) => {
-          setCurrentText((prev) => prev + chunk.content);
-        },
-        // onStatus
-        (status) => {
-          console.log('Status:', status.message);
-        },
-        // onComplete
-        (final) => {
-          setCurrentText(final.content || '');
-          setIsStreaming(false);
-        },
-        // onError
-        (err) => {
-          setError(err.error || 'Unknown error');
-          setIsStreaming(false);
-        },
-        controller.signal,
-      );
-    } else {
-      await startActivityAIChatSessionStream(
-        message,
-        activity_uuid,
-        access_token,
-        // onChunk
-        (chunk) => {
-          setCurrentText((prev) => prev + chunk.content);
-        },
-        // onStatus
-        (status) => {
-          console.log('Status:', status.message);
-        },
-        // onComplete
-        (final) => {
-          setCurrentText(final.content || '');
-          setIsStreaming(false);
-        },
-        // onError
-        (err) => {
-          setError(err.error || 'Unknown error');
-          setIsStreaming(false);
-        },
-        controller.signal,
-      );
-    }
+      dispatch?.({ type: 'setIsWaitingForResponse' });
 
-    // Clean up controller when stream completes
-    currentControllerRef.current = null;
-  };
+      const onChunk = (chunk: AIStreamChunk) => {
+        setCurrentText((prev) => prev + (chunk.content ?? ''));
+        dispatch?.({ type: 'setStreamingMessage', payload: (currentText + (chunk.content ?? '')) });
+      };
 
-  const cancelStream = () => {
+      const onStatus = (status: AIStreamChunk) => {
+        dispatch?.({ type: 'setStatusMessage', payload: status.message ?? null });
+      };
+
+      const onComplete = (final: AIStreamChunk) => {
+        const finalText = final.content || currentText;
+        setCurrentText(finalText);
+        setIsStreaming(false);
+        dispatch?.({ type: 'setIsNoLongerWaitingForResponse' });
+        dispatch?.({ type: 'clearStreamingMessage' });
+        if (final.content) {
+          dispatch?.({ type: 'addMessage', payload: { sender: 'ai', message: finalText, type: 'ai' } });
+        }
+      };
+
+      const onError = (err: AIStreamChunk) => {
+        setError(err.error || 'Unknown error');
+        setIsStreaming(false);
+        dispatch?.({ type: 'setIsNoLongerWaitingForResponse' });
+        dispatch?.({ type: 'setError', payload: { isError: true, status: 500, error_message: err.error || 'Unknown error' } });
+      };
+
+      if (aichat_uuid) {
+        await sendActivityAIChatMessageStream(
+          message, aichat_uuid, activity_uuid, access_token,
+          onChunk, onStatus, onComplete, onError, controller.signal,
+        );
+      } else {
+        await startActivityAIChatSessionStream(
+          message, activity_uuid, access_token,
+          onChunk, onStatus, onComplete, onError, controller.signal,
+        );
+      }
+
+      currentControllerRef.current = null;
+    },
+    [dispatch, currentText],
+  );
+
+  const cancelStream = useCallback(() => {
     if (currentControllerRef.current) {
       currentControllerRef.current.abort();
       currentControllerRef.current = null;
       setIsStreaming(false);
+      dispatch?.({ type: 'setIsNoLongerWaitingForResponse' });
     }
-  };
+  }, [dispatch]);
 
   return {
     streamResponse,

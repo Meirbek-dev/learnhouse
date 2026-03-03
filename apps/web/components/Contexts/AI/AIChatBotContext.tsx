@@ -1,6 +1,7 @@
 'use client';
 
-import type { AIMessage } from '@components/Objects/Activities/AI/AIActivityAsk';
+import type { AIMessage, AIError } from '@components/Contexts/AI/AIBaseContext';
+import { INITIAL_AI_ERROR } from '@components/Contexts/AI/AIBaseContext';
 import { createContext, use, useReducer } from 'react';
 import type { ReactNode } from 'react';
 
@@ -34,11 +35,6 @@ export interface AIChatBotStateTypes {
   error: AIError;
 }
 
-export interface AIError {
-  isError: boolean;
-  status: number;
-  error_message: string;
-}
 
 interface AIChatBotProviderProps {
   children: ReactNode;
@@ -53,7 +49,7 @@ const AIChatBotProvider = ({ children }: AIChatBotProviderProps) => {
     chatInputValue: '',
     streamingMessage: '',
     statusMessage: null,
-    error: { isError: false, status: 0, error_message: '' },
+    error: INITIAL_AI_ERROR,
   });
 
   return (

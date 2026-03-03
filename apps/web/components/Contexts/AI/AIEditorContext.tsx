@@ -1,6 +1,7 @@
 'use client';
 
-import type { AIMessage } from '@components/Objects/Activities/AI/AIActivityAsk';
+import type { AIMessage, AIError } from '@components/Contexts/AI/AIBaseContext';
+import { INITIAL_AI_ERROR } from '@components/Contexts/AI/AIBaseContext';
 import { createContext, useContext, useReducer } from 'react';
 import type { ReactNode } from 'react';
 
@@ -43,11 +44,6 @@ export interface AIEditorStateTypes {
   error: AIError;
 }
 
-export interface AIError {
-  isError: boolean;
-  status: number;
-  error_message: string;
-}
 
 interface AIEditorProviderProps {
   children: ReactNode;
@@ -63,7 +59,7 @@ const initialAIEditorState: AIEditorStateTypes = {
   selectedTool: 'Writer',
   isUserInputEnabled: true,
   critisizeScope: 'selection',
-  error: { isError: false, status: 0, error_message: '' },
+  error: INITIAL_AI_ERROR,
 };
 
 const AIEditorProvider = ({ children }: AIEditorProviderProps) => {

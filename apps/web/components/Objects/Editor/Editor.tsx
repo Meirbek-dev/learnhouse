@@ -10,7 +10,6 @@ import DividerVerticalIcon from '@components/svg/DividerVerticalIcon';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import EmbedObjects from './Extensions/EmbedObjects/EmbedObjects';
-import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import InfoCallout from './Extensions/Callout/Info/InfoCallout';
 import platformLogoLight from '@public/platform_logo_light.svg';
 import WebPreview from './Extensions/WebPreview/WebPreview';
@@ -94,9 +93,6 @@ const Editor = (props: EditorProps) => {
 
   dispatchAIEditor = useAIEditorDispatch();
   aiEditorState = useAIEditor();
-
-  const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' });
-  const isButtonAvailable = is_ai_feature_enabled;
 
   const courseUuid = props.course.course_uuid.slice(7);
   const activityUuid = props.activity.activity_uuid.slice(9);
@@ -232,7 +228,7 @@ const Editor = (props: EditorProps) => {
             <div className="flex justify-center items-center space-x-2">
               <div>
                 <div className="rounded-md text-teal-100 transition-all ease-linear hover:cursor-pointer">
-                  {isButtonAvailable && dispatchAIEditor && aiEditorState ? (
+                  {dispatchAIEditor && aiEditorState ? (
                     <div
                       onClick={() =>
                         dispatchAIEditor({

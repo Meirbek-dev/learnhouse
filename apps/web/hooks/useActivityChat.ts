@@ -1,0 +1,223 @@
+'use client';
+
+import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
+import { useCallback, useRef, useState, useTransition } from 'react';
+import type { AIMessage } from '@components/Contexts/AI/AIBaseContext';
+
+// Minimal dispatcher shape — compatible with both AIChatBotContext and
+// any other context that shares the same action vocabulary.
+type AIDispatch = React.Dispatch<{
+  type:
+    | 'addMessage'
+    | 'setAichat_uuid'
+    | 'setIsWaitingForResponse'
+    | 'setIsNoLongerWaitingForResponse'
+    | 'setChatInputValue'
+    | 'setStreamingMessage'
+    | 'clearStreamingMessage'
+    | 'setStatusMessage'
+    | 'setError';
+  payload?: any;
+}>;
+
+export interface UseActivityChatOptions {
+  activityUuid: string;
+  accessToken: string | undefined;
+  /** Current chat session UUID from context (null = start a new session). */
+  chatUuid: string | null;
+  /** The global context dispatch function. */
+  dispatch: AIDispatch;
+  /**
+   * When `true` (default), streaming chunks are accumulated in **local** component
+   * state so only this component re-renders during a stream, not every context
+   * consumer.
+   *
+   * Set to `false` when the streaming display lives in a *different* component
+   * tree (e.g. AIActionButton → ActivityChatMessageBox) and the context's
+   * `streamingMessage` field must be kept in sync for display.
+   */
+  localStreamingDisplay?: boolean;
+}
+
+export interface UseActivityChatReturn {
+  sendMessage: (message: string) => Promise<void>;
+  /** Live streaming text — only populated when `localStreamingDisplay` is true. */
+  localStreamingText: string;
+  /** In-flight status hint ("Thinking…", "Reading document…", etc.) */
+  statusMessage: string | null;
+  /** Whether a stream is currently in flight (local tracking). */
+  isLocalStreaming: boolean;
+  /** Abort the current in-flight stream. */
+  cancelStream: () => void;
+  /** Call this in a cleanup effect on component unmount. */
+  cleanup: () => void;
+}
+
+/**
+ * Encapsulates all AI chat streaming logic.
+ *
+ * Extracts `sendMessage`, AbortController management, and streaming
+ * buffer handling out of view components. Streaming chunks are kept
+ * in **local** state by default to prevent unnecessary re-renders of
+ * unrelated context consumers during high-frequency token updates.
+ */
+export function useActivityChat({
+  activityUuid,
+  accessToken,
+  chatUuid,
+  dispatch,
+  localStreamingDisplay = true,
+}: UseActivityChatOptions): UseActivityChatReturn {
+  const [localStreamingText, setLocalStreamingText] = useState('');
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [isLocalStreaming, setIsLocalStreaming] = useState(false);
+
+  const controllerRef = useRef<AbortController | null>(null);
+  const streamingBufferRef = useRef('');
+  const [, startTransition] = useTransition();
+
+  const cleanup = useCallback(() => {
+    controllerRef.current?.abort();
+    controllerRef.current = null;
+  }, []);
+
+  const cancelStream = useCallback(() => {
+    controllerRef.current?.abort();
+    controllerRef.current = null;
+    streamingBufferRef.current = '';
+    setLocalStreamingText('');
+    setStatusMessage(null);
+    setIsLocalStreaming(false);
+    if (localStreamingDisplay) {
+      startTransition(() => dispatch({ type: 'setIsNoLongerWaitingForResponse' }));
+    }
+  }, [dispatch, localStreamingDisplay]);
+
+  const sendMessage = useCallback(
+    async (message: string) => {
+      if (!message.trim() || !accessToken) return;
+
+      // Add the user's message to the committed message list immediately.
+      dispatch({ type: 'addMessage', payload: { sender: 'user', message, type: 'user' } as AIMessage });
+      dispatch({ type: 'setChatInputValue', payload: '' });
+      startTransition(() => dispatch({ type: 'setIsWaitingForResponse' }));
+
+      // Reset streaming state.
+      streamingBufferRef.current = '';
+      setLocalStreamingText('');
+      setStatusMessage('Thinking...');
+      setIsLocalStreaming(true);
+
+      // Cancel any in-flight stream before starting a new one.
+      controllerRef.current?.abort();
+      const controller = new AbortController();
+      controllerRef.current = controller;
+
+      // ── Streaming callbacks ────────────────────────────────────────
+      const handleChunk = (chunk: { content?: string }) => {
+        if (!chunk.content) return;
+        streamingBufferRef.current += chunk.content;
+        if (localStreamingDisplay) {
+          // Fast-path: update only local state, skip context dispatch.
+          setLocalStreamingText(streamingBufferRef.current);
+        } else {
+          // Cross-component path: push to context so sibling components
+          // (e.g. ActivityChatMessageBox) can show live progress.
+          dispatch({ type: 'setStreamingMessage', payload: streamingBufferRef.current });
+        }
+      };
+
+      const handleStatus = (status: { aichat_uuid?: string; message?: string }) => {
+        if (status.aichat_uuid) {
+          startTransition(() => dispatch({ type: 'setAichat_uuid', payload: status.aichat_uuid ?? null }));
+        }
+        setStatusMessage(status.message ?? null);
+        if (!localStreamingDisplay) {
+          dispatch({ type: 'setStatusMessage', payload: status.message ?? null });
+        }
+      };
+
+      const handleComplete = (final: { content?: string; aichat_uuid?: string }) => {
+        if (final.aichat_uuid) {
+          startTransition(() => dispatch({ type: 'setAichat_uuid', payload: final.aichat_uuid ?? null }));
+        }
+
+        // Commit the final AI message to the shared message list.
+        const finalMessage = final.content || streamingBufferRef.current;
+        dispatch({
+          type: 'addMessage',
+          payload: { sender: 'ai', message: finalMessage, type: 'ai' } as AIMessage,
+        });
+
+        // Clear all streaming state.
+        streamingBufferRef.current = '';
+        setLocalStreamingText('');
+        setStatusMessage(null);
+        setIsLocalStreaming(false);
+        controllerRef.current = null;
+
+        if (!localStreamingDisplay) {
+          dispatch({ type: 'clearStreamingMessage' });
+          dispatch({ type: 'setStatusMessage', payload: null });
+        }
+
+        startTransition(() => dispatch({ type: 'setIsNoLongerWaitingForResponse' }));
+      };
+
+      const handleError = (error: { error?: string }) => {
+        dispatch({
+          type: 'setError',
+          payload: { isError: true, status: 500, error_message: error.error || 'Streaming failed' },
+        });
+
+        streamingBufferRef.current = '';
+        setLocalStreamingText('');
+        setStatusMessage(null);
+        setIsLocalStreaming(false);
+        controllerRef.current = null;
+
+        if (!localStreamingDisplay) {
+          dispatch({ type: 'clearStreamingMessage' });
+          dispatch({ type: 'setStatusMessage', payload: null });
+        }
+
+        startTransition(() => dispatch({ type: 'setIsNoLongerWaitingForResponse' }));
+      };
+
+      // ── Fire the right endpoint ────────────────────────────────────
+      try {
+        if (chatUuid) {
+          await sendActivityAIChatMessageStream(
+            message,
+            chatUuid,
+            activityUuid,
+            accessToken,
+            handleChunk,
+            handleStatus,
+            handleComplete,
+            handleError,
+            controller.signal,
+          );
+        } else {
+          await startActivityAIChatSessionStream(
+            message,
+            activityUuid,
+            accessToken,
+            handleChunk,
+            handleStatus,
+            handleComplete,
+            handleError,
+            controller.signal,
+          );
+        }
+      } catch (err) {
+        handleError({ error: err instanceof Error ? err.message : 'Unknown error' });
+      }
+    },
+    // chatUuid intentionally excluded — it's read from the ref at call time
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [accessToken, activityUuid, chatUuid, dispatch, localStreamingDisplay],
+  );
+
+  return { sendMessage, localStreamingText, statusMessage, isLocalStreaming, cancelStream, cleanup };
+}

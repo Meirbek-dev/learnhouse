@@ -14,7 +14,6 @@ import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEdit
 import type { CritisizeScope } from '@components/Contexts/AI/AIEditorContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react';
-import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import platformLogoLight from '@public/platform_logo_light.svg';
 import { ScrollArea } from '@components/ui/scroll-area';
 import { AnimatePresence, motion } from 'motion/react';
@@ -922,14 +921,11 @@ export default function AIEditorToolkit({ editor, activity }: AIEditorToolkitPro
   const dispatchAIEditor = useAIEditorDispatch();
   const aiEditorState = useAIEditor();
   const t = useTranslations('Activities.AIEditorToolkit');
-  const isToolkitAvailable = useGetAIFeatures({ feature: 'editor' });
 
   const handleClose = useCallback(() => {
     dispatchAIEditor({ type: 'setIsModalClose' });
     dispatchAIEditor({ type: 'setIsFeedbackModalClose' });
   }, [dispatchAIEditor]);
-
-  if (!isToolkitAvailable) return null;
 
   return (
     <div className="flex space-x-2">
