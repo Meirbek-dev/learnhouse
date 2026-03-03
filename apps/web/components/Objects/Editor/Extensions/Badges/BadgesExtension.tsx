@@ -2,10 +2,12 @@ import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { ChevronDown, ChevronRight, Palette } from 'lucide-react';
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
-import EmojiPicker, { Theme } from 'emoji-picker-react';
+import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { twMerge } from 'tailwind-merge';
 import type { FC } from 'react';
+
+const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false, loading: () => null });
 
 const BadgesExtension: FC = (props: any) => {
   const t = useTranslations('DashPage.Editor.BadgesExtension');
@@ -249,7 +251,7 @@ const BadgesExtension: FC = (props: any) => {
             onEmojiClick={handleEmojiSelect}
             height="30rem"
             width="25rem"
-            theme={Theme.LIGHT}
+            theme={'light' as any}
             previewConfig={{ showPreview: false }}
             searchPlaceHolder={t('searchEmojis')}
             autoFocusSearch

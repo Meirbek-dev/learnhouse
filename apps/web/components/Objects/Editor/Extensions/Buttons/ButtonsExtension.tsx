@@ -2,10 +2,12 @@ import { AlignCenter, AlignLeft, AlignRight, ArrowRight, ChevronDown, Link, Pale
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
-import EmojiPicker, { Theme } from 'emoji-picker-react';
+import dynamic from 'next/dynamic';
 import type { ChangeEvent, FC } from 'react';
 import { useTranslations } from 'next-intl';
 import { twMerge } from 'tailwind-merge';
+
+const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false, loading: () => null });
 
 const ButtonsExtension: FC = (props: any) => {
   const t = useTranslations('DashPage.Editor.ButtonsExtension');
@@ -200,7 +202,7 @@ const ButtonsExtension: FC = (props: any) => {
             onEmojiClick={handleEmojiSelect}
             height="30rem"
             width="25rem"
-            theme={Theme.LIGHT}
+            theme={'light' as any}
             previewConfig={{ showPreview: false }}
             searchPlaceHolder={t('searchEmojis')}
             autoFocusSearch

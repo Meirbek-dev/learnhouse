@@ -2,17 +2,23 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { OnChange, OnMount } from '@monaco-editor/react';
-import { Editor, loader } from '@monaco-editor/react';
+import dynamic from 'next/dynamic';
 import { useTheme } from 'next-themes';
 
 import { cn } from '@/lib/utils';
 
-// Configure Monaco loader for self-hosted (avoid CDN issues)
-loader.config({
-  paths: {
-    vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.55.0/min/vs',
-  },
-});
+const MonacoEditor = dynamic(
+  () =>
+    import('@monaco-editor/react').then(({ Editor, loader }) => {
+      loader.config({
+        paths: {
+          vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.55.0/min/vs',
+        },
+      });
+      return { default: Editor };
+    }),
+  { ssr: false },
+);
 
 export interface Language {
   id: number;
@@ -120,7 +126,7 @@ export function CodeEditor({
 
   return (
     <div className={cn('overflow-hidden rounded-lg border', className)}>
-      <Editor
+      <MonacoEditor
         height={height}
         language={getMonacoLanguage(languageId)}
         value={value}

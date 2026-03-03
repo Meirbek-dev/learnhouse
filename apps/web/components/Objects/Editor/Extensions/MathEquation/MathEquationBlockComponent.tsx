@@ -7,9 +7,15 @@ import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import type { ChangeEvent } from 'react';
-import { BlockMath } from 'react-katex';
+import dynamic from 'next/dynamic';
 import { motion } from 'motion/react';
+// CSS imported statically so it's available when BlockMath renders
 import 'katex/dist/katex.min.css';
+
+const BlockMath = dynamic(
+  () => import('react-katex').then((m) => ({ default: m.BlockMath })),
+  { ssr: false, loading: () => <div className="animate-pulse h-8 rounded bg-gray-100" /> },
+);
 
 // Predefined LaTeX templates
 const mathTemplates = [

@@ -1,7 +1,6 @@
 'use client';
 
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
-import { Document, Font, Image, Page, StyleSheet, Text, View, pdf } from '@react-pdf/renderer';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserCertificates } from '@services/courses/certifications';
 import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
@@ -78,6 +77,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
     if (!userCertificate) return;
 
     try {
+      const { Document, Font, Image, Page, StyleSheet, Text, View, pdf } = await import('@react-pdf/renderer');
+
       // Register font for Cyrillic/Russian support
       Font.register({
         family: 'Roboto',

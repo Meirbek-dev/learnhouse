@@ -3,10 +3,12 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import type { EmojiClickData } from 'emoji-picker-react';
 import { Link as LinkIcon, Plus, X } from 'lucide-react';
-import EmojiPicker, { Theme } from 'emoji-picker-react';
+import dynamic from 'next/dynamic';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { generateUUID } from '@/lib/utils';
+
+const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false, loading: () => null });
 
 interface LearningItem {
   id: string;
@@ -367,7 +369,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
                   onEmojiClick={(emoji) => {
                     handleEmojiSelect(item.id, emoji);
                   }}
-                  theme={Theme.LIGHT}
+                  theme={'light' as any}
                   previewConfig={{ showPreview: false }}
                   searchPlaceHolder={t('searchEmojis')}
                   autoFocusSearch
