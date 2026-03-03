@@ -1,6 +1,7 @@
 'use client';
 
 import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
+import type { Course } from '@components/Objects/Thumbnails/CourseThumbnail';
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
 import NewCourseButton from '@/components/Objects/Elements/Buttons/NewCourseButton';
@@ -14,7 +15,7 @@ import { useState } from 'react';
 
 interface CourseProps {
   orgslug: string;
-  courses: any;
+  courses: Course[];
   org_id: number;
   totalCourses: number;
 }
@@ -77,7 +78,7 @@ const CoursesHome = (params: CourseProps) => {
       </div>
 
       <div className="grid w-full grid-cols-1 gap-6 pb-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
-        {courses.map((course: any) => (
+        {courses.map((course) => (
           <div
             key={course.course_uuid}
             className="mx-auto w-full max-w-[300px]"

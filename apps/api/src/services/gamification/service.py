@@ -20,6 +20,7 @@ from datetime import datetime
 from typing import Any
 
 from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, and_, select
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
@@ -34,6 +35,9 @@ from src.db.gamification import (
     calculate_level,
 )
 from src.services.gamification.policy import get_org_policy
+
+
+logger = logging.getLogger(__name__)
 
 
 class GamificationError(Exception):
@@ -72,18 +76,20 @@ def _fetch_count(db: Session, stmt: SelectOfScalar[int]) -> int:
     """Reliable count(*) helper that works across SQL backends."""
     try:
         value = db.scalar(stmt)
-    except Exception:
+    except (SQLAlchemyError, TypeError, AttributeError) as exc:
+        logger.warning("Primary count query failed; attempting fallback", exc_info=exc)
         try:
             result = db.exec(stmt)
-        except Exception:
+        except SQLAlchemyError as fallback_exc:
+            logger.warning("Fallback count query failed", exc_info=fallback_exc)
             return 0
         first = None
         try:
             first = result.one_or_none()
-        except Exception:
+        except (AttributeError, TypeError):
             try:
                 first = result.first()
-            except Exception:
+            except (AttributeError, TypeError):
                 first = None
         if first is None:
             return 0
@@ -224,7 +230,7 @@ def award_xp(
             elif source_id is not None:
                 try:
                     xp_source = XPSource(source)
-                except Exception:
+                except ValueError:
                     xp_source = None
                 if xp_source is not None:
                     stmt = select(XPTransaction).where(
@@ -253,7 +259,7 @@ def award_xp(
             return profile, existing_tx, False, False
         msg = f"Database error: {e}"
         raise GamificationError(msg)
-    except Exception:
+    except (SQLAlchemyError, ValueError, TypeError):
         db.rollback()
         raise
 
@@ -393,7 +399,8 @@ def get_leaderboard_read(db: Session, org_id: int, limit: int = 10, offset: int 
         try:
             users = db.exec(select(DBUser).where(DBUser.id.in_(ids))).all()
             user_map = {u.id: u for u in users}
-        except Exception:
+        except SQLAlchemyError as exc:
+            logger.warning("Failed to load leaderboard user metadata", exc_info=exc)
             user_map = {}
 
     entries = []

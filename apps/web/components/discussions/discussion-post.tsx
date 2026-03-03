@@ -2,6 +2,7 @@
 
 import { ArrowBigDown, ArrowBigUp, Clock, Edit, Reply, Send, Trash2 } from 'lucide-react';
 import { PermissionTooltip } from '@/components/Utils/PermissionTooltip';
+import dynamic from 'next/dynamic';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import RichContentRenderer from './rich-content-renderer';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -9,11 +10,15 @@ import UserAvatar from '@components/Objects/UserAvatar';
 import { Separator } from '@/components/ui/separator';
 import DiscussionReply from './discussion-reply';
 import { Button } from '@/components/ui/button';
-import RichTextEditor from './rich-text-editor';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import type React from 'react';
+
+const RichTextEditor = dynamic(() => import('./rich-text-editor'), {
+  ssr: false,
+  loading: () => <div className="h-[120px] w-full animate-pulse rounded-lg border bg-muted/40" />,
+});
 
 interface DiscussionPostData {
   id: string;

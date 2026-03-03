@@ -1,10 +1,12 @@
 'use client';
 
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import type { Chapter } from '@components/Contexts/CourseContext';
 import NewChapterModal from '@components/Objects/Modals/Chapters/NewChapter';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
+import type { DropResult } from '@hello-pangea/dnd';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { createChapter } from '@services/courses/chapters';
@@ -23,6 +25,14 @@ interface EditCourseStructureProps {
   course_uuid?: string;
 }
 
+interface NewChapterPayload {
+  name: string;
+  description: string;
+  thumbnail_image: string;
+  course_id: number;
+  org_id: number;
+}
+
 export type OrderPayload =
   | {
       chapter_order_by_ids?: {
@@ -36,7 +46,7 @@ export type OrderPayload =
 
 const EditCourseStructure = (props: EditCourseStructureProps) => {
   const router = useRouter();
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   // Check window availability - use lazy initialization
   const [winReady, setwinReady] = useState(() => typeof globalThis.window !== 'undefined');
@@ -57,7 +67,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   };
 
   // Submit new chapter
-  const submitChapter = async (chapter: any) => {
+  const submitChapter = async (chapter: NewChapterPayload) => {
     const loadingToast = toast.loading(t('creatingChapter'));
     try {
       await createChapter(chapter, access_token);
@@ -74,7 +84,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
     }
   };
 
-  const updateStructure = (result: any) => {
+  const updateStructure = (result: DropResult) => {
     const { destination, source, draggableId, type } = result;
     if (!destination) return;
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
@@ -92,9 +102,9 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
 
     if (type === 'activity') {
       const newChapterOrder = [...newCourseStructure.chapters];
-      const sourceChapter = newChapterOrder.find((chapter: any) => chapter.chapter_uuid === source.droppableId);
+      const sourceChapter = newChapterOrder.find((chapter: Chapter) => chapter.chapter_uuid === source.droppableId);
       const destinationChapter =
-        newChapterOrder.find((chapter: any) => chapter.chapter_uuid === destination.droppableId) ?? sourceChapter;
+        newChapterOrder.find((chapter: Chapter) => chapter.chapter_uuid === destination.droppableId) ?? sourceChapter;
 
       if (!(sourceChapter && destinationChapter)) return;
       if (!(sourceChapter.activities && destinationChapter.activities)) return;
@@ -131,7 +141,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                 {...provided.droppableProps}
                 ref={provided.innerRef}
               >
-                {course_structure.chapters.map((chapter: any, index: any) => {
+                {course_structure.chapters.map((chapter: Chapter, index: number) => {
                   return (
                     <ChapterElement
                       key={chapter.chapter_uuid}

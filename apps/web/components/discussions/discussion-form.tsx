@@ -2,10 +2,15 @@
 
 import UserAvatar from '@components/Objects/UserAvatar';
 import { Button } from '@/components/ui/button';
-import RichTextEditor from './rich-text-editor';
+import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { Send } from 'lucide-react';
 import { useState } from 'react';
+
+const RichTextEditor = dynamic(() => import('./rich-text-editor'), {
+  ssr: false,
+  loading: () => <div className="h-[120px] w-full animate-pulse rounded-lg border bg-muted/40" />,
+});
 
 interface DiscussionFormProps {
   currentUser: any;

@@ -208,8 +208,12 @@ export const getResponseMetadata = async (response: Response): Promise<CustomRes
   // This prevents errors if the response is empty (e.g., 204 No Content) or not valid JSON.
   try {
     data = await response.json();
-  } catch {
-    // Ignore parsing error; data will remain null.
+  } catch (error) {
+    console.warn('Failed to parse response JSON in getResponseMetadata', {
+      status: response.status,
+      statusText: response.statusText,
+      error,
+    });
   }
 
   return {
@@ -244,7 +248,12 @@ export const revalidateTags = async (tags: string[], orgslug: string) => {
     if (!response.ok) {
       throw new Error(`Failed to revalidate tags (${response.status})`);
     }
-  } catch {
+  } catch (error) {
+    console.warn('Failed to revalidate tags via POST, falling back to per-tag requests', {
+      tags: uniqueTags,
+      orgslug,
+      error,
+    });
     await Promise.all(
       uniqueTags.map((tag) => {
         const url = `${endpoint}?tag=${encodeURIComponent(tag)}`;

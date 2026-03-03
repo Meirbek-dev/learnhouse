@@ -41,6 +41,19 @@ export async function fetchWithRetry(
 
       return res;
     } catch (error) {
+      const isAbortError = error instanceof Error && error.name === 'AbortError';
+      if (isAbortError) {
+        console.warn('[fetchWithRetry] Request aborted; skipping retries', { input });
+        throw error;
+      }
+
+      console.warn('[fetchWithRetry] Request failed, retrying', {
+        attempt,
+        retries,
+        input,
+        error,
+      });
+
       if (attempt === retries) throw error;
       const wait = Math.floor(baseDelay * 2 ** (attempt - 1) * (0.5 + Math.random() * 0.5));
       await sleep(wait);
