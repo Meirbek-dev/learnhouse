@@ -29,13 +29,16 @@ export const getTopLevelCookieDomain = () =>
   isUnsupportedCookieDomain(PLATFORM_TOP_DOMAIN) ? undefined : PLATFORM_TOP_DOMAIN;
 
 /**
+ * Resolves the API base URL (always ending with a slash).
+ * This should run once at module init.
+ *
  * Returns the API base URL (always ending with a slash).
  * Falls back to current window origin + /api/v1/ in the browser when env is missing.
  *
  * For server-side requests in Docker, use internal container network.
  * For client-side requests, use the public-facing URL.
  */
-export const getAPIUrl = () => {
+const resolveAPIUrl = () => {
   // Server-side: use internal Docker network URL when available
   if (typeof globalThis.window === 'undefined') {
     const internalUrl = process.env.PLATFORM_INTERNAL_API_URL;
@@ -79,6 +82,10 @@ export const getAPIUrl = () => {
 
   return base;
 };
+
+const API_URL = resolveAPIUrl();
+
+export const getAPIUrl = () => API_URL;
 
 export const getBackendUrl = () => PLATFORM_BACKEND_URL;
 
