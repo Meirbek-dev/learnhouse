@@ -1,5 +1,5 @@
 """
-Streaming AI response support for real-time user feedback using LangChain v1 API.
+Streaming AI response support for real-time user feedback using the LangGraph streaming API.
 """
 
 import asyncio
@@ -233,7 +233,7 @@ async def ask_ai_stream(
             )
             raise AITimeoutError(60, details={"question_length": len(question)}) from e
 
-    except AIProcessingError, VectorStoreError, AITimeoutError:
+    except (AIProcessingError, VectorStoreError, AITimeoutError):
         raise
     except Exception as e:
         error_msg = f"Unexpected error during AI streaming: {e!s}"

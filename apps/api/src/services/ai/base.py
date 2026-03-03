@@ -4,8 +4,9 @@ import logging
 import re
 import threading
 from collections.abc import Sequence
+from dataclasses import dataclass
 from threading import Lock
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from cachetools import LRUCache
 from langchain_community.chat_message_histories import RedisChatMessageHistory
@@ -41,6 +42,18 @@ _fast_ai_service: "FastAIService | None" = None
 _fast_ai_service_lock = Lock()
 
 
+@dataclass(frozen=True, slots=True)
+class ChatSessionInfo:
+    """Typed container for chat session data."""
+
+    message_history: "RedisChatMessageHistory | list"
+    windowed_history: "WindowedChatMessageHistory"
+    aichat_uuid: str
+    storage_type: Literal["redis", "memory"]
+    total_messages: int
+    window_size: int
+
+
 def get_fast_ai_service() -> "FastAIService":
     """Get a process-wide FastAIService instance for cache warmness."""
     global _fast_ai_service
@@ -65,6 +78,7 @@ class WindowedChatMessageHistory(BaseChatMessageHistory):
         self._base_history = base_history
         self._messages: list[BaseMessage] = list(windowed_messages)
         self._window_size = window_size
+        self._lock = threading.Lock()
 
     @property
     def messages(self) -> list[BaseMessage]:
@@ -73,8 +87,9 @@ class WindowedChatMessageHistory(BaseChatMessageHistory):
     def add_messages(self, messages: Sequence[BaseMessage]) -> None:
         if self._base_history:
             self._base_history.add_messages(messages)
-        for message in messages:
-            self._messages = ([*self._messages, message])[-self._window_size :]
+        with self._lock:
+            for message in messages:
+                self._messages = ([*self._messages, message])[-self._window_size :]
 
     def clear(self) -> None:
         if self._base_history:
@@ -109,7 +124,7 @@ class OptimizedTextSplitter:
         if not text or not isinstance(text, str):
             return []
 
-        text_hash = hashlib.md5(text.encode()).hexdigest()
+        text_hash = hashlib.sha256(text.encode(), usedforsecurity=False).hexdigest()
 
         with self._chunk_cache_lock:
             cached = self._chunk_cache.get(text_hash)
@@ -155,16 +170,20 @@ class FastAIService:
         documents: list[str],
         embedding_model_name: str,
         collection_name: str | None = None,
-    ) -> VectorStore | None:
-        """Get cached vector store or create new one."""
-        # Offload CPU-bound hashing to a thread so the event loop stays free.
-        content_hash = await asyncio.to_thread(self._generate_content_hash, documents)
+    ) -> tuple[VectorStore, str] | tuple[None, str]:
+        """Get cached vector store or create new one.
+
+        Returns:
+            Tuple of (vector_store, content_hash). vector_store is None on failure.
+        """
+        # SHA-256 hashing is fast (<1 ms); no need for a thread-pool hop.
+        content_hash = self._generate_content_hash(documents)
         cache_key = f"{embedding_model_name}_{collection_name or 'anon'}_{content_hash}"
 
         cached_store = self.cache_manager.vector_store_cache.get(cache_key)
         if cached_store:
             logger.info("Vector store cache HIT: %s", cache_key[:60])
-            return cached_store
+            return cached_store, content_hash
 
         logger.info("Vector store cache MISS: %s — creating", cache_key[:60])
 
@@ -181,7 +200,33 @@ class FastAIService:
                 activity_uuid = collection_name.removeprefix("activity_")
                 self.cache_manager.register_vector_cache_key(activity_uuid, cache_key)
 
-        return vector_store
+        return vector_store, content_hash
+
+    async def _chunk_documents(self, documents: list[str]) -> list[str]:
+        """Chunk documents in parallel and validate output.
+
+        Raises:
+            VectorStoreError: If no valid chunks can be produced.
+        """
+        logger.info("Chunking %d documents", len(documents))
+        chunk_results = await asyncio.gather(
+            *(self.text_splitter.split_text_async(doc) for doc in documents),
+            return_exceptions=True,
+        )
+        all_chunks: list[str] = []
+        for result in chunk_results:
+            if isinstance(result, Exception):
+                logger.warning("Failed to chunk document: %s", result)
+                continue
+            if isinstance(result, list):
+                all_chunks.extend(result)
+        if not all_chunks:
+            raise VectorStoreError(
+                "No valid chunks created from documents",
+                details={"document_count": len(documents)},
+            )
+        logger.info("Produced %d chunks from %d documents", len(all_chunks), len(documents))
+        return all_chunks
 
     async def _create_vector_store(
         self,
@@ -247,37 +292,10 @@ class FastAIService:
                         except Exception:
                             pass  # Collection doesn't exist yet
 
-                    logger.info("Processing %d documents", len(documents))
-                    chunk_results = await asyncio.gather(
-                        *(
-                            self.text_splitter.split_text_async(doc)
-                            for doc in documents
-                        ),
-                        return_exceptions=True,
-                    )
+                    all_chunks = await self._chunk_documents(documents)
 
-                    all_chunks: list[str] = []
-                    for result in chunk_results:
-                        if isinstance(result, Exception):
-                            logger.warning("Failed to chunk document: %s", result)
-                            continue
-                        if isinstance(result, list):
-                            all_chunks.extend(result)
-
-                    if not all_chunks:
-                        raise VectorStoreError(
-                            "No valid chunks created from documents",
-                            details={"document_count": len(documents)},
-                        )
-
-                    logger.info(
-                        "Created %d chunks from %d documents",
-                        len(all_chunks),
-                        len(documents),
-                    )
-
-                    vector_store = await asyncio.to_thread(
-                        chroma_cls.from_texts,
+                    # afrom_texts runs embedding + insertion natively async
+                    vector_store = await chroma_cls.afrom_texts(
                         texts=all_chunks,
                         embedding=embedding_function,
                         client=chroma_client,
@@ -288,28 +306,8 @@ class FastAIService:
                     return vector_store
 
             # Fallback to InMemoryVectorStore
-            logger.info("Processing %d documents", len(documents))
-            chunk_results = await asyncio.gather(
-                *(self.text_splitter.split_text_async(doc) for doc in documents),
-                return_exceptions=True,
-            )
-
-            all_chunks: list[str] = []
-            for result in chunk_results:
-                if isinstance(result, Exception):
-                    logger.warning("Failed to chunk document: %s", result)
-                    continue
-                if isinstance(result, list):
-                    all_chunks.extend(result)
-
-            if not all_chunks:
-                raise VectorStoreError(
-                    "No valid chunks created from documents",
-                    details={"document_count": len(documents)},
-                )
-
-            vector_store = await asyncio.to_thread(
-                InMemoryVectorStore.from_texts,
+            all_chunks = await self._chunk_documents(documents)
+            vector_store = await InMemoryVectorStore.afrom_texts(
                 texts=all_chunks,
                 embedding=embedding_function,
             )
@@ -318,7 +316,7 @@ class FastAIService:
                 logger.debug("Chroma import error: %r", chroma_import_error)
             return vector_store
 
-        except EmbeddingError, VectorStoreError:
+        except (EmbeddingError, VectorStoreError):
             raise
         except Exception as e:
             raise VectorStoreError(
@@ -332,22 +330,18 @@ class FastAIService:
         system_prompt: str,
         vector_store: VectorStore,
         collection_name: str | None = None,
+        content_hash: str = "",
         max_iterations: int = 15,
         max_tokens: int = 4000,
     ) -> CompiledStateGraph | None:
         """Get cached compiled agent or create a new one.
 
-        Agents are cached per (model, collection, system_prompt) tuple.
-        Compiling the LangGraph StateGraph is the most expensive per-request
-        operation (~20-50 ms); caching eliminates that overhead entirely.
-
-        The cached agent retains a reference to the retriever closure over the
-        vector store. When the vector store TTL expires and a new one is
-        created, the agent cache entry will also have expired (agent TTL ≤
-        vector store TTL), so a fresh agent is built against the new store.
+        Agents are cached per (model, collection, system_prompt, content_hash) tuple.
+        Including content_hash ensures a stale agent (with a retriever pointing at
+        an old vector store) is never served after content changes.
         """
         prompt_hash = hashlib.sha256(system_prompt.encode()).hexdigest()[:16]
-        cache_key = f"agent_{llm_model_name}_{collection_name or 'anon'}_{prompt_hash}"
+        cache_key = f"agent_{llm_model_name}_{collection_name or 'anon'}_{prompt_hash}_{content_hash[:16]}"
 
         cached_agent = self.cache_manager.agent_cache.get(cache_key)
         if cached_agent is not None:
@@ -372,13 +366,15 @@ class FastAIService:
     ) -> CompiledStateGraph | None:
         """Compile a ReAct agent using langgraph.prebuilt.create_react_agent."""
         try:
-            # lru_cache handles caching — call directly
-            llm = get_llm(llm_model_name, streaming=True, max_tokens=max_tokens)
-            if not llm:
+            # get_llm is keyed only on model identity; bind max_tokens at call time
+            # so we don't pollute the LRU cache with per-request variants.
+            base_llm = get_llm(llm_model_name, streaming=True)
+            if not base_llm:
                 raise AIProcessingError(
                     f"LLM model {llm_model_name} not available",
                     details={"model_name": llm_model_name},
                 )
+            llm = base_llm.bind(max_tokens=max_tokens)
 
             retriever = vector_store.as_retriever(
                 search_type="similarity",
@@ -386,9 +382,9 @@ class FastAIService:
             )
 
             @tool
-            def find_context_text(query: str) -> str:
+            async def find_context_text(query: str) -> str:
                 """Find relevant context from the knowledge base. Use this to search for information related to the user's question."""
-                docs = retriever.invoke(query)
+                docs = await retriever.ainvoke(query)
                 if not docs:
                     return "No relevant context found."
                 return "\n\n".join(doc.page_content for doc in docs)
@@ -413,6 +409,7 @@ class FastAIService:
             ) from e
 
 
+
 async def prepare_agent(
     text_reference: str,
     message_for_the_prompt: str,
@@ -429,7 +426,7 @@ async def prepare_agent(
     """
     ai_service = get_fast_ai_service()
 
-    vector_store = await ai_service.get_or_create_vector_store(
+    vector_store, content_hash = await ai_service.get_or_create_vector_store(
         documents=[text_reference],
         embedding_model_name=embedding_model_name,
         collection_name=collection_name,
@@ -443,6 +440,7 @@ async def prepare_agent(
         system_prompt=message_for_the_prompt,
         vector_store=vector_store,
         collection_name=collection_name,
+        content_hash=content_hash,
         max_tokens=max_tokens,
     )
 
@@ -491,13 +489,11 @@ async def ask_ai(
             if cancel_event and cancel_event.is_set():
                 raise AIProcessingError("AI processing cancelled before invocation")
 
-            result = await asyncio.wait_for(
-                agent.ainvoke(
+            async with asyncio.timeout(60.0):
+                result = await agent.ainvoke(
                     {"messages": messages},
                     config={"recursion_limit": 30},
-                ),
-                timeout=60.0,
-            )
+                )
 
             output_messages = result.get("messages", [])
             if output_messages:
@@ -529,7 +525,7 @@ async def ask_ai(
         except TimeoutError as e:
             raise AITimeoutError(60, details={"question_length": len(question)}) from e
 
-    except AIProcessingError, VectorStoreError, AITimeoutError:
+    except (AIProcessingError, VectorStoreError, AITimeoutError):
         raise
     except Exception as e:
         raise AIProcessingError(
@@ -538,7 +534,7 @@ async def ask_ai(
         ) from e
 
 
-def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
+def get_chat_session_history(aichat_uuid: str | None = None) -> ChatSessionInfo:
     """
     Chat session history with windowed loading for performance.
 
@@ -549,17 +545,16 @@ def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
         config = get_platform_config()
         redis_conn_string = config.redis_config.redis_connection_string
 
-        window_size = getattr(
-            getattr(config.ai_config, "chat", None),
-            "history_window_size",
-            10,
-        )
+        chat_config = getattr(config.ai_config, "chat", None)
+        window_size = getattr(chat_config, "history_window_size", 10)
+        # Respect configured retention; fall back to 24 hours
+        message_ttl = getattr(chat_config, "message_retention", 86400)
 
         if redis_conn_string:
             try:
                 message_history = RedisChatMessageHistory(
                     url=redis_conn_string,
-                    ttl=2160000,  # 25 days
+                    ttl=message_ttl,
                     session_id=session_id,
                     key_prefix="openu_chat:",
                 )
@@ -588,14 +583,14 @@ def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
                     window_size=window_size,
                 )
 
-                return {
-                    "message_history": message_history,
-                    "windowed_history": windowed_history,
-                    "aichat_uuid": session_id,
-                    "storage_type": "redis",
-                    "total_messages": total_count,
-                    "window_size": window_size,
-                }
+                return ChatSessionInfo(
+                    message_history=message_history,
+                    windowed_history=windowed_history,
+                    aichat_uuid=session_id,
+                    storage_type="redis",
+                    total_messages=total_count,
+                    window_size=window_size,
+                )
 
             except Exception as redis_error:
                 logger.warning("Redis connection failed: %s", redis_error)
@@ -606,14 +601,14 @@ def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
             windowed_messages=[],
             window_size=window_size,
         )
-        return {
-            "message_history": [],
-            "windowed_history": windowed_history,
-            "aichat_uuid": session_id,
-            "storage_type": "memory",
-            "total_messages": 0,
-            "window_size": window_size,
-        }
+        return ChatSessionInfo(
+            message_history=[],
+            windowed_history=windowed_history,
+            aichat_uuid=session_id,
+            storage_type="memory",
+            total_messages=0,
+            window_size=window_size,
+        )
 
     except Exception as e:
         raise ChatSessionError(

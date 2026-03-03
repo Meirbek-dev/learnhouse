@@ -3,9 +3,9 @@ Thread-safe cache manager for AI services with proper TTL management.
 """
 
 import asyncio
-import inspect
 import logging
 from collections.abc import Awaitable, Callable
+from functools import cached_property
 from threading import Lock
 from typing import Any, TypeVar
 
@@ -31,10 +31,14 @@ class ThreadSafeCache[T]:
         """
         self._cache: TTLCache[str, T] = TTLCache(maxsize=maxsize, ttl=ttl)
         self._lock = Lock()
-        # Async lock to be used by async methods to avoid blocking the event loop
-        self._async_lock = asyncio.Lock()
         self._hit_count = 0
         self._miss_count = 0
+
+    @cached_property
+    def _async_lock(self) -> asyncio.Lock:
+        """Lazily created inside the running event loop so it is never
+        bound to the wrong loop when the cache is initialised at import time."""
+        return asyncio.Lock()
 
     def get(self, key: str) -> T | None:
         """
@@ -50,11 +54,11 @@ class ThreadSafeCache[T]:
             try:
                 value = self._cache[key]
                 self._hit_count += 1
-                logger.debug(f"Cache hit for key: {key}")
+                logger.debug("Cache hit for key: %s", key)
                 return value
             except KeyError:
                 self._miss_count += 1
-                logger.debug(f"Cache miss for key: {key}")
+                logger.debug("Cache miss for key: %s", key)
                 return None
 
     async def async_get(self, key: str) -> T | None:
@@ -72,7 +76,7 @@ class ThreadSafeCache[T]:
         """
         with self._lock:
             self._cache[key] = value
-            logger.debug(f"Cached item with key: {key}")
+            logger.debug("Cached item with key: %s", key)
 
     async def async_set(self, key: str, value: T) -> None:
         """Async-safe setter wrapper."""
@@ -88,7 +92,7 @@ class ThreadSafeCache[T]:
         with self._lock:
             try:
                 del self._cache[key]
-                logger.debug(f"Deleted cache entry: {key}")
+                logger.debug("Deleted cache entry: %s", key)
             except KeyError:
                 pass
 
@@ -150,7 +154,7 @@ class ThreadSafeCache[T]:
         try:
             value_or_awaitable = factory()
 
-            if inspect.isawaitable(value_or_awaitable):
+            if isinstance(value_or_awaitable, Awaitable):
                 value = await value_or_awaitable
             else:
                 value = value_or_awaitable
@@ -168,7 +172,7 @@ class ThreadSafeCache[T]:
                 return value
 
         except Exception as e:
-            logger.exception(f"Failed to compute value for key {key}: {e}")
+            logger.exception("Failed to compute value for key %s: %s", key, e)
             return None
 
 

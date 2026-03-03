@@ -3,8 +3,8 @@ ChromaDB connection pool for efficient resource management.
 """
 
 import asyncio
-import inspect
 import logging
+from collections.abc import Awaitable
 from contextlib import asynccontextmanager
 from threading import Lock
 from typing import TYPE_CHECKING, Any
@@ -24,10 +24,12 @@ class ChromaDBPool:
     Design:
     - Remote ChromaDB (HttpClient): a bounded pool of connections is maintained
       so concurrent requests reuse existing HTTP connections.
-    - In-process ephemeral: a **single shared EphemeralClient singleton** is
-      used. ChromaDB's EphemeralClient creates a completely isolated in-memory
-      database per instance, so pooling multiple EphemeralClients would give
-      every checkout a *different* database, breaking collection reuse entirely.
+    - Local fallback: a **single shared PersistentClient singleton** backed by
+      a configurable on-disk path is used so vector data survives process
+      restarts.  A shared singleton is required because
+      chromadb.PersistentClient / EphemeralClient each represent an isolated
+      in-memory database — creating multiple instances would give every checkout
+      a *different* database, breaking collection reuse entirely.
     """
 
     def __init__(self, max_connections: int = 10) -> None:
@@ -37,9 +39,9 @@ class ChromaDBPool:
         # lock to the wrong loop when __init__ is called before asyncio.run().
         self._loop_lock: asyncio.Lock | None = None
         self._total_created = 0
-        # Single shared EphemeralClient — all callers share one in-memory DB.
-        self._ephemeral_singleton: "chromadb.Client | None" = None
-        self._ephemeral_lock = Lock()  # thread lock for singleton creation
+        # Single shared PersistentClient — all callers share one on-disk DB.
+        self._persistent_singleton: "chromadb.Client | None" = None
+        self._persistent_lock = Lock()  # thread lock for singleton creation
         logger.info(
             "Initialized ChromaDB pool with max %d connections", max_connections
         )
@@ -91,28 +93,39 @@ class ChromaDBPool:
             return client
         except Exception as e:
             logger.warning(
-                "Remote ChromaDB unavailable (%s); falling back to ephemeral", e
+                "Remote ChromaDB unavailable (%s); falling back to persistent", e
             )
-            return self._get_or_create_ephemeral_singleton()
+            return self._get_or_create_persistent_singleton()
 
-    def _get_or_create_ephemeral_singleton(self) -> "chromadb.Client":
-        """Return the single shared EphemeralClient, creating it on first call."""
-        if self._ephemeral_singleton is not None:
-            return self._ephemeral_singleton
-        with self._ephemeral_lock:
-            if self._ephemeral_singleton is None:
+    def _get_or_create_persistent_singleton(self) -> "chromadb.Client":
+        """Return the single shared PersistentClient, creating it on first call.
+
+        Uses a configurable path (CHROMADB_PERSIST_PATH env var, defaulting to
+        ``./chromadb_data``) so data survives process restarts.
+        """
+        if self._persistent_singleton is not None:
+            return self._persistent_singleton
+        with self._persistent_lock:
+            if self._persistent_singleton is None:
+                import os
+
                 import chromadb
                 from chromadb.config import Settings
 
+                persist_path = os.environ.get("CHROMADB_PERSIST_PATH", "./chromadb_data")
                 settings = Settings(
                     anonymized_telemetry=False,
                     allow_reset=True,
-                    is_persistent=False,
+                    is_persistent=True,
                 )
-                self._ephemeral_singleton = chromadb.EphemeralClient(settings=settings)
+                self._persistent_singleton = chromadb.PersistentClient(
+                    path=persist_path, settings=settings
+                )
                 self._total_created += 1
-                logger.info("Created shared ChromaDB EphemeralClient singleton")
-        return self._ephemeral_singleton
+                logger.info(
+                    "Created shared ChromaDB PersistentClient (path=%s)", persist_path
+                )
+        return self._persistent_singleton
 
     @asynccontextmanager
     async def get_client(self, cancel_event: asyncio.Event | None = None):
@@ -128,7 +141,7 @@ class ChromaDBPool:
         """
         if not self._is_remote_mode():
             # In-process mode — yield the singleton; never "return" it to a pool.
-            client = await asyncio.to_thread(self._get_or_create_ephemeral_singleton)
+            client = await asyncio.to_thread(self._get_or_create_persistent_singleton)
             yield client
             return
 
@@ -162,13 +175,13 @@ class ChromaDBPool:
                     )
                     if callable(close_fn):
                         maybe = close_fn()
-                        if inspect.isawaitable(maybe):
+                        if isinstance(maybe, Awaitable):
                             await maybe
                 except Exception as e:
                     logger.warning("Error closing client: %s", e)
 
-        with self._ephemeral_lock:
-            self._ephemeral_singleton = None
+        with self._persistent_lock:
+            self._persistent_singleton = None
 
         logger.info("Closed all connections. Total created: %d", self._total_created)
 
@@ -179,7 +192,7 @@ class ChromaDBPool:
             "total_created": self._total_created,
             "available": len(self._pool),
             "in_use": self._total_created - len(self._pool),
-            "has_ephemeral_singleton": self._ephemeral_singleton is not None,
+            "has_persistent_singleton": self._persistent_singleton is not None,
         }
 
 

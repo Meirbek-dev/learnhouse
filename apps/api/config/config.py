@@ -163,8 +163,13 @@ def get_platform_config() -> PlatformConfig:
 
     # General Config
 
-    # Development Mode
-    env_development_mode = eval(os.environ.get("PLATFORM_DEVELOPMENT_MODE", "None"))
+    # Development Mode — safe boolean coercion (replaces eval)
+    _raw_dev_mode = os.environ.get("PLATFORM_DEVELOPMENT_MODE")
+    env_development_mode: bool | None = (
+        _raw_dev_mode.strip().lower() in ("true", "1", "yes")
+        if _raw_dev_mode is not None
+        else None
+    )
     development_mode = (
         env_development_mode
         if env_development_mode is not None

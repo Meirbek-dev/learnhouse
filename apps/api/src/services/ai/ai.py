@@ -12,7 +12,7 @@ from src.db.courses.activities import Activity, ActivityRead
 from src.db.courses.courses import Course, CourseRead
 from src.db.organization_config import OrganizationConfig
 from src.db.users import PublicUser
-from src.services.ai.base import ask_ai, get_chat_session_history
+from src.services.ai.base import ask_ai, get_chat_session_history, ChatSessionInfo
 from src.services.ai.cache_manager import get_ai_cache_manager
 from src.services.ai.exceptions import (
     ActivityNotFoundError,
@@ -47,7 +47,7 @@ class _ChatContext:
     system_message: str
     ai_model: str
     max_tokens: int
-    chat_session: dict[str, Any]
+    chat_session: ChatSessionInfo
     streaming_enabled: bool
 
 
@@ -193,12 +193,12 @@ async def _handle_ai_chat(
     ai_process_start = time.perf_counter()
     response = await ask_ai(
         message,
-        ctx.chat_session["windowed_history"],
+        ctx.chat_session.windowed_history,
         ctx.ai_text,
         ctx.system_message,
         _EMBEDDING_MODEL,
         ctx.ai_model,
-        session_id=ctx.chat_session["aichat_uuid"],
+        session_id=ctx.chat_session.aichat_uuid,
         cancel_event=cancel_event,
         collection_name=f"activity_{ctx.activity.activity_uuid}",
         max_tokens=ctx.max_tokens,
@@ -211,13 +211,13 @@ async def _handle_ai_chat(
 
     logger.info(
         "AI chat %s completed in %.1fms (AI: %.1fms)",
-        ctx.chat_session["aichat_uuid"],
+        ctx.chat_session.aichat_uuid,
         (time.perf_counter() - trace_start) * 1000,
         ai_ms,
     )
 
     return ActivityAIChatSessionResponse(
-        aichat_uuid=ctx.chat_session["aichat_uuid"],
+        aichat_uuid=ctx.chat_session.aichat_uuid,
         activity_uuid=ctx.activity.activity_uuid,
         message=ai_message,
     )
@@ -266,15 +266,27 @@ async def _handle_ai_chat_stream(
             logger.info(
                 "Streaming disabled for this org, falling back to non-streaming"
             )
-            response = await _handle_ai_chat(
-                activity_uuid, aichat_uuid, message, db_session, cancel_event
+            # Reuse the already-prepared context instead of calling _prepare_context
+            # a second time (which would re-fetch activity data and rebuild the prompt).
+            response = await ask_ai(
+                message,
+                ctx.chat_session.windowed_history,
+                ctx.ai_text,
+                ctx.system_message,
+                _EMBEDDING_MODEL,
+                ctx.ai_model,
+                session_id=ctx.chat_session.aichat_uuid,
+                cancel_event=cancel_event,
+                collection_name=f"activity_{ctx.activity.activity_uuid}",
+                max_tokens=ctx.max_tokens,
             )
+            ai_message = response.get("output", "")
             yield format_sse_message(
                 {
                     "type": "final",
-                    "aichat_uuid": response.aichat_uuid,
-                    "activity_uuid": response.activity_uuid,
-                    "message": response.message,
+                    "aichat_uuid": ctx.chat_session.aichat_uuid,
+                    "activity_uuid": ctx.activity.activity_uuid,
+                    "message": ai_message,
                 }
             )
             return
@@ -283,7 +295,7 @@ async def _handle_ai_chat_stream(
             {
                 "type": "status",
                 "status": "processing",
-                "aichat_uuid": ctx.chat_session["aichat_uuid"],
+                "aichat_uuid": ctx.chat_session.aichat_uuid,
             }
         )
 
@@ -291,19 +303,19 @@ async def _handle_ai_chat_stream(
 
         async for chunk in ask_ai_stream(
             message,
-            ctx.chat_session["windowed_history"],
+            ctx.chat_session.windowed_history,
             ctx.ai_text,
             ctx.system_message,
             _EMBEDDING_MODEL,
             ctx.ai_model,
-            session_id=ctx.chat_session["aichat_uuid"],
+            session_id=ctx.chat_session.aichat_uuid,
             cancel_event=cancel_event,
             collection_name=f"activity_{ctx.activity.activity_uuid}",
             max_tokens=ctx.max_tokens,
         ):
             yield chunk
 
-        logger.info("Streaming completed: %s", ctx.chat_session["aichat_uuid"])
+        logger.info("Streaming completed: %s", ctx.chat_session.aichat_uuid)
 
     except AIServiceException as e:
         yield _map_ai_error_to_sse(e)
