@@ -134,9 +134,21 @@ export async function startActivityAIChatSessionStream(
     const requestInit = RequestBodyWithAuthHeader('POST', data, null, access_token);
     if (signal) requestInit.signal = signal;
     const response = await fetch(`${getAPIUrl()}ai/start/activity_chat_session_stream`, requestInit);
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    if (!response.ok) {
+      let errorMessage = `HTTP error ${response.status}`;
+      let error_code: string | undefined;
+      try {
+        const body = await response.json();
+        errorMessage = body?.detail ?? body?.error ?? errorMessage;
+        error_code = body?.error_code;
+      } catch { /* non-JSON body */ }
+      onError?.({ type: 'error', error: errorMessage, status: response.status, error_code });
+      return;
+    }
     await readSSEStream(response, { onChunk, onStatus, onComplete, onError }, signal);
   } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') return;
+    if (error instanceof Error && error.name === 'AbortError') return;
     console.error('AI streaming failed:', error);
     onError?.({ type: 'error', error: error instanceof Error ? error.message : 'Unknown error', error_code: 'STREAM_ERROR' });
   }
@@ -158,9 +170,21 @@ export async function sendActivityAIChatMessageStream(
     const requestInit = RequestBodyWithAuthHeader('POST', data, null, access_token);
     if (signal) requestInit.signal = signal;
     const response = await fetch(`${getAPIUrl()}ai/send/activity_chat_message_stream`, requestInit);
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    if (!response.ok) {
+      let errorMessage = `HTTP error ${response.status}`;
+      let error_code: string | undefined;
+      try {
+        const body = await response.json();
+        errorMessage = body?.detail ?? body?.error ?? errorMessage;
+        error_code = body?.error_code;
+      } catch { /* non-JSON body */ }
+      onError?.({ type: 'error', error: errorMessage, status: response.status, error_code });
+      return;
+    }
     await readSSEStream(response, { onChunk, onStatus, onComplete, onError }, signal);
   } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') return;
+    if (error instanceof Error && error.name === 'AbortError') return;
     console.error('AI streaming failed:', error);
     onError?.({ type: 'error', error: error instanceof Error ? error.message : 'Unknown error', error_code: 'STREAM_ERROR' });
   }

@@ -122,17 +122,26 @@ async def _prepare_context(
     """Build the full context needed for any AI chat request."""
     activity, course, org_config = await _get_activity_data(activity_uuid, db_session)
 
-    content_task = asyncio.to_thread(
-        structure_activity_content_by_type, activity.content
-    )
-    chat_session_task = asyncio.to_thread(
+    # Cache the expensive content-structuring + serialization step so that
+    # follow-up messages in the same session don't repeat CPU work.
+    cache_manager = get_ai_cache_manager()
+    context_text_key = f"context_text_{activity_uuid}"
+    cached_text_pair = cache_manager.db_cache.get(context_text_key)
+    if cached_text_pair:
+        structured, ai_text = cached_text_pair
+        logger.debug("Context text cache HIT: %s", activity_uuid)
+    else:
+        structured = await asyncio.to_thread(
+            structure_activity_content_by_type, activity.content
+        )
+        ai_text = serialize_activity_text_to_ai_comprehensible_text(
+            structured, course, activity, isActivityEmpty=not structured
+        )
+        cache_manager.db_cache.set(context_text_key, (structured, ai_text))
+        logger.debug("Context text cache MISS: %s — cached", activity_uuid)
+
+    chat_session = await asyncio.to_thread(
         get_chat_session_history, aichat_uuid, user_id
-    )
-
-    structured, chat_session = await asyncio.gather(content_task, chat_session_task)
-
-    ai_text = serialize_activity_text_to_ai_comprehensible_text(
-        structured, course, activity, isActivityEmpty=not structured
     )
 
     system_message = (
@@ -307,19 +316,13 @@ async def _handle_ai_chat_stream(
                     "type": "final",
                     "aichat_uuid": ctx.chat_session.aichat_uuid,
                     "activity_uuid": ctx.activity.activity_uuid,
-                    "message": ai_message,
+                    "content": ai_message,
                 }
             )
             return
 
-        yield format_sse_message(
-            {
-                "type": "status",
-                "status": "processing",
-                "aichat_uuid": ctx.chat_session.aichat_uuid,
-            }
-        )
-
+        # `ask_ai_stream` emits its own initial status=processing event;
+        # we must NOT emit a duplicate here.
         logger.info("Streaming AI chat for activity %s", ctx.activity.activity_uuid)
 
         async for chunk in ask_ai_stream(

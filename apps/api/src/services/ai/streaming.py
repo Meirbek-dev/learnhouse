@@ -152,23 +152,21 @@ async def ask_ai_stream(
                     # The langgraph_node metadata tells us which node emitted this chunk
                     node_name = metadata.get("langgraph_node", "")
 
-                    # Skip tool node outputs - we only want the final AI response
+                    # Emit a progress hint when the agent calls its retrieval tool,
+                    # then skip the raw tool output from being sent as response content.
                     if "tool" in node_name.lower():
+                        if chunk_count == 0:
+                            # First tool call — let the user know we are reading context
+                            yield format_sse_message(
+                                {
+                                    "type": "status",
+                                    "status": "reading_context",
+                                    "aichat_uuid": session_id,
+                                }
+                            )
                         continue
 
                     content = _extract_chunk_text(message_chunk)
-
-                    # Send a granular status update after the first tool call result
-                    # so the user sees meaningful progress in their language (Russian).
-                    if "tool" in node_name.lower() and not content:
-                        yield format_sse_message(
-                            {
-                                "type": "status",
-                                "status": "reading_context",
-                                "aichat_uuid": session_id,
-                            }
-                        )
-                        continue
 
                     # Stream content if present
                     if content:

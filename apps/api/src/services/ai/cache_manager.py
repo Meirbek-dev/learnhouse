@@ -263,8 +263,9 @@ class AICacheManager:
         - All vector store cache entries registered for the activity
         - All agent cache entries registered for the activity
         """
-        # Clear DB cache entry
+        # Clear DB cache entries (activity data + pre-serialised context text)
         self.db_cache.delete(f"activity_{activity_uuid}")
+        self.db_cache.delete(f"context_text_{activity_uuid}")
 
         # Clear all vector store and agent entries tracked for this activity
         with self._index_lock:

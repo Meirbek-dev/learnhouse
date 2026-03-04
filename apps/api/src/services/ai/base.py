@@ -607,23 +607,50 @@ def get_chat_session_history(
                     key_prefix="openu_chat:",
                 )
 
-                # Use the public API to load history and slice to the window.
-                # Direct access to redis_client / key internals is fragile and
-                # breaks silently across library versions.
-                all_messages = message_history.messages
-                total_count = len(all_messages)
-                windowed_messages = (
-                    all_messages[-window_size:]
-                    if total_count > window_size
-                    else all_messages
-                )
+                # Fast-path: fetch only the tail of the Redis list instead of
+                # loading the full history and slicing in Python.  This keeps
+                # session-load latency constant regardless of total message count.
+                windowed_messages: list[BaseMessage] = []
+                total_count = 0
+                try:
+                    import json
 
-                logger.info(
-                    "Chat history for %s: using %d/%d messages",
-                    session_id,
-                    len(windowed_messages),
-                    total_count,
-                )
+                    from langchain_core.messages import messages_from_dict
+
+                    redis_key = message_history.key  # f"{key_prefix}{session_id}"
+                    redis_client = message_history.redis_client
+                    total_count = redis_client.llen(redis_key)
+                    raw_tail = redis_client.lrange(redis_key, -window_size, -1)
+                    for item in raw_tail:
+                        try:
+                            jsn = json.loads(item)
+                            windowed_messages.extend(messages_from_dict([jsn]))
+                        except Exception:
+                            pass
+                    logger.info(
+                        "Chat history (fast-path) %s: %d/%d messages loaded",
+                        session_id,
+                        len(windowed_messages),
+                        total_count,
+                    )
+                except Exception as _fast_path_err:
+                    # Fallback to full load + Python slice
+                    logger.debug(
+                        "Fast-path history fetch failed (%s), falling back", _fast_path_err
+                    )
+                    all_messages = message_history.messages
+                    total_count = len(all_messages)
+                    windowed_messages = (
+                        all_messages[-window_size:]
+                        if total_count > window_size
+                        else all_messages
+                    )
+                    logger.info(
+                        "Chat history (fallback) for %s: using %d/%d messages",
+                        session_id,
+                        len(windowed_messages),
+                        total_count,
+                    )
 
                 windowed_history = WindowedChatMessageHistory(
                     base_history=message_history,

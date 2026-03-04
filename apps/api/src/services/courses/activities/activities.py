@@ -1,8 +1,11 @@
+import logging
 from datetime import datetime
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
 from ulid import ULID
+
+logger = logging.getLogger(__name__)
 
 from src.db.courses.activities import (
     Activity,
@@ -251,6 +254,13 @@ async def update_activity(
     db_session.commit()
     db_session.refresh(activity)
 
+    # Invalidate AI caches so the next chat request uses fresh content
+    try:
+        from src.services.ai.cache_manager import get_ai_cache_manager
+        get_ai_cache_manager().invalidate_activity_cache(activity_uuid)
+    except Exception as _inv_err:
+        logger.warning("AI cache invalidation failed for %s: %s", activity_uuid, _inv_err)
+
     return ActivityRead.model_validate(activity)
 
 
@@ -302,6 +312,13 @@ async def delete_activity(
     db_session.delete(activity_chapter)
     db_session.delete(activity)
     db_session.commit()
+
+    # Invalidate AI caches; the activity no longer exists
+    try:
+        from src.services.ai.cache_manager import get_ai_cache_manager
+        get_ai_cache_manager().invalidate_activity_cache(activity_uuid)
+    except Exception as _inv_err:
+        logger.warning("AI cache invalidation failed for %s: %s", activity_uuid, _inv_err)
 
     return {"detail": "Activity deleted"}
 

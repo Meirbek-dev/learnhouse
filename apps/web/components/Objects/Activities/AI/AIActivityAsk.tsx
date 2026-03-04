@@ -162,10 +162,17 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
     };
   }, [aiChatBotState.isModalOpen]);
 
-  // Auto-scroll to bottom when messages or streaming text changes.
+  // Auto-scroll: instant during streaming (avoids repeated layout animation),
+  // smooth scroll when a new committed message arrives.
+  useEffect(() => {
+    if (activeStreamingText) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'instant' as ScrollBehavior });
+    }
+  }, [activeStreamingText]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [aiChatBotState.messages, activeStreamingText]);
+  }, [aiChatBotState.messages]);
 
   // Abort stream on unmount.
   useEffect(() => cleanup, [cleanup]);
@@ -176,6 +183,8 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
       cleanup();
       dispatchAIChatBot({ type: 'clearStreamingMessage' });
       dispatchAIChatBot({ type: 'setStatusMessage', payload: null });
+      // Always clear waiting state so the input is not stuck as disabled.
+      dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
     }
   }, [aiChatBotState.isModalOpen, cleanup, dispatchAIChatBot]);
 
@@ -326,8 +335,6 @@ interface AIMessageComponentProps {
 }
 
 const AIMessageComponent = ({ message, animated }: AIMessageComponentProps) => {
-  const words = message.message.split(' ');
-
   return (
     <div className="flex gap-2">
       <UserAvatar
@@ -335,23 +342,14 @@ const AIMessageComponent = ({ message, animated }: AIMessageComponentProps) => {
         variant="outline"
         predefined_avatar={message.sender === 'ai' ? 'ai' : undefined}
       />
-      <div className="flex-1 rounded-lg bg-white/5 px-3 py-2">
-        <p className="text-sm leading-relaxed text-white">
-          <AnimatePresence>
-            {words.map((word: string, i: number) => (
-              <motion.span
-                key={`${word}-${i}`}
-                initial={animated ? { opacity: 0, y: -10 } : { opacity: 1, y: 0 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={animated ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
-                transition={animated ? { delay: i * 0.05 } : {}}
-              >
-                {`${word} `}
-              </motion.span>
-            ))}
-          </AnimatePresence>
-        </p>
-      </div>
+      <motion.div
+        initial={animated ? { opacity: 0 } : false}
+        animate={{ opacity: 1 }}
+        transition={animated ? { duration: 0.25 } : undefined}
+        className="flex-1 rounded-lg bg-white/5 px-3 py-2"
+      >
+        <p className="text-sm leading-relaxed text-white whitespace-pre-wrap">{message.message}</p>
+      </motion.div>
     </div>
   );
 };

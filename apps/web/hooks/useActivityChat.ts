@@ -83,28 +83,50 @@ export function useActivityChat({
   const controllerRef = useRef<AbortController | null>(null);
   const streamingBufferRef = useRef('');
   const chatUuidRef = useRef<string | null>(chatUuid);
+  // Throttle timer: flush streaming-text state updates at most every 50 ms so
+  // high-frequency token events don't trigger a React render per token.
+  const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [, startTransition] = useTransition();
 
   useEffect(() => {
     chatUuidRef.current = chatUuid;
   }, [chatUuid]);
 
+  /** Cancel any pending throttle flush and clear local refs (safe to call on unmount). */
+  const _clearLocalRefs = useCallback(() => {
+    if (flushTimerRef.current !== null) {
+      clearTimeout(flushTimerRef.current);
+      flushTimerRef.current = null;
+    }
+    streamingBufferRef.current = '';
+  }, []);
+
+  /**
+   * Abort in-flight stream without touching React state.
+   * Safe to call from an unmount cleanup effect.
+   */
   const cleanup = useCallback(() => {
     controllerRef.current?.abort();
     controllerRef.current = null;
-  }, []);
+    _clearLocalRefs();
+  }, [_clearLocalRefs]);
 
+  /**
+   * User-triggered cancel: abort stream AND reset all UI state.
+   */
   const cancelStream = useCallback(() => {
     controllerRef.current?.abort();
     controllerRef.current = null;
-    streamingBufferRef.current = '';
+    _clearLocalRefs();
     setLocalStreamingText('');
     setStatusMessage(null);
     setIsLocalStreaming(false);
-    if (localStreamingDisplay) {
-      startTransition(() => dispatch({ type: 'setIsNoLongerWaitingForResponse' }));
+    startTransition(() => dispatch({ type: 'setIsNoLongerWaitingForResponse' }));
+    if (!localStreamingDisplay) {
+      dispatch({ type: 'clearStreamingMessage' });
+      dispatch({ type: 'setStatusMessage', payload: null });
     }
-  }, [dispatch, localStreamingDisplay]);
+  }, [dispatch, localStreamingDisplay, _clearLocalRefs]);
 
   const sendMessage = useCallback(
     async (message: string) => {
@@ -130,17 +152,24 @@ export function useActivityChat({
       controllerRef.current = controller;
 
       // ── Streaming callbacks ────────────────────────────────────────
+      /** Flush the accumulated buffer to React state (at most every 50 ms). */
+      const scheduleFlush = () => {
+        if (flushTimerRef.current !== null) return;
+        flushTimerRef.current = setTimeout(() => {
+          flushTimerRef.current = null;
+          const text = streamingBufferRef.current;
+          if (localStreamingDisplay) {
+            setLocalStreamingText(text);
+          } else {
+            dispatch({ type: 'setStreamingMessage', payload: text });
+          }
+        }, 50);
+      };
+
       const handleChunk = (chunk: { content?: string }) => {
         if (!chunk.content) return;
         streamingBufferRef.current += chunk.content;
-        if (localStreamingDisplay) {
-          // Fast-path: update only local state, skip context dispatch.
-          setLocalStreamingText(streamingBufferRef.current);
-        } else {
-          // Cross-component path: push to context so sibling components
-          // (e.g. ActivityChatMessageBox) can show live progress.
-          dispatch({ type: 'setStreamingMessage', payload: streamingBufferRef.current });
-        }
+        scheduleFlush();
       };
 
       const handleStatus = (status: { aichat_uuid?: string; message?: string }) => {
@@ -158,8 +187,14 @@ export function useActivityChat({
           startTransition(() => dispatch({ type: 'setAichat_uuid', payload: final.aichat_uuid ?? null }));
         }
 
-        // Commit the final AI message to the shared message list.
-        const finalMessage = final.content || streamingBufferRef.current;
+        // Cancel any pending throttle flush and commit the full final text immediately.
+        if (flushTimerRef.current !== null) {
+          clearTimeout(flushTimerRef.current);
+          flushTimerRef.current = null;
+        }
+
+        // Backward compat: backend may send `content` or legacy `message` key.
+        const finalMessage = final.content ?? (final as any).message ?? streamingBufferRef.current;
         dispatch({
           type: 'addMessage',
           payload: { sender: 'ai', message: finalMessage } as AIMessage,
@@ -186,6 +221,12 @@ export function useActivityChat({
           type: 'setError',
           payload: { isError: true, status: errorStatus, error_code: error.error_code, error_message: error.error || 'Streaming failed' },
         });
+
+        // Cancel any pending throttle flush.
+        if (flushTimerRef.current !== null) {
+          clearTimeout(flushTimerRef.current);
+          flushTimerRef.current = null;
+        }
 
         streamingBufferRef.current = '';
         setLocalStreamingText('');
