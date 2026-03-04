@@ -37,7 +37,8 @@ export type BaseChatAction =
   | { type: 'setIsWaitingForResponse' }
   | { type: 'setIsNoLongerWaitingForResponse' }
   | { type: 'setChatInputValue'; payload: string }
-  | { type: 'setError'; payload: AIError };
+  | { type: 'setError'; payload: AIError }
+  | { type: 'resetSession' };
 
 export const BASE_CHAT_INITIAL_STATE: BaseChatState = {
   messages: [],
@@ -59,6 +60,7 @@ const BASE_ACTION_TYPES = new Set<string>([
   'setIsNoLongerWaitingForResponse',
   'setChatInputValue',
   'setError',
+  'resetSession',
 ]);
 
 function baseReducer(state: BaseChatState, action: BaseChatAction): BaseChatState {
@@ -89,6 +91,9 @@ function baseReducer(state: BaseChatState, action: BaseChatAction): BaseChatStat
     }
     case 'setError': {
       return { ...state, error: action.payload };
+    }
+    case 'resetSession': {
+      return { ...state, messages: [], aichat_uuid: null, isWaitingForResponse: false, error: INITIAL_AI_ERROR, chatInputValue: '' };
     }
     default: {
       return state;

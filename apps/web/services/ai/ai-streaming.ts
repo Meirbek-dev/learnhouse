@@ -13,13 +13,83 @@ interface AIStreamChunk {
   type: 'status' | 'chunk' | 'final' | 'error';
   /** Session UUID returned by the backend on the first status event. */
   aichat_uuid?: string;
-  status?: string;
+  /** Status string on status events (e.g. 'processing') or HTTP status code on error events (e.g. 404, 503). */
+  status?: string | number;
   message?: string;
   content?: string;
   chunk_id?: number;
   total_chunks?: number;
   error?: string;
   error_code?: string;
+}
+
+interface SSECallbacks {
+  onChunk?: (chunk: AIStreamChunk) => void;
+  onStatus?: (chunk: AIStreamChunk) => void;
+  onComplete?: (chunk: AIStreamChunk) => void;
+  onError?: (chunk: AIStreamChunk) => void;
+}
+
+/**
+ * Shared SSE stream reader.
+ * Handles buffer management, event dispatch, and abort for both
+ * `startActivityAIChatSessionStream` and `sendActivityAIChatMessageStream`.
+ */
+async function readSSEStream(response: Response, callbacks: SSECallbacks, signal?: AbortSignal): Promise<void> {
+  if (!response.body) throw new Error('Response body is null');
+  const { onChunk, onStatus, onComplete, onError } = callbacks;
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let accumulatedContent = '';
+  let completed = false;
+
+  while (true) {
+    if (signal?.aborted) {
+      reader.cancel();
+      break;
+    }
+
+    const { done, value } = await reader.read();
+
+    if (done) {
+      if (!completed) {
+        onComplete?.({ type: 'final', content: accumulatedContent });
+        completed = true;
+      }
+      break;
+    }
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() ?? '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      try {
+        const chunk: AIStreamChunk = JSON.parse(line.slice(6));
+        switch (chunk.type) {
+          case 'status':
+            onStatus?.(chunk);
+            break;
+          case 'chunk':
+            if (chunk.content) accumulatedContent += chunk.content;
+            onChunk?.(chunk);
+            break;
+          case 'final':
+            completed = true;
+            onComplete?.(chunk);
+            break;
+          case 'error':
+            completed = true;
+            onError?.(chunk);
+            break;
+        }
+      } catch {
+        console.error('Failed to parse SSE chunk:', line);
+      }
+    }
+  }
 }
 
 /**
@@ -62,90 +132,13 @@ export async function startActivityAIChatSessionStream(
   try {
     const data = { message, activity_uuid };
     const requestInit = RequestBodyWithAuthHeader('POST', data, null, access_token);
-    // Attach abort signal if provided
     if (signal) requestInit.signal = signal;
     const response = await fetch(`${getAPIUrl()}ai/start/activity_chat_session_stream`, requestInit);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    if (!response.body) {
-      throw new Error('Response body is null');
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    // Accumulate chunk content locally so we can finalize the
-    // response even if server doesn't send an explicit 'final' event.
-    let accumulatedContent = '';
-    let completed = false;
-
-    while (true) {
-      // Stop if aborted
-      if (signal?.aborted) {
-        reader.cancel();
-        break;
-      }
-
-      const { done, value } = await reader.read();
-
-      if (done) {
-        // If stream ended without a 'final' event, finalize with
-        // whatever we have accumulated so the UI doesn't stay stuck.
-        if (!completed) {
-          onComplete?.({ type: 'final', content: accumulatedContent });
-          completed = true;
-        }
-        break;
-      }
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-
-      // Keep incomplete line in buffer
-      buffer = lines.pop() || '';
-
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          try {
-            const chunk: AIStreamChunk = JSON.parse(line.slice(6));
-
-            switch (chunk.type) {
-              case 'status': {
-                onStatus?.(chunk);
-                break;
-              }
-              case 'chunk': {
-                if (chunk.content) accumulatedContent += chunk.content;
-                onChunk?.(chunk);
-                break;
-              }
-              case 'final': {
-                completed = true;
-                onComplete?.(chunk);
-                break;
-              }
-              case 'error': {
-                completed = true;
-                onError?.(chunk);
-                break;
-              }
-            }
-          } catch (error) {
-            console.error('Failed to parse SSE chunk:', error);
-          }
-        }
-      }
-    }
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    await readSSEStream(response, { onChunk, onStatus, onComplete, onError }, signal);
   } catch (error) {
     console.error('AI streaming failed:', error);
-    onError?.({
-      type: 'error',
-      error: error instanceof Error ? error.message : 'Unknown error',
-      error_code: 'STREAM_ERROR',
-    });
+    onError?.({ type: 'error', error: error instanceof Error ? error.message : 'Unknown error', error_code: 'STREAM_ERROR' });
   }
 }
 
@@ -165,82 +158,10 @@ export async function sendActivityAIChatMessageStream(
     const requestInit = RequestBodyWithAuthHeader('POST', data, null, access_token);
     if (signal) requestInit.signal = signal;
     const response = await fetch(`${getAPIUrl()}ai/send/activity_chat_message_stream`, requestInit);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    if (!response.body) {
-      throw new Error('Response body is null');
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    // Accumulate chunk content locally so we can finalize the
-    // response even if server doesn't send an explicit 'final' event.
-    let accumulatedContent = '';
-    let completed = false;
-
-    while (true) {
-      if (signal?.aborted) {
-        reader.cancel();
-        break;
-      }
-
-      const { done, value } = await reader.read();
-
-      if (done) {
-        if (!completed) {
-          onComplete?.({ type: 'final', content: accumulatedContent });
-          completed = true;
-        }
-        break;
-      }
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-
-      buffer = lines.pop() || '';
-
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          try {
-            const chunk: AIStreamChunk = JSON.parse(line.slice(6));
-
-            switch (chunk.type) {
-              case 'status': {
-                onStatus?.(chunk);
-                break;
-              }
-              case 'chunk': {
-                if (chunk.content) accumulatedContent += chunk.content;
-                onChunk?.(chunk);
-                break;
-              }
-              case 'final': {
-                completed = true;
-                onComplete?.(chunk);
-                break;
-              }
-              case 'error': {
-                completed = true;
-                onError?.(chunk);
-                break;
-              }
-            }
-          } catch (error) {
-            console.error('Failed to parse SSE chunk:', error);
-          }
-        }
-      }
-    }
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    await readSSEStream(response, { onChunk, onStatus, onComplete, onError }, signal);
   } catch (error) {
     console.error('AI streaming failed:', error);
-    onError?.({
-      type: 'error',
-      error: error instanceof Error ? error.message : 'Unknown error',
-      error_code: 'STREAM_ERROR',
-    });
+    onError?.({ type: 'error', error: error instanceof Error ? error.message : 'Unknown error', error_code: 'STREAM_ERROR' });
   }
 }

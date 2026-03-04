@@ -61,6 +61,7 @@ import { useRouter } from 'next/navigation';
 import Link from '@components/ui/AppLink';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
+import AIChatBotProvider from '@components/Contexts/AI/AIChatBotContext';
 
 // Lazy load heavy components
 const Canva = lazy(() => import('@components/Objects/Activities/DynamicCanva/DynamicCanva'));
@@ -72,7 +73,6 @@ const AssignmentStudentActivity = lazy(
 const ExamActivity = lazy(() => import('@components/Activities/ExamActivity/ExamActivity'));
 const CodeChallengeActivity = lazy(() => import('@components/Objects/Activities/CodeChallenge/CodeChallengeActivity'));
 const AIActivityAsk = lazy(() => import('@components/Objects/Activities/AI/AIActivityAsk'));
-const AIChatBotProvider = lazy(() => import('@components/Contexts/AI/AIChatBotContext'));
 
 // Loading fallback component
 const LoadingFallback = () => (

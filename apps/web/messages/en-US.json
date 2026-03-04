@@ -5743,11 +5743,13 @@
       "collectionOfCourses": "Collections of courses from {orgName}",
       "newCollection": "New Collection",
       "noContent": "No collections yet",
+      "noContentDescription": "Create collections to organize your courses and content",
       "noContentUserAdmin": "Create collections to group courses together",
       "title": "Collections"
     },
     "Courses": {
       "noContent": "No courses yet",
+      "noContentDescription": "Create courses to start sharing learning content with your students",
       "noContentUserAdmin": "Create courses to add content",
       "title": "Courses"
     }

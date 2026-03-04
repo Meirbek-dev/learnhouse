@@ -14,6 +14,8 @@ export interface AIError {
   isError: boolean;
   status: number;
   error_message: string;
+  /** Machine-readable code from the backend SSE error event (e.g. 'AI_TIMEOUT_ERROR'). */
+  error_code?: string;
 }
 
 export const INITIAL_AI_ERROR: AIError = {

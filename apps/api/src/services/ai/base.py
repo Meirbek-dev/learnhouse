@@ -4,6 +4,7 @@ import logging
 import re
 import threading
 import warnings
+from collections import deque
 from collections.abc import Sequence
 from dataclasses import dataclass
 from threading import Lock
@@ -95,25 +96,24 @@ class WindowedChatMessageHistory(BaseChatMessageHistory):
         window_size: int,
     ) -> None:
         self._base_history = base_history
-        self._messages: list[BaseMessage] = list(windowed_messages)
+        self._messages: deque[BaseMessage] = deque(windowed_messages, maxlen=window_size)
         self._window_size = window_size
         self._lock = threading.Lock()
 
     @property
     def messages(self) -> list[BaseMessage]:
-        return self._messages
+        return list(self._messages)
 
     def add_messages(self, messages: Sequence[BaseMessage]) -> None:
         if self._base_history:
             self._base_history.add_messages(messages)
         with self._lock:
-            for message in messages:
-                self._messages = ([*self._messages, message])[-self._window_size :]
+            self._messages.extend(messages)  # deque handles maxlen automatically
 
     def clear(self) -> None:
         if self._base_history:
             self._base_history.clear()
-        self._messages = []
+        self._messages.clear()
 
 
 class OptimizedTextSplitter:
@@ -388,15 +388,12 @@ class FastAIService:
     ) -> CompiledStateGraph | None:
         """Compile a ReAct agent using langgraph.prebuilt.create_react_agent."""
         try:
-            # get_llm is keyed only on model identity; bind max_tokens at call time
-            # so we don't pollute the LRU cache with per-request variants.
-            base_llm = get_llm(llm_model_name, streaming=True)
-            if not base_llm:
+            llm = get_llm(llm_model_name, streaming=True, max_tokens=max_tokens)
+            if not llm:
                 raise AIProcessingError(
                     f"LLM model {llm_model_name} not available",
                     details={"model_name": llm_model_name},
                 )
-            llm = base_llm.bind(max_tokens=max_tokens)
 
             retriever = vector_store.as_retriever(
                 search_type="similarity",

@@ -11,8 +11,6 @@ from typing import Any
 
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.messages import AIMessage, HumanMessage
-from langgraph.graph.state import CompiledStateGraph
-
 from config.config import get_platform_config
 from src.services.ai.exceptions import (
     AIProcessingError,
@@ -49,7 +47,6 @@ async def ask_ai_stream(
     embedding_model_name: str,
     openai_model_name: str,
     session_id: str = "default",
-    agent_executor: CompiledStateGraph | None = None,
     cancel_event: asyncio.Event | None = None,
     collection_name: str | None = None,
     max_tokens: int = 4000,
@@ -69,7 +66,6 @@ async def ask_ai_stream(
         embedding_model_name: Embedding model to use
         openai_model_name: LLM model to use
         session_id: Session identifier
-        agent_executor: Pre-created agent (optional)
         cancel_event: Event to signal cancellation
         collection_name: Collection name for vector store
 
@@ -92,19 +88,17 @@ async def ask_ai_stream(
         raise AIProcessingError(error_msg)
 
     try:
-        # If no agent provided, create one using shared setup
-        if agent_executor is None:
-            from src.services.ai.base import prepare_agent
+        from src.services.ai.base import prepare_agent
 
-            agent_executor = await prepare_agent(
-                text_reference=text_reference,
-                message_for_the_prompt=message_for_the_prompt,
-                embedding_model_name=embedding_model_name,
-                openai_model_name=openai_model_name,
-                collection_name=collection_name,
-                max_tokens=max_tokens,
-                documents=documents,
-            )
+        agent_executor = await prepare_agent(
+            text_reference=text_reference,
+            message_for_the_prompt=message_for_the_prompt,
+            embedding_model_name=embedding_model_name,
+            openai_model_name=openai_model_name,
+            collection_name=collection_name,
+            max_tokens=max_tokens,
+            documents=documents,
+        )
 
         # Convert message history to LangChain v1 format
         history_messages = convert_history_to_messages(message_history)

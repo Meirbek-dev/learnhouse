@@ -45,7 +45,7 @@ def _rate_limit_key(request: Request) -> str:
                 token = parts[1]
                 return f"token:{hashlib.sha256(token.encode()).hexdigest()}"
             return f"auth:{hashlib.sha256(auth.encode()).hexdigest()}"
-        except IndexError, AttributeError:
+        except (IndexError, AttributeError):
             pass
 
     # Fallback to remote address
@@ -56,6 +56,19 @@ def _rate_limit_key(request: Request) -> str:
 limiter = Limiter(key_func=_rate_limit_key)
 
 router = APIRouter()
+
+
+async def _monitor_disconnect(request: Request, cancel_event: asyncio.Event, label: str = "stream") -> None:
+    """Poll for client disconnect and set cancel_event when detected."""
+    try:
+        while not cancel_event.is_set():
+            if await request.is_disconnected():
+                cancel_event.set()
+                logger.info("Disconnect monitor (%s): client gone, cancelling stream", label)
+                return
+            await asyncio.sleep(0.1)
+    except asyncio.CancelledError:
+        pass
 
 
 @router.post(
@@ -253,21 +266,10 @@ async def api_ai_send_activity_chat_message_stream(
     try:
         cancel_event = asyncio.Event()
 
-        async def disconnect_monitor_send() -> None:
-            try:
-                while not cancel_event.is_set():
-                    if await request.is_disconnected():
-                        cancel_event.set()
-                        logger.info(
-                            "Disconnect monitor: client gone, aborting send-message stream"
-                        )
-                        break
-                    await asyncio.sleep(0.5)
-            except asyncio.CancelledError:
-                pass
-
         async def event_generator():
-            monitor_task = asyncio.create_task(disconnect_monitor_send())
+            monitor_task = asyncio.create_task(
+                _monitor_disconnect(request, cancel_event, "send-message")
+            )
             try:
                 async for sse_string in ai_send_activity_chat_message_stream(
                     request,

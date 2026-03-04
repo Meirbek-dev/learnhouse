@@ -13,6 +13,7 @@ from src.db.courses.courses import Course, CourseRead
 from src.db.organization_config import OrganizationConfig
 from src.db.users import PublicUser
 from src.services.ai.base import ask_ai, get_chat_session_history, ChatSessionInfo
+from config.config import get_platform_config
 from src.services.ai.cache_manager import get_ai_cache_manager
 from src.services.ai.exceptions import (
     ActivityNotFoundError,
@@ -93,11 +94,16 @@ async def _get_activity_data(
                 activity_uuid, details={"error": str(e), "type": type(e).__name__}
             ) from e
 
-    # Always fetch org_config fresh — it carries feature flags that must
-    # propagate quickly (e.g. disabling AI should take effect in seconds).
-    org_config = db_session.exec(
-        select(OrganizationConfig).where(OrganizationConfig.org_id == course.org_id)
-    ).first()
+    # Fetch org_config with a short TTL cache — feature flags like AI-enabled
+    # propagate within ~10 s while avoiding a DB round-trip on every message.
+    org_config_cache_key = f"org_config_{course.org_id}"
+    org_config = cache_manager.org_config_cache.get(org_config_cache_key)
+    if org_config is None:
+        org_config = db_session.exec(
+            select(OrganizationConfig).where(OrganizationConfig.org_id == course.org_id)
+        ).first()
+        if org_config:
+            cache_manager.org_config_cache.set(org_config_cache_key, org_config)
 
     if not org_config:
         raise ActivityNotFoundError(

@@ -38,6 +38,12 @@ export interface UseActivityChatOptions {
    * `streamingMessage` field must be kept in sync for display.
    */
   localStreamingDisplay?: boolean;
+  /**
+   * Message shown while waiting for the first response chunk.
+   * Pass a localised string from the call site (e.g. `t('thinking')`).
+   * Defaults to `'Thinking...'` if not provided.
+   */
+  thinkingMessage?: string;
 }
 
 export interface UseActivityChatReturn {
@@ -68,6 +74,7 @@ export function useActivityChat({
   chatUuid,
   dispatch,
   localStreamingDisplay = true,
+  thinkingMessage,
 }: UseActivityChatOptions): UseActivityChatReturn {
   const [localStreamingText, setLocalStreamingText] = useState('');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -114,7 +121,7 @@ export function useActivityChat({
       // Reset streaming state.
       streamingBufferRef.current = '';
       setLocalStreamingText('');
-      setStatusMessage('Thinking...');
+      setStatusMessage(thinkingMessage ?? 'Thinking...');
       setIsLocalStreaming(true);
 
       // Cancel any in-flight stream before starting a new one.
@@ -173,10 +180,11 @@ export function useActivityChat({
         startTransition(() => dispatch({ type: 'setIsNoLongerWaitingForResponse' }));
       };
 
-      const handleError = (error: { error?: string }) => {
+      const handleError = (error: { error?: string; error_code?: string; status?: string | number }) => {
+        const errorStatus = typeof error.status === 'number' ? error.status : 500;
         dispatch({
           type: 'setError',
-          payload: { isError: true, status: 500, error_message: error.error || 'Streaming failed' },
+          payload: { isError: true, status: errorStatus, error_code: error.error_code, error_message: error.error || 'Streaming failed' },
         });
 
         streamingBufferRef.current = '';
