@@ -12,9 +12,9 @@
  */
 'use client';
 
-import { createContext, use, useReducer } from 'react';
-import type { Dispatch, ReactNode, Reducer } from 'react';
 import type { AIError, AIMessage } from './AIBaseContext';
+import type { Dispatch, ReactNode, Reducer } from 'react';
+import { createContext, use, useReducer } from 'react';
 import { INITIAL_AI_ERROR } from './AIBaseContext';
 
 // ── Base state shared by all AI chat contexts ────────────────────────────────
@@ -63,26 +63,36 @@ const BASE_ACTION_TYPES = new Set<string>([
 
 function baseReducer(state: BaseChatState, action: BaseChatAction): BaseChatState {
   switch (action.type) {
-    case 'setMessages':
+    case 'setMessages': {
       return { ...state, messages: action.payload };
-    case 'addMessage':
+    }
+    case 'addMessage': {
       return { ...state, messages: [...state.messages, action.payload] };
-    case 'setIsModalOpen':
+    }
+    case 'setIsModalOpen': {
       return { ...state, isModalOpen: true };
-    case 'setIsModalClose':
+    }
+    case 'setIsModalClose': {
       return { ...state, isModalOpen: false };
-    case 'setAichat_uuid':
+    }
+    case 'setAichat_uuid': {
       return { ...state, aichat_uuid: action.payload };
-    case 'setIsWaitingForResponse':
+    }
+    case 'setIsWaitingForResponse': {
       return { ...state, isWaitingForResponse: true };
-    case 'setIsNoLongerWaitingForResponse':
+    }
+    case 'setIsNoLongerWaitingForResponse': {
       return { ...state, isWaitingForResponse: false };
-    case 'setChatInputValue':
+    }
+    case 'setChatInputValue': {
       return { ...state, chatInputValue: action.payload };
-    case 'setError':
+    }
+    case 'setError': {
       return { ...state, error: action.payload };
-    default:
+    }
+    default: {
       return state;
+    }
   }
 }
 
@@ -97,8 +107,11 @@ function baseReducer(state: BaseChatState, action: BaseChatAction): BaseChatStat
  * partial overrides of base state fields (e.g. `{ messages: [] }`) — those
  * patches are merged into the full state by the combined reducer.
  */
-export type ExtraReducer<ExtraState extends object, ExtraAction extends { type: string }, FullState extends BaseChatState & ExtraState = BaseChatState & ExtraState> =
-  (state: FullState, action: ExtraAction) => ExtraState & Partial<BaseChatState>;
+export type ExtraReducer<
+  ExtraState extends object,
+  ExtraAction extends { type: string },
+  FullState extends BaseChatState & ExtraState = BaseChatState & ExtraState,
+> = (state: FullState, action: ExtraAction) => ExtraState & Partial<BaseChatState>;
 
 /**
  * Creates a typed context pair (StateContext + DispatchContext) with a
@@ -111,10 +124,7 @@ export type ExtraReducer<ExtraState extends object, ExtraAction extends { type: 
  *   return partial base-state overrides (e.g. `{ messages: [] }`) alongside
  *   the extra-state fields.
  */
-export function createAIChatContext<
-  ExtraState extends object,
-  ExtraAction extends { type: string },
->(
+export function createAIChatContext<ExtraState extends object, ExtraAction extends { type: string }>(
   extraInitialState: ExtraState,
   extraReducer: ExtraReducer<ExtraState, ExtraAction>,
 ) {

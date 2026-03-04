@@ -8,7 +8,6 @@
 
 import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { useCallback, useRef, useState } from 'react';
 
 interface AIStreamChunk {
   type: 'status' | 'chunk' | 'final' | 'error';
@@ -245,4 +244,3 @@ export async function sendActivityAIChatMessageStream(
     });
   }
 }
-

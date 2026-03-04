@@ -107,11 +107,7 @@ const CourseResultsSkeleton = () => (
   </div>
 );
 
-export const SearchBar: FC<SearchBarProps> = ({
-  className = '',
-  isMobile = false,
-  showSearchSuggestions = false,
-}) => {
+export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false, showSearchSuggestions = false }) => {
   const t = useTranslations('Components.SearchBar');
   const org = useOrg() as any;
   const orgslug = org?.slug;

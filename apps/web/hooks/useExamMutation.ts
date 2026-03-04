@@ -1,9 +1,9 @@
 'use client';
 
+import { calculateExponentialBackoffDelay } from '@/lib/retry';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { calculateExponentialBackoffDelay } from '@/lib/retry';
 
 export interface MutationOptions<TData, TVariables> {
   mutationFn: (variables: TVariables) => Promise<TData>;

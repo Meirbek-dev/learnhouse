@@ -13,8 +13,8 @@ import Google from 'next-auth/providers/google';
 import type { JWT } from 'next-auth/jwt';
 import { createHash } from 'node:crypto';
 import { cookies } from 'next/headers';
-import NextAuth from 'next-auth';
 import { LRUCache } from 'lru-cache';
+import NextAuth from 'next-auth';
 
 // ─── Session Cache Types ──────────────────────────────────────────────────────
 

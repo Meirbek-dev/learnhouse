@@ -2,9 +2,9 @@ import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { ChevronDown, ChevronRight, Palette } from 'lucide-react';
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
-import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { twMerge } from 'tailwind-merge';
+import dynamic from 'next/dynamic';
 import type { FC } from 'react';
 
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false, loading: () => null });

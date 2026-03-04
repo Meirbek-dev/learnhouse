@@ -2,8 +2,8 @@
 
 import { sendActivityAIChatMessageStream, startActivityAIChatSessionStream } from '@services/ai/ai-streaming';
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
-import type { AIMessage } from '@components/Contexts/AI/AIBaseContext';
 import { INITIAL_AI_ERROR } from '@components/Contexts/AI/AIBaseContext';
+import type { AIMessage } from '@components/Contexts/AI/AIBaseContext';
 
 // Minimal dispatcher shape — compatible with both AIChatBotContext and
 // any other context that shares the same action vocabulary.
@@ -219,8 +219,8 @@ export function useActivityChat({
             controller.signal,
           );
         }
-      } catch (err) {
-        handleError({ error: err instanceof Error ? err.message : 'Unknown error' });
+      } catch (error) {
+        handleError({ error: error instanceof Error ? error.message : 'Unknown error' });
       }
     },
     [accessToken, activityUuid, dispatch, localStreamingDisplay],

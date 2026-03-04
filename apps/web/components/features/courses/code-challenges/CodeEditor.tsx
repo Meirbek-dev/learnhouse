@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { OnChange, OnMount } from '@monaco-editor/react';
-import dynamic from 'next/dynamic';
 import { useTheme } from 'next-themes';
+import dynamic from 'next/dynamic';
 
 import { cn } from '@/lib/utils';
 

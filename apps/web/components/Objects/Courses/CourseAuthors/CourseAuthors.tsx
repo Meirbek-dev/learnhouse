@@ -322,8 +322,9 @@ const UpdatesListView = () => {
     can(Actions.MANAGE, Resources.COURSE, Scopes.OWN) || can(Actions.MANAGE, Resources.COURSE, Scopes.ORG);
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const { data: updates } = useSWR(`${getAPIUrl()}courses/${course?.courseStructure?.course_uuid}/updates`, (url: string) =>
-    swrFetcher(url, access_token),
+  const { data: updates } = useSWR(
+    `${getAPIUrl()}courses/${course?.courseStructure?.course_uuid}/updates`,
+    (url: string) => swrFetcher(url, access_token),
   );
   const t = useTranslations('Courses.CourseAuthors');
   const locale = useDateFnsLocale();

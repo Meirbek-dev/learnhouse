@@ -1,7 +1,7 @@
 'use client';
 
-import { createAIChatContext } from '@components/Contexts/AI/createAIChatContext';
 import type { BaseChatState, BaseChatAction, ExtraReducer } from '@components/Contexts/AI/createAIChatContext';
+import { createAIChatContext } from '@components/Contexts/AI/createAIChatContext';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -25,19 +25,25 @@ type AIEditorExtraAction =
 
 const editorExtraReducer: ExtraReducer<AIEditorExtraState, AIEditorExtraAction> = (state, action) => {
   switch (action.type) {
-    case 'setSelectedTool':
+    case 'setSelectedTool': {
       // Reset the message history whenever the user switches tools.
       return { ...state, selectedTool: action.payload, messages: [] };
-    case 'setIsFeedbackModalOpen':
+    }
+    case 'setIsFeedbackModalOpen': {
       return { ...state, isFeedbackModalOpen: true };
-    case 'setIsFeedbackModalClose':
+    }
+    case 'setIsFeedbackModalClose': {
       return { ...state, isFeedbackModalOpen: false };
-    case 'setIsUserInputEnabled':
+    }
+    case 'setIsUserInputEnabled': {
       return { ...state, isUserInputEnabled: action.payload };
-    case 'setCritisizeScope':
+    }
+    case 'setCritisizeScope': {
       return { ...state, critisizeScope: action.payload };
-    default:
+    }
+    default: {
       return state;
+    }
   }
 };
 

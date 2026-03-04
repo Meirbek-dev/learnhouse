@@ -7,18 +7,18 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 // for typing the session prop without exporting internal types
 export type PlatformSession = ReturnType<typeof usePlatformSession>;
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
-import { useEffect, useRef } from 'react';
 import platformLogoLight from '@public/platform_logo_light.svg';
+import { useActivityChat } from '@/hooks/useActivityChat';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { ScrollArea } from '@components/ui/scroll-area';
 import { Card, CardContent } from '@components/ui/card';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { useActivityChat } from '@/hooks/useActivityChat';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
+import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
@@ -245,9 +245,7 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
             </div>
 
             {/* Status Message */}
-            {activeStatusMessage && (
-              <p className="mb-2 text-xs text-white/60">{activeStatusMessage}</p>
-            )}
+            {activeStatusMessage && <p className="mb-2 text-xs text-white/60">{activeStatusMessage}</p>}
 
             {/* Messages Area */}
             <div className="mb-3 flex-1 overflow-hidden">

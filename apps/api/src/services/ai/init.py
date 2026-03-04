@@ -49,9 +49,7 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
 
 
 @lru_cache(maxsize=4)
-def get_llm(
-    model_name: str, streaming: bool = True
-) -> ChatOpenAI | None:
+def get_llm(model_name: str, streaming: bool = True) -> ChatOpenAI | None:
     """Get cached LLM instance with OpenAI configuration."""
     try:
         config = get_platform_config()

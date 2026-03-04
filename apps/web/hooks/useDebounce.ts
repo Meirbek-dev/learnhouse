@@ -18,7 +18,10 @@ export function useDebouncedValue<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-export function useDebouncedCallback<T extends AnyFunction>(callback: T, delay: number): (...args: Parameters<T>) => void {
+export function useDebouncedCallback<T extends AnyFunction>(
+  callback: T,
+  delay: number,
+): (...args: Parameters<T>) => void {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const callbackRef = useRef<T>(callback);
 

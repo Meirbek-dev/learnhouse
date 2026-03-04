@@ -241,9 +241,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
           {/* Center - Search */}
           <div className="hidden max-w-2xl flex-1 justify-center px-8 md:flex">
             <div className="w-full max-w-lg">
-              <SearchBar
-                className="w-full"
-              />
+              <SearchBar className="w-full" />
             </div>
           </div>
 

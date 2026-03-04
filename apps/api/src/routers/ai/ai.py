@@ -172,7 +172,9 @@ async def api_ai_start_activity_chat_session_stream(
                 while not cancel_event.is_set():
                     if await request.is_disconnected():
                         cancel_event.set()
-                        logger.info("Disconnect monitor: client gone, aborting start-session stream")
+                        logger.info(
+                            "Disconnect monitor: client gone, aborting start-session stream"
+                        )
                         break
                     await asyncio.sleep(0.5)
             except asyncio.CancelledError:
@@ -194,7 +196,11 @@ async def api_ai_start_activity_chat_session_stream(
             except Exception as e:
                 logger.exception(f"Error in streaming generator: {e}")
                 yield format_sse_message(
-                    {"type": "error", "error": "Внутренняя ошибка.", "error_code": "STREAM_ERROR"}
+                    {
+                        "type": "error",
+                        "error": "Внутренняя ошибка.",
+                        "error_code": "STREAM_ERROR",
+                    }
                 )
             finally:
                 cancel_event.set()
@@ -252,7 +258,9 @@ async def api_ai_send_activity_chat_message_stream(
                 while not cancel_event.is_set():
                     if await request.is_disconnected():
                         cancel_event.set()
-                        logger.info("Disconnect monitor: client gone, aborting send-message stream")
+                        logger.info(
+                            "Disconnect monitor: client gone, aborting send-message stream"
+                        )
                         break
                     await asyncio.sleep(0.5)
             except asyncio.CancelledError:
@@ -274,7 +282,11 @@ async def api_ai_send_activity_chat_message_stream(
             except Exception as e:
                 logger.exception(f"Error in streaming generator: {e}")
                 yield format_sse_message(
-                    {"type": "error", "error": "Внутренняя ошибка.", "error_code": "STREAM_ERROR"}
+                    {
+                        "type": "error",
+                        "error": "Внутренняя ошибка.",
+                        "error_code": "STREAM_ERROR",
+                    }
                 )
             finally:
                 cancel_event.set()

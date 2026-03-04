@@ -32,13 +32,12 @@ import {
   getFinalGrade,
   submitAssignmentForGrading,
 } from '@services/courses/assignments';
-import { CourseProvider } from '@components/Contexts/CourseContext';
-import type { Activity, Chapter, CourseStructure } from '@components/Contexts/CourseContext';
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity';
 import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar';
+import type { Activity, Chapter, CourseStructure } from '@components/Contexts/CourseContext';
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
@@ -50,6 +49,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import CourseEndView from '@components/Pages/Activity/CourseEndView';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
+import { CourseProvider } from '@components/Contexts/CourseContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';

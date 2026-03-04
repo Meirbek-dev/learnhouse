@@ -168,7 +168,11 @@ async def ask_ai_stream(
                     # so the user sees meaningful progress in their language (Russian).
                     if "tool" in node_name.lower() and not content:
                         yield format_sse_message(
-                            {"type": "status", "status": "reading_context", "aichat_uuid": session_id}
+                            {
+                                "type": "status",
+                                "status": "reading_context",
+                                "aichat_uuid": session_id,
+                            }
                         )
                         continue
 
@@ -242,14 +246,20 @@ async def ask_ai_stream(
             )
             raise AITimeoutError(60, details={"question_length": len(question)}) from e
 
-    except (AIProcessingError, VectorStoreError, AITimeoutError):
+    except AIProcessingError, VectorStoreError, AITimeoutError:
         raise
     except Exception as e:
         # Log full details server-side; send only a generic message to the client
         # to avoid leaking internal paths, stack frames, or credentials.
-        logger.exception("Unexpected error during AI streaming (session=%s): %s", session_id, e)
+        logger.exception(
+            "Unexpected error during AI streaming (session=%s): %s", session_id, e
+        )
         yield format_sse_message(
-            {"type": "error", "error": "Произошла внутренняя ошибка. Пожалуйста, попробуйте снова.", "error_code": "PROCESSING_ERROR"}
+            {
+                "type": "error",
+                "error": "Произошла внутренняя ошибка. Пожалуйста, попробуйте снова.",
+                "error_code": "PROCESSING_ERROR",
+            }
         )
         raise AIProcessingError(
             f"Unexpected error during AI streaming: {e!s}",

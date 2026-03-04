@@ -112,7 +112,9 @@ class ChromaDBPool:
                 import chromadb
                 from chromadb.config import Settings
 
-                persist_path = os.environ.get("CHROMADB_PERSIST_PATH", "./chromadb_data")
+                persist_path = os.environ.get(
+                    "CHROMADB_PERSIST_PATH", "./chromadb_data"
+                )
                 settings = Settings(
                     anonymized_telemetry=False,
                     allow_reset=True,

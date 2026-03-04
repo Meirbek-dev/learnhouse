@@ -2,9 +2,9 @@
 
 import UserAvatar from '@components/Objects/UserAvatar';
 import { Button } from '@/components/ui/button';
-import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { Send } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
 
 const RichTextEditor = dynamic(() => import('./rich-text-editor'), {

@@ -119,7 +119,9 @@ async def _prepare_context(
     content_task = asyncio.to_thread(
         structure_activity_content_by_type, activity.content
     )
-    chat_session_task = asyncio.to_thread(get_chat_session_history, aichat_uuid, user_id)
+    chat_session_task = asyncio.to_thread(
+        get_chat_session_history, aichat_uuid, user_id
+    )
 
     structured, chat_session = await asyncio.gather(content_task, chat_session_task)
 
@@ -195,7 +197,9 @@ async def _handle_ai_chat(
     """Shared logic for non-streaming start/send AI chat."""
     trace_start = time.perf_counter()
 
-    ctx = await _prepare_context(activity_uuid, aichat_uuid, db_session, user_id=user_id)
+    ctx = await _prepare_context(
+        activity_uuid, aichat_uuid, db_session, user_id=user_id
+    )
 
     ai_process_start = time.perf_counter()
     response = await ask_ai(

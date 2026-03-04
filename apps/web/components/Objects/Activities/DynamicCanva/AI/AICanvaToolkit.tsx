@@ -2,9 +2,9 @@ import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AICh
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { BookOpen, FormInput, Languages } from 'lucide-react';
+import { useActivityChat } from '@/hooks/useActivityChat';
 import platformLogo from '@public/platform_logo.svg';
 import { BubbleMenu } from '@tiptap/react/menus';
-import { useActivityChat } from '@/hooks/useActivityChat';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
@@ -25,58 +25,58 @@ const AICanvaToolkit = (props: AICanvaToolkitProps) => {
   return (
     <>
       <BubbleMenu
-          className="w-fit"
-          editor={props.editor}
-          shouldShow={({ editor }) => {
-            // Only show the bubble menu if text is selected
-            return editor.isActive('text') && !editor.state.selection.empty;
+        className="w-fit"
+        editor={props.editor}
+        shouldShow={({ editor }) => {
+          // Only show the bubble menu if text is selected
+          return editor.isActive('text') && !editor.state.selection.empty;
+        }}
+      >
+        <div
+          style={{
+            background:
+              'linear-gradient(0deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.25) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.2) 0%, rgba(0, 0, 0, 0) 100%), rgba(2, 1, 25, 0.98)',
           }}
+          className="flex h-auto w-max cursor-pointer items-center space-x-3 rounded-xl px-3 py-2 text-white shadow-2xl ring-1 ring-white/10 backdrop-blur-sm"
         >
-          <div
-            style={{
-              background:
-                'linear-gradient(0deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.25) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.2) 0%, rgba(0, 0, 0, 0) 100%), rgba(2, 1, 25, 0.98)',
-            }}
-            className="flex h-auto w-max cursor-pointer items-center space-x-3 rounded-xl px-3 py-2 text-white shadow-2xl ring-1 ring-white/10 backdrop-blur-sm"
-          >
-            <div className="flex items-center space-x-2 font-bold text-white/90">
-              <Image
-                className="rounded-lg ring-1 ring-white/10"
-                width={22}
-                src={platformLogo}
-                alt={t('aiIconAlt')}
-                style={{ height: 'auto' }}
-              />
-              <div className="text-sm">{t('aiTitle')}</div>
-            </div>
-            <div
-              className="flex h-4 w-px bg-white/20"
-              aria-hidden="true"
+          <div className="flex items-center space-x-2 font-bold text-white/90">
+            <Image
+              className="rounded-lg ring-1 ring-white/10"
+              width={22}
+              src={platformLogo}
+              alt={t('aiIconAlt')}
+              style={{ height: 'auto' }}
             />
-            <div className="flex space-x-2">
-              <AIActionButton
-                editor={props.editor}
-                activity={props.activity}
-                label="Explain"
-              />
-              <AIActionButton
-                editor={props.editor}
-                activity={props.activity}
-                label="Summarize"
-              />
-              <AIActionButton
-                editor={props.editor}
-                activity={props.activity}
-                label="Translate"
-              />
-              <AIActionButton
-                editor={props.editor}
-                activity={props.activity}
-                label="Examples"
-              />
-            </div>
+            <div className="text-sm">{t('aiTitle')}</div>
           </div>
-        </BubbleMenu>
+          <div
+            className="flex h-4 w-px bg-white/20"
+            aria-hidden="true"
+          />
+          <div className="flex space-x-2">
+            <AIActionButton
+              editor={props.editor}
+              activity={props.activity}
+              label="Explain"
+            />
+            <AIActionButton
+              editor={props.editor}
+              activity={props.activity}
+              label="Summarize"
+            />
+            <AIActionButton
+              editor={props.editor}
+              activity={props.activity}
+              label="Translate"
+            />
+            <AIActionButton
+              editor={props.editor}
+              activity={props.activity}
+              label="Examples"
+            />
+          </div>
+        </div>
+      </BubbleMenu>
     </>
   );
 };

@@ -2,7 +2,6 @@
 
 import { ArrowBigDown, ArrowBigUp, Clock, Edit, Reply, Send, Trash2 } from 'lucide-react';
 import { PermissionTooltip } from '@/components/Utils/PermissionTooltip';
-import dynamic from 'next/dynamic';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import RichContentRenderer from './rich-content-renderer';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -11,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import DiscussionReply from './discussion-reply';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import type React from 'react';

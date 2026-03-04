@@ -2,10 +2,10 @@ import { AlignCenter, AlignLeft, AlignRight, ArrowRight, ChevronDown, Link, Pale
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
-import dynamic from 'next/dynamic';
 import type { ChangeEvent, FC } from 'react';
 import { useTranslations } from 'next-intl';
 import { twMerge } from 'tailwind-merge';
+import dynamic from 'next/dynamic';
 
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false, loading: () => null });
 

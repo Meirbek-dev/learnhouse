@@ -37,7 +37,8 @@ except Exception as _e:
     _ChromaCls = None  # type: ignore[assignment,misc]
     _CHROMA_IMPORT_ERROR = _e
     logging.getLogger(__name__).warning(
-        "langchain_chroma unavailable, vector store will use InMemoryVectorStore fallback: %s", _e
+        "langchain_chroma unavailable, vector store will use InMemoryVectorStore fallback: %s",
+        _e,
     )
 
 from config.config import get_platform_config
@@ -243,7 +244,9 @@ class FastAIService:
                 "No valid chunks created from documents",
                 details={"document_count": len(documents)},
             )
-        logger.info("Produced %d chunks from %d documents", len(all_chunks), len(documents))
+        logger.info(
+            "Produced %d chunks from %d documents", len(all_chunks), len(documents)
+        )
         return all_chunks
 
     async def _create_vector_store(
@@ -261,7 +264,10 @@ class FastAIService:
             # chromadb/pydantic warning on every cold-path call).
             chroma_cls: "type[Chroma] | None" = _ChromaCls
             if chroma_cls is None and _CHROMA_IMPORT_ERROR is not None:
-                logger.debug("Chroma unavailable (import error at startup): %s", _CHROMA_IMPORT_ERROR)
+                logger.debug(
+                    "Chroma unavailable (import error at startup): %s",
+                    _CHROMA_IMPORT_ERROR,
+                )
 
             # lru_cache handles caching — call directly
             embedding_function = get_embedding_function(embedding_model_name)
@@ -325,7 +331,7 @@ class FastAIService:
             logger.info("InMemoryVectorStore fallback created")
             return vector_store
 
-        except (EmbeddingError, VectorStoreError):
+        except EmbeddingError, VectorStoreError:
             raise
         except Exception as e:
             raise VectorStoreError(
@@ -349,7 +355,9 @@ class FastAIService:
         Including content_hash ensures a stale agent (with a retriever pointing at
         an old vector store) is never served after content changes.
         """
-        prompt_hash = hashlib.sha1(system_prompt.encode(), usedforsecurity=False).hexdigest()[:16]
+        prompt_hash = hashlib.sha1(
+            system_prompt.encode(), usedforsecurity=False
+        ).hexdigest()[:16]
         safe_content_hash = (content_hash or "no-content")[:32]
         cache_key = f"agent_{llm_model_name}_{collection_name or 'anon'}_{prompt_hash}_{safe_content_hash}_{max_tokens}"
 
@@ -421,7 +429,6 @@ class FastAIService:
                 f"Failed to create agent: {e!s}",
                 details={"error_type": type(e).__name__},
             ) from e
-
 
 
 async def prepare_agent(
@@ -546,7 +553,7 @@ async def ask_ai(
         except TimeoutError as e:
             raise AITimeoutError(60, details={"question_length": len(question)}) from e
 
-    except (AIProcessingError, VectorStoreError, AITimeoutError):
+    except AIProcessingError, VectorStoreError, AITimeoutError:
         raise
     except Exception as e:
         raise AIProcessingError(
@@ -555,7 +562,9 @@ async def ask_ai(
         ) from e
 
 
-def get_chat_session_history(aichat_uuid: str | None = None, user_id: int | None = None) -> ChatSessionInfo:
+def get_chat_session_history(
+    aichat_uuid: str | None = None, user_id: int | None = None
+) -> ChatSessionInfo:
     """
     Chat session history with windowed loading for performance.
 
@@ -568,7 +577,9 @@ def get_chat_session_history(aichat_uuid: str | None = None, user_id: int | None
         # for backward compatibility.
         # TODO: Remove backward compat at some point
         if aichat_uuid and user_id is not None:
-            if aichat_uuid.startswith("user_") and not aichat_uuid.startswith(f"user_{user_id}_"):
+            if aichat_uuid.startswith("user_") and not aichat_uuid.startswith(
+                f"user_{user_id}_"
+            ):
                 raise ChatSessionError(
                     "Session does not belong to this user",
                     details={"session": aichat_uuid},
@@ -577,7 +588,11 @@ def get_chat_session_history(aichat_uuid: str | None = None, user_id: int | None
         elif aichat_uuid:
             session_id = aichat_uuid
         else:
-            session_id = f"user_{user_id}_{ULID()}" if user_id is not None else f"aichat_{ULID()}"
+            session_id = (
+                f"user_{user_id}_{ULID()}"
+                if user_id is not None
+                else f"aichat_{ULID()}"
+            )
         config = get_platform_config()
         redis_conn_string = config.redis_config.redis_connection_string
 

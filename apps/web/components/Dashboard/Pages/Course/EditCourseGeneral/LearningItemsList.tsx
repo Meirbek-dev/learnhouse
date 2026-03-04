@@ -3,10 +3,10 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import type { EmojiClickData } from 'emoji-picker-react';
 import { Link as LinkIcon, Plus, X } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { generateUUID } from '@/lib/utils';
+import dynamic from 'next/dynamic';
 
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false, loading: () => null });
 
