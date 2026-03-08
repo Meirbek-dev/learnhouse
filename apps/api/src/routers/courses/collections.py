@@ -9,7 +9,8 @@ from src.db.collections import (
     CollectionReadWithPermissions,
     CollectionUpdate,
 )
-from src.security.auth import get_current_user
+from src.db.users import AnonymousUser
+from src.security.auth import get_current_user, get_current_user_optional
 from src.services.courses.collections import (
     create_collection,
     delete_collection,
@@ -39,7 +40,9 @@ async def api_create_collection(
 async def api_get_collection(
     request: Request,
     collection_uuid: str,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    current_user: Annotated[
+        PublicUser | AnonymousUser, Depends(get_current_user_optional)
+    ],
     db_session=Depends(get_db_session),
 ) -> CollectionReadWithPermissions:
     """
@@ -54,7 +57,9 @@ async def api_get_collections_by(
     page: int,
     limit: int,
     org_id: int,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    current_user: Annotated[
+        PublicUser | AnonymousUser, Depends(get_current_user_optional)
+    ],
     db_session=Depends(get_db_session),
 ) -> list[CollectionReadWithPermissions]:
     """

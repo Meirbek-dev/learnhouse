@@ -44,13 +44,13 @@ async def get_course(
             detail="Course not found",
         )
 
-    # RBAC check
-    checker.require(
-        current_user.id,
-        "course:read",
-        course.org_id,
-        resource_owner_id=course.creator_id,
-    )
+    if not course.public:
+        checker.require(
+            current_user.id,
+            "course:read",
+            course.org_id,
+            resource_owner_id=course.creator_id,
+        )
 
     # Get course authors with their roles
     authors_statement = (
@@ -92,13 +92,13 @@ async def get_course_by_id(
             detail="Course not found",
         )
 
-    # RBAC check role-based access control
-    checker.require(
-        current_user.id,
-        "course:read",
-        course.org_id,
-        resource_owner_id=course.creator_id,
-    )
+    if not course.public:
+        checker.require(
+            current_user.id,
+            "course:read",
+            course.org_id,
+            resource_owner_id=course.creator_id,
+        )
 
     # Get course authors with their roles
     authors_statement = (

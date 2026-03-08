@@ -19,7 +19,7 @@ from src.db.courses.courses import (
 from src.db.courses.enhanced_responses import CourseReadWithPermissions
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
 from src.db.users import AnonymousUser, PublicUser
-from src.security.auth import get_current_user
+from src.security.auth import get_current_user, get_current_user_optional
 from src.security.rbac import PermissionCheckerDep
 from src.services.courses.contributors import (
     add_bulk_course_contributors,
@@ -122,7 +122,9 @@ async def api_get_course(
     request: Request,
     course_uuid: str,
     db_session: Annotated[Session, Depends(get_db_session)],
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    current_user: Annotated[
+        PublicUser | AnonymousUser, Depends(get_current_user_optional)
+    ],
     checker: PermissionCheckerDep,
 ) -> CourseRead:
     """
@@ -142,7 +144,9 @@ async def api_get_course_by_id(
     request: Request,
     course_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    current_user: Annotated[
+        PublicUser | AnonymousUser, Depends(get_current_user_optional)
+    ],
     checker: PermissionCheckerDep,
 ) -> CourseRead:
     """
@@ -162,7 +166,9 @@ async def api_get_course_meta(
     request: Request,
     course_uuid: str,
     with_unpublished_activities: bool = False,
-    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
+    current_user: Annotated[
+        PublicUser | AnonymousUser, Depends(get_current_user_optional)
+    ] = None,
     db_session=Depends(get_db_session),
     checker: PermissionCheckerDep = None,
 ) -> FullCourseRead:
@@ -186,7 +192,9 @@ async def api_get_course_by_orgslug(
     page: int,
     limit: int,
     org_slug: str,
-    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
+    current_user: Annotated[
+        PublicUser | AnonymousUser, Depends(get_current_user_optional)
+    ] = None,
     db_session=Depends(get_db_session),
 ) -> list[CourseReadWithPermissions]:
     """

@@ -36,15 +36,15 @@ async def get_collection(
             status_code=status.HTTP_409_CONFLICT, detail="Collection does not exist"
         )
 
-    # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(
-        current_user.id,
-        "collection:read",
-        org_id=collection.org_id,
-        resource_owner_id=collection.creator_id,
-    )
+    if not collection.public:
+        checker.require(
+            current_user.id,
+            "collection:read",
+            org_id=collection.org_id,
+            resource_owner_id=collection.creator_id,
+        )
 
     # get courses in collection
     statement_all = (
