@@ -45,7 +45,7 @@ def _rate_limit_key(request: Request) -> str:
                 token = parts[1]
                 return f"token:{hashlib.sha256(token.encode()).hexdigest()}"
             return f"auth:{hashlib.sha256(auth.encode()).hexdigest()}"
-        except (IndexError, AttributeError):
+        except IndexError, AttributeError:
             pass
 
     # Fallback to remote address
@@ -58,13 +58,17 @@ limiter = Limiter(key_func=_rate_limit_key)
 router = APIRouter()
 
 
-async def _monitor_disconnect(request: Request, cancel_event: asyncio.Event, label: str = "stream") -> None:
+async def _monitor_disconnect(
+    request: Request, cancel_event: asyncio.Event, label: str = "stream"
+) -> None:
     """Poll for client disconnect and set cancel_event when detected."""
     try:
         while not cancel_event.is_set():
             if await request.is_disconnected():
                 cancel_event.set()
-                logger.info("Disconnect monitor (%s): client gone, cancelling stream", label)
+                logger.info(
+                    "Disconnect monitor (%s): client gone, cancelling stream", label
+                )
                 return
             await asyncio.sleep(0.1)
     except asyncio.CancelledError:

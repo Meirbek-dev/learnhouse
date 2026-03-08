@@ -63,7 +63,12 @@ def get_llm(
             logger.warning("OpenAI API key not configured")
             return None
 
-        logger.info("Creating LLM: model=%s streaming=%s max_tokens=%s", model_name, streaming, max_tokens)
+        logger.info(
+            "Creating LLM: model=%s streaming=%s max_tokens=%s",
+            model_name,
+            streaming,
+            max_tokens,
+        )
         kwargs: dict = dict(
             model=model_name,
             api_key=api_key,

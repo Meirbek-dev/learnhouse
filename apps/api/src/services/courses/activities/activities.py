@@ -5,8 +5,6 @@ from fastapi import HTTPException, Request
 from sqlmodel import Session, select
 from ulid import ULID
 
-logger = logging.getLogger(__name__)
-
 from src.db.courses.activities import (
     Activity,
     ActivityCreate,
@@ -20,6 +18,8 @@ from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
 from src.services.payments.payments_access import check_activity_paid_access
+
+logger = logging.getLogger(__name__)
 
 ####################################################
 # CRUD
@@ -257,9 +257,12 @@ async def update_activity(
     # Invalidate AI caches so the next chat request uses fresh content
     try:
         from src.services.ai.cache_manager import get_ai_cache_manager
+
         get_ai_cache_manager().invalidate_activity_cache(activity_uuid)
     except Exception as _inv_err:
-        logger.warning("AI cache invalidation failed for %s: %s", activity_uuid, _inv_err)
+        logger.warning(
+            "AI cache invalidation failed for %s: %s", activity_uuid, _inv_err
+        )
 
     return ActivityRead.model_validate(activity)
 
@@ -316,9 +319,12 @@ async def delete_activity(
     # Invalidate AI caches; the activity no longer exists
     try:
         from src.services.ai.cache_manager import get_ai_cache_manager
+
         get_ai_cache_manager().invalidate_activity_cache(activity_uuid)
     except Exception as _inv_err:
-        logger.warning("AI cache invalidation failed for %s: %s", activity_uuid, _inv_err)
+        logger.warning(
+            "AI cache invalidation failed for %s: %s", activity_uuid, _inv_err
+        )
 
     return {"detail": "Activity deleted"}
 

@@ -96,7 +96,9 @@ class WindowedChatMessageHistory(BaseChatMessageHistory):
         window_size: int,
     ) -> None:
         self._base_history = base_history
-        self._messages: deque[BaseMessage] = deque(windowed_messages, maxlen=window_size)
+        self._messages: deque[BaseMessage] = deque(
+            windowed_messages, maxlen=window_size
+        )
         self._window_size = window_size
         self._lock = threading.Lock()
 
@@ -636,7 +638,8 @@ def get_chat_session_history(
                 except Exception as _fast_path_err:
                     # Fallback to full load + Python slice
                     logger.debug(
-                        "Fast-path history fetch failed (%s), falling back", _fast_path_err
+                        "Fast-path history fetch failed (%s), falling back",
+                        _fast_path_err,
                     )
                     all_messages = message_history.messages
                     total_count = len(all_messages)

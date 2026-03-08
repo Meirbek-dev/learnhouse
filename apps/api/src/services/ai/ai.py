@@ -10,14 +10,11 @@ from sqlmodel import Session, select
 
 from src.db.courses.activities import Activity, ActivityRead
 from src.db.courses.courses import Course, CourseRead
-from src.db.organization_config import OrganizationConfig
 from src.db.users import PublicUser
 from src.services.ai.base import ask_ai, get_chat_session_history, ChatSessionInfo
-from config.config import get_platform_config
 from src.services.ai.cache_manager import get_ai_cache_manager
 from src.services.ai.exceptions import (
     ActivityNotFoundError,
-    AIFeatureDisabledError,
     AIProcessingError,
     AIServiceException,
     AITimeoutError,
@@ -55,12 +52,8 @@ class _ChatContext:
 
 async def _get_activity_data(
     activity_uuid: str, db_session: Session
-) -> tuple[ActivityRead, CourseRead, OrganizationConfig]:
-    """Fetch and cache activity+course (5 min TTL); org_config always fresh.
-
-    org_config is NOT cached because it carries short-lived feature flags
-    (e.g. streaming_enabled) that must propagate within seconds.
-    """
+) -> tuple[ActivityRead, CourseRead]:
+    """Fetch and cache activity + course data for AI chat requests."""
 
     cache_manager = get_ai_cache_manager()
     cache_key = f"activity_{activity_uuid}"
@@ -94,23 +87,7 @@ async def _get_activity_data(
                 activity_uuid, details={"error": str(e), "type": type(e).__name__}
             ) from e
 
-    # Fetch org_config with a short TTL cache — feature flags like AI-enabled
-    # propagate within ~10 s while avoiding a DB round-trip on every message.
-    org_config_cache_key = f"org_config_{course.org_id}"
-    org_config = cache_manager.org_config_cache.get(org_config_cache_key)
-    if org_config is None:
-        org_config = db_session.exec(
-            select(OrganizationConfig).where(OrganizationConfig.org_id == course.org_id)
-        ).first()
-        if org_config:
-            cache_manager.org_config_cache.set(org_config_cache_key, org_config)
-
-    if not org_config:
-        raise ActivityNotFoundError(
-            activity_uuid, details={"org_config_not_found": True}
-        )
-
-    return activity, course, org_config
+    return activity, course
 
 
 async def _prepare_context(
@@ -120,7 +97,7 @@ async def _prepare_context(
     user_id: int | None = None,
 ) -> _ChatContext:
     """Build the full context needed for any AI chat request."""
-    activity, course, org_config = await _get_activity_data(activity_uuid, db_session)
+    activity, course = await _get_activity_data(activity_uuid, db_session)
 
     # Cache the expensive content-structuring + serialization step so that
     # follow-up messages in the same session don't repeat CPU work.
@@ -160,11 +137,7 @@ async def _prepare_context(
     )
 
     ai_model = "gpt-5-nano"
-    streaming_enabled = (
-        org_config.config.get("features", {})
-        .get("ai", {})
-        .get("streaming_enabled", True)
-    )
+    streaming_enabled = True
 
     return _ChatContext(
         activity=activity,
@@ -183,8 +156,6 @@ def _map_ai_errors_to_http(e: Exception) -> HTTPException:
     """Convert AI service exceptions to appropriate HTTP responses."""
     if isinstance(e, ActivityNotFoundError):
         return HTTPException(status_code=404, detail=e.message)
-    if isinstance(e, AIFeatureDisabledError):
-        return HTTPException(status_code=403, detail=e.message)
     if isinstance(e, AITimeoutError):
         return HTTPException(status_code=504, detail=e.message)
     if isinstance(e, (AIProcessingError, VectorStoreError, ChatSessionError)):
@@ -259,8 +230,6 @@ def _map_ai_error_to_sse(e: Exception) -> str:
     """Convert AI service exceptions to SSE error messages."""
     if isinstance(e, ActivityNotFoundError):
         return format_sse_message({"type": "error", "error": e.message, "status": 404})
-    if isinstance(e, AIFeatureDisabledError):
-        return format_sse_message({"type": "error", "error": e.message, "status": 403})
     if isinstance(e, AITimeoutError):
         return format_sse_message({"type": "error", "error": e.message, "status": 504})
     if isinstance(e, (AIProcessingError, VectorStoreError, ChatSessionError)):

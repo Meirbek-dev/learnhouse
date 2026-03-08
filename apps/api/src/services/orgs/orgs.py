@@ -1,30 +1,10 @@
-import logging
 from datetime import UTC, datetime
 from typing import Literal
 
-import orjson
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, select
 from ulid import ULID
 
-from src.db.organization_config import (
-    AIOrgConfig,
-    AnalyticsOrgConfig,
-    APIOrgConfig,
-    AssignmentOrgConfig,
-    CollaborationOrgConfig,
-    CourseOrgConfig,
-    DiscussionOrgConfig,
-    MemberOrgConfig,
-    OrganizationConfig,
-    OrganizationConfigBase,
-    OrgCloudConfig,
-    OrgFeatureConfig,
-    OrgGeneralConfig,
-    PaymentOrgConfig,
-    StorageOrgConfig,
-    UserGroupOrgConfig,
-)
 from src.db.organizations import (
     Organization,
     OrganizationCreate,
@@ -71,18 +51,7 @@ async def get_organization(
         current_user.id, "organization:read", org.id, resource_owner_id=org.creator_id
     )
 
-    # Get org config
-    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
-    result = db_session.exec(statement)
-
-    org_config = result.first()
-
-    if org_config is None:
-        logging.error(f"Organization {org_id} has no config")
-
-    config = OrganizationConfig.model_validate(org_config) if org_config else {}
-
-    return OrganizationRead(**org.model_dump(), config=config)
+    return OrganizationRead.model_validate(org)
 
 
 async def get_organization_by_slug(
@@ -102,18 +71,7 @@ async def get_organization_by_slug(
             detail="Organization not found",
         )
 
-    # Get org config
-    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
-    result = db_session.exec(statement)
-
-    org_config = result.first()
-
-    if org_config is None:
-        logging.error(f"Organization {org_slug} has no config")
-
-    config = OrganizationConfig.model_validate(org_config) if org_config else {}
-
-    return OrganizationRead(**org.model_dump(), config=config)
+    return OrganizationRead.model_validate(org)
 
 
 async def create_org(
@@ -169,134 +127,7 @@ async def create_org(
         org_id=int(org.id or 0),
     )
 
-    org_config = OrganizationConfigBase(
-        config_version="1.1",
-        general=OrgGeneralConfig(enabled=True, color="normal"),
-        features=OrgFeatureConfig(
-            courses=CourseOrgConfig(enabled=True, limit=0),
-            members=MemberOrgConfig(enabled=True, admin_limit=0, limit=0),
-            usergroups=UserGroupOrgConfig(enabled=True, limit=0),
-            storage=StorageOrgConfig(enabled=True, limit=0),
-            ai=AIOrgConfig(enabled=True, limit=0, model="gpt-5-nano"),
-            assignments=AssignmentOrgConfig(enabled=True, limit=0),
-            payments=PaymentOrgConfig(enabled=True),
-            discussions=DiscussionOrgConfig(enabled=True, limit=0),
-            analytics=AnalyticsOrgConfig(enabled=True, limit=0),
-            collaboration=CollaborationOrgConfig(enabled=True, limit=0),
-            api=APIOrgConfig(enabled=True, limit=0),
-        ),
-        cloud=OrgCloudConfig(plan="free", custom_domain=False),
-    )
-
-    org_config_dict = orjson.loads(org_config.model_dump_json())
-
-    # OrgSettings
-    org_settings = OrganizationConfig(
-        org_id=int(org.id or 0),
-        config=org_config_dict,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-
-    db_session.add(org_settings)
-    db_session.commit()
-    db_session.refresh(org_settings)
-
-    # Get org config
-    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
-    result = db_session.exec(statement)
-
-    org_config = result.first()
-
-    if org_config is None:
-        logging.error(f"Organization {org.id} has no config")
-
-    config = OrganizationConfig.model_validate(org_config)
-
-    return OrganizationRead(**org.model_dump(), config=config)
-
-
-async def create_org_with_config(
-    request: Request,
-    org_object: OrganizationCreate,
-    current_user: PublicUser | AnonymousUser,
-    db_session: Session,
-    submitted_config: OrganizationConfigBase,
-):
-    statement = select(Organization).where(Organization.slug == org_object.slug)
-    result = db_session.exec(statement)
-
-    org = result.first()
-
-    if org:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Organization already exists",
-        )
-
-    org = Organization.model_validate(org_object)
-
-    if isinstance(current_user, AnonymousUser):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="You should be logged in to be able to achieve this action",
-        )
-
-    # Complete the org object
-    org.org_uuid = f"org_{ULID()}"
-    org.creation_date = str(datetime.now())
-    org.update_date = str(datetime.now())
-    org.creator_id = current_user.id
-
-    db_session.add(org)
-    db_session.commit()
-    db_session.refresh(org)
-
-    from src.db.permissions import Role
-
-    admin_role = db_session.exec(
-        select(Role).where(Role.slug == RoleSlug.ADMIN)
-    ).first()
-    if not admin_role:
-        raise HTTPException(500, detail="Admin role not found")
-
-    # Link user to org by assigning admin role
-    from src.security.rbac import PermissionChecker
-
-    checker = PermissionChecker(db_session)
-    checker.assign_role(
-        user_id=int(current_user.id),
-        role_id=admin_role.id,
-        org_id=int(org.id or 0),
-    )
-    org_config = submitted_config
-
-    org_config_dict = orjson.loads(org_config.model_dump_json())
-
-    # OrgSettings
-    org_settings = OrganizationConfig(
-        org_id=int(org.id or 0),
-        config=org_config_dict,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-
-    db_session.add(org_settings)
-    db_session.commit()
-    db_session.refresh(org_settings)
-
-    # Get org config
-    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
-    result = db_session.exec(statement)
-
-    org_config = result.first()
-
-    if org_config is None:
-        logging.error(f"Organization {org.id} has no config")
-
-    config = OrganizationConfig.model_validate(org_config)
-
-    return OrganizationRead(**org.model_dump(), config=config)
+    return OrganizationRead.model_validate(org)
 
 
 async def update_org(
@@ -351,49 +182,6 @@ async def update_org(
     db_session.refresh(org)
 
     return OrganizationRead.model_validate(org)
-
-
-async def update_org_with_config_no_auth(
-    request: Request,
-    orgconfig: OrganizationConfigBase,
-    org_id: int,
-    db_session: Session,
-):
-    statement = select(Organization).where(Organization.id == org_id)
-    result = db_session.exec(statement)
-
-    org = result.first()
-
-    if not org:
-        raise HTTPException(
-            status_code=404,
-            detail="Organization slug not found",
-        )
-
-    # Get org config
-    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
-    result = db_session.exec(statement)
-
-    org_config = result.first()
-
-    if org_config is None:
-        logging.error(f"Organization {org_id} has no config")
-        raise HTTPException(
-            status_code=404,
-            detail="Organization config not found",
-        )
-
-    updated_config = orgconfig
-
-    # Update the database
-    org_config.config = orjson.loads(updated_config.model_dump_json())
-    org_config.update_date = str(datetime.now())
-
-    db_session.add(org_config)
-    db_session.commit()
-    db_session.refresh(org_config)
-
-    return {"detail": "Organization updated"}
 
 
 async def update_org_logo(
@@ -574,7 +362,6 @@ async def get_orgs_by_user_admin(
     # Convert user_id to int for proper type matching with database
     user_id_int = int(user_id)
 
-    # Join Organization, UserRole and OrganizationConfig in a single query
     # Resolve the admin role id by slug (new RBAC system)
     admin_role = db_session.exec(
         select(Role).where(Role.slug.in_(list(ADMIN_ROLE_SLUGS)))
@@ -597,27 +384,14 @@ async def get_orgs_by_user_admin(
 
     orgsWithConfig = []
     if org_ids:
-        statement = (
-            select(Organization, OrganizationConfig)
-            .outerjoin(
-                OrganizationConfig,
-                OrganizationConfig.org_id == Organization.id,
-            )
-            .where(Organization.id.in_(org_ids))
-        )
+        statement = select(Organization).where(Organization.id.in_(org_ids))
         result = db_session.exec(statement).all()
-        # Map by org id to preserve the set
-        org_map: dict[int, tuple] = {
-            org.id: (org, org_config) for org, org_config in result
-        }
+        org_map: dict[int, Organization] = {org.id: org for org in result if org.id}
         for oid in org_ids:
-            org, org_config = org_map.get(oid, (None, None))
+            org = org_map.get(oid)
             if not org:
                 continue
-            config = (
-                OrganizationConfig.model_validate(org_config) if org_config else None
-            )
-            org_read = OrganizationRead(**org.model_dump(), config=config)
+            org_read = OrganizationRead.model_validate(org)
             orgsWithConfig.append(org_read)
 
     return orgsWithConfig
@@ -646,32 +420,17 @@ async def get_orgs_by_user(
 
     orgsWithConfig = []
     if org_ids:
-        statement = (
-            select(Organization, OrganizationConfig)
-            .outerjoin(
-                OrganizationConfig,
-                OrganizationConfig.org_id == Organization.id,
-            )
-            .where(Organization.id.in_(org_ids))
-        )
+        statement = select(Organization).where(Organization.id.in_(org_ids))
         result = db_session.exec(statement).all()
-        org_map: dict[int, tuple] = {
-            org.id: (org, org_config) for org, org_config in result
-        }
+        org_map: dict[int, Organization] = {org.id: org for org in result if org.id}
         for oid in org_ids:
-            org, org_config = org_map.get(oid, (None, None))
+            org = org_map.get(oid)
             if not org:
                 continue
-            config = (
-                OrganizationConfig.model_validate(org_config) if org_config else None
-            )
-            org_read = OrganizationRead(**org.model_dump(), config=config)
+            org_read = OrganizationRead.model_validate(org)
             orgsWithConfig.append(org_read)
 
     return orgsWithConfig
-
-
-# Config related
 
 
 async def upload_org_preview_service(
@@ -712,33 +471,12 @@ async def update_org_landing(
         current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id
     )
 
-    # Get org config
-    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
-    result = db_session.exec(statement)
+    org.landing = landing_object
+    org.update_date = str(datetime.now())
 
-    org_config = result.first()
-
-    if org_config is None:
-        logging.error(f"Organization {org_id} has no config")
-        raise HTTPException(
-            status_code=404,
-            detail="Organization config not found",
-        )
-
-    # Convert to OrganizationConfigBase model and back to ensure all fields exist
-    config_model = OrganizationConfigBase(**org_config.config)
-
-    # Update the landing object
-    config_model.landing = landing_object
-
-    # Convert back to dict and update
-    updated_config_dict = orjson.loads(config_model.model_dump_json())
-    org_config.config = updated_config_dict
-    org_config.update_date = str(datetime.now())
-
-    db_session.add(org_config)
+    db_session.add(org)
     db_session.commit()
-    db_session.refresh(org_config)
+    db_session.refresh(org)
 
     return {"detail": "Landing object updated"}
 

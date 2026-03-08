@@ -880,8 +880,6 @@ This can remain in JSON settings and does not require a standalone relational ta
   - add `submitted_at` and `graded_at` to `AssignmentUserSubmission`
 - `apps/api/src/db/courses/exams.py`
   - extend `ExamSettingsBase` with `passing_score`
-- `apps/api/src/db/organization_config.py`
-  - optional analytics config defaults such as refresh interval and risk threshold days
 - `apps/api/cli.py`
   - add analytics rollup refresh command
 - `apps/api/src/services/courses/activities/assignments.py`

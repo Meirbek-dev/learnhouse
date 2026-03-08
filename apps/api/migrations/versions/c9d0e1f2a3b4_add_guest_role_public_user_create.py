@@ -38,27 +38,69 @@ _PERMISSION_KEY = "user:create:all"
 _ROLE_SLUG = "guest"
 
 
+def _column_value_sql(column_type: sa.types.TypeEngine, bind_name: str) -> str:
+    enum_name = getattr(column_type, "name", None)
+    if isinstance(column_type, sa.Enum) and enum_name:
+        return f"CAST(:{bind_name} AS {enum_name})"
+    return f":{bind_name}"
+
+
 def _upsert_permission(conn) -> None:
     """Insert user:create:all into permissions if it doesn't already exist."""
+    inspector = sa.inspect(conn)
+    permission_column_defs = {
+        column["name"]: column for column in inspector.get_columns("permissions")
+    }
+    permission_columns = set(permission_column_defs)
+
+    resource_type_sql = _column_value_sql(
+        permission_column_defs["resource_type"]["type"], "resource_type"
+    )
+    action_sql = _column_value_sql(permission_column_defs["action"]["type"], "action")
+    scope_sql = _column_value_sql(permission_column_defs["scope"]["type"], "scope")
+
+    parameters = {
+        "name": _PERMISSION_KEY,
+        "description": "Create a new user account (public self-registration)",
+        "permission_key": _PERMISSION_KEY,
+        "resource_type": "user",
+        "action": "create",
+        "scope": "all",
+    }
+
+    if "permission_key" in permission_columns:
+        conn.execute(
+            text(f"""
+                INSERT INTO permissions
+                    (name, resource_type, action, scope, description, permission_key)
+                VALUES (
+                    :name,
+                    {resource_type_sql},
+                    {action_sql},
+                    {scope_sql},
+                    :description,
+                    :permission_key
+                )
+                ON CONFLICT (name) DO NOTHING
+            """),
+            parameters,
+        )
+        return
+
     conn.execute(
-        text("""
+        text(f"""
             INSERT INTO permissions
-                (name, resource_type, action, scope, description, permission_key)
+                (name, resource_type, action, scope, description)
             VALUES (
                 :name,
-                CAST('user' AS resourcetype),
-                CAST('create' AS action),
-                CAST('all'  AS scope),
-                :description,
-                :permission_key
+                {resource_type_sql},
+                {action_sql},
+                {scope_sql},
+                :description
             )
             ON CONFLICT (name) DO NOTHING
         """),
-        {
-            "name": _PERMISSION_KEY,
-            "description": "Create a new user account (public self-registration)",
-            "permission_key": _PERMISSION_KEY,
-        },
+        parameters,
     )
 
 

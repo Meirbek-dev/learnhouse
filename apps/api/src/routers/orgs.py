@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, Request, UploadFile
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
-from src.db.organization_config import OrganizationConfigBase
 from src.db.organizations import (
     OrganizationCreate,
     OrganizationRead,
@@ -17,7 +16,6 @@ from src.security.auth import get_current_user, get_current_user_optional
 from src.security.rbac import PermissionCheckerDep
 from src.services.orgs.orgs import (
     create_org,
-    create_org_with_config,
     delete_org,
     get_organization,
     get_organization_by_slug,
@@ -50,23 +48,6 @@ async def api_create_org(
     Create new organization
     """
     return await create_org(request, org_object, current_user, db_session)
-
-
-# Temporary pre-alpha code
-@router.post("/withconfig/")
-async def api_create_org_withconfig(
-    request: Request,
-    org_object: OrganizationCreate,
-    config_object: OrganizationConfigBase,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session: Annotated[Session, Depends(get_db_session)],
-) -> OrganizationRead:
-    """
-    Create new organization
-    """
-    return await create_org_with_config(
-        request, org_object, current_user, db_session, config_object
-    )
 
 
 @router.get("/{org_id}")

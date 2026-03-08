@@ -1,5 +1,3 @@
-import os
-
 from fastapi import APIRouter, Depends
 
 from src.routers import (
@@ -27,7 +25,7 @@ from src.routers.courses import (
     exams,
 )
 from src.routers.courses.activities import activities, blocks
-from src.routers.ee import cloud_internal, payments
+from src.routers.ee import payments
 from src.routers.uploads import chunked_upload
 from src.routers.utils import router as utils_router
 from src.services.dev.dev import isDevModeEnabledOrRaise
@@ -78,15 +76,6 @@ v1_router.include_router(ai.router, prefix="/ai", tags=["ai"])
 
 # Payments/EE
 v1_router.include_router(payments.router, prefix="/payments", tags=["payments"])
-
-# Optional cloud-internal routes
-if os.environ.get("CLOUD_INTERNAL_KEY"):
-    v1_router.include_router(
-        cloud_internal.router,
-        prefix="/cloud_internal",
-        tags=["cloud_internal"],
-        dependencies=[Depends(cloud_internal.check_internal_cloud_key)],
-    )
 
 # Dev routes
 v1_router.include_router(

@@ -8,7 +8,11 @@ from pydantic import ValidationError
 from sqlmodel import Session, select
 from ulid import ULID
 
-from src.db.organizations import Organization, OrganizationRead
+from src.db.organizations import (
+    Organization,
+    OrganizationRead,
+    build_default_org_config,
+)
 from src.db.permission_enums import RoleSlug
 from src.db.permissions import Role, RoleRead, UserRole
 from src.db.users import (
@@ -503,7 +507,15 @@ def _safe_organization_read(org: Organization) -> OrganizationRead:
             exc,
         )
 
-        return OrganizationRead.model_construct(**org.model_dump())
+        return OrganizationRead.model_construct(
+            **org.model_dump(),
+            config=build_default_org_config(
+                org_id=org.id or 0,
+                landing=org.landing,
+                creation_date=org.creation_date,
+                update_date=org.update_date,
+            ),
+        )
 
 
 async def _link_user_to_organization(

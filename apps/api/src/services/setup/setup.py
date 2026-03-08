@@ -1,30 +1,11 @@
 import contextlib
 from datetime import UTC, datetime
 
-import orjson
 from fastapi import HTTPException
 from sqlmodel import Session, select
 from ulid import ULID
 
 from config.config import get_platform_config
-from src.db.organization_config import (
-    AIOrgConfig,
-    AnalyticsOrgConfig,
-    APIOrgConfig,
-    AssignmentOrgConfig,
-    CollaborationOrgConfig,
-    CourseOrgConfig,
-    DiscussionOrgConfig,
-    MemberOrgConfig,
-    OrganizationConfig,
-    OrganizationConfigBase,
-    OrgCloudConfig,
-    OrgFeatureConfig,
-    OrgGeneralConfig,
-    PaymentOrgConfig,
-    StorageOrgConfig,
-    UserGroupOrgConfig,
-)
 from src.db.organizations import Organization, OrganizationCreate
 from src.db.permission_enums import RoleSlug
 from src.db.users import User, UserCreate, UserRead
@@ -55,43 +36,6 @@ def install_create_organization(org_object: OrganizationCreate, db_session: Sess
     db_session.add(org)
     db_session.commit()
     db_session.refresh(org)
-
-    # Org Config
-    org_config = OrganizationConfigBase(
-        config_version="1.3",
-        general=OrgGeneralConfig(enabled=True, color="normal"),
-        features=OrgFeatureConfig(
-            courses=CourseOrgConfig(enabled=True, limit=0),
-            members=MemberOrgConfig(
-                enabled=True, signup_mode="open", admin_limit=0, limit=0
-            ),
-            usergroups=UserGroupOrgConfig(enabled=True, limit=0),
-            storage=StorageOrgConfig(enabled=True, limit=0),
-            ai=AIOrgConfig(enabled=True, limit=0, model="gpt-5-nano"),
-            assignments=AssignmentOrgConfig(enabled=True, limit=0),
-            payments=PaymentOrgConfig(enabled=False),
-            discussions=DiscussionOrgConfig(enabled=True, limit=0),
-            analytics=AnalyticsOrgConfig(enabled=True, limit=0),
-            collaboration=CollaborationOrgConfig(enabled=True, limit=0),
-            api=APIOrgConfig(enabled=True, limit=0),
-        ),
-        cloud=OrgCloudConfig(plan="free", custom_domain=False),
-        landing={},
-    )
-
-    org_config_dict = orjson.loads(org_config.model_dump_json())
-
-    # OrgSettings
-    org_settings = OrganizationConfig(
-        org_id=int(org.id or 0),
-        config=org_config_dict,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-
-    db_session.add(org_settings)
-    db_session.commit()
-    db_session.refresh(org_settings)
 
     return org
 
