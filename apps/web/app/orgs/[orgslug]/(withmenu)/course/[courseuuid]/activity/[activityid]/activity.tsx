@@ -46,6 +46,7 @@ import { Suspense, lazy, useEffect, useRef, useState, useTransition } from 'reac
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import AIChatBotProvider from '@components/Contexts/AI/AIChatBotContext';
 import CourseEndView from '@components/Pages/Activity/CourseEndView';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
@@ -61,7 +62,6 @@ import { useRouter } from 'next/navigation';
 import Link from '@components/ui/AppLink';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
-import AIChatBotProvider from '@components/Contexts/AI/AIChatBotContext';
 
 // Lazy load heavy components
 const Canva = lazy(() => import('@components/Objects/Activities/DynamicCanva/DynamicCanva'));

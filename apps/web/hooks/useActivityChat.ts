@@ -219,7 +219,12 @@ export function useActivityChat({
         const errorStatus = typeof error.status === 'number' ? error.status : 500;
         dispatch({
           type: 'setError',
-          payload: { isError: true, status: errorStatus, error_code: error.error_code, error_message: error.error || 'Streaming failed' },
+          payload: {
+            isError: true,
+            status: errorStatus,
+            error_code: error.error_code,
+            error_message: error.error || 'Streaming failed',
+          },
         });
 
         // Cancel any pending throttle flush.

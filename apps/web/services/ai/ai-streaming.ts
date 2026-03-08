@@ -141,7 +141,9 @@ export async function startActivityAIChatSessionStream(
         const body = await response.json();
         errorMessage = body?.detail ?? body?.error ?? errorMessage;
         error_code = body?.error_code;
-      } catch { /* non-JSON body */ }
+      } catch {
+        /* non-JSON body */
+      }
       onError?.({ type: 'error', error: errorMessage, status: response.status, error_code });
       return;
     }
@@ -150,7 +152,11 @@ export async function startActivityAIChatSessionStream(
     if (error instanceof DOMException && error.name === 'AbortError') return;
     if (error instanceof Error && error.name === 'AbortError') return;
     console.error('AI streaming failed:', error);
-    onError?.({ type: 'error', error: error instanceof Error ? error.message : 'Unknown error', error_code: 'STREAM_ERROR' });
+    onError?.({
+      type: 'error',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      error_code: 'STREAM_ERROR',
+    });
   }
 }
 
@@ -177,7 +183,9 @@ export async function sendActivityAIChatMessageStream(
         const body = await response.json();
         errorMessage = body?.detail ?? body?.error ?? errorMessage;
         error_code = body?.error_code;
-      } catch { /* non-JSON body */ }
+      } catch {
+        /* non-JSON body */
+      }
       onError?.({ type: 'error', error: errorMessage, status: response.status, error_code });
       return;
     }
@@ -186,6 +194,10 @@ export async function sendActivityAIChatMessageStream(
     if (error instanceof DOMException && error.name === 'AbortError') return;
     if (error instanceof Error && error.name === 'AbortError') return;
     console.error('AI streaming failed:', error);
-    onError?.({ type: 'error', error: error instanceof Error ? error.message : 'Unknown error', error_code: 'STREAM_ERROR' });
+    onError?.({
+      type: 'error',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      error_code: 'STREAM_ERROR',
+    });
   }
 }

@@ -93,7 +93,14 @@ function baseReducer(state: BaseChatState, action: BaseChatAction): BaseChatStat
       return { ...state, error: action.payload };
     }
     case 'resetSession': {
-      return { ...state, messages: [], aichat_uuid: null, isWaitingForResponse: false, error: INITIAL_AI_ERROR, chatInputValue: '' };
+      return {
+        ...state,
+        messages: [],
+        aichat_uuid: null,
+        isWaitingForResponse: false,
+        error: INITIAL_AI_ERROR,
+        chatInputValue: '',
+      };
     }
     default: {
       return state;
