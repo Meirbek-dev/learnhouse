@@ -13,7 +13,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, School, Settings, ShieldCheck, Users } from 'lucide-react';
+import { Backpack, BadgeDollarSign, BarChart3, BookCopy, Home, LogOut, School, Settings, ShieldCheck, Users } from 'lucide-react';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import platformLogoLight from '@public/platform_logo_light.svg';
@@ -87,7 +87,7 @@ const SidebarSkeleton = () => (
 const useNavigationItems = () => {
   const pathname = usePathname();
   const t = useTranslations('SidebarMenu');
-  const { canSeeOrg, canSeeCourses, canSeeAssignments, canSeeUsers, canSeeAdmin, canSeePayments } =
+  const { canSeeOrg, canSeeCourses, canSeeAssignments, canSeeAnalytics, canSeeUsers, canSeeAdmin, canSeePayments } =
     useNavigationPermissions();
 
   return [
@@ -117,6 +117,17 @@ const useNavigationItems = () => {
             icon: Backpack,
             tooltip: t('tooltips.assignments'),
             isActive: pathname.startsWith('/dash/assignments'),
+          },
+        ]
+      : []),
+    ...(canSeeAnalytics
+      ? [
+          {
+            title: t('tooltips.analytics'),
+            href: '/dash/analytics',
+            icon: BarChart3,
+            tooltip: t('tooltips.analytics'),
+            isActive: pathname.startsWith('/dash/analytics'),
           },
         ]
       : []),

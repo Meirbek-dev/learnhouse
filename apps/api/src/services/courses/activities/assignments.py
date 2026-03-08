@@ -1356,6 +1356,7 @@ async def create_assignment_submission(
         submission_status=AssignmentUserSubmissionStatus.SUBMITTED,
         creation_date=datetime.now().isoformat(),
         update_date=datetime.now().isoformat(),
+        submitted_at=datetime.now().isoformat(),
     )
 
     # Insert Assignment User Submission in DB
@@ -1799,6 +1800,8 @@ async def grade_assignment_submission(
 
     # Change the status of the submission
     assignment_user_submission.submission_status = AssignmentUserSubmissionStatus.GRADED
+    assignment_user_submission.graded_at = datetime.now().isoformat()
+    assignment_user_submission.update_date = datetime.now().isoformat()
 
     # Insert Assignment User Submission in DB
     db_session.add(assignment_user_submission)

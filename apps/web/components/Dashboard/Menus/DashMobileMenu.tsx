@@ -1,6 +1,6 @@
 'use client';
 
-import { Backpack, BadgeDollarSign, BookCopy, Home, School, Settings, ShieldCheck, Users } from 'lucide-react';
+import { Backpack, BadgeDollarSign, BarChart3, BookCopy, Home, School, Settings, ShieldCheck, Users } from 'lucide-react';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
@@ -10,7 +10,7 @@ import { useTranslations } from 'next-intl';
 const DashMobileMenu = () => {
   const session = usePlatformSession() as any;
   const t = useTranslations('SidebarMenu');
-  const { canSeeOrg, canSeeCourses, canSeeAssignments, canSeeUsers, canSeeAdmin, canSeePayments } =
+  const { canSeeOrg, canSeeCourses, canSeeAssignments, canSeeAnalytics, canSeeUsers, canSeeAdmin, canSeePayments } =
     useNavigationPermissions();
 
   return (
@@ -68,6 +68,23 @@ const DashMobileMenu = () => {
             >
               <Backpack size={20} />
               <span className="mt-1 text-xs">{t('mobile.assignments')}</span>
+            </AppLink>
+          </ToolTip>
+        ) : null}
+        {canSeeAnalytics ? (
+          <ToolTip
+            content={t('tooltips.analytics')}
+            slateBlack
+            sideOffset={8}
+            side="top"
+          >
+            <AppLink
+              href="/dash/analytics"
+              className="flex flex-col items-center p-2"
+              aria-label={t('ariaLabels.manageAnalytics')}
+            >
+              <BarChart3 size={20} />
+              <span className="mt-1 text-xs">{t('mobile.analytics')}</span>
             </AppLink>
           </ToolTip>
         ) : null}

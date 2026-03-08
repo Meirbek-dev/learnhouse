@@ -1,0 +1,40 @@
+import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
+import CourseHealthTable from '@components/Dashboard/Analytics/CourseHealthTable';
+import TeacherFilterBar from '@components/Dashboard/Analytics/TeacherFilterBar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getTeacherCourseList, normalizeAnalyticsQuery } from '@services/analytics/teacher';
+import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { auth } from '@/auth';
+
+export default async function AnalyticsCoursesPage(props: {
+  params: Promise<{ orgslug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const { orgslug } = await props.params;
+  const org = await getOrganizationContextInfo(orgslug);
+  const session = await auth();
+  const accessToken = session?.tokens?.access_token;
+  const query = normalizeAnalyticsQuery(await props.searchParams);
+
+  if (!accessToken) {
+    return <AnalyticsEmptyState title="Course analytics unavailable" description="An authenticated session is required to view scoped course analytics." />;
+  }
+
+  try {
+    const courseList = await getTeacherCourseList(org.id ?? org.org_id, accessToken, query);
+    return (
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
+        <Card className="border-slate-200 bg-white/90 shadow-sm">
+          <CardHeader>
+            <CardTitle>Course ranking</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-slate-600">Rank courses by engagement trend, grading pressure, and learner risk so instructors can prioritize interventions.</CardContent>
+        </Card>
+        <TeacherFilterBar orgslug={orgslug} query={query} courseCount={courseList.items.length} />
+        <CourseHealthTable orgslug={orgslug} rows={courseList.items} />
+      </div>
+    );
+  } catch (error) {
+    return <AnalyticsEmptyState title="Course analytics unavailable" description={error instanceof Error ? error.message : 'The course analytics view could not be loaded.'} />;
+  }
+}

@@ -1,0 +1,93 @@
+import type {
+  AnalyticsQuery,
+  AssessmentType,
+  AtRiskLearnersResponse,
+  TeacherAssessmentDetailResponse,
+  TeacherAssessmentListResponse,
+  TeacherCourseDetailResponse,
+  TeacherCourseListResponse,
+  TeacherOverviewResponse,
+} from '@/types/analytics';
+import { getAPIUrl } from '@services/config/config';
+
+const buildQueryString = (query: AnalyticsQuery = {}) => {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value === undefined || value === null || value === '') continue;
+    params.set(key, String(value));
+  }
+  const serialized = params.toString();
+  return serialized ? `?${serialized}` : '';
+};
+
+async function analyticsRequest<T>(path: string, accessToken: string, query?: AnalyticsQuery): Promise<T> {
+  const response = await fetch(`${getAPIUrl()}analytics/${path}${buildQueryString(query)}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    const message = payload?.detail?.message || payload?.detail || `Analytics request failed (${response.status})`;
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+export function normalizeAnalyticsQuery(searchParams: Record<string, string | string[] | undefined>): AnalyticsQuery {
+  const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
+  const teacherUserId = first(searchParams.teacher_user_id);
+  return {
+    window: (first(searchParams.window) as AnalyticsQuery['window']) || '28d',
+    compare: (first(searchParams.compare) as AnalyticsQuery['compare']) || 'previous_period',
+    bucket: (first(searchParams.bucket) as AnalyticsQuery['bucket']) || 'day',
+    course_ids: first(searchParams.course_ids),
+    cohort_ids: first(searchParams.cohort_ids),
+    teacher_user_id: teacherUserId ? Number(teacherUserId) : undefined,
+    timezone: first(searchParams.timezone) || 'UTC',
+  };
+}
+
+export function getTeacherOverview(orgId: number, accessToken: string, query?: AnalyticsQuery) {
+  return analyticsRequest<TeacherOverviewResponse>(`orgs/${orgId}/teacher/overview`, accessToken, query);
+}
+
+export function getTeacherCourseList(orgId: number, accessToken: string, query?: AnalyticsQuery) {
+  return analyticsRequest<TeacherCourseListResponse>(`orgs/${orgId}/teacher/courses`, accessToken, query);
+}
+
+export function getTeacherCourseDetail(orgId: number, courseId: number, accessToken: string, query?: AnalyticsQuery) {
+  return analyticsRequest<TeacherCourseDetailResponse>(`orgs/${orgId}/teacher/courses/${courseId}`, accessToken, query);
+}
+
+export function getTeacherAssessmentList(orgId: number, accessToken: string, query?: AnalyticsQuery) {
+  return analyticsRequest<TeacherAssessmentListResponse>(`orgs/${orgId}/teacher/assessments`, accessToken, query);
+}
+
+export function getTeacherAssessmentDetail(
+  orgId: number,
+  assessmentType: AssessmentType,
+  assessmentId: number,
+  accessToken: string,
+  query?: AnalyticsQuery,
+) {
+  return analyticsRequest<TeacherAssessmentDetailResponse>(
+    `orgs/${orgId}/teacher/assessments/${assessmentType}/${assessmentId}`,
+    accessToken,
+    query,
+  );
+}
+
+export function getAtRiskLearners(orgId: number, accessToken: string, query?: AnalyticsQuery) {
+  return analyticsRequest<AtRiskLearnersResponse>(`orgs/${orgId}/teacher/learners/at-risk`, accessToken, query);
+}
+
+export function getAnalyticsExportUrl(orgId: number, exportName: 'at-risk' | 'grading-backlog' | 'course-progress' | 'assessment-outcomes', query?: AnalyticsQuery) {
+  return `${getAPIUrl()}analytics/orgs/${orgId}/teacher/exports/${exportName}.csv${buildQueryString(query)}`;
+}

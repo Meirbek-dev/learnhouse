@@ -5865,6 +5865,7 @@
       "expandSidebar": "Бүйірлік панельді кеңейту",
       "goToHomepage": "Басты бетке өту",
       "home": "Басқару тақтасының басты бетіне өту",
+      "manageAnalytics": "Оқытушы аналитикасын ашу",
       "manageAssignments": "Тапсырмаларды басқару",
       "manageCourses": "Курстарды басқару",
       "managePayments": "Төлемдер мен шоттарды басқару",
@@ -5887,6 +5888,7 @@
     },
     "mobile": {
       "admin": "Әкімші",
+      "analytics": "Аналитика",
       "assignments": "Тапсырмалар",
       "courses": "Курстар",
       "home": "Басты бет",
@@ -5898,6 +5900,7 @@
     "orgName": "Ashyq Bilim",
     "tooltips": {
       "admin": "Әкімші басқару тақтасы",
+      "analytics": "Оқытушы аналитикасы",
       "assignments": "Тапсырмалар",
       "courses": "Курстар",
       "home": "Басты басқару тақтасы",

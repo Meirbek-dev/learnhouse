@@ -50,6 +50,7 @@ class ExamSettingsBase(SQLModelStrictBaseModel):
     # Result Visibility
     allow_result_review: bool = True
     show_correct_answers: bool = True
+    passing_score: int = 60
 
     # Anti-Cheating / Violation Detection
     copy_paste_protection: bool = False
@@ -98,6 +99,15 @@ class ExamSettingsBase(SQLModelStrictBaseModel):
             msg = f"violation_threshold must be between {VIOLATION_THRESHOLD_MIN} and {VIOLATION_THRESHOLD_MAX}"
             raise ValueError(msg)
         return v
+
+    @field_validator("passing_score", mode="before")
+    @classmethod
+    def validate_passing_score(cls, v):
+        if v is None:
+            return 60
+        if not (0 <= int(v) <= 100):
+            raise ValueError("passing_score must be between 0 and 100")
+        return int(v)
 
     @field_validator("access_mode", mode="before")
     @classmethod

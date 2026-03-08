@@ -1,6 +1,7 @@
 import asyncio
 import os
 from typing import Annotated
+from datetime import date
 
 import typer
 from sqlalchemy import create_engine
@@ -15,6 +16,7 @@ from src.services.setup.setup import (
     install_create_organization_user,
     install_default_elements,
 )
+from src.services.analytics.rollups import refresh_teacher_analytics_rollups
 
 cli = typer.Typer()
 
@@ -127,6 +129,23 @@ def install(
 @cli.command()
 def main() -> None:
     cli()
+
+
+@cli.command()
+def refresh_analytics(
+    org_id: Annotated[int | None, typer.Option(help="Optional organization id to refresh")] = None,
+    snapshot_date: Annotated[str | None, typer.Option(help="Optional snapshot date in YYYY-MM-DD format")] = None,
+) -> None:
+    platform_config = get_platform_config()
+    engine: Engine = create_engine(
+        platform_config.database_config.sql_connection_string,
+        echo=False,
+        pool_pre_ping=True,
+    )
+    db_session = Session(engine)
+    parsed_snapshot = date.fromisoformat(snapshot_date) if snapshot_date else None
+    result = refresh_teacher_analytics_rollups(db_session, org_id=org_id, snapshot_date=parsed_snapshot)
+    print(result)
 
 
 @cli.command()

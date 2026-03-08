@@ -1,0 +1,37 @@
+'use client';
+
+import type { FunnelStep } from '@/types/analytics';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+
+interface CompletionFunnelChartProps {
+  title: string;
+  description: string;
+  data: FunnelStep[];
+}
+
+export default function CompletionFunnelChart({ title, description, data }: CompletionFunnelChartProps) {
+  return (
+    <Card className="border-slate-200 bg-white/90 shadow-sm">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer
+          className="h-[280px] w-full"
+          config={{ count: { label: 'Learners', color: '#b45309' } }}
+        >
+          <BarChart data={data} layout="vertical" margin={{ left: 18 }}>
+            <CartesianGrid horizontal={false} strokeDasharray="3 3" />
+            <XAxis type="number" hide />
+            <YAxis dataKey="label" type="category" width={140} tickLine={false} axisLine={false} />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Bar dataKey="count" fill="var(--color-count)" radius={8} />
+          </BarChart>
+        </ChartContainer>
+      </CardContent>
+    </Card>
+  );
+}

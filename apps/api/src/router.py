@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from src.routers import (
+    analytics,
     auth,
     dev,
     gamification,
@@ -71,6 +72,7 @@ v1_router.include_router(
     prefix="/gamification",
     tags=["gamification"],
 )
+v1_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
 
 v1_router.include_router(ai.router, prefix="/ai", tags=["ai"])
 

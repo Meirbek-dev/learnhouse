@@ -5865,6 +5865,7 @@
       "expandSidebar": "Expand sidebar",
       "goToHomepage": "Go to homepage",
       "home": "Go to dashboard home",
+      "manageAnalytics": "Open teacher analytics dashboard",
       "manageAssignments": "Manage assignments",
       "manageCourses": "Manage courses",
       "managePayments": "Manage payments and billing",
@@ -5887,6 +5888,7 @@
     },
     "mobile": {
       "admin": "Admin",
+      "analytics": "Analytics",
       "assignments": "Assignments",
       "courses": "Courses",
       "home": "Home",
@@ -5898,6 +5900,7 @@
     "orgName": "Ashyq Bilim",
     "tooltips": {
       "admin": "Admin Dashboard",
+      "analytics": "Teacher Analytics",
       "assignments": "Assignments",
       "courses": "Courses",
       "home": "Dashboard Home",

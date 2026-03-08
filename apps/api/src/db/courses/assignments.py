@@ -337,6 +337,8 @@ class AssignmentUserSubmissionRead(AssignmentUserSubmissionBase):
     id: int
     creation_date: str
     update_date: str
+    submitted_at: str | None = None
+    graded_at: str | None = None
 
 
 class AssignmentUserSubmissionUpdate(SQLModelStrictBaseModel):
@@ -356,6 +358,8 @@ class AssignmentUserSubmission(AssignmentUserSubmissionBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     creation_date: str
     update_date: str
+    submitted_at: str | None = None
+    graded_at: str | None = None
     assignmentusersubmission_uuid: str
 
     submission_status: AssignmentUserSubmissionStatus = (

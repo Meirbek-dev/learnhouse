@@ -30,6 +30,17 @@ export function canSeeAssignments(can: CanCheck): boolean {
   );
 }
 
+export function canSeeAnalytics(can: CanCheck): boolean {
+  return (
+    can(Actions.READ, Resources.ANALYTICS, Scopes.ASSIGNED) ||
+    can(Actions.READ, Resources.ANALYTICS, Scopes.ORG) ||
+    can(Actions.READ, Resources.ANALYTICS, Scopes.ALL) ||
+    can(Actions.EXPORT, Resources.ANALYTICS, Scopes.ASSIGNED) ||
+    can(Actions.EXPORT, Resources.ANALYTICS, Scopes.ORG) ||
+    can(Actions.EXPORT, Resources.ANALYTICS, Scopes.ALL)
+  );
+}
+
 export function canSeeUsers(can: CanCheck): boolean {
   return (
     can(Actions.UPDATE, Resources.USER, Scopes.ORG) ||
@@ -58,6 +69,7 @@ export function canAccessDashboard(can: CanCheck): boolean {
     canSeeOrg(can) ||
     canSeeCourses(can) ||
     canSeeAssignments(can) ||
+    canSeeAnalytics(can) ||
     canSeeUsers(can) ||
     canSeeAdmin(can) ||
     canSeePayments(can)
