@@ -33,10 +33,10 @@ export default function AnalyticsMultiSeriesTrendChart({ title, description, dat
           <ChartContainer
             className="h-[320px] w-full"
             config={{
-              active_learners: { label: t('trend.activeLearners'), color: 'hsl(var(--chart-1))' },
-              completions: { label: t('trend.completions'), color: 'hsl(var(--chart-2))' },
-              submissions: { label: t('trend.submissions'), color: 'hsl(var(--chart-3))' },
-              grading_completed: { label: t('trend.gradingCompleted'), color: 'hsl(var(--chart-4))' },
+              active_learners: { label: t('trend.activeLearners'), color: 'var(--chart-1)' },
+              completions: { label: t('trend.completions'), color: 'var(--chart-2)' },
+              submissions: { label: t('trend.submissions'), color: 'var(--chart-3)' },
+              grading_completed: { label: t('trend.gradingCompleted'), color: 'var(--chart-4)' },
             }}
           >
             <AreaChart data={data}>

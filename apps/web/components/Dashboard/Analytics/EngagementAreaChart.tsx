@@ -29,7 +29,7 @@ export default function EngagementAreaChart({ title, description, data }: Engage
         <ChartContainer
           className="h-[280px] w-full"
           config={{
-            value: { label: title, color: 'hsl(var(--chart-1))' },
+            value: { label: title, color: 'var(--chart-1)' },
           }}
         >
           <AreaChart data={chartData}>
