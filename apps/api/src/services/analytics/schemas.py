@@ -11,6 +11,8 @@ class MetricCard(PydanticStrictBaseModel):
     delta_pct: float | None
     direction: Literal["up", "down", "flat"]
     label: str
+    unit: str | None = None
+    is_higher_better: bool = True
 
 
 class TimeSeriesPoint(PydanticStrictBaseModel):

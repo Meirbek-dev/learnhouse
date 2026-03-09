@@ -6366,6 +6366,7 @@
     },
     "kpi": {
       "stable": "stable",
+      "noData": "no prior data",
       "noComparison": "Comparison unavailable for this metric in the current release.",
       "changePeriod": "Change vs previous period: {delta}"
     },
@@ -6382,7 +6383,11 @@
     "table": {
       "searchDefault": "Search...",
       "emptyDefault": "No rows found for the selected filters.",
-      "visibleRows": "{count} visible rows"
+      "visibleRows": "{count} visible rows",
+      "showingRows": "{from}\u2013{to} of {total}",
+      "page": "Page {current} of {total}",
+      "prev": "Previous",
+      "next": "Next"
     },
     "trend": {
       "activeLearners": "Active learners",

@@ -21,12 +21,12 @@ export default function ScoreDistributionChart({ title, description, data }: Sco
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer className="h-[260px] w-full" config={{ count: { label: t('scoreChart.learners'), color: '#1d4ed8' } }}>
+        <ChartContainer className="h-[260px] w-full" config={{ count: { label: t('scoreChart.learners'), color: 'hsl(var(--chart-1))' } }}>
           <BarChart data={data}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis dataKey="label" tickLine={false} axisLine={false} />
             <YAxis tickLine={false} axisLine={false} />
-            <ChartTooltip content={<ChartTooltipContent />} />
+            <ChartTooltip content={<ChartTooltipContent nameKey="label" formatter={(v) => [`${v} ${t('scoreChart.learners')}`, '']} />} />
             <Bar dataKey="count" radius={8} fill="var(--color-count)" />
           </BarChart>
         </ChartContainer>

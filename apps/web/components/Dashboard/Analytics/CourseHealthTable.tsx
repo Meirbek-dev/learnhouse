@@ -33,7 +33,16 @@ export default function CourseHealthTable({ orgslug, rows }: CourseHealthTablePr
     },
     { accessorKey: 'at_risk_learners', header: t('courseHealth.colRisk') },
     { accessorKey: 'ungraded_submissions', header: t('courseHealth.colUngraded') },
-    { accessorKey: 'content_health_score', header: t('courseHealth.colHealth') },
+    {
+      accessorKey: 'content_health_score',
+      header: t('courseHealth.colHealth'),
+      cell: ({ row }) => {
+        const v = row.original.content_health_score;
+        if (v == null) return t('atRisk.na');
+        // Score is on a 0–1 scale; render as a percentage for human readability.
+        return `${Math.round(v * 100)}%`;
+      },
+    },
     {
       accessorKey: 'top_alert',
       header: t('courseHealth.colTopAlert'),

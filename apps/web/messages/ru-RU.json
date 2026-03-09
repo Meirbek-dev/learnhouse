@@ -6366,6 +6366,7 @@
     },
     "kpi": {
       "stable": "стабильно",
+      "noData": "нет данных",
       "noComparison": "Сравнение для этой метрики недоступно в текущей версии.",
       "changePeriod": "Изменение по сравнению с предыдущим периодом: {delta}"
     },
@@ -6382,7 +6383,11 @@
     "table": {
       "searchDefault": "Поиск...",
       "emptyDefault": "Строки не найдены для выбранных фильтров.",
-      "visibleRows": "{count} видимых строк"
+      "visibleRows": "{count} видимых строк",
+      "showingRows": "{from}–{to} из {total}",
+      "page": "Страница {current} из {total}",
+      "prev": "Назад",
+      "next": "Вперёд"
     },
     "trend": {
       "activeLearners": "Активные учащиеся",

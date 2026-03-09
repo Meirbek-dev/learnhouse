@@ -1,7 +1,8 @@
+from datetime import datetime
 from enum import Enum, StrEnum
 
 from pydantic import ConfigDict, field_validator
-from sqlalchemy import JSON, Column, ForeignKey
+from sqlalchemy import JSON, Column, DateTime, ForeignKey
 from sqlmodel import Field
 
 from src.db.strict_base_model import SQLModelStrictBaseModel
@@ -337,8 +338,8 @@ class AssignmentUserSubmissionRead(AssignmentUserSubmissionBase):
     id: int
     creation_date: str
     update_date: str
-    submitted_at: str | None = None
-    graded_at: str | None = None
+    submitted_at: datetime | None = None
+    graded_at: datetime | None = None
 
 
 class AssignmentUserSubmissionUpdate(SQLModelStrictBaseModel):
@@ -358,8 +359,14 @@ class AssignmentUserSubmission(AssignmentUserSubmissionBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     creation_date: str
     update_date: str
-    submitted_at: str | None = None
-    graded_at: str | None = None
+    submitted_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True), nullable=True),
+    )
+    graded_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True), nullable=True),
+    )
     assignmentusersubmission_uuid: str
 
     submission_status: AssignmentUserSubmissionStatus = (

@@ -3,12 +3,30 @@
 import type { AnalyticsFilterOption, AnalyticsQuery } from '@/types/analytics';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import { getAnalyticsBucketLabel, getAnalyticsCompareLabel } from '@/lib/analytics/labels';
 import Link from 'next/link';
 import { Filter, Globe2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+
+// Common IANA timezone identifiers for the select. These cover almost all deployed users.
+const COMMON_TIMEZONES = [
+  'UTC',
+  'Europe/London',
+  'Europe/Paris',
+  'Europe/Berlin',
+  'Europe/Moscow',
+  'Asia/Almaty',
+  'Asia/Kolkata',
+  'Asia/Shanghai',
+  'Asia/Tokyo',
+  'Australia/Sydney',
+  'America/New_York',
+  'America/Chicago',
+  'America/Denver',
+  'America/Los_Angeles',
+  'America/Sao_Paulo',
+] as const;
 
 interface TeacherFilterBarProps {
   orgslug: string;
@@ -110,7 +128,13 @@ export default function TeacherFilterBar({ orgslug, path, query, courseCount, co
             ))}
           </NativeSelect>
 
-          <Input name="timezone" defaultValue={query.timezone || 'UTC'} placeholder={t('filters.timezonePlaceholder')} />
+          <NativeSelect name="timezone" defaultValue={query.timezone || 'UTC'} className="w-full">
+            {COMMON_TIMEZONES.map((tz) => (
+              <NativeSelectOption key={tz} value={tz}>
+                {tz}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
 
           <NativeSelect name="sort_by" defaultValue={query.sort_by || ''} className="w-full lg:col-span-2">
             {sortOptions.map((option) => (

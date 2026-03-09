@@ -51,7 +51,12 @@ export default function AssessmentOutliersTable({ orgslug, rows }: AssessmentOut
     {
       accessorKey: 'difficulty_score',
       header: t('assessmentOutliers.colDifficulty'),
-      cell: ({ row }) => (row.original.difficulty_score === null ? t('atRisk.na') : row.original.difficulty_score),
+      cell: ({ row }) => {
+        const v = row.original.difficulty_score;
+        if (v === null) return t('atRisk.na');
+        // difficulty_score is on a 0–1 scale where 1 = hardest
+        return `${Math.round(v * 100)}%`;
+      },
     },
     {
       accessorKey: 'outlier_reason_codes',

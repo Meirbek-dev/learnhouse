@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 def supports_rollup_reads(filters: AnalyticsFilters) -> bool:
-    return not filters.cohort_ids and filters.window in {"7d", "28d"} and filters.compare == "previous_period"
+    return not filters.cohort_ids and filters.window in {"7d", "28d", "90d"} and filters.compare == "previous_period"
 
 
 def _unwrap_scalar_date(value: Any) -> date | None:

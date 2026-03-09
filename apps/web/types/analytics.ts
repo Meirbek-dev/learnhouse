@@ -29,6 +29,8 @@ export interface MetricCard {
   delta_pct: number | null;
   direction: 'up' | 'down' | 'flat';
   label: string;
+  unit: string | null;
+  is_higher_better: boolean;
 }
 
 export interface TimeSeriesPoint {

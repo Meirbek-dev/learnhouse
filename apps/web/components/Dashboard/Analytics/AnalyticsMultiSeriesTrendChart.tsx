@@ -33,17 +33,26 @@ export default function AnalyticsMultiSeriesTrendChart({ title, description, dat
           <ChartContainer
             className="h-[320px] w-full"
             config={{
-              active_learners: { label: t('trend.activeLearners'), color: '#0f766e' },
-              completions: { label: t('trend.completions'), color: '#0284c7' },
-              submissions: { label: t('trend.submissions'), color: '#f59e0b' },
-              grading_completed: { label: t('trend.gradingCompleted'), color: '#7c3aed' },
+              active_learners: { label: t('trend.activeLearners'), color: 'hsl(var(--chart-1))' },
+              completions: { label: t('trend.completions'), color: 'hsl(var(--chart-2))' },
+              submissions: { label: t('trend.submissions'), color: 'hsl(var(--chart-3))' },
+              grading_completed: { label: t('trend.gradingCompleted'), color: 'hsl(var(--chart-4))' },
             }}
           >
             <AreaChart data={data}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis dataKey="bucket" tickLine={false} axisLine={false} minTickGap={24} />
               <YAxis tickLine={false} axisLine={false} />
-              <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    formatter={(value, name, props) => {
+                      const label = props.dataKey as string;
+                      return [String(value), label];
+                    }}
+                  />
+                }
+              />
               <Legend content={<ChartLegendContent />} />
               <Area type="monotone" dataKey="active_learners" stroke="var(--color-active_learners)" fill="var(--color-active_learners)" fillOpacity={0.14} strokeWidth={2.5} />
               <Area type="monotone" dataKey="completions" stroke="var(--color-completions)" fill="var(--color-completions)" fillOpacity={0.1} strokeWidth={2} />

@@ -2,16 +2,17 @@
 
 import * as React from 'react';
 
-import type { ColumnDef, SortingState } from '@tanstack/react-table';
+import type { ColumnDef, PaginationState, SortingState } from '@tanstack/react-table';
 import { useTranslations } from 'next-intl';
 import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { ArrowDown, ArrowUp, ArrowUpDown, Search } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +25,7 @@ interface AnalyticsDataTableProps<TData> {
   searchPlaceholder?: string;
   emptyMessage?: string;
   className?: string;
+  pageSize?: number;
 }
 
 export default function AnalyticsDataTable<TData>({
@@ -32,22 +34,26 @@ export default function AnalyticsDataTable<TData>({
   searchPlaceholder,
   emptyMessage,
   className,
+  pageSize = 20,
 }: AnalyticsDataTableProps<TData>) {
   const t = useTranslations('TeacherAnalytics');
   const resolvedPlaceholder = searchPlaceholder ?? t('table.searchDefault');
   const resolvedEmpty = emptyMessage ?? t('table.emptyDefault');
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
+  const [pagination, setPagination] = React.useState<PaginationState>({ pageIndex: 0, pageSize });
 
   const table = useReactTable({
     data,
     columns,
-    state: { sorting, globalFilter },
+    state: { sorting, globalFilter, pagination },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     globalFilterFn: (row, _columnId, filterValue) => {
       const normalizedFilter = String(filterValue).toLowerCase();
       return row
@@ -57,6 +63,11 @@ export default function AnalyticsDataTable<TData>({
   });
 
   const rows = table.getRowModel().rows;
+  const totalFiltered = table.getFilteredRowModel().rows.length;
+  const { pageIndex, pageSize: currentPageSize } = table.getState().pagination;
+  const pageCount = table.getPageCount();
+  const from = pageIndex * currentPageSize + 1;
+  const to = Math.min(from + rows.length - 1, totalFiltered);
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -65,12 +76,20 @@ export default function AnalyticsDataTable<TData>({
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
             value={globalFilter}
-            onChange={(event) => setGlobalFilter(event.target.value)}
+            onChange={(event) => {
+              setGlobalFilter(event.target.value);
+              // Reset to first page when filtering
+              setPagination((p) => ({ ...p, pageIndex: 0 }));
+            }}
             placeholder={resolvedPlaceholder}
             className="pl-9"
           />
         </div>
-        <div className="text-sm text-slate-500">{t('table.visibleRows', { count: rows.length })}</div>
+        <div className="text-sm text-slate-500">
+          {totalFiltered > 0
+            ? t('table.showingRows', { from, to, total: totalFiltered })
+            : t('table.visibleRows', { count: 0 })}
+        </div>
       </div>
 
       <Table>
@@ -128,6 +147,32 @@ export default function AnalyticsDataTable<TData>({
           )}
         </TableBody>
       </Table>
+
+      {pageCount > 1 && (
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            {t('table.prev')}
+          </Button>
+          <span className="text-sm text-slate-600">
+            {t('table.page', { current: pageIndex + 1, total: pageCount })}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            {t('table.next')}
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

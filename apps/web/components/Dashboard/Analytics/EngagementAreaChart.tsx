@@ -29,14 +29,14 @@ export default function EngagementAreaChart({ title, description, data }: Engage
         <ChartContainer
           className="h-[280px] w-full"
           config={{
-            value: { label: title, color: '#0f766e' },
+            value: { label: title, color: 'hsl(var(--chart-1))' },
           }}
         >
           <AreaChart data={chartData}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis dataKey="bucket" tickLine={false} axisLine={false} />
             <YAxis tickLine={false} axisLine={false} />
-            <ChartTooltip content={<ChartTooltipContent />} />
+            <ChartTooltip content={<ChartTooltipContent nameKey="value" formatter={(v) => [String(v), title]} />} />
             <Area dataKey="value" type="monotone" fill="var(--color-value)" stroke="var(--color-value)" fillOpacity={0.18} strokeWidth={2.5} />
           </AreaChart>
         </ChartContainer>

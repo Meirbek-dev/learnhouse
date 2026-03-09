@@ -267,7 +267,13 @@ def cohort_names_for_user(context: AnalyticsContext, user_id: int, cohort_ids: I
     return [context.usergroup_names_by_id[group_id] for group_id in sorted(memberships) if group_id in context.usergroup_names_by_id]
 
 
-def load_analytics_context(db_session: Session, course_ids: list[int]) -> AnalyticsContext:
+def load_analytics_context(db_session: Session, course_ids: list[int], *, activity_start: datetime | None = None, activity_end: datetime | None = None) -> AnalyticsContext:
+    """Load analytics context for the given course IDs.
+
+    ``activity_start`` and ``activity_end`` bound which ``TrailStep`` and ``TrailRun`` rows are
+    fetched, reducing memory usage for large platforms with long history.  When omitted all rows
+    are returned (backwards-compatible behaviour).
+    """
     if not course_ids:
         return AnalyticsContext(
             generated_at=now_utc(),
@@ -322,13 +328,21 @@ def load_analytics_context(db_session: Session, course_ids: list[int]) -> Analyt
         for item in db_session.exec(select(ChapterActivity).where(ChapterActivity.course_id.in_(course_ids))).all()
     ]
 
+    trail_run_stmt = select(TrailRun).where(TrailRun.course_id.in_(course_ids))
+    if activity_start is not None:
+        trail_run_stmt = trail_run_stmt.where(TrailRun.update_date >= activity_start)
     trail_runs = [
         _unwrap_model(run, TrailRun)
-        for run in db_session.exec(select(TrailRun).where(TrailRun.course_id.in_(course_ids))).all()
+        for run in db_session.exec(trail_run_stmt).all()
     ]
+    trail_step_stmt = select(TrailStep).where(TrailStep.course_id.in_(course_ids))
+    if activity_start is not None:
+        trail_step_stmt = trail_step_stmt.where(TrailStep.update_date >= activity_start)
+    if activity_end is not None:
+        trail_step_stmt = trail_step_stmt.where(TrailStep.update_date <= activity_end)
     trail_steps = [
         _unwrap_model(step, TrailStep)
-        for step in db_session.exec(select(TrailStep).where(TrailStep.course_id.in_(course_ids))).all()
+        for step in db_session.exec(trail_step_stmt).all()
     ]
 
     assignments = [

@@ -6366,6 +6366,7 @@
     },
     "kpi": {
       "stable": "тұрақты",
+      "noData": "деректер жоқ",
       "noComparison": "Бұл метрика үшін ағымдағы нұсқада салыстыру қол жетімді емес.",
       "changePeriod": "Алдыңғы кезеңмен салыстырғандағы өзгеріс: {delta}"
     },
@@ -6382,7 +6383,11 @@
     "table": {
       "searchDefault": "Іздеу...",
       "emptyDefault": "Таңдалған фильтрлер бойынша жолдар табылмады.",
-      "visibleRows": "{count} көрінетін жол"
+      "visibleRows": "{count} көрінетін жол",
+      "showingRows": "{total} ішіндегі {from}\u2013{to}",
+      "page": "{total} беттен {current} бет",
+      "prev": "Алдыңғы",
+      "next": "Келесі"
     },
     "trend": {
       "activeLearners": "Белсенді оқушылар",

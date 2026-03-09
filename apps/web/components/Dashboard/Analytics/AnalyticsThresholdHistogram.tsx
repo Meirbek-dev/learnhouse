@@ -31,12 +31,12 @@ export default function AnalyticsThresholdHistogram({ title, description, data, 
       </CardHeader>
       <CardContent>
         {data.length ? (
-          <ChartContainer className="h-[280px] w-full" config={{ count: { label: t('histogram.learners'), color: '#1d4ed8' } }}>
+          <ChartContainer className="h-[280px] w-full" config={{ count: { label: t('histogram.learners'), color: 'hsl(var(--chart-3))' } }}>
             <BarChart data={data}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis dataKey="label" tickLine={false} axisLine={false} />
               <YAxis tickLine={false} axisLine={false} allowDecimals={false} />
-              <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartTooltip content={<ChartTooltipContent nameKey="label" formatter={(v) => [`${v} ${t('histogram.learners')}`, '']} />} />
               <Bar dataKey="count" radius={10} fill="var(--color-count)" />
               {thresholdBucketLabel ? (
                 <ReferenceLine

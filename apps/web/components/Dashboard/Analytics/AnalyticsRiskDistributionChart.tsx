@@ -13,10 +13,18 @@ interface AnalyticsRiskDistributionChartProps {
   totalAtRisk?: number;
 }
 
-const RISK_COLORS: Record<string, string> = {
-  high: '#dc2626',
-  medium: '#f59e0b',
-  low: '#64748b',
+// Use CSS custom properties that respect the design system and dark mode.
+const RISK_COLOR_VARS: Record<string, string> = {
+  high: 'var(--color-risk-high)',
+  medium: 'var(--color-risk-medium)',
+  low: 'var(--color-risk-low)',
+};
+
+// Fallback CSS values injected via style when ChartStyle variables are not yet applied.
+const RISK_COLOR_FALLBACKS: Record<string, string> = {
+  high: 'hsl(0 72% 51%)',    // red-600
+  medium: 'hsl(38 92% 50%)', // amber-500
+  low: 'hsl(215 16% 47%)',   // slate-500
 };
 
 export default function AnalyticsRiskDistributionChart({ rows, totalAtRisk }: AnalyticsRiskDistributionChartProps) {
@@ -40,15 +48,25 @@ export default function AnalyticsRiskDistributionChart({ rows, totalAtRisk }: An
       </CardHeader>
       <CardContent>
         {data.length ? (
-          <ChartContainer className="h-[280px] w-full" config={{ count: { label: t('riskDistribution.learners') } }}>
+          <ChartContainer
+            className="h-[280px] w-full"
+            config={{
+              count: { label: t('riskDistribution.learners') },
+              'risk-high': { color: RISK_COLOR_FALLBACKS.high },
+              'risk-medium': { color: RISK_COLOR_FALLBACKS.medium },
+              'risk-low': { color: RISK_COLOR_FALLBACKS.low },
+            }}
+          >
             <BarChart data={data}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis dataKey="label" tickLine={false} axisLine={false} />
               <YAxis tickLine={false} axisLine={false} allowDecimals={false} />
-              <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartTooltip
+                content={<ChartTooltipContent nameKey="label" formatter={(v) => [`${v} ${t('riskDistribution.learners')}`, '']} />}
+              />
               <Bar dataKey="count" radius={10}>
                 {data.map((entry) => (
-                  <Cell key={entry.level} fill={RISK_COLORS[entry.level] ?? '#94a3b8'} />
+                  <Cell key={entry.level} fill={`var(--color-risk-${entry.level}, ${RISK_COLOR_FALLBACKS[entry.level] ?? '#94a3b8'})`} />
                 ))}
               </Bar>
             </BarChart>

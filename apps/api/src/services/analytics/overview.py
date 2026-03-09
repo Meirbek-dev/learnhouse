@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import date, timedelta
 
+from sqlalchemy import func, select
 from sqlmodel import Session
 
+from src.db.analytics import DailyTeacherMetrics, LearnerRiskSnapshot
 from src.services.analytics.courses import build_course_rows
 from src.services.analytics.filters import AnalyticsFilters
 from src.services.analytics.queries import (
@@ -33,8 +35,10 @@ from src.services.analytics.schemas import (
 from src.services.analytics.scope import TeacherAnalyticsScope
 
 
-def _metric(label: str, value: float, previous: float | None) -> MetricCard:
+def _metric(label: str, value: float, previous: float | None, *, unit: str | None = None, is_higher_better: bool = True) -> MetricCard:
     delta_value = round(value - previous, 1) if previous is not None else None
+    # When previous is 0 and current is non-zero, delta_pct is infinite — return None and
+    # let the frontend display "no prior data" rather than the misleading "Stable" label.
     delta_pct = round(((value - previous) / previous) * 100, 1) if previous not in (None, 0) else None
     return MetricCard(
         value=round(value, 1),
@@ -42,11 +46,54 @@ def _metric(label: str, value: float, previous: float | None) -> MetricCard:
         delta_pct=delta_pct,
         direction=direction_for_delta(delta_value),
         label=label,
+        unit=unit,
+        is_higher_better=is_higher_better,
     )
 
 
+def _query_previous_at_risk_count(db_session: Session, org_id: int, course_ids: list[int], before_date: date) -> float:
+    """Return the at-risk learner count from the most recent LearnerRiskSnapshot before *before_date*."""
+    latest_date_result = db_session.exec(
+        select(func.max(LearnerRiskSnapshot.snapshot_date)).where(
+            LearnerRiskSnapshot.org_id == org_id,
+            LearnerRiskSnapshot.snapshot_date < before_date,
+        )
+    ).one_or_none()
+    latest_date = latest_date_result if isinstance(latest_date_result, date) else None
+    if latest_date is None:
+        return 0.0
+    filter_clause = [
+        LearnerRiskSnapshot.org_id == org_id,
+        LearnerRiskSnapshot.snapshot_date == latest_date,
+        LearnerRiskSnapshot.risk_level.in_(["medium", "high"]),
+    ]
+    if course_ids:
+        filter_clause.append(LearnerRiskSnapshot.course_id.in_(course_ids))
+    result = db_session.exec(
+        select(func.count()).select_from(LearnerRiskSnapshot).where(*filter_clause)
+    ).one_or_none()
+    return float(result if result is not None else 0)
+
+
+def _query_previous_negative_engagement(db_session: Session, org_id: int, teacher_user_id: int, before_date: date) -> float:
+    """Return the courses_with_negative_engagement from the most recent DailyTeacherMetrics before *before_date*."""
+    stmt = select(DailyTeacherMetrics).where(
+        DailyTeacherMetrics.org_id == org_id,
+        DailyTeacherMetrics.teacher_user_id == teacher_user_id,
+        DailyTeacherMetrics.metric_date < before_date,
+    ).order_by(DailyTeacherMetrics.metric_date.desc()).limit(1)
+    row = db_session.exec(stmt).first()
+    return float(row.courses_with_negative_engagement) if row is not None else 0.0
+
+
 def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filters: AnalyticsFilters) -> TeacherOverviewResponse:
-    context = load_analytics_context(db_session, scope.course_ids)
+    # Pre-compute window bounds so we can pass them as date filters to load_analytics_context,
+    # avoiding a full unbounded pull of TrailStep/TrailRun for every period.
+    now = None  # will be resolved inside window_bounds using system clock
+    _pre_start, _pre_end = filters.window_bounds(now=now)
+    previous_start_pre, _ = filters.previous_window_bounds(now=now)
+    # Fetch data starting from the previous period so delta calculations have the earlier data.
+    context = load_analytics_context(db_session, scope.course_ids, activity_start=previous_start_pre)
     allowed_user_ids = cohort_user_ids(context, filters.cohort_ids)
     events = build_activity_events(context, allowed_user_ids)
     snapshots = progress_snapshots(context, allowed_user_ids)
@@ -72,14 +119,19 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
 
     enrolled = len(snapshots)
     completion_rate = safe_pct(sum(1 for snapshot in snapshots.values() if snapshot.is_completed), enrolled) or 0.0
-    # Derive previous-period completion from events in the prior window
-    previous_active_set = {event.user_id for event in events if previous_start <= event.ts < previous_end}
-    previous_completion_rate = safe_pct(
-        sum(1 for snapshot in snapshots.values() if snapshot.is_completed and snapshot.user_id in previous_active_set),
-        len(previous_active_set),
-    ) or 0.0
+    # Previous-period completion rate: count learners who completed and whose last activity
+    # was before the current window start (proxy for "completed before this period").
+    # Use all enrolled as denominator to keep it comparable to the current period rate.
+    previous_completions = sum(
+        1 for snapshot in snapshots.values()
+        if snapshot.is_completed
+        and snapshot.last_activity_at is not None
+        and snapshot.last_activity_at < current_start
+    )
+    previous_completion_rate = safe_pct(previous_completions, enrolled) or 0.0
     at_risk_count = sum(1 for row in risk_rows if row.risk_level in {"medium", "high"})
-    previous_at_risk = at_risk_count  # no prior snapshot available in live path; neutral delta
+    # Query the most recent LearnerRiskSnapshot before the current window to get a real previous value.
+    previous_at_risk: float = _query_previous_at_risk_count(db_session, scope.org_id, scope.course_ids, previous_end.date())
     ungraded_submissions = sum(
         1
         for submission, _assignment in context.assignment_submissions
@@ -90,7 +142,10 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
     # Pass shared context to avoid a second full load inside build_course_rows
     generated_rows_timestamp, course_rows = build_course_rows(scope, filters, db_session, context=context)
     negative_engagement_courses = sum(1 for row in course_rows if row.engagement_delta_pct is not None and row.engagement_delta_pct < 0)
-    previous_negative_engagement = 0  # baseline for delta; no prior rollup in live path
+    # Query the previous period's DailyTeacherMetrics to get actual previous value instead of hardcoded 0.
+    previous_negative_engagement: float = _query_previous_negative_engagement(
+        db_session, scope.org_id, scope.teacher_user_id, previous_end.date()
+    )
 
     completions_events = []
     for snapshot in snapshots.values():
@@ -158,27 +213,34 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
                 "Активные учащиеся",
                 float(teacher_rollup.active_learners_7d if teacher_rollup is not None and filters.window == "7d" else teacher_rollup.active_learners_28d if teacher_rollup is not None else len(current_active_users)),
                 float(len(previous_active_users)),
+                is_higher_better=True,
             ),
             returning_learners=_metric(
                 "Вернувшиеся учащиеся",
-                float(teacher_rollup.returning_learners_28d if teacher_rollup is not None else returning_learners),
+                # Only use the 28d rollup when the window is actually 28d; otherwise use live computation.
+                float(teacher_rollup.returning_learners_28d if teacher_rollup is not None and filters.window == "28d" else returning_learners),
                 float(previous_returning),
+                is_higher_better=True,
             ),
             completion_rate=_metric(
                 "Доля завершения",
                 float(teacher_rollup.completion_rate if teacher_rollup is not None and teacher_rollup.completion_rate is not None else completion_rate),
                 float(previous_completion_rate),
+                unit="%",
+                is_higher_better=True,
             ),
             at_risk_learners=_metric(
                 "Учащиеся в зоне риска",
                 float(teacher_rollup.at_risk_learners if teacher_rollup is not None else at_risk_count),
                 float(previous_at_risk),
+                is_higher_better=False,
             ),
-            ungraded_submissions=_metric("Непроверенные отправки", float(teacher_rollup.ungraded_submissions if teacher_rollup is not None else ungraded_submissions), None),
+            ungraded_submissions=_metric("Непроверенные отправки", float(teacher_rollup.ungraded_submissions if teacher_rollup is not None else ungraded_submissions), None, is_higher_better=False),
             negative_engagement_courses=_metric(
                 "Курсы со снижением вовлеченности",
                 float(teacher_rollup.courses_with_negative_engagement if teacher_rollup is not None else negative_engagement_courses),
                 float(previous_negative_engagement),
+                is_higher_better=False,
             ),
         ),
         trends=trends,
