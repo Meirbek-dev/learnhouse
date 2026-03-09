@@ -1,6 +1,6 @@
 import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
+import AnalyticsThresholdHistogram from '@components/Dashboard/Analytics/AnalyticsThresholdHistogram';
 import QuestionDifficultyRadar from '@components/Dashboard/Analytics/QuestionDifficultyRadar';
-import ScoreDistributionChart from '@components/Dashboard/Analytics/ScoreDistributionChart';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -41,8 +41,13 @@ export default async function AnalyticsAssessmentDetailPage(props: {
         </Card>
 
         <div className="grid gap-6 xl:grid-cols-2">
-          <ScoreDistributionChart title="Score distribution" description="Histogram of learner performance across this assessment." data={detail.score_distribution} />
-          <ScoreDistributionChart title="Attempt distribution" description="How many tries learners needed before stopping." data={detail.attempt_distribution} />
+          <AnalyticsThresholdHistogram
+            title="Score distribution"
+            description="Histogram of learner performance across this assessment."
+            data={detail.score_distribution}
+            thresholdLabel={detail.assessment_type === 'exam' ? 'Pass threshold from exam settings' : 'Pass threshold: 60%'}
+          />
+          <AnalyticsThresholdHistogram title="Attempt distribution" description="How many tries learners needed before stopping." data={detail.attempt_distribution} />
         </div>
 
         {detail.question_breakdown?.length ? <QuestionDifficultyRadar title="Question difficulty" description="Lower accuracy highlights items that may be unclear or too difficult." data={detail.question_breakdown} /> : null}

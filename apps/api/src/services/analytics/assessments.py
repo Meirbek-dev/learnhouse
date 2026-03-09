@@ -2,13 +2,18 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 
+from sqlalchemy import select
 from sqlmodel import Session
 
-from src.db.courses.activities import ActivityTypeEnum
+from src.db.courses.activities import Activity, ActivityTypeEnum
+from src.db.courses.assignments import Assignment
+from src.db.courses.courses import Course
+from src.db.courses.exams import Exam
 from src.services.analytics.filters import AnalyticsFilters
 from src.services.analytics.queries import (
     AnalyticsContext,
     assessment_pass_threshold,
+    cohort_user_ids,
     display_name,
     hours_between,
     load_analytics_context,
@@ -18,6 +23,7 @@ from src.services.analytics.queries import (
     safe_pct,
     to_iso,
 )
+from src.services.analytics.rollups import list_latest_assessment_rollups, supports_rollup_reads
 from src.services.analytics.schemas import (
     AssessmentLearnerRow,
     AssessmentOutlierRow,
@@ -29,6 +35,99 @@ from src.services.analytics.schemas import (
     TeacherAssessmentListResponse,
 )
 from src.services.analytics.scope import TeacherAnalyticsScope
+
+
+def _build_rollup_assessment_rows(
+    db_session: Session,
+    scope: TeacherAnalyticsScope,
+    filters: AnalyticsFilters,
+) -> tuple[str, list[AssessmentOutlierRow]] | None:
+    if not supports_rollup_reads(filters):
+        return None
+    rollups = list_latest_assessment_rollups(db_session, org_id=scope.org_id, course_ids=scope.course_ids)
+    if not rollups:
+        return None
+
+    course_map = {
+        course.id: course
+        for course in db_session.exec(select(Course).where(Course.id.in_(list({row.course_id for row in rollups})))).all()
+    }
+    assignments = {
+        assignment.id: assignment
+        for assignment in db_session.exec(
+            select(Assignment).where(Assignment.id.in_(list({row.assessment_id for row in rollups if row.assessment_type == "assignment"})))
+        ).all()
+    }
+    exams = {
+        exam.id: exam
+        for exam in db_session.exec(
+            select(Exam).where(Exam.id.in_(list({row.assessment_id for row in rollups if row.assessment_type == "exam"})))
+        ).all()
+    }
+    activities = {
+        activity.id: activity
+        for activity in db_session.exec(
+            select(Activity).where(Activity.id.in_(list({row.assessment_id for row in rollups if row.assessment_type in {"quiz", "code_challenge"}})))
+        ).all()
+    }
+
+    rows: list[AssessmentOutlierRow] = []
+    for row in rollups:
+        course = course_map.get(row.course_id)
+        if course is None:
+            continue
+        if row.assessment_type == "assignment":
+            title = assignments.get(row.assessment_id).title if row.assessment_id in assignments else f"Assignment {row.assessment_id}"
+        elif row.assessment_type == "exam":
+            title = exams.get(row.assessment_id).title if row.assessment_id in exams else f"Exam {row.assessment_id}"
+        else:
+            title = activities.get(row.assessment_id).name if row.assessment_id in activities else f"Assessment {row.assessment_id}"
+
+        outlier_reason_codes: list[str] = []
+        if row.submission_rate is not None and float(row.submission_rate) < 60:
+            outlier_reason_codes.append("low_submission_rate")
+        if row.pass_rate is not None and float(row.pass_rate) < 60:
+            outlier_reason_codes.append("low_success_rate")
+        if row.grading_latency_hours_p90 is not None and float(row.grading_latency_hours_p90) > 72:
+            outlier_reason_codes.append("slow_feedback")
+
+        rows.append(
+            AssessmentOutlierRow(
+                assessment_type=row.assessment_type,
+                assessment_id=row.assessment_id,
+                activity_id=row.activity_id,
+                course_id=row.course_id,
+                course_name=course.name,
+                title=title,
+                submission_rate=float(row.submission_rate) if row.submission_rate is not None else None,
+                completion_rate=float(row.completion_rate) if row.completion_rate is not None else None,
+                pass_rate=float(row.pass_rate) if row.pass_rate is not None else None,
+                median_score=float(row.median_score) if row.median_score is not None else None,
+                avg_attempts=float(row.avg_attempts) if row.avg_attempts is not None else None,
+                grading_latency_hours_p50=float(row.grading_latency_hours_p50) if row.grading_latency_hours_p50 is not None else None,
+                grading_latency_hours_p90=float(row.grading_latency_hours_p90) if row.grading_latency_hours_p90 is not None else None,
+                difficulty_score=float(row.difficulty_score) if row.difficulty_score is not None else None,
+                outlier_reason_codes=outlier_reason_codes,
+            )
+        )
+
+    sort_by = filters.sort_by or "signals"
+    reverse = filters.sort_order != "asc"
+    sort_map = {
+        "title": lambda current: current.title.lower(),
+        "submission": lambda current: current.submission_rate if current.submission_rate is not None else -1,
+        "pass": lambda current: current.pass_rate if current.pass_rate is not None else -1,
+        "difficulty": lambda current: current.difficulty_score if current.difficulty_score is not None else -1,
+        "latency": lambda current: current.grading_latency_hours_p90 if current.grading_latency_hours_p90 is not None else -1,
+        "signals": lambda current: len(current.outlier_reason_codes),
+    }
+    rows.sort(key=sort_map.get(sort_by, sort_map["signals"]), reverse=reverse)
+    generated_at = max((row.generated_at for row in rollups), default=None)
+    return to_iso(generated_at) or "", rows
+
+
+def _is_allowed(user_id: int, allowed_user_ids: set[int] | None) -> bool:
+    return allowed_user_ids is None or user_id in allowed_user_ids
 
 
 def _score_bucket(score: float | None) -> str:
@@ -54,13 +153,19 @@ def _score_distribution(scores: list[float]) -> list[HistogramBucket]:
     return [HistogramBucket(label=label, count=buckets.get(label, 0)) for label in order if buckets.get(label, 0) > 0]
 
 
-def _build_assignment_rows(context: AnalyticsContext, snapshots: dict[tuple[int, int], object]) -> list[AssessmentOutlierRow]:
+def _build_assignment_rows(
+    context: AnalyticsContext,
+    snapshots: dict[tuple[int, int], object],
+    allowed_user_ids: set[int] | None,
+) -> list[AssessmentOutlierRow]:
     eligible_by_course: dict[int, set[int]] = defaultdict(set)
     for course_id, user_id in snapshots.keys():
         eligible_by_course[course_id].add(user_id)
 
     submissions_by_assignment: dict[int, list] = defaultdict(list)
     for submission, assignment in context.assignment_submissions:
+        if not _is_allowed(submission.user_id, allowed_user_ids):
+            continue
         if assignment.id is not None:
             submissions_by_assignment[assignment.id].append((submission, assignment))
 
@@ -113,13 +218,19 @@ def _build_assignment_rows(context: AnalyticsContext, snapshots: dict[tuple[int,
     return rows
 
 
-def _build_exam_rows(context: AnalyticsContext, snapshots: dict[tuple[int, int], object]) -> list[AssessmentOutlierRow]:
+def _build_exam_rows(
+    context: AnalyticsContext,
+    snapshots: dict[tuple[int, int], object],
+    allowed_user_ids: set[int] | None,
+) -> list[AssessmentOutlierRow]:
     eligible_by_course: dict[int, set[int]] = defaultdict(set)
     for course_id, user_id in snapshots.keys():
         eligible_by_course[course_id].add(user_id)
 
     attempts_by_exam: dict[int, list] = defaultdict(list)
     for attempt, exam in context.exam_attempts:
+        if not _is_allowed(attempt.user_id, allowed_user_ids):
+            continue
         if exam.id is not None and not attempt.is_preview:
             attempts_by_exam[exam.id].append((attempt, exam))
 
@@ -166,13 +277,19 @@ def _build_exam_rows(context: AnalyticsContext, snapshots: dict[tuple[int, int],
     return rows
 
 
-def _build_quiz_rows(context: AnalyticsContext, snapshots: dict[tuple[int, int], object]) -> list[AssessmentOutlierRow]:
+def _build_quiz_rows(
+    context: AnalyticsContext,
+    snapshots: dict[tuple[int, int], object],
+    allowed_user_ids: set[int] | None,
+) -> list[AssessmentOutlierRow]:
     eligible_by_course: dict[int, set[int]] = defaultdict(set)
     for course_id, user_id in snapshots.keys():
         eligible_by_course[course_id].add(user_id)
 
     attempts_by_activity: dict[int, list] = defaultdict(list)
     for attempt, activity in context.quiz_attempts:
+        if not _is_allowed(attempt.user_id, allowed_user_ids):
+            continue
         attempts_by_activity[activity.id].append((attempt, activity))
 
     rows: list[AssessmentOutlierRow] = []
@@ -215,13 +332,19 @@ def _build_quiz_rows(context: AnalyticsContext, snapshots: dict[tuple[int, int],
     return rows
 
 
-def _build_code_rows(context: AnalyticsContext, snapshots: dict[tuple[int, int], object]) -> list[AssessmentOutlierRow]:
+def _build_code_rows(
+    context: AnalyticsContext,
+    snapshots: dict[tuple[int, int], object],
+    allowed_user_ids: set[int] | None,
+) -> list[AssessmentOutlierRow]:
     eligible_by_course: dict[int, set[int]] = defaultdict(set)
     for course_id, user_id in snapshots.keys():
         eligible_by_course[course_id].add(user_id)
 
     submissions_by_activity: dict[int, list] = defaultdict(list)
     for submission, activity in context.code_submissions:
+        if not _is_allowed(submission.user_id, allowed_user_ids):
+            continue
         submissions_by_activity[activity.id].append((submission, activity))
 
     rows: list[AssessmentOutlierRow] = []
@@ -264,21 +387,40 @@ def _build_code_rows(context: AnalyticsContext, snapshots: dict[tuple[int, int],
     return rows
 
 
-def build_assessment_rows(context: AnalyticsContext) -> list[AssessmentOutlierRow]:
-    snapshots = progress_snapshots(context)
+def build_assessment_rows(context: AnalyticsContext, filters: AnalyticsFilters | None = None) -> list[AssessmentOutlierRow]:
+    allowed_user_ids = cohort_user_ids(context, filters.cohort_ids if filters else [])
+    snapshots = progress_snapshots(context, allowed_user_ids)
     rows = [
-        *_build_assignment_rows(context, snapshots),
-        *_build_quiz_rows(context, snapshots),
-        *_build_exam_rows(context, snapshots),
-        *_build_code_rows(context, snapshots),
+        *_build_assignment_rows(context, snapshots, allowed_user_ids),
+        *_build_quiz_rows(context, snapshots, allowed_user_ids),
+        *_build_exam_rows(context, snapshots, allowed_user_ids),
+        *_build_code_rows(context, snapshots, allowed_user_ids),
     ]
-    rows.sort(key=lambda row: (len(row.outlier_reason_codes), row.difficulty_score or 0, -(row.submission_rate or 0)), reverse=True)
+    sort_by = filters.sort_by if filters else None
+    sort_order = filters.sort_order if filters else "desc"
+    sort_map = {
+        "title": lambda row: row.title.lower(),
+        "submission": lambda row: row.submission_rate if row.submission_rate is not None else -1,
+        "pass": lambda row: row.pass_rate if row.pass_rate is not None else -1,
+        "difficulty": lambda row: row.difficulty_score if row.difficulty_score is not None else -1,
+        "latency": lambda row: row.grading_latency_hours_p90 if row.grading_latency_hours_p90 is not None else -1,
+        "signals": lambda row: len(row.outlier_reason_codes),
+    }
+    rows.sort(
+        key=sort_map.get(sort_by or "signals", lambda row: (len(row.outlier_reason_codes), row.difficulty_score or 0, -(row.submission_rate or 0))),
+        reverse=sort_order != "asc",
+    )
     return rows
 
 
-def get_teacher_assessment_list(db_session: Session, scope: TeacherAnalyticsScope, _filters: AnalyticsFilters) -> TeacherAssessmentListResponse:
+def get_teacher_assessment_list(db_session: Session, scope: TeacherAnalyticsScope, filters: AnalyticsFilters) -> TeacherAssessmentListResponse:
+    rollup_rows = _build_rollup_assessment_rows(db_session, scope, filters)
+    if rollup_rows is not None:
+        generated_at, rows = rollup_rows
+        return TeacherAssessmentListResponse(generated_at=generated_at, total=len(rows), items=rows)
     context = load_analytics_context(db_session, scope.course_ids)
-    return TeacherAssessmentListResponse(generated_at=to_iso(context.generated_at) or "", items=build_assessment_rows(context))
+    rows = build_assessment_rows(context, filters)
+    return TeacherAssessmentListResponse(generated_at=to_iso(context.generated_at) or "", total=len(rows), items=rows)
 
 
 def get_teacher_assessment_detail(
@@ -286,10 +428,11 @@ def get_teacher_assessment_detail(
     scope: TeacherAnalyticsScope,
     assessment_type: str,
     assessment_id: int,
-    _filters: AnalyticsFilters,
+    filters: AnalyticsFilters,
 ) -> TeacherAssessmentDetailResponse:
     context = load_analytics_context(db_session, scope.course_ids)
-    snapshots = progress_snapshots(context)
+    allowed_user_ids = cohort_user_ids(context, filters.cohort_ids)
+    snapshots = progress_snapshots(context, allowed_user_ids)
     eligible_by_course: dict[int, set[int]] = defaultdict(set)
     for course_id, user_id in snapshots.keys():
         eligible_by_course[course_id].add(user_id)
@@ -298,7 +441,11 @@ def get_teacher_assessment_detail(
         assignment = next((item for item in context.assignments if item.id == assessment_id), None)
         if assignment is None:
             raise ValueError(f"Assignment not found: {assessment_id}")
-        records = [(submission, _assignment) for submission, _assignment in context.assignment_submissions if _assignment.id == assessment_id]
+        records = [
+            (submission, _assignment)
+            for submission, _assignment in context.assignment_submissions
+            if _assignment.id == assessment_id and _is_allowed(submission.user_id, allowed_user_ids)
+        ]
         eligible = len(eligible_by_course.get(assignment.course_id, set()))
         scores = [float(submission.grade) for submission, _ in records if submission.submission_status.value == "GRADED"]
         latencies = [
@@ -353,7 +500,11 @@ def get_teacher_assessment_detail(
         exam = next((item for item in context.exams if item.id == assessment_id), None)
         if exam is None:
             raise ValueError(f"Exam not found: {assessment_id}")
-        records = [(attempt, _exam) for attempt, _exam in context.exam_attempts if _exam.id == assessment_id and not attempt.is_preview]
+        records = [
+            (attempt, _exam)
+            for attempt, _exam in context.exam_attempts
+            if _exam.id == assessment_id and not attempt.is_preview and _is_allowed(attempt.user_id, allowed_user_ids)
+        ]
         eligible = len(eligible_by_course.get(exam.course_id, set()))
         attempts_by_user = defaultdict(list)
         scores: list[float] = []
@@ -406,7 +557,11 @@ def get_teacher_assessment_detail(
         activity = context.activities_by_id.get(assessment_id)
         if activity is None or activity.course_id is None:
             raise ValueError(f"Quiz activity not found: {assessment_id}")
-        records = [(attempt, _activity) for attempt, _activity in context.quiz_attempts if _activity.id == assessment_id]
+        records = [
+            (attempt, _activity)
+            for attempt, _activity in context.quiz_attempts
+            if _activity.id == assessment_id and _is_allowed(attempt.user_id, allowed_user_ids)
+        ]
         eligible = len(eligible_by_course.get(activity.course_id, set()))
         attempts_by_user = defaultdict(list)
         scores: list[float] = []
@@ -474,7 +629,11 @@ def get_teacher_assessment_detail(
         activity = context.activities_by_id.get(assessment_id)
         if activity is None or activity.course_id is None:
             raise ValueError(f"Code challenge activity not found: {assessment_id}")
-        records = [(submission, _activity) for submission, _activity in context.code_submissions if _activity.id == assessment_id]
+        records = [
+            (submission, _activity)
+            for submission, _activity in context.code_submissions
+            if _activity.id == assessment_id and _is_allowed(submission.user_id, allowed_user_ids)
+        ]
         eligible = len(eligible_by_course.get(activity.course_id, set()))
         attempts_by_user = defaultdict(list)
         scores: list[float] = []

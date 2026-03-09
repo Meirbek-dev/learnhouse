@@ -71,16 +71,25 @@ def resolve_teacher_scope(
     )
 
     teacher_user_id = filters.teacher_user_id or current_user.id
+    target_user_id = teacher_user_id if has_org_scope else current_user.id
 
-    if has_org_scope and teacher_user_id != current_user.id:
-        target_user_id = teacher_user_id
-    else:
-        target_user_id = current_user.id
-
-    if has_org_scope:
+    if has_org_scope and filters.teacher_user_id:
         course_ids = db_session.exec(
-            select(Course.id).where(Course.org_id == org_id)
+            select(Course.id)
+            .outerjoin(ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid)
+            .where(Course.org_id == org_id)
+            .where(
+                or_(
+                    Course.creator_id == target_user_id,
+                    and_(
+                        ResourceAuthor.user_id == target_user_id,
+                        ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
+                    ),
+                )
+            )
         ).all()
+    elif has_org_scope:
+        course_ids = db_session.exec(select(Course.id).where(Course.org_id == org_id)).all()
     else:
         course_ids = db_session.exec(
             select(Course.id)

@@ -2,6 +2,7 @@ export type WindowPreset = '7d' | '28d' | '90d';
 export type ComparePreset = 'previous_period' | 'none';
 export type Bucket = 'day' | 'week';
 export type AssessmentType = 'assignment' | 'quiz' | 'exam' | 'code_challenge';
+export type SortOrder = 'asc' | 'desc';
 
 export interface AnalyticsQuery {
   window?: WindowPreset;
@@ -11,6 +12,15 @@ export interface AnalyticsQuery {
   cohort_ids?: string;
   teacher_user_id?: number;
   timezone?: string;
+  page?: number;
+  page_size?: number;
+  sort_by?: string;
+  sort_order?: SortOrder;
+}
+
+export interface AnalyticsFilterOption {
+  label: string;
+  value: string;
 }
 
 export interface MetricCard {
@@ -101,6 +111,7 @@ export interface TeacherCourseRow {
 
 export interface TeacherCourseListResponse {
   generated_at: string;
+  total: number;
   items: TeacherCourseRow[];
 }
 
@@ -176,6 +187,7 @@ export interface TeacherCourseDetailResponse {
 
 export interface TeacherAssessmentListResponse {
   generated_at: string;
+  total: number;
   items: AssessmentOutlierRow[];
 }
 
@@ -234,5 +246,7 @@ export interface TeacherAssessmentDetailResponse {
 export interface AtRiskLearnersResponse {
   generated_at: string;
   total: number;
+  page: number;
+  page_size: number;
   items: AtRiskLearnerRow[];
 }

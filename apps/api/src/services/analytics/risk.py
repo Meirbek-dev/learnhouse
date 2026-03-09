@@ -10,6 +10,8 @@ from src.services.analytics.queries import (
     AnalyticsContext,
     assessment_pass_threshold,
     build_activity_events,
+    cohort_names_for_user,
+    cohort_user_ids,
     display_name,
     load_analytics_context,
     now_utc,
@@ -21,8 +23,9 @@ from src.services.analytics.scope import TeacherAnalyticsScope
 
 
 def build_risk_rows(context: AnalyticsContext, filters: AnalyticsFilters) -> list[AtRiskLearnerRow]:
-    snapshots = progress_snapshots(context)
-    activity_events = build_activity_events(context)
+    allowed_user_ids = cohort_user_ids(context, filters.cohort_ids)
+    snapshots = progress_snapshots(context, allowed_user_ids)
+    activity_events = build_activity_events(context, allowed_user_ids)
     last_activity_by_pair = { (event.course_id, event.user_id): event.ts for event in activity_events }
     for event in activity_events:
         key = (event.course_id, event.user_id)
@@ -55,6 +58,8 @@ def build_risk_rows(context: AnalyticsContext, filters: AnalyticsFilters) -> lis
 
     assignment_seen: dict[tuple[int, int], set[int]] = defaultdict(set)
     for submission, assignment in context.assignment_submissions:
+        if allowed_user_ids is not None and submission.user_id not in allowed_user_ids:
+            continue
         key = (assignment.course_id, submission.user_id)
         assignment_seen[key].add(assignment.id)
         if submission.submission_status.value in {"SUBMITTED", "LATE"}:
@@ -64,6 +69,8 @@ def build_risk_rows(context: AnalyticsContext, filters: AnalyticsFilters) -> lis
 
     exam_seen: dict[tuple[int, int], set[int]] = defaultdict(set)
     for attempt, exam in context.exam_attempts:
+        if allowed_user_ids is not None and attempt.user_id not in allowed_user_ids:
+            continue
         if attempt.is_preview:
             continue
         key = (exam.course_id, attempt.user_id)
@@ -76,6 +83,8 @@ def build_risk_rows(context: AnalyticsContext, filters: AnalyticsFilters) -> lis
 
     code_success_by_pair: dict[tuple[int, int], set[int]] = defaultdict(set)
     for submission, activity in context.code_submissions:
+        if allowed_user_ids is not None and submission.user_id not in allowed_user_ids:
+            continue
         if activity.course_id is None:
             continue
         key = (activity.course_id, submission.user_id)
@@ -150,6 +159,7 @@ def build_risk_rows(context: AnalyticsContext, filters: AnalyticsFilters) -> lis
                 course_id=course_id,
                 course_name=course.name,
                 user_display_name=display_name(user),
+                cohort_name=", ".join(cohort_names_for_user(context, user_id, filters.cohort_ids)) or None,
                 progress_pct=round(snapshot.progress_pct, 1),
                 days_since_last_activity=days_since_last_activity,
                 open_grading_blocks=open_grading_blocks[pair],
@@ -173,8 +183,11 @@ def get_at_risk_learners(
 ) -> AtRiskLearnersResponse:
     context = load_analytics_context(db_session, scope.course_ids)
     rows = build_risk_rows(context, filters)
+    paged_rows = rows[filters.offset : filters.offset + filters.page_size]
     return AtRiskLearnersResponse(
         generated_at=to_iso(context.generated_at) or "",
         total=len(rows),
-        items=rows,
+        page=filters.page,
+        page_size=filters.page_size,
+        items=paged_rows,
     )

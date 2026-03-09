@@ -1,9 +1,10 @@
 'use client';
 
+import type { ColumnDef } from '@tanstack/react-table';
 import type { AssessmentOutlierRow } from '@/types/analytics';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AnalyticsDataTable from './AnalyticsDataTable';
 import Link from 'next/link';
 
 interface AssessmentOutliersTableProps {
@@ -12,6 +13,61 @@ interface AssessmentOutliersTableProps {
 }
 
 export default function AssessmentOutliersTable({ orgslug, rows }: AssessmentOutliersTableProps) {
+  const columns: ColumnDef<AssessmentOutlierRow>[] = [
+    {
+      accessorKey: 'title',
+      header: 'Assessment',
+      cell: ({ row }) => (
+        <div>
+          <Link
+            href={`/orgs/${orgslug}/dash/analytics/assessments/${row.original.assessment_type}/${row.original.assessment_id}`}
+            className="font-medium text-slate-900 hover:text-emerald-700"
+          >
+            {row.original.title}
+          </Link>
+          <div className="text-xs uppercase tracking-wide text-slate-500">{row.original.assessment_type.replace('_', ' ')}</div>
+        </div>
+      ),
+    },
+    { accessorKey: 'course_name', header: 'Course' },
+    {
+      accessorKey: 'submission_rate',
+      header: 'Submission',
+      cell: ({ row }) => (row.original.submission_rate === null ? 'n/a' : `${row.original.submission_rate}%`),
+    },
+    {
+      accessorKey: 'pass_rate',
+      header: 'Pass',
+      cell: ({ row }) => (row.original.pass_rate === null ? 'n/a' : `${row.original.pass_rate}%`),
+    },
+    {
+      accessorKey: 'median_score',
+      header: 'Median',
+      cell: ({ row }) => (row.original.median_score === null ? 'n/a' : `${row.original.median_score}%`),
+    },
+    {
+      accessorKey: 'difficulty_score',
+      header: 'Difficulty',
+      cell: ({ row }) => (row.original.difficulty_score === null ? 'n/a' : row.original.difficulty_score),
+    },
+    {
+      accessorKey: 'outlier_reason_codes',
+      header: 'Signals',
+      cell: ({ row }) =>
+        row.original.outlier_reason_codes.length ? (
+          <div className="max-w-[240px] whitespace-normal text-xs text-slate-600">
+            {row.original.outlier_reason_codes.map((code) => (
+              <Badge key={code} variant="outline" className="mb-1 mr-1">
+                {code}
+              </Badge>
+            ))}
+          </div>
+        ) : (
+          'Healthy'
+        ),
+    },
+  ];
+
   return (
     <Card className="border-slate-200 bg-white/90 shadow-sm">
       <CardHeader>
@@ -19,42 +75,7 @@ export default function AssessmentOutliersTable({ orgslug, rows }: AssessmentOut
         <CardDescription>Ranked assignments, quizzes, exams, and code challenges needing attention.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Assessment</TableHead>
-              <TableHead>Course</TableHead>
-              <TableHead>Submission</TableHead>
-              <TableHead>Pass</TableHead>
-              <TableHead>Median</TableHead>
-              <TableHead>Difficulty</TableHead>
-              <TableHead>Signals</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.map((row) => (
-              <TableRow key={`${row.assessment_type}-${row.assessment_id}`}>
-                <TableCell>
-                  <Link
-                    href={`/orgs/${orgslug}/dash/analytics/assessments/${row.assessment_type}/${row.assessment_id}`}
-                    className="font-medium text-slate-900 hover:text-emerald-700"
-                  >
-                    {row.title}
-                  </Link>
-                  <div className="text-xs uppercase tracking-wide text-slate-500">{row.assessment_type.replace('_', ' ')}</div>
-                </TableCell>
-                <TableCell>{row.course_name}</TableCell>
-                <TableCell>{row.submission_rate === null ? 'n/a' : `${row.submission_rate}%`}</TableCell>
-                <TableCell>{row.pass_rate === null ? 'n/a' : `${row.pass_rate}%`}</TableCell>
-                <TableCell>{row.median_score === null ? 'n/a' : `${row.median_score}%`}</TableCell>
-                <TableCell>{row.difficulty_score === null ? 'n/a' : row.difficulty_score}</TableCell>
-                <TableCell className="max-w-[220px] whitespace-normal text-xs text-slate-600">
-                  {row.outlier_reason_codes.length ? row.outlier_reason_codes.map((code) => <Badge key={code} variant="outline" className="mr-1 mb-1">{code}</Badge>) : 'Healthy'}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <AnalyticsDataTable columns={columns} data={rows} searchPlaceholder="Search assessments..." emptyMessage="No assessment outliers match the current scope." />
       </CardContent>
     </Card>
   );

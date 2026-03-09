@@ -4,6 +4,7 @@ import TeacherFilterBar from '@components/Dashboard/Analytics/TeacherFilterBar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getTeacherCourseList, normalizeAnalyticsQuery } from '@services/analytics/teacher';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { getUserGroups } from '@services/usergroups/usergroups';
 import { auth } from '@/auth';
 
 export default async function AnalyticsCoursesPage(props: {
@@ -21,7 +22,14 @@ export default async function AnalyticsCoursesPage(props: {
   }
 
   try {
-    const courseList = await getTeacherCourseList(org.id ?? org.org_id, accessToken, query);
+    const [courseList, usergroups] = await Promise.all([
+      getTeacherCourseList(org.id ?? org.org_id, accessToken, query),
+      getUserGroups(org.id ?? org.org_id, accessToken),
+    ]);
+    const courseOptions = courseList.items.map((course) => ({ label: course.course_name, value: String(course.course_id) }));
+    const cohortOptions = Array.isArray(usergroups.data)
+      ? usergroups.data.map((group: { id: number; name: string }) => ({ label: group.name, value: String(group.id) }))
+      : [];
     return (
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
         <Card className="border-slate-200 bg-white/90 shadow-sm">
@@ -30,7 +38,7 @@ export default async function AnalyticsCoursesPage(props: {
           </CardHeader>
           <CardContent className="text-sm text-slate-600">Rank courses by engagement trend, grading pressure, and learner risk so instructors can prioritize interventions.</CardContent>
         </Card>
-        <TeacherFilterBar orgslug={orgslug} query={query} courseCount={courseList.items.length} />
+        <TeacherFilterBar orgslug={orgslug} path={`/orgs/${orgslug}/dash/analytics/courses`} query={query} courseCount={courseList.items.length} courseOptions={courseOptions} cohortOptions={cohortOptions} />
         <CourseHealthTable orgslug={orgslug} rows={courseList.items} />
       </div>
     );

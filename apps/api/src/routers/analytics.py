@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi.responses import StreamingResponse
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
@@ -25,6 +26,14 @@ from src.services.analytics.filters import AnalyticsFilters, get_analytics_filte
 from src.services.analytics.scope import resolve_teacher_scope
 
 router = APIRouter()
+
+
+def _csv_response(stream, filename: str) -> StreamingResponse:
+    return StreamingResponse(
+        stream,
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 def _scope_for(
@@ -122,8 +131,7 @@ async def teacher_at_risk_export(
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     scope = _scope_for(db_session, current_user, org_id, filters, action="export")
-    csv_text = export_at_risk_csv(db_session, scope, filters)
-    return Response(content=csv_text, media_type="text/csv")
+    return _csv_response(export_at_risk_csv(db_session, scope, filters), "teacher-at-risk.csv")
 
 
 @router.get("/orgs/{org_id}/teacher/exports/grading-backlog.csv")
@@ -134,8 +142,7 @@ async def teacher_grading_backlog_export(
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     scope = _scope_for(db_session, current_user, org_id, filters, action="export")
-    csv_text = export_grading_backlog_csv(db_session, scope, filters)
-    return Response(content=csv_text, media_type="text/csv")
+    return _csv_response(export_grading_backlog_csv(db_session, scope, filters), "teacher-grading-backlog.csv")
 
 
 @router.get("/orgs/{org_id}/teacher/exports/course-progress.csv")
@@ -146,8 +153,7 @@ async def teacher_course_progress_export(
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     scope = _scope_for(db_session, current_user, org_id, filters, action="export")
-    csv_text = export_course_progress_csv(db_session, scope, filters)
-    return Response(content=csv_text, media_type="text/csv")
+    return _csv_response(export_course_progress_csv(db_session, scope, filters), "teacher-course-progress.csv")
 
 
 @router.get("/orgs/{org_id}/teacher/exports/assessment-outcomes.csv")
@@ -158,5 +164,4 @@ async def teacher_assessment_outcomes_export(
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     scope = _scope_for(db_session, current_user, org_id, filters, action="export")
-    csv_text = export_assessment_outcomes_csv(db_session, scope, filters)
-    return Response(content=csv_text, media_type="text/csv")
+    return _csv_response(export_assessment_outcomes_csv(db_session, scope, filters), "teacher-assessment-outcomes.csv")

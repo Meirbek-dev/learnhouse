@@ -105,6 +105,7 @@ class TeacherCourseRow(PydanticStrictBaseModel):
 
 class TeacherCourseListResponse(PydanticStrictBaseModel):
     generated_at: str
+    total: int = 0
     items: list[TeacherCourseRow]
 
 
@@ -174,6 +175,7 @@ class TeacherCourseDetailResponse(PydanticStrictBaseModel):
 
 class TeacherAssessmentListResponse(PydanticStrictBaseModel):
     generated_at: str
+    total: int = 0
     items: list[AssessmentOutlierRow]
 
 
@@ -234,4 +236,6 @@ class TeacherAssessmentDetailResponse(PydanticStrictBaseModel):
 class AtRiskLearnersResponse(PydanticStrictBaseModel):
     generated_at: str
     total: int
+    page: int = 1
+    page_size: int = 25
     items: list[AtRiskLearnerRow]

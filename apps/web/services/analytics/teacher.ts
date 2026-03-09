@@ -43,6 +43,8 @@ async function analyticsRequest<T>(path: string, accessToken: string, query?: An
 export function normalizeAnalyticsQuery(searchParams: Record<string, string | string[] | undefined>): AnalyticsQuery {
   const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
   const teacherUserId = first(searchParams.teacher_user_id);
+  const page = first(searchParams.page);
+  const pageSize = first(searchParams.page_size);
   return {
     window: (first(searchParams.window) as AnalyticsQuery['window']) || '28d',
     compare: (first(searchParams.compare) as AnalyticsQuery['compare']) || 'previous_period',
@@ -51,6 +53,10 @@ export function normalizeAnalyticsQuery(searchParams: Record<string, string | st
     cohort_ids: first(searchParams.cohort_ids),
     teacher_user_id: teacherUserId ? Number(teacherUserId) : undefined,
     timezone: first(searchParams.timezone) || 'UTC',
+    page: page ? Number(page) : 1,
+    page_size: pageSize ? Number(pageSize) : 25,
+    sort_by: first(searchParams.sort_by),
+    sort_order: (first(searchParams.sort_order) as AnalyticsQuery['sort_order']) || 'desc',
   };
 }
 

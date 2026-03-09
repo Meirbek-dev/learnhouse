@@ -16,6 +16,13 @@ platform_config = get_platform_config()
 # access to the values within the .ini file in use.
 config = context.config
 
+database_url = (
+    platform_config.database_config.sql_connection_string
+    or config.get_main_option("sqlalchemy.url")
+)
+if database_url:
+    config.set_main_option("sqlalchemy.url", database_url)
+
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
@@ -90,10 +97,15 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    connect_args = {}
+    if database_url and database_url.startswith("postgresql+"):
+        connect_args["connect_timeout"] = 5
+
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args=connect_args,
     )
 
     with connectable.connect() as connection:

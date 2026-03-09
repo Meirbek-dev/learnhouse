@@ -2,6 +2,7 @@ import TeacherOverview from '@components/Dashboard/Analytics/TeacherOverview';
 import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
 import { getTeacherAssessmentList, getTeacherCourseList, getTeacherOverview, normalizeAnalyticsQuery } from '@services/analytics/teacher';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { getUserGroups } from '@services/usergroups/usergroups';
 import { auth } from '@/auth';
 
 export default async function AnalyticsOverviewPage(props: {
@@ -20,11 +21,17 @@ export default async function AnalyticsOverviewPage(props: {
   }
 
   try {
-    const [overview, courseRows, assessmentRows] = await Promise.all([
+    const [overview, courseRows, assessmentRows, usergroups] = await Promise.all([
       getTeacherOverview(org.id ?? org.org_id, accessToken, query),
       getTeacherCourseList(org.id ?? org.org_id, accessToken, query),
       getTeacherAssessmentList(org.id ?? org.org_id, accessToken, query),
+      getUserGroups(org.id ?? org.org_id, accessToken),
     ]);
+
+    const courseOptions = courseRows.items.map((course) => ({ label: course.course_name, value: String(course.course_id) }));
+    const cohortOptions = Array.isArray(usergroups.data)
+      ? usergroups.data.map((group: { id: number; name: string }) => ({ label: group.name, value: String(group.id) }))
+      : [];
 
     return (
       <TeacherOverview
@@ -34,6 +41,8 @@ export default async function AnalyticsOverviewPage(props: {
         data={overview}
         courseRows={courseRows.items}
         assessmentRows={assessmentRows.items}
+        courseOptions={courseOptions}
+        cohortOptions={cohortOptions}
       />
     );
   } catch (error) {

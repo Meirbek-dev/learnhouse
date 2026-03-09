@@ -8,14 +8,17 @@ from src.services.analytics.queries import (
     ActivityEvent,
     build_activity_events,
     build_series,
+    cohort_user_ids,
     direction_for_delta,
     load_analytics_context,
     parse_timestamp,
     progress_snapshots,
     safe_pct,
+    to_tz_iso,
     to_iso,
 )
 from src.services.analytics.risk import build_risk_rows
+from src.services.analytics.rollups import freshness_seconds_from_rollup, get_latest_teacher_rollup, supports_rollup_reads
 from src.services.analytics.schemas import (
     AlertItem,
     MetricCard,
@@ -42,8 +45,9 @@ def _metric(label: str, value: float, previous: float | None) -> MetricCard:
 
 def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filters: AnalyticsFilters) -> TeacherOverviewResponse:
     context = load_analytics_context(db_session, scope.course_ids)
-    events = build_activity_events(context)
-    snapshots = progress_snapshots(context)
+    allowed_user_ids = cohort_user_ids(context, filters.cohort_ids)
+    events = build_activity_events(context, allowed_user_ids)
+    snapshots = progress_snapshots(context, allowed_user_ids)
     risk_rows = build_risk_rows(context, filters)
     generated_at = context.generated_at
     current_start, current_end = filters.window_bounds(now=generated_at)
@@ -52,6 +56,13 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
     current_active_users = {event.user_id for event in events if event.ts >= current_start}
     previous_active_users = {event.user_id for event in events if previous_start <= event.ts < previous_end}
     returning_learners = len(current_active_users & previous_active_users)
+    teacher_rollup = None
+    if supports_rollup_reads(filters):
+        teacher_rollup = get_latest_teacher_rollup(
+            db_session,
+            org_id=scope.org_id,
+            teacher_user_id=scope.teacher_user_id,
+        )
 
     enrolled = len(snapshots)
     completion_rate = safe_pct(sum(1 for snapshot in snapshots.values() if snapshot.is_completed), enrolled) or 0.0
@@ -60,6 +71,7 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
         1
         for submission, _assignment in context.assignment_submissions
         if submission.submission_status.value in {"SUBMITTED", "LATE"}
+        and (allowed_user_ids is None or submission.user_id in allowed_user_ids)
     )
 
     generated_rows_timestamp, course_rows = build_course_rows(scope, filters, db_session)
@@ -79,6 +91,8 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
     submission_events = [event for event in events if event.source in {"assignment", "quiz", "exam", "code_challenge"}]
     grading_events = []
     for submission, assignment in context.assignment_submissions:
+        if allowed_user_ids is not None and submission.user_id not in allowed_user_ids:
+            continue
         if submission.submission_status.value != "GRADED":
             continue
         graded_at = getattr(submission, "graded_at", None) or submission.update_date
@@ -88,10 +102,10 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
         grading_events.append(ActivityEvent(user_id=submission.user_id, course_id=assignment.course_id, ts=ts, source="graded_assignment"))
 
     trends = TeacherOverviewTrends(
-        active_learners=[TimeSeriesPoint(bucket_start=to_iso(bucket) or "", value=value) for bucket, value in build_series(events, filters.bucket, current_start, current_end, distinct_users=True)],
-        completions=[TimeSeriesPoint(bucket_start=to_iso(bucket) or "", value=value) for bucket, value in build_series(completions_events, filters.bucket, current_start, current_end)],
-        submissions=[TimeSeriesPoint(bucket_start=to_iso(bucket) or "", value=value) for bucket, value in build_series(submission_events, filters.bucket, current_start, current_end)],
-        grading_completed=[TimeSeriesPoint(bucket_start=to_iso(bucket) or "", value=value) for bucket, value in build_series(grading_events, filters.bucket, current_start, current_end)],
+        active_learners=[TimeSeriesPoint(bucket_start=to_tz_iso(bucket, filters.tzinfo) or "", value=value) for bucket, value in build_series(events, filters.bucket, current_start, current_end, distinct_users=True, tzinfo=filters.tzinfo)],
+        completions=[TimeSeriesPoint(bucket_start=to_tz_iso(bucket, filters.tzinfo) or "", value=value) for bucket, value in build_series(completions_events, filters.bucket, current_start, current_end, tzinfo=filters.tzinfo)],
+        submissions=[TimeSeriesPoint(bucket_start=to_tz_iso(bucket, filters.tzinfo) or "", value=value) for bucket, value in build_series(submission_events, filters.bucket, current_start, current_end, tzinfo=filters.tzinfo)],
+        grading_completed=[TimeSeriesPoint(bucket_start=to_tz_iso(bucket, filters.tzinfo) or "", value=value) for bucket, value in build_series(grading_events, filters.bucket, current_start, current_end, tzinfo=filters.tzinfo)],
     )
 
     alerts: list[AlertItem] = []
@@ -113,7 +127,7 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
 
     return TeacherOverviewResponse(
         generated_at=to_iso(generated_at) or generated_rows_timestamp,
-        freshness_seconds=0,
+        freshness_seconds=freshness_seconds_from_rollup(teacher_rollup.generated_at if teacher_rollup is not None else generated_at),
         window=filters.window,
         compare=filters.compare,
         scope=TeacherOverviewScope(
@@ -123,12 +137,16 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
             cohort_ids=scope.cohort_ids,
         ),
         summary=TeacherOverviewSummary(
-            active_learners=_metric("Active learners", float(len(current_active_users)), float(len(previous_active_users))),
-            returning_learners=_metric("Returning learners", float(returning_learners), None),
-            completion_rate=_metric("Completion rate", completion_rate, None),
-            at_risk_learners=_metric("At-risk learners", float(at_risk_count), None),
-            ungraded_submissions=_metric("Ungraded submissions", float(ungraded_submissions), None),
-            negative_engagement_courses=_metric("Courses with declining engagement", float(negative_engagement_courses), None),
+            active_learners=_metric(
+                "Active learners",
+                float(teacher_rollup.active_learners_7d if teacher_rollup is not None and filters.window == "7d" else teacher_rollup.active_learners_28d if teacher_rollup is not None else len(current_active_users)),
+                float(len(previous_active_users)),
+            ),
+            returning_learners=_metric("Returning learners", float(teacher_rollup.returning_learners_28d if teacher_rollup is not None else returning_learners), None),
+            completion_rate=_metric("Completion rate", float(teacher_rollup.completion_rate if teacher_rollup is not None and teacher_rollup.completion_rate is not None else completion_rate), None),
+            at_risk_learners=_metric("At-risk learners", float(teacher_rollup.at_risk_learners if teacher_rollup is not None else at_risk_count), None),
+            ungraded_submissions=_metric("Ungraded submissions", float(teacher_rollup.ungraded_submissions if teacher_rollup is not None else ungraded_submissions), None),
+            negative_engagement_courses=_metric("Courses with declining engagement", float(teacher_rollup.courses_with_negative_engagement if teacher_rollup is not None else negative_engagement_courses), None),
         ),
         trends=trends,
         alerts=alerts,

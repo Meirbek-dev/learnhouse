@@ -12,6 +12,7 @@ from src.db.strict_base_model import PydanticStrictBaseModel
 WindowPreset = Literal["7d", "28d", "90d"]
 ComparePreset = Literal["previous_period", "none"]
 Bucket = Literal["day", "week"]
+SortOrder = Literal["asc", "desc"]
 
 
 def _parse_csv_ints(value: str | None) -> list[int]:
@@ -37,6 +38,10 @@ class AnalyticsFilters(PydanticStrictBaseModel):
     cohort_ids: list[int] = []
     teacher_user_id: int | None = None
     timezone: str = "UTC"
+    page: int = 1
+    page_size: int = 25
+    sort_by: str | None = None
+    sort_order: SortOrder = "desc"
 
     @field_validator("timezone")
     @classmethod
@@ -61,6 +66,20 @@ class AnalyticsFilters(PydanticStrictBaseModel):
             return max(1, self.window_days // 7)
         return self.window_days
 
+    @property
+    def offset(self) -> int:
+        return (self.page - 1) * self.page_size
+
+    @field_validator("page")
+    @classmethod
+    def validate_page(cls, value: int) -> int:
+        return max(1, value)
+
+    @field_validator("page_size")
+    @classmethod
+    def validate_page_size(cls, value: int) -> int:
+        return min(max(1, value), 200)
+
     def window_bounds(self, *, now: datetime | None = None) -> tuple[datetime, datetime]:
         end = (now or datetime.now(tz=UTC)).astimezone(UTC)
         start = end - timedelta(days=self.window_days)
@@ -81,6 +100,10 @@ def get_analytics_filters(
     cohort_ids: Annotated[str | None, Query()] = None,
     teacher_user_id: Annotated[int | None, Query()] = None,
     timezone: Annotated[str, Query()] = "UTC",
+    page: Annotated[int, Query()] = 1,
+    page_size: Annotated[int, Query()] = 25,
+    sort_by: Annotated[str | None, Query()] = None,
+    sort_order: Annotated[SortOrder, Query()] = "desc",
 ) -> AnalyticsFilters:
     return AnalyticsFilters(
         window=window,
@@ -90,4 +113,8 @@ def get_analytics_filters(
         cohort_ids=_parse_csv_ints(cohort_ids),
         teacher_user_id=teacher_user_id,
         timezone=timezone,
+        page=page,
+        page_size=page_size,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
