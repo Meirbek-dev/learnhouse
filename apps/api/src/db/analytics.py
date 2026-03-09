@@ -36,6 +36,7 @@ class DailyTeacherMetrics(SQLModel, table=True):
     managed_course_count: int = 0
     active_learners_7d: int = 0
     active_learners_28d: int = 0
+    active_learners_90d: int = 0
     returning_learners_28d: int = 0
     completion_rate: float | None = Field(default=None, sa_column=Column(Numeric(5, 2)))
     avg_progress_pct: float | None = Field(default=None, sa_column=Column(Numeric(5, 2)))

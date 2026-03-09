@@ -12,9 +12,10 @@ import { useTranslations } from 'next-intl';
 interface AssessmentOutliersTableProps {
   orgslug: string;
   rows: AssessmentOutlierRow[];
+  storageKey?: string;
 }
 
-export default function AssessmentOutliersTable({ orgslug, rows }: AssessmentOutliersTableProps) {
+export default function AssessmentOutliersTable({ orgslug, rows, storageKey }: AssessmentOutliersTableProps) {
   const t = useTranslations('TeacherAnalytics');
   const columns: ColumnDef<AssessmentOutlierRow>[] = [
     {
@@ -83,7 +84,7 @@ export default function AssessmentOutliersTable({ orgslug, rows }: AssessmentOut
         <CardDescription>{t('assessmentOutliers.description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <AnalyticsDataTable columns={columns} data={rows} searchPlaceholder={t('assessmentOutliers.searchPlaceholder')} emptyMessage={t('assessmentOutliers.emptyMessage')} />
+        <AnalyticsDataTable columns={columns} data={rows} storageKey={storageKey} searchPlaceholder={t('assessmentOutliers.searchPlaceholder')} emptyMessage={t('assessmentOutliers.emptyMessage')} />
       </CardContent>
     </Card>
   );

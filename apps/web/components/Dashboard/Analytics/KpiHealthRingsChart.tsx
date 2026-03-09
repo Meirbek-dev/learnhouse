@@ -27,7 +27,7 @@ export default function KpiHealthRingsChart({ data }: KpiHealthRingsChartProps) 
       <CardContent>
         <ChartContainer
           className="h-[260px] w-full"
-          config={Object.fromEntries(data.map((d) => [d.name, { label: d.label, color: d.fill }]))}
+          config={Object.fromEntries(data.map((d) => [d.name, { label: d.label, color: d.fill, valueFormatter: (value: number | string | null | undefined) => `${Math.round(Number(value ?? 0))} / 100` }]))}
         >
           <RadialBarChart
             data={data}
@@ -47,7 +47,7 @@ export default function KpiHealthRingsChart({ data }: KpiHealthRingsChartProps) 
                 />
               }
             />
-            <RadialBar dataKey="value" background={{ fill: '#f1f5f9' }} cornerRadius={4} />
+            <RadialBar dataKey="value" background={{ fill: 'var(--chart-5)' }} cornerRadius={4} />
           </RadialBarChart>
         </ChartContainer>
         <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5">

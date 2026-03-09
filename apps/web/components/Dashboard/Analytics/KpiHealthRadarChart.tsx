@@ -26,8 +26,8 @@ export default function KpiHealthRadarChart({ data }: KpiHealthRadarChartProps) 
         <ChartContainer
           className="h-[300px] w-full"
           config={{
-            current: { label: t('kpiCharts.currentPeriod'), color: 'var(--chart-1)' },
-            previous: { label: t('kpiCharts.previousPeriod'), color: 'var(--chart-4)' },
+            current: { label: t('kpiCharts.currentPeriod'), color: 'var(--chart-1)', valueFormatter: (value) => `${Math.round(Number(value ?? 0))} / 100` },
+            previous: { label: t('kpiCharts.previousPeriod'), color: 'var(--chart-4)', valueFormatter: (value) => `${Math.round(Number(value ?? 0))} / 100` },
           }}
         >
           <RadarChart data={data} cx="50%" cy="50%">

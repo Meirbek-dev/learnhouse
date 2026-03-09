@@ -1,35 +1,35 @@
 'use client';
 
+import { lazy, Suspense } from 'react';
 import type {
   AnalyticsQuery,
   TeacherOverviewResponse,
-  TeacherCourseRow,
-  AssessmentOutlierRow,
 } from '@/types/analytics';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getAnalyticsAlertTypeLabel, getAnalyticsSeverityLabel } from '@/lib/analytics/labels';
-import AnalyticsRiskDistributionChart from './AnalyticsRiskDistributionChart';
-import AnalyticsMultiSeriesTrendChart from './AnalyticsMultiSeriesTrendChart';
 import { getAnalyticsExportUrl } from '@services/analytics/teacher';
-import AssessmentOutliersTable from './AssessmentOutliersTable';
 import type { AnalyticsFilterOption } from '@/types/analytics';
 import AnalyticsExportButton from './AnalyticsExportButton';
-import GradingBacklogPanel from './GradingBacklogPanel';
-import AtRiskLearnersTable from './AtRiskLearnersTable';
 import { useLocale, useTranslations } from 'next-intl';
-import CourseHealthTable from './CourseHealthTable';
 import TeacherFilterBar from './TeacherFilterBar';
-import TeacherKpiCharts from './TeacherKpiCharts';
+import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+
+const AnalyticsRiskDistributionChart = lazy(() => import('./AnalyticsRiskDistributionChart'));
+const AnalyticsMultiSeriesTrendChart = lazy(() => import('./AnalyticsMultiSeriesTrendChart'));
+const AssessmentOutliersTable = lazy(() => import('./AssessmentOutliersTable'));
+const GradingBacklogPanel = lazy(() => import('./GradingBacklogPanel'));
+const AtRiskLearnersTable = lazy(() => import('./AtRiskLearnersTable'));
+const CourseHealthTable = lazy(() => import('./CourseHealthTable'));
+const TeacherKpiCharts = lazy(() => import('./TeacherKpiCharts'));
+const TeacherKpiCards = lazy(() => import('./TeacherKpiCards'));
 
 interface TeacherOverviewProps {
   orgslug: string;
   orgId: number;
   query: AnalyticsQuery;
   data: TeacherOverviewResponse;
-  courseRows: TeacherCourseRow[];
-  assessmentRows: AssessmentOutlierRow[];
   courseOptions?: AnalyticsFilterOption[];
   cohortOptions?: AnalyticsFilterOption[];
 }
@@ -39,13 +39,12 @@ export default function TeacherOverview({
   orgId,
   query,
   data,
-  courseRows,
-  assessmentRows,
   courseOptions = [],
   cohortOptions = [],
 }: TeacherOverviewProps) {
   const t = useTranslations('TeacherAnalytics');
   const locale = useLocale();
+  const router = useRouter();
 
   function formatFreshness(seconds: number): string {
     if (seconds <= 0) return t('freshness.live');
@@ -55,17 +54,55 @@ export default function TeacherOverview({
     return t('freshness.days', { days: Math.round(seconds / 86400) });
   }
 
-  // Align multi-series trend data by bucket_start timestamp to avoid index misalignment
+  // Align trend series by the union of bucket timestamps so sparse series are not dropped.
+  const allBuckets = Array.from(
+    new Set([
+      ...data.trends.active_learners.map((point) => point.bucket_start),
+      ...data.trends.completions.map((point) => point.bucket_start),
+      ...data.trends.submissions.map((point) => point.bucket_start),
+      ...data.trends.grading_completed.map((point) => point.bucket_start),
+    ]),
+  ).sort();
   const completionsMap = new Map(data.trends.completions.map((p) => [p.bucket_start, p.value]));
   const submissionsMap = new Map(data.trends.submissions.map((p) => [p.bucket_start, p.value]));
   const gradingMap = new Map(data.trends.grading_completed.map((p) => [p.bucket_start, p.value]));
-  const trendData = data.trends.active_learners.map((point) => ({
-    bucket: new Date(point.bucket_start).toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
-    active_learners: point.value,
-    completions: completionsMap.get(point.bucket_start) ?? 0,
-    submissions: submissionsMap.get(point.bucket_start) ?? 0,
-    grading_completed: gradingMap.get(point.bucket_start) ?? 0,
+  const activeMap = new Map(data.trends.active_learners.map((p) => [p.bucket_start, p.value]));
+  const trendData = allBuckets.map((bucketStart) => ({
+    bucket_start: bucketStart,
+    bucket: new Date(bucketStart).toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
+    active_learners: activeMap.get(bucketStart) ?? 0,
+    completions: completionsMap.get(bucketStart) ?? 0,
+    submissions: submissionsMap.get(bucketStart) ?? 0,
+    grading_completed: gradingMap.get(bucketStart) ?? 0,
   }));
+
+  const kpiCards = [
+    { metric: data.summary.active_learners, sparkline: data.trends.active_learners.map((p) => p.value) },
+    { metric: data.summary.returning_learners, sparkline: data.trends.active_learners.map((p) => p.value) },
+    { metric: data.summary.completion_rate, sparkline: data.trends.completions.map((p) => p.value) },
+    { metric: data.summary.at_risk_learners, sparkline: [data.risk_distribution.high, data.risk_distribution.medium, data.risk_distribution.low] },
+    { metric: data.summary.ungraded_submissions, sparkline: data.trends.grading_completed.map((p) => p.value) },
+    { metric: data.summary.negative_engagement_courses, sparkline: data.course_preview.map((row) => row.engagement_delta_pct ?? 0) },
+  ];
+
+  const handleTrendClick = (bucketStart: string) => {
+    const params = new URLSearchParams();
+    if (query.window) params.set('window', query.window);
+    if (query.compare) params.set('compare', query.compare);
+    if (query.bucket) params.set('bucket', query.bucket);
+    if (query.course_ids) params.set('course_ids', query.course_ids);
+    if (query.cohort_ids) params.set('cohort_ids', query.cohort_ids);
+    if (query.timezone) params.set('timezone', query.timezone);
+    params.set('bucket_start', bucketStart);
+    params.set('sort_by', 'signals');
+    router.push(`/orgs/${orgslug}/dash/analytics/assessments?${params.toString()}`);
+  };
+
+  const SectionFallback = ({ height = 'h-[280px]' }: { height?: string }) => (
+    <Card className="border-slate-200 bg-white/90 shadow-sm">
+      <CardContent className={`${height} animate-pulse rounded-2xl bg-slate-100`} />
+    </Card>
+  );
 
   return (
     <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
@@ -97,32 +134,39 @@ export default function TeacherOverview({
         orgslug={orgslug}
         query={query}
         courseCount={data.scope.course_ids.length}
-        courseOptions={courseOptions}
-        cohortOptions={cohortOptions}
+        courseOptions={courseOptions.length ? courseOptions : data.course_options}
+        cohortOptions={cohortOptions.length ? cohortOptions : data.cohort_options}
       />
 
-      <TeacherKpiCharts
-        metrics={data.summary}
-        trends={data.trends}
-      />
+      <Suspense fallback={<SectionFallback height="h-[220px]" />}>
+        <TeacherKpiCards cards={kpiCards} />
+      </Suspense>
+
+      <Suspense fallback={<SectionFallback height="h-[420px]" />}>
+        <TeacherKpiCharts metrics={data.summary} trends={data.trends} />
+      </Suspense>
 
       <div className="grid gap-6 xl:grid-cols-[1.7fr_1fr]">
-        <AnalyticsMultiSeriesTrendChart
-          title={t('overview.trendTitle')}
-          description={t('overview.trendDescription')}
-          data={trendData}
-        />
-        <GradingBacklogPanel
-          backlogCount={data.summary.ungraded_submissions.value}
-          alerts={data.alerts}
-        />
+        <Suspense fallback={<SectionFallback height="h-[360px]" />}>
+          <AnalyticsMultiSeriesTrendChart
+            title={t('overview.trendTitle')}
+            description={t('overview.trendDescription')}
+            data={trendData}
+            onBucketClick={handleTrendClick}
+          />
+        </Suspense>
+        <Suspense fallback={<SectionFallback height="h-[220px]" />}>
+          <GradingBacklogPanel
+            backlogCount={data.summary.ungraded_submissions.value}
+            alerts={data.alerts}
+          />
+        </Suspense>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
-        <AnalyticsRiskDistributionChart
-          rows={data.at_risk_preview}
-          totalAtRisk={data.summary.at_risk_learners.value}
-        />
+        <Suspense fallback={<SectionFallback height="h-[320px]" />}>
+          <AnalyticsRiskDistributionChart counts={data.risk_distribution} totalAtRisk={data.summary.at_risk_learners.value} />
+        </Suspense>
         <Card className="border-slate-200 bg-white/90 shadow-sm">
           <CardHeader>
             <CardTitle>{t('overview.freshnessTitle')}</CardTitle>
@@ -195,13 +239,12 @@ export default function TeacherOverview({
 
       <div className="flex flex-col gap-6">
         <div>
-          <CourseHealthTable
-            orgslug={orgslug}
-            rows={courseRows.slice(0, 8)}
-          />
-          {courseRows.length > 8 && (
+          <Suspense fallback={<SectionFallback height="h-[320px]" />}>
+            <CourseHealthTable orgslug={orgslug} rows={data.course_preview} storageKey="overview-courses" />
+          </Suspense>
+          {data.course_total > 8 && (
             <p className="mt-2 text-sm text-slate-500">
-              {t('overview.showingCourses', { total: courseRows.length })}{' '}
+              {t('overview.showingCourses', { total: data.course_total })}{' '}
               <Link
                 href={`/orgs/${orgslug}/dash/analytics/courses`}
                 className="text-blue-600 hover:underline"
@@ -212,13 +255,12 @@ export default function TeacherOverview({
           )}
         </div>
         <div>
-          <AssessmentOutliersTable
-            orgslug={orgslug}
-            rows={assessmentRows.slice(0, 8)}
-          />
-          {assessmentRows.length > 8 && (
+          <Suspense fallback={<SectionFallback height="h-[320px]" />}>
+            <AssessmentOutliersTable orgslug={orgslug} rows={data.assessment_preview} storageKey="overview-assessments" />
+          </Suspense>
+          {data.assessment_total > 8 && (
             <p className="mt-2 text-sm text-slate-500">
-              {t('overview.showingAssessments', { total: assessmentRows.length })}{' '}
+              {t('overview.showingAssessments', { total: data.assessment_total })}{' '}
               <Link
                 href={`/orgs/${orgslug}/dash/analytics/assessments`}
                 className="text-blue-600 hover:underline"
@@ -230,11 +272,9 @@ export default function TeacherOverview({
         </div>
       </div>
 
-      <AtRiskLearnersTable
-        rows={data.at_risk_preview}
-        title={t('overview.watchlistTitle')}
-        description={t('overview.watchlistDescription')}
-      />
+      <Suspense fallback={<SectionFallback height="h-[320px]" />}>
+        <AtRiskLearnersTable rows={data.at_risk_preview} title={t('overview.watchlistTitle')} description={t('overview.watchlistDescription')} storageKey="overview-risk" />
+      </Suspense>
     </div>
   );
 }

@@ -6,7 +6,10 @@ from typing import Any
 from sqlalchemy import and_, or_, select
 from sqlmodel import Session
 
+from src.db.courses.activities import Activity, ActivityTypeEnum
+from src.db.courses.assignments import Assignment
 from src.db.courses.courses import Course
+from src.db.courses.exams import Exam
 from src.db.resource_authors import ResourceAuthor, ResourceAuthorshipStatusEnum
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import AuthenticationRequired, PermissionDenied, PermissionChecker
@@ -139,3 +142,41 @@ def ensure_course_in_scope(scope: TeacherAnalyticsScope, course_id: int) -> None
             permission="analytics:read",
             reason=f"Курс {course_id} находится вне разрешенной области аналитики",
         )
+
+
+def resolve_course_id_for_assessment(
+    db_session: Session,
+    assessment_type: str,
+    assessment_id: int,
+) -> int | None:
+    if assessment_type == "assignment":
+        assignment = db_session.exec(select(Assignment).where(Assignment.id == assessment_id)).first()
+        return assignment.course_id if assignment is not None else None
+    if assessment_type == "exam":
+        exam = db_session.exec(select(Exam).where(Exam.id == assessment_id)).first()
+        return exam.course_id if exam is not None else None
+    if assessment_type in {"quiz", "code_challenge"}:
+        activity = db_session.exec(select(Activity).where(Activity.id == assessment_id)).first()
+        if activity is None or activity.course_id is None:
+            return None
+        if assessment_type == "quiz" and activity.activity_type != ActivityTypeEnum.TYPE_QUIZ:
+            return None
+        if assessment_type == "code_challenge" and activity.activity_type != ActivityTypeEnum.TYPE_CODE_CHALLENGE:
+            return None
+        return activity.course_id
+    return None
+
+
+def ensure_assessment_in_scope(
+    db_session: Session,
+    scope: TeacherAnalyticsScope,
+    assessment_type: str,
+    assessment_id: int,
+) -> None:
+    course_id = resolve_course_id_for_assessment(db_session, assessment_type, assessment_id)
+    if course_id is None:
+        raise PermissionDenied(
+            permission="analytics:read",
+            reason=f"Оценивание {assessment_type}:{assessment_id} не найдено",
+        )
+    ensure_course_in_scope(scope, course_id)

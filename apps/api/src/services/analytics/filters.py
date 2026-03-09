@@ -36,13 +36,14 @@ class AnalyticsFilters(PydanticStrictBaseModel):
     window: WindowPreset = "28d"
     compare: ComparePreset = "previous_period"
     bucket: Bucket = "day"
+    bucket_start: datetime | None = None
     course_ids: list[int] = []
     cohort_ids: list[int] = []
     teacher_user_id: int | None = None
     timezone: str = "UTC"
     page: int = 1
     page_size: int = 25
-    sort_by: str | None = None
+    sort_by: CourseSortBy | AssessmentSortBy | None = None
     sort_order: SortOrder = "desc"
 
     @field_validator("timezone")
@@ -98,6 +99,7 @@ def get_analytics_filters(
     window: Annotated[WindowPreset, Query()] = "28d",
     compare: Annotated[ComparePreset, Query()] = "previous_period",
     bucket: Annotated[Bucket, Query()] = "day",
+    bucket_start: Annotated[datetime | None, Query()] = None,
     course_ids: Annotated[str | None, Query()] = None,
     cohort_ids: Annotated[str | None, Query()] = None,
     teacher_user_id: Annotated[int | None, Query()] = None,
@@ -111,6 +113,7 @@ def get_analytics_filters(
         window=window,
         compare=compare,
         bucket=bucket,
+        bucket_start=bucket_start,
         course_ids=_parse_csv_ints(course_ids),
         cohort_ids=_parse_csv_ints(cohort_ids),
         teacher_user_id=teacher_user_id,

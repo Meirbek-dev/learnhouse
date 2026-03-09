@@ -23,7 +23,7 @@ export default function CompletionFunnelChart({ title, description, data }: Comp
       <CardContent>
         <ChartContainer
           className="h-[280px] w-full"
-          config={{ count: { label: t('funnel.learners'), color: 'var(--chart-2)' } }}
+          config={{ count: { label: t('funnel.learners'), color: 'var(--chart-2)', valueFormatter: (value) => `${value ?? 0} ${t('funnel.learners')}` } }}
         >
           <BarChart data={data} layout="vertical" margin={{ left: 18 }}>
             <CartesianGrid horizontal={false} strokeDasharray="3 3" />

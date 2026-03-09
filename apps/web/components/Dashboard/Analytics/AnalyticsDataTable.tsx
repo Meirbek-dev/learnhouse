@@ -26,6 +26,7 @@ interface AnalyticsDataTableProps<TData> {
   emptyMessage?: string;
   className?: string;
   pageSize?: number;
+  storageKey?: string;
 }
 
 export default function AnalyticsDataTable<TData>({
@@ -35,6 +36,7 @@ export default function AnalyticsDataTable<TData>({
   emptyMessage,
   className,
   pageSize = 20,
+  storageKey,
 }: AnalyticsDataTableProps<TData>) {
   const t = useTranslations('TeacherAnalytics');
   const resolvedPlaceholder = searchPlaceholder ?? t('table.searchDefault');
@@ -42,6 +44,32 @@ export default function AnalyticsDataTable<TData>({
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
   const [pagination, setPagination] = React.useState<PaginationState>({ pageIndex: 0, pageSize });
+
+  React.useEffect(() => {
+    if (!storageKey || typeof window === 'undefined') return;
+    const raw = window.sessionStorage.getItem(`analytics-table:${storageKey}`);
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw) as {
+        sorting?: SortingState;
+        globalFilter?: string;
+        pagination?: PaginationState;
+      };
+      if (parsed.sorting) setSorting(parsed.sorting);
+      if (typeof parsed.globalFilter === 'string') setGlobalFilter(parsed.globalFilter);
+      if (parsed.pagination) setPagination(parsed.pagination);
+    } catch {
+      window.sessionStorage.removeItem(`analytics-table:${storageKey}`);
+    }
+  }, [storageKey]);
+
+  React.useEffect(() => {
+    if (!storageKey || typeof window === 'undefined') return;
+    window.sessionStorage.setItem(
+      `analytics-table:${storageKey}`,
+      JSON.stringify({ sorting, globalFilter, pagination }),
+    );
+  }, [globalFilter, pagination, sorting, storageKey]);
 
   const table = useReactTable({
     data,

@@ -28,8 +28,8 @@ export default function KpiSubmissionAreaChart({ data }: KpiSubmissionAreaChartP
           <ChartContainer
             className="h-[240px] w-full"
             config={{
-              submissions: { label: t('kpiCharts.submissions'), color: 'var(--chart-1)' },
-              grading: { label: t('kpiCharts.gradingCompleted'), color: 'var(--chart-2)' },
+              submissions: { label: t('kpiCharts.submissions'), color: 'var(--chart-1)', valueFormatter: (value) => `${value ?? 0} ${t('scoreChart.learners')}` },
+              grading: { label: t('kpiCharts.gradingCompleted'), color: 'var(--chart-2)', valueFormatter: (value) => `${value ?? 0} ${t('scoreChart.learners')}` },
             }}
           >
             <AreaChart data={data}>

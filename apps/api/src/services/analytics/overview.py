@@ -6,6 +6,7 @@ from sqlalchemy import func, select
 from sqlmodel import Session
 
 from src.db.analytics import DailyTeacherMetrics, LearnerRiskSnapshot
+from src.services.analytics.assessments import build_assessment_rows
 from src.services.analytics.courses import build_course_rows
 from src.services.analytics.filters import AnalyticsFilters
 from src.services.analytics.queries import (
@@ -25,7 +26,9 @@ from src.services.analytics.risk import build_risk_rows
 from src.services.analytics.rollups import freshness_seconds_from_rollup, get_latest_teacher_rollup, supports_rollup_reads
 from src.services.analytics.schemas import (
     AlertItem,
+    AnalyticsFilterOption,
     MetricCard,
+    RiskDistributionCounts,
     TeacherOverviewResponse,
     TeacherOverviewScope,
     TeacherOverviewSummary,
@@ -51,7 +54,7 @@ def _metric(label: str, value: float, previous: float | None, *, unit: str | Non
     )
 
 
-def _query_previous_at_risk_count(db_session: Session, org_id: int, course_ids: list[int], before_date: date) -> float:
+def _query_previous_at_risk_count(db_session: Session, org_id: int, course_ids: list[int], before_date: date) -> float | None:
     """Return the at-risk learner count from the most recent LearnerRiskSnapshot before *before_date*."""
     latest_date_result = db_session.exec(
         select(func.max(LearnerRiskSnapshot.snapshot_date)).where(
@@ -61,7 +64,7 @@ def _query_previous_at_risk_count(db_session: Session, org_id: int, course_ids: 
     ).one_or_none()
     latest_date = latest_date_result if isinstance(latest_date_result, date) else None
     if latest_date is None:
-        return 0.0
+        return None
     filter_clause = [
         LearnerRiskSnapshot.org_id == org_id,
         LearnerRiskSnapshot.snapshot_date == latest_date,
@@ -75,7 +78,7 @@ def _query_previous_at_risk_count(db_session: Session, org_id: int, course_ids: 
     return float(result if result is not None else 0)
 
 
-def _query_previous_negative_engagement(db_session: Session, org_id: int, teacher_user_id: int, before_date: date) -> float:
+def _query_previous_negative_engagement(db_session: Session, org_id: int, teacher_user_id: int, before_date: date) -> float | None:
     """Return the courses_with_negative_engagement from the most recent DailyTeacherMetrics before *before_date*."""
     stmt = select(DailyTeacherMetrics).where(
         DailyTeacherMetrics.org_id == org_id,
@@ -83,7 +86,16 @@ def _query_previous_negative_engagement(db_session: Session, org_id: int, teache
         DailyTeacherMetrics.metric_date < before_date,
     ).order_by(DailyTeacherMetrics.metric_date.desc()).limit(1)
     row = db_session.exec(stmt).first()
-    return float(row.courses_with_negative_engagement) if row is not None else 0.0
+    return float(row.courses_with_negative_engagement) if row is not None else None
+
+
+def _query_previous_teacher_metrics(db_session: Session, org_id: int, teacher_user_id: int, before_date: date) -> DailyTeacherMetrics | None:
+    stmt = select(DailyTeacherMetrics).where(
+        DailyTeacherMetrics.org_id == org_id,
+        DailyTeacherMetrics.teacher_user_id == teacher_user_id,
+        DailyTeacherMetrics.metric_date < before_date,
+    ).order_by(DailyTeacherMetrics.metric_date.desc()).limit(1)
+    return db_session.exec(stmt).first()
 
 
 def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filters: AnalyticsFilters) -> TeacherOverviewResponse:
@@ -131,7 +143,8 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
     previous_completion_rate = safe_pct(previous_completions, enrolled) or 0.0
     at_risk_count = sum(1 for row in risk_rows if row.risk_level in {"medium", "high"})
     # Query the most recent LearnerRiskSnapshot before the current window to get a real previous value.
-    previous_at_risk: float = _query_previous_at_risk_count(db_session, scope.org_id, scope.course_ids, previous_end.date())
+    previous_at_risk = _query_previous_at_risk_count(db_session, scope.org_id, scope.course_ids, previous_end.date())
+    previous_teacher_metrics = _query_previous_teacher_metrics(db_session, scope.org_id, scope.teacher_user_id, previous_end.date())
     ungraded_submissions = sum(
         1
         for submission, _assignment in context.assignment_submissions
@@ -141,9 +154,10 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
 
     # Pass shared context to avoid a second full load inside build_course_rows
     generated_rows_timestamp, course_rows = build_course_rows(scope, filters, db_session, context=context)
+    assessment_rows = build_assessment_rows(context, filters)
     negative_engagement_courses = sum(1 for row in course_rows if row.engagement_delta_pct is not None and row.engagement_delta_pct < 0)
     # Query the previous period's DailyTeacherMetrics to get actual previous value instead of hardcoded 0.
-    previous_negative_engagement: float = _query_previous_negative_engagement(
+    previous_negative_engagement = _query_previous_negative_engagement(
         db_session, scope.org_id, scope.teacher_user_id, previous_end.date()
     )
 
@@ -195,6 +209,12 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
         )
     alerts = sorted(alerts, key=lambda alert: {"critical": 2, "warning": 1, "info": 0}[alert.severity], reverse=True)[:8]
 
+    risk_distribution = RiskDistributionCounts(
+        high=sum(1 for row in risk_rows if row.risk_level == "high"),
+        medium=sum(1 for row in risk_rows if row.risk_level == "medium"),
+        low=sum(1 for row in risk_rows if row.risk_level == "low"),
+    )
+
     return TeacherOverviewResponse(
         generated_at=to_iso(generated_at) or generated_rows_timestamp,
         # For live queries, freshness is how long data is "stale" within the window (always live = 0).
@@ -211,7 +231,15 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
         summary=TeacherOverviewSummary(
             active_learners=_metric(
                 "Активные учащиеся",
-                float(teacher_rollup.active_learners_7d if teacher_rollup is not None and filters.window == "7d" else teacher_rollup.active_learners_28d if teacher_rollup is not None else len(current_active_users)),
+                float(
+                    teacher_rollup.active_learners_7d
+                    if teacher_rollup is not None and filters.window == "7d"
+                    else teacher_rollup.active_learners_28d
+                    if teacher_rollup is not None and filters.window == "28d"
+                    else teacher_rollup.active_learners_90d
+                    if teacher_rollup is not None and filters.window == "90d"
+                    else len(current_active_users)
+                ),
                 float(len(previous_active_users)),
                 is_higher_better=True,
             ),
@@ -232,18 +260,37 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
             at_risk_learners=_metric(
                 "Учащиеся в зоне риска",
                 float(teacher_rollup.at_risk_learners if teacher_rollup is not None else at_risk_count),
-                float(previous_at_risk),
+                float(previous_at_risk) if previous_at_risk is not None else None,
                 is_higher_better=False,
             ),
-            ungraded_submissions=_metric("Непроверенные отправки", float(teacher_rollup.ungraded_submissions if teacher_rollup is not None else ungraded_submissions), None, is_higher_better=False),
+            ungraded_submissions=_metric(
+                "Непроверенные отправки",
+                float(teacher_rollup.ungraded_submissions if teacher_rollup is not None else ungraded_submissions),
+                float(previous_teacher_metrics.ungraded_submissions) if previous_teacher_metrics is not None else None,
+                is_higher_better=False,
+            ),
             negative_engagement_courses=_metric(
                 "Курсы со снижением вовлеченности",
                 float(teacher_rollup.courses_with_negative_engagement if teacher_rollup is not None else negative_engagement_courses),
-                float(previous_negative_engagement),
+                float(previous_negative_engagement) if previous_negative_engagement is not None else None,
                 is_higher_better=False,
             ),
         ),
         trends=trends,
         alerts=alerts,
+        risk_distribution=risk_distribution,
         at_risk_preview=risk_rows[:8],
+        course_preview=course_rows[:8],
+        assessment_preview=assessment_rows[:8],
+        course_total=len(course_rows),
+        assessment_total=len(assessment_rows),
+        course_options=[
+            AnalyticsFilterOption(label=context.courses_by_id[course_id].name, value=str(course_id))
+            for course_id in sorted(context.courses_by_id)
+            if course_id in scope.course_ids
+        ],
+        cohort_options=[
+            AnalyticsFilterOption(label=name, value=str(group_id))
+            for group_id, name in sorted(context.usergroup_names_by_id.items(), key=lambda item: item[1].lower())
+        ],
     )

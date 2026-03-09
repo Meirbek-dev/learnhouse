@@ -8,6 +8,7 @@ export interface AnalyticsQuery {
   window?: WindowPreset;
   compare?: ComparePreset;
   bucket?: Bucket;
+  bucket_start?: string;
   course_ids?: string;
   cohort_ids?: string;
   teacher_user_id?: number;
@@ -38,6 +39,12 @@ export interface TimeSeriesPoint {
   value: number;
 }
 
+export interface RiskDistributionCounts {
+  high: number;
+  medium: number;
+  low: number;
+}
+
 export interface AlertItem {
   id: string;
   type: 'risk_spike' | 'engagement_drop' | 'grading_backlog' | 'assessment_outlier' | 'content_stale';
@@ -61,6 +68,7 @@ export interface AtRiskLearnerRow {
   open_grading_blocks: number;
   failed_assessments: number;
   missing_required_assessments: number;
+  risk_components: Record<string, number>;
   risk_score: number;
   risk_level: 'low' | 'medium' | 'high';
   reason_codes: string[];
@@ -93,7 +101,14 @@ export interface TeacherOverviewResponse {
     grading_completed: TimeSeriesPoint[];
   };
   alerts: AlertItem[];
+  risk_distribution: RiskDistributionCounts;
   at_risk_preview: AtRiskLearnerRow[];
+  course_preview: TeacherCourseRow[];
+  assessment_preview: AssessmentOutlierRow[];
+  course_total: number;
+  assessment_total: number;
+  course_options: AnalyticsFilterOption[];
+  cohort_options: AnalyticsFilterOption[];
 }
 
 export interface TeacherCourseRow {
@@ -114,7 +129,11 @@ export interface TeacherCourseRow {
 export interface TeacherCourseListResponse {
   generated_at: string;
   total: number;
+  page: number;
+  page_size: number;
   items: TeacherCourseRow[];
+  course_options: AnalyticsFilterOption[];
+  cohort_options: AnalyticsFilterOption[];
 }
 
 export interface FunnelStep {
@@ -190,7 +209,11 @@ export interface TeacherCourseDetailResponse {
 export interface TeacherAssessmentListResponse {
   generated_at: string;
   total: number;
+  page: number;
+  page_size: number;
   items: AssessmentOutlierRow[];
+  course_options: AnalyticsFilterOption[];
+  cohort_options: AnalyticsFilterOption[];
 }
 
 export interface HistogramBucket {
@@ -228,6 +251,8 @@ export interface TeacherAssessmentDetailResponse {
   assessment_id: number;
   course_id: number;
   title: string;
+  pass_threshold: number | null;
+  pass_threshold_bucket_label: string | null;
   summary: {
     eligible_learners: number;
     submitted_learners: number;
@@ -251,4 +276,6 @@ export interface AtRiskLearnersResponse {
   page: number;
   page_size: number;
   items: AtRiskLearnerRow[];
+  course_options: AnalyticsFilterOption[];
+  cohort_options: AnalyticsFilterOption[];
 }

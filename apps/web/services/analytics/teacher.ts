@@ -57,6 +57,7 @@ export function normalizeAnalyticsQuery(searchParams: Record<string, string | st
     page_size: pageSize ? Number(pageSize) : 25,
     sort_by: first(searchParams.sort_by),
     sort_order: (first(searchParams.sort_order) as AnalyticsQuery['sort_order']) || 'desc',
+    bucket_start: first(searchParams.bucket_start),
   };
 }
 

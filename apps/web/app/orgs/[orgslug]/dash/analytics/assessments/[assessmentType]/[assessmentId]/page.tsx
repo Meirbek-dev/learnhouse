@@ -49,7 +49,8 @@ export default async function AnalyticsAssessmentDetailPage(props: {
             title={t('pages.assessmentScoreDistTitle')}
             description={t('pages.assessmentScoreDistDesc')}
             data={detail.score_distribution}
-            thresholdLabel={detail.assessment_type === 'exam' ? t('pages.assessmentPassThresholdExam') : t('pages.assessmentPassThresholdDefault')}
+            thresholdLabel={detail.pass_threshold !== null ? `${t('pages.assessmentPassThresholdDefault')} ${detail.pass_threshold}%` : undefined}
+            thresholdBucketLabel={detail.pass_threshold_bucket_label || undefined}
           />
           <AnalyticsThresholdHistogram title={t('pages.assessmentAttemptDistTitle')} description={t('pages.assessmentAttemptDistDesc')} data={detail.attempt_distribution} />
         </div>

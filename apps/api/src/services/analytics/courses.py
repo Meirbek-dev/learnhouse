@@ -6,6 +6,7 @@ from datetime import timedelta
 from sqlalchemy import select
 from sqlmodel import Session
 
+from src.db.usergroups import UserGroup
 from src.services.analytics.assessments import build_assessment_rows
 from src.services.analytics.filters import AnalyticsFilters
 from src.services.analytics.queries import (
@@ -23,6 +24,7 @@ from src.services.analytics.risk import build_risk_rows
 from src.services.analytics.rollups import list_latest_assessment_rollups, list_latest_course_rollups, supports_rollup_reads
 from src.services.analytics.schemas import (
     ActivityDropoffRow,
+    AnalyticsFilterOption,
     AlertItem,
     ContentHealthRow,
     FunnelStep,
@@ -247,9 +249,46 @@ def get_teacher_course_list(db_session: Session, scope: TeacherAnalyticsScope, f
     rollup_rows = _build_rollup_course_rows(scope, filters, db_session)
     if rollup_rows is not None:
         generated_at, rows = rollup_rows
-        return TeacherCourseListResponse(generated_at=generated_at, total=len(rows), items=rows)
-    generated_at, rows = build_course_rows(scope, filters, db_session)
-    return TeacherCourseListResponse(generated_at=generated_at, total=len(rows), items=rows)
+        paged_rows = rows[filters.offset : filters.offset + filters.page_size]
+        course_map = {
+            course.id: course
+            for course in db_session.exec(select(Course).where(Course.id.in_(scope.course_ids))).all()
+        }
+        usergroups = list(db_session.exec(select(UserGroup).where(UserGroup.org_id == scope.org_id)).all())
+        return TeacherCourseListResponse(
+            generated_at=generated_at,
+            total=len(rows),
+            page=filters.page,
+            page_size=filters.page_size,
+            items=paged_rows,
+            course_options=[
+                AnalyticsFilterOption(label=course.name, value=str(course_id))
+                for course_id, course in sorted(course_map.items(), key=lambda item: item[1].name.lower())
+            ],
+            cohort_options=[
+                AnalyticsFilterOption(label=group.name, value=str(group.id))
+                for group in sorted(usergroups, key=lambda item: item.name.lower())
+            ],
+        )
+    context = load_analytics_context(db_session, scope.course_ids)
+    generated_at, rows = build_course_rows(scope, filters, db_session, context=context)
+    paged_rows = rows[filters.offset : filters.offset + filters.page_size]
+    return TeacherCourseListResponse(
+        generated_at=generated_at,
+        total=len(rows),
+        page=filters.page,
+        page_size=filters.page_size,
+        items=paged_rows,
+        course_options=[
+            AnalyticsFilterOption(label=context.courses_by_id[course_id].name, value=str(course_id))
+            for course_id in sorted(context.courses_by_id)
+            if course_id in scope.course_ids
+        ],
+        cohort_options=[
+            AnalyticsFilterOption(label=name, value=str(group_id))
+            for group_id, name in sorted(context.usergroup_names_by_id.items(), key=lambda item: item[1].lower())
+        ],
+    )
 
 
 def get_teacher_course_detail(db_session: Session, scope: TeacherAnalyticsScope, course_id: int, filters: AnalyticsFilters) -> TeacherCourseDetailResponse:

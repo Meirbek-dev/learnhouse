@@ -1,6 +1,6 @@
 'use client';
 
-import type { AtRiskLearnerRow } from '@/types/analytics';
+import type { RiskDistributionCounts } from '@/types/analytics';
 import { getAnalyticsRiskLevelLabel } from '@/lib/analytics/labels';
 import { useTranslations } from 'next-intl';
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ChartContainer, ChartEmptyState, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
 interface AnalyticsRiskDistributionChartProps {
-  rows: AtRiskLearnerRow[];
+  counts: RiskDistributionCounts;
   totalAtRisk?: number;
 }
 
@@ -27,15 +27,13 @@ const RISK_COLOR_FALLBACKS: Record<string, string> = {
   low: 'hsl(215 16% 47%)',   // slate-500
 };
 
-export default function AnalyticsRiskDistributionChart({ rows, totalAtRisk }: AnalyticsRiskDistributionChartProps) {
+export default function AnalyticsRiskDistributionChart({ counts, totalAtRisk }: AnalyticsRiskDistributionChartProps) {
   const t = useTranslations('TeacherAnalytics');
   const data = [
-    { level: 'high', label: getAnalyticsRiskLevelLabel(t, 'high'), count: rows.filter((row) => row.risk_level === 'high').length },
-    { level: 'medium', label: getAnalyticsRiskLevelLabel(t, 'medium'), count: rows.filter((row) => row.risk_level === 'medium').length },
-    { level: 'low', label: getAnalyticsRiskLevelLabel(t, 'low'), count: rows.filter((row) => row.risk_level === 'low').length },
+    { level: 'high', label: getAnalyticsRiskLevelLabel(t, 'high'), count: counts.high },
+    { level: 'medium', label: getAnalyticsRiskLevelLabel(t, 'medium'), count: counts.medium },
+    { level: 'low', label: getAnalyticsRiskLevelLabel(t, 'low'), count: counts.low },
   ].filter((item) => item.count > 0);
-
-  const isPreview = totalAtRisk !== undefined && totalAtRisk > rows.length;
 
   return (
     <Card className="border-slate-200 bg-white/90 shadow-sm">
@@ -43,7 +41,7 @@ export default function AnalyticsRiskDistributionChart({ rows, totalAtRisk }: An
         <CardTitle>{t('riskDistribution.title')}</CardTitle>
         <CardDescription>
           {t('riskDistribution.description')}
-          {isPreview ? ` ${t('riskDistribution.preview', { shown: rows.length, total: totalAtRisk })}` : ''}
+          {typeof totalAtRisk === 'number' ? ` ${t('riskDistribution.preview', { shown: totalAtRisk, total: totalAtRisk })}` : ''}
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ChartContainer, ChartEmptyState, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
 interface AnalyticsMultiSeriesTrendRow {
+  bucket_start: string;
   bucket: string;
   active_learners: number;
   completions: number;
@@ -18,10 +19,25 @@ interface AnalyticsMultiSeriesTrendChartProps {
   title: string;
   description: string;
   data: AnalyticsMultiSeriesTrendRow[];
+  onBucketClick?: (bucketStart: string) => void;
 }
 
-export default function AnalyticsMultiSeriesTrendChart({ title, description, data }: AnalyticsMultiSeriesTrendChartProps) {
+interface AnalyticsTrendChartClickState {
+  activePayload?: Array<{
+    payload?: AnalyticsMultiSeriesTrendRow;
+  }>;
+}
+
+export default function AnalyticsMultiSeriesTrendChart({ title, description, data, onBucketClick }: AnalyticsMultiSeriesTrendChartProps) {
   const t = useTranslations('TeacherAnalytics');
+
+  const handleChartClick = (state: AnalyticsTrendChartClickState | undefined) => {
+    const bucketStart = state?.activePayload?.[0]?.payload?.bucket_start;
+    if (bucketStart) {
+      onBucketClick?.(bucketStart);
+    }
+  };
+
   return (
     <Card className="border-slate-200 bg-white/90 shadow-sm">
       <CardHeader>
@@ -39,20 +55,11 @@ export default function AnalyticsMultiSeriesTrendChart({ title, description, dat
               grading_completed: { label: t('trend.gradingCompleted'), color: 'var(--chart-4)' },
             }}
           >
-            <AreaChart data={data}>
+            <AreaChart data={data} onClick={handleChartClick}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis dataKey="bucket" tickLine={false} axisLine={false} minTickGap={24} />
               <YAxis tickLine={false} axisLine={false} />
-              <ChartTooltip
-                content={
-                  <ChartTooltipContent
-                    formatter={(value, name, props) => {
-                      const label = props.dataKey as string;
-                      return [String(value), label];
-                    }}
-                  />
-                }
-              />
+              <ChartTooltip content={<ChartTooltipContent />} />
               <Legend content={<ChartLegendContent />} />
               <Area type="monotone" dataKey="active_learners" stroke="var(--color-active_learners)" fill="var(--color-active_learners)" fillOpacity={0.14} strokeWidth={2.5} />
               <Area type="monotone" dataKey="completions" stroke="var(--color-completions)" fill="var(--color-completions)" fillOpacity={0.1} strokeWidth={2} />

@@ -11,9 +11,10 @@ import { useTranslations } from 'next-intl';
 interface CourseHealthTableProps {
   orgslug: string;
   rows: TeacherCourseRow[];
+  storageKey?: string;
 }
 
-export default function CourseHealthTable({ orgslug, rows }: CourseHealthTableProps) {
+export default function CourseHealthTable({ orgslug, rows, storageKey }: CourseHealthTableProps) {
   const t = useTranslations('TeacherAnalytics');
   const columns: ColumnDef<TeacherCourseRow>[] = [
     {
@@ -64,7 +65,7 @@ export default function CourseHealthTable({ orgslug, rows }: CourseHealthTablePr
         <CardDescription>{t('courseHealth.description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <AnalyticsDataTable columns={columns} data={rows} searchPlaceholder={t('courseHealth.searchPlaceholder')} emptyMessage={t('courseHealth.emptyMessage')} />
+        <AnalyticsDataTable columns={columns} data={rows} storageKey={storageKey} searchPlaceholder={t('courseHealth.searchPlaceholder')} emptyMessage={t('courseHealth.emptyMessage')} />
       </CardContent>
     </Card>
   );

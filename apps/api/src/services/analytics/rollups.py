@@ -27,7 +27,12 @@ logger = logging.getLogger(__name__)
 
 
 def supports_rollup_reads(filters: AnalyticsFilters) -> bool:
-    return not filters.cohort_ids and filters.window in {"7d", "28d", "90d"} and filters.compare == "previous_period"
+    return (
+        not filters.cohort_ids
+        and filters.bucket_start is None
+        and filters.window in {"7d", "28d", "90d"}
+        and filters.compare == "previous_period"
+    )
 
 
 def _unwrap_scalar_date(value: Any) -> date | None:
@@ -138,6 +143,7 @@ def _merge_teacher_metrics(
             managed_course_count=len(teacher_course_ids),
             active_learners_7d=len({event.user_id for event in teacher_events if (context.generated_at - event.ts).days <= 7}),
             active_learners_28d=len(current_active),
+            active_learners_90d=len({event.user_id for event in teacher_events if (context.generated_at - event.ts).days <= 90}),
             returning_learners_28d=len(current_active & previous_active),
             completion_rate=safe_pct(sum(1 for snapshot in teacher_snapshots if snapshot.is_completed), len(teacher_snapshots)),
             avg_progress_pct=round(sum(snapshot.progress_pct for snapshot in teacher_snapshots) / max(1, len(teacher_snapshots)), 2),
@@ -182,7 +188,7 @@ def refresh_teacher_analytics_rollups(db_session: Session, *, org_id: int | None
             has_org_scope=True,
         )
         context = load_analytics_context(db_session, course_ids)
-        course_rows = build_course_rows(scope, filters, db_session)[1]
+        course_rows = build_course_rows(scope, filters, db_session, context=context)[1]
         assessment_rows = build_assessment_rows(context, filters)
         risk_rows = build_risk_rows(context, filters)
         snapshots = progress_snapshots(context)

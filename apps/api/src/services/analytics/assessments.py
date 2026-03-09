@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter, defaultdict
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
 from sqlmodel import Session
@@ -9,15 +10,18 @@ from src.db.courses.activities import Activity, ActivityTypeEnum
 from src.db.courses.assignments import Assignment
 from src.db.courses.courses import Course
 from src.db.courses.exams import Exam
+from src.db.usergroups import UserGroup
 from src.services.analytics.filters import AnalyticsFilters
 from src.services.analytics.queries import (
     AnalyticsContext,
     assessment_pass_threshold,
+    bucket_start as normalize_bucket_start,
     cohort_user_ids,
     display_name,
     hours_between,
     load_analytics_context,
     median_or_none,
+    parse_timestamp,
     percentile,
     progress_snapshots,
     safe_pct,
@@ -25,6 +29,7 @@ from src.services.analytics.queries import (
 )
 from src.services.analytics.rollups import list_latest_assessment_rollups, supports_rollup_reads
 from src.services.analytics.schemas import (
+    AnalyticsFilterOption,
     AssessmentLearnerRow,
     AssessmentOutlierRow,
     CommonFailureRow,
@@ -35,6 +40,27 @@ from src.services.analytics.schemas import (
     TeacherAssessmentListResponse,
 )
 from src.services.analytics.scope import TeacherAnalyticsScope
+
+
+def _selected_bucket_window(filters: AnalyticsFilters | None) -> tuple[datetime, datetime] | None:
+    if filters is None or filters.bucket_start is None:
+        return None
+    selected = filters.bucket_start
+    if selected.tzinfo is None:
+        selected = selected.replace(tzinfo=UTC)
+    local_start = normalize_bucket_start(selected, filters.bucket, filters.tzinfo)
+    local_end = local_start + (timedelta(weeks=1) if filters.bucket == "week" else timedelta(days=1))
+    return local_start.astimezone(UTC), local_end.astimezone(UTC)
+
+
+def _in_bucket_window(value: object, bucket_window: tuple[datetime, datetime] | None) -> bool:
+    if bucket_window is None:
+        return True
+    timestamp = parse_timestamp(value)
+    if timestamp is None:
+        return False
+    start, end = bucket_window
+    return start <= timestamp < end
 
 
 def _build_rollup_assessment_rows(
@@ -157,6 +183,7 @@ def _build_assignment_rows(
     context: AnalyticsContext,
     snapshots: dict[tuple[int, int], object],
     allowed_user_ids: set[int] | None,
+    bucket_window: tuple[datetime, datetime] | None,
 ) -> list[AssessmentOutlierRow]:
     eligible_by_course: dict[int, set[int]] = defaultdict(set)
     for course_id, user_id in snapshots.keys():
@@ -165,6 +192,8 @@ def _build_assignment_rows(
     submissions_by_assignment: dict[int, list] = defaultdict(list)
     for submission, assignment in context.assignment_submissions:
         if not _is_allowed(submission.user_id, allowed_user_ids):
+            continue
+        if not _in_bucket_window(getattr(submission, "submitted_at", None), bucket_window):
             continue
         if assignment.id is not None:
             submissions_by_assignment[assignment.id].append((submission, assignment))
@@ -222,6 +251,7 @@ def _build_exam_rows(
     context: AnalyticsContext,
     snapshots: dict[tuple[int, int], object],
     allowed_user_ids: set[int] | None,
+    bucket_window: tuple[datetime, datetime] | None,
 ) -> list[AssessmentOutlierRow]:
     eligible_by_course: dict[int, set[int]] = defaultdict(set)
     for course_id, user_id in snapshots.keys():
@@ -230,6 +260,8 @@ def _build_exam_rows(
     attempts_by_exam: dict[int, list] = defaultdict(list)
     for attempt, exam in context.exam_attempts:
         if not _is_allowed(attempt.user_id, allowed_user_ids):
+            continue
+        if not _in_bucket_window(attempt.submitted_at or attempt.started_at, bucket_window):
             continue
         if exam.id is not None and not attempt.is_preview:
             attempts_by_exam[exam.id].append((attempt, exam))
@@ -281,6 +313,7 @@ def _build_quiz_rows(
     context: AnalyticsContext,
     snapshots: dict[tuple[int, int], object],
     allowed_user_ids: set[int] | None,
+    bucket_window: tuple[datetime, datetime] | None,
 ) -> list[AssessmentOutlierRow]:
     eligible_by_course: dict[int, set[int]] = defaultdict(set)
     for course_id, user_id in snapshots.keys():
@@ -289,6 +322,8 @@ def _build_quiz_rows(
     attempts_by_activity: dict[int, list] = defaultdict(list)
     for attempt, activity in context.quiz_attempts:
         if not _is_allowed(attempt.user_id, allowed_user_ids):
+            continue
+        if not _in_bucket_window(attempt.end_ts or attempt.start_ts, bucket_window):
             continue
         attempts_by_activity[activity.id].append((attempt, activity))
 
@@ -336,6 +371,7 @@ def _build_code_rows(
     context: AnalyticsContext,
     snapshots: dict[tuple[int, int], object],
     allowed_user_ids: set[int] | None,
+    bucket_window: tuple[datetime, datetime] | None,
 ) -> list[AssessmentOutlierRow]:
     eligible_by_course: dict[int, set[int]] = defaultdict(set)
     for course_id, user_id in snapshots.keys():
@@ -344,6 +380,8 @@ def _build_code_rows(
     submissions_by_activity: dict[int, list] = defaultdict(list)
     for submission, activity in context.code_submissions:
         if not _is_allowed(submission.user_id, allowed_user_ids):
+            continue
+        if not _in_bucket_window(getattr(submission, "created_at", None), bucket_window):
             continue
         submissions_by_activity[activity.id].append((submission, activity))
 
@@ -390,11 +428,12 @@ def _build_code_rows(
 def build_assessment_rows(context: AnalyticsContext, filters: AnalyticsFilters | None = None) -> list[AssessmentOutlierRow]:
     allowed_user_ids = cohort_user_ids(context, filters.cohort_ids if filters else [])
     snapshots = progress_snapshots(context, allowed_user_ids)
+    bucket_window = _selected_bucket_window(filters)
     rows = [
-        *_build_assignment_rows(context, snapshots, allowed_user_ids),
-        *_build_quiz_rows(context, snapshots, allowed_user_ids),
-        *_build_exam_rows(context, snapshots, allowed_user_ids),
-        *_build_code_rows(context, snapshots, allowed_user_ids),
+        *_build_assignment_rows(context, snapshots, allowed_user_ids, bucket_window),
+        *_build_quiz_rows(context, snapshots, allowed_user_ids, bucket_window),
+        *_build_exam_rows(context, snapshots, allowed_user_ids, bucket_window),
+        *_build_code_rows(context, snapshots, allowed_user_ids, bucket_window),
     ]
     sort_by = filters.sort_by if filters else None
     sort_order = filters.sort_order if filters else "desc"
@@ -417,10 +456,46 @@ def get_teacher_assessment_list(db_session: Session, scope: TeacherAnalyticsScop
     rollup_rows = _build_rollup_assessment_rows(db_session, scope, filters)
     if rollup_rows is not None:
         generated_at, rows = rollup_rows
-        return TeacherAssessmentListResponse(generated_at=generated_at, total=len(rows), items=rows)
+        paged_rows = rows[filters.offset : filters.offset + filters.page_size]
+        course_map = {
+            course.id: course
+            for course in db_session.exec(select(Course).where(Course.id.in_(scope.course_ids))).all()
+        }
+        usergroups = list(db_session.exec(select(UserGroup).where(UserGroup.org_id == scope.org_id)).all())
+        return TeacherAssessmentListResponse(
+            generated_at=generated_at,
+            total=len(rows),
+            page=filters.page,
+            page_size=filters.page_size,
+            items=paged_rows,
+            course_options=[
+                AnalyticsFilterOption(label=course.name, value=str(course_id))
+                for course_id, course in sorted(course_map.items(), key=lambda item: item[1].name.lower())
+            ],
+            cohort_options=[
+                AnalyticsFilterOption(label=group.name, value=str(group.id))
+                for group in sorted(usergroups, key=lambda item: item.name.lower())
+            ],
+        )
     context = load_analytics_context(db_session, scope.course_ids)
     rows = build_assessment_rows(context, filters)
-    return TeacherAssessmentListResponse(generated_at=to_iso(context.generated_at) or "", total=len(rows), items=rows)
+    paged_rows = rows[filters.offset : filters.offset + filters.page_size]
+    return TeacherAssessmentListResponse(
+        generated_at=to_iso(context.generated_at) or "",
+        total=len(rows),
+        page=filters.page,
+        page_size=filters.page_size,
+        items=paged_rows,
+        course_options=[
+            AnalyticsFilterOption(label=context.courses_by_id[course_id].name, value=str(course_id))
+            for course_id in sorted(context.courses_by_id)
+            if course_id in scope.course_ids
+        ],
+        cohort_options=[
+            AnalyticsFilterOption(label=name, value=str(group_id))
+            for group_id, name in sorted(context.usergroup_names_by_id.items(), key=lambda item: item[1].lower())
+        ],
+    )
 
 
 def get_teacher_assessment_detail(
@@ -479,6 +554,8 @@ def get_teacher_assessment_detail(
             assessment_id=assessment_id,
             course_id=assignment.course_id,
             title=assignment.title,
+            pass_threshold=60,
+            pass_threshold_bucket_label=_score_bucket(60),
             summary=TeacherAssessmentDetailSummary(
                 eligible_learners=eligible,
                 submitted_learners=len({submission.user_id for submission, _ in records}),
@@ -536,6 +613,8 @@ def get_teacher_assessment_detail(
             assessment_id=assessment_id,
             course_id=exam.course_id,
             title=exam.title,
+            pass_threshold=threshold,
+            pass_threshold_bucket_label=_score_bucket(threshold),
             summary=TeacherAssessmentDetailSummary(
                 eligible_learners=eligible,
                 submitted_learners=len(attempts_by_user),
@@ -608,6 +687,8 @@ def get_teacher_assessment_detail(
             assessment_id=assessment_id,
             course_id=activity.course_id,
             title=activity.name,
+            pass_threshold=60,
+            pass_threshold_bucket_label=_score_bucket(60),
             summary=TeacherAssessmentDetailSummary(
                 eligible_learners=eligible,
                 submitted_learners=len(attempts_by_user),
@@ -673,6 +754,8 @@ def get_teacher_assessment_detail(
             assessment_id=assessment_id,
             course_id=activity.course_id,
             title=activity.name,
+            pass_threshold=60,
+            pass_threshold_bucket_label=_score_bucket(60),
             summary=TeacherAssessmentDetailSummary(
                 eligible_learners=eligible,
                 submitted_learners=len(attempts_by_user),

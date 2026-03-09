@@ -31,7 +31,7 @@ export default function AnalyticsThresholdHistogram({ title, description, data, 
       </CardHeader>
       <CardContent>
         {data.length ? (
-          <ChartContainer className="h-[280px] w-full" config={{ count: { label: t('histogram.learners'), color: 'var(--chart-3)' } }}>
+          <ChartContainer className="h-[280px] w-full" config={{ count: { label: t('histogram.learners'), color: 'var(--chart-3)', valueFormatter: (value) => `${value ?? 0} ${t('histogram.learners')}` } }}>
             <BarChart data={data}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis dataKey="label" tickLine={false} axisLine={false} />
@@ -41,9 +41,9 @@ export default function AnalyticsThresholdHistogram({ title, description, data, 
               {thresholdBucketLabel ? (
                 <ReferenceLine
                   x={thresholdBucketLabel}
-                  stroke="#dc2626"
+                  stroke="var(--chart-4)"
                   strokeDasharray="4 2"
-                  label={{ value: t('histogram.passLabel'), position: 'insideTopRight', fontSize: 11, fill: '#dc2626' }}
+                  label={{ value: t('histogram.passLabel'), position: 'insideTopRight', fontSize: 11, fill: 'var(--chart-4)' }}
                 />
               ) : null}
             </BarChart>

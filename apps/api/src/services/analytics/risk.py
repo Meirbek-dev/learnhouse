@@ -171,6 +171,13 @@ def build_risk_rows(context: AnalyticsContext, filters: AnalyticsFilters) -> lis
                 missing_required_assessments=missing,
                 risk_score=risk_score,
                 risk_level=risk_level,
+                risk_components={
+                    "inactivity": float(inactivity_component),
+                    "progress": float(progress_component),
+                    "failures": float(failure_component),
+                    "missing": float(missing_component),
+                    "grading": float(grading_component),
+                },
                 reason_codes=reason_codes,
                 recommended_action=recommended_action,
             )
@@ -194,4 +201,13 @@ def get_at_risk_learners(
         page=filters.page,
         page_size=filters.page_size,
         items=paged_rows,
+        course_options=[
+            {"label": context.courses_by_id[course_id].name, "value": str(course_id)}
+            for course_id in sorted(context.courses_by_id)
+            if course_id in scope.course_ids
+        ],
+        cohort_options=[
+            {"label": name, "value": str(group_id)}
+            for group_id, name in sorted(context.usergroup_names_by_id.items(), key=lambda item: item[1].lower())
+        ],
     )

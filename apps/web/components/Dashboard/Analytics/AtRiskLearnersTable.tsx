@@ -12,6 +12,7 @@ interface AtRiskLearnersTableProps {
   title?: string;
   description?: string;
   rows: AtRiskLearnerRow[];
+  storageKey?: string;
 }
 
 const riskVariant = (level: AtRiskLearnerRow['risk_level']) => {
@@ -24,6 +25,7 @@ export default function AtRiskLearnersTable({
   title,
   description,
   rows,
+  storageKey,
 }: AtRiskLearnersTableProps) {
   const t = useTranslations('TeacherAnalytics');
   const resolvedTitle = title ?? t('atRisk.defaultTitle');
@@ -53,7 +55,14 @@ export default function AtRiskLearnersTable({
     {
       accessorKey: 'risk_score',
       header: t('atRisk.colRisk'),
-      cell: ({ row }) => <Badge variant={riskVariant(row.original.risk_level)}>{getAnalyticsRiskLevelLabel(t, row.original.risk_level)} · {row.original.risk_score}</Badge>,
+      cell: ({ row }) => (
+        <div className="space-y-1">
+          <Badge variant={riskVariant(row.original.risk_level)}>{getAnalyticsRiskLevelLabel(t, row.original.risk_level)} · {row.original.risk_score}</Badge>
+          <div className="max-w-[260px] text-[11px] leading-4 text-slate-500">
+            I {Math.round(row.original.risk_components.inactivity ?? 0)} · P {Math.round(row.original.risk_components.progress ?? 0)} · F {Math.round(row.original.risk_components.failures ?? 0)} · M {Math.round(row.original.risk_components.missing ?? 0)} · G {Math.round(row.original.risk_components.grading ?? 0)}
+          </div>
+        </div>
+      ),
     },
     {
       accessorKey: 'reason_codes',
@@ -74,7 +83,7 @@ export default function AtRiskLearnersTable({
         <CardDescription>{resolvedDescription}</CardDescription>
       </CardHeader>
       <CardContent>
-        <AnalyticsDataTable columns={columns} data={rows} searchPlaceholder={t('atRisk.searchPlaceholder')} emptyMessage={t('atRisk.emptyMessage')} />
+        <AnalyticsDataTable columns={columns} data={rows} storageKey={storageKey} searchPlaceholder={t('atRisk.searchPlaceholder')} emptyMessage={t('atRisk.emptyMessage')} />
       </CardContent>
     </Card>
   );

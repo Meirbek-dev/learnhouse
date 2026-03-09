@@ -33,8 +33,8 @@ export default function KpiCompletionGauge({ completionPct, deltaPct, direction 
           <ChartContainer
             className="h-[220px] w-full"
             config={{
-              completion: { label: t('kpiCharts.completionRate'), color: 'var(--chart-2)' },
-              remaining: { label: t('kpiCharts.remaining'), color: '#e2e8f0' },
+              completion: { label: t('kpiCharts.completionRate'), color: 'var(--chart-2)', valueFormatter: (value) => `${value ?? 0}%` },
+              remaining: { label: t('kpiCharts.remaining'), color: 'var(--chart-5)', valueFormatter: (value) => `${value ?? 0}%` },
             }}
           >
             <PieChart>
@@ -52,7 +52,7 @@ export default function KpiCompletionGauge({ completionPct, deltaPct, direction 
                 strokeWidth={0}
               >
                 <Cell fill="var(--chart-2)" />
-                <Cell fill="#e2e8f0" />
+                <Cell fill="var(--chart-5)" />
               </Pie>
             </PieChart>
           </ChartContainer>

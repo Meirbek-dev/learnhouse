@@ -30,7 +30,7 @@ export default function QuestionDifficultyRadar({ title, description, data }: Qu
         {data.length > MAX && (
           <p className="mb-2 text-xs text-slate-500">{t('radar.showing', { shown: MAX, total: data.length })}</p>
         )}
-        <ChartContainer className="h-[320px] w-full" config={{ accuracy: { label: t('radar.accuracy'), color: '#0f766e' } }}>
+        <ChartContainer className="h-[320px] w-full" config={{ accuracy: { label: t('radar.accuracy'), color: 'var(--chart-2)', valueFormatter: (value) => `${Math.round(Number(value ?? 0))}%` } }}>
           <RadarChart data={radarData}>
             <ChartTooltip content={<ChartTooltipContent />} />
             <PolarGrid />

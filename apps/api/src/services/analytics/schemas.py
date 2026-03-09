@@ -38,6 +38,17 @@ class AlertItem(PydanticStrictBaseModel):
     learner_count: int | None = None
 
 
+class AnalyticsFilterOption(PydanticStrictBaseModel):
+    label: str
+    value: str
+
+
+class RiskDistributionCounts(PydanticStrictBaseModel):
+    high: int = 0
+    medium: int = 0
+    low: int = 0
+
+
 class AtRiskLearnerRow(PydanticStrictBaseModel):
     user_id: int
     course_id: int
@@ -51,6 +62,7 @@ class AtRiskLearnerRow(PydanticStrictBaseModel):
     missing_required_assessments: int
     risk_score: float
     risk_level: Literal["low", "medium", "high"]
+    risk_components: dict[str, float] = {}
     reason_codes: list[str]
     recommended_action: str
 
@@ -87,7 +99,14 @@ class TeacherOverviewResponse(PydanticStrictBaseModel):
     summary: TeacherOverviewSummary
     trends: TeacherOverviewTrends
     alerts: list[AlertItem]
+    risk_distribution: RiskDistributionCounts
     at_risk_preview: list[AtRiskLearnerRow]
+    course_preview: list["TeacherCourseRow"]
+    assessment_preview: list["AssessmentOutlierRow"]
+    course_total: int = 0
+    assessment_total: int = 0
+    course_options: list[AnalyticsFilterOption] = []
+    cohort_options: list[AnalyticsFilterOption] = []
 
 
 class TeacherCourseRow(PydanticStrictBaseModel):
@@ -108,7 +127,11 @@ class TeacherCourseRow(PydanticStrictBaseModel):
 class TeacherCourseListResponse(PydanticStrictBaseModel):
     generated_at: str
     total: int = 0
+    page: int = 1
+    page_size: int = 25
     items: list[TeacherCourseRow]
+    course_options: list[AnalyticsFilterOption] = []
+    cohort_options: list[AnalyticsFilterOption] = []
 
 
 class FunnelStep(PydanticStrictBaseModel):
@@ -178,7 +201,11 @@ class TeacherCourseDetailResponse(PydanticStrictBaseModel):
 class TeacherAssessmentListResponse(PydanticStrictBaseModel):
     generated_at: str
     total: int = 0
+    page: int = 1
+    page_size: int = 25
     items: list[AssessmentOutlierRow]
+    course_options: list[AnalyticsFilterOption] = []
+    cohort_options: list[AnalyticsFilterOption] = []
 
 
 class HistogramBucket(PydanticStrictBaseModel):
@@ -227,6 +254,8 @@ class TeacherAssessmentDetailResponse(PydanticStrictBaseModel):
     assessment_id: int
     course_id: int
     title: str
+    pass_threshold: float | None = None
+    pass_threshold_bucket_label: str | None = None
     summary: TeacherAssessmentDetailSummary
     score_distribution: list[HistogramBucket]
     attempt_distribution: list[HistogramBucket]
@@ -241,3 +270,5 @@ class AtRiskLearnersResponse(PydanticStrictBaseModel):
     page: int = 1
     page_size: int = 25
     items: list[AtRiskLearnerRow]
+    course_options: list[AnalyticsFilterOption] = []
+    cohort_options: list[AnalyticsFilterOption] = []

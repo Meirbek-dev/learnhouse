@@ -27,7 +27,7 @@ export default function KpiActiveLearnerLineChart({ data }: KpiActiveLearnerLine
           <ChartContainer
             className="h-[240px] w-full"
             config={{
-              active: { label: t('kpiCharts.activeLearners'), color: 'var(--chart-3)' },
+              active: { label: t('kpiCharts.activeLearners'), color: 'var(--chart-3)', valueFormatter: (value) => `${value ?? 0} ${t('scoreChart.learners')}` },
             }}
           >
             <LineChart data={data}>

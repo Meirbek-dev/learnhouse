@@ -5,9 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import { getAnalyticsBucketLabel, getAnalyticsCompareLabel } from '@/lib/analytics/labels';
-import Link from 'next/link';
 import { Filter, Globe2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { usePathname, useRouter } from 'next/navigation';
+import { useMemo, useState, useTransition } from 'react';
 
 // Common IANA timezone identifiers for the select. These cover almost all deployed users.
 const COMMON_TIMEZONES = [
@@ -44,7 +45,20 @@ const bucketOptions: Array<NonNullable<AnalyticsQuery['bucket']>> = ['day', 'wee
 
 export default function TeacherFilterBar({ orgslug, path, query, courseCount, courseOptions = [], cohortOptions = [] }: TeacherFilterBarProps) {
   const t = useTranslations('TeacherAnalytics');
-  const basePath = path || `/orgs/${orgslug}/dash/analytics`;
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+  const basePath = path || pathname || `/orgs/${orgslug}/dash/analytics`;
+  const [formState, setFormState] = useState({
+    window: query.window || '28d',
+    compare: query.compare || 'previous_period',
+    bucket: query.bucket || 'day',
+    course_ids: query.course_ids || '',
+    cohort_ids: query.cohort_ids || '',
+    timezone: query.timezone || 'UTC',
+    sort_by: query.sort_by || '',
+    sort_order: query.sort_order || 'desc',
+  });
 
   const sortOptions = [
     { value: '', label: t('filters.sortDefault') },
@@ -56,18 +70,27 @@ export default function TeacherFilterBar({ orgslug, path, query, courseCount, co
     { value: 'signals', label: t('filters.sortSignals') },
   ];
 
-  const buildHref = (windowValue: string) => {
+  const buildHref = (windowValue: string, nextState = formState) => {
     const params = new URLSearchParams();
     params.set('window', windowValue);
-    params.set('compare', query.compare || 'previous_period');
-    params.set('bucket', query.bucket || 'day');
-    if (query.course_ids) params.set('course_ids', query.course_ids);
-    if (query.cohort_ids) params.set('cohort_ids', query.cohort_ids);
-    if (query.sort_by) params.set('sort_by', query.sort_by);
-    if (query.sort_order) params.set('sort_order', query.sort_order);
-    if (query.timezone) params.set('timezone', query.timezone);
+    params.set('compare', nextState.compare || 'previous_period');
+    params.set('bucket', nextState.bucket || 'day');
+    if (nextState.course_ids) params.set('course_ids', nextState.course_ids);
+    if (nextState.cohort_ids) params.set('cohort_ids', nextState.cohort_ids);
+    if (nextState.sort_by) params.set('sort_by', nextState.sort_by);
+    if (nextState.sort_order) params.set('sort_order', nextState.sort_order);
+    if (nextState.timezone) params.set('timezone', nextState.timezone);
+    params.set('page', '1');
     return `${basePath}?${params.toString()}`;
   };
+
+  const applyFilters = (nextState = formState) => {
+    startTransition(() => {
+      router.push(buildHref(nextState.window, nextState), { scroll: false });
+    });
+  };
+
+  const resetHref = useMemo(() => basePath, [basePath]);
 
   return (
     <div className="mb-6 flex flex-col gap-4 rounded-3xl border border-slate-200/80 bg-white/85 p-4 shadow-sm backdrop-blur md:flex-row md:items-center md:justify-between">
@@ -85,8 +108,14 @@ export default function TeacherFilterBar({ orgslug, path, query, courseCount, co
             {query.timezone || 'UTC'}
           </Badge>
         </div>
-        <form action={basePath} method="get" className="mt-4 grid gap-3 lg:grid-cols-6">
-          <NativeSelect name="window" defaultValue={query.window || '28d'} className="w-full">
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            applyFilters();
+          }}
+          className="mt-4 grid gap-3 lg:grid-cols-6"
+        >
+          <NativeSelect value={formState.window} onChange={(event) => setFormState((state) => ({ ...state, window: event.target.value as NonNullable<AnalyticsQuery['window']> }))} className="w-full">
             {windows.map((windowValue) => (
               <NativeSelectOption key={windowValue} value={windowValue}>
                 {t('filters.windowPrefix', { window: windowValue })}
@@ -94,7 +123,7 @@ export default function TeacherFilterBar({ orgslug, path, query, courseCount, co
             ))}
           </NativeSelect>
 
-          <NativeSelect name="compare" defaultValue={query.compare || 'previous_period'} className="w-full">
+          <NativeSelect value={formState.compare} onChange={(event) => setFormState((state) => ({ ...state, compare: event.target.value as NonNullable<AnalyticsQuery['compare']> }))} className="w-full">
             {compareOptions.map((compareValue) => (
               <NativeSelectOption key={compareValue} value={compareValue}>
                 {t('filters.comparePrefix', { compare: getAnalyticsCompareLabel(t, compareValue) })}
@@ -102,7 +131,7 @@ export default function TeacherFilterBar({ orgslug, path, query, courseCount, co
             ))}
           </NativeSelect>
 
-          <NativeSelect name="bucket" defaultValue={query.bucket || 'day'} className="w-full">
+          <NativeSelect value={formState.bucket} onChange={(event) => setFormState((state) => ({ ...state, bucket: event.target.value as NonNullable<AnalyticsQuery['bucket']> }))} className="w-full">
             {bucketOptions.map((bucketValue) => (
               <NativeSelectOption key={bucketValue} value={bucketValue}>
                 {t('filters.bucketPrefix', { bucket: getAnalyticsBucketLabel(t, bucketValue) })}
@@ -110,7 +139,7 @@ export default function TeacherFilterBar({ orgslug, path, query, courseCount, co
             ))}
           </NativeSelect>
 
-          <NativeSelect name="course_ids" defaultValue={query.course_ids || ''} className="w-full">
+          <NativeSelect value={formState.course_ids} onChange={(event) => setFormState((state) => ({ ...state, course_ids: event.target.value }))} className="w-full">
             <NativeSelectOption value="">{t('filters.allCourses')}</NativeSelectOption>
             {courseOptions.map((option) => (
               <NativeSelectOption key={option.value} value={option.value}>
@@ -119,7 +148,7 @@ export default function TeacherFilterBar({ orgslug, path, query, courseCount, co
             ))}
           </NativeSelect>
 
-          <NativeSelect name="cohort_ids" defaultValue={query.cohort_ids || ''} className="w-full">
+          <NativeSelect value={formState.cohort_ids} onChange={(event) => setFormState((state) => ({ ...state, cohort_ids: event.target.value }))} className="w-full">
             <NativeSelectOption value="">{t('filters.allCohorts')}</NativeSelectOption>
             {cohortOptions.map((option) => (
               <NativeSelectOption key={option.value} value={option.value}>
@@ -128,7 +157,7 @@ export default function TeacherFilterBar({ orgslug, path, query, courseCount, co
             ))}
           </NativeSelect>
 
-          <NativeSelect name="timezone" defaultValue={query.timezone || 'UTC'} className="w-full">
+          <NativeSelect value={formState.timezone} onChange={(event) => setFormState((state) => ({ ...state, timezone: event.target.value }))} className="w-full">
             {COMMON_TIMEZONES.map((tz) => (
               <NativeSelectOption key={tz} value={tz}>
                 {tz}
@@ -136,7 +165,7 @@ export default function TeacherFilterBar({ orgslug, path, query, courseCount, co
             ))}
           </NativeSelect>
 
-          <NativeSelect name="sort_by" defaultValue={query.sort_by || ''} className="w-full lg:col-span-2">
+          <NativeSelect value={formState.sort_by} onChange={(event) => setFormState((state) => ({ ...state, sort_by: event.target.value }))} className="w-full lg:col-span-2">
             {sortOptions.map((option) => (
               <NativeSelectOption key={option.value || 'default'} value={option.value}>
                 {option.label}
@@ -144,14 +173,14 @@ export default function TeacherFilterBar({ orgslug, path, query, courseCount, co
             ))}
           </NativeSelect>
 
-          <NativeSelect name="sort_order" defaultValue={query.sort_order || 'desc'} className="w-full">
+          <NativeSelect value={formState.sort_order} onChange={(event) => setFormState((state) => ({ ...state, sort_order: event.target.value as NonNullable<AnalyticsQuery['sort_order']> }))} className="w-full">
             <NativeSelectOption value="desc">{t('filters.descending')}</NativeSelectOption>
             <NativeSelectOption value="asc">{t('filters.ascending')}</NativeSelectOption>
           </NativeSelect>
 
           <div className="flex gap-2 lg:col-span-3 lg:justify-end">
-            <Button type="submit" variant="default">{t('filters.applyFilters')}</Button>
-            <Button variant="outline" render={<Link href={basePath} />}>{t('filters.reset')}</Button>
+            <Button type="submit" variant="default" disabled={isPending}>{t('filters.applyFilters')}</Button>
+            <Button type="button" variant="outline" onClick={() => startTransition(() => router.push(resetHref, { scroll: false }))}>{t('filters.reset')}</Button>
           </div>
         </form>
       </div>
@@ -159,9 +188,13 @@ export default function TeacherFilterBar({ orgslug, path, query, courseCount, co
         {windows.map((windowValue) => (
           <Button
             key={windowValue}
-            variant={query.window === windowValue ? 'default' : 'outline'}
+            variant={formState.window === windowValue ? 'default' : 'outline'}
             size="sm"
-            render={<Link href={buildHref(windowValue)} />}
+            onClick={() => {
+              const nextState = { ...formState, window: windowValue };
+              setFormState(nextState);
+              applyFilters(nextState);
+            }}
           >
             {windowValue}
           </Button>

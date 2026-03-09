@@ -21,7 +21,7 @@ export default function ScoreDistributionChart({ title, description, data }: Sco
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer className="h-[260px] w-full" config={{ count: { label: t('scoreChart.learners'), color: 'var(--chart-1)' } }}>
+        <ChartContainer className="h-[260px] w-full" config={{ count: { label: t('scoreChart.learners'), color: 'var(--chart-1)', valueFormatter: (value) => `${value ?? 0} ${t('scoreChart.learners')}` } }}>
           <BarChart data={data}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis dataKey="label" tickLine={false} axisLine={false} />

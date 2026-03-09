@@ -139,13 +139,11 @@ def export_grading_backlog_csv(db_session: Session, scope: TeacherAnalyticsScope
                 continue
             user = context.users_by_id.get(submission.user_id)
             course = context.courses_by_id.get(assignment.course_id)
-            if course is None:
-                continue
             yield [
                 submission.user_id,
                 user.username if user else "Неизвестно",
                 assignment.course_id,
-                course.name,
+                course.name if course is not None else f"Удаленный курс #{assignment.course_id}",
                 assignment.id,
                 assignment.title,
                 _status_ru(submission.submission_status.value),

@@ -31,7 +31,8 @@ export default function AnalyticsExportButton({ href, label }: AnalyticsExportBu
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       // Infer filename from the URL path
-      const pathParts = href.split('?')[0].split('/');
+      const pathWithoutQuery = href.split('?').shift() ?? href;
+      const pathParts = pathWithoutQuery.split('/');
       anchor.download = pathParts[pathParts.length - 1] ?? 'export.csv';
       anchor.href = url;
       anchor.click();

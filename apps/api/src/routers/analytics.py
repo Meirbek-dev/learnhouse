@@ -25,7 +25,7 @@ from src.services.analytics import (
     get_teacher_overview,
 )
 from src.services.analytics.filters import AnalyticsFilters, get_analytics_filters
-from src.services.analytics.scope import resolve_teacher_scope
+from src.services.analytics.scope import ensure_assessment_in_scope, ensure_course_in_scope, resolve_teacher_scope
 
 router = APIRouter()
 
@@ -48,6 +48,31 @@ def _scope_for(
 ):
     checker = PermissionChecker(db_session)
     return resolve_teacher_scope(db_session, checker, current_user, org_id, filters, action=action)
+
+
+def _course_scope_for(
+    db_session: Session,
+    current_user: PublicUser | AnonymousUser,
+    org_id: int,
+    course_id: int,
+    filters: AnalyticsFilters,
+):
+    scope = _scope_for(db_session, current_user, org_id, filters, action="read")
+    ensure_course_in_scope(scope, course_id)
+    return scope
+
+
+def _assessment_scope_for(
+    db_session: Session,
+    current_user: PublicUser | AnonymousUser,
+    org_id: int,
+    assessment_type: str,
+    assessment_id: int,
+    filters: AnalyticsFilters,
+):
+    scope = _scope_for(db_session, current_user, org_id, filters, action="read")
+    ensure_assessment_in_scope(db_session, scope, assessment_type, assessment_id)
+    return scope
 
 
 @router.get("/orgs/{org_id}/teacher/overview")
@@ -100,7 +125,7 @@ async def teacher_course_detail(
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    scope = _scope_for(db_session, current_user, org_id, filters, action="read")
+    scope = _course_scope_for(db_session, current_user, org_id, course_id, filters)
     try:
         return get_teacher_course_detail(db_session, scope, course_id, filters)
     except ValueError as exc:
@@ -127,7 +152,7 @@ async def teacher_assessment_detail(
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    scope = _scope_for(db_session, current_user, org_id, filters, action="read")
+    scope = _assessment_scope_for(db_session, current_user, org_id, assessment_type, assessment_id, filters)
     try:
         return get_teacher_assessment_detail(db_session, scope, assessment_type, assessment_id, filters)
     except ValueError as exc:

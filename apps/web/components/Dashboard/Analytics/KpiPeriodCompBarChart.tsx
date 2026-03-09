@@ -26,8 +26,8 @@ export default function KpiPeriodCompBarChart({ data }: KpiPeriodCompBarChartPro
         <ChartContainer
           className="h-[260px] w-full"
           config={{
-            current: { label: t('kpiCharts.currentPeriod'), color: 'var(--chart-1)' },
-            previous: { label: t('kpiCharts.previousPeriod'), color: 'var(--chart-4)' },
+            current: { label: t('kpiCharts.currentPeriod'), color: 'var(--chart-1)', valueFormatter: (value) => `${value ?? 0}` },
+            previous: { label: t('kpiCharts.previousPeriod'), color: 'var(--chart-4)', valueFormatter: (value) => `${value ?? 0}` },
           }}
         >
           <BarChart data={data} barCategoryGap="28%">
