@@ -6249,5 +6249,276 @@
   "seconds": "Секунд",
   "selectDeadline": "Тапсырманы аяқтау үшін мерзімді таңдаңыз",
   "touUniversity": "Торайғыров университеті",
-  "webPreview": "Веб алдын ала қарау"
+  "webPreview": "Веб алдын ала қарау",
+  "TeacherAnalytics": {
+    "overview": {
+      "label": "Мұғалімнің аналитикасы",
+      "heading": "Курс белсенділігі, оқушылар тәуекелі және бағалау сапасына арналған операциялық аналитика.",
+      "description": "Бұл бақылау тақтасы мұғалімнің курстарымен шектелген және бейтарап диаграммалардың орнына іс-әрекетке бейімделген метрикаларды ұсынады.",
+      "exportAtRisk": "Тәуекелдегі оқушыларды экспорттау",
+      "exportGradingBacklog": "Бағалау кезегін экспорттау",
+      "trendTitle": "Белсенділік пен орындау тенденциясы",
+      "trendDescription": "Таңдалған уақыт аралығындағы белсенді оқушылар, аяқтаулар, тапсырмалар және аяқталған бағалаулар.",
+      "freshnessTitle": "Жаңалық және аумақ",
+      "freshnessDescription": "Ағымдағы аналитика көрінісіне арналған деректер шыққан жер.",
+      "labelGenerated": "Жасалды",
+      "labelFreshness": "Жаңалық",
+      "labelScopedCourses": "Аумақтағы курстар",
+      "labelCohorts": "Когорттар",
+      "cohortsAll": "Барлығы",
+      "alertsTitle": "Ескертулер",
+      "alertsDescription": "Ағымдағы аумақтан алынған басымдықты операциялық сигналдар.",
+      "alertsEmpty": "Таңдалған фильтр жиыны үшін белсенді ескертулер жоқ.",
+      "showingCourses": "{total} курстың 8-і көрсетілуде.",
+      "viewAllCourses": "Барлығын қарау →",
+      "showingAssessments": "{total} бағалаудың 8-і көрсетілуде.",
+      "viewAllAssessments": "Барлығын қарау →",
+      "watchlistTitle": "Шұғыл бақылау тізімі",
+      "watchlistDescription": "Осы аптада хабарласуды қажет ететін ең жоғары тәуекелдегі оқушылар."
+    },
+    "filters": {
+      "label": "Мұғалімнің аналитикасы",
+      "scopedCourses": "{count} аумақтағы курс",
+      "buckets": "{bucket} шелектер",
+      "windowPrefix": "Уақыт аралығы: {window}",
+      "comparePrefix": "Салыстыру: {compare}",
+      "bucketPrefix": "Шелек: {bucket}",
+      "allCourses": "Барлық курстар",
+      "allCohorts": "Барлық когорттар",
+      "timezonePlaceholder": "Уақыт белдеуі",
+      "descending": "Кему бойынша",
+      "ascending": "Өсу бойынша",
+      "applyFilters": "Фильтрлерді қолдану",
+      "reset": "Қалпына келтіру",
+      "sortDefault": "Әдепкі рейтинг",
+      "sortRisk": "Тәуекел",
+      "sortHealth": "Күй",
+      "sortCompletion": "Аяқтау",
+      "sortActiveLearners": "Белсенді оқушылар",
+      "sortDifficulty": "Қиындық",
+      "sortSignals": "Сигналдар"
+    },
+    "labels": {
+      "bucket": {
+        "day": "Күн",
+        "week": "Апта"
+      },
+      "compare": {
+        "previousPeriod": "Алдыңғы кезең",
+        "none": "Салыстыру жоқ"
+      },
+      "assessmentType": {
+        "assignment": "Тапсырма",
+        "quiz": "Тест",
+        "exam": "Емтихан",
+        "codeChallenge": "Код тапсырмасы"
+      },
+      "severity": {
+        "info": "Ақпарат",
+        "warning": "Ескерту",
+        "critical": "Маңызды"
+      },
+      "alertType": {
+        "riskSpike": "Тәуекелдің өсуі",
+        "engagementDrop": "Белсенділіктің төмендеуі",
+        "gradingBacklog": "Бағалау кезегі",
+        "assessmentOutlier": "Бағалау ауытқуы",
+        "contentStale": "Ескірген мазмұн"
+      },
+      "riskLevel": {
+        "low": "Төмен",
+        "medium": "Орташа",
+        "high": "Жоғары"
+      },
+      "reasonCode": {
+        "inactive7d": "7 күн белсенділік жоқ",
+        "lowProgress": "Төмен прогресс",
+        "repeatedFailures": "Қайталанатын сәтсіздіктер",
+        "missingRequiredAssessments": "Міндетті бағалаулар өтпеген",
+        "gradingBlock": "Бағалауды күтіп тұр",
+        "lowSubmissionRate": "Тапсыру үлесі төмен",
+        "lowSuccessRate": "Сәттілік үлесі төмен",
+        "slowFeedback": "Кері байланыс баяу",
+        "lowPassRate": "Өту үлесі төмен",
+        "gradingLatency": "Бағалау кешігуде",
+        "lowCompletionRate": "Аяқтау үлесі төмен",
+        "belowThreshold": "Шектен төмен",
+        "lowAccuracy": "Дәлдік төмен"
+      },
+      "signal": {
+        "contentFreshness": "Мазмұнның жаңалығы",
+        "averageProgress": "Орташа прогресс",
+        "gradingBacklog": "Бағалау кезегі"
+      },
+      "status": {
+        "pending": "Күтілуде",
+        "submitted": "Тапсырылды",
+        "graded": "Бағаланды",
+        "late": "Кешіктірілді",
+        "notSubmitted": "Тапсырылмаған",
+        "inProgress": "Орындалып жатыр",
+        "autoSubmitted": "Авто жіберілді",
+        "completed": "Аяқталды",
+        "failed": "Қате",
+        "processing": "Өңделуде",
+        "pendingJudge0": "Judge0 күтілуде"
+      }
+    },
+    "kpi": {
+      "stable": "тұрақты",
+      "noComparison": "Бұл метрика үшін ағымдағы нұсқада салыстыру қол жетімді емес.",
+      "changePeriod": "Алдыңғы кезеңмен салыстырғандағы өзгеріс: {delta}"
+    },
+    "freshness": {
+      "live": "Тікелей",
+      "seconds": "{seconds} сек. бұрын",
+      "minutes": "{minutes} мин. бұрын",
+      "hours": "{hours} сағ. бұрын",
+      "days": "{days} күн бұрын"
+    },
+    "emptyState": {
+      "accessNote": "Аналитика тек ұйым мүмкіндігі қосылған және ағымдағы пайдаланушыда аналитикаға рұқсат болған жағдайда көрсетіледі."
+    },
+    "table": {
+      "searchDefault": "Іздеу...",
+      "emptyDefault": "Таңдалған фильтрлер бойынша жолдар табылмады.",
+      "visibleRows": "{count} көрінетін жол"
+    },
+    "trend": {
+      "activeLearners": "Белсенді оқушылар",
+      "completions": "Аяқтаулар",
+      "submissions": "Тапсырмалар",
+      "gradingCompleted": "Бағалау аяқталды",
+      "emptyState": "Таңдалған аналитика терезесінде белсенділік пайда болғаннан кейін тренд деректері шығады."
+    },
+    "riskDistribution": {
+      "title": "Тәуекел таралымы",
+      "description": "Ағымдағы аумақтағы оқушылар тәуекелі кезек деңгейіне қарай.",
+      "preview": "Тәуекелдегі {total} оқушының ең жоғары {shown}-і көрсетілуде.",
+      "learners": "Оқушылар",
+      "emptyState": "Таңдалған аумақ үшін тәуекелдегі оқушылар жоқ."
+    },
+    "histogram": {
+      "learners": "Оқушылар",
+      "emptyState": "Таңдалған бағалау бойынша гистограмма деректері қол жетімді емес.",
+      "passLabel": "Өту"
+    },
+    "courseHealth": {
+      "title": "Курс денсаулығының рейтингі",
+      "description": "Операциялық қысым, белсенділік және мазмұн сапасы бойынша рейтингтелген курстар.",
+      "colCourse": "Курс",
+      "colActive7d": "Белсенді 7 күн",
+      "colCompletion": "Аяқтау",
+      "colRisk": "Тәуекел",
+      "colUngraded": "Бағаланбаған",
+      "colHealth": "Күй",
+      "colTopAlert": "Негізгі ескерту",
+      "noAlert": "Ескерту жоқ",
+      "searchPlaceholder": "Курстар бойынша іздеу...",
+      "emptyMessage": "Ағымдағы аналитика аумағына сәйкес курстар жоқ."
+    },
+    "assessmentOutliers": {
+      "title": "Бағалауларды тексеру",
+      "description": "Назар аударуды қажет ететін тапсырмалар, тесттер, емтихандар мен код тапсырмалары.",
+      "colAssessment": "Бағалау",
+      "colCourse": "Курс",
+      "colSubmission": "Тапсырма",
+      "colPass": "Өту",
+      "colMedian": "Медиана",
+      "colDifficulty": "Қиындық",
+      "colSignals": "Сигналдар",
+      "healthy": "Жақсы",
+      "searchPlaceholder": "Бағалаулар бойынша іздеу...",
+      "emptyMessage": "Ағымдағы аумаққа сәйкес бағалау ауытқулары жоқ."
+    },
+    "atRisk": {
+      "defaultTitle": "Тәуекелдегі оқушылар",
+      "defaultDescription": "Кезектілік бойынша рейтингтелген операциялық оқушылар тізімі.",
+      "colLearner": "Оқушы",
+      "userNumber": "Пайдаланушы #{userId}",
+      "colCourse": "Курс",
+      "colProgress": "Прогресс",
+      "colInactivity": "Белсенсіздік",
+      "colRisk": "Тәуекел",
+      "colReasons": "Себептер",
+      "colAction": "Ұсынылатын іс-әрекет",
+      "na": "жоқ",
+      "searchPlaceholder": "Оқушылар, курстар немесе себеп кодтары бойынша іздеу...",
+      "emptyMessage": "Ағымдағы фильтрлер үшін тәуекелдегі оқушылар жоқ."
+    },
+    "gradingBacklog": {
+      "title": "Бағалау кезегі",
+      "description": "Оқушыларға кері байланысты баяулататын аяқталмаған тапсырмалар.",
+      "noAlert": "Бағалау ескертуі жоқ"
+    },
+    "radar": {
+      "showing": "Қиындық бойынша {total} сұрақтың {shown}-і көрсетілуде.",
+      "accuracy": "Дәлдік"
+    },
+    "funnel": {
+      "learners": "Оқушылар"
+    },
+    "scoreChart": {
+      "learners": "Оқушылар"
+    },
+    "pages": {
+      "overviewDisabledTitle": "Аналитика қол жетімсіз",
+      "overviewDisabledDesc": "Бұл ұйымда аналитика өшірілген немесе ағымдағы сеанс аналитика деректеріне қол жеткізе алмайды.",
+      "overviewLoadError": "Аналитика қызметін жүктеу мүмкін болмады.",
+      "assessmentsUnavailableTitle": "Бағалау аналитикасы қол жетімсіз",
+      "assessmentsUnavailableDesc": "Бағалау аналитикасын тексеру үшін аутентификацияланған сеанс қажет.",
+      "assessmentsLoadError": "Бағалау аналитикасы көрінісін жүктеу мүмкін болмады.",
+      "assessmentDetailTitle": "Бағалау мәліметтері қол жетімсіз",
+      "assessmentDetailDesc": "Бағалау аналитикасын тексеру үшін аутентификацияланған сеанс қажет.",
+      "assessmentDetailLoadError": "Бағалау аналитикасының егжей-тегжейлі көрінісін жүктеу мүмкін болмады.",
+      "coursesUnavailableTitle": "Курс аналитикасы қол жетімсіз",
+      "coursesUnavailableDesc": "Аумақтық курс аналитикасын қарау үшін аутентификацияланған сеанс қажет.",
+      "coursesLoadError": "Курс аналитикасы көрінісін жүктеу мүмкін болмады.",
+      "courseRankingTitle": "Курс рейтингі",
+      "courseRankingDescription": "Нұсқаушылар кіруді басымдықтауы үшін белсенділік тенденциясы, бағалау қысымы және оқушылар тәуекелі бойынша курстарды сұрыптау.",
+      "courseDetailTitle": "Курс мәліметтері қол жетімсіз",
+      "courseDetailDesc": "Курс аналитикасын тексеру үшін аутентификацияланған сеанс қажет.",
+      "courseDetailLoadError": "Курс аналитикасының егжей-тегжейлі көрінісін жүктеу мүмкін болмады.",
+      "atRiskUnavailableTitle": "Оқушылар тәуекелі қол жетімсіз",
+      "atRiskUnavailableDesc": "Тәуекелдегі оқушыларды тексеру үшін аутентификацияланған сеанс қажет.",
+      "atRiskLoadError": "Оқушы тәуекелі көрінісін жүктеу мүмкін болмады.",
+      "atRiskPageTitle": "Тәуекелдегі оқушылардың толық тізімі",
+      "atRiskPageDescription": "Тәуекел деңгейі бойынша рейтингтелген {total} аумақтағы оқушылар.",
+      "courseDetailBadge": "Курс мәліметтері",
+      "courseStatCompletion": "Аяқтау",
+      "courseStatAvgProgress": "Орташа прогресс",
+      "courseStatUngraded": "Бағаланбаған тапсырмалар",
+      "courseEngagementTitle": "Белсенділік тенденциясы",
+      "courseEngagementDesc": "Осы курс бойынша уақыт бойынша ерекше белсенді оқушылар.",
+      "courseFunnelTitle": "Аяқтау шұңқыры",
+      "courseFunnelDesc": "Осы курстағы тіркелуден белсендіге және аяқтауға конверсиялау.",
+      "courseChapterDropoffTitle": "Тарау шығыны",
+      "courseChapterDropoffDesc": "Шығу нүктелерін анықтау үшін реттелген тараулар бойынша прогресс санаулары.",
+      "courseContentHealthTitle": "Мазмұн денсаулығы",
+      "courseAtRiskTitle": "Осы курстағы тәуекелдегі оқушылар",
+      "courseAtRiskDescription": "Таңдалған курсқа аумақтас ең жоғары тәуекелдегі оқушылар.",
+      "assessmentDetailBadge": "Бағалау #{id}",
+      "assessmentStatSubmissionRate": "Тапсырма пайызы",
+      "assessmentStatPassRate": "Өту пайызы",
+      "assessmentStatMedianScore": "Медиана балл",
+      "assessmentStatAvgAttempts": "Орташа әрекеттер саны",
+      "assessmentScoreDistTitle": "Балл таралымы",
+      "assessmentScoreDistDesc": "Осы бағалау бойынша оқушылардың жетістіктерінің гистограммасы.",
+      "assessmentAttemptDistTitle": "Әрекет таралымы",
+      "assessmentAttemptDistDesc": "Оқушылардың тоқтамас бұрын қанша рет тырысқаны.",
+      "assessmentQuestionTitle": "Сұрақ қиындығы",
+      "assessmentQuestionDesc": "Төмен дәлдік нақты емес немесе тым қиын тапсырмаларды белгілейді.",
+      "assessmentCommonFailuresTitle": "Жалпы қателіктер",
+      "assessmentNoCommonFailures": "Ағымдағы деректерде жалпы қателік кластері табылмады.",
+      "assessmentLearnerRowsTitle": "Оқушы жолдары",
+      "assessmentColLearner": "Оқушы",
+      "assessmentColAttempts": "Әрекеттер",
+      "assessmentColBestScore": "Ең жоғары балл",
+      "assessmentColLastScore": "Соңғы балл",
+      "assessmentColSubmitted": "Тапсырылды",
+      "assessmentColStatus": "Күй",
+      "assessmentPassThresholdExam": "Емтихан параметрлерінен өту шегі",
+      "assessmentPassThresholdDefault": "Өту шегі: 60%"
+    }
+  }
 }

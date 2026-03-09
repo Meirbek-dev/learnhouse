@@ -3,6 +3,7 @@
 import type { TimeSeriesPoint } from '@/types/analytics';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { useLocale } from 'next-intl';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
 interface EngagementAreaChartProps {
@@ -12,8 +13,9 @@ interface EngagementAreaChartProps {
 }
 
 export default function EngagementAreaChart({ title, description, data }: EngagementAreaChartProps) {
+  const locale = useLocale();
   const chartData = data.map((point) => ({
-    bucket: new Date(point.bucket_start).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+    bucket: new Date(point.bucket_start).toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
     value: point.value,
   }));
 

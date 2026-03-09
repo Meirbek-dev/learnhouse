@@ -4,6 +4,7 @@ import type { QuestionDifficultyRow } from '@/types/analytics';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from 'recharts';
+import { useTranslations } from 'next-intl';
 
 interface QuestionDifficultyRadarProps {
   title: string;
@@ -12,6 +13,7 @@ interface QuestionDifficultyRadarProps {
 }
 
 export default function QuestionDifficultyRadar({ title, description, data }: QuestionDifficultyRadarProps) {
+  const t = useTranslations('TeacherAnalytics');
   const MAX = 8;
   const radarData = data.slice(0, MAX).map((row) => ({
     label: row.question_label,
@@ -26,9 +28,9 @@ export default function QuestionDifficultyRadar({ title, description, data }: Qu
       </CardHeader>
       <CardContent>
         {data.length > MAX && (
-          <p className="mb-2 text-xs text-slate-500">Showing {MAX} of {data.length} questions by difficulty.</p>
+          <p className="mb-2 text-xs text-slate-500">{t('radar.showing', { shown: MAX, total: data.length })}</p>
         )}
-        <ChartContainer className="h-[320px] w-full" config={{ accuracy: { label: 'Accuracy', color: '#0f766e' } }}>
+        <ChartContainer className="h-[320px] w-full" config={{ accuracy: { label: t('radar.accuracy'), color: '#0f766e' } }}>
           <RadarChart data={radarData}>
             <ChartTooltip content={<ChartTooltipContent />} />
             <PolarGrid />

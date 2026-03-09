@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ActivitySquare, Lock } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface AnalyticsEmptyStateProps {
   title: string;
@@ -9,6 +10,7 @@ interface AnalyticsEmptyStateProps {
 }
 
 export default function AnalyticsEmptyState({ title, description }: AnalyticsEmptyStateProps) {
+  const t = useTranslations('TeacherAnalytics');
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-4xl items-center justify-center px-4 py-10">
       <Card className="border-slate-200 bg-linear-to-br from-white via-slate-50 to-emerald-50 shadow-sm">
@@ -21,7 +23,7 @@ export default function AnalyticsEmptyState({ title, description }: AnalyticsEmp
         </CardHeader>
         <CardContent className="flex items-center justify-center gap-3 text-sm text-slate-500">
           <Lock className="h-4 w-4" />
-          Analytics are shown only when the organization feature is enabled and the current user has analytics access.
+          {t('emptyState.accessNote')}
         </CardContent>
       </Card>
     </div>

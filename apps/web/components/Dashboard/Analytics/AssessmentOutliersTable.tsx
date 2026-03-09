@@ -4,8 +4,10 @@ import type { ColumnDef } from '@tanstack/react-table';
 import type { AssessmentOutlierRow } from '@/types/analytics';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getAnalyticsAssessmentTypeLabel, getAnalyticsReasonCodeLabel } from '@/lib/analytics/labels';
 import AnalyticsDataTable from './AnalyticsDataTable';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 interface AssessmentOutliersTableProps {
   orgslug: string;
@@ -13,10 +15,11 @@ interface AssessmentOutliersTableProps {
 }
 
 export default function AssessmentOutliersTable({ orgslug, rows }: AssessmentOutliersTableProps) {
+  const t = useTranslations('TeacherAnalytics');
   const columns: ColumnDef<AssessmentOutlierRow>[] = [
     {
       accessorKey: 'title',
-      header: 'Assessment',
+      header: t('assessmentOutliers.colAssessment'),
       cell: ({ row }) => (
         <div>
           <Link
@@ -25,45 +28,45 @@ export default function AssessmentOutliersTable({ orgslug, rows }: AssessmentOut
           >
             {row.original.title}
           </Link>
-          <div className="text-xs uppercase tracking-wide text-slate-500">{row.original.assessment_type.replace('_', ' ')}</div>
+          <div className="text-xs uppercase tracking-wide text-slate-500">{getAnalyticsAssessmentTypeLabel(t, row.original.assessment_type)}</div>
         </div>
       ),
     },
-    { accessorKey: 'course_name', header: 'Course' },
+    { accessorKey: 'course_name', header: t('assessmentOutliers.colCourse') },
     {
       accessorKey: 'submission_rate',
-      header: 'Submission',
-      cell: ({ row }) => (row.original.submission_rate === null ? 'n/a' : `${row.original.submission_rate}%`),
+      header: t('assessmentOutliers.colSubmission'),
+      cell: ({ row }) => (row.original.submission_rate === null ? t('atRisk.na') : `${row.original.submission_rate}%`),
     },
     {
       accessorKey: 'pass_rate',
-      header: 'Pass',
-      cell: ({ row }) => (row.original.pass_rate === null ? 'n/a' : `${row.original.pass_rate}%`),
+      header: t('assessmentOutliers.colPass'),
+      cell: ({ row }) => (row.original.pass_rate === null ? t('atRisk.na') : `${row.original.pass_rate}%`),
     },
     {
       accessorKey: 'median_score',
-      header: 'Median',
-      cell: ({ row }) => (row.original.median_score === null ? 'n/a' : `${row.original.median_score}%`),
+      header: t('assessmentOutliers.colMedian'),
+      cell: ({ row }) => (row.original.median_score === null ? t('atRisk.na') : `${row.original.median_score}%`),
     },
     {
       accessorKey: 'difficulty_score',
-      header: 'Difficulty',
-      cell: ({ row }) => (row.original.difficulty_score === null ? 'n/a' : row.original.difficulty_score),
+      header: t('assessmentOutliers.colDifficulty'),
+      cell: ({ row }) => (row.original.difficulty_score === null ? t('atRisk.na') : row.original.difficulty_score),
     },
     {
       accessorKey: 'outlier_reason_codes',
-      header: 'Signals',
+      header: t('assessmentOutliers.colSignals'),
       cell: ({ row }) =>
         row.original.outlier_reason_codes.length ? (
           <div className="max-w-[240px] whitespace-normal text-xs text-slate-600">
             {row.original.outlier_reason_codes.map((code) => (
               <Badge key={code} variant="outline" className="mb-1 mr-1">
-                {code}
+                {getAnalyticsReasonCodeLabel(t, code)}
               </Badge>
             ))}
           </div>
         ) : (
-          'Healthy'
+          t('assessmentOutliers.healthy')
         ),
     },
   ];
@@ -71,11 +74,11 @@ export default function AssessmentOutliersTable({ orgslug, rows }: AssessmentOut
   return (
     <Card className="border-slate-200 bg-white/90 shadow-sm">
       <CardHeader>
-        <CardTitle>Assessment outliers</CardTitle>
-        <CardDescription>Ranked assignments, quizzes, exams, and code challenges needing attention.</CardDescription>
+        <CardTitle>{t('assessmentOutliers.title')}</CardTitle>
+        <CardDescription>{t('assessmentOutliers.description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <AnalyticsDataTable columns={columns} data={rows} searchPlaceholder="Search assessments..." emptyMessage="No assessment outliers match the current scope." />
+        <AnalyticsDataTable columns={columns} data={rows} searchPlaceholder={t('assessmentOutliers.searchPlaceholder')} emptyMessage={t('assessmentOutliers.emptyMessage')} />
       </CardContent>
     </Card>
   );

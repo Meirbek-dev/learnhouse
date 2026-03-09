@@ -423,6 +423,6 @@ def refresh_teacher_analytics_rollups(db_session: Session, *, org_id: int | None
         "status": "ok",
         "org_id": org_id,
         "snapshot_date": target_date.isoformat(),
-        "message": "Teacher analytics rollups refreshed from live analytics read models.",
+        "message": "Агрегаты аналитики преподавателя обновлены из оперативных аналитических моделей чтения.",
         "orgs": refreshed_orgs,
     }

@@ -51,7 +51,7 @@ class AnalyticsFilters(PydanticStrictBaseModel):
         try:
             ZoneInfo(value)
         except ZoneInfoNotFoundError as exc:
-            raise ValueError(f"Unknown timezone: {value}") from exc
+            raise ValueError(f"Неизвестный часовой пояс: {value}") from exc
         return value
 
     @property

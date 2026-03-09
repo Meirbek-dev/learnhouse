@@ -120,7 +120,7 @@ def resolve_teacher_scope(
         if unauthorized:
             raise PermissionDenied(
                 permission=f"analytics:{action}",
-                reason=f"Requested courses are outside analytics scope: {unauthorized}",
+                reason=f"Запрошенные курсы находятся вне разрешенной области аналитики: {unauthorized}",
             )
         normalized_course_ids = sorted(requested)
 
@@ -137,5 +137,5 @@ def ensure_course_in_scope(scope: TeacherAnalyticsScope, course_id: int) -> None
     if course_id not in scope.course_ids:
         raise PermissionDenied(
             permission="analytics:read",
-            reason=f"Course {course_id} is outside the resolved analytics scope",
+            reason=f"Курс {course_id} находится вне разрешенной области аналитики",
         )

@@ -6249,5 +6249,276 @@
   "seconds": "Seconds",
   "selectDeadline": "Select a deadline for completing the task",
   "touUniversity": "Toraighyrov University",
-  "webPreview": "Web Preview"
+  "webPreview": "Web Preview",
+  "TeacherAnalytics": {
+    "overview": {
+      "label": "Teacher Analytics",
+      "heading": "Operational analytics for course engagement, learner risk, and assessment quality.",
+      "description": "This dashboard is scoped to the teacher's managed courses and exposes intervention-ready metrics instead of passive charts.",
+      "exportAtRisk": "Export at-risk learners",
+      "exportGradingBacklog": "Export grading backlog",
+      "trendTitle": "Engagement and execution trend",
+      "trendDescription": "Active learners, completions, submissions, and completed grading across the selected window.",
+      "freshnessTitle": "Freshness and scope",
+      "freshnessDescription": "Data provenance for the current analytics view.",
+      "labelGenerated": "Generated",
+      "labelFreshness": "Freshness",
+      "labelScopedCourses": "Scoped courses",
+      "labelCohorts": "Cohorts",
+      "cohortsAll": "All",
+      "alertsTitle": "Alerts",
+      "alertsDescription": "Prioritized operational signals derived from the current scope.",
+      "alertsEmpty": "No active alerts for the selected filter set.",
+      "showingCourses": "Showing 8 of {total} courses.",
+      "viewAllCourses": "View all →",
+      "showingAssessments": "Showing 8 of {total} assessments.",
+      "viewAllAssessments": "View all →",
+      "watchlistTitle": "Urgent learner watchlist",
+      "watchlistDescription": "Top-ranked learners who likely need outreach this week."
+    },
+    "filters": {
+      "label": "Teacher Analytics",
+      "scopedCourses": "{count} scoped courses",
+      "buckets": "{bucket} buckets",
+      "windowPrefix": "Window: {window}",
+      "comparePrefix": "Compare: {compare}",
+      "bucketPrefix": "Bucket: {bucket}",
+      "allCourses": "All courses",
+      "allCohorts": "All cohorts",
+      "timezonePlaceholder": "Timezone",
+      "descending": "Descending",
+      "ascending": "Ascending",
+      "applyFilters": "Apply filters",
+      "reset": "Reset",
+      "sortDefault": "Default ranking",
+      "sortRisk": "Risk",
+      "sortHealth": "Health",
+      "sortCompletion": "Completion",
+      "sortActiveLearners": "Active learners",
+      "sortDifficulty": "Difficulty",
+      "sortSignals": "Signals"
+    },
+    "labels": {
+      "bucket": {
+        "day": "Day",
+        "week": "Week"
+      },
+      "compare": {
+        "previousPeriod": "Previous period",
+        "none": "No comparison"
+      },
+      "assessmentType": {
+        "assignment": "Assignment",
+        "quiz": "Quiz",
+        "exam": "Exam",
+        "codeChallenge": "Code challenge"
+      },
+      "severity": {
+        "info": "Info",
+        "warning": "Warning",
+        "critical": "Critical"
+      },
+      "alertType": {
+        "riskSpike": "Risk spike",
+        "engagementDrop": "Engagement drop",
+        "gradingBacklog": "Grading backlog",
+        "assessmentOutlier": "Assessment outlier",
+        "contentStale": "Stale content"
+      },
+      "riskLevel": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      },
+      "reasonCode": {
+        "inactive7d": "Inactive for 7 days",
+        "lowProgress": "Low progress",
+        "repeatedFailures": "Repeated failures",
+        "missingRequiredAssessments": "Missing required assessments",
+        "gradingBlock": "Waiting on grading",
+        "lowSubmissionRate": "Low submission rate",
+        "lowSuccessRate": "Low success rate",
+        "slowFeedback": "Slow feedback",
+        "lowPassRate": "Low pass rate",
+        "gradingLatency": "Grading latency",
+        "lowCompletionRate": "Low completion rate",
+        "belowThreshold": "Below threshold",
+        "lowAccuracy": "Low accuracy"
+      },
+      "signal": {
+        "contentFreshness": "Content freshness",
+        "averageProgress": "Average progress",
+        "gradingBacklog": "Grading backlog"
+      },
+      "status": {
+        "pending": "Pending",
+        "submitted": "Submitted",
+        "graded": "Graded",
+        "late": "Late",
+        "notSubmitted": "Not submitted",
+        "inProgress": "In progress",
+        "autoSubmitted": "Auto-submitted",
+        "completed": "Completed",
+        "failed": "Failed",
+        "processing": "Processing",
+        "pendingJudge0": "Pending Judge0"
+      }
+    },
+    "kpi": {
+      "stable": "stable",
+      "noComparison": "Comparison unavailable for this metric in the current release.",
+      "changePeriod": "Change vs previous period: {delta}"
+    },
+    "freshness": {
+      "live": "Live",
+      "seconds": "{seconds}s ago",
+      "minutes": "{minutes}m ago",
+      "hours": "{hours}h ago",
+      "days": "{days}d ago"
+    },
+    "emptyState": {
+      "accessNote": "Analytics are shown only when the organization feature is enabled and the current user has analytics access."
+    },
+    "table": {
+      "searchDefault": "Search...",
+      "emptyDefault": "No rows found for the selected filters.",
+      "visibleRows": "{count} visible rows"
+    },
+    "trend": {
+      "activeLearners": "Active learners",
+      "completions": "Completions",
+      "submissions": "Submissions",
+      "gradingCompleted": "Grading completed",
+      "emptyState": "Trend data will appear once the selected analytics window contains activity."
+    },
+    "riskDistribution": {
+      "title": "Risk distribution",
+      "description": "Learner risk by urgency level for the current scope.",
+      "preview": "Showing top {shown} of {total} at-risk learners.",
+      "learners": "Learners",
+      "emptyState": "No at-risk learners are currently in view for the selected scope."
+    },
+    "histogram": {
+      "learners": "Learners",
+      "emptyState": "Histogram data is not available for the selected assessment.",
+      "passLabel": "Pass"
+    },
+    "courseHealth": {
+      "title": "Course health ranking",
+      "description": "Courses ranked by operational pressure, engagement, and content quality.",
+      "colCourse": "Course",
+      "colActive7d": "Active 7d",
+      "colCompletion": "Completion",
+      "colRisk": "Risk",
+      "colUngraded": "Ungraded",
+      "colHealth": "Health",
+      "colTopAlert": "Top alert",
+      "noAlert": "No alert",
+      "searchPlaceholder": "Search courses...",
+      "emptyMessage": "No courses match the current analytics scope."
+    },
+    "assessmentOutliers": {
+      "title": "Assessment outliers",
+      "description": "Ranked assignments, quizzes, exams, and code challenges needing attention.",
+      "colAssessment": "Assessment",
+      "colCourse": "Course",
+      "colSubmission": "Submission",
+      "colPass": "Pass",
+      "colMedian": "Median",
+      "colDifficulty": "Difficulty",
+      "colSignals": "Signals",
+      "healthy": "Healthy",
+      "searchPlaceholder": "Search assessments...",
+      "emptyMessage": "No assessment outliers match the current scope."
+    },
+    "atRisk": {
+      "defaultTitle": "At-risk learners",
+      "defaultDescription": "Operational learner list ranked by urgency.",
+      "colLearner": "Learner",
+      "userNumber": "User #{userId}",
+      "colCourse": "Course",
+      "colProgress": "Progress",
+      "colInactivity": "Inactivity",
+      "colRisk": "Risk",
+      "colReasons": "Reasons",
+      "colAction": "Recommended action",
+      "na": "n/a",
+      "searchPlaceholder": "Search learners, courses, or reason codes...",
+      "emptyMessage": "No at-risk learners are visible for the current filters."
+    },
+    "gradingBacklog": {
+      "title": "Grading backlog",
+      "description": "Outstanding submissions that are slowing learner feedback loops.",
+      "noAlert": "No grading alert"
+    },
+    "radar": {
+      "showing": "Showing {shown} of {total} questions by difficulty.",
+      "accuracy": "Accuracy"
+    },
+    "funnel": {
+      "learners": "Learners"
+    },
+    "scoreChart": {
+      "learners": "Learners"
+    },
+    "pages": {
+      "overviewDisabledTitle": "Analytics unavailable",
+      "overviewDisabledDesc": "This organization has analytics disabled or the current session cannot access analytics data.",
+      "overviewLoadError": "The analytics service could not be loaded.",
+      "assessmentsUnavailableTitle": "Assessment analytics unavailable",
+      "assessmentsUnavailableDesc": "An authenticated session is required to inspect assessment analytics.",
+      "assessmentsLoadError": "The assessment analytics view could not be loaded.",
+      "assessmentDetailTitle": "Assessment detail unavailable",
+      "assessmentDetailDesc": "An authenticated session is required to inspect assessment analytics.",
+      "assessmentDetailLoadError": "The assessment analytics detail view could not be loaded.",
+      "coursesUnavailableTitle": "Course analytics unavailable",
+      "coursesUnavailableDesc": "An authenticated session is required to view scoped course analytics.",
+      "coursesLoadError": "The course analytics view could not be loaded.",
+      "courseRankingTitle": "Course ranking",
+      "courseRankingDescription": "Rank courses by engagement trend, grading pressure, and learner risk so instructors can prioritize interventions.",
+      "courseDetailTitle": "Course detail unavailable",
+      "courseDetailDesc": "An authenticated session is required to inspect course analytics.",
+      "courseDetailLoadError": "The course analytics detail view could not be loaded.",
+      "atRiskUnavailableTitle": "Learner risk unavailable",
+      "atRiskUnavailableDesc": "An authenticated session is required to inspect at-risk learners.",
+      "atRiskLoadError": "The learner risk view could not be loaded.",
+      "atRiskPageTitle": "Full at-risk learner list",
+      "atRiskPageDescription": "Showing {total} scoped learners ranked by risk score.",
+      "courseDetailBadge": "Course detail",
+      "courseStatCompletion": "Completion",
+      "courseStatAvgProgress": "Average progress",
+      "courseStatUngraded": "Ungraded submissions",
+      "courseEngagementTitle": "Engagement trend",
+      "courseEngagementDesc": "Distinct active learners over time for this course.",
+      "courseFunnelTitle": "Completion funnel",
+      "courseFunnelDesc": "Enrollment to active to completion conversion for this course.",
+      "courseChapterDropoffTitle": "Chapter drop-off",
+      "courseChapterDropoffDesc": "Progress counts by ordered chapter to expose drop-off points.",
+      "courseContentHealthTitle": "Content health",
+      "courseAtRiskTitle": "At-risk learners in this course",
+      "courseAtRiskDescription": "Highest-risk learners scoped to the selected course.",
+      "assessmentDetailBadge": "Assessment #{id}",
+      "assessmentStatSubmissionRate": "Submission rate",
+      "assessmentStatPassRate": "Pass rate",
+      "assessmentStatMedianScore": "Median score",
+      "assessmentStatAvgAttempts": "Average attempts",
+      "assessmentScoreDistTitle": "Score distribution",
+      "assessmentScoreDistDesc": "Histogram of learner performance across this assessment.",
+      "assessmentAttemptDistTitle": "Attempt distribution",
+      "assessmentAttemptDistDesc": "How many tries learners needed before stopping.",
+      "assessmentQuestionTitle": "Question difficulty",
+      "assessmentQuestionDesc": "Lower accuracy highlights items that may be unclear or too difficult.",
+      "assessmentCommonFailuresTitle": "Common failures",
+      "assessmentNoCommonFailures": "No common failure cluster detected in the current data.",
+      "assessmentLearnerRowsTitle": "Learner rows",
+      "assessmentColLearner": "Learner",
+      "assessmentColAttempts": "Attempts",
+      "assessmentColBestScore": "Best score",
+      "assessmentColLastScore": "Last score",
+      "assessmentColSubmitted": "Submitted",
+      "assessmentColStatus": "Status",
+      "assessmentPassThresholdExam": "Pass threshold from exam settings",
+      "assessmentPassThresholdDefault": "Pass threshold: 60%"
+    }
+  }
 }

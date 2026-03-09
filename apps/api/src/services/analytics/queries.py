@@ -185,7 +185,7 @@ def direction_for_delta(delta_value: float | None) -> str:
 
 def display_name(user: User | None) -> str:
     if user is None:
-        return "Unknown learner"
+        return "Неизвестный пользователь"
     parts = [user.first_name, user.last_name]
     joined = " ".join(part for part in parts if part).strip()
     return joined or user.username or user.email

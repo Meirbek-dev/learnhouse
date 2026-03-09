@@ -4,7 +4,9 @@ import type { ColumnDef } from '@tanstack/react-table';
 import type { AtRiskLearnerRow } from '@/types/analytics';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getAnalyticsReasonCodeLabel, getAnalyticsRiskLevelLabel } from '@/lib/analytics/labels';
 import AnalyticsDataTable from './AnalyticsDataTable';
+import { useTranslations } from 'next-intl';
 
 interface AtRiskLearnersTableProps {
   title?: string;
@@ -19,45 +21,48 @@ const riskVariant = (level: AtRiskLearnerRow['risk_level']) => {
 };
 
 export default function AtRiskLearnersTable({
-  title = 'At-risk learners',
-  description = 'Operational learner list ranked by urgency.',
+  title,
+  description,
   rows,
 }: AtRiskLearnersTableProps) {
+  const t = useTranslations('TeacherAnalytics');
+  const resolvedTitle = title ?? t('atRisk.defaultTitle');
+  const resolvedDescription = description ?? t('atRisk.defaultDescription');
   const columns: ColumnDef<AtRiskLearnerRow>[] = [
     {
       accessorKey: 'user_display_name',
-      header: 'Learner',
+      header: t('atRisk.colLearner'),
       cell: ({ row }) => (
         <div>
           <div className="font-medium text-slate-900">{row.original.user_display_name}</div>
-          <div className="text-xs text-slate-500">User #{row.original.user_id}</div>
+          <div className="text-xs text-slate-500">{t('atRisk.userNumber', { userId: row.original.user_id })}</div>
         </div>
       ),
     },
-    { accessorKey: 'course_name', header: 'Course' },
+    { accessorKey: 'course_name', header: t('atRisk.colCourse') },
     {
       accessorKey: 'progress_pct',
-      header: 'Progress',
+      header: t('atRisk.colProgress'),
       cell: ({ row }) => `${row.original.progress_pct}%`,
     },
     {
       accessorKey: 'days_since_last_activity',
-      header: 'Inactivity',
-      cell: ({ row }) => (row.original.days_since_last_activity === null ? 'n/a' : `${row.original.days_since_last_activity}d`),
+      header: t('atRisk.colInactivity'),
+      cell: ({ row }) => (row.original.days_since_last_activity === null ? t('atRisk.na') : `${row.original.days_since_last_activity}d`),
     },
     {
       accessorKey: 'risk_score',
-      header: 'Risk',
-      cell: ({ row }) => <Badge variant={riskVariant(row.original.risk_level)}>{row.original.risk_level} · {row.original.risk_score}</Badge>,
+      header: t('atRisk.colRisk'),
+      cell: ({ row }) => <Badge variant={riskVariant(row.original.risk_level)}>{getAnalyticsRiskLevelLabel(t, row.original.risk_level)} · {row.original.risk_score}</Badge>,
     },
     {
       accessorKey: 'reason_codes',
-      header: 'Reasons',
-      cell: ({ row }) => <div className="max-w-[220px] whitespace-normal text-xs text-slate-600">{row.original.reason_codes.join(', ')}</div>,
+      header: t('atRisk.colReasons'),
+      cell: ({ row }) => <div className="max-w-[220px] whitespace-normal text-xs text-slate-600">{row.original.reason_codes.map((code) => getAnalyticsReasonCodeLabel(t, code)).join(', ')}</div>,
     },
     {
       accessorKey: 'recommended_action',
-      header: 'Recommended action',
+      header: t('atRisk.colAction'),
       cell: ({ row }) => <div className="max-w-[280px] whitespace-normal text-sm text-slate-700">{row.original.recommended_action}</div>,
     },
   ];
@@ -65,11 +70,11 @@ export default function AtRiskLearnersTable({
   return (
     <Card className="border-slate-200 bg-white/90 shadow-sm">
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardTitle>{resolvedTitle}</CardTitle>
+        <CardDescription>{resolvedDescription}</CardDescription>
       </CardHeader>
       <CardContent>
-        <AnalyticsDataTable columns={columns} data={rows} searchPlaceholder="Search learners, courses, or reason codes..." emptyMessage="No at-risk learners are visible for the current filters." />
+        <AnalyticsDataTable columns={columns} data={rows} searchPlaceholder={t('atRisk.searchPlaceholder')} emptyMessage={t('atRisk.emptyMessage')} />
       </CardContent>
     </Card>
   );

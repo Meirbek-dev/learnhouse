@@ -72,7 +72,6 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
 
     enrolled = len(snapshots)
     completion_rate = safe_pct(sum(1 for snapshot in snapshots.values() if snapshot.is_completed), enrolled) or 0.0
-    previous_snapshots = progress_snapshots(context, allowed_user_ids)
     # Derive previous-period completion from events in the prior window
     previous_active_set = {event.user_id for event in events if previous_start <= event.ts < previous_end}
     previous_completion_rate = safe_pct(
@@ -134,8 +133,8 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
                 id="risk-overview",
                 type="risk_spike",
                 severity="critical" if at_risk_count >= 15 else "warning",
-                title="Learner risk requires outreach",
-                body=f"{at_risk_count} learners in your current scope are medium or high risk.",
+                title="Риск учащихся требует вмешательства",
+                body=f"{at_risk_count} учащихся в текущем охвате имеют средний или высокий уровень риска.",
                 learner_count=at_risk_count,
             )
         )
@@ -156,28 +155,28 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
         ),
         summary=TeacherOverviewSummary(
             active_learners=_metric(
-                "Active learners",
+                "Активные учащиеся",
                 float(teacher_rollup.active_learners_7d if teacher_rollup is not None and filters.window == "7d" else teacher_rollup.active_learners_28d if teacher_rollup is not None else len(current_active_users)),
                 float(len(previous_active_users)),
             ),
             returning_learners=_metric(
-                "Returning learners",
+                "Вернувшиеся учащиеся",
                 float(teacher_rollup.returning_learners_28d if teacher_rollup is not None else returning_learners),
                 float(previous_returning),
             ),
             completion_rate=_metric(
-                "Completion rate",
+                "Доля завершения",
                 float(teacher_rollup.completion_rate if teacher_rollup is not None and teacher_rollup.completion_rate is not None else completion_rate),
                 float(previous_completion_rate),
             ),
             at_risk_learners=_metric(
-                "At-risk learners",
+                "Учащиеся в зоне риска",
                 float(teacher_rollup.at_risk_learners if teacher_rollup is not None else at_risk_count),
                 float(previous_at_risk),
             ),
-            ungraded_submissions=_metric("Ungraded submissions", float(teacher_rollup.ungraded_submissions if teacher_rollup is not None else ungraded_submissions), None),
+            ungraded_submissions=_metric("Непроверенные отправки", float(teacher_rollup.ungraded_submissions if teacher_rollup is not None else ungraded_submissions), None),
             negative_engagement_courses=_metric(
-                "Courses with declining engagement",
+                "Курсы со снижением вовлеченности",
                 float(teacher_rollup.courses_with_negative_engagement if teacher_rollup is not None else negative_engagement_courses),
                 float(previous_negative_engagement),
             ),

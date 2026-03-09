@@ -71,8 +71,8 @@ def _build_rollup_course_rows(scope: TeacherAnalyticsScope, filters: AnalyticsFi
                 id=f"grading-backlog-{rollup.course_id}",
                 type="grading_backlog",
                 severity="warning" if rollup.ungraded_submissions < 25 else "critical",
-                title="Grading backlog needs attention",
-                body=f"{rollup.ungraded_submissions} submissions are still awaiting grading.",
+                title="Очередь проверки требует внимания",
+                body=f"{rollup.ungraded_submissions} отправок все еще ожидают проверки.",
                 course_id=rollup.course_id,
             )
         elif rollup.engagement_delta_pct is not None and float(rollup.engagement_delta_pct) < -15:
@@ -80,8 +80,8 @@ def _build_rollup_course_rows(scope: TeacherAnalyticsScope, filters: AnalyticsFi
                 id=f"engagement-drop-{rollup.course_id}",
                 type="engagement_drop",
                 severity="warning",
-                title="Engagement has dropped",
-                body=f"Active learners are down {abs(float(rollup.engagement_delta_pct))}% versus the previous period.",
+                title="Вовлеченность снизилась",
+                body=f"Количество активных учащихся снизилось на {abs(float(rollup.engagement_delta_pct))}% по сравнению с предыдущим периодом.",
                 course_id=rollup.course_id,
             )
 
@@ -186,8 +186,8 @@ def build_course_rows(
                 id=f"grading-backlog-{course_id}",
                 type="grading_backlog",
                 severity="warning" if ungraded_submissions < 25 else "critical",
-                title="Grading backlog needs attention",
-                body=f"{ungraded_submissions} submissions are still awaiting grading.",
+                title="Очередь проверки требует внимания",
+                body=f"{ungraded_submissions} отправок все еще ожидают проверки.",
                 course_id=course_id,
             )
         elif engagement_delta_pct is not None and engagement_delta_pct < -15:
@@ -195,8 +195,8 @@ def build_course_rows(
                 id=f"engagement-drop-{course_id}",
                 type="engagement_drop",
                 severity="warning",
-                title="Engagement has dropped",
-                body=f"Active learners are down {abs(engagement_delta_pct)}% versus the previous period.",
+                title="Вовлеченность снизилась",
+                body=f"Количество активных учащихся снизилось на {abs(engagement_delta_pct)}% по сравнению с предыдущим периодом.",
                 course_id=course_id,
             )
         elif days_since_update is not None and days_since_update > 21:
@@ -204,8 +204,8 @@ def build_course_rows(
                 id=f"stale-content-{course_id}",
                 type="content_stale",
                 severity="info" if days_since_update <= 35 else "warning",
-                title="Content may be stale",
-                body=f"This course has not been updated for {days_since_update} days.",
+                title="Контент может быть устаревшим",
+                body=f"Этот курс не обновлялся уже {days_since_update} дн.",
                 course_id=course_id,
             )
 
@@ -325,9 +325,9 @@ def get_teacher_course_detail(db_session: Session, scope: TeacherAnalyticsScope,
         previous_count = current_count
 
     course_completion_funnel = [
-        FunnelStep(label="Enrolled", count=enrolled, pct_of_previous=None),
-        FunnelStep(label="Active last 7 days", count=active_learners_7d, pct_of_previous=safe_pct(active_learners_7d, enrolled)),
-        FunnelStep(label="Completed", count=sum(1 for snapshot in course_snapshots if snapshot.is_completed), pct_of_previous=safe_pct(sum(1 for snapshot in course_snapshots if snapshot.is_completed), active_learners_7d or enrolled)),
+        FunnelStep(label="Зачислены", count=enrolled, pct_of_previous=None),
+        FunnelStep(label="Активны за 7 дней", count=active_learners_7d, pct_of_previous=safe_pct(active_learners_7d, enrolled)),
+        FunnelStep(label="Завершили", count=sum(1 for snapshot in course_snapshots if snapshot.is_completed), pct_of_previous=safe_pct(sum(1 for snapshot in course_snapshots if snapshot.is_completed), active_learners_7d or enrolled)),
     ]
     chapter_funnel = []
     previous_chapter_count = None
@@ -344,7 +344,7 @@ def get_teacher_course_detail(db_session: Session, scope: TeacherAnalyticsScope,
         chapter = context.chapters_by_id.get(chapter_id)
         count = len(chapter_counts.get(chapter_id, set()))
         pct = safe_pct(count, previous_chapter_count) if previous_chapter_count else None
-        chapter_funnel.append(FunnelStep(label=chapter.name if chapter else f"Chapter {chapter_id}", count=count, pct_of_previous=pct))
+        chapter_funnel.append(FunnelStep(label=chapter.name if chapter else f"Глава {chapter_id}", count=count, pct_of_previous=pct))
         previous_chapter_count = count
 
     last_update = course_last_content_update(context, course_id)
@@ -355,21 +355,21 @@ def get_teacher_course_detail(db_session: Session, scope: TeacherAnalyticsScope,
             signal="content_freshness",
             severity="critical" if days_since_update is not None and days_since_update > 45 else "warning" if days_since_update is not None and days_since_update > 21 else "info",
             value=float(days_since_update) if days_since_update is not None else None,
-            note="Days since the course or one of its activities was last updated.",
+            note="Количество дней с последнего обновления курса или одного из его заданий.",
         ),
         ContentHealthRow(
             course_id=course_id,
             signal="average_progress",
             severity="warning" if avg_progress < 55 else "info",
             value=avg_progress,
-            note="Average progress across participating learners.",
+            note="Средний прогресс среди учащихся, попавших в текущий охват.",
         ),
         ContentHealthRow(
             course_id=course_id,
             signal="grading_backlog",
             severity="critical" if ungraded_submissions > 25 else "warning" if ungraded_submissions > 0 else "info",
             value=float(ungraded_submissions),
-            note="Ungraded assignment submissions currently blocking feedback.",
+            note="Непроверенные отправки заданий, которые сейчас задерживают обратную связь.",
         ),
     ]
 

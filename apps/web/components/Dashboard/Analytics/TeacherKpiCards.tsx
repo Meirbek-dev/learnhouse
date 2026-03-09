@@ -4,6 +4,7 @@ import type { MetricCard } from '@/types/analytics';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface TeacherKpiCardsProps {
   metrics: MetricCard[];
@@ -22,6 +23,7 @@ const badgeVariant = (direction: MetricCard['direction']) => {
 };
 
 export default function TeacherKpiCards({ metrics }: TeacherKpiCardsProps) {
+  const t = useTranslations('TeacherAnalytics');
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {metrics.map((metric) => (
@@ -36,11 +38,11 @@ export default function TeacherKpiCards({ metrics }: TeacherKpiCardsProps) {
             </div>
             <Badge variant={badgeVariant(metric.direction)}>
               {iconForDirection(metric.direction)}
-              {metric.delta_pct === null ? 'stable' : `${metric.delta_pct > 0 ? '+' : ''}${metric.delta_pct}%`}
+              {metric.delta_pct === null ? t('kpi.stable') : `${metric.delta_pct > 0 ? '+' : ''}${metric.delta_pct}%`}
             </Badge>
           </CardHeader>
           <CardContent className="text-sm text-slate-600">
-            {metric.delta_value === null ? 'Comparison unavailable for this metric in the current release.' : `Change vs previous period: ${metric.delta_value > 0 ? '+' : ''}${metric.delta_value}`}
+            {metric.delta_value === null ? t('kpi.noComparison') : t('kpi.changePeriod', { delta: `${metric.delta_value > 0 ? '+' : ''}${metric.delta_value}` })}
           </CardContent>
         </Card>
       ))}

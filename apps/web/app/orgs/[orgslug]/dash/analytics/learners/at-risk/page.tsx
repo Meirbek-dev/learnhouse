@@ -5,6 +5,7 @@ import { getAtRiskLearners, getTeacherCourseList, normalizeAnalyticsQuery } from
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getUserGroups } from '@services/usergroups/usergroups';
 import { auth } from '@/auth';
+import { getTranslations } from 'next-intl/server';
 
 export default async function AnalyticsAtRiskPage(props: {
   params: Promise<{ orgslug: string }>;
@@ -15,9 +16,10 @@ export default async function AnalyticsAtRiskPage(props: {
   const session = await auth();
   const accessToken = session?.tokens?.access_token;
   const query = normalizeAnalyticsQuery(await props.searchParams);
+  const t = await getTranslations('TeacherAnalytics');
 
   if (!accessToken) {
-    return <AnalyticsEmptyState title="Learner risk unavailable" description="An authenticated session is required to inspect at-risk learners." />;
+    return <AnalyticsEmptyState title={t('pages.atRiskUnavailableTitle')} description={t('pages.atRiskUnavailableDesc')} />;
   }
 
   try {
@@ -33,10 +35,10 @@ export default async function AnalyticsAtRiskPage(props: {
     return (
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
         <TeacherFilterBar orgslug={orgslug} path={`/orgs/${orgslug}/dash/analytics/learners/at-risk`} query={query} courseCount={courses.items.length} courseOptions={courseOptions} cohortOptions={cohortOptions} />
-        <AtRiskLearnersTable rows={risk.items} title="Full at-risk learner list" description={`Showing ${risk.total} scoped learners ranked by risk score.`} />
+        <AtRiskLearnersTable rows={risk.items} title={t('pages.atRiskPageTitle')} description={t('pages.atRiskPageDescription', { total: risk.total })} />
       </div>
     );
   } catch (error) {
-    return <AnalyticsEmptyState title="Learner risk unavailable" description={error instanceof Error ? error.message : 'The learner risk view could not be loaded.'} />;
+    return <AnalyticsEmptyState title={t('pages.atRiskUnavailableTitle')} description={error instanceof Error ? error.message : t('pages.atRiskLoadError')} />;
   }
 }

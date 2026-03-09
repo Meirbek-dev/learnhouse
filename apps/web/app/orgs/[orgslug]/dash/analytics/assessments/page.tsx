@@ -5,6 +5,7 @@ import { getTeacherAssessmentList, getTeacherCourseList, normalizeAnalyticsQuery
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getUserGroups } from '@services/usergroups/usergroups';
 import { auth } from '@/auth';
+import { getTranslations } from 'next-intl/server';
 
 export default async function AnalyticsAssessmentsPage(props: {
   params: Promise<{ orgslug: string }>;
@@ -15,9 +16,10 @@ export default async function AnalyticsAssessmentsPage(props: {
   const session = await auth();
   const accessToken = session?.tokens?.access_token;
   const query = normalizeAnalyticsQuery(await props.searchParams);
+  const t = await getTranslations('TeacherAnalytics');
 
   if (!accessToken) {
-    return <AnalyticsEmptyState title="Assessment analytics unavailable" description="An authenticated session is required to inspect assessment analytics." />;
+    return <AnalyticsEmptyState title={t('pages.assessmentsUnavailableTitle')} description={t('pages.assessmentsUnavailableDesc')} />;
   }
 
   try {
@@ -37,6 +39,6 @@ export default async function AnalyticsAssessmentsPage(props: {
       </div>
     );
   } catch (error) {
-    return <AnalyticsEmptyState title="Assessment analytics unavailable" description={error instanceof Error ? error.message : 'The assessment analytics view could not be loaded.'} />;
+    return <AnalyticsEmptyState title={t('pages.assessmentsUnavailableTitle')} description={error instanceof Error ? error.message : t('pages.assessmentsLoadError')} />;
   }
 }

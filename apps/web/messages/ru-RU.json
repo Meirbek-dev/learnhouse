@@ -5900,7 +5900,7 @@
     "orgName": "Ashyq Bilim",
     "tooltips": {
       "admin": "Панель администратора",
-      "analytics": "Аналитика преподавателя",
+      "analytics": "Аналитика",
       "assignments": "Задания",
       "courses": "Курсы",
       "home": "Главная панель",
@@ -6249,5 +6249,276 @@
   "seconds": "Секунды",
   "selectDeadline": "Выберите дедлайн для выполнения задачи",
   "touUniversity": "Торайгыров Университет",
-  "webPreview": "Веб-предпросмотр"
+  "webPreview": "Веб-предпросмотр",
+  "TeacherAnalytics": {
+    "overview": {
+      "label": "Аналитика",
+      "heading": "Операционная аналитика по вовлечённости в курс, рискам учащихся и качеству оценивания.",
+      "description": "Эта панель ограничена управляемыми курсами преподавателя и предоставляет метрики, готовые для принятия мер, вместо пассивных диаграмм.",
+      "exportAtRisk": "Экспорт учащихся в зоне риска",
+      "exportGradingBacklog": "Экспорт очереди проверки",
+      "trendTitle": "Тенденция вовлечённости и исполнения",
+      "trendDescription": "Активные учащиеся, завершения, отправки и завершённые проверки за выбранный период.",
+      "freshnessTitle": "Актуальность и охват",
+      "freshnessDescription": "Источник данных для текущего аналитического представления.",
+      "labelGenerated": "Создано",
+      "labelFreshness": "Актуальность",
+      "labelScopedCourses": "Курсы в охвате",
+      "labelCohorts": "Когорты",
+      "cohortsAll": "Все",
+      "alertsTitle": "Уведомления",
+      "alertsDescription": "Приоритетные операционные сигналы, полученные из текущего охвата.",
+      "alertsEmpty": "Нет активных уведомлений для выбранных фильтров.",
+      "showingCourses": "Показано 8 из {total} курсов.",
+      "viewAllCourses": "Смотреть все →",
+      "showingAssessments": "Показано 8 из {total} заданий.",
+      "viewAllAssessments": "Смотреть все →",
+      "watchlistTitle": "Срочный список наблюдения",
+      "watchlistDescription": "Учащиеся с наибольшим риском, которым, вероятно, нужна помощь на этой неделе."
+    },
+    "filters": {
+      "label": "Аналитика",
+      "scopedCourses": "{count} курсов в охвате",
+      "buckets": "шаги: {bucket}",
+      "windowPrefix": "Период: {window}",
+      "comparePrefix": "Сравнение: {compare}",
+      "bucketPrefix": "Шаг: {bucket}",
+      "allCourses": "Все курсы",
+      "allCohorts": "Все когорты",
+      "timezonePlaceholder": "Часовой пояс",
+      "descending": "По убыванию",
+      "ascending": "По возрастанию",
+      "applyFilters": "Применить фильтры",
+      "reset": "Сбросить",
+      "sortDefault": "По умолчанию",
+      "sortRisk": "Риск",
+      "sortHealth": "Здоровье",
+      "sortCompletion": "Завершение",
+      "sortActiveLearners": "Активные учащиеся",
+      "sortDifficulty": "Сложность",
+      "sortSignals": "Сигналы"
+    },
+    "labels": {
+      "bucket": {
+        "day": "День",
+        "week": "Неделя"
+      },
+      "compare": {
+        "previousPeriod": "Предыдущий период",
+        "none": "Без сравнения"
+      },
+      "assessmentType": {
+        "assignment": "Задание",
+        "quiz": "Тест",
+        "exam": "Экзамен",
+        "codeChallenge": "Задача по коду"
+      },
+      "severity": {
+        "info": "Инфо",
+        "warning": "Предупреждение",
+        "critical": "Критично"
+      },
+      "alertType": {
+        "riskSpike": "Рост риска",
+        "engagementDrop": "Падение вовлеченности",
+        "gradingBacklog": "Очередь проверки",
+        "assessmentOutlier": "Проблемное оценивание",
+        "contentStale": "Устаревший контент"
+      },
+      "riskLevel": {
+        "low": "Низкий",
+        "medium": "Средний",
+        "high": "Высокий"
+      },
+      "reasonCode": {
+        "inactive7d": "Нет активности 7 дней",
+        "lowProgress": "Низкий прогресс",
+        "repeatedFailures": "Повторяющиеся неудачи",
+        "missingRequiredAssessments": "Пропущены обязательные оценивания",
+        "gradingBlock": "Ожидает проверки",
+        "lowSubmissionRate": "Низкая доля отправок",
+        "lowSuccessRate": "Низкая доля успешных попыток",
+        "slowFeedback": "Медленная обратная связь",
+        "lowPassRate": "Низкая доля прохождения",
+        "gradingLatency": "Задержка проверки",
+        "lowCompletionRate": "Низкая доля завершения",
+        "belowThreshold": "Ниже порога",
+        "lowAccuracy": "Низкая точность"
+      },
+      "signal": {
+        "contentFreshness": "Актуальность контента",
+        "averageProgress": "Средний прогресс",
+        "gradingBacklog": "Очередь проверки"
+      },
+      "status": {
+        "pending": "В ожидании",
+        "submitted": "Отправлено",
+        "graded": "Проверено",
+        "late": "Просрочено",
+        "notSubmitted": "Не отправлено",
+        "inProgress": "В процессе",
+        "autoSubmitted": "Автоотправка",
+        "completed": "Завершено",
+        "failed": "Ошибка",
+        "processing": "Обрабатывается",
+        "pendingJudge0": "Ожидает Judge0"
+      }
+    },
+    "kpi": {
+      "stable": "стабильно",
+      "noComparison": "Сравнение для этой метрики недоступно в текущей версии.",
+      "changePeriod": "Изменение по сравнению с предыдущим периодом: {delta}"
+    },
+    "freshness": {
+      "live": "Прямой эфир",
+      "seconds": "{seconds} сек. назад",
+      "minutes": "{minutes} мин. назад",
+      "hours": "{hours} ч. назад",
+      "days": "{days} д. назад"
+    },
+    "emptyState": {
+      "accessNote": "Аналитика отображается только при включённой функции организации и наличии доступа к аналитике у текущего пользователя."
+    },
+    "table": {
+      "searchDefault": "Поиск...",
+      "emptyDefault": "Строки не найдены для выбранных фильтров.",
+      "visibleRows": "{count} видимых строк"
+    },
+    "trend": {
+      "activeLearners": "Активные учащиеся",
+      "completions": "Завершения",
+      "submissions": "Отправки",
+      "gradingCompleted": "Проверка завершена",
+      "emptyState": "Данные тенденций появятся, когда в выбранном аналитическом окне появится активность."
+    },
+    "riskDistribution": {
+      "title": "Распределение рисков",
+      "description": "Риск учащихся по уровню срочности для текущего охвата.",
+      "preview": "Показаны топ-{shown} из {total} учащихся в зоне риска.",
+      "learners": "Учащиеся",
+      "emptyState": "Нет учащихся в зоне риска для текущего охвата."
+    },
+    "histogram": {
+      "learners": "Учащиеся",
+      "emptyState": "Данные гистограммы недоступны для выбранного задания.",
+      "passLabel": "Проходной"
+    },
+    "courseHealth": {
+      "title": "Рейтинг здоровья курсов",
+      "description": "Курсы, ранжированные по операционной нагрузке, вовлечённости и качеству контента.",
+      "colCourse": "Курс",
+      "colActive7d": "Активные 7д",
+      "colCompletion": "Завершение",
+      "colRisk": "Риск",
+      "colUngraded": "Не проверено",
+      "colHealth": "Здоровье",
+      "colTopAlert": "Главное уведомление",
+      "noAlert": "Нет уведомлений",
+      "searchPlaceholder": "Поиск по курсам...",
+      "emptyMessage": "Нет курсов, соответствующих текущему охвату аналитики."
+    },
+    "assessmentOutliers": {
+      "title": "Проблемные задания",
+      "description": "Ранжированные задания, тесты, экзамены и задачи по коду, требующие внимания.",
+      "colAssessment": "Задание",
+      "colCourse": "Курс",
+      "colSubmission": "Отправки",
+      "colPass": "Прохождение",
+      "colMedian": "Медиана",
+      "colDifficulty": "Сложность",
+      "colSignals": "Сигналы",
+      "healthy": "В норме",
+      "searchPlaceholder": "Поиск по заданиям...",
+      "emptyMessage": "Нет проблемных заданий для текущего охвата."
+    },
+    "atRisk": {
+      "defaultTitle": "Учащиеся в зоне риска",
+      "defaultDescription": "Операционный список учащихся, ранжированных по срочности.",
+      "colLearner": "Учащийся",
+      "userNumber": "Пользователь #{userId}",
+      "colCourse": "Курс",
+      "colProgress": "Прогресс",
+      "colInactivity": "Бездействие",
+      "colRisk": "Риск",
+      "colReasons": "Причины",
+      "colAction": "Рекомендуемое действие",
+      "na": "н/д",
+      "searchPlaceholder": "Поиск по учащимся, курсам или кодам причин...",
+      "emptyMessage": "Нет учащихся в зоне риска для текущих фильтров."
+    },
+    "gradingBacklog": {
+      "title": "Очередь проверки",
+      "description": "Незавершённые отправки, которые замедляют обратную связь для учащихся.",
+      "noAlert": "Нет уведомления о проверке"
+    },
+    "radar": {
+      "showing": "Показано {shown} из {total} вопросов по сложности.",
+      "accuracy": "Точность"
+    },
+    "funnel": {
+      "learners": "Учащиеся"
+    },
+    "scoreChart": {
+      "learners": "Учащиеся"
+    },
+    "pages": {
+      "overviewDisabledTitle": "Аналитика недоступна",
+      "overviewDisabledDesc": "В этой организации аналитика отключена или текущий сеанс не имеет доступа к аналитическим данным.",
+      "overviewLoadError": "Не удалось загрузить службу аналитики.",
+      "assessmentsUnavailableTitle": "Аналитика заданий недоступна",
+      "assessmentsUnavailableDesc": "Для просмотра аналитики заданий требуется аутентифицированный сеанс.",
+      "assessmentsLoadError": "Не удалось загрузить представление аналитики заданий.",
+      "assessmentDetailTitle": "Детали задания недоступны",
+      "assessmentDetailDesc": "Для проверки аналитики задания требуется аутентифицированный сеанс.",
+      "assessmentDetailLoadError": "Не удалось загрузить детальное представление аналитики задания.",
+      "coursesUnavailableTitle": "Аналитика курсов недоступна",
+      "coursesUnavailableDesc": "Для просмотра аналитики курсов требуется аутентифицированный сеанс.",
+      "coursesLoadError": "Не удалось загрузить представление аналитики курсов.",
+      "courseRankingTitle": "Рейтинг курсов",
+      "courseRankingDescription": "Ранжирование курсов по тенденции вовлечённости, нагрузке на оценивание и рискам учащихся для расстановки приоритетов.",
+      "courseDetailTitle": "Детали курса недоступны",
+      "courseDetailDesc": "Для проверки аналитики курса требуется аутентифицированный сеанс.",
+      "courseDetailLoadError": "Не удалось загрузить детальное представление аналитики курса.",
+      "atRiskUnavailableTitle": "Риски учащихся недоступны",
+      "atRiskUnavailableDesc": "Для просмотра учащихся в зоне риска требуется аутентифицированный сеанс.",
+      "atRiskLoadError": "Не удалось загрузить представление рисков учащихся.",
+      "atRiskPageTitle": "Полный список учащихся в зоне риска",
+      "atRiskPageDescription": "{total} учащихся в охвате, ранжированных по уровню риска.",
+      "courseDetailBadge": "Детали курса",
+      "courseStatCompletion": "Завершение",
+      "courseStatAvgProgress": "Средний прогресс",
+      "courseStatUngraded": "Непроверенные отправки",
+      "courseEngagementTitle": "Тенденция вовлечённости",
+      "courseEngagementDesc": "Уникальные активные учащиеся по этому курсу с течением времени.",
+      "courseFunnelTitle": "Воронка завершения",
+      "courseFunnelDesc": "Конверсия от записи к активности и завершению курса.",
+      "courseChapterDropoffTitle": "Отсев по главам",
+      "courseChapterDropoffDesc": "Количество прогрессий по упорядоченным главам для выявления точек отсева.",
+      "courseContentHealthTitle": "Здоровье контента",
+      "courseAtRiskTitle": "Учащиеся в зоне риска в этом курсе",
+      "courseAtRiskDescription": "Учащиеся с наибольшим риском, ограниченные выбранным курсом.",
+      "assessmentDetailBadge": "Задание #{id}",
+      "assessmentStatSubmissionRate": "Процент отправок",
+      "assessmentStatPassRate": "Процент прохождения",
+      "assessmentStatMedianScore": "Медиана баллов",
+      "assessmentStatAvgAttempts": "Среднее количество попыток",
+      "assessmentScoreDistTitle": "Распределение баллов",
+      "assessmentScoreDistDesc": "Гистограмма успеваемости учащихся по этому заданию.",
+      "assessmentAttemptDistTitle": "Распределение попыток",
+      "assessmentAttemptDistDesc": "Сколько раз учащиеся пытались выполнить задание.",
+      "assessmentQuestionTitle": "Сложность вопросов",
+      "assessmentQuestionDesc": "Низкая точность указывает на неясные или слишком сложные задания.",
+      "assessmentCommonFailuresTitle": "Частые ошибки",
+      "assessmentNoCommonFailures": "В текущих данных не обнаружено кластера частых ошибок.",
+      "assessmentLearnerRowsTitle": "Строки учащихся",
+      "assessmentColLearner": "Учащийся",
+      "assessmentColAttempts": "Попытки",
+      "assessmentColBestScore": "Лучший балл",
+      "assessmentColLastScore": "Последний балл",
+      "assessmentColSubmitted": "Отправлено",
+      "assessmentColStatus": "Статус",
+      "assessmentPassThresholdExam": "Проходной порог из настроек экзамена",
+      "assessmentPassThresholdDefault": "Проходной порог: 60%"
+    }
+  }
 }

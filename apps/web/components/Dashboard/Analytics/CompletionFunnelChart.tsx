@@ -4,6 +4,7 @@ import type { FunnelStep } from '@/types/analytics';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { useTranslations } from 'next-intl';
 
 interface CompletionFunnelChartProps {
   title: string;
@@ -12,6 +13,7 @@ interface CompletionFunnelChartProps {
 }
 
 export default function CompletionFunnelChart({ title, description, data }: CompletionFunnelChartProps) {
+  const t = useTranslations('TeacherAnalytics');
   return (
     <Card className="border-slate-200 bg-white/90 shadow-sm">
       <CardHeader>
@@ -21,7 +23,7 @@ export default function CompletionFunnelChart({ title, description, data }: Comp
       <CardContent>
         <ChartContainer
           className="h-[280px] w-full"
-          config={{ count: { label: 'Learners', color: '#b45309' } }}
+          config={{ count: { label: t('funnel.learners'), color: '#b45309' } }}
         >
           <BarChart data={data} layout="vertical" margin={{ left: 18 }}>
             <CartesianGrid horizontal={false} strokeDasharray="3 3" />

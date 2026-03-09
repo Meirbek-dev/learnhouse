@@ -2,6 +2,7 @@
 
 import type { HistogramBucket } from '@/types/analytics';
 import { Badge } from '@/components/ui/badge';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartEmptyState, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Bar, BarChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from 'recharts';
@@ -16,6 +17,7 @@ interface AnalyticsThresholdHistogramProps {
 }
 
 export default function AnalyticsThresholdHistogram({ title, description, data, thresholdLabel, thresholdBucketLabel }: AnalyticsThresholdHistogramProps) {
+  const t = useTranslations('TeacherAnalytics');
   return (
     <Card className="border-slate-200 bg-white/90 shadow-sm">
       <CardHeader>
@@ -29,7 +31,7 @@ export default function AnalyticsThresholdHistogram({ title, description, data, 
       </CardHeader>
       <CardContent>
         {data.length ? (
-          <ChartContainer className="h-[280px] w-full" config={{ count: { label: 'Learners', color: '#1d4ed8' } }}>
+          <ChartContainer className="h-[280px] w-full" config={{ count: { label: t('histogram.learners'), color: '#1d4ed8' } }}>
             <BarChart data={data}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis dataKey="label" tickLine={false} axisLine={false} />
@@ -41,13 +43,13 @@ export default function AnalyticsThresholdHistogram({ title, description, data, 
                   x={thresholdBucketLabel}
                   stroke="#dc2626"
                   strokeDasharray="4 2"
-                  label={{ value: 'Pass', position: 'insideTopRight', fontSize: 11, fill: '#dc2626' }}
+                  label={{ value: t('histogram.passLabel'), position: 'insideTopRight', fontSize: 11, fill: '#dc2626' }}
                 />
               ) : null}
             </BarChart>
           </ChartContainer>
         ) : (
-          <ChartEmptyState description="Histogram data is not available for the selected assessment." />
+          <ChartEmptyState description={t('histogram.emptyState')} />
         )}
       </CardContent>
     </Card>

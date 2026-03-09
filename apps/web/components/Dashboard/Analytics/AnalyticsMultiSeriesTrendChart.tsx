@@ -1,6 +1,7 @@
 'use client';
 
 import { Area, AreaChart, CartesianGrid, Legend, XAxis, YAxis } from 'recharts';
+import { useTranslations } from 'next-intl';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartEmptyState, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -20,6 +21,7 @@ interface AnalyticsMultiSeriesTrendChartProps {
 }
 
 export default function AnalyticsMultiSeriesTrendChart({ title, description, data }: AnalyticsMultiSeriesTrendChartProps) {
+  const t = useTranslations('TeacherAnalytics');
   return (
     <Card className="border-slate-200 bg-white/90 shadow-sm">
       <CardHeader>
@@ -31,10 +33,10 @@ export default function AnalyticsMultiSeriesTrendChart({ title, description, dat
           <ChartContainer
             className="h-[320px] w-full"
             config={{
-              active_learners: { label: 'Active learners', color: '#0f766e' },
-              completions: { label: 'Completions', color: '#0284c7' },
-              submissions: { label: 'Submissions', color: '#f59e0b' },
-              grading_completed: { label: 'Grading completed', color: '#7c3aed' },
+              active_learners: { label: t('trend.activeLearners'), color: '#0f766e' },
+              completions: { label: t('trend.completions'), color: '#0284c7' },
+              submissions: { label: t('trend.submissions'), color: '#f59e0b' },
+              grading_completed: { label: t('trend.gradingCompleted'), color: '#7c3aed' },
             }}
           >
             <AreaChart data={data}>
@@ -50,7 +52,7 @@ export default function AnalyticsMultiSeriesTrendChart({ title, description, dat
             </AreaChart>
           </ChartContainer>
         ) : (
-          <ChartEmptyState description="Trend data will appear once the selected analytics window contains activity." />
+          <ChartEmptyState description={t('trend.emptyState')} />
         )}
       </CardContent>
     </Card>

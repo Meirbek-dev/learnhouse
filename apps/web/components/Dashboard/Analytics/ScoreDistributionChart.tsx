@@ -4,6 +4,7 @@ import type { HistogramBucket } from '@/types/analytics';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { useTranslations } from 'next-intl';
 
 interface ScoreDistributionChartProps {
   title: string;
@@ -12,6 +13,7 @@ interface ScoreDistributionChartProps {
 }
 
 export default function ScoreDistributionChart({ title, description, data }: ScoreDistributionChartProps) {
+  const t = useTranslations('TeacherAnalytics');
   return (
     <Card className="border-slate-200 bg-white/90 shadow-sm">
       <CardHeader>
@@ -19,7 +21,7 @@ export default function ScoreDistributionChart({ title, description, data }: Sco
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer className="h-[260px] w-full" config={{ count: { label: 'Learners', color: '#1d4ed8' } }}>
+        <ChartContainer className="h-[260px] w-full" config={{ count: { label: t('scoreChart.learners'), color: '#1d4ed8' } }}>
           <BarChart data={data}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis dataKey="label" tickLine={false} axisLine={false} />

@@ -77,11 +77,11 @@ def _build_rollup_assessment_rows(
         if course is None:
             continue
         if row.assessment_type == "assignment":
-            title = assignments.get(row.assessment_id).title if row.assessment_id in assignments else f"Assignment {row.assessment_id}"
+            title = assignments.get(row.assessment_id).title if row.assessment_id in assignments else f"Задание {row.assessment_id}"
         elif row.assessment_type == "exam":
-            title = exams.get(row.assessment_id).title if row.assessment_id in exams else f"Exam {row.assessment_id}"
+            title = exams.get(row.assessment_id).title if row.assessment_id in exams else f"Экзамен {row.assessment_id}"
         else:
-            title = activities.get(row.assessment_id).name if row.assessment_id in activities else f"Assessment {row.assessment_id}"
+            title = activities.get(row.assessment_id).name if row.assessment_id in activities else f"Оценивание {row.assessment_id}"
 
         outlier_reason_codes: list[str] = []
         if row.submission_rate is not None and float(row.submission_rate) < 60:
@@ -132,7 +132,7 @@ def _is_allowed(user_id: int, allowed_user_ids: set[int] | None) -> bool:
 
 def _score_bucket(score: float | None) -> str:
     if score is None:
-        return "Unknown"
+        return "Неизвестно"
     lower = int(min(80, (score // 20) * 20))
     upper = lower + 19 if lower < 80 else 100
     return f"{lower}-{upper}"
@@ -149,7 +149,7 @@ def _attempt_distribution(attempts_by_user: dict[int, int]) -> list[HistogramBuc
 
 def _score_distribution(scores: list[float]) -> list[HistogramBucket]:
     buckets = Counter(_score_bucket(score) for score in scores)
-    order = ["0-19", "20-39", "40-59", "60-79", "80-100", "Unknown"]
+    order = ["0-19", "20-39", "40-59", "60-79", "80-100", "Неизвестно"]
     return [HistogramBucket(label=label, count=buckets.get(label, 0)) for label in order if buckets.get(label, 0) > 0]
 
 
@@ -440,7 +440,7 @@ def get_teacher_assessment_detail(
     if assessment_type == "assignment":
         assignment = next((item for item in context.assignments if item.id == assessment_id), None)
         if assignment is None:
-            raise ValueError(f"Assignment not found: {assessment_id}")
+            raise ValueError(f"Задание не найдено: {assessment_id}")
         records = [
             (submission, _assignment)
             for submission, _assignment in context.assignment_submissions
@@ -468,8 +468,8 @@ def get_teacher_assessment_detail(
             for submission, _ in records
         ]
         common_failures = [
-            CommonFailureRow(key="late", label="Late submissions", count=sum(1 for submission, _ in records if submission.submission_status.value == "LATE")),
-            CommonFailureRow(key="ungraded", label="Awaiting grading", count=sum(1 for submission, _ in records if submission.submission_status.value in {"SUBMITTED", "LATE"})),
+            CommonFailureRow(key="late", label="Просроченные отправки", count=sum(1 for submission, _ in records if submission.submission_status.value == "LATE")),
+            CommonFailureRow(key="ungraded", label="Ожидают проверки", count=sum(1 for submission, _ in records if submission.submission_status.value in {"SUBMITTED", "LATE"})),
         ]
         common_failures = [item for item in common_failures if item.count > 0]
         pass_rate = safe_pct(sum(1 for score in scores if score >= 60), len(scores))
@@ -499,7 +499,7 @@ def get_teacher_assessment_detail(
     if assessment_type == "exam":
         exam = next((item for item in context.exams if item.id == assessment_id), None)
         if exam is None:
-            raise ValueError(f"Exam not found: {assessment_id}")
+            raise ValueError(f"Экзамен не найден: {assessment_id}")
         records = [
             (attempt, _exam)
             for attempt, _exam in context.exam_attempts
@@ -556,7 +556,7 @@ def get_teacher_assessment_detail(
     if assessment_type == "quiz":
         activity = context.activities_by_id.get(assessment_id)
         if activity is None or activity.course_id is None:
-            raise ValueError(f"Quiz activity not found: {assessment_id}")
+            raise ValueError(f"Активность теста не найдена: {assessment_id}")
         records = [
             (attempt, _activity)
             for attempt, _activity in context.quiz_attempts
@@ -574,7 +574,7 @@ def get_teacher_assessment_detail(
             question_breakdown.append(
                 QuestionDifficultyRow(
                     question_id=stat.question_id,
-                    question_label=f"Question {stat.question_id}",
+                    question_label=f"Вопрос {stat.question_id}",
                     accuracy_pct=safe_pct(stat.correct_count, stat.total_attempts),
                     avg_time_seconds=round(float(stat.avg_time_seconds), 2) if stat.avg_time_seconds is not None else None,
                 )
@@ -628,7 +628,7 @@ def get_teacher_assessment_detail(
     if assessment_type == "code_challenge":
         activity = context.activities_by_id.get(assessment_id)
         if activity is None or activity.course_id is None:
-            raise ValueError(f"Code challenge activity not found: {assessment_id}")
+            raise ValueError(f"Активность задачи по коду не найдена: {assessment_id}")
         records = [
             (submission, _activity)
             for submission, _activity in context.code_submissions
@@ -664,7 +664,7 @@ def get_teacher_assessment_detail(
                 )
             )
         common_failures = [
-            CommonFailureRow(key=key, label=f"Failed test {key}", count=count)
+            CommonFailureRow(key=key, label=f"Проваленный тест {key}", count=count)
             for key, count in failure_counter.most_common(8)
         ]
         return TeacherAssessmentDetailResponse(
@@ -690,4 +690,4 @@ def get_teacher_assessment_detail(
             learner_rows=sorted(learner_rows, key=lambda row: row.user_display_name),
         )
 
-    raise ValueError(f"Unsupported assessment type: {assessment_type}")
+    raise ValueError(f"Неподдерживаемый тип оценивания: {assessment_type}")

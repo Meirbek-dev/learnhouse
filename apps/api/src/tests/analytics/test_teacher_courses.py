@@ -2,7 +2,7 @@ import pytest
 
 from src.security.rbac import PermissionDenied
 from src.services.analytics.scope import TeacherAnalyticsScope, _coerce_course_id, ensure_course_in_scope
-from src.services.analytics.queries import _unwrap_model, _unwrap_pair
+from src.services.analytics.queries import _unwrap_model, _unwrap_pair, display_name
 
 
 class _FakeCourse:
@@ -76,3 +76,7 @@ def test_unwrap_pair_returns_models_from_row_mapping() -> None:
 
     assert left is submission
     assert right is assignment
+
+
+def test_display_name_returns_russian_unknown_for_missing_user() -> None:
+    assert display_name(None) == "Неизвестный пользователь"

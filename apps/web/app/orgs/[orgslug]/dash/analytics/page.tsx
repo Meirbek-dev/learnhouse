@@ -4,6 +4,7 @@ import { getTeacherAssessmentList, getTeacherCourseList, getTeacherOverview, nor
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getUserGroups } from '@services/usergroups/usergroups';
 import { auth } from '@/auth';
+import { getTranslations } from 'next-intl/server';
 
 export default async function AnalyticsOverviewPage(props: {
   params: Promise<{ orgslug: string }>;
@@ -15,9 +16,10 @@ export default async function AnalyticsOverviewPage(props: {
   const accessToken = session?.tokens?.access_token;
   const query = normalizeAnalyticsQuery(await props.searchParams);
   const analyticsEnabled = org?.config?.config?.features?.analytics?.enabled ?? true;
+  const t = await getTranslations('TeacherAnalytics');
 
   if (!analyticsEnabled || !accessToken) {
-    return <AnalyticsEmptyState title="Analytics unavailable" description="This organization has analytics disabled or the current session cannot access analytics data." />;
+    return <AnalyticsEmptyState title={t('pages.overviewDisabledTitle')} description={t('pages.overviewDisabledDesc')} />;
   }
 
   try {
@@ -46,6 +48,6 @@ export default async function AnalyticsOverviewPage(props: {
       />
     );
   } catch (error) {
-    return <AnalyticsEmptyState title="Analytics unavailable" description={error instanceof Error ? error.message : 'The analytics service could not be loaded.'} />;
+    return <AnalyticsEmptyState title={t('pages.overviewDisabledTitle')} description={error instanceof Error ? error.message : t('pages.overviewLoadError')} />;
   }
 }

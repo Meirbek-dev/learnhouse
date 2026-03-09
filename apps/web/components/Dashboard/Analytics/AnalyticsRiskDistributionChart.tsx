@@ -1,6 +1,8 @@
 'use client';
 
 import type { AtRiskLearnerRow } from '@/types/analytics';
+import { getAnalyticsRiskLevelLabel } from '@/lib/analytics/labels';
+import { useTranslations } from 'next-intl';
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,16 +14,17 @@ interface AnalyticsRiskDistributionChartProps {
 }
 
 const RISK_COLORS: Record<string, string> = {
-  High: '#dc2626',
-  Medium: '#f59e0b',
-  Low: '#64748b',
+  high: '#dc2626',
+  medium: '#f59e0b',
+  low: '#64748b',
 };
 
 export default function AnalyticsRiskDistributionChart({ rows, totalAtRisk }: AnalyticsRiskDistributionChartProps) {
+  const t = useTranslations('TeacherAnalytics');
   const data = [
-    { level: 'High', count: rows.filter((row) => row.risk_level === 'high').length },
-    { level: 'Medium', count: rows.filter((row) => row.risk_level === 'medium').length },
-    { level: 'Low', count: rows.filter((row) => row.risk_level === 'low').length },
+    { level: 'high', label: getAnalyticsRiskLevelLabel(t, 'high'), count: rows.filter((row) => row.risk_level === 'high').length },
+    { level: 'medium', label: getAnalyticsRiskLevelLabel(t, 'medium'), count: rows.filter((row) => row.risk_level === 'medium').length },
+    { level: 'low', label: getAnalyticsRiskLevelLabel(t, 'low'), count: rows.filter((row) => row.risk_level === 'low').length },
   ].filter((item) => item.count > 0);
 
   const isPreview = totalAtRisk !== undefined && totalAtRisk > rows.length;
@@ -29,18 +32,18 @@ export default function AnalyticsRiskDistributionChart({ rows, totalAtRisk }: An
   return (
     <Card className="border-slate-200 bg-white/90 shadow-sm">
       <CardHeader>
-        <CardTitle>Risk distribution</CardTitle>
+        <CardTitle>{t('riskDistribution.title')}</CardTitle>
         <CardDescription>
-          Learner risk by urgency level for the current scope.
-          {isPreview ? ` Showing top ${rows.length} of ${totalAtRisk} at-risk learners.` : ''}
+          {t('riskDistribution.description')}
+          {isPreview ? ` ${t('riskDistribution.preview', { shown: rows.length, total: totalAtRisk })}` : ''}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {data.length ? (
-          <ChartContainer className="h-[280px] w-full" config={{ count: { label: 'Learners' } }}>
+          <ChartContainer className="h-[280px] w-full" config={{ count: { label: t('riskDistribution.learners') } }}>
             <BarChart data={data}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
-              <XAxis dataKey="level" tickLine={false} axisLine={false} />
+              <XAxis dataKey="label" tickLine={false} axisLine={false} />
               <YAxis tickLine={false} axisLine={false} allowDecimals={false} />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Bar dataKey="count" radius={10}>
@@ -51,7 +54,7 @@ export default function AnalyticsRiskDistributionChart({ rows, totalAtRisk }: An
             </BarChart>
           </ChartContainer>
         ) : (
-          <ChartEmptyState description="No at-risk learners are currently in view for the selected scope." />
+          <ChartEmptyState description={t('riskDistribution.emptyState')} />
         )}
       </CardContent>
     </Card>

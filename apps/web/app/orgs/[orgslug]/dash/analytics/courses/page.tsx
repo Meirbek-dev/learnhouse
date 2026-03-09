@@ -6,6 +6,7 @@ import { getTeacherCourseList, normalizeAnalyticsQuery } from '@services/analyti
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getUserGroups } from '@services/usergroups/usergroups';
 import { auth } from '@/auth';
+import { getTranslations } from 'next-intl/server';
 
 export default async function AnalyticsCoursesPage(props: {
   params: Promise<{ orgslug: string }>;
@@ -16,9 +17,10 @@ export default async function AnalyticsCoursesPage(props: {
   const session = await auth();
   const accessToken = session?.tokens?.access_token;
   const query = normalizeAnalyticsQuery(await props.searchParams);
+  const t = await getTranslations('TeacherAnalytics');
 
   if (!accessToken) {
-    return <AnalyticsEmptyState title="Course analytics unavailable" description="An authenticated session is required to view scoped course analytics." />;
+    return <AnalyticsEmptyState title={t('pages.coursesUnavailableTitle')} description={t('pages.coursesUnavailableDesc')} />;
   }
 
   try {
@@ -34,15 +36,15 @@ export default async function AnalyticsCoursesPage(props: {
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
         <Card className="border-slate-200 bg-white/90 shadow-sm">
           <CardHeader>
-            <CardTitle>Course ranking</CardTitle>
+            <CardTitle>{t('pages.courseRankingTitle')}</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-slate-600">Rank courses by engagement trend, grading pressure, and learner risk so instructors can prioritize interventions.</CardContent>
+          <CardContent className="text-sm text-slate-600">{t('pages.courseRankingDescription')}</CardContent>
         </Card>
         <TeacherFilterBar orgslug={orgslug} path={`/orgs/${orgslug}/dash/analytics/courses`} query={query} courseCount={courseList.items.length} courseOptions={courseOptions} cohortOptions={cohortOptions} />
         <CourseHealthTable orgslug={orgslug} rows={courseList.items} />
       </div>
     );
   } catch (error) {
-    return <AnalyticsEmptyState title="Course analytics unavailable" description={error instanceof Error ? error.message : 'The course analytics view could not be loaded.'} />;
+    return <AnalyticsEmptyState title={t('pages.coursesUnavailableTitle')} description={error instanceof Error ? error.message : t('pages.coursesLoadError')} />;
   }
 }

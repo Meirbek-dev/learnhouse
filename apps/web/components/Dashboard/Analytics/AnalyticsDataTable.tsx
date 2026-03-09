@@ -3,6 +3,7 @@
 import * as React from 'react';
 
 import type { ColumnDef, SortingState } from '@tanstack/react-table';
+import { useTranslations } from 'next-intl';
 import {
   flexRender,
   getCoreRowModel,
@@ -28,10 +29,13 @@ interface AnalyticsDataTableProps<TData> {
 export default function AnalyticsDataTable<TData>({
   columns,
   data,
-  searchPlaceholder = 'Search...',
-  emptyMessage = 'No rows found for the selected filters.',
+  searchPlaceholder,
+  emptyMessage,
   className,
 }: AnalyticsDataTableProps<TData>) {
+  const t = useTranslations('TeacherAnalytics');
+  const resolvedPlaceholder = searchPlaceholder ?? t('table.searchDefault');
+  const resolvedEmpty = emptyMessage ?? t('table.emptyDefault');
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
 
@@ -62,11 +66,11 @@ export default function AnalyticsDataTable<TData>({
           <Input
             value={globalFilter}
             onChange={(event) => setGlobalFilter(event.target.value)}
-            placeholder={searchPlaceholder}
+            placeholder={resolvedPlaceholder}
             className="pl-9"
           />
         </div>
-        <div className="text-sm text-slate-500">{rows.length} visible rows</div>
+        <div className="text-sm text-slate-500">{t('table.visibleRows', { count: rows.length })}</div>
       </div>
 
       <Table>
@@ -118,7 +122,7 @@ export default function AnalyticsDataTable<TData>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-28 text-center text-sm text-slate-500">
-                {emptyMessage}
+                {resolvedEmpty}
               </TableCell>
             </TableRow>
           )}
