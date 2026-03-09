@@ -34,8 +34,8 @@ def _assign_permission_to_role(conn, role_slug: str, permission_name: str) -> No
     conn.execute(
         text(
             """
-            INSERT INTO role_permissions (role_id, permission_id)
-            SELECT r.id, p.id
+            INSERT INTO role_permissions (role_id, permission_id, granted_at)
+            SELECT r.id, p.id, NOW()
             FROM roles r
             JOIN permissions p ON p.name = :permission_name
             WHERE r.slug = :role_slug AND r.org_id IS NULL
