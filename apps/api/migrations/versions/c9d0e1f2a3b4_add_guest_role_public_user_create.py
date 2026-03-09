@@ -72,14 +72,23 @@ def _upsert_permission(conn) -> None:
         conn.execute(
             text(f"""
                 INSERT INTO permissions
-                    (name, resource_type, action, scope, description, permission_key)
+                    (
+                        name,
+                        resource_type,
+                        action,
+                        scope,
+                        description,
+                        permission_key,
+                        created_at
+                    )
                 VALUES (
                     :name,
                     {resource_type_sql},
                     {action_sql},
                     {scope_sql},
                     :description,
-                    :permission_key
+                    :permission_key,
+                    NOW()
                 )
                 ON CONFLICT (name) DO NOTHING
             """),
@@ -90,13 +99,14 @@ def _upsert_permission(conn) -> None:
     conn.execute(
         text(f"""
             INSERT INTO permissions
-                (name, resource_type, action, scope, description)
+                (name, resource_type, action, scope, description, created_at)
             VALUES (
                 :name,
                 {resource_type_sql},
                 {action_sql},
                 {scope_sql},
-                :description
+                :description,
+                NOW()
             )
             ON CONFLICT (name) DO NOTHING
         """),
@@ -108,7 +118,16 @@ def _upsert_guest_role(conn) -> None:
     """Insert the global `guest` system role if it doesn't already exist."""
     conn.execute(
         text("""
-            INSERT INTO roles (slug, name, description, is_system, priority, org_id)
+            INSERT INTO roles (
+                slug,
+                name,
+                description,
+                is_system,
+                priority,
+                org_id,
+                created_at,
+                updated_at
+            )
             VALUES (
                 :slug,
                 'Гость',
@@ -116,7 +135,9 @@ def _upsert_guest_role(conn) -> None:
                 'permissions required to self-register.',
                 TRUE,
                 0,
-                NULL
+                NULL,
+                NOW(),
+                NOW()
             )
             ON CONFLICT (slug, org_id) DO NOTHING
         """),
@@ -128,8 +149,9 @@ def _assign_permission_to_guest(conn) -> None:
     """Assign user:create:all to the guest role via role_permissions."""
     conn.execute(
         text("""
-            INSERT INTO role_permissions (role_id, permission_id)
+            INSERT INTO role_permissions (role_id, permission_id, granted_at)
             SELECT r.id, p.id
+                 , NOW()
             FROM   roles       r
             JOIN   permissions p ON p.name = :perm_key
             WHERE  r.slug     = :role_slug
