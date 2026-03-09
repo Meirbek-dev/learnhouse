@@ -118,8 +118,14 @@ def _build_rollup_course_rows(scope: TeacherAnalyticsScope, filters: AnalyticsFi
     return to_iso(generated_at) or "", rows
 
 
-def build_course_rows(scope: TeacherAnalyticsScope, filters: AnalyticsFilters, db_session: Session) -> tuple[str, list[TeacherCourseRow]]:
-    context = load_analytics_context(db_session, scope.course_ids)
+def build_course_rows(
+    scope: TeacherAnalyticsScope,
+    filters: AnalyticsFilters,
+    db_session: Session,
+    context=None,
+) -> tuple[str, list[TeacherCourseRow]]:
+    if context is None:
+        context = load_analytics_context(db_session, scope.course_ids)
     allowed_user_ids = cohort_user_ids(context, filters.cohort_ids)
     events = build_activity_events(context, allowed_user_ids)
     snapshots = progress_snapshots(context, allowed_user_ids)
@@ -155,13 +161,24 @@ def build_course_rows(scope: TeacherAnalyticsScope, filters: AnalyticsFilters, d
         )
         last_update = course_last_content_update(context, course_id)
         days_since_update = (now - last_update).days if last_update is not None else None
-        freshness_score = 100.0 if days_since_update is None else max(0.0, round(100 - (days_since_update * 3.5), 1))
+        # No update history means the course may be very stale; treat as 90-day old content
+        freshness_score = max(0.0, round(100 - (90 * 3.5), 1)) if days_since_update is None else max(0.0, round(100 - (days_since_update * 3.5), 1))
         content_health_score = round((freshness_score * 0.55) + (avg_progress * 0.45), 1)
         engagement_delta_pct = None
         if previous_active:
             engagement_delta_pct = round(((len(current_active) - len(previous_active)) / len(previous_active)) * 100, 1)
-        difficulty_values = [row.difficulty_score for row in assessments_by_course.get(course_id, []) if row.difficulty_score is not None]
-        assessment_difficulty_score = round(sum(difficulty_values) / len(difficulty_values), 1) if difficulty_values else None
+        # Weighted difficulty: weight each assessment by its submission count to avoid average-of-averages
+        difficulty_weighted_sum = sum(
+            (row.difficulty_score or 0) * max(1, int((row.submission_rate or 0) * 10))
+            for row in assessments_by_course.get(course_id, [])
+            if row.difficulty_score is not None
+        )
+        difficulty_weight_total = sum(
+            max(1, int((row.submission_rate or 0) * 10))
+            for row in assessments_by_course.get(course_id, [])
+            if row.difficulty_score is not None
+        )
+        assessment_difficulty_score = round(difficulty_weighted_sum / difficulty_weight_total, 1) if difficulty_weight_total else None
 
         top_alert = None
         if ungraded_submissions >= 10:
@@ -197,7 +214,8 @@ def build_course_rows(scope: TeacherAnalyticsScope, filters: AnalyticsFilters, d
                 course_id=course_id,
                 course_uuid=course.course_uuid,
                 course_name=course.name,
-                active_learners_7d=len({event.user_id for event in events if event.course_id == course_id and event.ts >= now - timedelta(days=7)}),
+                active_learners_7d=len(current_active if filters.window == "7d" else {event.user_id for event in events if event.course_id == course_id and event.ts >= now - timedelta(days=7)}),
+
                 completion_rate=completion_rate,
                 engagement_delta_pct=engagement_delta_pct,
                 at_risk_learners=at_risk_count,
@@ -218,6 +236,8 @@ def build_course_rows(scope: TeacherAnalyticsScope, filters: AnalyticsFilters, d
         "health": lambda row: row.content_health_score,
         "engagement": lambda row: row.engagement_delta_pct if row.engagement_delta_pct is not None else -10_000,
         "pressure": lambda row: (row.top_alert is not None, row.at_risk_learners, -row.content_health_score),
+        "difficulty": lambda row: row.assessment_difficulty_score if row.assessment_difficulty_score is not None else -1,
+        "signals": lambda row: row.top_alert is not None,
     }
     rows.sort(key=sort_map.get(sort_by, sort_map["pressure"]), reverse=reverse)
     return to_iso(context.generated_at) or "", rows

@@ -13,6 +13,8 @@ WindowPreset = Literal["7d", "28d", "90d"]
 ComparePreset = Literal["previous_period", "none"]
 Bucket = Literal["day", "week"]
 SortOrder = Literal["asc", "desc"]
+CourseSortBy = Literal["name", "active", "completion", "risk", "health", "engagement", "pressure", "difficulty", "signals"]
+AssessmentSortBy = Literal["title", "submission", "pass", "difficulty", "latency", "signals"]
 
 
 def _parse_csv_ints(value: str | None) -> list[int]:

@@ -5,10 +5,9 @@ import CompletionFunnelChart from '@components/Dashboard/Analytics/CompletionFun
 import EngagementAreaChart from '@components/Dashboard/Analytics/EngagementAreaChart';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getTeacherCourseDetail, getTeacherCourseList, normalizeAnalyticsQuery } from '@services/analytics/teacher';
+import { getTeacherCourseDetailByUuid, normalizeAnalyticsQuery } from '@services/analytics/teacher';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { auth } from '@/auth';
-import { notFound } from 'next/navigation';
 
 export default async function AnalyticsCourseDetailPage(props: {
   params: Promise<{ orgslug: string; courseuuid: string }>;
@@ -25,12 +24,7 @@ export default async function AnalyticsCourseDetailPage(props: {
   }
 
   try {
-    const courseList = await getTeacherCourseList(org.id ?? org.org_id, accessToken, query);
-    const courseRow = courseList.items.find((item) => item.course_uuid === courseuuid);
-    if (!courseRow) {
-      notFound();
-    }
-    const detail = await getTeacherCourseDetail(org.id ?? org.org_id, courseRow.course_id, accessToken, query);
+    const detail = await getTeacherCourseDetailByUuid(org.id ?? org.org_id, courseuuid, accessToken, query);
     return (
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
         <Card className="border-slate-200 bg-white/90 shadow-sm">

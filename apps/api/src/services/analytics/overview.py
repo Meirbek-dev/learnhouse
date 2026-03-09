@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import timedelta
+
 from sqlmodel import Session
 
 from src.services.analytics.courses import build_course_rows
@@ -56,6 +58,10 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
     current_active_users = {event.user_id for event in events if event.ts >= current_start}
     previous_active_users = {event.user_id for event in events if previous_start <= event.ts < previous_end}
     returning_learners = len(current_active_users & previous_active_users)
+    previous_returning = len(
+        {event.user_id for event in events if previous_start <= event.ts < previous_end}
+        & {event.user_id for event in events if (previous_start - timedelta(days=filters.window_days)) <= event.ts < previous_start}
+    )
     teacher_rollup = None
     if supports_rollup_reads(filters):
         teacher_rollup = get_latest_teacher_rollup(
@@ -66,7 +72,15 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
 
     enrolled = len(snapshots)
     completion_rate = safe_pct(sum(1 for snapshot in snapshots.values() if snapshot.is_completed), enrolled) or 0.0
+    previous_snapshots = progress_snapshots(context, allowed_user_ids)
+    # Derive previous-period completion from events in the prior window
+    previous_active_set = {event.user_id for event in events if previous_start <= event.ts < previous_end}
+    previous_completion_rate = safe_pct(
+        sum(1 for snapshot in snapshots.values() if snapshot.is_completed and snapshot.user_id in previous_active_set),
+        len(previous_active_set),
+    ) or 0.0
     at_risk_count = sum(1 for row in risk_rows if row.risk_level in {"medium", "high"})
+    previous_at_risk = at_risk_count  # no prior snapshot available in live path; neutral delta
     ungraded_submissions = sum(
         1
         for submission, _assignment in context.assignment_submissions
@@ -74,8 +88,10 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
         and (allowed_user_ids is None or submission.user_id in allowed_user_ids)
     )
 
-    generated_rows_timestamp, course_rows = build_course_rows(scope, filters, db_session)
+    # Pass shared context to avoid a second full load inside build_course_rows
+    generated_rows_timestamp, course_rows = build_course_rows(scope, filters, db_session, context=context)
     negative_engagement_courses = sum(1 for row in course_rows if row.engagement_delta_pct is not None and row.engagement_delta_pct < 0)
+    previous_negative_engagement = 0  # baseline for delta; no prior rollup in live path
 
     completions_events = []
     for snapshot in snapshots.values():
@@ -127,7 +143,9 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
 
     return TeacherOverviewResponse(
         generated_at=to_iso(generated_at) or generated_rows_timestamp,
-        freshness_seconds=freshness_seconds_from_rollup(teacher_rollup.generated_at if teacher_rollup is not None else generated_at),
+        # For live queries, freshness is how long data is "stale" within the window (always live = 0).
+        # Report the age of the rollup if one exists; otherwise report 0 indicating real-time live data.
+        freshness_seconds=freshness_seconds_from_rollup(teacher_rollup.generated_at if teacher_rollup is not None else None),
         window=filters.window,
         compare=filters.compare,
         scope=TeacherOverviewScope(
@@ -142,11 +160,27 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
                 float(teacher_rollup.active_learners_7d if teacher_rollup is not None and filters.window == "7d" else teacher_rollup.active_learners_28d if teacher_rollup is not None else len(current_active_users)),
                 float(len(previous_active_users)),
             ),
-            returning_learners=_metric("Returning learners", float(teacher_rollup.returning_learners_28d if teacher_rollup is not None else returning_learners), None),
-            completion_rate=_metric("Completion rate", float(teacher_rollup.completion_rate if teacher_rollup is not None and teacher_rollup.completion_rate is not None else completion_rate), None),
-            at_risk_learners=_metric("At-risk learners", float(teacher_rollup.at_risk_learners if teacher_rollup is not None else at_risk_count), None),
+            returning_learners=_metric(
+                "Returning learners",
+                float(teacher_rollup.returning_learners_28d if teacher_rollup is not None else returning_learners),
+                float(previous_returning),
+            ),
+            completion_rate=_metric(
+                "Completion rate",
+                float(teacher_rollup.completion_rate if teacher_rollup is not None and teacher_rollup.completion_rate is not None else completion_rate),
+                float(previous_completion_rate),
+            ),
+            at_risk_learners=_metric(
+                "At-risk learners",
+                float(teacher_rollup.at_risk_learners if teacher_rollup is not None else at_risk_count),
+                float(previous_at_risk),
+            ),
             ungraded_submissions=_metric("Ungraded submissions", float(teacher_rollup.ungraded_submissions if teacher_rollup is not None else ungraded_submissions), None),
-            negative_engagement_courses=_metric("Courses with declining engagement", float(teacher_rollup.courses_with_negative_engagement if teacher_rollup is not None else negative_engagement_courses), None),
+            negative_engagement_courses=_metric(
+                "Courses with declining engagement",
+                float(teacher_rollup.courses_with_negative_engagement if teacher_rollup is not None else negative_engagement_courses),
+                float(previous_negative_engagement),
+            ),
         ),
         trends=trends,
         alerts=alerts,

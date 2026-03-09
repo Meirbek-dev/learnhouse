@@ -68,6 +68,10 @@ export function getTeacherCourseList(orgId: number, accessToken: string, query?:
   return analyticsRequest<TeacherCourseListResponse>(`orgs/${orgId}/teacher/courses`, accessToken, query);
 }
 
+export function getTeacherCourseDetailByUuid(orgId: number, courseUuid: string, accessToken: string, query?: AnalyticsQuery) {
+  return analyticsRequest<TeacherCourseDetailResponse>(`orgs/${orgId}/teacher/courses/by-uuid/${courseUuid}`, accessToken, query);
+}
+
 export function getTeacherCourseDetail(orgId: number, courseId: number, accessToken: string, query?: AnalyticsQuery) {
   return analyticsRequest<TeacherCourseDetailResponse>(`orgs/${orgId}/teacher/courses/${courseId}`, accessToken, query);
 }

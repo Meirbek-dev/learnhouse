@@ -25,7 +25,7 @@ export default function CompletionFunnelChart({ title, description, data }: Comp
         >
           <BarChart data={data} layout="vertical" margin={{ left: 18 }}>
             <CartesianGrid horizontal={false} strokeDasharray="3 3" />
-            <XAxis type="number" hide />
+            <XAxis type="number" tickLine={false} axisLine={false} tickFormatter={(v) => String(v)} />
             <YAxis dataKey="label" type="category" width={140} tickLine={false} axisLine={false} />
             <ChartTooltip content={<ChartTooltipContent />} />
             <Bar dataKey="count" fill="var(--color-count)" radius={8} />

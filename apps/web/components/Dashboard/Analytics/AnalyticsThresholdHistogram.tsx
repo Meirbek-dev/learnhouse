@@ -4,16 +4,18 @@ import type { HistogramBucket } from '@/types/analytics';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartEmptyState, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from 'recharts';
 
 interface AnalyticsThresholdHistogramProps {
   title: string;
   description: string;
   data: HistogramBucket[];
   thresholdLabel?: string;
+  /** Label value of the bucket at the passing threshold, used to draw a vertical reference line */
+  thresholdBucketLabel?: string;
 }
 
-export default function AnalyticsThresholdHistogram({ title, description, data, thresholdLabel }: AnalyticsThresholdHistogramProps) {
+export default function AnalyticsThresholdHistogram({ title, description, data, thresholdLabel, thresholdBucketLabel }: AnalyticsThresholdHistogramProps) {
   return (
     <Card className="border-slate-200 bg-white/90 shadow-sm">
       <CardHeader>
@@ -34,6 +36,14 @@ export default function AnalyticsThresholdHistogram({ title, description, data, 
               <YAxis tickLine={false} axisLine={false} allowDecimals={false} />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Bar dataKey="count" radius={10} fill="var(--color-count)" />
+              {thresholdBucketLabel ? (
+                <ReferenceLine
+                  x={thresholdBucketLabel}
+                  stroke="#dc2626"
+                  strokeDasharray="4 2"
+                  label={{ value: 'Pass', position: 'insideTopRight', fontSize: 11, fill: '#dc2626' }}
+                />
+              ) : null}
             </BarChart>
           </ChartContainer>
         ) : (

@@ -221,7 +221,7 @@ function ChartTooltipContent({
                         {nestLabel ? tooltipLabel : null}
                         <span className="text-muted-foreground">{itemConfig?.label || item.name}</span>
                       </div>
-                      {item.value !== undefined && item.value !== null && (
+                      {(item.value !== undefined && item.value !== null) && (
                         <span className="font-mono font-medium text-foreground tabular-nums">
                           {displayValue}
                         </span>

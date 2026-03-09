@@ -213,7 +213,9 @@ def build_series(
     end_local = end.astimezone(tzinfo)
     while cursor <= end_local:
         buckets[cursor] = set() if distinct_users else 0.0
-        cursor += timedelta(days=7 if bucket == "week" else 1)
+        # Advance by calendar day/week to avoid DST drift: increment date then re-normalize
+        next_date = cursor.date() + (timedelta(weeks=1) if bucket == "week" else timedelta(days=1))
+        cursor = datetime(next_date.year, next_date.month, next_date.day, 0, 0, 0, tzinfo=tzinfo)
 
     for event in events:
         if event.ts < start or event.ts > end:
@@ -241,9 +243,16 @@ def build_series(
 
 
 def cohort_user_ids(context: AnalyticsContext, cohort_ids: Iterable[int]) -> set[int] | None:
-    normalized = {cohort_id for cohort_id in cohort_ids if cohort_id in context.usergroup_names_by_id}
-    if not normalized:
+    requested = list(cohort_ids)
+    if not requested:
         return None
+    # Only filter by cohort IDs that are known to this org's context.
+    # If none of the requested IDs are known, return an empty set so the
+    # caller does NOT silently fall back to showing all learners.
+    normalized = {cohort_id for cohort_id in requested if cohort_id in context.usergroup_names_by_id}
+    if not normalized:
+        # Requested cohorts exist but none overlap with this scope — yield empty result
+        return set()
     return {
         user_id
         for user_id, memberships in context.cohort_ids_by_user.items()

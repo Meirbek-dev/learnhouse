@@ -12,7 +12,8 @@ interface QuestionDifficultyRadarProps {
 }
 
 export default function QuestionDifficultyRadar({ title, description, data }: QuestionDifficultyRadarProps) {
-  const radarData = data.slice(0, 8).map((row) => ({
+  const MAX = 8;
+  const radarData = data.slice(0, MAX).map((row) => ({
     label: row.question_label,
     accuracy: row.accuracy_pct ?? 0,
   }));
@@ -24,6 +25,9 @@ export default function QuestionDifficultyRadar({ title, description, data }: Qu
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
+        {data.length > MAX && (
+          <p className="mb-2 text-xs text-slate-500">Showing {MAX} of {data.length} questions by difficulty.</p>
+        )}
         <ChartContainer className="h-[320px] w-full" config={{ accuracy: { label: 'Accuracy', color: '#0f766e' } }}>
           <RadarChart data={radarData}>
             <ChartTooltip content={<ChartTooltipContent />} />

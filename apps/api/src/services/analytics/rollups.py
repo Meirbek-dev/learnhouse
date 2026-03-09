@@ -17,6 +17,7 @@ from src.db.analytics import (
     LearnerRiskSnapshot,
 )
 from src.db.courses.courses import Course
+from src.db.resource_authors import ResourceAuthor, ResourceAuthorshipStatusEnum
 from src.services.analytics.filters import AnalyticsFilters
 from src.services.analytics.queries import build_activity_events, load_analytics_context, progress_snapshots, safe_pct
 from src.services.analytics.scope import TeacherAnalyticsScope
@@ -262,12 +263,31 @@ def refresh_teacher_analytics_rollups(db_session: Session, *, org_id: int | None
                 )
             )
 
+        # Build course_id → all author user_ids (creator + active co-authors)
+        uuid_to_course_id = {
+            c.course_uuid: c.id
+            for c in context.courses_by_id.values()
+            if c.course_uuid
+        }
+        co_author_rows = db_session.exec(
+            select(ResourceAuthor).where(
+                ResourceAuthor.resource_uuid.in_(list(uuid_to_course_id.keys())),
+                ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
+            )
+        ).all()
+        course_author_ids: dict[int, set[int]] = {}
+        for c in context.courses_by_id.values():
+            if c.creator_id is not None:
+                course_author_ids.setdefault(c.id, set()).add(c.creator_id)
+        for ra in co_author_rows:
+            cid = uuid_to_course_id.get(ra.resource_uuid)
+            if cid is not None:
+                course_author_ids.setdefault(cid, set()).add(ra.user_id)
+
         teacher_course_rows: dict[int, list] = {}
         for row in course_rows:
-            teacher_id = context.courses_by_id[row.course_id].creator_id
-            if teacher_id is None:
-                continue
-            teacher_course_rows.setdefault(teacher_id, []).append(row)
+            for author_id in course_author_ids.get(row.course_id, set()):
+                teacher_course_rows.setdefault(author_id, []).append(row)
 
         for teacher_id, rows in teacher_course_rows.items():
             teacher_course_ids = {row.course_id for row in rows}

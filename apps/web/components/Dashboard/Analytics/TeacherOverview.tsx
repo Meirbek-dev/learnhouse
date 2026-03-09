@@ -14,6 +14,7 @@ import AssessmentOutliersTable from './AssessmentOutliersTable';
 import AnalyticsExportButton from './AnalyticsExportButton';
 import { getAnalyticsExportUrl } from '@services/analytics/teacher';
 import type { AnalyticsFilterOption } from '@/types/analytics';
+import Link from 'next/link';
 
 interface TeacherOverviewProps {
   orgslug: string;
@@ -27,12 +28,24 @@ interface TeacherOverviewProps {
 }
 
 export default function TeacherOverview({ orgslug, orgId, query, data, courseRows, assessmentRows, courseOptions = [], cohortOptions = [] }: TeacherOverviewProps) {
-  const trendData = data.trends.active_learners.map((point, index) => ({
+  function formatFreshness(seconds: number): string {
+    if (seconds <= 0) return 'Live';
+    if (seconds < 60) return `${seconds}s ago`;
+    if (seconds < 3600) return `${Math.round(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.round(seconds / 3600)}h ago`;
+    return `${Math.round(seconds / 86400)}d ago`;
+  }
+
+  // Align multi-series trend data by bucket_start timestamp to avoid index misalignment
+  const completionsMap = new Map(data.trends.completions.map((p) => [p.bucket_start, p.value]));
+  const submissionsMap = new Map(data.trends.submissions.map((p) => [p.bucket_start, p.value]));
+  const gradingMap = new Map(data.trends.grading_completed.map((p) => [p.bucket_start, p.value]));
+  const trendData = data.trends.active_learners.map((point) => ({
     bucket: new Date(point.bucket_start).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
     active_learners: point.value,
-    completions: data.trends.completions[index]?.value ?? 0,
-    submissions: data.trends.submissions[index]?.value ?? 0,
-    grading_completed: data.trends.grading_completed[index]?.value ?? 0,
+    completions: completionsMap.get(point.bucket_start) ?? 0,
+    submissions: submissionsMap.get(point.bucket_start) ?? 0,
+    grading_completed: gradingMap.get(point.bucket_start) ?? 0,
   }));
 
   return (
@@ -78,7 +91,7 @@ export default function TeacherOverview({ orgslug, orgId, query, data, courseRow
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
-        <AnalyticsRiskDistributionChart rows={data.at_risk_preview} />
+        <AnalyticsRiskDistributionChart rows={data.at_risk_preview} totalAtRisk={data.summary.at_risk_learners.value} />
         <Card className="border-slate-200 bg-white/90 shadow-sm">
           <CardHeader>
             <CardTitle>Freshness and scope</CardTitle>
@@ -91,7 +104,7 @@ export default function TeacherOverview({ orgslug, orgId, query, data, courseRow
             </div>
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Freshness</div>
-              <div className="mt-2 text-lg font-semibold text-slate-900">{data.freshness_seconds}s</div>
+              <div className="mt-2 text-lg font-semibold text-slate-900">{formatFreshness(data.freshness_seconds)}</div>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Scoped courses</div>
@@ -115,7 +128,7 @@ export default function TeacherOverview({ orgslug, orgId, query, data, courseRow
             <div key={alert.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <div className="mb-2 flex items-center gap-2">
                 <Badge variant={alert.severity === 'critical' ? 'destructive' : alert.severity === 'warning' ? 'warning' : 'outline'}>{alert.severity}</Badge>
-                <span className="text-xs uppercase tracking-[0.18em] text-slate-500">{alert.type.replace('_', ' ')}</span>
+                <span className="text-xs uppercase tracking-[0.18em] text-slate-500">{alert.type.replaceAll('_', ' ')}</span>
               </div>
               <div className="font-medium text-slate-900">{alert.title}</div>
               <div className="mt-2 text-sm leading-6 text-slate-600">{alert.body}</div>
@@ -125,8 +138,24 @@ export default function TeacherOverview({ orgslug, orgId, query, data, courseRow
       </Card>
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
-        <CourseHealthTable orgslug={orgslug} rows={courseRows.slice(0, 8)} />
-        <AssessmentOutliersTable orgslug={orgslug} rows={assessmentRows.slice(0, 8)} />
+        <div>
+          <CourseHealthTable orgslug={orgslug} rows={courseRows.slice(0, 8)} />
+          {courseRows.length > 8 && (
+            <p className="mt-2 text-sm text-slate-500">
+              Showing 8 of {courseRows.length} courses.{' '}
+              <Link href={`/orgs/${orgslug}/dash/analytics/courses`} className="text-blue-600 hover:underline">View all →</Link>
+            </p>
+          )}
+        </div>
+        <div>
+          <AssessmentOutliersTable orgslug={orgslug} rows={assessmentRows.slice(0, 8)} />
+          {assessmentRows.length > 8 && (
+            <p className="mt-2 text-sm text-slate-500">
+              Showing 8 of {assessmentRows.length} assessments.{' '}
+              <Link href={`/orgs/${orgslug}/dash/analytics/assessments`} className="text-blue-600 hover:underline">View all →</Link>
+            </p>
+          )}
+        </div>
       </div>
 
       <AtRiskLearnersTable rows={data.at_risk_preview} title="Urgent learner watchlist" description="Top-ranked learners who likely need outreach this week." />

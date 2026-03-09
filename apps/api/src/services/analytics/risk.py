@@ -146,12 +146,16 @@ def build_risk_rows(context: AnalyticsContext, filters: AnalyticsFilters) -> lis
             continue
 
         recommended_action = "Send a personal outreach message and review the next blocked assessment."
-        if "inactive_7d" in reason_codes:
+        if "grading_block" in reason_codes:
+            recommended_action = "Prioritise grading this learner's submissions to unblock their progress."
+        elif "inactive_7d" in reason_codes:
             recommended_action = "Contact the learner this week and ask for a re-entry plan."
-        elif "missing_required_assessments" in reason_codes:
-            recommended_action = "Remind the learner about missing required work and due dates."
         elif "repeated_failures" in reason_codes:
             recommended_action = "Offer targeted remediation on the learner's weakest assessment area."
+        elif "missing_required_assessments" in reason_codes:
+            recommended_action = "Remind the learner about missing required work and due dates."
+        elif "low_progress" in reason_codes:
+            recommended_action = "Schedule a check-in focused on content pacing and chapter engagement."
 
         rows.append(
             AtRiskLearnerRow(

@@ -87,11 +87,14 @@ def export_grading_backlog_csv(db_session: Session, scope: TeacherAnalyticsScope
             if allowed_user_ids is not None and submission.user_id not in allowed_user_ids:
                 continue
             user = context.users_by_id.get(submission.user_id)
+            course = context.courses_by_id.get(assignment.course_id)
+            if course is None:
+                continue
             yield [
                 submission.user_id,
                 user.username if user else "Unknown",
                 assignment.course_id,
-                context.courses_by_id[assignment.course_id].name,
+                course.name,
                 assignment.id,
                 assignment.title,
                 submission.submission_status.value,
