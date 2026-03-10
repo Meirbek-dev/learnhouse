@@ -125,22 +125,6 @@ requires cgroup v1 access, this should be granted via targeted capabilities
 
 ---
 
-### 🟠 Example env file contains real-looking secrets committed to the repository
-
-`extra/example-openu-conf.env` contains:
-
-```
-NEXTAUTH_SECRET="secret"
-PLATFORM_AUTH_JWT_SECRET_KEY="secret"
-PLATFORM_OPENAI_API_KEY="secret"
-```
-
-Even as an "example" file, shipping literal `"secret"` values teaches bad habits and risks
-someone copying the file without modification. The file also contains hardcoded private LAN IPs
-(`192.168.12.35`) that leak internal network topology.
-
----
-
 ### 🟠 No Content-Security-Policy or additional security headers in nginx
 
 The nginx config adds three security headers:
@@ -156,6 +140,7 @@ Missing entirely:
 - `Permissions-Policy` — no feature policy
 - `Cross-Origin-Opener-Policy` / `Cross-Origin-Embedder-Policy`
 
+Note: Make sure media uploading will work fine
 ---
 
 ### 🟠 No rate limiting in nginx
@@ -203,28 +188,6 @@ mounted unless strictly required.
 ---
 
 ## 3. Docker Image Quality
-
-### 🔴 Non-existent / pre-release image versions used
-
-| Service      | Image used                  | Issue                                 |
-| ------------ | --------------------------- | ------------------------------------- |
-| app (Python) | `python:3.14.3-slim-trixie` | Python 3.14 is unreleased (pre-alpha) |
-| app (Node)   | `node:25-bullseye-slim`     | Node 25 is unstable (odd = non-LTS)   |
-| web runner   | `node:25-alpine`            | Same Node 25 issue                    |
-| db           | `postgres:18.2-trixie`      | PostgreSQL 18 does not exist yet      |
-| redis        | `redis:8.6.0-alpine`        | Redis 8.6.0 does not exist            |
-| proxy        | `nginx:1.29.5-alpine`       | nginx 1.29.5 does not exist           |
-
-Using imaginary version tags will cause `docker pull` to fail in any fresh environment. These
-must be pinned to real, current stable releases:
-
-- Python: `3.13-slim-bookworm`
-- Node: `22-alpine` (LTS)
-- PostgreSQL: `17-alpine`
-- Redis: `7-alpine`
-- nginx: `1.27-alpine` (stable mainline)
-
----
 
 ### 🔴 `bun install --no-frozen-lockfile` in both Dockerfiles
 
@@ -298,22 +261,6 @@ ENV NEXT_PUBLIC_PLATFORM_API_URL=$NEXT_PUBLIC_PLATFORM_API_URL
 
 ---
 
-### 🟡 PostgreSQL data volume path is wrong
-
-```yaml
-volumes:
-  - postgres_data:/var/lib/postgresql
-```
-
-The actual PostgreSQL data directory inside the official Postgres Docker image is
-`/var/lib/postgresql/data`, not `/var/lib/postgresql`. Postgres will initialise a new cluster in
-`/var/lib/postgresql/data` but this sub-path is not inside the mounted volume — it's in the
-container's writable layer. When the container is recreated, **all data is lost.**
-
-**Fix:** `postgres_data:/var/lib/postgresql/data`
-
----
-
 ### 🟡 `supervisord` runs as root
 
 ```ini
@@ -341,14 +288,6 @@ and nginx's `depends_on`.
 
 **Fix:** Health check should probe both, or the services should be split into separate containers
 with independent health checks.
-
----
-
-### 🟡 No image digest pinning (supply-chain risk)
-
-All base images are referenced by tag only (e.g., `nginx:1.29.5-alpine`). Tags are mutable —
-a registry can push a new image under the same tag. Using digest pins (`image@sha256:...`) ensures
-the exact image is pulled every time, protecting against registry compromises.
 
 ---
 
@@ -395,43 +334,6 @@ caching is functioning correctly in production without checking nginx logs.
 
 ---
 
-## 5. Build Pipeline
-
-### 🟠 No CI/CD pipeline
-
-There is no `.github/workflows/` or equivalent. Builds and deployments are entirely manual.
-There are no automated tests, linting checks, or image builds triggered on push. This means:
-
-- Broken code can be deployed without detection.
-- No audit trail of what was deployed when.
-- No way to enforce the lockfile or type-checking before an image is built.
-
----
-
-### 🟡 `next-auth` beta in production
-
-```json
-"next-auth": "5.0.0-beta.30"
-```
-
-Auth is the most security-critical part of any web application. Using a beta release for the
-authentication library in production is a significant risk. Beta APIs can break between releases,
-and security vulnerabilities in beta software may not receive CVE tracking or expedited patches.
-
----
-
-### 🟡 TypeScript development build used
-
-```json
-"typescript": "^6.0.0-dev.20260309"
-```
-
-This is a nightly development build of TypeScript, not a stable release. Development builds are
-not intended for production use, can have breaking bugs, and will produce different results on
-different days if the caret range resolves to a newer nightly.
-
----
-
 ## 6. Operational Readiness
 
 ### 🟠 No structured log aggregation
@@ -439,14 +341,6 @@ different days if the caret range resolves to a newer nightly.
 Both services write to stdout/stderr (good for Docker), but there is no log aggregation solution,
 no log rotation policy, and no alerting. `app_logs` is a volume that persists FastAPI logs, but
 there is no rotation configured, so it will grow unboundedly.
-
----
-
-### 🟠 No secrets management
-
-All secrets are passed via a flat `.env` file (`extra/.env`). There is no rotation strategy, no
-encryption at rest for the secrets file, and no audit trail for secret access. Production
-deployments should use Docker secrets, HashiCorp Vault, or a managed secrets service.
 
 ---
 
@@ -469,49 +363,38 @@ before the backend is ready, resulting in 502 errors.
 
 ## Summary Table
 
-| #   | Issue                                               | Severity |
-| --- | --------------------------------------------------- | -------- |
-| 1   | Monolith container (Next.js + FastAPI)              | 🔴        |
-| 2   | DB/Redis/ChromaDB/Judge0 ports exposed to internet  | 🔴        |
-| 3   | No HTTPS/TLS in nginx                               | 🔴        |
-| 4   | Weak hardcoded DB credentials                       | 🔴        |
-| 5   | Judge0 running with `privileged: true`              | 🔴        |
-| 6   | Non-existent image versions (postgres:18, node:25…) | 🔴        |
-| 7   | `bun install --no-frozen-lockfile`                  | 🔴        |
-| 8   | `extra/start.sh` dead code (PM2 not installed)      | 🟠        |
-| 9   | Example env has literal `"secret"` values           | 🟠        |
-| 10  | No rate limiting in nginx                           | 🟠        |
-| 11  | No CSP or HSTS headers                              | 🟠        |
-| 12  | CORS `allow_methods=["*"]` / `allow_headers=["*"]`  | 🟠        |
-| 13  | FastAPI docs proxied in production nginx            | 🟠        |
-| 14  | `NEXT_PUBLIC_*` domain hardcoded in Dockerfile      | 🟠        |
-| 15  | Grafting `/usr/local` from Node image into Python   | 🟠        |
-| 16  | `uv` installed without version pin                  | 🟠        |
-| 17  | No CI/CD pipeline                                   | 🟠        |
-| 18  | `next-auth` beta in production                      | 🟡        |
-| 19  | TypeScript dev nightly in devDependencies           | 🟡        |
-| 20  | PostgreSQL volume path wrong (data not persisted)   | 🟡        |
-| 21  | `supervisord` runs as root                          | 🟡        |
-| 22  | Health check ignores FastAPI (port 9000)            | 🟡        |
-| 23  | No image digest pinning                             | 🟡        |
-| 24  | Repetitive nginx proxy_set_header blocks            | 🟠        |
-| 25  | `client_max_body_size 500M` applied globally        | 🟠        |
-| 26  | No proxy timeout configuration                      | 🟡        |
-| 27  | Docker socket in backup container                   | 🟡        |
-| 28  | No structured log aggregation / rotation            | 🟠        |
-| 29  | No secrets management strategy                      | 🟠        |
-| 30  | No resource limits on Judge0                        | 🟡        |
+| #   | Issue                                              | Severity |
+| --- | -------------------------------------------------- | -------- |
+| 1   | Monolith container (Next.js + FastAPI)             | 🔴        |
+| 2   | DB/Redis/ChromaDB/Judge0 ports exposed to internet | 🔴        |
+| 3   | No HTTPS/TLS in nginx                              | 🔴        |
+| 4   | Weak hardcoded DB credentials                      | 🔴        |
+| 5   | Judge0 running with `privileged: true`             | 🔴        |
+| 7   | `bun install --no-frozen-lockfile`                 | 🔴        |
+| 10  | No rate limiting in nginx                          | 🟠        |
+| 11  | No CSP or HSTS headers                             | 🟠        |
+| 13  | FastAPI docs proxied in production nginx           | 🟠        |
+| 14  | `NEXT_PUBLIC_*` domain hardcoded in Dockerfile     | 🟠        |
+| 15  | Grafting `/usr/local` from Node image into Python  | 🟠        |
+| 16  | `uv` installed without version pin                 | 🟠        |
+| 21  | `supervisord` runs as root                         | 🟡        |
+| 22  | Health check ignores FastAPI (port 9000)           | 🟡        |
+| 23  | No image digest pinning                            | 🟡        |
+| 24  | Repetitive nginx proxy_set_header blocks           | 🟠        |
+| 25  | `client_max_body_size 500M` applied globally       | 🟠        |
+| 26  | No proxy timeout configuration                     | 🟡        |
+| 27  | Docker socket in backup container                  | 🟡        |
+| 28  | No structured log aggregation / rotation           | 🟠        |
+| 30  | No resource limits on Judge0                       | 🟡        |
 
 ---
 
 ## Top Priority Fixes (Ordered by Impact / Effort Ratio)
 
-1. **Fix PostgreSQL volume path** — one character change, prevents silent data loss.
-2. **Remove all `ports:` from backing services** — prevents public exposure in minutes.
-3. **Switch to real, stable image tags** — prerequisite for everything else working.
-4. **Add TLS to nginx** (Let's Encrypt + certbot container) — eliminates credential exposure.
-5. **Fix `bun install --no-frozen-lockfile`** — removes supply-chain risk in builds.
-6. **Split monolith into separate `web` and `api` containers** — enables independent scaling,
+1. **Remove all `ports:` from backing services** — prevents public exposure in minutes.
+2. **Switch to real, stable image tags** — prerequisite for everything else working.
+3. **Add TLS to nginx** (Let's Encrypt + certbot container) — eliminates credential exposure.
+4. **Fix `bun install --no-frozen-lockfile`** — removes supply-chain risk in builds.
+5. **Split monolith into separate `web` and `api` containers** — enables independent scaling,
    proper health checks, and correct resource allocation.
-7. **Set strong, randomised DB/Redis passwords** and add Redis `requirepass`.
-8. **Replace `extra/start.sh`** dead code and consolidate the two parallel Docker setups.
+6. **Set strong, randomised DB/Redis passwords** and add Redis `requirepass`.
