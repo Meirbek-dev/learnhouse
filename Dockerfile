@@ -10,7 +10,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
   UV_COMPILE_BYTECODE=1 \
   UV_LINK_MODE=copy
 
-# Install system dependencies — Nginx runs as its own separate container
+# Install system dependencies
 RUN --mount=type=cache,target=/var/cache/apt \
   --mount=type=cache,target=/var/lib/apt \
   apt-get update \
@@ -123,5 +123,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
   CMD curl -fsS http://localhost:8000/health || exit 1
 
 # dumb-init is PID 1: proper signal forwarding + zombie reaping
-# supervisord manages both application processes and restarts them on failure
-CMD ["dumb-init", "supervisord", "-n", "-c", "/etc/supervisor/conf.d/app.conf"]
+# Shell wrapper merges supervisord's stderr into stdout so Docker sees a single stream (no duplicate lines)
+CMD ["dumb-init", "sh", "-c", "exec supervisord -n -c /etc/supervisor/conf.d/app.conf 2>&1"]
