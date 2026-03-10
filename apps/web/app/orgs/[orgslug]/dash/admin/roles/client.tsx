@@ -72,7 +72,7 @@ export default function RBACAdminClient() {
   const org = useOrg();
   const session = usePlatformSession();
   const { can } = usePermissions();
-  const t = useTranslations('Components.OrgRoles');
+  const t = useTranslations('OrgRoles');
 
   const [roles, setRoles] = useState<RoleWithPermissions[]>([]);
   const [loadingRoles, setLoadingRoles] = useState(true);
@@ -1099,7 +1099,7 @@ function RoleEditForm({
   onSubmit: (data: { name: string; slug: string; description: string; priority: number }) => Promise<void>;
   onCancel: () => void;
 }) {
-  const t = useTranslations('Components.OrgRoles');
+  const t = useTranslations('OrgRoles');
   const [name, setName] = useState(role?.name || '');
   const [description, setDescription] = useState(role?.description || '');
   const [priority, setPriority] = useState(role?.priority ?? 0);

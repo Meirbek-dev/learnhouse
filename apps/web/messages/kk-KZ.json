@@ -1640,6 +1640,16 @@
       "userLabel": "Пайдаланушы",
       "userRolesDescription": "Ұйым мүшелеріне рөлдерді тағайындауды басқарыңыз",
       "userRolesTitle": "Пайдаланушы рөлдері",
+      "permissionTable": {
+        "resource": "Ресурс",
+        "code": "Рұқсат",
+        "action": "Әрекет",
+        "scope": "Ауқым",
+        "description": "Сипаттама"
+      },
+      "columns": "Бағандар",
+      "exportCSV": "CSV экспорттау",
+      "exportStarted": "Жүктеу басталды",
       "previous": "Артқа",
       "next": "Келесі",
       "audit": {

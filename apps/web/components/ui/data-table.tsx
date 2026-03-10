@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 
-import type { ColumnDef, PaginationState, RowData, SortingState, VisibilityState } from '@tanstack/react-table';
 import {
   flexRender,
   getCoreRowModel,
@@ -12,8 +11,8 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Download, Search, Settings2 } from 'lucide-react';
+import type { ColumnDef, PaginationState, RowData, SortingState, VisibilityState } from '@tanstack/react-table';
 
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -22,8 +21,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -64,19 +65,7 @@ interface DataTableProps<TData> {
   csvFileName?: string;
 }
 
-const defaultLabels: Required<DataTableLabels> = {
-  searchPlaceholder: 'Search table...',
-  emptyMessage: 'No rows found.',
-  visibleRows: (count) => `${count} visible rows`,
-  showingRows: ({ from, to, total }) => `${from}-${to} of ${total}`,
-  page: ({ current, total }) => `Page ${current} of ${total}`,
-  prev: 'Previous',
-  next: 'Next',
-  rowsPerPage: 'Rows per page',
-  columns: 'Columns',
-  exportCsv: 'Export CSV',
-  exportStarted: 'Download started',
-};
+// defaultLabels will be computed inside the component using translations
 
 export default function DataTable<TData>({
   columns,
@@ -92,6 +81,26 @@ export default function DataTable<TData>({
   enableCsvExport = false,
   csvFileName = `table-${new Date().toISOString()}.csv`,
 }: DataTableProps<TData>) {
+  // translation namespace is a generic "table" object defined in messages
+  const t = useTranslations('table');
+
+  const defaultLabels: Required<DataTableLabels> = React.useMemo(
+    () => ({
+      searchPlaceholder: t('searchDefault'),
+      emptyMessage: t('emptyDefault'),
+      visibleRows: (count) => t('visibleRows', { count }),
+      showingRows: ({ from, to, total }) => t('showingRows', { from, to, total }),
+      page: ({ current, total }) => t('page', { current, total }),
+      prev: t('prev'),
+      next: t('next'),
+      rowsPerPage: t('rowsPerPage'),
+      columns: t('columns'),
+      exportCsv: t('exportCSV'),
+      exportStarted: t('exportStarted'),
+    }),
+    [t],
+  );
+
   const resolvedLabels = { ...defaultLabels, ...labels };
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
@@ -160,9 +169,11 @@ export default function DataTable<TData>({
     manualPagination: serverPaginated,
     globalFilterFn: (row, _columnId, filterValue) => {
       const normalizedFilter = String(filterValue).toLowerCase();
-      return row
-        .getVisibleCells()
-        .some((cell) => String(cell.getValue() ?? '').toLowerCase().includes(normalizedFilter));
+      return row.getVisibleCells().some((cell) =>
+        String(cell.getValue() ?? '')
+          .toLowerCase()
+          .includes(normalizedFilter),
+      );
     },
   });
 
@@ -238,7 +249,10 @@ export default function DataTable<TData>({
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                  >
                     <Settings2 className="h-4 w-4" />
                     {resolvedLabels.columns}
                   </Button>
@@ -297,7 +311,10 @@ export default function DataTable<TData>({
                 const sortState = header.column.getIsSorted();
 
                 return (
-                  <TableHead key={header.id} className="bg-slate-50/80">
+                  <TableHead
+                    key={header.id}
+                    className="bg-slate-50/80"
+                  >
                     {header.isPlaceholder ? null : canSort ? (
                       <Button
                         variant="ghost"
@@ -328,7 +345,10 @@ export default function DataTable<TData>({
             rows.map((row) => (
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="align-top whitespace-normal">
+                  <TableCell
+                    key={cell.id}
+                    className="align-top whitespace-normal"
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -336,7 +356,10 @@ export default function DataTable<TData>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-28 text-center text-sm text-slate-500">
+              <TableCell
+                colSpan={columns.length}
+                className="h-28 text-center text-sm text-slate-500"
+              >
                 {resolvedLabels.emptyMessage}
               </TableCell>
             </TableRow>
@@ -354,7 +377,10 @@ export default function DataTable<TData>({
               className="rounded-md border border-slate-200 bg-white px-2 py-1 text-sm"
             >
               {pageSizeOptions.map((option) => (
-                <option key={option} value={option}>
+                <option
+                  key={option}
+                  value={option}
+                >
                   {option}
                 </option>
               ))}
@@ -371,7 +397,9 @@ export default function DataTable<TData>({
                 <ChevronLeft className="h-4 w-4" />
                 {resolvedLabels.prev}
               </Button>
-              <span className="text-sm text-slate-600">{resolvedLabels.page({ current: pageIndex + 1, total: pageCount })}</span>
+              <span className="text-sm text-slate-600">
+                {resolvedLabels.page({ current: pageIndex + 1, total: pageCount })}
+              </span>
               <Button
                 variant="outline"
                 size="sm"

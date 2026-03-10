@@ -1636,6 +1636,16 @@
       "auditLogLoadFailed": "Failed to load audit log",
       "loadingAuditLog": "Loading audit log...",
       "userRolesTitle": "User Roles",
+      "permissionTable": {
+        "resource": "Resource",
+        "code": "Permission",
+        "action": "Action",
+        "scope": "Scope",
+        "description": "Description"
+      },
+      "columns": "Columns",
+      "exportCSV": "Export CSV",
+      "exportStarted": "Download started",
       "userRolesDescription": "Manage role assignments for organization members",
       "assignRole": "Assign Role",
       "assignRoleTitle": "Assign Role to User",
