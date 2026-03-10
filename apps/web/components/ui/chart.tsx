@@ -43,22 +43,52 @@ function ChartContainer({
   className,
   children,
   config,
+  aspect, // optional prop passed through to ResponsiveContainer
   ...props
 }: React.ComponentProps<'div'> & {
   config: ChartConfig;
   children: React.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>['children'];
+  /**
+   * When specified, the aspect ratio is forwarded to the underlying `ResponsiveContainer`.
+   * The value is a **number** (width ÷ height) exactly as the Recharts prop expects.
+   * Omit the prop entirely to fall back to the caller's own CSS sizing.
+   */
+  aspect?: number;
 }) {
   const uniqueId = React.useId();
   const chartId = `chart-${id || uniqueId.replace(/:/g, '')}`;
 
+  const ref = React.useRef<HTMLDivElement>(null);
+  const [hasSize, setHasSize] = React.useState(false);
+
+  React.useLayoutEffect(() => {
+    if (!ref.current) return;
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      const { width, height } = entry.contentRect;
+      // only render chart once the container has non‑zero dimensions
+      if (width > 0 && height > 0) {
+        setHasSize(true);
+        observer.disconnect();
+      }
+    });
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <ChartContext.Provider value={{ config }}>
       <div
+        ref={ref}
         data-slot="chart"
         data-chart={chartId}
         // ensure the container always stretches and never collapses to 0
         className={cn(
-          "flex w-full min-w-0 min-h-0 aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden",
+          // drop the fixed aspect ratio when callers supply an explicit `aspect` prop
+          "flex w-full min-w-0 min-h-0 justify-center text-xs",
+          aspect === undefined ? 'aspect-video' : undefined,
+          "[&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden",
           className,
         )}
         {...props}
@@ -67,7 +97,17 @@ function ChartContainer({
           id={chartId}
           config={config}
         />
-        <RechartsPrimitive.ResponsiveContainer>{children}</RechartsPrimitive.ResponsiveContainer>
+        {hasSize && (
+          <RechartsPrimitive.ResponsiveContainer
+            width="100%"
+            height="100%"
+            minWidth={0}
+            minHeight={0}
+            aspect={aspect}
+          >
+            {children}
+          </RechartsPrimitive.ResponsiveContainer>
+        )}
       </div>
     </ChartContext.Provider>
   );

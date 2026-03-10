@@ -18,6 +18,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -251,7 +252,9 @@ export default function DataTable<TData>({
                 }
               />
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{resolvedLabels.columns}</DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>{resolvedLabels.columns}</DropdownMenuLabel>
+                </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 {table
                   .getAllLeafColumns()

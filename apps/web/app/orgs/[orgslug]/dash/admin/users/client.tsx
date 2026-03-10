@@ -43,7 +43,7 @@ import { toast } from 'sonner';
 export default function UserRolesClient() {
   const org = useOrg();
   const session = usePlatformSession();
-  const t = useTranslations('OrgRoles');
+  const t = useTranslations('Components.OrgRoles');
   const locale = useLocale();
 
   const [userRoles, setUserRoles] = useState<UserRoleAssignment[]>([]);

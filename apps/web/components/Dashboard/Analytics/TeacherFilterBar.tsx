@@ -12,12 +12,12 @@ import { useTranslations } from 'next-intl';
 
 // Common IANA timezone identifiers for the select. These cover almost all deployed users.
 const COMMON_TIMEZONES = [
+  'Asia/Almaty',
   'UTC',
   'Europe/London',
   'Europe/Paris',
   'Europe/Berlin',
   'Europe/Moscow',
-  'Asia/Almaty',
   'Asia/Kolkata',
   'Asia/Shanghai',
   'Asia/Tokyo',

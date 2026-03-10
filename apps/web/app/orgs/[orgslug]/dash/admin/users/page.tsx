@@ -5,7 +5,7 @@ import UserRolesClient from './client';
 import type { Metadata } from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('OrgRoles');
+  const t = await getTranslations('Components.OrgRoles');
 
   return {
     title: t('userRolesTitle'),
