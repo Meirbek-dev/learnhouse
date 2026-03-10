@@ -1,5 +1,6 @@
 'use client';
 
+import type { ColumnDef } from '@tanstack/react-table';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,36 +21,35 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import DataTable from '@/components/ui/data-table';
 import { assignRoleToUser, listOrgUsers, listRoles, listUserRoles, removeRoleFromUser } from '@/services/rbac';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AlertTriangle, Calendar, Plus, Search, Shield, Trash2, User } from 'lucide-react';
+import { AlertTriangle, Calendar, Plus, Shield, Trash2, User } from 'lucide-react';
 import { Actions, PermissionGuard, Resources, Scopes } from '@/components/Security';
 import type { OrgUserBasic, Role, UserRoleAssignment } from '@/types/permissions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@/services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 export default function UserRolesClient() {
   const org = useOrg();
   const session = usePlatformSession();
   const t = useTranslations('Components.OrgRoles');
+  const locale = useLocale();
 
   const [userRoles, setUserRoles] = useState<UserRoleAssignment[]>([]);
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
   const [users, setUsers] = useState<OrgUserBasic[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
@@ -115,18 +115,6 @@ export default function UserRolesClient() {
     fetchAll();
   }, [fetchUserRolesData, fetchRoles, fetchUsers]);
 
-  // Filter user roles by search
-  const filteredUserRoles = userRoles.filter((ur) => {
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      ur.user?.email?.toLowerCase().includes(searchLower) ||
-      ur.user?.username?.toLowerCase().includes(searchLower) ||
-      ur.user?.first_name?.toLowerCase().includes(searchLower) ||
-      ur.user?.last_name?.toLowerCase().includes(searchLower) ||
-      ur.role?.name?.toLowerCase().includes(searchLower)
-    );
-  });
-
   // Add role to user
   const handleAddUserRole = async () => {
     if (!accessToken || !selectedUserId || !selectedRoleId || !org?.id) return;
@@ -147,9 +135,9 @@ export default function UserRolesClient() {
   };
 
   // Open remove confirmation dialog
-  const handleRemoveUserRole = (userId: number, roleId: number, roleName?: string) => {
+  const handleRemoveUserRole = useCallback((userId: number, roleId: number, roleName?: string) => {
     setAssignmentToRemove({ userId, roleId, roleName });
-  };
+  }, []);
 
   // Confirm remove role from user
   const confirmRemoveUserRole = async () => {
@@ -169,6 +157,95 @@ export default function UserRolesClient() {
       toast.error(error instanceof Error ? error.message : 'Failed to remove role');
     }
   };
+
+  const columns = useMemo<ColumnDef<UserRoleAssignment>[]>(
+    () => [
+      {
+        accessorFn: (assignment) =>
+          [
+            assignment.user?.first_name,
+            assignment.user?.last_name,
+            assignment.user?.username,
+            assignment.user?.email,
+          ]
+            .filter(Boolean)
+            .join(' '),
+        id: 'user',
+        header: t('userLabel'),
+        cell: ({ row }) => {
+          const assignment = row.original;
+          return (
+            <div className="flex items-center gap-3">
+              <Avatar>
+                <AvatarImage
+                  src={
+                    assignment.user?.avatar_image
+                      ? assignment.user.avatar_image.startsWith('http')
+                        ? assignment.user.avatar_image
+                        : assignment.user.user_uuid
+                          ? getUserAvatarMediaDirectory(assignment.user.user_uuid, assignment.user.avatar_image)
+                          : undefined
+                      : undefined
+                  }
+                />
+                <AvatarFallback>
+                  <User className="h-4 w-4" />
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="font-medium">
+                  {assignment.user?.first_name
+                    ? `${assignment.user.first_name} ${assignment.user.last_name || ''}`.trim()
+                    : assignment.user?.username}
+                </div>
+                <div className="text-muted-foreground text-sm">{assignment.user?.email}</div>
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        accessorFn: (assignment) => assignment.role?.name || `Role #${assignment.role_id}`,
+        id: 'role',
+        header: t('roleLabel'),
+        cell: ({ row }) => (
+          <Badge variant="secondary">
+            <Shield className="mr-1 h-3 w-3" />
+            {row.original.role?.name || `Role #${row.original.role_id}`}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: 'assigned_at',
+        header: t('assignedAt'),
+        cell: ({ row }) => (
+          <div className="text-muted-foreground flex items-center gap-1 text-sm">
+            <Calendar className="h-3 w-3" />
+            {new Date(row.original.assigned_at).toLocaleDateString(locale)}
+          </div>
+        ),
+      },
+      {
+        id: 'actions',
+        header: () => <div className="text-right">{t('actions')}</div>,
+        enableSorting: false,
+        cell: ({ row }) => (
+          <div className="flex justify-end">
+            <PermissionGuard action={Actions.DELETE} resource={Resources.ROLE} scope={Scopes.ORG}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleRemoveUserRole(row.original.user_id, row.original.role_id, row.original.role?.name)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </PermissionGuard>
+          </div>
+        ),
+      },
+    ],
+    [handleRemoveUserRole, locale, t],
+  );
 
   if (loading) {
     return (
@@ -284,101 +361,20 @@ export default function UserRolesClient() {
         </PermissionGuard>
       </div>
 
-      {/* Search */}
-      <div className="flex items-center gap-4">
-        <div className="relative max-w-sm flex-1">
-          <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
-          <Input
-            placeholder={t('searchUsersOrRoles')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-      </div>
-
       {/* User Roles Table */}
       <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('userLabel')}</TableHead>
-              <TableHead>{t('roleLabel')}</TableHead>
-              <TableHead>{t('assignedAt')}</TableHead>
-              <TableHead className="text-right">{t('actions')}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredUserRoles.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={5}
-                  className="text-muted-foreground py-8 text-center"
-                >
-                  {t('noUserRoleAssignments')}
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredUserRoles.map((ur, idx) => (
-                <TableRow key={`${ur.user_id}-${ur.role_id}-${idx}`}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarImage
-                          src={
-                            ur.user?.avatar_image
-                              ? ur.user.avatar_image.startsWith('http')
-                                ? ur.user.avatar_image
-                                : ur.user.user_uuid
-                                  ? getUserAvatarMediaDirectory(ur.user.user_uuid, ur.user.avatar_image)
-                                  : undefined
-                              : undefined
-                          }
-                        />
-                        <AvatarFallback>
-                          <User className="h-4 w-4" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">
-                          {ur.user?.first_name ? `${ur.user.first_name} ${ur.user.last_name || ''}` : ur.user?.username}
-                        </div>
-                        <div className="text-muted-foreground text-sm">{ur.user?.email}</div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">
-                      <Shield className="mr-1 h-3 w-3" />
-                      {ur.role?.name || `Role #${ur.role_id}`}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-muted-foreground flex items-center gap-1 text-sm">
-                      <Calendar className="h-3 w-3" />
-                      {new Date(ur.assigned_at).toLocaleDateString()}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <PermissionGuard
-                      action={Actions.DELETE}
-                      resource={Resources.ROLE}
-                      scope={Scopes.ORG}
-                    >
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemoveUserRole(ur.user_id, ur.role_id, ur.role?.name)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </PermissionGuard>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+        <div className="p-6">
+          <DataTable
+            columns={columns}
+            data={userRoles}
+            pageSize={10}
+            storageKey={org?.id ? `org-${org.id}-user-roles` : 'org-user-roles'}
+            labels={{
+              searchPlaceholder: t('searchUsersOrRoles'),
+              emptyMessage: t('noUserRoleAssignments'),
+            }}
+          />
+        </div>
       </Card>
 
       <AlertDialog

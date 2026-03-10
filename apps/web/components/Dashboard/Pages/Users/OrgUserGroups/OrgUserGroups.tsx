@@ -1,5 +1,6 @@
 'use client';
 
+import type { ColumnDef } from '@tanstack/react-table';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,7 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
+import DataTable from '@components/ui/data-table';
 import { AlertTriangle, Loader2, Pencil, SquareUserRound, Users, X } from 'lucide-react';
 import EditUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/EditUserGroup';
 import AddUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/AddUserGroup';
@@ -32,6 +33,12 @@ interface DeleteUserGroupButtonProps {
   usergroupId: number;
   onDelete: (usergroupId: number) => Promise<void>;
   t: (key: string) => string;
+}
+
+interface UserGroup {
+  id: number;
+  name: string;
+  description?: string;
 }
 
 function DeleteUserGroupButton({ usergroupId, onDelete, t }: DeleteUserGroupButtonProps) {
@@ -91,8 +98,8 @@ const OrgUserGroups = () => {
   const [createUserGroupModal, setCreateUserGroupModal] = useState(false);
   const [editUserGroupModal, setEditUserGroupModal] = useState(false);
   const [selectedUserGroup, setSelectedUserGroup] = useState<any | null>(null);
-  const [selectedUserGroupIdForEdit, setSelectedUserGroupIdForEdit] = useState<string | null>(null);
-  const [selectedUserGroupIdForManage, setSelectedUserGroupIdForManage] = useState<string | null>(null);
+  const [selectedUserGroupIdForEdit, setSelectedUserGroupIdForEdit] = useState<number | null>(null);
+  const [selectedUserGroupIdForManage, setSelectedUserGroupIdForManage] = useState<number | null>(null);
 
   const {
     data: usergroups,
@@ -149,6 +156,84 @@ const OrgUserGroups = () => {
   }
   if (error) return <div>{t('errorLoadingUserGroups')}</div>;
 
+  const columns: ColumnDef<UserGroup>[] = [
+    {
+      accessorKey: 'name',
+      header: t('userGroupHeader'),
+    },
+    {
+      accessorFn: (usergroup) => usergroup.description || '',
+      id: 'description',
+      header: t('descriptionHeader'),
+      cell: ({ row }) => row.original.description || '—',
+    },
+    {
+      id: 'manageUsers',
+      header: t('manageUsersHeader'),
+      enableSorting: false,
+      cell: ({ row }) => (
+        <Modal
+          isDialogOpen={userGroupManagementModal ? selectedUserGroupIdForManage === row.original.id : false}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) handleCloseModal('manage');
+          }}
+          minHeight="lg"
+          minWidth="lg"
+          dialogContent={selectedUserGroup ? <ManageUsers usergroup_id={selectedUserGroup.id} /> : null}
+          dialogTitle={t('manageUsersModalTitle')}
+          dialogDescription={t('manageUsersModalDescription')}
+          dialogTrigger={
+            <span>
+              <button
+                className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer"
+                onClick={() => {
+                  handleOpenModal('manage', row.original);
+                }}
+                type="button"
+              >
+                <Users className="h-4 w-4" />
+                <span>{t('manageUsersButton')}</span>
+              </button>
+            </span>
+          }
+        />
+      ),
+    },
+    {
+      id: 'actions',
+      header: t('actionsHeader'),
+      enableSorting: false,
+      cell: ({ row }) => (
+        <div className="flex space-x-2">
+          <Modal
+            isDialogOpen={editUserGroupModal ? selectedUserGroupIdForEdit === row.original.id : false}
+            onOpenChange={(isOpen) => {
+              if (!isOpen) handleCloseModal('edit');
+            }}
+            dialogTrigger={
+              <span>
+                <button
+                  className="flex items-center space-x-2 rounded-md bg-sky-700 p-1 px-3 text-sm font-bold text-sky-100 hover:cursor-pointer"
+                  onClick={() => {
+                    handleOpenModal('edit', row.original);
+                  }}
+                  type="button"
+                >
+                  <Pencil className="size-4" />
+                  <span>{t('editButton')}</span>
+                </button>
+              </span>
+            }
+            minHeight="sm"
+            minWidth="sm"
+            dialogContent={selectedUserGroup ? <EditUserGroup usergroup={selectedUserGroup} /> : null}
+          />
+          <DeleteUserGroupButton usergroupId={row.original.id} onDelete={deleteUserGroupUI} t={t} />
+        </div>
+      ),
+    },
+  ];
+
   return (
     <>
       <div className="h-6" />
@@ -157,95 +242,13 @@ const OrgUserGroups = () => {
           <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
           <h2 className="text-sm text-gray-500">{t('description')}</h2>
         </div>
-        <div className="overflow-x-auto">
-          <Table className="overflow-hidden">
-            <TableHeader className="uppercase">
-              <TableRow>
-                <TableHead>{t('userGroupHeader')}</TableHead>
-                <TableHead>{t('descriptionHeader')}</TableHead>
-                <TableHead>{t('manageUsersHeader')}</TableHead>
-                <TableHead>{t('actionsHeader')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {usergroups?.map((usergroup: any) => (
-                <TableRow key={usergroup.id}>
-                  <TableCell>{usergroup.name}</TableCell>
-                  <TableCell>{usergroup.description}</TableCell>
-                  <TableCell>
-                    <Modal
-                      isDialogOpen={userGroupManagementModal ? selectedUserGroupIdForManage === usergroup.id : false}
-                      onOpenChange={(isOpen) => {
-                        if (!isOpen) handleCloseModal('manage');
-                      }}
-                      minHeight="lg"
-                      minWidth="lg"
-                      dialogContent={selectedUserGroup ? <ManageUsers usergroup_id={selectedUserGroup.id} /> : null}
-                      dialogTitle={t('manageUsersModalTitle')}
-                      dialogDescription={t('manageUsersModalDescription')}
-                      dialogTrigger={
-                        <span>
-                          <button
-                            className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer"
-                            onClick={() => {
-                              handleOpenModal('manage', usergroup);
-                            }}
-                            type="button"
-                          >
-                            <Users className="h-4 w-4" />
-                            <span>{t('manageUsersButton')}</span>
-                          </button>
-                        </span>
-                      }
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Modal
-                        isDialogOpen={editUserGroupModal ? selectedUserGroupIdForEdit === usergroup.id : false}
-                        onOpenChange={(isOpen) => {
-                          if (!isOpen) handleCloseModal('edit');
-                        }}
-                        dialogTrigger={
-                          <span>
-                            <button
-                              className="flex items-center space-x-2 rounded-md bg-sky-700 p-1 px-3 text-sm font-bold text-sky-100 hover:cursor-pointer"
-                              onClick={() => {
-                                handleOpenModal('edit', usergroup);
-                              }}
-                              type="button"
-                            >
-                              <Pencil className="size-4" />
-                              <span>{t('editButton')}</span>
-                            </button>
-                          </span>
-                        }
-                        minHeight="sm"
-                        minWidth="sm"
-                        dialogContent={selectedUserGroup ? <EditUserGroup usergroup={selectedUserGroup} /> : null}
-                      />
-                      <DeleteUserGroupButton
-                        usergroupId={usergroup.id}
-                        onDelete={deleteUserGroupUI}
-                        t={t}
-                      />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {(!usergroups || usergroups.length === 0) && (
-                <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    className="py-4 text-center text-gray-500"
-                  >
-                    {t('noUserGroupsFound')}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+        <DataTable
+          columns={columns}
+          data={usergroups ?? []}
+          pageSize={10}
+          storageKey={org?.id ? `org-${org.id}-usergroups` : 'org-usergroups'}
+          labels={{ emptyMessage: t('noUserGroupsFound') }}
+        />
         <div className="mt-3 mr-2 flex justify-end">
           <Modal
             isDialogOpen={createUserGroupModal}

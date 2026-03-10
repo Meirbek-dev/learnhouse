@@ -1,10 +1,10 @@
+import AssessmentLearnerRowsTable from '@components/Dashboard/Analytics/AssessmentLearnerRowsTable';
 import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
 import AnalyticsThresholdHistogram from '@components/Dashboard/Analytics/AnalyticsThresholdHistogram';
 import QuestionDifficultyRadar from '@components/Dashboard/Analytics/QuestionDifficultyRadar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { getAnalyticsAssessmentTypeLabel, getAnalyticsStatusLabel } from '@/lib/analytics/labels';
+import { getAnalyticsAssessmentTypeLabel } from '@/lib/analytics/labels';
 import { getTeacherAssessmentDetail, normalizeAnalyticsQuery } from '@services/analytics/teacher';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import type { AssessmentType } from '@/types/analytics';
@@ -65,38 +65,10 @@ export default async function AnalyticsAssessmentDetailPage(props: {
             {detail.common_failures.length ? detail.common_failures.map((failure) => <Badge key={failure.key} variant="outline">{failure.label} · {failure.count}</Badge>) : <div className="text-sm text-slate-500">{t('pages.assessmentNoCommonFailures')}</div>}
           </CardContent>
         </Card>
-
-        <Card className="border-slate-200 bg-white/90 shadow-sm">
-          <CardHeader>
-            <CardTitle>{t('pages.assessmentLearnerRowsTitle')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('pages.assessmentColLearner')}</TableHead>
-                  <TableHead>{t('pages.assessmentColAttempts')}</TableHead>
-                  <TableHead>{t('pages.assessmentColBestScore')}</TableHead>
-                  <TableHead>{t('pages.assessmentColLastScore')}</TableHead>
-                  <TableHead>{t('pages.assessmentColSubmitted')}</TableHead>
-                  <TableHead>{t('pages.assessmentColStatus')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {detail.learner_rows.map((row) => (
-                  <TableRow key={row.user_id}>
-                    <TableCell>{row.user_display_name}</TableCell>
-                    <TableCell>{row.attempts}</TableCell>
-                    <TableCell>{row.best_score ?? t('atRisk.na')}</TableCell>
-                    <TableCell>{row.last_score ?? t('atRisk.na')}</TableCell>
-                    <TableCell>{row.submitted_at ? new Date(row.submitted_at).toLocaleString(locale) : t('atRisk.na')}</TableCell>
-                    <TableCell>{getAnalyticsStatusLabel(t, row.status)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <AssessmentLearnerRowsTable
+          rows={detail.learner_rows}
+          storageKey={`assessment-${detail.assessment_type}-${detail.assessment_id}-learners`}
+        />
       </div>
     );
   } catch (error) {

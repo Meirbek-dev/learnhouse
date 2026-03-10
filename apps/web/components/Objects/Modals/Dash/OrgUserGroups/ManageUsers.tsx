@@ -1,6 +1,7 @@
 'use client';
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
+import type { ColumnDef } from '@tanstack/react-table';
+import DataTable from '@components/ui/data-table';
 import { linkUserToUserGroup, unLinkUserToUserGroup } from '@services/usergroups/usergroups';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -13,6 +14,16 @@ import { toast } from 'sonner';
 
 interface ManageUsersProps {
   usergroup_id: number;
+}
+
+interface OrgUserRow {
+  user: {
+    id: number;
+    username: string;
+    first_name?: string;
+    middle_name?: string;
+    last_name?: string;
+  };
 }
 
 const ManageUsers = (props: ManageUsersProps) => {
@@ -62,64 +73,67 @@ const ManageUsers = (props: ManageUsersProps) => {
     }
   };
 
+  const rows = orgUsersList(OrgUsers) as OrgUserRow[];
+  const columns: ColumnDef<OrgUserRow>[] = [
+    {
+      accessorFn: (row) =>
+        [row.user.first_name, row.user.middle_name, row.user.last_name, row.user.username].filter(Boolean).join(' '),
+      id: 'user',
+      header: t('userHeader'),
+      cell: ({ row }) => (
+        <div className="flex items-center space-x-2">
+          <span>{[row.original.user.first_name, row.original.user.middle_name, row.original.user.last_name].filter(Boolean).join(' ')}</span>
+          <span className="rounded-full bg-neutral-100 p-1 px-2 text-xs font-semibold text-neutral-400">
+            @{row.original.user.username}
+          </span>
+        </div>
+      ),
+    },
+    {
+      accessorFn: (row) => (isUserPartOfGroup(row.user.id) ? t('linkedStatus') : t('notLinkedStatus')),
+      id: 'linked',
+      header: t('linkedHeader'),
+      cell: ({ row }) =>
+        isUserPartOfGroup(row.original.user.id) ? (
+          <div className="flex w-fit items-center space-x-1 rounded-full bg-cyan-100 px-4 py-1 text-cyan-800">
+            <Check size={16} />
+            <span>{t('linkedStatus')}</span>
+          </div>
+        ) : (
+          <div className="flex w-fit items-center space-x-1 rounded-full bg-gray-100 px-4 py-1 text-gray-800">
+            <X size={16} />
+            <span>{t('notLinkedStatus')}</span>
+          </div>
+        ),
+    },
+    {
+      id: 'actions',
+      header: t('actionsHeader'),
+      enableSorting: false,
+      cell: ({ row }) => (
+        <div className="flex items-end space-x-2">
+          <button
+            onClick={() => handleLinkUser(row.original.user.id)}
+            className="flex items-center space-x-2 rounded-md bg-cyan-700 p-1 px-3 text-sm font-bold text-cyan-100 hover:cursor-pointer"
+          >
+            <Plus className="h-4 w-4" />
+            <span>{t('linkButton')}</span>
+          </button>
+          <button
+            onClick={() => handleUnlinkUser(row.original.user.id)}
+            className="flex items-center space-x-2 rounded-md bg-gray-700 p-1 px-3 text-sm font-bold text-gray-100 hover:cursor-pointer"
+          >
+            <X className="h-4 w-4" />
+            <span>{t('unlinkButton')}</span>
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="py-3">
-      <Table className="overflow-hidden">
-        <TableHeader className="uppercase">
-          <TableRow>
-            <TableHead>{t('userHeader')}</TableHead>
-            <TableHead>{t('linkedHeader')}</TableHead>
-            <TableHead>{t('actionsHeader')}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {orgUsersList(OrgUsers).map((user: any) => (
-            <TableRow key={user.user.id}>
-              <TableCell>
-                <div className="flex items-center space-x-2">
-                  <span>
-                    {[user.user.first_name, user.user.middle_name, user.user.last_name].filter(Boolean).join(' ')}
-                  </span>
-                  <span className="rounded-full bg-neutral-100 p-1 px-2 text-xs font-semibold text-neutral-400">
-                    @{user.user.username}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell>
-                {isUserPartOfGroup(user.user.id) ? (
-                  <div className="flex w-fit items-center space-x-1 rounded-full bg-cyan-100 px-4 py-1 text-cyan-800">
-                    <Check size={16} />
-                    <span>{t('linkedStatus')}</span>
-                  </div>
-                ) : (
-                  <div className="flex w-fit items-center space-x-1 rounded-full bg-gray-100 px-4 py-1 text-gray-800">
-                    <X size={16} />
-                    <span>{t('notLinkedStatus')}</span>
-                  </div>
-                )}
-              </TableCell>
-              <TableCell>
-                <div className="flex items-end space-x-2">
-                  <button
-                    onClick={() => handleLinkUser(user.user.id)}
-                    className="flex items-center space-x-2 rounded-md bg-cyan-700 p-1 px-3 text-sm font-bold text-cyan-100 hover:cursor-pointer"
-                  >
-                    <Plus className="h-4 w-4" />
-                    <span>{t('linkButton')}</span>
-                  </button>
-                  <button
-                    onClick={() => handleUnlinkUser(user.user.id)}
-                    className="flex items-center space-x-2 rounded-md bg-gray-700 p-1 px-3 text-sm font-bold text-gray-100 hover:cursor-pointer"
-                  >
-                    <X className="h-4 w-4" />
-                    <span>{t('unlinkButton')}</span>
-                  </button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <DataTable columns={columns} data={rows} pageSize={8} storageKey={`usergroup-${props.usergroup_id}-users`} />
     </div>
   );
 };

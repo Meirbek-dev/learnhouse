@@ -1,7 +1,8 @@
 'use client';
 
+import type { ColumnDef } from '@tanstack/react-table';
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
+import DataTable from '@components/ui/data-table';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
@@ -38,78 +39,86 @@ interface PaymentUserData {
 const PaymentsUsersTable = ({ data }: { data: PaymentUserData[] }) => {
   const t = useTranslations('Payments.CustomersPage');
   const locale = useLocale();
-  if (!data || data.length === 0) {
-    return <div className="py-8 text-center text-gray-500">{t('noCustomers')}</div>;
-  }
+  const columns: ColumnDef<PaymentUserData>[] = [
+    {
+      accessorFn: (item) => [item.user.first_name, item.user.last_name, item.user.username, item.user.email].join(' '),
+      id: 'user',
+      header: t('userHeader'),
+      cell: ({ row }) => (
+        <div className="flex items-center space-x-3">
+          <UserAvatar
+            size="sm"
+            variant="outline"
+            avatar_url={getUserAvatarMediaDirectory(row.original.user.user_uuid, row.original.user.avatar_image)}
+          />
+          <div className="flex flex-col">
+            <span className="font-medium">{row.original.user.first_name || row.original.user.username}</span>
+            <span className="text-sm text-gray-500">{row.original.user.email}</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'product.name',
+      id: 'product',
+      header: t('productHeader'),
+      accessorFn: (item) => `${item.product.name} ${item.product.description || ''}`,
+      cell: ({ row }) => row.original.product.name,
+    },
+    {
+      accessorFn: (item) => item.product.product_type,
+      id: 'type',
+      header: t('typeHeader'),
+      cell: ({ row }) => (
+        <div className="flex items-center space-x-2">
+          {row.original.product.product_type === 'subscription' ? (
+            <Badge variant="outline" className="flex items-center gap-1">
+              <RefreshCcw size={12} />
+              <span>{t('subscriptionType')}</span>
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="flex items-center gap-1">
+              <SquareCheck size={12} />
+              <span>{t('oneTimeType')}</span>
+            </Badge>
+          )}
+        </div>
+      ),
+    },
+    {
+      accessorFn: (item) => item.product.amount,
+      id: 'amount',
+      header: t('amountHeader'),
+      cell: ({ row }) =>
+        new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: row.original.product.currency,
+        }).format(row.original.product.amount),
+    },
+    {
+      accessorKey: 'status',
+      header: t('statusHeader'),
+      cell: ({ row }) => (
+        <Badge variant={row.original.status === 'active' ? 'default' : row.original.status === 'completed' ? 'default' : 'secondary'}>
+          {row.original.status}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: 'creation_date',
+      header: t('purchaseDateHeader'),
+      cell: ({ row }) => new Date(row.original.creation_date).toLocaleDateString(locale),
+    },
+  ];
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{t('userHeader')}</TableHead>
-          <TableHead>{t('productHeader')}</TableHead>
-          <TableHead>{t('typeHeader')}</TableHead>
-          <TableHead>{t('amountHeader')}</TableHead>
-          <TableHead>{t('statusHeader')}</TableHead>
-          <TableHead>{t('purchaseDateHeader')}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.map((item) => (
-          <TableRow key={item.payment_user_id}>
-            <TableCell className="font-medium">
-              <div className="flex items-center space-x-3">
-                <UserAvatar
-                  size="sm"
-                  variant="outline"
-                  avatar_url={getUserAvatarMediaDirectory(item.user.user_uuid, item.user.avatar_image)}
-                />
-                <div className="flex flex-col">
-                  <span className="font-medium">{item.user.first_name || item.user.username}</span>
-                  <span className="text-sm text-gray-500">{item.user.email}</span>
-                </div>
-              </div>
-            </TableCell>
-            <TableCell>{item.product.name}</TableCell>
-            <TableCell>
-              <div className="flex items-center space-x-2">
-                {item.product.product_type === 'subscription' ? (
-                  <Badge
-                    variant="outline"
-                    className="flex items-center gap-1"
-                  >
-                    <RefreshCcw size={12} />
-                    <span>{t('subscriptionType')}</span>
-                  </Badge>
-                ) : (
-                  <Badge
-                    variant="outline"
-                    className="flex items-center gap-1"
-                  >
-                    <SquareCheck size={12} />
-                    <span>{t('oneTimeType')}</span>
-                  </Badge>
-                )}
-              </div>
-            </TableCell>
-            <TableCell>
-              {new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: item.product.currency,
-              }).format(item.product.amount)}
-            </TableCell>
-            <TableCell>
-              <Badge
-                variant={item.status === 'active' ? 'default' : item.status === 'completed' ? 'default' : 'secondary'}
-              >
-                {item.status}
-              </Badge>
-            </TableCell>
-            <TableCell>{new Date(item.creation_date).toLocaleDateString(locale)}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <DataTable
+      columns={columns}
+      data={data}
+      pageSize={10}
+      storageKey="payments-customers"
+      labels={{ emptyMessage: t('noCustomers') }}
+    />
   );
 };
 

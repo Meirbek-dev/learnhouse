@@ -6427,9 +6427,19 @@
       "prev": "Назад",
       "next": "Вперёд"
     },
+      "permissionTable": {
+        "resource": "Ресурс",
+        "code": "Разрешение",
+        "action": "Действие",
+        "scope": "Область",
+        "description": "Описание"
+      },
     "trend": {
       "activeLearners": "Активные учащиеся",
       "completions": "Завершения",
+      "columns": "Колонки",
+      "exportCSV": "Экспорт CSV",
+      "exportStarted": "Загрузка начата",
       "submissions": "Отправки",
       "gradingCompleted": "Проверка завершена",
       "emptyState": "Данные тенденций появятся, когда в выбранном аналитическом окне появится активность."

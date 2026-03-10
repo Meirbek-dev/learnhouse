@@ -1,5 +1,6 @@
 'use client';
 
+import type { ColumnDef } from '@tanstack/react-table';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,20 +22,19 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import RolesUpdate from '@components/Objects/Modals/Dash/OrgUsers/RolesUpdate';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import DataTable from '@/components/ui/data-table';
 
-import { AlertTriangle, KeyRound, Loader2, LogOut, Search } from 'lucide-react';
+import { AlertTriangle, KeyRound, Loader2, LogOut } from 'lucide-react';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { removeUserFromOrg } from '@services/organizations/orgs';
-import React, { useMemo, useState, useTransition } from 'react';
+import React, { useState, useTransition } from 'react';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
@@ -46,6 +46,23 @@ interface RemoveUserButtonProps {
   username: string;
   onRemove: (userId: number) => Promise<void>;
   t: (key: string, values?: Record<string, string>) => string;
+}
+
+interface OrgUserRow {
+  user: {
+    id: number;
+    user_uuid?: string;
+    username: string;
+    first_name?: string;
+    middle_name?: string;
+    last_name?: string;
+    email?: string;
+  };
+  role: {
+    id?: number;
+    name?: string;
+    priority?: number;
+  };
 }
 
 function RemoveUserButton({ userId, username, onRemove, t }: RemoveUserButtonProps) {
@@ -125,7 +142,6 @@ const OrgUsers = () => {
     }
   })();
 
-  const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
   const {
@@ -139,30 +155,8 @@ const OrgUsers = () => {
   const totalUsers = orgUsersData?.total ?? 0;
   const totalPages = orgUsersData?.total_pages ?? 1;
 
-  // Client-side search filtering
-  const filteredUsers = useMemo(() => {
-    const orgUsers = orgUsersData?.users ?? [];
-    if (!orgUsers || !searchQuery.trim()) return orgUsers;
-
-    const query = searchQuery.toLowerCase().trim();
-    return orgUsers.filter((user: any) => {
-      const fullName = [user.user.first_name, user.user.middle_name, user.user.last_name]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      const username = (user.user.username || '').toLowerCase();
-      const email = (user.user.email || '').toLowerCase();
-      return fullName.includes(query) || username.includes(query) || email.includes(query);
-    });
-  }, [orgUsersData?.users, searchQuery]);
-
   const [rolesModal, setRolesModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
-
-  // Reset to page 1 when search changes (but don't need to refetch since filtering is client-side)
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
-  };
 
   const handleRolesModal = (user: any) => {
     setSelectedUser(user);
@@ -190,6 +184,110 @@ const OrgUsers = () => {
     }
   };
 
+  const users = (orgUsersData?.users ?? []) as OrgUserRow[];
+  const columns: ColumnDef<OrgUserRow>[] = [
+    {
+      accessorFn: (row) =>
+        [row.user.first_name, row.user.middle_name, row.user.last_name, row.user.username, row.user.email]
+          .filter(Boolean)
+          .join(' '),
+      id: 'user',
+      header: t('userHeader'),
+      cell: ({ row }) => (
+        <div className="flex items-center space-x-2">
+          <span>
+            {[row.original.user.first_name, row.original.user.middle_name, row.original.user.last_name]
+              .filter(Boolean)
+              .join(' ')}
+          </span>
+          <span className="rounded-full bg-neutral-100 p-1 px-2 text-xs font-semibold text-neutral-400">
+            @{row.original.user.username}
+          </span>
+        </div>
+      ),
+    },
+    {
+      accessorFn: (row) => row.role?.name || '',
+      id: 'role',
+      header: t('roleHeader'),
+      cell: ({ row }) => row.original.role?.name,
+    },
+    {
+      id: 'actions',
+      header: t('actionsHeader'),
+      enableSorting: false,
+      cell: ({ row }) => {
+        const user = row.original;
+        const isSelf =
+          session?.data?.user?.user_uuid === user.user.user_uuid || session?.data?.user?.id === user.user.id;
+        const targetPriority = getRolePriority(user.role);
+        const canManage = !isSelf && currentUserPriority > targetPriority;
+
+        if (isSelf) return <div className="text-neutral-500">{t('cannotEditSelf')}</div>;
+        if (currentUserPriority <= targetPriority) {
+          return <div className="text-neutral-500">{t('cannotManageHigherRole')}</div>;
+        }
+        if (!canManage) return <div className="text-neutral-500">{t('noActionsForAdministrators')}</div>;
+
+        const showEditRole = canUpdateRole;
+        const showRemoveUser = canDeleteUser;
+
+        if (!showEditRole && !showRemoveUser) {
+          return <div className="text-neutral-500">{t('noActionsForAdministrators')}</div>;
+        }
+
+        return (
+          <div className="flex items-end space-x-2">
+            {showEditRole && (
+              <Modal
+                isDialogOpen={rolesModal ? selectedUser?.user?.user_uuid === user.user.user_uuid : false}
+                onOpenChange={(isOpen) => {
+                  if (!isOpen) handleCloseRolesModal();
+                }}
+                minHeight="no-min"
+                dialogContent={
+                  selectedUser ? (
+                    <RolesUpdate
+                      alreadyAssignedRole={selectedUser.role?.id?.toString()}
+                      setRolesModal={setRolesModal}
+                      user={selectedUser}
+                    />
+                  ) : null
+                }
+                dialogTitle={t('updateRoleModalTitle')}
+                dialogDescription={t('updateRoleModalDescription', {
+                  username: user.user.username,
+                })}
+                dialogTrigger={
+                  <span>
+                    <button
+                      className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer"
+                      onClick={() => {
+                        handleRolesModal(user);
+                      }}
+                    >
+                      <KeyRound className="h-4 w-4" />
+                      <span>{t('editRoleButton')}</span>
+                    </button>
+                  </span>
+                }
+              />
+            )}
+
+            {showRemoveUser && (
+              <RemoveUserButton
+                userId={user.user.id}
+                username={user.user.username}
+                onRemove={handleRemoveUser}
+                t={t}
+              />
+            )}
+          </div>
+        );
+      },
+    },
+  ];
+
   return (
     <div>
       {isLoading ? (
@@ -204,131 +302,16 @@ const OrgUsers = () => {
               <h1 className="text-xl font-bold text-gray-800">{t('activeUsersTitle')}</h1>
               <h2 className="text-base text-gray-500"> {t('description')}</h2>
             </div>
-            <div className="relative mb-4 px-1">
-              <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2" />
-              <Input
-                type="text"
-                placeholder={t('searchPlaceholder')}
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <div className="overflow-x-auto">
-              <Table className="overflow-hidden">
-                <TableHeader className="uppercase">
-                  <TableRow>
-                    <TableHead>{t('userHeader')}</TableHead>
-                    <TableHead>{t('roleHeader')}</TableHead>
-                    <TableHead>{t('actionsHeader')}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers?.map((user: any) => (
-                    <TableRow key={user.user.id}>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <span>
-                            {[user.user.first_name, user.user.middle_name, user.user.last_name]
-                              .filter(Boolean)
-                              .join(' ')}
-                          </span>
-                          <span className="rounded-full bg-neutral-100 p-1 px-2 text-xs font-semibold text-neutral-400">
-                            @{user.user.username}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{user.role.name}</TableCell>
-                      <TableCell>
-                        <div className="flex items-end space-x-2">
-                          {(() => {
-                            const isSelf =
-                              session?.data?.user?.user_uuid === user.user.user_uuid ||
-                              session?.data?.user?.id === user.user.id;
-                            const targetPriority = getRolePriority(user.role);
-                            const canManage = !isSelf && currentUserPriority > targetPriority;
-
-                            if (isSelf) return <div className="text-neutral-500">{t('cannotEditSelf')}</div>;
-                            if (currentUserPriority <= targetPriority)
-                              return <div className="text-neutral-500">{t('cannotManageHigherRole')}</div>;
-                            if (!canManage)
-                              return <div className="text-neutral-500">{t('noActionsForAdministrators')}</div>;
-
-                            const showEditRole = canUpdateRole;
-                            const showRemoveUser = canDeleteUser;
-
-                            if (!showEditRole && !showRemoveUser) {
-                              return <div className="text-neutral-500">{t('noActionsForAdministrators')}</div>;
-                            }
-
-                            return (
-                              <>
-                                {showEditRole && (
-                                  <Modal
-                                    isDialogOpen={
-                                      rolesModal ? selectedUser?.user?.user_uuid === user.user.user_uuid : false
-                                    }
-                                    onOpenChange={(isOpen) => {
-                                      if (!isOpen) handleCloseRolesModal();
-                                    }}
-                                    minHeight="no-min"
-                                    dialogContent={
-                                      selectedUser ? (
-                                        <RolesUpdate
-                                          alreadyAssignedRole={selectedUser.role?.id?.toString()}
-                                          setRolesModal={setRolesModal}
-                                          user={selectedUser}
-                                        />
-                                      ) : null
-                                    }
-                                    dialogTitle={t('updateRoleModalTitle')}
-                                    dialogDescription={t('updateRoleModalDescription', {
-                                      username: user.user.username,
-                                    })}
-                                    dialogTrigger={
-                                      <span>
-                                        <button
-                                          className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer"
-                                          onClick={() => {
-                                            handleRolesModal(user);
-                                          }}
-                                        >
-                                          <KeyRound className="h-4 w-4" />
-                                          <span>{t('editRoleButton')}</span>
-                                        </button>
-                                      </span>
-                                    }
-                                  />
-                                )}
-
-                                {showRemoveUser && (
-                                  <RemoveUserButton
-                                    userId={user.user.id}
-                                    username={user.user.username}
-                                    onRemove={handleRemoveUser}
-                                    t={t}
-                                  />
-                                )}
-                              </>
-                            );
-                          })()}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {(!filteredUsers || filteredUsers.length === 0) && (
-                    <TableRow>
-                      <TableCell
-                        colSpan={3}
-                        className="py-4 text-center text-gray-500"
-                      >
-                        {searchQuery ? t('noSearchResults') : t('noUsersFound')}
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+            <DataTable
+              columns={columns}
+              data={users}
+              serverPaginated
+              storageKey={org?.id ? `org-${org.id}-users` : 'org-users'}
+              labels={{
+                searchPlaceholder: t('searchPlaceholder'),
+                emptyMessage: t('noUsersFound'),
+              }}
+            />
             {totalPages > 1 && (
               <div className="mt-4 flex items-center justify-between px-2">
                 <div className="text-muted-foreground text-sm">

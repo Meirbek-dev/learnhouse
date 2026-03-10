@@ -1,5 +1,6 @@
 'use client';
 
+import type { ColumnDef } from '@tanstack/react-table';
 import {
   addPermissionToRole,
   createRole as apiCreateRole,
@@ -46,8 +47,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import DataTable from '@/components/ui/data-table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Permission, RoleAuditEvent, RoleWithPermissions } from '@/types/permissions';
@@ -75,7 +76,6 @@ export default function RBACAdminClient() {
 
   const [roles, setRoles] = useState<RoleWithPermissions[]>([]);
   const [loadingRoles, setLoadingRoles] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('roles');
 
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
@@ -218,13 +218,6 @@ export default function RBACAdminClient() {
 
     fetchAudit();
   }, [accessToken, org?.id, activeTab, auditPage, t]);
-
-  const filteredRoles = roles.filter(
-    (role) =>
-      role.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      role.slug.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      role.description?.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
 
   const permissionsByResource = permissions.reduce<Record<string, Permission[]>>((acc, permission) => {
     if (!acc[permission.resource_type]) {
@@ -494,6 +487,185 @@ export default function RBACAdminClient() {
 
   const loading = loadingRoles || permissionsLoading;
 
+  const roleColumns: ColumnDef<RoleWithPermissions>[] = [
+    {
+      accessorFn: (role) => [role.name, role.slug, role.description].filter(Boolean).join(' '),
+      id: 'role',
+      header: t('tableHead.role'),
+      meta: { label: t('tableHead.role'), exportValue: (role) => role.name },
+      cell: ({ row }) => (
+        <div>
+          <div className="font-medium">{row.original.name}</div>
+          {row.original.description ? <div className="text-muted-foreground text-sm">{row.original.description}</div> : null}
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'slug',
+      header: t('tableHead.slug'),
+      meta: { label: t('tableHead.slug') },
+      cell: ({ row }) => <code className="bg-muted rounded px-1.5 py-0.5 text-sm">{row.original.slug}</code>,
+    },
+    {
+      accessorFn: (role) => (role.is_system ? t('system') : t('custom')),
+      id: 'type',
+      header: t('tableHead.type'),
+      meta: { label: t('tableHead.type') },
+      cell: ({ row }) =>
+        row.original.is_system ? (
+          <Badge variant="secondary" className="gap-1">
+            <Lock className="h-3 w-3" />
+            {t('system')}
+          </Badge>
+        ) : (
+          <Badge variant="outline" className="gap-1">
+            <Pencil className="h-3 w-3" />
+            {t('custom')}
+          </Badge>
+        ),
+    },
+    {
+      accessorKey: 'priority',
+      header: t('tableHead.priority'),
+      meta: { label: t('tableHead.priority') },
+    },
+    {
+      accessorFn: (role) => role.permissions_count ?? 0,
+      id: 'permissions',
+      header: t('tableHead.permissions'),
+      meta: { label: t('tableHead.permissions') },
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label={t('permissionsAria', { roleName: row.original.name })}
+          onClick={() => openPermissionsDialog(row.original)}
+        >
+          {t('permissionsCount', { count: row.original.permissions_count ?? 0 })}
+          <ChevronRight className="ml-1 h-4 w-4" />
+        </Button>
+      ),
+    },
+    {
+      accessorFn: (role) => role.users_count ?? 0,
+      id: 'users',
+      header: t('tableHead.users'),
+      meta: { label: t('tableHead.users') },
+      cell: ({ row }) => row.original.users_count ?? 0,
+    },
+    {
+      id: 'actions',
+      header: () => <div className="text-right">{t('tableHead.actions')}</div>,
+      enableSorting: false,
+      enableHiding: false,
+      meta: { label: t('tableHead.actions'), exportable: false },
+      cell: ({ row }) => (
+        <div className="flex justify-end gap-2">
+          <PermissionGuard action={Actions.CREATE} resource={Resources.ROLE} scope={Scopes.ORG}>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t('cloneRoleAria', { roleName: row.original.name })}
+              onClick={() => openCloneDialog(row.original)}
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+          </PermissionGuard>
+          <PermissionGuard action={Actions.UPDATE} resource={Resources.ROLE} scope={Scopes.ORG}>
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={row.original.is_system && !isSuperAdmin}
+              aria-label={t('editRoleAria', { roleName: row.original.name })}
+              onClick={() => openEditDialog(row.original)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          </PermissionGuard>
+          <PermissionGuard action={Actions.DELETE} resource={Resources.ROLE} scope={Scopes.ORG}>
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={(row.original.is_system && !isSuperAdmin) || deletingRoleId === row.original.id}
+              aria-label={t('deleteRoleAria', { roleName: row.original.name })}
+              onClick={() => handleDeleteRole(row.original)}
+            >
+              {deletingRoleId === row.original.id ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+            </Button>
+          </PermissionGuard>
+        </div>
+      ),
+    },
+  ];
+
+  const auditColumns: ColumnDef<RoleAuditEvent>[] = [
+    {
+      accessorKey: 'timestamp',
+      header: t('audit.timestamp'),
+      cell: ({ row }) => new Date(row.original.timestamp).toLocaleString(),
+    },
+    {
+      accessorFn: (entry) => String(entry.actor_id ?? '—'),
+      id: 'actor',
+      header: t('audit.actor'),
+      cell: ({ row }) => row.original.actor_id ?? '—',
+    },
+    {
+      accessorKey: 'action',
+      header: t('audit.action'),
+    },
+    {
+      accessorFn: (entry) => entry.target_role_slug ?? String(entry.target_role_id ?? '—'),
+      id: 'role',
+      header: t('audit.role'),
+      cell: ({ row }) => row.original.target_role_slug ?? row.original.target_role_id ?? '—',
+    },
+    {
+      accessorFn: (entry) => entry.diff_summary ?? '—',
+      id: 'summary',
+      header: t('audit.summary'),
+      cell: ({ row }) => row.original.diff_summary ?? '—',
+    },
+  ];
+
+  const permissionColumns: ColumnDef<Permission>[] = [
+    {
+      accessorKey: 'resource_type',
+      header: t('permissionTable.resource'),
+      meta: { label: t('permissionTable.resource') },
+    },
+    {
+      accessorKey: 'name',
+      header: t('permissionTable.code'),
+      meta: { label: t('permissionTable.code') },
+      cell: ({ row }) => <code className="text-sm">{row.original.name}</code>,
+    },
+    {
+      accessorKey: 'action',
+      header: t('permissionTable.action'),
+      meta: { label: t('permissionTable.action') },
+      cell: ({ row }) => <Badge variant="secondary">{row.original.action}</Badge>,
+    },
+    {
+      accessorKey: 'scope',
+      header: t('permissionTable.scope'),
+      meta: { label: t('permissionTable.scope') },
+      cell: ({ row }) => <Badge variant="outline">{row.original.scope}</Badge>,
+    },
+    {
+      accessorFn: (permission) => permission.description ?? t('noDescription'),
+      id: 'description',
+      header: t('permissionTable.description'),
+      meta: { label: t('permissionTable.description') },
+      cell: ({ row }) =>
+        row.original.description ? row.original.description : <span className="text-muted-foreground">{t('noDescription')}</span>,
+    },
+  ];
+
   if (loading) {
     return (
       <div className="container mx-auto space-y-6 p-6">
@@ -615,131 +787,23 @@ export default function RBACAdminClient() {
           value="roles"
           className="space-y-4"
         >
-          <div className="flex items-center gap-4">
-            <div className="relative max-w-sm flex-1">
-              <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
-              <Input
-                placeholder={t('searchRolesPlaceholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8"
-              />
-            </div>
-          </div>
-
           <Card className="p-2">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('tableHead.role')}</TableHead>
-                  <TableHead>{t('tableHead.slug')}</TableHead>
-                  <TableHead>{t('tableHead.type')}</TableHead>
-                  <TableHead>{t('tableHead.priority')}</TableHead>
-                  <TableHead>{t('tableHead.permissions')}</TableHead>
-                  <TableHead>{t('tableHead.users')}</TableHead>
-                  <TableHead className="text-right">{t('tableHead.actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredRoles.map((role) => (
-                  <TableRow key={role.id}>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{role.name}</div>
-                        {role.description && <div className="text-muted-foreground text-sm">{role.description}</div>}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <code className="bg-muted rounded px-1.5 py-0.5 text-sm">{role.slug}</code>
-                    </TableCell>
-                    <TableCell>
-                      {role.is_system ? (
-                        <Badge
-                          variant="secondary"
-                          className="gap-1"
-                        >
-                          <Lock className="h-3 w-3" />
-                          {t('system')}
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="outline"
-                          className="gap-1"
-                        >
-                          <Pencil className="h-3 w-3" />
-                          {t('custom')}
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>{role.priority}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        aria-label={t('permissionsAria', { roleName: role.name })}
-                        onClick={() => openPermissionsDialog(role)}
-                      >
-                        {t('permissionsCount', { count: role.permissions_count ?? 0 })}
-                        <ChevronRight className="ml-1 h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                    <TableCell>{role.users_count ?? 0}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <PermissionGuard
-                          action={Actions.CREATE}
-                          resource={Resources.ROLE}
-                          scope={Scopes.ORG}
-                        >
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label={t('cloneRoleAria', { roleName: role.name })}
-                            onClick={() => openCloneDialog(role)}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                        </PermissionGuard>
-                        <PermissionGuard
-                          action={Actions.UPDATE}
-                          resource={Resources.ROLE}
-                          scope={Scopes.ORG}
-                        >
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            disabled={role.is_system && !isSuperAdmin}
-                            aria-label={t('editRoleAria', { roleName: role.name })}
-                            onClick={() => openEditDialog(role)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </PermissionGuard>
-                        <PermissionGuard
-                          action={Actions.DELETE}
-                          resource={Resources.ROLE}
-                          scope={Scopes.ORG}
-                        >
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            disabled={(role.is_system && !isSuperAdmin) || deletingRoleId === role.id}
-                            aria-label={t('deleteRoleAria', { roleName: role.name })}
-                            onClick={() => handleDeleteRole(role)}
-                          >
-                            {deletingRoleId === role.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </PermissionGuard>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <DataTable
+              columns={roleColumns}
+              data={roles}
+              pageSize={10}
+              storageKey={org?.id ? `org-${org.id}-rbac-roles` : 'rbac-roles'}
+              enableColumnVisibility
+              enableCsvExport
+              csvFileName={`${org?.slug ?? 'organization'}-roles.csv`}
+              labels={{
+                searchPlaceholder: t('searchRolesPlaceholder'),
+                emptyMessage: t('loadFailed'),
+                columns: t('columns'),
+                exportCsv: t('exportCSV'),
+                exportStarted: t('exportStarted'),
+              }}
+            />
           </Card>
         </TabsContent>
 
@@ -756,35 +820,22 @@ export default function RBACAdminClient() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                {Object.entries(permissionsByResource).map(([resourceType, perms]) => (
-                  <div key={resourceType}>
-                    <h3 className="mb-2 flex items-center gap-2 font-semibold">
-                      <Badge variant="outline">{resourceType}</Badge>
-                      <span className="text-muted-foreground text-sm">
-                        ({t('permissionsCount', { count: perms.length })})
-                      </span>
-                    </h3>
-                    <div className="ml-4 grid gap-2">
-                      {perms.map((perm) => (
-                        <div
-                          key={perm.id}
-                          className="flex items-center justify-between rounded border p-2"
-                        >
-                          <div>
-                            <code className="text-sm">{perm.name}</code>
-                            {perm.description && <p className="text-muted-foreground text-xs">{perm.description}</p>}
-                          </div>
-                          <div className="flex gap-2">
-                            <Badge variant="secondary">{perm.action}</Badge>
-                            <Badge variant="outline">{perm.scope}</Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <DataTable
+                columns={permissionColumns}
+                data={permissions}
+                pageSize={20}
+                storageKey={org?.id ? `org-${org.id}-rbac-permissions` : 'rbac-permissions'}
+                enableColumnVisibility
+                enableCsvExport
+                csvFileName={`${org?.slug ?? 'organization'}-permissions.csv`}
+                labels={{
+                  searchPlaceholder: t('permissionSearchPlaceholder'),
+                  emptyMessage: t('noPermissions'),
+                  columns: t('columns'),
+                  exportCsv: t('exportCSV'),
+                  exportStarted: t('exportStarted'),
+                }}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -806,32 +857,16 @@ export default function RBACAdminClient() {
                 </div>
               ) : (
                 <>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>{t('audit.timestamp')}</TableHead>
-                        <TableHead>{t('audit.actor')}</TableHead>
-                        <TableHead>{t('audit.action')}</TableHead>
-                        <TableHead>{t('audit.role')}</TableHead>
-                        <TableHead>{t('audit.summary')}</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {(auditData?.items ?? []).map((entry, index) => (
-                        <TableRow key={`${entry.timestamp}-${entry.action}-${index}`}>
-                          <TableCell>{new Date(entry.timestamp).toLocaleString()}</TableCell>
-                          <TableCell>{entry.actor_id ?? '—'}</TableCell>
-                          <TableCell>{entry.action}</TableCell>
-                          <TableCell>{entry.target_role_slug ?? entry.target_role_id ?? '—'}</TableCell>
-                          <TableCell>{entry.diff_summary ?? '—'}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-
-                  {(auditData?.items?.length ?? 0) === 0 && (
-                    <div className="text-muted-foreground text-sm">{t('audit.empty')}</div>
-                  )}
+                  <DataTable
+                    columns={auditColumns}
+                    data={auditData?.items ?? []}
+                    serverPaginated
+                    storageKey={org?.id ? `org-${org.id}-rbac-audit` : 'rbac-audit'}
+                    labels={{
+                      searchPlaceholder: t('permissionSearchPlaceholder'),
+                      emptyMessage: t('audit.empty'),
+                    }}
+                  />
 
                   <div className="flex items-center justify-between">
                     <p className="text-muted-foreground text-sm">

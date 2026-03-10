@@ -6427,9 +6427,19 @@
       "prev": "Алдыңғы",
       "next": "Келесі"
     },
+      "permissionTable": {
+        "resource": "Ресурс",
+        "code": "Рұқсат",
+        "action": "Әрекет",
+        "scope": "Қамту",
+        "description": "Сипаттама"
+      },
     "trend": {
       "activeLearners": "Белсенді оқушылар",
       "completions": "Аяқтаулар",
+      "columns": "Бағандар",
+      "exportCSV": "CSV экспорттау",
+      "exportStarted": "Жүктеу басталды",
       "submissions": "Тапсырмалар",
       "gradingCompleted": "Бағалау аяқталды",
       "emptyState": "Таңдалған аналитика терезесінде белсенділік пайда болғаннан кейін тренд деректері шығады."
