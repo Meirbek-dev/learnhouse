@@ -217,9 +217,7 @@ def get_platform_config() -> PlatformConfig:
     # Check if environment variables are defined
     env_contact_email = os.environ.get("PLATFORM_CONTACT_EMAIL")
     env_domain = os.environ.get("PLATFORM_DOMAIN")
-    env_ssl = os.environ.get("PLATFORM_SSL")
     env_port = os.environ.get("PLATFORM_PORT")
-    env_use_default_org = os.environ.get("PLATFORM_USE_DEFAULT_ORG")
     env_allowed_origins = os.environ.get("PLATFORM_ALLOWED_ORIGINS")
     env_cookie_domain = os.environ.get("PLATFORM_COOKIE_DOMAIN")
 
@@ -227,27 +225,32 @@ def get_platform_config() -> PlatformConfig:
     if env_allowed_origins:
         env_allowed_origins = env_allowed_origins.split(",")
     env_allowed_regexp = os.environ.get("PLATFORM_ALLOWED_REGEXP")
-    env_self_hosted = os.environ.get("PLATFORM_SELF_HOSTED")
     env_sql_connection_string = os.environ.get("PLATFORM_SQL_CONNECTION_STRING")
+
+    # Boolean env vars: coerce explicitly so that PLATFORM_SSL=false is False,
+    # not truthy.  bool("false") == True in Python, which is the bug we avoid.
+    _BOOL_TRUE = ("true", "1", "yes")
+    _raw_ssl = os.environ.get("PLATFORM_SSL")
+    env_ssl: bool | None = _raw_ssl.strip().lower() in _BOOL_TRUE if _raw_ssl is not None else None
+    _raw_use_default_org = os.environ.get("PLATFORM_USE_DEFAULT_ORG")
+    env_use_default_org: bool | None = _raw_use_default_org.strip().lower() in _BOOL_TRUE if _raw_use_default_org is not None else None
+    _raw_self_hosted = os.environ.get("PLATFORM_SELF_HOSTED")
+    env_self_hosted: bool | None = _raw_self_hosted.strip().lower() in _BOOL_TRUE if _raw_self_hosted is not None else None
 
     # Fill in values with YAML file if they are not provided
     contact_email = env_contact_email or yaml_config.get("contact_email")
 
     domain = env_domain or yaml_config.get("hosting_config", {}).get("domain")
-    ssl = env_ssl or yaml_config.get("hosting_config", {}).get("ssl")
+    ssl: bool = env_ssl if env_ssl is not None else bool(yaml_config.get("hosting_config", {}).get("ssl", False))
     port = env_port or yaml_config.get("hosting_config", {}).get("port")
-    use_default_org = env_use_default_org or yaml_config.get("hosting_config", {}).get(
-        "use_default_org"
-    )
+    use_default_org: bool = env_use_default_org if env_use_default_org is not None else bool(yaml_config.get("hosting_config", {}).get("use_default_org", False))
     allowed_origins = env_allowed_origins or yaml_config.get("hosting_config", {}).get(
         "allowed_origins"
     )
     allowed_regexp = env_allowed_regexp or yaml_config.get("hosting_config", {}).get(
         "allowed_regexp"
     )
-    self_hosted = env_self_hosted or yaml_config.get("hosting_config", {}).get(
-        "self_hosted"
-    )
+    self_hosted: bool = env_self_hosted if env_self_hosted is not None else bool(yaml_config.get("hosting_config", {}).get("self_hosted", False))
 
     cookies_domain = env_cookie_domain or yaml_config.get("hosting_config", {}).get(
         "cookies_config", {}
@@ -336,12 +339,12 @@ def get_platform_config() -> PlatformConfig:
     # Create HostingConfig and DatabaseConfig objects
     hosting_config = HostingConfig(
         domain=domain,
-        ssl=bool(ssl),
+        ssl=ssl,
         port=int(port),
-        use_default_org=bool(use_default_org),
+        use_default_org=use_default_org,
         allowed_origins=list(allowed_origins),
         allowed_regexp=allowed_regexp,
-        self_hosted=bool(self_hosted),
+        self_hosted=self_hosted,
         cookie_config=cookie_config,
     )
     database_config = DatabaseConfig(
