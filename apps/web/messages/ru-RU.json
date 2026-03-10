@@ -297,6 +297,8 @@
         "timeExpired": "время истекло",
         "violationThresholdExceeded": "превышение порога нарушений"
       },
+      "additionalFlagged": "+{count} ещё",
+      "additionalUnanswered": "ещё {count}",
       "backToExam": "Вернуться",
       "backToManagement": "Вернуться к управлению",
       "confirmAndSubmit": "Подтвердить и отправить",
@@ -875,6 +877,19 @@
   },
   "Common": {
     "close": "Закрыть",
+    "DataTable": {
+      "searchPlaceholder": "Поиск по таблице...",
+      "emptyMessage": "Строки не найдены.",
+      "visibleRows": "{count} видимых строк",
+      "showingRows": "{from}–{to} из {total}",
+      "page": "Страница {current} из {total}",
+      "prev": "Назад",
+      "next": "Вперёд",
+      "rowsPerPage": "Строк на страницу",
+      "columns": "Колонки",
+      "exportCsv": "Экспорт CSV",
+      "exportStarted": "Загрузка начата"
+    },
     "googleLogo": "Логотип Google",
     "loading": "Загрузка...",
     "logoAlt": "Логотип Ashyq Bilim",
@@ -2080,6 +2095,7 @@
       "editPageButton": "Редактировать страницу",
       "failedToUpdateActivityName": "Не удалось обновить название активности",
       "noAccessToken": "Требуется аутентификация",
+      "ownerLabel": "Создатель",
       "ownerBadge": "Вы создали эту активность",
       "previewTooltip": "Предварительный просмотр активности",
       "publish": "Опубликовать",

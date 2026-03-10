@@ -297,6 +297,8 @@
         "timeExpired": "Уақыт аяқталды",
         "violationThresholdExceeded": "бұзушылық шегінен асып кету"
       },
+      "additionalFlagged": "+{count} тағы",
+      "additionalUnanswered": "тағы {count}",
       "backToExam": "Емтиханға оралу",
       "backToManagement": "Басқаруға оралу",
       "confirmAndSubmit": "Растау және тапсыру",
@@ -875,6 +877,19 @@
   },
   "Common": {
     "close": "Жабу",
+    "DataTable": {
+      "searchPlaceholder": "Кестеден іздеу...",
+      "emptyMessage": "Жолдар табылмады.",
+      "visibleRows": "{count} көрінетін жол",
+      "showingRows": "{total} ішіндегі {from}–{to}",
+      "page": "{total} беттен {current} бет",
+      "prev": "Алдыңғы",
+      "next": "Келесі",
+      "rowsPerPage": "Бетке жолдар",
+      "columns": "Бағандар",
+      "exportCsv": "CSV экспорттау",
+      "exportStarted": "Жүктеу басталды"
+    },
     "googleLogo": "Google логотипі",
     "loading": "Жүктелуде...",
     "logoAlt": "Ashyq Bilim логотипі",
@@ -2080,6 +2095,7 @@
       "editPageButton": "Бетті өңдеу",
       "failedToUpdateActivityName": "Белсенділік атауын жаңарту мүмкін болмады",
       "noAccessToken": "Аутентификация қажет",
+      "ownerLabel": "Иесі",
       "ownerBadge": "Сіз бұл белсенділікті жасадыңыз",
       "previewTooltip": "Белсенділікті алдын ала қарау",
       "publish": "Жариялау",
@@ -6512,7 +6528,7 @@
       "na": "жоқ",
       "searchPlaceholder": "Оқушылар, курстар немесе себеп кодтары бойынша іздеу...",
       "emptyMessage": "Ағымдағы фильтрлер үшін тәуекелдегі оқушылар жоқ.",
-      "gradeSubmissions": "Grade {count} pending submission(s) →",
+      "gradeSubmissions": "Күтілудегі {count} жұмысты бағалау →",
       "riskComponents": {
         "inactivity": "Белсенсіздік",
         "progress": "Прогресс олқылығы",

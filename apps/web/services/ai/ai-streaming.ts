@@ -42,7 +42,6 @@ async function readSSEStream(response: Response, callbacks: SSECallbacks, signal
   const decoder = new TextDecoder();
   let buffer = '';
   let accumulatedContent = '';
-  let completed = false;
 
   while (true) {
     if (signal?.aborted) {
@@ -53,10 +52,7 @@ async function readSSEStream(response: Response, callbacks: SSECallbacks, signal
     const { done, value } = await reader.read();
 
     if (done) {
-      if (!completed) {
-        onComplete?.({ type: 'final', content: accumulatedContent });
-        completed = true;
-      }
+      onComplete?.({ type: 'final', content: accumulatedContent });
       break;
     }
 
@@ -79,13 +75,14 @@ async function readSSEStream(response: Response, callbacks: SSECallbacks, signal
             break;
           }
           case 'final': {
-            completed = true;
             onComplete?.(chunk);
-            break;
+            return;
           }
           case 'error': {
-            completed = true;
             onError?.(chunk);
+            return;
+          }
+          default: {
             break;
           }
         }

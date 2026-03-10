@@ -23,7 +23,7 @@ const COMMON_RULES = {
   // ── React ─────────────────────────────────────────────────
   'react/prop-types': 'off', // Covered by TypeScript
   'react/no-unescaped-entities': 'off', // Too noisy with i18n content
-  'react/jsx-no-literals': 'warn', // next-intl handles i18n; this is too noisy
+  'react/jsx-no-literals': 'off', // next-intl handles i18n; this is too noisy
   'react/self-closing-comp': 'warn', // <Foo></Foo> → <Foo />
   'react/jsx-boolean-value': ['warn', 'never'], // foo={true} → foo
   'react/no-array-index-key': 'off', // Fragile list keys

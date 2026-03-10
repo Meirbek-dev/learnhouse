@@ -79,10 +79,10 @@ export default async function AnalyticsAtRiskPage(props: {
                 />
               }
             >
-              Prev
+              {t('table.prev')}
             </Button>
             <span className="text-sm text-slate-600">
-              Page {risk.page} / {totalPages}
+              {t('table.page', { current: risk.page, total: totalPages })}
             </span>
             <Button
               variant="outline"
@@ -94,7 +94,7 @@ export default async function AnalyticsAtRiskPage(props: {
                 />
               }
             >
-              Next
+              {t('table.next')}
             </Button>
           </div>
         ) : null}

@@ -297,6 +297,8 @@
         "timeExpired": "time expired",
         "violationThresholdExceeded": "violation threshold exceeded"
       },
+      "additionalFlagged": "+{count} more",
+      "additionalUnanswered": "and {count} more",
       "backToExam": "Back to exam",
       "backToManagement": "Back to Management",
       "confirmAndSubmit": "Confirm & Submit",
@@ -875,6 +877,19 @@
   },
   "Common": {
     "close": "Close",
+    "DataTable": {
+      "searchPlaceholder": "Search table...",
+      "emptyMessage": "No rows found.",
+      "visibleRows": "{count} visible rows",
+      "showingRows": "{from}–{to} of {total}",
+      "page": "Page {current} of {total}",
+      "prev": "Previous",
+      "next": "Next",
+      "rowsPerPage": "Rows per page",
+      "columns": "Columns",
+      "exportCsv": "Export CSV",
+      "exportStarted": "Download started"
+    },
     "googleLogo": "Google logo",
     "loading": "Loading...",
     "logoAlt": "Ashyq Bilim logo",
@@ -2080,6 +2095,7 @@
       "editPageButton": "Edit Page",
       "failedToUpdateActivityName": "Failed to update activity name",
       "noAccessToken": "Authentication required",
+      "ownerLabel": "Owner",
       "previewTooltip": "Preview Activity",
       "ownerBadge": "You created this activity",
       "publish": "Publish",

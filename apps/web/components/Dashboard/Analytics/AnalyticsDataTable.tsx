@@ -49,7 +49,10 @@ export default function AnalyticsDataTable<TData>({
         page: ({ current, total }) => t('table.page', { current, total }),
         prev: t('table.prev'),
         next: t('table.next'),
-        rowsPerPage: 'Rows',
+        rowsPerPage: t('table.rowsPerPage'),
+        columns: t('table.columns'),
+        exportCsv: t('table.exportCSV'),
+        exportStarted: t('table.exportStarted'),
       }}
     />
   );

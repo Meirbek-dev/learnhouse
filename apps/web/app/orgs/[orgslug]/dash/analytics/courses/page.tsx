@@ -85,10 +85,10 @@ export default async function AnalyticsCoursesPage(props: {
                 />
               }
             >
-              Prev
+              {t('table.prev')}
             </Button>
             <span className="text-sm text-slate-600">
-              Page {courseList.page} / {totalPages}
+              {t('table.page', { current: courseList.page, total: totalPages })}
             </span>
             <Button
               variant="outline"
@@ -100,7 +100,7 @@ export default async function AnalyticsCoursesPage(props: {
                 />
               }
             >
-              Next
+              {t('table.next')}
             </Button>
           </div>
         ) : null}

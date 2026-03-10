@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import {
   flexRender,
@@ -64,18 +65,9 @@ interface DataTableProps<TData> {
   csvFileName?: string;
 }
 
-const defaultLabels: Required<DataTableLabels> = {
-  searchPlaceholder: 'Search table...',
-  emptyMessage: 'No rows found.',
-  visibleRows: (count) => `${count} visible rows`,
-  showingRows: ({ from, to, total }) => `${from}-${to} of ${total}`,
-  page: ({ current, total }) => `Page ${current} of ${total}`,
-  prev: 'Previous',
-  next: 'Next',
-  rowsPerPage: 'Rows per page',
-  columns: 'Columns',
-  exportCsv: 'Export CSV',
-  exportStarted: 'Download started',
+const escapeCsv = (value: unknown) => {
+  const normalized = value === null || value === undefined ? '' : String(value);
+  return `"${normalized.replace(/"/g, '""')}"`;
 };
 
 export default function DataTable<TData>({
@@ -92,6 +84,20 @@ export default function DataTable<TData>({
   enableCsvExport = false,
   csvFileName = `table-${new Date().toISOString()}.csv`,
 }: DataTableProps<TData>) {
+  const t = useTranslations('Common.DataTable');
+  const defaultLabels: Required<DataTableLabels> = {
+    searchPlaceholder: t('searchPlaceholder'),
+    emptyMessage: t('emptyMessage'),
+    visibleRows: (count) => t('visibleRows', { count }),
+    showingRows: ({ from, to, total }) => t('showingRows', { from, to, total }),
+    page: ({ current, total }) => t('page', { current, total }),
+    prev: t('prev'),
+    next: t('next'),
+    rowsPerPage: t('rowsPerPage'),
+    columns: t('columns'),
+    exportCsv: t('exportCsv'),
+    exportStarted: t('exportStarted'),
+  };
   const resolvedLabels = { ...defaultLabels, ...labels };
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
@@ -187,11 +193,6 @@ export default function DataTable<TData>({
   const handleExportCsv = () => {
     const sourceRows = serverPaginated ? table.getRowModel().rows : table.getSortedRowModel().rows;
     if (sourceRows.length === 0 || exportableColumns.length === 0) return;
-
-    const escapeCsv = (value: unknown) => {
-      const normalized = value === null || value === undefined ? '' : String(value);
-      return `"${normalized.replace(/"/g, '""')}"`;
-    };
 
     const headerRow = exportableColumns.map((column) => {
       const label =

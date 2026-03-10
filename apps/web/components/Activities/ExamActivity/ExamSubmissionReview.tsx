@@ -137,7 +137,7 @@ export default function ExamSubmissionReview({
                       ))}
                       {unansweredQuestions.length > 20 && (
                         <span className="inline-flex items-center px-2 text-xs text-orange-700">
-                          ещё +{unansweredQuestions.length - 20}
+                          {t('additionalUnanswered', { count: unansweredQuestions.length - 20 })}
                         </span>
                       )}
                     </div>
@@ -166,7 +166,7 @@ export default function ExamSubmissionReview({
                       ))}
                       {flaggedQuestions.length > 20 && (
                         <span className="inline-flex items-center px-2 text-xs text-blue-700">
-                          +{flaggedQuestions.length - 20} more
+                          {t('additionalFlagged', { count: flaggedQuestions.length - 20 })}
                         </span>
                       )}
                     </div>
@@ -181,7 +181,7 @@ export default function ExamSubmissionReview({
                 <Checkbox
                   id="confirm-submission"
                   checked={confirmChecked}
-                  onCheckedChange={(checked) => setConfirmChecked(checked)}
+                  onCheckedChange={(checked) => setConfirmChecked(checked === true)}
                   className="mt-1"
                 />
                 <Label
