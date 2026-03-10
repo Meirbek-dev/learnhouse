@@ -58,8 +58,9 @@ function ChartContainer({
       <div
         data-slot="chart"
         data-chart={chartId}
+        // ensure the container always stretches and never collapses to 0
         className={cn(
-          "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden",
+          "flex w-full min-w-0 min-h-0 aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden",
           className,
         )}
         {...props}
@@ -221,10 +222,8 @@ function ChartTooltipContent({
                         {nestLabel ? tooltipLabel : null}
                         <span className="text-muted-foreground">{itemConfig?.label || item.name}</span>
                       </div>
-                      {(item.value !== undefined && item.value !== null) && (
-                        <span className="font-mono font-medium text-foreground tabular-nums">
-                          {displayValue}
-                        </span>
+                      {item.value !== undefined && item.value !== null && (
+                        <span className="font-mono font-medium text-foreground tabular-nums">{displayValue}</span>
                       )}
                     </div>
                   </>
@@ -288,7 +287,13 @@ function ChartLegendContent({
   );
 }
 
-function ChartEmptyState({ title = 'No data', description = 'There is no data available for the selected filters.' }: { title?: string; description?: string }) {
+function ChartEmptyState({
+  title = 'No data',
+  description = 'There is no data available for the selected filters.',
+}: {
+  title?: string;
+  description?: string;
+}) {
   return (
     <div className="flex h-full min-h-56 w-full items-center justify-center rounded-xl border border-dashed border-border/70 bg-muted/20 px-6 text-center">
       <div className="space-y-1">
@@ -324,4 +329,12 @@ function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key:
   return configLabelKey in config ? config[configLabelKey] : config[key as keyof typeof config];
 }
 
-export { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartStyle, ChartEmptyState };
+export {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+  ChartStyle,
+  ChartEmptyState,
+};

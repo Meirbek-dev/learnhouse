@@ -24,7 +24,6 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -65,7 +64,19 @@ interface DataTableProps<TData> {
   csvFileName?: string;
 }
 
-// defaultLabels will be computed inside the component using translations
+const defaultLabels: Required<DataTableLabels> = {
+  searchPlaceholder: 'Search table...',
+  emptyMessage: 'No rows found.',
+  visibleRows: (count) => `${count} visible rows`,
+  showingRows: ({ from, to, total }) => `${from}-${to} of ${total}`,
+  page: ({ current, total }) => `Page ${current} of ${total}`,
+  prev: 'Previous',
+  next: 'Next',
+  rowsPerPage: 'Rows per page',
+  columns: 'Columns',
+  exportCsv: 'Export CSV',
+  exportStarted: 'Download started',
+};
 
 export default function DataTable<TData>({
   columns,
@@ -81,26 +92,6 @@ export default function DataTable<TData>({
   enableCsvExport = false,
   csvFileName = `table-${new Date().toISOString()}.csv`,
 }: DataTableProps<TData>) {
-  // translation namespace is a generic "table" object defined in messages
-  const t = useTranslations('table');
-
-  const defaultLabels: Required<DataTableLabels> = React.useMemo(
-    () => ({
-      searchPlaceholder: t('searchDefault'),
-      emptyMessage: t('emptyDefault'),
-      visibleRows: (count) => t('visibleRows', { count }),
-      showingRows: ({ from, to, total }) => t('showingRows', { from, to, total }),
-      page: ({ current, total }) => t('page', { current, total }),
-      prev: t('prev'),
-      next: t('next'),
-      rowsPerPage: t('rowsPerPage'),
-      columns: t('columns'),
-      exportCsv: t('exportCSV'),
-      exportStarted: t('exportStarted'),
-    }),
-    [t],
-  );
-
   const resolvedLabels = { ...defaultLabels, ...labels };
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');

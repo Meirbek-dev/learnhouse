@@ -6435,7 +6435,11 @@
       "showingRows": "{from}–{to} из {total}",
       "page": "Страница {current} из {total}",
       "prev": "Назад",
-      "next": "Вперёд"
+      "next": "Вперёд",
+      "rowsPerPage": "Строк на страницу",
+      "columns": "Колонки",
+      "exportCSV": "Экспорт CSV",
+      "exportStarted": "Загрузка начата"
     },
       "permissionTable": {
         "resource": "Ресурс",

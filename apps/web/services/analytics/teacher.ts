@@ -24,7 +24,7 @@ async function analyticsRequest<T>(path: string, accessToken: string, query?: An
   const response = await fetch(`${getAPIUrl()}analytics/${path}${buildQueryString(query)}`, {
     method: 'GET',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     credentials: 'include',
@@ -69,8 +69,17 @@ export function getTeacherCourseList(orgId: number, accessToken: string, query?:
   return analyticsRequest<TeacherCourseListResponse>(`orgs/${orgId}/teacher/courses`, accessToken, query);
 }
 
-export function getTeacherCourseDetailByUuid(orgId: number, courseUuid: string, accessToken: string, query?: AnalyticsQuery) {
-  return analyticsRequest<TeacherCourseDetailResponse>(`orgs/${orgId}/teacher/courses/by-uuid/${courseUuid}`, accessToken, query);
+export function getTeacherCourseDetailByUuid(
+  orgId: number,
+  courseUuid: string,
+  accessToken: string,
+  query?: AnalyticsQuery,
+) {
+  return analyticsRequest<TeacherCourseDetailResponse>(
+    `orgs/${orgId}/teacher/courses/by-uuid/${courseUuid}`,
+    accessToken,
+    query,
+  );
 }
 
 export function getTeacherCourseDetail(orgId: number, courseId: number, accessToken: string, query?: AnalyticsQuery) {
@@ -99,6 +108,10 @@ export function getAtRiskLearners(orgId: number, accessToken: string, query?: An
   return analyticsRequest<AtRiskLearnersResponse>(`orgs/${orgId}/teacher/learners/at-risk`, accessToken, query);
 }
 
-export function getAnalyticsExportUrl(orgId: number, exportName: 'at-risk' | 'grading-backlog' | 'course-progress' | 'assessment-outcomes', query?: AnalyticsQuery) {
+export function getAnalyticsExportUrl(
+  orgId: number,
+  exportName: 'at-risk' | 'grading-backlog' | 'course-progress' | 'assessment-outcomes',
+  query?: AnalyticsQuery,
+) {
   return `${getAPIUrl()}analytics/orgs/${orgId}/teacher/exports/${exportName}.csv${buildQueryString(query)}`;
 }

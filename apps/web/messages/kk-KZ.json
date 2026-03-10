@@ -6435,7 +6435,11 @@
       "showingRows": "{total} ішіндегі {from}\u2013{to}",
       "page": "{total} беттен {current} бет",
       "prev": "Алдыңғы",
-      "next": "Келесі"
+      "next": "Келесі",
+      "rowsPerPage": "Бетке жолдар",
+      "columns": "Бағандар",
+      "exportCSV": "CSV экспорттау",
+      "exportStarted": "Жүктеу басталды"
     },
       "permissionTable": {
         "resource": "Ресурс",
