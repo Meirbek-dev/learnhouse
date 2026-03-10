@@ -5,12 +5,21 @@ from sqlmodel import SQLModel
 
 # Determine development mode from environment to avoid importing config at module import
 # time (which would create a circular import with config.config).
+def _parse_env_bool(value: str | None) -> bool:
+    if value is None:
+        return False
+
+    normalized = value.strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "off"}:
+        return False
+
+    return False
+
+
 _env_dev = os.environ.get("PLATFORM_DEVELOPMENT_MODE", None)
-if _env_dev is not None:
-    is_dev_mode = bool(eval(_env_dev))
-else:
-    # Default to False (production) if not explicitly set.
-    is_dev_mode = False
+is_dev_mode = _parse_env_bool(_env_dev)
 
 
 class FalsePydanticStrictBaseModel(BaseModel):

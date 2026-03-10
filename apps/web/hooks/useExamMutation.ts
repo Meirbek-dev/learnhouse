@@ -1,5 +1,6 @@
 'use client';
 
+import { getAPIUrl } from '@services/config/config';
 import { calculateExponentialBackoffDelay } from '@/lib/retry';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -233,17 +234,14 @@ export function useExamSubmission(accessToken: string, onSuccess?: () => void) {
       attemptUuid: string;
       answers: Record<number, any>;
     }) => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_LEARNHOUSE_API_URL}exams/${examUuid}/attempts/${attemptUuid}/submit`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(answers),
+      const response = await fetch(`${getAPIUrl()}exams/${examUuid}/attempts/${attemptUuid}/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
         },
-      );
+        body: JSON.stringify(answers),
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));

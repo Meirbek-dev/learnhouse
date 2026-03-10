@@ -42,6 +42,24 @@ def install(
     print("Default elements installed ✅")
 
     if short:
+        admin_email = os.environ.get("PLATFORM_INITIAL_ADMIN_EMAIL")
+        admin_password: str | None = os.environ.get("PLATFORM_INITIAL_ADMIN_PASSWORD")
+
+        if not admin_email:
+            print(
+                "❌ Error: PLATFORM_INITIAL_ADMIN_EMAIL environment variable is required"
+            )
+            raise typer.Exit(code=1)
+
+        if not admin_password:
+            print(
+                "❌ Error: PLATFORM_INITIAL_ADMIN_PASSWORD environment variable is required"
+            )
+            print(
+                "Please set PLATFORM_INITIAL_ADMIN_PASSWORD environment variable before running installation."
+            )
+            raise typer.Exit(code=1)
+
         # Create the Organization
         print("Creating Ashyq Bilim...")
         org = OrganizationCreate(
@@ -49,7 +67,7 @@ def install(
             description="Ashyq Bilim",
             about="Ashyq Bilim - Образовательная платформа для онлайн-обучения",
             slug="openu",
-            email="meirbek.dev@gmail.com",
+            email=platform_config.contact_email,
             logo_image="",
             thumbnail_image="",
             label="Ashyq Bilim",
@@ -59,28 +77,9 @@ def install(
 
         # Create Organization User
         print("Creating Ashyq Bilim user...")
-        # Use email from environment variable if provided, otherwise default to "meirbek.dev@gmail.com"
-        email: str = os.environ.get(
-            "PLATFORM_INITIAL_ADMIN_EMAIL", "meirbek.dev@gmail.com"
-        )
-        # Require password from environment variable
-        password: str | None = os.environ.get("PLATFORM_INITIAL_ADMIN_PASSWORD")
-        if not password:
-            print(
-                "❌ Error: PLATFORM_INITIAL_ADMIN_PASSWORD environment variable is required"
-            )
-            print(
-                "Please set PLATFORM_INITIAL_ADMIN_PASSWORD environment variable before running installation."
-            )
-            raise typer.Exit(code=1)
-        print(
-            "Using password from PLATFORM_INITIAL_ADMIN_PASSWORD environment variable"
-        )
-        if email != "meirbek.dev@gmail.com":
-            print(
-                f"Using email from PLATFORM_INITIAL_ADMIN_EMAIL environment variable: {email}"
-            )
-        user = UserCreate(username="Meirbek", email=email, password=password)
+        print(f"Using email from PLATFORM_INITIAL_ADMIN_EMAIL environment variable: {admin_email}")
+        print("Using password from PLATFORM_INITIAL_ADMIN_PASSWORD environment variable")
+        user = UserCreate(username="Admin", email=admin_email, password=admin_password)
         asyncio.run(install_create_organization_user(user, "openu", db_session))
         print("Ashyq Bilim user created ✅")
 
@@ -88,7 +87,7 @@ def install(
         print("Installation completed ✅")
         print()
         print("Login with the following credentials:")
-        print("email: " + email)
+        print("email: " + admin_email)
         print("password: (the password you set in PLATFORM_INITIAL_ADMIN_PASSWORD)")
         print("⚠️ Remember to change the password after logging in ⚠️")
 

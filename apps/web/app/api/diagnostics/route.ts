@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 
+import { getServerEnv, publicEnv } from '@/services/config/env';
+
 export async function GET() {
+  const serverEnv = getServerEnv();
   const diagnostics = {
     timestamp: new Date().toISOString(),
     nodeEnv: process.env.NODE_ENV,
@@ -11,31 +14,25 @@ export async function GET() {
     // Check environment variables
     diagnostics.checks.envVars = {
       status: 'checking',
-      NEXT_PUBLIC_PLATFORM_API_URL: Boolean(process.env.NEXT_PUBLIC_PLATFORM_API_URL),
-      NEXT_PUBLIC_PLATFORM_BACKEND_URL: Boolean(process.env.NEXT_PUBLIC_PLATFORM_BACKEND_URL),
-      NEXT_PUBLIC_PLATFORM_DOMAIN: Boolean(process.env.NEXT_PUBLIC_PLATFORM_DOMAIN),
-      NEXTAUTH_SECRET: Boolean(process.env.NEXTAUTH_SECRET),
-      NEXTAUTH_URL: Boolean(process.env.NEXTAUTH_URL),
+      NEXT_PUBLIC_PLATFORM_API_URL: Boolean(publicEnv.NEXT_PUBLIC_PLATFORM_API_URL),
+      NEXT_PUBLIC_PLATFORM_BACKEND_URL: Boolean(publicEnv.NEXT_PUBLIC_PLATFORM_BACKEND_URL),
+      NEXT_PUBLIC_PLATFORM_DOMAIN: Boolean(publicEnv.NEXT_PUBLIC_PLATFORM_DOMAIN),
+      PLATFORM_INTERNAL_API_URL: Boolean(serverEnv.PLATFORM_INTERNAL_API_URL),
+      NEXTAUTH_SECRET: Boolean(serverEnv.NEXTAUTH_SECRET),
+      NEXTAUTH_URL: Boolean(serverEnv.NEXTAUTH_URL),
     };
 
     // Check backend connectivity
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_PLATFORM_BACKEND_URL || process.env.NEXT_PUBLIC_PLATFORM_API_URL;
-      if (backendUrl) {
-        const response = await fetch(`${backendUrl}health`, {
-          signal: AbortSignal.timeout(5000),
-        });
-        diagnostics.checks.backend = {
-          status: response.ok ? 'healthy' : 'unhealthy',
-          statusCode: response.status,
-          url: backendUrl,
-        };
-      } else {
-        diagnostics.checks.backend = {
-          status: 'misconfigured',
-          error: 'Backend URL not set',
-        };
-      }
+      const backendUrl = serverEnv.PLATFORM_INTERNAL_API_URL || publicEnv.NEXT_PUBLIC_PLATFORM_API_URL;
+      const response = await fetch(`${backendUrl}health`, {
+        signal: AbortSignal.timeout(5000),
+      });
+      diagnostics.checks.backend = {
+        status: response.ok ? 'healthy' : 'unhealthy',
+        statusCode: response.status,
+        url: backendUrl,
+      };
     } catch (error: any) {
       diagnostics.checks.backend = {
         status: 'error',

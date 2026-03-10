@@ -5,7 +5,6 @@ contact_email: contact@cs-mooc.tou.edu.kz
 general:
   development_mode: true
   logfire_enabled: false
-  timezone: "Asia/Almaty"  # Kazakhstan (Astana) timezone
 
 security:
   auth_jwt_secret_key: secret
@@ -41,6 +40,6 @@ payments_config:
 ai_config:
   openai_api_key: ""
   chromadb_config:
-    isSeparateDatabaseEnabled: True
+    isSeparateDatabaseEnabled: true
     db_host: "localhost"
     db_port: 8001

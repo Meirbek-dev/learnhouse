@@ -5,6 +5,7 @@ import {
   loginWithOAuthToken,
 } from '@/services/auth/auth';
 import { SESSION_CACHE_MAX_SIZE, SESSION_CACHE_TTL_MS, TOKEN_REFRESH_BUFFER_MS } from '@/lib/constants';
+import { getServerEnv } from '@/services/config/env';
 import { getTopLevelCookieDomain, getUriWithOrg } from '@/services/config/config';
 import type { NextAuthConfig, NextAuthResult, Session } from 'next-auth';
 import { getResponseMetadata } from '@/services/utils/ts/requests';
@@ -90,9 +91,10 @@ const normalizeBoolean = (value?: string | null): boolean | undefined => {
   return undefined;
 };
 
+const serverEnv = getServerEnv();
 const cookieDomain = !isDevEnv ? getTopLevelCookieDomain() : undefined;
-const sslFlag = normalizeBoolean(process.env.PLATFORM_SSL);
-const nextAuthUrl = process.env.NEXTAUTH_URL;
+const sslFlag = normalizeBoolean(serverEnv.PLATFORM_SSL);
+const nextAuthUrl = serverEnv.NEXTAUTH_URL;
 const isHttpsUrl = typeof nextAuthUrl === 'string' && nextAuthUrl.startsWith('https://');
 const cookieSecure = !isDevEnv && (isHttpsUrl || sslFlag);
 const cookieNamePrefix = cookieSecure ? '__Secure-' : '';
@@ -155,8 +157,8 @@ const authConfig: NextAuthConfig = {
     }),
 
     Google({
-      clientId: process.env.PLATFORM_GOOGLE_CLIENT_ID,
-      clientSecret: process.env.PLATFORM_GOOGLE_CLIENT_SECRET,
+      clientId: serverEnv.PLATFORM_GOOGLE_CLIENT_ID,
+      clientSecret: serverEnv.PLATFORM_GOOGLE_CLIENT_SECRET,
       authorization: {
         params: { prompt: 'consent', access_type: 'offline', response_type: 'code' },
       },

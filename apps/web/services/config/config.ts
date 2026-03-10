@@ -1,9 +1,10 @@
-export const PLATFORM_HTTP_PROTOCOL =
-  process.env.NEXT_PUBLIC_PLATFORM_HTTPS?.toLowerCase() === 'true' ? 'https://' : 'http://';
-const PLATFORM_API_URL = `${process.env.NEXT_PUBLIC_PLATFORM_API_URL || ''}`;
-export const PLATFORM_BACKEND_URL = `${process.env.NEXT_PUBLIC_PLATFORM_BACKEND_URL || ''}`;
-export const PLATFORM_DOMAIN = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN;
-export const PLATFORM_TOP_DOMAIN = process.env.NEXT_PUBLIC_PLATFORM_TOP_DOMAIN;
+import { getServerEnv, publicEnv } from './env';
+
+export const PLATFORM_HTTP_PROTOCOL = publicEnv.NEXT_PUBLIC_PLATFORM_HTTPS === 'true' ? 'https://' : 'http://';
+const PLATFORM_API_URL = publicEnv.NEXT_PUBLIC_PLATFORM_API_URL;
+export const PLATFORM_BACKEND_URL = publicEnv.NEXT_PUBLIC_PLATFORM_BACKEND_URL;
+export const PLATFORM_DOMAIN = publicEnv.NEXT_PUBLIC_PLATFORM_DOMAIN;
+export const PLATFORM_TOP_DOMAIN = publicEnv.NEXT_PUBLIC_PLATFORM_TOP_DOMAIN;
 
 const isLikelyIPv4 = (host: string) => {
   if (!host) return false;
@@ -32,55 +33,18 @@ export const getTopLevelCookieDomain = () =>
  * Resolves the API base URL (always ending with a slash).
  * This should run once at module init.
  *
- * Returns the API base URL (always ending with a slash).
- * Falls back to current window origin + /api/v1/ in the browser when env is missing.
- *
  * For server-side requests in Docker, use internal container network.
  * For client-side requests, use the public-facing URL.
  */
 const resolveAPIUrl = () => {
-  // Server-side: use internal Docker network URL when available
   if (typeof globalThis.window === 'undefined') {
-    const internalUrl = process.env.PLATFORM_INTERNAL_API_URL;
+    const { PLATFORM_INTERNAL_API_URL: internalUrl } = getServerEnv();
     if (internalUrl) {
-      return internalUrl.endsWith('/') ? internalUrl : `${internalUrl}/`;
-    }
-
-    // Fallback for Docker environment: use localhost:9000
-    if (process.env.NODE_ENV === 'production' || process.env.PLATFORM_DEVELOPMENT_MODE === 'True') {
-      console.log('[Config] Using fallback localhost:9000 for API');
-      return 'http://localhost:9000/api/v1/';
+      return internalUrl;
     }
   }
 
-  // Client-side: use public-facing URL
-  let base = PLATFORM_API_URL;
-
-  // Browser fallback if env not provided at build time
-  if (!base && typeof globalThis.window !== 'undefined') {
-    const { protocol, hostname, port } = globalThis.location;
-    const portPart = port ? `:${port}` : '';
-    base = `${protocol}//${hostname}${portPart}/api/v1/`;
-  }
-
-  if (!base) {
-    // Last-resort sensible default for local dev
-    base = 'http://localhost:1338/api/v1/';
-
-    // Warn in server context when using fallback
-    if (typeof globalThis.window === 'undefined') {
-      console.warn(
-        '[Config] Using fallback API URL in server context. ' +
-          'Please set NEXT_PUBLIC_PLATFORM_API_URL or PLATFORM_INTERNAL_API_URL environment variable. ' +
-          `Current fallback: ${base}`,
-      );
-    }
-  }
-
-  // Ensure trailing slash
-  if (!base.endsWith('/')) base += '/';
-
-  return base;
+  return PLATFORM_API_URL;
 };
 
 const API_URL = resolveAPIUrl();
