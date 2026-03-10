@@ -352,38 +352,48 @@ def load_analytics_context(db_session: Session, course_ids: list[int], *, activi
     assignment_ids = [assignment.id for assignment in assignments if assignment.id is not None]
     assignment_submissions: list[tuple[AssignmentUserSubmission, Assignment]] = []
     if assignment_ids:
+        submission_stmt = (
+            select(AssignmentUserSubmission, Assignment)
+            .join(Assignment, Assignment.id == AssignmentUserSubmission.assignment_id)
+            .where(Assignment.id.in_(assignment_ids))
+        )
+        if activity_start is not None:
+            # filter by `update_date` which is reliably set when a submission is created or graded
+            submission_stmt = submission_stmt.where(AssignmentUserSubmission.update_date >= activity_start)
         assignment_submissions = [
             _unwrap_pair(row, AssignmentUserSubmission, Assignment)
-            for row in db_session.exec(
-                select(AssignmentUserSubmission, Assignment)
-                .join(Assignment, Assignment.id == AssignmentUserSubmission.assignment_id)
-                .where(Assignment.id.in_(assignment_ids))
-            ).all()
+            for row in db_session.exec(submission_stmt).all()
         ]
 
     exams = [_unwrap_model(exam, Exam) for exam in db_session.exec(select(Exam).where(Exam.course_id.in_(course_ids))).all()]
     exam_ids = [exam.id for exam in exams if exam.id is not None]
     exam_attempts: list[tuple[ExamAttempt, Exam]] = []
     if exam_ids:
+        exam_attempt_stmt = (
+            select(ExamAttempt, Exam)
+            .join(Exam, Exam.id == ExamAttempt.exam_id)
+            .where(Exam.id.in_(exam_ids))
+        )
+        if activity_start is not None:
+            exam_attempt_stmt = exam_attempt_stmt.where(ExamAttempt.started_at >= activity_start)
         exam_attempts = [
             _unwrap_pair(row, ExamAttempt, Exam)
-            for row in db_session.exec(
-                select(ExamAttempt, Exam)
-                .join(Exam, Exam.id == ExamAttempt.exam_id)
-                .where(Exam.id.in_(exam_ids))
-            ).all()
+            for row in db_session.exec(exam_attempt_stmt).all()
         ]
 
     activity_ids = [activity.id for activity in activities if activity.id is not None]
     quiz_attempts: list[tuple[QuizAttempt, Activity]] = []
     if activity_ids:
+        quiz_attempt_stmt = (
+            select(QuizAttempt, Activity)
+            .join(Activity, Activity.id == QuizAttempt.activity_id)
+            .where(Activity.id.in_(activity_ids))
+        )
+        if activity_start is not None:
+            quiz_attempt_stmt = quiz_attempt_stmt.where(QuizAttempt.start_ts >= activity_start)
         quiz_attempts = [
             _unwrap_pair(row, QuizAttempt, Activity)
-            for row in db_session.exec(
-                select(QuizAttempt, Activity)
-                .join(Activity, Activity.id == QuizAttempt.activity_id)
-                .where(Activity.id.in_(activity_ids))
-            ).all()
+            for row in db_session.exec(quiz_attempt_stmt).all()
         ]
 
     quiz_question_stats: list[QuizQuestionStat] = []
@@ -397,13 +407,16 @@ def load_analytics_context(db_session: Session, course_ids: list[int], *, activi
 
     code_submissions: list[tuple[CodeSubmission, Activity]] = []
     if activity_ids:
+        code_submission_stmt = (
+            select(CodeSubmission, Activity)
+            .join(Activity, Activity.id == CodeSubmission.activity_id)
+            .where(Activity.id.in_(activity_ids))
+        )
+        if activity_start is not None:
+            code_submission_stmt = code_submission_stmt.where(CodeSubmission.created_at >= activity_start)
         code_submissions = [
             _unwrap_pair(row, CodeSubmission, Activity)
-            for row in db_session.exec(
-                select(CodeSubmission, Activity)
-                .join(Activity, Activity.id == CodeSubmission.activity_id)
-                .where(Activity.id.in_(activity_ids))
-            ).all()
+            for row in db_session.exec(code_submission_stmt).all()
         ]
 
     certificate_rows = [

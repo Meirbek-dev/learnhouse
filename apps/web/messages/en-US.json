@@ -6274,7 +6274,9 @@
       "showingAssessments": "Showing 8 of {total} assessments.",
       "viewAllAssessments": "View all →",
       "watchlistTitle": "Urgent learner watchlist",
-      "watchlistDescription": "Top-ranked learners who likely need outreach this week."
+      "watchlistDescription": "Top-ranked learners who likely need outreach this week.",
+      "previewLabel": "Preview",
+      "viewAllAtRisk": "View full at-risk list →"
     },
     "filters": {
       "label": "Teacher Analytics",
@@ -6368,7 +6370,15 @@
       "stable": "stable",
       "noData": "no prior data",
       "noComparison": "Comparison unavailable for this metric in the current release.",
-      "changePeriod": "Change vs previous period: {delta}"
+      "changePeriod": "Change vs previous period: {delta}",
+      "definitions": {
+        "activeLearners": "Unique learners who completed at least one activity in the selected window.",
+        "returningLearners": "Learners who were also active in the immediately preceding period of equal length.",
+        "completionRate": "Percentage of enrolled learners who have fully completed the course.",
+        "atRisk": "Learners scoring 40+ on the composite risk index (inactivity + progress gap + failures + missing assessments + grading blocks).",
+        "ungradedSubmissions": "Assignment submissions currently awaiting teacher review and grading.",
+        "negativeCourses": "Courses where the active learner count has declined compared to the previous period."
+      }
     },
     "kpiCharts": {
       "activeLearners": "Active learners",
@@ -6477,7 +6487,15 @@
       "colAction": "Recommended action",
       "na": "n/a",
       "searchPlaceholder": "Search learners, courses, or reason codes...",
-      "emptyMessage": "No at-risk learners are visible for the current filters."
+      "emptyMessage": "No at-risk learners are visible for the current filters.",
+      "gradeSubmissions": "Grade {count} pending submission(s) →",
+      "riskComponents": {
+        "inactivity": "Inactivity",
+        "progress": "Progress gap",
+        "failures": "Failures",
+        "missing": "Missing",
+        "grading": "Awaiting grade"
+      }
     },
     "gradingBacklog": {
       "title": "Grading backlog",

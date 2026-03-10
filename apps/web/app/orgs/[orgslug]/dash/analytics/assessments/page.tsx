@@ -39,7 +39,16 @@ export default async function AnalyticsAssessmentsPage(props: {
     return (
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
         <TeacherFilterBar orgslug={orgslug} path={`/orgs/${orgslug}/dash/analytics/assessments`} query={query} courseCount={assessments.course_options.length} courseOptions={assessments.course_options} cohortOptions={assessments.cohort_options} />
-        <AssessmentOutliersTable orgslug={orgslug} rows={assessments.items} storageKey="assessments-page" />
+        <div className="flex items-center justify-between text-sm text-slate-500">
+          <span>
+            {t('table.showingRows', {
+              from: (assessments.page - 1) * assessments.page_size + 1,
+              to: Math.min(assessments.page * assessments.page_size, assessments.total),
+              total: assessments.total,
+            })}
+          </span>
+        </div>
+        <AssessmentOutliersTable orgslug={orgslug} rows={assessments.items} storageKey="assessments-page" serverPaginated={true} />
         {totalPages > 1 ? (
           <div className="flex items-center justify-end gap-2">
             <Button variant="outline" size="sm" disabled={assessments.page <= 1} render={<Link href={`/orgs/${orgslug}/dash/analytics/assessments?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, assessments.page - 1)), page_size: String(assessments.page_size) }).toString()}`} />}>Prev</Button>

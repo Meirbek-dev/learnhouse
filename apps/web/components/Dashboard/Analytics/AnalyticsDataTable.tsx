@@ -27,6 +27,13 @@ interface AnalyticsDataTableProps<TData> {
   className?: string;
   pageSize?: number;
   storageKey?: string;
+  /**
+   * When true the caller is handling pagination server-side. Client-side
+   * pagination controls are hidden and all rows in `data` are rendered as one
+   * page. Pagination state is excluded from sessionStorage persistence so it
+   * does not conflict with the server page param.
+   */
+  serverPaginated?: boolean;
 }
 
 export default function AnalyticsDataTable<TData>({
@@ -37,13 +44,18 @@ export default function AnalyticsDataTable<TData>({
   className,
   pageSize = 20,
   storageKey,
+  serverPaginated = false,
 }: AnalyticsDataTableProps<TData>) {
   const t = useTranslations('TeacherAnalytics');
   const resolvedPlaceholder = searchPlaceholder ?? t('table.searchDefault');
   const resolvedEmpty = emptyMessage ?? t('table.emptyDefault');
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
-  const [pagination, setPagination] = React.useState<PaginationState>({ pageIndex: 0, pageSize });
+  const [pagination, setPagination] = React.useState<PaginationState>({
+    pageIndex: 0,
+    // When server handles pagination show all rows in the current page batch.
+    pageSize: serverPaginated ? data.length || pageSize : pageSize,
+  });
 
   React.useEffect(() => {
     if (!storageKey || typeof window === 'undefined') return;
@@ -57,19 +69,21 @@ export default function AnalyticsDataTable<TData>({
       };
       if (parsed.sorting) setSorting(parsed.sorting);
       if (typeof parsed.globalFilter === 'string') setGlobalFilter(parsed.globalFilter);
-      if (parsed.pagination) setPagination(parsed.pagination);
+      // Only restore client pagination when not server-paginated.
+      if (!serverPaginated && parsed.pagination) setPagination(parsed.pagination);
     } catch {
       window.sessionStorage.removeItem(`analytics-table:${storageKey}`);
     }
-  }, [storageKey]);
+  }, [storageKey, serverPaginated]);
 
   React.useEffect(() => {
     if (!storageKey || typeof window === 'undefined') return;
+    // Exclude pagination from storage when server manages it.
     window.sessionStorage.setItem(
       `analytics-table:${storageKey}`,
-      JSON.stringify({ sorting, globalFilter, pagination }),
+      JSON.stringify(serverPaginated ? { sorting, globalFilter } : { sorting, globalFilter, pagination }),
     );
-  }, [globalFilter, pagination, sorting, storageKey]);
+  }, [globalFilter, pagination, sorting, storageKey, serverPaginated]);
 
   const table = useReactTable({
     data,
@@ -81,7 +95,9 @@ export default function AnalyticsDataTable<TData>({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    // Only register client-side pagination when not server-paginated.
+    ...(serverPaginated ? {} : { getPaginationRowModel: getPaginationRowModel() }),
+    manualPagination: serverPaginated,
     globalFilterFn: (row, _columnId, filterValue) => {
       const normalizedFilter = String(filterValue).toLowerCase();
       return row
@@ -176,7 +192,7 @@ export default function AnalyticsDataTable<TData>({
         </TableBody>
       </Table>
 
-      {pageCount > 1 && (
+      {!serverPaginated && pageCount > 1 && (
         <div className="flex items-center justify-end gap-2">
           <Button
             variant="outline"

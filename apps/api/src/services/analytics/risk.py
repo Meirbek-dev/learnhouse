@@ -161,6 +161,7 @@ def build_risk_rows(context: AnalyticsContext, filters: AnalyticsFilters) -> lis
             AtRiskLearnerRow(
                 user_id=user_id,
                 course_id=course_id,
+                course_uuid=getattr(course, "course_uuid", None),
                 course_name=course.name,
                 user_display_name=display_name(user),
                 cohort_name=", ".join(cohort_names_for_user(context, user_id, filters.cohort_ids)) or None,

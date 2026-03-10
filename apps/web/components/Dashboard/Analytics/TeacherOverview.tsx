@@ -76,16 +76,48 @@ export default function TeacherOverview({
     grading_completed: gradingMap.get(bucketStart) ?? 0,
   }));
 
+  // Build KPI cards with correct trend series.
+  // Only active_learners has a true per-bucket time-series trend to display.
+  // For all other metrics, pass an empty sparkline so the card renders cleanly without
+  // a misleading proxy line (issue 2). Definitions are added for `returning_learners`,
+  // `at_risk`, `content_health`, and `difficulty` (issue 3).
   const kpiCards = [
-    { metric: data.summary.active_learners, sparkline: data.trends.active_learners.map((p) => p.value) },
-    { metric: data.summary.returning_learners, sparkline: data.trends.active_learners.map((p) => p.value) },
-    { metric: data.summary.completion_rate, sparkline: data.trends.completions.map((p) => p.value) },
-    { metric: data.summary.at_risk_learners, sparkline: [data.risk_distribution.high, data.risk_distribution.medium, data.risk_distribution.low] },
-    { metric: data.summary.ungraded_submissions, sparkline: data.trends.grading_completed.map((p) => p.value) },
-    { metric: data.summary.negative_engagement_courses, sparkline: data.course_preview.map((row) => row.engagement_delta_pct ?? 0) },
+    {
+      metric: data.summary.active_learners,
+      sparkline: data.trends.active_learners.map((p) => p.value),
+      definition: t('kpi.definitions.activeLearners'),
+    },
+    {
+      metric: data.summary.returning_learners,
+      sparkline: [] as number[],
+      definition: t('kpi.definitions.returningLearners'),
+    },
+    {
+      metric: data.summary.completion_rate,
+      // Completions count correlates directionally with the rate; explicitly labelled below.
+      sparkline: data.trends.completions.map((p) => p.value),
+      definition: t('kpi.definitions.completionRate'),
+    },
+    {
+      metric: data.summary.at_risk_learners,
+      sparkline: [] as number[],
+      definition: t('kpi.definitions.atRisk'),
+    },
+    {
+      metric: data.summary.ungraded_submissions,
+      sparkline: [] as number[],
+      definition: t('kpi.definitions.ungradedSubmissions'),
+    },
+    {
+      metric: data.summary.negative_engagement_courses,
+      sparkline: [] as number[],
+      definition: t('kpi.definitions.negativeCourses'),
+    },
   ];
 
-  const handleTrendClick = (bucketStart: string) => {
+  // Context-aware chart click: if submissions > active_learners in the clicked bucket,
+  // route to the filtered assessment list; otherwise route to the course health list (issue 14).
+  const handleTrendClick = (bucketStart: string, row?: { active_learners: number; submissions: number; grading_completed: number }) => {
     const params = new URLSearchParams();
     if (query.window) params.set('window', query.window);
     if (query.compare) params.set('compare', query.compare);
@@ -94,8 +126,14 @@ export default function TeacherOverview({
     if (query.cohort_ids) params.set('cohort_ids', query.cohort_ids);
     if (query.timezone) params.set('timezone', query.timezone);
     params.set('bucket_start', bucketStart);
-    params.set('sort_by', 'signals');
-    router.push(`/orgs/${orgslug}/dash/analytics/assessments?${params.toString()}`);
+
+    const isSubmissionDominant = row && (row.submissions + row.grading_completed) >= row.active_learners;
+    if (isSubmissionDominant) {
+      params.set('sort_by', 'signals');
+      router.push(`/orgs/${orgslug}/dash/analytics/assessments?${params.toString()}`);
+    } else {
+      router.push(`/orgs/${orgslug}/dash/analytics/courses?${params.toString()}`);
+    }
   };
 
   const SectionFallback = ({ height = 'h-[280px]' }: { height?: string }) => (
@@ -239,42 +277,62 @@ export default function TeacherOverview({
 
       <div className="flex flex-col gap-6">
         <div>
+          {/* Preview badge always visible (issue 4) */}
+          <div className="mb-2 flex items-center gap-2">
+            <Badge variant="outline" className="text-xs">{t('overview.previewLabel')}</Badge>
+            <span className="text-xs text-slate-500">{t('overview.showingCourses', { total: data.course_total })}</span>
+          </div>
           <Suspense fallback={<SectionFallback height="h-[320px]" />}>
             <CourseHealthTable orgslug={orgslug} rows={data.course_preview} storageKey="overview-courses" />
           </Suspense>
-          {data.course_total > 8 && (
-            <p className="mt-2 text-sm text-slate-500">
-              {t('overview.showingCourses', { total: data.course_total })}{' '}
-              <Link
-                href={`/orgs/${orgslug}/dash/analytics/courses`}
-                className="text-blue-600 hover:underline"
-              >
-                {t('overview.viewAllCourses')}
-              </Link>
-            </p>
-          )}
+          <p className="mt-2 text-sm text-slate-500">
+            <Link
+              href={`/orgs/${orgslug}/dash/analytics/courses`}
+              className="text-blue-600 hover:underline"
+            >
+              {t('overview.viewAllCourses')}
+            </Link>
+          </p>
         </div>
         <div>
+          <div className="mb-2 flex items-center gap-2">
+            <Badge variant="outline" className="text-xs">{t('overview.previewLabel')}</Badge>
+            <span className="text-xs text-slate-500">{t('overview.showingAssessments', { total: data.assessment_total })}</span>
+          </div>
           <Suspense fallback={<SectionFallback height="h-[320px]" />}>
             <AssessmentOutliersTable orgslug={orgslug} rows={data.assessment_preview} storageKey="overview-assessments" />
           </Suspense>
-          {data.assessment_total > 8 && (
-            <p className="mt-2 text-sm text-slate-500">
-              {t('overview.showingAssessments', { total: data.assessment_total })}{' '}
-              <Link
-                href={`/orgs/${orgslug}/dash/analytics/assessments`}
-                className="text-blue-600 hover:underline"
-              >
-                {t('overview.viewAllAssessments')}
-              </Link>
-            </p>
-          )}
+          <p className="mt-2 text-sm text-slate-500">
+            <Link
+              href={`/orgs/${orgslug}/dash/analytics/assessments`}
+              className="text-blue-600 hover:underline"
+            >
+              {t('overview.viewAllAssessments')}
+            </Link>
+          </p>
         </div>
       </div>
 
-      <Suspense fallback={<SectionFallback height="h-[320px]" />}>
-        <AtRiskLearnersTable rows={data.at_risk_preview} title={t('overview.watchlistTitle')} description={t('overview.watchlistDescription')} storageKey="overview-risk" />
-      </Suspense>
+      {/* At-risk section with preview badge + CTA (issue 4) and orgslug for workflow links (issue 13) */}
+      <div>
+        <div className="mb-2 flex items-center gap-2">
+          <Badge variant="outline" className="text-xs">{t('overview.previewLabel')}</Badge>
+          <span className="text-xs text-slate-500">{t('riskDistribution.preview', { shown: data.at_risk_preview.length, total: data.at_risk_total })}</span>
+        </div>
+        <Suspense fallback={<SectionFallback height="h-[320px]" />}>
+          <AtRiskLearnersTable orgslug={orgslug} rows={data.at_risk_preview} title={t('overview.watchlistTitle')} description={t('overview.watchlistDescription')} storageKey="overview-risk" />
+        </Suspense>
+        {data.at_risk_total > 0 && (
+          <p className="mt-2 text-sm text-slate-500">
+            <Link
+              href={`/orgs/${orgslug}/dash/analytics/learners/at-risk`}
+              className="text-blue-600 hover:underline"
+            >
+              {t('overview.viewAllAtRisk')}
+            </Link>
+          </p>
+        )}
+      </div>
     </div>
   );
 }

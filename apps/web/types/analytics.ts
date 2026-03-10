@@ -32,6 +32,8 @@ export interface MetricCard {
   label: string;
   unit: string | null;
   is_higher_better: boolean;
+  benchmark: number | null;
+  benchmark_label: string | null;
 }
 
 export interface TimeSeriesPoint {
@@ -60,6 +62,7 @@ export interface AlertItem {
 export interface AtRiskLearnerRow {
   user_id: number;
   course_id: number;
+  course_uuid: string | null;
   course_name: string;
   user_display_name: string;
   cohort_name: string | null;
@@ -107,6 +110,7 @@ export interface TeacherOverviewResponse {
   assessment_preview: AssessmentOutlierRow[];
   course_total: number;
   assessment_total: number;
+  at_risk_total: number;
   course_options: AnalyticsFilterOption[];
   cohort_options: AnalyticsFilterOption[];
 }

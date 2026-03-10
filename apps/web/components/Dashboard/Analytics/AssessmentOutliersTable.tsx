@@ -13,9 +13,10 @@ interface AssessmentOutliersTableProps {
   orgslug: string;
   rows: AssessmentOutlierRow[];
   storageKey?: string;
+  serverPaginated?: boolean;
 }
 
-export default function AssessmentOutliersTable({ orgslug, rows, storageKey }: AssessmentOutliersTableProps) {
+export default function AssessmentOutliersTable({ orgslug, rows, storageKey, serverPaginated }: AssessmentOutliersTableProps) {
   const t = useTranslations('TeacherAnalytics');
   const columns: ColumnDef<AssessmentOutlierRow>[] = [
     {
@@ -55,8 +56,8 @@ export default function AssessmentOutliersTable({ orgslug, rows, storageKey }: A
       cell: ({ row }) => {
         const v = row.original.difficulty_score;
         if (v === null) return t('atRisk.na');
-        // difficulty_score is on a 0–1 scale where 1 = hardest
-        return `${Math.round(v * 100)}%`;
+        // difficulty_score = round(100 - pass_rate, 2) → already on a 0–100 scale.
+        return `${Math.round(v)}%`;
       },
     },
     {
@@ -84,7 +85,7 @@ export default function AssessmentOutliersTable({ orgslug, rows, storageKey }: A
         <CardDescription>{t('assessmentOutliers.description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <AnalyticsDataTable columns={columns} data={rows} storageKey={storageKey} searchPlaceholder={t('assessmentOutliers.searchPlaceholder')} emptyMessage={t('assessmentOutliers.emptyMessage')} />
+        <AnalyticsDataTable columns={columns} data={rows} storageKey={storageKey} serverPaginated={serverPaginated} searchPlaceholder={t('assessmentOutliers.searchPlaceholder')} emptyMessage={t('assessmentOutliers.emptyMessage')} />
       </CardContent>
     </Card>
   );

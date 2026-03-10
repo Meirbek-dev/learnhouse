@@ -45,7 +45,17 @@ export default async function AnalyticsCoursesPage(props: {
           <CardContent className="text-sm text-slate-600">{t('pages.courseRankingDescription')}</CardContent>
         </Card>
         <TeacherFilterBar orgslug={orgslug} path={`/orgs/${orgslug}/dash/analytics/courses`} query={query} courseCount={courseList.total} courseOptions={courseList.course_options} cohortOptions={courseList.cohort_options} />
-        <CourseHealthTable orgslug={orgslug} rows={courseList.items} storageKey="courses-page" />
+        {/* Server-side row count so users know how many rows exist across pages */}
+        <div className="flex items-center justify-between text-sm text-slate-500">
+          <span>
+            {t('table.showingRows', {
+              from: (courseList.page - 1) * courseList.page_size + 1,
+              to: Math.min(courseList.page * courseList.page_size, courseList.total),
+              total: courseList.total,
+            })}
+          </span>
+        </div>
+        <CourseHealthTable orgslug={orgslug} rows={courseList.items} storageKey="courses-page" serverPaginated={true} />
         {totalPages > 1 ? (
           <div className="flex items-center justify-end gap-2">
             <Button variant="outline" size="sm" disabled={courseList.page <= 1} render={<Link href={`/orgs/${orgslug}/dash/analytics/courses?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, courseList.page - 1)), page_size: String(courseList.page_size) }).toString()}`} />}>Prev</Button>

@@ -13,6 +13,9 @@ class MetricCard(PydanticStrictBaseModel):
     label: str
     unit: str | None = None
     is_higher_better: bool = True
+    # Optional comparative baseline shown alongside the current value.
+    benchmark: float | None = None
+    benchmark_label: str | None = None
 
 
 class TimeSeriesPoint(PydanticStrictBaseModel):
@@ -52,6 +55,7 @@ class RiskDistributionCounts(PydanticStrictBaseModel):
 class AtRiskLearnerRow(PydanticStrictBaseModel):
     user_id: int
     course_id: int
+    course_uuid: str | None = None
     course_name: str
     user_display_name: str
     cohort_name: str | None = None
@@ -105,6 +109,7 @@ class TeacherOverviewResponse(PydanticStrictBaseModel):
     assessment_preview: list["AssessmentOutlierRow"]
     course_total: int = 0
     assessment_total: int = 0
+    at_risk_total: int = 0
     course_options: list[AnalyticsFilterOption] = []
     cohort_options: list[AnalyticsFilterOption] = []
 

@@ -38,7 +38,7 @@ from src.services.analytics.schemas import (
 from src.services.analytics.scope import TeacherAnalyticsScope
 
 
-def _metric(label: str, value: float, previous: float | None, *, unit: str | None = None, is_higher_better: bool = True) -> MetricCard:
+def _metric(label: str, value: float, previous: float | None, *, unit: str | None = None, is_higher_better: bool = True, benchmark: float | None = None, benchmark_label: str | None = None) -> MetricCard:
     delta_value = round(value - previous, 1) if previous is not None else None
     # When previous is 0 and current is non-zero, delta_pct is infinite — return None and
     # let the frontend display "no prior data" rather than the misleading "Stable" label.
@@ -51,6 +51,8 @@ def _metric(label: str, value: float, previous: float | None, *, unit: str | Non
         label=label,
         unit=unit,
         is_higher_better=is_higher_better,
+        benchmark=round(benchmark, 1) if benchmark is not None else None,
+        benchmark_label=benchmark_label,
     )
 
 
@@ -256,12 +258,18 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
                 float(previous_completion_rate),
                 unit="%",
                 is_higher_better=True,
+                # Org benchmark: median completion rate across all scoped courses.
+                benchmark=round(sorted([row.completion_rate for row in course_rows])[len(course_rows) // 2], 1) if course_rows else None,
+                benchmark_label="Медиана по курсам",
             ),
             at_risk_learners=_metric(
                 "Учащиеся в зоне риска",
                 float(teacher_rollup.at_risk_learners if teacher_rollup is not None else at_risk_count),
                 float(previous_at_risk) if previous_at_risk is not None else None,
                 is_higher_better=False,
+                # Benchmark: share of enrolled learners that are at risk (to contextualise the raw count).
+                benchmark=round(safe_pct(at_risk_count, enrolled) or 0.0, 1) if enrolled else None,
+                benchmark_label="% от зачисленных",
             ),
             ungraded_submissions=_metric(
                 "Непроверенные отправки",
@@ -274,6 +282,9 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
                 float(teacher_rollup.courses_with_negative_engagement if teacher_rollup is not None else negative_engagement_courses),
                 float(previous_negative_engagement) if previous_negative_engagement is not None else None,
                 is_higher_better=False,
+                # Benchmark: share of all scoped courses with negative engagement.
+                benchmark=round(safe_pct(negative_engagement_courses, len(course_rows)) or 0.0, 1) if course_rows else None,
+                benchmark_label="% от курсов",
             ),
         ),
         trends=trends,
@@ -284,6 +295,7 @@ def get_teacher_overview(db_session: Session, scope: TeacherAnalyticsScope, filt
         assessment_preview=assessment_rows[:8],
         course_total=len(course_rows),
         assessment_total=len(assessment_rows),
+        at_risk_total=len(risk_rows),
         course_options=[
             AnalyticsFilterOption(label=context.courses_by_id[course_id].name, value=str(course_id))
             for course_id in sorted(context.courses_by_id)

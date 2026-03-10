@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 
 interface TeacherKpiCardsProps {
-  cards: Array<{ metric: MetricCard; sparkline: number[] }>;
+  cards: Array<{ metric: MetricCard; sparkline: number[]; definition?: string }>;
 }
 
 const iconForDirection = (direction: MetricCard['direction']) => {
@@ -55,7 +55,7 @@ export default function TeacherKpiCards({ cards }: TeacherKpiCardsProps) {
   const t = useTranslations('TeacherAnalytics');
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {cards.map(({ metric, sparkline }) => {
+      {cards.map(({ metric, sparkline, definition }) => {
         const displayValue = metric.unit === '%'
           ? `${metric.value.toLocaleString()}%`
           : metric.value.toLocaleString();
@@ -88,9 +88,15 @@ export default function TeacherKpiCards({ cards }: TeacherKpiCardsProps) {
             className="border-slate-200 bg-white/90 shadow-sm"
           >
             <CardHeader className="flex-row items-start justify-between gap-4">
-              <div>
+              <div className="min-w-0 flex-1">
                 <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{metric.label}</div>
                 <CardTitle className="mt-3 text-3xl font-semibold text-slate-900">{displayValue}</CardTitle>
+                {/* Benchmark baseline (issue 15) */}
+                {metric.benchmark !== null && metric.benchmark !== undefined && (
+                  <div className="mt-1 text-xs text-slate-500">
+                    {metric.benchmark_label}: {metric.unit === '%' ? `${metric.benchmark}%` : metric.benchmark}
+                  </div>
+                )}
                 <Sparkline values={sparkline} positive={metric.is_higher_better ?? true} />
               </div>
               {metric.delta_value !== null && (
@@ -100,10 +106,16 @@ export default function TeacherKpiCards({ cards }: TeacherKpiCardsProps) {
                 </Badge>
               )}
             </CardHeader>
-            <CardContent className="text-sm text-slate-600">
-              {metric.delta_value === null
-                ? t('kpi.noComparison')
-                : t('kpi.changePeriod', { delta: `${metric.delta_value > 0 ? '+' : ''}${metric.delta_value}${metric.unit ?? ''}` })}
+            <CardContent className="space-y-1">
+              <div className="text-sm text-slate-600">
+                {metric.delta_value === null
+                  ? t('kpi.noComparison')
+                  : t('kpi.changePeriod', { delta: `${metric.delta_value > 0 ? '+' : ''}${metric.delta_value}${metric.unit ?? ''}` })}
+              </div>
+              {/* Metric definition for returning learners, at-risk, content health, difficulty (issue 3) */}
+              {definition && (
+                <div className="text-xs leading-4 text-slate-400">{definition}</div>
+              )}
             </CardContent>
           </Card>
         );

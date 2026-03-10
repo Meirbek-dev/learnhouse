@@ -477,7 +477,8 @@ def get_teacher_assessment_list(db_session: Session, scope: TeacherAnalyticsScop
                 for group in sorted(usergroups, key=lambda item: item.name.lower())
             ],
         )
-    context = load_analytics_context(db_session, scope.course_ids)
+    previous_start, _ = filters.previous_window_bounds()
+    context = load_analytics_context(db_session, scope.course_ids, activity_start=previous_start)
     rows = build_assessment_rows(context, filters)
     paged_rows = rows[filters.offset : filters.offset + filters.page_size]
     return TeacherAssessmentListResponse(
@@ -505,7 +506,25 @@ def get_teacher_assessment_detail(
     assessment_id: int,
     filters: AnalyticsFilters,
 ) -> TeacherAssessmentDetailResponse:
-    context = load_analytics_context(db_session, scope.course_ids)
+    # Resolve course_id with a targeted query before loading the full analytics context
+    # so we only pull data for the one course that hosts this assessment.
+    scoped_course_id: int | None = None
+    if assessment_type == "assignment":
+        row = db_session.exec(select(Assignment).where(Assignment.id == assessment_id)).first()
+        if row and row.course_id in scope.course_ids:
+            scoped_course_id = row.course_id
+    elif assessment_type == "exam":
+        row = db_session.exec(select(Exam).where(Exam.id == assessment_id)).first()
+        if row and row.course_id in scope.course_ids:
+            scoped_course_id = row.course_id
+    else:
+        # Quiz and code_challenge assessments are Activity rows with a course_id field
+        row = db_session.exec(select(Activity).where(Activity.id == assessment_id)).first()
+        if row and row.course_id in scope.course_ids:
+            scoped_course_id = row.course_id
+
+    context_course_ids = [scoped_course_id] if scoped_course_id is not None else scope.course_ids
+    context = load_analytics_context(db_session, context_course_ids)
     allowed_user_ids = cohort_user_ids(context, filters.cohort_ids)
     snapshots = progress_snapshots(context, allowed_user_ids)
     eligible_by_course: dict[int, set[int]] = defaultdict(set)

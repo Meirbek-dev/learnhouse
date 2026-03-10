@@ -12,9 +12,10 @@ interface CourseHealthTableProps {
   orgslug: string;
   rows: TeacherCourseRow[];
   storageKey?: string;
+  serverPaginated?: boolean;
 }
 
-export default function CourseHealthTable({ orgslug, rows, storageKey }: CourseHealthTableProps) {
+export default function CourseHealthTable({ orgslug, rows, storageKey, serverPaginated }: CourseHealthTableProps) {
   const t = useTranslations('TeacherAnalytics');
   const columns: ColumnDef<TeacherCourseRow>[] = [
     {
@@ -40,8 +41,8 @@ export default function CourseHealthTable({ orgslug, rows, storageKey }: CourseH
       cell: ({ row }) => {
         const v = row.original.content_health_score;
         if (v == null) return t('atRisk.na');
-        // Score is on a 0–1 scale; render as a percentage for human readability.
-        return `${Math.round(v * 100)}%`;
+        // Score is already on a 0–100 scale (freshness × 0.55 + avg_progress × 0.45).
+        return `${Math.round(v)}%`;
       },
     },
     {
@@ -65,7 +66,7 @@ export default function CourseHealthTable({ orgslug, rows, storageKey }: CourseH
         <CardDescription>{t('courseHealth.description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <AnalyticsDataTable columns={columns} data={rows} storageKey={storageKey} searchPlaceholder={t('courseHealth.searchPlaceholder')} emptyMessage={t('courseHealth.emptyMessage')} />
+        <AnalyticsDataTable columns={columns} data={rows} storageKey={storageKey} serverPaginated={serverPaginated} searchPlaceholder={t('courseHealth.searchPlaceholder')} emptyMessage={t('courseHealth.emptyMessage')} />
       </CardContent>
     </Card>
   );

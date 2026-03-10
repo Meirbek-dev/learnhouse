@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getAnalyticsReasonCodeLabel, getAnalyticsRiskLevelLabel } from '@/lib/analytics/labels';
 import AnalyticsDataTable from './AnalyticsDataTable';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 interface AtRiskLearnersTableProps {
@@ -13,6 +14,9 @@ interface AtRiskLearnersTableProps {
   description?: string;
   rows: AtRiskLearnerRow[];
   storageKey?: string;
+  serverPaginated?: boolean;
+  /** Organisation slug used to build deep-links from risk rows. */
+  orgslug?: string;
 }
 
 const riskVariant = (level: AtRiskLearnerRow['risk_level']) => {
@@ -26,6 +30,8 @@ export default function AtRiskLearnersTable({
   description,
   rows,
   storageKey,
+  serverPaginated,
+  orgslug,
 }: AtRiskLearnersTableProps) {
   const t = useTranslations('TeacherAnalytics');
   const resolvedTitle = title ?? t('atRisk.defaultTitle');
@@ -34,12 +40,23 @@ export default function AtRiskLearnersTable({
     {
       accessorKey: 'user_display_name',
       header: t('atRisk.colLearner'),
-      cell: ({ row }) => (
-        <div>
-          <div className="font-medium text-slate-900">{row.original.user_display_name}</div>
-          <div className="text-xs text-slate-500">{t('atRisk.userNumber', { userId: row.original.user_id })}</div>
-        </div>
-      ),
+      cell: ({ row }) => {
+        const courseHref =
+          orgslug && row.original.course_uuid
+            ? `/orgs/${orgslug}/dash/analytics/courses/${row.original.course_uuid}`
+            : undefined;
+        return (
+          <div>
+            <div className="font-medium text-slate-900">{row.original.user_display_name}</div>
+            <div className="text-xs text-slate-500">{t('atRisk.userNumber', { userId: row.original.user_id })}</div>
+            {courseHref && (
+              <Link href={courseHref} className="mt-0.5 block text-xs text-emerald-700 hover:underline">
+                {row.original.course_name}
+              </Link>
+            )}
+          </div>
+        );
+      },
     },
     { accessorKey: 'course_name', header: t('atRisk.colCourse') },
     {
@@ -55,14 +72,29 @@ export default function AtRiskLearnersTable({
     {
       accessorKey: 'risk_score',
       header: t('atRisk.colRisk'),
-      cell: ({ row }) => (
-        <div className="space-y-1">
-          <Badge variant={riskVariant(row.original.risk_level)}>{getAnalyticsRiskLevelLabel(t, row.original.risk_level)} · {row.original.risk_score}</Badge>
-          <div className="max-w-[260px] text-[11px] leading-4 text-slate-500">
-            I {Math.round(row.original.risk_components.inactivity ?? 0)} · P {Math.round(row.original.risk_components.progress ?? 0)} · F {Math.round(row.original.risk_components.failures ?? 0)} · M {Math.round(row.original.risk_components.missing ?? 0)} · G {Math.round(row.original.risk_components.grading ?? 0)}
+      cell: ({ row }) => {
+        const c = row.original.risk_components;
+        return (
+          <div className="space-y-1">
+            <Badge variant={riskVariant(row.original.risk_level)}>
+              {getAnalyticsRiskLevelLabel(t, row.original.risk_level)} · {row.original.risk_score}
+            </Badge>
+            {/* Readable component breakdown replacing the old I/P/F/M/G abbreviations */}
+            <div className="max-w-[280px] text-[11px] leading-4 text-slate-500">
+              {[
+                [t('atRisk.riskComponents.inactivity'), c.inactivity],
+                [t('atRisk.riskComponents.progress'), c.progress],
+                [t('atRisk.riskComponents.failures'), c.failures],
+                [t('atRisk.riskComponents.missing'), c.missing],
+                [t('atRisk.riskComponents.grading'), c.grading],
+              ]
+                .filter(([, v]) => (v as number) > 0)
+                .map(([label, v]) => `${label} ${Math.round(v as number)}`)
+                .join(' · ')}
+            </div>
           </div>
-        </div>
-      ),
+        );
+      },
     },
     {
       accessorKey: 'reason_codes',
@@ -72,7 +104,24 @@ export default function AtRiskLearnersTable({
     {
       accessorKey: 'recommended_action',
       header: t('atRisk.colAction'),
-      cell: ({ row }) => <div className="max-w-[280px] whitespace-normal text-sm text-slate-700">{row.original.recommended_action}</div>,
+      cell: ({ row }) => {
+        const hasGradingBlock = row.original.open_grading_blocks > 0;
+        const gradingHref = orgslug && row.original.course_uuid
+          ? `/orgs/${orgslug}/dash/analytics/courses/${row.original.course_uuid}`
+          : orgslug
+          ? `/orgs/${orgslug}/dash/assignments`
+          : undefined;
+        return (
+          <div className="max-w-[280px] space-y-1 whitespace-normal text-sm text-slate-700">
+            <span>{row.original.recommended_action}</span>
+            {hasGradingBlock && gradingHref && (
+              <Link href={gradingHref} className="block text-xs text-emerald-700 hover:underline">
+                {t('atRisk.gradeSubmissions', { count: row.original.open_grading_blocks })} →
+              </Link>
+            )}
+          </div>
+        );
+      },
     },
   ];
 
@@ -83,8 +132,9 @@ export default function AtRiskLearnersTable({
         <CardDescription>{resolvedDescription}</CardDescription>
       </CardHeader>
       <CardContent>
-        <AnalyticsDataTable columns={columns} data={rows} storageKey={storageKey} searchPlaceholder={t('atRisk.searchPlaceholder')} emptyMessage={t('atRisk.emptyMessage')} />
+        <AnalyticsDataTable columns={columns} data={rows} storageKey={storageKey} serverPaginated={serverPaginated} searchPlaceholder={t('atRisk.searchPlaceholder')} emptyMessage={t('atRisk.emptyMessage')} />
       </CardContent>
     </Card>
   );
 }
+

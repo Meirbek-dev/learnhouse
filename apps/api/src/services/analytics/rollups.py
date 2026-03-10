@@ -187,7 +187,10 @@ def refresh_teacher_analytics_rollups(db_session: Session, *, org_id: int | None
             cohort_ids=[],
             has_org_scope=True,
         )
-        context = load_analytics_context(db_session, course_ids)
+        # Bound the context load to the previous-period start (2× the window) so the nightly
+        # rollup refresh does not repeatedly scan unbounded historical data (issue 12).
+        preliminary_previous_start, _ = filters.previous_window_bounds(now=datetime.now(tz=UTC))
+        context = load_analytics_context(db_session, course_ids, activity_start=preliminary_previous_start)
         course_rows = build_course_rows(scope, filters, db_session, context=context)[1]
         assessment_rows = build_assessment_rows(context, filters)
         risk_rows = build_risk_rows(context, filters)

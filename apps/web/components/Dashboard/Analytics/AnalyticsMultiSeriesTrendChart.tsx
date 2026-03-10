@@ -19,7 +19,7 @@ interface AnalyticsMultiSeriesTrendChartProps {
   title: string;
   description: string;
   data: AnalyticsMultiSeriesTrendRow[];
-  onBucketClick?: (bucketStart: string) => void;
+  onBucketClick?: (bucketStart: string, row?: AnalyticsMultiSeriesTrendRow) => void;
 }
 
 interface AnalyticsTrendChartClickState {
@@ -32,9 +32,10 @@ export default function AnalyticsMultiSeriesTrendChart({ title, description, dat
   const t = useTranslations('TeacherAnalytics');
 
   const handleChartClick = (state: AnalyticsTrendChartClickState | undefined) => {
-    const bucketStart = state?.activePayload?.[0]?.payload?.bucket_start;
+    const payload = state?.activePayload?.[0]?.payload;
+    const bucketStart = payload?.bucket_start;
     if (bucketStart) {
-      onBucketClick?.(bucketStart);
+      onBucketClick?.(bucketStart, payload);
     }
   };
 

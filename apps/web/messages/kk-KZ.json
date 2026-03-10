@@ -6274,7 +6274,9 @@
       "showingAssessments": "{total} бағалаудың 8-і көрсетілуде.",
       "viewAllAssessments": "Барлығын қарау →",
       "watchlistTitle": "Шұғыл бақылау тізімі",
-      "watchlistDescription": "Осы аптада хабарласуды қажет ететін ең жоғары тәуекелдегі оқушылар."
+      "watchlistDescription": "Осы аптада хабарласуды қажет ететін ең жоғары тәуекелдегі оқушылар.",
+      "previewLabel": "Алдын ала қарау",
+      "viewAllAtRisk": "Тәуекелдегі оқушылардың толық тізімі →"
     },
     "filters": {
       "label": "Мұғалімнің аналитикасы",
@@ -6368,7 +6370,15 @@
       "stable": "тұрақты",
       "noData": "деректер жоқ",
       "noComparison": "Бұл метрика үшін ағымдағы нұсқада салыстыру қол жетімді емес.",
-      "changePeriod": "Алдыңғы кезеңмен салыстырғандағы өзгеріс: {delta}"
+      "changePeriod": "Алдыңғы кезеңмен салыстырғандағы өзгеріс: {delta}",
+      "definitions": {
+        "activeLearners": "Unique learners who completed at least one activity in the selected window.",
+        "returningLearners": "Learners who were also active in the immediately preceding period of equal length.",
+        "completionRate": "Percentage of enrolled learners who have fully completed the course.",
+        "atRisk": "Learners scoring 40+ on the composite risk index (inactivity + progress gap + failures + missing assessments + grading blocks).",
+        "ungradedSubmissions": "Assignment submissions currently awaiting teacher review and grading.",
+        "negativeCourses": "Courses where the active learner count has declined compared to the previous period."
+      }
     },
     "kpiCharts": {
       "activeLearners": "Белсенді оқушылар",
@@ -6477,7 +6487,15 @@
       "colAction": "Ұсынылатын іс-әрекет",
       "na": "жоқ",
       "searchPlaceholder": "Оқушылар, курстар немесе себеп кодтары бойынша іздеу...",
-      "emptyMessage": "Ағымдағы фильтрлер үшін тәуекелдегі оқушылар жоқ."
+      "emptyMessage": "Ағымдағы фильтрлер үшін тәуекелдегі оқушылар жоқ.",
+      "gradeSubmissions": "Grade {count} pending submission(s) →",
+      "riskComponents": {
+        "inactivity": "Белсенсіздік",
+        "progress": "Прогресс олқылығы",
+        "failures": "Сәтсіздіктер",
+        "missing": "Жіберілген",
+        "grading": "Тексеру күтілуде"
+      }
     },
     "gradingBacklog": {
       "title": "Бағалау кезегі",

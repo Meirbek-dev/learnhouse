@@ -270,7 +270,10 @@ def get_teacher_course_list(db_session: Session, scope: TeacherAnalyticsScope, f
                 for group in sorted(usergroups, key=lambda item: item.name.lower())
             ],
         )
-    context = load_analytics_context(db_session, scope.course_ids)
+    # Bound the context load to the previous-period start so assessment data
+    # older than the comparison window is not loaded into memory.
+    previous_start, _ = filters.previous_window_bounds()
+    context = load_analytics_context(db_session, scope.course_ids, activity_start=previous_start)
     generated_at, rows = build_course_rows(scope, filters, db_session, context=context)
     paged_rows = rows[filters.offset : filters.offset + filters.page_size]
     return TeacherCourseListResponse(
@@ -293,7 +296,9 @@ def get_teacher_course_list(db_session: Session, scope: TeacherAnalyticsScope, f
 
 def get_teacher_course_detail(db_session: Session, scope: TeacherAnalyticsScope, course_id: int, filters: AnalyticsFilters) -> TeacherCourseDetailResponse:
     ensure_course_in_scope(scope, course_id)
-    context = load_analytics_context(db_session, scope.course_ids)
+    # Load only the single requested course instead of the full teacher scope.
+    # This cuts context-load cost proportionally to the number of courses the teacher manages.
+    context = load_analytics_context(db_session, [course_id])
     allowed_user_ids = cohort_user_ids(context, filters.cohort_ids)
     course = context.courses_by_id.get(course_id)
     if course is None:
