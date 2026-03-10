@@ -1,14 +1,14 @@
 'use client';
 
-import type { AnalyticsFilterOption, AnalyticsQuery } from '@/types/analytics';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import { getAnalyticsBucketLabel, getAnalyticsCompareLabel } from '@/lib/analytics/labels';
-import { Filter, Globe2 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
+import type { AnalyticsFilterOption, AnalyticsQuery } from '@/types/analytics';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMemo, useState, useTransition } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Filter, Globe2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 // Common IANA timezone identifiers for the select. These cover almost all deployed users.
 const COMMON_TIMEZONES = [
@@ -38,12 +38,19 @@ interface TeacherFilterBarProps {
   cohortOptions?: AnalyticsFilterOption[];
 }
 
-const windows: Array<NonNullable<AnalyticsQuery['window']>> = ['7d', '28d', '90d'];
+const windows: NonNullable<AnalyticsQuery['window']>[] = ['7d', '28d', '90d'];
 
-const compareOptions: Array<NonNullable<AnalyticsQuery['compare']>> = ['previous_period', 'none'];
-const bucketOptions: Array<NonNullable<AnalyticsQuery['bucket']>> = ['day', 'week'];
+const compareOptions: NonNullable<AnalyticsQuery['compare']>[] = ['previous_period', 'none'];
+const bucketOptions: NonNullable<AnalyticsQuery['bucket']>[] = ['day', 'week'];
 
-export default function TeacherFilterBar({ orgslug, path, query, courseCount, courseOptions = [], cohortOptions = [] }: TeacherFilterBarProps) {
+export default function TeacherFilterBar({
+  orgslug,
+  path,
+  query,
+  courseCount,
+  courseOptions = [],
+  cohortOptions = [],
+}: TeacherFilterBarProps) {
   const t = useTranslations('TeacherAnalytics');
   const router = useRouter();
   const pathname = usePathname();
@@ -101,7 +108,9 @@ export default function TeacherFilterBar({ orgslug, path, query, courseCount, co
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-600">
           <Badge variant="outline">{t('filters.scopedCourses', { count: courseCount })}</Badge>
-          <Badge variant="outline">{t('filters.buckets', { bucket: getAnalyticsBucketLabel(t, query.bucket || 'day') })}</Badge>
+          <Badge variant="outline">
+            {t('filters.buckets', { bucket: getAnalyticsBucketLabel(t, query.bucket || 'day') })}
+          </Badge>
           <Badge variant="outline">{getAnalyticsCompareLabel(t, query.compare || 'previous_period')}</Badge>
           <Badge variant="outline">
             <Globe2 className="mr-1 h-3.5 w-3.5" />
@@ -115,72 +124,157 @@ export default function TeacherFilterBar({ orgslug, path, query, courseCount, co
           }}
           className="mt-4 grid gap-3 lg:grid-cols-6"
         >
-          <NativeSelect value={formState.window} onChange={(event) => setFormState((state) => ({ ...state, window: event.target.value as NonNullable<AnalyticsQuery['window']> }))} className="w-full">
+          <NativeSelect
+            value={formState.window}
+            onChange={(event) =>
+              setFormState((state) => ({
+                ...state,
+                window: event.target.value as NonNullable<AnalyticsQuery['window']>,
+              }))
+            }
+            className="w-full"
+          >
             {windows.map((windowValue) => (
-              <NativeSelectOption key={windowValue} value={windowValue}>
+              <NativeSelectOption
+                key={windowValue}
+                value={windowValue}
+              >
                 {t('filters.windowPrefix', { window: windowValue })}
               </NativeSelectOption>
             ))}
           </NativeSelect>
 
-          <NativeSelect value={formState.compare} onChange={(event) => setFormState((state) => ({ ...state, compare: event.target.value as NonNullable<AnalyticsQuery['compare']> }))} className="w-full">
+          <NativeSelect
+            value={formState.compare}
+            onChange={(event) =>
+              setFormState((state) => ({
+                ...state,
+                compare: event.target.value as NonNullable<AnalyticsQuery['compare']>,
+              }))
+            }
+            className="w-full"
+          >
             {compareOptions.map((compareValue) => (
-              <NativeSelectOption key={compareValue} value={compareValue}>
+              <NativeSelectOption
+                key={compareValue}
+                value={compareValue}
+              >
                 {t('filters.comparePrefix', { compare: getAnalyticsCompareLabel(t, compareValue) })}
               </NativeSelectOption>
             ))}
           </NativeSelect>
 
-          <NativeSelect value={formState.bucket} onChange={(event) => setFormState((state) => ({ ...state, bucket: event.target.value as NonNullable<AnalyticsQuery['bucket']> }))} className="w-full">
+          <NativeSelect
+            value={formState.bucket}
+            onChange={(event) =>
+              setFormState((state) => ({
+                ...state,
+                bucket: event.target.value as NonNullable<AnalyticsQuery['bucket']>,
+              }))
+            }
+            className="w-full"
+          >
             {bucketOptions.map((bucketValue) => (
-              <NativeSelectOption key={bucketValue} value={bucketValue}>
+              <NativeSelectOption
+                key={bucketValue}
+                value={bucketValue}
+              >
                 {t('filters.bucketPrefix', { bucket: getAnalyticsBucketLabel(t, bucketValue) })}
               </NativeSelectOption>
             ))}
           </NativeSelect>
 
-          <NativeSelect value={formState.course_ids} onChange={(event) => setFormState((state) => ({ ...state, course_ids: event.target.value }))} className="w-full">
+          <NativeSelect
+            value={formState.course_ids}
+            onChange={(event) => setFormState((state) => ({ ...state, course_ids: event.target.value }))}
+            className="w-full"
+          >
             <NativeSelectOption value="">{t('filters.allCourses')}</NativeSelectOption>
             {courseOptions.map((option) => (
-              <NativeSelectOption key={option.value} value={option.value}>
+              <NativeSelectOption
+                key={option.value}
+                value={option.value}
+              >
                 {option.label}
               </NativeSelectOption>
             ))}
           </NativeSelect>
 
-          <NativeSelect value={formState.cohort_ids} onChange={(event) => setFormState((state) => ({ ...state, cohort_ids: event.target.value }))} className="w-full">
+          <NativeSelect
+            value={formState.cohort_ids}
+            onChange={(event) => setFormState((state) => ({ ...state, cohort_ids: event.target.value }))}
+            className="w-full"
+          >
             <NativeSelectOption value="">{t('filters.allCohorts')}</NativeSelectOption>
             {cohortOptions.map((option) => (
-              <NativeSelectOption key={option.value} value={option.value}>
+              <NativeSelectOption
+                key={option.value}
+                value={option.value}
+              >
                 {option.label}
               </NativeSelectOption>
             ))}
           </NativeSelect>
 
-          <NativeSelect value={formState.timezone} onChange={(event) => setFormState((state) => ({ ...state, timezone: event.target.value }))} className="w-full">
+          <NativeSelect
+            value={formState.timezone}
+            onChange={(event) => setFormState((state) => ({ ...state, timezone: event.target.value }))}
+            className="w-full"
+          >
             {COMMON_TIMEZONES.map((tz) => (
-              <NativeSelectOption key={tz} value={tz}>
+              <NativeSelectOption
+                key={tz}
+                value={tz}
+              >
                 {tz}
               </NativeSelectOption>
             ))}
           </NativeSelect>
 
-          <NativeSelect value={formState.sort_by} onChange={(event) => setFormState((state) => ({ ...state, sort_by: event.target.value }))} className="w-full lg:col-span-2">
+          <NativeSelect
+            value={formState.sort_by}
+            onChange={(event) => setFormState((state) => ({ ...state, sort_by: event.target.value }))}
+            className="w-full lg:col-span-2"
+          >
             {sortOptions.map((option) => (
-              <NativeSelectOption key={option.value || 'default'} value={option.value}>
+              <NativeSelectOption
+                key={option.value || 'default'}
+                value={option.value}
+              >
                 {option.label}
               </NativeSelectOption>
             ))}
           </NativeSelect>
 
-          <NativeSelect value={formState.sort_order} onChange={(event) => setFormState((state) => ({ ...state, sort_order: event.target.value as NonNullable<AnalyticsQuery['sort_order']> }))} className="w-full">
+          <NativeSelect
+            value={formState.sort_order}
+            onChange={(event) =>
+              setFormState((state) => ({
+                ...state,
+                sort_order: event.target.value as NonNullable<AnalyticsQuery['sort_order']>,
+              }))
+            }
+            className="w-full"
+          >
             <NativeSelectOption value="desc">{t('filters.descending')}</NativeSelectOption>
             <NativeSelectOption value="asc">{t('filters.ascending')}</NativeSelectOption>
           </NativeSelect>
 
           <div className="flex gap-2 lg:col-span-3 lg:justify-end">
-            <Button type="submit" variant="default" disabled={isPending}>{t('filters.applyFilters')}</Button>
-            <Button type="button" variant="outline" onClick={() => startTransition(() => router.push(resetHref, { scroll: false }))}>{t('filters.reset')}</Button>
+            <Button
+              type="submit"
+              variant="default"
+              disabled={isPending}
+            >
+              {t('filters.applyFilters')}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => startTransition(() => router.push(resetHref, { scroll: false }))}
+            >
+              {t('filters.reset')}
+            </Button>
           </div>
         </form>
       </div>

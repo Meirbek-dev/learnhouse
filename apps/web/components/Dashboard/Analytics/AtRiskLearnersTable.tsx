@@ -1,13 +1,13 @@
 'use client';
 
-import type { ColumnDef } from '@tanstack/react-table';
-import type { AtRiskLearnerRow } from '@/types/analytics';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getAnalyticsReasonCodeLabel, getAnalyticsRiskLevelLabel } from '@/lib/analytics/labels';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import type { AtRiskLearnerRow } from '@/types/analytics';
+import type { ColumnDef } from '@tanstack/react-table';
 import AnalyticsDataTable from './AnalyticsDataTable';
-import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
 interface AtRiskLearnersTableProps {
   title?: string;
@@ -50,7 +50,10 @@ export default function AtRiskLearnersTable({
             <div className="font-medium text-slate-900">{row.original.user_display_name}</div>
             <div className="text-xs text-slate-500">{t('atRisk.userNumber', { userId: row.original.user_id })}</div>
             {courseHref && (
-              <Link href={courseHref} className="mt-0.5 block text-xs text-emerald-700 hover:underline">
+              <Link
+                href={courseHref}
+                className="mt-0.5 block text-xs text-emerald-700 hover:underline"
+              >
                 {row.original.course_name}
               </Link>
             )}
@@ -67,7 +70,8 @@ export default function AtRiskLearnersTable({
     {
       accessorKey: 'days_since_last_activity',
       header: t('atRisk.colInactivity'),
-      cell: ({ row }) => (row.original.days_since_last_activity === null ? t('atRisk.na') : `${row.original.days_since_last_activity}d`),
+      cell: ({ row }) =>
+        row.original.days_since_last_activity === null ? t('atRisk.na') : `${row.original.days_since_last_activity}d`,
     },
     {
       accessorKey: 'risk_score',
@@ -99,23 +103,31 @@ export default function AtRiskLearnersTable({
     {
       accessorKey: 'reason_codes',
       header: t('atRisk.colReasons'),
-      cell: ({ row }) => <div className="max-w-[220px] whitespace-normal text-xs text-slate-600">{row.original.reason_codes.map((code) => getAnalyticsReasonCodeLabel(t, code)).join(', ')}</div>,
+      cell: ({ row }) => (
+        <div className="max-w-[220px] whitespace-normal text-xs text-slate-600">
+          {row.original.reason_codes.map((code) => getAnalyticsReasonCodeLabel(t, code)).join(', ')}
+        </div>
+      ),
     },
     {
       accessorKey: 'recommended_action',
       header: t('atRisk.colAction'),
       cell: ({ row }) => {
         const hasGradingBlock = row.original.open_grading_blocks > 0;
-        const gradingHref = orgslug && row.original.course_uuid
-          ? `/orgs/${orgslug}/dash/analytics/courses/${row.original.course_uuid}`
-          : orgslug
-          ? `/orgs/${orgslug}/dash/assignments`
-          : undefined;
+        const gradingHref =
+          orgslug && row.original.course_uuid
+            ? `/orgs/${orgslug}/dash/analytics/courses/${row.original.course_uuid}`
+            : orgslug
+              ? `/orgs/${orgslug}/dash/assignments`
+              : undefined;
         return (
           <div className="max-w-[280px] space-y-1 whitespace-normal text-sm text-slate-700">
             <span>{row.original.recommended_action}</span>
             {hasGradingBlock && gradingHref && (
-              <Link href={gradingHref} className="block text-xs text-emerald-700 hover:underline">
+              <Link
+                href={gradingHref}
+                className="block text-xs text-emerald-700 hover:underline"
+              >
                 {t('atRisk.gradeSubmissions', { count: row.original.open_grading_blocks })} →
               </Link>
             )}
@@ -132,9 +144,15 @@ export default function AtRiskLearnersTable({
         <CardDescription>{resolvedDescription}</CardDescription>
       </CardHeader>
       <CardContent>
-        <AnalyticsDataTable columns={columns} data={rows} storageKey={storageKey} serverPaginated={serverPaginated} searchPlaceholder={t('atRisk.searchPlaceholder')} emptyMessage={t('atRisk.emptyMessage')} />
+        <AnalyticsDataTable
+          columns={columns}
+          data={rows}
+          storageKey={storageKey}
+          serverPaginated={serverPaginated}
+          searchPlaceholder={t('atRisk.searchPlaceholder')}
+          emptyMessage={t('atRisk.emptyMessage')}
+        />
       </CardContent>
     </Card>
   );
 }
-

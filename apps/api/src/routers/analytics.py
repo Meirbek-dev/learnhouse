@@ -4,6 +4,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.responses import StreamingResponse
+from sqlalchemy import select as sa_select
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
@@ -11,7 +12,6 @@ from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionChecker
-from sqlalchemy import select as sa_select
 from src.services.analytics import (
     export_assessment_outcomes_csv,
     export_at_risk_csv,
@@ -25,7 +25,11 @@ from src.services.analytics import (
     get_teacher_overview,
 )
 from src.services.analytics.filters import AnalyticsFilters, get_analytics_filters
-from src.services.analytics.scope import ensure_assessment_in_scope, ensure_course_in_scope, resolve_teacher_scope
+from src.services.analytics.scope import (
+    ensure_assessment_in_scope,
+    ensure_course_in_scope,
+    resolve_teacher_scope,
+)
 
 router = APIRouter()
 
@@ -47,7 +51,9 @@ def _scope_for(
     action: str,
 ):
     checker = PermissionChecker(db_session)
-    return resolve_teacher_scope(db_session, checker, current_user, org_id, filters, action=action)
+    return resolve_teacher_scope(
+        db_session, checker, current_user, org_id, filters, action=action
+    )
 
 
 def _course_scope_for(
@@ -107,7 +113,9 @@ async def teacher_course_detail_by_uuid(
 ):
     scope = _scope_for(db_session, current_user, org_id, filters, action="read")
     course = db_session.exec(
-        sa_select(Course).where(Course.course_uuid == course_uuid, Course.id.in_(scope.course_ids))
+        sa_select(Course).where(
+            Course.course_uuid == course_uuid, Course.id.in_(scope.course_ids)
+        )
     ).first()
     if course is None:
         raise HTTPException(status_code=404, detail="Course not found in scope")
@@ -152,9 +160,13 @@ async def teacher_assessment_detail(
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    scope = _assessment_scope_for(db_session, current_user, org_id, assessment_type, assessment_id, filters)
+    scope = _assessment_scope_for(
+        db_session, current_user, org_id, assessment_type, assessment_id, filters
+    )
     try:
-        return get_teacher_assessment_detail(db_session, scope, assessment_type, assessment_id, filters)
+        return get_teacher_assessment_detail(
+            db_session, scope, assessment_type, assessment_id, filters
+        )
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
@@ -178,7 +190,9 @@ async def teacher_at_risk_export(
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     scope = _scope_for(db_session, current_user, org_id, filters, action="export")
-    return _csv_response(export_at_risk_csv(db_session, scope, filters), "teacher-at-risk.csv")
+    return _csv_response(
+        export_at_risk_csv(db_session, scope, filters), "teacher-at-risk.csv"
+    )
 
 
 @router.get("/orgs/{org_id}/teacher/exports/grading-backlog.csv")
@@ -189,7 +203,10 @@ async def teacher_grading_backlog_export(
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     scope = _scope_for(db_session, current_user, org_id, filters, action="export")
-    return _csv_response(export_grading_backlog_csv(db_session, scope, filters), "teacher-grading-backlog.csv")
+    return _csv_response(
+        export_grading_backlog_csv(db_session, scope, filters),
+        "teacher-grading-backlog.csv",
+    )
 
 
 @router.get("/orgs/{org_id}/teacher/exports/course-progress.csv")
@@ -200,7 +217,10 @@ async def teacher_course_progress_export(
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     scope = _scope_for(db_session, current_user, org_id, filters, action="export")
-    return _csv_response(export_course_progress_csv(db_session, scope, filters), "teacher-course-progress.csv")
+    return _csv_response(
+        export_course_progress_csv(db_session, scope, filters),
+        "teacher-course-progress.csv",
+    )
 
 
 @router.get("/orgs/{org_id}/teacher/exports/assessment-outcomes.csv")
@@ -211,4 +231,7 @@ async def teacher_assessment_outcomes_export(
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     scope = _scope_for(db_session, current_user, org_id, filters, action="export")
-    return _csv_response(export_assessment_outcomes_csv(db_session, scope, filters), "teacher-assessment-outcomes.csv")
+    return _csv_response(
+        export_assessment_outcomes_csv(db_session, scope, filters),
+        "teacher-assessment-outcomes.csv",
+    )

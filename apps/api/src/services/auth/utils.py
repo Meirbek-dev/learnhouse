@@ -7,7 +7,11 @@ from sqlmodel import Session, select
 from src.core.events.database import get_db_session
 from src.db.users import User, UserCreate, UserRead
 from src.security.auth import get_current_user
-from src.services.users.users import create_user, create_user_without_org, ensure_user_in_default_org
+from src.services.users.users import (
+    create_user,
+    create_user_without_org,
+    ensure_user_in_default_org,
+)
 
 
 async def get_google_user_info(access_token: str):

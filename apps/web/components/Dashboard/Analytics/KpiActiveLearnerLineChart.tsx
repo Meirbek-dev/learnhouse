@@ -1,12 +1,7 @@
 'use client';
 
+import { ChartContainer, ChartEmptyState, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  ChartContainer,
-  ChartEmptyState,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart';
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
 import { useTranslations } from 'next-intl';
 
@@ -27,15 +22,37 @@ export default function KpiActiveLearnerLineChart({ data }: KpiActiveLearnerLine
           <ChartContainer
             className="h-[240px] w-full"
             config={{
-              active: { label: t('kpiCharts.activeLearners'), color: 'var(--chart-3)', valueFormatter: (value) => `${value ?? 0} ${t('scoreChart.learners')}` },
+              active: {
+                label: t('kpiCharts.activeLearners'),
+                color: 'var(--chart-3)',
+                valueFormatter: (value) => `${value ?? 0} ${t('scoreChart.learners')}`,
+              },
             }}
           >
             <LineChart data={data}>
-              <CartesianGrid vertical={false} strokeDasharray="3 3" />
-              <XAxis dataKey="bucket" tickLine={false} axisLine={false} minTickGap={20} />
-              <YAxis tickLine={false} axisLine={false} />
+              <CartesianGrid
+                vertical={false}
+                strokeDasharray="3 3"
+              />
+              <XAxis
+                dataKey="bucket"
+                tickLine={false}
+                axisLine={false}
+                minTickGap={20}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+              />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <Line type="monotone" dataKey="active" stroke="var(--color-active)" strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
+              <Line
+                type="monotone"
+                dataKey="active"
+                stroke="var(--color-active)"
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{ r: 5 }}
+              />
             </LineChart>
           </ChartContainer>
         ) : (

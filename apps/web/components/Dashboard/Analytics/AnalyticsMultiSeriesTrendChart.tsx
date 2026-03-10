@@ -3,8 +3,14 @@
 import { Area, AreaChart, CartesianGrid, Legend, XAxis, YAxis } from 'recharts';
 import { useTranslations } from 'next-intl';
 
+import {
+  ChartContainer,
+  ChartEmptyState,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartContainer, ChartEmptyState, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
 interface AnalyticsMultiSeriesTrendRow {
   bucket_start: string;
@@ -23,12 +29,17 @@ interface AnalyticsMultiSeriesTrendChartProps {
 }
 
 interface AnalyticsTrendChartClickState {
-  activePayload?: Array<{
+  activePayload?: {
     payload?: AnalyticsMultiSeriesTrendRow;
-  }>;
+  }[];
 }
 
-export default function AnalyticsMultiSeriesTrendChart({ title, description, data, onBucketClick }: AnalyticsMultiSeriesTrendChartProps) {
+export default function AnalyticsMultiSeriesTrendChart({
+  title,
+  description,
+  data,
+  onBucketClick,
+}: AnalyticsMultiSeriesTrendChartProps) {
   const t = useTranslations('TeacherAnalytics');
 
   const handleChartClick = (state: AnalyticsTrendChartClickState | undefined) => {
@@ -56,16 +67,58 @@ export default function AnalyticsMultiSeriesTrendChart({ title, description, dat
               grading_completed: { label: t('trend.gradingCompleted'), color: 'var(--chart-4)' },
             }}
           >
-            <AreaChart data={data} onClick={handleChartClick}>
-              <CartesianGrid vertical={false} strokeDasharray="3 3" />
-              <XAxis dataKey="bucket" tickLine={false} axisLine={false} minTickGap={24} />
-              <YAxis tickLine={false} axisLine={false} />
+            <AreaChart
+              data={data}
+              onClick={handleChartClick}
+            >
+              <CartesianGrid
+                vertical={false}
+                strokeDasharray="3 3"
+              />
+              <XAxis
+                dataKey="bucket"
+                tickLine={false}
+                axisLine={false}
+                minTickGap={24}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+              />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Legend content={<ChartLegendContent />} />
-              <Area type="monotone" dataKey="active_learners" stroke="var(--color-active_learners)" fill="var(--color-active_learners)" fillOpacity={0.14} strokeWidth={2.5} />
-              <Area type="monotone" dataKey="completions" stroke="var(--color-completions)" fill="var(--color-completions)" fillOpacity={0.1} strokeWidth={2} />
-              <Area type="monotone" dataKey="submissions" stroke="var(--color-submissions)" fill="var(--color-submissions)" fillOpacity={0.08} strokeWidth={2} />
-              <Area type="monotone" dataKey="grading_completed" stroke="var(--color-grading_completed)" fill="var(--color-grading_completed)" fillOpacity={0.06} strokeWidth={2} />
+              <Area
+                type="monotone"
+                dataKey="active_learners"
+                stroke="var(--color-active_learners)"
+                fill="var(--color-active_learners)"
+                fillOpacity={0.14}
+                strokeWidth={2.5}
+              />
+              <Area
+                type="monotone"
+                dataKey="completions"
+                stroke="var(--color-completions)"
+                fill="var(--color-completions)"
+                fillOpacity={0.1}
+                strokeWidth={2}
+              />
+              <Area
+                type="monotone"
+                dataKey="submissions"
+                stroke="var(--color-submissions)"
+                fill="var(--color-submissions)"
+                fillOpacity={0.08}
+                strokeWidth={2}
+              />
+              <Area
+                type="monotone"
+                dataKey="grading_completed"
+                stroke="var(--color-grading_completed)"
+                fill="var(--color-grading_completed)"
+                fillOpacity={0.06}
+                strokeWidth={2}
+              />
             </AreaChart>
           </ChartContainer>
         ) : (

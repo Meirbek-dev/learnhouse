@@ -1,13 +1,13 @@
 'use client';
 
 import type { MetricCard, TimeSeriesPoint } from '@/types/analytics';
-import { useLocale, useTranslations } from 'next-intl';
-import KpiSubmissionAreaChart from './KpiSubmissionAreaChart';
 import KpiActiveLearnerLineChart from './KpiActiveLearnerLineChart';
+import KpiSubmissionAreaChart from './KpiSubmissionAreaChart';
 import KpiPeriodCompBarChart from './KpiPeriodCompBarChart';
-import KpiCompletionGauge from './KpiCompletionGauge';
-import KpiHealthRadarChart from './KpiHealthRadarChart';
 import KpiHealthRingsChart from './KpiHealthRingsChart';
+import KpiHealthRadarChart from './KpiHealthRadarChart';
+import { useLocale, useTranslations } from 'next-intl';
+import KpiCompletionGauge from './KpiCompletionGauge';
 
 interface TeacherKpiChartsProps {
   metrics: {
@@ -74,10 +74,26 @@ export default function TeacherKpiCharts({ metrics, trends }: TeacherKpiChartsPr
   // ── Bar chart data ────────────────────────────────────────────────────────
   const barData = [
     { metric: t('kpiCharts.activeLearners'), current: m.active_learners.value, previous: prevValue(m.active_learners) },
-    { metric: t('kpiCharts.returningLearners'), current: m.returning_learners.value, previous: prevValue(m.returning_learners) },
-    { metric: t('kpiCharts.atRiskLearners'), current: m.at_risk_learners.value, previous: prevValue(m.at_risk_learners) },
-    { metric: t('kpiCharts.ungradedSubs'), current: m.ungraded_submissions.value, previous: prevValue(m.ungraded_submissions) },
-    { metric: t('kpiCharts.negativeEngagement'), current: m.negative_engagement_courses.value, previous: prevValue(m.negative_engagement_courses) },
+    {
+      metric: t('kpiCharts.returningLearners'),
+      current: m.returning_learners.value,
+      previous: prevValue(m.returning_learners),
+    },
+    {
+      metric: t('kpiCharts.atRiskLearners'),
+      current: m.at_risk_learners.value,
+      previous: prevValue(m.at_risk_learners),
+    },
+    {
+      metric: t('kpiCharts.ungradedSubs'),
+      current: m.ungraded_submissions.value,
+      previous: prevValue(m.ungraded_submissions),
+    },
+    {
+      metric: t('kpiCharts.negativeEngagement'),
+      current: m.negative_engagement_courses.value,
+      previous: prevValue(m.negative_engagement_courses),
+    },
   ];
 
   // ── Radar chart data ──────────────────────────────────────────────────────
@@ -108,12 +124,42 @@ export default function TeacherKpiCharts({ metrics, trends }: TeacherKpiChartsPr
 
   // ── Radial chart data ─────────────────────────────────────────────────────
   const radialData = [
-    { name: 'active_learners', label: t('kpiCharts.activeLearners'), value: getHealthPct(m.active_learners), fill: CHART_COLORS[0]! },
-    { name: 'returning_learners', label: t('kpiCharts.returningLearners'), value: getHealthPct(m.returning_learners), fill: CHART_COLORS[1]! },
-    { name: 'completion_rate', label: t('kpiCharts.completionRate'), value: getHealthPct(m.completion_rate), fill: CHART_COLORS[2]! },
-    { name: 'at_risk_learners', label: t('kpiCharts.atRiskLearners'), value: getHealthPct(m.at_risk_learners), fill: CHART_COLORS[3]! },
-    { name: 'ungraded_submissions', label: t('kpiCharts.ungradedSubs'), value: getHealthPct(m.ungraded_submissions), fill: CHART_COLORS[4]! },
-    { name: 'negative_engagement_courses', label: t('kpiCharts.negativeEngagement'), value: getHealthPct(m.negative_engagement_courses), fill: CHART_COLORS[5]! },
+    {
+      name: 'active_learners',
+      label: t('kpiCharts.activeLearners'),
+      value: getHealthPct(m.active_learners),
+      fill: CHART_COLORS[0]!,
+    },
+    {
+      name: 'returning_learners',
+      label: t('kpiCharts.returningLearners'),
+      value: getHealthPct(m.returning_learners),
+      fill: CHART_COLORS[1]!,
+    },
+    {
+      name: 'completion_rate',
+      label: t('kpiCharts.completionRate'),
+      value: getHealthPct(m.completion_rate),
+      fill: CHART_COLORS[2]!,
+    },
+    {
+      name: 'at_risk_learners',
+      label: t('kpiCharts.atRiskLearners'),
+      value: getHealthPct(m.at_risk_learners),
+      fill: CHART_COLORS[3]!,
+    },
+    {
+      name: 'ungraded_submissions',
+      label: t('kpiCharts.ungradedSubs'),
+      value: getHealthPct(m.ungraded_submissions),
+      fill: CHART_COLORS[4]!,
+    },
+    {
+      name: 'negative_engagement_courses',
+      label: t('kpiCharts.negativeEngagement'),
+      value: getHealthPct(m.negative_engagement_courses),
+      fill: CHART_COLORS[5]!,
+    },
   ];
 
   return (

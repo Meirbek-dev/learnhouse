@@ -1,8 +1,6 @@
 'use client';
 
-import type { ColumnDef } from '@tanstack/react-table';
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
-import DataTable from '@components/ui/data-table';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
@@ -10,8 +8,10 @@ import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import { getOrgCustomers } from '@services/payments/payments';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
+import type { ColumnDef } from '@tanstack/react-table';
 import { RefreshCcw, SquareCheck } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
+import DataTable from '@components/ui/data-table';
 import { Badge } from '@components/ui/badge';
 import useSWR from 'swr';
 
@@ -72,12 +72,18 @@ const PaymentsUsersTable = ({ data }: { data: PaymentUserData[] }) => {
       cell: ({ row }) => (
         <div className="flex items-center space-x-2">
           {row.original.product.product_type === 'subscription' ? (
-            <Badge variant="outline" className="flex items-center gap-1">
+            <Badge
+              variant="outline"
+              className="flex items-center gap-1"
+            >
               <RefreshCcw size={12} />
               <span>{t('subscriptionType')}</span>
             </Badge>
           ) : (
-            <Badge variant="outline" className="flex items-center gap-1">
+            <Badge
+              variant="outline"
+              className="flex items-center gap-1"
+            >
               <SquareCheck size={12} />
               <span>{t('oneTimeType')}</span>
             </Badge>
@@ -99,7 +105,11 @@ const PaymentsUsersTable = ({ data }: { data: PaymentUserData[] }) => {
       accessorKey: 'status',
       header: t('statusHeader'),
       cell: ({ row }) => (
-        <Badge variant={row.original.status === 'active' ? 'default' : row.original.status === 'completed' ? 'default' : 'secondary'}>
+        <Badge
+          variant={
+            row.original.status === 'active' ? 'default' : row.original.status === 'completed' ? 'default' : 'secondary'
+          }
+        >
           {row.original.status}
         </Badge>
       ),

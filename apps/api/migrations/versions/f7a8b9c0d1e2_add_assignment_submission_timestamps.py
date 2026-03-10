@@ -17,8 +17,12 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    op.add_column("assignmentusersubmission", sa.Column("submitted_at", sa.Text(), nullable=True))
-    op.add_column("assignmentusersubmission", sa.Column("graded_at", sa.Text(), nullable=True))
+    op.add_column(
+        "assignmentusersubmission", sa.Column("submitted_at", sa.Text(), nullable=True)
+    )
+    op.add_column(
+        "assignmentusersubmission", sa.Column("graded_at", sa.Text(), nullable=True)
+    )
 
 
 def downgrade() -> None:

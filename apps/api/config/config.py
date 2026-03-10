@@ -231,26 +231,48 @@ def get_platform_config() -> PlatformConfig:
     # not truthy.  bool("false") == True in Python, which is the bug we avoid.
     _BOOL_TRUE = ("true", "1", "yes")
     _raw_ssl = os.environ.get("PLATFORM_SSL")
-    env_ssl: bool | None = _raw_ssl.strip().lower() in _BOOL_TRUE if _raw_ssl is not None else None
+    env_ssl: bool | None = (
+        _raw_ssl.strip().lower() in _BOOL_TRUE if _raw_ssl is not None else None
+    )
     _raw_use_default_org = os.environ.get("PLATFORM_USE_DEFAULT_ORG")
-    env_use_default_org: bool | None = _raw_use_default_org.strip().lower() in _BOOL_TRUE if _raw_use_default_org is not None else None
+    env_use_default_org: bool | None = (
+        _raw_use_default_org.strip().lower() in _BOOL_TRUE
+        if _raw_use_default_org is not None
+        else None
+    )
     _raw_self_hosted = os.environ.get("PLATFORM_SELF_HOSTED")
-    env_self_hosted: bool | None = _raw_self_hosted.strip().lower() in _BOOL_TRUE if _raw_self_hosted is not None else None
+    env_self_hosted: bool | None = (
+        _raw_self_hosted.strip().lower() in _BOOL_TRUE
+        if _raw_self_hosted is not None
+        else None
+    )
 
     # Fill in values with YAML file if they are not provided
     contact_email = env_contact_email or yaml_config.get("contact_email")
 
     domain = env_domain or yaml_config.get("hosting_config", {}).get("domain")
-    ssl: bool = env_ssl if env_ssl is not None else bool(yaml_config.get("hosting_config", {}).get("ssl", False))
+    ssl: bool = (
+        env_ssl
+        if env_ssl is not None
+        else bool(yaml_config.get("hosting_config", {}).get("ssl", False))
+    )
     port = env_port or yaml_config.get("hosting_config", {}).get("port")
-    use_default_org: bool = env_use_default_org if env_use_default_org is not None else bool(yaml_config.get("hosting_config", {}).get("use_default_org", False))
+    use_default_org: bool = (
+        env_use_default_org
+        if env_use_default_org is not None
+        else bool(yaml_config.get("hosting_config", {}).get("use_default_org", False))
+    )
     allowed_origins = env_allowed_origins or yaml_config.get("hosting_config", {}).get(
         "allowed_origins"
     )
     allowed_regexp = env_allowed_regexp or yaml_config.get("hosting_config", {}).get(
         "allowed_regexp"
     )
-    self_hosted: bool = env_self_hosted if env_self_hosted is not None else bool(yaml_config.get("hosting_config", {}).get("self_hosted", False))
+    self_hosted: bool = (
+        env_self_hosted
+        if env_self_hosted is not None
+        else bool(yaml_config.get("hosting_config", {}).get("self_hosted", False))
+    )
 
     cookies_domain = env_cookie_domain or yaml_config.get("hosting_config", {}).get(
         "cookies_config", {}

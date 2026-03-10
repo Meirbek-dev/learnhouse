@@ -33,12 +33,27 @@ export default function KpiCompletionGauge({ completionPct, deltaPct, direction 
           <ChartContainer
             className="h-[220px] w-full"
             config={{
-              completion: { label: t('kpiCharts.completionRate'), color: 'var(--chart-2)', valueFormatter: (value) => `${value ?? 0}%` },
-              remaining: { label: t('kpiCharts.remaining'), color: 'var(--chart-5)', valueFormatter: (value) => `${value ?? 0}%` },
+              completion: {
+                label: t('kpiCharts.completionRate'),
+                color: 'var(--chart-2)',
+                valueFormatter: (value) => `${value ?? 0}%`,
+              },
+              remaining: {
+                label: t('kpiCharts.remaining'),
+                color: 'var(--chart-5)',
+                valueFormatter: (value) => `${value ?? 0}%`,
+              },
             }}
           >
             <PieChart>
-              <ChartTooltip content={<ChartTooltipContent nameKey="name" formatter={(v) => [`${v}%`, '']} />} />
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    nameKey="name"
+                    formatter={(v) => [`${v}%`, '']}
+                  />
+                }
+              />
               <Pie
                 data={gaugeData}
                 cx="50%"
@@ -61,7 +76,8 @@ export default function KpiCompletionGauge({ completionPct, deltaPct, direction 
               <div className="text-4xl font-bold text-slate-900">{completionPct.toLocaleString()}%</div>
               {deltaPct !== null && (
                 <div className={`mt-0.5 text-sm font-medium ${deltaColor}`}>
-                  {deltaPct > 0 ? '+' : ''}{deltaPct}% {t('kpiCharts.vsPrevPeriod')}
+                  {deltaPct > 0 ? '+' : ''}
+                  {deltaPct}% {t('kpiCharts.vsPrevPeriod')}
                 </div>
               )}
             </div>

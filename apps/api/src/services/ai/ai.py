@@ -11,7 +11,7 @@ from sqlmodel import Session, select
 from src.db.courses.activities import Activity, ActivityRead
 from src.db.courses.courses import Course, CourseRead
 from src.db.users import PublicUser
-from src.services.ai.base import ask_ai, get_chat_session_history, ChatSessionInfo
+from src.services.ai.base import ChatSessionInfo, ask_ai, get_chat_session_history
 from src.services.ai.cache_manager import get_ai_cache_manager
 from src.services.ai.exceptions import (
     ActivityNotFoundError,
@@ -199,7 +199,7 @@ async def _handle_ai_chat(
         cancel_event=cancel_event,
         collection_name=f"activity_{ctx.activity.activity_uuid}",
         max_tokens=ctx.max_tokens,
-        documents=ctx.structured_sections if ctx.structured_sections else None,
+        documents=ctx.structured_sections or None,
     )
     ai_ms = (time.perf_counter() - ai_process_start) * 1000
 
@@ -277,7 +277,7 @@ async def _handle_ai_chat_stream(
                 cancel_event=cancel_event,
                 collection_name=f"activity_{ctx.activity.activity_uuid}",
                 max_tokens=ctx.max_tokens,
-                documents=ctx.structured_sections if ctx.structured_sections else None,
+                documents=ctx.structured_sections or None,
             )
             ai_message = response.get("output", "")
             yield format_sse_message(
@@ -305,7 +305,7 @@ async def _handle_ai_chat_stream(
             cancel_event=cancel_event,
             collection_name=f"activity_{ctx.activity.activity_uuid}",
             max_tokens=ctx.max_tokens,
-            documents=ctx.structured_sections if ctx.structured_sections else None,
+            documents=ctx.structured_sections or None,
         ):
             yield chunk
 

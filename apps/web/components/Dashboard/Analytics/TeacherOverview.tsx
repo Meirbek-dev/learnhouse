@@ -1,19 +1,16 @@
 'use client';
 
-import { lazy, Suspense } from 'react';
-import type {
-  AnalyticsQuery,
-  TeacherOverviewResponse,
-} from '@/types/analytics';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getAnalyticsAlertTypeLabel, getAnalyticsSeverityLabel } from '@/lib/analytics/labels';
+import type { AnalyticsQuery, TeacherOverviewResponse } from '@/types/analytics';
 import { getAnalyticsExportUrl } from '@services/analytics/teacher';
 import type { AnalyticsFilterOption } from '@/types/analytics';
 import AnalyticsExportButton from './AnalyticsExportButton';
 import { useLocale, useTranslations } from 'next-intl';
 import TeacherFilterBar from './TeacherFilterBar';
-import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
+import { useRouter } from 'next/navigation';
+import { lazy, Suspense } from 'react';
 import Link from 'next/link';
 
 const AnalyticsRiskDistributionChart = lazy(() => import('./AnalyticsRiskDistributionChart'));
@@ -50,19 +47,17 @@ export default function TeacherOverview({
     if (seconds <= 0) return t('freshness.live');
     if (seconds < 60) return t('freshness.seconds', { seconds });
     if (seconds < 3600) return t('freshness.minutes', { minutes: Math.round(seconds / 60) });
-    if (seconds < 86400) return t('freshness.hours', { hours: Math.round(seconds / 3600) });
-    return t('freshness.days', { days: Math.round(seconds / 86400) });
+    if (seconds < 86_400) return t('freshness.hours', { hours: Math.round(seconds / 3600) });
+    return t('freshness.days', { days: Math.round(seconds / 86_400) });
   }
 
   // Align trend series by the union of bucket timestamps so sparse series are not dropped.
-  const allBuckets = Array.from(
-    new Set([
-      ...data.trends.active_learners.map((point) => point.bucket_start),
-      ...data.trends.completions.map((point) => point.bucket_start),
-      ...data.trends.submissions.map((point) => point.bucket_start),
-      ...data.trends.grading_completed.map((point) => point.bucket_start),
-    ]),
-  ).sort();
+  const allBuckets = [...new Set([
+	...data.trends.active_learners.map((point) => point.bucket_start),
+	...data.trends.completions.map((point) => point.bucket_start),
+	...data.trends.submissions.map((point) => point.bucket_start),
+	...data.trends.grading_completed.map((point) => point.bucket_start)
+])].toSorted();
   const completionsMap = new Map(data.trends.completions.map((p) => [p.bucket_start, p.value]));
   const submissionsMap = new Map(data.trends.submissions.map((p) => [p.bucket_start, p.value]));
   const gradingMap = new Map(data.trends.grading_completed.map((p) => [p.bucket_start, p.value]));
@@ -117,7 +112,10 @@ export default function TeacherOverview({
 
   // Context-aware chart click: if submissions > active_learners in the clicked bucket,
   // route to the filtered assessment list; otherwise route to the course health list (issue 14).
-  const handleTrendClick = (bucketStart: string, row?: { active_learners: number; submissions: number; grading_completed: number }) => {
+  const handleTrendClick = (
+    bucketStart: string,
+    row?: { active_learners: number; submissions: number; grading_completed: number },
+  ) => {
     const params = new URLSearchParams();
     if (query.window) params.set('window', query.window);
     if (query.compare) params.set('compare', query.compare);
@@ -127,7 +125,7 @@ export default function TeacherOverview({
     if (query.timezone) params.set('timezone', query.timezone);
     params.set('bucket_start', bucketStart);
 
-    const isSubmissionDominant = row && (row.submissions + row.grading_completed) >= row.active_learners;
+    const isSubmissionDominant = row && row.submissions + row.grading_completed >= row.active_learners;
     if (isSubmissionDominant) {
       params.set('sort_by', 'signals');
       router.push(`/orgs/${orgslug}/dash/analytics/assessments?${params.toString()}`);
@@ -181,7 +179,10 @@ export default function TeacherOverview({
       </Suspense>
 
       <Suspense fallback={<SectionFallback height="h-[420px]" />}>
-        <TeacherKpiCharts metrics={data.summary} trends={data.trends} />
+        <TeacherKpiCharts
+          metrics={data.summary}
+          trends={data.trends}
+        />
       </Suspense>
 
       <div className="grid gap-6 xl:grid-cols-[1.7fr_1fr]">
@@ -203,7 +204,10 @@ export default function TeacherOverview({
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
         <Suspense fallback={<SectionFallback height="h-[320px]" />}>
-          <AnalyticsRiskDistributionChart counts={data.risk_distribution} totalAtRisk={data.summary.at_risk_learners.value} />
+          <AnalyticsRiskDistributionChart
+            counts={data.risk_distribution}
+            totalAtRisk={data.summary.at_risk_learners.value}
+          />
         </Suspense>
         <Card className="border-slate-200 bg-white/90 shadow-sm">
           <CardHeader>
@@ -279,11 +283,20 @@ export default function TeacherOverview({
         <div>
           {/* Preview badge always visible (issue 4) */}
           <div className="mb-2 flex items-center gap-2">
-            <Badge variant="outline" className="text-xs">{t('overview.previewLabel')}</Badge>
+            <Badge
+              variant="outline"
+              className="text-xs"
+            >
+              {t('overview.previewLabel')}
+            </Badge>
             <span className="text-xs text-slate-500">{t('overview.showingCourses', { total: data.course_total })}</span>
           </div>
           <Suspense fallback={<SectionFallback height="h-[320px]" />}>
-            <CourseHealthTable orgslug={orgslug} rows={data.course_preview} storageKey="overview-courses" />
+            <CourseHealthTable
+              orgslug={orgslug}
+              rows={data.course_preview}
+              storageKey="overview-courses"
+            />
           </Suspense>
           <p className="mt-2 text-sm text-slate-500">
             <Link
@@ -296,11 +309,22 @@ export default function TeacherOverview({
         </div>
         <div>
           <div className="mb-2 flex items-center gap-2">
-            <Badge variant="outline" className="text-xs">{t('overview.previewLabel')}</Badge>
-            <span className="text-xs text-slate-500">{t('overview.showingAssessments', { total: data.assessment_total })}</span>
+            <Badge
+              variant="outline"
+              className="text-xs"
+            >
+              {t('overview.previewLabel')}
+            </Badge>
+            <span className="text-xs text-slate-500">
+              {t('overview.showingAssessments', { total: data.assessment_total })}
+            </span>
           </div>
           <Suspense fallback={<SectionFallback height="h-[320px]" />}>
-            <AssessmentOutliersTable orgslug={orgslug} rows={data.assessment_preview} storageKey="overview-assessments" />
+            <AssessmentOutliersTable
+              orgslug={orgslug}
+              rows={data.assessment_preview}
+              storageKey="overview-assessments"
+            />
           </Suspense>
           <p className="mt-2 text-sm text-slate-500">
             <Link
@@ -316,11 +340,24 @@ export default function TeacherOverview({
       {/* At-risk section with preview badge + CTA (issue 4) and orgslug for workflow links (issue 13) */}
       <div>
         <div className="mb-2 flex items-center gap-2">
-          <Badge variant="outline" className="text-xs">{t('overview.previewLabel')}</Badge>
-          <span className="text-xs text-slate-500">{t('riskDistribution.preview', { shown: data.at_risk_preview.length, total: data.at_risk_total })}</span>
+          <Badge
+            variant="outline"
+            className="text-xs"
+          >
+            {t('overview.previewLabel')}
+          </Badge>
+          <span className="text-xs text-slate-500">
+            {t('riskDistribution.preview', { shown: data.at_risk_preview.length, total: data.at_risk_total })}
+          </span>
         </div>
         <Suspense fallback={<SectionFallback height="h-[320px]" />}>
-          <AtRiskLearnersTable orgslug={orgslug} rows={data.at_risk_preview} title={t('overview.watchlistTitle')} description={t('overview.watchlistDescription')} storageKey="overview-risk" />
+          <AtRiskLearnersTable
+            orgslug={orgslug}
+            rows={data.at_risk_preview}
+            title={t('overview.watchlistTitle')}
+            description={t('overview.watchlistDescription')}
+            storageKey="overview-risk"
+          />
         </Suspense>
         {data.at_risk_total > 0 && (
           <p className="mt-2 text-sm text-slate-500">

@@ -1,8 +1,12 @@
 import pytest
 
 from src.security.rbac import PermissionDenied
-from src.services.analytics.scope import TeacherAnalyticsScope, _coerce_course_id, ensure_course_in_scope
 from src.services.analytics.queries import _unwrap_model, _unwrap_pair, display_name
+from src.services.analytics.scope import (
+    TeacherAnalyticsScope,
+    _coerce_course_id,
+    ensure_course_in_scope,
+)
 
 
 class _FakeCourse:
@@ -31,13 +35,25 @@ class _FakeModelRow:
 
 
 def test_ensure_course_in_scope_allows_scoped_course() -> None:
-    scope = TeacherAnalyticsScope(org_id=10, teacher_user_id=99, course_ids=[1, 2, 3], cohort_ids=[], has_org_scope=False)
+    scope = TeacherAnalyticsScope(
+        org_id=10,
+        teacher_user_id=99,
+        course_ids=[1, 2, 3],
+        cohort_ids=[],
+        has_org_scope=False,
+    )
 
     ensure_course_in_scope(scope, 2)
 
 
 def test_ensure_course_in_scope_rejects_out_of_scope_course() -> None:
-    scope = TeacherAnalyticsScope(org_id=10, teacher_user_id=99, course_ids=[1, 2, 3], cohort_ids=[], has_org_scope=False)
+    scope = TeacherAnalyticsScope(
+        org_id=10,
+        teacher_user_id=99,
+        course_ids=[1, 2, 3],
+        cohort_ids=[],
+        has_org_scope=False,
+    )
 
     with pytest.raises(PermissionDenied):
         ensure_course_in_scope(scope, 5)
@@ -52,7 +68,9 @@ def test_ensure_course_in_scope_rejects_out_of_scope_course() -> None:
         (None, None),
     ],
 )
-def test_coerce_course_id_handles_scalar_and_row_shapes(raw_value: object, expected: int | None) -> None:
+def test_coerce_course_id_handles_scalar_and_row_shapes(
+    raw_value: object, expected: int | None
+) -> None:
     assert _coerce_course_id(raw_value) == expected
 
 

@@ -1,6 +1,5 @@
 'use client';
 
-import type { ColumnDef } from '@tanstack/react-table';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,7 +12,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import DataTable from '@components/ui/data-table';
 import { AlertTriangle, Loader2, Pencil, SquareUserRound, Users, X } from 'lucide-react';
 import EditUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/EditUserGroup';
 import AddUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/AddUserGroup';
@@ -23,7 +21,9 @@ import { deleteUserGroup } from '@services/usergroups/usergroups';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
+import type { ColumnDef } from '@tanstack/react-table';
 import { getAPIUrl } from '@services/config/config';
+import DataTable from '@components/ui/data-table';
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
@@ -228,7 +228,11 @@ const OrgUserGroups = () => {
             minWidth="sm"
             dialogContent={selectedUserGroup ? <EditUserGroup usergroup={selectedUserGroup} /> : null}
           />
-          <DeleteUserGroupButton usergroupId={row.original.id} onDelete={deleteUserGroupUI} t={t} />
+          <DeleteUserGroupButton
+            usergroupId={row.original.id}
+            onDelete={deleteUserGroupUI}
+            t={t}
+          />
         </div>
       ),
     },

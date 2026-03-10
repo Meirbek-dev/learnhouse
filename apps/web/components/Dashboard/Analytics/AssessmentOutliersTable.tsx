@@ -1,13 +1,13 @@
 'use client';
 
-import type { ColumnDef } from '@tanstack/react-table';
-import type { AssessmentOutlierRow } from '@/types/analytics';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getAnalyticsAssessmentTypeLabel, getAnalyticsReasonCodeLabel } from '@/lib/analytics/labels';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import type { AssessmentOutlierRow } from '@/types/analytics';
+import type { ColumnDef } from '@tanstack/react-table';
 import AnalyticsDataTable from './AnalyticsDataTable';
-import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
 interface AssessmentOutliersTableProps {
   orgslug: string;
@@ -16,7 +16,12 @@ interface AssessmentOutliersTableProps {
   serverPaginated?: boolean;
 }
 
-export default function AssessmentOutliersTable({ orgslug, rows, storageKey, serverPaginated }: AssessmentOutliersTableProps) {
+export default function AssessmentOutliersTable({
+  orgslug,
+  rows,
+  storageKey,
+  serverPaginated,
+}: AssessmentOutliersTableProps) {
   const t = useTranslations('TeacherAnalytics');
   const columns: ColumnDef<AssessmentOutlierRow>[] = [
     {
@@ -30,7 +35,9 @@ export default function AssessmentOutliersTable({ orgslug, rows, storageKey, ser
           >
             {row.original.title}
           </Link>
-          <div className="text-xs uppercase tracking-wide text-slate-500">{getAnalyticsAssessmentTypeLabel(t, row.original.assessment_type)}</div>
+          <div className="text-xs uppercase tracking-wide text-slate-500">
+            {getAnalyticsAssessmentTypeLabel(t, row.original.assessment_type)}
+          </div>
         </div>
       ),
     },
@@ -67,7 +74,11 @@ export default function AssessmentOutliersTable({ orgslug, rows, storageKey, ser
         row.original.outlier_reason_codes.length ? (
           <div className="max-w-[240px] whitespace-normal text-xs text-slate-600">
             {row.original.outlier_reason_codes.map((code) => (
-              <Badge key={code} variant="outline" className="mb-1 mr-1">
+              <Badge
+                key={code}
+                variant="outline"
+                className="mb-1 mr-1"
+              >
                 {getAnalyticsReasonCodeLabel(t, code)}
               </Badge>
             ))}
@@ -85,7 +96,14 @@ export default function AssessmentOutliersTable({ orgslug, rows, storageKey, ser
         <CardDescription>{t('assessmentOutliers.description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <AnalyticsDataTable columns={columns} data={rows} storageKey={storageKey} serverPaginated={serverPaginated} searchPlaceholder={t('assessmentOutliers.searchPlaceholder')} emptyMessage={t('assessmentOutliers.emptyMessage')} />
+        <AnalyticsDataTable
+          columns={columns}
+          data={rows}
+          storageKey={storageKey}
+          serverPaginated={serverPaginated}
+          searchPlaceholder={t('assessmentOutliers.searchPlaceholder')}
+          emptyMessage={t('assessmentOutliers.emptyMessage')}
+        />
       </CardContent>
     </Card>
   );

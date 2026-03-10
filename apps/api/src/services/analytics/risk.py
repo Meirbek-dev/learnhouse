@@ -22,11 +22,15 @@ from src.services.analytics.schemas import AtRiskLearnerRow, AtRiskLearnersRespo
 from src.services.analytics.scope import TeacherAnalyticsScope
 
 
-def build_risk_rows(context: AnalyticsContext, filters: AnalyticsFilters) -> list[AtRiskLearnerRow]:
+def build_risk_rows(
+    context: AnalyticsContext, filters: AnalyticsFilters
+) -> list[AtRiskLearnerRow]:
     allowed_user_ids = cohort_user_ids(context, filters.cohort_ids)
     snapshots = progress_snapshots(context, allowed_user_ids)
     activity_events = build_activity_events(context, allowed_user_ids)
-    last_activity_by_pair = { (event.course_id, event.user_id): event.ts for event in activity_events }
+    last_activity_by_pair = {
+        (event.course_id, event.user_id): event.ts for event in activity_events
+    }
     for event in activity_events:
         key = (event.course_id, event.user_id)
         current = last_activity_by_pair.get(key)
@@ -105,12 +109,22 @@ def build_risk_rows(context: AnalyticsContext, filters: AnalyticsFilters) -> lis
         last_activity = last_activity_by_pair.get(pair)
         days_since_last_activity = None
         if last_activity is not None:
-            days_since_last_activity = max(0, (now - last_activity.astimezone(UTC)).days)
+            days_since_last_activity = max(
+                0, (now - last_activity.astimezone(UTC)).days
+            )
 
         missing = 0
-        missing += len(course_assignment_ids.get(course_id, set()) - assignment_seen.get(pair, set()))
-        missing += len(course_exam_ids.get(course_id, set()) - exam_seen.get(pair, set()))
-        missing += len(course_code_ids.get(course_id, set()) - code_success_by_pair.get(pair, set()))
+        missing += len(
+            course_assignment_ids.get(course_id, set())
+            - assignment_seen.get(pair, set())
+        )
+        missing += len(
+            course_exam_ids.get(course_id, set()) - exam_seen.get(pair, set())
+        )
+        missing += len(
+            course_code_ids.get(course_id, set())
+            - code_success_by_pair.get(pair, set())
+        )
         missing_assessments[pair] = missing
 
         inactivity_component = min(40, (days_since_last_activity or 0) * 2)
@@ -119,7 +133,11 @@ def build_risk_rows(context: AnalyticsContext, filters: AnalyticsFilters) -> lis
         missing_component = min(24, missing * 6)
         grading_component = min(12, open_grading_blocks[pair] * 4)
         risk_score = round(
-            inactivity_component + progress_component + failure_component + missing_component + grading_component,
+            inactivity_component
+            + progress_component
+            + failure_component
+            + missing_component
+            + grading_component,
             1,
         )
 
@@ -153,7 +171,9 @@ def build_risk_rows(context: AnalyticsContext, filters: AnalyticsFilters) -> lis
         elif "repeated_failures" in reason_codes:
             recommended_action = "Предложите точечную помощь по самому слабому для учащегося направлению оценивания."
         elif "missing_required_assessments" in reason_codes:
-            recommended_action = "Напомните учащемуся о пропущенных обязательных работах и сроках сдачи."
+            recommended_action = (
+                "Напомните учащемуся о пропущенных обязательных работах и сроках сдачи."
+            )
         elif "low_progress" in reason_codes:
             recommended_action = "Назначьте встречу, чтобы обсудить темп прохождения и вовлеченность по главам."
 
@@ -164,7 +184,10 @@ def build_risk_rows(context: AnalyticsContext, filters: AnalyticsFilters) -> lis
                 course_uuid=getattr(course, "course_uuid", None),
                 course_name=course.name,
                 user_display_name=display_name(user),
-                cohort_name=", ".join(cohort_names_for_user(context, user_id, filters.cohort_ids)) or None,
+                cohort_name=", ".join(
+                    cohort_names_for_user(context, user_id, filters.cohort_ids)
+                )
+                or None,
                 progress_pct=round(snapshot.progress_pct, 1),
                 days_since_last_activity=days_since_last_activity,
                 open_grading_blocks=open_grading_blocks[pair],
@@ -209,6 +232,8 @@ def get_at_risk_learners(
         ],
         cohort_options=[
             {"label": name, "value": str(group_id)}
-            for group_id, name in sorted(context.usergroup_names_by_id.items(), key=lambda item: item[1].lower())
+            for group_id, name in sorted(
+                context.usergroup_names_by_id.items(), key=lambda item: item[1].lower()
+            )
         ],
     )

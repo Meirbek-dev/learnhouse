@@ -1,11 +1,11 @@
-import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
-import AssessmentOutliersTable from '@components/Dashboard/Analytics/AssessmentOutliersTable';
-import TeacherFilterBar from '@components/Dashboard/Analytics/TeacherFilterBar';
-import { Button } from '@/components/ui/button';
 import { getTeacherAssessmentList, normalizeAnalyticsQuery } from '@services/analytics/teacher';
+import AssessmentOutliersTable from '@components/Dashboard/Analytics/AssessmentOutliersTable';
+import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
+import TeacherFilterBar from '@components/Dashboard/Analytics/TeacherFilterBar';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { auth } from '@/auth';
 import { getTranslations } from 'next-intl/server';
+import { Button } from '@/components/ui/button';
+import { auth } from '@/auth';
 import Link from 'next/link';
 
 export default async function AnalyticsAssessmentsPage(props: {
@@ -20,7 +20,12 @@ export default async function AnalyticsAssessmentsPage(props: {
   const t = await getTranslations('TeacherAnalytics');
 
   if (!accessToken) {
-    return <AnalyticsEmptyState title={t('pages.assessmentsUnavailableTitle')} description={t('pages.assessmentsUnavailableDesc')} />;
+    return (
+      <AnalyticsEmptyState
+        title={t('pages.assessmentsUnavailableTitle')}
+        description={t('pages.assessmentsUnavailableDesc')}
+      />
+    );
   }
 
   try {
@@ -38,7 +43,14 @@ export default async function AnalyticsAssessmentsPage(props: {
     if (query.bucket_start) params.set('bucket_start', query.bucket_start);
     return (
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
-        <TeacherFilterBar orgslug={orgslug} path={`/orgs/${orgslug}/dash/analytics/assessments`} query={query} courseCount={assessments.course_options.length} courseOptions={assessments.course_options} cohortOptions={assessments.cohort_options} />
+        <TeacherFilterBar
+          orgslug={orgslug}
+          path={`/orgs/${orgslug}/dash/analytics/assessments`}
+          query={query}
+          courseCount={assessments.course_options.length}
+          courseOptions={assessments.course_options}
+          cohortOptions={assessments.cohort_options}
+        />
         <div className="flex items-center justify-between text-sm text-slate-500">
           <span>
             {t('table.showingRows', {
@@ -48,17 +60,51 @@ export default async function AnalyticsAssessmentsPage(props: {
             })}
           </span>
         </div>
-        <AssessmentOutliersTable orgslug={orgslug} rows={assessments.items} storageKey="assessments-page" serverPaginated={true} />
+        <AssessmentOutliersTable
+          orgslug={orgslug}
+          rows={assessments.items}
+          storageKey="assessments-page"
+          serverPaginated
+        />
         {totalPages > 1 ? (
           <div className="flex items-center justify-end gap-2">
-            <Button variant="outline" size="sm" disabled={assessments.page <= 1} render={<Link href={`/orgs/${orgslug}/dash/analytics/assessments?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, assessments.page - 1)), page_size: String(assessments.page_size) }).toString()}`} />}>Prev</Button>
-            <span className="text-sm text-slate-600">Page {assessments.page} / {totalPages}</span>
-            <Button variant="outline" size="sm" disabled={assessments.page >= totalPages} render={<Link href={`/orgs/${orgslug}/dash/analytics/assessments?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.min(totalPages, assessments.page + 1)), page_size: String(assessments.page_size) }).toString()}`} />}>Next</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={assessments.page <= 1}
+              render={
+                <Link
+                  href={`/orgs/${orgslug}/dash/analytics/assessments?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, assessments.page - 1)), page_size: String(assessments.page_size) }).toString()}`}
+                />
+              }
+            >
+              Prev
+            </Button>
+            <span className="text-sm text-slate-600">
+              Page {assessments.page} / {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={assessments.page >= totalPages}
+              render={
+                <Link
+                  href={`/orgs/${orgslug}/dash/analytics/assessments?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.min(totalPages, assessments.page + 1)), page_size: String(assessments.page_size) }).toString()}`}
+                />
+              }
+            >
+              Next
+            </Button>
           </div>
         ) : null}
       </div>
     );
   } catch (error) {
-    return <AnalyticsEmptyState title={t('pages.assessmentsUnavailableTitle')} description={error instanceof Error ? error.message : t('pages.assessmentsLoadError')} />;
+    return (
+      <AnalyticsEmptyState
+        title={t('pages.assessmentsUnavailableTitle')}
+        description={error instanceof Error ? error.message : t('pages.assessmentsLoadError')}
+      />
+    );
   }
 }

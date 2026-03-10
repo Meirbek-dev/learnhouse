@@ -35,7 +35,7 @@ declare module '@tanstack/react-table' {
   }
 }
 
-type DataTableLabels = {
+interface DataTableLabels {
   searchPlaceholder?: string;
   emptyMessage?: string;
   visibleRows?: (count: number) => string;
@@ -47,7 +47,7 @@ type DataTableLabels = {
   columns?: string;
   exportCsv?: string;
   exportStarted?: string;
-};
+}
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -102,8 +102,8 @@ export default function DataTable<TData>({
   });
 
   React.useEffect(() => {
-    if (!storageKey || typeof window === 'undefined') return;
-    const raw = window.sessionStorage.getItem(`data-table:${storageKey}`);
+    if (!storageKey || typeof globalThis.window === 'undefined') return;
+    const raw = globalThis.sessionStorage.getItem(`data-table:${storageKey}`);
     if (!raw) return;
 
     try {
@@ -119,7 +119,7 @@ export default function DataTable<TData>({
       if (parsed.columnVisibility) setColumnVisibility(parsed.columnVisibility);
       if (!serverPaginated && parsed.pagination) setPagination(parsed.pagination);
     } catch {
-      window.sessionStorage.removeItem(`data-table:${storageKey}`);
+      globalThis.sessionStorage.removeItem(`data-table:${storageKey}`);
     }
   }, [storageKey, serverPaginated]);
 
@@ -133,9 +133,9 @@ export default function DataTable<TData>({
   }, [data.length, pageSize, serverPaginated]);
 
   React.useEffect(() => {
-    if (!storageKey || typeof window === 'undefined') return;
+    if (!storageKey || typeof globalThis.window === 'undefined') return;
 
-    window.sessionStorage.setItem(
+    globalThis.sessionStorage.setItem(
       `data-table:${storageKey}`,
       JSON.stringify(
         serverPaginated
@@ -168,7 +168,7 @@ export default function DataTable<TData>({
     },
   });
 
-  const rows = table.getRowModel().rows;
+  const {rows} = table.getRowModel();
   const totalFiltered = table.getFilteredRowModel().rows.length;
   const { pageIndex, pageSize: currentPageSize } = table.getState().pagination;
   const pageCount = table.getPageCount();

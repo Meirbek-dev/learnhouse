@@ -1,6 +1,5 @@
 'use client';
 
-import type { ColumnDef } from '@tanstack/react-table';
 import {
   addPermissionToRole,
   createRole as apiCreateRole,
@@ -47,7 +46,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import DataTable from '@/components/ui/data-table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -56,8 +54,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
+import type { ColumnDef } from '@tanstack/react-table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
+import DataTable from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -496,7 +496,9 @@ export default function RBACAdminClient() {
       cell: ({ row }) => (
         <div>
           <div className="font-medium">{row.original.name}</div>
-          {row.original.description ? <div className="text-muted-foreground text-sm">{row.original.description}</div> : null}
+          {row.original.description ? (
+            <div className="text-muted-foreground text-sm">{row.original.description}</div>
+          ) : null}
         </div>
       ),
     },
@@ -513,12 +515,18 @@ export default function RBACAdminClient() {
       meta: { label: t('tableHead.type') },
       cell: ({ row }) =>
         row.original.is_system ? (
-          <Badge variant="secondary" className="gap-1">
+          <Badge
+            variant="secondary"
+            className="gap-1"
+          >
             <Lock className="h-3 w-3" />
             {t('system')}
           </Badge>
         ) : (
-          <Badge variant="outline" className="gap-1">
+          <Badge
+            variant="outline"
+            className="gap-1"
+          >
             <Pencil className="h-3 w-3" />
             {t('custom')}
           </Badge>
@@ -561,7 +569,11 @@ export default function RBACAdminClient() {
       meta: { label: t('tableHead.actions'), exportable: false },
       cell: ({ row }) => (
         <div className="flex justify-end gap-2">
-          <PermissionGuard action={Actions.CREATE} resource={Resources.ROLE} scope={Scopes.ORG}>
+          <PermissionGuard
+            action={Actions.CREATE}
+            resource={Resources.ROLE}
+            scope={Scopes.ORG}
+          >
             <Button
               variant="ghost"
               size="icon"
@@ -571,7 +583,11 @@ export default function RBACAdminClient() {
               <Copy className="h-4 w-4" />
             </Button>
           </PermissionGuard>
-          <PermissionGuard action={Actions.UPDATE} resource={Resources.ROLE} scope={Scopes.ORG}>
+          <PermissionGuard
+            action={Actions.UPDATE}
+            resource={Resources.ROLE}
+            scope={Scopes.ORG}
+          >
             <Button
               variant="ghost"
               size="icon"
@@ -582,7 +598,11 @@ export default function RBACAdminClient() {
               <Edit className="h-4 w-4" />
             </Button>
           </PermissionGuard>
-          <PermissionGuard action={Actions.DELETE} resource={Resources.ROLE} scope={Scopes.ORG}>
+          <PermissionGuard
+            action={Actions.DELETE}
+            resource={Resources.ROLE}
+            scope={Scopes.ORG}
+          >
             <Button
               variant="ghost"
               size="icon"
@@ -662,7 +682,9 @@ export default function RBACAdminClient() {
       header: t('permissionTable.description'),
       meta: { label: t('permissionTable.description') },
       cell: ({ row }) =>
-        row.original.description ? row.original.description : <span className="text-muted-foreground">{t('noDescription')}</span>,
+        row.original.description || (
+          <span className="text-muted-foreground">{t('noDescription')}</span>
+        ),
     },
   ];
 

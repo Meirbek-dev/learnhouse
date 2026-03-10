@@ -1,11 +1,11 @@
 'use client';
 
+import { ChartContainer, ChartEmptyState, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Bar, BarChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from 'recharts';
 import type { HistogramBucket } from '@/types/analytics';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartContainer, ChartEmptyState, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { Bar, BarChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from 'recharts';
 
 interface AnalyticsThresholdHistogramProps {
   title: string;
@@ -16,7 +16,13 @@ interface AnalyticsThresholdHistogramProps {
   thresholdBucketLabel?: string;
 }
 
-export default function AnalyticsThresholdHistogram({ title, description, data, thresholdLabel, thresholdBucketLabel }: AnalyticsThresholdHistogramProps) {
+export default function AnalyticsThresholdHistogram({
+  title,
+  description,
+  data,
+  thresholdLabel,
+  thresholdBucketLabel,
+}: AnalyticsThresholdHistogramProps) {
   const t = useTranslations('TeacherAnalytics');
   return (
     <Card className="border-slate-200 bg-white/90 shadow-sm">
@@ -31,19 +37,55 @@ export default function AnalyticsThresholdHistogram({ title, description, data, 
       </CardHeader>
       <CardContent>
         {data.length ? (
-          <ChartContainer className="h-[280px] w-full" config={{ count: { label: t('histogram.learners'), color: 'var(--chart-3)', valueFormatter: (value) => `${value ?? 0} ${t('histogram.learners')}` } }}>
+          <ChartContainer
+            className="h-[280px] w-full"
+            config={{
+              count: {
+                label: t('histogram.learners'),
+                color: 'var(--chart-3)',
+                valueFormatter: (value) => `${value ?? 0} ${t('histogram.learners')}`,
+              },
+            }}
+          >
             <BarChart data={data}>
-              <CartesianGrid vertical={false} strokeDasharray="3 3" />
-              <XAxis dataKey="label" tickLine={false} axisLine={false} />
-              <YAxis tickLine={false} axisLine={false} allowDecimals={false} />
-              <ChartTooltip content={<ChartTooltipContent nameKey="label" formatter={(v) => [`${v} ${t('histogram.learners')}`, '']} />} />
-              <Bar dataKey="count" radius={10} fill="var(--color-count)" />
+              <CartesianGrid
+                vertical={false}
+                strokeDasharray="3 3"
+              />
+              <XAxis
+                dataKey="label"
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                allowDecimals={false}
+              />
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    nameKey="label"
+                    formatter={(v) => [`${v} ${t('histogram.learners')}`, '']}
+                  />
+                }
+              />
+              <Bar
+                dataKey="count"
+                radius={10}
+                fill="var(--color-count)"
+              />
               {thresholdBucketLabel ? (
                 <ReferenceLine
                   x={thresholdBucketLabel}
                   stroke="var(--chart-4)"
                   strokeDasharray="4 2"
-                  label={{ value: t('histogram.passLabel'), position: 'insideTopRight', fontSize: 11, fill: 'var(--chart-4)' }}
+                  label={{
+                    value: t('histogram.passLabel'),
+                    position: 'insideTopRight',
+                    fontSize: 11,
+                    fill: 'var(--chart-4)',
+                  }}
                 />
               ) : null}
             </BarChart>

@@ -1,12 +1,12 @@
 'use client';
 
-import type { ColumnDef } from '@tanstack/react-table';
-import type { TeacherCourseRow } from '@/types/analytics';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import type { TeacherCourseRow } from '@/types/analytics';
+import type { ColumnDef } from '@tanstack/react-table';
 import AnalyticsDataTable from './AnalyticsDataTable';
-import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
 interface CourseHealthTableProps {
   orgslug: string;
@@ -22,7 +22,10 @@ export default function CourseHealthTable({ orgslug, rows, storageKey, serverPag
       accessorKey: 'course_name',
       header: t('courseHealth.colCourse'),
       cell: ({ row }) => (
-        <Link href={`/orgs/${orgslug}/dash/analytics/courses/${row.original.course_uuid}`} className="font-medium text-slate-900 hover:text-emerald-700">
+        <Link
+          href={`/orgs/${orgslug}/dash/analytics/courses/${row.original.course_uuid}`}
+          className="font-medium text-slate-900 hover:text-emerald-700"
+        >
           {row.original.course_name}
         </Link>
       ),
@@ -40,7 +43,7 @@ export default function CourseHealthTable({ orgslug, rows, storageKey, serverPag
       header: t('courseHealth.colHealth'),
       cell: ({ row }) => {
         const v = row.original.content_health_score;
-        if (v == null) return t('atRisk.na');
+        if (v === null) return t('atRisk.na');
         // Score is already on a 0–100 scale (freshness × 0.55 + avg_progress × 0.45).
         return `${Math.round(v)}%`;
       },
@@ -50,7 +53,15 @@ export default function CourseHealthTable({ orgslug, rows, storageKey, serverPag
       header: t('courseHealth.colTopAlert'),
       cell: ({ row }) =>
         row.original.top_alert ? (
-          <Badge variant={row.original.top_alert.severity === 'critical' ? 'destructive' : row.original.top_alert.severity === 'warning' ? 'warning' : 'outline'}>
+          <Badge
+            variant={
+              row.original.top_alert.severity === 'critical'
+                ? 'destructive'
+                : row.original.top_alert.severity === 'warning'
+                  ? 'warning'
+                  : 'outline'
+            }
+          >
             {row.original.top_alert.title}
           </Badge>
         ) : (
@@ -66,7 +77,14 @@ export default function CourseHealthTable({ orgslug, rows, storageKey, serverPag
         <CardDescription>{t('courseHealth.description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <AnalyticsDataTable columns={columns} data={rows} storageKey={storageKey} serverPaginated={serverPaginated} searchPlaceholder={t('courseHealth.searchPlaceholder')} emptyMessage={t('courseHealth.emptyMessage')} />
+        <AnalyticsDataTable
+          columns={columns}
+          data={rows}
+          storageKey={storageKey}
+          serverPaginated={serverPaginated}
+          searchPlaceholder={t('courseHealth.searchPlaceholder')}
+          emptyMessage={t('courseHealth.emptyMessage')}
+        />
       </CardContent>
     </Card>
   );

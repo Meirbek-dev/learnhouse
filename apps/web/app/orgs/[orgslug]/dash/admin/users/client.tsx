@@ -1,6 +1,5 @@
 'use client';
 
-import type { ColumnDef } from '@tanstack/react-table';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,23 +20,24 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import DataTable from '@/components/ui/data-table';
 import { assignRoleToUser, listOrgUsers, listRoles, listUserRoles, removeRoleFromUser } from '@/services/rbac';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { AlertTriangle, Calendar, Plus, Shield, Trash2, User } from 'lucide-react';
 import { Actions, PermissionGuard, Resources, Scopes } from '@/components/Security';
+import { AlertTriangle, Calendar, Plus, Shield, Trash2, User } from 'lucide-react';
 import type { OrgUserBasic, Role, UserRoleAssignment } from '@/types/permissions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@/services/media/media';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useOrg } from '@components/Contexts/OrgContext';
+import type { ColumnDef } from '@tanstack/react-table';
+import { useLocale, useTranslations } from 'next-intl';
 import { Skeleton } from '@/components/ui/skeleton';
+import DataTable from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 export default function UserRolesClient() {
@@ -162,12 +162,7 @@ export default function UserRolesClient() {
     () => [
       {
         accessorFn: (assignment) =>
-          [
-            assignment.user?.first_name,
-            assignment.user?.last_name,
-            assignment.user?.username,
-            assignment.user?.email,
-          ]
+          [assignment.user?.first_name, assignment.user?.last_name, assignment.user?.username, assignment.user?.email]
             .filter(Boolean)
             .join(' '),
         id: 'user',
@@ -231,11 +226,17 @@ export default function UserRolesClient() {
         enableSorting: false,
         cell: ({ row }) => (
           <div className="flex justify-end">
-            <PermissionGuard action={Actions.DELETE} resource={Resources.ROLE} scope={Scopes.ORG}>
+            <PermissionGuard
+              action={Actions.DELETE}
+              resource={Resources.ROLE}
+              scope={Scopes.ORG}
+            >
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => handleRemoveUserRole(row.original.user_id, row.original.role_id, row.original.role?.name)}
+                onClick={() =>
+                  handleRemoveUserRole(row.original.user_id, row.original.role_id, row.original.role?.name)
+                }
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

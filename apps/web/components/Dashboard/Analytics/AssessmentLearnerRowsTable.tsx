@@ -1,11 +1,11 @@
 'use client';
 
-import type { ColumnDef } from '@tanstack/react-table';
-import type { AssessmentLearnerRow } from '@/types/analytics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import DataTable from '@/components/ui/data-table';
 import { getAnalyticsStatusLabel } from '@/lib/analytics/labels';
+import type { AssessmentLearnerRow } from '@/types/analytics';
+import type { ColumnDef } from '@tanstack/react-table';
 import { useLocale, useTranslations } from 'next-intl';
+import DataTable from '@/components/ui/data-table';
 
 interface AssessmentLearnerRowsTableProps {
   rows: AssessmentLearnerRow[];

@@ -1,14 +1,14 @@
 'use client';
 
-import type { MetricCard } from '@/types/analytics';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
+import type { MetricCard } from '@/types/analytics';
+import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 
 interface TeacherKpiCardsProps {
-  cards: Array<{ metric: MetricCard; sparkline: number[]; definition?: string }>;
+  cards: { metric: MetricCard; sparkline: number[]; definition?: string }[];
 }
 
 const iconForDirection = (direction: MetricCard['direction']) => {
@@ -45,8 +45,17 @@ function Sparkline({ values, positive }: { values: number[]; positive: boolean }
   }, [values]);
 
   return (
-    <svg viewBox="0 0 100 32" className="mt-3 h-8 w-full overflow-visible">
-      <path d={path} fill="none" stroke={positive ? 'var(--chart-2)' : 'var(--chart-4)'} strokeWidth="2.25" strokeLinecap="round" />
+    <svg
+      viewBox="0 0 100 32"
+      className="mt-3 h-8 w-full overflow-visible"
+    >
+      <path
+        d={path}
+        fill="none"
+        stroke={positive ? 'var(--chart-2)' : 'var(--chart-4)'}
+        strokeWidth="2.25"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -56,9 +65,7 @@ export default function TeacherKpiCards({ cards }: TeacherKpiCardsProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {cards.map(({ metric, sparkline, definition }) => {
-        const displayValue = metric.unit === '%'
-          ? `${metric.value.toLocaleString()}%`
-          : metric.value.toLocaleString();
+        const displayValue = metric.unit === '%' ? `${metric.value.toLocaleString()}%` : metric.value.toLocaleString();
 
         let deltaLabel: string;
         if (metric.delta_pct === null && metric.delta_value === null) {
@@ -74,13 +81,14 @@ export default function TeacherKpiCards({ cards }: TeacherKpiCardsProps) {
 
         // When delta_pct is null but delta_value is non-null, the previous period had
         // no data — show "нет данных" rather than "стабильно" to avoid misleading teachers.
-        const badgeLabel = metric.delta_value === null
-          ? t('kpi.noComparison')
-          : metric.delta_pct === null && metric.delta_value === 0
-            ? t('kpi.stable')
-          : metric.delta_pct === null
-            ? t('kpi.noData')
-            : deltaLabel;
+        const badgeLabel =
+          metric.delta_value === null
+            ? t('kpi.noComparison')
+            : metric.delta_pct === null && metric.delta_value === 0
+              ? t('kpi.stable')
+              : metric.delta_pct === null
+                ? t('kpi.noData')
+                : deltaLabel;
 
         return (
           <Card
@@ -97,7 +105,10 @@ export default function TeacherKpiCards({ cards }: TeacherKpiCardsProps) {
                     {metric.benchmark_label}: {metric.unit === '%' ? `${metric.benchmark}%` : metric.benchmark}
                   </div>
                 )}
-                <Sparkline values={sparkline} positive={metric.is_higher_better ?? true} />
+                <Sparkline
+                  values={sparkline}
+                  positive={metric.is_higher_better ?? true}
+                />
               </div>
               {metric.delta_value !== null && (
                 <Badge variant={badgeVariant(metric.direction, metric.is_higher_better ?? true)}>
@@ -110,12 +121,12 @@ export default function TeacherKpiCards({ cards }: TeacherKpiCardsProps) {
               <div className="text-sm text-slate-600">
                 {metric.delta_value === null
                   ? t('kpi.noComparison')
-                  : t('kpi.changePeriod', { delta: `${metric.delta_value > 0 ? '+' : ''}${metric.delta_value}${metric.unit ?? ''}` })}
+                  : t('kpi.changePeriod', {
+                      delta: `${metric.delta_value > 0 ? '+' : ''}${metric.delta_value}${metric.unit ?? ''}`,
+                    })}
               </div>
               {/* Metric definition for returning learners, at-risk, content health, difficulty (issue 3) */}
-              {definition && (
-                <div className="text-xs leading-4 text-slate-400">{definition}</div>
-              )}
+              {definition && <div className="text-xs leading-4 text-slate-400">{definition}</div>}
             </CardContent>
           </Card>
         );

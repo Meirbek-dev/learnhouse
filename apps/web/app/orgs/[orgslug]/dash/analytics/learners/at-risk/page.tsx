@@ -1,11 +1,11 @@
-import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
-import AtRiskLearnersTable from '@components/Dashboard/Analytics/AtRiskLearnersTable';
-import TeacherFilterBar from '@components/Dashboard/Analytics/TeacherFilterBar';
-import { Button } from '@/components/ui/button';
 import { getAtRiskLearners, normalizeAnalyticsQuery } from '@services/analytics/teacher';
+import AtRiskLearnersTable from '@components/Dashboard/Analytics/AtRiskLearnersTable';
+import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
+import TeacherFilterBar from '@components/Dashboard/Analytics/TeacherFilterBar';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { auth } from '@/auth';
 import { getTranslations } from 'next-intl/server';
+import { Button } from '@/components/ui/button';
+import { auth } from '@/auth';
 import Link from 'next/link';
 
 export default async function AnalyticsAtRiskPage(props: {
@@ -20,7 +20,12 @@ export default async function AnalyticsAtRiskPage(props: {
   const t = await getTranslations('TeacherAnalytics');
 
   if (!accessToken) {
-    return <AnalyticsEmptyState title={t('pages.atRiskUnavailableTitle')} description={t('pages.atRiskUnavailableDesc')} />;
+    return (
+      <AnalyticsEmptyState
+        title={t('pages.atRiskUnavailableTitle')}
+        description={t('pages.atRiskUnavailableDesc')}
+      />
+    );
   }
 
   try {
@@ -37,7 +42,14 @@ export default async function AnalyticsAtRiskPage(props: {
     if (query.sort_order) params.set('sort_order', query.sort_order);
     return (
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
-        <TeacherFilterBar orgslug={orgslug} path={`/orgs/${orgslug}/dash/analytics/learners/at-risk`} query={query} courseCount={risk.course_options.length} courseOptions={risk.course_options} cohortOptions={risk.cohort_options} />
+        <TeacherFilterBar
+          orgslug={orgslug}
+          path={`/orgs/${orgslug}/dash/analytics/learners/at-risk`}
+          query={query}
+          courseCount={risk.course_options.length}
+          courseOptions={risk.course_options}
+          cohortOptions={risk.cohort_options}
+        />
         <div className="flex items-center justify-between text-sm text-slate-500">
           <span>
             {t('table.showingRows', {
@@ -47,17 +59,53 @@ export default async function AnalyticsAtRiskPage(props: {
             })}
           </span>
         </div>
-        <AtRiskLearnersTable orgslug={orgslug} rows={risk.items} title={t('pages.atRiskPageTitle')} description={t('pages.atRiskPageDescription', { total: risk.total })} storageKey="at-risk-page" serverPaginated={true} />
+        <AtRiskLearnersTable
+          orgslug={orgslug}
+          rows={risk.items}
+          title={t('pages.atRiskPageTitle')}
+          description={t('pages.atRiskPageDescription', { total: risk.total })}
+          storageKey="at-risk-page"
+          serverPaginated
+        />
         {totalPages > 1 ? (
           <div className="flex items-center justify-end gap-2">
-            <Button variant="outline" size="sm" disabled={risk.page <= 1} render={<Link href={`/orgs/${orgslug}/dash/analytics/learners/at-risk?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, risk.page - 1)), page_size: String(risk.page_size) }).toString()}`} />}>Prev</Button>
-            <span className="text-sm text-slate-600">Page {risk.page} / {totalPages}</span>
-            <Button variant="outline" size="sm" disabled={risk.page >= totalPages} render={<Link href={`/orgs/${orgslug}/dash/analytics/learners/at-risk?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.min(totalPages, risk.page + 1)), page_size: String(risk.page_size) }).toString()}`} />}>Next</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={risk.page <= 1}
+              render={
+                <Link
+                  href={`/orgs/${orgslug}/dash/analytics/learners/at-risk?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, risk.page - 1)), page_size: String(risk.page_size) }).toString()}`}
+                />
+              }
+            >
+              Prev
+            </Button>
+            <span className="text-sm text-slate-600">
+              Page {risk.page} / {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={risk.page >= totalPages}
+              render={
+                <Link
+                  href={`/orgs/${orgslug}/dash/analytics/learners/at-risk?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.min(totalPages, risk.page + 1)), page_size: String(risk.page_size) }).toString()}`}
+                />
+              }
+            >
+              Next
+            </Button>
           </div>
         ) : null}
       </div>
     );
   } catch (error) {
-    return <AnalyticsEmptyState title={t('pages.atRiskUnavailableTitle')} description={error instanceof Error ? error.message : t('pages.atRiskLoadError')} />;
+    return (
+      <AnalyticsEmptyState
+        title={t('pages.atRiskUnavailableTitle')}
+        description={error instanceof Error ? error.message : t('pages.atRiskLoadError')}
+      />
+    );
   }
 }

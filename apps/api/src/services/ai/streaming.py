@@ -11,6 +11,7 @@ from typing import Any
 
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.messages import AIMessage, HumanMessage
+
 from config.config import get_platform_config
 from src.services.ai.exceptions import (
     AIProcessingError,
@@ -253,8 +254,9 @@ async def ask_ai_stream(
                 "error_code": "PROCESSING_ERROR",
             }
         )
+        msg = f"Unexpected error during AI streaming: {e!s}"
         raise AIProcessingError(
-            f"Unexpected error during AI streaming: {e!s}",
+            msg,
             details={"error_type": type(e).__name__, "session_id": session_id},
         ) from e
 

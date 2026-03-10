@@ -1,12 +1,12 @@
+import { getTeacherCourseList, normalizeAnalyticsQuery } from '@services/analytics/teacher';
 import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
 import CourseHealthTable from '@components/Dashboard/Analytics/CourseHealthTable';
 import TeacherFilterBar from '@components/Dashboard/Analytics/TeacherFilterBar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { getTeacherCourseList, normalizeAnalyticsQuery } from '@services/analytics/teacher';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { auth } from '@/auth';
 import { getTranslations } from 'next-intl/server';
+import { Button } from '@/components/ui/button';
+import { auth } from '@/auth';
 import Link from 'next/link';
 
 export default async function AnalyticsCoursesPage(props: {
@@ -21,7 +21,12 @@ export default async function AnalyticsCoursesPage(props: {
   const t = await getTranslations('TeacherAnalytics');
 
   if (!accessToken) {
-    return <AnalyticsEmptyState title={t('pages.coursesUnavailableTitle')} description={t('pages.coursesUnavailableDesc')} />;
+    return (
+      <AnalyticsEmptyState
+        title={t('pages.coursesUnavailableTitle')}
+        description={t('pages.coursesUnavailableDesc')}
+      />
+    );
   }
 
   try {
@@ -44,7 +49,14 @@ export default async function AnalyticsCoursesPage(props: {
           </CardHeader>
           <CardContent className="text-sm text-slate-600">{t('pages.courseRankingDescription')}</CardContent>
         </Card>
-        <TeacherFilterBar orgslug={orgslug} path={`/orgs/${orgslug}/dash/analytics/courses`} query={query} courseCount={courseList.total} courseOptions={courseList.course_options} cohortOptions={courseList.cohort_options} />
+        <TeacherFilterBar
+          orgslug={orgslug}
+          path={`/orgs/${orgslug}/dash/analytics/courses`}
+          query={query}
+          courseCount={courseList.total}
+          courseOptions={courseList.course_options}
+          cohortOptions={courseList.cohort_options}
+        />
         {/* Server-side row count so users know how many rows exist across pages */}
         <div className="flex items-center justify-between text-sm text-slate-500">
           <span>
@@ -55,17 +67,51 @@ export default async function AnalyticsCoursesPage(props: {
             })}
           </span>
         </div>
-        <CourseHealthTable orgslug={orgslug} rows={courseList.items} storageKey="courses-page" serverPaginated={true} />
+        <CourseHealthTable
+          orgslug={orgslug}
+          rows={courseList.items}
+          storageKey="courses-page"
+          serverPaginated
+        />
         {totalPages > 1 ? (
           <div className="flex items-center justify-end gap-2">
-            <Button variant="outline" size="sm" disabled={courseList.page <= 1} render={<Link href={`/orgs/${orgslug}/dash/analytics/courses?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, courseList.page - 1)), page_size: String(courseList.page_size) }).toString()}`} />}>Prev</Button>
-            <span className="text-sm text-slate-600">Page {courseList.page} / {totalPages}</span>
-            <Button variant="outline" size="sm" disabled={courseList.page >= totalPages} render={<Link href={`/orgs/${orgslug}/dash/analytics/courses?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.min(totalPages, courseList.page + 1)), page_size: String(courseList.page_size) }).toString()}`} />}>Next</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={courseList.page <= 1}
+              render={
+                <Link
+                  href={`/orgs/${orgslug}/dash/analytics/courses?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, courseList.page - 1)), page_size: String(courseList.page_size) }).toString()}`}
+                />
+              }
+            >
+              Prev
+            </Button>
+            <span className="text-sm text-slate-600">
+              Page {courseList.page} / {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={courseList.page >= totalPages}
+              render={
+                <Link
+                  href={`/orgs/${orgslug}/dash/analytics/courses?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.min(totalPages, courseList.page + 1)), page_size: String(courseList.page_size) }).toString()}`}
+                />
+              }
+            >
+              Next
+            </Button>
           </div>
         ) : null}
       </div>
     );
   } catch (error) {
-    return <AnalyticsEmptyState title={t('pages.coursesUnavailableTitle')} description={error instanceof Error ? error.message : t('pages.coursesLoadError')} />;
+    return (
+      <AnalyticsEmptyState
+        title={t('pages.coursesUnavailableTitle')}
+        description={error instanceof Error ? error.message : t('pages.coursesLoadError')}
+      />
+    );
   }
 }

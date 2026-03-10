@@ -12,7 +12,11 @@ from src.db.courses.courses import Course
 from src.db.courses.exams import Exam
 from src.db.resource_authors import ResourceAuthor, ResourceAuthorshipStatusEnum
 from src.db.users import AnonymousUser, PublicUser
-from src.security.rbac import AuthenticationRequired, PermissionDenied, PermissionChecker
+from src.security.rbac import (
+    AuthenticationRequired,
+    PermissionChecker,
+    PermissionDenied,
+)
 from src.services.analytics.filters import AnalyticsFilters
 
 
@@ -41,12 +45,20 @@ def _coerce_course_id(value: Any) -> int | None:
     return int(value)
 
 
-def _has_analytics_scope(checker: PermissionChecker, user_id: int, org_id: int, action: str, scope: str) -> bool:
+def _has_analytics_scope(
+    checker: PermissionChecker, user_id: int, org_id: int, action: str, scope: str
+) -> bool:
     permissions = checker.get_expanded_permissions(user_id, org_id)
-    return f"analytics:{action}:{scope}" in permissions or f"analytics:*:{scope}" in permissions or "*:*:*" in permissions
+    return (
+        f"analytics:{action}:{scope}" in permissions
+        or f"analytics:*:{scope}" in permissions
+        or "*:*:*" in permissions
+    )
 
 
-def ensure_analytics_access(checker: PermissionChecker, user_id: int, org_id: int, action: str) -> None:
+def ensure_analytics_access(
+    checker: PermissionChecker, user_id: int, org_id: int, action: str
+) -> None:
     if any(
         _has_analytics_scope(checker, user_id, org_id, action, scope)
         for scope in ("assigned", "org", "all")
@@ -65,7 +77,7 @@ def resolve_teacher_scope(
     action: str,
 ) -> TeacherAnalyticsScope:
     if isinstance(current_user, AnonymousUser):
-        raise AuthenticationRequired()
+        raise AuthenticationRequired
 
     ensure_analytics_access(checker, current_user.id, org_id, action)
     has_org_scope = any(
@@ -79,31 +91,39 @@ def resolve_teacher_scope(
     if has_org_scope and filters.teacher_user_id:
         course_ids = db_session.exec(
             select(Course.id)
-            .outerjoin(ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid)
+            .outerjoin(
+                ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid
+            )
             .where(Course.org_id == org_id)
             .where(
                 or_(
                     Course.creator_id == target_user_id,
                     and_(
                         ResourceAuthor.user_id == target_user_id,
-                        ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
+                        ResourceAuthor.authorship_status
+                        == ResourceAuthorshipStatusEnum.ACTIVE,
                     ),
                 )
             )
         ).all()
     elif has_org_scope:
-        course_ids = db_session.exec(select(Course.id).where(Course.org_id == org_id)).all()
+        course_ids = db_session.exec(
+            select(Course.id).where(Course.org_id == org_id)
+        ).all()
     else:
         course_ids = db_session.exec(
             select(Course.id)
-            .outerjoin(ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid)
+            .outerjoin(
+                ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid
+            )
             .where(Course.org_id == org_id)
             .where(
                 or_(
                     Course.creator_id == current_user.id,
                     and_(
                         ResourceAuthor.user_id == current_user.id,
-                        ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
+                        ResourceAuthor.authorship_status
+                        == ResourceAuthorshipStatusEnum.ACTIVE,
                     ),
                 )
             )
@@ -150,18 +170,28 @@ def resolve_course_id_for_assessment(
     assessment_id: int,
 ) -> int | None:
     if assessment_type == "assignment":
-        assignment = db_session.exec(select(Assignment).where(Assignment.id == assessment_id)).first()
+        assignment = db_session.exec(
+            select(Assignment).where(Assignment.id == assessment_id)
+        ).first()
         return assignment.course_id if assignment is not None else None
     if assessment_type == "exam":
         exam = db_session.exec(select(Exam).where(Exam.id == assessment_id)).first()
         return exam.course_id if exam is not None else None
     if assessment_type in {"quiz", "code_challenge"}:
-        activity = db_session.exec(select(Activity).where(Activity.id == assessment_id)).first()
+        activity = db_session.exec(
+            select(Activity).where(Activity.id == assessment_id)
+        ).first()
         if activity is None or activity.course_id is None:
             return None
-        if assessment_type == "quiz" and activity.activity_type != ActivityTypeEnum.TYPE_QUIZ:
+        if (
+            assessment_type == "quiz"
+            and activity.activity_type != ActivityTypeEnum.TYPE_QUIZ
+        ):
             return None
-        if assessment_type == "code_challenge" and activity.activity_type != ActivityTypeEnum.TYPE_CODE_CHALLENGE:
+        if (
+            assessment_type == "code_challenge"
+            and activity.activity_type != ActivityTypeEnum.TYPE_CODE_CHALLENGE
+        ):
             return None
         return activity.course_id
     return None
@@ -173,7 +203,9 @@ def ensure_assessment_in_scope(
     assessment_type: str,
     assessment_id: int,
 ) -> None:
-    course_id = resolve_course_id_for_assessment(db_session, assessment_type, assessment_id)
+    course_id = resolve_course_id_for_assessment(
+        db_session, assessment_type, assessment_id
+    )
     if course_id is None:
         raise PermissionDenied(
             permission="analytics:read",

@@ -6,6 +6,7 @@ from datetime import timedelta
 from sqlalchemy import select
 from sqlmodel import Session
 
+from src.db.courses.courses import Course
 from src.db.usergroups import UserGroup
 from src.services.analytics.assessments import build_assessment_rows
 from src.services.analytics.filters import AnalyticsFilters
@@ -17,15 +18,19 @@ from src.services.analytics.queries import (
     load_analytics_context,
     progress_snapshots,
     safe_pct,
-    to_tz_iso,
     to_iso,
+    to_tz_iso,
 )
 from src.services.analytics.risk import build_risk_rows
-from src.services.analytics.rollups import list_latest_assessment_rollups, list_latest_course_rollups, supports_rollup_reads
+from src.services.analytics.rollups import (
+    list_latest_assessment_rollups,
+    list_latest_course_rollups,
+    supports_rollup_reads,
+)
 from src.services.analytics.schemas import (
     ActivityDropoffRow,
-    AnalyticsFilterOption,
     AlertItem,
+    AnalyticsFilterOption,
     ContentHealthRow,
     FunnelStep,
     TeacherCourseDetailResponse,
@@ -35,10 +40,11 @@ from src.services.analytics.schemas import (
     TimeSeriesPoint,
 )
 from src.services.analytics.scope import TeacherAnalyticsScope, ensure_course_in_scope
-from src.db.courses.courses import Course
 
 
-def _build_rollup_course_rows(scope: TeacherAnalyticsScope, filters: AnalyticsFilters, db_session: Session) -> tuple[str, list[TeacherCourseRow]] | None:
+def _build_rollup_course_rows(
+    scope: TeacherAnalyticsScope, filters: AnalyticsFilters, db_session: Session
+) -> tuple[str, list[TeacherCourseRow]] | None:
     if not supports_rollup_reads(filters):
         return None
     rollups = list_latest_course_rollups(
@@ -50,15 +56,23 @@ def _build_rollup_course_rows(scope: TeacherAnalyticsScope, filters: AnalyticsFi
     if not rollups:
         return None
 
-    assessment_rollups = list_latest_assessment_rollups(db_session, org_id=scope.org_id, course_ids=scope.course_ids)
+    assessment_rollups = list_latest_assessment_rollups(
+        db_session, org_id=scope.org_id, course_ids=scope.course_ids
+    )
     difficulty_by_course: dict[int, list[float]] = defaultdict(list)
     for assessment in assessment_rollups:
         if assessment.difficulty_score is not None:
-            difficulty_by_course[assessment.course_id].append(float(assessment.difficulty_score))
+            difficulty_by_course[assessment.course_id].append(
+                float(assessment.difficulty_score)
+            )
 
     courses = {
         course.id: course
-        for course in db_session.exec(select(Course).where(Course.id.in_([rollup.course_id for rollup in rollups]))).all()
+        for course in db_session.exec(
+            select(Course).where(
+                Course.id.in_([rollup.course_id for rollup in rollups])
+            )
+        ).all()
     }
 
     rows: list[TeacherCourseRow] = []
@@ -77,7 +91,10 @@ def _build_rollup_course_rows(scope: TeacherAnalyticsScope, filters: AnalyticsFi
                 body=f"{rollup.ungraded_submissions} отправок все еще ожидают проверки.",
                 course_id=rollup.course_id,
             )
-        elif rollup.engagement_delta_pct is not None and float(rollup.engagement_delta_pct) < -15:
+        elif (
+            rollup.engagement_delta_pct is not None
+            and float(rollup.engagement_delta_pct) < -15
+        ):
             top_alert = AlertItem(
                 id=f"engagement-drop-{rollup.course_id}",
                 type="engagement_drop",
@@ -94,11 +111,17 @@ def _build_rollup_course_rows(scope: TeacherAnalyticsScope, filters: AnalyticsFi
                 course_name=course.name,
                 active_learners_7d=rollup.active_learners_7d,
                 completion_rate=float(rollup.completion_rate or 0),
-                engagement_delta_pct=float(rollup.engagement_delta_pct) if rollup.engagement_delta_pct is not None else None,
+                engagement_delta_pct=float(rollup.engagement_delta_pct)
+                if rollup.engagement_delta_pct is not None
+                else None,
                 at_risk_learners=rollup.at_risk_learners,
                 ungraded_submissions=rollup.ungraded_submissions,
                 content_health_score=float(rollup.content_health_score or 0),
-                assessment_difficulty_score=round(sum(difficulty_values) / len(difficulty_values), 1) if difficulty_values else None,
+                assessment_difficulty_score=round(
+                    sum(difficulty_values) / len(difficulty_values), 1
+                )
+                if difficulty_values
+                else None,
                 last_content_update_at=to_iso(rollup.last_content_update_at),
                 top_alert=top_alert,
             )
@@ -112,8 +135,16 @@ def _build_rollup_course_rows(scope: TeacherAnalyticsScope, filters: AnalyticsFi
         "completion": lambda row: row.completion_rate,
         "risk": lambda row: row.at_risk_learners,
         "health": lambda row: row.content_health_score,
-        "engagement": lambda row: row.engagement_delta_pct if row.engagement_delta_pct is not None else -10_000,
-        "pressure": lambda row: (row.top_alert is not None, row.at_risk_learners, -row.content_health_score),
+        "engagement": lambda row: (
+            row.engagement_delta_pct
+            if row.engagement_delta_pct is not None
+            else -10_000
+        ),
+        "pressure": lambda row: (
+            row.top_alert is not None,
+            row.at_risk_learners,
+            -row.content_health_score,
+        ),
     }
     rows.sort(key=sort_map.get(sort_by, sort_map["pressure"]), reverse=reverse)
     generated_at = max((rollup.generated_at for rollup in rollups), default=None)
@@ -148,12 +179,41 @@ def build_course_rows(
         course = context.courses_by_id.get(course_id)
         if course is None:
             continue
-        current_active = {event.user_id for event in events if event.course_id == course_id and event.ts >= current_start}
-        previous_active = {event.user_id for event in events if event.course_id == course_id and previous_start <= event.ts < previous_end}
-        course_snapshots = [snapshot for key, snapshot in snapshots.items() if key[0] == course_id]
-        completion_rate = safe_pct(sum(1 for snapshot in course_snapshots if snapshot.is_completed), len(course_snapshots)) or 0.0
-        avg_progress = round(sum(snapshot.progress_pct for snapshot in course_snapshots) / len(course_snapshots), 1) if course_snapshots else 0.0
-        at_risk_count = sum(1 for row in risk_by_course.get(course_id, []) if row.risk_level in {"medium", "high"})
+        current_active = {
+            event.user_id
+            for event in events
+            if event.course_id == course_id and event.ts >= current_start
+        }
+        previous_active = {
+            event.user_id
+            for event in events
+            if event.course_id == course_id
+            and previous_start <= event.ts < previous_end
+        }
+        course_snapshots = [
+            snapshot for key, snapshot in snapshots.items() if key[0] == course_id
+        ]
+        completion_rate = (
+            safe_pct(
+                sum(1 for snapshot in course_snapshots if snapshot.is_completed),
+                len(course_snapshots),
+            )
+            or 0.0
+        )
+        avg_progress = (
+            round(
+                sum(snapshot.progress_pct for snapshot in course_snapshots)
+                / len(course_snapshots),
+                1,
+            )
+            if course_snapshots
+            else 0.0
+        )
+        at_risk_count = sum(
+            1
+            for row in risk_by_course.get(course_id, [])
+            if row.risk_level in {"medium", "high"}
+        )
         ungraded_submissions = sum(
             1
             for submission, assignment in context.assignment_submissions
@@ -162,13 +222,25 @@ def build_course_rows(
             and (allowed_user_ids is None or submission.user_id in allowed_user_ids)
         )
         last_update = course_last_content_update(context, course_id)
-        days_since_update = (now - last_update).days if last_update is not None else None
+        days_since_update = (
+            (now - last_update).days if last_update is not None else None
+        )
         # No update history means the course may be very stale; treat as 90-day old content
-        freshness_score = max(0.0, round(100 - (90 * 3.5), 1)) if days_since_update is None else max(0.0, round(100 - (days_since_update * 3.5), 1))
-        content_health_score = round((freshness_score * 0.55) + (avg_progress * 0.45), 1)
+        freshness_score = (
+            max(0.0, round(100 - (90 * 3.5), 1))
+            if days_since_update is None
+            else max(0.0, round(100 - (days_since_update * 3.5), 1))
+        )
+        content_health_score = round(
+            (freshness_score * 0.55) + (avg_progress * 0.45), 1
+        )
         engagement_delta_pct = None
         if previous_active:
-            engagement_delta_pct = round(((len(current_active) - len(previous_active)) / len(previous_active)) * 100, 1)
+            engagement_delta_pct = round(
+                ((len(current_active) - len(previous_active)) / len(previous_active))
+                * 100,
+                1,
+            )
         # Weighted difficulty: weight each assessment by its submission count to avoid average-of-averages
         difficulty_weighted_sum = sum(
             (row.difficulty_score or 0) * max(1, int((row.submission_rate or 0) * 10))
@@ -180,7 +252,11 @@ def build_course_rows(
             for row in assessments_by_course.get(course_id, [])
             if row.difficulty_score is not None
         )
-        assessment_difficulty_score = round(difficulty_weighted_sum / difficulty_weight_total, 1) if difficulty_weight_total else None
+        assessment_difficulty_score = (
+            round(difficulty_weighted_sum / difficulty_weight_total, 1)
+            if difficulty_weight_total
+            else None
+        )
 
         top_alert = None
         if ungraded_submissions >= 10:
@@ -216,8 +292,16 @@ def build_course_rows(
                 course_id=course_id,
                 course_uuid=course.course_uuid,
                 course_name=course.name,
-                active_learners_7d=len(current_active if filters.window == "7d" else {event.user_id for event in events if event.course_id == course_id and event.ts >= now - timedelta(days=7)}),
-
+                active_learners_7d=len(
+                    current_active
+                    if filters.window == "7d"
+                    else {
+                        event.user_id
+                        for event in events
+                        if event.course_id == course_id
+                        and event.ts >= now - timedelta(days=7)
+                    }
+                ),
                 completion_rate=completion_rate,
                 engagement_delta_pct=engagement_delta_pct,
                 at_risk_learners=at_risk_count,
@@ -236,25 +320,45 @@ def build_course_rows(
         "completion": lambda row: row.completion_rate,
         "risk": lambda row: row.at_risk_learners,
         "health": lambda row: row.content_health_score,
-        "engagement": lambda row: row.engagement_delta_pct if row.engagement_delta_pct is not None else -10_000,
-        "pressure": lambda row: (row.top_alert is not None, row.at_risk_learners, -row.content_health_score),
-        "difficulty": lambda row: row.assessment_difficulty_score if row.assessment_difficulty_score is not None else -1,
+        "engagement": lambda row: (
+            row.engagement_delta_pct
+            if row.engagement_delta_pct is not None
+            else -10_000
+        ),
+        "pressure": lambda row: (
+            row.top_alert is not None,
+            row.at_risk_learners,
+            -row.content_health_score,
+        ),
+        "difficulty": lambda row: (
+            row.assessment_difficulty_score
+            if row.assessment_difficulty_score is not None
+            else -1
+        ),
         "signals": lambda row: row.top_alert is not None,
     }
     rows.sort(key=sort_map.get(sort_by, sort_map["pressure"]), reverse=reverse)
     return to_iso(context.generated_at) or "", rows
 
 
-def get_teacher_course_list(db_session: Session, scope: TeacherAnalyticsScope, filters: AnalyticsFilters) -> TeacherCourseListResponse:
+def get_teacher_course_list(
+    db_session: Session, scope: TeacherAnalyticsScope, filters: AnalyticsFilters
+) -> TeacherCourseListResponse:
     rollup_rows = _build_rollup_course_rows(scope, filters, db_session)
     if rollup_rows is not None:
         generated_at, rows = rollup_rows
         paged_rows = rows[filters.offset : filters.offset + filters.page_size]
         course_map = {
             course.id: course
-            for course in db_session.exec(select(Course).where(Course.id.in_(scope.course_ids))).all()
+            for course in db_session.exec(
+                select(Course).where(Course.id.in_(scope.course_ids))
+            ).all()
         }
-        usergroups = list(db_session.exec(select(UserGroup).where(UserGroup.org_id == scope.org_id)).all())
+        usergroups = list(
+            db_session.exec(
+                select(UserGroup).where(UserGroup.org_id == scope.org_id)
+            ).all()
+        )
         return TeacherCourseListResponse(
             generated_at=generated_at,
             total=len(rows),
@@ -263,7 +367,9 @@ def get_teacher_course_list(db_session: Session, scope: TeacherAnalyticsScope, f
             items=paged_rows,
             course_options=[
                 AnalyticsFilterOption(label=course.name, value=str(course_id))
-                for course_id, course in sorted(course_map.items(), key=lambda item: item[1].name.lower())
+                for course_id, course in sorted(
+                    course_map.items(), key=lambda item: item[1].name.lower()
+                )
             ],
             cohort_options=[
                 AnalyticsFilterOption(label=group.name, value=str(group.id))
@@ -273,7 +379,9 @@ def get_teacher_course_list(db_session: Session, scope: TeacherAnalyticsScope, f
     # Bound the context load to the previous-period start so assessment data
     # older than the comparison window is not loaded into memory.
     previous_start, _ = filters.previous_window_bounds()
-    context = load_analytics_context(db_session, scope.course_ids, activity_start=previous_start)
+    context = load_analytics_context(
+        db_session, scope.course_ids, activity_start=previous_start
+    )
     generated_at, rows = build_course_rows(scope, filters, db_session, context=context)
     paged_rows = rows[filters.offset : filters.offset + filters.page_size]
     return TeacherCourseListResponse(
@@ -283,18 +391,27 @@ def get_teacher_course_list(db_session: Session, scope: TeacherAnalyticsScope, f
         page_size=filters.page_size,
         items=paged_rows,
         course_options=[
-            AnalyticsFilterOption(label=context.courses_by_id[course_id].name, value=str(course_id))
+            AnalyticsFilterOption(
+                label=context.courses_by_id[course_id].name, value=str(course_id)
+            )
             for course_id in sorted(context.courses_by_id)
             if course_id in scope.course_ids
         ],
         cohort_options=[
             AnalyticsFilterOption(label=name, value=str(group_id))
-            for group_id, name in sorted(context.usergroup_names_by_id.items(), key=lambda item: item[1].lower())
+            for group_id, name in sorted(
+                context.usergroup_names_by_id.items(), key=lambda item: item[1].lower()
+            )
         ],
     )
 
 
-def get_teacher_course_detail(db_session: Session, scope: TeacherAnalyticsScope, course_id: int, filters: AnalyticsFilters) -> TeacherCourseDetailResponse:
+def get_teacher_course_detail(
+    db_session: Session,
+    scope: TeacherAnalyticsScope,
+    course_id: int,
+    filters: AnalyticsFilters,
+) -> TeacherCourseDetailResponse:
     ensure_course_in_scope(scope, course_id)
     # Load only the single requested course instead of the full teacher scope.
     # This cuts context-load cost proportionally to the number of courses the teacher manages.
@@ -302,25 +419,66 @@ def get_teacher_course_detail(db_session: Session, scope: TeacherAnalyticsScope,
     allowed_user_ids = cohort_user_ids(context, filters.cohort_ids)
     course = context.courses_by_id.get(course_id)
     if course is None:
-        raise ValueError(f"Course not found: {course_id}")
+        msg = f"Course not found: {course_id}"
+        raise ValueError(msg)
 
     snapshots = progress_snapshots(context, allowed_user_ids)
-    course_snapshots = [snapshot for key, snapshot in snapshots.items() if key[0] == course_id]
-    risk_rows = [row for row in build_risk_rows(context, filters) if row.course_id == course_id]
-    assessment_rows = [row for row in build_assessment_rows(context, filters) if row.course_id == course_id]
-    events = [event for event in build_activity_events(context, allowed_user_ids) if event.course_id == course_id]
+    course_snapshots = [
+        snapshot for key, snapshot in snapshots.items() if key[0] == course_id
+    ]
+    risk_rows = [
+        row for row in build_risk_rows(context, filters) if row.course_id == course_id
+    ]
+    assessment_rows = [
+        row
+        for row in build_assessment_rows(context, filters)
+        if row.course_id == course_id
+    ]
+    events = [
+        event
+        for event in build_activity_events(context, allowed_user_ids)
+        if event.course_id == course_id
+    ]
 
     current_start, current_end = filters.window_bounds(now=context.generated_at)
     engagement_series = [
-        TimeSeriesPoint(bucket_start=to_tz_iso(bucket, filters.tzinfo) or "", value=value)
-        for bucket, value in build_series(events, filters.bucket, current_start, current_end, distinct_users=True, tzinfo=filters.tzinfo)
+        TimeSeriesPoint(
+            bucket_start=to_tz_iso(bucket, filters.tzinfo) or "", value=value
+        )
+        for bucket, value in build_series(
+            events,
+            filters.bucket,
+            current_start,
+            current_end,
+            distinct_users=True,
+            tzinfo=filters.tzinfo,
+        )
     ]
 
     enrolled = len(course_snapshots)
-    completion_rate = safe_pct(sum(1 for snapshot in course_snapshots if snapshot.is_completed), enrolled) or 0.0
-    avg_progress = round(sum(snapshot.progress_pct for snapshot in course_snapshots) / enrolled, 1) if enrolled else 0.0
-    active_learners_7d = len({event.user_id for event in events if event.ts >= context.generated_at - timedelta(days=7)})
-    certificates_issued = sum(1 for certificate, certification in context.certificates if certification.course_id == course_id)
+    completion_rate = (
+        safe_pct(
+            sum(1 for snapshot in course_snapshots if snapshot.is_completed), enrolled
+        )
+        or 0.0
+    )
+    avg_progress = (
+        round(sum(snapshot.progress_pct for snapshot in course_snapshots) / enrolled, 1)
+        if enrolled
+        else 0.0
+    )
+    active_learners_7d = len(
+        {
+            event.user_id
+            for event in events
+            if event.ts >= context.generated_at - timedelta(days=7)
+        }
+    )
+    certificates_issued = sum(
+        1
+        for certificate, certification in context.certificates
+        if certification.course_id == course_id
+    )
     ungraded_submissions = sum(
         1
         for submission, assignment in context.assignment_submissions
@@ -330,14 +488,25 @@ def get_teacher_course_detail(db_session: Session, scope: TeacherAnalyticsScope,
     )
 
     ordered_steps = []
-    chapter_order = {item.chapter_id: item.order for item in context.course_chapters if item.course_id == course_id}
+    chapter_order = {
+        item.chapter_id: item.order
+        for item in context.course_chapters
+        if item.course_id == course_id
+    }
     for chapter_activity in context.chapter_activities:
         if chapter_activity.course_id != course_id:
             continue
         activity = context.activities_by_id.get(chapter_activity.activity_id)
         if activity is None:
             continue
-        ordered_steps.append((chapter_order.get(chapter_activity.chapter_id, 0), chapter_activity.order, chapter_activity, activity))
+        ordered_steps.append(
+            (
+                chapter_order.get(chapter_activity.chapter_id, 0),
+                chapter_activity.order,
+                chapter_activity,
+                activity,
+            )
+        )
     ordered_steps.sort(key=lambda item: (item[0], item[1]))
 
     completion_by_activity: dict[int, set[int]] = defaultdict(set)
@@ -354,7 +523,11 @@ def get_teacher_course_detail(db_session: Session, scope: TeacherAnalyticsScope,
         if previous_count is None:
             previous_count = current_count
             continue
-        dropoff_pct = round(((previous_count - current_count) / previous_count) * 100, 1) if previous_count else 0.0
+        dropoff_pct = (
+            round(((previous_count - current_count) / previous_count) * 100, 1)
+            if previous_count
+            else 0.0
+        )
         activity_dropoff.append(
             ActivityDropoffRow(
                 chapter_id=chapter_activity.chapter_id,
@@ -370,8 +543,19 @@ def get_teacher_course_detail(db_session: Session, scope: TeacherAnalyticsScope,
 
     course_completion_funnel = [
         FunnelStep(label="Зачислены", count=enrolled, pct_of_previous=None),
-        FunnelStep(label="Активны за 7 дней", count=active_learners_7d, pct_of_previous=safe_pct(active_learners_7d, enrolled)),
-        FunnelStep(label="Завершили", count=sum(1 for snapshot in course_snapshots if snapshot.is_completed), pct_of_previous=safe_pct(sum(1 for snapshot in course_snapshots if snapshot.is_completed), active_learners_7d or enrolled)),
+        FunnelStep(
+            label="Активны за 7 дней",
+            count=active_learners_7d,
+            pct_of_previous=safe_pct(active_learners_7d, enrolled),
+        ),
+        FunnelStep(
+            label="Завершили",
+            count=sum(1 for snapshot in course_snapshots if snapshot.is_completed),
+            pct_of_previous=safe_pct(
+                sum(1 for snapshot in course_snapshots if snapshot.is_completed),
+                active_learners_7d or enrolled,
+            ),
+        ),
     ]
     chapter_funnel = []
     previous_chapter_count = None
@@ -381,23 +565,44 @@ def get_teacher_course_detail(db_session: Session, scope: TeacherAnalyticsScope,
             continue
         if step.course_id != course_id or not step.complete:
             continue
-        chapter_activity = next((item for item in context.chapter_activities if item.activity_id == step.activity_id and item.course_id == course_id), None)
+        chapter_activity = next(
+            (
+                item
+                for item in context.chapter_activities
+                if item.activity_id == step.activity_id and item.course_id == course_id
+            ),
+            None,
+        )
         if chapter_activity is not None:
             chapter_counts[chapter_activity.chapter_id].add(step.user_id)
-    for chapter_id, order in sorted(chapter_order.items(), key=lambda item: item[1]):
+    for chapter_id, _order in sorted(chapter_order.items(), key=lambda item: item[1]):
         chapter = context.chapters_by_id.get(chapter_id)
         count = len(chapter_counts.get(chapter_id, set()))
-        pct = safe_pct(count, previous_chapter_count) if previous_chapter_count else None
-        chapter_funnel.append(FunnelStep(label=chapter.name if chapter else f"Глава {chapter_id}", count=count, pct_of_previous=pct))
+        pct = (
+            safe_pct(count, previous_chapter_count) if previous_chapter_count else None
+        )
+        chapter_funnel.append(
+            FunnelStep(
+                label=chapter.name if chapter else f"Глава {chapter_id}",
+                count=count,
+                pct_of_previous=pct,
+            )
+        )
         previous_chapter_count = count
 
     last_update = course_last_content_update(context, course_id)
-    days_since_update = (context.generated_at - last_update).days if last_update is not None else None
+    days_since_update = (
+        (context.generated_at - last_update).days if last_update is not None else None
+    )
     content_health = [
         ContentHealthRow(
             course_id=course_id,
             signal="content_freshness",
-            severity="critical" if days_since_update is not None and days_since_update > 45 else "warning" if days_since_update is not None and days_since_update > 21 else "info",
+            severity="critical"
+            if days_since_update is not None and days_since_update > 45
+            else "warning"
+            if days_since_update is not None and days_since_update > 21
+            else "info",
             value=float(days_since_update) if days_since_update is not None else None,
             note="Количество дней с последнего обновления курса или одного из его заданий.",
         ),
@@ -411,7 +616,11 @@ def get_teacher_course_detail(db_session: Session, scope: TeacherAnalyticsScope,
         ContentHealthRow(
             course_id=course_id,
             signal="grading_backlog",
-            severity="critical" if ungraded_submissions > 25 else "warning" if ungraded_submissions > 0 else "info",
+            severity="critical"
+            if ungraded_submissions > 25
+            else "warning"
+            if ungraded_submissions > 0
+            else "info",
             value=float(ungraded_submissions),
             note="Непроверенные отправки заданий, которые сейчас задерживают обратную связь.",
         ),
@@ -419,17 +628,27 @@ def get_teacher_course_detail(db_session: Session, scope: TeacherAnalyticsScope,
 
     return TeacherCourseDetailResponse(
         generated_at=to_iso(context.generated_at) or "",
-        course={"id": course_id, "course_uuid": course.course_uuid, "name": course.name, "org_id": course.org_id},
+        course={
+            "id": course_id,
+            "course_uuid": course.course_uuid,
+            "name": course.name,
+            "org_id": course.org_id,
+        },
         summary=TeacherCourseDetailSummary(
             enrolled_learners=enrolled,
             active_learners_7d=active_learners_7d,
             completion_rate=completion_rate,
             avg_progress_pct=avg_progress,
-            at_risk_learners=sum(1 for row in risk_rows if row.risk_level in {"medium", "high"}),
+            at_risk_learners=sum(
+                1 for row in risk_rows if row.risk_level in {"medium", "high"}
+            ),
             ungraded_submissions=ungraded_submissions,
             certificates_issued=certificates_issued,
         ),
-        funnels={"course_completion": course_completion_funnel, "chapter_dropoff": chapter_funnel},
+        funnels={
+            "course_completion": course_completion_funnel,
+            "chapter_dropoff": chapter_funnel,
+        },
         engagement_trend=engagement_series,
         activity_dropoff=activity_dropoff,
         at_risk_learners=risk_rows[:20],

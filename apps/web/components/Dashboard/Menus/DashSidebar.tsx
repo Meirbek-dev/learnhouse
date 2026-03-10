@@ -13,7 +13,18 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { Backpack, BadgeDollarSign, BarChart3, BookCopy, Home, LogOut, School, Settings, ShieldCheck, Users } from 'lucide-react';
+import {
+  Backpack,
+  BadgeDollarSign,
+  BarChart3,
+  BookCopy,
+  Home,
+  LogOut,
+  School,
+  Settings,
+  ShieldCheck,
+  Users,
+} from 'lucide-react';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import platformLogoLight from '@public/platform_logo_light.svg';

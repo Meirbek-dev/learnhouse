@@ -1,7 +1,7 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import type { ColumnDef } from '@tanstack/react-table';
+import { useTranslations } from 'next-intl';
 
 import DataTable from '@/components/ui/data-table';
 

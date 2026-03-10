@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 from typing import Annotated, Literal
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from fastapi import HTTPException, Query
 from pydantic import field_validator
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from src.db.strict_base_model import PydanticStrictBaseModel
 
@@ -13,8 +13,20 @@ WindowPreset = Literal["7d", "28d", "90d"]
 ComparePreset = Literal["previous_period", "none"]
 Bucket = Literal["day", "week"]
 SortOrder = Literal["asc", "desc"]
-CourseSortBy = Literal["name", "active", "completion", "risk", "health", "engagement", "pressure", "difficulty", "signals"]
-AssessmentSortBy = Literal["title", "submission", "pass", "difficulty", "latency", "signals"]
+CourseSortBy = Literal[
+    "name",
+    "active",
+    "completion",
+    "risk",
+    "health",
+    "engagement",
+    "pressure",
+    "difficulty",
+    "signals",
+]
+AssessmentSortBy = Literal[
+    "title", "submission", "pass", "difficulty", "latency", "signals"
+]
 
 
 def _parse_csv_ints(value: str | None) -> list[int]:
@@ -28,7 +40,9 @@ def _parse_csv_ints(value: str | None) -> list[int]:
         try:
             items.append(int(chunk))
         except ValueError as exc:
-            raise HTTPException(status_code=422, detail=f"Invalid integer list value: {chunk}") from exc
+            raise HTTPException(
+                status_code=422, detail=f"Invalid integer list value: {chunk}"
+            ) from exc
     return items
 
 
@@ -52,7 +66,8 @@ class AnalyticsFilters(PydanticStrictBaseModel):
         try:
             ZoneInfo(value)
         except ZoneInfoNotFoundError as exc:
-            raise ValueError(f"Неизвестный часовой пояс: {value}") from exc
+            msg = f"Неизвестный часовой пояс: {value}"
+            raise ValueError(msg) from exc
         return value
 
     @property
@@ -83,12 +98,16 @@ class AnalyticsFilters(PydanticStrictBaseModel):
     def validate_page_size(cls, value: int) -> int:
         return min(max(1, value), 200)
 
-    def window_bounds(self, *, now: datetime | None = None) -> tuple[datetime, datetime]:
+    def window_bounds(
+        self, *, now: datetime | None = None
+    ) -> tuple[datetime, datetime]:
         end = (now or datetime.now(tz=UTC)).astimezone(UTC)
         start = end - timedelta(days=self.window_days)
         return start, end
 
-    def previous_window_bounds(self, *, now: datetime | None = None) -> tuple[datetime, datetime]:
+    def previous_window_bounds(
+        self, *, now: datetime | None = None
+    ) -> tuple[datetime, datetime]:
         current_start, _ = self.window_bounds(now=now)
         previous_end = current_start
         previous_start = previous_end - timedelta(days=self.window_days)

@@ -1,12 +1,12 @@
 'use client';
 
-import type { ColumnDef } from '@tanstack/react-table';
-import DataTable from '@components/ui/data-table';
 import { linkUserToUserGroup, unLinkUserToUserGroup } from '@services/usergroups/usergroups';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
+import type { ColumnDef } from '@tanstack/react-table';
 import { getAPIUrl } from '@services/config/config';
+import DataTable from '@components/ui/data-table';
 import { Check, Plus, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
@@ -82,7 +82,11 @@ const ManageUsers = (props: ManageUsersProps) => {
       header: t('userHeader'),
       cell: ({ row }) => (
         <div className="flex items-center space-x-2">
-          <span>{[row.original.user.first_name, row.original.user.middle_name, row.original.user.last_name].filter(Boolean).join(' ')}</span>
+          <span>
+            {[row.original.user.first_name, row.original.user.middle_name, row.original.user.last_name]
+              .filter(Boolean)
+              .join(' ')}
+          </span>
           <span className="rounded-full bg-neutral-100 p-1 px-2 text-xs font-semibold text-neutral-400">
             @{row.original.user.username}
           </span>
@@ -133,7 +137,12 @@ const ManageUsers = (props: ManageUsersProps) => {
 
   return (
     <div className="py-3">
-      <DataTable columns={columns} data={rows} pageSize={8} storageKey={`usergroup-${props.usergroup_id}-users`} />
+      <DataTable
+        columns={columns}
+        data={rows}
+        pageSize={8}
+        storageKey={`usergroup-${props.usergroup_id}-users`}
+      />
     </div>
   );
 };

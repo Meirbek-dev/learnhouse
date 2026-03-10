@@ -1,9 +1,9 @@
-import TeacherOverview from '@components/Dashboard/Analytics/TeacherOverview';
-import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
 import { getTeacherOverview, normalizeAnalyticsQuery } from '@services/analytics/teacher';
+import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
+import TeacherOverview from '@components/Dashboard/Analytics/TeacherOverview';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { auth } from '@/auth';
 import { getTranslations } from 'next-intl/server';
+import { auth } from '@/auth';
 
 export default async function AnalyticsOverviewPage(props: {
   params: Promise<{ orgslug: string }>;
@@ -18,7 +18,12 @@ export default async function AnalyticsOverviewPage(props: {
   const t = await getTranslations('TeacherAnalytics');
 
   if (!analyticsEnabled || !accessToken) {
-    return <AnalyticsEmptyState title={t('pages.overviewDisabledTitle')} description={t('pages.overviewDisabledDesc')} />;
+    return (
+      <AnalyticsEmptyState
+        title={t('pages.overviewDisabledTitle')}
+        description={t('pages.overviewDisabledDesc')}
+      />
+    );
   }
 
   try {
@@ -33,6 +38,11 @@ export default async function AnalyticsOverviewPage(props: {
       />
     );
   } catch (error) {
-    return <AnalyticsEmptyState title={t('pages.overviewDisabledTitle')} description={error instanceof Error ? error.message : t('pages.overviewLoadError')} />;
+    return (
+      <AnalyticsEmptyState
+        title={t('pages.overviewDisabledTitle')}
+        description={error instanceof Error ? error.message : t('pages.overviewLoadError')}
+      />
+    );
   }
 }

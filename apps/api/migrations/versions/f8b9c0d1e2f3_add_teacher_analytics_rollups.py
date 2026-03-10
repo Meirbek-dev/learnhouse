@@ -24,7 +24,9 @@ def _table_exists(inspector: sa.Inspector, table_name: str) -> bool:
 def _index_exists(inspector: sa.Inspector, table_name: str, index_name: str) -> bool:
     if not _table_exists(inspector, table_name):
         return False
-    return any(index.get("name") == index_name for index in inspector.get_indexes(table_name))
+    return any(
+        index.get("name") == index_name for index in inspector.get_indexes(table_name)
+    )
 
 
 def upgrade() -> None:
@@ -47,22 +49,54 @@ def upgrade() -> None:
             sa.Column("cohort_id", sa.BigInteger(), nullable=True),
             sa.Column("event_ts", sa.DateTime(timezone=True), nullable=False),
             sa.Column("event_date", sa.Date(), nullable=False),
-            sa.Column("payload", postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default=sa.text("'{}'::jsonb")),
-            sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+            sa.Column(
+                "payload",
+                postgresql.JSONB(astext_type=sa.Text()),
+                nullable=False,
+                server_default=sa.text("'{}'::jsonb"),
+            ),
+            sa.Column(
+                "created_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.text("now()"),
+            ),
         )
         inspector = sa.inspect(bind)
 
     if not _index_exists(inspector, "analytics_event", "ix_analytics_event_org_date"):
-        op.create_index("ix_analytics_event_org_date", "analytics_event", ["org_id", "event_date"], unique=False)
+        op.create_index(
+            "ix_analytics_event_org_date",
+            "analytics_event",
+            ["org_id", "event_date"],
+            unique=False,
+        )
         inspector = sa.inspect(bind)
-    if not _index_exists(inspector, "analytics_event", "ix_analytics_event_course_date"):
-        op.create_index("ix_analytics_event_course_date", "analytics_event", ["course_id", "event_date"], unique=False)
+    if not _index_exists(
+        inspector, "analytics_event", "ix_analytics_event_course_date"
+    ):
+        op.create_index(
+            "ix_analytics_event_course_date",
+            "analytics_event",
+            ["course_id", "event_date"],
+            unique=False,
+        )
         inspector = sa.inspect(bind)
     if not _index_exists(inspector, "analytics_event", "ix_analytics_event_user_date"):
-        op.create_index("ix_analytics_event_user_date", "analytics_event", ["user_id", "event_date"], unique=False)
+        op.create_index(
+            "ix_analytics_event_user_date",
+            "analytics_event",
+            ["user_id", "event_date"],
+            unique=False,
+        )
         inspector = sa.inspect(bind)
     if not _index_exists(inspector, "analytics_event", "ix_analytics_event_type_date"):
-        op.create_index("ix_analytics_event_type_date", "analytics_event", ["event_type", "event_date"], unique=False)
+        op.create_index(
+            "ix_analytics_event_type_date",
+            "analytics_event",
+            ["event_type", "event_date"],
+            unique=False,
+        )
         inspector = sa.inspect(bind)
 
     if not _table_exists(inspector, "daily_teacher_metrics"):
@@ -71,17 +105,47 @@ def upgrade() -> None:
             sa.Column("metric_date", sa.Date(), nullable=False),
             sa.Column("org_id", sa.BigInteger(), nullable=False),
             sa.Column("teacher_user_id", sa.BigInteger(), nullable=False),
-            sa.Column("managed_course_count", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("active_learners_7d", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("active_learners_28d", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("returning_learners_28d", sa.Integer(), nullable=False, server_default="0"),
+            sa.Column(
+                "managed_course_count", sa.Integer(), nullable=False, server_default="0"
+            ),
+            sa.Column(
+                "active_learners_7d", sa.Integer(), nullable=False, server_default="0"
+            ),
+            sa.Column(
+                "active_learners_28d", sa.Integer(), nullable=False, server_default="0"
+            ),
+            sa.Column(
+                "returning_learners_28d",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
+            ),
             sa.Column("completion_rate", sa.Numeric(5, 2), nullable=True),
             sa.Column("avg_progress_pct", sa.Numeric(5, 2), nullable=True),
-            sa.Column("at_risk_learners", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("ungraded_submissions", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("courses_with_negative_engagement", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("certificates_issued_28d", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("generated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+            sa.Column(
+                "at_risk_learners", sa.Integer(), nullable=False, server_default="0"
+            ),
+            sa.Column(
+                "ungraded_submissions", sa.Integer(), nullable=False, server_default="0"
+            ),
+            sa.Column(
+                "courses_with_negative_engagement",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
+            ),
+            sa.Column(
+                "certificates_issued_28d",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
+            ),
+            sa.Column(
+                "generated_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.text("now()"),
+            ),
             sa.PrimaryKeyConstraint("metric_date", "org_id", "teacher_user_id"),
         )
         inspector = sa.inspect(bind)
@@ -93,18 +157,37 @@ def upgrade() -> None:
             sa.Column("org_id", sa.BigInteger(), nullable=False),
             sa.Column("course_id", sa.BigInteger(), nullable=False),
             sa.Column("teacher_user_id", sa.BigInteger(), nullable=True),
-            sa.Column("enrolled_learners", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("active_learners_7d", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("active_learners_28d", sa.Integer(), nullable=False, server_default="0"),
+            sa.Column(
+                "enrolled_learners", sa.Integer(), nullable=False, server_default="0"
+            ),
+            sa.Column(
+                "active_learners_7d", sa.Integer(), nullable=False, server_default="0"
+            ),
+            sa.Column(
+                "active_learners_28d", sa.Integer(), nullable=False, server_default="0"
+            ),
             sa.Column("completion_rate", sa.Numeric(5, 2), nullable=True),
             sa.Column("avg_progress_pct", sa.Numeric(5, 2), nullable=True),
-            sa.Column("at_risk_learners", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("ungraded_submissions", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("certificates_issued", sa.Integer(), nullable=False, server_default="0"),
+            sa.Column(
+                "at_risk_learners", sa.Integer(), nullable=False, server_default="0"
+            ),
+            sa.Column(
+                "ungraded_submissions", sa.Integer(), nullable=False, server_default="0"
+            ),
+            sa.Column(
+                "certificates_issued", sa.Integer(), nullable=False, server_default="0"
+            ),
             sa.Column("content_health_score", sa.Numeric(5, 2), nullable=True),
             sa.Column("engagement_delta_pct", sa.Numeric(6, 2), nullable=True),
-            sa.Column("last_content_update_at", sa.DateTime(timezone=True), nullable=True),
-            sa.Column("generated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+            sa.Column(
+                "last_content_update_at", sa.DateTime(timezone=True), nullable=True
+            ),
+            sa.Column(
+                "generated_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.text("now()"),
+            ),
             sa.PrimaryKeyConstraint("metric_date", "org_id", "course_id"),
         )
         inspector = sa.inspect(bind)
@@ -118,11 +201,22 @@ def upgrade() -> None:
             sa.Column("activity_id", sa.BigInteger(), nullable=True),
             sa.Column("org_id", sa.BigInteger(), nullable=False),
             sa.Column("step_order", sa.Integer(), nullable=True),
-            sa.Column("started_learners", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("completed_learners", sa.Integer(), nullable=False, server_default="0"),
+            sa.Column(
+                "started_learners", sa.Integer(), nullable=False, server_default="0"
+            ),
+            sa.Column(
+                "completed_learners", sa.Integer(), nullable=False, server_default="0"
+            ),
             sa.Column("dropoff_from_previous_pct", sa.Numeric(6, 2), nullable=True),
-            sa.Column("generated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
-            sa.PrimaryKeyConstraint("metric_date", "course_id", "chapter_id", "activity_id"),
+            sa.Column(
+                "generated_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.text("now()"),
+            ),
+            sa.PrimaryKeyConstraint(
+                "metric_date", "course_id", "chapter_id", "activity_id"
+            ),
         )
         inspector = sa.inspect(bind)
 
@@ -135,8 +229,12 @@ def upgrade() -> None:
             sa.Column("org_id", sa.BigInteger(), nullable=False),
             sa.Column("course_id", sa.BigInteger(), nullable=False),
             sa.Column("activity_id", sa.BigInteger(), nullable=True),
-            sa.Column("eligible_learners", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("submitted_learners", sa.Integer(), nullable=False, server_default="0"),
+            sa.Column(
+                "eligible_learners", sa.Integer(), nullable=False, server_default="0"
+            ),
+            sa.Column(
+                "submitted_learners", sa.Integer(), nullable=False, server_default="0"
+            ),
             sa.Column("submission_rate", sa.Numeric(5, 2), nullable=True),
             sa.Column("completion_rate", sa.Numeric(5, 2), nullable=True),
             sa.Column("pass_rate", sa.Numeric(5, 2), nullable=True),
@@ -146,7 +244,12 @@ def upgrade() -> None:
             sa.Column("grading_latency_hours_p50", sa.Numeric(8, 2), nullable=True),
             sa.Column("grading_latency_hours_p90", sa.Numeric(8, 2), nullable=True),
             sa.Column("difficulty_score", sa.Numeric(6, 2), nullable=True),
-            sa.Column("generated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+            sa.Column(
+                "generated_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.text("now()"),
+            ),
             sa.PrimaryKeyConstraint("metric_date", "assessment_type", "assessment_id"),
         )
         inspector = sa.inspect(bind)
@@ -159,13 +262,32 @@ def upgrade() -> None:
             sa.Column("course_id", sa.BigInteger(), nullable=False),
             sa.Column("org_id", sa.BigInteger(), nullable=False),
             sa.Column("trailrun_id", sa.BigInteger(), nullable=True),
-            sa.Column("progress_pct", sa.Numeric(5, 2), nullable=False, server_default="0"),
-            sa.Column("completed_steps", sa.Integer(), nullable=False, server_default="0"),
+            sa.Column(
+                "progress_pct", sa.Numeric(5, 2), nullable=False, server_default="0"
+            ),
+            sa.Column(
+                "completed_steps", sa.Integer(), nullable=False, server_default="0"
+            ),
             sa.Column("total_steps", sa.Integer(), nullable=False, server_default="0"),
             sa.Column("last_activity_at", sa.DateTime(timezone=True), nullable=True),
-            sa.Column("is_completed", sa.Boolean(), nullable=False, server_default=sa.text("false")),
-            sa.Column("has_certificate", sa.Boolean(), nullable=False, server_default=sa.text("false")),
-            sa.Column("generated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+            sa.Column(
+                "is_completed",
+                sa.Boolean(),
+                nullable=False,
+                server_default=sa.text("false"),
+            ),
+            sa.Column(
+                "has_certificate",
+                sa.Boolean(),
+                nullable=False,
+                server_default=sa.text("false"),
+            ),
+            sa.Column(
+                "generated_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.text("now()"),
+            ),
             sa.PrimaryKeyConstraint("metric_date", "user_id", "course_id"),
         )
         inspector = sa.inspect(bind)
@@ -178,16 +300,39 @@ def upgrade() -> None:
             sa.Column("course_id", sa.BigInteger(), nullable=False),
             sa.Column("org_id", sa.BigInteger(), nullable=False),
             sa.Column("teacher_user_id", sa.BigInteger(), nullable=True),
-            sa.Column("progress_pct", sa.Numeric(5, 2), nullable=False, server_default="0"),
+            sa.Column(
+                "progress_pct", sa.Numeric(5, 2), nullable=False, server_default="0"
+            ),
             sa.Column("days_since_last_activity", sa.Integer(), nullable=True),
-            sa.Column("failed_assessments", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("missing_required_assessments", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("open_grading_blocks", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("risk_score", sa.Numeric(6, 2), nullable=False, server_default="0"),
+            sa.Column(
+                "failed_assessments", sa.Integer(), nullable=False, server_default="0"
+            ),
+            sa.Column(
+                "missing_required_assessments",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
+            ),
+            sa.Column(
+                "open_grading_blocks", sa.Integer(), nullable=False, server_default="0"
+            ),
+            sa.Column(
+                "risk_score", sa.Numeric(6, 2), nullable=False, server_default="0"
+            ),
             sa.Column("risk_level", sa.String(length=16), nullable=False),
-            sa.Column("reason_codes", postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default=sa.text("'[]'::jsonb")),
+            sa.Column(
+                "reason_codes",
+                postgresql.JSONB(astext_type=sa.Text()),
+                nullable=False,
+                server_default=sa.text("'[]'::jsonb"),
+            ),
             sa.Column("recommended_action", sa.String(length=255), nullable=True),
-            sa.Column("generated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+            sa.Column(
+                "generated_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.text("now()"),
+            ),
             sa.PrimaryKeyConstraint("snapshot_date", "user_id", "course_id"),
         )
 

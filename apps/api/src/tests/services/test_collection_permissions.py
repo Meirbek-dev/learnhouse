@@ -146,5 +146,3 @@ async def test_get_public_collection_allows_anonymous_without_rbac_check():
     assert result.can_update is False
     assert result.can_delete is False
     assert result.is_owner is False
-
-    

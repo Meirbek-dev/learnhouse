@@ -1,6 +1,16 @@
 'use client';
 
-import { Backpack, BadgeDollarSign, BarChart3, BookCopy, Home, School, Settings, ShieldCheck, Users } from 'lucide-react';
+import {
+  Backpack,
+  BadgeDollarSign,
+  BarChart3,
+  BookCopy,
+  Home,
+  School,
+  Settings,
+  ShieldCheck,
+  Users,
+} from 'lucide-react';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';

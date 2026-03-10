@@ -19,7 +19,9 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     op.add_column(
         "daily_teacher_metrics",
-        sa.Column("active_learners_90d", sa.Integer(), nullable=False, server_default="0"),
+        sa.Column(
+            "active_learners_90d", sa.Integer(), nullable=False, server_default="0"
+        ),
     )
     op.alter_column("daily_teacher_metrics", "active_learners_90d", server_default=None)
 

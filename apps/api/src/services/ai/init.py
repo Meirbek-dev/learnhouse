@@ -69,15 +69,15 @@ def get_llm(
             streaming,
             max_tokens,
         )
-        kwargs: dict = dict(
-            model=model_name,
-            api_key=api_key,
-            max_retries=3,
-            streaming=streaming,
-            frequency_penalty=0.0,
-            presence_penalty=0.0,
-            request_timeout=30.0,
-        )
+        kwargs: dict = {
+            "model": model_name,
+            "api_key": api_key,
+            "max_retries": 3,
+            "streaming": streaming,
+            "frequency_penalty": 0.0,
+            "presence_penalty": 0.0,
+            "request_timeout": 30.0,
+        }
         if max_tokens is not None:
             kwargs["max_tokens"] = max_tokens
         return ChatOpenAI(**kwargs)

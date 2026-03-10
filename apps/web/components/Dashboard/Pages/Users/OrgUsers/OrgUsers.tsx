@@ -1,6 +1,5 @@
 'use client';
 
-import type { ColumnDef } from '@tanstack/react-table';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,15 +24,16 @@ import {
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import RolesUpdate from '@components/Objects/Modals/Dash/OrgUsers/RolesUpdate';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import type { ColumnDef } from '@tanstack/react-table';
 import DataTable from '@/components/ui/data-table';
 
 import { AlertTriangle, KeyRound, Loader2, LogOut } from 'lucide-react';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { removeUserFromOrg } from '@services/organizations/orgs';
-import React, { useState, useTransition } from 'react';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
+import React, { useState, useTransition } from 'react';
 import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';

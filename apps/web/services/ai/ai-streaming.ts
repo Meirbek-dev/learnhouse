@@ -69,21 +69,25 @@ async function readSSEStream(response: Response, callbacks: SSECallbacks, signal
       try {
         const chunk: AIStreamChunk = JSON.parse(line.slice(6));
         switch (chunk.type) {
-          case 'status':
+          case 'status': {
             onStatus?.(chunk);
             break;
-          case 'chunk':
+          }
+          case 'chunk': {
             if (chunk.content) accumulatedContent += chunk.content;
             onChunk?.(chunk);
             break;
-          case 'final':
+          }
+          case 'final': {
             completed = true;
             onComplete?.(chunk);
             break;
-          case 'error':
+          }
+          case 'error': {
             completed = true;
             onError?.(chunk);
             break;
+          }
         }
       } catch {
         console.error('Failed to parse SSE chunk:', line);
