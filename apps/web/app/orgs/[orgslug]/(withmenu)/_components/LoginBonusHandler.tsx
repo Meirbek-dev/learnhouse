@@ -25,9 +25,13 @@ export function LoginBonusHandler({ orgId }: LoginBonusHandlerProps) {
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef<boolean>(false);
+  // Synchronous guard: prevents concurrent runs when the effect re-fires before
+  // localStorage.setItem completes (unstable function refs in deps cause this).
+  const hasAttemptedRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (!orgId || !profile) return;
+    if (hasAttemptedRef.current) return;
 
     isMountedRef.current = true;
 
@@ -36,6 +40,10 @@ export function LoginBonusHandler({ orgId }: LoginBonusHandlerProps) {
       const alreadyDone = typeof globalThis.window !== 'undefined' ? localStorage.getItem(todayKey) : null;
 
       if (alreadyDone) return;
+
+      // Mark as attempted synchronously before the async IIFE so re-runs from
+      // dep changes cannot start a second concurrent request.
+      hasAttemptedRef.current = true;
 
       // Fire-and-forget: update login streak SILENTLY
       (async () => {
