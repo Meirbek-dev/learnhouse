@@ -10,18 +10,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
   UV_COMPILE_BYTECODE=1 \
   UV_LINK_MODE=copy
 
-# Install Nginx, curl, and build-essential with cached apt layers
+# Install system dependencies — Nginx runs as its own separate container
 RUN --mount=type=cache,target=/var/cache/apt \
   --mount=type=cache,target=/var/lib/apt \
   apt-get update \
-  && apt-get install -y --no-install-recommends nginx curl build-essential ca-certificates gnupg \
-  && rm /etc/nginx/sites-enabled/default \
+  && apt-get install -y --no-install-recommends curl build-essential ca-certificates gnupg dumb-init supervisor \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-# Bring in a reproducible Node.js toolchain and install PM2 globally
+# Bring in Node.js runtime for the Next.js standalone server
 COPY --from=node:25-bullseye-slim /usr/local /usr/local
-RUN npm install -g pm2
 
 # Ensure uv is available for dependency management at runtime
 RUN pip install --upgrade pip \
@@ -111,11 +109,19 @@ COPY --link ./apps/api ./
 COPY --from=backend-deps /app/api/.venv ./.venv
 ENV PATH="/app/api/.venv/bin:${PATH}"
 
-# Run the backend
 WORKDIR /app
-COPY ./extra/nginx.conf /etc/nginx/conf.d/default.conf
+
+# supervisord manages both Next.js (port 8000) and FastAPI (port 9000)
+COPY ./extra/supervisord.conf /etc/supervisor/conf.d/app.conf
+
 ENV PORT=8000 PLATFORM_PORT=9000 HOSTNAME=0.0.0.0
-COPY ./extra/start.sh /app/start.sh
-RUN chmod +x /app/start.sh
-EXPOSE 80 443
-CMD ["sh", "/app/start.sh"]
+
+# Both service ports are exposed internally — the nginx proxy container routes to them
+EXPOSE 8000 9000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+  CMD curl -fsS http://localhost:8000/health || exit 1
+
+# dumb-init is PID 1: proper signal forwarding + zombie reaping
+# supervisord manages both application processes and restarts them on failure
+CMD ["dumb-init", "supervisord", "-n", "-c", "/etc/supervisor/conf.d/app.conf"]
