@@ -636,4 +636,11 @@ async def _get_default_organization(db_session: Session) -> Organization:
     return org
 
 
+async def ensure_user_in_default_org(db_session: Session, user_id: int) -> None:
+    """Ensure a user is a member of the default 'openu' organization (idempotent)."""
+    default_org = await _get_default_organization(db_session)
+    await _link_user_to_organization(db_session, user_id, default_org.id)
+    db_session.commit()
+
+
 ## 🔒 RBAC Utils ##
