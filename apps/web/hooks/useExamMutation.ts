@@ -1,8 +1,8 @@
 'use client';
 
-import { getAPIUrl } from '@services/config/config';
 import { calculateExponentialBackoffDelay } from '@/lib/retry';
 import { useCallback, useRef, useState } from 'react';
+import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 

@@ -37,7 +37,7 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
       return;
     }
 
-    const confirmLeave = () => window.confirm(messageRef.current || 'You have unsaved changes. Leave this page?');
+    const confirmLeave = () => globalThis.confirm(messageRef.current || 'You have unsaved changes. Leave this page?');
     let ignoreNextPop = false;
 
     const handleDocumentClick = (event: MouseEvent) => {
@@ -49,7 +49,7 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
         return;
       }
 
-      const target = event.target;
+      const {target} = event;
       if (!(target instanceof Element)) {
         return;
       }
@@ -67,8 +67,8 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
         return;
       }
 
-      const nextUrl = new URL(link.href, window.location.href);
-      const currentUrl = new URL(window.location.href);
+      const nextUrl = new URL(link.href, globalThis.location.href);
+      const currentUrl = new URL(globalThis.location.href);
       if (
         nextUrl.pathname === currentUrl.pathname &&
         nextUrl.search === currentUrl.search &&
@@ -83,7 +83,11 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
       }
     };
 
-    window.history.pushState({ ...(window.history.state ?? {}), __unsavedChangesGuard: true }, '', window.location.href);
+    globalThis.history.pushState(
+      { ...window.history.state, __unsavedChangesGuard: true },
+      '',
+      globalThis.location.href,
+    );
 
     const handlePopState = () => {
       if (ignoreNextPop) {
@@ -92,20 +96,24 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
       }
 
       if (!confirmLeave()) {
-        window.history.pushState({ ...(window.history.state ?? {}), __unsavedChangesGuard: true }, '', window.location.href);
+        globalThis.history.pushState(
+          { ...window.history.state, __unsavedChangesGuard: true },
+          '',
+          globalThis.location.href,
+        );
         return;
       }
 
       ignoreNextPop = true;
-      window.history.back();
+      globalThis.history.back();
     };
 
     document.addEventListener('click', handleDocumentClick, true);
-    window.addEventListener('popstate', handlePopState);
+    globalThis.addEventListener('popstate', handlePopState);
 
     return () => {
       document.removeEventListener('click', handleDocumentClick, true);
-      window.removeEventListener('popstate', handlePopState);
+      globalThis.removeEventListener('popstate', handlePopState);
     };
   }, [interceptInAppNavigation, isDirty]);
 }

@@ -1,6 +1,6 @@
+import { renderCourseWorkspacePage } from '@components/Dashboard/Courses/renderCourseWorkspacePage';
 import CourseWorkspaceOverview from '@components/Dashboard/Courses/CourseWorkspaceOverview';
 import { getCourseWorkspaceCapabilitiesForOrg } from '@/lib/course-management-server';
-import { renderCourseWorkspacePage } from '@components/Dashboard/Courses/renderCourseWorkspacePage';
 
 async function CourseWorkspaceOverviewPage(props: { params: Promise<{ orgslug: string; courseuuid: string }> }) {
   const { orgslug, courseuuid } = await props.params;

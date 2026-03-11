@@ -131,7 +131,7 @@ export default function MultiSelectCombobox<T>({
             </Button>
           }
         />
-        <PopoverContent className="w-auto min-w-(--radix-popper-anchor-width) p-0">
+        <PopoverContent className="w-auto min-w-(--anchor-width) p-0">
           <Command>
             <CommandInput placeholder={searchPlaceholderText} />
             <CommandList>

@@ -1,8 +1,8 @@
 'use server';
 
 import { RequestBodyWithAuthHeader, errorHandling, getResponseMetadata } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
 import { courseTag, getCourseListTags, tags } from '@/lib/cacheTags';
+import { getAPIUrl } from '@services/config/config';
 
 /*
  This file includes certification-related API calls

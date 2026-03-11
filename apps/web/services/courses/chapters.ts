@@ -90,7 +90,11 @@ export async function createChapter(data: any, access_token: string, options?: C
   return data_result;
 }
 
-export async function deleteChapter(coursechapter_id: number, access_token: string, options?: ChapterInvalidationOptions) {
+export async function deleteChapter(
+  coursechapter_id: number,
+  access_token: string,
+  options?: ChapterInvalidationOptions,
+) {
   const result: any = await fetch(
     `${getAPIUrl()}chapters/${coursechapter_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),

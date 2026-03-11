@@ -5967,348 +5967,6 @@
     "signUp": "Sign Up",
     "submit": "Submit"
   },
-  "Themes": {
-    "amberminimal": {
-      "description": "Minimalistic amber theme",
-      "name": "Amber Minimal"
-    },
-    "amethysthaze": {
-      "description": "Soft purple haze theme with amethyst accents",
-      "name": "Amethyst Haze"
-    },
-    "artDeco": {
-      "description": "Elegant Art Deco style with luxurious gold and geometric patterns",
-      "name": "Art Deco"
-    },
-    "black": {
-      "description": "Minimalistic black and white theme",
-      "name": "Black"
-    },
-    "boldtech": {
-      "description": "Bold purple tech theme with vibrant accents",
-      "name": "Bold Tech"
-    },
-    "bubblegum": {
-      "description": "Playful pink bubblegum theme with flat shadows",
-      "name": "Bubblegum"
-    },
-    "caffeine": {
-      "description": "Warm coffee-inspired theme with rich brown tones",
-      "name": "Caffeine"
-    },
-    "candyland": {
-      "description": "Sweet candy-colored theme with pastel rainbow accents",
-      "name": "Candyland"
-    },
-    "catppuccin": {
-      "description": "Soothing pastel theme inspired by Catppuccin color palette",
-      "name": "Catppuccin"
-    },
-    "claude": {
-      "description": "Warm beige theme inspired by Claude AI with copper accents",
-      "name": "Claude"
-    },
-    "claymorphism": {
-      "description": "Soft clay-textured theme with prominent rounded corners and depth",
-      "name": "Claymorphism"
-    },
-    "cleanSlate": {
-      "description": "Crisp minimalist theme with clean neutral tones",
-      "name": "Clean Slate"
-    },
-    "corporate": {
-      "description": "Professional corporate theme with clean lines and business aesthetics",
-      "name": "Corporate"
-    },
-    "cosmicnight": {
-      "description": "Deep purple cosmic theme with starry night aesthetics",
-      "name": "Cosmic Night"
-    },
-    "cyberpunk": {
-      "description": "Neon-infused futuristic theme with vibrant pink and cyan accents",
-      "name": "Cyberpunk"
-    },
-    "darkmatter": {
-      "description": "Deep space theme with mysterious dark matter aesthetics and golden accents",
-      "name": "Darkmatter"
-    },
-    "default": {
-      "description": "The default Ashyq Bilim theme",
-      "name": "Default"
-    },
-    "doom64": {
-      "description": "Retro gaming theme inspired by Doom 64 with sharp corners and bold colors",
-      "name": "Doom 64"
-    },
-    "elegantLuxury": {
-      "description": "Sophisticated luxury theme with elegant cream tones and rich mahogany accents",
-      "name": "Elegant Luxury"
-    },
-    "ghibliStudio": {
-      "description": "Whimsical Studio Ghibli-inspired theme with gentle pastels and natural tones",
-      "name": "Ghibli Studio"
-    },
-    "graphite": {
-      "description": "Professional monochrome theme with smooth graphite gray tones",
-      "name": "Graphite"
-    },
-    "kodamaGrave": {
-      "description": "Nature-inspired theme with peaceful forest green and earthy tones",
-      "name": "Kodama Grave"
-    },
-    "marvel": {
-      "description": "Heroic Marvel-inspired theme with bold reds and vibrant comic book aesthetics",
-      "name": "Marvel"
-    },
-    "mashmallow": {
-      "description": "Soft and fluffy marshmallow-inspired theme with sweet pastel colors",
-      "name": "Marshmallow"
-    },
-    "materialDesign": {
-      "description": "Google Material Design theme with clean elevation and bold colors",
-      "name": "Material Design"
-    },
-    "midnightBloom": {
-      "description": "Elegant nighttime theme with rich purple blooms and soft shadows",
-      "name": "Midnight Bloom"
-    },
-    "mochaMousse": {
-      "description": "Warm coffee-inspired theme with rich mocha and cream tones",
-      "name": "Mocha Mousse"
-    },
-    "mono": {
-      "description": "Ultra-minimal monochrome theme with pure black and white, no shadows",
-      "name": "Mono"
-    },
-    "nature": {
-      "description": "Fresh nature-inspired theme with organic green tones and earthy accents",
-      "name": "Nature"
-    },
-    "neoBrutalism": {
-      "description": "Bold brutalist design with thick black borders and strong shadows",
-      "name": "Neo Brutalism"
-    },
-    "northernLights": {
-      "description": "Magical aurora borealis theme with ethereal green and purple gradients",
-      "name": "Northern Lights"
-    },
-    "notebook": {
-      "description": "Paper notebook theme with ruled lines aesthetic and handwritten font style",
-      "name": "Notebook"
-    },
-    "oceanBreeze": {
-      "description": "Refreshing ocean-inspired theme with cool turquoise and seafoam tones",
-      "name": "Ocean Breeze"
-    },
-    "pastelDreams": {
-      "description": "Dreamy pastel theme with soft lavender and pink cotton candy colors",
-      "name": "Pastel Dreams"
-    },
-    "perpetuity": {
-      "description": "Timeless monospace terminal theme with cyan-tinted blue aesthetics",
-      "name": "Perpetuity"
-    },
-    "perplexity": {
-      "description": "Clean and modern Perplexity-inspired theme with cool blue tones",
-      "name": "Perplexity"
-    },
-    "quantumRose": {
-      "description": "Futuristic rose-tinted theme with quantum-inspired pink and magenta hues",
-      "name": "Quantum Rose"
-    },
-    "retroArcade": {
-      "description": "Bold neon-inspired palette with playful contrasts, evoking the vibrant glow of 80s arcades",
-      "name": "Retro Arcade"
-    },
-    "sage-garden": {
-      "description": "A gentle garden theme with soft sage greens and refreshing natural accents",
-      "name": "Sage Garden"
-    },
-    "slack": {
-      "description": "Collaborative Slack-inspired theme with purple accents and clean workspace aesthetics",
-      "name": "Slack"
-    },
-    "softPop": {
-      "description": "Bright, bubbly theme with pastel accents and clean contrasts for a playful yet modern look",
-      "name": "Soft Pop"
-    },
-    "solarDusk": {
-      "description": "Warm, golden tones fading into deep shadows-captures the calm glow of dusk before nightfall",
-      "name": "Solar Dusk"
-    },
-    "spotify": {
-      "description": "Music-inspired Spotify theme with vibrant green and dark contrasts",
-      "name": "Spotify"
-    },
-    "starryNight": {
-      "description": "Deep midnight blues and luminous highlights, evoking a tranquil star-filled night sky",
-      "name": "Starry Night"
-    },
-    "summer": {
-      "description": "Bright and sunny summer theme with warm oranges and golden tones",
-      "name": "Summer"
-    },
-    "sunsetHorizon": {
-      "description": "Radiant oranges and glowing ambers that reflect the warmth of a summer sunset on the horizon",
-      "name": "Sunset Horizon"
-    },
-    "supabase": {
-      "description": "Clean minimalism with fresh green accents, inspired by the signature Supabase brand identity",
-      "name": "Supabase"
-    },
-    "t3chat": {
-      "description": "Modern chat-inspired design with vibrant magentas and cool contrasts for lively conversations",
-      "name": "T3 Chat"
-    },
-    "tangerine": {
-      "description": "Juicy citrus tones blended with cool accents, delivering a fresh and energetic aesthetic",
-      "name": "Tangerine"
-    },
-    "twitter": {
-      "description": "Clean whites with iconic Twitter blue highlights, optimized for clarity and social interaction",
-      "name": "Twitter"
-    },
-    "valorant": {
-      "description": "Tactical Valorant-inspired theme with bold reds and sharp contrasts",
-      "name": "Valorant"
-    },
-    "vercel": {
-      "description": "Minimalist monochrome design with sharp contrasts, reflecting Vercel's sleek and modern aesthetic",
-      "name": "Vercel"
-    },
-    "vintagePaper": {
-      "description": "Soft parchment tones with muted contrasts, evoking the warmth and texture of aged paper",
-      "name": "Vintage Paper"
-    },
-    "violetBloom": {
-      "description": "Radiant purples with soft highlights, capturing the elegance and freshness of blooming violets",
-      "name": "Violet Bloom"
-    },
-    "vscode": {
-      "description": "Developer-friendly VS Code theme with cool blues and clean code aesthetics",
-      "name": "VS Code"
-    }
-  },
-  "ToastMessages": {
-    "errorSomethingWentWrong": "Something went wrong. Please try again later.",
-    "hi": "Hi",
-    "join": "Join ",
-    "joinQuestion": "join {orgname}?",
-    "orgJoinSuccess": " successfully joined the organization.",
-    "submit": "Submit "
-  },
-  "Trail": {
-    "courseLabel": "Course",
-    "downloadCertificate": "Download Certificate",
-    "loadingCertificate": "Loading...",
-    "noCertificateAvailable": "No certificate available",
-    "quitCourseButton": "Quit Course",
-    "viewCertificate": "View Certificate"
-  },
-  "TrailPage": {
-    "metaDescription": "Check your progress using trail and easily navigate through your courses.",
-    "myProgress": "My Progress",
-    "noCourses": "You haven't started any courses yet.",
-    "noCoursesInProgress": "No courses in progress",
-    "quitAllCourses": "Quit All Courses",
-    "quitAllCoursesConfirmation": "Are you sure you want to quit all courses? This action cannot be undone and you will lose all your progress.",
-    "quitAllCoursesDialogTitle": "Quit All Courses?",
-    "quittingProgress": "Quitting Courses ({progress}%)",
-    "startACourseToSeeYourProgress": "Start a course to see your progress here",
-    "startExploring": "Start exploring courses!",
-    "title": "Progress"
-  },
-  "UserProfilePage": {
-    "aboutTitle": "About",
-    "academicInfo": "Academic Information",
-    "courseSection": {
-      "errorLoadingCourses": "Error loading courses",
-      "loadingCourses": "Loading courses...",
-      "noCoursesFound": "No courses found"
-    },
-    "fetchError": "Failed to fetch user data: ",
-    "generalInfo": "General Information",
-    "in": "in",
-    "metaDescriptionFallback": "View {firstName} {lastName}'s profile and courses",
-    "metaTitle": "{firstName} {lastName}'s Profile",
-    "metaTitleError": "User Profile",
-    "noBiography": "No biography provided",
-    "professionalInfo": "Professional Information",
-    "profileLoadError": "Failed to load user profile",
-    "viewCourses": "View Courses"
-  },
-  "Validation": {
-    "activityDescriptionRequired": "Activity description is required",
-    "activityNameRequired": "Activity name is required",
-    "assignmentDescriptionRequired": "Assignment description is required",
-    "assignmentTitleRequired": "Assignment title is required",
-    "chapterDescriptionRequired": "Chapter description is required",
-    "chapterNameRequired": "Chapter name is required",
-    "contentRequired": "Content is required",
-    "descriptionMinLength": "Description must be at least {length} characters",
-    "descriptionRequired": "Description is required",
-    "documentNameRequired": "Document name is required",
-    "examDescriptionRequired": "Exam description is required",
-    "examTitleRequired": "Exam title is required",
-    "fieldRequired": "{fieldName} is required",
-    "fileRequired": "Please select a file",
-    "invalidEmail": "Invalid email address",
-    "loading": "Loading...",
-    "maxLength": "Must be no more than {length} characters",
-    "minLength": "Must be at least {length} characters",
-    "nameMinLength": "Name must be at least {length} characters",
-    "nameRequired": "Name is required",
-    "passwordMinLength": "Password must be at least {length} characters",
-    "pdfFileRequired": "Please select a PDF file",
-    "required": "Required",
-    "roleNameRequired": "Role name is required",
-    "roleRequired": "Role is required",
-    "selectGradingType": "Select grading type",
-    "titleRequired": "Title is required",
-    "usernameMinLength": "Username must be at least {length} characters",
-    "wrongCredentials": "Wrong Email or Password",
-    "passwordsDoNotMatch": "Passwords do not match",
-    "passwordsDontMatch": "Passwords do not match",
-    "passwordTooShort": "Password must be at least 8 characters",
-    "passwordTooLong": "Password must be at most 128 characters",
-    "passwordNeedsLowercase": "Password must contain at least one lowercase letter",
-    "passwordNeedsUppercase": "Password must contain at least one uppercase letter",
-    "passwordNeedsNumber": "Password must contain at least one number"
-  },
-  "activity": "Activity",
-  "additionalSettings": "Additional Settings",
-  "aiEditor": "AI Editor",
-  "calendar": {
-    "monthDropdown": "Month",
-    "next": "Next",
-    "previous": "Previous",
-    "yearDropdown": "Year"
-  },
-  "clickMe": "Click me",
-  "close": "Close",
-  "courses": "Courses",
-  "permissionTable": {
-    "resource": "Resource",
-    "code": "Permission",
-    "action": "Action",
-    "scope": "Scope",
-    "description": "Description"
-  },
-  "courses-0": "Courses",
-  "deleteChapter": "Delete Chapter",
-  "dialog": "Dialog",
-  "embeddedContentTitle": "Embedded content",
-  "failedToLoadUserData": "Failed to load user data.",
-  "columns": "Columns",
-  "exportCSV": "Export CSV",
-  "exportStarted": "Download started",
-  "minutes": "Minutes",
-  "platformLogo": "Ashyq Bilim logo",
-  "previous": "Previous",
-  "seconds": "Seconds",
-  "selectDeadline": "Select a deadline for completing the task",
-  "touUniversity": "Toraighyrov University",
-  "webPreview": "Web Preview",
   "TeacherAnalytics": {
     "overview": {
       "label": "Teacher Analytics",
@@ -6634,5 +6292,347 @@
       "assessmentPassThresholdExam": "Pass threshold from exam settings",
       "assessmentPassThresholdDefault": "Pass threshold: 60%"
     }
-  }
+  },
+  "Themes": {
+    "amberminimal": {
+      "description": "Minimalistic amber theme",
+      "name": "Amber Minimal"
+    },
+    "amethysthaze": {
+      "description": "Soft purple haze theme with amethyst accents",
+      "name": "Amethyst Haze"
+    },
+    "artDeco": {
+      "description": "Elegant Art Deco style with luxurious gold and geometric patterns",
+      "name": "Art Deco"
+    },
+    "black": {
+      "description": "Minimalistic black and white theme",
+      "name": "Black"
+    },
+    "boldtech": {
+      "description": "Bold purple tech theme with vibrant accents",
+      "name": "Bold Tech"
+    },
+    "bubblegum": {
+      "description": "Playful pink bubblegum theme with flat shadows",
+      "name": "Bubblegum"
+    },
+    "caffeine": {
+      "description": "Warm coffee-inspired theme with rich brown tones",
+      "name": "Caffeine"
+    },
+    "candyland": {
+      "description": "Sweet candy-colored theme with pastel rainbow accents",
+      "name": "Candyland"
+    },
+    "catppuccin": {
+      "description": "Soothing pastel theme inspired by Catppuccin color palette",
+      "name": "Catppuccin"
+    },
+    "claude": {
+      "description": "Warm beige theme inspired by Claude AI with copper accents",
+      "name": "Claude"
+    },
+    "claymorphism": {
+      "description": "Soft clay-textured theme with prominent rounded corners and depth",
+      "name": "Claymorphism"
+    },
+    "cleanSlate": {
+      "description": "Crisp minimalist theme with clean neutral tones",
+      "name": "Clean Slate"
+    },
+    "corporate": {
+      "description": "Professional corporate theme with clean lines and business aesthetics",
+      "name": "Corporate"
+    },
+    "cosmicnight": {
+      "description": "Deep purple cosmic theme with starry night aesthetics",
+      "name": "Cosmic Night"
+    },
+    "cyberpunk": {
+      "description": "Neon-infused futuristic theme with vibrant pink and cyan accents",
+      "name": "Cyberpunk"
+    },
+    "darkmatter": {
+      "description": "Deep space theme with mysterious dark matter aesthetics and golden accents",
+      "name": "Darkmatter"
+    },
+    "default": {
+      "description": "The default Ashyq Bilim theme",
+      "name": "Default"
+    },
+    "doom64": {
+      "description": "Retro gaming theme inspired by Doom 64 with sharp corners and bold colors",
+      "name": "Doom 64"
+    },
+    "elegantLuxury": {
+      "description": "Sophisticated luxury theme with elegant cream tones and rich mahogany accents",
+      "name": "Elegant Luxury"
+    },
+    "ghibliStudio": {
+      "description": "Whimsical Studio Ghibli-inspired theme with gentle pastels and natural tones",
+      "name": "Ghibli Studio"
+    },
+    "graphite": {
+      "description": "Professional monochrome theme with smooth graphite gray tones",
+      "name": "Graphite"
+    },
+    "kodamaGrave": {
+      "description": "Nature-inspired theme with peaceful forest green and earthy tones",
+      "name": "Kodama Grave"
+    },
+    "marvel": {
+      "description": "Heroic Marvel-inspired theme with bold reds and vibrant comic book aesthetics",
+      "name": "Marvel"
+    },
+    "mashmallow": {
+      "description": "Soft and fluffy marshmallow-inspired theme with sweet pastel colors",
+      "name": "Marshmallow"
+    },
+    "materialDesign": {
+      "description": "Google Material Design theme with clean elevation and bold colors",
+      "name": "Material Design"
+    },
+    "midnightBloom": {
+      "description": "Elegant nighttime theme with rich purple blooms and soft shadows",
+      "name": "Midnight Bloom"
+    },
+    "mochaMousse": {
+      "description": "Warm coffee-inspired theme with rich mocha and cream tones",
+      "name": "Mocha Mousse"
+    },
+    "mono": {
+      "description": "Ultra-minimal monochrome theme with pure black and white, no shadows",
+      "name": "Mono"
+    },
+    "nature": {
+      "description": "Fresh nature-inspired theme with organic green tones and earthy accents",
+      "name": "Nature"
+    },
+    "neoBrutalism": {
+      "description": "Bold brutalist design with thick black borders and strong shadows",
+      "name": "Neo Brutalism"
+    },
+    "northernLights": {
+      "description": "Magical aurora borealis theme with ethereal green and purple gradients",
+      "name": "Northern Lights"
+    },
+    "notebook": {
+      "description": "Paper notebook theme with ruled lines aesthetic and handwritten font style",
+      "name": "Notebook"
+    },
+    "oceanBreeze": {
+      "description": "Refreshing ocean-inspired theme with cool turquoise and seafoam tones",
+      "name": "Ocean Breeze"
+    },
+    "pastelDreams": {
+      "description": "Dreamy pastel theme with soft lavender and pink cotton candy colors",
+      "name": "Pastel Dreams"
+    },
+    "perpetuity": {
+      "description": "Timeless monospace terminal theme with cyan-tinted blue aesthetics",
+      "name": "Perpetuity"
+    },
+    "perplexity": {
+      "description": "Clean and modern Perplexity-inspired theme with cool blue tones",
+      "name": "Perplexity"
+    },
+    "quantumRose": {
+      "description": "Futuristic rose-tinted theme with quantum-inspired pink and magenta hues",
+      "name": "Quantum Rose"
+    },
+    "retroArcade": {
+      "description": "Bold neon-inspired palette with playful contrasts, evoking the vibrant glow of 80s arcades",
+      "name": "Retro Arcade"
+    },
+    "sage-garden": {
+      "description": "A gentle garden theme with soft sage greens and refreshing natural accents",
+      "name": "Sage Garden"
+    },
+    "slack": {
+      "description": "Collaborative Slack-inspired theme with purple accents and clean workspace aesthetics",
+      "name": "Slack"
+    },
+    "softPop": {
+      "description": "Bright, bubbly theme with pastel accents and clean contrasts for a playful yet modern look",
+      "name": "Soft Pop"
+    },
+    "solarDusk": {
+      "description": "Warm, golden tones fading into deep shadows-captures the calm glow of dusk before nightfall",
+      "name": "Solar Dusk"
+    },
+    "spotify": {
+      "description": "Music-inspired Spotify theme with vibrant green and dark contrasts",
+      "name": "Spotify"
+    },
+    "starryNight": {
+      "description": "Deep midnight blues and luminous highlights, evoking a tranquil star-filled night sky",
+      "name": "Starry Night"
+    },
+    "summer": {
+      "description": "Bright and sunny summer theme with warm oranges and golden tones",
+      "name": "Summer"
+    },
+    "sunsetHorizon": {
+      "description": "Radiant oranges and glowing ambers that reflect the warmth of a summer sunset on the horizon",
+      "name": "Sunset Horizon"
+    },
+    "supabase": {
+      "description": "Clean minimalism with fresh green accents, inspired by the signature Supabase brand identity",
+      "name": "Supabase"
+    },
+    "t3chat": {
+      "description": "Modern chat-inspired design with vibrant magentas and cool contrasts for lively conversations",
+      "name": "T3 Chat"
+    },
+    "tangerine": {
+      "description": "Juicy citrus tones blended with cool accents, delivering a fresh and energetic aesthetic",
+      "name": "Tangerine"
+    },
+    "twitter": {
+      "description": "Clean whites with iconic Twitter blue highlights, optimized for clarity and social interaction",
+      "name": "Twitter"
+    },
+    "valorant": {
+      "description": "Tactical Valorant-inspired theme with bold reds and sharp contrasts",
+      "name": "Valorant"
+    },
+    "vercel": {
+      "description": "Minimalist monochrome design with sharp contrasts, reflecting Vercel's sleek and modern aesthetic",
+      "name": "Vercel"
+    },
+    "vintagePaper": {
+      "description": "Soft parchment tones with muted contrasts, evoking the warmth and texture of aged paper",
+      "name": "Vintage Paper"
+    },
+    "violetBloom": {
+      "description": "Radiant purples with soft highlights, capturing the elegance and freshness of blooming violets",
+      "name": "Violet Bloom"
+    },
+    "vscode": {
+      "description": "Developer-friendly VS Code theme with cool blues and clean code aesthetics",
+      "name": "VS Code"
+    }
+  },
+  "ToastMessages": {
+    "errorSomethingWentWrong": "Something went wrong. Please try again later.",
+    "hi": "Hi",
+    "join": "Join ",
+    "joinQuestion": "join {orgname}?",
+    "orgJoinSuccess": " successfully joined the organization.",
+    "submit": "Submit "
+  },
+  "Trail": {
+    "courseLabel": "Course",
+    "downloadCertificate": "Download Certificate",
+    "loadingCertificate": "Loading...",
+    "noCertificateAvailable": "No certificate available",
+    "quitCourseButton": "Quit Course",
+    "viewCertificate": "View Certificate"
+  },
+  "TrailPage": {
+    "metaDescription": "Check your progress using trail and easily navigate through your courses.",
+    "myProgress": "My Progress",
+    "noCourses": "You haven't started any courses yet.",
+    "noCoursesInProgress": "No courses in progress",
+    "quitAllCourses": "Quit All Courses",
+    "quitAllCoursesConfirmation": "Are you sure you want to quit all courses? This action cannot be undone and you will lose all your progress.",
+    "quitAllCoursesDialogTitle": "Quit All Courses?",
+    "quittingProgress": "Quitting Courses ({progress}%)",
+    "startACourseToSeeYourProgress": "Start a course to see your progress here",
+    "startExploring": "Start exploring courses!",
+    "title": "Progress"
+  },
+  "UserProfilePage": {
+    "aboutTitle": "About",
+    "academicInfo": "Academic Information",
+    "courseSection": {
+      "errorLoadingCourses": "Error loading courses",
+      "loadingCourses": "Loading courses...",
+      "noCoursesFound": "No courses found"
+    },
+    "fetchError": "Failed to fetch user data: ",
+    "generalInfo": "General Information",
+    "in": "in",
+    "metaDescriptionFallback": "View {firstName} {lastName}'s profile and courses",
+    "metaTitle": "{firstName} {lastName}'s Profile",
+    "metaTitleError": "User Profile",
+    "noBiography": "No biography provided",
+    "professionalInfo": "Professional Information",
+    "profileLoadError": "Failed to load user profile",
+    "viewCourses": "View Courses"
+  },
+  "Validation": {
+    "activityDescriptionRequired": "Activity description is required",
+    "activityNameRequired": "Activity name is required",
+    "assignmentDescriptionRequired": "Assignment description is required",
+    "assignmentTitleRequired": "Assignment title is required",
+    "chapterDescriptionRequired": "Chapter description is required",
+    "chapterNameRequired": "Chapter name is required",
+    "contentRequired": "Content is required",
+    "descriptionMinLength": "Description must be at least {length} characters",
+    "descriptionRequired": "Description is required",
+    "documentNameRequired": "Document name is required",
+    "examDescriptionRequired": "Exam description is required",
+    "examTitleRequired": "Exam title is required",
+    "fieldRequired": "{fieldName} is required",
+    "fileRequired": "Please select a file",
+    "invalidEmail": "Invalid email address",
+    "loading": "Loading...",
+    "maxLength": "Must be no more than {length} characters",
+    "minLength": "Must be at least {length} characters",
+    "nameMinLength": "Name must be at least {length} characters",
+    "nameRequired": "Name is required",
+    "passwordMinLength": "Password must be at least {length} characters",
+    "pdfFileRequired": "Please select a PDF file",
+    "required": "Required",
+    "roleNameRequired": "Role name is required",
+    "roleRequired": "Role is required",
+    "selectGradingType": "Select grading type",
+    "titleRequired": "Title is required",
+    "usernameMinLength": "Username must be at least {length} characters",
+    "wrongCredentials": "Wrong Email or Password",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "passwordsDontMatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "passwordTooLong": "Password must be at most 128 characters",
+    "passwordNeedsLowercase": "Password must contain at least one lowercase letter",
+    "passwordNeedsUppercase": "Password must contain at least one uppercase letter",
+    "passwordNeedsNumber": "Password must contain at least one number"
+  },
+  "activity": "Activity",
+  "additionalSettings": "Additional Settings",
+  "aiEditor": "AI Editor",
+  "calendar": {
+    "monthDropdown": "Month",
+    "next": "Next",
+    "previous": "Previous",
+    "yearDropdown": "Year"
+  },
+  "clickMe": "Click me",
+  "close": "Close",
+  "columns": "Columns",
+  "courses": "Courses",
+  "courses-0": "Courses",
+  "deleteChapter": "Delete Chapter",
+  "dialog": "Dialog",
+  "embeddedContentTitle": "Embedded content",
+  "exportCSV": "Export CSV",
+  "exportStarted": "Download started",
+  "failedToLoadUserData": "Failed to load user data.",
+  "minutes": "Minutes",
+  "permissionTable": {
+    "resource": "Resource",
+    "code": "Permission",
+    "action": "Action",
+    "scope": "Scope",
+    "description": "Description"
+  },
+  "platformLogo": "Ashyq Bilim logo",
+  "previous": "Previous",
+  "seconds": "Seconds",
+  "selectDeadline": "Select a deadline for completing the task",
+  "touUniversity": "Toraighyrov University",
+  "webPreview": "Web Preview"
 }

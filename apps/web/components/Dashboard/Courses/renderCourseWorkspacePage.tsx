@@ -1,9 +1,9 @@
 import { getCourseWorkspaceCapabilitiesForOrg } from '@/lib/course-management-server';
-import { getCourseMetadata } from '@services/courses/courses';
-import CourseWorkspacePageShell from './CourseWorkspacePageShell';
-import { auth } from '@/auth';
-import type { ReactNode } from 'react';
 import type { CourseWorkspaceStage } from '@/lib/course-management';
+import CourseWorkspacePageShell from './CourseWorkspacePageShell';
+import { getCourseMetadata } from '@services/courses/courses';
+import type { ReactNode } from 'react';
+import { auth } from '@/auth';
 
 interface RenderCourseWorkspacePageOptions {
   orgslug: string;

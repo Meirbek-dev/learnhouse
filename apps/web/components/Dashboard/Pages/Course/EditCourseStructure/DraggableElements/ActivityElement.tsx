@@ -42,7 +42,6 @@ import { Button } from '@/components/ui/button';
 import { useState, useTransition } from 'react';
 import { Input } from '@/components/ui/input';
 import { Draggable } from '@hello-pangea/dnd';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { toast } from 'sonner';
@@ -133,7 +132,6 @@ const ACTIVITY_CONFIG = {
 
 const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: ActivityElementProps) => {
   // Hooks
-  const router = useRouter();
   const session = usePlatformSession() as PlatformSession;
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse() as Course;

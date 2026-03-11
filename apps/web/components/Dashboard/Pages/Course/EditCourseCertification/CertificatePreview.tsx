@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { Award, Building, Calendar, CheckCircle, Hash, QrCode, User } from 'lucide-react';
 import { getOrgLogoMediaDirectory } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -56,7 +56,8 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
 
     generateQRCode();
   }, [certificateId, qrCodeLink]);
-  // Function to get theme colors for each pattern
+  // Explicit static class maps — no runtime string manipulation.
+  // All class names are literal strings so Tailwind JIT can scan and include them.
   const getPatternTheme = (pattern: string) => {
     switch (pattern) {
       case 'royal': {
@@ -65,6 +66,12 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           secondary: 'text-amber-600',
           icon: 'text-amber-600',
           badge: 'bg-amber-50 text-amber-700 border-amber-200',
+          borderSecondary: 'border-amber-600',
+          gradientTo: 'to-amber-600',
+          awardBg: 'from-amber-100 to-amber-200',
+          bgSecondary: 'bg-amber-600',
+          bgPrimary: 'bg-amber-700',
+          bgIcon100: 'bg-amber-100',
         };
       }
       case 'tech': {
@@ -73,6 +80,12 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           secondary: 'text-cyan-600',
           icon: 'text-cyan-600',
           badge: 'bg-cyan-50 text-cyan-700 border-cyan-200',
+          borderSecondary: 'border-cyan-600',
+          gradientTo: 'to-cyan-600',
+          awardBg: 'from-cyan-100 to-cyan-200',
+          bgSecondary: 'bg-cyan-600',
+          bgPrimary: 'bg-cyan-700',
+          bgIcon100: 'bg-cyan-100',
         };
       }
       case 'nature': {
@@ -81,6 +94,12 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           secondary: 'text-green-600',
           icon: 'text-green-600',
           badge: 'bg-green-50 text-green-700 border-green-200',
+          borderSecondary: 'border-green-600',
+          gradientTo: 'to-green-600',
+          awardBg: 'from-green-100 to-green-200',
+          bgSecondary: 'bg-green-600',
+          bgPrimary: 'bg-green-700',
+          bgIcon100: 'bg-green-100',
         };
       }
       case 'geometric': {
@@ -89,6 +108,12 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           secondary: 'text-purple-600',
           icon: 'text-purple-600',
           badge: 'bg-purple-50 text-purple-700 border-purple-200',
+          borderSecondary: 'border-purple-600',
+          gradientTo: 'to-purple-600',
+          awardBg: 'from-purple-100 to-purple-200',
+          bgSecondary: 'bg-purple-600',
+          bgPrimary: 'bg-purple-700',
+          bgIcon100: 'bg-purple-100',
         };
       }
       case 'vintage': {
@@ -97,6 +122,12 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           secondary: 'text-orange-600',
           icon: 'text-orange-600',
           badge: 'bg-orange-50 text-orange-700 border-orange-200',
+          borderSecondary: 'border-orange-600',
+          gradientTo: 'to-orange-600',
+          awardBg: 'from-orange-100 to-orange-200',
+          bgSecondary: 'bg-orange-600',
+          bgPrimary: 'bg-orange-700',
+          bgIcon100: 'bg-orange-100',
         };
       }
       case 'waves': {
@@ -105,6 +136,12 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           secondary: 'text-blue-600',
           icon: 'text-blue-600',
           badge: 'bg-blue-50 text-blue-700 border-blue-200',
+          borderSecondary: 'border-blue-600',
+          gradientTo: 'to-blue-600',
+          awardBg: 'from-blue-100 to-blue-200',
+          bgSecondary: 'bg-blue-600',
+          bgPrimary: 'bg-blue-700',
+          bgIcon100: 'bg-blue-100',
         };
       }
       case 'minimal': {
@@ -113,6 +150,12 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           secondary: 'text-gray-600',
           icon: 'text-gray-600',
           badge: 'bg-gray-50 text-gray-700 border-gray-200',
+          borderSecondary: 'border-gray-600',
+          gradientTo: 'to-gray-600',
+          awardBg: 'from-gray-100 to-gray-200',
+          bgSecondary: 'bg-gray-600',
+          bgPrimary: 'bg-gray-700',
+          bgIcon100: 'bg-gray-100',
         };
       }
       case 'professional': {
@@ -121,6 +164,12 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           secondary: 'text-slate-600',
           icon: 'text-slate-600',
           badge: 'bg-slate-50 text-slate-700 border-slate-200',
+          borderSecondary: 'border-slate-600',
+          gradientTo: 'to-slate-600',
+          awardBg: 'from-slate-100 to-slate-200',
+          bgSecondary: 'bg-slate-600',
+          bgPrimary: 'bg-slate-700',
+          bgIcon100: 'bg-slate-100',
         };
       }
       case 'academic': {
@@ -129,6 +178,12 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           secondary: 'text-indigo-600',
           icon: 'text-indigo-600',
           badge: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+          borderSecondary: 'border-indigo-600',
+          gradientTo: 'to-indigo-600',
+          awardBg: 'from-indigo-100 to-indigo-200',
+          bgSecondary: 'bg-indigo-600',
+          bgPrimary: 'bg-indigo-700',
+          bgIcon100: 'bg-indigo-100',
         };
       }
       case 'modern': {
@@ -137,6 +192,12 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           secondary: 'text-blue-600',
           icon: 'text-blue-600',
           badge: 'bg-blue-50 text-blue-700 border-blue-200',
+          borderSecondary: 'border-blue-600',
+          gradientTo: 'to-blue-600',
+          awardBg: 'from-blue-100 to-blue-200',
+          bgSecondary: 'bg-blue-600',
+          bgPrimary: 'bg-blue-700',
+          bgIcon100: 'bg-blue-100',
         };
       }
       default: {
@@ -145,6 +206,12 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           secondary: 'text-gray-600',
           icon: 'text-gray-600',
           badge: 'bg-gray-50 text-gray-700 border-gray-200',
+          borderSecondary: 'border-gray-600',
+          gradientTo: 'to-gray-600',
+          awardBg: 'from-gray-100 to-gray-200',
+          bgSecondary: 'bg-gray-600',
+          bgPrimary: 'bg-gray-700',
+          bgIcon100: 'bg-gray-100',
         };
       }
     }
@@ -547,7 +614,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         {/* QR Code Box - Top Right */}
         <div className="absolute top-4 right-4 z-20 sm:top-6 sm:right-6">
           <div
-            className={`h-16 w-16 border-2 sm:h-24 sm:w-24 ${theme.secondary.replace('text-', 'border-')} rounded-md bg-white/90 p-1 backdrop-blur-sm`}
+            className={`h-16 w-16 border-2 sm:h-24 sm:w-24 ${theme.borderSecondary} rounded-md bg-white/90 p-1 backdrop-blur-sm`}
           >
             {qrCodeUrl ? (
               <img
@@ -567,36 +634,32 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         <div className="relative z-10 flex flex-1 flex-col items-center justify-center space-y-3 px-6 py-6 text-center">
           {/* Header with decorative line */}
           <div className="mb-2 flex items-center justify-center space-x-2">
-            <div
-              className={`h-px w-6 bg-linear-to-r from-transparent sm:w-8 ${theme.secondary.replace('text-', 'to-')}`}
-            />
+            <div className={`h-px w-6 bg-linear-to-r from-transparent sm:w-8 ${theme.gradientTo}`} />
             <div className={`text-xs sm:text-sm ${theme.secondary} font-medium tracking-wider uppercase`}>
               {t('certificate')}
             </div>
-            <div
-              className={`h-px w-6 bg-linear-to-l from-transparent sm:w-8 ${theme.secondary.replace('text-', 'to-')}`}
-            />
+            <div className={`h-px w-6 bg-linear-to-l from-transparent sm:w-8 ${theme.gradientTo}`} />
           </div>
 
           {/* Award Icon with decorative elements */}
           <div className="relative flex justify-center">
             <div
-              className={`h-12 w-12 bg-linear-to-br sm:h-16 sm:w-16 ${theme.icon.replace('text-', 'from-')}-100 ${theme.icon.replace('text-', 'to-')}-200 relative flex items-center justify-center rounded-full`}
+              className={`h-12 w-12 bg-linear-to-br sm:h-16 sm:w-16 ${theme.awardBg} relative flex items-center justify-center rounded-full`}
             >
               <Award className={`h-6 w-6 sm:h-8 sm:w-8 ${theme.icon}`} />
               {/* Decorative rays */}
               <div className="absolute inset-0 rounded-full">
                 <div
-                  className={`absolute top-0 left-1/2 h-2 w-px sm:h-3 ${theme.secondary.replace('text-', 'bg-')} -translate-x-1/2 -translate-y-1 opacity-60`}
+                  className={`absolute top-0 left-1/2 h-2 w-px sm:h-3 ${theme.bgSecondary} -translate-x-1/2 -translate-y-1 opacity-60`}
                 />
                 <div
-                  className={`absolute bottom-0 left-1/2 h-2 w-px sm:h-3 ${theme.secondary.replace('text-', 'bg-')} -translate-x-1/2 translate-y-1 opacity-60`}
+                  className={`absolute bottom-0 left-1/2 h-2 w-px sm:h-3 ${theme.bgSecondary} -translate-x-1/2 translate-y-1 opacity-60`}
                 />
                 <div
-                  className={`absolute top-1/2 left-0 h-px w-2 sm:w-3 ${theme.secondary.replace('text-', 'bg-')} -translate-x-1 -translate-y-1/2 opacity-60`}
+                  className={`absolute top-1/2 left-0 h-px w-2 sm:w-3 ${theme.bgSecondary} -translate-x-1 -translate-y-1/2 opacity-60`}
                 />
                 <div
-                  className={`absolute top-1/2 right-0 h-px w-2 sm:w-3 ${theme.secondary.replace('text-', 'bg-')} translate-x-1 -translate-y-1/2 opacity-60`}
+                  className={`absolute top-1/2 right-0 h-px w-2 sm:w-3 ${theme.bgSecondary} translate-x-1 -translate-y-1/2 opacity-60`}
                 />
               </div>
             </div>
@@ -614,9 +677,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
 
           {/* Decorative divider */}
           <div className="flex items-center justify-center space-x-1 py-1">
-            <div className={`h-px w-2 ${theme.secondary.replace('text-', 'bg-')} opacity-50`} />
-            <div className={`h-1 w-1 ${theme.primary.replace('text-', 'bg-')} rounded-full opacity-60`} />
-            <div className={`h-px w-2 ${theme.secondary.replace('text-', 'bg-')} opacity-50`} />
+            <div className={`h-px w-2 ${theme.bgSecondary} opacity-50`} />
+            <div className={`h-1 w-1 ${theme.bgPrimary} rounded-full opacity-60`} />
+            <div className={`h-px w-2 ${theme.bgSecondary} opacity-50`} />
           </div>
 
           {/* Certification Type Badge */}
@@ -644,7 +707,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
               <div className={`text-xs ${theme.primary} font-semibold`}>
                 {certificateInstructor || t('instructorName')}
               </div>
-              <div className={`h-px w-10 sm:w-12 ${theme.secondary.replace('text-', 'bg-')} opacity-50`} />
+              <div className={`h-px w-10 sm:w-12 ${theme.bgSecondary} opacity-50`} />
             </div>
 
             {/* Center: Logo */}
@@ -657,14 +720,12 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                     className="h-full w-full object-contain"
                   />
                 ) : (
-                  <div
-                    className={`h-full w-full ${theme.icon.replace('text-', 'bg-')}-100 flex items-center justify-center rounded-full`}
-                  >
+                  <div className={`h-full w-full ${theme.bgIcon100} flex items-center justify-center rounded-full`}>
                     <Building className={`h-4 w-4 sm:h-5 sm:w-5 ${theme.icon}`} />
                   </div>
                 )}
               </div>
-              <div className={`text-xs ${theme.secondary} font-medium`}>Ashyq Bilim</div>
+              <div className={`text-xs ${theme.secondary} font-medium`}>{(org as any)?.name || ''}</div>
             </div>
 
             {/* Right: Award Date */}

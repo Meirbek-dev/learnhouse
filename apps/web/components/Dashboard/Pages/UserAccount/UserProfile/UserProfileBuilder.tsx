@@ -1233,7 +1233,7 @@ const ExperienceEditor: FC<{
                           const newExperiences = [...section.experiences];
                           newExperiences[index] = {
                             ...experience,
-                            current: Boolean(checked),
+                            current: checked,
                             endDate: checked ? undefined : experience.endDate,
                           };
                           onChange({ ...section, experiences: newExperiences });
@@ -1442,7 +1442,7 @@ const EducationEditor: FC<{
                           const newEducation = [...section.education];
                           newEducation[index] = {
                             ...edu,
-                            current: Boolean(checked),
+                            current: checked,
                             endDate: checked ? undefined : edu.endDate,
                           };
                           onChange({ ...section, education: newEducation });

@@ -1,12 +1,20 @@
 'use client';
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { createChapter, updateCourseOrderStructure } from '@services/courses/chapters';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import NewChapterModal from '@components/Objects/Modals/Chapters/NewChapter';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
-import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { createChapter, updateCourseOrderStructure } from '@services/courses/chapters';
+import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { Hexagon } from 'lucide-react';
 import { useState } from 'react';
@@ -16,7 +24,6 @@ import ChapterElement from './DraggableElements/ChapterElement';
 
 interface EditCourseStructureProps {
   orgslug: string;
-  course_uuid?: string;
 }
 
 export type OrderPayload =
@@ -34,8 +41,6 @@ export type OrderPayload =
 const EditCourseStructure = (props: EditCourseStructureProps) => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  // Check window availability - use lazy initialization
-  const [winReady, setwinReady] = useState(() => typeof globalThis.window !== 'undefined');
   const t = useTranslations('CourseEdit.Structure');
 
   const dispatchCourse = useCourseDispatch();
@@ -58,8 +63,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
       await refreshCourseMeta();
       setNewChapterModal(false);
       toast.success(t('chapterCreatedSuccess'), { id: loadingToast });
-    } catch (error) {
-      console.error('Error creating chapter:', error);
+    } catch {
       toast.error(t('chapterCreateFailed'), { id: loadingToast });
     }
   };
@@ -124,64 +128,64 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   return (
     <div className="flex flex-col">
       <div className="h-6" />
-      {winReady ? (
-        <DragDropContext onDragEnd={updateStructure}>
-          <Droppable
-            type="chapter"
-            droppableId="chapters"
-            direction="vertical"
-          >
-            {(provided, snapshot) => (
-              <div
-                className={`space-y-4 ${snapshot.isDraggingOver ? 'bg-gray-50/50' : ''}`}
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-              >
-                {course_structure.chapters.map((chapter: any, index: any) => {
-                  return (
-                    <ChapterElement
-                      key={chapter.chapter_uuid}
-                      chapterIndex={index}
-                      orgslug={props.orgslug}
-                      course_uuid={course_uuid}
-                      chapter={chapter}
-                    />
-                  );
-                })}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-
-          {/* New Chapter Modal */}
-          <Modal
-            isDialogOpen={newChapterModal}
-            onOpenChange={setNewChapterModal}
-            minHeight="sm"
-            dialogContent={
-              <NewChapterModal
-                course={course ? course.courseStructure : null}
-                closeModal={closeNewChapterModal}
-                submitChapter={submitChapter}
-              />
-            }
-            dialogTitle={t('NewChapterModal.title')}
-            dialogDescription={t('NewChapterModal.description')}
-            dialogTrigger={
-              <div className="mx-auto my-16 flex h-10 max-w-(--breakpoint-2xl) flex-row items-center rounded-xl bg-cyan-800 px-6 py-5 text-white shadow-xs">
-                <div className="mx-auto flex items-center space-x-2 hover:cursor-pointer">
-                  <Hexagon
-                    strokeWidth={3}
-                    size={16}
-                    className="text-sm text-white"
+      <DragDropContext onDragEnd={updateStructure}>
+        <Droppable
+          type="chapter"
+          droppableId="chapters"
+          direction="vertical"
+        >
+          {(provided, snapshot) => (
+            <div
+              className={`space-y-4 ${snapshot.isDraggingOver ? 'bg-gray-50/50' : ''}`}
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+            >
+              {course_structure.chapters.map((chapter: any, index: any) => {
+                return (
+                  <ChapterElement
+                    key={chapter.chapter_uuid}
+                    chapterIndex={index}
+                    orgslug={props.orgslug}
+                    course_uuid={course_uuid}
+                    chapter={chapter}
                   />
-                  <div className="text-sm font-semibold">{t('addChapterButton')}</div>
-                </div>
-              </div>
+                );
+              })}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+
+        {/* New Chapter Dialog */}
+        <Dialog
+          open={newChapterModal}
+          onOpenChange={setNewChapterModal}
+        >
+          <DialogTrigger
+            render={
+              <Button className="mx-auto my-16 flex h-auto max-w-(--breakpoint-2xl) flex-row items-center rounded-xl bg-cyan-800 px-6 py-5 text-white shadow-xs hover:bg-cyan-700" />
             }
-          />
-        </DragDropContext>
-      ) : null}
+          >
+            <Hexagon
+              strokeWidth={3}
+              size={16}
+              className="text-white"
+            />
+            <span className="text-sm font-semibold">{t('addChapterButton')}</span>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t('NewChapterModal.title')}</DialogTitle>
+              <DialogDescription>{t('NewChapterModal.description')}</DialogDescription>
+            </DialogHeader>
+            <NewChapterModal
+              course={course ? course.courseStructure : null}
+              closeModal={closeNewChapterModal}
+              submitChapter={submitChapter}
+            />
+          </DialogContent>
+        </Dialog>
+      </DragDropContext>
     </div>
   );
 };

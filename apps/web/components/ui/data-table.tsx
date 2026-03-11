@@ -1,7 +1,7 @@
 'use client';
 
-import * as React from 'react';
 import { useTranslations } from 'next-intl';
+import * as React from 'react';
 
 import {
   flexRender,
@@ -175,7 +175,7 @@ export default function DataTable<TData>({
     },
   });
 
-  const {rows} = table.getRowModel();
+  const { rows } = table.getRowModel();
   const totalFiltered = table.getFilteredRowModel().rows.length;
   const { pageIndex, pageSize: currentPageSize } = table.getState().pagination;
   const pageCount = table.getPageCount();
@@ -268,7 +268,7 @@ export default function DataTable<TData>({
                       <DropdownMenuCheckboxItem
                         key={column.id}
                         checked={column.getIsVisible()}
-                        onCheckedChange={(checked) => column.toggleVisibility(Boolean(checked))}
+                        onCheckedChange={(checked) => column.toggleVisibility(checked)}
                       >
                         {label}
                       </DropdownMenuCheckboxItem>

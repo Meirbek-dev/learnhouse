@@ -3,13 +3,13 @@
 import { buildCourseWorkspacePath, getCourseReadinessSummary } from '@/lib/course-management';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { updateCourseAccess } from '@services/courses/courses';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import AppLink from '@/components/ui/AppLink';
+import { updateCourseAccess } from '@services/courses/courses';
 import { ExternalLink, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useState, useTransition } from 'react';
+import AppLink from '@/components/ui/AppLink';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
 export default function CourseReviewPublish({
@@ -69,10 +69,13 @@ export default function CourseReviewPublish({
           <div>
             <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Review & publish</div>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
-              {readiness.readyToPublish ? 'This course is structurally ready.' : 'Finish the remaining blockers before publishing.'}
+              {readiness.readyToPublish
+                ? 'This course is structurally ready.'
+                : 'Finish the remaining blockers before publishing.'}
             </h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              This page centralizes the last-mile checks that used to be scattered across tabs. Use it to confirm content quality, visibility, and launch state without hunting through the editor.
+              This page centralizes the last-mile checks that used to be scattered across tabs. Use it to confirm
+              content quality, visibility, and launch state without hunting through the editor.
             </p>
           </div>
 
@@ -105,7 +108,11 @@ export default function CourseReviewPublish({
             {readiness.checklist.map((item) => (
               <div
                 key={item.id}
-                className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200 p-4"
+                className={`flex items-start justify-between gap-4 rounded-2xl border p-4 border-l-4 ${
+                  item.complete
+                    ? 'border-slate-200 border-l-emerald-500 bg-emerald-50/30'
+                    : 'border-slate-200 border-l-amber-400 bg-amber-50/30'
+                }`}
               >
                 <div>
                   <div className="font-medium text-slate-950">{item.title}</div>
@@ -145,7 +152,10 @@ export default function CourseReviewPublish({
             <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600">
               <li>Publishing uses the course visibility flag already supported by the backend.</li>
               <li>Curriculum edits remain immediate, so confirm chapter and activity structure before launching.</li>
-              <li>Details, access, collaboration, and certificate work should be reviewed for clarity before making the course public.</li>
+              <li>
+                Details, access, collaboration, and certificate work should be reviewed for clarity before making the
+                course public.
+              </li>
             </ul>
           </div>
         </div>

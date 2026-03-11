@@ -1,8 +1,8 @@
 'use server';
 
 import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
 import { courseTag, getCourseListTags, tags } from '@/lib/cacheTags';
+import { getAPIUrl } from '@services/config/config';
 
 export async function getUserGroups(org_id: number, access_token: string) {
   const result: any = await fetch(

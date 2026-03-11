@@ -8,9 +8,12 @@
 
 ## Problem Statement
 
-The LMS already has a dashboard shell, permission-driven navigation, and a few isolated analytics surfaces such as code challenge instructor analytics. What it does not have is a dedicated teacher analytics domain with stable read APIs, clear metric definitions, and scalable rollups.
+The LMS already has a dashboard shell, permission-driven navigation, and a few isolated analytics
+surfaces such as code challenge instructor analytics. What it does not have is a dedicated teacher
+analytics domain with stable read APIs, clear metric definitions, and scalable rollups.
 
-The teacher dashboard must help instructors improve courses and intervene on learner risk. It should answer operational questions, not just display charts.
+The teacher dashboard must help instructors improve courses and intervene on learner risk. It should
+answer operational questions, not just display charts.
 
 Primary decisions the dashboard must support:
 
@@ -25,11 +28,14 @@ Primary decisions the dashboard must support:
 ### Confirmed current-state facts
 
 - Dashboard shell already exists under `apps/web/app/orgs/[orgslug]/dash`.
-- Frontend navigation is permission-driven in `apps/web/lib/rbac/navigation-policy.ts` and `apps/web/hooks/useNavigationPermissions.ts`.
+- Frontend navigation is permission-driven in `apps/web/lib/rbac/navigation-policy.ts` and
+  `apps/web/hooks/useNavigationPermissions.ts`.
 - Backend RBAC already defines `analytics` as a resource in `apps/api/src/db/permission_enums.py`.
 - There is no dedicated analytics router in `apps/api/src/router.py`.
-- Code challenge instructor analytics already exists in `apps/api/src/routers/courses/code_challenges.py`.
-- Course participation is currently modeled through `TrailRun` and `TrailStep`, not a dedicated enrollment table (feel free to rewrite).
+- Code challenge instructor analytics already exists in
+  `apps/api/src/routers/courses/code_challenges.py`.
+- Course participation is currently modeled through `TrailRun` and `TrailStep`, not a dedicated
+  enrollment table (feel free to rewrite).
 
 ### Critical modeling caveat
 
@@ -41,7 +47,8 @@ For v1:
 - `TrailStep` is the completion/progress backbone.
 - `CertificateUser` is a secondary completion validation signal.
 
-This means the first analytics release must explicitly document that completion and enrollment metrics are based on participation runs, not a true enrollment registry.
+This means the first analytics release must explicitly document that completion and enrollment
+metrics are based on participation runs, not a true enrollment registry.
 
 ## Design Goals
 
@@ -50,7 +57,8 @@ This means the first analytics release must explicitly document that completion 
 - Use direct ORM queries only where the query cost is bounded.
 - Introduce rollup tables for cross-course trends, ranked tables, and time-series charts.
 - Exclude preview and teacher test activity from learner-facing performance metrics by default.
-- Use the existing shadcn chart primitives in `apps/web/components/ui/chart.tsx` for area, bar, pie, radar, radial, and tooltip-based visualizations.
+- Use the existing shadcn chart primitives in `apps/web/components/ui/chart.tsx` for area, bar, pie,
+  radar, radial, and tooltip-based visualizations.
 - High type-safety. Minimize any types
 
 ## Non-Goals
@@ -66,7 +74,8 @@ This means the first analytics release must explicitly document that completion 
 
 - Router layer: teacher analytics endpoints under a dedicated analytics router.
 - Service layer: overview, courses, assessments, risk, exports, and rollup refresh logic.
-- Query layer: centralized SQLModel or SQLAlchemy query builders for filters, course scope, and time windows.
+- Query layer: centralized SQLModel or SQLAlchemy query builders for filters, course scope, and time
+  windows.
 - Storage layer:
   - raw transactional tables already in the repo
   - new analytics rollup tables
@@ -93,21 +102,23 @@ type ComparePreset = 'previous_period' | 'none';
 type Bucket = 'day' | 'week';
 
 interface AnalyticsFilterQuery {
- window?: WindowPreset;
- compare?: ComparePreset;
- bucket?: Bucket;
- course_ids?: string; // comma-separated numeric ids
- cohort_ids?: string; // comma-separated usergroup ids
- teacher_user_id?: number; // org admin or teaching lead only
- timezone?: string; // IANA timezone, fallback UTC
+  window?: WindowPreset;
+  compare?: ComparePreset;
+  bucket?: Bucket;
+  course_ids?: string; // comma-separated numeric ids
+  cohort_ids?: string; // comma-separated usergroup ids
+  teacher_user_id?: number; // org admin or teaching lead only
+  timezone?: string; // IANA timezone, fallback UTC
 }
 ```
 
 ### Access rules
 
-- Teacher overview, courses, and assessments require `analytics:read` with `assigned`, `org`, or `all` scope.
+- Teacher overview, courses, and assessments require `analytics:read` with `assigned`, `org`, or
+  `all` scope.
 - Exports require `analytics:export` with `assigned`, `org`, or `all` scope.
-- Course and assessment detail endpoints must additionally verify the user is the course owner, active author, grader, or has org-wide analytics scope.
+- Course and assessment detail endpoints must additionally verify the user is the course owner,
+  active author, grader, or has org-wide analytics scope.
 
 ### 1. Teacher Overview
 
@@ -122,62 +133,62 @@ Response model:
 
 ```ts
 interface TeacherOverviewResponse {
- generated_at: string;
- freshness_seconds: number;
- window: '7d' | '28d' | '90d';
- compare: 'previous_period' | 'none';
- scope: {
-  org_id: number;
-  teacher_user_id: number;
-  course_ids: number[];
-  cohort_ids: number[];
- };
- summary: {
-  active_learners: MetricCard;
-  returning_learners: MetricCard;
-  completion_rate: MetricCard;
-  at_risk_learners: MetricCard;
-  ungraded_submissions: MetricCard;
-  negative_engagement_courses: MetricCard;
- };
- trends: {
-  active_learners: TimeSeriesPoint[];
-  completions: TimeSeriesPoint[];
-  submissions: TimeSeriesPoint[];
-  grading_completed: TimeSeriesPoint[];
- };
- alerts: AlertItem[];
- at_risk_preview: AtRiskLearnerRow[];
+  generated_at: string;
+  freshness_seconds: number;
+  window: '7d' | '28d' | '90d';
+  compare: 'previous_period' | 'none';
+  scope: {
+    org_id: number;
+    teacher_user_id: number;
+    course_ids: number[];
+    cohort_ids: number[];
+  };
+  summary: {
+    active_learners: MetricCard;
+    returning_learners: MetricCard;
+    completion_rate: MetricCard;
+    at_risk_learners: MetricCard;
+    ungraded_submissions: MetricCard;
+    negative_engagement_courses: MetricCard;
+  };
+  trends: {
+    active_learners: TimeSeriesPoint[];
+    completions: TimeSeriesPoint[];
+    submissions: TimeSeriesPoint[];
+    grading_completed: TimeSeriesPoint[];
+  };
+  alerts: AlertItem[];
+  at_risk_preview: AtRiskLearnerRow[];
 }
 
 interface MetricCard {
- value: number;
- delta_value: number | null;
- delta_pct: number | null;
- direction: 'up' | 'down' | 'flat';
- label: string;
+  value: number;
+  delta_value: number | null;
+  delta_pct: number | null;
+  direction: 'up' | 'down' | 'flat';
+  label: string;
 }
 
 interface TimeSeriesPoint {
- bucket_start: string;
- value: number;
+  bucket_start: string;
+  value: number;
 }
 
 interface AlertItem {
- id: string;
- type:
-  | 'risk_spike'
-  | 'engagement_drop'
-  | 'grading_backlog'
-  | 'assessment_outlier'
-  | 'content_stale';
- severity: 'info' | 'warning' | 'critical';
- title: string;
- body: string;
- course_id?: number;
- activity_id?: number;
- assessment_id?: number;
- learner_count?: number;
+  id: string;
+  type:
+    | 'risk_spike'
+    | 'engagement_drop'
+    | 'grading_backlog'
+    | 'assessment_outlier'
+    | 'content_stale';
+  severity: 'info' | 'warning' | 'critical';
+  title: string;
+  body: string;
+  course_id?: number;
+  activity_id?: number;
+  assessment_id?: number;
+  learner_count?: number;
 }
 ```
 
@@ -193,23 +204,23 @@ Response model:
 
 ```ts
 interface TeacherCourseListResponse {
- generated_at: string;
- items: TeacherCourseRow[];
+  generated_at: string;
+  items: TeacherCourseRow[];
 }
 
 interface TeacherCourseRow {
- course_id: number;
- course_uuid: string;
- course_name: string;
- active_learners_7d: number;
- completion_rate: number;
- engagement_delta_pct: number | null;
- at_risk_learners: number;
- ungraded_submissions: number;
- content_health_score: number;
- assessment_difficulty_score: number | null;
- last_content_update_at: string | null;
- top_alert: AlertItem | null;
+  course_id: number;
+  course_uuid: string;
+  course_name: string;
+  active_learners_7d: number;
+  completion_rate: number;
+  engagement_delta_pct: number | null;
+  at_risk_learners: number;
+  ungraded_submissions: number;
+  content_health_score: number;
+  assessment_difficulty_score: number | null;
+  last_content_update_at: string | null;
+  top_alert: AlertItem | null;
 }
 ```
 
@@ -225,55 +236,55 @@ Response model:
 
 ```ts
 interface TeacherCourseDetailResponse {
- generated_at: string;
- course: {
-  id: number;
-  course_uuid: string;
-  name: string;
-  org_id: number;
- };
- summary: {
-  enrolled_learners: number;
-  active_learners_7d: number;
-  completion_rate: number;
-  avg_progress_pct: number;
-  at_risk_learners: number;
-  ungraded_submissions: number;
-  certificates_issued: number;
- };
- funnels: {
-  course_completion: FunnelStep[];
-  chapter_dropoff: FunnelStep[];
- };
- engagement_trend: TimeSeriesPoint[];
- activity_dropoff: ActivityDropoffRow[];
- at_risk_learners: AtRiskLearnerRow[];
- assessment_outliers: AssessmentOutlierRow[];
- content_health: ContentHealthRow[];
+  generated_at: string;
+  course: {
+    id: number;
+    course_uuid: string;
+    name: string;
+    org_id: number;
+  };
+  summary: {
+    enrolled_learners: number;
+    active_learners_7d: number;
+    completion_rate: number;
+    avg_progress_pct: number;
+    at_risk_learners: number;
+    ungraded_submissions: number;
+    certificates_issued: number;
+  };
+  funnels: {
+    course_completion: FunnelStep[];
+    chapter_dropoff: FunnelStep[];
+  };
+  engagement_trend: TimeSeriesPoint[];
+  activity_dropoff: ActivityDropoffRow[];
+  at_risk_learners: AtRiskLearnerRow[];
+  assessment_outliers: AssessmentOutlierRow[];
+  content_health: ContentHealthRow[];
 }
 
 interface FunnelStep {
- label: string;
- count: number;
- pct_of_previous: number | null;
+  label: string;
+  count: number;
+  pct_of_previous: number | null;
 }
 
 interface ActivityDropoffRow {
- chapter_id: number;
- activity_id: number;
- activity_name: string;
- activity_type: string;
- previous_step_completions: number;
- current_step_completions: number;
- dropoff_pct: number;
+  chapter_id: number;
+  activity_id: number;
+  activity_name: string;
+  activity_type: string;
+  previous_step_completions: number;
+  current_step_completions: number;
+  dropoff_pct: number;
 }
 
 interface ContentHealthRow {
- course_id: number;
- signal: string;
- severity: 'info' | 'warning' | 'critical';
- value: number | null;
- note: string;
+  course_id: number;
+  signal: string;
+  severity: 'info' | 'warning' | 'critical';
+  value: number | null;
+  note: string;
 }
 ```
 
@@ -289,26 +300,26 @@ Response model:
 
 ```ts
 interface TeacherAssessmentListResponse {
- generated_at: string;
- items: AssessmentOutlierRow[];
+  generated_at: string;
+  items: AssessmentOutlierRow[];
 }
 
 interface AssessmentOutlierRow {
- assessment_type: 'assignment' | 'quiz' | 'exam' | 'code_challenge';
- assessment_id: number;
- activity_id: number | null;
- course_id: number;
- course_name: string;
- title: string;
- submission_rate: number | null;
- completion_rate: number | null;
- pass_rate: number | null;
- median_score: number | null;
- avg_attempts: number | null;
- grading_latency_hours_p50: number | null;
- grading_latency_hours_p90: number | null;
- difficulty_score: number | null;
- outlier_reason_codes: string[];
+  assessment_type: 'assignment' | 'quiz' | 'exam' | 'code_challenge';
+  assessment_id: number;
+  activity_id: number | null;
+  course_id: number;
+  course_name: string;
+  title: string;
+  submission_rate: number | null;
+  completion_rate: number | null;
+  pass_rate: number | null;
+  median_score: number | null;
+  avg_attempts: number | null;
+  grading_latency_hours_p50: number | null;
+  grading_latency_hours_p90: number | null;
+  difficulty_score: number | null;
+  outlier_reason_codes: string[];
 }
 ```
 
@@ -324,55 +335,55 @@ Response model:
 
 ```ts
 interface TeacherAssessmentDetailResponse {
- generated_at: string;
- assessment_type: 'assignment' | 'quiz' | 'exam' | 'code_challenge';
- assessment_id: number;
- course_id: number;
- title: string;
- summary: {
-  eligible_learners: number;
-  submitted_learners: number;
-  submission_rate: number | null;
-  pass_rate: number | null;
-  median_score: number | null;
-  avg_attempts: number | null;
-  grading_latency_hours_p50: number | null;
-  grading_latency_hours_p90: number | null;
- };
- score_distribution: HistogramBucket[];
- attempt_distribution: HistogramBucket[];
- question_breakdown?: QuestionDifficultyRow[];
- common_failures: CommonFailureRow[];
- learner_rows: AssessmentLearnerRow[];
+  generated_at: string;
+  assessment_type: 'assignment' | 'quiz' | 'exam' | 'code_challenge';
+  assessment_id: number;
+  course_id: number;
+  title: string;
+  summary: {
+    eligible_learners: number;
+    submitted_learners: number;
+    submission_rate: number | null;
+    pass_rate: number | null;
+    median_score: number | null;
+    avg_attempts: number | null;
+    grading_latency_hours_p50: number | null;
+    grading_latency_hours_p90: number | null;
+  };
+  score_distribution: HistogramBucket[];
+  attempt_distribution: HistogramBucket[];
+  question_breakdown?: QuestionDifficultyRow[];
+  common_failures: CommonFailureRow[];
+  learner_rows: AssessmentLearnerRow[];
 }
 
 interface HistogramBucket {
- label: string;
- count: number;
+  label: string;
+  count: number;
 }
 
 interface QuestionDifficultyRow {
- question_id: string;
- question_label: string;
- accuracy_pct: number | null;
- avg_time_seconds: number | null;
+  question_id: string;
+  question_label: string;
+  accuracy_pct: number | null;
+  avg_time_seconds: number | null;
 }
 
 interface CommonFailureRow {
- key: string;
- label: string;
- count: number;
+  key: string;
+  label: string;
+  count: number;
 }
 
 interface AssessmentLearnerRow {
- user_id: number;
- user_display_name: string;
- attempts: number;
- best_score: number | null;
- last_score: number | null;
- submitted_at: string | null;
- graded_at: string | null;
- status: string | null;
+  user_id: number;
+  user_display_name: string;
+  attempts: number;
+  best_score: number | null;
+  last_score: number | null;
+  submitted_at: string | null;
+  graded_at: string | null;
+  status: string | null;
 }
 ```
 
@@ -388,26 +399,26 @@ Response model:
 
 ```ts
 interface AtRiskLearnersResponse {
- generated_at: string;
- total: number;
- items: AtRiskLearnerRow[];
+  generated_at: string;
+  total: number;
+  items: AtRiskLearnerRow[];
 }
 
 interface AtRiskLearnerRow {
- user_id: number;
- course_id: number;
- course_name: string;
- user_display_name: string;
- cohort_name: string | null;
- progress_pct: number;
- days_since_last_activity: number | null;
- open_grading_blocks: number;
- failed_assessments: number;
- missing_required_assessments: number;
- risk_score: number;
- risk_level: 'low' | 'medium' | 'high';
- reason_codes: string[];
- recommended_action: string;
+  user_id: number;
+  course_id: number;
+  course_name: string;
+  user_display_name: string;
+  cohort_name: string | null;
+  progress_pct: number;
+  days_since_last_activity: number | null;
+  open_grading_blocks: number;
+  failed_assessments: number;
+  missing_required_assessments: number;
+  risk_score: number;
+  risk_level: 'low' | 'medium' | 'high';
+  reason_codes: string[];
+  recommended_action: string;
 }
 ```
 
@@ -434,13 +445,15 @@ Every teacher endpoint must begin with course scope resolution.
 
 Use these sources in order:
 
-1. If the caller has `analytics:read:org` or `analytics:read:all`, use all org courses after filter narrowing.
+1. If the caller has `analytics:read:org` or `analytics:read:all`, use all org courses after filter
+   narrowing.
 2. Otherwise resolve teacher-managed courses through:
 
 - `Course.creator_id == current_user.id`
 - active authorship rows in `ResourceAuthor` where `resource_uuid == Course.course_uuid`
 
-1. For assignment and grading workload, also honor assignment-related scope when the user is acting as a grader.
+1. For assignment and grading workload, also honor assignment-related scope when the user is acting
+   as a grader.
 
 ### ORM sources
 
@@ -498,7 +511,8 @@ This section names the concrete source of truth for every v1 metric.
 
 ### Active learner union
 
-Use a normalized union subquery for learner activity rather than maintaining separate logic per endpoint.
+Use a normalized union subquery for learner activity rather than maintaining separate logic per
+endpoint.
 
 ```sql
 SELECT user_id, course_id, activity_ts FROM (
@@ -538,7 +552,8 @@ WHERE activity_ts >= :window_start
 
 Implementation note:
 
-- Put this in a shared analytics query helper rather than duplicating it in overview and course detail services.
+- Put this in a shared analytics query helper rather than duplicating it in overview and course
+  detail services.
 
 ### Course progress
 
@@ -597,7 +612,8 @@ Required schema change for reliable latency:
 
 ## Rollup Table Definitions
 
-Use ordinary tables refreshed by scheduled jobs, not materialized views, to stay aligned with the existing SQLModel and alembic workflow.
+Use ordinary tables refreshed by scheduled jobs, not materialized views, to stay aligned with the
+existing SQLModel and alembic workflow.
 
 ### 1. `analytics_event`
 
@@ -817,7 +833,8 @@ Add the following permission strings through the existing RBAC model:
 Role updates:
 
 - `RoleSlug.INSTRUCTOR`: add both of the above
-- `RoleSlug.MAINTAINER`: add `analytics:read:org` if maintainers should supervise teaching across the org
+- `RoleSlug.MAINTAINER`: add `analytics:read:org` if maintainers should supervise teaching across
+  the org
 
 Remove `analytics:read:own`; Write alembic migrations.
 
@@ -1003,7 +1020,9 @@ course_scope = await resolve_teacher_course_scope(...)
 requested_course_ids = validate_requested_courses(filter_params, course_scope)
 ```
 
-If the user has org-wide analytics scope, pass through all org courses. Otherwise set `is_assigned=True` only after the service resolves that the course belongs to the teacher's active scope.
+If the user has org-wide analytics scope, pass through all org courses. Otherwise set
+`is_assigned=True` only after the service resolves that the course belongs to the teacher's active
+scope.
 
 ## Data Freshness and Quality Rules
 
@@ -1013,7 +1032,8 @@ If the user has org-wide analytics scope, pass through all org courses. Otherwis
   - exam preview attempts
   - teacher-created sandbox activity where identifiable
   - deleted or orphaned content rows
-- Completion rollups should reconcile `TrailStep` completion with `CertificateUser` issuance and log anomalies.
+- Completion rollups should reconcile `TrailStep` completion with `CertificateUser` issuance and log
+  anomalies.
 
 ## Delivery
 
@@ -1043,7 +1063,8 @@ If the user has org-wide analytics scope, pass through all org courses. Otherwis
 - assignment grading latency is not defensible until timestamps are added.
 - exam pass-rate semantics are weak until `passing_score` is formalized.
 - some learner activity is currently inferred from update timestamps rather than append-only events.
-- if teacher/course scope resolution is inconsistent across endpoints, analytics trust will collapse quickly.
+- if teacher/course scope resolution is inconsistent across endpoints, analytics trust will collapse
+  quickly.
 
 ## Recommended Acceptance Criteria
 

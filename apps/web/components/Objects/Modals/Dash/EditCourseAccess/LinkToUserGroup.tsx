@@ -9,10 +9,10 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import useSWR from 'swr';
 import { Info } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import useSWR from 'swr';
 
 interface UserGroup {
   id: number;

@@ -40,7 +40,6 @@ const CreateCourseModal = ({ closeModal, org_id, onCreated }: CreateCourseModalP
   const session = usePlatformSession() as any;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [isUploading, setIsUploading] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
   const validationSchema = v.object({
@@ -156,7 +155,15 @@ const CreateCourseModal = ({ closeModal, org_id, onCreated }: CreateCourseModalP
         })();
       });
     },
-    [t, orgId, session.data?.tokens?.access_token, closeModal, router, onCreated],
+    [
+	t,
+	orgId,
+	session.data?.tokens?.access_token,
+	closeModal,
+	router,
+	onCreated,
+	org.slug
+],
   );
 
   const handleFileChange = useCallback(
@@ -262,7 +269,7 @@ const CreateCourseModal = ({ closeModal, org_id, onCreated }: CreateCourseModalP
                         <img
                           src={thumbnailPreview || URL.createObjectURL(thumbnailValue)}
                           alt={t('thumbnailPreviewAlt') || 'Thumbnail preview'}
-                          className={`h-full w-full object-cover ${isUploading ? 'animate-pulse' : ''}`}
+                          className="h-full w-full object-cover"
                         />
                         <Button
                           type="button"
@@ -297,7 +304,6 @@ const CreateCourseModal = ({ closeModal, org_id, onCreated }: CreateCourseModalP
                       size="sm"
                       className="flex-1"
                       onClick={() => fileInputRef.current?.click()}
-                      disabled={isUploading}
                     >
                       <UploadCloud className="mr-2 h-4 w-4" />
                       {t('thumbnailUpload')}
@@ -392,7 +398,7 @@ const CreateCourseModal = ({ closeModal, org_id, onCreated }: CreateCourseModalP
           </Button>
           <Button
             type="submit"
-            disabled={isPending || form.formState.isSubmitting || isUploading}
+            disabled={isPending || form.formState.isSubmitting}
           >
             {isPending || form.formState.isSubmitting ? (
               <>

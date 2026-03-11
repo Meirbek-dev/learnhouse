@@ -306,7 +306,7 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
                         id="show-button"
                         checked={showButton}
                         onCheckedChange={(checked) => {
-                          setShowButton(Boolean(checked));
+                          setShowButton(checked);
                         }}
                       />
                       <Label
@@ -323,7 +323,7 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
                             id="open-in-popup"
                             checked={openInPopup}
                             onCheckedChange={(checked) => {
-                              setOpenInPopup(Boolean(checked));
+                              setOpenInPopup(checked);
                             }}
                           />
                           <Label

@@ -1,17 +1,19 @@
 'use client';
 
-import { getCourseReadinessSummary, buildCourseWorkspacePath, getCourseContentStats } from '@/lib/course-management';
-import type { CourseWorkspaceStage } from '@/lib/course-management';
-import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
-import { CourseProvider, useCourse } from '@components/Contexts/CourseContext';
-import CourseConflictDialog from '@components/Dashboard/Pages/Course/CourseConflictDialog';
-import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
-import { getUriWithOrg } from '@services/config/config';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import AppLink from '@/components/ui/AppLink';
-import { cn } from '@/lib/utils';
-import type { ReactNode } from 'react';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarInset,
+  SidebarProvider,
+  SidebarSeparator,
+  SidebarTrigger,
+} from '@/components/ui/sidebar';
 import {
   BookCopy,
   CheckCircle2,
@@ -23,6 +25,18 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react';
+import { getCourseReadinessSummary, buildCourseWorkspacePath, getCourseContentStats } from '@/lib/course-management';
+import CourseConflictDialog from '@components/Dashboard/Pages/Course/CourseConflictDialog';
+import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
+import { CourseProvider, useCourse } from '@components/Contexts/CourseContext';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
+import type { CourseWorkspaceStage } from '@/lib/course-management';
+import { getUriWithOrg } from '@services/config/config';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import AppLink from '@/components/ui/AppLink';
+import { Badge } from '@/components/ui/badge';
+import type { ReactNode } from 'react';
 
 interface CourseWorkspacePageShellProps {
   orgslug: string;
@@ -62,163 +76,204 @@ function CourseWorkspaceChrome({
   });
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(15,23,42,0.06),_transparent_42%),linear-gradient(180deg,_#f7f5ef_0%,_#ffffff_22%,_#f8fafc_100%)]">
+    <SidebarProvider>
       <CourseConflictDialog />
-      <div className="mx-auto flex max-w-[1600px] gap-6 px-4 py-6 lg:px-8">
-        <aside className="hidden w-72 shrink-0 lg:block">
-          <div className="sticky top-6 space-y-4 rounded-3xl border border-slate-200/80 bg-white/85 p-5 shadow-sm backdrop-blur">
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Course workspace</div>
-              <div className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{course.courseStructure.name || 'Untitled course'}</div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Badge variant={course.courseStructure.public ? 'success' : 'outline'}>
-                  {course.courseStructure.public ? 'Public' : 'Private'}
-                </Badge>
-                <Badge variant={readiness.readyToPublish ? 'success' : 'warning'}>
-                  {readiness.readyToPublish ? 'Ready' : `${readiness.issues.length} blocker${readiness.issues.length === 1 ? '' : 's'}`}
-                </Badge>
-              </div>
+
+      {/* Left sidebar */}
+      <Sidebar
+        collapsible="offcanvas"
+        className="border-r-0"
+      >
+        <SidebarHeader className="p-5">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-sidebar-foreground/50">
+              Course workspace
             </div>
-
-            <div className="rounded-2xl bg-slate-950 p-4 text-slate-50">
-              <div className="text-xs uppercase tracking-[0.18em] text-slate-300">Workspace status</div>
-              <div className="mt-3 text-3xl font-semibold">{readiness.completed}/{readiness.total}</div>
-              <div className="text-sm text-slate-300">Readiness checks complete</div>
-              <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
-                <div className="rounded-2xl bg-white/10 p-3">
-                  <div className="text-slate-300">Chapters</div>
-                  <div className="text-xl font-semibold text-white">{stats.chapters}</div>
-                </div>
-                <div className="rounded-2xl bg-white/10 p-3">
-                  <div className="text-slate-300">Activities</div>
-                  <div className="text-xl font-semibold text-white">{stats.activities}</div>
-                </div>
-              </div>
-              <div className="mt-4 text-sm text-slate-300">
-                {hasDirtySections ? 'Unsaved changes are active in this workspace.' : 'All visible section drafts are currently stable.'}
-              </div>
+            <div className="mt-2 text-xl font-semibold tracking-tight text-sidebar-foreground line-clamp-2">
+              {course.courseStructure.name || 'Untitled course'}
             </div>
-
-            <nav className="space-y-1">
-              {visibleStages.map((stage) => {
-                const Icon = stage.icon;
-                const isActive = stage.key === activeStage;
-
-                return (
-                  <AppLink
-                    key={stage.key}
-                    href={buildCourseWorkspacePath(orgslug, courseuuid, stage.key)}
-                    className={cn(
-                      'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors',
-                      isActive ? 'bg-slate-950 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950',
-                    )}
-                  >
-                    <Icon className="size-4" />
-                    <span>{stage.label}</span>
-                  </AppLink>
-                );
-              })}
-            </nav>
-
-            <div className="border-t border-slate-200 pt-4">
-              <Button
-                variant="outline"
-                nativeButton={false}
-                className="w-full justify-start gap-2"
-                render={<AppLink href={`/orgs/${orgslug}/dash/courses`} />}
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              <Badge
+                variant={course.courseStructure.public ? 'success' : 'outline'}
+                className="text-xs"
               >
-                <BookCopy className="size-4" />
-                All courses
-              </Button>
+                {course.courseStructure.public ? 'Public' : 'Private'}
+              </Badge>
+              <Badge
+                variant={readiness.readyToPublish ? 'success' : 'warning'}
+                className="text-xs"
+              >
+                {readiness.readyToPublish
+                  ? 'Ready'
+                  : `${readiness.issues.length} blocker${readiness.issues.length === 1 ? '' : 's'}`}
+              </Badge>
+              {hasDirtySections && (
+                <Badge
+                  variant="warning"
+                  className="text-xs"
+                >
+                  Unsaved
+                </Badge>
+              )}
             </div>
           </div>
-        </aside>
+        </SidebarHeader>
 
-        <div className="min-w-0 flex-1">
-          <div className="mb-6 rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-sm backdrop-blur">
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Course workspace</div>
-                <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{course.courseStructure.name || 'Untitled course'}</h1>
-                <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-                  {course.courseStructure.description?.trim() || 'Use this workspace to shape the course, manage access, coordinate collaborators, and review publish readiness.'}
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Badge variant={course.courseStructure.public ? 'success' : 'outline'}>
-                    {course.courseStructure.public ? 'Public' : 'Private'}
-                  </Badge>
-                  <Badge variant={readiness.readyToPublish ? 'success' : 'warning'}>
-                    {readiness.readyToPublish ? 'Publish-ready' : 'Needs review'}
-                  </Badge>
-                  {course.courseStructure.update_date ? <Badge variant="secondary">Updated {new Date(course.courseStructure.update_date).toLocaleDateString()}</Badge> : null}
-                  {hasDirtySections ? <Badge variant="warning">Unsaved changes</Badge> : null}
+        <SidebarSeparator />
+
+        {/* Stats mini-card */}
+        <div className="mx-3 my-3 rounded-xl bg-sidebar-accent p-3">
+          <div className="text-xs font-medium uppercase tracking-widest text-sidebar-foreground/50">Status</div>
+          <div className="mt-2 flex items-baseline gap-1">
+            <span className="text-2xl font-bold text-sidebar-foreground">{readiness.completed}</span>
+            <span className="text-sm text-sidebar-foreground/60">/ {readiness.total} checks</span>
+          </div>
+          <Progress
+            value={readiness.total > 0 ? Math.round((readiness.completed / readiness.total) * 100) : 0}
+            className="mt-2 h-1.5"
+          />
+          <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <div className="text-sidebar-foreground/50">Chapters</div>
+              <div className="text-base font-semibold text-sidebar-foreground">{stats.chapters}</div>
+            </div>
+            <div>
+              <div className="text-sidebar-foreground/50">Activities</div>
+              <div className="text-base font-semibold text-sidebar-foreground">{stats.activities}</div>
+            </div>
+          </div>
+        </div>
+
+        <SidebarContent>
+          <SidebarMenu>
+            {visibleStages.map((stage) => {
+              const Icon = stage.icon;
+              const isActive = stage.key === activeStage;
+              return (
+                <SidebarMenuItem key={stage.key}>
+                  <SidebarMenuButton
+                    render={<AppLink href={buildCourseWorkspacePath(orgslug, courseuuid, stage.key)} />}
+                    isActive={isActive}
+                    tooltip={stage.label}
+                  >
+                    <Icon />
+                    <span>{stage.label}</span>
+                  </SidebarMenuButton>
+                  {stage.key === 'review' && !readiness.readyToPublish && readiness.issues.length > 0 && (
+                    <SidebarMenuBadge>{readiness.issues.length}</SidebarMenuBadge>
+                  )}
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
+        </SidebarContent>
+
+        <SidebarSeparator />
+
+        <SidebarFooter className="p-3">
+          <Button
+            nativeButton={false}
+            variant="outline"
+            className="w-full justify-start gap-2"
+            render={<AppLink href={`/orgs/${orgslug}/dash/courses`} />}
+          >
+            <BookCopy className="size-4" />
+            All courses
+          </Button>
+        </SidebarFooter>
+      </Sidebar>
+
+      {/* Main content */}
+      <SidebarInset className="flex min-h-screen min-w-0 flex-1 flex-col bg-[radial-gradient(circle_at_top,_rgba(15,23,42,0.06),_transparent_42%),linear-gradient(180deg,_#f7f5ef_0%,_#ffffff_22%,_#f8fafc_100%)]">
+        {/* Top header card */}
+        <div className="mx-4 mt-4 rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-sm backdrop-blur lg:mx-6 lg:mt-6">
+          <div className="flex items-center gap-3">
+            <SidebarTrigger className="shrink-0" />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    Course workspace
+                  </div>
+                  <h1 className="mt-1 truncate text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                    {course.courseStructure.name || 'Untitled course'}
+                  </h1>
+                  <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                    {course.courseStructure.description?.trim() ||
+                      'Use this workspace to shape the course, manage access, coordinate collaborators, and review publish readiness.'}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Badge variant={course.courseStructure.public ? 'success' : 'outline'}>
+                      {course.courseStructure.public ? 'Public' : 'Private'}
+                    </Badge>
+                    <Badge variant={readiness.readyToPublish ? 'success' : 'warning'}>
+                      {readiness.readyToPublish ? 'Publish-ready' : 'Needs review'}
+                    </Badge>
+                    {course.courseStructure.update_date ? (
+                      <Badge variant="secondary">
+                        Updated {new Date(course.courseStructure.update_date).toLocaleDateString()}
+                      </Badge>
+                    ) : null}
+                    {hasDirtySections ? <Badge variant="warning">Unsaved changes</Badge> : null}
+                  </div>
+                </div>
+
+                <div className="flex shrink-0 flex-wrap gap-3">
+                  <Button
+                    nativeButton={false}
+                    variant="outline"
+                    render={<AppLink href={buildCourseWorkspacePath(orgslug, courseuuid, 'review')} />}
+                  >
+                    <ShieldCheck className="size-4" />
+                    Review
+                  </Button>
+                  <Button
+                    nativeButton={false}
+                    render={<a href={getUriWithOrg(orgslug, `/course/${courseuuid}`)} />}
+                  >
+                    Preview course
+                  </Button>
                 </div>
               </div>
-
-              <div className="flex flex-wrap gap-3">
-                <Button
-                  variant="outline"
-                  nativeButton={false}
-                  render={<AppLink href={buildCourseWorkspacePath(orgslug, courseuuid, 'review')} />}
-                >
-                  <ShieldCheck className="size-4" />
-                  Review
-                </Button>
-                <Button
-                  nativeButton={false}
-                  render={<a href={getUriWithOrg(orgslug, `/course/${courseuuid}`)} />}
-                >
-                  Preview course
-                </Button>
-              </div>
-            </div>
-
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Curriculum</div>
-                <div className="mt-2 text-2xl font-semibold text-slate-950">{stats.activities}</div>
-                <div className="text-sm text-slate-600">Activities across {stats.chapters} chapter{stats.chapters === 1 ? '' : 's'}</div>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Readiness</div>
-                <div className="mt-2 text-2xl font-semibold text-slate-950">{readiness.completed}/{readiness.total}</div>
-                <div className="text-sm text-slate-600">Checks completed before publish review</div>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Collaboration</div>
-                <div className="mt-2 text-2xl font-semibold text-slate-950">{course.editorData.contributors.data?.length ?? 0}</div>
-                <div className="text-sm text-slate-600">Active contributor records loaded for this course</div>
-              </div>
-            </div>
-
-            <div className="mt-5 flex gap-2 overflow-x-auto pb-1 lg:hidden">
-              {visibleStages.map((stage) => {
-                const Icon = stage.icon;
-                const isActive = stage.key === activeStage;
-
-                return (
-                  <AppLink
-                    key={stage.key}
-                    href={buildCourseWorkspacePath(orgslug, courseuuid, stage.key)}
-                    className={cn(
-                      'inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors',
-                      isActive
-                        ? 'border-slate-950 bg-slate-950 text-white'
-                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-950',
-                    )}
-                  >
-                    <Icon className="size-4" />
-                    {stage.label}
-                  </AppLink>
-                );
-              })}
             </div>
           </div>
 
-          <div className="rounded-[32px] border border-slate-200/80 bg-white/92 p-4 shadow-sm backdrop-blur lg:p-6">{children}</div>
+          {/* Stats grid */}
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+              <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Curriculum</div>
+              <div className="mt-2 text-2xl font-semibold text-slate-950">{stats.activities}</div>
+              <div className="text-sm text-slate-600">
+                Activities across {stats.chapters} chapter{stats.chapters === 1 ? '' : 's'}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+              <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Readiness</div>
+              <div className="mt-2 text-2xl font-semibold text-slate-950">
+                {readiness.completed}/{readiness.total}
+              </div>
+              <Progress
+                value={readiness.total > 0 ? Math.round((readiness.completed / readiness.total) * 100) : 0}
+                className="mt-2 h-1.5"
+              />
+              <div className="mt-1 text-sm text-slate-600">Checks completed before publish review</div>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+              <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Collaboration</div>
+              <div className="mt-2 text-2xl font-semibold text-slate-950">
+                {course.editorData.contributors.data?.length ?? 0}
+              </div>
+              <div className="text-sm text-slate-600">Active contributor records loaded for this course</div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+
+        {/* Page content */}
+        <div className="mx-4 my-4 rounded-[32px] border border-slate-200/80 bg-white/92 p-4 shadow-sm backdrop-blur lg:mx-6 lg:my-6 lg:p-6">
+          {children}
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
 

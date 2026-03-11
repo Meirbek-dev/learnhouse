@@ -41,27 +41,13 @@ export function buildCourseCreationPath(orgslug: string, sourceCourseUuid?: stri
   return `/orgs/${orgslug}/dash/courses/new${query}`;
 }
 
-export function mapLegacyCourseStage(subpage: string): CourseWorkspaceStage {
-  switch (subpage) {
-    case 'general':
-      return 'details';
-    case 'content':
-      return 'curriculum';
-    case 'contributors':
-      return 'collaboration';
-    case 'certification':
-      return 'certificate';
-    case 'access':
-      return 'access';
-    default:
-      return 'overview';
-  }
-}
-
 export function getCourseContentStats(course: any): { chapters: number; activities: number } {
   const chapters = Array.isArray(course?.chapters) ? course.chapters.length : 0;
   const activities = Array.isArray(course?.chapters)
-    ? course.chapters.reduce((total: number, chapter: any) => total + (Array.isArray(chapter.activities) ? chapter.activities.length : 0), 0)
+    ? course.chapters.reduce(
+        (total: number, chapter: any) => total + (Array.isArray(chapter.activities) ? chapter.activities.length : 0),
+        0,
+      )
     : 0;
 
   return { chapters, activities };
@@ -153,4 +139,9 @@ export function getCourseManagementBadges(course: any, editorData?: CourseEditor
   }
 
   return badges;
+}
+
+export function courseNeedsAttention(course: any): boolean {
+  const stats = getCourseContentStats(course);
+  return !course.thumbnail_image || !course.description?.trim() || stats.activities === 0;
 }

@@ -18,8 +18,8 @@ import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
 import { useState, useTransition } from 'react';
 import { Input } from '@/components/ui/input';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 
 import NewActivityButton from '../Buttons/NewActivityButton';
 import ActivityElement from './ActivityElement';
@@ -75,7 +75,6 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
   const session = usePlatformSession() as PlatformSession;
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
-  const router = useRouter();
   const t = useTranslations('CourseEdit');
   const [isPending, startTransition] = useTransition();
 
@@ -100,7 +99,7 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
 
   const handleSaveEdit = async () => {
     if (!access_token) {
-      console.error('No access token available');
+      toast.error('Authentication required');
       return;
     }
 
@@ -115,8 +114,8 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
         await updateChapter(chapter.id, { name: trimmedName }, access_token, { courseUuid: course_uuid });
         await course.refreshCourseMeta();
         setIsEditing(false);
-      } catch (error) {
-        console.error('Failed to update chapter:', error);
+      } catch (error: any) {
+        toast.error(error?.message || t('chapterUpdateFailed'));
         // Reset to original name on error
         setEditedName(chapter.name);
       }
@@ -125,7 +124,7 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
 
   const handleDeleteChapter = async () => {
     if (!access_token) {
-      console.error('No access token available');
+      toast.error('Authentication required');
       return;
     }
 
@@ -134,8 +133,8 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
         await deleteChapter(chapter.id, access_token, { courseUuid: course_uuid });
         await course.refreshCourseMeta();
         setIsDeleteDialogOpen(false);
-      } catch (error) {
-        console.error('Failed to delete chapter:', error);
+      } catch (error: any) {
+        toast.error(error?.message || t('chapterDeleteFailed'));
         setIsDeleteDialogOpen(false);
       }
     });
@@ -153,7 +152,6 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
 
   // Early validation (moved below all hooks to satisfy Rules of Hooks)
   if (!chapter?.chapter_uuid) {
-    console.error('ChapterElement: Invalid chapter data', chapter);
     return null;
   }
 

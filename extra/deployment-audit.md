@@ -1,8 +1,8 @@
 # Deployment Audit — Ashyq Bilim
 
 > **Scope:** Root `Dockerfile`, `docker-compose.yml`, `extra/nginx.conf`, `extra/supervisord.conf`,
-> `extra/start.sh`, `apps/web/Dockerfile`, `apps/api/Dockerfile`, `apps/web/next.config.ts`,
-> and related configuration files.
+> `extra/start.sh`, `apps/web/Dockerfile`, `apps/api/Dockerfile`, `apps/web/next.config.ts`, and
+> related configuration files.
 >
 > Severity legend: 🔴 Critical · 🟠 High · 🟡 Medium · 🔵 Low / nitpick
 
@@ -17,11 +17,12 @@
 
 **Consequences:**
 
-- **Zero independent scaling.** Spike in AI traffic? You must scale the frontend too, and vice versa.
+- **Zero independent scaling.** Spike in AI traffic? You must scale the frontend too, and vice
+  versa.
 - **Single point of failure.** If one service crashes and cannot be restarted by supervisord within
-  `startretries=5`, the entire container is still considered "healthy" because the health check
-  only probes port 8000 (Next.js). The FastAPI backend can be completely dead while Docker reports
-  the container as healthy.
+  `startretries=5`, the entire container is still considered "healthy" because the health check only
+  probes port 8000 (Next.js). The FastAPI backend can be completely dead while Docker reports the
+  container as healthy.
 - **Enormous image size.** The final stage inherits a full Python 3.14 base with build tools, then
   grafts the entire `/usr/local` tree from a Node 25 image on top. You carry two full runtimes plus
   all build dependencies into production.
@@ -56,18 +57,18 @@ judge0_server: ports: ["2358:2358"]  # Remote code execution service
 ```
 
 Every single internal service is bound to `0.0.0.0` on the host. On a typical VPS this means they
-are reachable from the public internet. Redis in particular has no password configured — anyone
-who can reach port 6379 owns the cache (and potentially can use `SLAVEOF` or `CONFIG SET` to
-achieve RCE). ChromaDB has no built-in authentication in the default community image.
+are reachable from the public internet. Redis in particular has no password configured — anyone who
+can reach port 6379 owns the cache (and potentially can use `SLAVEOF` or `CONFIG SET` to achieve
+RCE). ChromaDB has no built-in authentication in the default community image.
 
-**Fix:** Replace all `ports:` with `expose:` for services that are only consumed internally.
-Create explicit named networks and segment them:
+**Fix:** Replace all `ports:` with `expose:` for services that are only consumed internally. Create
+explicit named networks and segment them:
 
 ```yaml
 networks:
-  frontend: {}          # nginx → web, api
-  backend:  {}          # api → db, redis, chromadb
-  sandbox:  {}          # judge0 → db, redis only
+  frontend: {} # nginx → web, api
+  backend: {} # api → db, redis, chromadb
+  sandbox: {} # judge0 → db, redis only
 ```
 
 ---
@@ -97,14 +98,14 @@ block, and `add_header Strict-Transport-Security "max-age=63072000; includeSubDo
 ```yaml
 environment:
   POSTGRES_USER: openu
-  POSTGRES_PASSWORD: openu   # password == username
+  POSTGRES_PASSWORD: openu # password == username
   POSTGRES_DB: openu
 ```
 
 The same string is used for username, password, and database name. The connection string in the
-example env confirms this: `postgresql+psycopg://openu:openu@db:5432/openu`. Even if the port
-is not exposed publicly, any container on the default Docker network can connect without
-brute-forcing anything.
+example env confirms this: `postgresql+psycopg://openu:openu@db:5432/openu`. Even if the port is not
+exposed publicly, any container on the default Docker network can connect without brute-forcing
+anything.
 
 ---
 
@@ -120,8 +121,8 @@ judge0_workers:
 `privileged: true` grants the container full access to the host kernel — equivalent to running as
 root on the host with every capability. Judge0 executes arbitrary user-submitted code. A container
 escape from a privileged container is trivially achievable with well-known techniques. If Judge0
-requires cgroup v1 access, this should be granted via targeted capabilities
-(`--cap-add SYS_ADMIN`) and a read-only cgroup mount, not blanket `privileged`.
+requires cgroup v1 access, this should be granted via targeted capabilities (`--cap-add SYS_ADMIN`)
+and a read-only cgroup mount, not blanket `privileged`.
 
 ---
 
@@ -140,15 +141,14 @@ Missing entirely:
 - `Permissions-Policy` — no feature policy
 - `Cross-Origin-Opener-Policy` / `Cross-Origin-Embedder-Policy`
 
-Note: Make sure media uploading will work fine
----
+## Note: Make sure media uploading will work fine
 
 ### 🟠 No rate limiting in nginx
 
 There are no `limit_req_zone` or `limit_req` directives anywhere. The `/api/auth` endpoint
 (credential login), `/api/v1` (AI endpoints), and even the entire frontend are completely
-unprotected from brute force and flood attacks. FastAPI does use `slowapi` for some routes, but
-this is a last line of defence — nginx should be the first.
+unprotected from brute force and flood attacks. FastAPI does use `slowapi` for some routes, but this
+is a last line of defence — nginx should be the first.
 
 ---
 
@@ -159,8 +159,8 @@ location /api/v1/docs  { proxy_pass http://app:9000; ... }
 location /api/v1/redoc { proxy_pass http://app:9000; ... }
 ```
 
-The comment reads "only available in development mode", but these routes are actively proxied in
-the production nginx config. `app.py` disables these endpoints when `development_mode` is False
+The comment reads "only available in development mode", but these routes are actively proxied in the
+production nginx config. `app.py` disables these endpoints when `development_mode` is False
 (returning 404), so they are harmless today — but they are also never cleaned up, and a
 misconfiguration of `development_mode` would immediately expose the full API schema in production.
 
@@ -205,8 +205,8 @@ RUN bun install --no-frozen-lockfile
 - Supply-chain attacks can silently slip in dependency upgrades.
 - It defeats the entire purpose of committing a lockfile.
 
-**Fix:** Remove the flag entirely. `bun install` respects `bun.lock` by default. If the lockfile
-is legitimately out of date, update it locally and commit it — never in CI/CD or Docker.
+**Fix:** Remove the flag entirely. `bun install` respects `bun.lock` by default. If the lockfile is
+legitimately out of date, update it locally and commit it — never in CI/CD or Docker.
 
 ---
 
@@ -235,9 +235,9 @@ The correct approach for the monolith pattern (if it is kept) is multi-stage wit
 RUN pip install --upgrade pip && pip install uv
 ```
 
-This fetches the latest `uv` at build time. Pin it: `pip install uv==0.x.y`. The `apps/api/
-Dockerfile` correctly uses `COPY --from=ghcr.io/astral-sh/uv:latest` — but `:latest` is also
-a non-deterministic pin. Fix: `COPY --from=ghcr.io/astral-sh/uv:0.7.x`.
+This fetches the latest `uv` at build time. Pin it: `pip install uv==0.x.y`. The
+`apps/api/ Dockerfile` correctly uses `COPY --from=ghcr.io/astral-sh/uv:latest` — but `:latest` is
+also a non-deterministic pin. Fix: `COPY --from=ghcr.io/astral-sh/uv:0.7.x`.
 
 ---
 
@@ -269,9 +269,8 @@ user=root
 ```
 
 Both child processes (Next.js, FastAPI) are spawned under root unless they drop privileges
-themselves. Neither does. Running production application processes as root violates the principle
-of least privilege. If either service is compromised, the attacker has full root inside the
-container.
+themselves. Neither does. Running production application processes as root violates the principle of
+least privilege. If either service is compromised, the attacker has full root inside the container.
 
 ---
 
@@ -282,9 +281,9 @@ HEALTHCHECK CMD curl -fsS http://localhost:8000/health || exit 1
 ```
 
 Port 8000 is the Next.js frontend. Port 9000 is the FastAPI backend. Docker marks the container
-`healthy` as long as Next.js responds, regardless of whether FastAPI is running. Heavy AI
-endpoints on port 9000 can be completely down while the container appears healthy to both Docker
-and nginx's `depends_on`.
+`healthy` as long as Next.js responds, regardless of whether FastAPI is running. Heavy AI endpoints
+on port 9000 can be completely down while the container appears healthy to both Docker and nginx's
+`depends_on`.
 
 **Fix:** Health check should probe both, or the services should be split into separate containers
 with independent health checks.
@@ -304,16 +303,16 @@ proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 proxy_set_header X-Forwarded-Proto $scheme;
 ```
 
-This appears 8 times. Define them once in a shared snippet or at `server` level. Repetition
-creates maintenance risk — one forgotten update produces inconsistent header forwarding.
+This appears 8 times. Define them once in a shared snippet or at `server` level. Repetition creates
+maintenance risk — one forgotten update produces inconsistent header forwarding.
 
 ---
 
 ### 🟠 `client_max_body_size 500M` applies to all routes
 
-A 500 MB request body limit is applied globally, including to the login endpoint, API queries,
-and static file requests. This makes it trivial to exhaust the server's disk and memory with a
-single connection. File upload size limits should be scoped to upload-specific locations only.
+A 500 MB request body limit is applied globally, including to the login endpoint, API queries, and
+static file requests. This makes it trivial to exhaust the server's disk and memory with a single
+connection. File upload size limits should be scoped to upload-specific locations only.
 
 ---
 
@@ -338,26 +337,26 @@ caching is functioning correctly in production without checking nginx logs.
 
 ### 🟠 No structured log aggregation
 
-Both services write to stdout/stderr (good for Docker), but there is no log aggregation solution,
-no log rotation policy, and no alerting. `app_logs` is a volume that persists FastAPI logs, but
-there is no rotation configured, so it will grow unboundedly.
+Both services write to stdout/stderr (good for Docker), but there is no log aggregation solution, no
+log rotation policy, and no alerting. `app_logs` is a volume that persists FastAPI logs, but there
+is no rotation configured, so it will grow unboundedly.
 
 ---
 
 ### 🟡 No resource limits on ChromaDB or Judge0
 
-The `chromadb` service has resource limits but the `judge0_server` and `judge0_workers`
-have none. Code execution is the most CPU/memory-intensive workload — unconstrained, a surge of
-submissions can starve the database and API containers.
+The `chromadb` service has resource limits but the `judge0_server` and `judge0_workers` have none.
+Code execution is the most CPU/memory-intensive workload — unconstrained, a surge of submissions can
+starve the database and API containers.
 
 ---
 
 ### 🟡 No readiness probe distinct from health check
 
-Docker Compose supports only a single `healthcheck`. Both the health check (liveness) and
-readiness (is the service ready to serve traffic?) are conflated. A slow startup of FastAPI
-(which loads LLM models and ChromaDB connections) can cause nginx to start forwarding traffic
-before the backend is ready, resulting in 502 errors.
+Docker Compose supports only a single `healthcheck`. Both the health check (liveness) and readiness
+(is the service ready to serve traffic?) are conflated. A slow startup of FastAPI (which loads LLM
+models and ChromaDB connections) can cause nginx to start forwarding traffic before the backend is
+ready, resulting in 502 errors.
 
 ---
 
@@ -365,27 +364,27 @@ before the backend is ready, resulting in 502 errors.
 
 | #   | Issue                                              | Severity |
 | --- | -------------------------------------------------- | -------- |
-| 1   | Monolith container (Next.js + FastAPI)             | 🔴        |
-| 2   | DB/Redis/ChromaDB/Judge0 ports exposed to internet | 🔴        |
-| 3   | No HTTPS/TLS in nginx                              | 🔴        |
-| 4   | Weak hardcoded DB credentials                      | 🔴        |
-| 5   | Judge0 running with `privileged: true`             | 🔴        |
-| 7   | `bun install --no-frozen-lockfile`                 | 🔴        |
-| 10  | No rate limiting in nginx                          | 🟠        |
-| 11  | No CSP or HSTS headers                             | 🟠        |
-| 13  | FastAPI docs proxied in production nginx           | 🟠        |
-| 14  | `NEXT_PUBLIC_*` domain hardcoded in Dockerfile     | 🟠        |
-| 15  | Grafting `/usr/local` from Node image into Python  | 🟠        |
-| 16  | `uv` installed without version pin                 | 🟠        |
-| 21  | `supervisord` runs as root                         | 🟡        |
-| 22  | Health check ignores FastAPI (port 9000)           | 🟡        |
-| 23  | No image digest pinning                            | 🟡        |
-| 24  | Repetitive nginx proxy_set_header blocks           | 🟠        |
-| 25  | `client_max_body_size 500M` applied globally       | 🟠        |
-| 26  | No proxy timeout configuration                     | 🟡        |
-| 27  | Docker socket in backup container                  | 🟡        |
-| 28  | No structured log aggregation / rotation           | 🟠        |
-| 30  | No resource limits on Judge0                       | 🟡        |
+| 1   | Monolith container (Next.js + FastAPI)             | 🔴       |
+| 2   | DB/Redis/ChromaDB/Judge0 ports exposed to internet | 🔴       |
+| 3   | No HTTPS/TLS in nginx                              | 🔴       |
+| 4   | Weak hardcoded DB credentials                      | 🔴       |
+| 5   | Judge0 running with `privileged: true`             | 🔴       |
+| 7   | `bun install --no-frozen-lockfile`                 | 🔴       |
+| 10  | No rate limiting in nginx                          | 🟠       |
+| 11  | No CSP or HSTS headers                             | 🟠       |
+| 13  | FastAPI docs proxied in production nginx           | 🟠       |
+| 14  | `NEXT_PUBLIC_*` domain hardcoded in Dockerfile     | 🟠       |
+| 15  | Grafting `/usr/local` from Node image into Python  | 🟠       |
+| 16  | `uv` installed without version pin                 | 🟠       |
+| 21  | `supervisord` runs as root                         | 🟡       |
+| 22  | Health check ignores FastAPI (port 9000)           | 🟡       |
+| 23  | No image digest pinning                            | 🟡       |
+| 24  | Repetitive nginx proxy_set_header blocks           | 🟠       |
+| 25  | `client_max_body_size 500M` applied globally       | 🟠       |
+| 26  | No proxy timeout configuration                     | 🟡       |
+| 27  | Docker socket in backup container                  | 🟡       |
+| 28  | No structured log aggregation / rotation           | 🟠       |
+| 30  | No resource limits on Judge0                       | 🟡       |
 
 ---
 
@@ -395,6 +394,6 @@ before the backend is ready, resulting in 502 errors.
 2. **Switch to real, stable image tags** — prerequisite for everything else working.
 3. **Add TLS to nginx** (Let's Encrypt + certbot container) — eliminates credential exposure.
 4. **Fix `bun install --no-frozen-lockfile`** — removes supply-chain risk in builds.
-5. **Split monolith into separate `web` and `api` containers** — enables independent scaling,
-   proper health checks, and correct resource allocation.
+5. **Split monolith into separate `web` and `api` containers** — enables independent scaling, proper
+   health checks, and correct resource allocation.
 6. **Set strong, randomised DB/Redis passwords** and add Redis `requirepass`.

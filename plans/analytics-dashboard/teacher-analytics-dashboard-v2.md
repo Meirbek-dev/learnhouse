@@ -4,16 +4,22 @@
 
 - Scope: extend the shipped teacher analytics MVP into a production-ready analytics product
 - Audience: backend, frontend, data, QA, and operations owners working in this repository
-- Goal: define the next implementation phase based on what is already in the codebase, not the earlier greenfield plan
+- Goal: define the next implementation phase based on what is already in the codebase, not the
+  earlier greenfield plan
 
 ## Executive Summary
 
-Teacher analytics is no longer theoretical in this repository. The product already ships a dedicated analytics router, scoped teacher analytics pages, exports, shared analytics types, and a first set of chart-driven views. The current implementation is useful, but it is still an MVP built on live queries and whole-scope in-memory aggregation.
+Teacher analytics is no longer theoretical in this repository. The product already ships a dedicated
+analytics router, scoped teacher analytics pages, exports, shared analytics types, and a first set
+of chart-driven views. The current implementation is useful, but it is still an MVP built on live
+queries and whole-scope in-memory aggregation.
 
-v2 should convert that MVP into a teacher operating surface that is fast, explainable, and safe to run at org scale. The work is not just "add more charts." It is to:
+v2 should convert that MVP into a teacher operating surface that is fast, explainable, and safe to
+run at org scale. The work is not just "add more charts." It is to:
 
 - deepen the product so teachers can act, not just observe
-- use the shared chart primitives for multi-series and comparison views rather than one-metric widgets only
+- use the shared chart primitives for multi-series and comparison views rather than one-metric
+  widgets only
 - harden the analytics data path so freshness, performance, and exports are production-grade
 - make filters, drill-downs, and tables behave like operational tools
 
@@ -24,7 +30,8 @@ The following is already present in the repository today.
 ### Backend
 
 - Dedicated analytics router under `GET /api/v1/analytics/...`
-- Teacher overview, course list, course detail, assessment list, assessment detail, at-risk learners, and CSV export endpoints
+- Teacher overview, course list, course detail, assessment list, assessment detail, at-risk
+  learners, and CSV export endpoints
 - Shared analytics filter parsing and teacher scope resolution
 - RBAC support for `analytics:read:assigned`, `analytics:export:assigned`, and `analytics:read:org`
 - Live-query analytics services under `apps/api/src/services/analytics/`
@@ -35,15 +42,21 @@ The following is already present in the repository today.
 
 - Teacher analytics routes under the org dashboard shell
 - Navigation gating through `canSeeAnalytics`
-- Overview page with KPI cards, alert cards, grading backlog panel, course table, assessment table, and at-risk learner preview
-  - Course detail page with engagement trend, completion funnel, chapter drop-off funnel, content health cards, assessment outliers, and at-risk learners
-- Assessment detail page with score distribution, attempt distribution, question difficulty radar, common failures, and learner rows
+- Overview page with KPI cards, alert cards, grading backlog panel, course table, assessment table,
+  and at-risk learner preview
+  - Course detail page with engagement trend, completion funnel, chapter drop-off funnel, content
+    health cards, assessment outliers, and at-risk learners
+- Assessment detail page with score distribution, attempt distribution, question difficulty radar,
+  common failures, and learner rows
 - Shared analytics service client and analytics types
 - Shared shadcn-style chart wrapper in `apps/web/components/ui/chart.tsx`
 
 ### Current Architectural Reality
 
-The shipped dashboard is still powered by live reads. The core query layer loads all scoped course data into memory through `load_analytics_context(...)`, then derives metrics in Python. That works for a first release, but it will not hold up cleanly for org-wide analytics growth, large teacher scopes, or tighter freshness SLAs.
+The shipped dashboard is still powered by live reads. The core query layer loads all scoped course
+data into memory through `load_analytics_context(...)`, then derives metrics in Python. That works
+for a first release, but it will not hold up cleanly for org-wide analytics growth, large teacher
+scopes, or tighter freshness SLAs.
 
 ## Current Gaps To Address In v2
 
@@ -51,36 +64,52 @@ These are the highest-value gaps in the current implementation.
 
 ### Product and UX gaps
 
-- The overview underuses its own response model. The API returns `completions`, `submissions`, and `grading_completed` trends, but the UI only renders a single active-learners area chart.
-- The filter bar only exposes window switching. Compare mode, bucket, course selection, cohort selection, teacher switching, and timezone selection are not surfaced as real controls.
-- The teacher workflow is still read-only. There are no saved views, follow-up queues, alert state, bulk outreach workflows, or "what changed since last week" summaries.
-- Tables are static. They need sorting, filtering, pagination, density control, sticky columns, and stronger drill-through actions (use tanstack table).
-- Assessment detail is useful, but still shallow for instructors trying to diagnose why performance is bad.
+- The overview underuses its own response model. The API returns `completions`, `submissions`, and
+  `grading_completed` trends, but the UI only renders a single active-learners area chart.
+- The filter bar only exposes window switching. Compare mode, bucket, course selection, cohort
+  selection, teacher switching, and timezone selection are not surfaced as real controls.
+- The teacher workflow is still read-only. There are no saved views, follow-up queues, alert state,
+  bulk outreach workflows, or "what changed since last week" summaries.
+- Tables are static. They need sorting, filtering, pagination, density control, sticky columns, and
+  stronger drill-through actions (use tanstack table).
+- Assessment detail is useful, but still shallow for instructors trying to diagnose why performance
+  is bad.
 
 ### Data and correctness gaps
 
 - `freshness_seconds` is effectively placeholder data today.
 - Rollup refresh exists only as a stub and does not populate production read models.
-- `teacher_user_id` is not yet a trustworthy teacher-level analytics filter for org-wide supervisors; the current scope logic keeps org-wide course scope and mainly echoes the selected teacher in the response.
+- `teacher_user_id` is not yet a trustworthy teacher-level analytics filter for org-wide
+  supervisors; the current scope logic keeps org-wide course scope and mainly echoes the selected
+  teacher in the response.
 - `cohort_ids` are accepted by the API but are not yet applied through the analytics query layer.
-- Timezone is validated, but the current bucketing logic still normalizes to UTC rather than bucketing in the requested display timezone.
-- Most KPI comparison deltas are missing or intentionally `null`; only a small subset actually compare current vs previous period.
+- Timezone is validated, but the current bucketing logic still normalizes to UTC rather than
+  bucketing in the requested display timezone.
+- Most KPI comparison deltas are missing or intentionally `null`; only a small subset actually
+  compare current vs previous period.
 
 ### Performance and operational gaps
 
-- Whole-scope loading across courses, activities, trail runs, trail steps, submissions, attempts, and users is expensive and scales poorly.
+- Whole-scope loading across courses, activities, trail runs, trail steps, submissions, attempts,
+  and users is expensive and scales poorly.
 - Exports are synchronous string generation instead of streaming or background export jobs.
-- There are no clear performance budgets, cache strategy, freshness monitoring, or query observability for analytics endpoints.
-- The current dashboard lacks clear "data stale" affordances and degraded-mode behavior when analytics data is partial.
+- There are no clear performance budgets, cache strategy, freshness monitoring, or query
+  observability for analytics endpoints.
+- The current dashboard lacks clear "data stale" affordances and degraded-mode behavior when
+  analytics data is partial.
 
 ### Chart system gaps
 
 - `chart.tsx` is only being used for basic single-series area, bar, and radar charts.
 - `ChartLegend` and `ChartLegendContent` exist but are not used by the analytics UI.
-- Tooltips do not reliably display zero values because the content renderer checks truthiness instead of defined numeric values.
-- Color usage is still mostly hardcoded per widget rather than driven by a reusable semantic analytics palette.
-- There is no first-class support for synchronized charts, compare overlays, thresholds, or empty-state handling.
-- Formatting for dates, percentages, durations, and scores is repeated in widgets instead of being standardized at the chart layer.
+- Tooltips do not reliably display zero values because the content renderer checks truthiness
+  instead of defined numeric values.
+- Color usage is still mostly hardcoded per widget rather than driven by a reusable semantic
+  analytics palette.
+- There is no first-class support for synchronized charts, compare overlays, thresholds, or
+  empty-state handling.
+- Formatting for dates, percentages, durations, and scores is repeated in widgets instead of being
+  standardized at the chart layer.
 
 ## v2 Product Goals
 
@@ -96,34 +125,42 @@ The default teacher experience should answer:
 
 ### 2. Make comparisons first-class
 
-Comparison should be visible across overview, course, and assessment views rather than hidden in raw numbers. Every important chart and KPI should support current period vs previous period, and where useful, course vs org benchmark.
+Comparison should be visible across overview, course, and assessment views rather than hidden in raw
+numbers. Every important chart and KPI should support current period vs previous period, and where
+useful, course vs org benchmark.
 
 ### 3. Make analytics explainable
 
-Every alert, score, and ranking needs an explanation path. Teachers should be able to see why a course is flagged, why a learner is high risk, and why an assessment is considered an outlier.
+Every alert, score, and ranking needs an explanation path. Teachers should be able to see why a
+course is flagged, why a learner is high risk, and why an assessment is considered an outlier.
 
 ### 4. Make analytics fast enough for org scope
 
-Org-wide maintainers and teaching leads need near-instant page loads for overview and list views, with detail pages remaining comfortably interactive at larger data volumes.
+Org-wide maintainers and teaching leads need near-instant page loads for overview and list views,
+with detail pages remaining comfortably interactive at larger data volumes.
 
 ### 5. Make freshness and trust visible
 
-Teachers should always know when the data was generated, what it includes, and where caveats still apply.
+Teachers should always know when the data was generated, what it includes, and where caveats still
+apply.
 
 ## v2 Experience Plan
 
 ### A. Overview becomes a teacher command center
 
-Replace the current landing page shape with a dashboard that combines summary, trend, triage, and action.
+Replace the current landing page shape with a dashboard that combines summary, trend, triage, and
+action.
 
 #### New overview sections
 
 - "What changed" strip: top positive and negative deltas since the previous window
-- Multi-series engagement panel: active learners, completions, submissions, grading completions, and optional compare overlay
+- Multi-series engagement panel: active learners, completions, submissions, grading completions, and
+  optional compare overlay
 - Alert queue: grouped by severity and action type instead of a flat card list
 - At-risk operations panel: risk distribution, inactivity buckets, and top learners needing contact
 - Course movers table: biggest drops and biggest improvements across scoped courses
-- Assessment watchlist: hardest assessments, slowest grading, lowest submission rate, and highest retry pressure
+- Assessment watchlist: hardest assessments, slowest grading, lowest submission rate, and highest
+  retry pressure
 - Freshness and caveat panel: generated time, source mode, and known metric caveats
 
 #### Product additions
@@ -156,7 +193,8 @@ Course detail should move beyond one funnel and one trend.
 
 ### C. Assessment analytics becomes diagnostic, not descriptive
 
-Assessment detail should help teachers decide whether an assessment is too hard, unclear, too slow to grade, or simply ignored.
+Assessment detail should help teachers decide whether an assessment is too hard, unclear, too slow
+to grade, or simply ignored.
 
 #### New assessment detail modules
 
@@ -166,7 +204,8 @@ Assessment detail should help teachers decide whether an assessment is too hard,
 - Failure taxonomy for code challenges based on failed test clusters
 - Grading latency distribution and SLA breach counts for assignments
 - Attempt path breakdown: first-pass success, recovered after retry, repeated failure
-- Learner segmentation: never started, started not submitted, submitted not passed, graded but still failing
+- Learner segmentation: never started, started not submitted, submitted not passed, graded but still
+  failing
 
 #### New assessment list ranking modes
 
@@ -182,41 +221,51 @@ The current risk table is a good seed, but it needs operational depth.
 
 #### New at-risk capabilities
 
-- saved views for "inactive 7d", "missing required work", "grading-blocked", and "high-risk near completion"
+- saved views for "inactive 7d", "missing required work", "grading-blocked", and "high-risk near
+  completion"
 - risk reason chips with human-readable explanations
 - outreach priority column and suggested contact timing
 - bulk export from the filtered table, not only from overview buttons
 - direct links from learner rows to course and assessment blockers
-- optional instructor notes or intervention status in a later phase if the product wants closed-loop follow-up
+- optional instructor notes or intervention status in a later phase if the product wants closed-loop
+  follow-up
 
 ## Better Use Of `chart.tsx`
 
-v2 should treat `apps/web/components/ui/chart.tsx` as the analytics visualization contract rather than a thin wrapper around Recharts.
+v2 should treat `apps/web/components/ui/chart.tsx` as the analytics visualization contract rather
+than a thin wrapper around Recharts.
 
 ### Current underuse
 
-The shared chart layer already supports themed series config, shared tooltip content, and legends, but the analytics views currently use it only for simple one-series charts with minimal formatting. This leaves a lot of capability unused and forces too much presentation logic into individual widgets.
+The shared chart layer already supports themed series config, shared tooltip content, and legends,
+but the analytics views currently use it only for simple one-series charts with minimal formatting.
+This leaves a lot of capability unused and forces too much presentation logic into individual
+widgets.
 
 ### Required chart usage patterns for v2
 
 #### Overview
 
-- use a synchronized multi-series area chart for active learners, completions, submissions, and grading completed
+- use a synchronized multi-series area chart for active learners, completions, submissions, and
+  grading completed
 - add a compare series with dashed stroke when `compare=previous_period`
 - render a legend using `ChartLegend` and `ChartLegendContent`
 - support threshold and annotation markers for major alert events when useful
 
 #### Course detail
 
-- use composed charts for engagement vs completion so teachers can see whether activity is turning into progress
+- use composed charts for engagement vs completion so teachers can see whether activity is turning
+  into progress
 - render chapter drop-off as a ranked horizontal bar chart with clearer labels and delta formatting
-- use radial or gauge-style views for content health and grading SLA only if the score formula is explicit
+- use radial or gauge-style views for content health and grading SLA only if the score formula is
+  explicit
 
 #### Assessment detail
 
 - add score histograms with pass threshold reference lines
 - use stacked bars for attempt outcomes and submission states
-- keep radar charts for question difficulty only when the number of items is small enough to remain readable
+- keep radar charts for question difficulty only when the number of items is small enough to remain
+  readable
 - use scatter or dot plots when comparing accuracy to time spent per question
 
 #### Risk analytics
@@ -232,7 +281,8 @@ The shared chart layer already supports themed series config, shared tooltip con
 - support `syncId` and shared cursor behavior for linked charts on the same page
 - add a first-class empty state path for charts with no data
 - add a loading or skeleton wrapper so widgets stop reimplementing empty/loading visuals
-- expose a consistent reference-line helper pattern for pass thresholds, SLA targets, and benchmark lines
+- expose a consistent reference-line helper pattern for pass thresholds, SLA targets, and benchmark
+  lines
 
 #### Correctness fixes
 
@@ -264,7 +314,8 @@ These should all consume the shared chart contract instead of bypassing it.
 
 ### 1. Move from live-query MVP to hybrid read models
 
-Use a hybrid strategy rather than jumping directly from the current code to fully precomputed everything.
+Use a hybrid strategy rather than jumping directly from the current code to fully precomputed
+everything.
 
 #### Keep live queries for
 
@@ -294,7 +345,8 @@ The current `refresh_teacher_analytics_rollups(...)` hook needs to become an act
 
 ### 3. Reduce whole-scope data loading
 
-Refactor `load_analytics_context(...)` so the analytics service layer does not eagerly fetch every scoped table for every endpoint.
+Refactor `load_analytics_context(...)` so the analytics service layer does not eagerly fetch every
+scoped table for every endpoint.
 
 #### Replace with
 
@@ -317,7 +369,8 @@ v2 must fully implement these filters through scope resolution and query executi
 
 #### Specific fixes
 
-- `teacher_user_id` must narrow the managed-course scope when the caller has org-wide analytics rights and explicitly chooses a teacher
+- `teacher_user_id` must narrow the managed-course scope when the caller has org-wide analytics
+  rights and explicitly chooses a teacher
 - `cohort_ids` must affect learner sets, not just echo back in the response
 - bucketing must use the requested timezone for display grouping while keeping UTC in storage
 
@@ -343,8 +396,7 @@ The analytics routes should share a common shell that handles:
 
 ### 2. Standardize dashboard table behavior
 
-Use tanstack table.
-All analytics tables should support:
+Use tanstack table. All analytics tables should support:
 
 - column sorting
 - search or quick filters where appropriate
@@ -364,7 +416,8 @@ The frontend should centralize formatting for:
 
 ### 4. Make drill-downs coherent
 
-From any alert, KPI, course row, or assessment row, the teacher should be able to reach the detail view that explains the metric without losing the active filter context.
+From any alert, KPI, course row, or assessment row, the teacher should be able to reach the detail
+view that explains the metric without losing the active filter context.
 
 ## Production Readiness Plan
 
@@ -377,7 +430,8 @@ From any alert, KPI, course row, or assessment row, the teacher should be able t
 
 ### Performance budgets
 
-- overview and list endpoints should be optimized for sub-second to low-second responses under org scope
+- overview and list endpoints should be optimized for sub-second to low-second responses under org
+  scope
 - large CSV exports should not require full in-memory string assembly in the request path
 - chart-heavy pages should keep first render stable on both desktop and mobile
 
@@ -385,7 +439,8 @@ From any alert, KPI, course row, or assessment row, the teacher should be able t
 
 - add validation jobs for metric anomalies and missing rollup rows
 - log disagreements between rollup and live-query spot checks during rollout
-- explicitly document which metrics are rollup-backed vs live-query-backed while the system is hybrid
+- explicitly document which metrics are rollup-backed vs live-query-backed while the system is
+  hybrid
 
 ### Rollout safety
 
@@ -470,7 +525,8 @@ v2 is ready when the following are true.
 
 ### Chart system
 
-- the analytics UI uses shared legends, shared tooltips, compare overlays, and semantic series colors consistently
+- the analytics UI uses shared legends, shared tooltips, compare overlays, and semantic series
+  colors consistently
 - zero values render correctly in tooltips and tables
 - charts remain readable on mobile and accessible to keyboard and screen-reader users
 
@@ -499,4 +555,7 @@ Treat v2 as two parallel tracks:
 1. product depth and chart quality on the frontend
 2. data-path hardening and rollup adoption on the backend
 
-If only one track ships, the dashboard will remain unbalanced. Frontend-only work will look better but stay fragile under scale. Backend-only work will be faster but still feel underpowered to teachers. The right v2 is both: better decisions for instructors and a data pipeline that can support them reliably.
+If only one track ships, the dashboard will remain unbalanced. Frontend-only work will look better
+but stay fragile under scale. Backend-only work will be faster but still feel underpowered to
+teachers. The right v2 is both: better decisions for instructors and a data pipeline that can
+support them reliably.

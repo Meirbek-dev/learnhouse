@@ -11,8 +11,8 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { AlertTriangle, RefreshCcw } from 'lucide-react';
 import { useCourse } from '@components/Contexts/CourseContext';
+import { AlertTriangle, RefreshCcw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 const CourseConflictDialog = () => {

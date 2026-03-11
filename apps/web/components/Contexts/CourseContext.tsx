@@ -1,16 +1,11 @@
 'use client';
 
+import { createEmptyCourseEditorBundle, getCourseEditorBundle, getCourseEditorBundleKey, getCourseMetadataKey } from '@services/courses/editor';
+import type { CourseEditorBundle } from '@services/courses/editor';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { createContext, use, useEffect, useReducer } from 'react';
 import ErrorUI from '@/components/Objects/Elements/Error/Error';
-import {
-  createEmptyCourseEditorBundle,
-  getCourseEditorBundle,
-  getCourseEditorBundleKey,
-  getCourseMetadataKey,
-  type CourseEditorBundle,
-} from '@services/courses/editor';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
@@ -124,24 +119,23 @@ export const CourseProvider = ({
     error,
     isLoading: isSWRLoading,
     mutate: mutateCourseMeta,
-  } = useSWR<CourseStructure>(
-    courseMetaUrl,
-    (url: string) => swrFetcher(url, access_token),
-    {
-      fallbackData: initialCourse || undefined,
-      revalidateOnMount: !initialCourse,
-      revalidateIfStale: !initialCourse,
-    },
-  );
+  } = useSWR<CourseStructure>(courseMetaUrl, (url: string) => swrFetcher(url, access_token), {
+    fallbackData: initialCourse || undefined,
+    revalidateOnMount: !initialCourse,
+    revalidateIfStale: !initialCourse,
+  });
 
-  const { data: editorBundleData, isLoading: isEditorDataLoading, mutate: mutateEditorBundle } = useSWR<CourseEditorBundle>(
-    getCourseEditorBundleKey(courseuuid, access_token),
-    () => getCourseEditorBundle(courseuuid, access_token as string),
+  const {
+    data: editorBundleData,
+    isLoading: isEditorDataLoading,
+    mutate: mutateEditorBundle,
+  } = useSWR<CourseEditorBundle>(getCourseEditorBundleKey(courseuuid, access_token), () =>
+    getCourseEditorBundle(courseuuid, access_token!),
   );
 
   const initialState: CourseState = {
     courseStructure: {
-      ...(initialCourse || {}),
+      ...initialCourse,
       course_uuid: initialCourse?.course_uuid || courseuuid,
       chapters: initialCourse?.chapters || [],
     },

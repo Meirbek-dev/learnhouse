@@ -682,9 +682,7 @@ export default function RBACAdminClient() {
       header: t('permissionTable.description'),
       meta: { label: t('permissionTable.description') },
       cell: ({ row }) =>
-        row.original.description || (
-          <span className="text-muted-foreground">{t('noDescription')}</span>
-        ),
+        row.original.description || <span className="text-muted-foreground">{t('noDescription')}</span>,
     },
   ];
 

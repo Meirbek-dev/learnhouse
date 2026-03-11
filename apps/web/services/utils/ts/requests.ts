@@ -215,7 +215,10 @@ export const errorHandling = async (res: Response) => {
       typeof data?.detail === 'string'
         ? data.detail
         : Array.isArray(data?.detail)
-          ? data.detail.map((item: { msg?: string }) => item?.msg).filter(Boolean).join(', ')
+          ? data.detail
+              .map((item: { msg?: string }) => item?.msg)
+              .filter(Boolean)
+              .join(', ')
           : res.statusText || 'Request failed';
 
     const error: any = new Error(detail || 'Request failed');

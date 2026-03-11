@@ -13,7 +13,10 @@ export interface CourseWorkspaceCapabilities {
   canDeleteCourse: boolean;
 }
 
-function hasCoursePermission(session: any, action: typeof Actions.UPDATE | typeof Actions.MANAGE | typeof Actions.DELETE) {
+function hasCoursePermission(
+  session: any,
+  action: typeof Actions.UPDATE | typeof Actions.MANAGE | typeof Actions.DELETE,
+) {
   return (
     sessionCan(session, Resources.COURSE, action, Scopes.ORG) ||
     sessionCan(session, Resources.COURSE, action, Scopes.OWN)

@@ -724,7 +724,7 @@ const VideoSettingsForm = ({
                     onCheckedChange={(checked) => {
                       setVideoDetails({
                         ...videoDetails,
-                        autoplay: Boolean(checked),
+                        autoplay: checked,
                       });
                     }}
                     className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600"
@@ -752,7 +752,7 @@ const VideoSettingsForm = ({
                     onCheckedChange={(checked) => {
                       setVideoDetails({
                         ...videoDetails,
-                        muted: Boolean(checked),
+                        muted: checked,
                       });
                     }}
                     className="data-[state=checked]:border-red-600 data-[state=checked]:bg-red-600"

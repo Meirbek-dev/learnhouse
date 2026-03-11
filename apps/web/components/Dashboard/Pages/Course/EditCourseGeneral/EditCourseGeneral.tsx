@@ -2,20 +2,20 @@
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { AlertTriangle, BookOpen, Image as ImageIcon, Loader2, Tag, Video } from 'lucide-react';
-import { updateCourseMetadata } from '@services/courses/courses';
-import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import { AlertTriangle, Image as ImageIcon, Loader2, Tag, Video } from 'lucide-react';
+import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Card, CardContent, CardHeader } from '@components/ui/card';
+import { updateCourseMetadata } from '@services/courses/courses';
+import { useCourse } from '@components/Contexts/CourseContext';
 import { TagsInput } from '@components/ui/custom/tags-input';
-import { Button } from '@/components/ui/button';
 import { useEffect, useId, useRef, useState } from 'react';
+import { useDirtySection } from '@/hooks/useDirtySection';
 import { Separator } from '@components/ui/separator';
 import LearningItemsList from './LearningItemsList';
 import { Textarea } from '@components/ui/textarea';
 import ThumbnailUpdate from './ThumbnailUpdate';
 import { Input } from '@components/ui/input';
-import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useTranslations } from 'next-intl';
 import { generateUUID } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
@@ -23,9 +23,51 @@ import { toast } from 'sonner';
 
 const generateId = () => generateUUID();
 
+function initializeLearnings(learnings: any): string {
+  if (!learnings) return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
+  try {
+    const parsed = JSON.parse(learnings);
+    if (Array.isArray(parsed)) return learnings;
+  } catch {
+    if (typeof learnings === 'string') {
+      return JSON.stringify([{ id: generateId(), text: learnings, emoji: '📝' }]);
+    }
+  }
+  return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
+}
+
+function parseTags(raw: any): string[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw as string[];
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.map((tag) => String(tag).trim()).filter(Boolean);
+    } catch {
+      // Fallback to legacy comma-separated data
+    }
+    return raw
+      .split(',')
+      .map((t: string) => t.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
+function buildFormValues(courseStructure: any): FormValues {
+  return {
+    name: courseStructure?.name || '',
+    description: courseStructure?.description || '',
+    about: courseStructure?.about || '',
+    learnings: initializeLearnings(courseStructure?.learnings || ''),
+    tags: parseTags(courseStructure?.tags),
+    public: courseStructure?.public ?? false,
+    thumbnail_type: courseStructure?.thumbnail_type || 'image',
+  };
+}
+
 interface EditCourseStructureProps {
   orgslug: string;
-  course_uuid?: string;
 }
 
 interface FormValues {
@@ -74,11 +116,10 @@ const validateValues = (values: FormValues, t: any) => {
   return errors;
 };
 
-function EditCourseGeneral(_props: EditCourseStructureProps) {
+function EditCourseGeneral(props: EditCourseStructureProps) {
   const t = useTranslations('CourseEdit.General');
   const tCommon = useTranslations('Common');
   const [error, setError] = useState('');
-  const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const thumbnailTypeItems = [
@@ -124,150 +165,52 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
     },
   ];
   const course = useCourse();
-  const dispatchCourse = useCourseDispatch();
   const { isLoading, courseStructure, refreshCourseMeta, showConflict } = course;
   const formId = useId();
   const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
 
-  useUnsavedChangesGuard(isDirty);
-
-  const getInitialValues = (): FormValues => {
-    const initializeLearnings = (learnings: any) => {
-      if (!learnings) return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
-      try {
-        const parsed = JSON.parse(learnings);
-        if (Array.isArray(parsed)) return learnings;
-      } catch {
-        if (typeof learnings === 'string') {
-          return JSON.stringify([{ id: generateId(), text: learnings, emoji: '📝' }]);
-        }
-      }
-      return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
-    };
-
-    const parseTags = (raw: any): string[] => {
-      if (!raw) return [];
-      if (Array.isArray(raw)) return raw as string[];
-      if (typeof raw === 'string') {
-        try {
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) {
-            return parsed.map((tag) => String(tag).trim()).filter(Boolean);
-          }
-        } catch {
-          // Fallback to legacy comma-separated data
-        }
-        return raw
-          .split(',')
-          .map((t: string) => t.trim())
-          .filter(Boolean);
-      }
-      return [];
-    };
-
-    return {
-      name: courseStructure?.name || '',
-      description: courseStructure?.description || '',
-      about: courseStructure?.about || '',
-      learnings: initializeLearnings(courseStructure?.learnings || ''),
-      tags: parseTags(courseStructure?.tags),
-      public: courseStructure?.public ?? false,
-      thumbnail_type: courseStructure?.thumbnail_type || 'image',
-    };
-  };
+  const { isDirty, isDirtyRef, markDirty, markClean } = useDirtySection('general');
 
   const form = useForm<FormValues>({
-    defaultValues: getInitialValues(),
+    defaultValues: buildFormValues(courseStructure),
     mode: 'onChange',
   });
 
   const initialRef = useRef<FormValues>(form.getValues());
-  const isDirtyRef = useRef(false);
 
-  // Reset when backend data changes
+  // Reset when backend data changes (skipped when user has unsaved edits)
   useEffect(() => {
     if (!isLoading && courseStructure) {
-      if (isDirtyRef.current) {
-        return;
-      }
-
-      // Inline initial values computation to avoid adding a non-stable function to deps
-      const initializeLearnings = (learnings: any) => {
-        if (!learnings) return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
-        try {
-          const parsed = JSON.parse(learnings);
-          if (Array.isArray(parsed)) return learnings;
-        } catch {
-          if (typeof learnings === 'string') {
-            return JSON.stringify([{ id: generateId(), text: learnings, emoji: '📝' }]);
-          }
-        }
-        return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
-      };
-
-      const parseTags = (raw: any): string[] => {
-        if (!raw) return [];
-        if (Array.isArray(raw)) return raw as string[];
-        if (typeof raw === 'string') {
-          try {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) {
-              return parsed.map((tag) => String(tag).trim()).filter(Boolean);
-            }
-          } catch {
-            // Fallback to legacy comma-separated data
-          }
-          return raw
-            .split(',')
-            .map((t: string) => t.trim())
-            .filter(Boolean);
-        }
-        return [];
-      };
-
-      const vals: FormValues = {
-        name: courseStructure?.name || '',
-        description: courseStructure?.description || '',
-        about: courseStructure?.about || '',
-        learnings: initializeLearnings(courseStructure?.learnings || ''),
-        tags: parseTags(courseStructure?.tags),
-        public: courseStructure?.public ?? false,
-        thumbnail_type: courseStructure?.thumbnail_type || 'image',
-      };
-
+      if (isDirtyRef.current) return;
+      const vals = buildFormValues(courseStructure);
       form.reset(vals);
       initialRef.current = vals;
-  isDirtyRef.current = false;
-      setIsDirty(false);
-      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'general', dirty: false } });
+      markClean();
       setError('');
     }
-  }, [isLoading, courseStructure, dispatchCourse, form]);
+  }, [isLoading, courseStructure, form, isDirtyRef, markClean]);
 
-  // Watch for unsaved changes & sync context
+  // Watch for unsaved changes
   useEffect(() => {
     const sub = form.watch((values) => {
       if (isLoading) return;
       const errors = validateValues(values as FormValues, t);
-      // set field errors imperatively
       (Object.keys(values) as (keyof FormValues)[]).forEach((k) => {
         if (errors[k]) form.setError(k, { message: errors[k] });
         else form.clearErrors(k);
       });
       const changed = JSON.stringify(values) !== JSON.stringify(initialRef.current);
-      isDirtyRef.current = changed;
-      setIsDirty(changed);
-      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'general', dirty: changed } });
+      if (changed) markDirty();
+      else markClean();
     });
     return () => sub.unsubscribe();
-  }, [form, isLoading, dispatchCourse, courseStructure, t]);
+  }, [form, isLoading, markDirty, markClean, t]);
 
   const handleSubmit = async (values: FormValues) => {
     const errors = validateValues(values, t);
     if (Object.keys(errors).length > 0) {
       setError(t('errors.saveFailed'));
-      // Focus on the first field with an error for better accessibility
       const firstErrorField = Object.keys(errors)[0] as keyof FormValues;
       form.setFocus(firstErrorField);
       return;
@@ -285,7 +228,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
     try {
       const response = await updateCourseMetadata(course.courseStructure.course_uuid, values, accessToken, {
         lastKnownUpdateDate: course.courseStructure.update_date,
-        orgSlug: _props.orgslug,
+        orgSlug: props.orgslug,
       });
 
       if (!response.success) {
@@ -300,19 +243,10 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
         return;
       }
 
-      dispatchCourse({
-        type: 'setCourseStructure',
-        payload: {
-          ...course.courseStructure,
-          ...response.data,
-        },
-      });
       await refreshCourseMeta();
 
       initialRef.current = values;
-      isDirtyRef.current = false;
-      setIsDirty(false);
-      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'general', dirty: false } });
+      markClean();
       toast.success(tCommon('saved'));
     } catch (saveError: any) {
       if (saveError?.status === 409) {
@@ -325,6 +259,12 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleDiscard = () => {
+    form.reset(initialRef.current);
+    markClean();
+    setError('');
   };
 
   if (isLoading || !courseStructure) {
@@ -376,36 +316,16 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
 
           <Card>
             <CardHeader>
-              {/* Header Section */}
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <h1
-                    id="course-edit-title"
-                    className="flex items-center gap-2 text-2xl font-bold tracking-tight"
-                  >
-                    <BookOpen
-                      className="text-primary h-8 w-8"
-                      aria-hidden="true"
-                    />
-                    {t('title', { courseName: courseStructure.name || '' })}
-                  </h1>
-                  <p className="text-muted-foreground text-base">{t('subtitle')}</p>
-                  <p className="text-sm text-slate-500">Changes stay in draft until you save this stage.</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  {isDirty ? <span className="text-sm text-gray-500">Draft not saved</span> : null}
-                  <Button
-                    type="submit"
-                    form={formId}
-                    disabled={!isDirty || isSaving}
-                  >
-                    {isSaving ? tCommon('saving') : 'Save changes'}
-                  </Button>
-                </div>
-              </div>
+              <SectionHeader
+                title={t('title', { courseName: courseStructure.name || '' })}
+                description={t('subtitle')}
+                isDirty={isDirty}
+                isSaving={isSaving}
+                onSave={() => form.handleSubmit(handleSubmit)()}
+                onDiscard={handleDiscard}
+              />
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Basic Information Section */}
               <div className="space-y-6">
                 <FormField
                   control={form.control}
@@ -513,7 +433,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
 
               <Separator />
 
-              {/* Thumbnail Section */}
+              {/* Thumbnail Section — independent of metadata dirty state */}
               <div className="space-y-4">
                 <FormField
                   control={form.control}
@@ -534,7 +454,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                             <SelectGroup>
                               {thumbnailTypeItems.map((item) => (
                                 <SelectItem
-                                  key={String(item.value)}
+                                  key={item.value}
                                   value={item.value}
                                 >
                                   {item.label}
@@ -549,25 +469,10 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="thumbnail_type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex justify-center text-base font-semibold">
-                        {t('thumbnail.label')}
-                      </FormLabel>
-                      <FormControl>
-                        <ThumbnailUpdate
-                          thumbnailType={field.value}
-                          disabled={isDirty}
-                          disabledReason={isDirty ? 'Save or discard metadata changes before updating the thumbnail.' : undefined}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div>
+                  <div className="mb-2 flex justify-center text-base font-semibold">{t('thumbnail.label')}</div>
+                  <ThumbnailUpdate thumbnailType={form.watch('thumbnail_type')} />
+                </div>
               </div>
             </CardContent>
           </Card>

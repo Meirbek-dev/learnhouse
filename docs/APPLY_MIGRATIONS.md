@@ -1,15 +1,17 @@
 # Applying API Migrations On A Dockerized Server
 
-This project runs database migrations with Alembic from the `app` service image.
-The API startup checks `alembic_version` and will fail if migrations have not been applied, so run migrations before starting or restarting the API container.
-In production, the container starts in `/app`, while the API project lives in `/app/api`, so migration commands must set the working directory explicitly.
+This project runs database migrations with Alembic from the `app` service image. The API startup
+checks `alembic_version` and will fail if migrations have not been applied, so run migrations before
+starting or restarting the API container. In production, the container starts in `/app`, while the
+API project lives in `/app/api`, so migration commands must set the working directory explicitly.
 
 ## When To Use Which Command
 
 - Use `docker compose exec app ...` when the `app` container is already running.
 - Use `docker compose run --rm app ...` when the `app` container is not running yet.
 
-From the `docker compose ps -a` output you shared, `db` is running but `app` is not listed, so use the `run --rm` flow below.
+From the `docker compose ps -a` output you shared, `db` is running but `app` is not listed, so use
+the `run --rm` flow below.
 
 ## 1. Connect To The Server
 

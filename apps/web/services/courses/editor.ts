@@ -14,7 +14,12 @@ export interface CourseEditorBundle {
   certifications: CourseEditorResource<any[]>;
 }
 
-const createResource = <T>(data: T | null, status = 0, error: string | null = null, available = true): CourseEditorResource<T> => ({
+const createResource = <T>(
+  data: T | null,
+  status = 0,
+  error: string | null = null,
+  available = true,
+): CourseEditorResource<T> => ({
   data,
   status,
   error,
@@ -27,13 +32,19 @@ export const createEmptyCourseEditorBundle = (): CourseEditorBundle => ({
   certifications: createResource<any[]>(null, 0, null, false),
 });
 
-const toArrayResource = (response: { success: boolean; data: any; status: number; HTTPmessage: string }): CourseEditorResource<any[]> => {
+const toArrayResource = (response: {
+  success: boolean;
+  data: any;
+  status: number;
+  HTTPmessage: string;
+}): CourseEditorResource<any[]> => {
   if (response.status === 401 || response.status === 403) {
     return createResource<any[]>(null, response.status, null, false);
   }
 
   if (!response.success) {
-    const detail = typeof response.data?.detail === 'string' ? response.data.detail : response.HTTPmessage || 'Request failed';
+    const detail =
+      typeof response.data?.detail === 'string' ? response.data.detail : response.HTTPmessage || 'Request failed';
     return createResource<any[]>([], response.status, detail, true);
   }
 

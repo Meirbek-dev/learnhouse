@@ -1,5 +1,6 @@
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { requireAnyPermission } from '@/lib/server-auth';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import type { ReactNode } from 'react';
 
 interface CoursesLayoutProps {
@@ -21,7 +22,7 @@ async function CoursesLayout({ children, params }: CoursesLayoutProps) {
     { action: Actions.MANAGE, resource: Resources.COURSE, scope: Scopes.OWN },
   ]);
 
-  return <>{children}</>;
+  return <NuqsAdapter>{children}</NuqsAdapter>;
 }
 
 export default CoursesLayout;

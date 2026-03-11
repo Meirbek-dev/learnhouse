@@ -361,7 +361,11 @@ export async function getActivityByID(activity_id: number, _next?: any, access_t
   return fetchActivityById(activity_id, access_token);
 }
 
-export async function deleteActivity(activity_uuid: string, access_token: string, options?: ActivityInvalidationOptions) {
+export async function deleteActivity(
+  activity_uuid: string,
+  access_token: string,
+  options?: ActivityInvalidationOptions,
+) {
   const result = await fetch(
     `${getAPIUrl()}activities/${activity_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
@@ -400,7 +404,12 @@ export async function getActivityWithAuthHeader(activity_uuid: string, _next?: a
   return fetchActivityWithAuth(activity_uuid, access_token || undefined);
 }
 
-export async function updateActivity(data: any, activity_uuid: string, access_token: string, options?: ActivityInvalidationOptions) {
+export async function updateActivity(
+  data: any,
+  activity_uuid: string,
+  access_token: string,
+  options?: ActivityInvalidationOptions,
+) {
   const result = await fetch(
     `${getAPIUrl()}activities/${activity_uuid}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),

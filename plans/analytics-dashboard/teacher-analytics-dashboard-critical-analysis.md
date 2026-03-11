@@ -2,10 +2,9 @@
 
 ## Status
 
-This document is a systematic critique of the currently shipped teacher analytics implementation.
-It covers concrete bugs, architectural failures, data correctness problems, frontend structural
-issues, and UX deficiencies. Each section names the specific file and line range where the problem
-lives.
+This document is a systematic critique of the currently shipped teacher analytics implementation. It
+covers concrete bugs, architectural failures, data correctness problems, frontend structural issues,
+and UX deficiencies. Each section names the specific file and line range where the problem lives.
 
 ---
 
@@ -15,9 +14,9 @@ lives.
 
 `apps/api/src/services/analytics/queries.py` — `load_analytics_context()`
 
-Every single analytics endpoint calls `load_analytics_context(db_session, course_ids)`, which
-issues **14+ separate SQL queries** and loads the following tables entirely into Python memory for
-all scoped courses:
+Every single analytics endpoint calls `load_analytics_context(db_session, course_ids)`, which issues
+**14+ separate SQL queries** and loads the following tables entirely into Python memory for all
+scoped courses:
 
 - `Course`, `Activity`, `Chapter`, `CourseChapter`, `ChapterActivity`
 - `TrailRun`, `TrailStep`
@@ -43,9 +42,9 @@ context = load_analytics_context(db_session, scope.course_ids)   # first load
 generated_rows_timestamp, course_rows = build_course_rows(scope, filters, db_session)
 ```
 
-`build_course_rows` in `courses.py` calls `load_analytics_context` a **second time**. Every
-overview request therefore pays the full 14-query load twice. There is no caching, no context
-sharing, and no guard against this.
+`build_course_rows` in `courses.py` calls `load_analytics_context` a **second time**. Every overview
+request therefore pays the full 14-query load twice. There is no caching, no context sharing, and no
+guard against this.
 
 ### 1.3 The rollup refresh doesn't fix this — it makes it worse
 
@@ -79,9 +78,9 @@ len({event.user_id for event in events
 ```
 
 `current_start` is `now - window_days` (7, 28, or 90 days). The second expression is always
-`now - 7 days`. When the selected window is 28d or 90d, `current_active` counts all users active
-in the full window, while `active_learners_7d` counts only the last 7 days. They will produce
-different numbers and the `engagement_delta_pct` is computed against the wrong baseline.
+`now - 7 days`. When the selected window is 28d or 90d, `current_active` counts all users active in
+the full window, while `active_learners_7d` counts only the last 7 days. They will produce different
+numbers and the `engagement_delta_pct` is computed against the wrong baseline.
 
 ### 2.2 `TeacherOverview.tsx` aligns multi-series trend data by array position, not timestamp
 
@@ -97,11 +96,11 @@ const trendData = data.trends.active_learners.map((point, index) => ({
 }));
 ```
 
-Each trend series is built independently by `build_series()`. If any series has fewer buckets
-than `active_learners` (e.g. because there were no grading events in that window), the positional
-indexing falls through to `?? 0`, silently assigning a value of zero to the wrong date bucket.
-The series are never re-aligned to their `bucket_start` timestamps. A chart rendered from this
-data can show the wrong values on the wrong dates.
+Each trend series is built independently by `build_series()`. If any series has fewer buckets than
+`active_learners` (e.g. because there were no grading events in that window), the positional
+indexing falls through to `?? 0`, silently assigning a value of zero to the wrong date bucket. The
+series are never re-aligned to their `bucket_start` timestamps. A chart rendered from this data can
+show the wrong values on the wrong dates.
 
 ### 2.3 `AnalyticsRiskDistributionChart` shows distribution from 8 preview rows, not the full list
 
@@ -116,10 +115,10 @@ export default function AnalyticsRiskDistributionChart({ rows }: ...) {
 }
 ```
 
-The component receives `data.at_risk_preview` from the overview, which is capped at **8 rows**.
-For an org with 200 at-risk learners, this chart displays a distribution derived from 8 samples.
-A teacher looking at this chart will see completely wrong proportions between high, medium, and
-low risk, drawing false conclusions about the severity of the situation.
+The component receives `data.at_risk_preview` from the overview, which is capped at **8 rows**. For
+an org with 200 at-risk learners, this chart displays a distribution derived from 8 samples. A
+teacher looking at this chart will see completely wrong proportions between high, medium, and low
+risk, drawing false conclusions about the severity of the situation.
 
 ### 2.4 Front-end filter options include sort keys that do not exist in the backend
 
@@ -168,9 +167,9 @@ freshness_seconds=freshness_seconds_from_rollup(
 ```
 
 When no rollup exists (the default state for most deployments), `generated_at` is
-`context.generated_at`, which is `now_utc()` from the moment the request runs. The result is
-always 0 or a few milliseconds. The UI therefore always displays "0s" in the freshness panel,
-which is meaningless and misleading. Teachers cannot tell how old the data is.
+`context.generated_at`, which is `now_utc()` from the moment the request runs. The result is always
+0 or a few milliseconds. The UI therefore always displays "0s" in the freshness panel, which is
+meaningless and misleading. Teachers cannot tell how old the data is.
 
 ### 2.6 Course detail page fetches the full course list just to resolve a UUID
 
@@ -180,7 +179,12 @@ which is meaningless and misleading. Teachers cannot tell how old the data is.
 const courseList = await getTeacherCourseList(org.id ?? org.org_id, accessToken, query);
 const courseRow = courseList.items.find((item) => item.course_uuid === courseuuid);
 if (!courseRow) notFound();
-const detail = await getTeacherCourseDetail(org.id ?? org.org_id, courseRow.course_id, accessToken, query);
+const detail = await getTeacherCourseDetail(
+  org.id ?? org.org_id,
+  courseRow.course_id,
+  accessToken,
+  query,
+);
 ```
 
 This fetches **all courses in scope**, loads all their analytics context on the backend, serializes
@@ -219,10 +223,10 @@ for row in course_rows:
 ```
 
 Rollup rows are written keyed to the course creator only. But `resolve_teacher_scope` correctly
-resolves teacher scope through both `Course.creator_id` and active `ResourceAuthor` rows. This
-means that for a co-authored course, the live query correctly attributes the course to both
-author A and author B, but the rollup only writes metrics for author A. Author B queries will
-always fall back to the slow live path.
+resolves teacher scope through both `Course.creator_id` and active `ResourceAuthor` rows. This means
+that for a co-authored course, the live query correctly attributes the course to both author A and
+author B, but the rollup only writes metrics for author A. Author B queries will always fall back to
+the slow live path.
 
 ### 2.9 `export_grading_backlog_csv` silently crashes on unknown course ID
 
@@ -234,15 +238,17 @@ context.courses_by_id[assignment.course_id].name
 
 This is a direct dictionary access without `.get()`. If `assignment.course_id` is not in
 `courses_by_id` (which can happen if a course was deleted after submissions were recorded), this
-raises a `KeyError` and crashes the entire CSV export mid-stream, potentially sending a partial
-CSV to the browser with no error indicator.
+raises a `KeyError` and crashes the entire CSV export mid-stream, potentially sending a partial CSV
+to the browser with no error indicator.
 
 ### 2.10 `TeacherKpiCards` shows "stable" for 4 out of 6 metrics because delta is always `None`
 
 `apps/web/components/Dashboard/Analytics/TeacherKpiCards.tsx`
 
 ```tsx
-{metric.delta_pct === null ? 'stable' : `${metric.delta_pct > 0 ? '+' : ''}${metric.delta_pct}%`}
+{
+  metric.delta_pct === null ? 'stable' : `${metric.delta_pct > 0 ? '+' : ''}${metric.delta_pct}%`;
+}
 ```
 
 In `overview.py`, the following metrics pass `None` as the `previous` value in `_metric()`:
@@ -253,10 +259,10 @@ In `overview.py`, the following metrics pass `None` as the `previous` value in `
 - `ungraded_submissions` — always `None`
 - `negative_engagement_courses` — always `None`
 
-Only `active_learners` gets an actual delta comparison. This means 5 of the 6 KPI cards show a
-green "stable" badge even though there is no data to support the stability claim. The badge
-variant is `"success"` for "up" and `"warning"` for "down". "stable" maps to `"outline"`, which is
-visually identical to the no-data state — but it is still showing a misleading color signal.
+Only `active_learners` gets an actual delta comparison. This means 5 of the 6 KPI cards show a green
+"stable" badge even though there is no data to support the stability claim. The badge variant is
+`"success"` for "up" and `"warning"` for "down". "stable" maps to `"outline"`, which is visually
+identical to the no-data state — but it is still showing a misleading color signal.
 
 ---
 
@@ -274,11 +280,11 @@ def cohort_user_ids(context: AnalyticsContext, cohort_ids: Iterable[int]) -> set
     ...
 ```
 
-If the user sends `cohort_ids=5,6` but groups 5 and 6 happen to come from a different org's
-courses that are NOT in the scoped course list, `usergroup_names_by_id` won't contain them and
-`normalized` will be empty, making the function return `None` (= "no filter applied"). The
-cohort filter silently does nothing instead of returning an empty result or an error. Teachers
-who think they are scoping to a specific cohort are instead seeing all learners.
+If the user sends `cohort_ids=5,6` but groups 5 and 6 happen to come from a different org's courses
+that are NOT in the scoped course list, `usergroup_names_by_id` won't contain them and `normalized`
+will be empty, making the function return `None` (= "no filter applied"). The cohort filter silently
+does nothing instead of returning an empty result or an error. Teachers who think they are scoping
+to a specific cohort are instead seeing all learners.
 
 ### 3.2 Timezone bucketing in `build_series` can produce misaligned buckets
 
@@ -292,11 +298,11 @@ while cursor <= end_local:
     cursor += timedelta(days=7 if bucket == "week" else 1)
 ```
 
-`timedelta(days=7)` is calendar-correct in most cases, but during a DST transition the local
-clock day is not 24 hours. The cursor advances by exactly 604 800 seconds regardless of DST. On
-week mode near spring-forward or fall-back boundaries, the cursor can drift to a different local
-time and produce a bucket that starts at 1:00 AM or 11:00 PM instead of midnight, depending on
-timezone. This is an edge case but causes incorrect aggregation for orgs in DST-affected zones.
+`timedelta(days=7)` is calendar-correct in most cases, but during a DST transition the local clock
+day is not 24 hours. The cursor advances by exactly 604 800 seconds regardless of DST. On week mode
+near spring-forward or fall-back boundaries, the cursor can drift to a different local time and
+produce a bucket that starts at 1:00 AM or 11:00 PM instead of midnight, depending on timezone. This
+is an edge case but causes incorrect aggregation for orgs in DST-affected zones.
 
 ### 3.3 Assessment difficulty score on `TeacherCourseRow` is an average of averages
 
@@ -307,10 +313,10 @@ difficulty_values = [row.difficulty_score for row in assessments_by_course.get(c
 assessment_difficulty_score = round(sum(difficulty_values) / len(difficulty_values), 1) if difficulty_values else None
 ```
 
-`difficulty_score` for each assessment is itself `round(100 - pass_rate, 2)`. Averaging these
-across assessments with different volumes of submissions is statistically meaningless — an
-assessment with 2 submissions that failed both counts the same as one with 200 submissions.
-A weighted average by submission count is required.
+`difficulty_score` for each assessment is itself `round(100 - pass_rate, 2)`. Averaging these across
+assessments with different volumes of submissions is statistically meaningless — an assessment with
+2 submissions that failed both counts the same as one with 200 submissions. A weighted average by
+submission count is required.
 
 ### 3.4 Risk score thresholds are arbitrary and undocumented
 
@@ -324,13 +330,13 @@ missing_component = min(24, missing * 6)
 grading_component = min(12, open_grading_blocks[pair] * 4)
 ```
 
-The maximum possible score is 40 + 30 + 24 + 24 + 12 = 130. The thresholds that determine
-risk level are 70 (high) and 40 (medium). These numbers appear to be invented without
-validation against real learner outcomes. More critically, there is no test that validates
-these thresholds, no documentation explaining the rationale, and the score is opaque to
-teachers (they see "high · 84" with no explanation of what 84 means or what would reduce it).
-A learner who has been inactive for 20 days gets a score of 40 and is marked "medium risk"
-with the same label as a learner who has failed 3 assessments and missed 4 required items.
+The maximum possible score is 40 + 30 + 24 + 24 + 12 = 130. The thresholds that determine risk level
+are 70 (high) and 40 (medium). These numbers appear to be invented without validation against real
+learner outcomes. More critically, there is no test that validates these thresholds, no
+documentation explaining the rationale, and the score is opaque to teachers (they see "high · 84"
+with no explanation of what 84 means or what would reduce it). A learner who has been inactive for
+20 days gets a score of 40 and is marked "medium risk" with the same label as a learner who has
+failed 3 assessments and missed 4 required items.
 
 ---
 
@@ -338,8 +344,8 @@ with the same label as a learner who has failed 3 assessments and missed 4 requi
 
 ### 4.1 The page components are bloated server-component wrappers with no separation of concerns
 
-Every analytics page (`page.tsx`) directly calls multiple service functions, creates derived
-option arrays for filters, and returns a single component tree. The pattern is:
+Every analytics page (`page.tsx`) directly calls multiple service functions, creates derived option
+arrays for filters, and returns a single component tree. The pattern is:
 
 ```tsx
 // courses/page.tsx
@@ -355,12 +361,11 @@ data-fetching boundaries, and no Suspense boundaries.
 
 ### 4.2 Filter state is server-driven but components are client-driven with no synchronization
 
-`TeacherFilterBar` submits a native HTML form, which triggers a full-page server-side re-render.
-But the tables (`AnalyticsDataTable`) and charts inside are `'use client'` components with
-client-side sorting and search state. When the page re-renders, all client state (sort order,
-search query, open rows) is reset. A teacher who sorts the at-risk table by risk score, then
-changes the time window, loses their sort order. There is no state persistence across filter
-changes.
+`TeacherFilterBar` submits a native HTML form, which triggers a full-page server-side re-render. But
+the tables (`AnalyticsDataTable`) and charts inside are `'use client'` components with client-side
+sorting and search state. When the page re-renders, all client state (sort order, search query, open
+rows) is reset. A teacher who sorts the at-risk table by risk score, then changes the time window,
+loses their sort order. There is no state persistence across filter changes.
 
 ### 4.3 Data is sliced at the component boundary with no user feedback
 
@@ -372,16 +377,16 @@ changes.
 ```
 
 The overview page silently renders only the top 8 courses and top 8 assessments. There is no
-"showing 8 of 47" indicator, no "view all" link, no hint that data is truncated. Teachers with
-many courses will believe the table is exhaustive.
+"showing 8 of 47" indicator, no "view all" link, no hint that data is truncated. Teachers with many
+courses will believe the table is exhaustive.
 
 ### 4.4 `EngagementAreaChart` is a dead component
 
 `apps/web/components/Dashboard/Analytics/EngagementAreaChart.tsx`
 
 This component implements a single-series area chart. The overview no longer uses it — it was
-replaced by `AnalyticsMultiSeriesTrendChart`. The course detail page still uses it. The component
-is nearly identical to the chart configuration inside `AnalyticsMultiSeriesTrendChart`, duplicating
+replaced by `AnalyticsMultiSeriesTrendChart`. The course detail page still uses it. The component is
+nearly identical to the chart configuration inside `AnalyticsMultiSeriesTrendChart`, duplicating
 chart config, container sizing, and tooltip setup. There is no shared base chart layer; each
 component reimplements its own Recharts setup independently.
 
@@ -390,17 +395,16 @@ component reimplements its own Recharts setup independently.
 `apps/web/components/Dashboard/Analytics/TeacherFilterBar.tsx`
 
 Both `course_ids` and `cohort_ids` use a single `NativeSelect` element. The backend accepts
-comma-separated integer lists for both parameters. The UI makes it impossible to filter to
-multiple courses or multiple cohorts simultaneously, which is a primary use case for teaching
-leads and org admins who need to compare cohorts.
+comma-separated integer lists for both parameters. The UI makes it impossible to filter to multiple
+courses or multiple cohorts simultaneously, which is a primary use case for teaching leads and org
+admins who need to compare cohorts.
 
 ### 4.6 The assessment detail route requires navigating through the assessment list
 
-There are no links from the **at-risk learner rows** to the specific assessment that is
-blocking progress. The risk model tracks `open_grading_blocks`, `failed_assessments`, and
-`missing_required_assessments`, but the at-risk table only renders generic text
-("Contact the learner this week"). There is no drill-through from a learner to the specific
-blocked assessment.
+There are no links from the **at-risk learner rows** to the specific assessment that is blocking
+progress. The risk model tracks `open_grading_blocks`, `failed_assessments`, and
+`missing_required_assessments`, but the at-risk table only renders generic text ("Contact the
+learner this week"). There is no drill-through from a learner to the specific blocked assessment.
 
 Similarly, the **assessment list page** (`/assessments/page.tsx`) renders `AssessmentOutliersTable`
 with `orgslug` for link generation, but the assessment list does not link to the at-risk learners
@@ -409,11 +413,11 @@ assessment → learner) is one-directional and incomplete.
 
 ### 4.7 No loading states at all
 
-All analytics pages are async server components that produce no loading UI. When a teacher changes
-a filter, Next.js suspends the entire page while the server runs the analytics queries (which can
-take seconds). There is no skeleton, no spinner, no partial content. The browser shows a blank or
-stale page. For the overview endpoint, which triggers two `load_analytics_context` calls as
-identified in section 1.2, this pause can be several seconds on any reasonably sized org.
+All analytics pages are async server components that produce no loading UI. When a teacher changes a
+filter, Next.js suspends the entire page while the server runs the analytics queries (which can take
+seconds). There is no skeleton, no spinner, no partial content. The browser shows a blank or stale
+page. For the overview endpoint, which triggers two `load_analytics_context` calls as identified in
+section 1.2, this pause can be several seconds on any reasonably sized org.
 
 ### 4.8 Error handling swallows all errors into the same empty state
 
@@ -426,11 +430,11 @@ Every page wraps everything in a single try/catch:
 }
 ```
 
-A backend 403 (permission denied), a 404 (course not found), a 500 (query timeout), and a
-network error all produce the same empty state component. Teachers cannot distinguish between
-"you don't have access", "this course was deleted", and "the server is down". The error
-message from the API (`detail` field) is surfaced as raw text, which is often a Python exception
-message not suitable for display to teachers.
+A backend 403 (permission denied), a 404 (course not found), a 500 (query timeout), and a network
+error all produce the same empty state component. Teachers cannot distinguish between "you don't
+have access", "this course was deleted", and "the server is down". The error message from the API
+(`detail` field) is surfaced as raw text, which is often a Python exception message not suitable for
+display to teachers.
 
 ---
 
@@ -441,11 +445,11 @@ message not suitable for display to teachers.
 `apps/web/components/Dashboard/Analytics/AnalyticsThresholdHistogram.tsx`
 
 Despite being named "Threshold Histogram" and accepting a `thresholdLabel` prop, the component
-renders no reference line, no vertical marker, and no visual threshold at all. The threshold
-is only a `<Badge>` text label in the card header, which a teacher can easily miss. The pass
-threshold for exams and assignments is one of the most actionable pieces of information in the
-score distribution — teachers need to see the distribution split around the threshold, not just
-a badge saying "Pass threshold: 60%".
+renders no reference line, no vertical marker, and no visual threshold at all. The threshold is only
+a `<Badge>` text label in the card header, which a teacher can easily miss. The pass threshold for
+exams and assignments is one of the most actionable pieces of information in the score distribution
+— teachers need to see the distribution split around the threshold, not just a badge saying "Pass
+threshold: 60%".
 
 ### 5.2 `AnalyticsRiskDistributionChart` uses a single color for all risk levels
 
@@ -456,8 +460,8 @@ config={{ count: { label: 'Learners', color: '#dc2626' } }}
 ```
 
 All three bars (High, Medium, Low) are rendered in the same shade of red. This makes the chart
-harder to scan at a glance. Risk levels should have semantically distinct colors:
-high = destructive red, medium = warning amber, low = neutral grey/green.
+harder to scan at a glance. Risk levels should have semantically distinct colors: high = destructive
+red, medium = warning amber, low = neutral grey/green.
 
 ### 5.3 Tooltip zero-value suppression
 
@@ -469,22 +473,25 @@ high = destructive red, medium = warning amber, low = neutral grey/green.
 )}
 ```
 
-This correctly avoids rendering `null`, but the condition also suppresses `0`. When a series
-has zero completions or zero submissions on a given day, the tooltip row is hidden entirely.
-Teachers hovering over low-activity buckets see an incomplete tooltip that omits the zero
-values rather than showing "Completions: 0".
+This correctly avoids rendering `null`, but the condition also suppresses `0`. When a series has
+zero completions or zero submissions on a given day, the tooltip row is hidden entirely. Teachers
+hovering over low-activity buckets see an incomplete tooltip that omits the zero values rather than
+showing "Completions: 0".
 
 ### 5.4 `CompletionFunnelChart` hides the X axis entirely
 
 `apps/web/components/Dashboard/Analytics/CompletionFunnelChart.tsx`
 
 ```tsx
-<XAxis type="number" hide />
+<XAxis
+  type="number"
+  hide
+/>
 ```
 
-A funnel chart without a numeric axis gives no scale reference. Teachers cannot tell whether
-a bar represents 3 learners or 300 without a tooltip interaction. For a chart that is supposed
-to show drop-off severity, hiding the count axis defeats the purpose.
+A funnel chart without a numeric axis gives no scale reference. Teachers cannot tell whether a bar
+represents 3 learners or 300 without a tooltip interaction. For a chart that is supposed to show
+drop-off severity, hiding the count axis defeats the purpose.
 
 ### 5.5 `QuestionDifficultyRadar` silently caps at 8 questions
 
@@ -494,10 +501,10 @@ to show drop-off severity, hiding the count axis defeats the purpose.
 const radarData = data.slice(0, 8).map(...)
 ```
 
-There is no message indicating that questions beyond the first 8 are hidden. An exam with
-20 questions has 12 invisible data points. The radar also only shows `accuracy_pct` and
-drops `avg_time_seconds`, which is provided in the payload but unused, even though time
-spent per question is a strong difficulty signal.
+There is no message indicating that questions beyond the first 8 are hidden. An exam with 20
+questions has 12 invisible data points. The radar also only shows `accuracy_pct` and drops
+`avg_time_seconds`, which is provided in the payload but unused, even though time spent per question
+is a strong difficulty signal.
 
 ---
 
@@ -511,9 +518,9 @@ spent per question is a strong difficulty signal.
 <div className="mt-2 text-lg font-semibold text-slate-900">{data.freshness_seconds}s</div>
 ```
 
-"864000s" means nothing. "10 days ago" is actionable. Even when the service is running correctly
-and rollups are populated, the freshness panel will show numbers like "3600s" or "86400s" that
-require mental arithmetic to interpret. This should be a human-readable relative duration.
+"864000s" means nothing. "10 days ago" is actionable. Even when the service is running correctly and
+rollups are populated, the freshness panel will show numbers like "3600s" or "86400s" that require
+mental arithmetic to interpret. This should be a human-readable relative duration.
 
 ### 6.2 Alert type is displayed as raw underscore_case
 
@@ -523,11 +530,10 @@ require mental arithmetic to interpret. This should be a human-readable relative
 <span ...>{alert.type.replace('_', ' ')}</span>
 ```
 
-`"risk_spike"` becomes `"risk spike"`. `"grading_backlog"` becomes `"grading backlog"`.
-A `.replace('_', ' ')` only replaces the **first** underscore.
-`"code_challenge_outlier"` would become `"code challenge_outlier"`. This is a known JS `.replace()`
-gotcha — a regex with the global flag is needed. The display strings should be proper
-labels anyway ("Grading Backlog", "At-Risk Spike").
+`"risk_spike"` becomes `"risk spike"`. `"grading_backlog"` becomes `"grading backlog"`. A
+`.replace('_', ' ')` only replaces the **first** underscore. `"code_challenge_outlier"` would become
+`"code challenge_outlier"`. This is a known JS `.replace()` gotcha — a regex with the global flag is
+needed. The display strings should be proper labels anyway ("Grading Backlog", "At-Risk Spike").
 
 ### 6.3 The overview page sends 4 API requests on load with no visual feedback between them
 
@@ -564,10 +570,10 @@ if "grading_block" in reason_codes:
     recommended_action = "Prioritise grading this learner's submissions to unblock their progress."
 ```
 
-Each learner gets exactly one recommended action regardless of how many risk factors they have.
-A learner who is inactive, has failed 3 assessments, and has 4 missing required exercises gets
-the single message for the last matched reason code. The logic is `if, if, if` (not `elif`),
-so the last matched condition always wins. The most urgent action is not necessarily last.
+Each learner gets exactly one recommended action regardless of how many risk factors they have. A
+learner who is inactive, has failed 3 assessments, and has 4 missing required exercises gets the
+single message for the last matched reason code. The logic is `if, if, if` (not `elif`), so the last
+matched condition always wins. The most urgent action is not necessarily last.
 
 ### 6.5 The at-risk table shows "user_display_name" as raw `User #123` when name is missing
 
@@ -577,19 +583,19 @@ so the last matched condition always wins. The most urgent action is not necessa
 <div className="text-xs text-slate-500">User #{row.original.user_id}</div>
 ```
 
-When the display name resolves to "Unknown learner" (a user whose name fields are all empty,
-which is valid for SSO users) and the secondary line also shows a raw integer ID, there is no
-way for a teacher reading the table to identify the learner without going to the user management
-section. The table should show the email or username as a fallback rather than a raw integer.
+When the display name resolves to "Unknown learner" (a user whose name fields are all empty, which
+is valid for SSO users) and the secondary line also shows a raw integer ID, there is no way for a
+teacher reading the table to identify the learner without going to the user management section. The
+table should show the email or username as a fallback rather than a raw integer.
 
 ### 6.6 The assessment list page at `/assessments` has no filter bar
 
 `apps/web/app/orgs/[orgslug]/dash/analytics/assessments/page.tsx`
 
-The assessments list page does not render a `TeacherFilterBar`. Window, compare mode, cohort,
-and course filters cannot be changed from the assessments page. Teachers who want to see
-assessments for a specific cohort or filtered to the last 7 days have to go back to the overview
-page, change the filter, and then navigate to assessments again.
+The assessments list page does not render a `TeacherFilterBar`. Window, compare mode, cohort, and
+course filters cannot be changed from the assessments page. Teachers who want to see assessments for
+a specific cohort or filtered to the last 7 days have to go back to the overview page, change the
+filter, and then navigate to assessments again.
 
 ---
 
@@ -604,15 +610,15 @@ scope = _scope_for(db_session, current_user, org_id, filters, action="read")
 return get_teacher_course_detail(db_session, scope, course_id, filters)
 ```
 
-`_scope_for` resolves the teacher's course scope, but the course detail endpoint does not
-verify that `course_id` is within `scope.course_ids` before loading it. The check is inside
-`get_teacher_course_detail`, which calls `ensure_course_in_scope`. This is correct but fragile:
-if a developer adds a new detail endpoint and forgets to call `ensure_course_in_scope`, a teacher
-can request analytics for any course by ID.
+`_scope_for` resolves the teacher's course scope, but the course detail endpoint does not verify
+that `course_id` is within `scope.course_ids` before loading it. The check is inside
+`get_teacher_course_detail`, which calls `ensure_course_in_scope`. This is correct but fragile: if a
+developer adds a new detail endpoint and forgets to call `ensure_course_in_scope`, a teacher can
+request analytics for any course by ID.
 
-The assessment detail endpoint has the same pattern — `ensure_assessment_in_scope` is called
-inside the service, not at the router layer where it would be enforced as a first-class
-authorization boundary.
+The assessment detail endpoint has the same pattern — `ensure_assessment_in_scope` is called inside
+the service, not at the router layer where it would be enforced as a first-class authorization
+boundary.
 
 ### 7.2 `sort_by` and `sort_order` query parameters are passed unsanitized into the Python sort_map
 
@@ -624,11 +630,11 @@ sort_map = { ... }
 rows.sort(key=sort_map.get(sort_by, sort_map["pressure"]), reverse=reverse)
 ```
 
-Since `sort_map.get(unknown_key, fallback)` is used, this is not a direct injection risk —
-unknown values fall back gracefully. However, `sort_by` is a free-form string from
-`AnalyticsFilters.sort_by: str | None` with no validation of allowed values. It should be
-a `Literal` type that the Pydantic model validates, ensuring the API rejects invalid sort
-keys with a 422 rather than silently falling back.
+Since `sort_map.get(unknown_key, fallback)` is used, this is not a direct injection risk — unknown
+values fall back gracefully. However, `sort_by` is a free-form string from
+`AnalyticsFilters.sort_by: str | None` with no validation of allowed values. It should be a
+`Literal` type that the Pydantic model validates, ensuring the API rejects invalid sort keys with a
+422 rather than silently falling back.
 
 ---
 

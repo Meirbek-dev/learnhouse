@@ -1,0 +1,58 @@
+'use client';
+
+import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
+
+interface SectionHeaderProps {
+  title: string;
+  description?: string;
+  isDirty: boolean;
+  isSaving: boolean;
+  onSave: () => void;
+  onDiscard: () => void;
+  children?: React.ReactNode;
+}
+
+/**
+ * Shared section header with title, unsaved-changes indicator, Discard and Save buttons.
+ * Used across all EditCourse* workspace sections to eliminate copy-pasted header boilerplate.
+ */
+export function SectionHeader({
+  title,
+  description,
+  isDirty,
+  isSaving,
+  onSave,
+  onDiscard,
+  children,
+}: SectionHeaderProps) {
+  const tCommon = useTranslations('Common');
+
+  return (
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
+        {description ? <p className="mt-1 text-sm text-slate-500">{description}</p> : null}
+      </div>
+      <div className="flex shrink-0 items-center gap-3">
+        {children}
+        {isDirty ? <span className="text-sm text-slate-500">{/* i18n:TODO */}Unsaved changes</span> : null}
+        <Button
+          type="button"
+          variant="outline"
+          disabled={!isDirty || isSaving}
+          onClick={onDiscard}
+        >
+          {/* i18n:TODO */}Discard
+        </Button>
+        <Button
+          type="button"
+          disabled={!isDirty || isSaving}
+          onClick={onSave}
+        >
+          {isSaving ? tCommon('saving') : /* i18n:TODO */ 'Save changes'}
+        </Button>
+      </div>
+    </div>
+  );
+}

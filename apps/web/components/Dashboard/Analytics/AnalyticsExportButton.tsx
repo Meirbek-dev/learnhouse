@@ -20,7 +20,7 @@ export default function AnalyticsExportButton({ href, label }: AnalyticsExportBu
       const accessToken = session.data?.tokens?.access_token;
       const headers: HeadersInit = {};
       if (accessToken) {
-        headers['Authorization'] = `Bearer ${accessToken}`;
+        headers.Authorization = `Bearer ${accessToken}`;
       }
       const response = await fetch(href, { headers });
       if (!response.ok) {

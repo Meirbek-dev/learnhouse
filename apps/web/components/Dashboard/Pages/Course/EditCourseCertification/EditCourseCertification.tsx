@@ -1,31 +1,34 @@
+'use client';
+
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { createCertification, deleteCertification, updateCertification } from '@services/courses/certifications';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { createCertification, deleteCertification, updateCertification } from '@services/courses/certifications';
-import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
-import { AlertTriangle, Award, FileText, Sparkles } from 'lucide-react';
+import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { Button } from '@/components/ui/button';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { AlertTriangle, Award, FileText, Sparkles } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useCourse } from '@components/Contexts/CourseContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
+import { useDirtySection } from '@/hooks/useDirtySection';
 import { Separator } from '@/components/ui/separator';
 import CertificatePreview from './CertificatePreview';
 import { Textarea } from '@/components/ui/textarea';
 import { useForm, useWatch } from 'react-hook-form';
 import { Spinner } from '@components/ui/spinner';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import * as v from 'valibot';
 
 interface EditCourseCertificationProps {
   orgslug: string;
-  course_uuid?: string;
 }
 
 const CERTIFICATE_PATTERNS = [
@@ -41,58 +44,92 @@ const CERTIFICATE_PATTERNS = [
   { value: 'modern', icon: '✨' },
 ] as const;
 
-const EditCourseCertification = (_props: EditCourseCertificationProps) => {
+// Module-level type-only schema (no translated messages needed for type inference)
+const _certFormSchemaForTypes = v.object({
+  enable_certification: v.boolean(),
+  certification_name: v.string(),
+  certification_description: v.string(),
+  certification_type: v.picklist([
+    'completion',
+    'achievement',
+    'assessment',
+    'participation',
+    'mastery',
+    'professional',
+    'continuing',
+    'workshop',
+    'specialization',
+  ] as const),
+  certificate_pattern: v.picklist([
+    'royal',
+    'tech',
+    'nature',
+    'geometric',
+    'vintage',
+    'waves',
+    'minimal',
+    'professional',
+    'academic',
+    'modern',
+  ] as const),
+  certificate_instructor: v.optional(v.string()),
+});
+
+type FormValues = v.InferOutput<typeof _certFormSchemaForTypes>;
+
+const EditCourseCertification = (props: EditCourseCertificationProps) => {
   const [error, setError] = useState('');
   const [hasHydrated, setHasHydrated] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const course = useCourse();
-  const dispatchCourse = useCourseDispatch();
-  const { isLoading, courseStructure, editorData, refreshEditorData, showConflict } = course as any;
+  const { isLoading, courseStructure, editorData, refreshEditorData, showConflict } = course;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('Certificates.EditCourseCertification');
   const tCommon = useTranslations('Common');
 
-  // Form schema
-  const formSchema = v.pipe(
-    v.object({
-      enable_certification: v.boolean(),
-      certification_name: v.pipe(v.string(), v.maxLength(100, t('maxCharacters100'))),
-      certification_description: v.pipe(v.string(), v.maxLength(500, t('maxCharacters500'))),
-      certification_type: v.picklist([
-        'completion',
-        'achievement',
-        'assessment',
-        'participation',
-        'mastery',
-        'professional',
-        'continuing',
-        'workshop',
-        'specialization',
-      ]),
-      certificate_pattern: v.picklist([
-        'royal',
-        'tech',
-        'nature',
-        'geometric',
-        'vintage',
-        'waves',
-        'minimal',
-        'professional',
-        'academic',
-        'modern',
-      ]),
-      certificate_instructor: v.optional(v.string()),
-    }),
-    v.check((data) => {
-      if (data.enable_certification) {
-        return Boolean(data.certification_name?.trim() && data.certification_description?.trim());
-      }
-      return true;
-    }, t('validationRequiredFields')),
+  const formSchema = useMemo(
+    () =>
+      v.pipe(
+        v.object({
+          enable_certification: v.boolean(),
+          certification_name: v.pipe(v.string(), v.maxLength(100, t('maxCharacters100'))),
+          certification_description: v.pipe(v.string(), v.maxLength(500, t('maxCharacters500'))),
+          certification_type: v.picklist([
+            'completion',
+            'achievement',
+            'assessment',
+            'participation',
+            'mastery',
+            'professional',
+            'continuing',
+            'workshop',
+            'specialization',
+          ]),
+          certificate_pattern: v.picklist([
+            'royal',
+            'tech',
+            'nature',
+            'geometric',
+            'vintage',
+            'waves',
+            'minimal',
+            'professional',
+            'academic',
+            'modern',
+          ]),
+          certificate_instructor: v.optional(v.string()),
+        }),
+        v.check((data) => {
+          if (data.enable_certification) {
+            return Boolean(data.certification_name?.trim() && data.certification_description?.trim());
+          }
+          return true;
+        }, t('validationRequiredFields')),
+      ),
+    [t],
   );
-
-  type FormValues = v.InferOutput<typeof formSchema>;
 
   const certifications = editorData.certifications.data ?? [];
   const certificationsError = editorData.certifications.error;
@@ -111,22 +148,19 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
     },
   });
 
-  const certificationTypes = [
-    'completion',
-    'achievement',
-    'assessment',
-    'participation',
-    'mastery',
-    'professional',
-    'continuing',
-    'workshop',
-    'specialization',
-  ] as const;
-
-  const certificationTypeItems = certificationTypes.map((type) => ({
-    value: type,
-    label: t(`certificationTypes.${type}`),
-  }));
+  const certificationTypeItems = (
+    [
+      'completion',
+      'achievement',
+      'assessment',
+      'participation',
+      'mastery',
+      'professional',
+      'continuing',
+      'workshop',
+      'specialization',
+    ] as const
+  ).map((type) => ({ value: type, label: t(`certificationTypes.${type}`) }));
 
   const getInitialValues = useCallback((): FormValues => {
     const getInstructorName = () => {
@@ -134,9 +168,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
         const author = courseStructure.authors[0];
         const firstName = author.user?.first_name || '';
         const lastName = author.user?.last_name || '';
-        if (firstName || lastName) {
-          return `${firstName} ${lastName}`.trim();
-        }
+        if (firstName || lastName) return `${firstName} ${lastName}`.trim();
       }
       return '';
     };
@@ -153,34 +185,22 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
   }, [courseStructure, existingCertification, hasExistingCertification]);
 
   const initialValuesRef = useRef<FormValues>(form.getValues());
-  const isDirtyRef = useRef(false);
 
-  // Initialize form
+  const { isDirty, isDirtyRef, markDirty, markClean } = useDirtySection('certification');
+
+  // Initialize form when data is ready
   useEffect(() => {
     if (editorData.certifications.data !== null && !isLoading) {
-      if (isDirtyRef.current) {
-        return;
-      }
-
+      if (isDirtyRef.current) return;
       const newValues = getInitialValues();
       form.reset(newValues);
       initialValuesRef.current = newValues;
-      setIsDirty(false);
-      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'certification', dirty: false } });
+      markClean();
       setHasHydrated(true);
     }
-  }, [
-    editorData.certifications.data,
-    isLoading,
-    dispatchCourse,
-    form,
-    existingCertification,
-    getInitialValues,
-    hasExistingCertification,
-    courseStructure,
-  ]);
+  }, [editorData.certifications.data, isLoading, form, getInitialValues, isDirtyRef, markClean]);
 
-  // Debounced update - subscribe only to specific fields to avoid full-form subscription re-renders
+  // Subscribe to individual watched fields to avoid over-rendering
   const isEnabled = useWatch({ control: form.control, name: 'enable_certification' });
   const certificationName = useWatch({ control: form.control, name: 'certification_name' });
   const certificationDescription = useWatch({ control: form.control, name: 'certification_description' });
@@ -188,19 +208,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
   const certificatePattern = useWatch({ control: form.control, name: 'certificate_pattern' });
   const certificateInstructor = useWatch({ control: form.control, name: 'certificate_instructor' });
 
-  const watchedValuesRef = useRef({
-    enable_certification: isEnabled,
-    certification_name: certificationName,
-    certification_description: certificationDescription,
-    certification_type: certificationType,
-    certificate_pattern: certificatePattern,
-    certificate_instructor: certificateInstructor,
-  });
-  const [isDirty, setIsDirty] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-
-  useUnsavedChangesGuard(isDirty);
-
+  // Track dirty state on form value changes
   useEffect(() => {
     if (!isLoading && hasHydrated) {
       const currentValues = {
@@ -211,14 +219,10 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
         certificate_pattern: certificatePattern,
         certificate_instructor: certificateInstructor,
       };
-
-      watchedValuesRef.current = currentValues;
       const dirty = JSON.stringify(initialValuesRef.current) !== JSON.stringify(currentValues);
-      isDirtyRef.current = dirty;
-      setIsDirty(dirty);
-      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'certification', dirty } });
+      if (dirty) markDirty();
+      else markClean();
     }
-    return;
   }, [
     isEnabled,
     certificationName,
@@ -228,17 +232,14 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
     certificateInstructor,
     isLoading,
     hasHydrated,
-    existingCertification?.certification_uuid,
-    dispatchCourse,
-    courseStructure,
+    markDirty,
+    markClean,
   ]);
 
   const handleDiscard = () => {
     form.reset(initialValuesRef.current);
-    isDirtyRef.current = false;
-    setIsDirty(false);
+    markClean();
     setError('');
-    dispatchCourse({ type: 'setSectionDirty', payload: { section: 'certification', dirty: false } });
   };
 
   const handleSaveCertification = form.handleSubmit(async (values) => {
@@ -259,25 +260,23 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
         if (existingCertification) {
           await updateCertification(existingCertification.certification_uuid, config, access_token, {
             courseUuid: courseStructure.course_uuid,
-            orgSlug: _props.orgslug,
+            orgSlug: props.orgslug,
           });
         } else {
           await createCertification(courseStructure.id, config, access_token, {
             courseUuid: courseStructure.course_uuid,
-            orgSlug: _props.orgslug,
+            orgSlug: props.orgslug,
           });
         }
       } else if (existingCertification) {
         await deleteCertification(existingCertification.certification_uuid, access_token, {
           courseUuid: courseStructure.course_uuid,
-          orgSlug: _props.orgslug,
+          orgSlug: props.orgslug,
         });
       }
 
       initialValuesRef.current = values;
-      isDirtyRef.current = false;
-      setIsDirty(false);
-      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'certification', dirty: false } });
+      markClean();
       await refreshEditorData();
       toast.success(
         values.enable_certification
@@ -299,7 +298,6 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
     }
   });
 
-  // Loading state
   if (isLoading || !courseStructure || (course.isEditorDataLoading && editorData.certifications.data === null)) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -311,7 +309,6 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
     );
   }
 
-  // Error state
   if (certificationsError) {
     return (
       <Alert
@@ -329,42 +326,26 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
       <div className="mx-4 sm:mx-10">
         <Card>
           <CardHeader className="space-y-1">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <CardTitle className="text-2xl">{t('courseCertification')}</CardTitle>
-                <CardDescription>{t('enableCertification')}</CardDescription>
-                <p className="text-sm text-slate-500">Changes stay in draft until you save this stage.</p>
-              </div>
-              <div className="flex items-center gap-3">
-                {isDirty ? <span className="text-sm text-gray-500">Draft not saved</span> : null}
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={!isDirty || isSaving}
-                  onClick={handleDiscard}
-                >
-                  Discard draft
-                </Button>
-                <Button
-                  type="button"
-                  disabled={!isDirty || isSaving}
-                  onClick={handleSaveCertification}
-                >
-                  {isSaving ? tCommon('saving') : 'Save changes'}
-                </Button>
-                <Label
-                  htmlFor="cert-toggle"
-                  className="cursor-pointer"
-                >
-                  <Switch
-                    id="cert-toggle"
-                    checked={isEnabled}
-                    onCheckedChange={(checked) => form.setValue('enable_certification', checked, { shouldDirty: true })}
-                    disabled={isSaving}
-                  />
-                </Label>
-              </div>
-            </div>
+            <SectionHeader
+              title={t('courseCertification')}
+              description={t('enableCertification')}
+              isDirty={isDirty}
+              isSaving={isSaving}
+              onSave={handleSaveCertification}
+              onDiscard={handleDiscard}
+            >
+              <Label
+                htmlFor="cert-toggle"
+                className="cursor-pointer"
+              >
+                <Switch
+                  id="cert-toggle"
+                  checked={isEnabled}
+                  onCheckedChange={(checked) => form.setValue('enable_certification', checked, { shouldDirty: true })}
+                  disabled={isSaving}
+                />
+              </Label>
+            </SectionHeader>
           </CardHeader>
 
           <CardContent>
@@ -378,12 +359,11 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
               </Alert>
             )}
 
-            {/* Enabled State with Configuration */}
             {isEnabled && (
               <Form {...form}>
                 <form className="space-y-8">
                   <div className="grid gap-8 lg:grid-cols-5">
-                    {/* Configuration Section */}
+                    {/* Configuration */}
                     <div className="space-y-8 lg:col-span-3">
                       {/* Basic Information */}
                       <div className="space-y-4">
@@ -482,16 +462,24 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
                             <FormItem>
                               <FormLabel>{t('certificatePattern')}</FormLabel>
                               <FormControl>
-                                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                                <RadioGroup
+                                  value={field.value}
+                                  onValueChange={field.onChange}
+                                  className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"
+                                >
                                   {CERTIFICATE_PATTERNS.map((pattern) => (
-                                    <button
+                                    <Label
                                       key={pattern.value}
-                                      type="button"
-                                      onClick={() => field.onChange(pattern.value)}
-                                      className={`hover:border-primary/50 relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
+                                      htmlFor={`pattern-${pattern.value}`}
+                                      className={`hover:border-primary/50 relative flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
                                         field.value === pattern.value ? 'border-primary bg-primary/5' : 'border-border'
                                       }`}
                                     >
+                                      <RadioGroupItem
+                                        value={pattern.value}
+                                        id={`pattern-${pattern.value}`}
+                                        className="sr-only"
+                                      />
                                       <span className="text-2xl">{pattern.icon}</span>
                                       <span className="text-xs font-medium">
                                         {t(`certificatePatterns.${pattern.value}`)}
@@ -504,9 +492,9 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
                                           ✓
                                         </Badge>
                                       )}
-                                    </button>
+                                    </Label>
                                   ))}
-                                </div>
+                                </RadioGroup>
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -532,7 +520,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
                       </div>
                     </div>
 
-                    {/* Preview Section */}
+                    {/* Preview */}
                     <div className="lg:col-span-2">
                       <div className="sticky top-6">
                         <Card>
@@ -560,7 +548,6 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
               </Form>
             )}
 
-            {/* Disabled State */}
             {!isEnabled && (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <div className="bg-muted mb-4 rounded-full p-6">
@@ -568,15 +555,14 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
                 </div>
                 <h3 className="mb-2 text-lg font-semibold">{t('noCertificationConfigured')}</h3>
                 <p className="text-muted-foreground mb-6 max-w-sm text-sm">{t('noCertificationDescription')}</p>
-                <button
+                <Button
                   type="button"
                   onClick={() => form.setValue('enable_certification', true, { shouldDirty: true })}
                   disabled={isSaving}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Award className="h-4 w-4" />
                   {t('enableCertificationButton')}
-                </button>
+                </Button>
               </div>
             )}
           </CardContent>

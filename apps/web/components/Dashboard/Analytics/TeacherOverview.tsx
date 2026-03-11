@@ -52,12 +52,14 @@ export default function TeacherOverview({
   }
 
   // Align trend series by the union of bucket timestamps so sparse series are not dropped.
-  const allBuckets = [...new Set([
-	...data.trends.active_learners.map((point) => point.bucket_start),
-	...data.trends.completions.map((point) => point.bucket_start),
-	...data.trends.submissions.map((point) => point.bucket_start),
-	...data.trends.grading_completed.map((point) => point.bucket_start)
-])].toSorted();
+  const allBuckets = [
+    ...new Set([
+      ...data.trends.active_learners.map((point) => point.bucket_start),
+      ...data.trends.completions.map((point) => point.bucket_start),
+      ...data.trends.submissions.map((point) => point.bucket_start),
+      ...data.trends.grading_completed.map((point) => point.bucket_start),
+    ]),
+  ].toSorted();
   const completionsMap = new Map(data.trends.completions.map((p) => [p.bucket_start, p.value]));
   const submissionsMap = new Map(data.trends.submissions.map((p) => [p.bucket_start, p.value]));
   const gradingMap = new Map(data.trends.grading_completed.map((p) => [p.bucket_start, p.value]));

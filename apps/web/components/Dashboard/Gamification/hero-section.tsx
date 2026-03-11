@@ -61,10 +61,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
 
   return (
     <Card className={cn('relative overflow-hidden border-2 py-2', className)}>
-      {/* Dynamic gradient background based on level */}
-      <div
-        className={cn('absolute inset-0 opacity-10', 'bg-linear-to-br from-primary via-transparent to-purple-500')}
-      />
+      <div className="absolute inset-0 opacity-10" />
 
       {/* Animated particles for high-level users */}
       {profile.level >= 15 && (

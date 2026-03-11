@@ -1,12 +1,20 @@
 'use client';
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { createActivity, createExternalVideoActivity, createFileActivity } from '@services/courses/activities';
-import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
 import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
-import Modal from '@/components/Objects/Elements/Modal/Modal';
+import { useOrg } from '@components/Contexts/OrgContext';
 import { getAPIUrl } from '@services/config/config';
+import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { Layers } from 'lucide-react';
 import { useState } from 'react';
@@ -21,15 +29,12 @@ interface NewActivityButtonProps {
 const NewActivityButton = (props: NewActivityButtonProps) => {
   const [newActivityModal, setNewActivityModal] = useState(false);
   const course = useCourse();
+  const org = useOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
   const t = useTranslations('CourseEdit.NewActivityModal');
   const tNotify = useTranslations('DashPage.Notifications');
-
-  const openNewActivityModal = async (_chapterId: any) => {
-    setNewActivityModal(true);
-  };
 
   const closeNewActivityModal = async () => {
     setNewActivityModal(false);
@@ -37,9 +42,6 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
 
   // Submit new activity
   const submitActivity = async (activity: any) => {
-    const org = await getOrganizationContextInfoWithoutCredentials(props.orgslug, {
-      revalidate: 1800,
-    });
     const toast_loading = toast.loading(tNotify('creatingActivity'));
     await createActivity(activity, props.chapterId, org.org_id, access_token, {
       courseUuid: course.courseStructure.course_uuid,
@@ -58,7 +60,6 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
 
     try {
       await createFileActivity(file, type, activity, chapterId, access_token, (progress) => {
-        // Update toast with progress
         toast.loading(`${tNotify('uploadingAndCreating')} ${progress.percentage}%`, {
           id: toast_loading,
         });
@@ -71,15 +72,14 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
       toast.dismiss(toast_loading);
       toast.success(tNotify('fileUploadSuccess'));
       toast.success(tNotify('activityCreatedSuccess'));
-    } catch (error) {
+    } catch {
       toast.dismiss(toast_loading);
       toast.error(tNotify('uploadFailed'));
-      console.error('File upload error:', error);
     }
   };
 
   // Submit YouTube Video Upload
-  const submitExternalVideo = async (external_video_data: any, activity: any, _chapterId: number) => {
+  const submitExternalVideo = async (external_video_data: any, activity: any) => {
     const toast_loading = toast.loading(tNotify('creatingActivity'));
     await createExternalVideoActivity(external_video_data, activity, props.chapterId, access_token);
     mutate(
@@ -92,13 +92,19 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
 
   return (
     <div className="flex justify-center">
-      <Modal
-        isDialogOpen={newActivityModal}
+      <Dialog
+        open={newActivityModal}
         onOpenChange={setNewActivityModal}
-        minHeight="no-min"
-        minWidth="lg"
-        addDefCloseButton={false}
-        dialogContent={
+      >
+        <DialogTrigger render={<Button className="my-3 h-10 rounded-xl px-4 py-2" />}>
+          <Layers size={17} />
+          <span className="ml-2 text-sm font-semibold">{t('title')}</span>
+        </DialogTrigger>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{t('title')}</DialogTitle>
+            <DialogDescription>{t('description')}</DialogDescription>
+          </DialogHeader>
           <NewActivityModal
             closeModal={closeNewActivityModal}
             submitFileActivity={submitFileActivity}
@@ -108,21 +114,8 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
             course={course}
             orgslug={props.orgslug}
           />
-        }
-        dialogTitle={t('title')}
-        dialogDescription={t('description')}
-        dialogTrigger={
-          <div
-            onClick={() => {
-              openNewActivityModal(props.chapterId);
-            }}
-            className="max-w-auto bg-primary text-primary-foreground my-3 flex h-10 items-center justify-center rounded-xl px-4 py-2 hover:cursor-pointer"
-          >
-            <Layers size={17} />
-            <div className="ml-2 text-sm font-semibold">{t('title')}</div>
-          </div>
-        }
-      />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

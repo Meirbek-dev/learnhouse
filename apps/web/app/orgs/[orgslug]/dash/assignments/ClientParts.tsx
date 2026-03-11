@@ -1,9 +1,9 @@
 'use client';
 
-import { buildCourseWorkspacePath } from '@/lib/course-management';
 import { AlertCircle, BookOpen, FileText, GalleryVerticalEnd, Layers2, UserPen } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { buildCourseWorkspacePath } from '@/lib/course-management';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getUriWithOrg } from '@services/config/config';
 import { buttonVariants } from '@/components/ui/button';

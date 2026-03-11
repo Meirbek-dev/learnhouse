@@ -5,9 +5,9 @@ import {
   errorHandling,
   getResponseMetadata,
 } from '@services/utils/ts/requests';
+import { courseTag, getCourseListTags, tags } from '@/lib/cacheTags';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { getAPIUrl } from '@services/config/config';
-import { courseTag, getCourseListTags, tags } from '@/lib/cacheTags';
 
 /*
  This file includes POST, PUT, DELETE requests and cached GET requests
@@ -87,11 +87,11 @@ async function fetchEditableOrgCourses(
   const result = await fetch(
     `${getAPIUrl()}courses/org_slug/${org_slug}/editable/page/${page}/limit/${limit}${queryParams.size > 0 ? `?${queryParams.toString()}` : ''}`,
     {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${access_token}`,
-    },
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${access_token}`,
+      },
     },
   );
 
@@ -150,8 +150,8 @@ async function fetchCourseMetadata(course_uuid: string, access_token?: string, w
   const result = await fetch(
     `${getAPIUrl()}courses/course_${course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
     {
-    method: 'GET',
-    headers,
+      method: 'GET',
+      headers,
     },
   );
   return await errorHandling(result);
@@ -213,7 +213,12 @@ const toCourseMetadataPayload = (data: any, options?: CourseWriteOptions) => ({
   last_known_update_date: options?.lastKnownUpdateDate ?? data.update_date ?? undefined,
 });
 
-export async function updateCourseMetadata(course_uuid: string, data: any, access_token: string, options?: CourseWriteOptions) {
+export async function updateCourseMetadata(
+  course_uuid: string,
+  data: any,
+  access_token: string,
+  options?: CourseWriteOptions,
+) {
   const result = await fetch(
     `${getAPIUrl()}courses/${course_uuid}/metadata`,
     RequestBodyWithAuthHeader('PUT', toCourseMetadataPayload(data, options), null, access_token),
@@ -231,7 +236,12 @@ export async function updateCourseMetadata(course_uuid: string, data: any, acces
   return metadata;
 }
 
-export async function updateCourseAccess(course_uuid: string, data: any, access_token: string, options?: CourseWriteOptions) {
+export async function updateCourseAccess(
+  course_uuid: string,
+  data: any,
+  access_token: string,
+  options?: CourseWriteOptions,
+) {
   const result = await fetch(
     `${getAPIUrl()}courses/${course_uuid}/access`,
     RequestBodyWithAuthHeader(
@@ -259,16 +269,13 @@ export async function updateCourseAccess(course_uuid: string, data: any, access_
   return metadata;
 }
 
-export async function updateCourse(course_uuid: string, data: any, access_token: string) {
-  return updateCourseMetadata(course_uuid, data, access_token);
-}
-
 /**
  * Cached fetch for full course data
  */
 async function fetchCourse(course_uuid: string, access_token: string) {
   'use cache';
   cacheTag(tags.courses);
+  cacheTag(courseTag.detail(course_uuid));
   cacheLife(CacheProfiles.courses);
 
   const result = await fetch(`${getAPIUrl()}courses/${course_uuid}`, {
@@ -313,7 +320,12 @@ export async function getCourseById(course_id: number, _next?: any, access_token
   return fetchCourseById(course_id, access_token);
 }
 
-export async function updateCourseThumbnail(course_uuid: string, formData: FormData, access_token: string, options?: CourseWriteOptions) {
+export async function updateCourseThumbnail(
+  course_uuid: string,
+  formData: FormData,
+  access_token: string,
+  options?: CourseWriteOptions,
+) {
   const result: any = await fetch(
     `${getAPIUrl()}courses/${course_uuid}/thumbnail`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),

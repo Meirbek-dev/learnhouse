@@ -81,9 +81,7 @@ export default async function AnalyticsAtRiskPage(props: {
             >
               {t('table.prev')}
             </Button>
-            <span className="text-sm text-slate-600">
-              {t('table.page', { current: risk.page, total: totalPages })}
-            </span>
+            <span className="text-sm text-slate-600">{t('table.page', { current: risk.page, total: totalPages })}</span>
             <Button
               variant="outline"
               size="sm"

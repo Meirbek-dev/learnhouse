@@ -277,13 +277,7 @@ export function useActivityChat({
         handleError({ error: error instanceof Error ? error.message : 'Unknown error' });
       }
     },
-    [
-	accessToken,
-	activityUuid,
-	dispatch,
-	localStreamingDisplay,
-	thinkingMessage
-],
+    [accessToken, activityUuid, dispatch, localStreamingDisplay, thinkingMessage],
   );
 
   return { sendMessage, localStreamingText, statusMessage, isLocalStreaming, cancelStream, cleanup };

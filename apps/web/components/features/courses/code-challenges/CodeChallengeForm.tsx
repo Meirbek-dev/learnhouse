@@ -233,7 +233,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
   ];
 
   // Compute a safe default language id for the language Tabs (avoid undefined access)
-  const defaultLanguageId = Number(watchAllowedLanguages?.[0] ?? JUDGE0_LANGUAGES?.[0]?.id ?? 71);
+  const defaultLanguageId = (watchAllowedLanguages?.[0] ?? JUDGE0_LANGUAGES?.[0]?.id ?? 71);
 
   const handleFormSubmit: SubmitHandler<CodeChallengeFormInput> = async (data) => {
     try {
