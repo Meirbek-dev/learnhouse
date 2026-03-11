@@ -69,19 +69,23 @@ async function CoursesPage(props: {
 
   const session = await auth();
   const access_token = session?.tokens?.access_token;
-  const { courses, total } = await getEditableOrgCourses(
-    orgslug,
-    access_token || undefined,
-    currentPage,
-    COURSES_PER_PAGE,
-    query,
-    sortBy,
-  );
+  const [org, { courses, total }] = await Promise.all([
+    getOrganizationContextInfo(orgslug, null, access_token || undefined),
+    getEditableOrgCourses(
+      orgslug,
+      access_token || undefined,
+      currentPage,
+      COURSES_PER_PAGE,
+      query,
+      sortBy,
+    ),
+  ]);
 
   return (
     <CoursesHome
       orgslug={orgslug}
       courses={courses}
+      org_id={org.id}
       totalCourses={total}
       currentPage={currentPage}
       searchQuery={query}

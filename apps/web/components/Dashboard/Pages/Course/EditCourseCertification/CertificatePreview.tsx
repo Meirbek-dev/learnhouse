@@ -1,3 +1,4 @@
+'use client'
 import { Award, Building, Calendar, CheckCircle, Hash, QrCode, User } from 'lucide-react';
 import { getOrgLogoMediaDirectory } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';

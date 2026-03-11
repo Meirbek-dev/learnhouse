@@ -1,5 +1,6 @@
 'use client';
 
+import { buildCourseWorkspacePath } from '@/lib/course-management';
 import { AlertCircle, BookOpen, FileText, GalleryVerticalEnd, Layers2, UserPen } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -53,10 +54,7 @@ export const CourseCard = ({ course, assignments, org }: any) => {
 
           <Link
             prefetch={false}
-            href={{
-              pathname: getUriWithOrg(org.slug, `/dash/courses/course/${courseId}/content`),
-              query: { subpage: 'editor' },
-            }}
+            href={buildCourseWorkspacePath(org.slug, courseId, 'curriculum')}
             className={cn(
               buttonVariants({ variant: 'default', size: 'sm' }),
               'w-full sm:w-auto inline-flex items-center justify-center',

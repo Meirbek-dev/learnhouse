@@ -1,7 +1,5 @@
-import { getCourseMetadata } from '@services/courses/courses';
-import { auth } from '@/auth';
-
-import CourseOverviewClientPage from './page-client';
+import { buildCourseWorkspacePath, mapLegacyCourseStage } from '@/lib/course-management';
+import { redirect } from 'next/navigation';
 
 export interface CourseOverviewParams {
   orgslug: string;
@@ -11,16 +9,7 @@ export interface CourseOverviewParams {
 
 async function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
   const params = await props.params;
-  const session = await auth();
-  const accessToken = session?.tokens?.access_token;
-  const initialCourse = await getCourseMetadata(params.courseuuid, null, accessToken, true);
-
-  return (
-    <CourseOverviewClientPage
-      params={params}
-      initialCourse={initialCourse}
-    />
-  );
+  redirect(buildCourseWorkspacePath(params.orgslug, params.courseuuid, mapLegacyCourseStage(params.subpage)));
 }
 
 export default CourseOverviewPage;

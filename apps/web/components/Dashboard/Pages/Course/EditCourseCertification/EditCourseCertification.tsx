@@ -3,7 +3,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { createCertification, deleteCertification, updateCertification } from '@services/courses/certifications';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
-import { AlertTriangle, Award, FileText, Loader2, Sparkles } from 'lucide-react';
+import { AlertTriangle, Award, FileText, Sparkles } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Button } from '@/components/ui/button';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -43,8 +43,7 @@ const CERTIFICATE_PATTERNS = [
 
 const EditCourseCertification = (_props: EditCourseCertificationProps) => {
   const [error, setError] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
-  const [hasInitialized, setHasInitialized] = useState(false);
+  const [hasHydrated, setHasHydrated] = useState(false);
 
   const course = useCourse();
   const dispatchCourse = useCourseDispatch();
@@ -129,130 +128,54 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
     label: t(`certificationTypes.${type}`),
   }));
 
-  // Handle toggle
-  const handleCertificationToggle = useCallback(
-    async (enabled: boolean) => {
-      if (enabled && !hasExistingCertification) {
-        setIsCreating(true);
-        setError('');
-
-        try {
-          const formValues = form.getValues();
-          const config = {
-            certification_name: formValues.certification_name || courseStructure?.name || '',
-            certification_description: formValues.certification_description || courseStructure?.description || '',
-            certification_type: formValues.certification_type || 'completion',
-            certificate_pattern: formValues.certificate_pattern || 'professional',
-            certificate_instructor: formValues.certificate_instructor || '',
-          };
-
-          const result = await createCertification(courseStructure.id, config, access_token, {
-            courseUuid: courseStructure.course_uuid,
-            orgSlug: _props.orgslug,
-          });
-
-          if (result) {
-            toast.success(t('certificationCreated'));
-            await refreshEditorData();
-            form.setValue('enable_certification', true);
-          } else {
-            throw new Error('Failed to create certification');
-          }
-        } catch (createError: any) {
-          if (createError?.status === 409) {
-            showConflict(createError?.detail || createError?.message);
-            return;
-          }
-          setError(t('certificationError'));
-          toast.error(t('certificationError'));
-          form.setValue('enable_certification', false);
-        } finally {
-          setIsCreating(false);
+  const getInitialValues = useCallback((): FormValues => {
+    const getInstructorName = () => {
+      if (courseStructure?.authors?.length > 0) {
+        const author = courseStructure.authors[0];
+        const firstName = author.user?.first_name || '';
+        const lastName = author.user?.last_name || '';
+        if (firstName || lastName) {
+          return `${firstName} ${lastName}`.trim();
         }
-      } else if (!enabled && hasExistingCertification) {
-        try {
-          const result = await deleteCertification(existingCertification.certification_uuid, access_token, {
-            courseUuid: courseStructure.course_uuid,
-            orgSlug: _props.orgslug,
-          });
-
-          if (result) {
-            toast.success(t('certificationRemoved'));
-            await refreshEditorData();
-            form.setValue('enable_certification', false);
-          } else {
-            throw new Error('Failed to delete certification');
-          }
-        } catch (deleteError: any) {
-          if (deleteError?.status === 409) {
-            showConflict(deleteError?.detail || deleteError?.message);
-            return;
-          }
-          setError(t('certificationRemoveError'));
-          toast.error(t('certificationRemoveError'));
-          form.setValue('enable_certification', true);
-        }
-      } else {
-        form.setValue('enable_certification', enabled);
       }
-    },
-    [
-      hasExistingCertification,
-      form,
-      courseStructure,
-      access_token,
-      existingCertification,
-      refreshEditorData,
-      showConflict,
-      t,
-      _props.orgslug,
-    ],
-  );
+      return '';
+    };
+
+    const config = existingCertification?.config || {};
+    return {
+      enable_certification: hasExistingCertification,
+      certification_name: config.certification_name || courseStructure?.name || '',
+      certification_description: config.certification_description || courseStructure?.description || '',
+      certification_type: (config.certification_type as FormValues['certification_type']) || 'completion',
+      certificate_pattern: (config.certificate_pattern as FormValues['certificate_pattern']) || 'professional',
+      certificate_instructor: config.certificate_instructor || getInstructorName(),
+    };
+  }, [courseStructure, existingCertification, hasExistingCertification]);
+
+  const initialValuesRef = useRef<FormValues>(form.getValues());
+  const isDirtyRef = useRef(false);
 
   // Initialize form
   useEffect(() => {
-    if (editorData.certifications.data !== null && !isLoading && !hasInitialized) {
-      const getInstructorName = () => {
-        if (courseStructure?.authors?.length > 0) {
-          const author = courseStructure.authors[0];
-          const firstName = author.user?.first_name || '';
-          const lastName = author.user?.last_name || '';
-          if (firstName || lastName) {
-            return `${firstName} ${lastName}`.trim();
-          }
-        }
-        return '';
-      };
+    if (editorData.certifications.data !== null && !isLoading) {
+      if (isDirtyRef.current) {
+        return;
+      }
 
-      const config = existingCertification?.config || {};
-      const newValues = {
-        enable_certification: hasExistingCertification,
-        certification_name: config.certification_name || courseStructure?.name || '',
-        certification_description: config.certification_description || courseStructure?.description || '',
-        certification_type: (config.certification_type as FormValues['certification_type']) || 'completion',
-        certificate_pattern: (config.certificate_pattern as FormValues['certificate_pattern']) || 'professional',
-        certificate_instructor: config.certificate_instructor || getInstructorName(),
-      };
-
+      const newValues = getInitialValues();
       form.reset(newValues);
-      initialConfigRef.current = {
-        certification_name: newValues.certification_name,
-        certification_description: newValues.certification_description,
-        certification_type: newValues.certification_type,
-        certificate_pattern: newValues.certificate_pattern,
-        certificate_instructor: newValues.certificate_instructor,
-      };
+      initialValuesRef.current = newValues;
       setIsDirty(false);
       dispatchCourse({ type: 'setSectionDirty', payload: { section: 'certification', dirty: false } });
-      setHasInitialized(true);
+      setHasHydrated(true);
     }
   }, [
     editorData.certifications.data,
     isLoading,
-    hasInitialized,
     dispatchCourse,
     form,
     existingCertification,
+    getInitialValues,
     hasExistingCertification,
     courseStructure,
   ]);
@@ -266,21 +189,22 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
   const certificateInstructor = useWatch({ control: form.control, name: 'certificate_instructor' });
 
   const watchedValuesRef = useRef({
+    enable_certification: isEnabled,
     certification_name: certificationName,
     certification_description: certificationDescription,
     certification_type: certificationType,
     certificate_pattern: certificatePattern,
     certificate_instructor: certificateInstructor,
   });
-  const initialConfigRef = useRef<Record<string, any> | null>(null);
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useUnsavedChangesGuard(isDirty);
 
   useEffect(() => {
-    if (!isLoading && hasExistingCertification && hasInitialized) {
+    if (!isLoading && hasHydrated) {
       const currentValues = {
+        enable_certification: isEnabled,
         certification_name: certificationName,
         certification_description: certificationDescription,
         certification_type: certificationType,
@@ -289,48 +213,79 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
       };
 
       watchedValuesRef.current = currentValues;
-      const dirty = JSON.stringify(initialConfigRef.current) !== JSON.stringify(currentValues);
+      const dirty = JSON.stringify(initialValuesRef.current) !== JSON.stringify(currentValues);
+      isDirtyRef.current = dirty;
       setIsDirty(dirty);
       dispatchCourse({ type: 'setSectionDirty', payload: { section: 'certification', dirty } });
     }
     return;
   }, [
+    isEnabled,
     certificationName,
     certificationDescription,
     certificationType,
     certificatePattern,
     certificateInstructor,
     isLoading,
-    hasExistingCertification,
-    hasInitialized,
+    hasHydrated,
     existingCertification?.certification_uuid,
     dispatchCourse,
     courseStructure,
   ]);
 
-  const handleSaveCertification = async () => {
-    if (!(access_token && hasExistingCertification && existingCertification && isDirty)) return;
+  const handleDiscard = () => {
+    form.reset(initialValuesRef.current);
+    isDirtyRef.current = false;
+    setIsDirty(false);
+    setError('');
+    dispatchCourse({ type: 'setSectionDirty', payload: { section: 'certification', dirty: false } });
+  };
+
+  const handleSaveCertification = form.handleSubmit(async (values) => {
+    if (!(access_token && courseStructure) || !isDirty) return;
 
     const config = {
-      certification_name: certificationName,
-      certification_description: certificationDescription,
-      certification_type: certificationType,
-      certificate_pattern: certificatePattern,
-      certificate_instructor: certificateInstructor,
+      certification_name: values.certification_name,
+      certification_description: values.certification_description,
+      certification_type: values.certification_type,
+      certificate_pattern: values.certificate_pattern,
+      certificate_instructor: values.certificate_instructor,
     };
 
     setIsSaving(true);
     setError('');
     try {
-      await updateCertification(existingCertification.certification_uuid, config, access_token, {
-        courseUuid: courseStructure.course_uuid,
-        orgSlug: _props.orgslug,
-      });
-      await refreshEditorData();
-      initialConfigRef.current = config;
+      if (values.enable_certification) {
+        if (existingCertification) {
+          await updateCertification(existingCertification.certification_uuid, config, access_token, {
+            courseUuid: courseStructure.course_uuid,
+            orgSlug: _props.orgslug,
+          });
+        } else {
+          await createCertification(courseStructure.id, config, access_token, {
+            courseUuid: courseStructure.course_uuid,
+            orgSlug: _props.orgslug,
+          });
+        }
+      } else if (existingCertification) {
+        await deleteCertification(existingCertification.certification_uuid, access_token, {
+          courseUuid: courseStructure.course_uuid,
+          orgSlug: _props.orgslug,
+        });
+      }
+
+      initialValuesRef.current = values;
+      isDirtyRef.current = false;
       setIsDirty(false);
       dispatchCourse({ type: 'setSectionDirty', payload: { section: 'certification', dirty: false } });
-      toast.success(tCommon('saved'));
+      await refreshEditorData();
+      toast.success(
+        values.enable_certification
+          ? hasExistingCertification
+            ? tCommon('saved')
+            : t('certificationCreated')
+          : t('certificationRemoved'),
+      );
     } catch (saveError: any) {
       if (saveError?.status === 409) {
         showConflict(saveError?.detail || saveError?.message);
@@ -342,7 +297,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
     } finally {
       setIsSaving(false);
     }
-  };
+  });
 
   // Loading state
   if (isLoading || !courseStructure || (course.isEditorDataLoading && editorData.certifications.data === null)) {
@@ -378,18 +333,25 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
               <div className="space-y-1">
                 <CardTitle className="text-2xl">{t('courseCertification')}</CardTitle>
                 <CardDescription>{t('enableCertification')}</CardDescription>
+                <p className="text-sm text-slate-500">Changes stay in draft until you save this stage.</p>
               </div>
               <div className="flex items-center gap-3">
-                {isDirty ? <span className="text-sm text-gray-500">{tCommon('unsavedChanges')}</span> : null}
-                {isEnabled && hasExistingCertification ? (
-                  <Button
-                    type="button"
-                    disabled={!isDirty || isSaving || isCreating}
-                    onClick={handleSaveCertification}
-                  >
-                    {isSaving ? tCommon('saving') : tCommon('save')}
-                  </Button>
-                ) : null}
+                {isDirty ? <span className="text-sm text-gray-500">Draft not saved</span> : null}
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!isDirty || isSaving}
+                  onClick={handleDiscard}
+                >
+                  Discard draft
+                </Button>
+                <Button
+                  type="button"
+                  disabled={!isDirty || isSaving}
+                  onClick={handleSaveCertification}
+                >
+                  {isSaving ? tCommon('saving') : 'Save changes'}
+                </Button>
                 <Label
                   htmlFor="cert-toggle"
                   className="cursor-pointer"
@@ -397,11 +359,10 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
                   <Switch
                     id="cert-toggle"
                     checked={isEnabled}
-                    onCheckedChange={handleCertificationToggle}
-                    disabled={isCreating}
+                    onCheckedChange={(checked) => form.setValue('enable_certification', checked, { shouldDirty: true })}
+                    disabled={isSaving}
                   />
                 </Label>
-                {isCreating && <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />}
               </div>
             </div>
           </CardHeader>
@@ -418,7 +379,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
             )}
 
             {/* Enabled State with Configuration */}
-            {isEnabled && hasExistingCertification && (
+            {isEnabled && (
               <Form {...form}>
                 <form className="space-y-8">
                   <div className="grid gap-8 lg:grid-cols-5">
@@ -609,22 +570,13 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
                 <p className="text-muted-foreground mb-6 max-w-sm text-sm">{t('noCertificationDescription')}</p>
                 <button
                   type="button"
-                  onClick={() => handleCertificationToggle(true)}
-                  disabled={isCreating}
+                  onClick={() => form.setValue('enable_certification', true, { shouldDirty: true })}
+                  disabled={isSaving}
                   className="bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Award className="h-4 w-4" />
                   {t('enableCertificationButton')}
                 </button>
-              </div>
-            )}
-
-            {/* Creating State */}
-            {isEnabled && !hasExistingCertification && isCreating && (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Loader2 className="text-primary mb-4 h-12 w-12 animate-spin" />
-                <h3 className="mb-2 text-lg font-semibold">{t('creatingCertification')}</h3>
-                <p className="text-muted-foreground max-w-sm text-sm">{t('creatingCertificationDescription')}</p>
               </div>
             )}
           </CardContent>

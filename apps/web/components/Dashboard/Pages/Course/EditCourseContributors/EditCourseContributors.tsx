@@ -1,17 +1,4 @@
 'use client';
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,15 +7,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { bulkAddContributors, bulkRemoveContributors, editContributor, updateCourseAccess } from '@services/courses/courses';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Check, ChevronDown, Info, Loader2, Search, UserPen, Users } from 'lucide-react';
+import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { searchOrgContent } from '@services/search/search';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useDebouncedValue } from '@/hooks/useDebounce';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useLocale, useTranslations } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
@@ -185,11 +173,8 @@ interface ContributorOptionCardProps {
   isActive: boolean;
   title: string;
   description: string;
-  confirmTitle: string;
-  confirmMessage: string;
-  confirmButton: string;
   icon: React.ReactNode;
-  onConfirm: () => void | Promise<void>;
+  onSelect: () => void;
   activeLabel?: string;
   disabled?: boolean;
 }
@@ -198,72 +183,35 @@ function ContributorOptionCard({
   isActive,
   title,
   description,
-  confirmTitle,
-  confirmMessage,
-  confirmButton,
   icon,
-  onConfirm,
+  onSelect,
   activeLabel,
   disabled = false,
 }: ContributorOptionCardProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
-
-  const handleConfirm = () => {
-    startTransition(() => {
-      void Promise.resolve(onConfirm()).then(() => {
-        setIsOpen(false);
-      });
-    });
-  };
-
   return (
-    <AlertDialog
-      open={isOpen}
-      onOpenChange={setIsOpen}
+    <button
+      type="button"
+      onClick={onSelect}
+      disabled={disabled}
+      className={`relative h-[200px] w-full rounded-lg border p-4 text-left transition-all ${
+        isActive
+          ? 'border-slate-950 bg-slate-950 text-white shadow-sm'
+          : 'border-slate-200 bg-slate-100 text-slate-900 hover:bg-slate-200'
+      } ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
     >
-      <AlertDialogTrigger
-        render={
-          <div
-            className={`h-[200px] w-full rounded-lg bg-slate-100 transition-all ${
-              disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-slate-200'
-            }`}
-          >
-            {isActive ? (
-              <div className="absolute mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
-                {activeLabel}
-              </div>
-            ) : null}
-            <div className="flex h-full flex-col items-center justify-center space-y-1 p-2 sm:p-4">
-              {icon}
-              <div className="text-xl font-bold text-slate-700 sm:text-2xl">{title}</div>
-              <div className="w-full text-center text-sm leading-5 tracking-tight text-gray-400 sm:w-[500px] sm:text-base">
-                {description}
-              </div>
-            </div>
-          </div>
-        }
-      />
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogMedia>
-            <Info className="text-primary size-6" />
-          </AlertDialogMedia>
-          <AlertDialogTitle>{confirmTitle}</AlertDialogTitle>
-          <AlertDialogDescription>{confirmMessage}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending} />
-          <AlertDialogAction
-            onClick={handleConfirm}
-            disabled={isPending || disabled}
-          >
-            {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-            {confirmButton}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      {isActive ? (
+        <div className="absolute left-3 top-3 w-fit rounded-lg bg-white/15 px-3 py-1 text-sm font-bold text-white">
+          {activeLabel}
+        </div>
+      ) : null}
+      <div className="flex h-full flex-col items-center justify-center space-y-1 p-2 text-center sm:p-4">
+        {icon}
+        <div className={`text-xl font-bold sm:text-2xl ${isActive ? 'text-white' : 'text-slate-700'}`}>{title}</div>
+        <div className={`w-full text-sm leading-5 tracking-tight sm:w-[500px] sm:text-base ${isActive ? 'text-white/75' : 'text-gray-400'}`}>
+          {description}
+        </div>
+      </div>
+    </button>
   );
 }
 
@@ -291,14 +239,29 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
   const [selectedContributors, setSelectedContributors] = useState<number[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const initialRef = useRef<boolean | undefined>(courseStructure?.open_to_contributors);
+  const isDirtyRef = useRef(false);
+
+  useUnsavedChangesGuard(isDirty);
 
   useEffect(() => {
+    if (isDirtyRef.current) {
+      return;
+    }
+
     setIsOpenToContributors(courseStructure?.open_to_contributors);
-  }, [courseStructure?.open_to_contributors]);
+    initialRef.current = courseStructure?.open_to_contributors;
+    setIsDirty(false);
+    dispatchCourse({ type: 'setSectionDirty', payload: { section: 'contributors', dirty: false } });
+  }, [courseStructure?.open_to_contributors, dispatchCourse]);
 
   useEffect(() => {
-    dispatchCourse({ type: 'setSectionDirty', payload: { section: 'contributors', dirty: false } });
-  }, [dispatchCourse]);
+    const dirty = isOpenToContributors !== undefined && isOpenToContributors !== initialRef.current;
+    isDirtyRef.current = dirty;
+    setIsDirty(dirty);
+    dispatchCourse({ type: 'setSectionDirty', payload: { section: 'contributors', dirty } });
+  }, [dispatchCourse, isOpenToContributors]);
 
   useEffect(() => {
     const searchUsers = async () => {
@@ -511,14 +474,21 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
     }
   };
 
-  const handleContributorAccessChange = async (nextOpenToContributors: boolean) => {
-    if (!(access_token && isOpenToContributors !== undefined) || nextOpenToContributors === isOpenToContributors) return;
+  const handleDiscard = () => {
+    setIsOpenToContributors(initialRef.current);
+    isDirtyRef.current = false;
+    setIsDirty(false);
+    dispatchCourse({ type: 'setSectionDirty', payload: { section: 'contributors', dirty: false } });
+  };
+
+  const handleContributorAccessSave = async () => {
+    if (!(access_token && isOpenToContributors !== undefined) || !isDirty) return;
 
     setIsSaving(true);
     try {
       const response = await updateCourseAccess(
         courseStructure.course_uuid,
-        { open_to_contributors: nextOpenToContributors },
+        { open_to_contributors: isOpenToContributors },
         access_token,
         {
           lastKnownUpdateDate: courseStructure.update_date,
@@ -542,7 +512,10 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
           ...response.data,
         },
       });
-      setIsOpenToContributors(nextOpenToContributors);
+      initialRef.current = isOpenToContributors;
+      isDirtyRef.current = false;
+      setIsDirty(false);
+      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'contributors', dirty: false } });
       await refreshCourseEditor();
       toast.success(tCommon('saved'));
     } catch (error: any) {
@@ -567,8 +540,26 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
                 <div>
                   <h1 className="text-lg font-bold text-gray-800 sm:text-xl">{t('courseContributorsTitle')}</h1>
                   <h2 className="text-xs text-gray-500 sm:text-sm">{t('courseContributorsSubtitle')}</h2>
+                  <p className="mt-1 text-sm text-slate-500">Changes stay in draft until you save this stage.</p>
                 </div>
-                {isSaving ? <span className="text-sm text-gray-500">{tCommon('saving')}</span> : null}
+                <div className="flex items-center gap-3">
+                  {isDirty ? <span className="text-sm text-gray-500">Draft not saved</span> : null}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={!isDirty || isSaving}
+                    onClick={handleDiscard}
+                  >
+                    Discard draft
+                  </Button>
+                  <Button
+                    type="button"
+                    disabled={!isDirty || isSaving}
+                    onClick={handleContributorAccessSave}
+                  >
+                    {isSaving ? tCommon('saving') : 'Save changes'}
+                  </Button>
+                </div>
               </div>
             </div>
             <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
@@ -576,16 +567,13 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
                 isActive={isOpenToContributors ?? false}
                 title={t('openToContributorsTitle')}
                 description={t('openToContributorsDescription')}
-                confirmTitle={t('openToContributorsTitle')}
-                confirmMessage={t('openToContributorsMessage')}
-                confirmButton={t('openToContributorsButton')}
                 icon={
                   <UserPen
-                    className="text-slate-400"
+                    className={isOpenToContributors ? 'text-white/80' : 'text-slate-400'}
                     size={32}
                   />
                 }
-                onConfirm={() => handleContributorAccessChange(true)}
+                onSelect={() => setIsOpenToContributors(true)}
                 activeLabel={t('activeBadge')}
                 disabled={isSaving}
               />
@@ -593,16 +581,13 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
                 isActive={!isOpenToContributors}
                 title={t('closeToContributorsTitle')}
                 description={t('closeToContributorsDescription')}
-                confirmTitle={t('closeToContributorsTitle')}
-                confirmMessage={t('closeToContributorsMessage')}
-                confirmButton={t('closeToContributorsButton')}
                 icon={
                   <Users
-                    className="text-slate-400"
+                    className={!isOpenToContributors ? 'text-white/80' : 'text-slate-400'}
                     size={32}
                   />
                 }
-                onConfirm={() => handleContributorAccessChange(false)}
+                onSelect={() => setIsOpenToContributors(false)}
                 activeLabel={t('activeBadge')}
                 disabled={isSaving}
               />

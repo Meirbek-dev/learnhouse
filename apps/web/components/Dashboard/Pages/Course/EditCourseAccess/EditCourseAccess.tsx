@@ -14,28 +14,25 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import LinkToUserGroup from '@components/Objects/Modals/Dash/EditCourseAccess/LinkToUserGroup';
-import { AlertTriangle, Globe, Info, Loader2, SquareUserRound, Users, X } from 'lucide-react';
+import { AlertTriangle, Globe, Loader2, SquareUserRound, Users, X } from 'lucide-react';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { updateCourseAccess } from '@services/courses/courses';
 import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
+import { Button } from '@/components/ui/button';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
-// Reusable component for access option cards with AlertDialog
 interface AccessOptionCardProps {
   isActive: boolean;
   icon: React.ComponentType<{ className?: string; size?: number }>;
   title: string;
   description: string;
-  dialogTitle: string;
-  dialogDescription: string;
-  confirmButtonText: string;
   activeBadgeText: string;
-  status: 'info' | 'warning';
-  onConfirm: () => void | Promise<void>;
+  onSelect: () => void;
   disabled?: boolean;
 }
 
@@ -44,89 +41,37 @@ const AccessOptionCard = ({
   icon: Icon,
   title,
   description,
-  dialogTitle,
-  dialogDescription,
-  confirmButtonText,
   activeBadgeText,
-  status,
-  onConfirm,
+  onSelect,
   disabled = false,
 }: AccessOptionCardProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const t = useTranslations('Components.ConfirmationModal');
-
-  const handleConfirm = () => {
-    startTransition(() => {
-      void Promise.resolve(onConfirm()).then(() => {
-        setIsOpen(false);
-      });
-    });
-  };
-
-  const isInfo = status === 'info';
-  const IconComponent = isInfo ? Info : AlertTriangle;
-  const iconBgClass = isInfo
-    ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/20 dark:text-blue-400'
-    : 'bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400';
-
   return (
-    <AlertDialog
-      open={isOpen}
-      onOpenChange={setIsOpen}
+    <button
+      type="button"
+      onClick={onSelect}
+      disabled={disabled}
+      className={`relative h-[200px] w-full rounded-lg border p-4 text-left transition-all ${
+        isActive
+          ? 'border-slate-950 bg-slate-950 text-white shadow-sm'
+          : 'border-slate-200 bg-slate-100 text-slate-900 hover:bg-slate-200'
+      } ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
     >
-      <AlertDialogTrigger
-        render={
-          <div
-            className={`h-[200px] w-full rounded-lg bg-slate-100 transition-all ${
-              disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-slate-200'
-            }`}
-          >
-            {isActive && (
-              <div className="absolute mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
-                {activeBadgeText}
-              </div>
-            )}
-            <div className="flex h-full flex-col items-center justify-center space-y-1 p-2 sm:p-4">
-              <Icon
-                className="text-slate-400"
-                size={32}
-              />
-              <div className="text-xl font-bold text-slate-700 sm:text-2xl">{title}</div>
-              <div className="w-full text-center text-sm leading-5 tracking-tight text-gray-400 sm:w-[500px] sm:text-base">
-                {description}
-              </div>
-            </div>
-          </div>
-        }
-      />
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogMedia className={iconBgClass}>
-            <IconComponent className="size-8" />
-          </AlertDialogMedia>
-          <AlertDialogTitle>{dialogTitle}</AlertDialogTitle>
-          <AlertDialogDescription>{dialogDescription}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending} />
-          <AlertDialogAction
-            variant={isInfo ? 'default' : 'destructive'}
-            onClick={handleConfirm}
-            disabled={isPending || disabled}
-          >
-            {isPending ? (
-              <div className="flex items-center gap-2">
-                <Loader2 className="size-4 animate-spin" />
-                {t('loading')}
-              </div>
-            ) : (
-              confirmButtonText
-            )}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      {isActive ? (
+        <div className="absolute left-3 top-3 w-fit rounded-lg bg-white/15 px-3 py-1 text-sm font-bold text-white">
+          {activeBadgeText}
+        </div>
+      ) : null}
+      <div className="flex h-full flex-col items-center justify-center space-y-1 text-center">
+        <Icon
+          className={isActive ? 'text-white/80' : 'text-slate-400'}
+          size={32}
+        />
+        <div className={`text-xl font-bold sm:text-2xl ${isActive ? 'text-white' : 'text-slate-700'}`}>{title}</div>
+        <div className={`w-full text-sm leading-5 tracking-tight sm:w-[500px] sm:text-base ${isActive ? 'text-white/75' : 'text-gray-500'}`}>
+          {description}
+        </div>
+      </div>
+    </button>
   );
 };
 
@@ -143,27 +88,49 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
   const dispatchCourse = useCourseDispatch();
   const t = useTranslations('DashPage.Courses.Access');
   const tCommon = useTranslations('Common');
-  const [isClientPublic, setIsClientPublic] = useState<boolean | undefined>(() => courseStructure?.public);
+  const [draftPublic, setDraftPublic] = useState<boolean | undefined>(() => courseStructure?.public);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
   const usergroups = editorData.linkedUserGroups.data ?? [];
   const isUserGroupsLoading = course.isEditorDataLoading && editorData.linkedUserGroups.data === null;
+  const initialRef = useRef<boolean | undefined>(courseStructure?.public);
+  const isDirtyRef = useRef(false);
+
+  useUnsavedChangesGuard(isDirty);
 
   useEffect(() => {
-    setIsClientPublic(courseStructure?.public);
-  }, [courseStructure?.public]);
+    if (isDirtyRef.current) {
+      return;
+    }
 
-  useEffect(() => {
+    setDraftPublic(courseStructure?.public);
+    initialRef.current = courseStructure?.public;
+    setIsDirty(false);
     dispatchCourse({ type: 'setSectionDirty', payload: { section: 'access', dirty: false } });
-  }, [dispatchCourse]);
+  }, [courseStructure?.public, dispatchCourse]);
 
-  const handleAccessChange = async (nextPublic: boolean) => {
-    if (!(access_token && isClientPublic !== undefined) || nextPublic === isClientPublic) return;
+  useEffect(() => {
+    const dirty = draftPublic !== undefined && draftPublic !== initialRef.current;
+    isDirtyRef.current = dirty;
+    setIsDirty(dirty);
+    dispatchCourse({ type: 'setSectionDirty', payload: { section: 'access', dirty } });
+  }, [dispatchCourse, draftPublic]);
+
+  const handleDiscard = () => {
+    setDraftPublic(initialRef.current);
+    isDirtyRef.current = false;
+    setIsDirty(false);
+    dispatchCourse({ type: 'setSectionDirty', payload: { section: 'access', dirty: false } });
+  };
+
+  const handleAccessSave = async () => {
+    if (!(access_token && draftPublic !== undefined) || !isDirty) return;
 
     setIsSaving(true);
     try {
       const response = await updateCourseAccess(
         courseStructure.course_uuid,
-        { public: nextPublic },
+        { public: draftPublic },
         access_token,
         {
           lastKnownUpdateDate: courseStructure.update_date,
@@ -187,7 +154,10 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
           ...response.data,
         },
       });
-      setIsClientPublic(nextPublic);
+      initialRef.current = draftPublic;
+      isDirtyRef.current = false;
+      setIsDirty(false);
+      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'access', dirty: false } });
       await refreshCourseEditor();
       toast.success(tCommon('saved'));
     } catch (error: any) {
@@ -212,39 +182,49 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
                 <div>
                   <h1 className="text-lg font-bold text-gray-800 sm:text-xl">{t('accessToTheCourse')}</h1>
                   <h2 className="text-xs text-gray-500 sm:text-sm">{t('accessDescription')}</h2>
+                  <p className="mt-1 text-sm text-slate-500">Changes stay in draft until you save this stage.</p>
                 </div>
-                {isSaving ? <span className="text-sm text-gray-500">{tCommon('saving')}</span> : null}
+                <div className="flex items-center gap-3">
+                  {isDirty ? <span className="text-sm text-gray-500">Draft not saved</span> : null}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={!isDirty || isSaving}
+                    onClick={handleDiscard}
+                  >
+                    Discard draft
+                  </Button>
+                  <Button
+                    type="button"
+                    disabled={!isDirty || isSaving}
+                    onClick={handleAccessSave}
+                  >
+                    {isSaving ? tCommon('saving') : 'Save changes'}
+                  </Button>
+                </div>
               </div>
             </div>
             <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
               <AccessOptionCard
-                isActive={isClientPublic === true}
+                isActive={draftPublic === true}
                 icon={Globe}
                 title={t('publicLabel')}
                 description={t('publicDescription')}
-                dialogTitle={t('changeToPublicConfirmTitle')}
-                dialogDescription={t('changeToPublicConfirmMsg')}
-                confirmButtonText={t('changeToPublicButton')}
                 activeBadgeText={t('activeBadge')}
-                status="info"
-                onConfirm={() => handleAccessChange(true)}
+                onSelect={() => setDraftPublic(true)}
                 disabled={isSaving}
               />
               <AccessOptionCard
-                isActive={isClientPublic === false}
+                isActive={draftPublic === false}
                 icon={Users}
                 title={t('usersOnlyLabel')}
                 description={t('usersOnlyDescription')}
-                dialogTitle={t('changeToUsersOnlyConfirmTitle')}
-                dialogDescription={t('changeToUsersOnlyConfirmMsg')}
-                confirmButtonText={t('changeToUsersOnlyButton')}
                 activeBadgeText={t('activeBadge')}
-                status="info"
-                onConfirm={() => handleAccessChange(false)}
+                onSelect={() => setDraftPublic(false)}
                 disabled={isSaving}
               />
             </div>
-            {!isClientPublic && (
+            {draftPublic === false && (
               <UserGroupsSection
                 usergroups={usergroups}
                 isLoading={isUserGroupsLoading}

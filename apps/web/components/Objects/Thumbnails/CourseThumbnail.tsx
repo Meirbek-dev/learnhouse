@@ -11,6 +11,7 @@ import {
   Play,
   Settings2,
 } from 'lucide-react';
+import { buildCourseWorkspacePath } from '@/lib/course-management';
 import { useMemo, useState, useTransition } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
@@ -425,14 +426,14 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, orgSlug, onDelete }) => {
       id: 'edit-content',
       label: t('editContent'),
       icon: FilePenLine,
-      onClick: () => router.push(getUriWithOrg(orgSlug, `/dash/courses/course/${courseIdClean}/content`)),
+      onClick: () => router.push(buildCourseWorkspacePath(orgSlug, courseIdClean, 'curriculum')),
       requiresAction: 'update',
     },
     {
       id: 'settings',
       label: t('settings'),
       icon: Settings2,
-      onClick: () => router.push(getUriWithOrg(orgSlug, `/dash/courses/course/${courseIdClean}/general`)),
+      onClick: () => router.push(buildCourseWorkspacePath(orgSlug, courseIdClean, 'details')),
       requiresAction: 'update',
     },
     {

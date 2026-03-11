@@ -390,15 +390,16 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                     {t('title', { courseName: courseStructure.name || '' })}
                   </h1>
                   <p className="text-muted-foreground text-base">{t('subtitle')}</p>
+                  <p className="text-sm text-slate-500">Changes stay in draft until you save this stage.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  {isDirty ? <span className="text-sm text-gray-500">{tCommon('unsavedChanges')}</span> : null}
+                  {isDirty ? <span className="text-sm text-gray-500">Draft not saved</span> : null}
                   <Button
                     type="submit"
                     form={formId}
                     disabled={!isDirty || isSaving}
                   >
-                    {isSaving ? tCommon('saving') : tCommon('save')}
+                    {isSaving ? tCommon('saving') : 'Save changes'}
                   </Button>
                 </div>
               </div>
