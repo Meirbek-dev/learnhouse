@@ -21,14 +21,14 @@ export default function QuestionDifficultyRadar({ title, description, data }: Qu
   }));
 
   return (
-    <Card className="border-slate-200 bg-white/90 shadow-sm">
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
         {data.length > MAX && (
-          <p className="mb-2 text-xs text-slate-500">{t('radar.showing', { shown: MAX, total: data.length })}</p>
+          <p className="mb-2 text-xs text-muted-foreground">{t('radar.showing', { shown: MAX, total: data.length })}</p>
         )}
         <ChartContainer
           className="h-[320px] w-full"

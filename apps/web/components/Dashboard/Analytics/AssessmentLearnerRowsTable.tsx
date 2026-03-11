@@ -50,7 +50,7 @@ export default function AssessmentLearnerRowsTable({ rows, storageKey }: Assessm
   ];
 
   return (
-    <Card className="border-slate-200 bg-white/90 shadow-sm">
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>{t('pages.assessmentLearnerRowsTitle')}</CardTitle>
       </CardHeader>

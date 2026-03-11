@@ -31,11 +31,11 @@ export default function AssessmentOutliersTable({
         <div>
           <Link
             href={`/orgs/${orgslug}/dash/analytics/assessments/${row.original.assessment_type}/${row.original.assessment_id}`}
-            className="font-medium text-slate-900 hover:text-emerald-700"
+            className="font-medium text-foreground hover:text-emerald-700"
           >
             {row.original.title}
           </Link>
-          <div className="text-xs uppercase tracking-wide text-slate-500">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground">
             {getAnalyticsAssessmentTypeLabel(t, row.original.assessment_type)}
           </div>
         </div>
@@ -72,7 +72,7 @@ export default function AssessmentOutliersTable({
       header: t('assessmentOutliers.colSignals'),
       cell: ({ row }) =>
         row.original.outlier_reason_codes.length ? (
-          <div className="max-w-[240px] whitespace-normal text-xs text-slate-600">
+          <div className="max-w-[240px] whitespace-normal text-xs text-muted-foreground">
             {row.original.outlier_reason_codes.map((code) => (
               <Badge
                 key={code}
@@ -90,7 +90,7 @@ export default function AssessmentOutliersTable({
   ];
 
   return (
-    <Card className="border-slate-200 bg-white/90 shadow-sm">
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>{t('assessmentOutliers.title')}</CardTitle>
         <CardDescription>{t('assessmentOutliers.description')}</CardDescription>

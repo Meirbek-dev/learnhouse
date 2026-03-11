@@ -108,7 +108,7 @@ const CoursesHome = ({
     const attention = courses.filter((course) => courseNeedsAttention(course)).length;
 
     return [
-      { label: 'Visible now', value: courses.length, className: 'bg-slate-950 text-white' },
+      { label: 'Visible now', value: courses.length, className: 'bg-primary text-primary-foreground' },
       { label: 'Publish-ready', value: ready, className: 'bg-emerald-50 text-emerald-900' },
       { label: 'Private', value: privateCount, className: 'bg-amber-50 text-amber-900' },
       { label: 'Needs attention', value: attention, className: 'bg-rose-50 text-rose-900' },
@@ -297,7 +297,7 @@ const CoursesHome = ({
 
   const bulkToolbar =
     selectedCourses.length > 0 ? (
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted px-3 py-2">
         <Badge variant="outline">{selectedCourses.length} selected</Badge>
         <Button
           type="button"
@@ -377,14 +377,14 @@ const CoursesHome = ({
             <div className="space-y-1">
               <AppLink
                 href={buildCourseWorkspacePath(orgslug, removeCoursePrefix(course.course_uuid))}
-                className="font-semibold text-slate-950 hover:text-slate-700"
+                className="font-semibold text-foreground hover:text-foreground/70"
               >
                 {course.name}
               </AppLink>
-              <div className="line-clamp-2 text-sm text-slate-500">
+              <div className="line-clamp-2 text-sm text-muted-foreground">
                 {course.description?.trim() || 'No description yet.'}
               </div>
-              <div className="text-xs text-slate-400">
+              <div className="text-xs text-muted-foreground">
                 {stats.chapters} chapters · {stats.activities} activities
               </div>
             </div>
@@ -414,7 +414,7 @@ const CoursesHome = ({
         header: 'Updated',
         meta: { label: 'Updated' },
         cell: ({ row }) => (
-          <div className="text-sm text-slate-600">
+          <div className="text-sm text-muted-foreground">
             {row.original.update_date ? new Date(row.original.update_date).toLocaleDateString() : 'Unknown'}
           </div>
         ),
@@ -445,18 +445,18 @@ const CoursesHome = ({
   ];
 
   return (
-    <div className="min-h-screen w-full bg-[radial-gradient(circle_at_top,_rgba(15,23,42,0.06),_transparent_42%),linear-gradient(180deg,_#f7f5ef_0%,_#ffffff_22%,_#f8fafc_100%)] px-4 py-6 lg:px-8">
+    <div className="min-h-screen w-full bg-background px-4 py-6 lg:px-8">
       <div className="mb-6">
         <BreadCrumbs type="courses" />
 
-        <div className="mt-4 rounded-3xl border border-slate-200/80 bg-white/92 p-6 shadow-sm backdrop-blur">
+        <div className="mt-4 rounded-xl border bg-card p-6 shadow-sm">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="max-w-3xl">
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Course management</div>
-              <h1 className="mt-2 text-4xl font-semibold tracking-tight text-slate-950">
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Course management</div>
+              <h1 className="mt-2 text-4xl font-semibold tracking-tight text-foreground">
                 Manage courses as a workspace
               </h1>
-              <p className="mt-3 text-sm leading-6 text-slate-600">
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">
                 This view is built for triage and maintenance. Use presets to focus on private, publish-ready, recently
                 updated, or problem courses, then jump directly into the new workspace stages.
               </p>
@@ -504,8 +504,8 @@ const CoursesHome = ({
               className={cn(
                 'rounded-full px-4 py-2 text-sm font-medium transition-colors',
                 preset === item.key
-                  ? 'bg-slate-950 text-white'
-                  : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-100',
+                  ? 'bg-primary text-primary-foreground'
+                  : 'border border-input bg-background text-foreground hover:bg-accent',
               )}
             >
               {item.label}
@@ -513,7 +513,7 @@ const CoursesHome = ({
           ))}
         </div>
 
-        <div className="mt-4 flex flex-col gap-4 rounded-3xl border border-slate-200/80 bg-white/92 p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+        <div className="mt-4 flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
           <form
             className="flex w-full max-w-2xl items-center gap-2"
             onSubmit={(event) => {
@@ -547,11 +547,11 @@ const CoursesHome = ({
           </form>
 
           <div className="flex items-center gap-3">
-            <label className="text-sm font-medium text-gray-600">Sort</label>
+            <label className="text-sm font-medium text-muted-foreground">Sort</label>
             <select
               value={sortBy}
               onChange={(event) => updateRoute({ sort: event.target.value, page: '1' })}
-              className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm"
+              className="rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="updated">Recently updated</option>
               <option value="name">Name</option>
@@ -559,17 +559,17 @@ const CoursesHome = ({
           </div>
         </div>
 
-        <div className="mt-3 text-sm text-gray-500">
+        <div className="mt-3 text-sm text-muted-foreground">
           {courses.length} visible on this page, {totalCourses} total in the workspace.
         </div>
       </div>
 
       {courses.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-slate-300 bg-white/80 py-12 shadow-sm">
+        <div className="rounded-xl border border-dashed bg-card py-12 shadow-sm">
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
-              <h2 className="mb-2 text-2xl font-bold text-gray-600">No matching courses on this page</h2>
-              <p className="text-lg text-gray-400">
+              <h2 className="mb-2 text-2xl font-bold text-muted-foreground">No matching courses on this page</h2>
+              <p className="text-lg text-muted-foreground">
                 {hasQuery ? 'Adjust the search or preset.' : 'Create a course or widen the current preset.'}
               </p>
               {canCreateCourse ? (
@@ -602,7 +602,7 @@ const CoursesHome = ({
           ))}
         </div>
       ) : (
-        <div className="rounded-3xl border border-slate-200/80 bg-white/92 p-4 shadow-sm">
+        <div className="rounded-xl border bg-card p-4 shadow-sm">
           <DataTable
             columns={columns}
             data={courses}
@@ -621,8 +621,8 @@ const CoursesHome = ({
       )}
 
       {hasPagination ? (
-        <div className="flex items-center justify-between border-t border-gray-200 py-6">
-          <div className="text-sm text-gray-500">
+        <div className="flex items-center justify-between border-t py-6">
+          <div className="text-sm text-muted-foreground">
             Page {currentPage} of {totalPages}
           </div>
           <div className="flex items-center gap-2">

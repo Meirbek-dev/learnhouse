@@ -64,16 +64,16 @@ export default function CourseReviewPublish({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl border border-slate-200 bg-linear-to-br from-emerald-50 via-white to-sky-50 p-6">
+      <div className="rounded-xl border bg-card p-6">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Review & publish</div>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Review & publish</div>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
               {readiness.readyToPublish
                 ? 'This course is structurally ready.'
                 : 'Finish the remaining blockers before publishing.'}
             </h2>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
               This page centralizes the last-mile checks that used to be scattered across tabs. Use it to confirm
               content quality, visibility, and launch state without hunting through the editor.
             </p>
@@ -102,21 +102,21 @@ export default function CourseReviewPublish({
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-5">
-          <div className="text-sm font-semibold text-slate-950">Readiness checklist</div>
+        <div className="rounded-xl border bg-card p-5">
+          <div className="text-sm font-semibold text-foreground">Readiness checklist</div>
           <div className="mt-4 space-y-3">
             {readiness.checklist.map((item) => (
               <div
                 key={item.id}
-                className={`flex items-start justify-between gap-4 rounded-2xl border p-4 border-l-4 ${
+                className={`flex items-start justify-between gap-4 rounded-lg border p-4 border-l-4 ${
                   item.complete
-                    ? 'border-slate-200 border-l-emerald-500 bg-emerald-50/30'
-                    : 'border-slate-200 border-l-amber-400 bg-amber-50/30'
+                    ? 'border-border border-l-emerald-500 bg-emerald-50/30 dark:bg-emerald-950/20'
+                    : 'border-border border-l-amber-400 bg-amber-50/30 dark:bg-amber-950/20'
                 }`}
               >
                 <div>
-                  <div className="font-medium text-slate-950">{item.title}</div>
-                  <div className="mt-1 text-sm text-slate-600">{item.description}</div>
+                  <div className="font-medium text-foreground">{item.title}</div>
+                  <div className="mt-1 text-sm text-muted-foreground">{item.description}</div>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   <Badge variant={item.complete ? 'success' : 'warning'}>{item.complete ? 'Done' : 'Fix'}</Badge>
@@ -137,19 +137,19 @@ export default function CourseReviewPublish({
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-3xl border border-slate-200 bg-slate-950 p-5 text-white">
-            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">Launch state</div>
+          <div className="rounded-xl border bg-foreground p-5 text-background">
+            <div className="text-xs font-semibold uppercase tracking-wider text-background/60">Launch state</div>
             <div className="mt-3 text-3xl font-semibold">{course.courseStructure.public ? 'Live' : 'Private'}</div>
-            <div className="mt-2 text-sm text-slate-300">
+            <div className="mt-2 text-sm text-background/70">
               {course.courseStructure.public
                 ? 'Learners can discover this course according to its current access rules.'
                 : 'Learners cannot access this course publicly until you publish it.'}
             </div>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-5">
-            <div className="text-sm font-semibold text-slate-950">Publishing notes</div>
-            <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600">
+          <div className="rounded-xl border bg-card p-5">
+            <div className="text-sm font-semibold text-foreground">Publishing notes</div>
+            <ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
               <li>Publishing uses the course visibility flag already supported by the backend.</li>
               <li>Curriculum edits remain immediate, so confirm chapter and activity structure before launching.</li>
               <li>

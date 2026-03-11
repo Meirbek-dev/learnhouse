@@ -170,7 +170,7 @@ const PublishingState = () => {
             onClick={() => {
               setIsEditModalOpen(true);
             }}
-            className="flex cursor-pointer items-center space-x-2 rounded-md border border-blue-600/10 bg-linear-to-bl from-blue-400/50 to-blue-200/80 px-3 py-2 font-medium text-blue-800 shadow-lg shadow-blue-900/10"
+            className="flex cursor-pointer items-center space-x-2 rounded-md border bg-background px-3 py-2 font-medium text-foreground shadow-sm hover:bg-accent"
           >
             <Pencil size={18} />
             <p className="text-sm font-bold">{t('edit')}</p>
@@ -186,7 +186,7 @@ const PublishingState = () => {
           <Link
             target="_blank"
             href={`/course/${assignment?.course_object?.course_uuid.replace('course_', '')}/activity/${assignment?.activity_object?.activity_uuid.replace('activity_', '')}`}
-            className="flex cursor-pointer items-center space-x-2 rounded-md border border-cyan-600/10 bg-linear-to-bl from-sky-400/50 to-cyan-200/80 px-3 py-2 font-medium text-cyan-800 shadow-lg shadow-cyan-900/10"
+            className="flex cursor-pointer items-center space-x-2 rounded-md border bg-background px-3 py-2 font-medium text-foreground shadow-sm hover:bg-accent"
           >
             <Eye size={18} />
             <p className="text-sm font-bold">{t('preview')}</p>
@@ -201,7 +201,7 @@ const PublishingState = () => {
           >
             <div
               onClick={() => updateAssignmentPublishState(assignment?.assignment_object?.assignment_uuid)}
-              className="flex cursor-pointer items-center space-x-2 rounded-md border border-gray-600/10 bg-linear-to-bl from-gray-400/50 to-gray-200/80 px-3 py-2 font-medium text-gray-800 shadow-lg shadow-gray-900/10"
+              className="flex cursor-pointer items-center space-x-2 rounded-md border bg-background px-3 py-2 font-medium text-foreground shadow-sm hover:bg-accent"
             >
               <BookX size={18} />
               <p className="text-sm font-bold">{t('unpublish')}</p>
@@ -217,7 +217,7 @@ const PublishingState = () => {
           >
             <div
               onClick={() => updateAssignmentPublishState(assignment?.assignment_object?.assignment_uuid)}
-              className="flex cursor-pointer items-center space-x-2 rounded-md border border-green-600/10 bg-linear-to-bl from-green-400/50 to-lime-200/80 px-3 py-2 font-medium text-green-800 shadow-lg shadow-green-900/10"
+              className="flex cursor-pointer items-center space-x-2 rounded-md bg-primary px-3 py-2 font-medium text-primary-foreground shadow-sm hover:bg-primary/90"
             >
               <BookOpen size={18} />
               <p className="text-sm font-bold">{t('publish')}</p>

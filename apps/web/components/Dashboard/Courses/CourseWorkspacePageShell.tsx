@@ -1,18 +1,12 @@
 'use client';
 
 import {
-  Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuBadge,
-  SidebarMenuButton,
   SidebarMenuItem,
-  SidebarInset,
-  SidebarProvider,
-  SidebarSeparator,
-  SidebarTrigger,
 } from '@/components/ui/sidebar';
 import {
   BookCopy,
@@ -36,6 +30,8 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import AppLink from '@/components/ui/AppLink';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import type { ReactNode } from 'react';
 
 interface CourseWorkspacePageShellProps {
@@ -75,130 +71,138 @@ function CourseWorkspaceChrome({
     message: 'You have unsaved course changes. Leave this workspace?',
   });
 
+  const workspaceNavClassName = (isActive: boolean) =>
+    cn(
+      'flex min-h-10 items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors',
+      isActive
+        ? 'border-sidebar-accent-foreground/20 bg-sidebar-accent text-sidebar-accent-foreground'
+        : 'border-sidebar-border/60 text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
+    );
+
   return (
-    <SidebarProvider>
+    <div className="flex min-h-screen min-w-0 flex-1 flex-col bg-background xl:flex-row">
       <CourseConflictDialog />
 
-      {/* Left sidebar */}
-      <Sidebar
-        collapsible="offcanvas"
-        className="border-r-0"
-      >
-        <SidebarHeader className="p-5">
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-sidebar-foreground/50">
-              Course workspace
-            </div>
-            <div className="mt-2 text-xl font-semibold tracking-tight text-sidebar-foreground line-clamp-2">
-              {course.courseStructure.name || 'Untitled course'}
-            </div>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              <Badge
-                variant={course.courseStructure.public ? 'success' : 'outline'}
-                className="text-xs"
-              >
-                {course.courseStructure.public ? 'Public' : 'Private'}
-              </Badge>
-              <Badge
-                variant={readiness.readyToPublish ? 'success' : 'warning'}
-                className="text-xs"
-              >
-                {readiness.readyToPublish
-                  ? 'Ready'
-                  : `${readiness.issues.length} blocker${readiness.issues.length === 1 ? '' : 's'}`}
-              </Badge>
-              {hasDirtySections && (
+      <aside className="border-b bg-sidebar text-sidebar-foreground xl:sticky xl:top-0 xl:h-svh xl:w-80 xl:shrink-0 xl:border-r xl:border-b-0">
+        <div className="flex h-full flex-col">
+          <SidebarHeader className="p-5">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-sidebar-foreground/50">
+                Course workspace
+              </div>
+              <div className="mt-2 text-xl font-semibold tracking-tight text-sidebar-foreground line-clamp-2">
+                {course.courseStructure.name || 'Untitled course'}
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
                 <Badge
-                  variant="warning"
+                  variant={course.courseStructure.public ? 'success' : 'outline'}
                   className="text-xs"
                 >
-                  Unsaved
+                  {course.courseStructure.public ? 'Public' : 'Private'}
                 </Badge>
-              )}
-            </div>
-          </div>
-        </SidebarHeader>
-
-        <SidebarSeparator />
-
-        {/* Stats mini-card */}
-        <div className="mx-3 my-3 rounded-xl bg-sidebar-accent p-3">
-          <div className="text-xs font-medium uppercase tracking-widest text-sidebar-foreground/50">Status</div>
-          <div className="mt-2 flex items-baseline gap-1">
-            <span className="text-2xl font-bold text-sidebar-foreground">{readiness.completed}</span>
-            <span className="text-sm text-sidebar-foreground/60">/ {readiness.total} checks</span>
-          </div>
-          <Progress
-            value={readiness.total > 0 ? Math.round((readiness.completed / readiness.total) * 100) : 0}
-            className="mt-2 h-1.5"
-          />
-          <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-            <div>
-              <div className="text-sidebar-foreground/50">Chapters</div>
-              <div className="text-base font-semibold text-sidebar-foreground">{stats.chapters}</div>
-            </div>
-            <div>
-              <div className="text-sidebar-foreground/50">Activities</div>
-              <div className="text-base font-semibold text-sidebar-foreground">{stats.activities}</div>
-            </div>
-          </div>
-        </div>
-
-        <SidebarContent>
-          <SidebarMenu>
-            {visibleStages.map((stage) => {
-              const Icon = stage.icon;
-              const isActive = stage.key === activeStage;
-              return (
-                <SidebarMenuItem key={stage.key}>
-                  <SidebarMenuButton
-                    render={<AppLink href={buildCourseWorkspacePath(orgslug, courseuuid, stage.key)} />}
-                    isActive={isActive}
-                    tooltip={stage.label}
+                <Badge
+                  variant={readiness.readyToPublish ? 'success' : 'warning'}
+                  className="text-xs"
+                >
+                  {readiness.readyToPublish
+                    ? 'Ready'
+                    : `${readiness.issues.length} blocker${readiness.issues.length === 1 ? '' : 's'}`}
+                </Badge>
+                {hasDirtySections && (
+                  <Badge
+                    variant="warning"
+                    className="text-xs"
                   >
-                    <Icon />
-                    <span>{stage.label}</span>
-                  </SidebarMenuButton>
-                  {stage.key === 'review' && !readiness.readyToPublish && readiness.issues.length > 0 && (
-                    <SidebarMenuBadge>{readiness.issues.length}</SidebarMenuBadge>
-                  )}
-                </SidebarMenuItem>
-              );
-            })}
-          </SidebarMenu>
-        </SidebarContent>
+                    Unsaved
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </SidebarHeader>
 
-        <SidebarSeparator />
+          <Separator className="bg-sidebar-border" />
 
-        <SidebarFooter className="p-3">
-          <Button
-            nativeButton={false}
-            variant="outline"
-            className="w-full justify-start gap-2"
-            render={<AppLink href={`/orgs/${orgslug}/dash/courses`} />}
-          >
-            <BookCopy className="size-4" />
-            All courses
-          </Button>
-        </SidebarFooter>
-      </Sidebar>
+          <div className="mx-3 my-3 rounded-xl bg-sidebar-accent p-3">
+            <div className="text-xs font-medium uppercase tracking-widest text-sidebar-foreground/50">Status</div>
+            <div className="mt-2 flex items-baseline gap-1">
+              <span className="text-2xl font-bold text-sidebar-foreground">{readiness.completed}</span>
+              <span className="text-sm text-sidebar-foreground/60">/ {readiness.total} checks</span>
+            </div>
+            <Progress
+              value={readiness.total > 0 ? Math.round((readiness.completed / readiness.total) * 100) : 0}
+              className="mt-2 h-1.5"
+            />
+            <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <div className="text-sidebar-foreground/50">Chapters</div>
+                <div className="text-base font-semibold text-sidebar-foreground">{stats.chapters}</div>
+              </div>
+              <div>
+                <div className="text-sidebar-foreground/50">Activities</div>
+                <div className="text-base font-semibold text-sidebar-foreground">{stats.activities}</div>
+              </div>
+            </div>
+          </div>
 
-      {/* Main content */}
-      <SidebarInset className="flex min-h-screen min-w-0 flex-1 flex-col bg-[radial-gradient(circle_at_top,_rgba(15,23,42,0.06),_transparent_42%),linear-gradient(180deg,_#f7f5ef_0%,_#ffffff_22%,_#f8fafc_100%)]">
+          <SidebarContent className="px-3 pb-3 xl:flex-1">
+            <SidebarMenu className="flex-row gap-2 overflow-x-auto pb-1 xl:flex-col xl:overflow-visible">
+              {visibleStages.map((stage) => {
+                const Icon = stage.icon;
+                const isActive = stage.key === activeStage;
+                return (
+                  <SidebarMenuItem
+                    key={stage.key}
+                    className="min-w-44 shrink-0 xl:min-w-0"
+                  >
+                    <AppLink
+                      href={buildCourseWorkspacePath(orgslug, courseuuid, stage.key)}
+                      aria-current={isActive ? 'page' : undefined}
+                      className={workspaceNavClassName(isActive)}
+                    >
+                      <Icon className="size-4 shrink-0" />
+                      <span className="truncate">{stage.label}</span>
+                      {stage.key === 'review' && !readiness.readyToPublish && readiness.issues.length > 0 ? (
+                        <SidebarMenuBadge className="static ml-auto h-6 min-w-6 rounded-full bg-sidebar text-sidebar-foreground">
+                          {readiness.issues.length}
+                        </SidebarMenuBadge>
+                      ) : null}
+                    </AppLink>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarContent>
+
+          <Separator className="bg-sidebar-border" />
+
+          <SidebarFooter className="p-3">
+            <Button
+              nativeButton={false}
+              variant="outline"
+              className="w-full justify-start gap-2"
+              render={<AppLink href={`/orgs/${orgslug}/dash/courses`} />}
+            >
+              <BookCopy className="size-4" />
+              All courses
+            </Button>
+          </SidebarFooter>
+        </div>
+      </aside>
+
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col bg-background">
         {/* Top header card */}
-        <div className="mx-4 mt-4 rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-sm backdrop-blur lg:mx-6 lg:mt-6">
-          <div className="flex items-center gap-3">
-            <SidebarTrigger className="shrink-0" />
+        <div className="mx-4 mt-4 rounded-xl border bg-card p-5 shadow-sm lg:mx-6 lg:mt-6">
+          <div>
             <div className="min-w-0 flex-1">
               <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                 <div className="min-w-0">
-                  <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Course workspace
                   </div>
-                  <h1 className="mt-1 truncate text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                  <h1 className="mt-1 truncate text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                     {course.courseStructure.name || 'Untitled course'}
                   </h1>
-                  <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                  <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
                     {course.courseStructure.description?.trim() ||
                       'Use this workspace to shape the course, manage access, coordinate collaborators, and review publish readiness.'}
                   </p>
@@ -240,40 +244,37 @@ function CourseWorkspaceChrome({
 
           {/* Stats grid */}
           <div className="mt-5 grid gap-3 md:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-              <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Curriculum</div>
-              <div className="mt-2 text-2xl font-semibold text-slate-950">{stats.activities}</div>
-              <div className="text-sm text-slate-600">
+            <div className="rounded-lg border bg-muted/50 p-4">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">Curriculum</div>
+              <div className="mt-2 text-2xl font-semibold text-foreground">{stats.activities}</div>
+              <div className="text-sm text-muted-foreground">
                 Activities across {stats.chapters} chapter{stats.chapters === 1 ? '' : 's'}
               </div>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-              <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Readiness</div>
-              <div className="mt-2 text-2xl font-semibold text-slate-950">
+            <div className="rounded-lg border bg-muted/50 p-4">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">Readiness</div>
+              <div className="mt-2 text-2xl font-semibold text-foreground">
                 {readiness.completed}/{readiness.total}
               </div>
               <Progress
                 value={readiness.total > 0 ? Math.round((readiness.completed / readiness.total) * 100) : 0}
                 className="mt-2 h-1.5"
               />
-              <div className="mt-1 text-sm text-slate-600">Checks completed before publish review</div>
+              <div className="mt-1 text-sm text-muted-foreground">Checks completed before publish review</div>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-              <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Collaboration</div>
-              <div className="mt-2 text-2xl font-semibold text-slate-950">
+            <div className="rounded-lg border bg-muted/50 p-4">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">Collaboration</div>
+              <div className="mt-2 text-2xl font-semibold text-foreground">
                 {course.editorData.contributors.data?.length ?? 0}
               </div>
-              <div className="text-sm text-slate-600">Active contributor records loaded for this course</div>
+              <div className="text-sm text-muted-foreground">Active contributor records loaded for this course</div>
             </div>
           </div>
         </div>
 
-        {/* Page content */}
-        <div className="mx-4 my-4 rounded-[32px] border border-slate-200/80 bg-white/92 p-4 shadow-sm backdrop-blur lg:mx-6 lg:my-6 lg:p-6">
-          {children}
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+        <div className="mx-4 my-4 rounded-xl border bg-card p-4 shadow-sm lg:mx-6 lg:my-6 lg:p-6">{children}</div>
+      </div>
+    </div>
   );
 }
 

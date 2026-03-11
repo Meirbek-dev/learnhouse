@@ -433,7 +433,7 @@ export default function OrgEditImages() {
           className="mt-2"
         >
           <div className="flex w-full flex-col space-y-5">
-            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-8 transition-all duration-300">
+            <div className="w-full rounded-xl bg-muted/30 py-8 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-8">
                 <div className="group relative">
                   <img
@@ -466,8 +466,8 @@ export default function OrgEditImages() {
                     disabled={isLogoUploading}
                     className={cn(
                       'rounded-full px-6 py-2.5 font-medium text-sm',
-                      'bg-linear-to-r from-blue-500 to-blue-600 text-white',
-                      'hover:from-blue-600 hover:to-blue-700',
+                      'bg-primary text-primary-foreground',
+                      'hover:bg-primary/90',
                       'shadow-xs transition-all duration-300 hover:shadow-sm',
                       'flex items-center space-x-2',
                       isLogoUploading && 'cursor-not-allowed opacity-75',
@@ -499,7 +499,7 @@ export default function OrgEditImages() {
           className="mt-2"
         >
           <div className="flex w-full flex-col space-y-5">
-            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-8 transition-all duration-300">
+            <div className="w-full rounded-xl bg-muted/30 py-8 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-8">
                 <div className="group relative">
                   <img
@@ -532,8 +532,8 @@ export default function OrgEditImages() {
                     disabled={isThumbnailUploading}
                     className={cn(
                       'rounded-full px-6 py-2.5 font-medium text-sm',
-                      'bg-linear-to-r from-purple-500 to-purple-600 text-white',
-                      'hover:from-purple-600 hover:to-purple-700',
+                      'bg-primary text-primary-foreground',
+                      'hover:bg-primary/90',
                       'shadow-xs transition-all duration-300 hover:shadow-sm',
                       'flex items-center space-x-2',
                       isThumbnailUploading && 'cursor-not-allowed opacity-75',
@@ -567,7 +567,7 @@ export default function OrgEditImages() {
           className="mt-4"
         >
           <div className="flex w-full flex-col space-y-5">
-            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-6 transition-all duration-300">
+            <div className="w-full rounded-xl bg-muted/30 py-6 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-6">
                 <DragDropContext onDragEnd={handleDragEnd}>
                   <Droppable

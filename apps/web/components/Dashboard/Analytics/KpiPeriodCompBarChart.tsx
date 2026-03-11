@@ -12,7 +12,7 @@ interface KpiPeriodCompBarChartProps {
 export default function KpiPeriodCompBarChart({ data }: KpiPeriodCompBarChartProps) {
   const t = useTranslations('TeacherAnalytics');
   return (
-    <Card className="border-slate-200 bg-white/90 shadow-sm">
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>{t('kpiCharts.periodCompTitle')}</CardTitle>
         <CardDescription>{t('kpiCharts.periodCompDesc')}</CardDescription>

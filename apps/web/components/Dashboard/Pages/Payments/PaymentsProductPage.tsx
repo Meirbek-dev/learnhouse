@@ -336,8 +336,8 @@ const PaymentsProductPage = () => {
             onClick={() => {
               setIsCreateModalOpen(true);
             }}
-            className={`soft-shadow mb-4 flex items-center space-x-2 rounded-lg border border-gray-600 bg-linear-to-bl from-gray-700 to-gray-900 px-3 py-1.5 font-medium text-white shadow-gray-900/20 transition duration-300 ${
-              isStripeEnabled ? 'hover:from-gray-600 hover:to-gray-800' : 'cursor-not-allowed opacity-50'
+            className={`soft-shadow mb-4 flex items-center space-x-2 rounded-lg border bg-foreground px-3 py-1.5 font-medium text-background transition duration-300 ${
+              isStripeEnabled ? 'hover:bg-foreground/90' : 'cursor-not-allowed opacity-50'
             }`}
             disabled={!isStripeEnabled}
           >

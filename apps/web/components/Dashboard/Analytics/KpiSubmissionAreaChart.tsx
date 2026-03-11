@@ -18,7 +18,7 @@ interface KpiSubmissionAreaChartProps {
 export default function KpiSubmissionAreaChart({ data }: KpiSubmissionAreaChartProps) {
   const t = useTranslations('TeacherAnalytics');
   return (
-    <Card className="border-slate-200 bg-white/90 shadow-sm">
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>{t('kpiCharts.submissionTrendTitle')}</CardTitle>
         <CardDescription>{t('kpiCharts.submissionTrendDesc')}</CardDescription>

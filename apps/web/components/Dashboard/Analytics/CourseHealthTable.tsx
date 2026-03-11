@@ -24,7 +24,7 @@ export default function CourseHealthTable({ orgslug, rows, storageKey, serverPag
       cell: ({ row }) => (
         <Link
           href={`/orgs/${orgslug}/dash/analytics/courses/${row.original.course_uuid}`}
-          className="font-medium text-slate-900 hover:text-emerald-700"
+          className="font-medium text-foreground hover:text-emerald-700"
         >
           {row.original.course_name}
         </Link>
@@ -71,7 +71,7 @@ export default function CourseHealthTable({ orgslug, rows, storageKey, serverPag
   ];
 
   return (
-    <Card className="border-slate-200 bg-white/90 shadow-sm">
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>{t('courseHealth.title')}</CardTitle>
         <CardDescription>{t('courseHealth.description')}</CardDescription>

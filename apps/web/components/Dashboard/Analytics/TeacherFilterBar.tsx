@@ -100,13 +100,13 @@ export default function TeacherFilterBar({
   const resetHref = useMemo(() => basePath, [basePath]);
 
   return (
-    <div className="mb-6 flex flex-col gap-4 rounded-3xl border border-slate-200/80 bg-white/85 p-4 shadow-sm backdrop-blur md:flex-row md:items-center md:justify-between">
+    <div className="mb-6 flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-sm md:flex-row md:items-center md:justify-between">
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           <Filter className="h-3.5 w-3.5" />
           {t('filters.label')}
         </div>
-        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           <Badge variant="outline">{t('filters.scopedCourses', { count: courseCount })}</Badge>
           <Badge variant="outline">
             {t('filters.buckets', { bucket: getAnalyticsBucketLabel(t, query.bucket || 'day') })}

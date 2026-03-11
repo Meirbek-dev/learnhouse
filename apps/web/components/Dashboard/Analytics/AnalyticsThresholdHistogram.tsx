@@ -25,7 +25,7 @@ export default function AnalyticsThresholdHistogram({
 }: AnalyticsThresholdHistogramProps) {
   const t = useTranslations('TeacherAnalytics');
   return (
-    <Card className="border-slate-200 bg-white/90 shadow-sm">
+    <Card className="shadow-sm">
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <div>

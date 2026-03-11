@@ -12,7 +12,7 @@ interface KpiActiveLearnerLineChartProps {
 export default function KpiActiveLearnerLineChart({ data }: KpiActiveLearnerLineChartProps) {
   const t = useTranslations('TeacherAnalytics');
   return (
-    <Card className="border-slate-200 bg-white/90 shadow-sm">
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>{t('kpiCharts.activeTrendTitle')}</CardTitle>
         <CardDescription>{t('kpiCharts.activeTrendDesc')}</CardDescription>

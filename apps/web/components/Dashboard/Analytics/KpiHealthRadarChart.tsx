@@ -12,7 +12,7 @@ interface KpiHealthRadarChartProps {
 export default function KpiHealthRadarChart({ data }: KpiHealthRadarChartProps) {
   const t = useTranslations('TeacherAnalytics');
   return (
-    <Card className="border-slate-200 bg-white/90 shadow-sm">
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>{t('kpiCharts.healthRadarTitle')}</CardTitle>
         <CardDescription>{t('kpiCharts.healthRadarDesc')}</CardDescription>

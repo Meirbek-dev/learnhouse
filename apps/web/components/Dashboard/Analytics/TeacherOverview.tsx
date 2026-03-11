@@ -137,23 +137,23 @@ export default function TeacherOverview({
   };
 
   const SectionFallback = ({ height = 'h-[280px]' }: { height?: string }) => (
-    <Card className="border-slate-200 bg-white/90 shadow-sm">
-      <CardContent className={`${height} animate-pulse rounded-2xl bg-slate-100`} />
+    <Card className="shadow-sm">
+      <CardContent className={`${height} animate-pulse rounded-lg bg-muted`} />
     </Card>
   );
 
   return (
     <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
-      <section className="overflow-hidden rounded-[2rem] border border-slate-200/80 p-6 shadow-sm md:p-8">
+      <section className="overflow-hidden rounded-xl border bg-card p-6 shadow-sm md:p-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {t('overview.label')}
             </div>
-            <h1 className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight text-slate-950 md:text-4xl">
+            <h1 className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
               {t('overview.heading')}
             </h1>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 md:text-base">{t('overview.description')}</p>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground md:text-base">{t('overview.description')}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <AnalyticsExportButton
@@ -211,31 +211,31 @@ export default function TeacherOverview({
             totalAtRisk={data.summary.at_risk_learners.value}
           />
         </Suspense>
-        <Card className="border-slate-200 bg-white/90 shadow-sm">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>{t('overview.freshnessTitle')}</CardTitle>
             <CardDescription>{t('overview.freshnessDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{t('overview.labelGenerated')}</div>
-              <div className="mt-2 text-lg font-semibold text-slate-900">
+            <div className="rounded-lg border bg-muted p-4">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">{t('overview.labelGenerated')}</div>
+              <div className="mt-2 text-lg font-semibold text-foreground">
                 {new Date(data.generated_at).toLocaleString(locale)}
               </div>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{t('overview.labelFreshness')}</div>
-              <div className="mt-2 text-lg font-semibold text-slate-900">{formatFreshness(data.freshness_seconds)}</div>
+            <div className="rounded-lg border bg-muted p-4">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">{t('overview.labelFreshness')}</div>
+              <div className="mt-2 text-lg font-semibold text-foreground">{formatFreshness(data.freshness_seconds)}</div>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="text-xs uppercase tracking-[0.18em] text-slate-500">
+            <div className="rounded-lg border bg-muted p-4">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">
                 {t('overview.labelScopedCourses')}
               </div>
-              <div className="mt-2 text-lg font-semibold text-slate-900">{data.scope.course_ids.length}</div>
+              <div className="mt-2 text-lg font-semibold text-foreground">{data.scope.course_ids.length}</div>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{t('overview.labelCohorts')}</div>
-              <div className="mt-2 text-lg font-semibold text-slate-900">
+            <div className="rounded-lg border bg-muted p-4">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">{t('overview.labelCohorts')}</div>
+              <div className="mt-2 text-lg font-semibold text-foreground">
                 {data.scope.cohort_ids.length || t('overview.cohortsAll')}
               </div>
             </div>
@@ -243,7 +243,7 @@ export default function TeacherOverview({
         </Card>
       </div>
 
-      <Card className="border-slate-200 bg-white/90 shadow-sm">
+      <Card className="shadow-sm">
         <CardHeader>
           <CardTitle>{t('overview.alertsTitle')}</CardTitle>
           <CardDescription>{t('overview.alertsDescription')}</CardDescription>
@@ -253,7 +253,7 @@ export default function TeacherOverview({
             data.alerts.map((alert) => (
               <div
                 key={alert.id}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                className="rounded-lg border bg-muted p-4"
               >
                 <div className="mb-2 flex items-center gap-2">
                   <Badge
@@ -267,16 +267,16 @@ export default function TeacherOverview({
                   >
                     {getAnalyticsSeverityLabel(t, alert.severity)}
                   </Badge>
-                  <span className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                  <span className="text-xs uppercase tracking-wider text-muted-foreground">
                     {getAnalyticsAlertTypeLabel(t, alert.type)}
                   </span>
                 </div>
-                <div className="font-medium text-slate-900">{alert.title}</div>
-                <div className="mt-2 text-sm leading-6 text-slate-600">{alert.body}</div>
+                <div className="font-medium text-foreground">{alert.title}</div>
+                <div className="mt-2 text-sm leading-6 text-muted-foreground">{alert.body}</div>
               </div>
             ))
           ) : (
-            <div className="text-sm text-slate-500">{t('overview.alertsEmpty')}</div>
+            <div className="text-sm text-muted-foreground">{t('overview.alertsEmpty')}</div>
           )}
         </CardContent>
       </Card>
@@ -291,7 +291,7 @@ export default function TeacherOverview({
             >
               {t('overview.previewLabel')}
             </Badge>
-            <span className="text-xs text-slate-500">{t('overview.showingCourses', { total: data.course_total })}</span>
+            <span className="text-xs text-muted-foreground">{t('overview.showingCourses', { total: data.course_total })}</span>
           </div>
           <Suspense fallback={<SectionFallback height="h-[320px]" />}>
             <CourseHealthTable
@@ -300,7 +300,7 @@ export default function TeacherOverview({
               storageKey="overview-courses"
             />
           </Suspense>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-foreground">
             <Link
               href={`/orgs/${orgslug}/dash/analytics/courses`}
               className="text-blue-600 hover:underline"
@@ -317,7 +317,7 @@ export default function TeacherOverview({
             >
               {t('overview.previewLabel')}
             </Badge>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-muted-foreground">
               {t('overview.showingAssessments', { total: data.assessment_total })}
             </span>
           </div>
@@ -328,7 +328,7 @@ export default function TeacherOverview({
               storageKey="overview-assessments"
             />
           </Suspense>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-foreground">
             <Link
               href={`/orgs/${orgslug}/dash/analytics/assessments`}
               className="text-blue-600 hover:underline"
@@ -348,7 +348,7 @@ export default function TeacherOverview({
           >
             {t('overview.previewLabel')}
           </Badge>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-muted-foreground">
             {t('riskDistribution.preview', { shown: data.at_risk_preview.length, total: data.at_risk_total })}
           </span>
         </div>
@@ -362,7 +362,7 @@ export default function TeacherOverview({
           />
         </Suspense>
         {data.at_risk_total > 0 && (
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-foreground">
             <Link
               href={`/orgs/${orgslug}/dash/analytics/learners/at-risk`}
               className="text-blue-600 hover:underline"

@@ -20,10 +20,10 @@ export default function KpiCompletionGauge({ completionPct, deltaPct, direction 
   ];
 
   const deltaColor =
-    direction === 'up' ? 'text-emerald-600' : direction === 'down' ? 'text-amber-600' : 'text-slate-500';
+    direction === 'up' ? 'text-emerald-600' : direction === 'down' ? 'text-amber-600' : 'text-muted-foreground';
 
   return (
-    <Card className="border-slate-200 bg-white/90 shadow-sm">
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>{t('kpiCharts.completionGaugeTitle')}</CardTitle>
         <CardDescription>{t('kpiCharts.completionGaugeDesc')}</CardDescription>
@@ -73,7 +73,7 @@ export default function KpiCompletionGauge({ completionPct, deltaPct, direction 
           </ChartContainer>
           <div className="pointer-events-none absolute inset-0 flex items-end justify-center pb-6">
             <div className="text-center">
-              <div className="text-4xl font-bold text-slate-900">{completionPct.toLocaleString()}%</div>
+              <div className="text-4xl font-bold text-foreground">{completionPct.toLocaleString()}%</div>
               {deltaPct !== null && (
                 <div className={`mt-0.5 text-sm font-medium ${deltaColor}`}>
                   {deltaPct > 0 ? '+' : ''}

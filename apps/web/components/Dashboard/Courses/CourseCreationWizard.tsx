@@ -158,26 +158,26 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
   };
 
   const summaryContent = (
-    <div className="space-y-4 text-sm text-slate-300">
+    <div className="space-y-4 text-sm text-background/70">
       <div>
-        <div className="text-slate-400">Title</div>
-        <div className="mt-1 text-base font-semibold text-white">{name.trim() || 'Untitled course'}</div>
+        <div className="text-background/50">Title</div>
+        <div className="mt-1 text-base font-semibold text-background">{name.trim() || 'Untitled course'}</div>
       </div>
       <div>
-        <div className="text-slate-400">Visibility</div>
+        <div className="text-background/50">Visibility</div>
         <div className="mt-1">{visibility === 'public' ? 'Public launch target' : 'Private draft mode'}</div>
       </div>
       <div>
-        <div className="text-slate-400">Template</div>
+        <div className="text-background/50">Template</div>
         <div className="mt-1 capitalize">{template === 'outline' ? 'Existing outline' : template}</div>
       </div>
       <div>
-        <div className="text-slate-400">Launch destination</div>
+        <div className="text-background/50">Launch destination</div>
         <div className="mt-1 capitalize">{launchDestination}</div>
       </div>
       {template === 'outline' && sourceCourseUuid ? (
         <div>
-          <div className="text-slate-400">Source course</div>
+          <div className="text-background/50">Source course</div>
           <div className="mt-1">
             {sourceOptions.find((c) => c.cleanUuid === sourceCourseUuid)?.name || 'Selected outline course'}
           </div>
@@ -187,13 +187,13 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
   );
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(15,23,42,0.08),_transparent_38%),linear-gradient(180deg,_#f8fafc_0%,_#ffffff_24%,_#f7f5ef_100%)] px-4 py-8 lg:px-8">
+    <div className="min-h-screen bg-background px-4 py-8 lg:px-8">
       <div className="mx-auto max-w-5xl space-y-6">
         {/* Header + step indicator */}
-        <div className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm backdrop-blur">
-          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Guided setup</div>
-          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-slate-950">Create a course workspace</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+        <div className="rounded-xl border bg-card p-6 shadow-sm">
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Guided setup</div>
+          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-foreground">Create a course workspace</h1>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
             Start from a blank course, seed a starter outline, or reuse another course as a structural template.
           </p>
 
@@ -211,19 +211,19 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                     <div
                       className={cn(
                         'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold',
-                        done && 'bg-emerald-600 text-white',
-                        active && 'bg-slate-950 text-white',
-                        !done && !active && 'border border-slate-300 text-slate-400',
+                        done && 'bg-primary/80 text-primary-foreground',
+                        active && 'bg-primary text-primary-foreground',
+                        !done && !active && 'border border-input text-muted-foreground',
                       )}
                     >
                       {done ? <CheckCircle2 className="size-3.5" /> : index + 1}
                     </div>
-                    <span className={cn('text-sm font-medium', active ? 'text-slate-950' : 'text-slate-400')}>
+                    <span className={cn('text-sm font-medium', active ? 'text-foreground' : 'text-muted-foreground')}>
                       {label}
                     </span>
                   </div>
                   {index < STEPS.length - 1 && (
-                    <div className={cn('mx-3 h-px w-8 shrink-0', done ? 'bg-emerald-500' : 'bg-slate-200')} />
+                    <div className={cn('mx-3 h-px w-8 shrink-0', done ? 'bg-primary/60' : 'bg-border')} />
                   )}
                 </div>
               );
@@ -238,14 +238,14 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
               render={
                 <button
                   type="button"
-                  className="group flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-950 px-5 py-4 text-white"
+                  className="group flex w-full items-center justify-between rounded-t-xl border bg-foreground px-5 py-4 text-background"
                 />
               }
             >
               <span className="text-sm font-semibold">Setup summary</span>
-              <ChevronDown className="size-4 text-slate-300 transition-transform group-data-open:rotate-180" />
+              <ChevronDown className="size-4 text-background/60 transition-transform group-data-open:rotate-180" />
             </CollapsibleTrigger>
-            <CollapsibleContent className="rounded-b-2xl border border-t-0 border-slate-200 bg-slate-950 px-5 pb-5">
+            <CollapsibleContent className="rounded-b-xl border border-t-0 bg-foreground px-5 pb-5 text-background">
               {summaryContent}
             </CollapsibleContent>
           </Collapsible>
@@ -253,20 +253,20 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
 
         <div className="grid gap-6 xl:grid-cols-[1.3fr_0.8fr]">
           {/* Main form */}
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border bg-card p-6 shadow-sm">
             {/* Step 0: Basics */}
             {currentStep === 0 ? (
               <div className="space-y-5">
                 <div>
-                  <div className="text-sm font-semibold text-slate-950">Basics</div>
-                  <div className="mt-1 text-sm text-slate-600">
+                  <div className="text-sm font-semibold text-foreground">Basics</div>
+                  <div className="mt-1 text-sm text-muted-foreground">
                     Start with the public-facing identity and intended audience posture for this course.
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label
                     htmlFor="course-title"
-                    className="text-sm font-medium text-slate-700"
+                    className="text-sm font-medium text-foreground"
                   >
                     Course title
                   </label>
@@ -280,7 +280,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                 <div className="space-y-2">
                   <label
                     htmlFor="course-description"
-                    className="text-sm font-medium text-slate-700"
+                    className="text-sm font-medium text-foreground"
                   >
                     Short description
                   </label>
@@ -294,7 +294,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                 </div>
 
                 <fieldset className="space-y-3">
-                  <legend className="text-sm font-medium text-slate-700">Audience default</legend>
+                  <legend className="text-sm font-medium text-foreground">Audience default</legend>
                   <RadioGroup
                     value={visibility}
                     onValueChange={(val) => {
@@ -326,8 +326,8 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                             'block cursor-pointer rounded-2xl border p-4 transition-colors',
                             'peer-focus-visible:ring-primary peer-focus-visible:ring-2',
                             visibility === option.value
-                              ? 'border-slate-950 bg-slate-950 text-white'
-                              : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50',
+                              ? 'border-primary bg-primary text-primary-foreground'
+                              : 'border-input bg-card text-foreground hover:bg-accent',
                           )}
                         >
                           <div className="font-medium">{option.title}</div>
@@ -344,8 +344,8 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
             {currentStep === 1 ? (
               <div className="space-y-5">
                 <div>
-                  <div className="text-sm font-semibold text-slate-950">Template</div>
-                  <div className="mt-1 text-sm text-slate-600">
+                  <div className="text-sm font-semibold text-foreground">Template</div>
+                  <div className="mt-1 text-sm text-muted-foreground">
                     Choose how much structure you want the new course to start with.
                   </div>
                 </div>
@@ -386,8 +386,8 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                           'block cursor-pointer rounded-2xl border p-4 transition-colors',
                           'peer-focus-visible:ring-primary peer-focus-visible:ring-2',
                           template === option.value
-                            ? 'border-slate-950 bg-slate-950 text-white'
-                            : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50',
+                            ? 'border-primary bg-primary text-primary-foreground'
+                            : 'border-input bg-card text-foreground hover:bg-accent',
                         )}
                       >
                         <div className="font-medium">{option.title}</div>
@@ -401,7 +401,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                   <div className="space-y-2">
                     <label
                       htmlFor="source-course"
-                      className="text-sm font-medium text-slate-700"
+                      className="text-sm font-medium text-foreground"
                     >
                       Source course
                     </label>
@@ -409,7 +409,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                       id="source-course"
                       value={sourceCourseUuid}
                       onChange={(e) => setSourceCourseUuid(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm"
+                      className="w-full rounded-md border border-input bg-background px-4 py-3 text-sm"
                     >
                       <option value="">Select a course</option>
                       {sourceOptions.map((course) => (
@@ -421,7 +421,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                         </option>
                       ))}
                     </select>
-                    <div className="text-sm text-slate-500">
+                    <div className="text-sm text-muted-foreground">
                       This copies the chapter outline only, not activity content.
                     </div>
                   </div>
@@ -433,8 +433,8 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
             {currentStep === 2 ? (
               <div className="space-y-5">
                 <div>
-                  <div className="text-sm font-semibold text-slate-950">Launch</div>
-                  <div className="mt-1 text-sm text-slate-600">
+                  <div className="text-sm font-semibold text-foreground">Launch</div>
+                  <div className="mt-1 text-sm text-muted-foreground">
                     Decide where to land after the workspace is created.
                   </div>
                 </div>
@@ -470,8 +470,8 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                           'block cursor-pointer rounded-2xl border p-4 transition-colors',
                           'peer-focus-visible:ring-primary peer-focus-visible:ring-2',
                           launchDestination === option.value
-                            ? 'border-slate-950 bg-slate-950 text-white'
-                            : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50',
+                            ? 'border-primary bg-primary text-primary-foreground'
+                            : 'border-input bg-card text-foreground hover:bg-accent',
                         )}
                       >
                         <div className="font-medium">{option.title}</div>
@@ -483,7 +483,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
               </div>
             ) : null}
 
-            <div className="mt-8 flex items-center justify-between border-t border-slate-200 pt-5">
+            <div className="mt-8 flex items-center justify-between border-t pt-5">
               <Button
                 type="button"
                 variant="outline"
@@ -518,8 +518,8 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
 
           {/* Desktop summary sidebar */}
           <div className="hidden xl:block">
-            <div className="sticky top-6 rounded-3xl border border-slate-200 bg-slate-950 p-6 text-white shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">Setup summary</div>
+            <div className="sticky top-6 rounded-xl border bg-foreground p-6 text-background shadow-sm">
+              <div className="text-xs font-semibold uppercase tracking-wider text-background/60">Setup summary</div>
               <div className="mt-4">{summaryContent}</div>
             </div>
           </div>

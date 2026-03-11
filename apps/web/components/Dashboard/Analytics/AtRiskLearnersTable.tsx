@@ -47,8 +47,8 @@ export default function AtRiskLearnersTable({
             : undefined;
         return (
           <div>
-            <div className="font-medium text-slate-900">{row.original.user_display_name}</div>
-            <div className="text-xs text-slate-500">{t('atRisk.userNumber', { userId: row.original.user_id })}</div>
+            <div className="font-medium text-foreground">{row.original.user_display_name}</div>
+            <div className="text-xs text-muted-foreground">{t('atRisk.userNumber', { userId: row.original.user_id })}</div>
             {courseHref && (
               <Link
                 href={courseHref}
@@ -84,7 +84,7 @@ export default function AtRiskLearnersTable({
               {getAnalyticsRiskLevelLabel(t, row.original.risk_level)} · {row.original.risk_score}
             </Badge>
             {/* Readable component breakdown replacing the old I/P/F/M/G abbreviations */}
-            <div className="max-w-[280px] text-[11px] leading-4 text-slate-500">
+            <div className="max-w-[280px] text-[11px] leading-4 text-muted-foreground">
               {[
                 [t('atRisk.riskComponents.inactivity'), c.inactivity],
                 [t('atRisk.riskComponents.progress'), c.progress],
@@ -104,7 +104,7 @@ export default function AtRiskLearnersTable({
       accessorKey: 'reason_codes',
       header: t('atRisk.colReasons'),
       cell: ({ row }) => (
-        <div className="max-w-[220px] whitespace-normal text-xs text-slate-600">
+        <div className="max-w-[220px] whitespace-normal text-xs text-muted-foreground">
           {row.original.reason_codes.map((code) => getAnalyticsReasonCodeLabel(t, code)).join(', ')}
         </div>
       ),
@@ -121,7 +121,7 @@ export default function AtRiskLearnersTable({
               ? `/orgs/${orgslug}/dash/assignments`
               : undefined;
         return (
-          <div className="max-w-[280px] space-y-1 whitespace-normal text-sm text-slate-700">
+          <div className="max-w-[280px] space-y-1 whitespace-normal text-sm text-muted-foreground">
             <span>{row.original.recommended_action}</span>
             {hasGradingBlock && gradingHref && (
               <Link
@@ -138,7 +138,7 @@ export default function AtRiskLearnersTable({
   ];
 
   return (
-    <Card className="border-slate-200 bg-white/90 shadow-sm">
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>{resolvedTitle}</CardTitle>
         <CardDescription>{resolvedDescription}</CardDescription>

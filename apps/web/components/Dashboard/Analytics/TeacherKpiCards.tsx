@@ -93,15 +93,15 @@ export default function TeacherKpiCards({ cards }: TeacherKpiCardsProps) {
         return (
           <Card
             key={metric.label}
-            className="border-slate-200 bg-white/90 shadow-sm"
+            className="shadow-sm"
           >
             <CardHeader className="flex-row items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
-                <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{metric.label}</div>
-                <CardTitle className="mt-3 text-3xl font-semibold text-slate-900">{displayValue}</CardTitle>
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{metric.label}</div>
+                <CardTitle className="mt-3 text-3xl font-semibold text-foreground">{displayValue}</CardTitle>
                 {/* Benchmark baseline (issue 15) */}
                 {metric.benchmark !== null && metric.benchmark !== undefined && (
-                  <div className="mt-1 text-xs text-slate-500">
+                  <div className="mt-1 text-xs text-muted-foreground">
                     {metric.benchmark_label}: {metric.unit === '%' ? `${metric.benchmark}%` : metric.benchmark}
                   </div>
                 )}
@@ -118,7 +118,7 @@ export default function TeacherKpiCards({ cards }: TeacherKpiCardsProps) {
               )}
             </CardHeader>
             <CardContent className="space-y-1">
-              <div className="text-sm text-slate-600">
+              <div className="text-sm text-muted-foreground">
                 {metric.delta_value === null
                   ? t('kpi.noComparison')
                   : t('kpi.changePeriod', {
@@ -126,7 +126,7 @@ export default function TeacherKpiCards({ cards }: TeacherKpiCardsProps) {
                     })}
               </div>
               {/* Metric definition for returning learners, at-risk, content health, difficulty (issue 3) */}
-              {definition && <div className="text-xs leading-4 text-slate-400">{definition}</div>}
+              {definition && <div className="text-xs leading-4 text-muted-foreground">{definition}</div>}
             </CardContent>
           </Card>
         );

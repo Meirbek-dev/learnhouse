@@ -36,7 +36,7 @@ export default function AnalyticsRiskDistributionChart({ counts, totalAtRisk }: 
   ].filter((item) => item.count > 0);
 
   return (
-    <Card className="border-slate-200 bg-white/90 shadow-sm">
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>{t('riskDistribution.title')}</CardTitle>
         <CardDescription>

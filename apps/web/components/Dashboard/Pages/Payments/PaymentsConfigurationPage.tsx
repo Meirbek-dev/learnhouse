@@ -244,28 +244,28 @@ const PaymentsConfigurationPage: FC = () => {
 
         <div className="subtle-shadow flex flex-col rounded-lg">
           {stripeConfig ? (
-            <div className="flex items-center justify-between rounded-lg bg-linear-to-r from-indigo-500 to-purple-600 p-6 shadow-md">
+            <div className="flex items-center justify-between rounded-lg border bg-card p-6 shadow-sm">
               <div className="flex items-center space-x-3">
                 <SiStripe
-                  className="text-white"
+                  className="text-foreground"
                   size={32}
                 />
                 <div className="flex flex-col">
                   <div className="flex items-center space-x-2">
-                    <span className="text-xl font-semibold text-white">Stripe</span>
+                    <span className="text-xl font-semibold text-foreground">Stripe</span>
                     {stripeConfig.provider_specific_id && stripeConfig.active ? (
-                      <div className="flex items-center space-x-1 rounded-full bg-green-500/20 px-2 py-0.5">
-                        <div className="h-2 w-2 rounded-full bg-green-500" />
-                        <span className="text-xs text-green-100">{t('connectedStatus')}</span>
+                      <div className="flex items-center space-x-1 rounded-full bg-emerald-500/20 px-2 py-0.5">
+                        <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                        <span className="text-xs text-emerald-700 dark:text-emerald-300">{t('connectedStatus')}</span>
                       </div>
                     ) : (
                       <div className="flex items-center space-x-1 rounded-full bg-red-500/20 px-2 py-0.5">
                         <div className="h-2 w-2 rounded-full bg-red-500" />
-                        <span className="text-xs text-red-100">{t('notConnectedStatus')}</span>
+                        <span className="text-xs text-red-700 dark:text-red-300">{t('notConnectedStatus')}</span>
                       </div>
                     )}
                   </div>
-                  <span className="text-sm text-white/80">
+                  <span className="text-sm text-muted-foreground">
                     {stripeConfig.provider_specific_id
                       ? `${t('linkedAccountLabel')}: ${stripeConfig.provider_specific_id}`
                       : t('accountNotConfigured')}
@@ -296,7 +296,7 @@ const PaymentsConfigurationPage: FC = () => {
           ) : (
             <Button
               onClick={enableStripe}
-              className="flex items-center justify-center space-x-2 rounded-lg bg-linear-to-r from-indigo-500 to-purple-600 p-3 px-6 text-white shadow-md transition duration-300 hover:from-indigo-600 hover:to-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center justify-center space-x-2 rounded-lg bg-primary p-3 px-6 text-primary-foreground shadow-sm transition duration-300 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isOnboarding}
             >
               {isOnboarding ? (

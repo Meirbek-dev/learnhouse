@@ -19,7 +19,7 @@ interface KpiHealthRingsChartProps {
 export default function KpiHealthRingsChart({ data }: KpiHealthRingsChartProps) {
   const t = useTranslations('TeacherAnalytics');
   return (
-    <Card className="border-slate-200 bg-white/90 shadow-sm">
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>{t('kpiCharts.healthRingsTitle')}</CardTitle>
         <CardDescription>{t('kpiCharts.healthRingsDesc')}</CardDescription>
@@ -68,7 +68,7 @@ export default function KpiHealthRingsChart({ data }: KpiHealthRingsChartProps) 
           {data.map((d) => (
             <div
               key={d.name}
-              className="flex items-center gap-1.5 text-xs text-slate-600"
+              className="flex items-center gap-1.5 text-xs text-muted-foreground"
             >
               <span
                 className="h-2.5 w-2.5 shrink-0 rounded-full"

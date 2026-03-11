@@ -13,15 +13,15 @@ export default function AnalyticsEmptyState({ title, description }: AnalyticsEmp
   const t = useTranslations('TeacherAnalytics');
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-4xl items-center justify-center px-4 py-10">
-      <Card className="border-slate-200 bg-linear-to-br from-white via-slate-50 to-emerald-50 shadow-sm">
+      <Card className="shadow-sm">
         <CardHeader className="items-center text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-900 text-white shadow-md">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-foreground text-background shadow-md">
             <ActivitySquare className="h-7 w-7" />
           </div>
           <CardTitle className="text-2xl">{title}</CardTitle>
           <CardDescription className="max-w-2xl text-base">{description}</CardDescription>
         </CardHeader>
-        <CardContent className="flex items-center justify-center gap-3 text-sm text-slate-500">
+        <CardContent className="flex items-center justify-center gap-3 text-sm text-muted-foreground">
           <Lock className="h-4 w-4" />
           {t('emptyState.accessNote')}
         </CardContent>

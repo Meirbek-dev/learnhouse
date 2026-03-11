@@ -51,7 +51,7 @@ export default function AnalyticsMultiSeriesTrendChart({
   };
 
   return (
-    <Card className="border-slate-200 bg-white/90 shadow-sm">
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>

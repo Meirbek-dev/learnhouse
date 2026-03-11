@@ -24,13 +24,7 @@ const DashMobileMenu = () => {
     useNavigationPermissions();
 
   return (
-    <div
-      style={{
-        background:
-          'linear-gradient(160deg, #0c1222 0%, #1a2332 30%, #2d3748 60%, #4a5568 100%), radial-gradient(ellipse at top left, rgba(99, 179, 237, 0.12) 0%, transparent 60%), radial-gradient(ellipse at bottom right, rgba(167, 139, 250, 0.08) 0%, transparent 60%)',
-      }}
-      className="fixed right-0 bottom-0 left-0 z-50 text-white shadow-xl backdrop-blur-lg"
-    >
+    <div className="fixed right-0 bottom-0 left-0 z-50 border-t border-sidebar-border bg-sidebar text-sidebar-foreground shadow-lg supports-[backdrop-filter]:bg-sidebar/90 supports-[backdrop-filter]:backdrop-blur-md">
       <div className="flex h-16 items-center justify-around px-2">
         <ToolTip
           content={t('tooltips.home')}
