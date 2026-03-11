@@ -36,7 +36,6 @@ import { PermissionTooltip } from '@/components/Utils/PermissionTooltip';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { revalidateTags } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -185,7 +184,6 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
       try {
         await updateActivity({ ...activity, name: trimmedName }, activity.activity_uuid, access_token);
         await mutate(courseMetaUrl);
-        await revalidateTags(['courses'], orgslug);
         toast.success(t('activityNameUpdatedSuccess'));
         setIsEditing(false);
       } catch (error) {
@@ -208,7 +206,6 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
     try {
       await updateActivity({ ...activity, published: !activity.published }, activity.activity_uuid, access_token);
       await mutate(courseMetaUrl);
-      await revalidateTags(['courses'], orgslug);
       toast.success(t('activityUpdateSuccess'));
     } catch (error) {
       console.error('Failed to toggle publish status:', error);
@@ -236,7 +233,6 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
 
         await deleteActivity(activity.activity_uuid, access_token);
         await mutate(courseMetaUrl);
-        await revalidateTags(['courses'], orgslug);
         toast.success(t('activityDeletedSuccess'));
         setIsDeleteDialogOpen(false);
       } catch (error) {

@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
+import { auth } from '@/auth';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,7 +9,21 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 } as const;
 
+async function requireAuthenticatedSession() {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401, headers: corsHeaders });
+  }
+
+  return null;
+}
+
 export async function GET(request: NextRequest) {
+  const unauthorized = await requireAuthenticatedSession();
+  if (unauthorized) {
+    return unauthorized;
+  }
+
   const tag = request.nextUrl.searchParams.get('tag');
 
   if (!tag) {
@@ -21,6 +36,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const unauthorized = await requireAuthenticatedSession();
+  if (unauthorized) {
+    return unauthorized;
+  }
+
   try {
     const { tags, orgslug } = await request.json();
 

@@ -1,4 +1,6 @@
-from pydantic import ConfigDict
+from datetime import datetime
+
+from pydantic import ConfigDict, field_validator
 from sqlmodel import Column, Field, ForeignKey, Integer
 
 from src.db.courses.activities import ActivityRead, ActivityReadWithPermissions
@@ -76,4 +78,17 @@ class ChapterOrder(PydanticStrictBaseModel):
 
 
 class ChapterUpdateOrder(PydanticStrictBaseModel):
+    last_known_update_date: datetime | None = None
     chapter_order_by_ids: list[ChapterOrder]
+
+    @field_validator("last_known_update_date", mode="before")
+    @classmethod
+    def validate_last_known_update_date(cls, value):
+        if isinstance(value, datetime) or value is None:
+            return value
+        if isinstance(value, str):
+            normalized = value.strip()
+            if normalized.endswith("Z"):
+                normalized = f"{normalized[:-1]}+00:00"
+            return datetime.fromisoformat(normalized)
+        return value

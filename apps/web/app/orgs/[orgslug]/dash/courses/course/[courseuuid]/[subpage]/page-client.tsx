@@ -11,6 +11,7 @@ import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { usePermissions } from '@/components/Security';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -23,7 +24,14 @@ function CourseOverviewContent({ params }: { params: CourseOverviewParams }) {
   const router = useRouter();
   const { can, loading: rightsLoading } = usePermissions();
   const course = useCourse();
-  const isCurrentSectionDirty = Boolean(course.dirtySections[params.subpage as keyof typeof course.dirtySections]);
+  const hasAnyDirtySection = Object.values(course.dirtySections).some(Boolean);
+
+  const canAnyScope = (action: string, resource: string, scopes: string[]) => scopes.some((scope) => can(action as any, resource as any, scope as any));
+
+  useUnsavedChangesGuard(hasAnyDirtySection, {
+    message: t('unsavedChangesDescription'),
+    interceptInAppNavigation: true,
+  });
 
   const tabs = [
     {
@@ -33,7 +41,7 @@ function CourseOverviewContent({ params }: { params: CourseOverviewParams }) {
       href: `/dash/courses/course/${params.courseuuid}/general`,
       requiredAction: Actions.UPDATE,
       requiredResource: Resources.COURSE,
-      requiredScope: Scopes.OWN,
+      requiredScopes: [Scopes.OWN, Scopes.ORG],
     },
     {
       key: 'content',
@@ -42,7 +50,7 @@ function CourseOverviewContent({ params }: { params: CourseOverviewParams }) {
       href: `/dash/courses/course/${params.courseuuid}/content`,
       requiredAction: Actions.UPDATE,
       requiredResource: Resources.COURSE,
-      requiredScope: Scopes.OWN,
+      requiredScopes: [Scopes.OWN, Scopes.ORG],
     },
     {
       key: 'access',
@@ -51,7 +59,7 @@ function CourseOverviewContent({ params }: { params: CourseOverviewParams }) {
       href: `/dash/courses/course/${params.courseuuid}/access`,
       requiredAction: Actions.MANAGE,
       requiredResource: Resources.COURSE,
-      requiredScope: Scopes.OWN,
+      requiredScopes: [Scopes.OWN, Scopes.ORG],
     },
     {
       key: 'contributors',
@@ -60,7 +68,7 @@ function CourseOverviewContent({ params }: { params: CourseOverviewParams }) {
       href: `/dash/courses/course/${params.courseuuid}/contributors`,
       requiredAction: Actions.MANAGE,
       requiredResource: Resources.COURSE,
-      requiredScope: Scopes.OWN,
+      requiredScopes: [Scopes.OWN, Scopes.ORG],
     },
     {
       key: 'certification',
@@ -69,14 +77,14 @@ function CourseOverviewContent({ params }: { params: CourseOverviewParams }) {
       href: `/dash/courses/course/${params.courseuuid}/certification`,
       requiredAction: Actions.CREATE,
       requiredResource: Resources.CERTIFICATE,
-      requiredScope: Scopes.ORG,
+      requiredScopes: [Scopes.ORG],
     },
   ];
 
-  const visibleTabs = tabs.filter((tab) => can(tab.requiredAction, tab.requiredResource, tab.requiredScope));
+  const visibleTabs = tabs.filter((tab) => canAnyScope(tab.requiredAction, tab.requiredResource, tab.requiredScopes));
   const currentTab = tabs.find((tab) => tab.key === params.subpage);
   const hasAccessToCurrentPage = currentTab
-    ? can(currentTab.requiredAction, currentTab.requiredResource, currentTab.requiredScope)
+    ? canAnyScope(currentTab.requiredAction, currentTab.requiredResource, currentTab.requiredScopes)
     : false;
 
   useEffect(() => {
@@ -116,7 +124,7 @@ function CourseOverviewContent({ params }: { params: CourseOverviewParams }) {
           {tabs.map((tab) => {
             const IconComponent = tab.icon;
             const isActive = params.subpage.toString() === tab.key;
-            const hasAccess = can(tab.requiredAction, tab.requiredResource, tab.requiredScope);
+            const hasAccess = canAnyScope(tab.requiredAction, tab.requiredResource, tab.requiredScopes);
 
             if (!hasAccess) {
               return (
@@ -149,16 +157,6 @@ function CourseOverviewContent({ params }: { params: CourseOverviewParams }) {
               <Link
                 key={tab.key}
                 href={`/orgs/${params.orgslug}${tab.href}`}
-                onClick={(event) => {
-                  if (isActive || !isCurrentSectionDirty) {
-                    return;
-                  }
-
-                  const shouldLeave = window.confirm(t('unsavedChangesDescription'));
-                  if (!shouldLeave) {
-                    event.preventDefault();
-                  }
-                }}
               >
                 <div
                   className={`border-primary flex w-fit cursor-pointer space-x-4 py-2 text-center transition-all ease-linear ${
@@ -183,16 +181,16 @@ function CourseOverviewContent({ params }: { params: CourseOverviewParams }) {
         className="relative h-full overflow-y-auto"
       >
         <div className="absolute inset-0">
-          {params.subpage === 'content' && can(Actions.UPDATE, Resources.COURSE, Scopes.OWN) ? (
+          {params.subpage === 'content' && canAnyScope(Actions.UPDATE, Resources.COURSE, [Scopes.OWN, Scopes.ORG]) ? (
             <EditCourseStructure orgslug={params.orgslug} />
           ) : null}
-          {params.subpage === 'general' && can(Actions.UPDATE, Resources.COURSE, Scopes.OWN) ? (
+          {params.subpage === 'general' && canAnyScope(Actions.UPDATE, Resources.COURSE, [Scopes.OWN, Scopes.ORG]) ? (
             <EditCourseGeneral orgslug={params.orgslug} />
           ) : null}
-          {params.subpage === 'access' && can(Actions.MANAGE, Resources.COURSE, Scopes.OWN) ? (
+          {params.subpage === 'access' && canAnyScope(Actions.MANAGE, Resources.COURSE, [Scopes.OWN, Scopes.ORG]) ? (
             <EditCourseAccess orgslug={params.orgslug} />
           ) : null}
-          {params.subpage === 'contributors' && can(Actions.MANAGE, Resources.COURSE, Scopes.OWN) ? (
+          {params.subpage === 'contributors' && canAnyScope(Actions.MANAGE, Resources.COURSE, [Scopes.OWN, Scopes.ORG]) ? (
             <EditCourseContributors orgslug={params.orgslug} />
           ) : null}
           {params.subpage === 'certification' && can(Actions.CREATE, Resources.CERTIFICATE, Scopes.ORG) ? (

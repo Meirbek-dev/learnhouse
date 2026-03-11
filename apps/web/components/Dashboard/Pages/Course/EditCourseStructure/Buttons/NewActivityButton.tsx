@@ -6,9 +6,7 @@ import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewAc
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { revalidateTags } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Layers } from 'lucide-react';
 import { useState } from 'react';
@@ -22,7 +20,6 @@ interface NewActivityButtonProps {
 
 const NewActivityButton = (props: NewActivityButtonProps) => {
   const [newActivityModal, setNewActivityModal] = useState(false);
-  const router = useRouter();
   const course = useCourse();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -51,7 +48,6 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
     toast.dismiss(toast_loading);
     toast.success(tNotify('activityCreatedSuccess'));
     setNewActivityModal(false);
-    await revalidateTags(['courses'], props.orgslug);
   };
 
   // Submit File Upload
@@ -73,7 +69,6 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
       toast.dismiss(toast_loading);
       toast.success(tNotify('fileUploadSuccess'));
       toast.success(tNotify('activityCreatedSuccess'));
-      await revalidateTags(['courses'], props.orgslug);
     } catch (error) {
       toast.dismiss(toast_loading);
       toast.error(tNotify('uploadFailed'));
@@ -91,7 +86,6 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
     setNewActivityModal(false);
     toast.dismiss(toast_loading);
     toast.success(tNotify('activityCreatedSuccess'));
-    await revalidateTags(['courses'], props.orgslug);
   };
 
   return (

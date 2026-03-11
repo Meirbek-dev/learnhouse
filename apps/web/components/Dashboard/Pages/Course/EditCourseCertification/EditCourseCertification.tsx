@@ -1,7 +1,7 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { createCertification, deleteCertification, updateCertification } from '@services/courses/certifications';
+import { getCourseCertifications, createCertification, deleteCertification, updateCertification } from '@services/courses/certifications';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { AlertTriangle, Award, FileText, Loader2, Sparkles } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
@@ -12,7 +12,6 @@ import { valibotResolver } from '@hookform/resolvers/valibot';
 import { Separator } from '@/components/ui/separator';
 import CertificatePreview from './CertificatePreview';
 import { Textarea } from '@/components/ui/textarea';
-import { getAPIUrl } from '@services/config/config';
 import { useForm, useWatch } from 'react-hook-form';
 import { Spinner } from '@components/ui/spinner';
 import { Switch } from '@/components/ui/switch';
@@ -106,21 +105,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
     courseStructure?.course_uuid && access_token ? `certifications/course/${courseStructure.course_uuid}` : null,
     async () => {
       if (!(courseStructure?.course_uuid && access_token)) return null;
-      const result = await fetch(`${getAPIUrl()}certifications/course/${courseStructure.course_uuid}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${access_token}`,
-        },
-        credentials: 'include',
-      });
-      const response = await result.json();
-      return {
-        success: result.status === 200,
-        data: response,
-        status: result.status,
-        HTTPmessage: result.statusText,
-      };
+      return getCourseCertifications(courseStructure.course_uuid, null, access_token);
     },
   );
 

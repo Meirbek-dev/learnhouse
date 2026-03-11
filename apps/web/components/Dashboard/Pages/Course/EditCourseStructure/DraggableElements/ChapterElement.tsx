@@ -14,7 +14,6 @@ import { AlertTriangle, GripVertical, Hexagon, Loader2, MoreHorizontal, Pencil, 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { deleteChapter, updateChapter } from '@services/courses/chapters';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { revalidateTags } from '@services/utils/ts/requests';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';
@@ -119,7 +118,6 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
       try {
         await updateChapter(chapter.id, { name: trimmedName }, access_token);
         await mutate(courseMetaUrl);
-        await revalidateTags(['courses'], orgslug);
         setIsEditing(false);
       } catch (error) {
         console.error('Failed to update chapter:', error);
@@ -139,7 +137,6 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
       try {
         await deleteChapter(chapter.id, access_token);
         await mutate(courseMetaUrl);
-        await revalidateTags(['courses'], orgslug);
         setIsDeleteDialogOpen(false);
       } catch (error) {
         console.error('Failed to delete chapter:', error);

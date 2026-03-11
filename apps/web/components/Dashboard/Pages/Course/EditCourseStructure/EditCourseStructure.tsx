@@ -6,7 +6,6 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { revalidateTags } from '@services/utils/ts/requests';
 import { createChapter, updateCourseOrderStructure } from '@services/courses/chapters';
 import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
@@ -24,6 +23,7 @@ interface EditCourseStructureProps {
 
 export type OrderPayload =
   | {
+      last_known_update_date?: string | null;
       chapter_order_by_ids?: {
         chapter_id: number;
         activities_order_by_ids: {
@@ -60,7 +60,6 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
       mutate(
         `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
       );
-      await revalidateTags(['courses'], props.orgslug);
       setNewChapterModal(false);
       toast.success(t('chapterCreatedSuccess'), { id: loadingToast });
     } catch (error) {
@@ -104,6 +103,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
     dispatchCourse({ type: 'setCourseStructure', payload: newCourseStructure });
 
     const payload: OrderPayload = {
+      last_known_update_date: course_structure.update_date,
       chapter_order_by_ids: newCourseStructure.chapters.map((chapter: any) => ({
         chapter_id: chapter.id,
         activities_order_by_ids: (chapter.activities || []).map((activity: any) => ({ activity_id: activity.id })),
@@ -115,10 +115,9 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
       await mutate(
         `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
       );
-      await revalidateTags(['courses'], props.orgslug);
-    } catch {
+    } catch (error: any) {
       dispatchCourse({ type: 'setCourseStructure', payload: course_structure });
-      toast.error(t('saveOrderError'));
+      toast.error(error?.message || t('saveOrderError'));
     }
   };
 

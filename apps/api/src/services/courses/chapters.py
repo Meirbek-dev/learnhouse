@@ -23,6 +23,7 @@ from src.db.courses.course_chapters import CourseChapter
 from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
+from src.services.courses.courses import _ensure_course_is_current
 
 ####################################################
 # CRUD
@@ -346,6 +347,8 @@ async def reorder_chapters_and_activities(
         course.org_id,
         resource_owner_id=course.creator_id,
     )
+
+    _ensure_course_is_current(course, chapters_order.last_known_update_date)
 
     ###########
     # Chapters

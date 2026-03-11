@@ -9,7 +9,6 @@ import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { revalidateTags } from '@services/utils/ts/requests';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Search, X } from 'lucide-react';
@@ -77,9 +76,6 @@ const CoursesHome = (params: CourseProps) => {
         <CreateCourseModal
           closeModal={closeNewCourseModal}
           org_id={params.org_id}
-          onCreated={async () => {
-            await revalidateTags(['courses'], orgslug);
-          }}
         />
       }
       dialogTitle={t('createCourse')}

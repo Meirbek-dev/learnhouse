@@ -37,7 +37,6 @@ interface LocalThumbnail {
 const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
-  const thumbnailDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const course = useCourse();
   const session = usePlatformSession() as any;
@@ -58,16 +57,6 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
       }
     };
   }, [localThumbnail]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (thumbnailDelayRef.current) {
-        clearTimeout(thumbnailDelayRef.current);
-      }
-    };
-  }, []);
-
   const showError = useCallback((message: string) => {
     toast.error(message, {
       duration: 3000,
@@ -129,16 +118,6 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
         await mutate(
           `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
         );
-
-        // Wait for backend to stabilize
-        await new Promise((resolve) => {
-          thumbnailDelayRef.current = globalThis.setTimeout(resolve, 1500);
-        });
-
-        if (thumbnailDelayRef.current) {
-          clearTimeout(thumbnailDelayRef.current);
-          thumbnailDelayRef.current = null;
-        }
 
         if (!res.success) {
           showError(res.HTTPmessage);

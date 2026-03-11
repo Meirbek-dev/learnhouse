@@ -239,6 +239,7 @@ export const revalidateTags = async (tags: string[], orgslug: string) => {
   try {
     const response = await fetch(endpoint, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -257,7 +258,7 @@ export const revalidateTags = async (tags: string[], orgslug: string) => {
     await Promise.all(
       uniqueTags.map((tag) => {
         const url = `${endpoint}?tag=${encodeURIComponent(tag)}`;
-        return fetch(url);
+        return fetch(url, { credentials: 'include' });
       }),
     );
   }

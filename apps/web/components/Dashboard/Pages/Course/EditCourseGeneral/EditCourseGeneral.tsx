@@ -186,10 +186,15 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
   });
 
   const initialRef = useRef<FormValues>(form.getValues());
+  const isDirtyRef = useRef(false);
 
   // Reset when backend data changes
   useEffect(() => {
     if (!isLoading && courseStructure) {
+      if (isDirtyRef.current) {
+        return;
+      }
+
       // Inline initial values computation to avoid adding a non-stable function to deps
       const initializeLearnings = (learnings: any) => {
         if (!learnings) return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
@@ -236,6 +241,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
 
       form.reset(vals);
       initialRef.current = vals;
+  isDirtyRef.current = false;
       setIsDirty(false);
       dispatchCourse({ type: 'setSectionDirty', payload: { section: 'general', dirty: false } });
       setError('');
@@ -253,6 +259,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
         else form.clearErrors(k);
       });
       const changed = JSON.stringify(values) !== JSON.stringify(initialRef.current);
+      isDirtyRef.current = changed;
       setIsDirty(changed);
       dispatchCourse({ type: 'setSectionDirty', payload: { section: 'general', dirty: changed } });
     });
@@ -301,6 +308,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
       await mutate(courseMetaUrl);
 
       initialRef.current = values;
+      isDirtyRef.current = false;
       setIsDirty(false);
       dispatchCourse({ type: 'setSectionDirty', payload: { section: 'general', dirty: false } });
       toast.success(tCommon('saved'));

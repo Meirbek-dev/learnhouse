@@ -25,7 +25,7 @@ import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { searchOrgContent } from '@services/search/search';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -292,6 +292,7 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
   const [selectedContributors, setSelectedContributors] = useState<number[]>([]);
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const isDirtyRef = useRef(false);
 
   useUnsavedChangesGuard(isDirty);
 
@@ -301,12 +302,17 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
         courseStructure?.open_to_contributors !== undefined &&
         isOpenToContributors !== undefined &&
         isOpenToContributors !== courseStructure.open_to_contributors;
+      isDirtyRef.current = Boolean(dirty);
       setIsDirty(Boolean(dirty));
       dispatchCourse({ type: 'setSectionDirty', payload: { section: 'contributors', dirty: Boolean(dirty) } });
     }
   }, [isLoading, isOpenToContributors, courseStructure, dispatchCourse]);
 
   useEffect(() => {
+    if (isDirtyRef.current) {
+      return;
+    }
+
     setIsOpenToContributors(courseStructure?.open_to_contributors);
   }, [courseStructure?.open_to_contributors]);
 
@@ -530,6 +536,7 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
         },
       });
       await mutate(`${getAPIUrl()}courses/${courseStructure.course_uuid}/meta?with_unpublished_activities=${course.withUnpublishedActivities}`);
+      isDirtyRef.current = false;
       setIsDirty(false);
       dispatchCourse({ type: 'setSectionDirty', payload: { section: 'contributors', dirty: false } });
       toast.success(tCommon('saved'));

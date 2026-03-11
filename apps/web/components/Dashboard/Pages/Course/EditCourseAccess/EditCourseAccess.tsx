@@ -21,7 +21,7 @@ import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Button } from '@/components/ui/button';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
@@ -150,18 +150,24 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
   const [isClientPublic, setIsClientPublic] = useState<boolean | undefined>(() => courseStructure?.public);
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const isDirtyRef = useRef(false);
 
   useUnsavedChangesGuard(isDirty);
 
   useEffect(() => {
     if (!isLoading) {
       const dirty = isClientPublic !== undefined && isClientPublic !== courseStructure?.public;
+      isDirtyRef.current = Boolean(dirty);
       setIsDirty(Boolean(dirty));
       dispatchCourse({ type: 'setSectionDirty', payload: { section: 'access', dirty: Boolean(dirty) } });
     }
   }, [isLoading, isClientPublic, courseStructure, dispatchCourse]);
 
   useEffect(() => {
+    if (isDirtyRef.current) {
+      return;
+    }
+
     setIsClientPublic(courseStructure?.public);
   }, [courseStructure?.public]);
 
@@ -190,6 +196,7 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
         },
       });
       await mutate(`${getAPIUrl()}courses/${courseStructure.course_uuid}/meta?with_unpublished_activities=${course.withUnpublishedActivities}`);
+      isDirtyRef.current = false;
       setIsDirty(false);
       dispatchCourse({ type: 'setSectionDirty', payload: { section: 'access', dirty: false } });
       toast.success(tCommon('saved'));

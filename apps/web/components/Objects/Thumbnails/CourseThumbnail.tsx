@@ -42,7 +42,6 @@ import Link from '@components/ui/AppLink';
 
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { deleteCourseFromBackend } from '@services/courses/courses';
-import { revalidateTags } from '@services/utils/ts/requests';
 import { getUriWithOrg } from '@services/config/config';
 
 // ============================================================================
@@ -579,7 +578,6 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
     const toastId = toast.loading(t('deleting'));
     try {
       await deleteCourseFromBackend(course.course_uuid, session.data?.tokens?.access_token);
-      await revalidateTags(['courses'], orgslug);
       toast.success(t('toastDeleteSuccess'));
       router.refresh();
     } catch {

@@ -1,32 +1,30 @@
 # Course Management Workflow - Critical Analysis (Current State)
 
-**Date:** 2026-03-10
+**Date:** 2026-03-11
 **Scope:** Current course management flow in `apps/web` and `apps/api`
-**Goal:** Document the major workflow, authorization, state-management, data, and UX issues in the current course management implementation and define the fixes required to make it coherent and reliable.
+**Goal:** Document the current workflow problems in course management and define concrete solutions that make the experience coherent, safe, and maintainable.
 
 ---
 
 ## Executive Assessment
 
-The current course management system is functional, but the workflow is not internally consistent.
+The current course management area is meaningfully better than the older implementation, but it is still not coherent as a workflow.
 
-The main problem is not a single broken page. The problem is that the system mixes three different editing models at once:
+Two earlier problems have already been improved:
 
-1. **Immediate actions**: contributor changes, chapter creation, chapter rename, activity creation, thumbnail upload, certification create/delete.
-2. **Deferred local changes**: course metadata, access visibility, contributor openness, drag-and-drop ordering, certification config edits.
-3. **Global save orchestration**: one shared save button tries to persist multiple unrelated sections in one sequence.
+1. The course list is now properly paginated and supports search and sorting.
+2. The old page-wide global save orchestration has been replaced with section-level save buttons.
 
-That makes the editor hard to reason about for users and fragile to maintain for engineers.
+Those changes reduced some of the worst complexity. The remaining problems are deeper:
 
-The most serious defects are:
+1. Authorization is still split across the wrong boundaries.
+2. Individual sections still mix immediate-save and deferred-save behavior.
+3. Shared course state can overwrite local drafts.
+4. Unsaved-change protection is incomplete.
+5. Concurrency protection is only implemented for part of the editor.
+6. Cache invalidation and freshness handling are redundant, inconsistent, and hard to reason about.
 
-1. **Authorization rules are inconsistent across server layouts, client tabs, and API behavior.**
-2. **The save model is inconsistent and sometimes incorrect.**
-3. **The list page ignores real pagination and overfetches heavily.**
-4. **The editor state is too coupled, so unrelated sections interfere with each other.**
-5. **The save path causes excessive refresh, revalidation, and stale-state risk.**
-
-Until those are fixed, the course management area will continue to feel unpredictable even when individual components appear to work.
+The editor mostly works when one user changes one field at a time. It becomes fragile when permissions differ by scope, when multiple people edit the same course, or when a user mixes media/actions with unsaved drafts.
 
 ---
 
@@ -34,493 +32,401 @@ Until those are fixed, the course management area will continue to feel unpredic
 
 ### 1. Course list
 
-- `apps/web/app/orgs/[orgslug]/dash/courses/page.tsx` fetches org data and editable courses server-side.
-- The page requests `getEditableOrgCourses(..., 1, 999)` and passes the entire list to the client.
-- `apps/web/app/orgs/[orgslug]/dash/courses/client.tsx` renders the cards and opens the create modal.
+- `apps/web/app/orgs/[orgslug]/dash/courses/page.tsx` fetches editable courses server-side.
+- The page now supports pagination, search, and sort through `getEditableOrgCourses()`.
+- `apps/web/app/orgs/[orgslug]/dash/courses/client.tsx` renders the list and opens course creation.
 
-### 2. Course creation
+### 2. Editor shell
 
-- `CreateCourseModal` submits to `createNewCourse()`.
-- On success it revalidates course tags, closes the modal, and refreshes the router.
+- `apps/web/app/orgs/[orgslug]/dash/courses/layout.tsx` applies one shared permission gate to both the list page and course-detail routes.
+- `apps/web/app/orgs/[orgslug]/dash/courses/course/[courseuuid]/[subpage]/page.tsx` server-fetches initial course metadata.
+- `apps/web/app/orgs/[orgslug]/dash/courses/course/[courseuuid]/[subpage]/page-client.tsx` renders tab navigation and gates individual tabs on the client.
+- `apps/web/components/Contexts/CourseContext.tsx` stores shared course data and per-section dirty flags.
 
-### 3. Course editing
+### 3. Persistence behavior by section
 
-- `apps/web/app/orgs/[orgslug]/dash/courses/course/[courseuuid]/[subpage]/page.tsx` is a client page.
-- It gates tabs with client-side permissions.
-- `CourseProvider` then fetches `/courses/{uuid}/meta?with_unpublished_activities=true` through SWR.
-- Each tab edits part of a shared `CourseContext` state.
+The workflow is no longer "one global save button", but it is still internally inconsistent.
 
-### 4. Persistence behavior today
+- General tab:
+  - Metadata fields are deferred until Save.
+  - Thumbnail upload is immediate.
+- Access tab:
+  - Public/private access is deferred until Save.
+  - User-group link/unlink actions are immediate.
+- Contributors tab:
+  - `open_to_contributors` is deferred until Save.
+  - Add/remove/update contributor actions are immediate.
+- Certification tab:
+  - Enable/disable certification is immediate.
+  - Certification config edits are deferred until Save.
+- Content tab:
+  - Create/rename/delete/reorder actions are immediate.
 
-- **Immediate write**:
-  - chapter create/delete/rename
-  - activity create/delete/rename/publish
-  - contributor add/remove/role/status updates
-  - usergroup unlink
-  - thumbnail upload
-  - certification create/delete
-- **Deferred until Save button**:
-  - general metadata edits
-  - visibility/public toggle
-  - `open_to_contributors` toggle
-  - drag-and-drop order
-  - certification config edits
-- **Global save entry point**:
-  - `apps/web/components/Dashboard/Misc/SaveState.tsx`
-
-This is the central workflow flaw: users are in one editor, but the system behaves like several unrelated editors sharing the same screen.
+The result is not a single editing model. It is several editing models sharing one UI.
 
 ---
 
-## Critical Issues And Fixes
+## Critical Issues And Solutions
 
-## 1. Permission Model Is Internally Inconsistent
+## 1. Route-Level Authorization Is Split Across The Wrong Boundaries
 
-### Issue 1.1: The server layout blocks `own`-scope editors before the page loads
+### Problem
 
-**Evidence**
+The same route layout protects both the course list and the course editor, but the list and the editor do not actually require the same permissions.
 
-- `apps/web/app/orgs/[orgslug]/dash/courses/layout.tsx` only allows:
-  - `CREATE COURSE ORG`
-  - `UPDATE COURSE ORG`
-  - `MANAGE COURSE ORG`
-- The detail page itself uses client checks for `Scopes.OWN` on multiple tabs.
-- The API endpoint `get_editable_courses_orgslug()` in `apps/api/src/services/courses/courses.py` explicitly supports `course:update:own`.
+### Evidence
 
-**Impact**
+- `apps/web/app/orgs/[orgslug]/dash/courses/layout.tsx` allows access if the user has any of:
+  - `course:create:org`
+  - `course:update:org`
+  - `course:update:own`
+  - `course:manage:org`
+  - `course:manage:own`
+- `apps/web/app/orgs/[orgslug]/dash/courses/course/[courseuuid]/[subpage]/page-client.tsx` then gates actual editor tabs separately.
 
-- A user who is allowed to edit only their own course can be denied by the route layout before they ever reach the page.
-- The backend, list API, and client tab model do not agree on who is allowed to use the editor.
+### Why this is a problem
 
-**Fix**
+This creates two concrete failures:
 
-1. Update the course layout to accept both `ORG` and `OWN` scopes where appropriate.
-2. Separate list-page access from course-detail access if needed.
-3. Define one canonical permission matrix for:
-   - list page
-   - detail page shell
-   - each tab
-   - each mutation endpoint
+1. A user with only `course:create:org` can pass the shared `dash/courses` layout and reach the course-detail shell even though they cannot use any edit tab.
+2. A user with org-level course permissions can still be blocked from tabs because the client checks exact `OWN` scope in multiple places.
 
-### Issue 1.2: Access-sensitive fields are mixed into the general course update endpoint
+The client permission helper in `apps/web/components/Security/PermissionProvider.tsx` does exact permission-string matching. It does not broaden `ORG` into `OWN`. That means a user with `course:update:org` does not automatically satisfy checks written as `course:update:own`.
 
-**Evidence**
+### Impact
 
-- `apps/api/src/services/courses/courses.py:update_course()` allows one payload to update both general metadata and sensitive access fields.
-- It adds special checks only when `public` or `open_to_contributors` are present.
-- The frontend uses the same shared course object and the same save flow for unrelated edits.
+- Users can be admitted to the wrong shell and then see an access-denied state only after load.
+- Org-level editors can be blocked from tabs they should be allowed to use.
+- Authorization logic becomes hard to audit because list access and detail access are coupled.
 
-**Impact**
+### Solution
 
-- Access-management concerns are coupled to basic metadata edits.
-- It is harder to reason about who can change what.
-- The API contract encourages oversized update payloads.
-
-**Fix**
-
-1. Split the API into section-specific mutations:
-   - `PATCH /courses/{uuid}/metadata`
-   - `PATCH /courses/{uuid}/access`
-   - `PATCH /courses/{uuid}/ordering`
-   - certification endpoints stay separate
-2. Keep sensitive-field authorization isolated in the access endpoint.
-3. Make each tab call only the endpoint for the section it owns.
+1. Split the current `dash/courses` layout into separate authorization boundaries:
+    - list/create shell
+    - course-detail shell
+2. Define one explicit permission matrix for each course tab.
+3. Stop encoding org-level editor access as `OWN` checks on the client.
+4. Either:
+    - pass resolved tab access from the server, or
+    - implement scope broadening rules in the client permission layer intentionally.
 
 ---
 
-## 2. The Save Workflow Is Inconsistent And Sometimes Wrong
+## 2. The Editor Still Uses Mixed Save Models Inside The Same Section
 
-### Issue 2.1: One page mixes immediate-save and deferred-save behaviors
+### Problem
 
-**Evidence**
+The old global save model is gone, but each section still mixes immediate writes and deferred writes in ways users cannot infer reliably.
 
-- Immediate actions are scattered across content, contributors, thumbnail, and certification flows.
-- Deferred changes are stored in `CourseContext` and later pushed via `SaveState`.
+### Evidence
 
-**Impact**
+- General tab:
+  - `apps/web/components/Dashboard/Pages/Course/EditCourseGeneral/EditCourseGeneral.tsx` saves text metadata explicitly.
+  - `apps/web/components/Dashboard/Pages/Course/EditCourseGeneral/ThumbnailUpdate.tsx` uploads thumbnails immediately.
+- Contributors tab:
+  - `apps/web/components/Dashboard/Pages/Course/EditCourseContributors/EditCourseContributors.tsx` saves `open_to_contributors` explicitly.
+  - The same component adds/removes/updates contributors immediately.
+- Certification tab:
+  - `apps/web/components/Dashboard/Pages/Course/EditCourseCertification/EditCourseCertification.tsx` creates/deletes certification immediately.
+  - The same component saves certification config separately.
 
-- Users cannot predict whether a change is already persisted or still local.
-- Engineers must remember which tab uses which persistence model.
-- The workflow is much harder to test because there is no single editing contract.
+### Impact
 
-**Fix**
+- Users cannot form a reliable mental model of what is already persisted.
+- Partial updates are easy to create accidentally.
+- Error handling becomes inconsistent because one section contains multiple mutation styles.
 
-Choose one model and apply it consistently.
+### Solution
 
-**Recommended direction:** section-level save, not one global save.
+Pick one contract per section and enforce it consistently.
 
-1. Each tab owns its own draft state.
-2. Each tab has its own save/discard lifecycle.
-3. Immediate actions remain immediate only when they are naturally atomic.
-4. Reordering becomes a tab-local draft with an explicit save action inside the content tab.
+Recommended direction:
 
-### Issue 2.2: The global save button saves unrelated sections together
-
-**Evidence**
-
-- `apps/web/components/Dashboard/Misc/SaveState.tsx` always attempts:
-  - order save
-  - metadata save
-  - certification save
-- It does this from a single click regardless of which tab the user was working in.
-
-**Impact**
-
-- A user changing one field can trigger writes for multiple domains.
-- Failures are hard to communicate accurately because one click maps to several backend calls.
-- Partial success is likely and difficult to explain.
-
-**Fix**
-
-1. Remove the cross-tab global save orchestration.
-2. Remove page-wide save
-3. Move save ownership into each tab.
-
-### Issue 2.3: The page is marked dirty on first load
-
-**Evidence**
-
-- In `SaveState.tsx`, the initial `useEffect` builds `chapter_order_by_ids` and then dispatches `setIsNotSaved()` on first initialization.
-
-**Impact**
-
-- The UI can show unsaved changes before the user edits anything.
-- The save button can encourage needless writes.
-
-**Fix**
-
-1. Initial state hydration must not mark the page dirty.
-2. Dirty state should only change after a real user mutation.
-3. Compare current order against an initial snapshot instead of forcing dirty on initialization.
-
-### Issue 2.4: Reordering is deferred, but other structure changes are immediate
-
-**Evidence**
-
-- In the content editor:
-  - new chapter/activity creation is immediate
-  - rename/delete actions are immediate
-  - drag-and-drop reordering is local and requires the shared save button
-
-**Impact**
-
-- The content tab has two different persistence models inside one interaction surface.
-- Users cannot build a clear mental model of when content changes are committed.
-
-**Fix**
-
-1. Make all content mutations follow the same model.
-2. Preferred option: content tab has explicit save for structural edits, including reorder, rename, create, and delete.
-3. Alternative: persist reorder immediately as well, with optimistic rollback.
+1. Each section owns one draft and one save lifecycle.
+2. Keep truly atomic actions immediate only when they do not coexist with unsaved draft fields in the same section.
+3. Move media actions and configuration actions into separate sections if they must keep different persistence behavior.
+4. If a section mixes both kinds of change, make the section explicitly stage everything until Save.
 
 ---
 
-## 3. State Architecture Is Too Coupled
+## 3. Shared Course State Can Overwrite Local Drafts
 
-### Issue 3.1: All tabs mutate one shared `CourseContext` object
+### Problem
 
-**Evidence**
+The editor uses a shared `CourseContext` as both a read model and a synchronization source for local section state. That makes local drafts vulnerable to unrelated updates.
 
-- `apps/web/components/Contexts/CourseContext.tsx` stores a single `courseStructure`, `courseOrder`, and `isSaved` flag.
-- General, access, contributors, certification, and content tabs all write into that shared state.
+### Evidence
 
-**Impact**
+- `apps/web/components/Contexts/CourseContext.tsx` stores one shared `courseStructure` object for the editor.
+- `apps/web/components/Dashboard/Pages/Course/EditCourseGeneral/EditCourseGeneral.tsx` resets the form whenever `courseStructure` changes.
+- `apps/web/components/Dashboard/Pages/Course/EditCourseGeneral/ThumbnailUpdate.tsx` mutates course metadata immediately after thumbnail upload.
 
-- Unrelated tabs are coupled through one mutable object.
-- Dirty tracking is coarse and unreliable.
-- Saving one section can accidentally include stale or unrelated data from another section.
+This means a user can:
 
-**Fix**
+1. type unsaved changes into the general form,
+2. upload a thumbnail,
+3. trigger a course metadata refresh,
+4. have the form reset from shared state.
 
-1. Reduce `CourseContext` to shared read-only course data plus invalidation hooks.
-2. Move editable draft state into section-local hooks.
-3. Track dirty state per section, not for the whole editor.
+The same structural risk exists anywhere section-local state is re-derived automatically from `courseStructure` after external mutations.
 
-### Issue 3.3: There is no navigation guard for unsaved local edits
+### Impact
 
-**Evidence**
+- Unsaved edits can be silently replaced by refreshed server state.
+- Draft reliability depends on mutation ordering, not just user intent.
+- The shared context becomes an accidental source of destructive resets.
 
-- The editor exposes `isSaved`, but there is no route-leave or `beforeunload` guard.
+### Solution
 
-**Impact**
-
-- Deferred edits are easy to lose.
-
-**Fix**
-
-1. Add browser unload protection for dirty sections.
-2. Add in-app route-change confirmation when the current tab has unsaved changes.
-3. Scope the warning to the active tab, not the whole editor.
-
----
-
-## 4. Data Contracts Are Inconsistent
-
-### Issue 4.1: The course list page throws away pagination and fetches 999 items
-
-**Evidence**
-
-- `apps/web/app/orgs/[orgslug]/dash/courses/page.tsx` hardcodes `COURSES_PER_PAGE = 999`.
-- The API already returns `X-Total-Count` and supports page/limit.
-- `totalCourses` is passed to the client but not used for pagination.
-
-**Impact**
-
-- Large orgs pay unnecessary server and render cost.
-- The UI cannot scale with real course volume.
-- The backend pagination support is effectively bypassed.
-
-**Fix**
-
-1. Use real pagination on the list page.
-2. Add search and sort at the list level.
-3. Render only one page of cards at a time.
-4. Keep `X-Total-Count` as the source of truth for controls.
-
-### Issue 4.2: The general editor and create flow do not share the same learnings format
-
-**Evidence**
-
-- `CreateCourseModal` sends `learnings` as `values.learnings?.join(', ')`.
-- `EditCourseGeneral` expects `learnings` as JSON string content representing structured items.
-- The backend accepts `learnings` as a plain string.
-
-**Impact**
-
-- Course creation and course editing are not using the same data model.
-- Structured learning items degrade into an untyped string contract.
-- The editor has to carry format-recovery logic.
-
-**Fix**
-
-1. Define one canonical backend schema for `learnings`.
-2. Store it as structured JSON, not overloaded free-form string content.
-3. Make creation and editing use the same serializer and validator.
-
-### Issue 4.3: Backend validation is too weak for structured course metadata
-
-**Evidence**
-
-- `CourseUpdate` accepts `learnings` and `tags` as strings.
-- The frontend performs more validation than the backend does.
-
-**Impact**
-
-- Invalid data can still reach storage if the request does not come from the current form.
-- The backend does not protect the domain model.
-
-**Fix**
-
-1. Move structural validation to the API boundary.
-2. Enforce shape, length, and normalization server-side.
-3. Treat the frontend validator as UX help, not the source of truth.
-
-### Issue 4.4: Certification default instructor extraction is using the wrong shape
-
-**Evidence**
-
-- `apps/web/components/Dashboard/Pages/Course/EditCourseCertification/EditCourseCertification.tsx` reads `courseStructure.authors[0].first_name` and `last_name`.
-- Backend course author objects are shaped as `AuthorWithRole { user: UserRead, ... }`.
-
-**Impact**
-
-- The default instructor field can initialize blank even when author data exists.
-
-**Fix**
-
-1. Read from `author.user.first_name` and `author.user.last_name`.
-2. Add a typed course-author interface on the frontend to prevent this class of bug.
+1. Treat `CourseContext` as shared canonical read data, not as the live source for resetting local drafts after mount.
+2. Move section drafts into isolated local stores or hooks.
+3. Only reset a section draft when one of these is true:
+    - the user explicitly discards,
+    - that section saved successfully,
+    - the page is re-entered fresh.
+4. When immediate mutations return partial server updates, merge only the affected fields instead of force-resetting the whole section form.
 
 ---
 
-## 5. Fetching, Refresh, And Cache Invalidation Are Too Expensive
+## 4. Unsaved-Changes Protection Is Incomplete
 
-### Issue 5.1: One save click can trigger multiple refresh cycles
+### Problem
 
-**Evidence**
+The editor only protects some navigation paths.
 
-- `SaveState.tsx` calls `router.refresh()` inside `changeOrderBackend()` and again inside `changeMetadataBackend()`.
-- It also calls `mutate()` repeatedly around the same course meta URL.
-- It revalidates tags multiple times in the same save path.
+### Evidence
 
-**Impact**
+- `apps/web/hooks/useUnsavedChangesGuard.ts` only installs a `beforeunload` listener.
+- `apps/web/app/orgs/[orgslug]/dash/courses/course/[courseuuid]/[subpage]/page-client.tsx` only prompts when the user clicks another course tab and the current tab is dirty.
 
-- Unnecessary network and rendering work.
-- The page can feel unstable during save.
-- Save latency is inflated by orchestration overhead rather than only backend work.
+This does not cover:
 
-**Fix**
+- sidebar navigation,
+- breadcrumb navigation,
+- browser back/forward within the app,
+- any other client-side route transition outside the tab strip.
 
-1. Collapse one save action into one refresh cycle at most.
-2. Prefer optimistic local update plus targeted SWR mutate.
-3. Revalidate only the tags actually affected by the section that changed.
+It also only checks the current tab, not whether another section already has unsaved work.
 
-### Issue 5.2: Cache invalidation is too broad
+### Impact
 
-**Evidence**
+- Users can lose changes through normal in-app navigation.
+- Dirty-state warnings are inconsistent and easy to bypass unintentionally.
 
-- `apps/web/services/courses/courses.ts` revalidates both `tags.courses` and `tags.editableCourses` for create, update, thumbnail update, and delete.
+### Solution
 
-**Impact**
-
-- Small updates invalidate more cache than necessary.
-- This increases the reload surface across the app.
-
-**Fix**
-
-1. Add section- and entity-specific cache tags.
-2. Invalidate the course list only when list-visible data changes.
-3. Keep course-detail caches separate from editable list caches.
-
-### Issue 5.3: The detail editor is client-gated and client-fetched end to end
-
-**Evidence**
-
-- The course detail page is a client page.
-- It waits for client permission state.
-- Then `CourseProvider` fetches course meta via SWR.
-
-**Impact**
-
-- Slower perceived load than a server-preloaded route.
-- Tab switches depend on client fetch orchestration.
-- Authorization and content load are split across two client steps.
-
-**Fix**
-
-1. Move the course editor shell to a server component.
-2. Resolve permission and initial course data server-side.
-3. Hydrate client tabs with initial data rather than fetching the first view entirely on the client.
-
-### Issue 5.4: The same org data is fetched multiple times in the same flow
-
-**Evidence**
-
-- `generateMetadata()` fetches org context.
-- `CoursesPage()` fetches org context again.
-- The org context provider can also fetch org data client-side.
-
-**Impact**
-
-- Redundant requests during navigation.
-
-**Fix**
-
-1. Share org context from the server layout where possible.
-2. Pass stable initial org data into the client provider.
-3. Avoid refetching the same org object at page and provider level.
+1. Add one centralized in-app route-leave guard for the course editor.
+2. Warn when any section is dirty, not only the active tab.
+3. Keep the warning message section-aware so it still tells the user which draft would be lost.
 
 ---
 
-## 6. UX And Product Feedback Are Not Clear Enough
+## 5. Optimistic Concurrency Protection Is Only Partially Implemented
 
-### Issue 6.1: The course list does not expose search, sort, or pagination even though the backend supports pagination
+### Problem
 
-**Impact**
+The codebase already has a good concurrency primitive, `last_known_update_date`, but only some mutations use it.
 
-- Managing a large catalog becomes visually noisy and slow.
-- The page is usable only for small organizations.
+### Evidence
 
-**Fix**
+- `apps/api/src/services/courses/courses.py` enforces `_ensure_course_is_current()` for:
+  - `update_course_metadata()`
+  - `update_course_access()`
+- `apps/api/src/services/courses/chapters.py` does not enforce any equivalent check in `reorder_chapters_and_activities()`.
+- Immediate flows such as thumbnail upload and contributor mutations also do not share one consistent optimistic-concurrency contract.
 
-1. Add list filters and pagination.
-2. Preserve the current card layout, but add a server-driven pager and search box.
-3. Only fetch the current page.
+### Impact
 
-### Issue 6.2: Error handling is uneven across sections
+- Metadata and access changes are protected from overwriting stale state.
+- Structure changes are not.
+- The same editor therefore has different data-loss guarantees depending on which action the user takes.
 
-**Evidence**
+### Additional UX gap
 
-- Some flows use detailed toasts.
-- Some catch blocks collapse everything to a generic error.
-- Multi-step saves do not report section-level success/failure clearly.
+When the protected mutations do fail, the UI mainly surfaces a generic error string. There is no structured conflict recovery flow.
 
-**Impact**
+### Solution
 
-- Users do not know what actually failed.
-- Retrying becomes guesswork.
-
-**Fix**
-
-1. Standardize mutation result handling.
-2. Show section-specific failures.
-3. In batch-like flows, report which subsection failed and which succeeded.
-
-### Issue 6.3: The save model is not visible in the UI
-
-**Impact**
-
-- A user cannot tell which changes are already committed.
-- Immediate-save and deferred-save sections look visually similar.
-
-**Fix**
-
-1. Make save behavior explicit per section.
-2. Label sections as either auto-saved or manually saved.
-3. Prefer removing mixed behavior rather than documenting a confusing model.
+1. Extend optimistic concurrency to all course-editing mutations that can overwrite prior state.
+2. Add `last_known_update_date` to reorder and any other stateful edit operations.
+3. Return structured conflict metadata on 409 responses.
+4. Offer a concrete recovery path in the UI:
+    - reload latest version,
+    - compare changes,
+    - retry safely.
 
 ---
 
-## Recommended Target State
+## 6. Cache Invalidation And Freshness Handling Are Redundant And Inconsistent
 
-The course management area should move to this model:
+### Problem
 
-1. **List page**
-   - server-paginated
-   - searchable
-   - uses real totals
+The course workflow currently uses too many freshness mechanisms at once:
 
-2. **Editor shell**
-   - server-authorized
-   - server-hydrated with initial course data
-   - tab access rules aligned with backend permission rules
+- server-side `revalidateTag()` in server actions,
+- client-side calls to `/api/revalidate`,
+- local SWR `mutate()`,
+- `router.refresh()` in some flows.
 
-3. **Per-tab editing model**
-   - General tab owns metadata draft and save
-   - Access tab owns access draft and save
-   - Content tab owns structure draft and save
-   - Contributors tab uses immediate atomic actions
-   - Certification tab uses its own save lifecycle
+### Evidence
 
-4. **API model**
-   - section-specific endpoints
-   - strong backend validation
-   - optimistic concurrency checks
+- `apps/web/services/courses/courses.ts` revalidates server tags inside mutations.
+- `apps/web/services/courses/chapters.ts` does the same for structure mutations.
+- `apps/web/services/utils/ts/requests.ts` exposes a separate client `revalidateTags()` helper that posts to `/api/revalidate`.
+- Components like:
+  - `apps/web/components/Objects/Modals/Course/Create/CreateCourse.tsx`
+  - `apps/web/components/Objects/Thumbnails/CourseThumbnail.tsx`
+  - `apps/web/components/Dashboard/Pages/Course/EditCourseStructure/Buttons/NewActivityButton.tsx`
+   combine multiple freshness mechanisms in one user action.
 
-5. **Cache model**
-   - targeted invalidation
-   - one refresh per user action at most
-   - optimistic local updates where safe
+### Why this is a problem
+
+This is not just redundant. It makes correctness ownership unclear.
+
+- Which layer is responsible for keeping server-rendered pages fresh?
+- Which layer is responsible for SWR caches?
+- Which tags are canonical for editable lists versus detail pages?
+- Which mutations need `router.refresh()` and which do not?
+
+Right now the answer varies by component.
+
+### Additional operational risk
+
+`apps/web/app/api/revalidate/route.ts` is publicly callable and does not require authentication or a secret. Since the course workflow depends on that route from the client, anyone who can hit the app can trigger arbitrary tag invalidation and force cache churn.
+
+### Impact
+
+- More refresh work than necessary.
+- Hard-to-debug stale-state bugs.
+- Higher chance of accidental over-invalidation.
+- Public cache-invalidation surface area.
+
+### Solution
+
+1. Define a single freshness policy per mutation type:
+    - server revalidation for server-rendered caches,
+    - SWR mutate for client-local state,
+    - `router.refresh()` only when route-level data actually changed.
+2. Make tag ownership explicit and consistent.
+3. Remove redundant revalidation calls from components once the mutation layer owns freshness.
+4. Protect `/api/revalidate` with authentication or a server-only secret, or remove it from client mutation paths entirely.
 
 ---
 
-## Priority Plan (one-shot)
+## 7. Section Data Fetching Is Fragmented And Duplicative
 
-1. Fix route/layout permission mismatch so `own`-scope editors are not blocked.
-2. Split access updates out of the general course update path.
-3. Stop marking the editor dirty on initial load.
-4. Remove the page-wide save orchestration in `SaveState.tsx`.
-5. Move to per-tab save ownership.
-6. Normalize content-tab persistence behavior.
-7. Define structured backend schemas for learnings and tags.
-8. Add version-based conflict detection.
-9. Tighten backend validation for course metadata.
-10. Implement real list pagination and search.
-11. Reduce refresh/revalidate churn.
-12. Server-hydrate the editor shell and initial course payload.
+### Problem
+
+The course editor has a shared provider, but several tabs still fetch their own parallel data in inconsistent ways.
+
+### Evidence
+
+- `apps/web/components/Contexts/CourseContext.tsx` fetches course metadata.
+- `apps/web/components/Dashboard/Pages/Course/EditCourseContributors/EditCourseContributors.tsx` separately fetches contributors.
+- `apps/web/components/Dashboard/Pages/Course/EditCourseCertification/EditCourseCertification.tsx` separately fetches certifications and bypasses the shared service wrappers with a manual `fetch()`.
+- `apps/web/components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess.tsx` separately fetches linked user groups.
+
+Not every extra fetch is inherently wrong, but the current pattern has no clear contract. Some sections use shared service helpers, some use raw `fetch`, some rely on `CourseContext`, and some stitch their own data layer locally.
+
+### Impact
+
+- The editor is harder to maintain because each tab invents its own fetch pattern.
+- Freshness and cache ownership differ by section.
+- It becomes harder to predict which data should live in shared state and which should remain tab-local.
+
+### Solution
+
+1. Define explicit data boundaries:
+    - shared editor shell data,
+    - section-owned query data,
+    - action-specific transient data.
+2. Standardize on service-layer helpers instead of ad hoc tab-local `fetch()` calls.
+3. Use shared SWR key helpers where applicable.
+4. Only keep data in `CourseContext` if multiple sections truly depend on it.
+
+---
+
+## 8. The Thumbnail Workflow Depends On Timing Instead Of A Stable Readiness Contract
+
+### Problem
+
+The thumbnail upload flow relies on a hard-coded delay to let the backend "stabilize" before the UI trusts the result.
+
+### Evidence
+
+- `apps/web/components/Dashboard/Pages/Course/EditCourseGeneral/ThumbnailUpdate.tsx` waits 1500ms after updating the thumbnail before continuing.
+
+### Why this is a problem
+
+This means correctness depends on elapsed time rather than an explicit backend contract.
+
+Possible underlying causes include:
+
+- asynchronous media processing,
+- storage propagation delay,
+- metadata not being ready when the mutation resolves.
+
+### Impact
+
+- Slower perceived save behavior.
+- Non-deterministic freshness.
+- Fragility on slower or faster infrastructure.
+
+### Solution
+
+1. Make the backend return the finalized media state that the frontend should render.
+2. If processing is asynchronous, return a processing status and poll or subscribe explicitly.
+3. Remove time-based waits from the client once the backend provides a readiness signal.
+
+---
+
+## Recommended Target Architecture
+
+The cleanest path forward is:
+
+1. Split route authorization by page responsibility.
+2. Keep one permission matrix for course tabs and resolve it consistently across server and client.
+3. Reduce `CourseContext` to shared canonical course data plus dirty-state registry.
+4. Keep section drafts local and resilient to unrelated shared-state updates.
+5. Standardize each section on one persistence model.
+6. Extend concurrency protection to every stateful course mutation.
+7. Centralize freshness rules in the mutation layer and remove public revalidation from the browser path.
+
+---
+
+## Priority Order
+
+### Immediate
+
+1. Fix the route and tab permission mismatch.
+2. Prevent shared-state refreshes from resetting unsaved local drafts.
+3. Add a real in-app dirty-navigation guard.
+
+### Next
+
+1. Extend optimistic concurrency to structure and other mutable sections.
+2. Unify cache invalidation ownership.
+3. Remove time-based thumbnail stabilization.
+
+### After that
+
+1. Normalize section query boundaries.
+2. Standardize service usage and SWR keys.
+3. Simplify the editor around one draft model per section.
 
 ---
 
 ## Bottom Line
 
-The current course management area does not primarily suffer from missing components. It suffers from **inconsistent workflow semantics**.
+The course management workflow is no longer failing because of one giant save button or fake pagination. Those problems have already moved in the right direction.
 
-The fastest way to improve it is not to keep patching individual tabs. The right move is to make the system coherent:
+The current failures are subtler and more structural:
 
-1. align permission rules,
-2. split section responsibilities,
-3. stop mixing immediate and deferred save models arbitrarily,
-4. reduce shared mutable editor state,
-5. use pagination and targeted invalidation everywhere.
+- the wrong authorization boundary,
+- mixed persistence rules inside sections,
+- shared state that can overwrite drafts,
+- incomplete unsaved-change protection,
+- partial concurrency guarantees,
+- and a freshness model with too many overlapping mechanisms.
 
-Once those are fixed, the rest of the issues become smaller, clearer, and easier to solve.
+If those are fixed, the editor will stop feeling fragile and start behaving like one deliberate product instead of several mutation styles sharing the same route.
