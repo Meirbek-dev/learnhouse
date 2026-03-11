@@ -1,6 +1,7 @@
 import { ArrowBigUpDash, Image as ImageIcon, UploadCloud, Video } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { updateCourseThumbnail } from '@services/courses/courses';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -185,10 +186,10 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
 
     if (!thumbnailToShow.url) {
       return (
-        <div className="mx-auto flex h-[270px] max-w-[480px] items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50">
+        <div className="mx-auto flex h-[270px] max-w-[480px] items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/50">
           <div className="text-center">
-            <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <p className="mt-2 text-sm text-gray-500">
+            <ImageIcon className="text-muted-foreground mx-auto h-12 w-12" />
+            <p className="text-muted-foreground mt-2 text-sm">
               {activeTab === 'image' ? t('noImageThumbnail') : t('noVideoThumbnail')}
             </p>
           </div>
@@ -201,7 +202,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
         <div className="mx-auto max-w-[480px]">
           <video
             src={thumbnailToShow.url}
-            className={`aspect-video w-full rounded-lg border border-gray-200 object-cover shadow-sm ${
+            className={`aspect-video w-full rounded-lg border border-border object-cover shadow-sm ${
               isLoading ? 'animate-pulse' : ''
             }`}
             controls
@@ -215,7 +216,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
         <img
           src={thumbnailToShow.url}
           alt={localThumbnail ? t('thumbnailPreviewAlt') : t('currentThumbnailAlt')}
-          className={`aspect-video w-full rounded-lg border border-gray-200 object-cover shadow-sm ${
+          className={`aspect-video w-full rounded-lg border border-border object-cover shadow-sm ${
             isLoading ? 'animate-pulse' : ''
           }`}
         />
@@ -306,7 +307,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
 
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <div className="flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 text-sm font-medium text-green-700">
+                  <div className="text-muted-foreground flex items-center gap-2 rounded-full border bg-muted px-4 py-2 text-sm font-medium">
                     <ArrowBigUpDash className="h-4 w-4 animate-bounce" />
                     {t('uploading')}
                   </div>
@@ -316,7 +317,12 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
               )}
 
               <p className="text-muted-foreground text-center text-xs">{t('supportedFormats')}</p>
-              {disabledReason ? <p className="text-center text-xs text-amber-600">{disabledReason}</p> : null}
+              {disabledReason ? (
+                <Alert className="border-border bg-muted/60">
+                  <AlertTitle>{t('uploadImageButton')}</AlertTitle>
+                  <AlertDescription>{disabledReason}</AlertDescription>
+                </Alert>
+              ) : null}
             </TabsContent>
 
             <TabsContent
@@ -327,7 +333,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
 
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <div className="flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 text-sm font-medium text-green-700">
+                  <div className="text-muted-foreground flex items-center gap-2 rounded-full border bg-muted px-4 py-2 text-sm font-medium">
                     <ArrowBigUpDash className="h-4 w-4 animate-bounce" />
                     {t('uploading')}
                   </div>
@@ -337,7 +343,12 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
               )}
 
               <p className="text-muted-foreground text-center text-xs">{t('supportedVideoFormats')}</p>
-              {disabledReason ? <p className="text-center text-xs text-amber-600">{disabledReason}</p> : null}
+              {disabledReason ? (
+                <Alert className="border-border bg-muted/60">
+                  <AlertTitle>{t('uploadVideo')}</AlertTitle>
+                  <AlertDescription>{disabledReason}</AlertDescription>
+                </Alert>
+              ) : null}
             </TabsContent>
           </Tabs>
         </CardContent>
@@ -353,7 +364,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
 
         {isLoading ? (
           <div className="flex items-center justify-center">
-            <div className="flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 text-sm font-medium text-green-700">
+            <div className="text-muted-foreground flex items-center gap-2 rounded-full border bg-muted px-4 py-2 text-sm font-medium">
               <ArrowBigUpDash className="h-4 w-4 animate-bounce" />
               {t('uploading')}
             </div>
@@ -365,7 +376,12 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
         <p className="text-muted-foreground text-center text-xs">
           {thumbnailType === 'image' ? t('supportedFormats') : t('supportedVideoFormats')}
         </p>
-        {disabledReason ? <p className="text-center text-xs text-amber-600">{disabledReason}</p> : null}
+        {disabledReason ? (
+          <Alert className="border-border bg-muted/60">
+            <AlertTitle>{thumbnailType === 'image' ? t('uploadImageButton') : t('uploadVideo')}</AlertTitle>
+            <AlertDescription>{disabledReason}</AlertDescription>
+          </Alert>
+        ) : null}
       </CardContent>
     </Card>
   );

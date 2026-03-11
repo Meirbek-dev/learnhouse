@@ -1,13 +1,13 @@
 'use client';
 
 import { buildCourseWorkspacePath, getCourseContentStats, getCourseReadinessSummary } from '@/lib/course-management';
+import { CourseStatusBadge, courseWorkflowMutedPanelClass, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import { AlertTriangle, ArrowRight, CheckCircle2, FileStack, Globe, Users } from 'lucide-react';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { Button } from '@/components/ui/button';
 import AppLink from '@/components/ui/AppLink';
-import { Badge } from '@/components/ui/badge';
 
 export default function CourseWorkspaceOverview({
   orgslug,
@@ -42,9 +42,7 @@ export default function CourseWorkspaceOverview({
                   : 'This workspace is now organized around lifecycle stages. Use the checklist to finish missing course setup without guessing which tab owns which task.'}
               </p>
             </div>
-            <Badge variant={readiness.readyToPublish ? 'success' : 'warning'}>
-              {readiness.readyToPublish ? 'Ready' : `${readiness.issues.length} open`}
-            </Badge>
+            <CourseStatusBadge status={readiness.readyToPublish ? 'ready' : 'needs-review'} />
           </div>
           <div className="mt-6 flex flex-wrap gap-3">
             {capabilities.canEditCurriculum ? (
@@ -67,20 +65,20 @@ export default function CourseWorkspaceOverview({
           </div>
         </div>
 
-        <div className="rounded-xl border bg-foreground p-6 text-background">
-          <div className="text-xs font-semibold uppercase tracking-wider text-background/60">Workspace pulse</div>
+        <div className={courseWorkflowSummaryCardClass}>
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Workspace pulse</div>
           <div className="mt-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-            <div className="rounded-lg bg-background/10 p-4">
-              <div className="text-background/70">Chapters</div>
-              <div className="mt-1 text-3xl font-semibold">{stats.chapters}</div>
+            <div className={courseWorkflowMutedPanelClass}>
+              <div className="text-muted-foreground">Chapters</div>
+              <div className="mt-1 text-3xl font-semibold text-foreground">{stats.chapters}</div>
             </div>
-            <div className="rounded-lg bg-background/10 p-4">
-              <div className="text-background/70">Activities</div>
-              <div className="mt-1 text-3xl font-semibold">{stats.activities}</div>
+            <div className={courseWorkflowMutedPanelClass}>
+              <div className="text-muted-foreground">Activities</div>
+              <div className="mt-1 text-3xl font-semibold text-foreground">{stats.activities}</div>
             </div>
-            <div className="rounded-lg bg-background/10 p-4">
-              <div className="text-background/70">Contributors</div>
-              <div className="mt-1 text-3xl font-semibold">{contributors.length}</div>
+            <div className={courseWorkflowMutedPanelClass}>
+              <div className="text-muted-foreground">Contributors</div>
+              <div className="mt-1 text-3xl font-semibold text-foreground">{contributors.length}</div>
             </div>
           </div>
         </div>
@@ -99,7 +97,7 @@ export default function CourseWorkspaceOverview({
                 href={buildCourseWorkspacePath(orgslug, courseuuid, (item.href as any) || 'overview')}
                 className="flex items-start gap-3 rounded-lg border px-4 py-3 transition-colors hover:bg-muted/50"
               >
-                <Badge variant={item.complete ? 'success' : 'warning'}>{item.complete ? 'Done' : 'Open'}</Badge>
+                <CourseStatusBadge status={item.complete ? 'ready' : 'needs-review'} />
                 <div className="min-w-0">
                   <div className="font-medium text-foreground">{item.title}</div>
                   <div className="text-sm text-muted-foreground">{item.description}</div>
@@ -115,7 +113,7 @@ export default function CourseWorkspaceOverview({
             Curriculum snapshot
           </div>
           <div className="mt-4 space-y-3 text-sm text-muted-foreground">
-            <div className="rounded-lg bg-muted p-4">
+            <div className={courseWorkflowMutedPanelClass}>
               <div className="font-medium text-foreground">
                 {stats.chapters} chapter{stats.chapters === 1 ? '' : 's'}
               </div>
@@ -123,7 +121,7 @@ export default function CourseWorkspaceOverview({
                 {stats.activities} activit{stats.activities === 1 ? 'y' : 'ies'} are currently in the course structure.
               </div>
             </div>
-            <div className="rounded-lg bg-muted p-4">
+            <div className={courseWorkflowMutedPanelClass}>
               <div className="font-medium text-foreground">Next step</div>
               <div className="mt-1">
                 Use curriculum for high-speed structure work. This stage keeps immediate operations visible and
@@ -148,7 +146,7 @@ export default function CourseWorkspaceOverview({
             Governance snapshot
           </div>
           <div className="mt-4 space-y-3 text-sm text-muted-foreground">
-            <div className="rounded-lg bg-muted p-4">
+            <div className={courseWorkflowMutedPanelClass}>
               <div className="font-medium text-foreground">Access</div>
               <div className="mt-1 flex items-center gap-2">
                 <Globe className="size-4 text-muted-foreground" />
@@ -157,9 +155,9 @@ export default function CourseWorkspaceOverview({
                   : 'This course is currently private.'}
               </div>
               {isPrivateWithNoGroups && capabilities.canManageAccess ? (
-                <Alert className="mt-2 border-amber-300 bg-amber-50 py-2 text-amber-800">
+                <Alert className="mt-2 border-border bg-muted py-2 text-foreground">
                   <AlertTriangle className="size-3.5" />
-                  <AlertDescription className="text-xs text-amber-800">
+                  <AlertDescription className="text-xs text-muted-foreground">
                     Private course with no linked user groups — learners cannot access it. Add user groups in{' '}
                     <AppLink
                       href={buildCourseWorkspacePath(orgslug, courseuuid, 'access')}

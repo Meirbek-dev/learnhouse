@@ -1,26 +1,16 @@
 'use client';
 
-import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
+import { buildCourseCreationPath } from '@/lib/course-management';
 import NewCourseButton from '@/components/Objects/Elements/Buttons/NewCourseButton';
 import { Actions, PermissionGuard, Resources, Scopes } from '@/components/Security';
-import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { revalidateTags } from '@services/utils/ts/requests';
-import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import AppLink from '@/components/ui/AppLink';
 
 interface CreateCourseTriggerProps {
   orgslug: string;
   org_id: number;
 }
 
-export default function CreateCourseTrigger({ orgslug, org_id }: CreateCourseTriggerProps) {
-  const t = useTranslations('CoursesPage');
-  const [newCourseModal, setNewCourseModal] = useState(false);
-
-  function closeNewCourseModal() {
-    setNewCourseModal(false);
-  }
-
+export default function CreateCourseTrigger({ orgslug, org_id: _org_id }: CreateCourseTriggerProps) {
   return (
     <PermissionGuard
       action={Actions.CREATE}
@@ -28,25 +18,7 @@ export default function CreateCourseTrigger({ orgslug, org_id }: CreateCourseTri
       scope={Scopes.ORG}
       fallback={null}
     >
-      <div>
-        <NewCourseButton onClick={() => setNewCourseModal(true)} />
-        <Modal
-          isDialogOpen={newCourseModal}
-          onOpenChange={setNewCourseModal}
-          minHeight="md"
-          dialogContent={
-            <CreateCourseModal
-              closeModal={closeNewCourseModal}
-              org_id={org_id}
-              onCreated={async () => {
-                await revalidateTags(['courses'], orgslug);
-              }}
-            />
-          }
-          dialogTitle={t('createCourse')}
-          dialogDescription={t('createCourseDescription')}
-        />
-      </div>
+      <NewCourseButton render={<AppLink href={buildCourseCreationPath(orgslug)} />} />
     </PermissionGuard>
   );
 }

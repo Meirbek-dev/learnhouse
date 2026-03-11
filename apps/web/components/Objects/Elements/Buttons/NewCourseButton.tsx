@@ -1,22 +1,24 @@
 'use client';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
-import type { FC } from 'react';
+import type { FC, ReactElement } from 'react';
 
 interface NewCourseButtonProps {
   onClick?: () => void;
+  render?: ReactElement;
 }
 
-const NewCourseButton: FC<NewCourseButtonProps> = ({ onClick }) => {
+const NewCourseButton: FC<NewCourseButtonProps> = ({ onClick, render }) => {
   const t = useTranslations('Components.Button');
   return (
     <Button
-      type="button"
+      type={render ? undefined : 'button'}
+      render={render}
       onClick={onClick}
-      className="my-auto space-x-1 rounded-lg px-4 py-2 font-semibold antialiased shadow-md drop-shadow-lg transition-all duration-100 ease-out hover:scale-105 hover:shadow-lg focus:outline-none active:scale-95"
+      className="my-auto gap-2 rounded-lg px-4 py-2 font-semibold"
     >
-      <div>{t('newCourse')}</div>
-      <div className="bg-primary-foreground/20 rounded-full px-1 text-sm font-medium">+</div>
+      <span>{t('newCourse')}</span>
+      <span className="rounded-full border border-current/15 px-1.5 text-xs font-medium leading-5">+</span>
     </Button>
   );
 };

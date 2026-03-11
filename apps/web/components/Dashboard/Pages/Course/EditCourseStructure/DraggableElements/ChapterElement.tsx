@@ -168,7 +168,7 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
             bg-background mx-2 mb-4 rounded-xl shadow-sm
             transition-all duration-200
             sm:mx-4 md:mx-6 lg:mx-10
-            ${snapshot.isDragging ? 'scale-105 rotate-1 shadow-2xl ring-2 ring-blue-500/30' : 'hover:shadow-md'}
+            ${snapshot.isDragging ? 'scale-105 rotate-1 shadow-2xl ring-2 ring-ring/30' : 'hover:shadow-md'}
           `}
         >
           {/* Chapter Header */}
@@ -184,9 +184,9 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
               </div>
 
               {/* Chapter Icon */}
-              <div className="flex-shrink-0 rounded-lg bg-blue-50 p-2">
+              <div className="bg-muted flex-shrink-0 rounded-lg p-2">
                 <Hexagon
-                  className="h-4 w-4 text-blue-600"
+                  className="text-muted-foreground h-4 w-4"
                   strokeWidth={2.5}
                 />
               </div>
@@ -256,7 +256,7 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
+                    <AlertDialogMedia className="bg-muted text-foreground">
                       <AlertTriangle className="size-8" />
                     </AlertDialogMedia>
                     <AlertDialogTitle>{t('deleteChapterTitle', { name: chapter.name })}</AlertDialogTitle>
@@ -295,7 +295,7 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
                 {...provided.droppableProps}
                 className={`
                   min-h-[80px] rounded-lg px-4 py-3 transition-colors
-                  ${snapshot.isDraggingOver ? 'bg-blue-50/50' : ''}
+                  ${snapshot.isDraggingOver ? 'bg-muted/50' : ''}
                 `}
               >
                 {activities.length > 0 ? (

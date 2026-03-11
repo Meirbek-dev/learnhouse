@@ -29,6 +29,7 @@ import {
   Video,
   X,
 } from 'lucide-react';
+import { CourseWorkflowBadge } from '@components/Dashboard/Courses/courseWorkflowUi';
 import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from '@services/courses/assignments';
 import { deleteActivity, updateActivity } from '@services/courses/activities';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
@@ -101,32 +102,32 @@ const ACTIVITY_CONFIG = {
   TYPE_VIDEO: {
     Icon: Video,
     translationKey: 'video',
-    colorClass: 'bg-purple-50 text-purple-700 border-purple-200',
+    colorClass: 'border-border bg-muted text-foreground',
   },
   TYPE_DOCUMENT: {
     Icon: File,
     translationKey: 'document',
-    colorClass: 'bg-blue-50 text-blue-700 border-blue-200',
+    colorClass: 'border-border bg-background text-foreground',
   },
   TYPE_ASSIGNMENT: {
     Icon: Backpack,
     translationKey: 'assignment',
-    colorClass: 'bg-orange-50 text-orange-700 border-orange-200',
+    colorClass: 'border-border bg-accent/60 text-accent-foreground',
   },
   TYPE_DYNAMIC: {
     Icon: Sparkles,
     translationKey: 'dynamic',
-    colorClass: 'bg-pink-50 text-pink-700 border-pink-200',
+    colorClass: 'border-border bg-accent/60 text-accent-foreground',
   },
   TYPE_EXAM: {
     Icon: ClipboardList,
     translationKey: 'exam',
-    colorClass: 'bg-amber-50 text-amber-700 border-amber-200',
+    colorClass: 'border-border bg-muted/70 text-muted-foreground',
   },
   TYPE_CODE_CHALLENGE: {
     Icon: Code2,
     translationKey: 'codeChallenge',
-    colorClass: 'bg-cyan-50 text-cyan-700 border-cyan-200',
+    colorClass: 'border-border bg-accent/60 text-accent-foreground',
   },
 } as const;
 
@@ -276,7 +277,7 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
             transition-all duration-200
             ${
               snapshot.isDragging
-                ? 'scale-[1.02] rotate-1 shadow-xl ring-2 ring-blue-500/30'
+                ? 'scale-[1.02] rotate-1 shadow-xl ring-2 ring-ring/30'
                 : 'shadow-sm hover:shadow-md'
             }
           `}
@@ -310,7 +311,7 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
                   variant="ghost"
                   onClick={handleSaveEdit}
                   disabled={isPending || !editedName.trim()}
-                  className="h-8 w-8 p-0 hover:bg-green-50 hover:text-green-700"
+                  className="h-8 w-8 p-0 hover:bg-muted"
                 >
                   {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 </Button>
@@ -319,7 +320,7 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
                   variant="ghost"
                   onClick={handleCancelEdit}
                   disabled={isPending}
-                  className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-700"
+                  className="h-8 w-8 p-0 hover:bg-muted"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -332,16 +333,14 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
                     size="sm"
                     variant="ghost"
                     onClick={handleStartEdit}
-                    className="h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-blue-50 hover:text-blue-700"
+                    className="h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-muted"
                   >
                     <Pencil className="h-3 w-3" />
                   </Button>
                 )}
                 {isOwner && (
                   <ToolTip content={t('ownerBadge', { default: 'You created this activity' })}>
-                    <span className="ml-1 rounded-md bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700">
-                      {t('ownerLabel')}
-                    </span>
+                    <CourseWorkflowBadge tone="info">{t('ownerLabel')}</CourseWorkflowBadge>
                   </ToolTip>
                 )}
               </div>
@@ -369,8 +368,8 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
                 disabled={isUpdatingPublish || !canUpdate}
                 className={
                   activity.published
-                    ? 'border-neutral-300 bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                    : 'bg-green-600 text-white hover:bg-green-700'
+                    ? 'border-border bg-muted text-foreground hover:bg-muted/80'
+                    : undefined
                 }
               >
                 {isUpdatingPublish ? (
@@ -397,7 +396,6 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
               <Button
                 size="sm"
                 variant="outline"
-                className="border-cyan-300 bg-cyan-50 text-cyan-700 hover:bg-cyan-100"
               >
                 <Link
                   href={`${getUriWithOrg(orgslug, '')}/course/${course_uuid.replace(
@@ -432,7 +430,7 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
+                    <AlertDialogMedia className="bg-muted text-foreground">
                       <AlertTriangle className="size-8" />
                     </AlertDialogMedia>
                     <AlertDialogTitle>{t('deleteTitle', { name: activity.name })}</AlertDialogTitle>
@@ -523,7 +521,6 @@ const ActivityEditButton = ({
       <Button
         size="sm"
         variant="outline"
-        className="border-sky-300 bg-sky-50 text-sky-700 hover:bg-sky-100"
       >
         <Link
           href={editUrl}
@@ -562,7 +559,6 @@ const ActivityEditButton = ({
       <Button
         size="sm"
         variant="outline"
-        className="border-teal-300 bg-teal-50 text-teal-700 hover:bg-teal-100"
       >
         <Link
           href={editUrl}
@@ -588,7 +584,6 @@ const ActivityEditButton = ({
       <Button
         size="sm"
         variant="outline"
-        className="border-cyan-300 bg-cyan-50 text-cyan-700 hover:bg-cyan-100"
       >
         <Link
           href={editUrl}

@@ -29,6 +29,7 @@ import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbna
 import type { Course } from '@components/Objects/Thumbnails/CourseThumbnail';
 import { deleteCourseFromBackend, updateCourseAccess } from '@services/courses/courses';
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
+import { CourseStatusBadge, courseWorkflowSummaryCardClass } from '@components/Dashboard/Courses/courseWorkflowUi';
 import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -40,7 +41,6 @@ import { Button } from '@/components/ui/button';
 import AppLink from '@/components/ui/AppLink';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 interface ManageableCourse extends Course {
@@ -108,10 +108,10 @@ const CoursesHome = ({
     const attention = courses.filter((course) => courseNeedsAttention(course)).length;
 
     return [
-      { label: 'Visible now', value: courses.length, className: 'bg-primary text-primary-foreground' },
-      { label: 'Publish-ready', value: ready, className: 'bg-emerald-50 text-emerald-900' },
-      { label: 'Private', value: privateCount, className: 'bg-amber-50 text-amber-900' },
-      { label: 'Needs attention', value: attention, className: 'bg-rose-50 text-rose-900' },
+      { label: 'Visible now', value: courses.length, detail: 'Courses on this page' },
+      { label: 'Publish-ready', value: ready, detail: 'Ready for review' },
+      { label: 'Private', value: privateCount, detail: 'Internal-only visibility' },
+      { label: 'Needs attention', value: attention, detail: 'Requires follow-up' },
     ];
   }, [courses]);
 
@@ -275,7 +275,7 @@ const CoursesHome = ({
           description: `This will make ${selectedCourses.length} selected course${selectedCourses.length === 1 ? '' : 's'} public wherever learners can access them.`,
           confirmLabel: 'Publish courses',
           variant: 'default' as const,
-          mediaClassName: 'bg-emerald-50 text-emerald-700',
+          mediaClassName: 'bg-muted text-foreground',
         }
       : pendingBulkAction === 'private'
         ? {
@@ -283,7 +283,7 @@ const CoursesHome = ({
             description: `This will hide ${selectedCourses.length} selected course${selectedCourses.length === 1 ? '' : 's'} from public access until you publish them again.`,
             confirmLabel: 'Move to private',
             variant: 'default' as const,
-            mediaClassName: 'bg-amber-50 text-amber-700',
+            mediaClassName: 'bg-muted text-foreground',
           }
         : pendingBulkAction === 'delete'
           ? {
@@ -291,7 +291,7 @@ const CoursesHome = ({
               description: `This permanently deletes ${selectedCourses.length} selected course${selectedCourses.length === 1 ? '' : 's'}. This action cannot be undone.`,
               confirmLabel: 'Delete courses',
               variant: 'destructive' as const,
-              mediaClassName: 'bg-red-50 text-red-700',
+              mediaClassName: 'bg-destructive/10 text-destructive',
             }
           : null;
 
@@ -401,9 +401,9 @@ const CoursesHome = ({
 
           return (
             <div className="flex flex-wrap gap-2">
-              <Badge variant={course.public ? 'success' : 'outline'}>{course.public ? 'Public' : 'Private'}</Badge>
-              <Badge variant={ready ? 'success' : 'warning'}>{ready ? 'Ready' : 'Needs review'}</Badge>
-              {courseNeedsAttention(course) ? <Badge variant="warning">Attention</Badge> : null}
+              <CourseStatusBadge status={course.public ? 'public' : 'private'} />
+              <CourseStatusBadge status={ready ? 'ready' : 'needs-review'} />
+              {courseNeedsAttention(course) ? <CourseStatusBadge status="attention" /> : null}
             </div>
           );
         },
@@ -453,12 +453,10 @@ const CoursesHome = ({
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="max-w-3xl">
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Course management</div>
-              <h1 className="mt-2 text-4xl font-semibold tracking-tight text-foreground">
-                Manage courses as a workspace
-              </h1>
+              <h1 className="mt-2 text-4xl font-semibold tracking-tight text-foreground">Manage course workspaces</h1>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                This view is built for triage and maintenance. Use presets to focus on private, publish-ready, recently
-                updated, or problem courses, then jump directly into the new workspace stages.
+                Review the catalog in a management-first table, filter by lifecycle state, and launch directly into the
+                guided creation flow or an existing course workspace.
               </p>
             </div>
 
@@ -486,10 +484,11 @@ const CoursesHome = ({
             {summaryCards.map((card) => (
               <div
                 key={card.label}
-                className={`rounded-2xl px-4 py-5 ${card.className}`}
+                className={courseWorkflowSummaryCardClass}
               >
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] opacity-70">{card.label}</div>
-                <div className="mt-2 text-3xl font-semibold">{card.value}</div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">{card.label}</div>
+                <div className="mt-2 text-3xl font-semibold text-foreground">{card.value}</div>
+                <div className="mt-1 text-sm text-muted-foreground">{card.detail}</div>
               </div>
             ))}
           </div>
@@ -497,19 +496,15 @@ const CoursesHome = ({
 
         <div className="mt-6 flex flex-wrap gap-2">
           {presets.map((item) => (
-            <button
+            <Button
               key={item.key}
               type="button"
+              variant={preset === item.key ? 'default' : 'outline'}
+              size="sm"
               onClick={() => updateRoute({ preset: item.key === 'all' ? null : item.key, page: '1' })}
-              className={cn(
-                'rounded-full px-4 py-2 text-sm font-medium transition-colors',
-                preset === item.key
-                  ? 'bg-primary text-primary-foreground'
-                  : 'border border-input bg-background text-foreground hover:bg-accent',
-              )}
             >
               {item.label}
-            </button>
+            </Button>
           ))}
         </div>
 

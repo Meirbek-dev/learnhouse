@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { CourseStatusBadge } from './courseWorkflowUi';
 import { useTranslations } from 'next-intl';
 
 interface SectionHeaderProps {
@@ -29,14 +30,14 @@ export function SectionHeader({
   const tCommon = useTranslations('Common');
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-      <div>
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">{title}</h1>
         {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
       </div>
-      <div className="flex shrink-0 items-center gap-3">
+      <div className="flex shrink-0 flex-wrap items-center gap-3">
         {children}
-        {isDirty ? <span className="text-sm text-muted-foreground">{/* i18n:TODO */}Unsaved changes</span> : null}
+        {isDirty ? <CourseStatusBadge status="unsaved" /> : null}
         <Button
           type="button"
           variant="outline"

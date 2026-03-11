@@ -271,12 +271,12 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
   return (
     <div className="space-y-2">
       {items.length === 0 && (
-        <div className="rounded-lg bg-gray-50/50 py-3 text-center text-sm text-gray-500">{t('noItems')}</div>
+        <div className="rounded-lg border bg-muted/50 py-3 text-center text-sm text-muted-foreground">{t('noItems')}</div>
       )}
 
       <div
         ref={scrollContainerRef}
-        className={`space-y-2 ${isScrollable ? 'scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent max-h-[350px] overflow-y-auto pr-1' : ''}`}
+        className={`space-y-2 ${isScrollable ? 'scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent max-h-[350px] overflow-y-auto pr-1' : ''}`}
       >
         {items.map((item) => (
           <div
@@ -284,7 +284,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
             id={`learning-item-${item.id}`}
             className="group relative"
           >
-            <div className="flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50/70 px-3 py-2 transition-colors hover:bg-gray-50">
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 transition-colors hover:bg-muted/70">
               <button
                 type="button"
                 onClick={() => {
@@ -313,7 +313,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
               />
 
               {item.link ? (
-                <div className="flex items-center gap-1 rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-500">
+                <div className="flex items-center gap-1 rounded border bg-background px-2 py-0.5 text-xs text-muted-foreground">
                   <LinkIcon size={12} />
                   <span className="max-w-[100px] truncate">{item.link}</span>
                 </div>
@@ -336,7 +336,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
                       }, 0);
                     }
                   }}
-                  className="text-gray-400 transition-colors hover:text-blue-500"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
                   title={item.link ? t('editLinkTooltip') : t('addLinkTooltip')}
                   aria-label={item.link ? t('editLinkAriaLabel') : t('addLinkAriaLabel')}
                 >
@@ -348,7 +348,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
                   onClick={() => {
                     removeItem(item.id);
                   }}
-                  className="text-gray-300 transition-colors hover:text-gray-500"
+                  className="text-muted-foreground/70 transition-colors hover:text-foreground"
                   aria-label={t('removeItemAriaLabel')}
                   title={t('removeItemTooltip')}
                 >
@@ -381,7 +381,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
             {showLinkInput === item.id && (
               <div
                 ref={linkInputRef}
-                className="mt-1 rounded-lg border border-gray-200 bg-white p-2 shadow-sm"
+                className="mt-1 rounded-lg border border-border bg-background p-2 shadow-sm"
               >
                 <Input
                   ref={setLinkInputRef(item.id)}
@@ -407,7 +407,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
       <button
         type="button"
         onClick={addItem}
-        className="mt-2 flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-700"
+        className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <Plus
           size={16}

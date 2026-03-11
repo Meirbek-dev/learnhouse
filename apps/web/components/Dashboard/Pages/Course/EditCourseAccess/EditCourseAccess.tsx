@@ -24,9 +24,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import LinkToUserGroup from '@components/Objects/Modals/Dash/EditCourseAccess/LinkToUserGroup';
 import { AlertTriangle, Globe, Loader2, SquareUserRound, Users, X } from 'lucide-react';
 import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups';
+import { CourseChoiceCard } from '@components/Dashboard/Courses/courseWorkflowUi';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { RadioGroup } from '@/components/ui/radio-group';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { updateCourseAccess } from '@services/courses/courses';
@@ -34,7 +35,6 @@ import { useDirtySection } from '@/hooks/useDirtySection';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSaveSection } from '@/hooks/useSaveSection';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -110,45 +110,25 @@ const EditCourseAccess = (props: EditCourseAccessProps) => {
         disabled={isSaving}
         className="grid grid-cols-1 gap-3 sm:grid-cols-2"
       >
-        <Label
-          htmlFor="access-public"
-          className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border p-6 text-center transition-colors ${
-            draftPublic === true
-              ? 'border-slate-950 bg-slate-950 text-white'
-              : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
-          }`}
-        >
-          <RadioGroupItem
-            value="public"
-            id="access-public"
-            className="sr-only"
-          />
-          <Globe className={`size-8 ${draftPublic === true ? 'text-white/80' : 'text-slate-400'}`} />
-          <span className="text-xl font-bold">{t('publicLabel')}</span>
-          <span className={`text-sm leading-5 ${draftPublic === true ? 'text-white/75' : 'text-slate-500'}`}>
-            {t('publicDescription')}
-          </span>
-        </Label>
+        <CourseChoiceCard
+          id="access-public"
+          value="public"
+          checked={draftPublic === true}
+          title={t('publicLabel')}
+          description={t('publicDescription')}
+          icon={Globe}
+          disabled={isSaving}
+        />
 
-        <Label
-          htmlFor="access-private"
-          className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border p-6 text-center transition-colors ${
-            draftPublic === false
-              ? 'border-slate-950 bg-slate-950 text-white'
-              : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
-          }`}
-        >
-          <RadioGroupItem
-            value="private"
-            id="access-private"
-            className="sr-only"
-          />
-          <Users className={`size-8 ${draftPublic === false ? 'text-white/80' : 'text-slate-400'}`} />
-          <span className="text-xl font-bold">{t('usersOnlyLabel')}</span>
-          <span className={`text-sm leading-5 ${draftPublic === false ? 'text-white/75' : 'text-slate-500'}`}>
-            {t('usersOnlyDescription')}
-          </span>
-        </Label>
+        <CourseChoiceCard
+          id="access-private"
+          value="private"
+          checked={draftPublic === false}
+          title={t('usersOnlyLabel')}
+          description={t('usersOnlyDescription')}
+          icon={Users}
+          disabled={isSaving}
+        />
       </RadioGroup>
 
       {/* User groups — only shown for private courses */}
@@ -179,13 +159,13 @@ const UserGroupsSection = ({
   const t = useTranslations('DashPage.Courses.Access');
 
   return (
-    <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-5">
+    <div className="space-y-4 rounded-xl border bg-card p-5">
       <div>
-        <h2 className="text-lg font-bold text-slate-800">{t('title')}</h2>
-        <p className="text-sm text-slate-500">{t('description')}</p>
+        <h2 className="text-lg font-bold text-foreground">{t('title')}</h2>
+        <p className="text-sm text-muted-foreground">{t('description')}</p>
       </div>
 
-      <ScrollArea className="max-h-72 rounded-lg border border-slate-200 bg-white">
+      <ScrollArea className="max-h-72 rounded-lg border bg-background">
         <Table>
           <TableHeader className="uppercase">
             <TableRow>
@@ -222,7 +202,7 @@ const UserGroupsSection = ({
               <Button
                 type="button"
                 size="sm"
-                className="bg-emerald-700 hover:bg-emerald-800"
+                className="min-w-40"
               />
             }
           >
@@ -298,7 +278,7 @@ const UnlinkUserGroupRow = ({
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
+              <AlertDialogMedia className="bg-muted text-foreground">
                 <AlertTriangle className="size-8" />
               </AlertDialogMedia>
               <AlertDialogTitle>{t('unlinkConfirmTitle')}</AlertDialogTitle>

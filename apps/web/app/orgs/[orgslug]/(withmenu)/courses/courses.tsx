@@ -1,17 +1,14 @@
 'use client';
 
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
+import { buildCourseCreationPath } from '@/lib/course-management';
 import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfContentTitle';
-import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
 import NewCourseButton from '@/components/Objects/Elements/Buttons/NewCourseButton';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import CourseGridClient from '@components/Landings/CourseGridClient';
-import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { revalidateTags } from '@services/utils/ts/requests';
+import AppLink from '@/components/ui/AppLink';
 
-import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 
 interface CourseProps {
   orgslug: string;
@@ -50,15 +47,8 @@ const EmptyStateMessage = ({ canManageOrg, t, newCourseButtonTrigger }: any) => 
 const Courses = (props: CourseProps) => {
   const t = useTranslations('CoursesPage');
   const { orgslug, courses, totalCourses, org_id } = props;
-  const searchParams = useSearchParams();
-  const isCreatingCourse = Boolean(searchParams.get('new'));
-  const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
   const { can } = usePermissions();
   const canManageOrg = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
-
-  async function closeNewCourseModal() {
-    setNewCourseModal(false);
-  }
 
   // Single trigger for opening the modal
   const newCourseButtonTrigger = (
@@ -69,9 +59,7 @@ const Courses = (props: CourseProps) => {
       fallback={null}
     >
       <NewCourseButton
-        onClick={() => {
-          setNewCourseModal(true);
-        }}
+        render={<AppLink href={buildCourseCreationPath(orgslug)} />}
       />
     </PermissionGuard>
   );
@@ -89,25 +77,6 @@ const Courses = (props: CourseProps) => {
             />
             {newCourseButtonTrigger}
           </div>
-
-          {/* Single Modal instance rendered here */}
-          <Modal
-            isDialogOpen={newCourseModal}
-            onOpenChange={setNewCourseModal}
-            minHeight="md"
-            dialogContent={
-              <CreateCourseModal
-                closeModal={closeNewCourseModal}
-                org_id={org_id}
-                onCreated={async () => {
-                  // Revalidate pages for this org after a course is created
-                  await revalidateTags(['courses'], orgslug);
-                }}
-              />
-            }
-            dialogTitle={t('createCourse')}
-            dialogDescription={t('createCourseDescription')}
-          />
 
           {!hasCourses ? (
             <EmptyStateMessage

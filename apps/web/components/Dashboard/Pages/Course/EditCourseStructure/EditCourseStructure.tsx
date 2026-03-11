@@ -136,7 +136,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
         >
           {(provided, snapshot) => (
             <div
-              className={`space-y-4 ${snapshot.isDraggingOver ? 'bg-gray-50/50' : ''}`}
+              className={`space-y-4 ${snapshot.isDraggingOver ? 'bg-muted/40' : ''}`}
               {...provided.droppableProps}
               ref={provided.innerRef}
             >
@@ -162,14 +162,11 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
           onOpenChange={setNewChapterModal}
         >
           <DialogTrigger
-            render={
-              <Button className="mx-auto my-16 flex h-auto max-w-(--breakpoint-2xl) flex-row items-center rounded-xl bg-cyan-800 px-6 py-5 text-white shadow-xs hover:bg-cyan-700" />
-            }
+            render={<Button className="mx-auto my-16 flex h-auto max-w-(--breakpoint-2xl) flex-row items-center rounded-xl px-6 py-5 shadow-xs" />}
           >
             <Hexagon
               strokeWidth={3}
               size={16}
-              className="text-white"
             />
             <span className="text-sm font-semibold">{t('addChapterButton')}</span>
           </DialogTrigger>

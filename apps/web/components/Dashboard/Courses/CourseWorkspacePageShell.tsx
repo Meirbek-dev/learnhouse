@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { getCourseReadinessSummary, buildCourseWorkspacePath, getCourseContentStats } from '@/lib/course-management';
 import CourseConflictDialog from '@components/Dashboard/Pages/Course/CourseConflictDialog';
+import { CourseStatusBadge, CourseWorkflowBadge } from './courseWorkflowUi';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
 import { CourseProvider, useCourse } from '@components/Contexts/CourseContext';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
@@ -29,7 +30,6 @@ import { getUriWithOrg } from '@services/config/config';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import AppLink from '@/components/ui/AppLink';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import type { ReactNode } from 'react';
@@ -94,28 +94,12 @@ function CourseWorkspaceChrome({
                 {course.courseStructure.name || 'Untitled course'}
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                <Badge
-                  variant={course.courseStructure.public ? 'success' : 'outline'}
+                <CourseStatusBadge status={course.courseStructure.public ? 'public' : 'private'} className="text-xs" />
+                <CourseStatusBadge
+                  status={readiness.readyToPublish ? 'ready' : 'needs-review'}
                   className="text-xs"
-                >
-                  {course.courseStructure.public ? 'Public' : 'Private'}
-                </Badge>
-                <Badge
-                  variant={readiness.readyToPublish ? 'success' : 'warning'}
-                  className="text-xs"
-                >
-                  {readiness.readyToPublish
-                    ? 'Ready'
-                    : `${readiness.issues.length} blocker${readiness.issues.length === 1 ? '' : 's'}`}
-                </Badge>
-                {hasDirtySections && (
-                  <Badge
-                    variant="warning"
-                    className="text-xs"
-                  >
-                    Unsaved
-                  </Badge>
-                )}
+                />
+                {hasDirtySections ? <CourseStatusBadge status="unsaved" className="text-xs" /> : null}
               </div>
             </div>
           </SidebarHeader>
@@ -207,18 +191,14 @@ function CourseWorkspaceChrome({
                       'Use this workspace to shape the course, manage access, coordinate collaborators, and review publish readiness.'}
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <Badge variant={course.courseStructure.public ? 'success' : 'outline'}>
-                      {course.courseStructure.public ? 'Public' : 'Private'}
-                    </Badge>
-                    <Badge variant={readiness.readyToPublish ? 'success' : 'warning'}>
-                      {readiness.readyToPublish ? 'Publish-ready' : 'Needs review'}
-                    </Badge>
+                    <CourseStatusBadge status={course.courseStructure.public ? 'public' : 'private'} />
+                    <CourseStatusBadge status={readiness.readyToPublish ? 'ready' : 'needs-review'} />
                     {course.courseStructure.update_date ? (
-                      <Badge variant="secondary">
+                      <CourseWorkflowBadge tone="info">
                         Updated {new Date(course.courseStructure.update_date).toLocaleDateString()}
-                      </Badge>
+                      </CourseWorkflowBadge>
                     ) : null}
-                    {hasDirtySections ? <Badge variant="warning">Unsaved changes</Badge> : null}
+                    {hasDirtySections ? <CourseStatusBadge status="unsaved" /> : null}
                   </div>
                 </div>
 

@@ -1,16 +1,16 @@
 'use client';
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, Loader2, Sparkles } from 'lucide-react';
 import { createNewCourse, getCourseMetadata } from '@services/courses/courses';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { RadioGroup } from '@/components/ui/radio-group';
 import { buildCourseWorkspacePath } from '@/lib/course-management';
+import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import { createChapter } from '@services/courses/chapters';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useMemo, useTransition } from 'react';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import { useQueryState } from 'nuqs';
@@ -158,26 +158,26 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
   };
 
   const summaryContent = (
-    <div className="space-y-4 text-sm text-background/70">
+    <div className="space-y-4 text-sm text-muted-foreground">
       <div>
-        <div className="text-background/50">Title</div>
-        <div className="mt-1 text-base font-semibold text-background">{name.trim() || 'Untitled course'}</div>
+        <div className="text-muted-foreground">Title</div>
+        <div className="mt-1 text-base font-semibold text-foreground">{name.trim() || 'Untitled course'}</div>
       </div>
       <div>
-        <div className="text-background/50">Visibility</div>
+        <div className="text-muted-foreground">Visibility</div>
         <div className="mt-1">{visibility === 'public' ? 'Public launch target' : 'Private draft mode'}</div>
       </div>
       <div>
-        <div className="text-background/50">Template</div>
+        <div className="text-muted-foreground">Template</div>
         <div className="mt-1 capitalize">{template === 'outline' ? 'Existing outline' : template}</div>
       </div>
       <div>
-        <div className="text-background/50">Launch destination</div>
+        <div className="text-muted-foreground">Launch destination</div>
         <div className="mt-1 capitalize">{launchDestination}</div>
       </div>
       {template === 'outline' && sourceCourseUuid ? (
         <div>
-          <div className="text-background/50">Source course</div>
+          <div className="text-muted-foreground">Source course</div>
           <div className="mt-1">
             {sourceOptions.find((c) => c.cleanUuid === sourceCourseUuid)?.name || 'Selected outline course'}
           </div>
@@ -238,14 +238,14 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
               render={
                 <button
                   type="button"
-                  className="group flex w-full items-center justify-between rounded-t-xl border bg-foreground px-5 py-4 text-background"
+                  className="group flex w-full items-center justify-between rounded-t-xl border bg-card px-5 py-4 text-foreground"
                 />
               }
             >
               <span className="text-sm font-semibold">Setup summary</span>
-              <ChevronDown className="size-4 text-background/60 transition-transform group-data-open:rotate-180" />
+              <ChevronDown className="size-4 text-muted-foreground transition-transform group-data-open:rotate-180" />
             </CollapsibleTrigger>
-            <CollapsibleContent className="rounded-b-xl border border-t-0 bg-foreground px-5 pb-5 text-background">
+            <CollapsibleContent className="rounded-b-xl border border-t-0 bg-card px-5 pb-5 text-foreground">
               {summaryContent}
             </CollapsibleContent>
           </Collapsible>
@@ -314,26 +314,15 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                         description: 'Launch the workspace ready for public discovery after review.',
                       },
                     ].map((option) => (
-                      <div key={option.value}>
-                        <RadioGroupItem
-                          value={option.value}
-                          id={`vis-${option.value}`}
-                          className="sr-only peer"
-                        />
-                        <Label
-                          htmlFor={`vis-${option.value}`}
-                          className={cn(
-                            'block cursor-pointer rounded-2xl border p-4 transition-colors',
-                            'peer-focus-visible:ring-primary peer-focus-visible:ring-2',
-                            visibility === option.value
-                              ? 'border-primary bg-primary text-primary-foreground'
-                              : 'border-input bg-card text-foreground hover:bg-accent',
-                          )}
-                        >
-                          <div className="font-medium">{option.title}</div>
-                          <div className="mt-1 text-sm opacity-80">{option.description}</div>
-                        </Label>
-                      </div>
+                      <CourseChoiceCard
+                        key={option.value}
+                        id={`vis-${option.value}`}
+                        value={option.value}
+                        checked={visibility === option.value}
+                        title={option.title}
+                        description={option.description}
+                        icon={option.value === 'public' ? CheckCircle2 : ArrowLeft}
+                      />
                     ))}
                   </RadioGroup>
                 </fieldset>
@@ -374,26 +363,15 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                       description: 'Reuse chapter structure from another editable course.',
                     },
                   ].map((option) => (
-                    <div key={option.value}>
-                      <RadioGroupItem
-                        value={option.value}
-                        id={`tpl-${option.value}`}
-                        className="sr-only peer"
-                      />
-                      <Label
-                        htmlFor={`tpl-${option.value}`}
-                        className={cn(
-                          'block cursor-pointer rounded-2xl border p-4 transition-colors',
-                          'peer-focus-visible:ring-primary peer-focus-visible:ring-2',
-                          template === option.value
-                            ? 'border-primary bg-primary text-primary-foreground'
-                            : 'border-input bg-card text-foreground hover:bg-accent',
-                        )}
-                      >
-                        <div className="font-medium">{option.title}</div>
-                        <div className="mt-1 text-sm opacity-80">{option.description}</div>
-                      </Label>
-                    </div>
+                    <CourseChoiceCard
+                      key={option.value}
+                      id={`tpl-${option.value}`}
+                      value={option.value}
+                      checked={template === option.value}
+                      title={option.title}
+                      description={option.description}
+                      icon={option.value === 'outline' ? ChevronDown : option.value === 'starter' ? Sparkles : CheckCircle2}
+                    />
                   ))}
                 </RadioGroup>
 
@@ -458,26 +436,15 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                       description: 'Jump straight into chapters and activities.',
                     },
                   ].map((option) => (
-                    <div key={option.value}>
-                      <RadioGroupItem
-                        value={option.value}
-                        id={`dest-${option.value}`}
-                        className="sr-only peer"
-                      />
-                      <Label
-                        htmlFor={`dest-${option.value}`}
-                        className={cn(
-                          'block cursor-pointer rounded-2xl border p-4 transition-colors',
-                          'peer-focus-visible:ring-primary peer-focus-visible:ring-2',
-                          launchDestination === option.value
-                            ? 'border-primary bg-primary text-primary-foreground'
-                            : 'border-input bg-card text-foreground hover:bg-accent',
-                        )}
-                      >
-                        <div className="font-medium">{option.title}</div>
-                        <div className="mt-1 text-sm opacity-80">{option.description}</div>
-                      </Label>
-                    </div>
+                    <CourseChoiceCard
+                      key={option.value}
+                      id={`dest-${option.value}`}
+                      value={option.value}
+                      checked={launchDestination === option.value}
+                      title={option.title}
+                      description={option.description}
+                      icon={option.value === 'curriculum' ? ArrowRight : CheckCircle2}
+                    />
                   ))}
                 </RadioGroup>
               </div>
@@ -518,8 +485,8 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
 
           {/* Desktop summary sidebar */}
           <div className="hidden xl:block">
-            <div className="sticky top-6 rounded-xl border bg-foreground p-6 text-background shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-wider text-background/60">Setup summary</div>
+            <div className={cn('sticky top-6', courseWorkflowSummaryCardClass)}>
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Setup summary</div>
               <div className="mt-4">{summaryContent}</div>
             </div>
           </div>

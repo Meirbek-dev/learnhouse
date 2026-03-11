@@ -11,13 +11,14 @@ import {
   editContributor,
   updateCourseAccess,
 } from '@services/courses/courses';
+import { CourseChoiceCard, courseWorkflowMutedPanelClass } from '@components/Dashboard/Courses/courseWorkflowUi';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { RadioGroup } from '@/components/ui/radio-group';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { searchOrgContent } from '@services/search/search';
@@ -31,7 +32,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import type { Locale } from '@/i18n/config';
 import { toast } from 'sonner';
 
@@ -321,16 +322,16 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
   const getStatusStyle = (status: ContributorStatus): string => {
     switch (status) {
       case 'ACTIVE': {
-        return 'bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800';
+        return 'border-border bg-background text-foreground hover:bg-muted';
       }
       case 'INACTIVE': {
-        return 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-gray-800';
+        return 'border-border bg-muted/70 text-muted-foreground hover:bg-muted';
       }
       case 'PENDING': {
-        return 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100 hover:text-yellow-800';
+        return 'border-border bg-accent/50 text-accent-foreground hover:bg-accent';
       }
       default: {
-        return 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-gray-800';
+        return 'border-border bg-muted/70 text-muted-foreground hover:bg-muted';
       }
     }
   };
@@ -410,45 +411,25 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
         disabled={isSaving}
         className="grid grid-cols-1 gap-3 sm:grid-cols-2"
       >
-        <Label
-          htmlFor="contrib-open"
-          className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border p-6 text-center transition-colors ${
-            isOpenToContributors === true
-              ? 'border-slate-950 bg-slate-950 text-white'
-              : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
-          }`}
-        >
-          <RadioGroupItem
-            value="open"
-            id="contrib-open"
-            className="sr-only"
-          />
-          <UserPen className={`size-8 ${isOpenToContributors === true ? 'text-white/80' : 'text-slate-400'}`} />
-          <span className="text-xl font-bold">{t('openToContributorsTitle')}</span>
-          <span className={`text-sm leading-5 ${isOpenToContributors === true ? 'text-white/75' : 'text-slate-500'}`}>
-            {t('openToContributorsDescription')}
-          </span>
-        </Label>
+        <CourseChoiceCard
+          id="contrib-open"
+          value="open"
+          checked={isOpenToContributors === true}
+          title={t('openToContributorsTitle')}
+          description={t('openToContributorsDescription')}
+          icon={UserPen}
+          disabled={isSaving}
+        />
 
-        <Label
-          htmlFor="contrib-closed"
-          className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border p-6 text-center transition-colors ${
-            isOpenToContributors === false
-              ? 'border-slate-950 bg-slate-950 text-white'
-              : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
-          }`}
-        >
-          <RadioGroupItem
-            value="closed"
-            id="contrib-closed"
-            className="sr-only"
-          />
-          <Users className={`size-8 ${isOpenToContributors === false ? 'text-white/80' : 'text-slate-400'}`} />
-          <span className="text-xl font-bold">{t('closeToContributorsTitle')}</span>
-          <span className={`text-sm leading-5 ${isOpenToContributors === false ? 'text-white/75' : 'text-slate-500'}`}>
-            {t('closeToContributorsDescription')}
-          </span>
-        </Label>
+        <CourseChoiceCard
+          id="contrib-closed"
+          value="closed"
+          checked={isOpenToContributors === false}
+          title={t('closeToContributorsTitle')}
+          description={t('closeToContributorsDescription')}
+          icon={Users}
+          disabled={isSaving}
+        />
       </RadioGroup>
 
       {/* User search combobox */}
@@ -459,8 +440,8 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
         >
           <PopoverTrigger render={<div className="relative w-full" />}>
             <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
-            <input
-              className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border px-3 py-1 pl-8 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
+              <Input
+                className="pl-8"
               placeholder={t('searchUsersPlaceholder')}
               value={searchQuery}
               onChange={(e) => {
@@ -477,7 +458,7 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
             <Command>
               <CommandList>
                 {isSearching ? (
-                  <div className="p-4 text-center text-sm text-slate-500">{t('searchingMessage')}</div>
+                  <div className="p-4 text-center text-sm text-muted-foreground">{t('searchingMessage')}</div>
                 ) : (
                   <>
                     <CommandEmpty>{t('noUsersFoundMessage')}</CommandEmpty>
@@ -506,13 +487,13 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
                               showProfilePopup
                             />
                             <div className="min-w-0 flex-1">
-                              <div className="truncate font-medium text-slate-900">
+                              <div className="truncate font-medium text-foreground">
                                 {[user.first_name, user.middle_name, user.last_name].filter(Boolean).join(' ')}
                               </div>
-                              <div className="text-xs text-slate-500">@{user.username}</div>
+                              <div className="text-xs text-muted-foreground">@{user.username}</div>
                             </div>
                             {isExisting && (
-                              <span className="shrink-0 rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
+                              <span className="shrink-0 rounded border bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                                 {t('alreadyContributorMessage')}
                               </span>
                             )}
@@ -528,8 +509,8 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
         </Popover>
 
         {selectedUsers.length > 0 && (
-          <div className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3">
-            <span className="text-sm text-slate-700">{t('usersSelectedMessage', { count: selectedUsers.length })}</span>
+          <div className={courseWorkflowMutedPanelClass + ' flex items-center justify-between'}>
+            <span className="text-sm text-foreground">{t('usersSelectedMessage', { count: selectedUsers.length })}</span>
             <div className="flex gap-2">
               <Button
                 onClick={() => setSelectedUsers([])}
@@ -550,10 +531,10 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
       </div>
 
       {/* Contributors table */}
-      <div className="rounded-xl border border-slate-200 bg-white">
+      <div className="rounded-xl border bg-card">
         {selectedContributors.length > 0 && (
-          <div className="flex items-center justify-between rounded-t-xl border-b bg-slate-50 px-4 py-3">
-            <span className="text-sm text-slate-700">
+          <div className="flex items-center justify-between rounded-t-xl border-b bg-muted/60 px-4 py-3">
+            <span className="text-sm text-foreground">
               {t('contributorsSelectedMessage', { count: selectedContributors.length })}
             </span>
             <div className="flex gap-2">
@@ -576,7 +557,7 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
         )}
 
         {isContributorsLoading ? (
-          <div className="px-4 py-6 text-center text-sm text-slate-500">{t('loadingContributors')}</div>
+          <div className="px-4 py-6 text-center text-sm text-muted-foreground">{t('loadingContributors')}</div>
         ) : (
           <ScrollArea className="max-h-[520px]">
             <Table>
@@ -609,8 +590,8 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
                 {sortContributors(contributors).map((contributor) => (
                   <TableRow
                     key={`${contributor.user_id}-${contributor.id}`}
-                    className={`${selectedContributors.includes(contributor.user_id) ? 'bg-slate-50' : ''} ${
-                      contributor.authorship !== 'CREATOR' ? 'cursor-pointer hover:bg-slate-50' : ''
+                    className={`${selectedContributors.includes(contributor.user_id) ? 'bg-muted/60' : ''} ${
+                      contributor.authorship !== 'CREATOR' ? 'cursor-pointer hover:bg-muted/50' : ''
                     }`}
                     onClick={(e) => {
                       if (
@@ -648,8 +629,8 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
                         .filter(Boolean)
                         .join(' ')}
                     </TableCell>
-                    <TableCell className="text-slate-500">@{contributor.user.username}</TableCell>
-                    <TableCell className="text-slate-500">{contributor.user.email}</TableCell>
+                    <TableCell className="text-muted-foreground">@{contributor.user.username}</TableCell>
+                    <TableCell className="text-muted-foreground">{contributor.user.email}</TableCell>
                     <TableCell>
                       <RoleDropdown
                         contributor={contributor}
@@ -665,7 +646,7 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
                         getStatusStyle={getStatusStyle}
                       />
                     </TableCell>
-                    <TableCell className="text-sm text-slate-500">
+                    <TableCell className="text-sm text-muted-foreground">
                       {formatDate(contributor.creation_date, locale)}
                     </TableCell>
                   </TableRow>

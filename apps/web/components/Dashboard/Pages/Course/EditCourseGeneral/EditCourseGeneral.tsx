@@ -270,7 +270,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
   if (isLoading || !courseStructure) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-gray-600">
+        <div className="text-muted-foreground flex animate-pulse items-center rounded-md border bg-muted px-4 py-2 text-sm font-medium">
           <Loader2
             size={16}
             className="text-primary mr-2 animate-spin"
@@ -430,50 +430,54 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                   )}
                 />
               </div>
+            </CardContent>
+          </Card>
 
-              <Separator />
-
-              {/* Thumbnail Section — independent of metadata dirty state */}
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="thumbnail_type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-base font-semibold">{t('thumbnailType')}</FormLabel>
-                      <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          items={thumbnailTypeItems}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              {thumbnailTypeItems.map((item) => (
-                                <SelectItem
-                                  key={item.value}
-                                  value={item.value}
-                                >
-                                  {item.label}
-                                </SelectItem>
-                              ))}
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div>
-                  <div className="mb-2 flex justify-center text-base font-semibold">{t('thumbnail.label')}</div>
-                  <ThumbnailUpdate thumbnailType={form.watch('thumbnail_type')} />
-                </div>
+          <Card>
+            <CardHeader>
+              <div className="space-y-1">
+                <h2 className="text-2xl font-bold tracking-tight text-foreground">{t('thumbnail.label')}</h2>
+                <p className="text-sm text-muted-foreground">
+                  Thumbnail updates are applied immediately. Metadata changes above stay local until you save them.
+                </p>
               </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <FormField
+                control={form.control}
+                name="thumbnail_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">{t('thumbnailType')}</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        items={thumbnailTypeItems}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {thumbnailTypeItems.map((item) => (
+                              <SelectItem
+                                key={item.value}
+                                value={item.value}
+                              >
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <ThumbnailUpdate thumbnailType={form.watch('thumbnail_type')} />
             </CardContent>
           </Card>
         </form>

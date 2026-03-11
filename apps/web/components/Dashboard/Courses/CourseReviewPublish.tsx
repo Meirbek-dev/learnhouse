@@ -1,6 +1,7 @@
 'use client';
 
 import { buildCourseWorkspacePath, getCourseReadinessSummary } from '@/lib/course-management';
+import { CourseStatusBadge, courseWorkflowMutedPanelClass, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
@@ -9,7 +10,6 @@ import { ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState, useTransition } from 'react';
 import AppLink from '@/components/ui/AppLink';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
 export default function CourseReviewPublish({
@@ -108,18 +108,14 @@ export default function CourseReviewPublish({
             {readiness.checklist.map((item) => (
               <div
                 key={item.id}
-                className={`flex items-start justify-between gap-4 rounded-lg border p-4 border-l-4 ${
-                  item.complete
-                    ? 'border-border border-l-emerald-500 bg-emerald-50/30 dark:bg-emerald-950/20'
-                    : 'border-border border-l-amber-400 bg-amber-50/30 dark:bg-amber-950/20'
-                }`}
+                className="flex items-start justify-between gap-4 rounded-lg border bg-muted/40 p-4"
               >
                 <div>
                   <div className="font-medium text-foreground">{item.title}</div>
                   <div className="mt-1 text-sm text-muted-foreground">{item.description}</div>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
-                  <Badge variant={item.complete ? 'success' : 'warning'}>{item.complete ? 'Done' : 'Fix'}</Badge>
+                  <CourseStatusBadge status={item.complete ? 'ready' : 'needs-review'} />
                   {item.href ? (
                     <Button
                       variant="outline"
@@ -137,10 +133,13 @@ export default function CourseReviewPublish({
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-xl border bg-foreground p-5 text-background">
-            <div className="text-xs font-semibold uppercase tracking-wider text-background/60">Launch state</div>
-            <div className="mt-3 text-3xl font-semibold">{course.courseStructure.public ? 'Live' : 'Private'}</div>
-            <div className="mt-2 text-sm text-background/70">
+          <div className={courseWorkflowSummaryCardClass}>
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Launch state</div>
+              <CourseStatusBadge status={course.courseStructure.public ? 'live' : 'private'} />
+            </div>
+            <div className="mt-3 text-3xl font-semibold text-foreground">{course.courseStructure.public ? 'Live' : 'Private'}</div>
+            <div className="mt-2 text-sm text-muted-foreground">
               {course.courseStructure.public
                 ? 'Learners can discover this course according to its current access rules.'
                 : 'Learners cannot access this course publicly until you publish it.'}
@@ -149,14 +148,11 @@ export default function CourseReviewPublish({
 
           <div className="rounded-xl border bg-card p-5">
             <div className="text-sm font-semibold text-foreground">Publishing notes</div>
-            <ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
-              <li>Publishing uses the course visibility flag already supported by the backend.</li>
-              <li>Curriculum edits remain immediate, so confirm chapter and activity structure before launching.</li>
-              <li>
-                Details, access, collaboration, and certificate work should be reviewed for clarity before making the
-                course public.
-              </li>
-            </ul>
+            <div className="mt-3 space-y-3 text-sm leading-6 text-muted-foreground">
+              <div className={courseWorkflowMutedPanelClass}>Publishing uses the course visibility flag already supported by the backend.</div>
+              <div className={courseWorkflowMutedPanelClass}>Curriculum edits remain immediate, so confirm chapter and activity structure before launching.</div>
+              <div className={courseWorkflowMutedPanelClass}>Details, access, collaboration, and certificate work should be reviewed for clarity before making the course public.</div>
+            </div>
           </div>
         </div>
       </div>

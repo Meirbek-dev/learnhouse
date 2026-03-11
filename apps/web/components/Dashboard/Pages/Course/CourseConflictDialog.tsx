@@ -30,13 +30,13 @@ const CourseConflictDialog = () => {
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogMedia className="bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-400">
+          <AlertDialogMedia className="bg-muted text-foreground">
             <AlertTriangle className="size-8" />
           </AlertDialogMedia>
           <AlertDialogTitle>{t('title')}</AlertDialogTitle>
           <AlertDialogDescription>
             {course.conflict.message || t('description')}
-            <div className="mt-3 text-sm text-gray-500">{t('reloadWarning')}</div>
+            <div className="mt-3 text-sm text-muted-foreground">{t('reloadWarning')}</div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
