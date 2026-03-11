@@ -1,20 +1,88 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UnsavedChangesGuardOptions {
   message?: string;
   interceptInAppNavigation?: boolean;
 }
 
+interface PendingNavigation {
+  kind: 'history-back' | 'link';
+  href?: string;
+}
+
 export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChangesGuardOptions) {
   const message = options?.message ?? '';
   const interceptInAppNavigation = options?.interceptInAppNavigation ?? false;
   const messageRef = useRef(message);
+  const ignoreNextPopRef = useRef(false);
+  const allowNavigationRef = useRef(false);
+  const pendingLinkRef = useRef<HTMLAnchorElement | null>(null);
+  const pendingNavigationRef = useRef<PendingNavigation | null>(null);
+  const [pendingNavigation, setPendingNavigation] = useState<PendingNavigation | null>(null);
 
   useEffect(() => {
     messageRef.current = message;
   }, [message]);
+
+  useEffect(() => {
+    pendingNavigationRef.current = pendingNavigation;
+  }, [pendingNavigation]);
+
+  useEffect(() => {
+    if (isDirty) {
+      return;
+    }
+
+    allowNavigationRef.current = false;
+    ignoreNextPopRef.current = false;
+    pendingLinkRef.current = null;
+    setPendingNavigation(null);
+  }, [isDirty]);
+
+  const cancelNavigation = useCallback(() => {
+    const currentPending = pendingNavigationRef.current;
+
+    if (currentPending?.kind === 'history-back') {
+      globalThis.history.pushState(
+        { ...window.history.state, __unsavedChangesGuard: true },
+        '',
+        globalThis.location.href,
+      );
+    }
+
+    pendingLinkRef.current = null;
+    allowNavigationRef.current = false;
+    setPendingNavigation(null);
+  }, []);
+
+  const confirmNavigation = useCallback(() => {
+    const currentPending = pendingNavigationRef.current;
+
+    if (!currentPending) {
+      return;
+    }
+
+    setPendingNavigation(null);
+
+    if (currentPending.kind === 'history-back') {
+      ignoreNextPopRef.current = true;
+      globalThis.history.back();
+      return;
+    }
+
+    allowNavigationRef.current = true;
+
+    if (pendingLinkRef.current?.isConnected) {
+      pendingLinkRef.current.click();
+      return;
+    }
+
+    if (currentPending.href) {
+      globalThis.location.assign(currentPending.href);
+    }
+  }, []);
 
   useEffect(() => {
     if (!isDirty) {
@@ -37,10 +105,11 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
       return;
     }
 
-    const confirmLeave = () => globalThis.confirm(messageRef.current || 'You have unsaved changes. Leave this page?');
-    let ignoreNextPop = false;
-
     const handleDocumentClick = (event: MouseEvent) => {
+      if (allowNavigationRef.current) {
+        return;
+      }
+
       if (event.defaultPrevented || event.button !== 0) {
         return;
       }
@@ -77,10 +146,10 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
         return;
       }
 
-      if (!confirmLeave()) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
+      event.preventDefault();
+      event.stopPropagation();
+      pendingLinkRef.current = link;
+      setPendingNavigation({ kind: 'link', href: nextUrl.toString() });
     };
 
     globalThis.history.pushState(
@@ -90,22 +159,13 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
     );
 
     const handlePopState = () => {
-      if (ignoreNextPop) {
-        ignoreNextPop = false;
+      if (ignoreNextPopRef.current) {
+        ignoreNextPopRef.current = false;
         return;
       }
 
-      if (!confirmLeave()) {
-        globalThis.history.pushState(
-          { ...window.history.state, __unsavedChangesGuard: true },
-          '',
-          globalThis.location.href,
-        );
-        return;
-      }
-
-      ignoreNextPop = true;
-      globalThis.history.back();
+      pendingLinkRef.current = null;
+      setPendingNavigation({ kind: 'history-back' });
     };
 
     document.addEventListener('click', handleDocumentClick, true);
@@ -116,4 +176,11 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
       globalThis.removeEventListener('popstate', handlePopState);
     };
   }, [interceptInAppNavigation, isDirty]);
+
+  return {
+    cancelNavigation,
+    confirmNavigation,
+    isPromptOpen: pendingNavigation !== null,
+    promptMessage: messageRef.current || 'You have unsaved changes. Leave this page?',
+  };
 }

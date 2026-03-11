@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, Loader2, Sparkles } f
 import { createNewCourse, getCourseMetadata } from '@services/courses/courses';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { RadioGroup } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { buildCourseWorkspacePath } from '@/lib/course-management';
 import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import { createChapter } from '@services/courses/chapters';
@@ -404,22 +405,27 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                     >
                       {t('template.sourceCourse')}
                     </label>
-                    <select
-                      id="source-course"
+                    <Select
                       value={sourceCourseUuid}
-                      onChange={(e) => setSourceCourseUuid(e.target.value)}
-                      className="w-full rounded-md border border-input bg-background px-4 py-3 text-sm"
+                      onValueChange={(value) => {
+                        void setSourceCourseUuid(value);
+                      }}
+                      items={sourceOptions.map((course) => ({ value: course.cleanUuid, label: course.name }))}
                     >
-                      <option value="">{t('template.selectCourse')}</option>
-                      {sourceOptions.map((course) => (
-                        <option
-                          key={course.course_uuid}
-                          value={course.cleanUuid}
-                        >
-                          {course.name}
-                        </option>
-                      ))}
-                    </select>
+                      <SelectTrigger id="source-course">
+                        <SelectValue placeholder={t('template.selectCourse')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sourceOptions.map((course) => (
+                          <SelectItem
+                            key={course.course_uuid}
+                            value={course.cleanUuid}
+                          >
+                            {course.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <div className="text-sm text-muted-foreground">
                       {t('template.sourceCourseHelp')}
                     </div>

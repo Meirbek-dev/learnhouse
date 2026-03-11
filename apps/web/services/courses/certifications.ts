@@ -21,6 +21,7 @@ interface CertificationInvalidationOptions {
   courseUuid?: string;
   orgSlug?: string;
   includeEditableList?: boolean;
+  lastKnownUpdateDate?: string | null;
 }
 
 async function revalidateCertificationTags(options?: CertificationInvalidationOptions) {
@@ -58,7 +59,16 @@ export async function createCertification(
 ) {
   const result = await fetch(
     `${getAPIUrl()}certifications/`,
-    RequestBodyWithAuthHeader('POST', { course_id, config }, null, access_token),
+    RequestBodyWithAuthHeader(
+      'POST',
+      {
+        course_id,
+        config,
+        last_known_update_date: options?.lastKnownUpdateDate ?? undefined,
+      },
+      null,
+      access_token,
+    ),
   );
   const data = await errorHandling(result);
 
@@ -78,7 +88,12 @@ export async function updateCertification(
 ) {
   const result = await fetch(
     `${getAPIUrl()}certifications/${certification_uuid}`,
-    RequestBodyWithAuthHeader('PUT', { config }, null, access_token),
+    RequestBodyWithAuthHeader(
+      'PUT',
+      { config, last_known_update_date: options?.lastKnownUpdateDate ?? undefined },
+      null,
+      access_token,
+    ),
   );
   const data = await errorHandling(result);
 
@@ -95,8 +110,13 @@ export async function deleteCertification(
   access_token: string,
   options?: CertificationInvalidationOptions,
 ) {
+  const query = new URLSearchParams();
+  if (options?.lastKnownUpdateDate) {
+    query.set('last_known_update_date', options.lastKnownUpdateDate);
+  }
+
   const result = await fetch(
-    `${getAPIUrl()}certifications/${certification_uuid}`,
+    `${getAPIUrl()}certifications/${certification_uuid}${query.size > 0 ? `?${query.toString()}` : ''}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
   const data = await errorHandling(result);

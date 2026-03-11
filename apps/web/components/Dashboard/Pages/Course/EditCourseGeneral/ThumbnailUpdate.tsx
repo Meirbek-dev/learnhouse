@@ -1,11 +1,11 @@
 import { ArrowBigUpDash, Image as ImageIcon, UploadCloud, Video } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
+import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { updateCourseThumbnail } from '@services/courses/courses';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Card, CardContent } from '@components/ui/card';
 import { Button } from '@components/ui/button';
@@ -40,6 +40,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
   const videoInputRef = useRef<HTMLInputElement>(null);
 
   const course = useCourse();
+  const dispatchCourse = useCourseDispatch();
   const session = usePlatformSession() as any;
   const org = useOrg() as any;
   const t = useTranslations('CourseEdit.General.Thumbnail');
@@ -112,14 +113,20 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
           course.courseStructure.course_uuid,
           formData,
           session.data?.tokens?.access_token,
-          { orgSlug: org?.slug },
+          {
+            lastKnownUpdateDate: course.courseStructure.update_date,
+            orgSlug: org?.slug,
+          },
         );
-
-        await course.refreshCourseMeta();
 
         if (!res.success) {
           showError(res.HTTPmessage);
         } else {
+          if (res.data) {
+            dispatchCourse({ type: 'setCourseStructure', payload: res.data });
+          } else {
+            await course.refreshCourseMeta();
+          }
           setLocalThumbnail(null);
           toast.success(t('thumbnailUpdatedSuccessfully'), {
             duration: 3000,
@@ -132,7 +139,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
         setIsLoading(false);
       }
     },
-    [course, org?.slug, session, showError, t],
+    [course, dispatchCourse, org?.slug, session, showError, t],
   );
 
   const handleFileChange = useCallback(

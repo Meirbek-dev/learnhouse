@@ -1010,40 +1010,6 @@
       "updated": "Updated",
       "updatedDate": "Updated {updateDate, date, medium}"
     },
-    "CreateCourseModal": {
-      "ariaLabel": "Choose course thumbnail image to upload",
-      "cancel": "Cancel",
-      "createCourse": "Create Course",
-      "creating": "Creating...",
-      "labelDescription": "Description",
-      "labelLearnings": "Course Learnings (What will the course teach?)",
-      "labelName": "Course Name",
-      "labelTags": "Course Tags",
-      "labelThumbnail": "Course Thumbnail",
-      "labelVisibility": "Course Visibility",
-      "noThumbnail": "No thumbnail selected",
-      "placeholderLearnings": "Press Enter to add...",
-      "placeholderTags": "Press Enter to add...",
-      "placeholderVisibility": "Select Visibility",
-      "schemaDescriptionMax": "Must be 1000 characters or less",
-      "schemaDescriptionMin": "Description must be at least 5 characters",
-      "schemaNameMax": "Must be 100 characters or less",
-      "schemaNameRequired": "Course name is required",
-      "selectFile": "Select Thumbnail Image",
-      "supportedFormats": "Supported formats: JPG, PNG, WEBP, GIF",
-      "thumbnailChoose": "Choose from Gallery",
-      "thumbnailInvalidType": "Invalid file type. Please select an image (jpeg, jpg, png, webp, gif).",
-      "thumbnailPreviewAlt": "Course thumbnail preview",
-      "thumbnailTooLarge": "File size must be less than 8MB",
-      "thumbnailUpload": "Upload Image",
-      "toastError": "Failed to create course",
-      "toastErrorOrgLoad": "Failed to load organization",
-      "toastErrorOrgMissing": "Organization information is missing",
-      "toastLoading": "Creating course...",
-      "toastSuccess": "Course created successfully",
-      "visibilityItemPrivate": "Private (Available only to users)",
-      "visibilityItemPublic": "Public (Available to view on the internet)"
-    },
     "Dialog": {
       "cancel": "Cancel",
       "close": "Close"
@@ -3569,6 +3535,9 @@
           "reviewPublish": "Review & Publish"
         },
         "untitledCourse": "Untitled course",
+        "unsavedDialogLeave": "Leave workspace",
+        "unsavedDialogStay": "Stay here",
+        "unsavedDialogTitle": "Leave with unsaved changes?",
         "unsavedChangesWarning": "You have unsaved course changes. Leave this workspace?"
       }
     },

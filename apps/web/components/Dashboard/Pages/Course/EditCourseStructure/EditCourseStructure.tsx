@@ -10,13 +10,15 @@ import {
 } from '@/components/ui/dialog';
 import { createChapter, updateCourseOrderStructure } from '@services/courses/chapters';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import NewChapterModal from '@components/Objects/Modals/Chapters/NewChapter';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
-import { Hexagon } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Hexagon, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -50,6 +52,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   const course_uuid = course ? course.courseStructure.course_uuid : '';
   // New Chapter creation
   const [newChapterModal, setNewChapterModal] = useState(false);
+  const [structureStatus, setStructureStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   const closeNewChapterModal = async () => {
     setNewChapterModal(false);
@@ -57,14 +60,16 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
 
   // Submit new chapter
   const submitChapter = async (chapter: any) => {
-    const loadingToast = toast.loading(t('creatingChapter'));
+    setStructureStatus('saving');
     try {
       await createChapter(chapter, access_token, { courseUuid: course_uuid });
       await refreshCourseMeta();
       setNewChapterModal(false);
-      toast.success(t('chapterCreatedSuccess'), { id: loadingToast });
+      setStructureStatus('saved');
+      toast.success(t('chapterCreatedSuccess'));
     } catch {
-      toast.error(t('chapterCreateFailed'), { id: loadingToast });
+      setStructureStatus('error');
+      toast.error(t('chapterCreateFailed'));
     }
   };
 
@@ -111,14 +116,17 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
     };
 
     try {
+      setStructureStatus('saving');
       await updateCourseOrderStructure(course_uuid, payload, access_token, { courseUuid: course_uuid });
       await refreshCourseMeta();
+      setStructureStatus('saved');
     } catch (error: any) {
       dispatchCourse({ type: 'setCourseStructure', payload: course_structure });
       if (error?.status === 409) {
         showConflict(error?.detail || error?.message);
         return;
       }
+      setStructureStatus('error');
       toast.error(error?.message || t('saveOrderError'));
     }
   };
@@ -126,8 +134,39 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   if (!course) return <PageLoading />;
 
   return (
-    <div className="flex flex-col">
-      <div className="h-6" />
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('title')}</CardTitle>
+          <Alert className="border-border bg-muted/40">
+            {structureStatus === 'saving' ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : structureStatus === 'error' ? (
+              <AlertTriangle className="size-4" />
+            ) : (
+              <CheckCircle2 className="size-4" />
+            )}
+            <AlertTitle>
+              {structureStatus === 'saving'
+                ? t('savingOrder', { default: 'Applying curriculum changes' })
+                : structureStatus === 'error'
+                  ? t('saveOrderError')
+                  : t('curriculumChangesApplyImmediately', { default: 'Curriculum changes apply immediately' })}
+            </AlertTitle>
+            <AlertDescription>
+              {structureStatus === 'error'
+                ? t('refreshAfterError', {
+                    default: 'The latest structure change could not be saved. Review the current curriculum and try again.',
+                  })
+                : t('curriculumInlineFeedback', {
+                    default:
+                      'Drag, reorder, and chapter creation actions save as you work. This inline status row is the source of truth for curriculum persistence.',
+                  })}
+            </AlertDescription>
+          </Alert>
+        </CardHeader>
+      </Card>
+
       <DragDropContext onDragEnd={updateStructure}>
         <Droppable
           type="chapter"
@@ -156,32 +195,35 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
           )}
         </Droppable>
 
-        {/* New Chapter Dialog */}
-        <Dialog
-          open={newChapterModal}
-          onOpenChange={setNewChapterModal}
-        >
-          <DialogTrigger
-            render={<Button className="mx-auto my-16 flex h-auto max-w-(--breakpoint-2xl) flex-row items-center rounded-xl px-6 py-5 shadow-xs" />}
-          >
-            <Hexagon
-              strokeWidth={3}
-              size={16}
-            />
-            <span className="text-sm font-semibold">{t('addChapterButton')}</span>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t('NewChapterModal.title')}</DialogTitle>
-              <DialogDescription>{t('NewChapterModal.description')}</DialogDescription>
-            </DialogHeader>
-            <NewChapterModal
-              course={course ? course.courseStructure : null}
-              closeModal={closeNewChapterModal}
-              submitChapter={submitChapter}
-            />
-          </DialogContent>
-        </Dialog>
+        <Card>
+          <CardContent className="flex justify-center py-10">
+            <Dialog
+              open={newChapterModal}
+              onOpenChange={setNewChapterModal}
+            >
+              <DialogTrigger
+                render={<Button className="flex h-auto flex-row items-center rounded-xl px-6 py-5 shadow-xs" />}
+              >
+                <Hexagon
+                  strokeWidth={3}
+                  size={16}
+                />
+                <span className="text-sm font-semibold">{t('addChapterButton')}</span>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t('NewChapterModal.title')}</DialogTitle>
+                  <DialogDescription>{t('NewChapterModal.description')}</DialogDescription>
+                </DialogHeader>
+                <NewChapterModal
+                  course={course ? course.courseStructure : null}
+                  closeModal={closeNewChapterModal}
+                  submitChapter={submitChapter}
+                />
+              </DialogContent>
+            </Dialog>
+          </CardContent>
+        </Card>
       </DragDropContext>
     </div>
   );

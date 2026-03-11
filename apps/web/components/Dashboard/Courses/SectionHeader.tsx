@@ -51,7 +51,7 @@ export function SectionHeader({
           disabled={!isDirty || isSaving}
           onClick={onSave}
         >
-          {isSaving ? tCommon('saving') : /* i18n:TODO */ 'Save changes'}
+          {isSaving ? tCommon('saving') : tCommon('save')}
         </Button>
       </div>
     </div>

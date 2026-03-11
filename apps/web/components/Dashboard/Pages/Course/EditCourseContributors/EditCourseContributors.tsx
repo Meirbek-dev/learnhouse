@@ -11,12 +11,14 @@ import {
   editContributor,
   updateCourseAccess,
 } from '@services/courses/courses';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CourseChoiceCard, courseWorkflowMutedPanelClass } from '@components/Dashboard/Courses/courseWorkflowUi';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react';
 import { RadioGroup } from '@/components/ui/radio-group';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
@@ -404,35 +406,59 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
         onDiscard={handleDiscard}
       />
 
-      {/* Contributor access RadioGroup */}
-      <RadioGroup
-        value={isOpenToContributors === true ? 'open' : isOpenToContributors === false ? 'closed' : undefined}
-        onValueChange={(val) => setIsOpenToContributors(val === 'open')}
-        disabled={isSaving}
-        className="grid grid-cols-1 gap-3 sm:grid-cols-2"
-      >
-        <CourseChoiceCard
-          id="contrib-open"
-          value="open"
-          checked={isOpenToContributors === true}
-          title={t('openToContributorsTitle')}
-          description={t('openToContributorsDescription')}
-          icon={UserPen}
-          disabled={isSaving}
-        />
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('courseContributorsTitle')}</CardTitle>
+          <Alert className="border-border bg-muted/40">
+            <UserPen className="size-4" />
+            <AlertTitle>Contributor policy is staged until you save</AlertTitle>
+            <AlertDescription>
+              The open or closed contribution policy stays local until you save this section. Adding, removing, and editing contributors below applies immediately.
+            </AlertDescription>
+          </Alert>
+        </CardHeader>
+        <CardContent>
+          <RadioGroup
+            value={isOpenToContributors === true ? 'open' : isOpenToContributors === false ? 'closed' : undefined}
+            onValueChange={(val) => setIsOpenToContributors(val === 'open')}
+            disabled={isSaving}
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+          >
+            <CourseChoiceCard
+              id="contrib-open"
+              value="open"
+              checked={isOpenToContributors === true}
+              title={t('openToContributorsTitle')}
+              description={t('openToContributorsDescription')}
+              icon={UserPen}
+              disabled={isSaving}
+            />
 
-        <CourseChoiceCard
-          id="contrib-closed"
-          value="closed"
-          checked={isOpenToContributors === false}
-          title={t('closeToContributorsTitle')}
-          description={t('closeToContributorsDescription')}
-          icon={Users}
-          disabled={isSaving}
-        />
-      </RadioGroup>
+            <CourseChoiceCard
+              id="contrib-closed"
+              value="closed"
+              checked={isOpenToContributors === false}
+              title={t('closeToContributorsTitle')}
+              description={t('closeToContributorsDescription')}
+              icon={Users}
+              disabled={isSaving}
+            />
+          </RadioGroup>
+        </CardContent>
+      </Card>
 
-      {/* User search combobox */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('manageContributorsTitle', { default: 'Manage contributors' })}</CardTitle>
+          <Alert className="border-border bg-muted/40">
+            <Users className="size-4" />
+            <AlertTitle>Roster actions apply immediately</AlertTitle>
+            <AlertDescription>
+              Search, add, remove, role changes, and status updates update the live contributor roster right away. Keep them separate from the policy draft above.
+            </AlertDescription>
+          </Alert>
+        </CardHeader>
+        <CardContent className="space-y-4">
       <div className="space-y-3">
         <Popover
           open={searchOpen}
@@ -530,7 +556,6 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
         )}
       </div>
 
-      {/* Contributors table */}
       <div className="rounded-xl border bg-card">
         {selectedContributors.length > 0 && (
           <div className="flex items-center justify-between rounded-t-xl border-b bg-muted/60 px-4 py-3">
@@ -656,6 +681,8 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
           </ScrollArea>
         )}
       </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

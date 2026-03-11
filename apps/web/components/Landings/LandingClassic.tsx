@@ -147,10 +147,7 @@ const LandingClassic = async ({
                 title={t('Courses.title')}
                 type="cou"
                 action={
-                  <CreateCourseTrigger
-                    orgslug={orgslug}
-                    org_id={org_id}
-                  />
+                  <CreateCourseTrigger orgslug={orgslug} />
                 }
               />
 

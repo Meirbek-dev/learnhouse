@@ -326,6 +326,10 @@ export async function updateCourseThumbnail(
   access_token: string,
   options?: CourseWriteOptions,
 ) {
+  if (options?.lastKnownUpdateDate) {
+    formData.set('last_known_update_date', options.lastKnownUpdateDate);
+  }
+
   const result: any = await fetch(
     `${getAPIUrl()}courses/${course_uuid}/thumbnail`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),

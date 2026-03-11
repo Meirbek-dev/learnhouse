@@ -2,6 +2,7 @@
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, Image as ImageIcon, Loader2, Tag, Video } from 'lucide-react';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
@@ -438,11 +439,19 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
               <div className="space-y-1">
                 <h2 className="text-2xl font-bold tracking-tight text-foreground">{t('thumbnail.label')}</h2>
                 <p className="text-sm text-muted-foreground">
-                  Thumbnail updates are applied immediately. Metadata changes above stay local until you save them.
+                  Media updates are intentionally isolated from the draft fields above.
                 </p>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
+              <Alert className="border-border bg-muted/40">
+                <ImageIcon className="size-4" />
+                <AlertTitle>Media actions apply immediately</AlertTitle>
+                <AlertDescription>
+                  Thumbnail uploads update the live course record right away. Title, description, learnings, tags, and other general settings above stay local until you save this section.
+                </AlertDescription>
+              </Alert>
+
               <FormField
                 control={form.control}
                 name="thumbnail_type"

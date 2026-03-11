@@ -111,32 +111,32 @@ export const OrgProvider = ({
   if (isLoading) return <PageLoading />;
   if (!isUserPartOfTheOrg && session.status === 'authenticated' && !isAllowedPathname) {
     return (
-      <div className="mx-auto flex flex-col items-center space-y-6 bg-linear-to-b from-yellow-100 to-yellow-100/5 py-10 antialiased ">
-        <div className="flex flex-row items-center space-x-5 rounded-xl ">
-          <div className="text-yellow-700">
+      <div className="mx-auto flex max-w-2xl flex-col items-center space-y-6 rounded-2xl border bg-card p-8 antialiased">
+        <div className="flex flex-row items-center space-x-5 rounded-xl">
+          <div className="text-muted-foreground">
             <PersonStanding size={45} />
           </div>
           <div className="flex flex-col">
-            <p className="text-3xl font-bold text-yellow-700">{t('notMemberInfo')}</p>
+            <p className="text-3xl font-bold text-foreground">{t('notMemberInfo')}</p>
           </div>
         </div>
         <div className="flex space-x-4">
           <a
             href={getUriWithoutOrg('/home')}
-            className="flex items-center space-x-2 rounded-full bg-gray-700 px-4 py-1 text-gray-200 shadow-lg transition-all ease-linear hover:bg-gray-800 "
+            className="flex items-center space-x-2 rounded-full border bg-muted px-4 py-1 text-foreground transition-colors hover:bg-muted/80"
           >
             <Home
-              className="text-gray-200"
+              className="text-foreground"
               size={17}
             />
             <span className="text-md font-bold">{t('home')}</span>
           </a>
           <button
             onClick={handleSignOut}
-            className="flex items-center space-x-2 rounded-full bg-red-700 px-4 py-1 text-red-200 shadow-lg transition-all ease-linear hover:bg-red-800 "
+            className="flex items-center space-x-2 rounded-full bg-destructive px-4 py-1 text-destructive-foreground transition-colors hover:bg-destructive/90"
           >
             <LogOut
-              className="text-red-200"
+              className="text-destructive-foreground"
               size={17}
             />
             <span className="text-md font-bold">{t('signOut')}</span>

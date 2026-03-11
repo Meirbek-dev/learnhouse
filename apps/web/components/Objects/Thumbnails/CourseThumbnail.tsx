@@ -154,7 +154,7 @@ const CourseImage: FC<CourseImageProps> = ({
       />
 
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-50"
+        className="pointer-events-none absolute inset-0 bg-black/15"
         aria-hidden="true"
       />
 
@@ -624,7 +624,7 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
           >
             <h3
               id={titleId}
-              className="line-clamp-2 leading-tight font-semibold tracking-tight text-gray-900"
+              className="line-clamp-2 leading-tight font-semibold tracking-tight text-foreground"
             >
               {course.name}
             </h3>

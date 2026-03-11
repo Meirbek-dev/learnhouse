@@ -1,3 +1,6 @@
+from datetime import datetime
+
+from pydantic import field_validator
 from sqlalchemy import JSON, Column, ForeignKey
 from sqlmodel import Field
 
@@ -25,10 +28,36 @@ class Certifications(CertificationBase, table=True):
 class CertificationCreate(SQLModelStrictBaseModel):
     course_id: int
     config: dict = Field(default={})
+    last_known_update_date: datetime | None = None
+
+    @field_validator("last_known_update_date", mode="before")
+    @classmethod
+    def validate_last_known_update_date(cls, value):
+        if value is None or isinstance(value, datetime):
+            return value
+        if isinstance(value, str):
+            normalized = value.strip()
+            if normalized.endswith("Z"):
+                normalized = f"{normalized[:-1]}+00:00"
+            return datetime.fromisoformat(normalized)
+        return value
 
 
 class CertificationUpdate(SQLModelStrictBaseModel):
     config: dict | None = None
+    last_known_update_date: datetime | None = None
+
+    @field_validator("last_known_update_date", mode="before")
+    @classmethod
+    def validate_last_known_update_date(cls, value):
+        if value is None or isinstance(value, datetime):
+            return value
+        if isinstance(value, str):
+            normalized = value.strip()
+            if normalized.endswith("Z"):
+                normalized = f"{normalized[:-1]}+00:00"
+            return datetime.fromisoformat(normalized)
+        return value
 
 
 class CertificationRead(SQLModelStrictBaseModel):

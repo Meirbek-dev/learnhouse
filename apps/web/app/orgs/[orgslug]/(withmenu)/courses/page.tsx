@@ -60,7 +60,6 @@ const CoursesPage = async (params: any) => {
   return (
     <div>
       <Courses
-        org_id={org.org_id}
         orgslug={orgslug}
         courses={courses}
         totalCourses={total}

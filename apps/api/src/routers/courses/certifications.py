@@ -1,6 +1,7 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request
+from datetime import datetime
+from fastapi import APIRouter, Depends, Query, Request
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
@@ -92,12 +93,17 @@ async def api_delete_certification(
     certification_uuid: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
+    last_known_update_date: Annotated[datetime | None, Query()] = None,
 ):
     """
     Delete certification by certification_id
     """
     return await delete_certification(
-        request, certification_uuid, current_user, db_session
+        request,
+        certification_uuid,
+        current_user,
+        db_session,
+        last_known_update_date=last_known_update_date,
     )
 
 

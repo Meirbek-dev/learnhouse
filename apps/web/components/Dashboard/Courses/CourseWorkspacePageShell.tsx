@@ -1,6 +1,18 @@
 'use client';
 
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  AlertTriangle,
   BookCopy,
   CheckCircle2,
   ChevronRight,
@@ -47,6 +59,10 @@ function CourseWorkspaceChrome({
   const course = useCourse();
   const hasDirtySections = Object.values(course.dirtySections).some(Boolean);
   const readiness = getCourseReadinessSummary(course.courseStructure, course.editorData);
+  const unsavedChangesGuard = useUnsavedChangesGuard(hasDirtySections, {
+    interceptInAppNavigation: true,
+    message: t('unsavedChangesWarning'),
+  });
   const stageConfig = [
     { key: 'overview', label: t('tabs.overview'), icon: LayoutDashboard, capability: 'canViewWorkspace' },
     { key: 'details', label: t('tabs.details'), icon: FileCog, capability: 'canEditDetails' },
@@ -58,14 +74,35 @@ function CourseWorkspaceChrome({
   ] as const;
   const visibleStages = stageConfig.filter((stage) => capabilities[stage.capability]);
 
-  useUnsavedChangesGuard(hasDirtySections, {
-    interceptInAppNavigation: true,
-    message: t('unsavedChangesWarning'),
-  });
-
   return (
     <div className="flex min-h-screen min-w-0 flex-1 flex-col">
       <CourseConflictDialog />
+      <AlertDialog
+        open={unsavedChangesGuard.isPromptOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            unsavedChangesGuard.cancelNavigation();
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-muted text-foreground">
+              <AlertTriangle className="size-8" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>{t('unsavedDialogTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>{unsavedChangesGuard.promptMessage}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={unsavedChangesGuard.cancelNavigation}>
+              {t('unsavedDialogStay')}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={unsavedChangesGuard.confirmNavigation}>
+              {t('unsavedDialogLeave')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <header className="sticky top-0 z-20 border-b bg-background">
         {/* Title row */}

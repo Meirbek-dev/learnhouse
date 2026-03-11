@@ -261,17 +261,20 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
           await updateCertification(existingCertification.certification_uuid, config, access_token, {
             courseUuid: courseStructure.course_uuid,
             orgSlug: props.orgslug,
+            lastKnownUpdateDate: courseStructure.update_date,
           });
         } else {
           await createCertification(courseStructure.id, config, access_token, {
             courseUuid: courseStructure.course_uuid,
             orgSlug: props.orgslug,
+            lastKnownUpdateDate: courseStructure.update_date,
           });
         }
       } else if (existingCertification) {
         await deleteCertification(existingCertification.certification_uuid, access_token, {
           courseUuid: courseStructure.course_uuid,
           orgSlug: props.orgslug,
+          lastKnownUpdateDate: courseStructure.update_date,
         });
       }
 

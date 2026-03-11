@@ -994,40 +994,6 @@
       "updated": "Жаңартылды",
       "updatedDate": "Жаңартылған {updateDate, date, medium}"
     },
-    "CreateCourseModal": {
-      "ariaLabel": "Жүктеу үшін курстың нобай кескінін таңдаңыз",
-      "cancel": "Болдырмау",
-      "createCourse": "Курс жасау",
-      "creating": "Жасалуда...",
-      "labelDescription": "Сипаттамасы",
-      "labelLearnings": "Курс оқулары (Курс не үйретеді?)",
-      "labelName": "Курс атауы",
-      "labelTags": "Курс тегтері",
-      "labelThumbnail": "Курс мұқабасы",
-      "labelVisibility": "Курстың көрінуі",
-      "noThumbnail": "Кескін таңдалмады",
-      "placeholderLearnings": "Қосу үшін Enter басыңыз...",
-      "placeholderTags": "Қосу үшін Enter басыңыз...",
-      "placeholderVisibility": "Көрінуін таңдаңыз",
-      "schemaDescriptionMax": "1000 таңбадан аз болуы керек",
-      "schemaDescriptionMin": "Сипаттама кемінде 10 таңбадан тұруы керек",
-      "schemaNameMax": "100 таңбадан аз болуы керек",
-      "schemaNameRequired": "Курс атауы қажет",
-      "selectFile": "Нобай кескінін таңдаңыз",
-      "supportedFormats": "Қолдау көрсетілетін форматтар: JPG, PNG, WEBP, GIF",
-      "thumbnailChoose": "Галереядан таңдау",
-      "thumbnailInvalidType": "Қате файл түрі. Суретті таңдаңыз (jpeg, jpg, png, webp, gif).",
-      "thumbnailPreviewAlt": "Курстың кескінінің алдын ала қарауы",
-      "thumbnailTooLarge": "Файл өлшемі 8МБ-тан кем болуы керек",
-      "thumbnailUpload": "Суретті жүктеу",
-      "toastError": "Курсты жасау мүмкін болмады",
-      "toastErrorOrgLoad": "Ұйымды жүктеу мүмкін болмады",
-      "toastErrorOrgMissing": "Ұйым туралы ақпарат жоқ",
-      "toastLoading": "Курс жасалуда...",
-      "toastSuccess": "Курс сәтті жасалды",
-      "visibilityItemPrivate": "Жеке (Тек авторизацияланған пайдаланушыларға қолжетімді)",
-      "visibilityItemPublic": "Жалпы (Барлығына қарау үшін қолжетімді)"
-    },
     "Dialog": {
       "cancel": "Болдырмау",
       "close": "Жабу"
@@ -3582,6 +3548,9 @@
           "reviewPublish": "Тексеру және жариялау"
         },
         "untitledCourse": "Атаусыз курс",
+        "unsavedDialogLeave": "Жұмыс кеңістігінен шығу",
+        "unsavedDialogStay": "Осында қалу",
+        "unsavedDialogTitle": "Сақталмаған өзгерістермен шығу керек пе?",
         "unsavedChangesWarning": "Курста сақталмаған өзгерістер бар. Осы жұмыс кеңістігінен шығу керек пе?"
       }
     },

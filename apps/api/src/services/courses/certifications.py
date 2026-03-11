@@ -1,7 +1,7 @@
 import logging
 import random
 import string
-from datetime import datetime, timezone
+from datetime import datetime
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
@@ -21,6 +21,7 @@ from src.db.courses.courses import Course
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
+from src.services.courses.courses import _ensure_course_is_current
 from src.services.gamification import StreakType, XPSource
 from src.services.gamification import service as gamification_service
 
@@ -58,16 +59,23 @@ async def create_certification(
         resource_owner_id=course.creator_id,
     )
 
+    _ensure_course_is_current(course, certification_object.last_known_update_date)
+
+    now = tz_now()
+
     # Create certification
     certification = Certifications(
         course_id=certification_object.course_id,
         config=certification_object.config or {},
         certification_uuid=str(f"certification_{ULID()}"),
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
+        creation_date=now.isoformat(),
+        update_date=now.isoformat(),
     )
 
+    course.update_date = now
+
     # Insert certification in DB
+    db_session.add(course)
     db_session.add(certification)
     db_session.commit()
     db_session.refresh(certification)
@@ -192,14 +200,22 @@ async def update_certification(
         resource_owner_id=course.creator_id,
     )
 
+    _ensure_course_is_current(course, certification_object.last_known_update_date)
+
     # Update only the fields that were passed in
-    for var, value in vars(certification_object).items():
+    update_data = certification_object.model_dump(exclude_unset=True)
+    update_data.pop("last_known_update_date", None)
+
+    for var, value in update_data.items():
         if value is not None:
             setattr(certification, var, value)
 
     # Update the update_date
-    certification.update_date = str(datetime.now())
+    now = tz_now()
+    certification.update_date = now.isoformat()
+    course.update_date = now
 
+    db_session.add(course)
     db_session.add(certification)
     db_session.commit()
     db_session.refresh(certification)
@@ -212,6 +228,7 @@ async def delete_certification(
     certification_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    last_known_update_date: datetime | None = None,
 ) -> dict:
     """Delete a certification"""
 
@@ -245,6 +262,11 @@ async def delete_certification(
         resource_owner_id=course.creator_id,
     )
 
+    _ensure_course_is_current(course, last_known_update_date)
+
+    course.update_date = tz_now()
+
+    db_session.add(course)
     db_session.delete(certification)
     db_session.commit()
 

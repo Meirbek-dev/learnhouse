@@ -39,6 +39,7 @@ import { useTranslations } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import DataTable from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLink from '@/components/ui/AppLink';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -191,7 +192,10 @@ const CoursesHome = ({
       void (async () => {
         const results = await Promise.allSettled(
           targetCourses.map((course) =>
-            updateCourseAccess(course.course_uuid, { public: nextPublic }, accessToken, { orgSlug: orgslug }),
+            updateCourseAccess(course.course_uuid, { public: nextPublic }, accessToken, {
+              lastKnownUpdateDate: course.update_date,
+              orgSlug: orgslug,
+            }),
           ),
         );
 
@@ -540,14 +544,22 @@ const CoursesHome = ({
 
           <div className="flex items-center gap-3">
             <label className="text-sm font-medium text-muted-foreground">{t('sort.label')}</label>
-            <select
+            <Select
               value={sortBy}
-              onChange={(event) => updateRoute({ sort: event.target.value, page: '1' })}
-              className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+              onValueChange={(value) => updateRoute({ sort: value, page: '1' })}
+              items={[
+                { value: 'updated', label: t('sort.updated') },
+                { value: 'name', label: t('sort.name') },
+              ]}
             >
-              <option value="updated">{t('sort.updated')}</option>
-              <option value="name">{t('sort.name')}</option>
-            </select>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="updated">{t('sort.updated')}</SelectItem>
+                <SelectItem value="name">{t('sort.name')}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -705,7 +717,10 @@ function CourseRowActions({ course, orgslug }: { course: ManageableCourse; orgsl
     startTransition(() => {
       void (async () => {
         try {
-          await updateCourseAccess(course.course_uuid, { public: !course.public }, accessToken, { orgSlug: orgslug });
+          await updateCourseAccess(course.course_uuid, { public: !course.public }, accessToken, {
+            lastKnownUpdateDate: course.update_date,
+            orgSlug: orgslug,
+          });
           toast.success(course.public ? t('rowActions.visibilityMovedPrivate') : t('rowActions.visibilityPublished'));
           router.refresh();
         } catch {

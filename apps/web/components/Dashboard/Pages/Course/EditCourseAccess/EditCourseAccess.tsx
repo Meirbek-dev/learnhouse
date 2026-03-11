@@ -22,12 +22,14 @@ import {
 } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import LinkToUserGroup from '@components/Objects/Modals/Dash/EditCourseAccess/LinkToUserGroup';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, Globe, Loader2, SquareUserRound, Users, X } from 'lucide-react';
 import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { CourseChoiceCard } from '@components/Dashboard/Courses/courseWorkflowUi';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { RadioGroup } from '@/components/ui/radio-group';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { updateCourseAccess } from '@services/courses/courses';
@@ -103,33 +105,46 @@ const EditCourseAccess = (props: EditCourseAccessProps) => {
         onDiscard={handleDiscard}
       />
 
-      {/* Access option RadioGroup */}
-      <RadioGroup
-        value={draftPublic === true ? 'public' : draftPublic === false ? 'private' : undefined}
-        onValueChange={(val) => setDraftPublic(val === 'public')}
-        disabled={isSaving}
-        className="grid grid-cols-1 gap-3 sm:grid-cols-2"
-      >
-        <CourseChoiceCard
-          id="access-public"
-          value="public"
-          checked={draftPublic === true}
-          title={t('publicLabel')}
-          description={t('publicDescription')}
-          icon={Globe}
-          disabled={isSaving}
-        />
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('accessToTheCourse')}</CardTitle>
+          <Alert className="border-border bg-muted/40">
+            <Globe className="size-4" />
+            <AlertTitle>Access policy is staged until you save</AlertTitle>
+            <AlertDescription>
+              Visibility changes stay local until you save this section. User-group linking below applies immediately and is intentionally isolated from the policy draft.
+            </AlertDescription>
+          </Alert>
+        </CardHeader>
+        <CardContent>
+          <RadioGroup
+            value={draftPublic === true ? 'public' : draftPublic === false ? 'private' : undefined}
+            onValueChange={(val) => setDraftPublic(val === 'public')}
+            disabled={isSaving}
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+          >
+            <CourseChoiceCard
+              id="access-public"
+              value="public"
+              checked={draftPublic === true}
+              title={t('publicLabel')}
+              description={t('publicDescription')}
+              icon={Globe}
+              disabled={isSaving}
+            />
 
-        <CourseChoiceCard
-          id="access-private"
-          value="private"
-          checked={draftPublic === false}
-          title={t('usersOnlyLabel')}
-          description={t('usersOnlyDescription')}
-          icon={Users}
-          disabled={isSaving}
-        />
-      </RadioGroup>
+            <CourseChoiceCard
+              id="access-private"
+              value="private"
+              checked={draftPublic === false}
+              title={t('usersOnlyLabel')}
+              description={t('usersOnlyDescription')}
+              icon={Users}
+              disabled={isSaving}
+            />
+          </RadioGroup>
+        </CardContent>
+      </Card>
 
       {/* User groups — only shown for private courses */}
       {draftPublic === false && (
@@ -159,66 +174,75 @@ const UserGroupsSection = ({
   const t = useTranslations('DashPage.Courses.Access');
 
   return (
-    <div className="space-y-4 rounded-xl border bg-card p-5">
-      <div>
-        <h2 className="text-lg font-bold text-foreground">{t('title')}</h2>
+    <Card>
+      <CardHeader>
+        <CardTitle>{t('title')}</CardTitle>
+        <Alert className="border-border bg-muted/40">
+          <Users className="size-4" />
+          <AlertTitle>User-group links apply immediately</AlertTitle>
+          <AlertDescription>
+            These links take effect as soon as you confirm them. Keep access policy changes above separate and save them explicitly.
+          </AlertDescription>
+        </Alert>
+      </CardHeader>
+      <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">{t('description')}</p>
-      </div>
 
-      <ScrollArea className="max-h-72 rounded-lg border bg-background">
-        <Table>
-          <TableHeader className="uppercase">
-            <TableRow>
-              <TableHead>{t('tableHeaderName')}</TableHead>
-              <TableHead>{t('tableHeaderActions')}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
+        <ScrollArea className="max-h-72 rounded-lg border bg-background">
+          <Table>
+            <TableHeader className="uppercase">
               <TableRow>
-                <TableCell colSpan={2}>{t('loadingUserGroups', { default: 'Loading user groups...' })}</TableCell>
+                <TableHead>{t('tableHeaderName')}</TableHead>
+                <TableHead>{t('tableHeaderActions')}</TableHead>
               </TableRow>
-            ) : null}
-            {usergroups?.map((usergroup: any) => (
-              <UnlinkUserGroupRow
-                key={usergroup.id}
-                usergroup={usergroup}
-                courseUuid={course.courseStructure.course_uuid}
-                accessToken={access_token}
-                orgslug={orgslug}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </ScrollArea>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={2}>{t('loadingUserGroups', { default: 'Loading user groups...' })}</TableCell>
+                </TableRow>
+              ) : null}
+              {usergroups?.map((usergroup: any) => (
+                <UnlinkUserGroupRow
+                  key={usergroup.id}
+                  usergroup={usergroup}
+                  courseUuid={course.courseStructure.course_uuid}
+                  accessToken={access_token}
+                  orgslug={orgslug}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        </ScrollArea>
 
-      <div className="flex justify-end">
-        <Dialog
-          open={userGroupModal}
-          onOpenChange={setUserGroupModal}
-        >
-          <DialogTrigger
-            render={
-              <Button
-                type="button"
-                size="sm"
-                className="min-w-40"
-              />
-            }
+        <div className="flex justify-end">
+          <Dialog
+            open={userGroupModal}
+            onOpenChange={setUserGroupModal}
           >
-            <SquareUserRound className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span>{t('linkToUserGroupButton')}</span>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>{t('linkModalTitle')}</DialogTitle>
-              <DialogDescription>{t('linkModalDescription')}</DialogDescription>
-            </DialogHeader>
-            <LinkToUserGroup setUserGroupModal={setUserGroupModal} />
-          </DialogContent>
-        </Dialog>
-      </div>
-    </div>
+            <DialogTrigger
+              render={
+                <Button
+                  type="button"
+                  size="sm"
+                  className="min-w-40"
+                />
+              }
+            >
+              <SquareUserRound className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span>{t('linkToUserGroupButton')}</span>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>{t('linkModalTitle')}</DialogTitle>
+                <DialogDescription>{t('linkModalDescription')}</DialogDescription>
+              </DialogHeader>
+              <LinkToUserGroup setUserGroupModal={setUserGroupModal} />
+            </DialogContent>
+          </Dialog>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

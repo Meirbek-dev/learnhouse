@@ -1,12 +1,10 @@
 'use client';
 
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
-import { buildCourseCreationPath } from '@/lib/course-management';
+import CreateCourseTrigger from '@/components/Landings/CreateCourseTrigger';
 import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfContentTitle';
-import NewCourseButton from '@/components/Objects/Elements/Buttons/NewCourseButton';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import CourseGridClient from '@components/Landings/CourseGridClient';
-import AppLink from '@/components/ui/AppLink';
 
 import { useTranslations } from 'next-intl';
 
@@ -14,10 +12,9 @@ interface CourseProps {
   orgslug: string;
   courses: any[];
   totalCourses: number;
-  org_id: number;
 }
 
-const EmptyStateMessage = ({ canManageOrg, t, newCourseButtonTrigger }: any) => (
+const EmptyStateMessage = ({ canManageOrg, t, createCourseTrigger }: any) => (
   <div className="col-span-full flex items-center justify-center py-12">
     <div className="max-w-md text-center">
       <div className="mb-6">
@@ -39,30 +36,18 @@ const EmptyStateMessage = ({ canManageOrg, t, newCourseButtonTrigger }: any) => 
       </div>
       <h1 className="mb-3 text-2xl font-bold text-gray-700">{t('noCourses')}</h1>
       <p className="mb-6 text-lg text-gray-500">{canManageOrg ? t('createACourse') : t('noCoursesAvailable')}</p>
-      {canManageOrg ? <div className="flex justify-center">{newCourseButtonTrigger}</div> : null}
+      {canManageOrg ? <div className="flex justify-center">{createCourseTrigger}</div> : null}
     </div>
   </div>
 );
 
 const Courses = (props: CourseProps) => {
   const t = useTranslations('CoursesPage');
-  const { orgslug, courses, totalCourses, org_id } = props;
+  const { orgslug, courses, totalCourses } = props;
   const { can } = usePermissions();
   const canManageOrg = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
 
-  // Single trigger for opening the modal
-  const newCourseButtonTrigger = (
-    <PermissionGuard
-      action={Actions.CREATE}
-      resource={Resources.COURSE}
-      scope={Scopes.ORG}
-      fallback={null}
-    >
-      <NewCourseButton
-        render={<AppLink href={buildCourseCreationPath(orgslug)} />}
-      />
-    </PermissionGuard>
-  );
+  const createCourseTrigger = <CreateCourseTrigger orgslug={orgslug} />;
 
   const hasCourses = courses.length > 0 || totalCourses > 0;
 
@@ -75,14 +60,14 @@ const Courses = (props: CourseProps) => {
               title={t('title')}
               type="cou"
             />
-            {newCourseButtonTrigger}
+            {createCourseTrigger}
           </div>
 
           {!hasCourses ? (
             <EmptyStateMessage
               canManageOrg={canManageOrg}
               t={t}
-              newCourseButtonTrigger={newCourseButtonTrigger}
+              createCourseTrigger={createCourseTrigger}
             />
           ) : (
             <CourseGridClient

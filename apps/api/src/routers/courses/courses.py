@@ -109,6 +109,7 @@ async def api_create_course_thumbnail(
     request: Request,
     course_uuid: str,
     thumbnail_type: Annotated[ThumbnailType, Form()] = ThumbnailType.IMAGE,
+    last_known_update_date: Annotated[datetime | None, Form()] = None,
     thumbnail: UploadFile | None = None,
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db_session=Depends(get_db_session),
@@ -117,7 +118,13 @@ async def api_create_course_thumbnail(
     Update Course Thumbnail (Image or Video)
     """
     return await update_course_thumbnail(
-        request, course_uuid, current_user, db_session, thumbnail, thumbnail_type
+        request,
+        course_uuid,
+        current_user,
+        db_session,
+        thumbnail,
+        thumbnail_type,
+        last_known_update_date=last_known_update_date,
     )
 
 

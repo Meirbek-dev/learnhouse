@@ -994,40 +994,6 @@
       "updated": "Обновлён",
       "updatedDate": "Обновлено {updateDate, date, medium}"
     },
-    "CreateCourseModal": {
-      "ariaLabel": "Выберите миниатюру курса для загрузки",
-      "cancel": "Отмена",
-      "createCourse": "Создать курс",
-      "creating": "Создание...",
-      "labelDescription": "Описание",
-      "labelLearnings": "Изучаемые темы курса (Чему научит курс?)",
-      "labelName": "Название курса",
-      "labelTags": "Теги курса",
-      "labelThumbnail": "Обложка курса",
-      "labelVisibility": "Видимость курса",
-      "noThumbnail": "Миниатюра не выбрана",
-      "placeholderLearnings": "Нажмите Enter, чтобы добавить...",
-      "placeholderTags": "Нажмите Enter, чтобы добавить...",
-      "placeholderVisibility": "Выберите видимость",
-      "schemaDescriptionMax": "Должно быть 1000 символов или меньше",
-      "schemaDescriptionMin": "Описание должно содержать не менее 5 символов",
-      "schemaNameMax": "Должно быть 100 символов или меньше",
-      "schemaNameRequired": "Требуется название курса",
-      "selectFile": "Выберите изображение миниатюры",
-      "supportedFormats": "Поддерживаемые форматы: JPG, PNG, WEBP, GIF",
-      "thumbnailChoose": "Выбрать из галереи",
-      "thumbnailInvalidType": "Недопустимый тип файла. Пожалуйста, выберите изображение (jpeg, jpg, png, webp, gif).",
-      "thumbnailPreviewAlt": "Предпросмотр миниатюры курса",
-      "thumbnailTooLarge": "Размер файла должен быть меньше 8 МБ",
-      "thumbnailUpload": "Загрузить изображение",
-      "toastError": "Не удалось создать курс",
-      "toastErrorOrgLoad": "Не удалось загрузить организацию",
-      "toastErrorOrgMissing": "Информация отсутствует",
-      "toastLoading": "Создание курса...",
-      "toastSuccess": "Курс успешно создан",
-      "visibilityItemPrivate": "Приватный (Доступен только авторизованным пользователям)",
-      "visibilityItemPublic": "Публичный (Доступен всем для просмотра)"
-    },
     "Dialog": {
       "cancel": "Отмена",
       "close": "Закрыть"
@@ -3582,6 +3548,9 @@
           "reviewPublish": "Проверка и публикация"
         },
         "untitledCourse": "Курс без названия",
+        "unsavedDialogLeave": "Покинуть рабочее пространство",
+        "unsavedDialogStay": "Остаться",
+        "unsavedDialogTitle": "Покинуть с несохранёнными изменениями?",
         "unsavedChangesWarning": "У вас есть несохранённые изменения в курсе. Покинуть это рабочее пространство?"
       }
     },

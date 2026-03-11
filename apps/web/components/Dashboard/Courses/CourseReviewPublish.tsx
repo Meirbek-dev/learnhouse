@@ -3,10 +3,11 @@
 import { buildCourseWorkspacePath, getCourseReadinessSummary } from '@/lib/course-management';
 import { CourseStatusBadge, courseWorkflowMutedPanelClass, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { updateCourseAccess } from '@services/courses/courses';
-import { ExternalLink, Loader2 } from 'lucide-react';
+import { AlertTriangle, ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
@@ -77,6 +78,15 @@ export default function CourseReviewPublish({
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
               {t('description')}
             </p>
+            {!readiness.readyToPublish ? (
+              <Alert className="mt-4 border-border bg-muted/40">
+                <AlertTriangle className="size-4" />
+                <AlertTitle>{t('notReadyTitle')}</AlertTitle>
+                <AlertDescription>
+                  {t('description')}
+                </AlertDescription>
+              </Alert>
+            ) : null}
           </div>
 
           <div className="flex flex-wrap gap-3">

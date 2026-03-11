@@ -704,6 +704,7 @@ async def update_course_thumbnail(
     db_session: Session,
     thumbnail_file: UploadFile | None = None,
     thumbnail_type: ThumbnailType = ThumbnailType.IMAGE,
+    last_known_update_date: datetime | None = None,
     checker: PermissionChecker | None = None,
 ):
     statement = select(Course).where(Course.course_uuid == course_uuid)
@@ -724,6 +725,8 @@ async def update_course_thumbnail(
         course.org_id,
         resource_owner_id=course.creator_id,
     )
+
+    _ensure_course_is_current(course, last_known_update_date)
 
     # Get org uuid
     org_statement = select(Organization).where(Organization.id == course.org_id)

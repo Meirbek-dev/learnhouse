@@ -45,6 +45,14 @@ export default function CourseWorkspaceOverview({
             </div>
             <CourseStatusBadge status={readiness.readyToPublish ? 'ready' : 'needs-review'} />
           </div>
+          {!readiness.readyToPublish ? (
+            <Alert className="mt-4 border-border bg-muted/40">
+              <AlertTriangle className="size-4" />
+              <AlertDescription>
+                {t('notReadyDescription')}
+              </AlertDescription>
+            </Alert>
+          ) : null}
           <div className="mt-6 flex flex-wrap gap-3">
             {capabilities.canEditCurriculum ? (
               <Button
@@ -54,16 +62,17 @@ export default function CourseWorkspaceOverview({
                 {t('openCurriculum')}
               </Button>
             ) : null}
-            {capabilities.canReviewCourse ? (
-              <Button
-                variant="outline"
-                nativeButton={false}
-                render={<AppLink href={buildCourseWorkspacePath(orgslug, courseuuid, 'review')} />}
+          </div>
+          {capabilities.canReviewCourse ? (
+            <div className="mt-4 text-sm text-muted-foreground">
+              <AppLink
+                href={buildCourseWorkspacePath(orgslug, courseuuid, 'review')}
+                className="font-medium text-foreground underline underline-offset-4"
               >
                 {t('reviewReadiness')}
-              </Button>
-            ) : null}
-          </div>
+              </AppLink>
+            </div>
+          ) : null}
         </div>
 
         <div className={courseWorkflowSummaryCardClass}>

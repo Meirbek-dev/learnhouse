@@ -102,22 +102,22 @@ const ACTIVITY_CONFIG = {
   TYPE_VIDEO: {
     Icon: Video,
     translationKey: 'video',
-    colorClass: 'border-border bg-muted text-foreground',
+    colorClass: 'border-border bg-muted/60 text-foreground',
   },
   TYPE_DOCUMENT: {
     Icon: File,
     translationKey: 'document',
-    colorClass: 'border-border bg-background text-foreground',
+    colorClass: 'border-border bg-muted/40 text-foreground',
   },
   TYPE_ASSIGNMENT: {
     Icon: Backpack,
     translationKey: 'assignment',
-    colorClass: 'border-border bg-accent/60 text-accent-foreground',
+    colorClass: 'border-border bg-muted/70 text-foreground',
   },
   TYPE_DYNAMIC: {
     Icon: Sparkles,
     translationKey: 'dynamic',
-    colorClass: 'border-border bg-accent/60 text-accent-foreground',
+    colorClass: 'border-border bg-muted/70 text-foreground',
   },
   TYPE_EXAM: {
     Icon: ClipboardList,
@@ -127,7 +127,7 @@ const ACTIVITY_CONFIG = {
   TYPE_CODE_CHALLENGE: {
     Icon: Code2,
     translationKey: 'codeChallenge',
-    colorClass: 'border-border bg-accent/60 text-accent-foreground',
+    colorClass: 'border-border bg-muted/70 text-foreground',
   },
 } as const;
 

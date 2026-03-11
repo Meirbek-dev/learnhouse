@@ -160,7 +160,6 @@ export default defineConfig([
       'components/Dashboard/Courses/**/*.{ts,tsx}',
       'components/Dashboard/Pages/Course/**/*.{ts,tsx}',
       'components/Landings/CreateCourseTrigger.tsx',
-      'components/Objects/Elements/Buttons/NewCourseButton.tsx',
       'app/orgs/[orgslug]/(withmenu)/courses/**/*.{ts,tsx}',
     ],
     rules: {
