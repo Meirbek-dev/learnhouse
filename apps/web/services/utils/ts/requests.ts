@@ -203,7 +203,7 @@ export const swrFetcherWithHeaders = async (
 
 export const errorHandling = async (res: Response) => {
   if (!res.ok) {
-    let data: any = null;
+    let data: any;
 
     try {
       data = await res.json();

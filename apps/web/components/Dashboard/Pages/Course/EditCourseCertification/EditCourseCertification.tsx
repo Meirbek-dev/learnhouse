@@ -14,7 +14,6 @@ import { useCourse } from '@components/Contexts/CourseContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDirtySection } from '@/hooks/useDirtySection';
 import { Separator } from '@/components/ui/separator';
-import CertificatePreview from './CertificatePreview';
 import { Textarea } from '@/components/ui/textarea';
 import { useForm, useWatch } from 'react-hook-form';
 import { Spinner } from '@components/ui/spinner';
@@ -26,6 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import * as v from 'valibot';
+import CertificatePreview from './CertificatePreview';
 
 interface EditCourseCertificationProps {
   orgslug: string;

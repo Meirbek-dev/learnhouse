@@ -671,6 +671,7 @@
       "awardedLabel": "Awarded",
       "certificate": "Certificate",
       "certificateId": "Certificate ID",
+      "certificateIdInline": "ID {id}",
       "certificateOf": "Certificate of",
       "certificatePreview": "Certificate Preview",
       "certificateQRAlt": "Certificate QR Code",
@@ -681,7 +682,10 @@
       "instructor": "Instructor",
       "instructorName": "Dr. Jane Smith",
       "organizationLogoAlt": "Ashyq Bilim Logo",
+      "previewNote": "The preview uses theme tokens only. Pattern choice now changes layout density and framing instead of custom color packs.",
+      "qrLabel": "QR",
       "scanToVerify": "Scan to verify",
+      "template": "Template",
       "thisIsToConfirm": "This is to confirm that"
     },
     "CertificateVerificationPage": {
@@ -2988,7 +2992,8 @@
         "editor": "Editor",
         "noAssignments": "There are no assignments available for this course, create assignments in the course editor",
         "noCourses": "You don't have any courses you can edit. Create a course or ask an admin to add you as a contributor.",
-        "submissions": "Submissions"
+        "submissions": "Submissions",
+        "viewCourseAria": "View {courseName} course"
       },
       "NewTaskModal": {
         "createSuccess": "Task created successfully",
@@ -3218,6 +3223,354 @@
       "courseLabel": "Course",
       "downloadMoocRequirements": "Download MOOC development requirements",
       "rightsGuide": "Rights Guide"
+    },
+    "CourseManagement": {
+      "Dashboard": {
+        "bulk": {
+          "clearSelection": "Clear selection",
+          "delete": "Delete selected",
+          "movePrivate": "Move selected to private",
+          "publish": "Publish selected",
+          "selectedCount": "{count, plural, one {# selected} other {# selected}}"
+        },
+        "dialogs": {
+          "delete": {
+            "confirm": "Delete courses",
+            "description": "This permanently deletes {count, plural, one {# selected course} other {# selected courses}}. This action cannot be undone.",
+            "title": "Delete selected courses?"
+          },
+          "private": {
+            "confirm": "Move to private",
+            "description": "This will hide {count, plural, one {# selected course} other {# selected courses}} from public access until you publish {count, plural, one {it} other {them}} again.",
+            "title": "Move selected courses to private?"
+          },
+          "publish": {
+            "confirm": "Publish courses",
+            "description": "This will make {count, plural, one {# selected course} other {# selected courses}} public wherever learners can access {count, plural, one {it} other {them}}.",
+            "title": "Publish selected courses?"
+          }
+        },
+        "empty": {
+          "createAction": "Create with guided setup",
+          "title": "No matching courses on this page",
+          "withQuery": "Adjust the search or preset.",
+          "withoutQuery": "Create a course or widen the current preset."
+        },
+        "errors": {
+          "cannotDeleteSelection": "No selected courses can be deleted.",
+          "cannotUpdateSelection": "No selected courses can be updated."
+        },
+        "guidedSetup": "Guided setup",
+        "header": {
+          "description": "Review the catalog in a management-first table, filter by lifecycle state, and launch directly into the guided creation flow or an existing course workspace.",
+          "label": "Course management",
+          "title": "Manage course workspaces"
+        },
+        "pagination": {
+          "next": "Next",
+          "page": "Page {current} of {total}",
+          "previous": "Previous"
+        },
+        "presets": {
+          "all": "All",
+          "attention": "Needs attention",
+          "drafts": "Drafts",
+          "private": "Private",
+          "published": "Published",
+          "recent": "Recently updated"
+        },
+        "resultsSummary": "{visible} visible on this page, {total} total in the workspace.",
+        "rowActions": {
+          "delete": "Delete",
+          "deleteError": "Unable to delete course.",
+          "deleteSuccess": "Course deleted.",
+          "movePrivate": "Move to private",
+          "openCurriculum": "Open curriculum",
+          "openWorkspace": "Open workspace",
+          "publish": "Publish",
+          "reviewPublish": "Review & publish",
+          "useAsTemplate": "Use as template",
+          "visibilityError": "Unable to update course visibility.",
+          "visibilityMovedPrivate": "Course moved to private.",
+          "visibilityPublished": "Course is now public."
+        },
+        "search": {
+          "clear": "Clear",
+          "placeholder": "Search courses across the org",
+          "submit": "Search"
+        },
+        "sort": {
+          "label": "Sort",
+          "name": "Name",
+          "updated": "Recently updated"
+        },
+        "summary": {
+          "attention": {
+            "detail": "Requires follow-up",
+            "label": "Needs attention"
+          },
+          "private": {
+            "detail": "Internal-only visibility",
+            "label": "Private"
+          },
+          "ready": {
+            "detail": "Ready for review",
+            "label": "Publish-ready"
+          },
+          "visible": {
+            "detail": "Courses on this page",
+            "label": "Visible now"
+          }
+        },
+        "table": {
+          "actions": "Actions",
+          "course": "Course",
+          "emptyMessage": "No courses match the current filters.",
+          "filterPlaceholder": "Filter current page results",
+          "noDescription": "No description yet.",
+          "select": "Select",
+          "selectCourseAria": "Select {courseName}",
+          "selectVisibleAria": "Select visible courses",
+          "status": "Status",
+          "structureSummary": "{chapters} chapters · {activities} activities",
+          "unknownDate": "Unknown",
+          "updated": "Updated"
+        },
+        "toasts": {
+          "deleteFailed": "{count, plural, one {# selected course could not be deleted.} other {# selected courses could not be deleted.}}",
+          "deleted": "{count, plural, one {Deleted # course.} other {Deleted # courses.}}",
+          "movedPrivate": "{count, plural, one {Moved # course to private.} other {Moved # courses to private.}}",
+          "published": "{count, plural, one {Published # course.} other {Published # courses.}}",
+          "updateFailed": "{count, plural, one {# selected course could not be updated.} other {# selected courses could not be updated.}}"
+        },
+        "viewMode": {
+          "cards": "Card view",
+          "table": "Table view"
+        }
+      },
+      "Overview": {
+        "access": {
+          "privateNoGroupsWarning": "Private course with no linked user groups. Learners cannot access it. Add user groups in <link>Access</link>.",
+          "privateState": "This course is currently private.",
+          "publicState": "This course is currently public."
+        },
+        "activities": "Activities",
+        "activityCountDescription": "{count, plural, one {# activity is currently in the course structure.} other {# activities are currently in the course structure.}}",
+        "certificate": {
+          "configured": "Certificate configuration exists for this course.",
+          "notConfigured": "No certificate configuration has been created yet."
+        },
+        "chapterCount": "{count, plural, one {# chapter} other {# chapters}}",
+        "chapters": "Chapters",
+        "collaboration": {
+          "loadedRecords": "{count, plural, one {# contributor record loaded.} other {# contributor records loaded.}}"
+        },
+        "contributors": "Contributors",
+        "curriculumSnapshot": "Curriculum snapshot",
+        "governanceSnapshot": "Governance snapshot",
+        "nextStep": "Next step",
+        "nextStepDescription": "Use curriculum for high-speed structure work. This stage keeps immediate operations visible and recoverable.",
+        "notReadyDescription": "This workspace is now organized around lifecycle stages. Use the checklist to finish missing course setup without guessing which tab owns which task.",
+        "notReadyTitle": "Course still needs setup work",
+        "openCurriculum": "Open curriculum",
+        "readyDescription": "Core setup, structure, and access checks are in place. Use review to confirm discoverability and launch state.",
+        "readinessChecklist": "Readiness checklist",
+        "readyLabel": "Ready to move",
+        "readyTitle": "Course is ready for review",
+        "reviewReadiness": "Review publish readiness",
+        "sections": {
+          "access": "Access",
+          "certificate": "Certificate",
+          "collaboration": "Collaboration"
+        },
+        "workspacePulse": "Workspace pulse"
+      },
+      "Readiness": {
+        "checklist": {
+          "access": {
+            "description": "Confirm who should be able to discover and enroll in the course.",
+            "title": "Access rules are reviewed"
+          },
+          "certificate": {
+            "description": "Either configure certification or explicitly leave it disabled.",
+            "title": "Certification is intentional"
+          },
+          "collaboration": {
+            "description": "Keep at least one active owner or maintainer assigned to the course.",
+            "title": "Ownership is clear"
+          },
+          "curriculum": {
+            "description": "Add at least one chapter and one activity before publishing.",
+            "title": "Curriculum has structure"
+          },
+          "details": {
+            "description": "Title and description should clearly explain what this course offers.",
+            "title": "Details are complete"
+          },
+          "media": {
+            "description": "A thumbnail helps the course look intentional in lists and previews.",
+            "title": "Cover media is set"
+          }
+        }
+      },
+      "Review": {
+        "description": "This page centralizes the last-mile checks that used to be scattered across tabs. Use it to confirm content quality, visibility, and launch state without hunting through the editor.",
+        "errors": {
+          "accessUpdate": "Unable to update course access.",
+          "visibilityUpdate": "Failed to update course visibility."
+        },
+        "launchState": "Launch state",
+        "launchStateDescriptions": {
+          "live": "Learners can discover this course according to its current access rules.",
+          "private": "Learners cannot access this course publicly until you publish it."
+        },
+        "launchStates": {
+          "live": "Live",
+          "private": "Private"
+        },
+        "movePrivate": "Move back to private",
+        "notes": {
+          "curriculum": "Curriculum edits remain immediate, so confirm chapter and activity structure before launching.",
+          "review": "Details, access, collaboration, and certificate work should be reviewed for clarity before making the course public.",
+          "visibility": "Publishing uses the course visibility flag already supported by the backend."
+        },
+        "notReadyTitle": "Finish the remaining blockers before publishing.",
+        "openAction": "Open",
+        "previewPublicPage": "Preview public page",
+        "publishCourse": "Publish course",
+        "publishingNotes": "Publishing notes",
+        "readinessChecklist": "Readiness checklist",
+        "readyTitle": "This course is structurally ready.",
+        "sectionLabel": "Review & publish",
+        "toasts": {
+          "movedPrivate": "Course moved back to private.",
+          "published": "Course is now public."
+        }
+      },
+      "Wizard": {
+        "actions": {
+          "back": "Back",
+          "continue": "Continue",
+          "createWorkspace": "Create workspace"
+        },
+        "basics": {
+          "audienceDefault": "Audience default",
+          "courseTitle": "Course title",
+          "courseTitlePlaceholder": "Example: Data Analysis for Teachers",
+          "description": "Start with the public-facing identity and intended audience posture for this course.",
+          "shortDescription": "Short description",
+          "shortDescriptionPlaceholder": "Explain what learners will get from this course and who it is for."
+        },
+        "errors": {
+          "authRequired": "You must be signed in to create a course.",
+          "createWorkspace": "Unable to create course workspace.",
+          "creationFailed": "Course creation failed."
+        },
+        "header": {
+          "description": "Start from a blank course, seed a starter outline, or reuse another course as a structural template.",
+          "label": "Guided setup",
+          "title": "Create a course workspace"
+        },
+        "importedChapterDescription": "Imported from source course outline.",
+        "importedChapterName": "Imported chapter",
+        "launch": {
+          "curriculum": {
+            "description": "Jump straight into chapters and activities.",
+            "title": "Open curriculum"
+          },
+          "description": "Decide where to land after the workspace is created.",
+          "overview": {
+            "description": "Land in the workspace control center first.",
+            "title": "Open overview"
+          }
+        },
+        "starterChapters": {
+          "coreLessons": {
+            "description": "Add the first activities that deliver the main learning value.",
+            "name": "Core lessons"
+          },
+          "introduction": {
+            "description": "Start the course with context, goals, and navigation guidance.",
+            "name": "Introduction"
+          }
+        },
+        "steps": {
+          "basics": "Basics",
+          "launch": "Launch",
+          "template": "Template"
+        },
+        "summary": {
+          "heading": "Setup summary",
+          "launchDestination": "Launch destination",
+          "selectedOutlineCourse": "Selected outline course",
+          "sourceCourse": "Source course",
+          "template": "Template",
+          "title": "Title",
+          "untitledCourse": "Untitled course",
+          "visibility": "Visibility"
+        },
+        "template": {
+          "blank": {
+            "description": "Start with an empty course and build structure manually.",
+            "title": "Blank workspace"
+          },
+          "description": "Choose how much structure you want the new course to start with.",
+          "outline": {
+            "description": "Reuse chapter structure from another editable course.",
+            "title": "Use existing course as outline"
+          },
+          "selectCourse": "Select a course",
+          "sourceCourse": "Source course",
+          "sourceCourseHelp": "This copies the chapter outline only, not activity content.",
+          "starter": {
+            "description": "Seed the workspace with two starter chapters for faster setup.",
+            "title": "Starter outline"
+          }
+        },
+        "toasts": {
+          "created": "Course workspace created."
+        },
+        "visibility": {
+          "private": {
+            "description": "Keep the course internal while the team builds and reviews it.",
+            "summary": "Private draft mode",
+            "title": "Private"
+          },
+          "public": {
+            "description": "Launch the workspace ready for public discovery after review.",
+            "summary": "Public launch target",
+            "title": "Public"
+          }
+        }
+      },
+      "Workflow": {
+        "status": {
+          "attention": "Attention",
+          "draft": "Draft",
+          "live": "Live",
+          "needsReview": "Needs review",
+          "private": "Private",
+          "public": "Public",
+          "ready": "Ready",
+          "unsavedChanges": "Unsaved changes"
+        }
+      },
+      "Workspace": {
+        "breadcrumb": "Courses",
+        "previewButton": "Preview",
+        "reviewButton": "Review",
+        "tabs": {
+          "access": "Access",
+          "certificate": "Certificate",
+          "collaboration": "Collaboration",
+          "curriculum": "Curriculum",
+          "details": "Details",
+          "overview": "Overview",
+          "reviewPublish": "Review & Publish"
+        },
+        "untitledCourse": "Untitled course",
+        "unsavedChangesWarning": "You have unsaved course changes. Leave this workspace?"
+      }
     },
     "Courses": {
       "Access": {

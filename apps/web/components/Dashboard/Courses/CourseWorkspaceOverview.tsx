@@ -7,6 +7,7 @@ import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
 import AppLink from '@/components/ui/AppLink';
 
 export default function CourseWorkspaceOverview({
@@ -18,6 +19,8 @@ export default function CourseWorkspaceOverview({
   courseuuid: string;
   capabilities: CourseWorkspaceCapabilities;
 }) {
+  const t = useTranslations('DashPage.CourseManagement.Overview');
+  const tReadiness = useTranslations('DashPage.CourseManagement.Readiness');
   const course = useCourse();
   const stats = getCourseContentStats(course.courseStructure);
   const readiness = getCourseReadinessSummary(course.courseStructure, course.editorData);
@@ -32,14 +35,12 @@ export default function CourseWorkspaceOverview({
         <div className="rounded-xl border bg-card p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ready to move</div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('readyLabel')}</div>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
-                {readiness.readyToPublish ? 'Course is ready for review' : 'Course still needs setup work'}
+                {readiness.readyToPublish ? t('readyTitle') : t('notReadyTitle')}
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                {readiness.readyToPublish
-                  ? 'Core setup, structure, and access checks are in place. Use review to confirm discoverability and launch state.'
-                  : 'This workspace is now organized around lifecycle stages. Use the checklist to finish missing course setup without guessing which tab owns which task.'}
+                {readiness.readyToPublish ? t('readyDescription') : t('notReadyDescription')}
               </p>
             </div>
             <CourseStatusBadge status={readiness.readyToPublish ? 'ready' : 'needs-review'} />
@@ -50,7 +51,7 @@ export default function CourseWorkspaceOverview({
                 nativeButton={false}
                 render={<AppLink href={buildCourseWorkspacePath(orgslug, courseuuid, 'curriculum')} />}
               >
-                Open curriculum
+                {t('openCurriculum')}
               </Button>
             ) : null}
             {capabilities.canReviewCourse ? (
@@ -59,25 +60,25 @@ export default function CourseWorkspaceOverview({
                 nativeButton={false}
                 render={<AppLink href={buildCourseWorkspacePath(orgslug, courseuuid, 'review')} />}
               >
-                Review publish readiness
+                {t('reviewReadiness')}
               </Button>
             ) : null}
           </div>
         </div>
 
         <div className={courseWorkflowSummaryCardClass}>
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Workspace pulse</div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('workspacePulse')}</div>
           <div className="mt-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
             <div className={courseWorkflowMutedPanelClass}>
-              <div className="text-muted-foreground">Chapters</div>
+              <div className="text-muted-foreground">{t('chapters')}</div>
               <div className="mt-1 text-3xl font-semibold text-foreground">{stats.chapters}</div>
             </div>
             <div className={courseWorkflowMutedPanelClass}>
-              <div className="text-muted-foreground">Activities</div>
+              <div className="text-muted-foreground">{t('activities')}</div>
               <div className="mt-1 text-3xl font-semibold text-foreground">{stats.activities}</div>
             </div>
             <div className={courseWorkflowMutedPanelClass}>
-              <div className="text-muted-foreground">Contributors</div>
+              <div className="text-muted-foreground">{t('contributors')}</div>
               <div className="mt-1 text-3xl font-semibold text-foreground">{contributors.length}</div>
             </div>
           </div>
@@ -88,7 +89,7 @@ export default function CourseWorkspaceOverview({
         <div className="rounded-xl border bg-card p-5">
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <CheckCircle2 className="size-4" />
-            Readiness checklist
+            {t('readinessChecklist')}
           </div>
           <div className="mt-4 space-y-3">
             {readiness.checklist.map((item) => (
@@ -99,8 +100,8 @@ export default function CourseWorkspaceOverview({
               >
                 <CourseStatusBadge status={item.complete ? 'ready' : 'needs-review'} />
                 <div className="min-w-0">
-                  <div className="font-medium text-foreground">{item.title}</div>
-                  <div className="text-sm text-muted-foreground">{item.description}</div>
+                  <div className="font-medium text-foreground">{tReadiness(`checklist.${item.id}.title`)}</div>
+                  <div className="text-sm text-muted-foreground">{tReadiness(`checklist.${item.id}.description`)}</div>
                 </div>
               </AppLink>
             ))}
@@ -110,23 +111,16 @@ export default function CourseWorkspaceOverview({
         <div className="rounded-xl border bg-card p-5">
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <FileStack className="size-4" />
-            Curriculum snapshot
+            {t('curriculumSnapshot')}
           </div>
           <div className="mt-4 space-y-3 text-sm text-muted-foreground">
             <div className={courseWorkflowMutedPanelClass}>
-              <div className="font-medium text-foreground">
-                {stats.chapters} chapter{stats.chapters === 1 ? '' : 's'}
-              </div>
-              <div className="mt-1">
-                {stats.activities} activit{stats.activities === 1 ? 'y' : 'ies'} are currently in the course structure.
-              </div>
+              <div className="font-medium text-foreground">{t('chapterCount', { count: stats.chapters })}</div>
+              <div className="mt-1">{t('activityCountDescription', { count: stats.activities })}</div>
             </div>
             <div className={courseWorkflowMutedPanelClass}>
-              <div className="font-medium text-foreground">Next step</div>
-              <div className="mt-1">
-                Use curriculum for high-speed structure work. This stage keeps immediate operations visible and
-                recoverable.
-              </div>
+              <div className="font-medium text-foreground">{t('nextStep')}</div>
+              <div className="mt-1">{t('nextStepDescription')}</div>
             </div>
           </div>
           <Button
@@ -135,7 +129,7 @@ export default function CourseWorkspaceOverview({
             className="mt-4 w-full justify-between"
             render={<AppLink href={buildCourseWorkspacePath(orgslug, courseuuid, 'curriculum')} />}
           >
-            Open curriculum
+            {t('openCurriculum')}
             <ArrowRight className="size-4" />
           </Button>
         </div>
@@ -143,45 +137,43 @@ export default function CourseWorkspaceOverview({
         <div className="rounded-xl border bg-card p-5">
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <Users className="size-4" />
-            Governance snapshot
+            {t('governanceSnapshot')}
           </div>
           <div className="mt-4 space-y-3 text-sm text-muted-foreground">
             <div className={courseWorkflowMutedPanelClass}>
-              <div className="font-medium text-foreground">Access</div>
+              <div className="font-medium text-foreground">{t('sections.access')}</div>
               <div className="mt-1 flex items-center gap-2">
                 <Globe className="size-4 text-muted-foreground" />
-                {course.courseStructure.public
-                  ? 'This course is currently public.'
-                  : 'This course is currently private.'}
+                {course.courseStructure.public ? t('access.publicState') : t('access.privateState')}
               </div>
               {isPrivateWithNoGroups && capabilities.canManageAccess ? (
                 <Alert className="mt-2 border-border bg-muted py-2 text-foreground">
                   <AlertTriangle className="size-3.5" />
                   <AlertDescription className="text-xs text-muted-foreground">
-                    Private course with no linked user groups — learners cannot access it. Add user groups in{' '}
-                    <AppLink
-                      href={buildCourseWorkspacePath(orgslug, courseuuid, 'access')}
-                      className="font-semibold underline underline-offset-2"
-                    >
-                      Access
-                    </AppLink>
-                    .
+                    {t.rich('access.privateNoGroupsWarning', {
+                      link: (chunks) => (
+                        <AppLink
+                          href={buildCourseWorkspacePath(orgslug, courseuuid, 'access')}
+                          className="font-semibold underline underline-offset-2"
+                        >
+                          {chunks}
+                        </AppLink>
+                      ),
+                    })}
                   </AlertDescription>
                 </Alert>
               ) : null}
             </div>
             <div className="rounded-lg bg-muted p-4">
-              <div className="font-medium text-foreground">Collaboration</div>
-              <div className="mt-1">
-                {contributors.length} contributor record{contributors.length === 1 ? '' : 's'} loaded.
-              </div>
+              <div className="font-medium text-foreground">{t('sections.collaboration')}</div>
+              <div className="mt-1">{t('collaboration.loadedRecords', { count: contributors.length })}</div>
             </div>
             <div className="rounded-lg bg-muted p-4">
-              <div className="font-medium text-foreground">Certificate</div>
+              <div className="font-medium text-foreground">{t('sections.certificate')}</div>
               <div className="mt-1">
                 {certifications.length > 0
-                  ? 'Certificate configuration exists for this course.'
-                  : 'No certificate configuration has been created yet.'}
+                  ? t('certificate.configured')
+                  : t('certificate.notConfigured')}
               </div>
             </div>
           </div>

@@ -9,12 +9,25 @@ export type CourseWorkspaceStage =
   | 'certificate'
   | 'review';
 
+export type CourseReadinessItemId =
+  | 'details'
+  | 'media'
+  | 'curriculum'
+  | 'collaboration'
+  | 'access'
+  | 'certificate';
+
+export type CourseManagementBadgeId =
+  | 'public'
+  | 'private'
+  | 'readyToPublish'
+  | 'needsAttention'
+  | 'noActivitiesYet';
+
 export interface CourseChecklistItem {
-  id: string;
-  title: string;
-  description: string;
+  id: CourseReadinessItemId;
   complete: boolean;
-  href?: string;
+  href?: CourseWorkspaceStage;
 }
 
 export function cleanCourseUuid(courseUuid: string): string {
@@ -64,43 +77,31 @@ export function getCourseReadinessChecklist(
   return [
     {
       id: 'details',
-      title: 'Details are complete',
-      description: 'Title and description should clearly explain what this course offers.',
       complete: Boolean(course?.name?.trim() && course?.description?.trim()),
       href: 'details',
     },
     {
       id: 'media',
-      title: 'Cover media is set',
-      description: 'A thumbnail helps the course look intentional in lists and previews.',
       complete: Boolean(course?.thumbnail_image),
       href: 'details',
     },
     {
       id: 'curriculum',
-      title: 'Curriculum has structure',
-      description: 'Add at least one chapter and one activity before publishing.',
       complete: stats.chapters > 0 && stats.activities > 0,
       href: 'curriculum',
     },
     {
       id: 'collaboration',
-      title: 'Ownership is clear',
-      description: 'Keep at least one active owner or maintainer assigned to the course.',
       complete: Array.isArray(contributors) && contributors.length > 0,
       href: 'collaboration',
     },
     {
       id: 'access',
-      title: 'Access rules are reviewed',
-      description: 'Confirm who should be able to discover and enroll in the course.',
       complete: typeof course?.public === 'boolean',
       href: 'access',
     },
     {
       id: 'certificate',
-      title: 'Certification is intentional',
-      description: 'Either configure certification or explicitly leave it disabled.',
       complete: Array.isArray(certifications),
       href: 'certificate',
     },
@@ -121,21 +122,24 @@ export function getCourseReadinessSummary(course: any, editorData?: CourseEditor
   };
 }
 
-export function getCourseManagementBadges(course: any, editorData?: CourseEditorBundle | null): string[] {
+export function getCourseManagementBadges(
+  course: any,
+  editorData?: CourseEditorBundle | null,
+): CourseManagementBadgeId[] {
   const summary = getCourseReadinessSummary(course, editorData);
   const stats = getCourseContentStats(course);
-  const badges: string[] = [];
+  const badges: CourseManagementBadgeId[] = [];
 
-  badges.push(course?.public ? 'Public' : 'Private');
+  badges.push(course?.public ? 'public' : 'private');
 
   if (summary.readyToPublish) {
-    badges.push('Ready to publish');
+    badges.push('readyToPublish');
   } else if (summary.issues.length > 0) {
-    badges.push('Needs attention');
+    badges.push('needsAttention');
   }
 
   if (stats.activities === 0) {
-    badges.push('No activities yet');
+    badges.push('noActivitiesYet');
   }
 
   return badges;

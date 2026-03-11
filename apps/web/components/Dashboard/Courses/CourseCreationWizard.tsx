@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useMemo, useTransition } from 'react';
 import { Input } from '@/components/ui/input';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useQueryState } from 'nuqs';
 import { cn } from '@/lib/utils';
@@ -28,12 +29,8 @@ interface CourseCreationWizardProps {
 
 const STEPS = ['Basics', 'Template', 'Launch'] as const;
 
-const starterChapters = [
-  { name: 'Introduction', description: 'Start the course with context, goals, and navigation guidance.' },
-  { name: 'Core lessons', description: 'Add the first activities that deliver the main learning value.' },
-];
-
 export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: CourseCreationWizardProps) {
+  const t = useTranslations('DashPage.CourseManagement.Wizard');
   const router = useRouter();
   const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
@@ -57,6 +54,22 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
   const sourceOptions = useMemo(
     () => sourceCourses.map((course) => ({ ...course, cleanUuid: course.course_uuid.replace(/^course_/, '') })),
     [sourceCourses],
+  );
+
+  const stepLabels = [t('steps.basics'), t('steps.template'), t('steps.launch')] as const;
+
+  const starterChapters = useMemo(
+    () => [
+      {
+        name: t('starterChapters.introduction.name'),
+        description: t('starterChapters.introduction.description'),
+      },
+      {
+        name: t('starterChapters.coreLessons.name'),
+        description: t('starterChapters.coreLessons.description'),
+      },
+    ],
+    [t],
   );
 
   const canContinue = (() => {
@@ -99,8 +112,8 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
       chapters.map((chapter: any) =>
         createChapter(
           {
-            name: chapter.name || 'Imported chapter',
-            description: chapter.description || 'Imported from source course outline.',
+            name: chapter.name || t('importedChapterName'),
+            description: chapter.description || t('importedChapterDescription'),
             thumbnail_image: '',
             course_id: createdCourse.id,
             org_id: createdCourse.org_id,
@@ -114,7 +127,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
 
   const handleCreate = () => {
     if (!accessToken) {
-      toast.error('You must be signed in to create a course.');
+      toast.error(t('errors.authRequired'));
       return;
     }
 
@@ -136,7 +149,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
           );
 
           if (!result.success) {
-            throw new Error(result.data?.detail || 'Course creation failed.');
+            throw new Error(result.data?.detail || t('errors.creationFailed'));
           }
 
           if (template === 'starter') {
@@ -145,13 +158,13 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
             await createOutlineFromSource(result.data);
           }
 
-          toast.success('Course workspace created.');
+          toast.success(t('toasts.created'));
           router.push(
             buildCourseWorkspacePath(orgslug, result.data.course_uuid, launchDestination as LaunchDestination),
           );
           router.refresh();
         } catch (error: any) {
-          toast.error(error?.message || 'Unable to create course workspace.');
+          toast.error(error?.message || t('errors.createWorkspace'));
         }
       })();
     });
@@ -160,26 +173,34 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
   const summaryContent = (
     <div className="space-y-4 text-sm text-muted-foreground">
       <div>
-        <div className="text-muted-foreground">Title</div>
-        <div className="mt-1 text-base font-semibold text-foreground">{name.trim() || 'Untitled course'}</div>
+        <div className="text-muted-foreground">{t('summary.title')}</div>
+        <div className="mt-1 text-base font-semibold text-foreground">{name.trim() || t('summary.untitledCourse')}</div>
       </div>
       <div>
-        <div className="text-muted-foreground">Visibility</div>
-        <div className="mt-1">{visibility === 'public' ? 'Public launch target' : 'Private draft mode'}</div>
+        <div className="text-muted-foreground">{t('summary.visibility')}</div>
+        <div className="mt-1">{visibility === 'public' ? t('visibility.public.summary') : t('visibility.private.summary')}</div>
       </div>
       <div>
-        <div className="text-muted-foreground">Template</div>
-        <div className="mt-1 capitalize">{template === 'outline' ? 'Existing outline' : template}</div>
+        <div className="text-muted-foreground">{t('summary.template')}</div>
+        <div className="mt-1">
+          {template === 'blank'
+            ? t('template.blank.title')
+            : template === 'starter'
+              ? t('template.starter.title')
+              : t('template.outline.title')}
+        </div>
       </div>
       <div>
-        <div className="text-muted-foreground">Launch destination</div>
-        <div className="mt-1 capitalize">{launchDestination}</div>
+        <div className="text-muted-foreground">{t('summary.launchDestination')}</div>
+        <div className="mt-1">
+          {launchDestination === 'overview' ? t('launch.overview.title') : t('launch.curriculum.title')}
+        </div>
       </div>
       {template === 'outline' && sourceCourseUuid ? (
         <div>
-          <div className="text-muted-foreground">Source course</div>
+          <div className="text-muted-foreground">{t('summary.sourceCourse')}</div>
           <div className="mt-1">
-            {sourceOptions.find((c) => c.cleanUuid === sourceCourseUuid)?.name || 'Selected outline course'}
+            {sourceOptions.find((c) => c.cleanUuid === sourceCourseUuid)?.name || t('summary.selectedOutlineCourse')}
           </div>
         </div>
       ) : null}
@@ -191,15 +212,15 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
       <div className="mx-auto max-w-5xl space-y-6">
         {/* Header + step indicator */}
         <div className="rounded-xl border bg-card p-6 shadow-sm">
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Guided setup</div>
-          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-foreground">Create a course workspace</h1>
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('header.label')}</div>
+          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-foreground">{t('header.title')}</h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
-            Start from a blank course, seed a starter outline, or reuse another course as a structural template.
+            {t('header.description')}
           </p>
 
           {/* Linear step indicator */}
           <div className="mt-5 flex items-center">
-            {STEPS.map((label, index) => {
+            {stepLabels.map((label, index) => {
               const done = index < currentStep;
               const active = index === currentStep;
               return (
@@ -242,7 +263,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                 />
               }
             >
-              <span className="text-sm font-semibold">Setup summary</span>
+              <span className="text-sm font-semibold">{t('summary.heading')}</span>
               <ChevronDown className="size-4 text-muted-foreground transition-transform group-data-open:rotate-180" />
             </CollapsibleTrigger>
             <CollapsibleContent className="rounded-b-xl border border-t-0 bg-card px-5 pb-5 text-foreground">
@@ -258,9 +279,9 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
             {currentStep === 0 ? (
               <div className="space-y-5">
                 <div>
-                  <div className="text-sm font-semibold text-foreground">Basics</div>
+                  <div className="text-sm font-semibold text-foreground">{t('steps.basics')}</div>
                   <div className="mt-1 text-sm text-muted-foreground">
-                    Start with the public-facing identity and intended audience posture for this course.
+                    {t('basics.description')}
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -268,13 +289,13 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                     htmlFor="course-title"
                     className="text-sm font-medium text-foreground"
                   >
-                    Course title
+                    {t('basics.courseTitle')}
                   </label>
                   <Input
                     id="course-title"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Example: Data Analysis for Teachers"
+                    placeholder={t('basics.courseTitlePlaceholder')}
                   />
                 </div>
                 <div className="space-y-2">
@@ -282,19 +303,19 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                     htmlFor="course-description"
                     className="text-sm font-medium text-foreground"
                   >
-                    Short description
+                    {t('basics.shortDescription')}
                   </label>
                   <Textarea
                     id="course-description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Explain what learners will get from this course and who it is for."
+                    placeholder={t('basics.shortDescriptionPlaceholder')}
                     className="min-h-32"
                   />
                 </div>
 
                 <fieldset className="space-y-3">
-                  <legend className="text-sm font-medium text-foreground">Audience default</legend>
+                  <legend className="text-sm font-medium text-foreground">{t('basics.audienceDefault')}</legend>
                   <RadioGroup
                     value={visibility}
                     onValueChange={(val) => {
@@ -305,13 +326,13 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                     {[
                       {
                         value: 'private',
-                        title: 'Private',
-                        description: 'Keep the course internal while the team builds and reviews it.',
+                        title: t('visibility.private.title'),
+                        description: t('visibility.private.description'),
                       },
                       {
                         value: 'public',
-                        title: 'Public',
-                        description: 'Launch the workspace ready for public discovery after review.',
+                        title: t('visibility.public.title'),
+                        description: t('visibility.public.description'),
                       },
                     ].map((option) => (
                       <CourseChoiceCard
@@ -333,9 +354,9 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
             {currentStep === 1 ? (
               <div className="space-y-5">
                 <div>
-                  <div className="text-sm font-semibold text-foreground">Template</div>
+                  <div className="text-sm font-semibold text-foreground">{t('steps.template')}</div>
                   <div className="mt-1 text-sm text-muted-foreground">
-                    Choose how much structure you want the new course to start with.
+                    {t('template.description')}
                   </div>
                 </div>
 
@@ -349,18 +370,18 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                   {[
                     {
                       value: 'blank',
-                      title: 'Blank workspace',
-                      description: 'Start with an empty course and build structure manually.',
+                        title: t('template.blank.title'),
+                        description: t('template.blank.description'),
                     },
                     {
                       value: 'starter',
-                      title: 'Starter outline',
-                      description: 'Seed the workspace with two starter chapters for faster setup.',
+                        title: t('template.starter.title'),
+                        description: t('template.starter.description'),
                     },
                     {
                       value: 'outline',
-                      title: 'Use existing course as outline',
-                      description: 'Reuse chapter structure from another editable course.',
+                        title: t('template.outline.title'),
+                        description: t('template.outline.description'),
                     },
                   ].map((option) => (
                     <CourseChoiceCard
@@ -381,7 +402,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                       htmlFor="source-course"
                       className="text-sm font-medium text-foreground"
                     >
-                      Source course
+                      {t('template.sourceCourse')}
                     </label>
                     <select
                       id="source-course"
@@ -389,7 +410,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                       onChange={(e) => setSourceCourseUuid(e.target.value)}
                       className="w-full rounded-md border border-input bg-background px-4 py-3 text-sm"
                     >
-                      <option value="">Select a course</option>
+                      <option value="">{t('template.selectCourse')}</option>
                       {sourceOptions.map((course) => (
                         <option
                           key={course.course_uuid}
@@ -400,7 +421,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                       ))}
                     </select>
                     <div className="text-sm text-muted-foreground">
-                      This copies the chapter outline only, not activity content.
+                      {t('template.sourceCourseHelp')}
                     </div>
                   </div>
                 ) : null}
@@ -411,9 +432,9 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
             {currentStep === 2 ? (
               <div className="space-y-5">
                 <div>
-                  <div className="text-sm font-semibold text-foreground">Launch</div>
+                  <div className="text-sm font-semibold text-foreground">{t('steps.launch')}</div>
                   <div className="mt-1 text-sm text-muted-foreground">
-                    Decide where to land after the workspace is created.
+                    {t('launch.description')}
                   </div>
                 </div>
 
@@ -427,13 +448,13 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                   {[
                     {
                       value: 'overview',
-                      title: 'Open overview',
-                      description: 'Land in the workspace control center first.',
+                        title: t('launch.overview.title'),
+                        description: t('launch.overview.description'),
                     },
                     {
                       value: 'curriculum',
-                      title: 'Open curriculum',
-                      description: 'Jump straight into chapters and activities.',
+                        title: t('launch.curriculum.title'),
+                        description: t('launch.curriculum.description'),
                     },
                   ].map((option) => (
                     <CourseChoiceCard
@@ -458,7 +479,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                 disabled={currentStep === 0 || isPending}
               >
                 <ArrowLeft className="size-4" />
-                Back
+                {t('actions.back')}
               </Button>
 
               {currentStep < 2 ? (
@@ -467,7 +488,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                   onClick={() => setStep(String(currentStep + 1))}
                   disabled={!canContinue || isPending}
                 >
-                  Continue
+                  {t('actions.continue')}
                   <ArrowRight className="size-4" />
                 </Button>
               ) : (
@@ -477,7 +498,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                   disabled={!canContinue || isPending}
                 >
                   {isPending ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
-                  Create workspace
+                  {t('actions.createWorkspace')}
                 </Button>
               )}
             </div>
@@ -486,7 +507,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
           {/* Desktop summary sidebar */}
           <div className="hidden xl:block">
             <div className={cn('sticky top-6', courseWorkflowSummaryCardClass)}>
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Setup summary</div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('summary.heading')}</div>
               <div className="mt-4">{summaryContent}</div>
             </div>
           </div>

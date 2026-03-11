@@ -8,6 +8,7 @@ import { useCourse } from '@components/Contexts/CourseContext';
 import { updateCourseAccess } from '@services/courses/courses';
 import { ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
 import AppLink from '@/components/ui/AppLink';
 import { toast } from 'sonner';
@@ -21,6 +22,8 @@ export default function CourseReviewPublish({
   courseuuid: string;
   capabilities: CourseWorkspaceCapabilities;
 }) {
+  const t = useTranslations('DashPage.CourseManagement.Review');
+  const tReadiness = useTranslations('DashPage.CourseManagement.Readiness');
   const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
   const course = useCourse();
@@ -48,13 +51,13 @@ export default function CourseReviewPublish({
           );
 
           if (!response.success) {
-            throw new Error(response.data?.detail || response.HTTPmessage || 'Unable to update course access.');
+            throw new Error(response.data?.detail || response.HTTPmessage || t('errors.accessUpdate'));
           }
 
           await course.refreshCourseMeta();
-          toast.success(course.courseStructure.public ? 'Course moved back to private.' : 'Course is now public.');
+          toast.success(course.courseStructure.public ? t('toasts.movedPrivate') : t('toasts.published'));
         } catch (error: any) {
-          toast.error(error?.message || 'Failed to update course visibility.');
+          toast.error(error?.message || t('errors.visibilityUpdate'));
         } finally {
           setIsRefreshing(false);
         }
@@ -67,15 +70,12 @@ export default function CourseReviewPublish({
       <div className="rounded-xl border bg-card p-6">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Review & publish</div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('sectionLabel')}</div>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
-              {readiness.readyToPublish
-                ? 'This course is structurally ready.'
-                : 'Finish the remaining blockers before publishing.'}
+              {readiness.readyToPublish ? t('readyTitle') : t('notReadyTitle')}
             </h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-              This page centralizes the last-mile checks that used to be scattered across tabs. Use it to confirm
-              content quality, visibility, and launch state without hunting through the editor.
+              {t('description')}
             </p>
           </div>
 
@@ -86,7 +86,7 @@ export default function CourseReviewPublish({
               render={<a href={`/orgs/${orgslug}/course/${courseuuid}`} />}
             >
               <ExternalLink className="size-4" />
-              Preview public page
+              {t('previewPublicPage')}
             </Button>
             {capabilities.canManageAccess ? (
               <Button
@@ -94,7 +94,7 @@ export default function CourseReviewPublish({
                 disabled={isPending || isRefreshing || !readiness.readyToPublish}
               >
                 {isPending || isRefreshing ? <Loader2 className="size-4 animate-spin" /> : null}
-                {course.courseStructure.public ? 'Move back to private' : 'Publish course'}
+                {course.courseStructure.public ? t('movePrivate') : t('publishCourse')}
               </Button>
             ) : null}
           </div>
@@ -103,7 +103,7 @@ export default function CourseReviewPublish({
 
       <div className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
         <div className="rounded-xl border bg-card p-5">
-          <div className="text-sm font-semibold text-foreground">Readiness checklist</div>
+          <div className="text-sm font-semibold text-foreground">{t('readinessChecklist')}</div>
           <div className="mt-4 space-y-3">
             {readiness.checklist.map((item) => (
               <div
@@ -111,8 +111,8 @@ export default function CourseReviewPublish({
                 className="flex items-start justify-between gap-4 rounded-lg border bg-muted/40 p-4"
               >
                 <div>
-                  <div className="font-medium text-foreground">{item.title}</div>
-                  <div className="mt-1 text-sm text-muted-foreground">{item.description}</div>
+                  <div className="font-medium text-foreground">{tReadiness(`checklist.${item.id}.title`)}</div>
+                  <div className="mt-1 text-sm text-muted-foreground">{tReadiness(`checklist.${item.id}.description`)}</div>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   <CourseStatusBadge status={item.complete ? 'ready' : 'needs-review'} />
@@ -123,7 +123,7 @@ export default function CourseReviewPublish({
                       nativeButton={false}
                       render={<AppLink href={buildCourseWorkspacePath(orgslug, courseuuid, item.href as any)} />}
                     >
-                      Open
+                      {t('openAction')}
                     </Button>
                   ) : null}
                 </div>
@@ -135,23 +135,23 @@ export default function CourseReviewPublish({
         <div className="space-y-4">
           <div className={courseWorkflowSummaryCardClass}>
             <div className="flex items-center justify-between gap-3">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Launch state</div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('launchState')}</div>
               <CourseStatusBadge status={course.courseStructure.public ? 'live' : 'private'} />
             </div>
-            <div className="mt-3 text-3xl font-semibold text-foreground">{course.courseStructure.public ? 'Live' : 'Private'}</div>
+            <div className="mt-3 text-3xl font-semibold text-foreground">{course.courseStructure.public ? t('launchStates.live') : t('launchStates.private')}</div>
             <div className="mt-2 text-sm text-muted-foreground">
               {course.courseStructure.public
-                ? 'Learners can discover this course according to its current access rules.'
-                : 'Learners cannot access this course publicly until you publish it.'}
+                ? t('launchStateDescriptions.live')
+                : t('launchStateDescriptions.private')}
             </div>
           </div>
 
           <div className="rounded-xl border bg-card p-5">
-            <div className="text-sm font-semibold text-foreground">Publishing notes</div>
+            <div className="text-sm font-semibold text-foreground">{t('publishingNotes')}</div>
             <div className="mt-3 space-y-3 text-sm leading-6 text-muted-foreground">
-              <div className={courseWorkflowMutedPanelClass}>Publishing uses the course visibility flag already supported by the backend.</div>
-              <div className={courseWorkflowMutedPanelClass}>Curriculum edits remain immediate, so confirm chapter and activity structure before launching.</div>
-              <div className={courseWorkflowMutedPanelClass}>Details, access, collaboration, and certificate work should be reviewed for clarity before making the course public.</div>
+              <div className={courseWorkflowMutedPanelClass}>{t('notes.visibility')}</div>
+              <div className={courseWorkflowMutedPanelClass}>{t('notes.curriculum')}</div>
+              <div className={courseWorkflowMutedPanelClass}>{t('notes.review')}</div>
             </div>
           </div>
         </div>

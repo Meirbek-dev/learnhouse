@@ -107,7 +107,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
               <div className="space-y-1">
                 <div className="flex items-center gap-1 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   <Hash className="size-3.5" />
-                  <span>ID {certificateId || 'OU-2025-001'}</span>
+                  <span>{t('certificateIdInline', { id: certificateId || 'OU-2025-001' })}</span>
                 </div>
                 <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{t('certificate')}</div>
               </div>
@@ -183,14 +183,14 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             <aside className="border-t bg-muted/50 p-6 md:border-t-0 md:border-l">
               <div className="space-y-4">
                 <div>
-                  <div className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Template</div>
+                  <div className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">{t('template')}</div>
                   <div className="mt-2 text-sm font-medium text-foreground">
                     {t(`certificatePatterns.${certificatePattern}`, { defaultValue: t('certificate') })}
                   </div>
                 </div>
 
                 <div className="rounded-lg border bg-background p-3">
-                  <div className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">QR</div>
+                  <div className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">{t('qrLabel')}</div>
                   <div className="mt-3 flex items-center justify-center">
                     {qrCodeUrl ? (
                       <img src={qrCodeUrl} alt={t('certificateQRAlt')} className="h-28 w-28 object-contain" />
@@ -201,7 +201,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                 </div>
 
                 <div className="rounded-lg border bg-background p-3 text-sm text-muted-foreground">
-                  The preview uses theme tokens only. Pattern choice now changes layout density and framing instead of custom color packs.
+                  {t('previewNote')}
                 </div>
               </div>
             </aside>

@@ -35,6 +35,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import type { ColumnDef } from '@tanstack/react-table';
+import { useTranslations } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import DataTable from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
@@ -71,6 +72,7 @@ const CoursesHome = ({
   pageSize,
   preset,
 }: CourseProps) => {
+  const t = useTranslations('DashPage.CourseManagement.Dashboard');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -108,12 +110,12 @@ const CoursesHome = ({
     const attention = courses.filter((course) => courseNeedsAttention(course)).length;
 
     return [
-      { label: 'Visible now', value: courses.length, detail: 'Courses on this page' },
-      { label: 'Publish-ready', value: ready, detail: 'Ready for review' },
-      { label: 'Private', value: privateCount, detail: 'Internal-only visibility' },
-      { label: 'Needs attention', value: attention, detail: 'Requires follow-up' },
+      { label: t('summary.visible.label'), value: courses.length, detail: t('summary.visible.detail') },
+      { label: t('summary.ready.label'), value: ready, detail: t('summary.ready.detail') },
+      { label: t('summary.private.label'), value: privateCount, detail: t('summary.private.detail') },
+      { label: t('summary.attention.label'), value: attention, detail: t('summary.attention.detail') },
     ];
-  }, [courses]);
+  }, [courses, t]);
 
   const canManageCourse = useCallback(
     (course: ManageableCourse) =>
@@ -181,7 +183,7 @@ const CoursesHome = ({
 
     const targetCourses = selectedCourses.filter((course) => canManageCourse(course));
     if (targetCourses.length === 0) {
-      toast.error('No selected courses can be updated.');
+      toast.error(t('errors.cannotUpdateSelection'));
       return;
     }
 
@@ -200,17 +202,13 @@ const CoursesHome = ({
         const failedCount = targetCourses.length - successCount;
 
         if (successCount > 0) {
-          toast.success(
-            nextPublic
-              ? `Published ${successCount} course${successCount === 1 ? '' : 's'}.`
-              : `Moved ${successCount} course${successCount === 1 ? '' : 's'} to private.`,
-          );
+          toast.success(nextPublic ? t('toasts.published', { count: successCount }) : t('toasts.movedPrivate', { count: successCount }));
           setSelectedCourseUuids([]);
           router.refresh();
         }
 
         if (failedCount > 0) {
-          toast.error(`${failedCount} selected course${failedCount === 1 ? '' : 's'} could not be updated.`);
+          toast.error(t('toasts.updateFailed', { count: failedCount }));
         }
       })();
     });
@@ -223,7 +221,7 @@ const CoursesHome = ({
 
     const targetCourses = selectedCourses.filter((course) => canDeleteCourse(course));
     if (targetCourses.length === 0) {
-      toast.error('No selected courses can be deleted.');
+      toast.error(t('errors.cannotDeleteSelection'));
       return;
     }
 
@@ -237,13 +235,13 @@ const CoursesHome = ({
         const failedCount = targetCourses.length - successCount;
 
         if (successCount > 0) {
-          toast.success(`Deleted ${successCount} course${successCount === 1 ? '' : 's'}.`);
+          toast.success(t('toasts.deleted', { count: successCount }));
           setSelectedCourseUuids([]);
           router.refresh();
         }
 
         if (failedCount > 0) {
-          toast.error(`${failedCount} selected course${failedCount === 1 ? '' : 's'} could not be deleted.`);
+          toast.error(t('toasts.deleteFailed', { count: failedCount }));
         }
       })();
     });
@@ -271,25 +269,25 @@ const CoursesHome = ({
   const bulkActionMeta =
     pendingBulkAction === 'publish'
       ? {
-          title: 'Publish selected courses?',
-          description: `This will make ${selectedCourses.length} selected course${selectedCourses.length === 1 ? '' : 's'} public wherever learners can access them.`,
-          confirmLabel: 'Publish courses',
+          title: t('dialogs.publish.title'),
+          description: t('dialogs.publish.description', { count: selectedCourses.length }),
+          confirmLabel: t('dialogs.publish.confirm'),
           variant: 'default' as const,
           mediaClassName: 'bg-muted text-foreground',
         }
       : pendingBulkAction === 'private'
         ? {
-            title: 'Move selected courses to private?',
-            description: `This will hide ${selectedCourses.length} selected course${selectedCourses.length === 1 ? '' : 's'} from public access until you publish them again.`,
-            confirmLabel: 'Move to private',
+            title: t('dialogs.private.title'),
+            description: t('dialogs.private.description', { count: selectedCourses.length }),
+            confirmLabel: t('dialogs.private.confirm'),
             variant: 'default' as const,
             mediaClassName: 'bg-muted text-foreground',
           }
         : pendingBulkAction === 'delete'
           ? {
-              title: 'Delete selected courses?',
-              description: `This permanently deletes ${selectedCourses.length} selected course${selectedCourses.length === 1 ? '' : 's'}. This action cannot be undone.`,
-              confirmLabel: 'Delete courses',
+              title: t('dialogs.delete.title'),
+              description: t('dialogs.delete.description', { count: selectedCourses.length }),
+              confirmLabel: t('dialogs.delete.confirm'),
               variant: 'destructive' as const,
               mediaClassName: 'bg-destructive/10 text-destructive',
             }
@@ -298,7 +296,7 @@ const CoursesHome = ({
   const bulkToolbar =
     selectedCourses.length > 0 ? (
       <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted px-3 py-2">
-        <Badge variant="outline">{selectedCourses.length} selected</Badge>
+        <Badge variant="outline">{t('bulk.selectedCount', { count: selectedCourses.length })}</Badge>
         <Button
           type="button"
           size="sm"
@@ -306,7 +304,7 @@ const CoursesHome = ({
           disabled={isBulkPending || !selectedCourses.some((course) => canManageCourse(course))}
           onClick={() => setPendingBulkAction('publish')}
         >
-          Publish selected
+          {t('bulk.publish')}
         </Button>
         <Button
           type="button"
@@ -315,7 +313,7 @@ const CoursesHome = ({
           disabled={isBulkPending || !selectedCourses.some((course) => canManageCourse(course))}
           onClick={() => setPendingBulkAction('private')}
         >
-          Move selected to private
+          {t('bulk.movePrivate')}
         </Button>
         <Button
           type="button"
@@ -324,7 +322,7 @@ const CoursesHome = ({
           disabled={isBulkPending || !selectedCourses.some((course) => canDeleteCourse(course))}
           onClick={() => setSelectedCourseUuids([])}
         >
-          Clear selection
+          {t('bulk.clearSelection')}
         </Button>
         <Button
           type="button"
@@ -333,7 +331,7 @@ const CoursesHome = ({
           disabled={isBulkPending || !selectedCourses.some((course) => canDeleteCourse(course))}
           onClick={() => setPendingBulkAction('delete')}
         >
-          Delete selected
+          {t('bulk.delete')}
         </Button>
       </div>
     ) : null;
@@ -346,12 +344,12 @@ const CoursesHome = ({
           <Checkbox
             checked={allVisibleSelected}
             onCheckedChange={(checked) => toggleAllVisibleCourses(checked)}
-            aria-label="Select visible courses"
+            aria-label={t('table.selectVisibleAria')}
           />
         ),
         enableSorting: false,
         enableHiding: false,
-        meta: { label: 'Select', exportable: false },
+        meta: { label: t('table.select'), exportable: false },
         cell: ({ row }) => {
           const course = row.original;
           const disabled = !(canManageCourse(course) || canDeleteCourse(course));
@@ -360,15 +358,15 @@ const CoursesHome = ({
               checked={selectedCourseUuids.includes(course.course_uuid)}
               disabled={disabled}
               onCheckedChange={(checked) => toggleCourseSelection(course.course_uuid, checked)}
-              aria-label={`Select ${course.name}`}
+              aria-label={t('table.selectCourseAria', { courseName: course.name })}
             />
           );
         },
       },
       {
         accessorKey: 'name',
-        header: 'Course',
-        meta: { label: 'Course' },
+        header: t('table.course'),
+        meta: { label: t('table.course') },
         cell: ({ row }) => {
           const course = row.original;
           const stats = getCourseContentStats(course);
@@ -382,10 +380,10 @@ const CoursesHome = ({
                 {course.name}
               </AppLink>
               <div className="line-clamp-2 text-sm text-muted-foreground">
-                {course.description?.trim() || 'No description yet.'}
+                {course.description?.trim() || t('table.noDescription')}
               </div>
               <div className="text-xs text-muted-foreground">
-                {stats.chapters} chapters · {stats.activities} activities
+                {t('table.structureSummary', { chapters: stats.chapters, activities: stats.activities })}
               </div>
             </div>
           );
@@ -393,8 +391,8 @@ const CoursesHome = ({
       },
       {
         id: 'status',
-        header: 'Status',
-        meta: { label: 'Status' },
+        header: t('table.status'),
+        meta: { label: t('table.status') },
         cell: ({ row }) => {
           const course = row.original;
           const ready = getCourseReadinessSummary(course, null).readyToPublish;
@@ -411,11 +409,11 @@ const CoursesHome = ({
       {
         id: 'updated',
         accessorFn: (course) => course.update_date,
-        header: 'Updated',
-        meta: { label: 'Updated' },
+        header: t('table.updated'),
+        meta: { label: t('table.updated') },
         cell: ({ row }) => (
           <div className="text-sm text-muted-foreground">
-            {row.original.update_date ? new Date(row.original.update_date).toLocaleDateString() : 'Unknown'}
+            {row.original.update_date ? new Date(row.original.update_date).toLocaleDateString() : t('table.unknownDate')}
           </div>
         ),
       },
@@ -423,7 +421,7 @@ const CoursesHome = ({
         id: 'actions',
         header: '',
         enableSorting: false,
-        meta: { label: 'Actions', exportable: false },
+        meta: { label: t('table.actions'), exportable: false },
         cell: ({ row }) => (
           <CourseRowActions
             course={row.original}
@@ -432,16 +430,16 @@ const CoursesHome = ({
         ),
       },
     ],
-    [allVisibleSelected, canDeleteCourse, canManageCourse, orgslug, selectedCourseUuids, toggleAllVisibleCourses],
+    [allVisibleSelected, canDeleteCourse, canManageCourse, orgslug, selectedCourseUuids, t, toggleAllVisibleCourses],
   );
 
   const presets = [
-    { key: 'all', label: 'All' },
-    { key: 'drafts', label: 'Drafts' },
-    { key: 'published', label: 'Published' },
-    { key: 'private', label: 'Private' },
-    { key: 'recent', label: 'Recently updated' },
-    { key: 'attention', label: 'Needs attention' },
+    { key: 'all', label: t('presets.all') },
+    { key: 'drafts', label: t('presets.drafts') },
+    { key: 'published', label: t('presets.published') },
+    { key: 'private', label: t('presets.private') },
+    { key: 'recent', label: t('presets.recent') },
+    { key: 'attention', label: t('presets.attention') },
   ];
 
   return (
@@ -452,11 +450,10 @@ const CoursesHome = ({
         <div className="mt-4 rounded-xl border bg-card p-6 shadow-sm">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="max-w-3xl">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Course management</div>
-              <h1 className="mt-2 text-4xl font-semibold tracking-tight text-foreground">Manage course workspaces</h1>
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('header.label')}</div>
+              <h1 className="mt-2 text-4xl font-semibold tracking-tight text-foreground">{t('header.title')}</h1>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                Review the catalog in a management-first table, filter by lifecycle state, and launch directly into the
-                guided creation flow or an existing course workspace.
+                {t('header.description')}
               </p>
             </div>
 
@@ -466,7 +463,7 @@ const CoursesHome = ({
                 onClick={() => updateRoute({ view: viewMode === 'table' ? 'cards' : null })}
               >
                 {viewMode === 'table' ? <LayoutGrid className="size-4" /> : <List className="size-4" />}
-                {viewMode === 'table' ? 'Card view' : 'Table view'}
+                {viewMode === 'table' ? t('viewMode.cards') : t('viewMode.table')}
               </Button>
               {canCreateCourse ? (
                 <Button
@@ -474,7 +471,7 @@ const CoursesHome = ({
                   render={<AppLink href={buildCourseCreationPath(orgslug)} />}
                 >
                   <Sparkles className="size-4" />
-                  Guided setup
+                  {t('guidedSetup')}
                 </Button>
               ) : null}
             </div>
@@ -521,11 +518,11 @@ const CoursesHome = ({
               <Input
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
-                placeholder="Search courses across the org"
+                placeholder={t('search.placeholder')}
                 className="pl-9"
               />
             </div>
-            <Button type="submit">Search</Button>
+            <Button type="submit">{t('search.submit')}</Button>
             {hasQuery ? (
               <Button
                 type="button"
@@ -536,26 +533,26 @@ const CoursesHome = ({
                 }}
               >
                 <X className="mr-2 h-4 w-4" />
-                Clear
+                {t('search.clear')}
               </Button>
             ) : null}
           </form>
 
           <div className="flex items-center gap-3">
-            <label className="text-sm font-medium text-muted-foreground">Sort</label>
+            <label className="text-sm font-medium text-muted-foreground">{t('sort.label')}</label>
             <select
               value={sortBy}
               onChange={(event) => updateRoute({ sort: event.target.value, page: '1' })}
               className="rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
-              <option value="updated">Recently updated</option>
-              <option value="name">Name</option>
+              <option value="updated">{t('sort.updated')}</option>
+              <option value="name">{t('sort.name')}</option>
             </select>
           </div>
         </div>
 
         <div className="mt-3 text-sm text-muted-foreground">
-          {courses.length} visible on this page, {totalCourses} total in the workspace.
+          {t('resultsSummary', { visible: courses.length, total: totalCourses })}
         </div>
       </div>
 
@@ -563,9 +560,9 @@ const CoursesHome = ({
         <div className="rounded-xl border border-dashed bg-card py-12 shadow-sm">
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
-              <h2 className="mb-2 text-2xl font-bold text-muted-foreground">No matching courses on this page</h2>
+              <h2 className="mb-2 text-2xl font-bold text-muted-foreground">{t('empty.title')}</h2>
               <p className="text-lg text-muted-foreground">
-                {hasQuery ? 'Adjust the search or preset.' : 'Create a course or widen the current preset.'}
+                {hasQuery ? t('empty.withQuery') : t('empty.withoutQuery')}
               </p>
               {canCreateCourse ? (
                 <div className="mt-6 flex justify-center">
@@ -574,7 +571,7 @@ const CoursesHome = ({
                     render={<AppLink href={buildCourseCreationPath(orgslug)} />}
                   >
                     <Sparkles className="size-4" />
-                    Create with guided setup
+                    {t('empty.createAction')}
                   </Button>
                 </div>
               ) : null}
@@ -608,8 +605,8 @@ const CoursesHome = ({
             serverPaginated
             toolbarContent={bulkToolbar}
             labels={{
-              searchPlaceholder: 'Filter current page results',
-              emptyMessage: 'No courses match the current filters.',
+              searchPlaceholder: t('table.filterPlaceholder'),
+              emptyMessage: t('table.emptyMessage'),
             }}
           />
         </div>
@@ -618,7 +615,7 @@ const CoursesHome = ({
       {hasPagination ? (
         <div className="flex items-center justify-between border-t py-6">
           <div className="text-sm text-muted-foreground">
-            Page {currentPage} of {totalPages}
+            {t('pagination.page', { current: currentPage, total: totalPages })}
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -626,14 +623,14 @@ const CoursesHome = ({
               disabled={currentPage <= 1}
               onClick={() => updateRoute({ page: String(Math.max(1, currentPage - 1)) })}
             >
-              Previous
+              {t('pagination.previous')}
             </Button>
             <Button
               variant="outline"
               disabled={currentPage >= totalPages}
               onClick={() => updateRoute({ page: String(Math.min(totalPages, currentPage + 1)) })}
             >
-              Next
+              {t('pagination.next')}
             </Button>
           </div>
         </div>
@@ -672,6 +669,7 @@ const CoursesHome = ({
 };
 
 function CourseRowActions({ course, orgslug }: { course: ManageableCourse; orgslug: string }) {
+  const t = useTranslations('DashPage.CourseManagement.Dashboard');
   const router = useRouter();
   const session = usePlatformSession() as any;
   const { can } = usePermissions();
@@ -692,10 +690,10 @@ function CourseRowActions({ course, orgslug }: { course: ManageableCourse; orgsl
       void (async () => {
         try {
           await deleteCourseFromBackend(course.course_uuid, accessToken, { orgSlug: orgslug });
-          toast.success('Course deleted.');
+          toast.success(t('rowActions.deleteSuccess'));
           router.refresh();
         } catch {
-          toast.error('Unable to delete course.');
+          toast.error(t('rowActions.deleteError'));
         }
       })();
     });
@@ -708,10 +706,10 @@ function CourseRowActions({ course, orgslug }: { course: ManageableCourse; orgsl
       void (async () => {
         try {
           await updateCourseAccess(course.course_uuid, { public: !course.public }, accessToken, { orgSlug: orgslug });
-          toast.success(course.public ? 'Course moved to private.' : 'Course is now public.');
+          toast.success(course.public ? t('rowActions.visibilityMovedPrivate') : t('rowActions.visibilityPublished'));
           router.refresh();
         } catch {
-          toast.error('Unable to update course visibility.');
+          toast.error(t('rowActions.visibilityError'));
         }
       })();
     });
@@ -735,7 +733,7 @@ function CourseRowActions({ course, orgslug }: { course: ManageableCourse; orgsl
           onClick={() => router.push(buildCourseWorkspacePath(orgslug, removeCoursePrefix(course.course_uuid)))}
         >
           <List className="size-4" />
-          Open workspace
+          {t('rowActions.openWorkspace')}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() =>
@@ -743,7 +741,7 @@ function CourseRowActions({ course, orgslug }: { course: ManageableCourse; orgsl
           }
         >
           <Workflow className="size-4" />
-          Open curriculum
+          {t('rowActions.openCurriculum')}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() =>
@@ -751,16 +749,16 @@ function CourseRowActions({ course, orgslug }: { course: ManageableCourse; orgsl
           }
         >
           <Sparkles className="size-4" />
-          Review & publish
+          {t('rowActions.reviewPublish')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => router.push(buildCourseCreationPath(orgslug, course.course_uuid))}>
           <LayoutGrid className="size-4" />
-          Use as template
+          {t('rowActions.useAsTemplate')}
         </DropdownMenuItem>
         {canManageCourse ? (
           <DropdownMenuItem onClick={handleToggleVisibility}>
             <Sparkles className="size-4" />
-            {course.public ? 'Move to private' : 'Publish'}
+            {course.public ? t('rowActions.movePrivate') : t('rowActions.publish')}
           </DropdownMenuItem>
         ) : null}
         {canDeleteCourse ? (
@@ -769,7 +767,7 @@ function CourseRowActions({ course, orgslug }: { course: ManageableCourse; orgsl
             variant="destructive"
           >
             <Trash2 className="size-4" />
-            Delete
+            {t('rowActions.delete')}
           </DropdownMenuItem>
         ) : null}
       </DropdownMenuContent>

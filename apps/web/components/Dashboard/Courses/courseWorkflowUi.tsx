@@ -2,6 +2,7 @@
 
 import type { LucideIcon } from 'lucide-react';
 import { AlertTriangle, CheckCircle2, CircleDot, Globe, Lock, Sparkles } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
@@ -54,15 +55,16 @@ export function CourseStatusBadge({
     | 'draft';
   className?: string;
 }) {
+  const t = useTranslations('DashPage.CourseManagement.Workflow.status');
   const config = {
-    public: { label: 'Public', tone: 'success' as const, icon: Globe },
-    private: { label: 'Private', tone: 'info' as const, icon: Lock },
-    ready: { label: 'Ready', tone: 'success' as const, icon: CheckCircle2 },
-    'needs-review': { label: 'Needs review', tone: 'warning' as const, icon: AlertTriangle },
-    attention: { label: 'Attention', tone: 'warning' as const, icon: Sparkles },
-    unsaved: { label: 'Unsaved changes', tone: 'warning' as const, icon: CircleDot },
-    live: { label: 'Live', tone: 'success' as const, icon: Globe },
-    draft: { label: 'Draft', tone: 'info' as const, icon: CircleDot },
+    public: { label: t('public'), tone: 'success' as const, icon: Globe },
+    private: { label: t('private'), tone: 'info' as const, icon: Lock },
+    ready: { label: t('ready'), tone: 'success' as const, icon: CheckCircle2 },
+    'needs-review': { label: t('needsReview'), tone: 'warning' as const, icon: AlertTriangle },
+    attention: { label: t('attention'), tone: 'warning' as const, icon: Sparkles },
+    unsaved: { label: t('unsavedChanges'), tone: 'warning' as const, icon: CircleDot },
+    live: { label: t('live'), tone: 'success' as const, icon: Globe },
+    draft: { label: t('draft'), tone: 'info' as const, icon: CircleDot },
   }[status];
 
   return (
