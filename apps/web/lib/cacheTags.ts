@@ -32,7 +32,28 @@ export const courseTag = {
   contributors: (courseUuid: string) => `course:${courseUuid}:contributors`,
   certifications: (courseUuid: string) => `course:${courseUuid}:certifications`,
   editableList: (orgSlug: string) => `courses:${orgSlug}:editable`,
+  publicList: (orgSlug: string) => `courses:${orgSlug}:public`,
 } as const;
+
+interface CourseListTagOptions {
+  includeEditable?: boolean;
+  includePublic?: boolean;
+}
+
+export function getCourseListTags(orgSlug: string, options: CourseListTagOptions = {}): string[] {
+  const { includeEditable = true, includePublic = true } = options;
+  const scopedTags: string[] = [];
+
+  if (includeEditable) {
+    scopedTags.push(courseTag.editableList(orgSlug));
+  }
+
+  if (includePublic) {
+    scopedTags.push(courseTag.publicList(orgSlug));
+  }
+
+  return scopedTags;
+}
 
 export async function revalidateGamification(orgId: number) {
   // Dynamically import to keep this file usable on both server and client

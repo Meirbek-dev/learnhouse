@@ -5,6 +5,7 @@ import EditCourseContributors from '@components/Dashboard/Pages/Course/EditCours
 import EditCourseStructure from '@components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure';
 import EditCourseGeneral from '@components/Dashboard/Pages/Course/EditCourseGeneral/EditCourseGeneral';
 import EditCourseAccess from '@components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess';
+import CourseConflictDialog from '@components/Dashboard/Pages/Course/CourseConflictDialog';
 import { Award, GalleryVerticalEnd, Globe, Info, Loader2, Lock, UserPen } from 'lucide-react';
 import { CourseProvider, useCourse } from '../../../../../../../../components/Contexts/CourseContext';
 import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop';
@@ -118,6 +119,7 @@ function CourseOverviewContent({ params }: { params: CourseOverviewParams }) {
 
   return (
     <div className="grid h-screen w-full grid-rows-[auto_1fr] bg-[#f8f8f8]">
+      <CourseConflictDialog />
       <div className="soft-shadow bg-background z-10 pr-10 pl-10 text-sm tracking-tight">
         <CourseOverviewTop params={params} />
         <div className="flex space-x-3 text-sm font-bold">

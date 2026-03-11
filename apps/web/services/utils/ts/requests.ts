@@ -153,6 +153,22 @@ export const swrFetcher = async (url: string, token?: string) => {
   return errorHandling(response);
 };
 
+export const fetchResponseMetadata = async (url: string, token?: string): Promise<CustomResponseTyping> => {
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers,
+    redirect: 'follow',
+    credentials: 'include',
+  });
+
+  return getResponseMetadata(response);
+};
+
 /**
  * SWR fetcher that returns both data and response headers.
  * Useful for paginated endpoints that return total count in headers.
@@ -185,10 +201,27 @@ export const swrFetcherWithHeaders = async (
   return { data, headers: resHeaders };
 };
 
-export const errorHandling = (res: Response) => {
+export const errorHandling = async (res: Response) => {
   if (!res.ok) {
-    const error: any = new Error(res.statusText || 'Request failed');
+    let data: any = null;
+
+    try {
+      data = await res.json();
+    } catch {
+      data = null;
+    }
+
+    const detail =
+      typeof data?.detail === 'string'
+        ? data.detail
+        : Array.isArray(data?.detail)
+          ? data.detail.map((item: { msg?: string }) => item?.msg).filter(Boolean).join(', ')
+          : res.statusText || 'Request failed';
+
+    const error: any = new Error(detail || 'Request failed');
     error.status = res.status;
+    error.data = data;
+    error.detail = data?.detail;
     throw error;
   }
   return res.json();

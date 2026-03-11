@@ -25,19 +25,15 @@ import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { searchOrgContent } from '@services/search/search';
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useDebouncedValue } from '@/hooks/useDebounce';
-import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useLocale, useTranslations } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
-import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { Locale } from '@/i18n/config';
-import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 
 interface EditCourseContributorsProps {
@@ -193,8 +189,9 @@ interface ContributorOptionCardProps {
   confirmMessage: string;
   confirmButton: string;
   icon: React.ReactNode;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   activeLabel?: string;
+  disabled?: boolean;
 }
 
 function ContributorOptionCard({
@@ -207,14 +204,16 @@ function ContributorOptionCard({
   icon,
   onConfirm,
   activeLabel,
+  disabled = false,
 }: ContributorOptionCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const handleConfirm = () => {
     startTransition(() => {
-      onConfirm();
-      setIsOpen(false);
+      void Promise.resolve(onConfirm()).then(() => {
+        setIsOpen(false);
+      });
     });
   };
 
@@ -225,7 +224,11 @@ function ContributorOptionCard({
     >
       <AlertDialogTrigger
         render={
-          <div className="h-[200px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all hover:bg-slate-200">
+          <div
+            className={`h-[200px] w-full rounded-lg bg-slate-100 transition-all ${
+              disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-slate-200'
+            }`}
+          >
             {isActive ? (
               <div className="absolute mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
                 {activeLabel}
@@ -253,7 +256,7 @@ function ContributorOptionCard({
           <AlertDialogCancel disabled={isPending} />
           <AlertDialogAction
             onClick={handleConfirm}
-            disabled={isPending}
+            disabled={isPending || disabled}
           >
             {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
             {confirmButton}
@@ -270,15 +273,12 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
-  const { isLoading, courseStructure } = course;
+  const { courseStructure, editorData, refreshCourseEditor, showConflict } = course;
   const dispatchCourse = useCourseDispatch();
   const org = useOrg() as any;
   const tCommon = useTranslations('Common');
-
-  const { data: contributors } = useSWR<Contributor[]>(
-    courseStructure ? `${getAPIUrl()}courses/${courseStructure.course_uuid}/contributors` : null,
-    (url: string) => swrFetcher(url, access_token),
-  );
+  const contributors = (editorData.contributors.data ?? []) as Contributor[];
+  const isContributorsLoading = course.isEditorDataLoading && editorData.contributors.data === null;
 
   // Initialize from courseStructure.open_to_contributors with lazy initialization
   const [isOpenToContributors, setIsOpenToContributors] = useState<boolean | undefined>(
@@ -290,31 +290,15 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
   const [isSearching, setIsSearching] = useState(false);
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
   const [selectedContributors, setSelectedContributors] = useState<number[]>([]);
-  const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const isDirtyRef = useRef(false);
-
-  useUnsavedChangesGuard(isDirty);
 
   useEffect(() => {
-    if (!isLoading) {
-      const dirty =
-        courseStructure?.open_to_contributors !== undefined &&
-        isOpenToContributors !== undefined &&
-        isOpenToContributors !== courseStructure.open_to_contributors;
-      isDirtyRef.current = Boolean(dirty);
-      setIsDirty(Boolean(dirty));
-      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'contributors', dirty: Boolean(dirty) } });
-    }
-  }, [isLoading, isOpenToContributors, courseStructure, dispatchCourse]);
-
-  useEffect(() => {
-    if (isDirtyRef.current) {
-      return;
-    }
-
     setIsOpenToContributors(courseStructure?.open_to_contributors);
   }, [courseStructure?.open_to_contributors]);
+
+  useEffect(() => {
+    dispatchCourse({ type: 'setSectionDirty', payload: { section: 'contributors', dirty: false } });
+  }, [dispatchCourse]);
 
   useEffect(() => {
     const searchUsers = async () => {
@@ -370,7 +354,13 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
     if (selectedUsers.length === 0) return;
 
     try {
-      const response = await bulkAddContributors(courseStructure.course_uuid, selectedUsers, access_token);
+      const response = await bulkAddContributors(courseStructure.course_uuid, selectedUsers, access_token, {
+        orgSlug: org.slug,
+      });
+      if (response.status === 409) {
+        showConflict(response.data?.detail);
+        return;
+      }
       if (response.status === 200) {
         const result = response.data as BulkAddResponse;
 
@@ -394,7 +384,7 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
         });
 
         // Refresh contributors list
-        mutate(`${getAPIUrl()}courses/${courseStructure.course_uuid}/contributors`);
+        await refreshCourseEditor();
         // Clear selection and search
         setSelectedUsers([]);
         setSearchQuery('');
@@ -435,10 +425,15 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
         updatedData.authorship,
         updatedData.authorship_status,
         access_token,
+        { orgSlug: org.slug },
       );
+      if (res.status === 409) {
+        showConflict(res.data?.detail);
+        return;
+      }
       if (res.status === 200 && res.data?.status === 'success') {
         toast.success(res.data.detail || t('successfullyUpdatedContributor'));
-        mutate(`${getAPIUrl()}courses/${courseStructure.course_uuid}/contributors`);
+        await refreshCourseEditor();
       } else {
         toast.error(res.data?.detail || t('failedToUpdateContributor'));
       }
@@ -492,7 +487,13 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
       const selectedUsernames =
         contributors?.filter((c) => selectedContributors.includes(c.user_id)).map((c) => c.user.username) || [];
 
-      const response = await bulkRemoveContributors(courseStructure.course_uuid, selectedUsernames, access_token);
+      const response = await bulkRemoveContributors(courseStructure.course_uuid, selectedUsernames, access_token, {
+        orgSlug: org.slug,
+      });
+      if (response.status === 409) {
+        showConflict(response.data?.detail);
+        return;
+      }
 
       if (response.status === 200) {
         toast.success(
@@ -500,8 +501,7 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
             count: selectedContributors.length,
           }),
         );
-        // Refresh contributors list
-        mutate(`${getAPIUrl()}courses/${courseStructure.course_uuid}/contributors`);
+        await refreshCourseEditor();
         // Clear selection
         setSelectedContributors([]);
       }
@@ -511,19 +511,26 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
     }
   };
 
-  const handleSaveContributorAccess = async () => {
-    if (!(access_token && isDirty && isOpenToContributors !== undefined)) return;
+  const handleContributorAccessChange = async (nextOpenToContributors: boolean) => {
+    if (!(access_token && isOpenToContributors !== undefined) || nextOpenToContributors === isOpenToContributors) return;
 
     setIsSaving(true);
     try {
       const response = await updateCourseAccess(
         courseStructure.course_uuid,
-        { open_to_contributors: isOpenToContributors },
+        { open_to_contributors: nextOpenToContributors },
         access_token,
-        { lastKnownUpdateDate: courseStructure.update_date },
+        {
+          lastKnownUpdateDate: courseStructure.update_date,
+          orgSlug: org.slug,
+        },
       );
 
       if (!response.success) {
+        if (response.status === 409) {
+          showConflict(response.data?.detail);
+          return;
+        }
         toast.error(response.data?.detail || tCommon('errorGeneric'));
         return;
       }
@@ -535,12 +542,14 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
           ...response.data,
         },
       });
-      await mutate(`${getAPIUrl()}courses/${courseStructure.course_uuid}/meta?with_unpublished_activities=${course.withUnpublishedActivities}`);
-      isDirtyRef.current = false;
-      setIsDirty(false);
-      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'contributors', dirty: false } });
+      setIsOpenToContributors(nextOpenToContributors);
+      await refreshCourseEditor();
       toast.success(tCommon('saved'));
     } catch (error: any) {
+      if (error?.status === 409) {
+        showConflict(error?.detail || error?.message);
+        return;
+      }
       toast.error(error?.message || tCommon('errorGeneric'));
     } finally {
       setIsSaving(false);
@@ -559,16 +568,7 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
                   <h1 className="text-lg font-bold text-gray-800 sm:text-xl">{t('courseContributorsTitle')}</h1>
                   <h2 className="text-xs text-gray-500 sm:text-sm">{t('courseContributorsSubtitle')}</h2>
                 </div>
-                <div className="flex items-center gap-3">
-                  {isDirty ? <span className="text-sm text-gray-500">{tCommon('unsavedChanges')}</span> : null}
-                  <Button
-                    type="button"
-                    disabled={!isDirty || isSaving}
-                    onClick={handleSaveContributorAccess}
-                  >
-                    {isSaving ? tCommon('saving') : tCommon('save')}
-                  </Button>
-                </div>
+                {isSaving ? <span className="text-sm text-gray-500">{tCommon('saving')}</span> : null}
               </div>
             </div>
             <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
@@ -585,8 +585,9 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
                     size={32}
                   />
                 }
-                onConfirm={() => setIsOpenToContributors(true)}
+                onConfirm={() => handleContributorAccessChange(true)}
                 activeLabel={t('activeBadge')}
+                disabled={isSaving}
               />
               <ContributorOptionCard
                 isActive={!isOpenToContributors}
@@ -601,10 +602,12 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
                     size={32}
                   />
                 }
-                onConfirm={() => setIsOpenToContributors(false)}
+                onConfirm={() => handleContributorAccessChange(false)}
                 activeLabel={t('activeBadge')}
+                disabled={isSaving}
               />
             </div>
+            {isContributorsLoading ? <div className="px-1 py-3 text-sm text-gray-500">{t('loadingContributors')}</div> : null}
             <div className="space-y-4">
               <div className="relative">
                 <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />

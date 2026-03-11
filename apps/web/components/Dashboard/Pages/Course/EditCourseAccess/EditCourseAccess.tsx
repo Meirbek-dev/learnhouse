@@ -19,14 +19,9 @@ import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext
 import { updateCourseAccess } from '@services/courses/courses';
 import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { Button } from '@/components/ui/button';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { useEffect, useRef, useState, useTransition } from 'react';
-import { swrFetcher } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
-import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
+import { useEffect, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 
 // Reusable component for access option cards with AlertDialog
@@ -40,7 +35,8 @@ interface AccessOptionCardProps {
   confirmButtonText: string;
   activeBadgeText: string;
   status: 'info' | 'warning';
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
+  disabled?: boolean;
 }
 
 const AccessOptionCard = ({
@@ -54,6 +50,7 @@ const AccessOptionCard = ({
   activeBadgeText,
   status,
   onConfirm,
+  disabled = false,
 }: AccessOptionCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -61,8 +58,9 @@ const AccessOptionCard = ({
 
   const handleConfirm = () => {
     startTransition(() => {
-      onConfirm();
-      setIsOpen(false);
+      void Promise.resolve(onConfirm()).then(() => {
+        setIsOpen(false);
+      });
     });
   };
 
@@ -79,7 +77,11 @@ const AccessOptionCard = ({
     >
       <AlertDialogTrigger
         render={
-          <div className="h-[200px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all hover:bg-slate-200">
+          <div
+            className={`h-[200px] w-full rounded-lg bg-slate-100 transition-all ${
+              disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-slate-200'
+            }`}
+          >
             {isActive && (
               <div className="absolute mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
                 {activeBadgeText}
@@ -107,11 +109,11 @@ const AccessOptionCard = ({
           <AlertDialogDescription>{dialogDescription}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel />
+          <AlertDialogCancel disabled={isPending} />
           <AlertDialogAction
             variant={isInfo ? 'default' : 'destructive'}
             onClick={handleConfirm}
-            disabled={isPending}
+            disabled={isPending || disabled}
           >
             {isPending ? (
               <div className="flex items-center gap-2">
@@ -137,53 +139,43 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
-  const { isLoading, courseStructure } = course;
+  const { courseStructure, editorData, refreshCourseEditor, showConflict } = course;
   const dispatchCourse = useCourseDispatch();
   const t = useTranslations('DashPage.Courses.Access');
   const tCommon = useTranslations('Common');
-
-  const { data: usergroups } = useSWR(
-    courseStructure ? `${getAPIUrl()}usergroups/resource/${courseStructure.course_uuid}` : null,
-    (url) => swrFetcher(url, access_token),
-  );
-  // Initialize from courseStructure.public with lazy initialization
   const [isClientPublic, setIsClientPublic] = useState<boolean | undefined>(() => courseStructure?.public);
-  const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const isDirtyRef = useRef(false);
-
-  useUnsavedChangesGuard(isDirty);
-
-  useEffect(() => {
-    if (!isLoading) {
-      const dirty = isClientPublic !== undefined && isClientPublic !== courseStructure?.public;
-      isDirtyRef.current = Boolean(dirty);
-      setIsDirty(Boolean(dirty));
-      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'access', dirty: Boolean(dirty) } });
-    }
-  }, [isLoading, isClientPublic, courseStructure, dispatchCourse]);
+  const usergroups = editorData.linkedUserGroups.data ?? [];
+  const isUserGroupsLoading = course.isEditorDataLoading && editorData.linkedUserGroups.data === null;
 
   useEffect(() => {
-    if (isDirtyRef.current) {
-      return;
-    }
-
     setIsClientPublic(courseStructure?.public);
   }, [courseStructure?.public]);
 
-  const handleSave = async () => {
-    if (!(access_token && isDirty && isClientPublic !== undefined)) return;
+  useEffect(() => {
+    dispatchCourse({ type: 'setSectionDirty', payload: { section: 'access', dirty: false } });
+  }, [dispatchCourse]);
+
+  const handleAccessChange = async (nextPublic: boolean) => {
+    if (!(access_token && isClientPublic !== undefined) || nextPublic === isClientPublic) return;
 
     setIsSaving(true);
     try {
       const response = await updateCourseAccess(
         courseStructure.course_uuid,
-        { public: isClientPublic },
+        { public: nextPublic },
         access_token,
-        { lastKnownUpdateDate: courseStructure.update_date },
+        {
+          lastKnownUpdateDate: courseStructure.update_date,
+          orgSlug: _props.orgslug,
+        },
       );
 
       if (!response.success) {
+        if (response.status === 409) {
+          showConflict(response.data?.detail);
+          return;
+        }
         toast.error(response.data?.detail || tCommon('errorGeneric'));
         return;
       }
@@ -195,12 +187,14 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
           ...response.data,
         },
       });
-      await mutate(`${getAPIUrl()}courses/${courseStructure.course_uuid}/meta?with_unpublished_activities=${course.withUnpublishedActivities}`);
-      isDirtyRef.current = false;
-      setIsDirty(false);
-      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'access', dirty: false } });
+      setIsClientPublic(nextPublic);
+      await refreshCourseEditor();
       toast.success(tCommon('saved'));
     } catch (error: any) {
+      if (error?.status === 409) {
+        showConflict(error?.detail || error?.message);
+        return;
+      }
       toast.error(error?.message || tCommon('errorGeneric'));
     } finally {
       setIsSaving(false);
@@ -219,16 +213,7 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
                   <h1 className="text-lg font-bold text-gray-800 sm:text-xl">{t('accessToTheCourse')}</h1>
                   <h2 className="text-xs text-gray-500 sm:text-sm">{t('accessDescription')}</h2>
                 </div>
-                <div className="flex items-center gap-3">
-                  {isDirty ? <span className="text-sm text-gray-500">{tCommon('unsavedChanges')}</span> : null}
-                  <Button
-                    type="button"
-                    disabled={!isDirty || isSaving}
-                    onClick={handleSave}
-                  >
-                    {isSaving ? tCommon('saving') : tCommon('save')}
-                  </Button>
-                </div>
+                {isSaving ? <span className="text-sm text-gray-500">{tCommon('saving')}</span> : null}
               </div>
             </div>
             <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
@@ -242,7 +227,8 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
                 confirmButtonText={t('changeToPublicButton')}
                 activeBadgeText={t('activeBadge')}
                 status="info"
-                onConfirm={() => setIsClientPublic(true)}
+                onConfirm={() => handleAccessChange(true)}
+                disabled={isSaving}
               />
               <AccessOptionCard
                 isActive={isClientPublic === false}
@@ -254,10 +240,17 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
                 confirmButtonText={t('changeToUsersOnlyButton')}
                 activeBadgeText={t('activeBadge')}
                 status="info"
-                onConfirm={() => setIsClientPublic(false)}
+                onConfirm={() => handleAccessChange(false)}
+                disabled={isSaving}
               />
             </div>
-            {!isClientPublic && <UserGroupsSection usergroups={usergroups} />}
+            {!isClientPublic && (
+              <UserGroupsSection
+                usergroups={usergroups}
+                isLoading={isUserGroupsLoading}
+                orgslug={_props.orgslug}
+              />
+            )}
           </div>
         </div>
       ) : null}
@@ -265,7 +258,15 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
   );
 };
 
-const UserGroupsSection = ({ usergroups }: { usergroups: any[] }) => {
+const UserGroupsSection = ({
+  usergroups,
+  isLoading,
+  orgslug,
+}: {
+  usergroups: any[];
+  isLoading: boolean;
+  orgslug: string;
+}) => {
   const course = useCourse();
   const [userGroupModal, setUserGroupModal] = useState(false);
   const session = usePlatformSession() as any;
@@ -287,12 +288,18 @@ const UserGroupsSection = ({ usergroups }: { usergroups: any[] }) => {
             </TableRow>
           </TableHeader>
           <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={2}>{t('loadingUserGroups', { default: 'Loading user groups...' })}</TableCell>
+              </TableRow>
+            ) : null}
             {usergroups?.map((usergroup: any) => (
               <UnlinkUserGroupRow
                 key={usergroup.id}
                 usergroup={usergroup}
                 courseUuid={course.courseStructure.course_uuid}
                 accessToken={access_token}
+                orgslug={orgslug}
               />
             ))}
           </TableBody>
@@ -328,22 +335,28 @@ const UnlinkUserGroupRow = ({
   usergroup,
   courseUuid,
   accessToken,
+  orgslug,
 }: {
   usergroup: any;
   courseUuid: string;
   accessToken: string;
+  orgslug: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const course = useCourse();
   const t = useTranslations('DashPage.Courses.Access');
 
   const removeUserGroupLink = () => {
     startTransition(async () => {
       try {
-        const res = await unLinkResourcesToUserGroup(usergroup.id, courseUuid, accessToken);
+        const res = await unLinkResourcesToUserGroup(usergroup.id, courseUuid, accessToken, {
+          courseUuid,
+          orgSlug: orgslug,
+        });
         if (res.status === 200) {
           toast.success(t('unlinkUserGroupSuccess'));
-          mutate(`${getAPIUrl()}usergroups/resource/${courseUuid}`);
+          await course.refreshEditorData();
           setIsOpen(false);
         } else {
           toast.error(t('unlinkUserGroupErrorDetailed', { error: res.data.detail }));

@@ -11,7 +11,6 @@ import { TagsInput } from '@components/ui/custom/tags-input';
 import { Button } from '@/components/ui/button';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Separator } from '@components/ui/separator';
-import { getAPIUrl } from '@services/config/config';
 import LearningItemsList from './LearningItemsList';
 import { Textarea } from '@components/ui/textarea';
 import ThumbnailUpdate from './ThumbnailUpdate';
@@ -20,7 +19,6 @@ import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useTranslations } from 'next-intl';
 import { generateUUID } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
-import { mutate } from 'swr';
 import { toast } from 'sonner';
 
 const generateId = () => generateUUID();
@@ -127,11 +125,10 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
   ];
   const course = useCourse();
   const dispatchCourse = useCourseDispatch();
-  const { isLoading, courseStructure } = course;
+  const { isLoading, courseStructure, refreshCourseMeta, showConflict } = course;
   const formId = useId();
   const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
-  const courseMetaUrl = `${getAPIUrl()}courses/${courseStructure.course_uuid}/meta?with_unpublished_activities=${course.withUnpublishedActivities}`;
 
   useUnsavedChangesGuard(isDirty);
 
@@ -288,10 +285,15 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
     try {
       const response = await updateCourseMetadata(course.courseStructure.course_uuid, values, accessToken, {
         lastKnownUpdateDate: course.courseStructure.update_date,
+        orgSlug: _props.orgslug,
       });
 
       if (!response.success) {
         const detail = response.data?.detail;
+        if (response.status === 409) {
+          showConflict(typeof detail === 'string' ? detail : undefined);
+          return;
+        }
         const message = typeof detail === 'string' ? detail : t('errors.saveFailed');
         setError(message);
         toast.error(message);
@@ -305,7 +307,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
           ...response.data,
         },
       });
-      await mutate(courseMetaUrl);
+      await refreshCourseMeta();
 
       initialRef.current = values;
       isDirtyRef.current = false;
@@ -313,6 +315,10 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
       dispatchCourse({ type: 'setSectionDirty', payload: { section: 'general', dirty: false } });
       toast.success(tCommon('saved'));
     } catch (saveError: any) {
+      if (saveError?.status === 409) {
+        showConflict(saveError?.detail || saveError?.message);
+        return;
+      }
       const message = saveError?.message || t('errors.saveFailed');
       setError(message);
       toast.error(message);
@@ -551,7 +557,11 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                         {t('thumbnail.label')}
                       </FormLabel>
                       <FormControl>
-                        <ThumbnailUpdate thumbnailType={field.value} />
+                        <ThumbnailUpdate
+                          thumbnailType={field.value}
+                          disabled={isDirty}
+                          disabledReason={isDirty ? 'Save or discard metadata changes before updating the thumbnail.' : undefined}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

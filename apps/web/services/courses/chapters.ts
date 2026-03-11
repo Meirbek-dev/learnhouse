@@ -3,7 +3,7 @@
 import type { OrderPayload } from '@components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure';
 import { RequestBodyWithAuthHeader, errorHandling } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { tags } from '@/lib/cacheTags';
+import { courseTag, tags } from '@/lib/cacheTags';
 
 /*
  This file includes only POST, PUT, DELETE requests
@@ -26,7 +26,21 @@ export async function updateChaptersMetadata(course_uuid: string, data: any, acc
   return data_result;
 }
 
-export async function updateChapter(coursechapter_id: number, data: any, access_token: string) {
+interface ChapterInvalidationOptions {
+  courseUuid?: string;
+}
+
+async function revalidateChapterTags(options?: ChapterInvalidationOptions) {
+  const { revalidateTag } = await import('next/cache');
+  revalidateTag(options?.courseUuid ? courseTag.detail(options.courseUuid) : tags.courses, 'max');
+}
+
+export async function updateChapter(
+  coursechapter_id: number,
+  data: any,
+  access_token: string,
+  options?: ChapterInvalidationOptions,
+) {
   const result: any = await fetch(
     `${getAPIUrl()}chapters/${coursechapter_id}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
@@ -35,14 +49,18 @@ export async function updateChapter(coursechapter_id: number, data: any, access_
 
   // Revalidate course cache after chapter update
   if (result.ok) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(tags.courses, 'max');
+    await revalidateChapterTags(options);
   }
 
   return data_result;
 }
 
-export async function updateCourseOrderStructure(course_uuid: string, data: OrderPayload, access_token: string) {
+export async function updateCourseOrderStructure(
+  course_uuid: string,
+  data: OrderPayload,
+  access_token: string,
+  options?: ChapterInvalidationOptions,
+) {
   const result: any = await fetch(
     `${getAPIUrl()}chapters/course/${course_uuid}/order`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
@@ -51,14 +69,13 @@ export async function updateCourseOrderStructure(course_uuid: string, data: Orde
 
   // Revalidate course cache after reordering
   if (result.ok) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(tags.courses, 'max');
+    await revalidateChapterTags({ courseUuid: options?.courseUuid ?? course_uuid });
   }
 
   return data_result;
 }
 
-export async function createChapter(data: any, access_token: string) {
+export async function createChapter(data: any, access_token: string, options?: ChapterInvalidationOptions) {
   const result: any = await fetch(
     `${getAPIUrl()}chapters/`,
     RequestBodyWithAuthHeader('POST', data, null, access_token),
@@ -67,14 +84,13 @@ export async function createChapter(data: any, access_token: string) {
 
   // Revalidate course cache after creating chapter
   if (result.ok) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(tags.courses, 'max');
+    await revalidateChapterTags(options);
   }
 
   return data_result;
 }
 
-export async function deleteChapter(coursechapter_id: number, access_token: string) {
+export async function deleteChapter(coursechapter_id: number, access_token: string, options?: ChapterInvalidationOptions) {
   const result: any = await fetch(
     `${getAPIUrl()}chapters/${coursechapter_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
@@ -83,8 +99,7 @@ export async function deleteChapter(coursechapter_id: number, access_token: stri
 
   // Revalidate course cache after deleting chapter
   if (result.ok) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(tags.courses, 'max');
+    await revalidateChapterTags(options);
   }
 
   return data_result;

@@ -2217,6 +2217,13 @@
       "creatingChapter": "Creating...",
       "saveOrderError": "Failed to save the new content order"
     },
+    "Conflict": {
+      "title": "This course changed in another editor",
+      "description": "Someone saved a newer version of this course while you were editing.",
+      "reloadWarning": "Reload to get the latest course data before trying again. Reloading will discard unsaved changes on this page.",
+      "reloadButton": "Reload latest course",
+      "reviewDraftButton": "Keep reviewing my draft"
+    },
     "activityNamePlaceholder": "Activity name",
     "activityTypes": {
       "assignment": "Assignment",
@@ -3237,6 +3244,7 @@
         "unlinkConfirmTitle": "Unlink UserGroup?",
         "unlinkUserGroupErrorDetailed": "Failed to unlink user group: {error}",
         "unlinkUserGroupErrorGeneric": "Failed to unlink user group",
+        "loadingUserGroups": "Loading user groups...",
         "unlinkUserGroupSuccess": "Successfully unlinked user group",
         "usersOnlyDescription": "The Course is only accessible to signed in users, additionally you can choose which UserGroups can access this course",
         "usersOnlyLabel": "Users Only"
@@ -3422,6 +3430,7 @@
       "roleContributor": "Contributor",
       "roleMaintainer": "Maintainer",
       "roleReporter": "Reporter",
+      "loadingContributors": "Loading contributors...",
       "searchUsersPlaceholder": "Search users by name or username to add as contributors...",
       "searchingMessage": "Searching...",
       "statusActive": "Active",

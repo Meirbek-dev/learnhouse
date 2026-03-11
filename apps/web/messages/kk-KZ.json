@@ -2217,6 +2217,13 @@
       "creatingChapter": "Жасалуда...",
       "saveOrderError": "Жаңа мазмұн ретін сақтау мүмкін болмады"
     },
+    "Conflict": {
+      "title": "Бұл курс басқа редакторда өзгертілді",
+      "description": "Сіз өңдеп жатқанда біреу осы курстың жаңарақ нұсқасын сақтап қойды.",
+      "reloadWarning": "Қайта әрекеттенбес бұрын курстың соңғы деректерін жүктеңіз. Қайта жүктеу осы беттегі сақталмаған өзгерістерді өшіреді.",
+      "reloadButton": "Курстың соңғы нұсқасын жүктеу",
+      "reviewDraftButton": "Жобамды қарап шығуды жалғастыру"
+    },
     "activityNamePlaceholder": "Белсенділік атауы",
     "activityTypes": {
       "assignment": "Тапсырма",
@@ -3250,6 +3257,7 @@
         "unlinkConfirmTitle": "Топты ажырату?",
         "unlinkUserGroupErrorDetailed": "Топты ажырату сәтсіз аяқталды: {error}",
         "unlinkUserGroupErrorGeneric": "Топты ажырату сәтсіз аяқталды",
+        "loadingUserGroups": "Пайдаланушылар топтары жүктелуде...",
         "unlinkUserGroupSuccess": "Топ сәтті ажыратылды",
         "usersOnlyDescription": "Курс тек тіркелген пайдаланушыларға қолжетімді. Қай топтар кіре алатынын таңдай аласыз",
         "usersOnlyLabel": "Тек пайдаланушылар"
@@ -3422,6 +3430,7 @@
       "roleContributor": "Қатысушы",
       "roleMaintainer": "Қолдаушы",
       "roleReporter": "Баяндамашы",
+      "loadingContributors": "Қатысушылар жүктелуде...",
       "searchUsersPlaceholder": "Пайдаланушыларды аты немесе пайдаланушы аты бойынша іздеу, қатысушы ретінде қосу үшін...",
       "searchingMessage": "Іздеуде...",
       "statusActive": "Белсенді",

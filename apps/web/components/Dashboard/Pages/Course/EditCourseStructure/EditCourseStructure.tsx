@@ -7,12 +7,10 @@ import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { createChapter, updateCourseOrderStructure } from '@services/courses/chapters';
-import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import { Hexagon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { mutate } from 'swr';
 
 import ChapterElement from './DraggableElements/ChapterElement';
 
@@ -43,8 +41,8 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   const dispatchCourse = useCourseDispatch();
   const course = useCourse();
   const course_structure = course.courseStructure;
+  const { refreshCourseMeta, showConflict } = course;
   const course_uuid = course ? course.courseStructure.course_uuid : '';
-  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
   // New Chapter creation
   const [newChapterModal, setNewChapterModal] = useState(false);
 
@@ -56,10 +54,8 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   const submitChapter = async (chapter: any) => {
     const loadingToast = toast.loading(t('creatingChapter'));
     try {
-      await createChapter(chapter, access_token);
-      mutate(
-        `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
-      );
+      await createChapter(chapter, access_token, { courseUuid: course_uuid });
+      await refreshCourseMeta();
       setNewChapterModal(false);
       toast.success(t('chapterCreatedSuccess'), { id: loadingToast });
     } catch (error) {
@@ -111,12 +107,14 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
     };
 
     try {
-      await updateCourseOrderStructure(course_uuid, payload, access_token);
-      await mutate(
-        `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
-      );
+      await updateCourseOrderStructure(course_uuid, payload, access_token, { courseUuid: course_uuid });
+      await refreshCourseMeta();
     } catch (error: any) {
       dispatchCourse({ type: 'setCourseStructure', payload: course_structure });
+      if (error?.status === 409) {
+        showConflict(error?.detail || error?.message);
+        return;
+      }
       toast.error(error?.message || t('saveOrderError'));
     }
   };

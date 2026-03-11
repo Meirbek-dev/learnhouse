@@ -9,7 +9,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import useSWR, { mutate } from 'swr';
+import useSWR from 'swr';
 import { Info } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -49,11 +49,14 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
     }
 
     try {
-      const res = await linkResourcesToUserGroup(effectiveUserGroup, courseStructure.course_uuid, access_token);
+      const res = await linkResourcesToUserGroup(effectiveUserGroup, courseStructure.course_uuid, access_token, {
+        courseUuid: courseStructure.course_uuid,
+        orgSlug: org.slug,
+      });
       if (res.status === 200) {
         props.setUserGroupModal(false);
         toast.success(t('linkSuccess'));
-        mutate(`${getAPIUrl()}usergroups/resource/${courseStructure.course_uuid}`);
+        await course.refreshEditorData();
       } else {
         toast.error(t('linkError', { error: res.data?.detail || t('unknownError') }));
       }

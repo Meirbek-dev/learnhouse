@@ -41,7 +41,9 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
       revalidate: 1800,
     });
     const toast_loading = toast.loading(tNotify('creatingActivity'));
-    await createActivity(activity, props.chapterId, org.org_id, access_token);
+    await createActivity(activity, props.chapterId, org.org_id, access_token, {
+      courseUuid: course.courseStructure.course_uuid,
+    });
     mutate(
       `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
     );

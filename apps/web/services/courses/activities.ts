@@ -4,7 +4,7 @@ import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/
 import { shouldUseChunkedUpload, uploadFileChunked } from '@services/utils/chunked-upload';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { getAPIUrl } from '@services/config/config';
-import { tags } from '@/lib/cacheTags';
+import { courseTag, tags } from '@/lib/cacheTags';
 
 interface UploadProgress {
   percentage: number;
@@ -12,7 +12,23 @@ interface UploadProgress {
   totalChunks?: number;
 }
 
-export async function createActivity(data: any, chapter_id: number, org_id: number, access_token: string) {
+interface ActivityInvalidationOptions {
+  courseUuid?: string;
+}
+
+async function revalidateActivityCourseTags(options?: ActivityInvalidationOptions) {
+  const { revalidateTag } = await import('next/cache');
+  revalidateTag(tags.activities, 'max');
+  revalidateTag(options?.courseUuid ? courseTag.detail(options.courseUuid) : tags.courses, 'max');
+}
+
+export async function createActivity(
+  data: any,
+  chapter_id: number,
+  org_id: number,
+  access_token: string,
+  options?: ActivityInvalidationOptions,
+) {
   // Only set empty content if not already provided
   if (!data.content) {
     data.content = {};
@@ -26,9 +42,7 @@ export async function createActivity(data: any, chapter_id: number, org_id: numb
 
   // Revalidate activities and courses cache after creating activity
   if (metaData.success) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(tags.activities, 'max');
-    revalidateTag(tags.courses, 'max');
+    await revalidateActivityCourseTags(options);
   }
 
   return metaData;
@@ -347,7 +361,7 @@ export async function getActivityByID(activity_id: number, _next?: any, access_t
   return fetchActivityById(activity_id, access_token);
 }
 
-export async function deleteActivity(activity_uuid: string, access_token: string) {
+export async function deleteActivity(activity_uuid: string, access_token: string, options?: ActivityInvalidationOptions) {
   const result = await fetch(
     `${getAPIUrl()}activities/${activity_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
@@ -356,9 +370,7 @@ export async function deleteActivity(activity_uuid: string, access_token: string
 
   // Revalidate activities cache after deletion
   if (result.ok) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(tags.activities, 'max');
-    revalidateTag(tags.courses, 'max');
+    await revalidateActivityCourseTags(options);
   }
 
   return data;
@@ -388,7 +400,7 @@ export async function getActivityWithAuthHeader(activity_uuid: string, _next?: a
   return fetchActivityWithAuth(activity_uuid, access_token || undefined);
 }
 
-export async function updateActivity(data: any, activity_uuid: string, access_token: string) {
+export async function updateActivity(data: any, activity_uuid: string, access_token: string, options?: ActivityInvalidationOptions) {
   const result = await fetch(
     `${getAPIUrl()}activities/${activity_uuid}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
@@ -397,14 +409,7 @@ export async function updateActivity(data: any, activity_uuid: string, access_to
 
   // Revalidate caches so updated content is visible to all users
   if (metadata.success) {
-    const { revalidateTag, refresh } = await import('next/cache');
-    // Purge the activities and courses data cache for all users
-    console.log('[updateActivity] Revalidating cache tags:', tags.activities, tags.courses);
-    revalidateTag(tags.activities, 'max');
-    revalidateTag(tags.courses, 'max');
-    // Also refresh client-side router cache
-    refresh();
-    console.log('[updateActivity] Cache revalidation complete');
+    await revalidateActivityCourseTags(options);
   }
 
   return metadata;

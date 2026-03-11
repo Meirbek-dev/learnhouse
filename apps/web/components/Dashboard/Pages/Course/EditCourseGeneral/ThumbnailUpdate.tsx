@@ -7,12 +7,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Card, CardContent } from '@components/ui/card';
-import { getAPIUrl } from '@services/config/config';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import type React from 'react';
-import { mutate } from 'swr';
 
 const MAX_FILE_SIZE = 8_000_000; // 8MB for images
 const MAX_VIDEO_FILE_SIZE = 100_000_000; // 100MB for videos
@@ -24,6 +22,8 @@ type ValidVideoMimeType = (typeof VALID_VIDEO_MIME_TYPES)[number];
 
 interface ThumbnailUpdateProps {
   thumbnailType: 'image' | 'video' | 'both';
+  disabled?: boolean;
+  disabledReason?: string;
 }
 
 type TabType = 'image' | 'video';
@@ -34,7 +34,7 @@ interface LocalThumbnail {
   type: 'image' | 'video';
 }
 
-const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
+const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: ThumbnailUpdateProps) => {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
@@ -46,8 +46,6 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
   const [localThumbnail, setLocalThumbnail] = useState<LocalThumbnail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>(thumbnailType === 'video' ? 'video' : 'image');
-
-  const withUnpublishedActivities = course?.withUnpublishedActivities ?? false;
 
   // Cleanup blob URLs
   useEffect(() => {
@@ -113,11 +111,10 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
           course.courseStructure.course_uuid,
           formData,
           session.data?.tokens?.access_token,
+          { orgSlug: org?.slug },
         );
 
-        await mutate(
-          `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
-        );
+        await course.refreshCourseMeta();
 
         if (!res.success) {
           showError(res.HTTPmessage);
@@ -134,7 +131,7 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
         setIsLoading(false);
       }
     },
-    [course, session, withUnpublishedActivities, showError, t],
+    [course, org?.slug, session, showError, t],
   );
 
   const handleFileChange = useCallback(
@@ -235,13 +232,13 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
         accept=".jpg,.jpeg,.png"
         onChange={(e) => handleFileChange(e, 'image')}
         aria-label={t('ariaLabelImage')}
-        disabled={isLoading}
+        disabled={isLoading || disabled}
       />
       <Button
         type="button"
         variant="outline"
         size="default"
-        disabled={isLoading}
+        disabled={isLoading || disabled}
         onClick={() => imageInputRef.current?.click()}
         className="flex-1"
       >
@@ -260,13 +257,13 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
         accept=".mp4,.webm,.mkv"
         onChange={(e) => handleFileChange(e, 'video')}
         aria-label={t('ariaLabelVideo')}
-        disabled={isLoading}
+        disabled={isLoading || disabled}
       />
       <Button
         type="button"
         variant="outline"
         size="default"
-        disabled={isLoading}
+        disabled={isLoading || disabled}
         onClick={() => videoInputRef.current?.click()}
         className="flex-1"
       >
@@ -287,14 +284,14 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
             <TabsList className="mb-6 grid w-full grid-cols-2">
               <TabsTrigger
                 value="image"
-                disabled={isLoading}
+                disabled={isLoading || disabled}
               >
                 <ImageIcon className="mr-2 h-4 w-4" />
                 {t('image')}
               </TabsTrigger>
               <TabsTrigger
                 value="video"
-                disabled={isLoading}
+                disabled={isLoading || disabled}
               >
                 <Video className="mr-2 h-4 w-4" />
                 {t('video')}
@@ -319,6 +316,7 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
               )}
 
               <p className="text-muted-foreground text-center text-xs">{t('supportedFormats')}</p>
+              {disabledReason ? <p className="text-center text-xs text-amber-600">{disabledReason}</p> : null}
             </TabsContent>
 
             <TabsContent
@@ -339,6 +337,7 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
               )}
 
               <p className="text-muted-foreground text-center text-xs">{t('supportedVideoFormats')}</p>
+              {disabledReason ? <p className="text-center text-xs text-amber-600">{disabledReason}</p> : null}
             </TabsContent>
           </Tabs>
         </CardContent>
@@ -366,6 +365,7 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
         <p className="text-muted-foreground text-center text-xs">
           {thumbnailType === 'image' ? t('supportedFormats') : t('supportedVideoFormats')}
         </p>
+        {disabledReason ? <p className="text-center text-xs text-amber-600">{disabledReason}</p> : null}
       </CardContent>
     </Card>
   );

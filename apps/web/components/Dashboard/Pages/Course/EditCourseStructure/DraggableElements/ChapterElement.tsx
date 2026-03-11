@@ -15,13 +15,11 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { deleteChapter, updateChapter } from '@services/courses/chapters';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
-import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';
 import { useState, useTransition } from 'react';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { mutate } from 'swr';
 
 import NewActivityButton from '../Buttons/NewActivityButton';
 import ActivityElement from './ActivityElement';
@@ -88,8 +86,6 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
 
   // Derived values
   const activities = chapter.activities ?? [];
-  const withUnpublishedActivities = course?.withUnpublishedActivities ?? false;
-  const courseMetaUrl = `${getAPIUrl()}courses/${course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`;
 
   // Handlers
   const handleStartEdit = () => {
@@ -116,8 +112,8 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
 
     startTransition(async () => {
       try {
-        await updateChapter(chapter.id, { name: trimmedName }, access_token);
-        await mutate(courseMetaUrl);
+        await updateChapter(chapter.id, { name: trimmedName }, access_token, { courseUuid: course_uuid });
+        await course.refreshCourseMeta();
         setIsEditing(false);
       } catch (error) {
         console.error('Failed to update chapter:', error);
@@ -135,8 +131,8 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
 
     startTransition(async () => {
       try {
-        await deleteChapter(chapter.id, access_token);
-        await mutate(courseMetaUrl);
+        await deleteChapter(chapter.id, access_token, { courseUuid: course_uuid });
+        await course.refreshCourseMeta();
         setIsDeleteDialogOpen(false);
       } catch (error) {
         console.error('Failed to delete chapter:', error);

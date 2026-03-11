@@ -2,7 +2,7 @@
 
 import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { tags } from '@/lib/cacheTags';
+import { courseTag, getCourseListTags, tags } from '@/lib/cacheTags';
 
 export async function getUserGroups(org_id: number, access_token: string) {
   const result: any = await fetch(
@@ -94,7 +94,12 @@ export async function deleteUserGroup(usergroup_id: number, access_token: string
   return metadata;
 }
 
-export async function linkResourcesToUserGroup(usergroup_id: number, resource_uuids: any, access_token: string) {
+export async function linkResourcesToUserGroup(
+  usergroup_id: number,
+  resource_uuids: any,
+  access_token: string,
+  options?: UserGroupCourseInvalidationOptions,
+) {
   const result: any = await fetch(
     `${getAPIUrl()}usergroups/${usergroup_id}/add_resources?resource_uuids=${resource_uuids}`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
@@ -103,15 +108,46 @@ export async function linkResourcesToUserGroup(usergroup_id: number, resource_uu
 
   // Revalidate organizations and courses cache after linking resources
   if (metadata.success) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(tags.organizations, 'max');
-    revalidateTag(tags.courses, 'max');
+    await revalidateUserGroupCourseTags(options);
   }
 
   return metadata;
 }
 
-export async function unLinkResourcesToUserGroup(usergroup_id: number, resource_uuids: any, access_token: string) {
+interface UserGroupCourseInvalidationOptions {
+  courseUuid?: string;
+  orgSlug?: string;
+}
+
+async function revalidateUserGroupCourseTags(options?: UserGroupCourseInvalidationOptions) {
+  const { revalidateTag } = await import('next/cache');
+  const tagsToRevalidate = new Set<string>([tags.organizations]);
+
+  if (options?.courseUuid) {
+    tagsToRevalidate.add(courseTag.detail(options.courseUuid));
+    tagsToRevalidate.add(courseTag.access(options.courseUuid));
+  }
+
+  if (options?.orgSlug) {
+    getCourseListTags(options.orgSlug, {
+      includeEditable: true,
+      includePublic: false,
+    }).forEach((tag) => tagsToRevalidate.add(tag));
+  } else {
+    tagsToRevalidate.add(tags.courses);
+  }
+
+  for (const tag of tagsToRevalidate) {
+    revalidateTag(tag, 'max');
+  }
+}
+
+export async function unLinkResourcesToUserGroup(
+  usergroup_id: number,
+  resource_uuids: any,
+  access_token: string,
+  options?: UserGroupCourseInvalidationOptions,
+) {
   const result: any = await fetch(
     `${getAPIUrl()}usergroups/${usergroup_id}/remove_resources?resource_uuids=${resource_uuids}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
@@ -120,9 +156,7 @@ export async function unLinkResourcesToUserGroup(usergroup_id: number, resource_
 
   // Revalidate organizations and courses cache after unlinking resources
   if (metadata.success) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(tags.organizations, 'max');
-    revalidateTag(tags.courses, 'max');
+    await revalidateUserGroupCourseTags(options);
   }
 
   return metadata;

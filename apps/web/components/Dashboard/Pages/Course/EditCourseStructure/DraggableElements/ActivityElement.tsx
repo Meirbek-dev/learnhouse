@@ -182,7 +182,9 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
 
     startTransition(async () => {
       try {
-        await updateActivity({ ...activity, name: trimmedName }, activity.activity_uuid, access_token);
+        await updateActivity({ ...activity, name: trimmedName }, activity.activity_uuid, access_token, {
+          courseUuid: course_uuid,
+        });
         await mutate(courseMetaUrl);
         toast.success(t('activityNameUpdatedSuccess'));
         setIsEditing(false);
@@ -204,7 +206,9 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
     const toastId = toast.loading(t('updating'));
 
     try {
-      await updateActivity({ ...activity, published: !activity.published }, activity.activity_uuid, access_token);
+      await updateActivity({ ...activity, published: !activity.published }, activity.activity_uuid, access_token, {
+        courseUuid: course_uuid,
+      });
       await mutate(courseMetaUrl);
       toast.success(t('activityUpdateSuccess'));
     } catch (error) {
@@ -231,7 +235,7 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
           await deleteAssignmentUsingActivityUUID(activity.activity_uuid, access_token);
         }
 
-        await deleteActivity(activity.activity_uuid, access_token);
+        await deleteActivity(activity.activity_uuid, access_token, { courseUuid: course_uuid });
         await mutate(courseMetaUrl);
         toast.success(t('activityDeletedSuccess'));
         setIsDeleteDialogOpen(false);

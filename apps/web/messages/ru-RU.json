@@ -2217,6 +2217,13 @@
       "creatingChapter": "Создание...",
       "saveOrderError": "Не удалось сохранить новый порядок контента"
     },
+    "Conflict": {
+      "title": "Этот курс изменился в другом редакторе",
+      "description": "Пока вы редактировали курс, кто-то сохранил более новую версию.",
+      "reloadWarning": "Перед следующей попыткой загрузите актуальные данные курса. Перезагрузка удалит несохраненные изменения на этой странице.",
+      "reloadButton": "Загрузить актуальный курс",
+      "reviewDraftButton": "Продолжить просматривать черновик"
+    },
     "activityNamePlaceholder": "Название активности",
     "activityTypes": {
       "assignment": "Задание",
@@ -3250,6 +3257,7 @@
         "unlinkConfirmTitle": "Отвязать группу?",
         "unlinkUserGroupErrorDetailed": "Не удалось отвязать группу: {error}",
         "unlinkUserGroupErrorGeneric": "Не удалось отвязать группу",
+        "loadingUserGroups": "Загрузка групп пользователей...",
         "unlinkUserGroupSuccess": "Группа успешно отвязана",
         "usersOnlyDescription": "Курс доступен только авторизованным пользователям. Можно выбрать, какие группы получат доступ",
         "usersOnlyLabel": "Только пользователи"
@@ -3422,6 +3430,7 @@
       "roleContributor": "Соавтор",
       "roleMaintainer": "Модератор",
       "roleReporter": "Репортер",
+      "loadingContributors": "Загрузка соавторов...",
       "searchUsersPlaceholder": "Искать пользователей по имени или логину для добавления в соавторы...",
       "searchingMessage": "Поиск...",
       "statusActive": "Активный",

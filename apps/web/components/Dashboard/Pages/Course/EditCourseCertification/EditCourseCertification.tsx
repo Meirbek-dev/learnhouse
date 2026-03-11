@@ -1,7 +1,7 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { getCourseCertifications, createCertification, deleteCertification, updateCertification } from '@services/courses/certifications';
+import { createCertification, deleteCertification, updateCertification } from '@services/courses/certifications';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { AlertTriangle, Award, FileText, Loader2, Sparkles } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
@@ -22,7 +22,6 @@ import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import * as v from 'valibot';
-import useSWR from 'swr';
 
 interface EditCourseCertificationProps {
   orgslug: string;
@@ -49,7 +48,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
 
   const course = useCourse();
   const dispatchCourse = useCourseDispatch();
-  const { isLoading, courseStructure } = course as any;
+  const { isLoading, courseStructure, editorData, refreshEditorData, showConflict } = course as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('Certificates.EditCourseCertification');
@@ -96,20 +95,9 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
 
   type FormValues = v.InferOutput<typeof formSchema>;
 
-  // Fetch certifications
-  const {
-    data: certifications,
-    error: certificationsError,
-    mutate: mutateCertifications,
-  } = useSWR(
-    courseStructure?.course_uuid && access_token ? `certifications/course/${courseStructure.course_uuid}` : null,
-    async () => {
-      if (!(courseStructure?.course_uuid && access_token)) return null;
-      return getCourseCertifications(courseStructure.course_uuid, null, access_token);
-    },
-  );
-
-  const existingCertification = certifications?.data?.[0];
+  const certifications = editorData.certifications.data ?? [];
+  const certificationsError = editorData.certifications.error;
+  const existingCertification = certifications[0];
   const hasExistingCertification = Boolean(existingCertification);
 
   const form = useForm<FormValues>({
@@ -158,16 +146,23 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
             certificate_instructor: formValues.certificate_instructor || '',
           };
 
-          const result = await createCertification(courseStructure.id, config, access_token);
+          const result = await createCertification(courseStructure.id, config, access_token, {
+            courseUuid: courseStructure.course_uuid,
+            orgSlug: _props.orgslug,
+          });
 
           if (result) {
             toast.success(t('certificationCreated'));
-            await mutateCertifications();
+            await refreshEditorData();
             form.setValue('enable_certification', true);
           } else {
             throw new Error('Failed to create certification');
           }
-        } catch {
+        } catch (createError: any) {
+          if (createError?.status === 409) {
+            showConflict(createError?.detail || createError?.message);
+            return;
+          }
           setError(t('certificationError'));
           toast.error(t('certificationError'));
           form.setValue('enable_certification', false);
@@ -176,16 +171,23 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
         }
       } else if (!enabled && hasExistingCertification) {
         try {
-          const result = await deleteCertification(existingCertification.certification_uuid, access_token);
+          const result = await deleteCertification(existingCertification.certification_uuid, access_token, {
+            courseUuid: courseStructure.course_uuid,
+            orgSlug: _props.orgslug,
+          });
 
           if (result) {
             toast.success(t('certificationRemoved'));
-            await mutateCertifications();
+            await refreshEditorData();
             form.setValue('enable_certification', false);
           } else {
             throw new Error('Failed to delete certification');
           }
-        } catch {
+        } catch (deleteError: any) {
+          if (deleteError?.status === 409) {
+            showConflict(deleteError?.detail || deleteError?.message);
+            return;
+          }
           setError(t('certificationRemoveError'));
           toast.error(t('certificationRemoveError'));
           form.setValue('enable_certification', true);
@@ -194,12 +196,22 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
         form.setValue('enable_certification', enabled);
       }
     },
-    [hasExistingCertification, form, courseStructure, access_token, existingCertification, mutateCertifications, t],
+    [
+      hasExistingCertification,
+      form,
+      courseStructure,
+      access_token,
+      existingCertification,
+      refreshEditorData,
+      showConflict,
+      t,
+      _props.orgslug,
+    ],
   );
 
   // Initialize form
   useEffect(() => {
-    if (certifications && !isLoading && !hasInitialized) {
+    if (editorData.certifications.data !== null && !isLoading && !hasInitialized) {
       const getInstructorName = () => {
         if (courseStructure?.authors?.length > 0) {
           const author = courseStructure.authors[0];
@@ -235,7 +247,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
       setHasInitialized(true);
     }
   }, [
-    certifications,
+    editorData.certifications.data,
     isLoading,
     hasInitialized,
     dispatchCourse,
@@ -310,13 +322,20 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
     setIsSaving(true);
     setError('');
     try {
-      await updateCertification(existingCertification.certification_uuid, config, access_token);
-      await mutateCertifications();
+      await updateCertification(existingCertification.certification_uuid, config, access_token, {
+        courseUuid: courseStructure.course_uuid,
+        orgSlug: _props.orgslug,
+      });
+      await refreshEditorData();
       initialConfigRef.current = config;
       setIsDirty(false);
       dispatchCourse({ type: 'setSectionDirty', payload: { section: 'certification', dirty: false } });
       toast.success(tCommon('saved'));
     } catch (saveError: any) {
+      if (saveError?.status === 409) {
+        showConflict(saveError?.detail || saveError?.message);
+        return;
+      }
       const message = saveError?.message || t('certificationError');
       setError(message);
       toast.error(message);
@@ -326,7 +345,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
   };
 
   // Loading state
-  if (isLoading || !courseStructure || (courseStructure.course_uuid && access_token && certifications === undefined)) {
+  if (isLoading || !courseStructure || (course.isEditorDataLoading && editorData.certifications.data === null)) {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="text-muted-foreground flex items-center gap-2">

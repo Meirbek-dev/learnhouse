@@ -121,6 +121,7 @@ const CreateCourseModal = ({ closeModal, org_id, onCreated }: CreateCourseModalP
               },
               values.thumbnail,
               session.data?.tokens?.access_token,
+              { orgSlug: org?.slug },
             );
 
             toast.dismiss(toastId);
