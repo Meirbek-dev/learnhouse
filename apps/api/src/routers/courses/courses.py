@@ -10,7 +10,9 @@ from src.db.courses.course_updates import (
     CourseUpdateUpdate,
 )
 from src.db.courses.courses import (
+    CourseAccessUpdate,
     CourseCreate,
+    CourseMetadataUpdate,
     CourseRead,
     CourseUpdate,
     FullCourseRead,
@@ -40,7 +42,9 @@ from src.services.courses.courses import (
     get_courses_orgslug,
     get_editable_courses_orgslug,
     search_courses,
+    update_course_access,
     update_course,
+    update_course_metadata,
     update_course_thumbnail,
 )
 from src.services.courses.updates import (
@@ -256,6 +260,8 @@ async def api_get_editable_courses_by_orgslug(
     page: int,
     limit: int,
     org_slug: str,
+    query: str | None = None,
+    sort_by: str | None = "updated",
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db_session=Depends(get_db_session),
 ) -> list[CourseReadWithPermissions]:
@@ -266,11 +272,11 @@ async def api_get_editable_courses_by_orgslug(
     Returns X-Total-Count header with the number of editable courses.
     """
     courses = await get_editable_courses_orgslug(
-        request, current_user, org_slug, db_session, page, limit
+        request, current_user, org_slug, db_session, page, limit, query, sort_by
     )
 
     total_count = await count_editable_courses_orgslug(
-        current_user, org_slug, db_session
+        current_user, org_slug, db_session, query
     )
     response.headers["X-Total-Count"] = str(total_count)
     response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
@@ -311,6 +317,32 @@ async def api_update_course(
     """
     return await update_course(
         request, course_object, course_uuid, current_user, db_session
+    )
+
+
+@router.put("/{course_uuid}/metadata")
+async def api_update_course_metadata(
+    request: Request,
+    course_uuid: str,
+    metadata_object: CourseMetadataUpdate,
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+) -> CourseRead:
+    return await update_course_metadata(
+        request, course_uuid, metadata_object, current_user, db_session
+    )
+
+
+@router.put("/{course_uuid}/access")
+async def api_update_course_access(
+    request: Request,
+    course_uuid: str,
+    access_object: CourseAccessUpdate,
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+) -> CourseRead:
+    return await update_course_access(
+        request, course_uuid, access_object, current_user, db_session
     )
 
 

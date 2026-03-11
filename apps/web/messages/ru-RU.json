@@ -2214,7 +2214,8 @@
       "addChapterButton": "Добавить главу",
       "chapterCreateFailed": "Не удалось создать главу",
       "chapterCreatedSuccess": "Глава успешно создана",
-      "creatingChapter": "Создание..."
+      "creatingChapter": "Создание...",
+      "saveOrderError": "Не удалось сохранить новый порядок контента"
     },
     "activityNamePlaceholder": "Название активности",
     "activityTypes": {
@@ -2342,16 +2343,29 @@
       "deleteUpdateConfirmation": "Вы уверены, что хотите удалить это обновление?",
       "deleteUpdateTitle": "Удалить обновление?",
       "deletingUpdate": "Удаление обновления...",
-      "newUpdate": "Новое обновление",
+      "noPermissionToAccessTab": "У вас нет доступа к разделу {tabName}",
+      "unsavedChangesDescription": "В этом разделе есть несохраненные изменения. Выйти без сохранения?",
       "noUpdatesYet": "Пока нет обновлений",
       "publishUpdate": "Опубликовать обновление",
+      "clearSearch": "Очистить",
       "publishing": "Публикуется...",
       "titleRequired": "Название обязательно",
       "update": "обновление",
       "updateAddFailed": "Не удалось добавить обновление",
+      "emptyPageDescription": "Курсы пока недоступны",
+      "emptySearchResults": "По вашему запросу курсы не найдены",
+      "nextPage": "Следующая",
       "updateAddedSuccess": "Обновление успешно добавлено",
       "updateContent": "Содержание обновления",
-      "updateContentPlaceholder": "Поделитесь подробностями обновления...",
+      "pageStatus": "Страница {current} из {total}",
+      "previousPage": "Предыдущая",
+      "resultsCount": "{count} курсов",
+      "rightsGuide": "Права и доступ",
+      "searchButton": "Поиск",
+      "searchPlaceholder": "Поиск редактируемых курсов",
+      "sortLabel": "Сортировка",
+      "sortName": "Название",
+      "sortUpdated": "Недавно обновленные",
       "updateDeleteFailed": "Не удалось удалить обновление",
       "updateDeletedSuccess": "Обновление успешно удалено",
       "updateTitle": "Название обновления",
@@ -6457,13 +6471,13 @@
       "exportCSV": "Экспорт CSV",
       "exportStarted": "Загрузка начата"
     },
-      "permissionTable": {
-        "resource": "Ресурс",
-        "code": "Разрешение",
-        "action": "Действие",
-        "scope": "Область",
-        "description": "Описание"
-      },
+    "permissionTable": {
+      "resource": "Ресурс",
+      "code": "Разрешение",
+      "action": "Действие",
+      "scope": "Область",
+      "description": "Описание"
+    },
     "trend": {
       "activeLearners": "Активные учащиеся",
       "completions": "Завершения",

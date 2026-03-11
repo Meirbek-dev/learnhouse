@@ -1,4 +1,6 @@
+import json
 from datetime import UTC, datetime, timezone
+from uuid import uuid4
 from enum import Enum, StrEnum
 
 from pydantic import ConfigDict, field_validator
@@ -52,6 +54,86 @@ class CourseBase(SQLModelStrictBaseModel):
     thumbnail_video: str | None = Field(default="")
     public: bool
     open_to_contributors: bool = False
+
+    @field_validator("learnings", mode="before")
+    @classmethod
+    def validate_learnings(cls, value):
+        if value is None:
+            return None
+        if isinstance(value, list):
+            raw_items = value
+        elif isinstance(value, str):
+            stripped = value.strip()
+            if not stripped:
+                return None
+            try:
+                parsed = json.loads(stripped)
+            except json.JSONDecodeError:
+                parsed = stripped
+            raw_items = parsed if isinstance(parsed, list) else [parsed]
+        else:
+            raw_items = [value]
+
+        normalized_items = []
+        for item in raw_items:
+            if isinstance(item, str):
+                text = item.strip()
+                if not text:
+                    continue
+                normalized_items.append(
+                    {"id": uuid4().hex, "text": text, "emoji": "📝"}
+                )
+                continue
+
+            if not isinstance(item, dict):
+                continue
+
+            text = str(item.get("text", "")).strip()
+            if not text:
+                continue
+
+            normalized_item = {
+                "id": str(item.get("id") or uuid4().hex),
+                "text": text,
+                "emoji": str(item.get("emoji") or "📝"),
+            }
+            link = str(item.get("link") or "").strip()
+            if link:
+                normalized_item["link"] = link
+            normalized_items.append(normalized_item)
+
+        return json.dumps(normalized_items, ensure_ascii=False)
+
+    @field_validator("tags", mode="before")
+    @classmethod
+    def validate_tags(cls, value):
+        if value is None:
+            return None
+
+        raw_tags: list[str]
+        if isinstance(value, list):
+            raw_tags = [str(tag).strip() for tag in value]
+        elif isinstance(value, str):
+            stripped = value.strip()
+            if not stripped:
+                return None
+            try:
+                parsed = json.loads(stripped)
+            except json.JSONDecodeError:
+                parsed = [segment.strip() for segment in stripped.split(",")]
+            if isinstance(parsed, list):
+                raw_tags = [str(tag).strip() for tag in parsed]
+            else:
+                raw_tags = [str(parsed).strip()]
+        else:
+            raw_tags = [str(value).strip()]
+
+        normalized_tags = []
+        for tag in raw_tags:
+            if tag and tag not in normalized_tags:
+                normalized_tags.append(tag)
+
+        return json.dumps(normalized_tags, ensure_ascii=False)
 
     @field_validator("thumbnail_type", mode="before")
     @classmethod
@@ -114,6 +196,63 @@ class CourseUpdate(CourseBase):
         if isinstance(v, str):
             return ThumbnailType(v)
         return v
+
+
+class CourseMetadataUpdate(PydanticStrictBaseModel):
+    name: str | None = None
+    description: str | None = None
+    about: str | None = None
+    learnings: str | None = None
+    tags: str | None = None
+    thumbnail_type: ThumbnailType | None = None
+    last_known_update_date: datetime | None = None
+
+    @field_validator("thumbnail_type", mode="before")
+    @classmethod
+    def validate_thumbnail_type(cls, v):
+        if isinstance(v, str):
+            return ThumbnailType(v)
+        return v
+
+    @field_validator("learnings", mode="before")
+    @classmethod
+    def validate_metadata_learnings(cls, value):
+        return CourseBase.validate_learnings(value)
+
+    @field_validator("tags", mode="before")
+    @classmethod
+    def validate_metadata_tags(cls, value):
+        return CourseBase.validate_tags(value)
+
+    @field_validator("last_known_update_date", mode="before")
+    @classmethod
+    def validate_last_known_update_date(cls, value):
+        if value is None or isinstance(value, datetime):
+            return value
+        if isinstance(value, str):
+            normalized = value.strip()
+            if normalized.endswith("Z"):
+                normalized = f"{normalized[:-1]}+00:00"
+            return datetime.fromisoformat(normalized)
+        return value
+
+
+class CourseAccessUpdate(PydanticStrictBaseModel):
+    public: bool | None = None
+    open_to_contributors: bool | None = None
+    last_known_update_date: datetime | None = None
+
+    @field_validator("last_known_update_date", mode="before")
+    @classmethod
+    def validate_last_known_update_date(cls, value):
+        if value is None or isinstance(value, datetime):
+            return value
+        if isinstance(value, str):
+            normalized = value.strip()
+            if normalized.endswith("Z"):
+                normalized = f"{normalized[:-1]}+00:00"
+            return datetime.fromisoformat(normalized)
+        return value
 
 
 class CourseRead(PydanticStrictBaseModel):

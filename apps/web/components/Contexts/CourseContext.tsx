@@ -35,6 +35,7 @@ export interface Chapter {
 }
 
 type Learnings = string | object | null;
+export type CourseSectionKey = 'general' | 'access' | 'contributors' | 'certification' | 'content';
 
 // Course structure interface with improved typing
 export interface CourseStructure {
@@ -52,32 +53,19 @@ export interface CourseStructure {
   [key: string]: any;
 }
 
-// Course order interface
-interface CourseOrder {
-  chapter_order_by_ids?: {
-    chapter_id: number;
-    activities_order_by_ids: {
-      activity_id: number;
-    }[];
-  }[];
-  [key: string]: any; // For additional properties
-}
-
 // Action types for the reducer
 type CourseAction =
   | { type: 'setCourseStructure'; payload: CourseStructure }
-  | { type: 'setCourseOrder'; payload: CourseOrder }
-  | { type: 'setIsSaved' }
-  | { type: 'setIsNotSaved' }
-  | { type: 'setIsLoaded' };
+  | { type: 'setIsLoaded' }
+  | { type: 'setSectionDirty'; payload: { section: CourseSectionKey; dirty: boolean } }
+  | { type: 'clearDirtySections' };
 
 // Course state interface
 interface CourseState {
   courseStructure: CourseStructure;
-  courseOrder: CourseOrder;
-  isSaved: boolean;
   isLoading: boolean;
   withUnpublishedActivities: boolean;
+  dirtySections: Partial<Record<CourseSectionKey, boolean>>;
 }
 
 // Course provider props interface
@@ -85,6 +73,7 @@ interface CourseProviderProps {
   children: ReactNode;
   courseuuid: string;
   withUnpublishedActivities?: boolean;
+  initialCourse?: CourseStructure | null;
 }
 
 // Dispatch type
@@ -93,7 +82,12 @@ type CourseDispatch = React.Dispatch<CourseAction>;
 export const CourseContext = createContext<CourseState | null>(null);
 export const CourseDispatchContext = createContext<CourseDispatch | null>(null);
 
-export const CourseProvider = ({ children, courseuuid, withUnpublishedActivities = false }: CourseProviderProps) => {
+export const CourseProvider = ({
+  children,
+  courseuuid,
+  withUnpublishedActivities = false,
+  initialCourse,
+}: CourseProviderProps) => {
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('Contexts.Course');
@@ -105,17 +99,22 @@ export const CourseProvider = ({ children, courseuuid, withUnpublishedActivities
   } = useSWR<CourseStructure>(
     `${getAPIUrl()}courses/${courseuuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
     (url: string) => swrFetcher(url, access_token),
+    {
+      fallbackData: initialCourse || undefined,
+      revalidateOnMount: !initialCourse,
+      revalidateIfStale: !initialCourse,
+    },
   );
 
   const initialState: CourseState = {
     courseStructure: {
-      course_uuid: courseuuid,
-      chapters: [], // Initialize as empty array to satisfy required type
+      ...(initialCourse || {}),
+      course_uuid: initialCourse?.course_uuid || courseuuid,
+      chapters: initialCourse?.chapters || [],
     },
-    courseOrder: {},
-    isSaved: true,
-    isLoading: true,
+    isLoading: !initialCourse,
     withUnpublishedActivities,
+    dirtySections: {},
   };
 
   const [state, dispatch] = useReducer(courseReducer, initialState);
@@ -164,17 +163,20 @@ function courseReducer(state: CourseState, action: CourseAction): CourseState {
     case 'setCourseStructure': {
       return { ...state, courseStructure: action.payload };
     }
-    case 'setCourseOrder': {
-      return { ...state, courseOrder: action.payload };
-    }
-    case 'setIsSaved': {
-      return { ...state, isSaved: true };
-    }
-    case 'setIsNotSaved': {
-      return { ...state, isSaved: false };
-    }
     case 'setIsLoaded': {
       return { ...state, isLoading: false };
+    }
+    case 'setSectionDirty': {
+      return {
+        ...state,
+        dirtySections: {
+          ...state.dirtySections,
+          [action.payload.section]: action.payload.dirty,
+        },
+      };
+    }
+    case 'clearDirtySections': {
+      return { ...state, dirtySections: {} };
     }
     default: {
       const _exhaustiveCheck: never = action;

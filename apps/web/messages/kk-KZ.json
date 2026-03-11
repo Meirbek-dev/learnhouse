@@ -2214,7 +2214,8 @@
       "addChapterButton": "Тарау қосу",
       "chapterCreateFailed": "Тарауды жасау мүмкін болмады",
       "chapterCreatedSuccess": "Тарау сәтті жасалды",
-      "creatingChapter": "Жасалуда..."
+      "creatingChapter": "Жасалуда...",
+      "saveOrderError": "Жаңа мазмұн ретін сақтау мүмкін болмады"
     },
     "activityNamePlaceholder": "Белсенділік атауы",
     "activityTypes": {
@@ -2342,16 +2343,29 @@
       "deleteUpdateConfirmation": "Бұл жаңартуды жойғыңыз келетініне сенімдісіз бе?",
       "deleteUpdateTitle": "Жаңартуды жою керек пе?",
       "deletingUpdate": "Жаңарту жойылуда...",
-      "newUpdate": "Жаңа жаңарту",
+      "noPermissionToAccessTab": "{tabName} бөліміне қол жеткізуге рұқсатыңыз жоқ",
+      "unsavedChangesDescription": "Бұл бөлімде сақталмаған өзгерістер бар. Сақтамай шығу керек пе?",
       "noUpdatesYet": "Әлі жаңартулар жоқ",
       "publishUpdate": "Жаңартуды жариялау",
+      "clearSearch": "Тазалау",
       "publishing": "Баспа ісі",
       "titleRequired": "Атауы міндетті",
       "update": "жаңарту",
       "updateAddFailed": "Жаңартуды қосу мүмкін болмады",
+      "emptyPageDescription": "Курстар әзірге қолжетімді емес",
+      "emptySearchResults": "Іздеу бойынша курс табылмады",
+      "nextPage": "Келесі",
       "updateAddedSuccess": "Жаңарту сәтті қосылды",
       "updateContent": "Жаңарту мазмұны",
-      "updateContentPlaceholder": "Жаңартуыңыздың мәліметтерін бөлісіңіз...",
+      "pageStatus": "{current} / {total} бет",
+      "previousPage": "Алдыңғы",
+      "resultsCount": "{count} курс",
+      "rightsGuide": "Құқықтар нұсқаулығы",
+      "searchButton": "Іздеу",
+      "searchPlaceholder": "Өңдеуге болатын курстарды іздеу",
+      "sortLabel": "Сұрыптау",
+      "sortName": "Атауы",
+      "sortUpdated": "Жақында жаңартылған",
       "updateDeleteFailed": "Жаңартуды жою мүмкін болмады",
       "updateDeletedSuccess": "Жаңарту сәтті жойылды",
       "updateTitle": "Жаңарту атауы",
@@ -6457,13 +6471,13 @@
       "exportCSV": "CSV экспорттау",
       "exportStarted": "Жүктеу басталды"
     },
-      "permissionTable": {
-        "resource": "Ресурс",
-        "code": "Рұқсат",
-        "action": "Әрекет",
-        "scope": "Қамту",
-        "description": "Сипаттама"
-      },
+    "permissionTable": {
+      "resource": "Ресурс",
+      "code": "Рұқсат",
+      "action": "Әрекет",
+      "scope": "Қамту",
+      "description": "Сипаттама"
+    },
     "trend": {
       "activeLearners": "Белсенді оқушылар",
       "completions": "Аяқтаулар",

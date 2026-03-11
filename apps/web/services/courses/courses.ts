@@ -7,7 +7,7 @@ import {
 } from '@services/utils/ts/requests';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { getAPIUrl } from '@services/config/config';
-import { tags } from '@/lib/cacheTags';
+import { courseTag, tags } from '@/lib/cacheTags';
 
 /*
  This file includes POST, PUT, DELETE requests and cached GET requests
@@ -63,22 +63,36 @@ async function fetchEditableOrgCourses(
   page = 1,
   limit = 20,
   access_token?: string,
+  query?: string,
+  sortBy = 'updated',
 ): Promise<{ courses: any[]; total: number }> {
   'use cache';
   cacheTag(tags.editableCourses);
+  cacheTag(courseTag.editableList(org_slug));
   cacheLife(CacheProfiles.courses);
 
   if (!access_token) {
     return { courses: [], total: 0 };
   }
 
-  const result = await fetch(`${getAPIUrl()}courses/org_slug/${org_slug}/editable/page/${page}/limit/${limit}`, {
+  const queryParams = new URLSearchParams();
+  if (query?.trim()) {
+    queryParams.set('query', query.trim());
+  }
+  if (sortBy) {
+    queryParams.set('sort_by', sortBy);
+  }
+
+  const result = await fetch(
+    `${getAPIUrl()}courses/org_slug/${org_slug}/editable/page/${page}/limit/${limit}${queryParams.size > 0 ? `?${queryParams.toString()}` : ''}`,
+    {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${access_token}`,
     },
-  });
+    },
+  );
 
   if (!result.ok) {
     const error: any = new Error(result.statusText || 'Request failed');
@@ -92,8 +106,15 @@ async function fetchEditableOrgCourses(
   return { courses, total };
 }
 
-export async function getEditableOrgCourses(org_slug: string, access_token?: any, page = 1, limit = 20) {
-  return fetchEditableOrgCourses(org_slug, page, limit, access_token);
+export async function getEditableOrgCourses(
+  org_slug: string,
+  access_token?: any,
+  page = 1,
+  limit = 20,
+  query?: string,
+  sortBy = 'updated',
+) {
+  return fetchEditableOrgCourses(org_slug, page, limit, access_token, query, sortBy);
 }
 
 export async function searchOrgCourses(
@@ -114,9 +135,10 @@ export async function searchOrgCourses(
 /**
  * Cached fetch for course metadata
  */
-async function fetchCourseMetadata(course_uuid: string, access_token?: string) {
+async function fetchCourseMetadata(course_uuid: string, access_token?: string, withUnpublishedActivities = false) {
   'use cache';
   cacheTag(tags.courses);
+  cacheTag(courseTag.detail(`course_${course_uuid}`));
   cacheLife(CacheProfiles.courses);
 
   const headers: HeadersInit = { 'Content-Type': 'application/json' };
@@ -124,39 +146,83 @@ async function fetchCourseMetadata(course_uuid: string, access_token?: string) {
     headers.Authorization = `Bearer ${access_token}`;
   }
 
-  const result = await fetch(`${getAPIUrl()}courses/course_${course_uuid}/meta`, {
+  const result = await fetch(
+    `${getAPIUrl()}courses/course_${course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+    {
     method: 'GET',
     headers,
-  });
+    },
+  );
   return await errorHandling(result);
 }
 
-export async function getCourseMetadata(course_uuid: string, _next?: any, access_token?: string | null) {
-  return fetchCourseMetadata(course_uuid, access_token || undefined);
+export async function getCourseMetadata(
+  course_uuid: string,
+  _next?: any,
+  access_token?: string | null,
+  withUnpublishedActivities = false,
+) {
+  return fetchCourseMetadata(course_uuid, access_token || undefined, withUnpublishedActivities);
 }
 
-export async function updateCourse(course_uuid: string, data: any, access_token: string) {
-  // Transform frontend data format to API format
-  const apiData = {
-    ...data,
-    // API expects tags as comma-separated string, frontend uses array
-    tags: Array.isArray(data.tags) ? data.tags.join(', ') : data.tags,
-  };
+interface CourseWriteOptions {
+  lastKnownUpdateDate?: string | null;
+}
 
-  const result: any = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}`,
-    RequestBodyWithAuthHeader('PUT', apiData, null, access_token),
+const toCourseMetadataPayload = (data: any, options?: CourseWriteOptions) => ({
+  name: data.name,
+  description: data.description ?? '',
+  about: data.about ?? '',
+  learnings: Array.isArray(data.learnings) ? JSON.stringify(data.learnings) : data.learnings,
+  tags: Array.isArray(data.tags) ? JSON.stringify(data.tags) : data.tags,
+  thumbnail_type: data.thumbnail_type,
+  last_known_update_date: options?.lastKnownUpdateDate ?? data.update_date ?? undefined,
+});
+
+export async function updateCourseMetadata(course_uuid: string, data: any, access_token: string, options?: CourseWriteOptions) {
+  const result = await fetch(
+    `${getAPIUrl()}courses/${course_uuid}/metadata`,
+    RequestBodyWithAuthHeader('PUT', toCourseMetadataPayload(data, options), null, access_token),
   );
-  const data_result = await errorHandling(result);
+  const metadata = await getResponseMetadata(result);
 
-  // Revalidate course cache after update
-  if (result.ok) {
+  if (metadata.success) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
     revalidateTag(tags.editableCourses, 'max');
+    revalidateTag(courseTag.detail(course_uuid), 'max');
   }
 
-  return data_result;
+  return metadata;
+}
+
+export async function updateCourseAccess(course_uuid: string, data: any, access_token: string, options?: CourseWriteOptions) {
+  const result = await fetch(
+    `${getAPIUrl()}courses/${course_uuid}/access`,
+    RequestBodyWithAuthHeader(
+      'PUT',
+      {
+        ...data,
+        last_known_update_date: options?.lastKnownUpdateDate ?? data.update_date ?? undefined,
+      },
+      null,
+      access_token,
+    ),
+  );
+  const metadata = await getResponseMetadata(result);
+
+  if (metadata.success) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.courses, 'max');
+    revalidateTag(courseTag.access(course_uuid), 'max');
+    revalidateTag(courseTag.detail(course_uuid), 'max');
+  }
+
+  return metadata;
+}
+
+export async function updateCourse(course_uuid: string, data: any, access_token: string) {
+  return updateCourseMetadata(course_uuid, data, access_token);
 }
 
 /**
@@ -221,6 +287,7 @@ export async function updateCourseThumbnail(course_uuid: string, formData: FormD
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
     revalidateTag(tags.editableCourses, 'max');
+    revalidateTag(courseTag.detail(course_uuid), 'max');
   }
 
   return metadata;
@@ -268,6 +335,7 @@ export async function deleteCourseFromBackend(course_uuid: string, access_token:
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
     revalidateTag(tags.editableCourses, 'max');
+    revalidateTag(courseTag.detail(course_uuid), 'max');
   }
 
   return data_result;
@@ -299,6 +367,7 @@ export async function editContributor(
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
     revalidateTag(tags.editableCourses, 'max');
+    revalidateTag(courseTag.contributors(course_uuid), 'max');
   }
 
   return metadata;
@@ -332,6 +401,7 @@ export async function bulkAddContributors(course_uuid: string, data: any, access
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
     revalidateTag(tags.editableCourses, 'max');
+    revalidateTag(courseTag.contributors(course_uuid), 'max');
   }
 
   return metadata;
@@ -349,6 +419,7 @@ export async function bulkRemoveContributors(course_uuid: string, data: any, acc
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
     revalidateTag(tags.editableCourses, 'max');
+    revalidateTag(courseTag.contributors(course_uuid), 'max');
   }
 
   return data_result;

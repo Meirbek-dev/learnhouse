@@ -2214,7 +2214,8 @@
       "addChapterButton": "Add Chapter",
       "chapterCreateFailed": "Failed to create chapter",
       "chapterCreatedSuccess": "Chapted created successfully",
-      "creatingChapter": "Creating..."
+      "creatingChapter": "Creating...",
+      "saveOrderError": "Failed to save the new content order"
     },
     "activityNamePlaceholder": "Activity name",
     "activityTypes": {
@@ -3251,16 +3252,29 @@
         "general": "General",
         "loading": "Loading...",
         "noPermissionToAccess": "You don't have permission to access this course.",
-        "noPermissionToAccessTab": "You don't have permission to access {tabName}"
+        "noPermissionToAccessTab": "You don't have permission to access {tabName}",
+        "unsavedChangesDescription": "You have unsaved changes in this section. Leave without saving?"
       },
       "HomePageClient": {
+        "clearSearch": "Clear",
         "courses": "Courses",
         "createACourse": "Create a course to add content",
         "createCourse": "Create Course",
         "createCourseDescription": "Create a new course",
+        "emptyPageDescription": "No courses available yet",
+        "emptySearchResults": "No courses matched your search",
+        "nextPage": "Next",
         "noCourses": "No courses yet",
         "noCoursesAvailable": "No courses available yet",
-        "rightsGuide": "Rights Guide"
+        "pageStatus": "Page {current} of {total}",
+        "previousPage": "Previous",
+        "resultsCount": "{count} courses",
+        "rightsGuide": "Rights Guide",
+        "searchButton": "Search",
+        "searchPlaceholder": "Search editable courses",
+        "sortLabel": "Sort",
+        "sortName": "Name",
+        "sortUpdated": "Recently updated"
       },
       "RightsDocumentation": {
         "backToDashboard": "Back to Dashboard",

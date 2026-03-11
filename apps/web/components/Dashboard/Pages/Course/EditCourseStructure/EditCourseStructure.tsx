@@ -7,9 +7,8 @@ import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { createChapter } from '@services/courses/chapters';
+import { createChapter, updateCourseOrderStructure } from '@services/courses/chapters';
 import { getAPIUrl } from '@services/config/config';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Hexagon } from 'lucide-react';
 import { useState } from 'react';
@@ -35,7 +34,6 @@ export type OrderPayload =
   | undefined;
 
 const EditCourseStructure = (props: EditCourseStructureProps) => {
-  const router = useRouter();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   // Check window availability - use lazy initialization
@@ -43,8 +41,6 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   const t = useTranslations('CourseEdit.Structure');
 
   const dispatchCourse = useCourseDispatch();
-
-  const [_order, _setOrder] = useState<OrderPayload>();
   const course = useCourse();
   const course_structure = course.courseStructure;
   const course_uuid = course ? course.courseStructure.course_uuid : '';
@@ -65,7 +61,6 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
         `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
       );
       await revalidateTags(['courses'], props.orgslug);
-      router.refresh();
       setNewChapterModal(false);
       toast.success(t('chapterCreatedSuccess'), { id: loadingToast });
     } catch (error) {
@@ -74,12 +69,12 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
     }
   };
 
-  const updateStructure = (result: any) => {
-    const { destination, source, draggableId, type } = result;
+  const updateStructure = async (result: any) => {
+    const { destination, source, type } = result;
     if (!destination) return;
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
-    const newCourseStructure = { ...course_structure };
+    const newCourseStructure = structuredClone(course_structure);
 
     if (type === 'chapter') {
       const newChapterOrder = [...newCourseStructure.chapters];
@@ -106,11 +101,25 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
       newCourseStructure.chapters = newChapterOrder;
     }
 
-    dispatchCourse({
-      type: 'setCourseStructure',
-      payload: newCourseStructure,
-    });
-    dispatchCourse({ type: 'setIsNotSaved' });
+    dispatchCourse({ type: 'setCourseStructure', payload: newCourseStructure });
+
+    const payload: OrderPayload = {
+      chapter_order_by_ids: newCourseStructure.chapters.map((chapter: any) => ({
+        chapter_id: chapter.id,
+        activities_order_by_ids: (chapter.activities || []).map((activity: any) => ({ activity_id: activity.id })),
+      })),
+    };
+
+    try {
+      await updateCourseOrderStructure(course_uuid, payload, access_token);
+      await mutate(
+        `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+      );
+      await revalidateTags(['courses'], props.orgslug);
+    } catch {
+      dispatchCourse({ type: 'setCourseStructure', payload: course_structure });
+      toast.error(t('saveOrderError'));
+    }
   };
 
   if (!course) return <PageLoading />;

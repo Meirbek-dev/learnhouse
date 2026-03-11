@@ -18,7 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { bulkAddContributors, bulkRemoveContributors, editContributor } from '@services/courses/courses';
+import { bulkAddContributors, bulkRemoveContributors, editContributor, updateCourseAccess } from '@services/courses/courses';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Check, ChevronDown, Info, Loader2, Search, UserPen, Users } from 'lucide-react';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
@@ -30,6 +30,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useDebouncedValue } from '@/hooks/useDebounce';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useLocale, useTranslations } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import { getAPIUrl } from '@services/config/config';
@@ -109,7 +110,7 @@ const RoleDropdown = ({
         <Button
           variant="outline"
           className="w-[200px] justify-between"
-          disabled={contributor.authorship === 'CREATOR'}
+          disabled={contributor.authorship === 'CREATOR' || contributor.authorship_status !== 'ACTIVE'}
         />
       }
     >
@@ -272,6 +273,7 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
   const { isLoading, courseStructure } = course;
   const dispatchCourse = useCourseDispatch();
   const org = useOrg() as any;
+  const tCommon = useTranslations('Common');
 
   const { data: contributors } = useSWR<Contributor[]>(
     courseStructure ? `${getAPIUrl()}courses/${courseStructure.course_uuid}/contributors` : null,
@@ -288,22 +290,25 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
   const [isSearching, setIsSearching] = useState(false);
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
   const [selectedContributors, setSelectedContributors] = useState<number[]>([]);
+  const [isDirty, setIsDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useUnsavedChangesGuard(isDirty);
 
   useEffect(() => {
-    if (
-      !isLoading &&
-      courseStructure?.open_to_contributors !== undefined &&
-      isOpenToContributors !== undefined &&
-      isOpenToContributors !== courseStructure.open_to_contributors
-    ) {
-      dispatchCourse({ type: 'setIsNotSaved' });
-      const updatedCourse = {
-        ...courseStructure,
-        open_to_contributors: isOpenToContributors,
-      };
-      dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse });
+    if (!isLoading) {
+      const dirty =
+        courseStructure?.open_to_contributors !== undefined &&
+        isOpenToContributors !== undefined &&
+        isOpenToContributors !== courseStructure.open_to_contributors;
+      setIsDirty(Boolean(dirty));
+      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'contributors', dirty: Boolean(dirty) } });
     }
   }, [isLoading, isOpenToContributors, courseStructure, dispatchCourse]);
+
+  useEffect(() => {
+    setIsOpenToContributors(courseStructure?.open_to_contributors);
+  }, [courseStructure?.open_to_contributors]);
 
   useEffect(() => {
     const searchUsers = async () => {
@@ -500,6 +505,41 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
     }
   };
 
+  const handleSaveContributorAccess = async () => {
+    if (!(access_token && isDirty && isOpenToContributors !== undefined)) return;
+
+    setIsSaving(true);
+    try {
+      const response = await updateCourseAccess(
+        courseStructure.course_uuid,
+        { open_to_contributors: isOpenToContributors },
+        access_token,
+        { lastKnownUpdateDate: courseStructure.update_date },
+      );
+
+      if (!response.success) {
+        toast.error(response.data?.detail || tCommon('errorGeneric'));
+        return;
+      }
+
+      dispatchCourse({
+        type: 'setCourseStructure',
+        payload: {
+          ...courseStructure,
+          ...response.data,
+        },
+      });
+      await mutate(`${getAPIUrl()}courses/${courseStructure.course_uuid}/meta?with_unpublished_activities=${course.withUnpublishedActivities}`);
+      setIsDirty(false);
+      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'contributors', dirty: false } });
+      toast.success(tCommon('saved'));
+    } catch (error: any) {
+      toast.error(error?.message || tCommon('errorGeneric'));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div>
       {courseStructure ? (
@@ -507,8 +547,22 @@ const EditCourseContributors = (_props: EditCourseContributorsProps) => {
           <div className="h-6" />
           <div className="mx-4 rounded-xl bg-white px-4 py-4 shadow-xs sm:mx-10">
             <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-3 py-3 sm:px-5">
-              <h1 className="text-lg font-bold text-gray-800 sm:text-xl">{t('courseContributorsTitle')}</h1>
-              <h2 className="text-xs text-gray-500 sm:text-sm">{t('courseContributorsSubtitle')}</h2>
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-lg font-bold text-gray-800 sm:text-xl">{t('courseContributorsTitle')}</h1>
+                  <h2 className="text-xs text-gray-500 sm:text-sm">{t('courseContributorsSubtitle')}</h2>
+                </div>
+                <div className="flex items-center gap-3">
+                  {isDirty ? <span className="text-sm text-gray-500">{tCommon('unsavedChanges')}</span> : null}
+                  <Button
+                    type="button"
+                    disabled={!isDirty || isSaving}
+                    onClick={handleSaveContributorAccess}
+                  >
+                    {isSaving ? tCommon('saving') : tCommon('save')}
+                  </Button>
+                </div>
+              </div>
             </div>
             <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
               <ContributorOptionCard

@@ -26,7 +26,7 @@ const VALID_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp',
 
 interface CreateCourseModalProps {
   closeModal: () => void;
-  org_id: number;
+  org_id?: number;
   onCreated?: () => void | Promise<void>;
 } // Note: parent must pass `org_id` to avoid an extra fetch. Use `onCreated` to run post-create work (e.g., revalidate tags)
 
@@ -104,13 +104,19 @@ const CreateCourseModal = ({ closeModal, org_id, onCreated }: CreateCourseModalP
       startTransition(() => {
         void (async () => {
           try {
+            if (!orgId) {
+              toast.dismiss(toastId);
+              toast.error(t('toastError'));
+              return;
+            }
+
             const res = await createNewCourse(
               orgId,
               {
                 name: values.name,
                 description: values.description || '',
-                learnings: values.learnings?.join(', ') || '',
-                tags: values.tags?.join(', ') || '',
+                learnings: JSON.stringify(values.learnings || []),
+                tags: JSON.stringify(values.tags || []),
                 visibility: values.visibility,
               },
               values.thumbnail,

@@ -52,7 +52,6 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
     toast.success(tNotify('activityCreatedSuccess'));
     setNewActivityModal(false);
     await revalidateTags(['courses'], props.orgslug);
-    router.refresh();
   };
 
   // Submit File Upload
@@ -75,7 +74,6 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
       toast.success(tNotify('fileUploadSuccess'));
       toast.success(tNotify('activityCreatedSuccess'));
       await revalidateTags(['courses'], props.orgslug);
-      router.refresh();
     } catch (error) {
       toast.dismiss(toast_loading);
       toast.error(tNotify('uploadFailed'));
@@ -94,7 +92,6 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
     toast.dismiss(toast_loading);
     toast.success(tNotify('activityCreatedSuccess'));
     await revalidateTags(['courses'], props.orgslug);
-    router.refresh();
   };
 
   return (

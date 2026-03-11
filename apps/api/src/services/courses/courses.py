@@ -8,7 +8,9 @@ from ulid import ULID
 from src.db.courses.courses import (
     AuthorWithRole,
     Course,
+    CourseAccessUpdate,
     CourseCreate,
+    CourseMetadataUpdate,
     CourseRead,
     CourseUpdate,
     FullCourseRead,
@@ -26,6 +28,70 @@ from src.db.usergroup_user import UserGroupUser
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.rbac import PermissionChecker
 from src.services.courses.thumbnails import upload_thumbnail
+
+
+def _course_search_filter(search_query: str | None):
+    if not search_query:
+        return None
+
+    normalized = search_query.strip()
+    if not normalized:
+        return None
+
+    pattern = f"%{normalized}%"
+    return or_(
+        Course.name.ilike(pattern),
+        Course.description.ilike(pattern),
+        Course.about.ilike(pattern),
+        Course.learnings.ilike(pattern),
+        Course.tags.ilike(pattern),
+    )
+
+
+def _apply_course_sort(query, sort_by: str | None):
+    if sort_by == "name":
+        return query.order_by(func.lower(Course.name).asc(), Course.id.asc())
+    return query.order_by(Course.update_date.desc(), Course.id.desc())
+
+
+def _ensure_course_is_current(
+    course: Course, last_known_update_date: datetime | None
+) -> None:
+    if last_known_update_date is None:
+        return
+
+    current_update_date = course.update_date
+    expected_update_date = last_known_update_date
+
+    if expected_update_date.tzinfo is None:
+        expected_update_date = expected_update_date.replace(tzinfo=UTC)
+
+    if current_update_date != expected_update_date:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Course has changed since you opened this editor. Reload and try again.",
+        )
+
+
+def _serialize_course_with_authors(course: Course, db_session: Session) -> CourseRead:
+    authors_statement = (
+        select(ResourceAuthor, User)
+        .join(User, ResourceAuthor.user_id == User.id)
+        .where(ResourceAuthor.resource_uuid == course.course_uuid)
+        .order_by(ResourceAuthor.id.asc())
+    )
+    author_results = db_session.exec(authors_statement).all()
+    authors = [
+        AuthorWithRole(
+            user=UserRead.model_validate(user),
+            authorship=resource_author.authorship,
+            authorship_status=resource_author.authorship_status,
+            creation_date=resource_author.creation_date,
+            update_date=resource_author.update_date,
+        )
+        for resource_author, user in author_results
+    ]
+    return CourseRead.model_validate({**course.model_dump(), "authors": authors})
 
 
 async def get_course(
@@ -425,22 +491,12 @@ async def search_courses(
     limit: int = 20,
 ) -> list[CourseRead]:
     offset = (page - 1) * limit
+    search_filter = _course_search_filter(search_query)
 
     # Base query
-    query = (
-        select(Course)
-        .join(Organization)
-        .where(Organization.slug == org_slug)
-        .where(
-            or_(
-                text(f"LOWER(course.name) LIKE LOWER('%{search_query}%')"),
-                text(f"LOWER(course.description) LIKE LOWER('%{search_query}%')"),
-                text(f"LOWER(course.about) LIKE LOWER('%{search_query}%')"),
-                text(f"LOWER(course.learnings) LIKE LOWER('%{search_query}%')"),
-                text(f"LOWER(course.tags) LIKE LOWER('%{search_query}%')"),
-            )
-        )
-    )
+    query = select(Course).join(Organization).where(Organization.slug == org_slug)
+    if search_filter is not None:
+        query = query.where(search_filter)
 
     if isinstance(current_user, AnonymousUser):
         # For anonymous users, only show public courses
@@ -451,35 +507,43 @@ async def search_courses(
         # 2. Courses not in any UserGroup
         # 3. Courses in UserGroups where the user is a member
         # 4. Courses where the user is a resource author
-        query = (
-            query.outerjoin(
-                UserGroupResource, UserGroupResource.resource_uuid == Course.course_uuid
-            )
-            .outerjoin(
+        has_usergroup_link = (
+            select(UserGroupResource.id)
+            .where(UserGroupResource.resource_uuid == Course.course_uuid)
+            .exists()
+        )
+        has_usergroup_membership = (
+            select(UserGroupResource.id)
+            .join(
                 UserGroupUser,
-                and_(
-                    UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
-                    UserGroupUser.user_id == current_user.id,
-                ),
-            )
-            .outerjoin(
-                ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid
+                UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
             )
             .where(
-                or_(
-                    Course.public,
-                    UserGroupResource.resource_uuid
-                    is None,  # Courses not in any UserGroup
-                    UserGroupUser.user_id
-                    == current_user.id,  # Courses in UserGroups where user is a member
-                    ResourceAuthor.user_id
-                    == current_user.id,  # Courses where user is a resource author
-                )
+                UserGroupResource.resource_uuid == Course.course_uuid,
+                UserGroupUser.user_id == current_user.id,
+            )
+            .exists()
+        )
+        is_resource_author = (
+            select(ResourceAuthor.id)
+            .where(
+                ResourceAuthor.resource_uuid == Course.course_uuid,
+                ResourceAuthor.user_id == current_user.id,
+            )
+            .exists()
+        )
+
+        query = query.where(
+            or_(
+                Course.public,
+                ~has_usergroup_link,
+                has_usergroup_membership,
+                is_resource_author,
             )
         )
 
     # Apply pagination
-    query = query.offset(offset).limit(limit).distinct()
+    query = _apply_course_sort(query, "updated").offset(offset).limit(limit)
 
     courses = db_session.exec(query).all()
 
@@ -825,28 +889,87 @@ async def update_course(
     db_session.commit()
     db_session.refresh(course)
 
-    # Get course authors with their roles
-    authors_statement = (
-        select(ResourceAuthor, User)
-        .join(User, ResourceAuthor.user_id == User.id)
-        .where(ResourceAuthor.resource_uuid == course.course_uuid)
-        .order_by(ResourceAuthor.id.asc())
+    return _serialize_course_with_authors(course, db_session)
+
+
+async def update_course_metadata(
+    request: Request,
+    course_uuid: str,
+    metadata_object: CourseMetadataUpdate,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+    checker: PermissionChecker | None = None,
+):
+    statement = select(Course).where(Course.course_uuid == course_uuid)
+    course = db_session.exec(statement).first()
+
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    if checker is None:
+        checker = PermissionChecker(db_session)
+
+    checker.require(
+        current_user.id,
+        "course:update",
+        course.org_id,
+        resource_owner_id=course.creator_id,
     )
-    author_results = db_session.exec(authors_statement).all()
 
-    # Convert to AuthorWithRole objects
-    authors = [
-        AuthorWithRole(
-            user=UserRead.model_validate(user),
-            authorship=resource_author.authorship,
-            authorship_status=resource_author.authorship_status,
-            creation_date=resource_author.creation_date,
-            update_date=resource_author.update_date,
-        )
-        for resource_author, user in author_results
-    ]
+    _ensure_course_is_current(course, metadata_object.last_known_update_date)
 
-    return CourseRead.model_validate({**course.model_dump(), "authors": authors})
+    update_data = metadata_object.model_dump(exclude_unset=True)
+    update_data.pop("last_known_update_date", None)
+
+    for field, value in update_data.items():
+        setattr(course, field, value)
+
+    course.update_date = datetime.now(tz=UTC)
+    db_session.add(course)
+    db_session.commit()
+    db_session.refresh(course)
+
+    return _serialize_course_with_authors(course, db_session)
+
+
+async def update_course_access(
+    request: Request,
+    course_uuid: str,
+    access_object: CourseAccessUpdate,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+    checker: PermissionChecker | None = None,
+):
+    statement = select(Course).where(Course.course_uuid == course_uuid)
+    course = db_session.exec(statement).first()
+
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    if checker is None:
+        checker = PermissionChecker(db_session)
+
+    checker.require(
+        current_user.id,
+        "course:manage",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
+
+    _ensure_course_is_current(course, access_object.last_known_update_date)
+
+    update_data = access_object.model_dump(exclude_unset=True)
+    update_data.pop("last_known_update_date", None)
+
+    for field, value in update_data.items():
+        setattr(course, field, value)
+
+    course.update_date = datetime.now(tz=UTC)
+    db_session.add(course)
+    db_session.commit()
+    db_session.refresh(course)
+
+    return _serialize_course_with_authors(course, db_session)
 
 
 async def delete_course(
@@ -972,6 +1095,8 @@ async def get_editable_courses_orgslug(
     db_session: Session,
     page: int = 1,
     limit: int = 20,
+    search_query: str | None = None,
+    sort_by: str | None = "updated",
 ) -> list[CourseReadWithPermissions]:
     """
     Return courses for an org that the current user has permission to edit
@@ -1001,36 +1126,39 @@ async def get_editable_courses_orgslug(
     has_broad_update = PermissionChecker._has_perm(
         granted, "course", "update", "all"
     ) or PermissionChecker._has_perm(granted, "course", "update", "org")
+    search_filter = _course_search_filter(search_query)
 
     offset = (page - 1) * limit
 
     if has_broad_update:
-        id_query = (
-            select(Course.id)
-            .join(Organization)
-            .where(Organization.slug == org_slug)
-            .distinct()
-            .offset(offset)
-            .limit(limit)
-        )
+        id_query = select(Course.id).join(Organization).where(Organization.slug == org_slug)
+        if search_filter is not None:
+            id_query = id_query.where(search_filter)
+        id_query = _apply_course_sort(id_query, sort_by).offset(offset).limit(limit)
     else:
         has_own_update = PermissionChecker._has_perm(granted, "course", "update", "own")
         if not has_own_update:
             return []
 
+        is_active_author = (
+            select(ResourceAuthor.id)
+            .where(
+                ResourceAuthor.resource_uuid == Course.course_uuid,
+                ResourceAuthor.user_id == current_user.id,
+                ResourceAuthor.authorship_status
+                == ResourceAuthorshipStatusEnum.ACTIVE,
+            )
+            .exists()
+        )
+
         id_query = (
             select(Course.id)
             .join(Organization, Organization.id == Course.org_id)
-            .join(ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid)
-            .where(
-                Organization.slug == org_slug,
-                ResourceAuthor.user_id == current_user.id,
-                ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
-            )
-            .distinct()
-            .offset(offset)
-            .limit(limit)
+            .where(Organization.slug == org_slug, is_active_author)
         )
+        if search_filter is not None:
+            id_query = id_query.where(search_filter)
+        id_query = _apply_course_sort(id_query, sort_by).offset(offset).limit(limit)
 
     id_subquery = id_query.subquery()
 
@@ -1112,6 +1240,7 @@ async def count_editable_courses_orgslug(
     current_user: PublicUser | AnonymousUser,
     org_slug: str,
     db_session: Session,
+    search_query: str | None = None,
 ) -> int:
     """Count courses the current user can edit in an org."""
     if isinstance(current_user, AnonymousUser):
@@ -1129,6 +1258,7 @@ async def count_editable_courses_orgslug(
     has_broad_update = PermissionChecker._has_perm(
         granted, "course", "update", "all"
     ) or PermissionChecker._has_perm(granted, "course", "update", "org")
+    search_filter = _course_search_filter(search_query)
 
     if has_broad_update:
         query = (
@@ -1151,6 +1281,9 @@ async def count_editable_courses_orgslug(
                 ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
             )
         )
+
+    if search_filter is not None:
+        query = query.where(search_filter)
 
     return db_session.exec(query).one()
 

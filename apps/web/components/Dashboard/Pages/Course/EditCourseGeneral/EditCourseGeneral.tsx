@@ -3,18 +3,25 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { AlertTriangle, BookOpen, Image as ImageIcon, Loader2, Tag, Video } from 'lucide-react';
+import { updateCourseMetadata } from '@services/courses/courses';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Card, CardContent, CardHeader } from '@components/ui/card';
 import { TagsInput } from '@components/ui/custom/tags-input';
+import { Button } from '@/components/ui/button';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Separator } from '@components/ui/separator';
+import { getAPIUrl } from '@services/config/config';
 import LearningItemsList from './LearningItemsList';
 import { Textarea } from '@components/ui/textarea';
 import ThumbnailUpdate from './ThumbnailUpdate';
 import { Input } from '@components/ui/input';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useTranslations } from 'next-intl';
 import { generateUUID } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
+import { mutate } from 'swr';
+import { toast } from 'sonner';
 
 const generateId = () => generateUUID();
 
@@ -71,7 +78,10 @@ const validateValues = (values: FormValues, t: any) => {
 
 function EditCourseGeneral(_props: EditCourseStructureProps) {
   const t = useTranslations('CourseEdit.General');
+  const tCommon = useTranslations('Common');
   const [error, setError] = useState('');
+  const [isDirty, setIsDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const thumbnailTypeItems = [
     {
@@ -119,6 +129,11 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
   const dispatchCourse = useCourseDispatch();
   const { isLoading, courseStructure } = course;
   const formId = useId();
+  const session = usePlatformSession() as any;
+  const accessToken = session?.data?.tokens?.access_token;
+  const courseMetaUrl = `${getAPIUrl()}courses/${courseStructure.course_uuid}/meta?with_unpublished_activities=${course.withUnpublishedActivities}`;
+
+  useUnsavedChangesGuard(isDirty);
 
   const getInitialValues = (): FormValues => {
     const initializeLearnings = (learnings: any) => {
@@ -138,6 +153,14 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
       if (!raw) return [];
       if (Array.isArray(raw)) return raw as string[];
       if (typeof raw === 'string') {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            return parsed.map((tag) => String(tag).trim()).filter(Boolean);
+          }
+        } catch {
+          // Fallback to legacy comma-separated data
+        }
         return raw
           .split(',')
           .map((t: string) => t.trim())
@@ -185,6 +208,14 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
         if (!raw) return [];
         if (Array.isArray(raw)) return raw as string[];
         if (typeof raw === 'string') {
+          try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              return parsed.map((tag) => String(tag).trim()).filter(Boolean);
+            }
+          } catch {
+            // Fallback to legacy comma-separated data
+          }
           return raw
             .split(',')
             .map((t: string) => t.trim())
@@ -205,9 +236,11 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
 
       form.reset(vals);
       initialRef.current = vals;
+      setIsDirty(false);
+      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'general', dirty: false } });
       setError('');
     }
-  }, [isLoading, courseStructure, form]);
+  }, [isLoading, courseStructure, dispatchCourse, form]);
 
   // Watch for unsaved changes & sync context
   useEffect(() => {
@@ -220,22 +253,13 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
         else form.clearErrors(k);
       });
       const changed = JSON.stringify(values) !== JSON.stringify(initialRef.current);
-      if (changed) {
-        dispatchCourse({ type: 'setIsNotSaved' });
-        dispatchCourse({
-          type: 'setCourseStructure',
-          payload: {
-            ...courseStructure,
-            ...values,
-            tags: values.tags?.filter((tag): tag is string => tag !== undefined) ?? [],
-          },
-        });
-      }
+      setIsDirty(changed);
+      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'general', dirty: changed } });
     });
     return () => sub.unsubscribe();
   }, [form, isLoading, dispatchCourse, courseStructure, t]);
 
-  const handleSubmit = (values: FormValues) => {
+  const handleSubmit = async (values: FormValues) => {
     const errors = validateValues(values, t);
     if (Object.keys(errors).length > 0) {
       setError(t('errors.saveFailed'));
@@ -244,8 +268,49 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
       form.setFocus(firstErrorField);
       return;
     }
-    dispatchCourse({ type: 'setIsSaved' });
+
+    if (!accessToken) {
+      setError(t('errors.saveFailed'));
+      toast.error(t('errors.saveFailed'));
+      return;
+    }
+
+    setIsSaving(true);
     setError('');
+
+    try {
+      const response = await updateCourseMetadata(course.courseStructure.course_uuid, values, accessToken, {
+        lastKnownUpdateDate: course.courseStructure.update_date,
+      });
+
+      if (!response.success) {
+        const detail = response.data?.detail;
+        const message = typeof detail === 'string' ? detail : t('errors.saveFailed');
+        setError(message);
+        toast.error(message);
+        return;
+      }
+
+      dispatchCourse({
+        type: 'setCourseStructure',
+        payload: {
+          ...course.courseStructure,
+          ...response.data,
+        },
+      });
+      await mutate(courseMetaUrl);
+
+      initialRef.current = values;
+      setIsDirty(false);
+      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'general', dirty: false } });
+      toast.success(tCommon('saved'));
+    } catch (saveError: any) {
+      const message = saveError?.message || t('errors.saveFailed');
+      setError(message);
+      toast.error(message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (isLoading || !courseStructure) {
@@ -311,6 +376,16 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                     {t('title', { courseName: courseStructure.name || '' })}
                   </h1>
                   <p className="text-muted-foreground text-base">{t('subtitle')}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {isDirty ? <span className="text-sm text-gray-500">{tCommon('unsavedChanges')}</span> : null}
+                  <Button
+                    type="submit"
+                    form={formId}
+                    disabled={!isDirty || isSaving}
+                  >
+                    {isSaving ? tCommon('saving') : tCommon('save')}
+                  </Button>
                 </div>
               </div>
             </CardHeader>

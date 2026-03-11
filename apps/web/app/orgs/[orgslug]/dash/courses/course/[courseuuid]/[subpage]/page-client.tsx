@@ -1,0 +1,225 @@
+'use client';
+
+import EditCourseCertification from '@components/Dashboard/Pages/Course/EditCourseCertification/EditCourseCertification';
+import EditCourseContributors from '@components/Dashboard/Pages/Course/EditCourseContributors/EditCourseContributors';
+import EditCourseStructure from '@components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure';
+import EditCourseGeneral from '@components/Dashboard/Pages/Course/EditCourseGeneral/EditCourseGeneral';
+import EditCourseAccess from '@components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess';
+import { Award, GalleryVerticalEnd, Globe, Info, Loader2, Lock, UserPen } from 'lucide-react';
+import { CourseProvider, useCourse } from '../../../../../../../../components/Contexts/CourseContext';
+import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
+import { Actions, Resources, Scopes } from '@/types/permissions';
+import { usePermissions } from '@/components/Security';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import Link from '@components/ui/AppLink';
+import type { CourseOverviewParams } from './page';
+import { useEffect } from 'react';
+import { motion } from 'motion/react';
+
+function CourseOverviewContent({ params }: { params: CourseOverviewParams }) {
+  const t = useTranslations('DashPage.Courses.CoursePage');
+  const router = useRouter();
+  const { can, loading: rightsLoading } = usePermissions();
+  const course = useCourse();
+  const isCurrentSectionDirty = Boolean(course.dirtySections[params.subpage as keyof typeof course.dirtySections]);
+
+  const tabs = [
+    {
+      key: 'general',
+      label: t('general'),
+      icon: Info,
+      href: `/dash/courses/course/${params.courseuuid}/general`,
+      requiredAction: Actions.UPDATE,
+      requiredResource: Resources.COURSE,
+      requiredScope: Scopes.OWN,
+    },
+    {
+      key: 'content',
+      label: t('content'),
+      icon: GalleryVerticalEnd,
+      href: `/dash/courses/course/${params.courseuuid}/content`,
+      requiredAction: Actions.UPDATE,
+      requiredResource: Resources.COURSE,
+      requiredScope: Scopes.OWN,
+    },
+    {
+      key: 'access',
+      label: t('access'),
+      icon: Globe,
+      href: `/dash/courses/course/${params.courseuuid}/access`,
+      requiredAction: Actions.MANAGE,
+      requiredResource: Resources.COURSE,
+      requiredScope: Scopes.OWN,
+    },
+    {
+      key: 'contributors',
+      label: t('contributors'),
+      icon: UserPen,
+      href: `/dash/courses/course/${params.courseuuid}/contributors`,
+      requiredAction: Actions.MANAGE,
+      requiredResource: Resources.COURSE,
+      requiredScope: Scopes.OWN,
+    },
+    {
+      key: 'certification',
+      label: t('certification'),
+      icon: Award,
+      href: `/dash/courses/course/${params.courseuuid}/certification`,
+      requiredAction: Actions.CREATE,
+      requiredResource: Resources.CERTIFICATE,
+      requiredScope: Scopes.ORG,
+    },
+  ];
+
+  const visibleTabs = tabs.filter((tab) => can(tab.requiredAction, tab.requiredResource, tab.requiredScope));
+  const currentTab = tabs.find((tab) => tab.key === params.subpage);
+  const hasAccessToCurrentPage = currentTab
+    ? can(currentTab.requiredAction, currentTab.requiredResource, currentTab.requiredScope)
+    : false;
+
+  useEffect(() => {
+    if (!(rightsLoading || hasAccessToCurrentPage) && visibleTabs.length > 0) {
+      const firstAvailableTab = visibleTabs[0];
+      if (firstAvailableTab) {
+        router.replace(`/orgs/${params.orgslug}${firstAvailableTab.href}`);
+      }
+    }
+  }, [rightsLoading, hasAccessToCurrentPage, visibleTabs, router, params.orgslug]);
+
+  if (rightsLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-[#f8f8f8]">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!rightsLoading && visibleTabs.length === 0) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-[#f8f8f8]">
+        <div className="text-center">
+          <Lock className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+          <h3 className="mb-2 text-lg font-medium text-gray-900">{t('accessDenied')}</h3>
+          <p className="text-gray-500">{t('noPermissionToAccess')}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid h-screen w-full grid-rows-[auto_1fr] bg-[#f8f8f8]">
+      <div className="soft-shadow bg-background z-10 pr-10 pl-10 text-sm tracking-tight">
+        <CourseOverviewTop params={params} />
+        <div className="flex space-x-3 text-sm font-bold">
+          {tabs.map((tab) => {
+            const IconComponent = tab.icon;
+            const isActive = params.subpage.toString() === tab.key;
+            const hasAccess = can(tab.requiredAction, tab.requiredResource, tab.requiredScope);
+
+            if (!hasAccess) {
+              return (
+                <Tooltip key={tab.key}>
+                  <TooltipTrigger
+                    render={
+                      <div className="border-primary flex w-fit cursor-not-allowed space-x-4 py-2 text-center opacity-30 transition-all ease-linear" />
+                    }
+                  >
+                    <div className="mx-2 flex items-center space-x-2.5">
+                      <IconComponent size={16} />
+                      <div>{tab.label}</div>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="bottom"
+                    sideOffset={8}
+                    className="max-w-60 text-wrap"
+                  >
+                    <div className="text-center">
+                      <div className="font-medium text-gray-900">{t('accessRestricted')}</div>
+                      <div className="text-xs text-gray-100/90">{t('noPermissionToAccessTab', { tabName: tab.label })}</div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            }
+
+            return (
+              <Link
+                key={tab.key}
+                href={`/orgs/${params.orgslug}${tab.href}`}
+                onClick={(event) => {
+                  if (isActive || !isCurrentSectionDirty) {
+                    return;
+                  }
+
+                  const shouldLeave = window.confirm(t('unsavedChangesDescription'));
+                  if (!shouldLeave) {
+                    event.preventDefault();
+                  }
+                }}
+              >
+                <div
+                  className={`border-primary flex w-fit cursor-pointer space-x-4 py-2 text-center transition-all ease-linear ${
+                    isActive ? 'border-b-4' : 'opacity-50 hover:opacity-75'
+                  }`}
+                >
+                  <div className="mx-2 flex items-center space-x-2.5">
+                    <IconComponent size={16} />
+                    <div>{tab.label}</div>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.1, type: 'spring', stiffness: 80 }}
+        className="relative h-full overflow-y-auto"
+      >
+        <div className="absolute inset-0">
+          {params.subpage === 'content' && can(Actions.UPDATE, Resources.COURSE, Scopes.OWN) ? (
+            <EditCourseStructure orgslug={params.orgslug} />
+          ) : null}
+          {params.subpage === 'general' && can(Actions.UPDATE, Resources.COURSE, Scopes.OWN) ? (
+            <EditCourseGeneral orgslug={params.orgslug} />
+          ) : null}
+          {params.subpage === 'access' && can(Actions.MANAGE, Resources.COURSE, Scopes.OWN) ? (
+            <EditCourseAccess orgslug={params.orgslug} />
+          ) : null}
+          {params.subpage === 'contributors' && can(Actions.MANAGE, Resources.COURSE, Scopes.OWN) ? (
+            <EditCourseContributors orgslug={params.orgslug} />
+          ) : null}
+          {params.subpage === 'certification' && can(Actions.CREATE, Resources.CERTIFICATE, Scopes.ORG) ? (
+            <EditCourseCertification orgslug={params.orgslug} />
+          ) : null}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+export default function CourseOverviewClientPage({
+  params,
+  initialCourse,
+}: {
+  params: CourseOverviewParams;
+  initialCourse: any;
+}) {
+  const courseuuid = `course_${params.courseuuid}`;
+
+  return (
+    <CourseProvider
+      courseuuid={courseuuid}
+      withUnpublishedActivities
+      initialCourse={initialCourse}
+    >
+      <CourseOverviewContent params={params} />
+    </CourseProvider>
+  );
+}

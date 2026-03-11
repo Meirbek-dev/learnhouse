@@ -39,25 +39,54 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   };
 }
 
-const COURSES_PER_PAGE = 999;
+const COURSES_PER_PAGE = 24;
+
+function parsePage(value: string | string[] | undefined): number {
+  const raw = Array.isArray(value) ? value[0] : value;
+  const parsed = Number.parseInt(raw ?? '1', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+}
+
+function parseQuery(value: string | string[] | undefined): string {
+  const raw = Array.isArray(value) ? value[0] : value;
+  return raw?.trim() ?? '';
+}
+
+function parseSort(value: string | string[] | undefined): 'updated' | 'name' {
+  const raw = Array.isArray(value) ? value[0] : value;
+  return raw === 'name' ? 'name' : 'updated';
+}
 
 async function CoursesPage(props: {
   params: Promise<{ orgslug: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { orgslug } = await props.params;
+  const searchParams = await props.searchParams;
+  const currentPage = parsePage(searchParams.page);
+  const query = parseQuery(searchParams.q);
+  const sortBy = parseSort(searchParams.sort);
 
-  const org = await getOrganizationContextInfo(orgslug);
   const session = await auth();
   const access_token = session?.tokens?.access_token;
-  const { courses, total } = await getEditableOrgCourses(orgslug, access_token || undefined, 1, COURSES_PER_PAGE);
+  const { courses, total } = await getEditableOrgCourses(
+    orgslug,
+    access_token || undefined,
+    currentPage,
+    COURSES_PER_PAGE,
+    query,
+    sortBy,
+  );
 
   return (
     <CoursesHome
-      org_id={org.org_id}
       orgslug={orgslug}
       courses={courses}
       totalCourses={total}
+      currentPage={currentPage}
+      searchQuery={query}
+      sortBy={sortBy}
+      pageSize={COURSES_PER_PAGE}
     />
   );
 }

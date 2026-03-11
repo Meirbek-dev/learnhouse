@@ -16,7 +16,9 @@ async function CoursesLayout({ children, params }: CoursesLayoutProps) {
   await requireAnyPermission(orgslug, [
     { action: Actions.CREATE, resource: Resources.COURSE, scope: Scopes.ORG },
     { action: Actions.UPDATE, resource: Resources.COURSE, scope: Scopes.ORG },
+    { action: Actions.UPDATE, resource: Resources.COURSE, scope: Scopes.OWN },
     { action: Actions.MANAGE, resource: Resources.COURSE, scope: Scopes.ORG },
+    { action: Actions.MANAGE, resource: Resources.COURSE, scope: Scopes.OWN },
   ]);
 
   return <>{children}</>;

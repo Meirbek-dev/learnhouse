@@ -188,7 +188,6 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
         await revalidateTags(['courses'], orgslug);
         toast.success(t('activityNameUpdatedSuccess'));
         setIsEditing(false);
-        router.refresh();
       } catch (error) {
         console.error('Failed to update activity name:', error);
         toast.error(t('failedToUpdateActivityName'));
@@ -211,7 +210,6 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
       await mutate(courseMetaUrl);
       await revalidateTags(['courses'], orgslug);
       toast.success(t('activityUpdateSuccess'));
-      router.refresh();
     } catch (error) {
       console.error('Failed to toggle publish status:', error);
       toast.error(t('updateFailed', { default: 'Failed to update activity' }));
@@ -241,7 +239,6 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
         await revalidateTags(['courses'], orgslug);
         toast.success(t('activityDeletedSuccess'));
         setIsDeleteDialogOpen(false);
-        router.refresh();
       } catch (error) {
         console.error('Failed to delete activity:', error);
         toast.error(t('deleteFailed', { default: 'Failed to delete activity' }));

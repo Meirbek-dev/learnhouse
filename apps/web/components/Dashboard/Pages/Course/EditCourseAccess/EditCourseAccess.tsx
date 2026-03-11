@@ -16,12 +16,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import LinkToUserGroup from '@components/Objects/Modals/Dash/EditCourseAccess/LinkToUserGroup';
 import { AlertTriangle, Globe, Info, Loader2, SquareUserRound, Users, X } from 'lucide-react';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import { updateCourseAccess } from '@services/courses/courses';
 import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { Button } from '@/components/ui/button';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { useEffect, useState, useTransition } from 'react';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
@@ -137,6 +140,7 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
   const { isLoading, courseStructure } = course;
   const dispatchCourse = useCourseDispatch();
   const t = useTranslations('DashPage.Courses.Access');
+  const tCommon = useTranslations('Common');
 
   const { data: usergroups } = useSWR(
     courseStructure ? `${getAPIUrl()}usergroups/resource/${courseStructure.course_uuid}` : null,
@@ -144,22 +148,57 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
   );
   // Initialize from courseStructure.public with lazy initialization
   const [isClientPublic, setIsClientPublic] = useState<boolean | undefined>(() => courseStructure?.public);
+  const [isDirty, setIsDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useUnsavedChangesGuard(isDirty);
 
   useEffect(() => {
-    if (
-      !isLoading &&
-      courseStructure?.public !== undefined &&
-      isClientPublic !== undefined &&
-      isClientPublic !== courseStructure.public
-    ) {
-      dispatchCourse({ type: 'setIsNotSaved' });
-      const updatedCourse = {
-        ...courseStructure,
-        public: isClientPublic,
-      };
-      dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse });
+    if (!isLoading) {
+      const dirty = isClientPublic !== undefined && isClientPublic !== courseStructure?.public;
+      setIsDirty(Boolean(dirty));
+      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'access', dirty: Boolean(dirty) } });
     }
   }, [isLoading, isClientPublic, courseStructure, dispatchCourse]);
+
+  useEffect(() => {
+    setIsClientPublic(courseStructure?.public);
+  }, [courseStructure?.public]);
+
+  const handleSave = async () => {
+    if (!(access_token && isDirty && isClientPublic !== undefined)) return;
+
+    setIsSaving(true);
+    try {
+      const response = await updateCourseAccess(
+        courseStructure.course_uuid,
+        { public: isClientPublic },
+        access_token,
+        { lastKnownUpdateDate: courseStructure.update_date },
+      );
+
+      if (!response.success) {
+        toast.error(response.data?.detail || tCommon('errorGeneric'));
+        return;
+      }
+
+      dispatchCourse({
+        type: 'setCourseStructure',
+        payload: {
+          ...courseStructure,
+          ...response.data,
+        },
+      });
+      await mutate(`${getAPIUrl()}courses/${courseStructure.course_uuid}/meta?with_unpublished_activities=${course.withUnpublishedActivities}`);
+      setIsDirty(false);
+      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'access', dirty: false } });
+      toast.success(tCommon('saved'));
+    } catch (error: any) {
+      toast.error(error?.message || tCommon('errorGeneric'));
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div>
@@ -168,8 +207,22 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
           <div className="h-6" />
           <div className="mx-4 rounded-xl bg-white px-4 py-4 shadow-xs sm:mx-10">
             <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-3 py-3 sm:px-5">
-              <h1 className="text-lg font-bold text-gray-800 sm:text-xl">{t('accessToTheCourse')}</h1>
-              <h2 className="text-xs text-gray-500 sm:text-sm">{t('accessDescription')}</h2>
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-lg font-bold text-gray-800 sm:text-xl">{t('accessToTheCourse')}</h1>
+                  <h2 className="text-xs text-gray-500 sm:text-sm">{t('accessDescription')}</h2>
+                </div>
+                <div className="flex items-center gap-3">
+                  {isDirty ? <span className="text-sm text-gray-500">{tCommon('unsavedChanges')}</span> : null}
+                  <Button
+                    type="button"
+                    disabled={!isDirty || isSaving}
+                    onClick={handleSave}
+                  >
+                    {isSaving ? tCommon('saving') : tCommon('save')}
+                  </Button>
+                </div>
+              </div>
             </div>
             <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
               <AccessOptionCard

@@ -121,7 +121,6 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
         await mutate(courseMetaUrl);
         await revalidateTags(['courses'], orgslug);
         setIsEditing(false);
-        router.refresh();
       } catch (error) {
         console.error('Failed to update chapter:', error);
         // Reset to original name on error
@@ -142,7 +141,6 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
         await mutate(courseMetaUrl);
         await revalidateTags(['courses'], orgslug);
         setIsDeleteDialogOpen(false);
-        router.refresh();
       } catch (error) {
         console.error('Failed to delete chapter:', error);
         setIsDeleteDialogOpen(false);

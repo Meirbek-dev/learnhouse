@@ -12,7 +12,6 @@ import Image from 'next/image';
 import EmptyThumbnailImage from '../../../public/empty_thumbnail.webp';
 
 import BreadCrumbs from './BreadCrumbs';
-import SaveState from './SaveState';
 
 export const CourseOverviewTop = ({ params }: { params: CourseOverviewParams }) => {
   const course = useCourse();
@@ -60,6 +59,7 @@ export const CourseOverviewTop = ({ params }: { params: CourseOverviewParams }) 
         </div>
         <div className="flex items-center gap-3">
           <Button
+            variant="outline"
             nativeButton={false}
             render={<a href="https://tou.edu.kz/ru/component/docs/?id_n=466" />}
             size="sm"
@@ -68,7 +68,6 @@ export const CourseOverviewTop = ({ params }: { params: CourseOverviewParams }) 
             <BookOpen className="size-4" />
             <span>{t('downloadMoocRequirements')}</span>
           </Button>
-          <SaveState orgslug={params.orgslug} />
         </div>
       </div>
     </>

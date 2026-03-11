@@ -1,10 +1,11 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { createCertification, deleteCertification } from '@services/courses/certifications';
+import { createCertification, deleteCertification, updateCertification } from '@services/courses/certifications';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { AlertTriangle, Award, FileText, Loader2, Sparkles } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { Button } from '@/components/ui/button';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { valibotResolver } from '@hookform/resolvers/valibot';
@@ -18,6 +19,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import * as v from 'valibot';
@@ -52,6 +54,7 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('Certificates.EditCourseCertification');
+  const tCommon = useTranslations('Common');
 
   // Form schema
   const formSchema = v.pipe(
@@ -215,8 +218,8 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
       const getInstructorName = () => {
         if (courseStructure?.authors?.length > 0) {
           const author = courseStructure.authors[0];
-          const firstName = author.first_name || '';
-          const lastName = author.last_name || '';
+          const firstName = author.user?.first_name || '';
+          const lastName = author.user?.last_name || '';
           if (firstName || lastName) {
             return `${firstName} ${lastName}`.trim();
           }
@@ -235,12 +238,22 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
       };
 
       form.reset(newValues);
+      initialConfigRef.current = {
+        certification_name: newValues.certification_name,
+        certification_description: newValues.certification_description,
+        certification_type: newValues.certification_type,
+        certificate_pattern: newValues.certificate_pattern,
+        certificate_instructor: newValues.certificate_instructor,
+      };
+      setIsDirty(false);
+      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'certification', dirty: false } });
       setHasInitialized(true);
     }
   }, [
     certifications,
     isLoading,
     hasInitialized,
+    dispatchCourse,
     form,
     existingCertification,
     hasExistingCertification,
@@ -262,8 +275,11 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
     certificate_pattern: certificatePattern,
     certificate_instructor: certificateInstructor,
   });
+  const initialConfigRef = useRef<Record<string, any> | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  useUnsavedChangesGuard(isDirty);
 
   useEffect(() => {
     if (!isLoading && hasExistingCertification && hasInitialized) {
@@ -275,40 +291,10 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
         certificate_instructor: certificateInstructor,
       };
 
-      const prev = watchedValuesRef.current;
-      const hasChanged = JSON.stringify(prev) !== JSON.stringify(currentValues);
-      if (!hasChanged) return;
-
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-
-      debounceTimeoutRef.current = setTimeout(() => {
-        watchedValuesRef.current = currentValues;
-        dispatchCourse({ type: 'setIsNotSaved' });
-
-        const updatedCourse = {
-          ...courseStructure,
-          _certificationData: {
-            certification_uuid: existingCertification.certification_uuid,
-            config: {
-              certification_name: currentValues.certification_name,
-              certification_description: currentValues.certification_description,
-              certification_type: currentValues.certification_type,
-              certificate_pattern: currentValues.certificate_pattern,
-              certificate_instructor: currentValues.certificate_instructor,
-            },
-          },
-        };
-
-        dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse });
-      }, 300);
-
-      return () => {
-        if (debounceTimeoutRef.current) {
-          clearTimeout(debounceTimeoutRef.current);
-        }
-      };
+      watchedValuesRef.current = currentValues;
+      const dirty = JSON.stringify(initialConfigRef.current) !== JSON.stringify(currentValues);
+      setIsDirty(dirty);
+      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'certification', dirty } });
     }
     return;
   }, [
@@ -324,6 +310,35 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
     dispatchCourse,
     courseStructure,
   ]);
+
+  const handleSaveCertification = async () => {
+    if (!(access_token && hasExistingCertification && existingCertification && isDirty)) return;
+
+    const config = {
+      certification_name: certificationName,
+      certification_description: certificationDescription,
+      certification_type: certificationType,
+      certificate_pattern: certificatePattern,
+      certificate_instructor: certificateInstructor,
+    };
+
+    setIsSaving(true);
+    setError('');
+    try {
+      await updateCertification(existingCertification.certification_uuid, config, access_token);
+      await mutateCertifications();
+      initialConfigRef.current = config;
+      setIsDirty(false);
+      dispatchCourse({ type: 'setSectionDirty', payload: { section: 'certification', dirty: false } });
+      toast.success(tCommon('saved'));
+    } catch (saveError: any) {
+      const message = saveError?.message || t('certificationError');
+      setError(message);
+      toast.error(message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Loading state
   if (isLoading || !courseStructure || (courseStructure.course_uuid && access_token && certifications === undefined)) {
@@ -361,6 +376,16 @@ const EditCourseCertification = (_props: EditCourseCertificationProps) => {
                 <CardDescription>{t('enableCertification')}</CardDescription>
               </div>
               <div className="flex items-center gap-3">
+                {isDirty ? <span className="text-sm text-gray-500">{tCommon('unsavedChanges')}</span> : null}
+                {isEnabled && hasExistingCertification ? (
+                  <Button
+                    type="button"
+                    disabled={!isDirty || isSaving || isCreating}
+                    onClick={handleSaveCertification}
+                  >
+                    {isSaving ? tCommon('saving') : tCommon('save')}
+                  </Button>
+                ) : null}
                 <Label
                   htmlFor="cert-toggle"
                   className="cursor-pointer"

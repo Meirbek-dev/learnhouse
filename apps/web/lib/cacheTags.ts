@@ -26,6 +26,14 @@ export const tags = {
   users: 'users',
 } as const;
 
+export const courseTag = {
+  detail: (courseUuid: string) => `course:${courseUuid}:detail`,
+  access: (courseUuid: string) => `course:${courseUuid}:access`,
+  contributors: (courseUuid: string) => `course:${courseUuid}:contributors`,
+  certifications: (courseUuid: string) => `course:${courseUuid}:certifications`,
+  editableList: (orgSlug: string) => `courses:${orgSlug}:editable`,
+} as const;
+
 export async function revalidateGamification(orgId: number) {
   // Dynamically import to keep this file usable on both server and client
   const { revalidateTag } = await import('next/cache');
