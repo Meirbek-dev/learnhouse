@@ -4,9 +4,28 @@ import { useCourse } from '@components/Contexts/CourseContext';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
+type SaveResponse = { success?: boolean; status?: number; data?: any } | void;
+
 interface SaveSectionOptions {
-  /** Called after a successful save to reset dirty state. */
   onSuccess?: () => void;
+  onError?: (message: string) => void;
+  successMessage?: string;
+  errorMessage?: string;
+}
+
+interface SaveInvocationOptions {
+  onSuccess?: () => void;
+  successMessage?: string;
+  errorMessage?: string;
+  refresh?: 'meta' | 'editor';
+}
+
+function normalizeResponse(response: SaveResponse) {
+  if (response && typeof response === 'object' && 'success' in response) {
+    return response;
+  }
+
+  return { success: true, data: response };
 }
 
 /**
@@ -24,11 +43,11 @@ export function useSaveSection(options?: SaveSectionOptions) {
   const [isSaving, setIsSaving] = useState(false);
   const { showConflict, refreshCourseMeta, refreshCourseEditor } = useCourse();
 
-  const save = useCallback(
-    async (saveFn: () => Promise<{ success: boolean; status?: number; data?: any }>) => {
+  const runSave = useCallback(
+    async (saveFn: () => Promise<SaveResponse>, invocationOptions?: SaveInvocationOptions) => {
       setIsSaving(true);
       try {
-        const response = await saveFn();
+        const response = normalizeResponse(await saveFn());
 
         if (!response.success) {
           if (response.status === 409) {
@@ -37,61 +56,54 @@ export function useSaveSection(options?: SaveSectionOptions) {
             return;
           }
           const message =
-            typeof response.data?.detail === 'string' ? response.data.detail : 'Failed to save. Please try again.'; // i18n:TODO
+            typeof response.data?.detail === 'string'
+              ? response.data.detail
+              : invocationOptions?.errorMessage || options?.errorMessage || 'Failed to save. Please try again.';
+          options?.onError?.(message);
           toast.error(message);
           return;
         }
 
-        // Refresh SWR — the CourseContext useEffect will pick up fresh data.
-        // Do NOT also dispatch setCourseStructure optimistically (causes double-update).
-        await refreshCourseMeta();
-        toast.success('Changes saved'); // i18n:TODO
+        if ((invocationOptions?.refresh || 'meta') === 'editor') {
+          await refreshCourseEditor();
+        } else {
+          await refreshCourseMeta();
+        }
+
+        const successMessage = invocationOptions?.successMessage || options?.successMessage || 'Changes saved';
+        if (successMessage) {
+          toast.success(successMessage);
+        }
+
+        invocationOptions?.onSuccess?.();
         options?.onSuccess?.();
       } catch (error: any) {
         if (error?.status === 409) {
           showConflict(error?.detail || error?.message);
           return;
         }
-        toast.error(error?.message || 'Failed to save. Please try again.'); // i18n:TODO
+        const message = error?.message || invocationOptions?.errorMessage || options?.errorMessage || 'Failed to save. Please try again.';
+        options?.onError?.(message);
+        toast.error(message);
       } finally {
         setIsSaving(false);
       }
     },
-    [showConflict, refreshCourseMeta, options],
+    [options, refreshCourseEditor, refreshCourseMeta, showConflict],
+  );
+
+  const save = useCallback(
+    async (saveFn: () => Promise<SaveResponse>, invocationOptions?: Omit<SaveInvocationOptions, 'refresh'>) => {
+      await runSave(saveFn, { ...invocationOptions, refresh: 'meta' });
+    },
+    [runSave],
   );
 
   const saveWithEditorRefresh = useCallback(
-    async (saveFn: () => Promise<{ success: boolean; status?: number; data?: any }>) => {
-      setIsSaving(true);
-      try {
-        const response = await saveFn();
-
-        if (!response.success) {
-          if (response.status === 409) {
-            const detail = response.data?.detail;
-            showConflict(typeof detail === 'string' ? detail : undefined);
-            return;
-          }
-          const message =
-            typeof response.data?.detail === 'string' ? response.data.detail : 'Failed to save. Please try again.'; // i18n:TODO
-          toast.error(message);
-          return;
-        }
-
-        await refreshCourseEditor();
-        toast.success('Changes saved'); // i18n:TODO
-        options?.onSuccess?.();
-      } catch (error: any) {
-        if (error?.status === 409) {
-          showConflict(error?.detail || error?.message);
-          return;
-        }
-        toast.error(error?.message || 'Failed to save. Please try again.'); // i18n:TODO
-      } finally {
-        setIsSaving(false);
-      }
+    async (saveFn: () => Promise<SaveResponse>, invocationOptions?: Omit<SaveInvocationOptions, 'refresh'>) => {
+      await runSave(saveFn, { ...invocationOptions, refresh: 'editor' });
     },
-    [showConflict, refreshCourseEditor, options],
+    [runSave],
   );
 
   return { isSaving, save, saveWithEditorRefresh };

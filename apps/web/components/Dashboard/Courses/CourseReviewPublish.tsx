@@ -1,7 +1,7 @@
 'use client';
 
 import { buildCourseWorkspacePath, getCourseReadinessSummary } from '@/lib/course-management';
-import { CourseStatusBadge, courseWorkflowMutedPanelClass, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
+import { CourseStatusBadge, courseWorkflowCardClass, courseWorkflowMutedPanelClass, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
@@ -57,12 +57,19 @@ export default function CourseReviewPublish({
           );
 
           if (!response.success) {
-            throw new Error(response.data?.detail || response.HTTPmessage || t('errors.accessUpdate'));
+            const error: any = new Error(response.data?.detail || response.HTTPmessage || t('errors.accessUpdate'));
+            error.status = response.status;
+            error.detail = response.data?.detail;
+            throw error;
           }
 
           await course.refreshCourseMeta();
           toast.success(wasPublic ? t('toasts.movedPrivate') : t('toasts.published'));
         } catch (error: any) {
+          if (error?.status === 409) {
+            course.showConflict(error?.detail || error?.message);
+            return;
+          }
           toast.error(error?.message || t('errors.visibilityUpdate'));
         } finally {
           setIsRefreshing(false);
@@ -73,7 +80,7 @@ export default function CourseReviewPublish({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border bg-card p-6">
+      <div className={`${courseWorkflowCardClass} p-6`}>
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('sectionLabel')}</div>
@@ -108,7 +115,7 @@ export default function CourseReviewPublish({
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
-        <div className="rounded-xl border bg-card p-5">
+        <div className={`${courseWorkflowCardClass} p-5`}>
           <div className="text-sm font-semibold text-foreground">{t('readinessChecklist')}</div>
           <div className="mt-4 space-y-3">
             {readiness.checklist.map((item) => (
@@ -152,7 +159,7 @@ export default function CourseReviewPublish({
             </div>
           </div>
 
-          <div className="rounded-xl border bg-card p-5">
+          <div className={`${courseWorkflowCardClass} p-5`}>
             <div className="text-sm font-semibold text-foreground">{t('publishingNotes')}</div>
             <div className="mt-3 space-y-3 text-sm leading-6 text-muted-foreground">
               <div className={courseWorkflowMutedPanelClass}>{t('notes.visibility')}</div>

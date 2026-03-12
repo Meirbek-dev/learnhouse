@@ -21,6 +21,7 @@ from src.db.organizations import Organization
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
+from src.services.courses.courses import _ensure_course_is_current
 from src.services.courses.activities.uploads.videos import upload_subtitle, upload_video
 
 
@@ -77,6 +78,7 @@ async def create_video_activity(
     current_user: PublicUser,
     db_session: Session,
     video_file: UploadFile | None = None,
+    last_known_update_date: datetime | None = None,
     details: str = "{}",
     subtitle_files: list[UploadFile] | None = None,
     video_uploaded_path: str | None = None,
@@ -121,6 +123,8 @@ async def create_video_activity(
         course.org_id,
         resource_owner_id=course.creator_id,
     )
+
+    _ensure_course_is_current(course, last_known_update_date)
 
     # Get org_uuid
     statement = select(Organization).where(Organization.id == coursechapter.org_id)
@@ -280,6 +284,7 @@ class ExternalVideo(PydanticStrictBaseModel):
     type: Literal["youtube", "vimeo"]
     chapter_id: int
     details: str = "{}"
+    last_known_update_date: datetime | None = None
 
 
 class ExternalVideoInDB(PydanticStrictBaseModel):
@@ -329,6 +334,8 @@ async def create_external_video_activity(
         course.org_id,
         resource_owner_id=course.creator_id,
     )
+
+    _ensure_course_is_current(course, data.last_known_update_date)
 
     # generate activity_uuid
     activity_uuid = f"activity_{ULID()}"

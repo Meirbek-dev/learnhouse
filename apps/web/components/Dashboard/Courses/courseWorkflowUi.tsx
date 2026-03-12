@@ -14,9 +14,13 @@ const courseWorkflowBadgeToneClass: Record<CourseWorkflowBadgeTone, string> = {
   default: 'border-border bg-background text-foreground',
   info: 'border-border bg-muted/70 text-muted-foreground',
   success: 'border-border bg-muted text-foreground',
-  warning: 'border-amber-200/60 bg-amber-50/70 text-amber-900 dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-300',
-  danger: 'border-destructive/20 bg-destructive/5 text-destructive',
+  warning: 'border-border bg-accent/50 text-accent-foreground',
+  danger: 'border-destructive/20 bg-destructive/10 text-destructive',
 };
+
+export function getCourseWorkflowToneClass(tone: CourseWorkflowBadgeTone) {
+  return courseWorkflowBadgeToneClass[tone];
+}
 
 export function CourseWorkflowBadge({
   tone = 'default',
@@ -32,13 +36,15 @@ export function CourseWorkflowBadge({
   return (
     <Badge
       variant="outline"
-      className={cn('gap-1.5', courseWorkflowBadgeToneClass[tone], className)}
+      className={cn('gap-1.5', getCourseWorkflowToneClass(tone), className)}
     >
       {Icon ? <Icon className="size-3.5" /> : null}
       <span>{children}</span>
     </Badge>
   );
 }
+
+export const courseWorkflowCardClass = 'rounded-xl border bg-card shadow-sm';
 
 export function CourseStatusBadge({
   status,
@@ -128,5 +134,5 @@ export function CourseChoiceCard({
   );
 }
 
-export const courseWorkflowSummaryCardClass = 'rounded-xl border bg-card p-5 shadow-sm';
+export const courseWorkflowSummaryCardClass = `${courseWorkflowCardClass} p-5`;
 export const courseWorkflowMutedPanelClass = 'rounded-lg border bg-muted/50 p-4';

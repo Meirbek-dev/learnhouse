@@ -17,6 +17,7 @@ from src.db.courses.courses import Course
 from src.db.organizations import Organization
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
+from src.services.courses.courses import _ensure_course_is_current
 from src.services.courses.activities.uploads.pdfs import upload_pdf
 
 
@@ -26,6 +27,7 @@ async def create_documentpdf_activity(
     chapter_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    last_known_update_date: datetime | None = None,
     pdf_file: UploadFile | None = None,
 ):
     # get chapter_id
@@ -64,6 +66,8 @@ async def create_documentpdf_activity(
         course.org_id,
         resource_owner_id=course.creator_id,
     )
+
+    _ensure_course_is_current(course, last_known_update_date)
 
     # get org_id
     org_id = coursechapter.org_id

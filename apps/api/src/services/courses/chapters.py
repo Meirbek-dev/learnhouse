@@ -51,6 +51,8 @@ async def create_chapter(
         resource_owner_id=course.creator_id,
     )
 
+    _ensure_course_is_current(course, chapter_object.last_known_update_date)
+
     # Complete chapter object
     chapter.course_id = chapter_object.course_id
     chapter.chapter_uuid = f"chapter_{ULID()}"
@@ -176,8 +178,19 @@ async def update_chapter(
         resource_owner_id=chapter.creator_id,
     )
 
+    statement = select(Course).where(Course.id == chapter.course_id)
+    course = db_session.exec(statement).first()
+
+    if not course:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Course does not exist"
+        )
+
+    _ensure_course_is_current(course, chapter_object.last_known_update_date)
+
     # Update only the fields that were passed in
     update_data = chapter_object.model_dump(exclude_unset=True)
+    update_data.pop("last_known_update_date", None)
     for field, value in update_data.items():
         setattr(chapter, field, value)
 
@@ -194,6 +207,7 @@ async def delete_chapter(
     chapter_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    last_known_update_date: datetime | None = None,
 ):
     statement = select(Chapter).where(Chapter.id == chapter_id)
     chapter = db_session.exec(statement).first()
@@ -211,6 +225,16 @@ async def delete_chapter(
         chapter.org_id,
         resource_owner_id=chapter.creator_id,
     )
+
+    statement = select(Course).where(Course.id == chapter.course_id)
+    course = db_session.exec(statement).first()
+
+    if not course:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Course does not exist"
+        )
+
+    _ensure_course_is_current(course, last_known_update_date)
 
     # Remove all linked chapter activities
     statement = select(ChapterActivity).where(ChapterActivity.chapter_id == chapter.id)

@@ -94,6 +94,19 @@ class ActivityCreate(ActivityBase):
     activity_type: ActivityTypeEnum = ActivityTypeEnum.TYPE_CUSTOM
     activity_sub_type: ActivitySubTypeEnum = ActivitySubTypeEnum.SUBTYPE_CUSTOM
     details: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    last_known_update_date: datetime | None = None
+
+    @field_validator("last_known_update_date", mode="before")
+    @classmethod
+    def validate_last_known_update_date(cls, value):
+        if isinstance(value, datetime) or value is None:
+            return value
+        if isinstance(value, str):
+            normalized = value.strip()
+            if normalized.endswith("Z"):
+                normalized = f"{normalized[:-1]}+00:00"
+            return datetime.fromisoformat(normalized)
+        return value
 
 
 class ActivityUpdate(ActivityBase):
@@ -105,6 +118,19 @@ class ActivityUpdate(ActivityBase):
     published: bool | None = None
     published_version: int | None = None
     version: int | None = None
+    last_known_update_date: datetime | None = None
+
+    @field_validator("last_known_update_date", mode="before")
+    @classmethod
+    def validate_last_known_update_date(cls, value):
+        if isinstance(value, datetime) or value is None:
+            return value
+        if isinstance(value, str):
+            normalized = value.strip()
+            if normalized.endswith("Z"):
+                normalized = f"{normalized[:-1]}+00:00"
+            return datetime.fromisoformat(normalized)
+        return value
 
 
 class ActivityRead(ActivityBase):

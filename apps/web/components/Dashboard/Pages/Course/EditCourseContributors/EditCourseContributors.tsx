@@ -12,7 +12,7 @@ import {
   updateCourseAccess,
 } from '@services/courses/courses';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CourseChoiceCard, courseWorkflowMutedPanelClass } from '@components/Dashboard/Courses/courseWorkflowUi';
+import { CourseChoiceCard, courseWorkflowMutedPanelClass, getCourseWorkflowToneClass } from '@components/Dashboard/Courses/courseWorkflowUi';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -324,16 +324,16 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
   const getStatusStyle = (status: ContributorStatus): string => {
     switch (status) {
       case 'ACTIVE': {
-        return 'border-border bg-background text-foreground hover:bg-muted';
+        return `${getCourseWorkflowToneClass('success')} hover:bg-muted`;
       }
       case 'INACTIVE': {
-        return 'border-border bg-muted/70 text-muted-foreground hover:bg-muted';
+        return `${getCourseWorkflowToneClass('info')} hover:bg-muted`;
       }
       case 'PENDING': {
-        return 'border-border bg-accent/50 text-accent-foreground hover:bg-accent';
+        return `${getCourseWorkflowToneClass('warning')} hover:bg-accent`;
       }
       default: {
-        return 'border-border bg-muted/70 text-muted-foreground hover:bg-muted';
+        return `${getCourseWorkflowToneClass('info')} hover:bg-muted`;
       }
     }
   };
@@ -449,7 +449,7 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('manageContributorsTitle', { default: 'Manage contributors' })}</CardTitle>
+          <CardTitle>{t('manageContributorsTitle')}</CardTitle>
           <Alert className="border-border bg-muted/40">
             <Users className="size-4" />
             <AlertTitle>Roster actions apply immediately</AlertTitle>

@@ -17,6 +17,7 @@ from src.db.courses.chapters import Chapter
 from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
+from src.services.courses.courses import _ensure_course_is_current
 from src.services.payments.payments_access import check_activity_paid_access
 
 logger = logging.getLogger(__name__)
@@ -59,6 +60,8 @@ async def create_activity(
         course.org_id,
         resource_owner_id=course.creator_id,
     )
+
+    _ensure_course_is_current(course, activity_object.last_known_update_date)
 
     # Create Activity
     activity = Activity(**activity_object.model_dump())
@@ -242,8 +245,11 @@ async def update_activity(
         resource_owner_id=activity.creator_id,
     )
 
+    _ensure_course_is_current(course, activity_object.last_known_update_date)
+
     # Update only the fields that were passed in
     update_data = activity_object.model_dump(exclude_unset=True)
+    update_data.pop("last_known_update_date", None)
     for field, value in update_data.items():
         if value is not None:
             setattr(activity, field, value)
@@ -272,6 +278,7 @@ async def delete_activity(
     activity_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    last_known_update_date: datetime | None = None,
 ):
     statement = select(Activity).where(Activity.activity_uuid == activity_uuid)
     activity = db_session.exec(statement).first()
@@ -299,6 +306,8 @@ async def delete_activity(
         course.org_id,
         resource_owner_id=activity.creator_id,
     )
+
+    _ensure_course_is_current(course, last_known_update_date)
 
     # Delete activity from chapter
     statement = select(ChapterActivity).where(

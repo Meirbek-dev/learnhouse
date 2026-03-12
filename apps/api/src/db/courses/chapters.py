@@ -37,7 +37,19 @@ class Chapter(ChapterBase, table=True):
 class ChapterCreate(ChapterBase):
     # referenced order here will be ignored and just used for validation
     # used order will be the next available.
-    pass
+    last_known_update_date: datetime | None = None
+
+    @field_validator("last_known_update_date", mode="before")
+    @classmethod
+    def validate_last_known_update_date(cls, value):
+        if isinstance(value, datetime) or value is None:
+            return value
+        if isinstance(value, str):
+            normalized = value.strip()
+            if normalized.endswith("Z"):
+                normalized = f"{normalized[:-1]}+00:00"
+            return datetime.fromisoformat(normalized)
+        return value
 
 
 class ChapterUpdate(SQLModelStrictBaseModel):
@@ -46,6 +58,19 @@ class ChapterUpdate(SQLModelStrictBaseModel):
     thumbnail_image: str | None = None
     org_id: int | None = None
     course_id: int | None = None
+    last_known_update_date: datetime | None = None
+
+    @field_validator("last_known_update_date", mode="before")
+    @classmethod
+    def validate_last_known_update_date(cls, value):
+        if isinstance(value, datetime) or value is None:
+            return value
+        if isinstance(value, str):
+            normalized = value.strip()
+            if normalized.endswith("Z"):
+                normalized = f"{normalized[:-1]}+00:00"
+            return datetime.fromisoformat(normalized)
+        return value
 
 
 class ChapterRead(ChapterBase):

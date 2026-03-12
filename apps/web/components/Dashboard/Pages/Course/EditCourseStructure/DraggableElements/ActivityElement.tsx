@@ -8,8 +8,13 @@ import {
   AlertDialogHeader,
   AlertDialogMedia,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   AlertTriangle,
   Backpack,
@@ -22,6 +27,7 @@ import {
   GripVertical,
   Loader2,
   Lock,
+  MoreHorizontal,
   Pencil,
   Save,
   Sparkles,
@@ -33,7 +39,6 @@ import { CourseWorkflowBadge } from '@components/Dashboard/Courses/courseWorkflo
 import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from '@services/courses/assignments';
 import { deleteActivity, updateActivity } from '@services/courses/activities';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { PermissionTooltip } from '@/components/Utils/PermissionTooltip';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
@@ -135,7 +140,8 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
   // Hooks
   const session = usePlatformSession() as PlatformSession;
   const access_token = session?.data?.tokens?.access_token;
-  const course = useCourse() as Course;
+  const courseContext = useCourse();
+  const course = courseContext as Course;
   const isMobile = useIsMobile();
   const t = useTranslations('CourseEdit.ActivityElement');
 
@@ -181,7 +187,7 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
 
   const handleSaveEdit = async () => {
     if (!access_token) {
-      toast.error(t('noAccessToken', { default: 'Authentication required' }));
+      toast.error('Authentication required');
       return;
     }
 
@@ -193,15 +199,26 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
 
     setIsSavingEdit(true);
     try {
-      await updateActivity({ ...activity, name: trimmedName }, activity.activity_uuid, access_token, {
+      const response = await updateActivity({ ...activity, name: trimmedName }, activity.activity_uuid, access_token, {
         courseUuid: course_uuid,
+        lastKnownUpdateDate: courseContext.courseStructure.update_date,
       });
+      if (!response.success) {
+        throw Object.assign(new Error(response.data?.detail || t('failedToUpdateActivityName')), {
+          status: response.status,
+          detail: response.data?.detail,
+        });
+      }
       await mutate(courseMetaUrl);
       toast.success(t('activityNameUpdatedSuccess'));
       setIsEditing(false);
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.status === 409) {
+        courseContext.showConflict(error?.detail || error?.message);
+        return;
+      }
       console.error('Failed to update activity name:', error);
-      toast.error(t('failedToUpdateActivityName'));
+      toast.error(error?.message || t('failedToUpdateActivityName'));
       setEditedName(activity.name);
     } finally {
       setIsSavingEdit(false);
@@ -210,7 +227,7 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
 
   const handleTogglePublish = async () => {
     if (!access_token) {
-      toast.error(t('noAccessToken', { default: 'Authentication required' }));
+      toast.error('Authentication required');
       return;
     }
 
@@ -218,14 +235,25 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
     const toastId = toast.loading(t('updating'));
 
     try {
-      await updateActivity({ ...activity, published: !activity.published }, activity.activity_uuid, access_token, {
+      const response = await updateActivity({ ...activity, published: !activity.published }, activity.activity_uuid, access_token, {
         courseUuid: course_uuid,
+        lastKnownUpdateDate: courseContext.courseStructure.update_date,
       });
+      if (!response.success) {
+        throw Object.assign(new Error(response.data?.detail || t('updateFailed')), {
+          status: response.status,
+          detail: response.data?.detail,
+        });
+      }
       await mutate(courseMetaUrl);
       toast.success(t('activityUpdateSuccess'));
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.status === 409) {
+        courseContext.showConflict(error?.detail || error?.message);
+        return;
+      }
       console.error('Failed to toggle publish status:', error);
-      toast.error(t('updateFailed', { default: 'Failed to update activity' }));
+      toast.error(error?.message || t('updateFailed'));
     } finally {
       toast.dismiss(toastId);
       setIsUpdatingPublish(false);
@@ -234,7 +262,7 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
 
   const handleDeleteActivity = async () => {
     if (!access_token) {
-      toast.error(t('noAccessToken', { default: 'Authentication required' }));
+      toast.error('Authentication required');
       return;
     }
 
@@ -247,13 +275,26 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
         await deleteAssignmentUsingActivityUUID(activity.activity_uuid, access_token);
       }
 
-      await deleteActivity(activity.activity_uuid, access_token, { courseUuid: course_uuid });
+      const response = await deleteActivity(activity.activity_uuid, access_token, {
+        courseUuid: course_uuid,
+        lastKnownUpdateDate: courseContext.courseStructure.update_date,
+      });
+      if (!response.success) {
+        throw Object.assign(new Error(response.data?.detail || 'Failed to delete activity'), {
+          status: response.status,
+          detail: response.data?.detail,
+        });
+      }
       await mutate(courseMetaUrl);
       toast.success(t('activityDeletedSuccess'));
       setIsDeleteDialogOpen(false);
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.status === 409) {
+        courseContext.showConflict(error?.detail || error?.message);
+        return;
+      }
       console.error('Failed to delete activity:', error);
-      toast.error(t('deleteFailed', { default: 'Failed to delete activity' }));
+      toast.error(error?.message || t('deleteFailed'));
     } finally {
       toast.dismiss(toastId);
       setIsDeletingActivity(false);
@@ -347,7 +388,7 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
                   </Button>
                 )}
                 {isOwner && (
-                  <ToolTip content={t('ownerBadge', { default: 'You created this activity' })}>
+                  <ToolTip content="You created this activity">
                     <CourseWorkflowBadge tone="info">{t('ownerLabel')}</CourseWorkflowBadge>
                   </ToolTip>
                 )}
@@ -357,7 +398,6 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
 
           {/* Action Buttons */}
           <div className="flex flex-shrink-0 items-center gap-2">
-            {/* Edit Button (for assignments and dynamic pages) */}
             <ActivityEditButton
               activity={activity}
               orgslug={orgslug}
@@ -365,106 +405,79 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
               assignmentUUID={assignmentUUID ?? null}
               isAssignmentLoading={isAssignmentLoading}
             />
-
-            {/* Publish/Unpublish Toggle */}
-            <PermissionTooltip
-              enabled={canUpdate}
-              action="update"
-            >
-              <Button
-                size="sm"
-                variant={activity.published ? 'outline' : 'default'}
-                onClick={handleTogglePublish}
-                disabled={isUpdatingPublish || !canUpdate}
-                className={
-                  activity.published
-                    ? 'border-border bg-muted text-foreground hover:bg-muted/80'
-                    : undefined
-                }
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={<Button size="sm" variant="ghost" className="h-8 w-8 p-0" />}
               >
-                {isUpdatingPublish ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : activity.published ? (
-                  <>
-                    <Lock className="h-3.5 w-3.5" />
-                    {!isMobile && <span className="ml-1.5 text-xs">{t('unpublish')}</span>}
-                  </>
-                ) : (
-                  <>
-                    <Globe className="h-3.5 w-3.5" />
-                    {!isMobile && <span className="ml-1.5 text-xs">{t('publish')}</span>}
-                  </>
-                )}
-              </Button>
-            </PermissionTooltip>
-
-            {/* Preview Button */}
-            <ToolTip
-              content={t('previewTooltip')}
-              sideOffset={8}
-            >
-              <Button
-                size="sm"
-                variant="outline"
-                nativeButton={false}
-                render={
-                  <a
-                    href={`${getUriWithOrg(orgslug, '')}/course/${course_uuid.replace('course_', '')}/activity/${activity.activity_uuid.replace('activity_', '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  />
-                }
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-            </ToolTip>
-
-            {/* Delete Button */}
-            <PermissionTooltip
-              enabled={canDelete}
-              action="delete"
-            >
-              <AlertDialog
-                open={isDeleteDialogOpen}
-                onOpenChange={setIsDeleteDialogOpen}
-              >
-                <AlertDialogTrigger disabled={!canDelete}>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    disabled={!canDelete}
+                <MoreHorizontal className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {canUpdate ? (
+                  <DropdownMenuItem onSelect={handleStartEdit}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    {t('editButton')}
+                  </DropdownMenuItem>
+                ) : null}
+                <DropdownMenuItem
+                  onSelect={() => {
+                    window.open(
+                      `${getUriWithOrg(orgslug, '')}/course/${course_uuid.replace('course_', '')}/activity/${activity.activity_uuid.replace('activity_', '')}`,
+                      '_blank',
+                      'noopener,noreferrer',
+                    );
+                  }}
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  {t('previewTooltip')}
+                </DropdownMenuItem>
+                {canUpdate ? (
+                  <DropdownMenuItem onSelect={handleTogglePublish} disabled={isUpdatingPublish}>
+                    {activity.published ? <Lock className="mr-2 h-4 w-4" /> : <Globe className="mr-2 h-4 w-4" />}
+                    {activity.published ? t('unpublish') : t('publish')}
+                  </DropdownMenuItem>
+                ) : null}
+                {canDelete ? (
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onSelect={() => setIsDeleteDialogOpen(true)}
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogMedia className="bg-muted text-foreground">
-                      <AlertTriangle className="size-8" />
-                    </AlertDialogMedia>
-                    <AlertDialogTitle>{t('deleteTitle', { name: activity.name })}</AlertDialogTitle>
-                    <AlertDialogDescription>{t('deleteConfirmation')}</AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isDeletingActivity} />
-                    <AlertDialogAction
-                      variant="destructive"
-                      onClick={handleDeleteActivity}
-                      disabled={isDeletingActivity}
-                    >
-                      {isDeletingActivity ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          {t('deleting')}
-                        </>
-                      ) : (
-                        t('deleteButton')
-                      )}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </PermissionTooltip>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    {t('deleteButton')}
+                  </DropdownMenuItem>
+                ) : null}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <AlertDialog
+              open={isDeleteDialogOpen}
+              onOpenChange={setIsDeleteDialogOpen}
+            >
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogMedia className="bg-muted text-foreground">
+                    <AlertTriangle className="size-8" />
+                  </AlertDialogMedia>
+                  <AlertDialogTitle>{t('deleteTitle', { name: activity.name })}</AlertDialogTitle>
+                  <AlertDialogDescription>{t('deleteConfirmation')}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isDeletingActivity} />
+                  <AlertDialogAction
+                    variant="destructive"
+                    onClick={handleDeleteActivity}
+                    disabled={isDeletingActivity}
+                  >
+                    {isDeletingActivity ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {t('deleting')}
+                      </>
+                    ) : (
+                      t('deleteButton')
+                    )}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       )}
@@ -485,7 +498,7 @@ const ActivityTypeBadge = ({ activityType }: { activityType: ActivityType }) => 
   const label = t(`ActivityTypes.${translationKey}`);
 
   return (
-    <div className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1 ${colorClass}`}>
+    <div className={cn('flex items-center gap-1.5 rounded-md border px-2.5 py-1', colorClass)}>
       <Icon className="h-3.5 w-3.5" />
       <span className="pl-1 text-xs font-medium">{label}</span>
     </div>

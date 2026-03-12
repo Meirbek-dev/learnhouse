@@ -1,5 +1,8 @@
 import { Actions, Resources, Scopes } from '@/types/permissions';
+import { cleanCourseUuid, type CourseWorkspaceStage } from '@/lib/course-management';
+import { getCourseUserRights } from '@services/courses/courses';
 import { requireAuth, sessionCan } from '@/lib/server-auth';
+import { redirect } from 'next/navigation';
 
 export interface CourseWorkspaceCapabilities {
   canViewWorkspace: boolean;
@@ -13,34 +16,84 @@ export interface CourseWorkspaceCapabilities {
   canDeleteCourse: boolean;
 }
 
-function hasCoursePermission(
-  session: any,
-  action: typeof Actions.UPDATE | typeof Actions.MANAGE | typeof Actions.DELETE,
-) {
-  return (
-    sessionCan(session, Resources.COURSE, action, Scopes.ORG) ||
-    sessionCan(session, Resources.COURSE, action, Scopes.OWN)
-  );
+function hasCreateCoursePermission(session: any) {
+  return sessionCan(session, Resources.COURSE, Actions.CREATE, Scopes.ORG);
 }
 
-export async function getCourseWorkspaceCapabilitiesForOrg(orgslug: string): Promise<CourseWorkspaceCapabilities> {
-  const session = await requireAuth(orgslug);
+interface CourseRightsResponse {
+  permissions?: {
+    read?: boolean;
+    update?: boolean;
+    delete?: boolean;
+    update_content?: boolean;
+    manage_contributors?: boolean;
+    manage_access?: boolean;
+    create_certifications?: boolean;
+  };
+}
 
-  const canEdit = hasCoursePermission(session, Actions.UPDATE);
-  const canManage = hasCoursePermission(session, Actions.MANAGE);
-  const canDelete = hasCoursePermission(session, Actions.DELETE);
-  const canCreateCourse = sessionCan(session, Resources.COURSE, Actions.CREATE, Scopes.ORG);
-  const canManageCertificate = sessionCan(session, Resources.CERTIFICATE, Actions.CREATE, Scopes.ORG);
+function mapCourseRightsToCapabilities(session: any, rights: CourseRightsResponse): CourseWorkspaceCapabilities {
+  const canEditDetails = Boolean(rights.permissions?.update);
+  const canEditCurriculum = Boolean(rights.permissions?.update_content ?? rights.permissions?.update);
+  const canManageAccess = Boolean(rights.permissions?.manage_access);
+  const canManageCollaboration = Boolean(rights.permissions?.manage_contributors);
+  const canManageCertificate = Boolean(rights.permissions?.create_certifications);
+  const canDeleteCourse = Boolean(rights.permissions?.delete);
+  const canReviewCourse = canEditDetails || canEditCurriculum || canManageAccess || canManageCertificate;
 
   return {
-    canViewWorkspace: canEdit || canManage || canManageCertificate,
-    canCreateCourse,
-    canEditDetails: canEdit,
-    canEditCurriculum: canEdit,
-    canManageAccess: canManage,
-    canManageCollaboration: canManage,
+    canViewWorkspace: canReviewCourse || canManageCollaboration,
+    canCreateCourse: hasCreateCoursePermission(session),
+    canEditDetails,
+    canEditCurriculum,
+    canManageAccess,
+    canManageCollaboration,
     canManageCertificate,
-    canReviewCourse: canEdit || canManage || canManageCertificate,
-    canDeleteCourse: canDelete,
+    canReviewCourse,
+    canDeleteCourse,
   };
+}
+
+export async function getCourseWorkspaceCapabilitiesForCourse(
+  orgslug: string,
+  courseuuid: string,
+): Promise<CourseWorkspaceCapabilities> {
+  const session = await requireAuth(orgslug);
+  const accessToken = session?.tokens?.access_token;
+  if (!accessToken) {
+    redirect(`/orgs/${orgslug}/unauthorized`);
+  }
+
+  const rights = (await getCourseUserRights(`course_${cleanCourseUuid(courseuuid)}`, accessToken)) as CourseRightsResponse;
+  const capabilities = mapCourseRightsToCapabilities(session, rights);
+
+  if (!capabilities.canViewWorkspace) {
+    redirect(`/orgs/${orgslug}/unauthorized`);
+  }
+
+  return capabilities;
+}
+
+export async function requireCourseWorkspaceStageAccess(
+  orgslug: string,
+  courseuuid: string,
+  stage: CourseWorkspaceStage,
+): Promise<CourseWorkspaceCapabilities> {
+  const capabilities = await getCourseWorkspaceCapabilitiesForCourse(orgslug, courseuuid);
+
+  const allowedByStage: Record<CourseWorkspaceStage, boolean> = {
+    overview: capabilities.canViewWorkspace,
+    details: capabilities.canEditDetails,
+    curriculum: capabilities.canEditCurriculum,
+    access: capabilities.canManageAccess,
+    collaboration: capabilities.canManageCollaboration,
+    certificate: capabilities.canManageCertificate,
+    review: capabilities.canReviewCourse,
+  };
+
+  if (!allowedByStage[stage]) {
+    redirect(`/orgs/${orgslug}/unauthorized`);
+  }
+
+  return capabilities;
 }

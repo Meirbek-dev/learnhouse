@@ -8,9 +8,14 @@ import {
   AlertDialogHeader,
   AlertDialogMedia,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { AlertTriangle, GripVertical, Hexagon, Loader2, Pencil, Save, Trash2, X } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { AlertTriangle, GripVertical, Hexagon, Loader2, MoreHorizontal, Pencil, Save, Trash2, X } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { deleteChapter, updateChapter } from '@services/courses/chapters';
 import { useCourse } from '@components/Contexts/CourseContext';
@@ -76,6 +81,7 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
   const session = usePlatformSession() as PlatformSession;
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
+  const { showConflict } = course;
   const t = useTranslations('CourseEdit');
 
   // State
@@ -113,10 +119,17 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
 
     setIsSavingEdit(true);
     try {
-      await updateChapter(chapter.id, { name: trimmedName }, access_token, { courseUuid: course_uuid });
+      await updateChapter(chapter.id, { name: trimmedName }, access_token, {
+        courseUuid: course_uuid,
+        lastKnownUpdateDate: course.courseStructure.update_date,
+      });
       await course.refreshCourseMeta();
       setIsEditing(false);
     } catch (error: any) {
+      if (error?.status === 409) {
+        showConflict(error?.detail || error?.message);
+        return;
+      }
       toast.error(error?.message || t('chapterUpdateFailed'));
       setEditedName(chapter.name);
     } finally {
@@ -132,10 +145,17 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
 
     setIsDeletingChapter(true);
     try {
-      await deleteChapter(chapter.id, access_token, { courseUuid: course_uuid });
+      await deleteChapter(chapter.id, access_token, {
+        courseUuid: course_uuid,
+        lastKnownUpdateDate: course.courseStructure.update_date,
+      });
       await course.refreshCourseMeta();
       setIsDeleteDialogOpen(false);
     } catch (error: any) {
+      if (error?.status === 409) {
+        showConflict(error?.detail || error?.message);
+        return;
+      }
       toast.error(error?.message || t('chapterDeleteFailed'));
       setIsDeleteDialogOpen(false);
     } finally {
@@ -240,21 +260,32 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
               </div>
             </div>
 
-            {/* Right Section: Delete Button */}
+            {/* Right Section: Actions */}
             <div className="flex-shrink-0">
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={<Button size="sm" variant="ghost" className="h-8 w-8 p-0" />}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onSelect={handleStartEdit}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    {t('edit')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onSelect={() => setIsDeleteDialogOpen(true)}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    {t('deleteChapterButton')}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <AlertDialog
                 open={isDeleteDialogOpen}
                 onOpenChange={setIsDeleteDialogOpen}
               >
-                <AlertDialogTrigger>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    className="h-8"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogMedia className="bg-muted text-foreground">
@@ -284,20 +315,18 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
               </AlertDialog>
             </div>
           </div>
-
-          {/* Activities Droppable Area */}
           <Droppable
             droppableId={chapter.chapter_uuid}
             type="activity"
           >
-            {(provided, snapshot) => (
+            {(provided, droppableSnapshot) => (
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className={`
-                  min-h-[80px] rounded-lg px-4 py-3 transition-colors
-                  ${snapshot.isDraggingOver ? 'bg-muted/50' : ''}
-                `}
+                className={cn(
+                  'min-h-[80px] rounded-lg px-4 py-3 transition-colors',
+                  droppableSnapshot.isDraggingOver && 'bg-muted/50',
+                )}
               >
                 {activities.length > 0 ? (
                   activities.map((activity, index) => (
@@ -311,7 +340,7 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
                   ))
                 ) : (
                   <div className="flex min-h-[60px] items-center justify-center text-sm text-muted-foreground">
-                    {t('noActivities', { default: 'No activities yet' })}
+                    {t('noActivities')}
                   </div>
                 )}
                 {provided.placeholder}

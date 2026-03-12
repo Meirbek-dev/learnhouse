@@ -10,7 +10,6 @@ import {
   AlertDialogHeader,
   AlertDialogMedia,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import {
   Dialog,
@@ -199,7 +198,7 @@ const UserGroupsSection = ({
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={2}>{t('loadingUserGroups', { default: 'Loading user groups...' })}</TableCell>
+                  <TableCell colSpan={2}>{t('loadingUserGroups')}</TableCell>
                 </TableRow>
               ) : null}
               {usergroups?.map((usergroup: any) => (
@@ -291,15 +290,14 @@ const UnlinkUserGroupRow = ({
           open={isOpen}
           onOpenChange={setIsOpen}
         >
-          <AlertDialogTrigger>
-            <Button
-              variant="destructive"
-              size="sm"
-            >
-              <X className="h-4 w-4" />
-              <span>{t('deleteLinkButton')}</span>
-            </Button>
-          </AlertDialogTrigger>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => setIsOpen(true)}
+          >
+            <X className="h-4 w-4" />
+            <span>{t('deleteLinkButton')}</span>
+          </Button>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogMedia className="bg-muted text-foreground">

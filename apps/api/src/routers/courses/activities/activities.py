@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, Request, UploadFile
@@ -110,11 +112,14 @@ async def api_delete_activity(
     activity_uuid: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
+    last_known_update_date: datetime | None = None,
 ):
     """
     Delete activity by activity_id
     """
-    return await delete_activity(request, activity_uuid, current_user, db_session)
+    return await delete_activity(
+        request, activity_uuid, current_user, db_session, last_known_update_date
+    )
 
 
 # Video activity
@@ -125,12 +130,13 @@ async def api_create_video_activity(
     request: Request,
     name: Annotated[str, Form()],
     chapter_id: Annotated[str, Form()],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session=Depends(get_db_session),
+    last_known_update_date: Annotated[datetime | None, Form()] = None,
     details: Annotated[str, Form()] = "{}",
     video_file: UploadFile | None = None,
     video_uploaded_path: Annotated[str | None, Form()] = None,
     subtitle_files: list[UploadFile] | None = None,
-    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
-    db_session=Depends(get_db_session),
 ) -> ActivityRead:
     """
     Create new activity with optional subtitle files.
@@ -145,9 +151,10 @@ async def api_create_video_activity(
         current_user,
         db_session,
         video_file,
-        details,
-        subtitle_files,
-        video_uploaded_path,
+        last_known_update_date=last_known_update_date,
+        details=details,
+        subtitle_files=subtitle_files,
+        video_uploaded_path=video_uploaded_path,
     )
 
 
@@ -172,8 +179,9 @@ async def api_create_documentpdf_activity(
     name: Annotated[str, Form()],
     chapter_id: Annotated[str, Form()],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    pdf_file: UploadFile | None = None,
     db_session=Depends(get_db_session),
+    last_known_update_date: Annotated[datetime | None, Form()] = None,
+    pdf_file: UploadFile | None = None,
 ) -> ActivityRead:
     """
     Create new activity
@@ -184,5 +192,6 @@ async def api_create_documentpdf_activity(
         int(chapter_id),
         current_user,
         db_session,
+        last_known_update_date,
         pdf_file,  # Convert string to int
     )

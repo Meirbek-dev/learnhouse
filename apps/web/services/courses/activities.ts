@@ -14,6 +14,7 @@ interface UploadProgress {
 
 interface ActivityInvalidationOptions {
   courseUuid?: string;
+  lastKnownUpdateDate?: string | null;
 }
 
 async function revalidateActivityCourseTags(options?: ActivityInvalidationOptions) {
@@ -36,6 +37,7 @@ export async function createActivity(
   // ensure the server receives the target chapter and org so the activity is created under that chapter
   data.chapter_id = chapter_id;
   data.org_id = org_id;
+  data.last_known_update_date = options?.lastKnownUpdateDate ?? data.last_known_update_date ?? undefined;
 
   const result = await fetch(`${getAPIUrl()}activities/`, RequestBodyWithAuthHeader('POST', data, null, access_token));
   const metaData = await getResponseMetadata(result);
@@ -99,7 +101,19 @@ async function uploadFormData(
     });
 
     if (!result.ok) {
-      throw new Error(`Upload failed with status ${result.status}`);
+      let detail = `Upload failed with status ${result.status}`;
+      try {
+        const errorData = await result.json();
+        if (typeof errorData?.detail === 'string') {
+          detail = errorData.detail;
+        }
+      } catch {
+        // Ignore JSON parse failures and preserve the generic message.
+      }
+      const error: any = new Error(detail);
+      error.status = result.status;
+      error.detail = detail;
+      throw error;
     }
 
     const json = await result.json();
@@ -133,7 +147,19 @@ async function uploadFormData(
           reject(new Error('Invalid JSON response'));
         }
       } else {
-        reject(new Error(`Upload failed with status ${xhr.status}`));
+        let detail = `Upload failed with status ${xhr.status}`;
+        try {
+          const errorData = JSON.parse(xhr.responseText || '{}');
+          if (typeof errorData?.detail === 'string') {
+            detail = errorData.detail;
+          }
+        } catch {
+          // Ignore parse failures and preserve the generic message.
+        }
+        const error: any = new Error(detail);
+        error.status = xhr.status;
+        error.detail = detail;
+        reject(error);
       }
     });
 
@@ -154,6 +180,7 @@ async function createVideoActivityChunked(
   data: any,
   chapterId: number,
   accessToken: string,
+  options?: ActivityInvalidationOptions,
   onProgress?: (progress: UploadProgress) => void,
 ): Promise<any> {
   const orgUuid = data.org_uuid;
@@ -187,6 +214,9 @@ async function createVideoActivityChunked(
   const formData = new FormData();
   formData.append('chapter_id', chapterId.toString());
   formData.append('name', data.name);
+  if (options?.lastKnownUpdateDate) {
+    formData.append('last_known_update_date', options.lastKnownUpdateDate);
+  }
   formData.append(
     'video_uploaded_path',
     `courses/${courseUuid}/activities/${tempActivityUuid}/video/video.${videoFormat}`,
@@ -207,7 +237,19 @@ async function createVideoActivityChunked(
   });
 
   if (!result.ok) {
-    throw new Error(`Failed to create activity: ${result.status}`);
+    let detail = `Failed to create activity: ${result.status}`;
+    try {
+      const errorData = await result.json();
+      if (typeof errorData?.detail === 'string') {
+        detail = errorData.detail;
+      }
+    } catch {
+      // Ignore JSON parse failures and preserve the generic message.
+    }
+    const error: any = new Error(detail);
+    error.status = result.status;
+    error.detail = detail;
+    throw error;
   }
 
   return result.json();
@@ -221,11 +263,15 @@ async function createVideoActivityStandard(
   data: any,
   chapterId: number,
   accessToken: string,
+  options?: ActivityInvalidationOptions,
   onProgress?: (progress: UploadProgress) => void,
 ): Promise<any> {
   const formData = new FormData();
   formData.append('chapter_id', chapterId.toString());
   formData.append('name', data.name);
+  if (options?.lastKnownUpdateDate) {
+    formData.append('last_known_update_date', options.lastKnownUpdateDate);
+  }
   formData.append('video_file', file);
 
   if (data.details?.subtitles && Array.isArray(data.details.subtitles)) {
@@ -247,10 +293,14 @@ async function createPdfActivity(
   data: any,
   chapterId: number,
   accessToken: string,
+  options?: ActivityInvalidationOptions,
   onProgress?: (progress: UploadProgress) => void,
 ): Promise<any> {
   const formData = new FormData();
   formData.append('chapter_id', chapterId.toString());
+  if (options?.lastKnownUpdateDate) {
+    formData.append('last_known_update_date', options.lastKnownUpdateDate);
+  }
   formData.append('pdf_file', file);
   formData.append('name', data.name);
 
@@ -266,24 +316,31 @@ export async function createFileActivity(
   data: any,
   chapterId: number,
   accessToken: string,
+  options?: ActivityInvalidationOptions,
   onProgress?: (progress: UploadProgress) => void,
 ): Promise<any> {
   if (type === 'video') {
     if (shouldUseChunkedUpload(file.size)) {
       console.log('Using chunked upload for video activity');
-      return createVideoActivityChunked(file, data, chapterId, accessToken, onProgress);
+      return createVideoActivityChunked(file, data, chapterId, accessToken, options, onProgress);
     }
-    return createVideoActivityStandard(file, data, chapterId, accessToken, onProgress);
+    return createVideoActivityStandard(file, data, chapterId, accessToken, options, onProgress);
   }
 
   if (type === 'documentpdf') {
-    return createPdfActivity(file, data, chapterId, accessToken, onProgress);
+    return createPdfActivity(file, data, chapterId, accessToken, options, onProgress);
   }
 
   throw new Error(`Unsupported file activity type: ${type}`);
 }
 
-export async function createExternalVideoActivity(data: any, activity: any, chapter_id: number, access_token: string) {
+export async function createExternalVideoActivity(
+  data: any,
+  activity: any,
+  chapter_id: number,
+  access_token: string,
+  options?: ActivityInvalidationOptions,
+) {
   // add coursechapter_id to data
   data.chapter_id = chapter_id;
   data.activity_id = activity.id;
@@ -304,11 +361,12 @@ export async function createExternalVideoActivity(data: any, activity: any, chap
       }
     : defaultDetails;
   data.details = JSON.stringify(videoDetails);
+  data.last_known_update_date = options?.lastKnownUpdateDate ?? data.last_known_update_date ?? undefined;
   const result = await fetch(
     `${getAPIUrl()}activities/external_video`,
     RequestBodyWithAuthHeader('POST', data, null, access_token),
   );
-  return result.json();
+  return getResponseMetadata(result);
 }
 
 /**
@@ -366,11 +424,16 @@ export async function deleteActivity(
   access_token: string,
   options?: ActivityInvalidationOptions,
 ) {
+  const query = new URLSearchParams();
+  if (options?.lastKnownUpdateDate) {
+    query.set('last_known_update_date', options.lastKnownUpdateDate);
+  }
+
   const result = await fetch(
-    `${getAPIUrl()}activities/${activity_uuid}`,
+    `${getAPIUrl()}activities/${activity_uuid}${query.size > 0 ? `?${query.toString()}` : ''}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const data = await result.json();
+  const data = await getResponseMetadata(result);
 
   // Revalidate activities cache after deletion
   if (result.ok) {
@@ -412,7 +475,15 @@ export async function updateActivity(
 ) {
   const result = await fetch(
     `${getAPIUrl()}activities/${activity_uuid}`,
-    RequestBodyWithAuthHeader('PUT', data, null, access_token),
+    RequestBodyWithAuthHeader(
+      'PUT',
+      {
+        ...data,
+        last_known_update_date: options?.lastKnownUpdateDate ?? data.last_known_update_date ?? undefined,
+      },
+      null,
+      access_token,
+    ),
   );
   const metadata = await getResponseMetadata(result);
 

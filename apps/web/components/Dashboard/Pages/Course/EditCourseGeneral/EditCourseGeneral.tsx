@@ -12,6 +12,7 @@ import { useCourse } from '@components/Contexts/CourseContext';
 import { TagsInput } from '@components/ui/custom/tags-input';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useDirtySection } from '@/hooks/useDirtySection';
+import { useSaveSection } from '@/hooks/useSaveSection';
 import { Separator } from '@components/ui/separator';
 import LearningItemsList from './LearningItemsList';
 import { Textarea } from '@components/ui/textarea';
@@ -20,7 +21,6 @@ import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { generateUUID } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 
 const generateId = () => generateUUID();
 
@@ -121,7 +121,6 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
   const t = useTranslations('CourseEdit.General');
   const tCommon = useTranslations('Common');
   const [error, setError] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
 
   const thumbnailTypeItems = [
     {
@@ -166,12 +165,17 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     },
   ];
   const course = useCourse();
-  const { isLoading, courseStructure, refreshCourseMeta, showConflict } = course;
+  const { isLoading, courseStructure } = course;
   const formId = useId();
   const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
 
   const { isDirty, isDirtyRef, markDirty, markClean } = useDirtySection('general');
+  const { isSaving, save } = useSaveSection({
+    errorMessage: t('errors.saveFailed'),
+    successMessage: tCommon('saved'),
+    onError: setError,
+  });
 
   const form = useForm<FormValues>({
     defaultValues: buildFormValues(courseStructure),
@@ -219,47 +223,21 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
 
     if (!accessToken) {
       setError(t('errors.saveFailed'));
-      toast.error(t('errors.saveFailed'));
       return;
     }
 
-    setIsSaving(true);
     setError('');
 
-    try {
-      const response = await updateCourseMetadata(course.courseStructure.course_uuid, values, accessToken, {
+    await save(async () => updateCourseMetadata(course.courseStructure.course_uuid, values, accessToken, {
         lastKnownUpdateDate: course.courseStructure.update_date,
         orgSlug: props.orgslug,
-      });
-
-      if (!response.success) {
-        const detail = response.data?.detail;
-        if (response.status === 409) {
-          showConflict(typeof detail === 'string' ? detail : undefined);
-          return;
-        }
-        const message = typeof detail === 'string' ? detail : t('errors.saveFailed');
-        setError(message);
-        toast.error(message);
-        return;
-      }
-
-      await refreshCourseMeta();
-
-      initialRef.current = values;
-      markClean();
-      toast.success(tCommon('saved'));
-    } catch (saveError: any) {
-      if (saveError?.status === 409) {
-        showConflict(saveError?.detail || saveError?.message);
-        return;
-      }
-      const message = saveError?.message || t('errors.saveFailed');
-      setError(message);
-      toast.error(message);
-    } finally {
-      setIsSaving(false);
-    }
+      }), {
+      onSuccess: () => {
+        initialRef.current = values;
+        markClean();
+        setError('');
+      },
+    });
   };
 
   const handleDiscard = () => {

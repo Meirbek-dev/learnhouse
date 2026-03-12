@@ -28,6 +28,7 @@ export async function updateChaptersMetadata(course_uuid: string, data: any, acc
 
 interface ChapterInvalidationOptions {
   courseUuid?: string;
+  lastKnownUpdateDate?: string | null;
 }
 
 async function revalidateChapterTags(options?: ChapterInvalidationOptions) {
@@ -43,7 +44,15 @@ export async function updateChapter(
 ) {
   const result: any = await fetch(
     `${getAPIUrl()}chapters/${coursechapter_id}`,
-    RequestBodyWithAuthHeader('PUT', data, null, access_token),
+    RequestBodyWithAuthHeader(
+      'PUT',
+      {
+        ...data,
+        last_known_update_date: options?.lastKnownUpdateDate ?? data.last_known_update_date ?? undefined,
+      },
+      null,
+      access_token,
+    ),
   );
   const data_result = await errorHandling(result);
 
@@ -78,7 +87,15 @@ export async function updateCourseOrderStructure(
 export async function createChapter(data: any, access_token: string, options?: ChapterInvalidationOptions) {
   const result: any = await fetch(
     `${getAPIUrl()}chapters/`,
-    RequestBodyWithAuthHeader('POST', data, null, access_token),
+    RequestBodyWithAuthHeader(
+      'POST',
+      {
+        ...data,
+        last_known_update_date: options?.lastKnownUpdateDate ?? data.last_known_update_date ?? undefined,
+      },
+      null,
+      access_token,
+    ),
   );
   const data_result = await errorHandling(result);
 
@@ -95,8 +112,13 @@ export async function deleteChapter(
   access_token: string,
   options?: ChapterInvalidationOptions,
 ) {
+  const query = new URLSearchParams();
+  if (options?.lastKnownUpdateDate) {
+    query.set('last_known_update_date', options.lastKnownUpdateDate);
+  }
+
   const result: any = await fetch(
-    `${getAPIUrl()}chapters/${coursechapter_id}`,
+    `${getAPIUrl()}chapters/${coursechapter_id}${query.size > 0 ? `?${query.toString()}` : ''}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
   const data_result = await errorHandling(result);

@@ -5,6 +5,9 @@ from sqlalchemy import func
 from sqlmodel import Session, and_, or_, select, text
 from ulid import ULID
 
+from src.db.courses.certifications import Certifications
+from src.db.courses.chapter_activities import ChapterActivity
+from src.db.courses.course_chapters import CourseChapter
 from src.db.courses.courses import (
     AuthorWithRole,
     Course,
@@ -52,6 +55,153 @@ def _apply_course_sort(query, sort_by: str | None):
     if sort_by == "name":
         return query.order_by(func.lower(Course.name).asc(), Course.id.asc())
     return query.order_by(Course.update_date.desc(), Course.id.desc())
+
+
+def _is_course_recent(updated_at: datetime) -> bool:
+    if updated_at.tzinfo is None:
+        updated_at = updated_at.replace(tzinfo=UTC)
+    return (datetime.now(tz=UTC) - updated_at).days <= 14
+
+
+def _build_editable_course_insights(
+    courses: list[CourseReadWithPermissions], db_session: Session
+) -> dict[str, dict[str, bool]]:
+    if not courses:
+        return {}
+
+    course_ids = [course.id for course in courses]
+    course_uuids = [course.course_uuid for course in courses]
+
+    active_author_counts = {
+        resource_uuid: count
+        for resource_uuid, count in db_session.exec(
+            select(ResourceAuthor.resource_uuid, func.count(ResourceAuthor.id))
+            .where(
+                ResourceAuthor.resource_uuid.in_(course_uuids),
+                ResourceAuthor.authorship_status
+                == ResourceAuthorshipStatusEnum.ACTIVE,
+            )
+            .group_by(ResourceAuthor.resource_uuid)
+        ).all()
+    }
+    chapter_counts = {
+        course_id: count
+        for course_id, count in db_session.exec(
+            select(CourseChapter.course_id, func.count(CourseChapter.chapter_id.distinct()))
+            .where(CourseChapter.course_id.in_(course_ids))
+            .group_by(CourseChapter.course_id)
+        ).all()
+    }
+    activity_counts = {
+        course_id: count
+        for course_id, count in db_session.exec(
+            select(ChapterActivity.course_id, func.count(ChapterActivity.activity_id.distinct()))
+            .where(ChapterActivity.course_id.in_(course_ids))
+            .group_by(ChapterActivity.course_id)
+        ).all()
+    }
+    linked_usergroup_counts = {
+        resource_uuid: count
+        for resource_uuid, count in db_session.exec(
+            select(UserGroupResource.resource_uuid, func.count(UserGroupResource.id.distinct()))
+            .where(UserGroupResource.resource_uuid.in_(course_uuids))
+            .group_by(UserGroupResource.resource_uuid)
+        ).all()
+    }
+    certification_counts = {
+        course_id: count
+        for course_id, count in db_session.exec(
+            select(Certifications.course_id, func.count(Certifications.id.distinct()))
+            .where(Certifications.course_id.in_(course_ids))
+            .group_by(Certifications.course_id)
+        ).all()
+    }
+
+    insights: dict[str, dict[str, bool]] = {}
+    for course in courses:
+        chapter_count = int(chapter_counts.get(course.id, 0) or 0)
+        activity_count = int(activity_counts.get(course.id, 0) or 0)
+        author_count = int(active_author_counts.get(course.course_uuid, 0) or 0)
+        linked_usergroups = int(linked_usergroup_counts.get(course.course_uuid, 0) or 0)
+        certifications = int(certification_counts.get(course.id, 0) or 0)
+        has_description = bool((course.description or "").strip())
+        ready = (
+            bool((course.name or "").strip())
+            and has_description
+            and bool(course.thumbnail_image)
+            and chapter_count > 0
+            and activity_count > 0
+            and author_count > 0
+            and (bool(course.public) or linked_usergroups > 0)
+            and certifications > 0
+        )
+        attention = not bool(course.thumbnail_image) or not has_description or activity_count == 0
+        insights[course.course_uuid] = {
+            "ready": ready,
+            "attention": attention,
+            "recent": _is_course_recent(course.update_date),
+        }
+    return insights
+
+
+def _matches_editable_course_preset(
+    course: CourseReadWithPermissions,
+    insights: dict[str, bool],
+    preset: str | None,
+) -> bool:
+    if not preset or preset == "all":
+        return True
+    if preset == "drafts":
+        return (not bool(course.public)) or (not insights["ready"])
+    if preset == "published":
+        return bool(course.public)
+    if preset == "private":
+        return not bool(course.public)
+    if preset == "recent":
+        return insights["recent"]
+    if preset == "attention":
+        return insights["attention"] or (not insights["ready"])
+    return True
+
+
+async def list_editable_courses_orgslug(
+    request: Request,
+    current_user: PublicUser | AnonymousUser,
+    org_slug: str,
+    db_session: Session,
+    page: int = 1,
+    limit: int = 20,
+    search_query: str | None = None,
+    sort_by: str | None = "updated",
+    preset: str | None = None,
+) -> tuple[list[CourseReadWithPermissions], int, dict[str, int]]:
+    all_courses = await get_editable_courses_orgslug(
+        request,
+        current_user,
+        org_slug,
+        db_session,
+        page=1,
+        limit=10_000,
+        search_query=search_query,
+        sort_by=sort_by,
+        apply_pagination=False,
+    )
+
+    insights = _build_editable_course_insights(all_courses, db_session)
+    summary = {
+        "total": len(all_courses),
+        "ready": sum(1 for course in all_courses if insights.get(course.course_uuid, {}).get("ready")),
+        "private": sum(1 for course in all_courses if not bool(course.public)),
+        "attention": sum(1 for course in all_courses if insights.get(course.course_uuid, {}).get("attention")),
+    }
+
+    filtered_courses = [
+        course
+        for course in all_courses
+        if _matches_editable_course_preset(course, insights.get(course.course_uuid, {}), preset)
+    ]
+    offset = max(page - 1, 0) * limit
+    return filtered_courses[offset : offset + limit], len(filtered_courses), summary
 
 
 def _ensure_course_is_current(
@@ -1100,6 +1250,7 @@ async def get_editable_courses_orgslug(
     limit: int = 20,
     search_query: str | None = None,
     sort_by: str | None = "updated",
+    apply_pagination: bool = True,
 ) -> list[CourseReadWithPermissions]:
     """
     Return courses for an org that the current user has permission to edit
@@ -1137,7 +1288,7 @@ async def get_editable_courses_orgslug(
         id_query = select(Course.id).join(Organization).where(Organization.slug == org_slug)
         if search_filter is not None:
             id_query = id_query.where(search_filter)
-        id_query = _apply_course_sort(id_query, sort_by).offset(offset).limit(limit)
+        id_query = _apply_course_sort(id_query, sort_by)
     else:
         has_own_update = PermissionChecker._has_perm(granted, "course", "update", "own")
         if not has_own_update:
@@ -1161,7 +1312,10 @@ async def get_editable_courses_orgslug(
         )
         if search_filter is not None:
             id_query = id_query.where(search_filter)
-        id_query = _apply_course_sort(id_query, sort_by).offset(offset).limit(limit)
+        id_query = _apply_course_sort(id_query, sort_by)
+
+    if apply_pagination:
+        id_query = id_query.offset(offset).limit(limit)
 
     id_subquery = id_query.subquery()
 

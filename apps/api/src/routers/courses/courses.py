@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, Request, Response, UploadFile
@@ -41,6 +43,7 @@ from src.services.courses.courses import (
     get_course_user_rights,
     get_courses_orgslug,
     get_editable_courses_orgslug,
+    list_editable_courses_orgslug,
     search_courses,
     update_course_access,
     update_course,
@@ -269,6 +272,7 @@ async def api_get_editable_courses_by_orgslug(
     org_slug: str,
     query: str | None = None,
     sort_by: str | None = "updated",
+    preset: str | None = "all",
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db_session=Depends(get_db_session),
 ) -> list[CourseReadWithPermissions]:
@@ -278,15 +282,17 @@ async def api_get_editable_courses_by_orgslug(
     Only returns courses where the user has ``course:update`` permission.
     Returns X-Total-Count header with the number of editable courses.
     """
-    courses = await get_editable_courses_orgslug(
-        request, current_user, org_slug, db_session, page, limit, query, sort_by
-    )
-
-    total_count = await count_editable_courses_orgslug(
-        current_user, org_slug, db_session, query
+    courses, total_count, summary = await list_editable_courses_orgslug(
+        request, current_user, org_slug, db_session, page, limit, query, sort_by, preset
     )
     response.headers["X-Total-Count"] = str(total_count)
-    response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
+    response.headers["X-Summary-Total"] = str(summary["total"])
+    response.headers["X-Summary-Ready"] = str(summary["ready"])
+    response.headers["X-Summary-Private"] = str(summary["private"])
+    response.headers["X-Summary-Attention"] = str(summary["attention"])
+    response.headers["Access-Control-Expose-Headers"] = (
+        "X-Total-Count, X-Summary-Total, X-Summary-Ready, X-Summary-Private, X-Summary-Attention"
+    )
 
     return courses
 

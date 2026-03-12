@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertTriangle, Award, FileText, Sparkles } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useSaveSection } from '@/hooks/useSaveSection';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDirtySection } from '@/hooks/useDirtySection';
@@ -23,7 +24,6 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
 import * as v from 'valibot';
 import CertificatePreview from './CertificatePreview';
 
@@ -80,10 +80,9 @@ type FormValues = v.InferOutput<typeof _certFormSchemaForTypes>;
 const EditCourseCertification = (props: EditCourseCertificationProps) => {
   const [error, setError] = useState('');
   const [hasHydrated, setHasHydrated] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
 
   const course = useCourse();
-  const { isLoading, courseStructure, editorData, refreshEditorData, showConflict } = course;
+  const { isLoading, courseStructure, editorData } = course;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('Certificates.EditCourseCertification');
@@ -187,6 +186,10 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
   const initialValuesRef = useRef<FormValues>(form.getValues());
 
   const { isDirty, isDirtyRef, markDirty, markClean } = useDirtySection('certification');
+  const { isSaving, saveWithEditorRefresh } = useSaveSection({
+    errorMessage: t('certificationError'),
+    onError: setError,
+  });
 
   // Initialize form when data is ready
   useEffect(() => {
@@ -253,52 +256,46 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
       certificate_instructor: values.certificate_instructor,
     };
 
-    setIsSaving(true);
     setError('');
-    try {
+
+    await saveWithEditorRefresh(async () => {
       if (values.enable_certification) {
         if (existingCertification) {
-          await updateCertification(existingCertification.certification_uuid, config, access_token, {
-            courseUuid: courseStructure.course_uuid,
-            orgSlug: props.orgslug,
-            lastKnownUpdateDate: courseStructure.update_date,
-          });
-        } else {
-          await createCertification(courseStructure.id, config, access_token, {
+          return updateCertification(existingCertification.certification_uuid, config, access_token, {
             courseUuid: courseStructure.course_uuid,
             orgSlug: props.orgslug,
             lastKnownUpdateDate: courseStructure.update_date,
           });
         }
-      } else if (existingCertification) {
-        await deleteCertification(existingCertification.certification_uuid, access_token, {
+
+        return createCertification(courseStructure.id, config, access_token, {
+            courseUuid: courseStructure.course_uuid,
+            orgSlug: props.orgslug,
+            lastKnownUpdateDate: courseStructure.update_date,
+          });
+      }
+
+      if (existingCertification) {
+        return deleteCertification(existingCertification.certification_uuid, access_token, {
           courseUuid: courseStructure.course_uuid,
           orgSlug: props.orgslug,
           lastKnownUpdateDate: courseStructure.update_date,
         });
       }
 
-      initialValuesRef.current = values;
-      markClean();
-      await refreshEditorData();
-      toast.success(
-        values.enable_certification
-          ? hasExistingCertification
-            ? tCommon('saved')
-            : t('certificationCreated')
-          : t('certificationRemoved'),
-      );
-    } catch (saveError: any) {
-      if (saveError?.status === 409) {
-        showConflict(saveError?.detail || saveError?.message);
-        return;
-      }
-      const message = saveError?.message || t('certificationError');
-      setError(message);
-      toast.error(message);
-    } finally {
-      setIsSaving(false);
-    }
+      return { success: true };
+    }, {
+      successMessage: values.enable_certification
+        ? hasExistingCertification
+          ? tCommon('saved')
+          : t('certificationCreated')
+        : t('certificationRemoved'),
+      onSuccess: () => {
+        initialValuesRef.current = values;
+        markClean();
+        setError('');
+      },
+    });
   });
 
   if (isLoading || !courseStructure || (course.isEditorDataLoading && editorData.certifications.data === null)) {

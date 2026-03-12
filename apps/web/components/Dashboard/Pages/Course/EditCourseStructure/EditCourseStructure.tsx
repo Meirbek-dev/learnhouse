@@ -62,12 +62,19 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   const submitChapter = async (chapter: any) => {
     setStructureStatus('saving');
     try {
-      await createChapter(chapter, access_token, { courseUuid: course_uuid });
+      await createChapter(chapter, access_token, {
+        courseUuid: course_uuid,
+        lastKnownUpdateDate: course_structure.update_date,
+      });
       await refreshCourseMeta();
       setNewChapterModal(false);
       setStructureStatus('saved');
       toast.success(t('chapterCreatedSuccess'));
-    } catch {
+    } catch (error: any) {
+      if (error?.status === 409) {
+        showConflict(error?.detail || error?.message);
+        return;
+      }
       setStructureStatus('error');
       toast.error(t('chapterCreateFailed'));
     }

@@ -66,14 +66,23 @@ async function fetchEditableOrgCourses(
   access_token?: string,
   query?: string,
   sortBy = 'updated',
-): Promise<{ courses: any[]; total: number }> {
+  preset?: string,
+): Promise<{
+  courses: any[];
+  total: number;
+  summary: { total: number; ready: number; private: number; attention: number };
+}> {
   'use cache';
   cacheTag(tags.editableCourses);
   cacheTag(courseTag.editableList(org_slug));
   cacheLife(CacheProfiles.courses);
 
   if (!access_token) {
-    return { courses: [], total: 0 };
+    return {
+      courses: [],
+      total: 0,
+      summary: { total: 0, ready: 0, private: 0, attention: 0 },
+    };
   }
 
   const queryParams = new URLSearchParams();
@@ -82,6 +91,9 @@ async function fetchEditableOrgCourses(
   }
   if (sortBy) {
     queryParams.set('sort_by', sortBy);
+  }
+  if (preset?.trim()) {
+    queryParams.set('preset', preset.trim());
   }
 
   const result = await fetch(
@@ -103,8 +115,14 @@ async function fetchEditableOrgCourses(
 
   const courses = await result.json();
   const total = Number.parseInt(result.headers.get('X-Total-Count') ?? '0', 10);
+  const summary = {
+    total: Number.parseInt(result.headers.get('X-Summary-Total') ?? String(total), 10),
+    ready: Number.parseInt(result.headers.get('X-Summary-Ready') ?? '0', 10),
+    private: Number.parseInt(result.headers.get('X-Summary-Private') ?? '0', 10),
+    attention: Number.parseInt(result.headers.get('X-Summary-Attention') ?? '0', 10),
+  };
 
-  return { courses, total };
+  return { courses, total, summary };
 }
 
 export async function getEditableOrgCourses(
@@ -114,8 +132,25 @@ export async function getEditableOrgCourses(
   limit = 20,
   query?: string,
   sortBy = 'updated',
+  preset?: string,
 ) {
-  return fetchEditableOrgCourses(org_slug, page, limit, access_token, query, sortBy);
+  return fetchEditableOrgCourses(org_slug, page, limit, access_token, query, sortBy, preset);
+}
+
+export async function getCourseUserRights(course_uuid: string, access_token?: string | null) {
+  if (!access_token) {
+    throw new Error('Access token required');
+  }
+
+  const result = await fetch(`${getAPIUrl()}courses/${course_uuid}/rights`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${access_token}`,
+    },
+  });
+
+  return await errorHandling(result);
 }
 
 export async function searchOrgCourses(

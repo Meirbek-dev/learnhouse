@@ -1,4 +1,4 @@
-import { getCourseWorkspaceCapabilitiesForOrg } from '@/lib/course-management-server';
+import { requireCourseWorkspaceStageAccess } from '@/lib/course-management-server';
 import type { CourseWorkspaceStage } from '@/lib/course-management';
 import CourseWorkspacePageShell from './CourseWorkspacePageShell';
 import { getCourseMetadata } from '@services/courses/courses';
@@ -10,7 +10,7 @@ interface RenderCourseWorkspacePageOptions {
   courseuuid: string;
   activeStage: CourseWorkspaceStage;
   children: ReactNode;
-  capabilities?: Awaited<ReturnType<typeof getCourseWorkspaceCapabilitiesForOrg>>;
+  capabilities?: Awaited<ReturnType<typeof requireCourseWorkspaceStageAccess>>;
 }
 
 export async function renderCourseWorkspacePage({
@@ -24,7 +24,7 @@ export async function renderCourseWorkspacePage({
   const accessToken = session?.tokens?.access_token;
   const [initialCourse, resolvedCapabilities] = await Promise.all([
     getCourseMetadata(courseuuid, null, accessToken, true),
-    capabilities ? Promise.resolve(capabilities) : getCourseWorkspaceCapabilitiesForOrg(orgslug),
+    capabilities ? Promise.resolve(capabilities) : requireCourseWorkspaceStageAccess(orgslug, courseuuid, activeStage),
   ]);
 
   return (

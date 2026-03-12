@@ -1,698 +1,418 @@
-# Course Management — Critical Analysis & Improvement Plan
+# Course Management Workflow, UI, and UX Critical Analysis Plan
 
-> **Scope:** All files under `apps/web/app/orgs/[orgslug]/dash/courses/`,
-> `apps/web/components/Dashboard/Courses/`, and
-> `apps/web/components/Dashboard/Pages/Course/`.
->
-> Organized by severity. Each section includes the exact file, root cause, and a concrete fix.
+## Scope
 
----
+This plan covers the current course management surface across:
 
-## 1. Confirmed Bugs
+- `apps/web/app/orgs/[orgslug]/dash/courses/**`
+- `apps/web/components/Dashboard/Courses/**`
+- `apps/web/components/Dashboard/Pages/Course/**`
+- supporting hooks and services used by the workflow
 
-### 1.1 Inverted toast after toggling course visibility
+The goal is not a cosmetic polish pass. The goal is to fix the workflow model, remove current bugs, and bring the UI back under a consistent shadcn-based design system.
 
-**File:** `components/Dashboard/Courses/CourseReviewPublish.tsx` — `toggleVisibility()`
+## Executive Summary
 
-```ts
-// AFTER refreshCourseMeta() the structure already has the NEW value.
-// If we just published (public → true), course.courseStructure.public === true
-// → toast shows t('toasts.movedPrivate')  ← WRONG
-await course.refreshCourseMeta();
-toast.success(course.courseStructure.public ? t('toasts.movedPrivate') : t('toasts.published'));
-```
+The current course management rewrite has the right broad direction: a dedicated course index, guided creation, a course workspace, explicit save flows for form sections, and a review/publish stage. The implementation is not coherent enough yet.
 
-The condition reads the **post-refresh** value, so the message is always the opposite of what happened.
+The main problems are:
 
-**Fix:** Capture the intent before the API call.
+- authorization is over-permissive in the workspace shell and route model
+- filtering, totals, and summary cards are computed from paginated subsets, so the dashboard can show incorrect numbers and empty states
+- curriculum mutations still bypass the concurrency strategy the rewrite already established
+- edit sections mix staged and immediate-save behaviors in ways that are hard to reason about
+- destructive actions still use invalid trigger composition in several places
+- the visual layer is inconsistent and still carries “vibecoded” cues: gradients in shared chrome, ad hoc warning colors, and improvised spacing and interaction patterns
 
-```ts
-const wasPublic = course.courseStructure.public;
-// ... await updateCourseAccess(...)
-await course.refreshCourseMeta();
-toast.success(wasPublic ? t('toasts.movedPrivate') : t('toasts.published'));
-```
+This plan prioritizes fixing correctness and mental-model issues first, then tightening the UI around shadcn primitives and token-based styling.
 
----
+## Confirmed Problems And Suggested Fixes
 
-### 1.2 Certificate readiness check is always `true`
+### P0. Workspace authorization is too broad and can leak stage access
 
-**File:** `lib/course-management.ts` — `getCourseReadinessChecklist()`
+Files:
 
-```ts
-// Array.isArray([]) === true — an empty certifications array passes this check
-{ id: 'certificate', complete: Array.isArray(certifications), href: 'certificate' }
-```
+- `apps/web/lib/course-management-server.ts`
+- `apps/web/app/orgs/[orgslug]/dash/courses/[courseuuid]/layout.tsx`
+- all stage pages under `apps/web/app/orgs/[orgslug]/dash/courses/[courseuuid]/**`
 
-Every new course is considered to have a certificate configured even when none exists. The Readiness tab badge count and Overview checklist are both wrong.
+Problem:
 
-**Fix:**
+- `getCourseWorkspaceCapabilitiesForOrg` derives permissions at the org level and treats `Scopes.OWN` as a global capability without resolving whether the current course is actually owned by the current user.
+- the `[courseuuid]/layout.tsx` route guard allows any user with update, manage, or certificate-create capability into the whole workspace tree.
+- individual stage routes do not add stage-specific server authorization.
 
-```ts
-{ id: 'certificate', complete: certifications.length > 0, href: 'certificate' }
-```
+Impact:
 
----
+- a user with only “own course” permissions can be shown edit capabilities for courses they do not own
+- a certificate manager can get into details or curriculum routes directly by URL even if the UI hides the tabs later
+- the shell capability map is not a trustworthy authorization boundary
 
-### 1.3 `<a>` nested inside `<button>` in `ActivityElement` (invalid HTML + broken click)
+Suggested fix:
 
-**File:** `components/Dashboard/Pages/Course/EditCourseStructure/DraggableElements/ActivityElement.tsx`
+- resolve workspace capabilities against the actual course record, not just org session scopes
+- split route guards by stage: details and curriculum need course update permission, access and collaboration need course manage permission, certificate needs certificate permission, review should follow publish-review policy
+- keep the capability map as a UI convenience only after server authorization is correct
 
-The preview button and all edit-link buttons render a `<Link>` *inside* a `<Button>`:
+### P0. Course dashboard filtering and counts are mathematically wrong
 
-```tsx
-<Button size="sm" variant="outline">
-  <Link href={...} target="_blank">   {/* renders <a> inside <button> — invalid HTML */}
-    <Eye className="h-4 w-4" />
-  </Link>
-</Button>
-```
+Files:
 
-Browsers coerce this into broken DOM. Click area is inconsistent and screen readers see two interactive elements.
+- `apps/web/app/orgs/[orgslug]/dash/courses/page.tsx`
+- `apps/web/app/orgs/[orgslug]/dash/courses/client.tsx`
 
-Same pattern appears in `ActivityEditButton` for dynamic pages, assignments, and code challenges.
+Problem:
 
-**Fix:** Use the `render` / `nativeButton={false}` prop pattern already used elsewhere:
+- the page fetches one paginated backend slice, then applies preset filtering on that slice only
+- summary cards in `client.tsx` derive “ready”, “private”, and “attention” counts from the visible page data, not from the full result set
+- `totalCourses` is still the backend total for the unfiltered query, so pagination and counts drift apart
 
-```tsx
-<Button
-  size="sm"
-  variant="outline"
-  nativeButton={false}
-  render={<a href={previewUrl} target="_blank" rel="noopener noreferrer" />}
->
-  <Eye className="size-4" />
-</Button>
-```
+Impact:
 
----
+- preset pages can show empty results even when matching courses exist on later pages
+- counts in the summary cards are wrong for any org with more than one page of courses
+- users cannot trust the dashboard state
 
-### 1.4 `AlertDialogTrigger` wrapping `Button` creates nested interactive elements
+Suggested fix:
 
-**File:** `components/Dashboard/Pages/Course/EditCourseStructure/DraggableElements/ChapterElement.tsx`
+- move preset filtering into the backend query contract
+- return filtered totals from the server
+- return aggregate summary stats from the server instead of deriving them from the current page slice
 
-```tsx
-<AlertDialogTrigger>         {/* renders its own <button> */}
-  <Button variant="destructive" size="sm">   {/* second <button> inside */}
-    <Trash2 />
-  </Button>
-</AlertDialogTrigger>
-```
+### P0. Curriculum mutations still bypass concurrency protection
 
-This is invalid HTML (nested `<button>` elements). The shadcn `AlertDialogTrigger` supports `asChild` or the same `render` pattern — use it.
+Files:
 
-**Fix:**
+- `apps/web/components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure.tsx`
+- `apps/web/components/Dashboard/Pages/Course/EditCourseStructure/DraggableElements/ChapterElement.tsx`
+- `apps/web/components/Dashboard/Pages/Course/EditCourseStructure/DraggableElements/ActivityElement.tsx`
+- `apps/web/services/courses/chapters.ts`
+- `apps/web/services/courses/activities.ts`
 
-```tsx
-<AlertDialogTrigger render={<Button variant="destructive" size="sm" />}>
-  <Trash2 className="size-4" />
-</AlertDialogTrigger>
-```
+Problem:
 
-Same pattern appears in `ActivityElement.tsx` delete trigger.
+- the rewrite foundation explicitly calls for `last_known_update_date` style protection on stateful mutations, but chapter and activity operations still do not consistently send concurrency metadata
+- chapter rename, chapter delete, activity rename, activity publish, activity delete, and several create flows mutate directly and then revalidate
+- reorder uses conflict handling, but most row-level mutations do not
 
----
+Impact:
 
-### 1.5 Course description uses single-line `<Input>` with a 1000-character limit
+- two editors can overwrite each other silently in curriculum editing
+- the UI already has a conflict dialog, but large parts of the curriculum surface do not participate in that model
+- users can lose edits without a clear explanation
 
-**File:** `components/Dashboard/Pages/Course/EditCourseGeneral/EditCourseGeneral.tsx`
+Suggested fix:
 
-```tsx
-<FormField name="description" render={({ field }) => (
-  <FormItem>
-    <FormLabel>…</FormLabel>
-    <FormControl>
-      <Input {...field} placeholder="…" maxLength={1000} />   {/* ← Input, not Textarea */}
-    </FormControl>
-  </FormItem>
-)} />
-```
+- extend `last_known_update_date` handling to all chapter and activity mutations
+- standardize all stateful course mutations behind one mutation layer with the same conflict contract
+- only keep optimistic updates where rollback and conflict states are explicit and tested
 
-Users cannot see their paragraph-length descriptions. The validation allows 1000 chars in a single-line input — visually nonsensical.
+### P1. Access and collaboration use split persistence models that confuse users
 
-**Fix:** Replace `<Input>` with `<Textarea className="min-h-[100px] resize-y" />`.
+Files:
 
----
+- `apps/web/components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess.tsx`
+- `apps/web/components/Dashboard/Pages/Course/EditCourseContributors/EditCourseContributors.tsx`
 
-### 1.6 Access readiness check passes for private course with no user groups
+Problem:
 
-**File:** `lib/course-management.ts` — `getCourseReadinessChecklist()`
+- access policy is staged and requires Save
+- user-group linking applies immediately
+- contributor policy is staged and requires Save
+- contributor add, remove, role change, and status change apply immediately
 
-```ts
-{ id: 'access', complete: typeof course?.public === 'boolean', href: 'access' }
-```
+Impact:
 
-A course can be `public: false` (private) with **zero** linked user groups — no learner can ever enroll — and still pass the access readiness check. This makes "Ready to Publish" meaningless.
+- each page has two persistence models at once
+- the UI explains this in alerts, which is already a signal that the behavior is not self-evident
+- users have to remember which controls are drafts and which controls are live mutations
 
-**Fix:**
+Suggested fix:
 
-```ts
-{
-  id: 'access',
-  complete: course?.public === true
-    || (course?.public === false && linkedUserGroups.length > 0),
-  href: 'access',
-},
-```
+- split these pages into clearly separated sections with different headers and action areas
+- use one explicit “Policy” card for staged settings and one explicit “Live memberships” card for immediate mutations
+- visually separate local draft actions from server-live actions with different affordances and copy
+- if possible, move all policy editing to staged save and all membership editing to row-level actions with no shared Save bar
 
-`linkedUserGroups` is already available from the `editorData` parameter.
+### P1. Invalid trigger composition still exists in destructive actions
 
----
+Files:
 
-### 1.7 `EditCourseStructure` Alert uses non-standard `{ default: '...' }` translation fallbacks
+- `apps/web/components/Dashboard/Pages/Course/EditCourseStructure/DraggableElements/ChapterElement.tsx`
+- `apps/web/components/Dashboard/Pages/Course/EditCourseStructure/DraggableElements/ActivityElement.tsx`
+- `apps/web/components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess.tsx`
 
-**File:** `components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure.tsx`
+Problem:
 
-```ts
-t('savingOrder', { default: 'Applying curriculum changes' })
-t('curriculumChangesApplyImmediately', { default: '…' })
-t('curriculumInlineFeedback', { default: '…' })
-t('refreshAfterError', { default: '…' })
-```
+- `AlertDialogTrigger` wraps `Button` in several places instead of using the shadcn `render` or `asChild` style composition that the codebase already uses elsewhere
 
-`next-intl` does not support a `default` option in `t()`. The second argument is an interpolation values object; passing `{ default: '...' }` silently inserts the string `'...'` as a variable named `default`. The displayed text will either be the key name itself or a broken interpolation string.
+Impact:
 
-**Fix:** Add these keys to the `CourseEdit.Structure` namespace in the message files, or inline them as string constants while the translation files are being updated.
+- invalid nested interactive elements
+- inconsistent click behavior and accessibility semantics
+- destructive controls remain brittle in the exact flows that need to feel safest
 
----
+Suggested fix:
 
-### 1.8 `SectionHeader` "Discard" button is not translated
+- refactor all dialog and dropdown triggers to the same composition pattern used elsewhere in the repo
+- treat this as a shared cleanup rule for the whole dashboard, not a one-off course fix
 
-**File:** `components/Dashboard/Courses/SectionHeader.tsx`
+### P1. Shared save infrastructure is only half adopted
 
-```tsx
-<Button type="button" variant="outline" …>
-  {/* i18n:TODO */}Discard   {/* ← hardcoded English */}
-</Button>
-```
+Files:
 
-The `i18n:TODO` comment indicates this was left unfinished. Every user sees "Discard" regardless of locale.
+- `apps/web/hooks/useSaveSection.ts`
+- `apps/web/components/Dashboard/Pages/Course/EditCourseGeneral/EditCourseGeneral.tsx`
+- `apps/web/components/Dashboard/Pages/Course/EditCourseCertification/EditCourseCertification.tsx`
+- `apps/web/components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure.tsx`
 
-**Fix:** Add a `discard` key to the `Common` namespace and use `tCommon('discard')`.
+Problem:
 
----
+- `useSaveSection` exists to centralize save, conflict, refresh, and toast behavior
+- not all sections use it
+- `useSaveSection` itself still contains hardcoded English strings and two near-duplicate save paths
+- curriculum editing uses a different mutation model entirely
 
-## 2. Design System Violations
+Impact:
 
-### 2.1 `bg-white` and `border-neutral-*` hardcoded in `ActivityElement` — dark mode broken
+- inconsistent save UX across stages
+- translation coverage is incomplete
+- conflict handling is uneven
+- maintenance cost stays high because new bugs are fixed per page instead of once in the save layer
 
-**File:** `ActivityElement.tsx`
+Suggested fix:
 
-```tsx
-className={`
-  mb-2 flex items-center gap-3 rounded-lg border border-neutral-200 bg-white p-3
-  …
-`}
-…
-className="cursor-grab text-neutral-400 hover:text-neutral-600 active:cursor-grabbing"
-…
-<p className="… text-neutral-900">
-```
+- make `useSaveSection` the default path for staged forms
+- inject translated copy into the hook instead of hardcoding messages
+- split the hook into a single configurable mutation primitive if necessary, rather than carrying duplicated save functions
+- keep curriculum separate only if its immediate-save model is intentionally different and fully conflict-safe
 
-`bg-white` and `border-neutral-200` are absolute colour values that make the curriculum editor **completely broken in dark mode** — white backgrounds on a dark surface, invisible borders.
+### P1. Curriculum rows are overloaded with too many interaction modes
 
-**Fix:** Replace with design-system tokens:
+Files:
 
-```tsx
-// bg-white  → bg-card
-// border-neutral-200  → border
-// text-neutral-900  → text-foreground
-// text-neutral-400  → text-muted-foreground
-// text-neutral-600  → text-foreground (hover)
-// text-neutral-500  → text-muted-foreground
-// text-neutral-300  → text-muted-foreground/50
-```
+- `apps/web/components/Dashboard/Pages/Course/EditCourseStructure/DraggableElements/ChapterElement.tsx`
+- `apps/web/components/Dashboard/Pages/Course/EditCourseStructure/DraggableElements/ActivityElement.tsx`
 
----
+Problem:
 
-### 2.2 `text-neutral-*` and `border-neutral-*` in `ChapterElement` — same dark mode breakage
+- the same row is simultaneously a drag handle, an inline editor, a status surface, a publish toggle, a preview launcher, and a destructive action container
 
-**File:** `ChapterElement.tsx`
+Impact:
 
-```tsx
-className="… border-b border-neutral-100 …"
-className="cursor-grab text-neutral-400 hover:text-neutral-600 …"
-<h3 className="… text-neutral-900 …">{chapter.name}</h3>
-<Pencil className="h-3.5 w-3.5 text-neutral-500" />
-<div className="… text-sm text-neutral-400">…   {/* empty state label */}
-<div className="… border-t border-neutral-100">  {/* bottom separator */}
-  <MoreHorizontal className="h-5 w-5 text-neutral-300" />
-```
+- noisy layout
+- weak scanability
+- frequent accidental clicks during drag-heavy workflows
+- mobile degradation because the row action density is too high
 
-**Fix:** Same token mapping as 2.1. Remove the decorative `MoreHorizontal` separator entirely (see §3.4).
+Suggested fix:
 
----
+- make the drag handle the only draggable target, not the whole card
+- move secondary actions into a compact overflow menu on desktop and a bottom sheet on mobile
+- keep only the most important inline signals visible: name, type, publish state, and conflict or error state
+- reserve inline editing for the selected row, not every row by default
 
-### 2.3 Template literals for dynamic `className` instead of `cn()`
+### P1. Current stage chrome does not fully match the workflow model
 
-**Files:** `ActivityElement.tsx`, `ChapterElement.tsx`, `EditCourseStructure.tsx`
+Files:
 
-```tsx
-// ActivityElement.tsx
-className={`
-  mb-2 flex items-center gap-3 rounded-lg border … bg-white p-3
-  transition-all duration-200
-  ${snapshot.isDragging ? 'scale-[1.02] rotate-1 shadow-xl …' : 'shadow-sm hover:shadow-md'}
-`}
+- `apps/web/components/Dashboard/Courses/CourseWorkspacePageShell.tsx`
+- `apps/web/components/Dashboard/Courses/CourseWorkspaceOverview.tsx`
+- `apps/web/components/Dashboard/Courses/CourseReviewPublish.tsx`
 
-// ChapterElement.tsx
-className={`
-  bg-background mx-2 mb-4 …
-  ${snapshot.isDragging ? 'scale-105 rotate-1 shadow-2xl …' : 'hover:shadow-md'}
-`}
+Problem:
 
-// EditCourseStructure.tsx
-className={`space-y-4 ${snapshot.isDraggingOver ? 'bg-muted/40' : ''}`}
-```
+- the shell is route-based, but the visual treatment still behaves like a tab strip plus status bar plus command bar compressed into one sticky header
+- overview, review, and edit stages repeat similar readiness and status blocks with slightly different tone and structure
+- review is positioned like the final gate, but publish state is still editable from other places
 
-Inconsistent with the rest of the codebase which uses `cn()`. Template literals don't de-duplicate class names, are not autocomplete-friendly, and trigger full re-renders by creating new string references on every render.
+Impact:
 
-**Fix:** Use `cn()` everywhere.
+- the workspace lacks a single clear source of truth for “what state is this course in?”
+- users have to re-read the same readiness state in different layouts
 
----
+Suggested fix:
 
-### 2.4 Exaggerated drag animations violate spatial consistency
+- keep route-based navigation, but simplify the chrome to three layers only: breadcrumb, title and status row, stage navigation
+- define one reusable readiness summary component used by overview and review
+- centralize publish and visibility decisions in review, or make the exceptions explicit
 
-**Files:** `ActivityElement.tsx`, `ChapterElement.tsx`
+### P2. Translation fallbacks are being used as if `next-intl` supported default copy
 
-```tsx
-// Chapter — 5% scale + 1° rotation on drag
-snapshot.isDragging ? 'scale-105 rotate-1 shadow-2xl ring-2 ring-ring/30'
+Files:
 
-// Activity — 2% scale + 1° rotation on drag
-snapshot.isDragging ? 'scale-[1.02] rotate-1 shadow-xl ring-2 ring-ring/30'
-```
+- `apps/web/components/Dashboard/Pages/Course/EditCourseStructure/DraggableElements/ChapterElement.tsx`
+- `apps/web/components/Dashboard/Pages/Course/EditCourseStructure/DraggableElements/ActivityElement.tsx`
+- `apps/web/components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess.tsx`
+- `apps/web/components/Dashboard/Pages/Course/EditCourseContributors/EditCourseContributors.tsx`
 
-Rotation on a list item is disorienting in a canvas that has no other rotated elements. `scale-105` causes layout shifts that break the visual feedback of where the item will land. The existing `@hello-pangea/dnd` placeholder mechanism already provides correct spatial feedback.
+Problem:
 
-**Fix:**
+- multiple calls use `t('key', { default: '...' })`
+- this is not a reliable fallback strategy in this codebase and leaves translated copy ambiguous
 
-```tsx
-snapshot.isDragging ? 'opacity-90 shadow-lg ring-1 ring-border'
-```
+Impact:
 
----
+- inconsistent localized output
+- hidden message-key failures during QA
 
-### 2.5 `bg-accent/60` used for "warning" badge tone — colour is theme-dependent
+Suggested fix:
 
-**File:** `courseWorkflowUi.tsx`
+- remove fake fallback usage
+- add the missing messages explicitly
+- fail fast in development for missing course-management translations
 
-```ts
-warning: 'border-border bg-accent/60 text-accent-foreground',
-```
+### P2. The current visual language still looks improvised instead of system-driven
 
-`accent` maps to different hues depending on the theme. In the default shadcn theme it's near-white, making the "needs review" badge almost invisible. The `warning` tone should be more explicit.
+Files:
 
-**Fix:**
+- `apps/web/components/Dashboard/Courses/courseWorkflowUi.tsx`
+- `apps/web/components/Dashboard/Menus/DashSidebar.tsx`
+- several course workspace pages using one-off muted panels and alert styling
 
-```ts
-warning: 'border-amber-200/60 bg-amber-50/70 text-amber-900 dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-300',
-```
+Problem:
 
-Or use a `data-[tone=warning]` variant pattern in the Badge component to keep it configurable from the CSS layer.
+- shared dashboard chrome still uses gradient styling in places such as the sidebar org badge
+- warning and status treatments are hand-assembled instead of coming from a consistent token strategy
+- course pages use repeated ad hoc card and panel combinations rather than a small set of approved surface patterns
 
----
+Impact:
 
-### 2.6 `border-primary bg-primary/5` in certificate pattern picker is not composable
+- the UI feels assembled from local decisions instead of one design system
+- gradients and flashy accents cheapen an otherwise enterprise workflow
+- future maintenance will continue to reintroduce off-brand styles unless there is a clear rule set
 
-**File:** `EditCourseCertification.tsx`
+Suggested fix:
 
-```tsx
-field.value === pattern.value ? 'border-primary bg-primary/5' : 'border-border'
-```
+- remove gradients from course management and its shared dashboard shell
+- do not use `slate-*`, `gray-*`, `neutral-*`, or hardcoded amber classes for core workflow surfaces
+- standardize on shadcn semantic tokens: `bg-background`, `bg-card`, `bg-muted`, `text-foreground`, `text-muted-foreground`, `border-border`, `text-destructive`
+- define a small status vocabulary for course workflow badges and alerts, then reuse it everywhere
 
-The selected-pattern tile uses a fixed inline active colour instead of the `CourseChoiceCard` component that already implements this consistent selected-card pattern. The certificate section invents its own selection UI.
+## Recommended UX And UI Direction
 
-**Fix:** Extract the certificate pattern picker into a component that reuses `CourseChoiceCard` or the same tokens used there (`border-primary bg-accent/40 ring-1 ring-ring/20`).
+### 1. Course Index
 
----
+Use the course index as an operational dashboard, not a gallery.
 
-## 3. UX / Workflow Problems
+Recommended structure:
 
-### 3.1 Summary statistics on the courses dashboard count current page, not the total inventory
+- top row: page title, one primary `New course` action, saved filters, search
+- second row: server-truth summary cards using real aggregate counts
+- main area: table-first by default, cards as an alternate view
+- bulk actions: sticky toolbar that appears only when rows are selected
 
-**File:** `app/orgs/[orgslug]/dash/courses/client.tsx` — `summaryCards`
+Shadcn components to lean on:
 
-```ts
-const summaryCards = useMemo(() => {
-  const ready = courses.filter(…).length;   // 'courses' = current page (max 24)
-  const privateCount = courses.filter(…).length;
-  const attention = courses.filter(…).length;
-  return [
-    { label: 'Visible', value: courses.length, … },  // "8 courses" when org has 150
-    …
-  ];
-}, [courses, t]);
-```
+- `Card` for summary blocks
+- `DataTable` for the main surface
+- `Select`, `Input`, `Badge`, `Button`, `DropdownMenu`, `AlertDialog`
 
-An org with 150 courses on page 3 shows "Visible: 24, Ready: 7" — these numbers mean almost nothing. The user has no accurate signal of their course health.
+### 2. Course Creation Wizard
 
-**Fix:** Either pass server-computed aggregates via the page's `searchParams`/server component, or clearly label the cards "On this page" and provide totals separately.
+The wizard direction is good, but it should feel more operational and less decorative.
 
----
+Recommended changes:
 
-### 3.2 Duplicate `notReadyDescription` alert in Overview and Review pages
+- keep the 3-step flow
+- reduce the hero-like treatment and make the summary panel denser
+- avoid large ornamental step visuals; use a cleaner shadcn stepper treatment or segmented progress row
+- make template behavior explicit: blank, starter outline, or chapter-only copy from source
 
-**Files:** `CourseWorkspaceOverview.tsx`, `CourseReviewPublish.tsx`
+### 3. Workspace Shell
 
-Both pages render the `notReadyDescription` translation key twice: once in a `<p>` and once inside an `<Alert>` immediately below it.
+The shell should communicate status first and options second.
 
-```tsx
-<p className="… text-muted-foreground">{readiness.readyToPublish ? t('readyDescription') : t('notReadyDescription')}</p>
+Recommended structure:
 
-{!readiness.readyToPublish ? (
-  <Alert …>
-    <AlertDescription>{t('notReadyDescription')}</AlertDescription>  {/* same text */}
-  </Alert>
-) : null}
-```
+- breadcrumb row
+- title row with course name, status badges, and a small action cluster
+- stage nav row
+- page body with one consistent max width and spacing system
 
-**Fix:** Remove the standalone `<Alert>` wrapper. The paragraph already communicates the state. If a visual callout is needed, use the Alert *instead* of the paragraph.
+Remove:
 
----
+- redundant readiness blocks repeated across overview and review
+- decorative emphasis that competes with course status
 
-### 3.3 Publish button is permanently disabled for any imperfect readiness state
+### 4. Details, Access, Collaboration, Certificate
 
-**File:** `CourseReviewPublish.tsx`
+Every staged section should use the same mental model:
 
-```tsx
-<Button
-  onClick={toggleVisibility}
-  disabled={isPending || isRefreshing || !readiness.readyToPublish}
->
-```
+- section header with dirty state, discard, save
+- primary form card
+- secondary informational cards below
+- destructive or live-mutation areas isolated in their own card with explicit copy
 
-Until **all** checklist items pass, the Publish button is completely disabled with no explanation. There is no "publish anyway" escape hatch and no indication of *which specific item* is blocking.
+Use `SectionHeader`, `Card`, `Form`, `Alert`, `Separator`, `Table`, and `Dialog` consistently.
 
-Also, because bug 1.2 (certificate always complete) is a false green, if it gets fixed the Publish button will be newly disabled for courses that previously published fine.
+### 5. Curriculum Editor
 
-**Fix:**
+This should feel like a structured editor, not a pile of draggable tiles.
 
-- Show the checklist inline above the Publish button.
-- Allow publishing with a confirmation dialog when non-critical items are incomplete (e.g., certificate not set up).
-- Hard-block only the *structural* requirements (name, description, at least one activity).
+Recommended changes:
 
----
+- chapter cards become calmer containers with smaller shadows and no theatrical drag state
+- drag only from the grip handle
+- row actions move into overflow menus
+- add clear saved, saving, conflict, and error states near the section header and the affected row
+- reserve inline editing for one selected entity at a time
 
-### 3.4 Decorative `MoreHorizontal` separator at the bottom of every chapter is visual noise
+### 6. Review And Publish
 
-**File:** `ChapterElement.tsx`
+Review should be the authoritative launch gate.
 
-```tsx
-{/* Bottom Separator */}
-<div className="flex h-8 items-center justify-center border-t border-neutral-100">
-  <MoreHorizontal className="h-5 w-5 text-neutral-300" />
-</div>
-```
+Recommended changes:
 
-This element exists purely as decoration with no affordance. The three-dot icon (conventionally meaning "more options") renders disabled in the middle of a border, which confuses users into clicking it. It should be removed.
+- readiness checklist on the left
+- publish state and launch controls on the right
+- one reusable readiness summary shared with overview
+- no other stage should feel like an alternative publish control center unless that is a deliberate product rule
 
----
+## Visual System Cleanup Rules
 
-### 3.5 Inconsistent page layout padding across workspace sections
+Apply these rules across course management and any shared dashboard surfaces it depends on.
 
-Comparing the outer containers of each section:
+- use shadcn primitives and semantic tokens only for core surfaces
+- remove gradients from the course workspace, course dashboard, and shared sidebar elements used in those flows
+- remove slate, gray, and neutral utility classes from course-management-adjacent UI
+- do not invent status styles locally; route them through shared badge and alert variants
+- prefer `Card` plus `Separator` over custom muted panel stacks unless there is a proven reuse case
+- keep shadows subtle and functional; avoid high-drama drag states, rotations, or flashy badges
 
-| Section           | Container                                                                      |
-| ----------------- | ------------------------------------------------------------------------------ |
-| Overview / Review | `<div className="space-y-6">` (no padding — gets it from shell's `py-6 px-4`)  |
-| Details (General) | `<div className="mx-auto space-y-8 p-6">` (double padding)                     |
-| Access            | `<div className="mx-auto space-y-6 p-6">` (double padding)                     |
-| Curriculum        | no outer wrapper — goes straight to `<Card>`                                   |
-| Certification     | `<div className="space-y-6 py-6"><div className="mx-4 sm:mx-10">` (asymmetric) |
-| Contributors      | varies                                                                         |
+## Prioritized Delivery Plan - One shot
 
-The shell already provides `px-4 py-6 lg:px-6`. Sections that add their own `p-6` get 24px padding stacked on top of the shell's 24px = 48px of whitespace on mobile. Sections without padding look tight against the edge on small screens.
+- fix capability resolution so route guards and visible stages are course-aware
+- move preset filtering and aggregate counts to the backend
+- add concurrency metadata to all chapter and activity mutations
+- standardize conflict handling for curriculum row actions
 
-**Fix:** Standardize all sections to simply `<div className="space-y-6">` and rely on the shell for page padding. Apply a max-width via a shared `pageContentClass` constant.
+- unify staged section save behavior behind shared infrastructure
+- split staged policy editing from live membership editing in access and collaboration
+- refactor invalid dialog trigger composition
+- simplify curriculum row actions and drag behavior
 
----
+- remove gradients from shared dashboard chrome used by course management
+- replace ad hoc status styling with shared workflow variants
+- normalize spacing, panel structure, and badge treatments across overview, review, and edit stages
+- audit and remove remaining hardcoded non-semantic color utilities in course management files
 
-### 3.6 Certification section hides the entire form when `enable_certification === false`
+- verify permissions by role and by ownership
+- verify multi-editor conflict behavior on the same course
+- verify pagination, preset filters, and summary counts on orgs with more than one page of courses
+- verify localization coverage for all course workflow messages
+- verify desktop and mobile behavior for curriculum action density
 
-**File:** `EditCourseCertification.tsx`
+## Acceptance Criteria
 
-When the toggle is off, the full configuration form disappears and is replaced by a centered button:
+- a user cannot access a stage they are not authorized for, even by direct URL
+- dashboard totals, presets, and pagination remain correct for large orgs
+- concurrent edits produce explicit conflict handling instead of silent overwrites
+- every staged edit page follows the same save and discard model
+- live mutations are visually and behaviorally separate from staged form edits
+- curriculum rows are calmer, easier to scan, and safer to operate
+- course management uses shadcn tokens and components without gradients, slate, gray, or neutral hacks in shared workflow UI
 
-```tsx
-{!isEnabled && (
-  <div className="flex flex-col items-center justify-center py-12 text-center">
-    <Award className="h-12 w-12" />
-    <Button onClick={() => form.setValue('enable_certification', true)}>
-      Enable Certification
-    </Button>
-  </div>
-)}
-```
+## Final Recommendation
 
-This means a user who wants to *preview* the certificate they previously set up must toggle the switch on, find the preview, then toggle it off again. The preview should remain visible in a read-only state, with the form inputs showing as disabled but visible.
-
----
-
-### 3.7 "Curriculum Snapshot" card in Overview has static placeholder content
-
-**File:** `CourseWorkspaceOverview.tsx`
-
-```tsx
-<div className={courseWorkflowMutedPanelClass}>
-  <div className="font-medium text-foreground">{t('nextStep')}</div>
-  <div className="mt-1">{t('nextStepDescription')}</div>
-</div>
-```
-
-This panel always shows the same static "next step" message regardless of actual course state. It provides zero value — it reads like filler text from a design mockup.
-
-**Fix:** Make the next-step panel contextual. If there are no activities, link to Curriculum. If activities exist but course is private with no groups, link to Access. If readiness is complete but course is not live, link to Review.
-
----
-
-### 3.8 Wizard URL state pollution
-
-**File:** `CourseCreationWizard.tsx`
-
-The wizard persists all form values in URL query params for back-navigation support, but never cleans them up after course creation. After a successful creation and redirect, the browser history stack contains URLs like:
-
-```
-/orgs/my-org/dash/courses/new?step=2&name=My+Course&desc=...&vis=private&tpl=blank&dest=curriculum
-```
-
-If the user hits back, they re-enter the wizard pre-filled with the previous course's data and could accidentally create a duplicate. The `useQueryState` setters should be cleared before redirecting.
-
----
-
-### 3.9 Checklist items in Overview are navigable links but look like read-only status rows
-
-**File:** `CourseWorkspaceOverview.tsx`
-
-```tsx
-<AppLink href={buildCourseWorkspacePath(…, item.href)} className="flex items-start gap-3 …">
-  <CourseStatusBadge status={…} />
-  <div>…</div>
-</AppLink>
-```
-
-Each checklist item is a clickable link to the relevant section, but it has no visual affordance indicating it's interactive (no chevron, no underline, no hover state that looks like a link). Users won't discover this navigability.
-
-**Fix:** Add `<ArrowRight className="size-4 ml-auto shrink-0 text-muted-foreground" />` or use `hover:bg-muted/50` with a right-arrow indicator.
-
----
-
-## 4. Performance Issues
-
-### 4.1 Per-activity SWR fetch for assignment UUID — N+1 API calls
-
-**File:** `ActivityElement.tsx` — `ActivityEditButton`
-
-```tsx
-const { data: assignmentUUID } = useSWR(
-  activity.activity_type === 'TYPE_ASSIGNMENT' && access_token
-    ? [`assignment-${activity.activity_uuid}`, access_token]
-    : null,
-  async () => getAssignmentFromActivityUUID(activity.activity_uuid, access_token!),
-);
-```
-
-This hook runs **inside** the `ActivityEditButton` component, which is rendered for every activity element. A curriculum with 40 assignment activities fires 40 parallel API requests to resolve `assignment_uuid`s.
-
-**Fix:** Pre-resolve `assignment_uuid` when the editor bundle loads (in the `CourseContext` or on the server in `renderCourseWorkspacePage`), so the data is available as a prop. Alternatively, store a `activityUuid → assignmentUuid` map in the `CourseContext` and populate it lazily the first time the curriculum section mounts.
-
----
-
-### 4.2 `getCourseReadinessSummary` called on every course row for table column rendering
-
-**File:** `apps/web/app/orgs/[orgslug]/dash/courses/client.tsx`
-
-```tsx
-// Inside the status column cell — called on every render of the table:
-const ready = getCourseReadinessSummary(course, null).readyToPublish;
-// And also inside summaryCards memo:
-const ready = courses.filter(course => getCourseReadinessSummary(course, null).readyToPublish).length;
-```
-
-`getCourseReadinessSummary` calls `getCourseReadinessChecklist` which iterates the chapters array via `getCourseContentStats`. With 24 courses each having 50 activities, this is O(24 × 50) work on every table re-render (e.g., every checkbox click).
-
-**Fix:** Memoize per-row readiness outside `ColumnDef`. Either attach a `_readiness` field to the course object server-side, or memoize the result with `useMemo` keyed on `course.update_date`.
-
----
-
-## 5. Code Quality Issues
-
-### 5.1 `any` casts throughout — suppressing type errors on critical data paths
-
-```tsx
-// CourseWorkspacePageShell.tsx
-initialCourse: any;
-capabilities: CourseWorkspaceCapabilities;
-
-// ChapterElement.tsx
-const course = useCourse() as any;
-await updateChapter(chapter.id, { name: trimmedName }, access_token, { courseUuid: course_uuid });
-
-// EditCourseStructure.tsx
-const submitChapter = async (chapter: any) => {
-```
-
-Using `any` on `courseStructure`, `chapter`, and `session` suppresses IDE feedback and makes it impossible to catch shape mismatches at compile time. The `CourseStructure` and `Activity` interfaces are already defined in `CourseContext.tsx` but not used for these local variables.
-
----
-
-### 5.2 `ChapterElement` error messages for `handleSaveEdit` and `handleDeleteChapter` use hardcoded English strings
-
-```tsx
-if (!access_token) {
-  toast.error('Authentication required');   // hardcoded, not translated
-  return;
-}
-```
-
-Compared to `ActivityElement` which uses `t('noAccessToken', { default: 'Authentication required' })`. The translation fallback pattern is inconsistent across the two sibling components.
-
----
-
-### 5.3 `useSWR` + `useTransition` async handler anti-pattern in `ActivityElement`
-
-```tsx
-startTransition(async () => {
-  try {
-    await updateActivity(…);
-    await mutate(courseMetaUrl);
-  } catch (error) { … }
-});
-```
-
-`startTransition` is React's mechanism for non-urgent state updates; it does **not** support Promise-based callbacks as of React 18 (Promise support lands in React 19). The `async () => {}` inside `startTransition` executes, but React cannot track the async work, so the `isPending` flag returns to `false` before the await resolves. The loading indicator disappears early.
-
-**Fix:** In React 18, run the async work outside the transition and only call `startTransition` to apply synchronous state mutations.
-
----
-
-### 5.4 `DialogTrigger` and `AlertDialogTrigger` render prop usage is inconsistent
-
-Some places use the `render` prop pattern:
-
-```tsx
-<DialogTrigger render={<Button size="sm" />}>Content</DialogTrigger>
-```
-
-Others use child-wrapping:
-
-```tsx
-<AlertDialogTrigger>
-  <Button …>Content</Button>
-</AlertDialogTrigger>
-```
-
-These two patterns have different DOM outcomes (see bug 1.4). Enforce the `render` prop pattern everywhere.
-
----
-
-### 5.5 `client.tsx` `CoursesHome` component is 680+ lines — beyond maintainable single-component size
-
-The `CoursesHome` component handles: breadcrumbs, summary cards, preset filter bar, search + sort toolbar, bulk action state, bulk confirmation dialogs, results summary, empty state, card view, table view, and pagination. Each concern should live in its own file.
-
-Suggested split:
-
-- `CourseFilterBar` (search + sort + presets)
-- `CourseSummaryCards` (stat cards)
-- `CourseBulkToolbar` (bulk selection / actions)
-- `CourseCardGrid` / `CourseDataTable` (views)
-- `CoursePagination`
-
----
-
-## 6. Must do Improvements Summary (One shot)
-
-| #           | File                                                     | Change                                                    | Priority     |
-| ----------- | -------------------------------------------------------- | --------------------------------------------------------- | ------------ |
-| Fix 1.1     | `CourseReviewPublish.tsx`                                | Capture pre-toggle state for toast message                | **Critical** |
-| Fix 1.2     | `lib/course-management.ts`                               | `certifications.length > 0` in readiness check            | **Critical** |
-| Fix 1.3     | `ActivityElement.tsx`                                    | `nativeButton={false} render={<a />}` for link buttons    | **Critical** |
-| Fix 1.4     | `ChapterElement.tsx`, `ActivityElement.tsx`              | `AlertDialogTrigger render={<Button />}`                  | **Critical** |
-| Fix 1.5     | `EditCourseGeneral.tsx`                                  | Replace description `<Input>` with `<Textarea>`           | **High**     |
-| Fix 1.6     | `lib/course-management.ts`                               | Access check includes private + no groups                 | **High**     |
-| Fix 1.7     | `EditCourseStructure.tsx`                                | Add missing i18n keys                                     | **High**     |
-| Fix 1.8     | `SectionHeader.tsx`                                      | Translate "Discard" button                                | **High**     |
-| Fix 2.1–2.2 | `ActivityElement.tsx`, `ChapterElement.tsx`              | Replace all `neutral-*` and `bg-white` with design tokens | **High**     |
-| Fix 2.3     | Both draggable elements                                  | `cn()` instead of template literals                       | **Medium**   |
-| Fix 2.4     | Both draggable elements                                  | Remove rotation, soften drag shadow                       | **Medium**   |
-| Fix 2.5     | `courseWorkflowUi.tsx`                                   | Use explicit amber tokens for warning tone                | **Medium**   |
-| Fix 3.1     | `client.tsx`                                             | Server-computed aggregates for summary cards              | **High**     |
-| Fix 3.2     | `CourseWorkspaceOverview.tsx`, `CourseReviewPublish.tsx` | Remove duplicate alert                                    | **Medium**   |
-| Fix 3.3     | `CourseReviewPublish.tsx`                                | Allow publish with incomplete non-critical checks         | **Medium**   |
-| Fix 3.4     | `ChapterElement.tsx`                                     | Remove decorative `MoreHorizontal` separator              | **Low**      |
-| Fix 3.5     | All workspace pages                                      | Standardize section container to `space-y-6` only         | **Medium**   |
-| Fix 3.8     | `CourseCreationWizard.tsx`                               | Clear URL params after successful creation                | **Medium**   |
-| Fix 3.9     | `CourseWorkspaceOverview.tsx`                            | Add visual affordance to checklist links                  | **Low**      |
-| Fix 4.1     | `ActivityElement.tsx`                                    | Resolve assignment UUIDs at the context/page level        | **High**     |
-| Fix 4.2     | `client.tsx`                                             | Memoize readiness per course row                          | **Medium**   |
-| Fix 5.3     | `ActivityElement.tsx`                                    | Fix `async` inside `startTransition` pattern              | **Medium**   |
-
----
-
-## 7. Component-level fixes for ActivityElement and ChapterElement (consolidated)
-
-Both draggable elements should be refactored as follows for correctness and theme-safety:
-
-**ActivityElement** wrapper:
-
-```tsx
-<div
-  ref={provided.innerRef}
-  {...provided.draggableProps}
-  className={cn(
-    'mb-2 flex items-center gap-3 rounded-lg border bg-card p-3 transition-shadow',
-    snapshot.isDragging ? 'opacity-90 shadow-lg ring-1 ring-ring/30' : 'shadow-sm hover:shadow-md',
-  )}
->
-```
-
-**ChapterElement** drag handle + name:
-
-```tsx
-className="cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
-…
-<h3 className="truncate text-sm font-medium text-foreground sm:text-base">
-…
-<Pencil className="size-3.5 text-muted-foreground" />
-…
-<div className="flex min-h-[60px] items-center justify-center text-sm text-muted-foreground">
-```
-
-Delete the bottom separator entirely:
-
-```diff
-- <div className="flex h-8 items-center justify-center border-t border-neutral-100">
--   <MoreHorizontal className="h-5 w-5 text-neutral-300" />
-- </div>
-```
-
-**ChapterElement** card wrapper:
-
-```tsx
-className={cn(
-  'mb-4 rounded-xl border bg-card transition-shadow',
-  snapshot.isDragging ? 'opacity-90 shadow-xl ring-1 ring-ring/30' : 'shadow-sm hover:shadow-md',
-)}
-```
-
-Remove the responsive horizontal margin (`mx-2 sm:mx-4 md:mx-6 lg:mx-10`) — the shell already provides horizontal padding, and the extra stacking creates orphan whitespace on large screens.
+Do not treat this as a pure styling pass. The biggest problems are product-model and systems problems: authorization, concurrency, and mixed persistence semantics. Fix those first, then apply the design cleanup so the UI accurately communicates how the system works.

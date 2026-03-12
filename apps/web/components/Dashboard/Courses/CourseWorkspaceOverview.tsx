@@ -1,7 +1,7 @@
 'use client';
 
 import { buildCourseWorkspacePath, getCourseContentStats, getCourseReadinessSummary } from '@/lib/course-management';
-import { CourseStatusBadge, courseWorkflowMutedPanelClass, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
+import { CourseStatusBadge, courseWorkflowCardClass, courseWorkflowMutedPanelClass, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import { AlertTriangle, ArrowRight, CheckCircle2, FileStack, Globe, Users } from 'lucide-react';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -32,7 +32,7 @@ export default function CourseWorkspaceOverview({
   return (
     <div className="space-y-6">
       <section className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
-        <div className="rounded-xl border bg-card p-6">
+        <div className={`${courseWorkflowCardClass} p-6`}>
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('readyLabel')}</div>
@@ -87,7 +87,7 @@ export default function CourseWorkspaceOverview({
       </section>
 
       <section className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-xl border bg-card p-5">
+        <div className={`${courseWorkflowCardClass} p-5`}>
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <CheckCircle2 className="size-4" />
             {t('readinessChecklist')}
@@ -110,7 +110,7 @@ export default function CourseWorkspaceOverview({
           </div>
         </div>
 
-        <div className="rounded-xl border bg-card p-5">
+        <div className={`${courseWorkflowCardClass} p-5`}>
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <FileStack className="size-4" />
             {t('curriculumSnapshot')}
@@ -136,7 +136,7 @@ export default function CourseWorkspaceOverview({
           </Button>
         </div>
 
-        <div className="rounded-xl border bg-card p-5">
+        <div className={`${courseWorkflowCardClass} p-5`}>
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <Users className="size-4" />
             {t('governanceSnapshot')}
@@ -166,11 +166,11 @@ export default function CourseWorkspaceOverview({
                 </Alert>
               ) : null}
             </div>
-            <div className="rounded-lg bg-muted p-4">
+            <div className={courseWorkflowMutedPanelClass}>
               <div className="font-medium text-foreground">{t('sections.collaboration')}</div>
               <div className="mt-1">{t('collaboration.loadedRecords', { count: contributors.length })}</div>
             </div>
-            <div className="rounded-lg bg-muted p-4">
+            <div className={courseWorkflowMutedPanelClass}>
               <div className="font-medium text-foreground">{t('sections.certificate')}</div>
               <div className="mt-1">
                 {certifications.length > 0

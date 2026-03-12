@@ -59,6 +59,12 @@ interface CourseProps {
   sortBy: 'updated' | 'name';
   pageSize: number;
   preset: string;
+  summaryCounts: {
+    total: number;
+    ready: number;
+    private: number;
+    attention: number;
+  };
 }
 
 type BulkActionKind = 'publish' | 'private' | 'delete';
@@ -72,6 +78,7 @@ const CoursesHome = ({
   sortBy,
   pageSize,
   preset,
+  summaryCounts,
 }: CourseProps) => {
   const t = useTranslations('DashPage.CourseManagement.Dashboard');
   const router = useRouter();
@@ -114,17 +121,13 @@ const CoursesHome = ({
   }, [courses]);
 
   const summaryCards = useMemo(() => {
-    const ready = courses.filter((course) => courseReadinessMap.get(course.course_uuid)).length;
-    const privateCount = courses.filter((course) => !course.public).length;
-    const attention = courses.filter((course) => courseNeedsAttention(course)).length;
-
     return [
-      { label: t('summary.total.label'), value: totalCourses, detail: t('summary.total.detail') },
-      { label: t('summary.ready.label'), value: ready, detail: t('summary.ready.detail') },
-      { label: t('summary.private.label'), value: privateCount, detail: t('summary.private.detail') },
-      { label: t('summary.attention.label'), value: attention, detail: t('summary.attention.detail') },
+      { label: t('summary.total.label'), value: summaryCounts.total, detail: t('summary.total.detail') },
+      { label: t('summary.ready.label'), value: summaryCounts.ready, detail: t('summary.ready.detail') },
+      { label: t('summary.private.label'), value: summaryCounts.private, detail: t('summary.private.detail') },
+      { label: t('summary.attention.label'), value: summaryCounts.attention, detail: t('summary.attention.detail') },
     ];
-  }, [courses, courseReadinessMap, t, totalCourses]);
+  }, [summaryCounts, t]);
 
   const canManageCourse = useCallback(
     (course: ManageableCourse) =>
