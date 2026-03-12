@@ -2074,7 +2074,8 @@
       "unpublish": "Жариялаудан алу",
       "unpublishButton": "Жариялаудан алу",
       "updateFailed": "Белсенділікті жаңарту мүмкін болмады",
-      "updating": "Белсенділік жаңартылуда..."
+      "updating": "Белсенділік жаңартылуда...",
+      "editButton": "Өңдеу"
     },
     "ChapterElement": {
       "chapterNamePlaceholder": "Тарау атауы",
@@ -2194,7 +2195,8 @@
       "savingOrder": "Оқу жоспары өзгертулері қолданылуда",
       "curriculumChangesApplyImmediately": "Оқу жоспары өзгертулері бірден қолданылады",
       "curriculumInlineFeedback": "Жылжыту, қайта реттеу және тарау жасау әрекеттері жұмыс барысында сақталады.",
-      "refreshAfterError": "Соңғы құрылым өзгертуін сақтау мүмкін болмады. Қазіргі оқу жоспарын қарап, қайта көріңіз."
+      "refreshAfterError": "Соңғы құрылым өзгертуін сақтау мүмкін болмады. Қазіргі оқу жоспарын қарап, қайта көріңіз.",
+      "title": "Курстың оқу жоспары"
     },
     "Conflict": {
       "title": "Бұл курс басқа редакторда өзгертілді",
@@ -2221,6 +2223,7 @@
     "deleteChapterConfirmationWithCount": "Бұл тарау және оның {count, plural, =0 {0 белсенділігі} one {# белсенділігі} other {# белсенділігі}} біржола жойылады.",
     "deleteChapterTitle": "{name} жою керек пе?",
     "deleting": "Жойылуда...",
+    "edit": "Өңдеу",
     "editButton": "Өңдеу",
     "noActivities": "Белсенділіктер әлі жоқ"
   },
@@ -2330,6 +2333,7 @@
       "deleteUpdateConfirmation": "Бұл жаңартуды жойғыңыз келетініне сенімдісіз бе?",
       "deleteUpdateTitle": "Жаңартуды жою керек пе?",
       "deletingUpdate": "Жаңарту жойылуда...",
+      "newUpdate": "Жаңа жаңарту",
       "noPermissionToAccessTab": "{tabName} бөліміне қол жеткізуге рұқсатыңыз жоқ",
       "unsavedChangesDescription": "Бұл бөлімде сақталмаған өзгерістер бар. Сақтамай шығу керек пе?",
       "noUpdatesYet": "Әлі жаңартулар жоқ",
@@ -2344,6 +2348,7 @@
       "nextPage": "Келесі",
       "updateAddedSuccess": "Жаңарту сәтті қосылды",
       "updateContent": "Жаңарту мазмұны",
+      "updateContentPlaceholder": "Жаңартуыңыздың мәліметтерімен бөлісіңіз...",
       "pageStatus": "{current} / {total} бет",
       "previousPage": "Алдыңғы",
       "resultsCount": "{count} курс",
@@ -3580,6 +3585,7 @@
         "changeToUsersOnlyConfirmMsg": "Бұл курсты тек тіркелген пайдаланушыларға қолжетімді еткіңіз келетініне сенімдісіз бе?",
         "changeToUsersOnlyConfirmTitle": "Тек пайдаланушыларға қылу?",
         "deleteLinkButton": "Сілтемені жою",
+        "deleting": "Жойылуда...",
         "description": "Курсты тек белгілі бір пайдаланушылар тобына қолжетімді ету үшін топқа байланыстыруға болады",
         "linkModalDescription": "Бұл курсқа қолжетімді болатын пайдаланушылар тобын таңдаңыз.",
         "linkModalTitle": "Курсты топқа байланыстыру",
@@ -3596,7 +3602,11 @@
         "loadingUserGroups": "Пайдаланушылар топтары жүктелуде...",
         "unlinkUserGroupSuccess": "Топ сәтті ажыратылды",
         "usersOnlyDescription": "Курс тек тіркелген пайдаланушыларға қолжетімді. Қай топтар кіре алатынын таңдай аласыз",
-        "usersOnlyLabel": "Тек пайдаланушылар"
+        "usersOnlyLabel": "Тек пайдаланушылар",
+        "accessPolicyStagedTitle": "Қолжетімділік саясаты Сақтау басқанша сақталмайды",
+        "accessPolicyStagedDescription": "Көрінерлік өзгерістері бұл бөлімді сақтағанша дейін локалды болып қалады. Төмендегі пайдаланушылар тобын байланыстыру бірден қолданылады.",
+        "userGroupLinksImmediateTitle": "Пайдаланушылар тобы байланыстырулары бірден қолданылады",
+        "userGroupLinksImmediateDescription": "Бұл байланыстырулар растаудан кейін күшіне енеді. Қолжетімділік саясаты өзгерістерін бөлек сақтаңыз."
       },
       "CoursePage": {
         "access": "Қолжетімділік",
@@ -3609,16 +3619,29 @@
         "general": "Жалпы",
         "loading": "Жүктелуде...",
         "noPermissionToAccess": "Бұл курсқа кіруге рұқсатыңыз жоқ.",
-        "noPermissionToAccessTab": "Сізге {tabName} қолжетімді емес"
+        "noPermissionToAccessTab": "Сізге {tabName} қолжетімді емес",
+        "unsavedChangesDescription": "Бұл бөлімде сақталмаған өзгерістер бар. Сақтамай шығу керек пе?"
       },
       "HomePageClient": {
         "courses": "Курстар",
+        "clearSearch": "Тазалау",
         "createACourse": "Материал қосу үшін курс жасаңыз",
         "createCourse": "Курс жасау",
         "createCourseDescription": "Жаңа курс жасау",
+        "emptyPageDescription": "Курстар әзірге қолжетімді емес",
+        "emptySearchResults": "Іздеу бойынша курс табылмады",
+        "nextPage": "Келесі",
         "noCourses": "Курстар әлі жоқ",
         "noCoursesAvailable": "Курстар әзірге қолжетімді емес",
-        "rightsGuide": "Құқықтар нұсқаулығы"
+        "pageStatus": "{current} / {total} бет",
+        "previousPage": "Алдыңғы",
+        "resultsCount": "{count} курс",
+        "rightsGuide": "Құқықтар нұсқаулығы",
+        "searchButton": "Іздеу",
+        "searchPlaceholder": "Өңдеуге болатын курстарды іздеу",
+        "sortLabel": "Сұрыптау",
+        "sortName": "Атауы",
+        "sortUpdated": "Жақында жаңартылған"
       },
       "RightsDocumentation": {
         "backToDashboard": "Басты бетке оралу",
@@ -3749,6 +3772,7 @@
       "failedToUpdateContributor": "Қатысушыны жаңарту сәтсіз аяқталды",
       "inactive": "Белсенді емес",
       "maintainer": "Қолдаушы",
+      "manageContributorsTitle": "Қатысушыларды басқару",
       "nameColumn": "Аты",
       "noUsersFoundMessage": "Пайдаланушылар табылмады",
       "openConfirmMsg": "Бұл курсты қатысушылар үшін ашқыңыз келетініне сенімдісіз бе?",
@@ -3782,7 +3806,11 @@
       "tableHeaderStatus": "Мәртебе",
       "title": "Курс қатысушылары",
       "usernameColumn": "Пайдаланушы аты",
-      "usersSelectedMessage": "{count, plural, one {# пайдаланушы таңдалды} other {# пайдаланушы таңдалды}}"
+      "usersSelectedMessage": "{count, plural, one {# пайдаланушы таңдалды} other {# пайдаланушы таңдалды}}",
+      "contributorPolicyStagedTitle": "Қатысушылық саясаты Сақтау басқанша сақталмайды",
+      "contributorPolicyStagedDescription": "Ашық немесе жабық қатысу саясаты бұл бөлімді сақтағанша дейін локалды болып қалады. Төменде қатысушыларды қосу, жою және өңдеу бірден қолданылады.",
+      "rosterActionsImmediateTitle": "Қатысушылармен әрекеттер бірден қолданылады",
+      "rosterActionsImmediateDescription": "Іздеу, қосу, жою, рөлдер мен мәртебелерді өзгерту қатысушылар тізімін бірден жаңартады. Оларды жоғарыдағы саясат жобасынан бөлек сақтаңыз."
     },
     "Editor": {
       "BadgesExtension": {
@@ -6958,13 +6986,23 @@
   },
   "clickMe": "Мені басыңыз",
   "close": "Жабу",
+  "columns": "Бағандар",
   "courses": "Курстар",
   "courses-0": "Курстар",
   "deleteChapter": "Тарауды жою",
   "dialog": "Диалог",
   "embeddedContentTitle": "Енгізілген мазмұн",
+  "exportCSV": "CSV экспорты",
+  "exportStarted": "Жүктеу басталды",
   "failedToLoadUserData": "Пайдаланушы деректерін жүктеу сәтсіз аяқталды.",
   "minutes": "Минут",
+  "permissionTable": {
+    "resource": "Ресурс",
+    "code": "Рұқсат",
+    "action": "Іс-әрекет",
+    "scope": "Аясы",
+    "description": "Сипаттама"
+  },
   "platformLogo": "Ashyq Bilim логотипі",
   "previous": "Алдыңғы",
   "seconds": "Секунд",

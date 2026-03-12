@@ -2074,7 +2074,8 @@
       "unpublish": "Unpublish",
       "unpublishButton": "Unpublish",
       "updateFailed": "Failed to update activity",
-      "updating": "Updating activity..."
+      "updating": "Updating activity...",
+      "editButton": "Edit"
     },
     "ChapterElement": {
       "chapterNamePlaceholder": "Chapter name",
@@ -2194,7 +2195,8 @@
       "savingOrder": "Applying curriculum changes",
       "curriculumChangesApplyImmediately": "Curriculum changes apply immediately",
       "curriculumInlineFeedback": "Drag, reorder, and chapter creation actions save as you work.",
-      "refreshAfterError": "The latest structure change could not be saved. Review the current curriculum and try again."
+      "refreshAfterError": "The latest structure change could not be saved. Review the current curriculum and try again.",
+      "title": "Course Curriculum"
     },
     "Conflict": {
       "title": "This course changed in another editor",
@@ -2221,6 +2223,7 @@
     "deleteChapterConfirmationWithCount": "This will permanently delete the chapter and its {count, plural, =0 {0 activities} one {# activity} other {# activities}}.",
     "deleteChapterTitle": "Delete {name}?",
     "deleting": "Deleting...",
+    "edit": "Edit",
     "editButton": "Edit",
     "noActivities": "No activities yet"
   },
@@ -3567,6 +3570,7 @@
         "changeToUsersOnlyConfirmMsg": "Are you sure you want this course to be only accessible to signed in users?",
         "changeToUsersOnlyConfirmTitle": "Change to Users Only?",
         "deleteLinkButton": "Delete link",
+        "deleting": "Deleting...",
         "description": "You can choose to give access to this course to specific groups of users only by linking it to a UserGroup",
         "linkModalDescription": "Choose a UserGroup to link this course to. Users from this UserGroup will have access to this course.",
         "linkModalTitle": "Link Course to a UserGroup",
@@ -3583,7 +3587,11 @@
         "loadingUserGroups": "Loading user groups...",
         "unlinkUserGroupSuccess": "Successfully unlinked user group",
         "usersOnlyDescription": "The Course is only accessible to signed in users, additionally you can choose which UserGroups can access this course",
-        "usersOnlyLabel": "Users Only"
+        "usersOnlyLabel": "Users Only",
+        "accessPolicyStagedTitle": "Access policy is staged until you save",
+        "accessPolicyStagedDescription": "Visibility changes stay local until you save this section. User-group linking below applies immediately and is intentionally isolated from the policy draft.",
+        "userGroupLinksImmediateTitle": "User-group links apply immediately",
+        "userGroupLinksImmediateDescription": "These links take effect as soon as you confirm them. Keep access policy changes above separate and save them explicitly."
       },
       "CoursePage": {
         "access": "Access",
@@ -3749,6 +3757,7 @@
       "failedToUpdateContributor": "Failed to update contributor",
       "inactive": "Inactive",
       "maintainer": "Maintainer",
+      "manageContributorsTitle": "Manage Contributors",
       "nameColumn": "Name",
       "noUsersFoundMessage": "No users found",
       "openConfirmMsg": "Are you sure you want to open this course to contributors?",
@@ -3782,7 +3791,11 @@
       "tableHeaderStatus": "Status",
       "title": "Course Contributors",
       "usernameColumn": "Username",
-      "usersSelectedMessage": "{count, plural, one {# user selected} other {# users selected}}"
+      "usersSelectedMessage": "{count, plural, one {# user selected} other {# users selected}}",
+      "contributorPolicyStagedTitle": "Contributor policy is staged until you save",
+      "contributorPolicyStagedDescription": "The open or closed contribution policy stays local until you save this section. Adding, removing, and editing contributors below applies immediately.",
+      "rosterActionsImmediateTitle": "Roster actions apply immediately",
+      "rosterActionsImmediateDescription": "Search, add, remove, role changes, and status updates update the live contributor roster right away. Keep them separate from the policy draft above."
     },
     "Editor": {
       "BadgesExtension": {

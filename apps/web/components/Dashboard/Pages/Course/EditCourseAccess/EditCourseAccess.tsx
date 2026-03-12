@@ -109,9 +109,9 @@ const EditCourseAccess = (props: EditCourseAccessProps) => {
           <CardTitle>{t('accessToTheCourse')}</CardTitle>
           <Alert className="border-border bg-muted/40">
             <Globe className="size-4" />
-            <AlertTitle>Access policy is staged until you save</AlertTitle>
+            <AlertTitle>{t('accessPolicyStagedTitle')}</AlertTitle>
             <AlertDescription>
-              Visibility changes stay local until you save this section. User-group linking below applies immediately and is intentionally isolated from the policy draft.
+              {t('accessPolicyStagedDescription')}
             </AlertDescription>
           </Alert>
         </CardHeader>
@@ -178,9 +178,9 @@ const UserGroupsSection = ({
         <CardTitle>{t('title')}</CardTitle>
         <Alert className="border-border bg-muted/40">
           <Users className="size-4" />
-          <AlertTitle>User-group links apply immediately</AlertTitle>
+          <AlertTitle>{t('userGroupLinksImmediateTitle')}</AlertTitle>
           <AlertDescription>
-            These links take effect as soon as you confirm them. Keep access policy changes above separate and save them explicitly.
+            {t('userGroupLinksImmediateDescription')}
           </AlertDescription>
         </Alert>
       </CardHeader>

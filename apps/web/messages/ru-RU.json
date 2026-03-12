@@ -2074,7 +2074,8 @@
       "unpublish": "Снять с публикации",
       "unpublishButton": "Снять с публикации",
       "updateFailed": "Не удалось обновить активность",
-      "updating": "Обновление активности..."
+      "updating": "Обновление активности...",
+      "editButton": "Редактировать"
     },
     "ChapterElement": {
       "chapterNamePlaceholder": "Название главы",
@@ -2194,7 +2195,8 @@
       "savingOrder": "Применяются изменения учебного плана",
       "curriculumChangesApplyImmediately": "Изменения учебного плана применяются немедленно",
       "curriculumInlineFeedback": "Перетаскивание, изменение порядка и создание глав сохраняются по мере работы.",
-      "refreshAfterError": "Последнее изменение структуры не удалось сохранить. Просмотрите текущий учебный план и попробуйте снова."
+      "refreshAfterError": "Последнее изменение структуры не удалось сохранить. Просмотрите текущий учебный план и попробуйте снова.",
+      "title": "Учебный план курса"
     },
     "Conflict": {
       "title": "Этот курс изменился в другом редакторе",
@@ -2221,6 +2223,7 @@
     "deleteChapterConfirmationWithCount": "Это навсегда удалит главу и {count, plural, =0 {0 активностей} one {# активность} few {# активности} other {# активностей}}.",
     "deleteChapterTitle": "Удалить {name}?",
     "deleting": "Удаление...",
+    "edit": "Редактировать",
     "editButton": "Редактировать",
     "noActivities": "Пока нет активностей"
   },
@@ -2330,6 +2333,7 @@
       "deleteUpdateConfirmation": "Вы уверены, что хотите удалить это обновление?",
       "deleteUpdateTitle": "Удалить обновление?",
       "deletingUpdate": "Удаление обновления...",
+      "newUpdate": "Новое обновление",
       "noPermissionToAccessTab": "У вас нет доступа к разделу {tabName}",
       "unsavedChangesDescription": "В этом разделе есть несохраненные изменения. Выйти без сохранения?",
       "noUpdatesYet": "Пока нет обновлений",
@@ -2344,6 +2348,7 @@
       "nextPage": "Следующая",
       "updateAddedSuccess": "Обновление успешно добавлено",
       "updateContent": "Содержание обновления",
+      "updateContentPlaceholder": "Поделитесь деталями вашего обновления...",
       "pageStatus": "Страница {current} из {total}",
       "previousPage": "Предыдущая",
       "resultsCount": "{count} курсов",
@@ -3580,6 +3585,7 @@
         "changeToUsersOnlyConfirmMsg": "Вы уверены, что хотите ограничить доступ только для авторизованных пользователей?",
         "changeToUsersOnlyConfirmTitle": "Сделать только для пользователей?",
         "deleteLinkButton": "Удалить ссылку",
+        "deleting": "Удаление...",
         "description": "Вы можете открыть доступ к курсу только для определённых групп пользователей, связав его с группой",
         "linkModalDescription": "Выберите группу пользователей, которой будет доступен этот курс.",
         "linkModalTitle": "Привязать курс к группе",
@@ -3596,7 +3602,11 @@
         "loadingUserGroups": "Загрузка групп пользователей...",
         "unlinkUserGroupSuccess": "Группа успешно отвязана",
         "usersOnlyDescription": "Курс доступен только авторизованным пользователям. Можно выбрать, какие группы получат доступ",
-        "usersOnlyLabel": "Только пользователи"
+        "usersOnlyLabel": "Только пользователи",
+        "accessPolicyStagedTitle": "Политика доступа не сохраняется до нажатия кнопки «Сохранить»",
+        "accessPolicyStagedDescription": "Изменения видимости остаются локальными до сохранения этого раздела. Привязка групп пользователей ниже применяется немедленно и намеренно отделена от черновика политики.",
+        "userGroupLinksImmediateTitle": "Привязки групп пользователей применяются немедленно",
+        "userGroupLinksImmediateDescription": "Эти привязки вступают в силу сразу после подтверждения. Храните изменения политики доступа отдельно и сохраняйте явно."
       },
       "CoursePage": {
         "access": "Доступ",
@@ -3609,16 +3619,29 @@
         "general": "Общее",
         "loading": "Загрузка...",
         "noPermissionToAccess": "У вас нет доступа к этому курсу.",
-        "noPermissionToAccessTab": "У вас нет доступа к {tabName}"
+        "noPermissionToAccessTab": "У вас нет доступа к {tabName}",
+        "unsavedChangesDescription": "В этом разделе есть несохраненные изменения. Выйти без сохранения?"
       },
       "HomePageClient": {
         "courses": "Курсы",
+        "clearSearch": "Очистить",
         "createACourse": "Создайте курс, чтобы добавить материалы",
         "createCourse": "Создать курс",
         "createCourseDescription": "Создать новый курс",
+        "emptyPageDescription": "Курсы пока недоступны",
+        "emptySearchResults": "По вашему запросу курсы не найдены",
+        "nextPage": "Следующая",
         "noCourses": "Курсов пока нет",
         "noCoursesAvailable": "Курсы пока недоступны",
-        "rightsGuide": "Права и доступ"
+        "pageStatus": "Страница {current} из {total}",
+        "previousPage": "Предыдущая",
+        "resultsCount": "{count} курсов",
+        "rightsGuide": "Права и доступ",
+        "searchButton": "Поиск",
+        "searchPlaceholder": "Поиск редактируемых курсов",
+        "sortLabel": "Сортировка",
+        "sortName": "Название",
+        "sortUpdated": "Недавно обновлённые"
       },
       "RightsDocumentation": {
         "backToDashboard": "Назад к панели",
@@ -3749,6 +3772,7 @@
       "failedToUpdateContributor": "Не удалось обновить соавтора",
       "inactive": "Неактивный",
       "maintainer": "Модератор",
+      "manageContributorsTitle": "Управление соавторами",
       "nameColumn": "Имя",
       "noUsersFoundMessage": "Пользователи не найдены",
       "openConfirmMsg": "Вы уверены, что хотите открыть этот курс для соавторов?",
@@ -3782,7 +3806,11 @@
       "tableHeaderStatus": "Статус",
       "title": "Соавторы курса",
       "usernameColumn": "Имя пользователя",
-      "usersSelectedMessage": "{count, plural, one {# пользователь выбран} few {# пользователя выбрано} many {# пользователей выбрано} other {# пользователей выбрано}}"
+      "usersSelectedMessage": "{count, plural, one {# пользователь выбран} few {# пользователя выбрано} many {# пользователей выбрано} other {# пользователей выбрано}}",
+      "contributorPolicyStagedTitle": "Политика соавторства не сохраняется до нажатия кнопки «Сохранить»",
+      "contributorPolicyStagedDescription": "Политика открытого или закрытого доступа остаётся локальной до сохранения этого раздела. Добавление, удаление и редактирование соавторов ниже применяется немедленно.",
+      "rosterActionsImmediateTitle": "Действия с участниками применяются немедленно",
+      "rosterActionsImmediateDescription": "Поиск, добавление, удаление, изменение ролей и статусов обновляют список соавторов немедленно. Храните их отдельно от черновика политики выше."
     },
     "Editor": {
       "BadgesExtension": {
@@ -6958,13 +6986,23 @@
   },
   "clickMe": "Нажмите на меня",
   "close": "Закрыть",
+  "columns": "Столбцы",
   "courses": "Курсы",
   "courses-0": "Курсы",
   "deleteChapter": "Удалить главу",
   "dialog": "Диалог",
   "embeddedContentTitle": "Встроенный контент",
+  "exportCSV": "Экспорт CSV",
+  "exportStarted": "Скачивание началось",
   "failedToLoadUserData": "Не удалось загрузить данные пользователя.",
   "minutes": "Минуты",
+  "permissionTable": {
+    "resource": "Ресурс",
+    "code": "Разрешение",
+    "action": "Действие",
+    "scope": "Область",
+    "description": "Описание"
+  },
   "platformLogo": "Логотип Ashyq Bilim",
   "previous": "Назад",
   "seconds": "Секунды",

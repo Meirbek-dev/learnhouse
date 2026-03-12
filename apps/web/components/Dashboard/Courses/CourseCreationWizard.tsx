@@ -15,7 +15,7 @@ import { useMemo, useTransition } from 'react';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useQueryState, useQueryStates } from 'nuqs';
+import { useQueryState, useQueryStates, parseAsString } from 'nuqs';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -51,13 +51,13 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
   });
   const [, setAllWizardParams] = useQueryStates(
     {
-      step: { defaultValue: '0' },
-      name: { defaultValue: '' },
-      desc: { defaultValue: '' },
-      vis: { defaultValue: 'private' },
-      tpl: { defaultValue: 'blank' },
-      src: { defaultValue: '' },
-      dest: { defaultValue: 'curriculum' },
+      step: parseAsString.withDefault('0'),
+      name: parseAsString.withDefault(''),
+      desc: parseAsString.withDefault(''),
+      vis: parseAsString.withDefault('private'),
+      tpl: parseAsString.withDefault('blank'),
+      src: parseAsString.withDefault(''),
+      dest: parseAsString.withDefault('curriculum'),
     },
     { shallow: true },
   );

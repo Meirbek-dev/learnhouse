@@ -415,9 +415,9 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
           <CardTitle>{t('courseContributorsTitle')}</CardTitle>
           <Alert className="border-border bg-muted/40">
             <UserPen className="size-4" />
-            <AlertTitle>Contributor policy is staged until you save</AlertTitle>
+            <AlertTitle>{t('contributorPolicyStagedTitle')}</AlertTitle>
             <AlertDescription>
-              The open or closed contribution policy stays local until you save this section. Adding, removing, and editing contributors below applies immediately.
+              {t('contributorPolicyStagedDescription')}
             </AlertDescription>
           </Alert>
         </CardHeader>
@@ -456,9 +456,9 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
           <CardTitle>{t('manageContributorsTitle')}</CardTitle>
           <Alert className="border-border bg-muted/40">
             <Users className="size-4" />
-            <AlertTitle>Roster actions apply immediately</AlertTitle>
+            <AlertTitle>{t('rosterActionsImmediateTitle')}</AlertTitle>
             <AlertDescription>
-              Search, add, remove, role changes, and status updates update the live contributor roster right away. Keep them separate from the policy draft above.
+              {t('rosterActionsImmediateDescription')}
             </AlertDescription>
           </Alert>
         </CardHeader>

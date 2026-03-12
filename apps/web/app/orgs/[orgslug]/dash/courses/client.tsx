@@ -363,7 +363,8 @@ const CoursesHome = ({
         id: 'select',
         header: () => (
           <Checkbox
-            checked={headerCheckboxState}
+            checked={headerCheckboxState === true}
+            indeterminate={headerCheckboxState === 'indeterminate'}
             onCheckedChange={(checked) => toggleAllVisibleCourses(checked)}
             aria-label={t('table.selectVisibleAria')}
           />
